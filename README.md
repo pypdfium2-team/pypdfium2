@@ -96,7 +96,7 @@ PyPDFium2 contains scripts to automate the release process:
 
 * To build wheels for all platforms, run `./release.sh`. This will download binaries
   and header files, write finished Python wheels to `dist/`, and run `check-wheel-contents`.
-* To deploy the wheels to PyPI, use `twine upload dist/*` as usual.
+* To publish the wheels to PyPI, use `twine upload dist/*` as usual.
 * To clean up after a release, run `./clean.sh`. This will remove downloaded files and
   build artifacts.
 
