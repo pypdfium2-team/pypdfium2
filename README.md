@@ -25,6 +25,9 @@ python3 setup_${platform_name}.py bdist_wheel
 
 # install it
 python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
+
+# remove downloaded files and build artifacts
+bash clean.sh
 ```
 
 
@@ -118,19 +121,19 @@ PyPDFium2 contains scripts to automate the release process:
 ### Publishing the wheels
 
 * You may want to upload to [TestPyPI](https://test.pypi.org/legacy/) first to ensure
-    everything works as expected:
-    ```bash
-    twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
-    ```
+  everything works as expected:
+   ```bash
+   twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+   ```
 * If all went well, upload to the real PyPI:
-    ```bash
-    twine upload dist/*
-    ```
+  ```bash
+  twine upload dist/*
+  ```
 
 
 ## Licensing
 
-The PyPDFium2 deployment scripts are Apache-2.0 licensed.
+PyPDFium2 deployment scripts are Apache-2.0 licensed.
 The auto-generated bindings file contains BSD-3-Clause code.
 
 Documentation and examples are CC-BY-4.0.
