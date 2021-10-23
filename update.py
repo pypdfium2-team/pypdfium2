@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
-# Deploy the PDFium binaries and generate ctypes bindings
+# Download the PDFium binaries and generate ctypes bindings
 
 import os
 from os.path import (
@@ -18,10 +18,10 @@ import subprocess
 from urllib import request
 
 
-SourceTree = dirname(realpath(__file__))
-VersionFile = join(SourceTree,'src','pypdfium2','_version.py')
-DataTree = join(SourceTree,'data')
-ReleaseURL = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
+SourceTree   = dirname(realpath(__file__))
+VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
+DataTree     = join(SourceTree,'data')
+ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
 ReleaseFiles = {
     'pdfium-mac-arm64.tgz'    : 'darwin-arm64',
     'pdfium-mac-x64.tgz'      : 'darwin-x64',
