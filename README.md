@@ -8,9 +8,25 @@ library developed by Google.
 
 ## Install/Update
 
+### Install from PyPI
+
 ```bash
 python3 -m pip install -U pypdfium2
 ```
+
+### Manual installation
+
+```bash
+# download binaries / header files and generate bindings
+python3 update.py
+
+# build the package that corresponds to your platform
+python3 setup_${platform_name}.py bdist_wheel
+
+# install it
+python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
+```
+
 
 ## Documentation
 
@@ -96,9 +112,20 @@ PyPDFium2 contains scripts to automate the release process:
 
 * To build wheels for all platforms, run `./release.sh`. This will download binaries
   and header files, write finished Python wheels to `dist/`, and run `check-wheel-contents`.
-* To publish the wheels to PyPI, use `twine upload dist/*` as usual.
 * To clean up after a release, run `./clean.sh`. This will remove downloaded files and
   build artifacts.
+
+### Publishing the wheels
+
+* You may want to upload to [TestPyPI](https://test.pypi.org/legacy/) first to ensure
+    everything works as expected:
+    ```bash
+    twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+    ```
+* If all went well, upload to the real PyPI:
+    ```bash
+    twine upload dist/*
+    ```
 
 
 ## Licensing
@@ -113,7 +140,7 @@ PDFium is available by the terms and conditions of either Apache 2.0 or BSD-3-Cl
 Various other BSD- and MIT-style licenses apply to the dependencies of PDFium.
 
 License texts for PDFium and its dependencies are included in the file [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt),
-which is also shipped with binary redistributions.
+which is also shipped with binary re-distributions.
 
 
 ## History
