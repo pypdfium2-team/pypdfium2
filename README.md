@@ -23,7 +23,10 @@ python3 update.py
 # build the package that corresponds to your platform
 python3 setup_${platform_name}.py bdist_wheel
 
-# install it
+# optionally, run check-wheel-contents on the package to confirm its validity
+check-wheel-contents dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
+
+# install the package
 python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 
 # remove downloaded files and build artifacts
@@ -133,7 +136,7 @@ Currently supported architectures:
 `*` Not tested yet
 
 If you have access to a theoretically supported but untested system, please report
-success or failure in the PyPDFium2 bug tracker.
+success or failure on the [issues panel](https://github.com/pypdfium2-team/pypdfium2/issues).
 
 (In case `bblanchon/pdfium-binaries` would add support for more architectures, PyPDFium2
 could be adapted easily.)
