@@ -86,6 +86,35 @@ if __name__ == "__main__":
 ```
 
 
+## Licensing
+
+PyPDFium2 deployment scripts are Apache-2.0 licensed.
+The auto-generated bindings file contains BSD-3-Clause code.
+
+Documentation and examples are CC-BY-4.0.
+
+PDFium is available by the terms and conditions of either Apache 2.0 or BSD-3-Clause, at your choice.
+
+Various other BSD- and MIT-style licenses apply to the dependencies of PDFium.
+
+License texts for PDFium and its dependencies are included in the file [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt),
+which is also shipped with binary re-distributions.
+
+
+## History
+
+PyPDFium2 is the successor of *pypdfium* and *pypdfium-reboot*.
+
+The initial *pypdfium* was packaged manually and did not get regular updates.
+There were no platform-specific wheels, but only one wheel for 64-bit Windows, macOS and
+Linux that was misleadingly marked as 'universal'. Overall it was rather a proof of concept.
+
+*pypdfium-reboot* then added a script to automate binary deployment and bindings generation
+to simplify regular updates. However, it was still not platform specific.
+
+PyPDFium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
+
+
 ## Development
 
 PDFium builds are retrieved from [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries).
@@ -129,32 +158,3 @@ PyPDFium2 contains scripts to automate the release process:
   ```bash
   twine upload dist/*
   ```
-
-
-## Licensing
-
-PyPDFium2 deployment scripts are Apache-2.0 licensed.
-The auto-generated bindings file contains BSD-3-Clause code.
-
-Documentation and examples are CC-BY-4.0.
-
-PDFium is available by the terms and conditions of either Apache 2.0 or BSD-3-Clause, at your choice.
-
-Various other BSD- and MIT-style licenses apply to the dependencies of PDFium.
-
-License texts for PDFium and its dependencies are included in the file [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt),
-which is also shipped with binary re-distributions.
-
-
-## History
-
-PyPDFium2 is the successor of *pypdfium* and *pypdfium-reboot*.
-
-The initial *pypdfium* was packaged manually and did not get regular updates.
-There were no platform-specific wheels, but only one wheel for 64-bit Windows, macOS and
-Linux that was misleadingly marked as 'universal'. Overall it was rather a proof of concept.
-
-*pypdfium-reboot* then added a script to automate binary deployment and bindings generation
-to simplify regular updates. However, it was still not platform specific.
-
-PyPDFium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
