@@ -119,8 +119,8 @@ def unpack_archives(archives):
     
     for file in archives:
         extraction_path = join(dirname(file), 'build_tar')
-        archive = tarfile.open(file)
-        archive.extractall(extraction_path)
+        with tarfile.open(file) as archive:
+            archive.extractall(extraction_path)
         os.remove(file)
 
 
