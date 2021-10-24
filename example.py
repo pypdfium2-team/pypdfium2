@@ -34,10 +34,10 @@ if __name__ == "__main__":
     )
     
     # retrieve data from bitmap
-    buffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
-    buffer_ = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+    cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
+    buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
 
-    img = Image.frombuffer("RGBA", (width, height), buffer_.contents, "raw", "BGRA", 0, 1)
+    img = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
     img.save("out.png")
     
     if bitmap is not None:
