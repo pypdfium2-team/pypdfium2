@@ -5,7 +5,6 @@
 rm -r dist
 rm -r build
 rm -r data/*
-rm -r docs/build/*
 rm -r src/pypdfium2.egg-info/
 rm -r __pycache__
 rm -r src/pypdfium2/__pycache__
