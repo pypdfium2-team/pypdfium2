@@ -3,8 +3,9 @@
 
 ## PyPDFium2
 
-PyPDFium2 is a Python 3 binding to PDFium, the liberal-licensed PDF rendering
-library developed by Google.
+[PyPDFium2](https://github.com/pypdfium2-team/pypdfium2) is a Python 3 binding to
+[PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), the liberal-licensed
+PDF rendering library developed by Google.
 
 ## Install/Update
 
