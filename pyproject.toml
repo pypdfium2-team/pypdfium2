@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "pypdfium2"
+version = "0.1.0"
+description = "PyPDFium2 is a Python 3 binding to PDFium, the liberal-licensed PDF rendering library developed by Google."
+authors = ["geisserml <geisserml@gmail.com>", "Adam Huganir <adam@huganir.com>"]
+readme = "README.md"
+homepage = "https://github.com/pypdfium2-team/pypdfium2"
+repository = "https://github.com/pypdfium2-team/pypdfium2"
+license = "Apache-2.0"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Education",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Software Development :: Libraries"]
+keywords = ["Python", "PDF", "PDFium"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+pillow = "^8.4.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[black]
+line-length = 120
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
+include = '\.pyi?$'
+extend-exclude = 'src/pypdfium2/_pypdfium.py'
+
+[tool.isort]
+profile = "black"
