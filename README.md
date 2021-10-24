@@ -101,8 +101,8 @@ PDFium is available by the terms and conditions of either Apache 2.0 or BSD-3-Cl
 
 Various other BSD- and MIT-style licenses apply to the dependencies of PDFium.
 
-License texts for PDFium and its dependencies are included in the file [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt),
-which is also shipped with binary re-distributions.
+License texts for PDFium and its dependencies are included in the file
+[`LICENSE-PDFium.txt`](LICENSE-PDFium.txt), which is also shipped with binary re-distributions.
 
 
 ## History
@@ -137,12 +137,14 @@ Currently supported architectures:
 `*` Not tested yet
 
 If you have access to a theoretically supported but untested system, please report
-success or failure on the [issues panel](https://github.com/pypdfium2-team/pypdfium2/issues).
+success or failure on the issues panel.
 
 (In case `bblanchon/pdfium-binaries` would add support for more architectures, PyPDFium2
 could be adapted easily.)
 
-For wheel naming conventions, please see [Python Packaging / Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/) and the various referenced PEPs.
+For wheel naming conventions, please see
+[Python Packaging / Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/)
+and the various referenced PEPs.
 
 PyPDFium2 contains scripts to automate the release process:
 
@@ -162,3 +164,20 @@ PyPDFium2 contains scripts to automate the release process:
   ```bash
   twine upload dist/*
   ```
+
+
+## Issues
+
+Since PyPDFium2 is built using upstream binaries and an automatic bindings creator,
+issues that are not related to packaging and bindings generation most likely need to
+be addressed upstream. However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
+is always a good place to start if you have any problems or questions.
+
+If the cause of an issue could be determined to be in PDFium, the problem needs to be
+reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list).
+
+Issues related to build configuration should be discussed at
+[pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
+
+If the issue is caused by the bindings generator, refer to the
+[ctypesgen bug tracker](https://github.com/ctypesgen/ctypesgen/issues).
