@@ -169,8 +169,8 @@ PyPDFium2 contains scripts to automate the release process:
 ## Issues
 
 Since PyPDFium2 is built using upstream binaries and an automatic bindings creator,
-issues that are not related to packaging and bindings generation most likely need to
-be addressed upstream. However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
+issues that are not related to packaging most likely need to be addressed upstream.
+However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
 is always a good place to start if you have any problems or questions.
 
 If the cause of an issue could be determined to be in PDFium, the problem needs to be
