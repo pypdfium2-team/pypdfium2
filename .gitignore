@@ -4,6 +4,7 @@
 data/*
 build/
 dist/
+docs/build/*
 
 **/__pycache__
 *.pyc
