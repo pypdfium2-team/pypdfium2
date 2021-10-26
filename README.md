@@ -42,7 +42,9 @@ for PDFium is available.
 PyPDFium2 transparently maps all PDFium classes, enums and functions to Python.
 
 
-## Quick Start
+## Examples
+
+### Using the PDFium API
 
 ```python3
 import sys
@@ -50,7 +52,6 @@ import ctypes
 from PIL import Image
 import pypdfium2 as pdfium
 
-pdfium.FPDF_InitLibraryWithConfig(None)
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -87,6 +88,34 @@ if __name__ == "__main__":
     pdfium.FPDF_ClosePage(page)
     
     pdfium.FPDF_CloseDocument(doc)
+```
+
+### Using the support model
+
+```python3
+import sys
+import pypdfium2 as pdfium
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        print("Usage: example.py somefile.pdf")
+        sys.exit()
+    
+    filename = sys.argv[1]
+    
+    with pdfium.PdfContext(filename) as pdf:
+        pil_image = pdfium.render_page(
+            pdf,
+            page_index = 0,
+            scale = 1,
+            rotation = 0,
+            background_colour = 0xFFFFFFFF,
+            render_annotations = True,
+            optimise_mode = pdfium.OptimiseMode.lcd_display,
+        )
+    
+    pil_image.save("out.png")
 ```
 
 
@@ -157,9 +186,9 @@ PyPDFium2 contains scripts to automate the release process:
 
 * You may want to upload to [TestPyPI](https://test.pypi.org/legacy/) first to ensure
   everything works as expected:
-   ```bash
-   twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
-   ```
+  ```bash
+  twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+  ```
 * If all went well, upload to the real PyPI:
   ```bash
   twine upload dist/*
@@ -171,7 +200,7 @@ PyPDFium2 contains scripts to automate the release process:
 Since PyPDFium2 is built using upstream binaries and an automatic bindings creator,
 issues that are not related to packaging most likely need to be addressed upstream.
 However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
-is always a good place to start if you have any problems or questions.
+is always a good place to start if you have any problems, questions or suggestions.
 
 If the cause of an issue could be determined to be in PDFium, the problem needs to be
 reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list).
@@ -179,5 +208,5 @@ reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/l
 Issues related to build configuration should be discussed at
 [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
 
-If the issue is caused by the bindings generator, refer to the
+If your issue is caused by the bindings generator, refer to the
 [ctypesgen bug tracker](https://github.com/ctypesgen/ctypesgen/issues).
