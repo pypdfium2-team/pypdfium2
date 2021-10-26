@@ -60,6 +60,8 @@ def _translate_rotation(rotation: int):
         return 2
     elif rotation == 270:
         return 3
+    else:
+        raise ValueError(f"Invalid rotation {rotation}")
 
 
 def render_page(
