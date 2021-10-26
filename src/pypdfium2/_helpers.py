@@ -4,16 +4,34 @@
 import math
 import ctypes
 import traceback
+from typing import Optional
 from PIL import Image
 from os.path import abspath
+
+
 import pypdfium2 as pdfium
 from pypdfium2._exceptions import *
 from pypdfium2._constants import *
 
 
 class PdfContext:
+    """
+    Context manager to open (and automatically close again) a PDFium document
+    from a file path.
     
-    def __init__(self, file_path: str, password: str = None):
+    Parameters:
+        
+        file_path:
+            File path string to a PDF document.
+        
+        password:
+            A password to unlock the document, if encrypted.
+    
+    Returns:
+        ``FPDF_DOCUMENT``
+    """
+    
+    def __init__(self, file_path: str, password: Optional[str] = None):
         self.file_path = abspath(file_path)
         self.password = password
     
@@ -76,11 +94,10 @@ def render_page(
             
             Note that UserUnit is not taken into account, so if you are using PyPDFium2 in
             conjunction with an other PDF library, you may want to check for a possible
-            ``/UserUnit`` and multiply the scale factor with it.
+            ``/UserUnit`` in the page dictionary and multiply this scale factor with it.
         
         rotation:
-            Change page orientation by rotating with 90, 180, or 270 degrees.
-            Value 0 means no rotation.
+            Rotate the page by 90, 180, or 270 degrees. Value 0 means no rotation.
         
         background_colour:
             A 32-bit colour value in 8888 ARGB format. Defaults to white (``0xFFFFFFFF``).
