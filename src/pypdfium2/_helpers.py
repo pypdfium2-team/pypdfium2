@@ -70,7 +70,7 @@ def render_page(
         *,
         scale: float = 1,
         rotation: int = 0,
-        background_colour: int = 0xFFFFFFFF,
+        background_colour: Optional[int] = 0xFFFFFFFF,
         render_annotations: bool = True,
         optimise_mode: OptimiseMode = OptimiseMode.none,
     ) -> Image.Image:
@@ -104,6 +104,7 @@ def render_page(
         
         background_colour:
             A 32-bit colour value in 8888 ARGB format. Defaults to white (``0xFFFFFFFF``).
+            To use an alpha channel rather than a background colour, set it to *None*.
         
         render_annotations:
             Whether to render page annotations.
@@ -125,7 +126,9 @@ def render_page(
     height = math.ceil(pdfium.FPDF_GetPageHeightF(page) * scale)
     
     bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
-    pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, background_colour)
+    
+    if background_colour is not None:
+        pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, background_colour)
     
     render_flags = 0x00
     if render_annotations:
