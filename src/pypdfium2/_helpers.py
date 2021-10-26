@@ -45,9 +45,10 @@ class PdfContext:
         return self.pdf
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        if exc_type is not None:
-            traceback.print_exc()
         pdfium.FPDF_CloseDocument(self.pdf)
+        if exc_type is not None:
+            print(exc_traceback)
+            raise exc_type(exc_value)
 
 
 def _translate_rotation(rotation: int):
