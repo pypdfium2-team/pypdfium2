@@ -21,7 +21,7 @@ if __name__ == '__main__':
             rotation = 0,
             background_colour = 0xFFFFFFFF,
             render_annotations = True,
-            optimise_mode = pdfium.OptimiseMode.lcd_display,
+            optimise_mode = pdfium.OptimiseMode.none,
         )
     
     pil_image.save("out.png")
