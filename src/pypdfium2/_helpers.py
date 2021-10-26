@@ -3,11 +3,9 @@
 
 import math
 import ctypes
-import traceback
 from typing import Optional
 from PIL import Image
 from os.path import abspath
-
 
 import pypdfium2 as pdfium
 from pypdfium2._exceptions import *
@@ -103,7 +101,10 @@ def render_page(
             Rotate the page by 90, 180, or 270 degrees. Value 0 means no rotation.
         
         background_colour:
-            A 32-bit colour value in 8888 ARGB format. Defaults to white (``0xFFFFFFFF``).
+            
+            .. _8888 ARGB: https://en.wikipedia.org/wiki/RGBA_color_model#ARGB32
+            
+            A 32-bit colour value in `8888 ARGB`_ format. Defaults to white (``0xFFFFFFFF``).
             To use an alpha channel rather than a background colour, set it to *None*.
         
         render_annotations:
