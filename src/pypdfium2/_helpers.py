@@ -70,7 +70,7 @@ def render_page(
         rotation: int = 0,
         background_colour: int = 0xFFFFFFFF,
         render_annotations: bool = True,
-        optimise_mode: OptimiseMode = OptimiseMode.lcd_display,
+        optimise_mode: OptimiseMode = OptimiseMode.none,
     ) -> Image.Image:
     """
     Rasterise a PDF page using PDFium.
