@@ -4,5 +4,22 @@
 API
 ===
 
+Support model
+*************
+
 .. automodule:: pypdfium2._helpers
+    :members:
+
+
+Constants
+*********
+
+.. automodule:: pypdfium2._constants
+    :members:
+
+
+Exceptions
+**********
+
+.. automodule:: pypdfium2._exceptions
     :members:
