@@ -47,81 +47,64 @@ PyPDFium2 transparently maps all PDFium classes, enums and functions to Python.
 ### Using the PDFium API
 
 ```python3
-import sys
 import ctypes
 from PIL import Image
 import pypdfium2 as pdfium
 
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print("Usage: example.py somefile.pdf")
-        sys.exit()
-    
-    filename = sys.argv[1]
-    
-    doc = pdfium.FPDF_LoadDocument(filename, None) # load document (filename, password string)
-    page_count = pdfium.FPDF_GetPageCount(doc)     # get page count
-    assert page_count >= 1
+doc = pdfium.FPDF_LoadDocument(filename, None) # load document (filename, password string)
+page_count = pdfium.FPDF_GetPageCount(doc)     # get page count
+assert page_count >= 1
 
-    page   = pdfium.FPDF_LoadPage(doc, 0)                # load the first page
-    width  = int(pdfium.FPDF_GetPageWidthF(page)  + 0.5) # get page width
-    height = int(pdfium.FPDF_GetPageHeightF(page) + 0.5) # get page height
-    
-    # render to bitmap
-    bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
-    pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
-    pdfium.FPDF_RenderPageBitmap(
-        bitmap, page, 0, 0, width, height, 0, 
-        pdfium.FPDF_LCD_TEXT | pdfium.FPDF_ANNOT
-    )
-    
-    # retrieve data from bitmap
-    cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
-    buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+page   = pdfium.FPDF_LoadPage(doc, 0)                # load the first page
+width  = int(pdfium.FPDF_GetPageWidthF(page)  + 0.5) # get page width
+height = int(pdfium.FPDF_GetPageHeightF(page) + 0.5) # get page height
 
-    img = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
-    img.save("out.png")
-    
-    if bitmap is not None:
-        pdfium.FPDFBitmap_Destroy(bitmap)
-    pdfium.FPDF_ClosePage(page)
-    
-    pdfium.FPDF_CloseDocument(doc)
+# render to bitmap
+bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
+pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
+pdfium.FPDF_RenderPageBitmap(
+    bitmap, page, 0, 0, width, height, 0, 
+    pdfium.FPDF_LCD_TEXT | pdfium.FPDF_ANNOT
+)
+
+# retrieve data from bitmap
+cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
+buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+
+img = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
+img.save("out.png")
+
+if bitmap is not None:
+    pdfium.FPDFBitmap_Destroy(bitmap)
+pdfium.FPDF_ClosePage(page)
+
+pdfium.FPDF_CloseDocument(doc)
 ```
 
 ### Using the support model
 
 ```python3
-import sys
 import pypdfium2 as pdfium
 
+with pdfium.PdfContext(filename) as pdf:
+    pil_image = pdfium.render_page(
+        pdf,
+        page_index = 0,
+        scale = 1,
+        rotation = 0,
+        background_colour = 0xFFFFFFFF,
+        render_annotations = True,
+        optimise_mode = pdfium.OptimiseMode.none,
+    )
 
-if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print("Usage: example.py somefile.pdf")
-        sys.exit()
-    
-    filename = sys.argv[1]
-    
-    with pdfium.PdfContext(filename) as pdf:
-        pil_image = pdfium.render_page(
-            pdf,
-            page_index = 0,
-            scale = 1,
-            rotation = 0,
-            background_colour = 0xFFFFFFFF,
-            render_annotations = True,
-            optimise_mode = pdfium.OptimiseMode.lcd_display,
-        )
-    
-    pil_image.save("out.png")
+pil_image.save("out.png")
 ```
 
 
 ## Licensing
 
-PyPDFium2 deployment scripts are Apache-2.0 licensed.
+PyPDFium2 source code itself is Apache-2.0 licensed.
 The auto-generated bindings file contains BSD-3-Clause code.
 
 Documentation and examples are CC-BY-4.0.
