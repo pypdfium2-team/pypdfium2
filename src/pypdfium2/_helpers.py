@@ -30,7 +30,7 @@ class PdfContext:
     """
     
     def __init__(self, file_path: str, password: Optional[str] = None):
-        self.file_path = abspath(file_path)
+        self.file_path = abspath(file_path).encode('UTF-8')
         self.password = password
     
     def __enter__(self) -> pdfium.FPDF_DOCUMENT:
