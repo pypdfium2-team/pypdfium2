@@ -9,7 +9,6 @@ from os.path import (
     dirname,
     realpath,
     join,
-    splitext,
 )
 import shutil
 import tarfile
