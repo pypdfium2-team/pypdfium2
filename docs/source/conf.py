@@ -36,6 +36,8 @@ extensions = [
     'sphinx.ext.napoleon',
 ]
 
+autodoc_preserve_defaults = True
+
 autodoc_default_options = {
     'undoc-members': True,
     'member-order': 'bysource',
