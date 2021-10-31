@@ -52,12 +52,11 @@ def _set_version(version_content, variable, new_version):
 
 
 def get_latest_version():
-    Git = shutil.which('git')
     git_ls = subprocess.run(
-        f'{Git} ls-remote https://github.com/bblanchon/pdfium-binaries.git',
+        f'git ls-remote https://github.com/bblanchon/pdfium-binaries.git',
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE,
-        shell = True,
+        shell  = True,
     )
     git_ls = git_ls.stdout.decode('UTF-8')
     tag = git_ls.split('\t')[-1].replace('\n', '')
@@ -126,8 +125,6 @@ def unpack_archives(archives):
 
 def generate_bindings():
     
-    Ctypesgen = shutil.which('ctypesgen')
-    
     for dirname in ReleaseFiles.values():
         
         platform_dir = join(DataTree, dirname)
@@ -164,12 +161,11 @@ def generate_bindings():
         shutil.move(new_binpath, dest_binpath)
         strip_dir = os.path.abspath('.')
         
-        ctypesgen_cmd = f"{Ctypesgen} --library=pdfium --strip-build-path {strip_dir} -L . {header_files} -o {bindings_file}"
+        ctypesgen_cmd = f"ctypesgen --library=pdfium --strip-build-path {strip_dir} -L . {header_files} -o {bindings_file}"
         subprocess.run(
             ctypesgen_cmd,
             stdout = subprocess.PIPE,
-            #stderr = subprocess.PIPE,
-            shell = True,
+            shell  = True,
         )
         
         shutil.rmtree(build_dir)
