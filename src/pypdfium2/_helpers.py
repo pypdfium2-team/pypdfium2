@@ -1,8 +1,11 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
+import sys
 import math
 import ctypes
+import shutil
+import tempfile
 from typing import Optional
 from PIL import Image
 from os.path import abspath
@@ -35,7 +38,20 @@ class PdfContext:
     
     def __enter__(self) -> pdfium.FPDF_DOCUMENT:
         
-        self.pdf = pdfium.FPDF_LoadDocument(self.file_path, self.password)
+        # On Windows, FPDF_LoadDocument() does not support filenames with multibyte characters
+        # https://bugs.chromium.org/p/pdfium/issues/detail?id=682
+        # To circumvent this issue, we create a temporary copy with a compatible name if we
+        # are on Windows and the filename contains non-ascii characters.
+        
+        if sys.platform.startswith('win32') and not self.file_path.isascii():
+            self.temporary = tempfile.NamedTemporaryFile()
+            shutil.copy(self.file_path, self.temporary.name)
+            file_path = self.temporary.name
+        else:
+            self.temporary = None
+            file_path = self.file_path
+        
+        self.pdf = pdfium.FPDF_LoadDocument(file_path, self.password)
         
         if pdfium.FPDF_GetPageCount(self.pdf) < 1:
             raise PageCountInvalidError("No pages could be recognised.")
@@ -44,6 +60,8 @@ class PdfContext:
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
         pdfium.FPDF_CloseDocument(self.pdf)
+        if self.temporary is not None:
+            self.temporary.close()
 
 
 def _translate_rotation(rotation: int):
