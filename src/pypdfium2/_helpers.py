@@ -8,7 +8,7 @@ import shutil
 import tempfile
 from typing import Optional
 from PIL import Image
-from os.path import abspath
+from os.path import abspath, join
 
 import pypdfium2 as pdfium
 from pypdfium2._exceptions import *
@@ -44,11 +44,11 @@ class PdfContext:
         # are on Windows and the filename contains non-ascii characters.
         
         if sys.platform.startswith('win32') and not self.file_path.isascii():
-            self.temporary = tempfile.NamedTemporaryFile()
-            shutil.copy(self.file_path, self.temporary.name)
-            file_path = self.temporary.name
+            self.tempdir = tempfile.TemporaryDirectory()
+            file_path = join(self.tempdir.name,'temporary.pdf')
+            shutil.copy(self.file_path, file_path)
         else:
-            self.temporary = None
+            self.tempdir = None
             file_path = self.file_path
         
         self.pdf = pdfium.FPDF_LoadDocument(file_path, self.password)
@@ -60,8 +60,8 @@ class PdfContext:
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
         pdfium.FPDF_CloseDocument(self.pdf)
-        if self.temporary is not None:
-            self.temporary.close()
+        if self.tempdir is not None:
+            self.tempdir.cleanup()
 
 
 def _translate_rotation(rotation: int):
