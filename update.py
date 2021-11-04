@@ -27,8 +27,8 @@ ReleaseFiles = {
     'pdfium-linux-arm.tgz'    : 'linux-arm32',
     'pdfium-linux-arm64.tgz'  : 'linux-arm64',
     'pdfium-linux-x64.tgz'    : 'linux-x64',
-    'pdfium-windows-x64.tgz'  : 'windows-x64',
-    'pdfium-windows-x86.tgz'  : 'windows-x86',
+    'pdfium-win-x64.tgz'      : 'windows-x64',
+    'pdfium-win-x86.tgz'      : 'windows-x86',
 }
 
 
@@ -54,7 +54,7 @@ def get_latest_version():
     git_ls = subprocess.run(
         f'git ls-remote https://github.com/bblanchon/pdfium-binaries.git',
         stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE,
+        stderr = subprocess.STDOUT,
         shell  = True,
     )
     git_ls = git_ls.stdout.decode('UTF-8')
