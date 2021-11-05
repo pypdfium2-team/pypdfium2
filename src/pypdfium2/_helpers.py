@@ -83,7 +83,7 @@ def render_page(
         *,
         scale: float = 1,
         rotation: int = 0,
-        background_colour: Optional[int] = 0xFFFFFFFF,
+        background_colour: int = 0xFFFFFFFF,
         render_annotations: bool = True,
         optimise_mode: OptimiseMode = OptimiseMode.none,
     ) -> Image.Image:
