@@ -160,10 +160,11 @@ def generate_bindings():
         shutil.move(new_binpath, dest_binpath)
         strip_dir = os.path.abspath('.')
         
-        ctypesgen_cmd = f"ctypesgen --library=pdfium --strip-build-path {strip_dir} -L . {header_files} -o {bindings_file}"
+        ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {strip_dir} -L . {header_files} -o {bindings_file}"
         subprocess.run(
             ctypesgen_cmd,
             stdout = subprocess.PIPE,
+            cwd    = platform_dir,
             shell  = True,
         )
         
