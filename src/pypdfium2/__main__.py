@@ -133,7 +133,7 @@ def process_page(
         scale,
         rotation,
         background_colour,
-        no_annotations,
+        render_annotations,
         optimise_mode,
         output,
         prefix,
@@ -148,7 +148,7 @@ def process_page(
             scale = scale,
             rotation = rotation,
             background_colour = background_colour,
-            render_annotations = not no_annotations,
+            render_annotations = render_annotations,
             optimise_mode = optimise_mode,
         )
         
@@ -174,7 +174,7 @@ def get_pageargs(args, page_indices, prefix, n_digits):
             args.scale,
             args.rotation,
             args.background_colour,
-            args.no_annotations,
+            not args.no_annotations,
             args.optimise_mode,
             args.output,
             prefix,
