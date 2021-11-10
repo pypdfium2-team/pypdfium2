@@ -15,3 +15,4 @@ For the low-level interface, please refer to the `PDFium documentation`_ instead
    :caption: Table of Contents
    
    api
+   cli
