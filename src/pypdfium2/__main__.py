@@ -15,7 +15,8 @@ from os.path import (
 
 def rotation_type(string):
     rotation = int(string)
-    assert rotation in (0, 90, 180, 270)
+    if rotation not in (0, 90, 180, 270):
+        raise ValueError(f"Invalid rotation value {rotation}")
     return rotation
 
 def hex_or_none_type(string):
@@ -201,7 +202,8 @@ def main():
         print(f"PyPDFium2 {pdfium.__version__}", f"PDFium {pdfium.__pdfium_version__}", sep='\n')
         sys.exit()
     
-    assert args.pdffile is not None
+    if args.pdffile is None:
+        raise ValueError("An input file is required.")
     
     with pdfium.PdfContext(args.pdffile, args.password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
