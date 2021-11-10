@@ -34,6 +34,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
+    'sphinxcontrib.programoutput',
 ]
 
 autodoc_preserve_defaults = True
