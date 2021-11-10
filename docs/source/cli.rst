@@ -4,6 +4,6 @@
 CLI
 ===
 
-PyPDFium also has a command-line interface:
+PyPDFium2 also has a command-line interface:
 
 .. program-output:: pypdfium2 --help
