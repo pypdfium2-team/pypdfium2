@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import sys
 import argparse
 import concurrent.futures
 import pypdfium2 as pdfium
@@ -62,7 +63,9 @@ def parse_args():
         description = "Rasterise PDFs with PyPDFium2"
     )
     parser.add_argument(
-        'pdffile',
+        '--input', '-i',
+        dest = 'pdffile',
+        default = None,
         help = "Path to the PDF document to render.",
     )
     parser.add_argument(
@@ -122,6 +125,11 @@ def parse_args():
         default = os.cpu_count(),
         type = int,
         help = "The number of processes to use for rendering. Defaults to the number of CPU cores."
+    )
+    parser.add_argument(
+        '--version', '-v',
+        action = 'store_true',
+        help = "Show the program version and exit."
     )
     return parser.parse_args()
 
@@ -187,7 +195,13 @@ def get_pageargs(args, page_indices, prefix, n_digits):
 
 def main():
     
-    args = parse_args()  
+    args = parse_args()
+    
+    if args.version:
+        print(f"PyPDFium2 {pdfium.__version__}", f"PDFium {pdfium.__pdfium_version__}", sep='\n')
+        sys.exit()
+    
+    assert args.pdffile is not None
     
     with pdfium.PdfContext(args.pdffile, args.password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
