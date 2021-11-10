@@ -6,13 +6,13 @@ import math
 import ctypes
 import shutil
 import tempfile
-from typing import Optional
 from PIL import Image
+from typing import Optional
 from os.path import abspath, join
 
 import pypdfium2 as pdfium
-from pypdfium2._exceptions import *
 from pypdfium2._constants import *
+from pypdfium2._exceptions import *
 
 
 class PdfContext:
@@ -140,6 +140,9 @@ def render_page(
     
     width  = math.ceil(pdfium.FPDF_GetPageWidthF(page)  * scale)
     height = math.ceil(pdfium.FPDF_GetPageHeightF(page) * scale)
+    
+    if rotation in (90, 270):
+        width, height = height, width
     
     bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
     
