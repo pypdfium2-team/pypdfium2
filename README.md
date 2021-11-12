@@ -107,6 +107,11 @@ pil_image.save("out.png")
 pypdfium2 -i your_file.pdf -o your_output_dir/ --scale 1 --rotation 0 --optimise-mode none
 ```
 
+If you want to render multiple files at once, a bash `for`-loop may be suitable:
+```bash
+for file in ./*.pdf; do echo $file && pypdfium2 -i $file -o your_output_dir/ --scale 2; done
+```
+
 To obtain a list of possible command-line parameters, run
 ```bash
 pypdfium2 --help
