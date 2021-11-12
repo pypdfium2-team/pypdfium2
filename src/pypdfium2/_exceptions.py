@@ -5,7 +5,7 @@
 class PageCountInvalidError (Exception):
     """
     Raised if ``FPDF_GetPageCount()`` returns a value less than 1.
-    This hints at an invalid file path.
+    This may hint at an invalid file path or a missing password.
     """
     pass
 
