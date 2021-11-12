@@ -7,6 +7,7 @@
 [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), the liberal-licensed
 PDF rendering library developed by Google.
 
+
 ## Install/Update
 
 ### Install from PyPI
@@ -109,7 +110,7 @@ pypdfium2 -i your_file.pdf -o your_output_dir/ --scale 1 --rotation 0 --optimise
 
 If you want to render multiple files at once, a bash `for`-loop may be suitable:
 ```bash
-for file in ./*.pdf; do echo $file && pypdfium2 -i $file -o your_output_dir/ --scale 2; done
+for file in ./*.pdf; do echo "$file" && pypdfium2 -i "$file" -o your_output_dir/ --scale 2; done
 ```
 
 To obtain a list of possible command-line parameters, run
