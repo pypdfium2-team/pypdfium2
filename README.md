@@ -101,6 +101,17 @@ with pdfium.PdfContext(filename) as pdf:
 pil_image.save("out.png")
 ```
 
+### Using the command-line interface
+
+```bash
+pypdfium2 -i your_file.pdf -o your_output_dir/ --scale 1 --rotation 0 --optimise-mode none
+```
+
+To obtain a list of possible command-line parameters, run
+```bash
+pypdfium2 --help
+```
+
 
 ## Licensing
 
@@ -129,7 +140,8 @@ Linux that was misleadingly marked as 'universal'. Overall it was rather a proof
 to simplify regular updates. However, it was still not platform specific.
 
 PyPDFium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
-It also adds a basic support model on top of the PDFium C API to simplify common use cases.
+It also adds a basic support model and a command-line interface on top of the PDFium C API
+to simplify common use cases.
 
 
 ## Development
