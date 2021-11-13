@@ -38,20 +38,10 @@ class PdfContext:
     
     def __enter__(self) -> pdfium.FPDF_DOCUMENT:
         
-        # On Windows, FPDF_LoadDocument() does not support filenames with multibyte characters
+        # On Windows, FPDF_LoadDocument() does not support filenames with multi-byte characters
         # https://bugs.chromium.org/p/pdfium/issues/detail?id=682
-        # To circumvent this issue, we create a temporary copy with a compatible name if we
-        # are on Windows and the filename contains non-ascii characters.
         
-        if sys.platform.startswith('win32') and not self.file_path.isascii():
-            self.tempdir = tempfile.TemporaryDirectory()
-            file_path = join(self.tempdir.name,'temporary.pdf')
-            shutil.copy(self.file_path, file_path)
-        else:
-            self.tempdir = None
-            file_path = self.file_path
-        
-        self.pdf = pdfium.FPDF_LoadDocument(file_path, self.password)
+        self.pdf = pdfium.FPDF_LoadDocument(self.file_path, self.password)
         
         if pdfium.FPDF_GetPageCount(self.pdf) < 1:
             raise PageCountInvalidError("No pages could be recognised.")
@@ -60,8 +50,6 @@ class PdfContext:
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
         pdfium.FPDF_CloseDocument(self.pdf)
-        if self.tempdir is not None:
-            self.tempdir.cleanup()
 
 
 def _translate_rotation(rotation: int):
