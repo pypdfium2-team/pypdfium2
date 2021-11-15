@@ -32,19 +32,35 @@ class PdfContext:
         ``FPDF_DOCUMENT``
     """
     
+    # On Windows, FPDF_LoadDocument() does not support filenames with multi-byte characters
+    # https://bugs.chromium.org/p/pdfium/issues/detail?id=682
+    
     def __init__(self, file_path: str, password: Optional[str] = None):
         self.file_path = abspath(file_path)
         self.password = password
     
-    def __enter__(self) -> pdfium.FPDF_DOCUMENT:
-        
-        # On Windows, FPDF_LoadDocument() does not support filenames with multi-byte characters
-        # https://bugs.chromium.org/p/pdfium/issues/detail?id=682
+    def __enter__(self) -> pdfium.FPDF_DOCUMENT:    
         
         self.pdf = pdfium.FPDF_LoadDocument(self.file_path, self.password)
+        page_count = pdfium.FPDF_GetPageCount(self.pdf)
         
-        if pdfium.FPDF_GetPageCount(self.pdf) < 1:
-            raise PageCountInvalidError("No pages could be recognised.")
+        if page_count < 1:
+            
+            last_error = pdfium.FPDF_GetLastError()
+            if last_error == pdfium.FPDF_ERR_SUCCESS:
+                raise LoadPdfError(f"Even though no errors were reported, page count is invalid.")
+            elif last_error == pdfium.FPDF_ERR_UNKNOWN:
+                raise LoadPdfError("An unknown error occurred whilst attempting to load the document.")
+            elif last_error == pdfium.FPDF_ERR_FILE:
+                raise LoadPdfError("The file could not be found or opened.")
+            elif last_error == pdfium.FPDF_ERR_FORMAT:
+                raise LoadPdfError("The file is not a PDF.")
+            elif last_error == pdfium.FPDF_ERR_PASSWORD:
+                raise LoadPdfError("Missing or wrong password.")
+            elif last_error == pdfium.FPDF_ERR_SECURITY:
+                raise LoadPdfError("The document uses an unsupported security scheme.")
+            else:
+                raise LoadPdfError(f"Unknown PDFium error code {last_error}.")
         
         return self.pdf
     
