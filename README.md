@@ -45,6 +45,41 @@ PyPDFium2 transparently maps all PDFium classes, enums and functions to Python.
 
 ## Examples
 
+### Using the command-line interface
+
+```bash
+pypdfium2 -i your_file.pdf -o your_output_dir/ --scale 1 --rotation 0 --optimise-mode none
+```
+
+If you want to render multiple files at once, a bash `for`-loop may be suitable:
+```bash
+for file in ./*.pdf; do echo "$file" && pypdfium2 -i "$file" -o your_output_dir/ --scale 2; done
+```
+
+To obtain a list of possible command-line parameters, run
+```bash
+pypdfium2 --help
+```
+
+### Using the support model
+
+```python3
+import pypdfium2 as pdfium
+
+with pdfium.PdfContext(filename) as pdf:
+    pil_image = pdfium.render_page(
+        pdf,
+        page_index = 0,
+        scale = 1,
+        rotation = 0,
+        background_colour = 0xFFFFFFFF,
+        render_annotations = True,
+        optimise_mode = pdfium.OptimiseMode.none,
+    )
+
+pil_image.save("out.png")
+```
+
 ### Using the PDFium API
 
 ```python3
@@ -81,41 +116,6 @@ if bitmap is not None:
 pdfium.FPDF_ClosePage(page)
 
 pdfium.FPDF_CloseDocument(doc)
-```
-
-### Using the support model
-
-```python3
-import pypdfium2 as pdfium
-
-with pdfium.PdfContext(filename) as pdf:
-    pil_image = pdfium.render_page(
-        pdf,
-        page_index = 0,
-        scale = 1,
-        rotation = 0,
-        background_colour = 0xFFFFFFFF,
-        render_annotations = True,
-        optimise_mode = pdfium.OptimiseMode.none,
-    )
-
-pil_image.save("out.png")
-```
-
-### Using the command-line interface
-
-```bash
-pypdfium2 -i your_file.pdf -o your_output_dir/ --scale 1 --rotation 0 --optimise-mode none
-```
-
-If you want to render multiple files at once, a bash `for`-loop may be suitable:
-```bash
-for file in ./*.pdf; do echo "$file" && pypdfium2 -i "$file" -o your_output_dir/ --scale 2; done
-```
-
-To obtain a list of possible command-line parameters, run
-```bash
-pypdfium2 --help
 ```
 
 
