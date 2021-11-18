@@ -238,7 +238,7 @@ This issue cannot reasonably be worked around in PyPDFium2, for the following re
   ```python3
   import sys
   
-  if sys.platform.startswith('win32') and filename.isascii():
+  if sys.platform.startswith('win32') and not filename.isascii():
       # create a temporary copy and remap the file name
       # (str.isascii() requires at least Python 3.7)
       ...
