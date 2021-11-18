@@ -12,7 +12,6 @@ docs/build/
 *.pyc
 *.egg-info
 *.kate-swp
-*.kdev4
 
 src/pypdfium2/_pypdfium.py
 pdfium
