@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
-data/*
+data/
 !data/.gitkeep
 build/
 dist/
-docs/build/*
+docs/build/
+!docs/build/.gitkeep
 
 **/__pycache__
 *.pyc
