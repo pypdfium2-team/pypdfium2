@@ -173,7 +173,7 @@ success or failure on the issues panel.
 could be adapted easily.)
 
 For wheel naming conventions, please see
-[Python Packaging / Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/)
+[Python Packaging: Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/)
 and the various referenced PEPs.
 
 PyPDFium2 contains scripts to automate the release process:
@@ -215,6 +215,8 @@ If your issue is caused by the bindings generator, refer to the
 
 ## Known limitations
 
+### Non-ascii file paths on Windows
+
 On Windows, PDFium currently is not able to open documents with file names containing multi-byte, non-ascii
 characters. This bug is [reported since March 2017](https://bugs.chromium.org/p/pdfium/issues/detail?id=682).
 However, the PDFium development team so far has not given it much attention. The cause of the issue
@@ -243,3 +245,6 @@ This issue cannot reasonably be worked around in PyPDFium2, for the following re
       # (str.isascii() requires at least Python 3.7)
       ...
   ```
+  
+  This workaround is currently used for the command-line interface of PyPDFium2
+  (see [`__main__.py`](src/pypdfium2/__main__.py)).
