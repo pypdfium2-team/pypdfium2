@@ -1,9 +1,13 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
+logger = logging.getLogger(__name__)
+
 import os
 import sys
 import argparse
+import tempfile
 import concurrent.futures
 import pypdfium2 as pdfium
 from os.path import (
@@ -171,13 +175,13 @@ def invoke_process_page(args):
     return process_page(*args)
 
 
-def get_pageargs(args, page_indices, prefix, n_digits):
+def get_pageargs(args, filename, page_indices, prefix, n_digits):
     
     meta_args = []
     
     for i in page_indices:
         subgroup = [
-            args.pdffile,
+            filename,
             i,
             args.password,
             args.scale,
@@ -205,7 +209,16 @@ def main():
     if args.pdffile is None:
         raise ValueError("An input file is required.")
     
-    with pdfium.PdfContext(args.pdffile, args.password) as pdf:
+    filename = args.pdffile
+    temporary = None
+    if sys.platform.startswith('win32') and not filename.isascii():
+        temporary = tempfile.NamedTemporaryFile()
+        logger.warning(f"Using temporary copy {temporary.name} due to issues with non-ascii filenames on Windows.")
+        with open(args.pdffile, 'rb') as file:
+            temporary.write(file.read())
+        filename = temporary.name
+    
+    with pdfium.PdfContext(filename, args.password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
     
     if args.pages is None:
@@ -220,12 +233,15 @@ def main():
     else:
         prefix = args.prefix
     
-    pageargs = get_pageargs(args, page_indices, prefix, n_digits)
+    pageargs = get_pageargs(args, filename, page_indices, prefix, n_digits)
     
     with concurrent.futures.ProcessPoolExecutor(args.processes) as pool:
         map = pool.map(invoke_process_page, pageargs)
         for filename in map:
             print(filename)
+    
+    if temporary is not None:
+        temporary.close()
 
 
 # the if-main guard is necessary for multiprocessing to work correctly
