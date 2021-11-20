@@ -138,8 +138,8 @@ License texts for PDFium and its dependencies are included in the file
 PyPDFium2 is the successor of *pypdfium* and *pypdfium-reboot*.
 
 The initial *pypdfium* was packaged manually and did not get regular updates.
-There were no platform-specific wheels, but only one wheel for 64-bit Windows, macOS and
-Linux that was misleadingly marked as 'universal'. Overall it was rather a proof of concept.
+There were no platform-specific wheels, but only a single wheel that contained
+binaries for 64-bit Linux, Windows and macOS.
 
 *pypdfium-reboot* then added a script to automate binary deployment and bindings generation
 to simplify regular updates. However, it was still not platform specific.
