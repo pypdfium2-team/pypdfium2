@@ -183,6 +183,9 @@ def render_page(
     
     pil_image = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
     
+    if background_colour is not None:
+        pil_image = pil_image.convert("RGB")
+    
     if bitmap is not None:
         pdfium.FPDFBitmap_Destroy(bitmap)
     pdfium.FPDF_ClosePage(page)
