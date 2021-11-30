@@ -9,7 +9,9 @@ import sys
 import tempfile
 from os.path import basename, join, splitext
 
-from . import _pypdfium as pdfium
+from pypdfium2 import PdfContext, render_page
+
+from . import __pdfium_version__, __version__, _pypdfium as pdfium
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +159,7 @@ def process_page(
     n_digits,
 ):
     with pdfium.PdfContext(pdffile, password) as pdf:
-        pil_image = pdfium.render_page(
+        pil_image = render_page(
             pdf,
             page_index=i,
             scale=scale,
@@ -204,8 +206,8 @@ def main():
 
     if args.version:
         print(
-            f"PyPDFium2 {pdfium.__version__}",
-            f"PDFium {pdfium.__pdfium_version__}",
+            f"PyPDFium2 {__version__}",
+            f"PDFium {__pdfium_version__}",
             sep="\n",
         )
         sys.exit()
@@ -224,7 +226,7 @@ def main():
             temporary.write(file.read())
         filename = temporary.name
 
-    with pdfium.PdfContext(filename, args.password) as pdf:
+    with PdfContext(filename, args.password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
 
     if args.pages is None:
