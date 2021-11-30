@@ -9,6 +9,6 @@ Source:
 # Copyright: $YEAR $NAME <$CONTACT>
 # License: ...
 
-# Files: pypdfium2.kdev4 .kdev4/*
-# Copyright: 2021 geisserml <geisserml@gmail.com>
-# License: CC-BY-4.0
+Files: pypdfium2.kdev4 .kdev4/*
+Copyright: 2021 geisserml <geisserml@gmail.com>
+License: CC-BY-4.0
