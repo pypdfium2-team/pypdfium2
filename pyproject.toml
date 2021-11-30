@@ -30,6 +30,9 @@ ctypesgen = "^1.0.2"
 black = "^21.11b1"
 flake8 = "^4.0.1"
 isort = "^5.10.1"
+Sphinx = "^4.3.1"
+sphinx-rtd-theme = "^1.0.0"
+sphinxcontrib-programoutput = "^0.17"
 
 
 [black]
