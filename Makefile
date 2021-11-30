@@ -1,4 +1,5 @@
-
+# SPDX-FileCopyrightText: 2021 Adam Huganir <adam@huganir.com>
+# SPDX-License-Identifier: CC-BY-4.0 
 
 release: clean update-binaries build-all
 	check-wheel-contents dist/*
