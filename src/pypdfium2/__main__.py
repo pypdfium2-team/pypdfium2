@@ -63,7 +63,7 @@ def pagetext_type(value):
     return page_indices
 
 
-def parse_args(args):
+def parse_args(args=sys.argv[1:]):
     parser = argparse.ArgumentParser(description="Rasterise PDFs with PyPDFium2")
     parser.add_argument(
         "--input",
@@ -202,7 +202,7 @@ def get_pageargs(args, filename, page_indices, prefix, n_digits):
 
 
 def main():
-    args = parse_args(sys.argv[1:])
+    args = parse_args()
     
     if args.version:
         print(
