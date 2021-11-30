@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
-# Build Files
 data/
 !data/.gitkeep
 build/
@@ -9,41 +8,13 @@ dist/
 docs/build/
 !docs/build/.gitkeep
 
-# Python generated
+.idea
 **/__pycache__
-*.py[cod]
+*.pyc
 *.egg-info
 *.kate-swp
 
-# Binaries/generated code
 src/pypdfium2/_pypdfium.py
 pdfium
 pdfium.dll
 pdfium.dylib
-
-# IDEs
-.idea
-.vscode
-*.kate-swp
-*.kdev4
-
-# Sphinx documentation
-docs/_build/
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-
-
-
