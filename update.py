@@ -172,12 +172,10 @@ def generate_bindings():
         
         shutil.rmtree(build_dir)
         
-        with open(bindings_file, 'r') as file:
-            file_text = file.read()
-            file_text = file_text.replace(strip_dir, '.')
-        
-        with open(bindings_file, 'w') as file:
-            file.write(file_text)
+        with open(bindings_file, 'r+') as file_handle:
+            text = file_handle.read()
+            text = text.replace(strip_dir, '.')
+            file_handle.write(text)
 
 
 def main():
