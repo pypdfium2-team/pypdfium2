@@ -33,6 +33,7 @@ isort = "^5.10.1"
 Sphinx = "^4.3.1"
 sphinx-rtd-theme = "^1.0.0"
 sphinxcontrib-programoutput = "^0.17"
+pytest = "^6.2.5"
 
 
 [black]
