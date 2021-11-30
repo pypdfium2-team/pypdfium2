@@ -5,7 +5,8 @@
 
 [PyPDFium2](https://github.com/pypdfium2-team/pypdfium2) is a Python 3 binding to
 [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), the liberal-licensed
-PDF rendering library developed by Google.
+PDF rendering library authored by Foxit and maintained by Google.
+
 
 ## Install/Update
 
@@ -42,57 +43,84 @@ for PDFium is available.
 PyPDFium2 transparently maps all PDFium classes, enums and functions to Python.
 
 
-## Quick Start
+## Examples
+
+### Using the command-line interface
+
+```bash
+pypdfium2 -i your_file.pdf -o your_output_dir/ --scale 1 --rotation 0 --optimise-mode none
+```
+
+If you want to render multiple files at once, a bash `for`-loop may be suitable:
+```bash
+for file in ./*.pdf; do echo "$file" && pypdfium2 -i "$file" -o your_output_dir/ --scale 2; done
+```
+
+To obtain a list of possible command-line parameters, run
+```bash
+pypdfium2 --help
+```
+
+### Using the support model
 
 ```python3
-import sys
+import pypdfium2 as pdfium
+
+with pdfium.PdfContext(filename) as pdf:
+    pil_image = pdfium.render_page(
+        pdf,
+        page_index = 0,
+        scale = 1,
+        rotation = 0,
+        background_colour = 0xFFFFFFFF,
+        render_annotations = True,
+        optimise_mode = pdfium.OptimiseMode.none,
+    )
+
+pil_image.save("out.png")
+```
+
+### Using the PDFium API
+
+```python3
 import ctypes
 from PIL import Image
 import pypdfium2 as pdfium
 
-pdfium.FPDF_InitLibraryWithConfig(None)
+doc = pdfium.FPDF_LoadDocument(filename, None) # load document (filename, password string)
+page_count = pdfium.FPDF_GetPageCount(doc)     # get page count
+assert page_count >= 1
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print("Usage: example.py somefile.pdf")
-        sys.exit()
-    
-    filename = sys.argv[1]
-    
-    doc = pdfium.FPDF_LoadDocument(filename, None) # load document (filename, password string)
-    page_count = pdfium.FPDF_GetPageCount(doc)     # get page count
-    assert page_count >= 1
+page   = pdfium.FPDF_LoadPage(doc, 0)                # load the first page
+width  = int(pdfium.FPDF_GetPageWidthF(page)  + 0.5) # get page width
+height = int(pdfium.FPDF_GetPageHeightF(page) + 0.5) # get page height
 
-    page   = pdfium.FPDF_LoadPage(doc, 0)                # load the first page
-    width  = int(pdfium.FPDF_GetPageWidthF(page)  + 0.5) # get page width
-    height = int(pdfium.FPDF_GetPageHeightF(page) + 0.5) # get page height
-    
-    # render to bitmap
-    bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
-    pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
-    pdfium.FPDF_RenderPageBitmap(
-        bitmap, page, 0, 0, width, height, 0, 
-        pdfium.FPDF_LCD_TEXT | pdfium.FPDF_ANNOT
-    )
-    
-    # retrieve data from bitmap
-    cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
-    buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+# render to bitmap
+bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
+pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
+pdfium.FPDF_RenderPageBitmap(
+    bitmap, page, 0, 0, width, height, 0, 
+    pdfium.FPDF_LCD_TEXT | pdfium.FPDF_ANNOT
+)
 
-    img = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
-    img.save("out.png")
-    
-    if bitmap is not None:
-        pdfium.FPDFBitmap_Destroy(bitmap)
-    pdfium.FPDF_ClosePage(page)
-    
-    pdfium.FPDF_CloseDocument(doc)
+# retrieve data from bitmap
+cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
+buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+
+img = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
+img.save("out.png")
+
+if bitmap is not None:
+    pdfium.FPDFBitmap_Destroy(bitmap)
+pdfium.FPDF_ClosePage(page)
+
+pdfium.FPDF_CloseDocument(doc)
 ```
 
 
 ## Licensing
 
-PyPDFium2 deployment scripts are Apache-2.0 licensed.
+PyPDFium2 source code itself is Apache-2.0 licensed.
 The auto-generated bindings file contains BSD-3-Clause code.
 
 Documentation and examples are CC-BY-4.0.
@@ -110,13 +138,15 @@ License texts for PDFium and its dependencies are included in the file
 PyPDFium2 is the successor of *pypdfium* and *pypdfium-reboot*.
 
 The initial *pypdfium* was packaged manually and did not get regular updates.
-There were no platform-specific wheels, but only one wheel for 64-bit Windows, macOS and
-Linux that was misleadingly marked as 'universal'. Overall it was rather a proof of concept.
+There were no platform-specific wheels, but only a single wheel that contained
+binaries for 64-bit Linux, Windows and macOS.
 
 *pypdfium-reboot* then added a script to automate binary deployment and bindings generation
 to simplify regular updates. However, it was still not platform specific.
 
 PyPDFium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
+It also adds a basic support model and a command-line interface on top of the PDFium C API
+to simplify common use cases.
 
 
 ## Development
@@ -143,7 +173,7 @@ success or failure on the issues panel.
 could be adapted easily.)
 
 For wheel naming conventions, please see
-[Python Packaging / Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/)
+[Python Packaging: Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/)
 and the various referenced PEPs.
 
 PyPDFium2 contains scripts to automate the release process:
@@ -157,9 +187,9 @@ PyPDFium2 contains scripts to automate the release process:
 
 * You may want to upload to [TestPyPI](https://test.pypi.org/legacy/) first to ensure
   everything works as expected:
-   ```bash
-   twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
-   ```
+  ```bash
+  twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+  ```
 * If all went well, upload to the real PyPI:
   ```bash
   twine upload dist/*
@@ -171,7 +201,7 @@ PyPDFium2 contains scripts to automate the release process:
 Since PyPDFium2 is built using upstream binaries and an automatic bindings creator,
 issues that are not related to packaging most likely need to be addressed upstream.
 However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
-is always a good place to start if you have any problems or questions.
+is always a good place to start if you have any problems, questions or suggestions.
 
 If the cause of an issue could be determined to be in PDFium, the problem needs to be
 reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list).
@@ -179,5 +209,42 @@ reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/l
 Issues related to build configuration should be discussed at
 [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
 
-If the issue is caused by the bindings generator, refer to the
+If your issue is caused by the bindings generator, refer to the
 [ctypesgen bug tracker](https://github.com/ctypesgen/ctypesgen/issues).
+
+
+## Known limitations
+
+### Non-ascii file paths on Windows
+
+On Windows, PDFium currently is not able to open documents with file names containing multi-byte, non-ascii
+characters. This bug is [reported since March 2017](https://bugs.chromium.org/p/pdfium/issues/detail?id=682).
+However, the PDFium development team so far has not given it much attention. The cause of the issue
+is known and the structure for a fix was proposed, but it has not been applied yet.
+
+This issue cannot reasonably be worked around in PyPDFium2, for the following reasons:
+
+* Using `FPDF_LoadMemDocument()` rather than `FPDF_LoadDocument()` is not possible due to issues with
+  concurrent access to the same file. Moreover, it would be less efficient as the whole document has
+  to be loaded into memory. This makes it impractical for large files.
+* `FPDF_LoadCustomDocument()` is not a solution, since mapping the complex file reading callback to Python
+  is hardly feasible. Furthermore, there would likely be the same problem with concurrent access.
+* Creating a tempfile with a compatible name would be possible, but cannot be done in PyPDFium2 itself:
+  For faster rendering, you usually set up a multiprocessing pool or a concurrent future. This means
+  each process has to initialise its own `PdfContext`. If an automatic tempfile workaround were implemented
+  in `PdfContext`, this would mean that each process creates its own temporary copy of the file, which
+  would be highly inefficient. The tempfile should be created only once for all pages, not for each page
+  separately. Therefore, this workaround can only be applied downstream.
+  It could be done somewhat like this:
+  
+  ```python3
+  import sys
+  
+  if sys.platform.startswith('win32') and not filename.isascii():
+      # create a temporary copy and remap the file name
+      # (str.isascii() requires at least Python 3.7)
+      ...
+  ```
+  
+  This workaround is currently used for the command-line interface of PyPDFium2
+  (see [`__main__.py`](src/pypdfium2/__main__.py)).

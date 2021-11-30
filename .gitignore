@@ -1,20 +1,22 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: CC-BY-4.0
 
 # Build Files
-data/*
+data/
+!data/.gitkeep
 build/
 dist/
-!data/.gitkeep
-src/pypdfium2/_pypdfium.py
+docs/build/
+!docs/build/.gitkeep
 
 # Python generated
 **/__pycache__
 *.py[cod]
 *.egg-info
-*$py.class
+*.kate-swp
 
-# Binaries
+# Binaries/generated code
+src/pypdfium2/_pypdfium.py
 pdfium
 pdfium.dll
 pdfium.dylib
