@@ -3,57 +3,63 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-import shutil
+from os.path import (
+    dirname,
+    realpath,
+    join,
+    basename,
+    exists,
+)
 from glob import glob
-from os.path import basename, dirname, exists, join, realpath
-from typing import Callable
-
+import shutil
 import setuptools
+from typing import Callable
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
+
 SourceTree = dirname(realpath(__file__))
-TargetDir = join(SourceTree, "src", "pypdfium2")
-DataTree = join(SourceTree, "data")
+TargetDir  = join(SourceTree,'src','pypdfium2')
+DataTree   = join(SourceTree,'data')
 
-Darwin64 = join(DataTree, "darwin-x64")
-DarwinArm64 = join(DataTree, "darwin-arm64")
-Linux64 = join(DataTree, "linux-x64")
-LinuxArm64 = join(DataTree, "linux-arm64")
-LinuxArm32 = join(DataTree, "linux-arm32")
-Windows64 = join(DataTree, "windows-x64")
-Windows86 = join(DataTree, "windows-x86")
+Darwin64     = join(DataTree,'darwin-x64')
+DarwinArm64  = join(DataTree,'darwin-arm64')
+Linux64      = join(DataTree,'linux-x64')
+LinuxArm64   = join(DataTree,'linux-arm64')
+LinuxArm32   = join(DataTree,'linux-arm32')
+Windows64    = join(DataTree,'windows-x64')
+Windows86    = join(DataTree,'windows-x86')
 
 
-class BDistBase(_bdist_wheel):
+class BDistBase (_bdist_wheel):
     def finalize_options(self):
         _bdist_wheel.finalize_options(self)
-        self.python_tag = "py3"
+        self.python_tag = 'py3'
         self.plat_name_supplied = True
 
 
 def _clean():
-
-    build_cache = join(SourceTree, "build")
-    bindings_file = join(TargetDir, "_pypdfium.py")
-
-    binary_linux = join(TargetDir, "pdfium")
-    binary_windows = join(TargetDir, "pdfium.dll")
-    binary_darwin = join(TargetDir, "pdfium.dylib")
-
+    
+    build_cache    = join(SourceTree,'build')
+    bindings_file  = join(TargetDir,'_pypdfium.py')
+    
+    binary_linux   = join(TargetDir,'pdfium')
+    binary_windows = join(TargetDir,'pdfium.dll')
+    binary_darwin  = join(TargetDir,'pdfium.dylib')
+    
     files = [bindings_file, binary_linux, binary_windows, binary_darwin]
-
+    
     if exists(build_cache):
         shutil.rmtree(build_cache)
-
+    
     for file in files:
         if exists(file):
             os.remove(file)
 
 
 def _copy_bindings(platform_dir):
-    for file in glob(join(platform_dir, "*")):
+    for file in glob(join(platform_dir,'*')):
         file_basename = basename(file)
-        shutil.copy(file, join(TargetDir, file_basename))
+        shutil.copy(file, join(TargetDir,file_basename))
 
 
 def build(lib_setup: Callable, platform_dir):
