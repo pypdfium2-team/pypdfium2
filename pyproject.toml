@@ -19,19 +19,19 @@ classifiers = [
     "Topic :: Software Development :: Libraries"]
 keywords = ["Python", "PDF", "PDFium"]
 
+
 [tool.poetry.dependencies]
 python = "^3.6.1"
 pillow = "^8.4.0"
 
 [tool.poetry.dev-dependencies]
+wheel = "^0.37.0"
+ctypesgen = "^1.0.2"
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
 
 [black]
 line-length = 120
-target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
+target-version = ['py38', 'py39', 'py310']
 include = '\.pyi?$'
 extend-exclude = 'src/pypdfium2/_pypdfium.py'
 

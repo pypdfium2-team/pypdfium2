@@ -1,4 +1,12 @@
 [[package]]
+name = "ctypesgen"
+version = "1.0.2"
+description = "Python wrapper generator for ctypes"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pillow"
 version = "8.4.0"
 description = "Python Imaging Library (Fork)"
@@ -9,9 +17,12 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "1d45da9910599a72abcc0b949fba1300cfaa44202e4dc967c7fd314671ba10de"
+content-hash = "361a886d47b55a4559f665241722b3c6d154c40358affb71dc560e6db514f316"
 
 [metadata.files]
+ctypesgen = [
+    {file = "ctypesgen-1.0.2-py2.py3-none-any.whl", hash = "sha256:0940c5bb42cacadc6979eab6aeebc98049b272ed019061ab4781ee375e4c7475"},
+]
 pillow = [
     {file = "Pillow-8.4.0-cp310-cp310-macosx_10_10_universal2.whl", hash = "sha256:81f8d5c81e483a9442d72d182e1fb6dcb9723f289a57e8030811bac9ea3fef8d"},
     {file = "Pillow-8.4.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:3f97cfb1e5a392d75dd8b9fd274d205404729923840ca94ca45a0af57e13dbe6"},

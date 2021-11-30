@@ -5,6 +5,8 @@
 data/*
 build/
 dist/
+!data/.gitkeep
+src/pypdfium2/_pypdfium.py
 
 # Python generated
 **/__pycache__
@@ -39,5 +41,7 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+
 
 
