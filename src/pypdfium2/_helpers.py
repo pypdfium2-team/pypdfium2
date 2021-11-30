@@ -5,12 +5,11 @@ import ctypes
 import math
 from os.path import abspath
 from typing import Optional
-
 from PIL import Image
 
-from . import _pypdfium as pdfium
-from ._constants import *
-from ._exceptions import *
+from pypdfium2 import _pypdfium as pdfium
+from pypdfium2._constants import *
+from pypdfium2._exceptions import *
 
 
 class PdfContext:

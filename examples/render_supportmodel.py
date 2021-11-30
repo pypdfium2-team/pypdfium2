@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 import sys
-
 import pypdfium2 as pdfium
 
 if __name__ == "__main__":
