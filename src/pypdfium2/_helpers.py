@@ -8,9 +8,9 @@ from typing import Optional
 
 from PIL import Image
 
-import pypdfium2 as pdfium
-from pypdfium2._constants import *
-from pypdfium2._exceptions import *
+from . import _pypdfium as pdfium
+from ._constants import *
+from ._exceptions import *
 
 
 class PdfContext:
@@ -38,12 +38,10 @@ class PdfContext:
         self.password = password
 
     def __enter__(self) -> pdfium.FPDF_DOCUMENT:
-
         self.pdf = pdfium.FPDF_LoadDocument(self.file_path, self.password)
         page_count = pdfium.FPDF_GetPageCount(self.pdf)
 
         if page_count < 1:
-
             last_error = pdfium.FPDF_GetLastError()
             if last_error == pdfium.FPDF_ERR_SUCCESS:
                 raise LoadPdfError(

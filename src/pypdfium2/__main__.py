@@ -9,7 +9,7 @@ import sys
 import tempfile
 from os.path import basename, join, splitext
 
-import pypdfium2 as pdfium
+from . import _pypdfium as pdfium
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,6 @@ def optimise_mode_type(string):
 
 
 def pagetext_type(value):
-
     if value == "":
         return
 
@@ -157,9 +156,7 @@ def process_page(
     prefix,
     n_digits,
 ):
-
     with pdfium.PdfContext(pdffile, password) as pdf:
-
         pil_image = pdfium.render_page(
             pdf,
             page_index=i,
@@ -170,7 +167,7 @@ def process_page(
             optimise_mode=optimise_mode,
         )
 
-    filename = join(output, f"{prefix}{i+1:0{n_digits}}.png")
+    filename = join(output, f"{prefix}{i + 1:0{n_digits}}.png")
     pil_image.save(filename)
 
     return filename
@@ -181,7 +178,6 @@ def invoke_process_page(args):
 
 
 def get_pageargs(args, filename, page_indices, prefix, n_digits):
-
     meta_args = []
 
     for i in page_indices:
@@ -204,7 +200,6 @@ def get_pageargs(args, filename, page_indices, prefix, n_digits):
 
 
 def main():
-
     args = parse_args()
 
     if args.version:

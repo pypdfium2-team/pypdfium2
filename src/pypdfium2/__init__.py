@@ -4,26 +4,25 @@
 import atexit
 import logging
 
-from pypdfium2._logging import setup_logger
+from ._logging import setup_logger
 
 logger = logging.getLogger(__name__)
 setup_logger(logger)
 
-from pypdfium2 import _version
-from pypdfium2._constants import *
-from pypdfium2._exceptions import *
-from pypdfium2._helpers import *
-from pypdfium2._pypdfium import *
+from . import _pypdfium as pdfium
+from ._constants import *
+from ._exceptions import *
+from ._helpers import *
+from ._version import V_LIBPDFIUM, V_PYPDFIUM2
 
-__version__ = _version.V_PYPDFIUM2
-__pdfium_version__ = _version.V_LIBPDFIUM
+__version__ = V_PYPDFIUM2
+__pdfium_version__ = V_LIBPDFIUM
 
-
-FPDF_InitLibrary()
+pdfium.FPDF_InitLibrary()
 
 
 def exit_handler():
-    FPDF_DestroyLibrary()
+    pdfium.FPDF_DestroyLibrary()
 
 
 atexit.register(exit_handler)
