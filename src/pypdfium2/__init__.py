@@ -4,6 +4,5 @@
 from . import _version
 from ._pypdfium import *
 
-
 __version__ = _version.V_PYPDFIUM2
 __pdfium_version__ = _version.V_LIBPDFIUM

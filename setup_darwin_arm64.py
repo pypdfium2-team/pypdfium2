@@ -4,16 +4,19 @@
 
 from setup_base import *
 
-class bdist (BDistBase):
+
+class bdist(BDistBase):
     def finalize_options(self):
         BDistBase.finalize_options(self)
-        self.plat_name = 'macosx_11_0_arm64'
+        self.plat_name = "macosx_11_0_arm64"
+
 
 def lib_setup():
     setuptools.setup(
-        cmdclass = {'bdist_wheel': bdist},
-        package_data = {'': ['pdfium.dylib']},
+        cmdclass={"bdist_wheel": bdist},
+        package_data={"": ["pdfium.dylib"]},
     )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     build(lib_setup, DarwinArm64)

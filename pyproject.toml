@@ -21,17 +21,20 @@ keywords = ["Python", "PDF", "PDFium"]
 
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.6.2"
 pillow = "^8.4.0"
 
 [tool.poetry.dev-dependencies]
 wheel = "^0.37.0"
 ctypesgen = "^1.0.2"
+black = "^21.11b1"
+flake8 = "^4.0.1"
+isort = "^5.10.1"
 
 
 [black]
 line-length = 120
-target-version = ['py38', 'py39', 'py310']
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
 include = '\.pyi?$'
 extend-exclude = 'src/pypdfium2/_pypdfium.py'
 
