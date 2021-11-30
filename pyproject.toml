@@ -21,7 +21,7 @@ keywords = ["Python", "PDF", "PDFium"]
 
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.7.0"
 pillow = "^8.4.0"
 
 [tool.poetry.dev-dependencies]
