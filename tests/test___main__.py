@@ -30,7 +30,7 @@ def test_rotation_type_fail_oob():
         ("None", None),
         ("none", None),
         ("10", 10),
-        ("0xFFFFFFFF", 4294967295),
+        ("0xFFFFFFFF", 0xFFFFFFFF),
     ],
 )
 def test_hex_or_none_type(test_input, expected):
@@ -59,7 +59,7 @@ _base_parsed_args = {
     "pages": None,
     "scale": 2.0,
     "rotation": 0,
-    "background_colour": 4294967295,
+    "background_colour": 0xFFFFFFFF,
     "no_annotations": False,
     "optimise_mode": OptimiseMode.none,
     "processes": 16,
@@ -76,7 +76,5 @@ _base_parsed_args = {
     ],
 )
 def test_parse_args(test_input, expected):
-    # TODO: rewrite after adding a input argument to parse_args fn
-    # sys.argv = test_input
-    # assert vars(parse_args()) == expected
+    assert vars(parse_args(test_input)) == expected
     assert True

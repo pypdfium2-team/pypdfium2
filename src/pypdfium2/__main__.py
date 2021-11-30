@@ -9,9 +9,9 @@ import sys
 import tempfile
 from os.path import basename, join, splitext
 
-from pypdfium2 import PdfContext, render_page
-
-from . import __pdfium_version__, __version__, _pypdfium as pdfium
+from pypdfium2._helpers import *
+from pypdfium2._version import V_PYPDFIUM2, V_LIBPDFIUM
+from pypdfium2 import _pypdfium as pdfium
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def hex_or_none_type(string):
 
 
 def optimise_mode_type(string):
-    return pdfium.OptimiseMode[string.lower()]
+    return OptimiseMode[string.lower()]
 
 
 def pagetext_type(value):
@@ -63,7 +63,7 @@ def pagetext_type(value):
     return page_indices
 
 
-def parse_args():
+def parse_args(args):
     parser = argparse.ArgumentParser(description="Rasterise PDFs with PyPDFium2")
     parser.add_argument(
         "--input",
@@ -142,7 +142,7 @@ def parse_args():
         action="store_true",
         help="Show the program version and exit.",
     )
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def process_page(
@@ -158,7 +158,7 @@ def process_page(
     prefix,
     n_digits,
 ):
-    with pdfium.PdfContext(pdffile, password) as pdf:
+    with PdfContext(pdffile, password) as pdf:
         pil_image = render_page(
             pdf,
             page_index=i,
@@ -202,19 +202,19 @@ def get_pageargs(args, filename, page_indices, prefix, n_digits):
 
 
 def main():
-    args = parse_args()
-
+    args = parse_args(sys.argv)
+    
     if args.version:
         print(
-            f"PyPDFium2 {__version__}",
-            f"PDFium {__pdfium_version__}",
+            f"PyPDFium2 {V_PYPDFIUM2}",
+            f"PDFium {V_LIBPDFIUM}",
             sep="\n",
         )
         sys.exit()
 
     if args.pdffile is None:
         raise ValueError("An input file is required.")
-
+    
     filename = args.pdffile
     temporary = None
     if sys.platform.startswith("win32") and not filename.isascii():
@@ -225,29 +225,29 @@ def main():
         with open(args.pdffile, "rb") as file:
             temporary.write(file.read())
         filename = temporary.name
-
+    
     with PdfContext(filename, args.password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
-
+    
     if args.pages is None:
         page_indices = [i for i in range(n_pages)]
     else:
         page_indices = args.pages
-
+    
     n_digits = len(str(n_pages))
-
+    
     if args.prefix is None:
         prefix = splitext(basename(args.pdffile))[0] + "_"
     else:
         prefix = args.prefix
-
+    
     pageargs = get_pageargs(args, filename, page_indices, prefix, n_digits)
-
+    
     with concurrent.futures.ProcessPoolExecutor(args.processes) as pool:
         map = pool.map(invoke_process_page, pageargs)
         for filename in map:
             print(filename)
-
+    
     if temporary is not None:
         temporary.close()
 

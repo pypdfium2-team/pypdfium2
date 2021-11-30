@@ -4,16 +4,16 @@
 import atexit
 import logging
 
-from ._logging import setup_logger
+from pypdfium2._logging import setup_logger
 
 logger = logging.getLogger(__name__)
 setup_logger(logger)
 
-from . import _pypdfium as pdfium
-from ._constants import *
-from ._exceptions import *
-from ._helpers import *
-from ._version import V_LIBPDFIUM, V_PYPDFIUM2
+from pypdfium2 import _pypdfium as pdfium
+from pypdfium2._constants import *
+from pypdfium2._exceptions import *
+from pypdfium2._helpers import *
+from pypdfium2._version import V_LIBPDFIUM, V_PYPDFIUM2
 
 __version__ = V_PYPDFIUM2
 __pdfium_version__ = V_LIBPDFIUM
