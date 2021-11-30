@@ -202,7 +202,7 @@ def get_pageargs(args, filename, page_indices, prefix, n_digits):
 
 
 def main():
-    args = parse_args(sys.argv)
+    args = parse_args(sys.argv[1:])
     
     if args.version:
         print(
