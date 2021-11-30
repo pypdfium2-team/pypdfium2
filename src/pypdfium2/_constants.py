@@ -4,8 +4,9 @@
 from enum import Enum
 
 
-class OptimiseMode (Enum):
+class OptimiseMode(Enum):
     """ How to optimise page rendering """
-    none = 0          #: Do not use any optimisations
-    lcd_display = 1   #: Optimise for LCD displays
-    printing = 2      #: Optimise for printing
+
+    none = 0  #: Do not use any optimisations
+    lcd_display = 1  #: Optimise for LCD displays
+    printing = 2  #: Optimise for printing

@@ -10,7 +10,6 @@ from PIL import Image
 
 import pypdfium2 as pdfium
 
-
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("Usage: example.py somefile.pdf")
