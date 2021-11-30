@@ -56,8 +56,7 @@ def pagetext_type(value):
             page_indices.extend(pages)
 
         else:
-
-            page_indices.append(int(page_or_range))
+            page_indices.append(int(page_or_range) - 1)
 
     return page_indices
 
