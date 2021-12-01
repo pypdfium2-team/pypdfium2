@@ -10,8 +10,10 @@ import pytest
 @pytest.mark.parametrize(
     "test_input,expected",
     [
-        ("90", 90),
         ("0", 0),
+        ("90", 90),
+        ("180", 180),
+        ("270", 270),
     ],
 )
 def test_rotation_type(test_input, expected):
@@ -21,6 +23,8 @@ def test_rotation_type(test_input, expected):
 def test_rotation_type_fail_oob():
     with pytest.raises(ValueError):
         main.rotation_type("101")
+    with pytest.raises(ValueError):
+        main.rotation_type("string")
 
 
 @pytest.mark.parametrize(
