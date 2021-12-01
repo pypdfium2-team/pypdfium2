@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
-from pypdfium2 import OptimiseMode
 from pypdfium2 import __main__ as main
+from pypdfium2._constants import OptimiseMode
 import pytest
 
 
@@ -51,15 +51,31 @@ def test_pagetext_type(test_input, expected):
 
 
 def test_parse_args():
+    
     argv = [
         '-i', 'path/to/document.pdf',
         '-o', 'output_dir/',
         '--password', 'test-password',
+        '--prefix', 'render_',
         '--pages', '1,4,5-7,6-4',
+        '--scale', '2',
+        '--rotation', '90',
+        '--background-colour', '0xFFFFFFFF',
+        '--optimise-mode', 'none',
+        '--processes', '4',
     ]
     
     args = main.parse_args(argv)
-    assert args.pages == [0, 3, 4, 5, 6, 5, 4, 3]
+    
     assert args.pdffile == 'path/to/document.pdf'
     assert args.output == 'output_dir/'
     assert args.password == 'test-password'
+    assert args.prefix == 'render_'
+    assert args.pages == [0, 3, 4, 5, 6, 5, 4, 3]
+    assert args.scale == 2
+    assert args.rotation == 90
+    assert args.background_colour == 0xFFFFFFFF
+    assert args.no_annotations == False
+    assert args.optimise_mode == OptimiseMode.none
+    assert args.processes == 4
+    assert args.version == False
