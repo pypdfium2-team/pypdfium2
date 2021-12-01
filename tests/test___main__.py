@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2021 Adam Huganir <adam@huganir.com>
 # SPDX-License-Identifier: Apache-2.0
 
-from pypdfium2 import OptimiseMode, _pypdfium
+from pypdfium2 import OptimiseMode
 from pypdfium2.__main__ import (
     hex_or_none_type,
     pagetext_type,
@@ -54,30 +54,16 @@ def test_pagetext_type(test_input, expected):
     assert pagetext_type(test_input) == expected
 
 
-_base_parsed_args = {
-    "pdffile": None,
-    "output": None,
-    "prefix": None,
-    "password": None,
-    "pages": None,
-    "scale": 2.0,
-    "rotation": 0,
-    "background_colour": 0xFFFFFFFF,
-    "no_annotations": False,
-    "optimise_mode": OptimiseMode.none,
-    "processes": 16,
-    "version": False,
-}
-
-
-@pytest.mark.parametrize(
-    "test_input,expected",
-    [
-        (["python"], _base_parsed_args),
-        (["python", "--pages=1,2"], {**_base_parsed_args, "pages": [1, 2]}),
-        (["python", "--scale=3.14"], {**_base_parsed_args, "scale": 3.14}),
-    ],
-)
-def test_parse_args(test_input, expected):
-    # assert vars(parse_args(test_input)) == expected
-    assert True
+def test_parse_args():
+    argv = [
+        '-i', 'path/to/document.pdf',
+        '-o', 'output_dir/',
+        '--password', 'test-password',
+        '--pages', '1,4,5-7,6-4',
+    ]
+    
+    args = parse_args(argv)
+    assert args.pages == [0, 3, 4, 5, 6, 5, 4, 3]
+    assert args.pdffile == 'path/to/document.pdf'
+    assert args.output == 'output_dir/'
+    assert args.password == 'test-password'

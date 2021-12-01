@@ -63,7 +63,7 @@ def pagetext_type(value):
     return page_indices
 
 
-def parse_args():
+def parse_args(args=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         description = "Rasterise PDFs with PyPDFium2"
     )
@@ -136,7 +136,7 @@ def parse_args():
         action = 'store_true',
         help = "Show the program version and exit."
     )
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def process_page(
