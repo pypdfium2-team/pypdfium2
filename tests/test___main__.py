@@ -2,12 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pypdfium2 import OptimiseMode
-from pypdfium2.__main__ import (
-    hex_or_none_type,
-    pagetext_type,
-    parse_args,
-    rotation_type,
-)
+from pypdfium2 import __main__ as main
 import pytest
 
 
@@ -19,12 +14,12 @@ import pytest
     ],
 )
 def test_rotation_type(test_input, expected):
-    assert rotation_type(test_input) == expected
+    assert main.rotation_type(test_input) == expected
 
 
 def test_rotation_type_fail_oob():
     with pytest.raises(ValueError):
-        rotation_type("101")
+        main.rotation_type("101")
 
 
 @pytest.mark.parametrize(
@@ -37,7 +32,7 @@ def test_rotation_type_fail_oob():
     ],
 )
 def test_hex_or_none_type(test_input, expected):
-    assert hex_or_none_type(test_input) == expected
+    assert main.hex_or_none_type(test_input) == expected
 
 
 @pytest.mark.parametrize(
@@ -51,7 +46,7 @@ def test_hex_or_none_type(test_input, expected):
     ],
 )
 def test_pagetext_type(test_input, expected):
-    assert pagetext_type(test_input) == expected
+    assert main.pagetext_type(test_input) == expected
 
 
 def test_parse_args():
@@ -62,7 +57,7 @@ def test_parse_args():
         '--pages', '1,4,5-7,6-4',
     ]
     
-    args = parse_args(argv)
+    args = main.parse_args(argv)
     assert args.pages == [0, 3, 4, 5, 6, 5, 4, 3]
     assert args.pdffile == 'path/to/document.pdf'
     assert args.output == 'output_dir/'
