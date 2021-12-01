@@ -12,3 +12,7 @@ Source:
 Files: pypdfium2.kdev4 .kdev4/*
 Copyright: 2021 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
+
+Files: tests/resources/*.pdf
+Copyright: 2021 geisserml <geisserml@gmail.com>
+License: CC-BY-4.0
