@@ -8,9 +8,9 @@ from pypdfium2 import _exceptions as exceptions
 from pypdfium2 import _pypdfium as pdfium
 
 
-def _check_pdf(pdf):
+def _check_pdf(pdf, page_count=1):
     assert isinstance(pdf, pdfium.FPDF_DOCUMENT)
-    assert pdfium.FPDF_GetPageCount(pdf) == 1
+    assert pdfium.FPDF_GetPageCount(pdf) == page_count
 
 
 def test_pdfcontext():
