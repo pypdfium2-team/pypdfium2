@@ -17,3 +17,5 @@ src/pypdfium2/_pypdfium.py
 pdfium
 pdfium.dll
 pdfium.dylib
+
+tests/.pytest_cache
