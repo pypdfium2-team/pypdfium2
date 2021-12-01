@@ -8,7 +8,8 @@ from pathlib import Path
 ResourceDir = Path(__file__).parent.resolve() / 'resources'
 
 class TestFiles:
-    test_render = ResourceDir / 'test_render.pdf'
+    test_render    = ResourceDir / 'test_render.pdf'
+    test_encrypted = ResourceDir / 'test_encrypted.pdf'
 
 
 def test_paths():

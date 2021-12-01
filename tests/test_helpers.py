@@ -4,13 +4,30 @@
 import pytest
 from configuration import TestFiles
 from pypdfium2 import _helpers as helpers
+from pypdfium2 import _exceptions as exceptions
 from pypdfium2 import _pypdfium as pdfium
+
+
+def _check_pdf(pdf):
+    assert isinstance(pdf, pdfium.FPDF_DOCUMENT)
+    assert pdfium.FPDF_GetPageCount(pdf) == 1
 
 
 def test_pdfcontext():
     with helpers.PdfContext(TestFiles.test_render) as pdf:
-        assert isinstance(pdf, pdfium.FPDF_DOCUMENT)
-        assert pdfium.FPDF_GetPageCount(pdf) == 1
+        _check_pdf(pdf)
+
+def test_open_encrypted():
+    with helpers.PdfContext(TestFiles.test_encrypted, 'test_user') as pdf:
+        _check_pdf(pdf)
+    with helpers.PdfContext(TestFiles.test_encrypted, 'test_owner') as pdf:
+        _check_pdf(pdf)
+
+
+def test_open_encrypted_fail():
+    with pytest.raises(exceptions.LoadPdfError, match="Missing or wrong password."):
+        with helpers.PdfContext(TestFiles.test_encrypted, 'string') as pdf:
+            pass
 
 
 @pytest.mark.parametrize(
