@@ -21,9 +21,9 @@ def test_rotation_type(test_input, expected):
 
 
 def test_rotation_type_fail_oob():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid rotation value"):
         main.rotation_type("101")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="invalid literal for int()"):
         main.rotation_type("string")
 
 
