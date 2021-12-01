@@ -36,7 +36,7 @@ class PdfContext:
     # https://bugs.chromium.org/p/pdfium/issues/detail?id=682
     
     def __init__(self, file_path: str, password: Optional[str] = None):
-        self.file_path = abspath(file_path)
+        self.file_path = abspath(str(file_path))
         self.password = password
     
     def __enter__(self) -> pdfium.FPDF_DOCUMENT:    
