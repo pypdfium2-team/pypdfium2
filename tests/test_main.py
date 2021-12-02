@@ -2,13 +2,13 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
+import pytest
 from pypdfium2 import __main__ as main
 from pypdfium2._constants import OptimiseMode
-import pytest
 
 
 @pytest.mark.parametrize(
-    "test_input,expected",
+    "test_input, expected",
     [
         ("0", 0),
         ("90", 90),
@@ -21,14 +21,14 @@ def test_rotation_type(test_input, expected):
 
 
 def test_rotation_type_fail_oob():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid rotation value"):
         main.rotation_type("101")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="invalid literal for int()"):
         main.rotation_type("string")
 
 
 @pytest.mark.parametrize(
-    "test_input,expected",
+    "test_input, expected",
     [
         ("None", None),
         ("none", None),
@@ -41,7 +41,7 @@ def test_hex_or_none_type(test_input, expected):
 
 
 @pytest.mark.parametrize(
-    "test_input,expected",
+    "test_input, expected",
     [
         ("", None),
         ("1,2", [0, 1]),
