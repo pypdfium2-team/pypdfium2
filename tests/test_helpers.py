@@ -75,3 +75,22 @@ def test_render_encrypted():
     
     pil_image_a.close()
     pil_image_b.close()
+
+
+def test_render_alpha():
+    
+    with helpers.PdfContext(TestFiles.test_render) as pdf:
+        pil_image = helpers.render_page(
+            pdf, 0,
+            background_colour = None,
+        )
+    
+    assert pil_image.mode == 'RGBA'
+    assert pil_image.size == (595, 842)
+    assert pil_image.getpixel( (0, 0) ) == (0, 0, 0, 0)
+    assert pil_image.getpixel( (62, 66) ) == (0, 0, 0, 186)
+    assert pil_image.getpixel( (150, 180) ) == (129, 212, 26, 255)
+    assert pil_image.getpixel( (150, 390) ) == (42, 96, 153, 255)
+    assert pil_image.getpixel( (150, 570) ) == (128, 0, 128, 255)
+    
+    pil_image.close()
