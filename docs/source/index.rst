@@ -16,3 +16,10 @@ For the low-level interface, please refer to the `PDFium documentation`_ instead
    
    api
    cli
+
+
+Index
+-----
+
+* :ref:`genindex`
+* :ref:`modindex`
