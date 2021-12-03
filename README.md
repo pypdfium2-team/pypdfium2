@@ -36,13 +36,6 @@ bash clean.sh
 ```
 
 
-## Documentation
-
-[API documentation](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html)
-for PDFium is available.
-PyPDFium2 transparently maps all PDFium classes, enums and functions to Python.
-
-
 ## Examples
 
 ### Using the command-line interface
@@ -60,6 +53,9 @@ To obtain a list of possible command-line parameters, run
 ```bash
 pypdfium2 --help
 ```
+
+CLI documentation: https://pypdfium2.readthedocs.io/en/latest/cli.html
+
 
 ### Using the support model
 
@@ -79,6 +75,9 @@ with pdfium.PdfContext(filename) as pdf:
 
 pil_image.save("out.png")
 ```
+
+Support model documentation: https://pypdfium2.readthedocs.io/en/latest/api.html
+
 
 ### Using the PDFium API
 
@@ -116,6 +115,11 @@ pdfium.FPDF_ClosePage(page)
 
 pdfium.FPDF_CloseDocument(doc)
 ```
+
+Documentation for the [PDFium API](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html)
+is available. PyPDFium2 transparently maps all PDFium classes, enums and functions to Python.
+However, there can sometimes be minor differences between Foxit and open-source PDFium.
+In case of doubts, take a look at the inline source code documentation of PDFium.
 
 
 ## Licensing
