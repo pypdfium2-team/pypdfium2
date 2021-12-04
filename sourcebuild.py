@@ -18,6 +18,7 @@ from os.path import (
 HomeDir       = os.path.expanduser('~')
 SourceTree    = dirname(abspath(__file__))
 WorkDir       = join(SourceTree,'sourcebuild')
+PatchDir      = join(WorkDir,'patches')
 DepotToolsDir = join(WorkDir,'depot_tools')
 PDFiumDir     = join(WorkDir,'pdfium')
 BuildDir      = join(PDFiumDir,'out')
@@ -48,6 +49,25 @@ Libnames = [
     'libpdfium.dll',
 ]
 
+Patches = [
+    (
+        join(PDFiumDir,'public','fpdfview.h'),
+        join(PatchDir,'public_headers.patch'),
+    ),
+    (
+        join(PDFiumDir,'toolchain','win','BUILD.gn'),
+        join(PatchDir,'rc_compiler.patch'),
+    ),
+    (
+        join(PDFiumDir,'BUILD.gn'),
+        join(PatchDir,'shared_library.patch'),
+    ),
+    (
+        join(PDFiumDir,'core','fxge','win32','cgdi_printer_driver.cpp'),
+        join(PatchDir,'widestring.patch'),
+    ),
+]
+
 
 def dl_depottools():
     
@@ -68,10 +88,16 @@ def dl_pdfium():
     sync_cmd = f"{GClient} sync --no-history --shallow"
     print(sync_cmd)
     subprocess.run(sync_cmd, shell=True, cwd=WorkDir)
+
+
+def patch():
     
-    patch_cmd = f"patch -u BUILD.gn -i ../patches/shared_lib.patch"
-    print(patch_cmd)
-    subprocess.run(patch_cmd, shell=True, cwd=PDFiumDir)
+    for target_file, patch_file in Patches:
+        cmd = f"patch -u {target_file} -i {patch_file}"
+        print(cmd)
+        subprocess.run(cmd, shell=True, cwd=PDFiumDir)
+    
+    shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
 def configure():
@@ -139,6 +165,7 @@ def main():
     
     dl_depottools()
     dl_pdfium()
+    patch()
     
     configure()
     build()
