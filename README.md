@@ -35,6 +35,13 @@ python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 bash clean.sh
 ```
 
+### Source build
+
+```bash
+python3 setup_source.py bdist_wheel
+pip3 install dist/pypdfium2-${version}-py3-none-any.whl
+```
+
 
 ## Examples
 
