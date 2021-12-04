@@ -84,17 +84,17 @@ def dl_pdfium():
     subprocess.run(sync_cmd, shell=True, cwd=WorkDir)
 
 
-def _apply_patchset(patchset):
+def _apply_patchset(patchset, cwd):
     for patch in patchset:
         cmd = f"git apply -v {patch}"
         print(cmd)
-        subprocess.run(cmd, shell=True, cwd=WorkDir)
+        subprocess.run(cmd, shell=True, cwd=cwd)
 
 def patch_depottools():
-    _apply_patchset(DepotPatches)
+    _apply_patchset(DepotPatches, DepotToolsDir)
 
 def patch_pdfium():
-    _apply_patchset(PdfiumPatches)
+    _apply_patchset(PdfiumPatches, PDFiumDir)
     shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
