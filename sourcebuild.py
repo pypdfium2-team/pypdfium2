@@ -52,29 +52,14 @@ Libnames = [
 ]
 
 PdfiumPatches = [
-    (
-        join(PDFiumDir,'public','fpdfview.h'),
-        join(PatchDir,'public_headers.patch'),
-    ),
-    (
-        join(PDFiumDir,'toolchain','win','BUILD.gn'),
-        join(PatchDir,'rc_compiler.patch'),
-    ),
-    (
-        join(PDFiumDir,'BUILD.gn'),
-        join(PatchDir,'shared_library.patch'),
-    ),
-    (
-        join(PDFiumDir,'core','fxge','win32','cgdi_printer_driver.cpp'),
-        join(PatchDir,'widestring.patch'),
-    ),
+    join(PatchDir,'public_headers.patch'),
+    join(PatchDir,'rc_compiler.patch'),
+    join(PatchDir,'shared_library.patch'),
+    join(PatchDir,'widestring.patch'),
 ]
 
 DepotPatches = [
-    (
-        join(DepotToolsDir,'gclient_scm.py'),
-        join(PatchDir,'gclient_scm.patch'),
-    ),
+    join(PatchDir,'gclient_scm.patch'),
 ]
 
 
@@ -100,8 +85,8 @@ def dl_pdfium():
 
 
 def _apply_patchset(patchset):
-    for target_file, patch_file in patchset:
-        cmd = f"patch -u {target_file} -i {patch_file}"
+    for patch in patchset:
+        cmd = f"git apply -v {patch}"
         print(cmd)
         subprocess.run(cmd, shell=True, cwd=WorkDir)
 
