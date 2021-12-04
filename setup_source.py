@@ -5,7 +5,7 @@
 import os
 import distutils.util
 from setup_base import *
-from sourcebuild import main as sourcebuild_main
+import sourcebuild
 
 
 class bdist (BDistBase):
@@ -25,7 +25,7 @@ def lib_setup(libname):
 
 if __name__ == '__main__':
     
-    libname = sourcebuild_main()
+    libname = sourcebuild.main()
     build(lambda: lib_setup(libname), SourceBuild)
     
     binary = join(SourceTree,'src','pypdfium2',libname)
