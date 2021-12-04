@@ -40,13 +40,14 @@ use_custom_libcxx = true
 """
 
 Libnames = [
-    'pdfium',
     'pdfium.so',
     'libpdfium.so',
     'pdfium.dylib',
     'libpdfium.dylib',
     'pdfium.dll',
     'libpdfium.dll',
+    'libpdfium'
+    'pdfium',
 ]
 
 Patches = [
