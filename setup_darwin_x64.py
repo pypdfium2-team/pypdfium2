@@ -7,7 +7,7 @@ from setup_base import *
 class bdist (BDistBase):
     def finalize_options(self):
         BDistBase.finalize_options(self)
-        self.plat_name = 'macosx_10_10_x86_64'
+        self.plat_name = 'macosx_10_11_x86_64'
 
 def lib_setup():
     setuptools.setup(
