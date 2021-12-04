@@ -5,6 +5,7 @@
 # Attempt to build PDFium from source. This may take very long.
 
 import os
+import sys
 import shutil
 import subprocess
 from os.path import (
@@ -162,7 +163,10 @@ def pack(src_libpath):
 
 def main():
     
-    os.environ['PATH'] += f":{DepotToolsDir}"
+    if sys.platform.startswith('win32'):
+        os.environ['PATH'] += f";{DepotToolsDir}"
+    else:
+        os.environ['PATH'] += f":{DepotToolsDir}"
     
     dl_depottools()
     dl_pdfium()
