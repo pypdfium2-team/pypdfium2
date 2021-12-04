@@ -32,15 +32,4 @@ update-binaries:
 	python3 update.py
 
 clean:
-	-rm -r dist
-	-rm -r build
-	-rm -r data/*
-	-touch data/.gitkeep
-	-rm -r src/pypdfium2.egg-info/
-	-rm -r __pycache__
-	-rm -r src/pypdfium2/__pycache__
-	-unlink src/pypdfium2/_pypdfium.py
-	-unlink src/pypdfium2/pdfium
-	-unlink src/pypdfium2/pdfium.dll
-	-unlink src/pypdfium2/pdfium.dylib
-
+	bash clean.sh
