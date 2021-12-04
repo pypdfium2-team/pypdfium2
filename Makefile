@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: CC-BY-4.0 
 
 release: clean update-binaries build-all
-	check-wheel-contents dist/*
+		check-wheel-contents dist/*
 
 build-all: build-darwin-arm64 build-darwin-x64 build-linux-arm32 build-linux-arm64 \
-			build-win-x64 build-win-x86 build-linux-x64
+		build-win-x64 build-win-x86 build-linux-x64
 
 build-darwin-x64:
 	python3 setup_darwin_x64.py   bdist_wheel
