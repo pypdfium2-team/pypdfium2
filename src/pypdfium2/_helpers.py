@@ -1,14 +1,11 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
-import sys
 import math
 import ctypes
-import shutil
-import tempfile
 from PIL import Image
 from typing import Optional
-from os.path import abspath, join
+from os.path import abspath
 
 from pypdfium2._constants import *
 from pypdfium2._exceptions import *
