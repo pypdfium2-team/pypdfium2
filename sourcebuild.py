@@ -105,10 +105,8 @@ def _apply_patchset(patchset):
         print(cmd)
         subprocess.run(cmd, shell=True, cwd=WorkDir)
 
-
 def patch_depottools():
     _apply_patchset(DepotPatches)
-
 
 def patch_pdfium():
     _apply_patchset(PdfiumPatches)
