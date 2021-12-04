@@ -9,6 +9,9 @@ touch data/.gitkeep
 rm -r src/pypdfium2.egg-info/
 rm -r __pycache__
 rm -r src/pypdfium2/__pycache__
+rm -rf sourcebuild/depot_tools
+rm -rf sourcebuild/pdfium
+rm -rf sourcebuild/.*
 unlink src/pypdfium2/_pypdfium.py
 unlink src/pypdfium2/pdfium
 unlink src/pypdfium2/pdfium.dll
