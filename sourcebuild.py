@@ -90,7 +90,7 @@ def dl_pdfium():
     subprocess.run(sync_cmd, shell=True, cwd=WorkDir)
 
 
-def patch():
+def patch_pdfium():
     
     for target_file, patch_file in Patches:
         cmd = f"patch -u {target_file} -i {patch_file}"
@@ -165,7 +165,7 @@ def main():
     
     dl_depottools()
     dl_pdfium()
-    patch()
+    patch_pdfium()
     
     configure()
     build()
