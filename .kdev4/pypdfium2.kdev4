@@ -2,7 +2,7 @@
 BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x12\x00p\x00y\x00p\x00d\x00f\x00i\x00u\x00m\x002)
 
 [Filters]
-size=9
+size=10
 
 [Filters][0]
 inclusive=0
@@ -48,6 +48,11 @@ targets=1
 inclusive=0
 pattern=docs/build/*
 targets=2
+
+[Filters][9]
+inclusive=0
+pattern=sourcebuild/*
+targets=3
 
 [Project]
 VersionControlSupport=kdevgit
