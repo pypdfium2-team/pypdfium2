@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
-# Attempt to build PDFium from source
+# Attempt to build PDFium from source. This may take very long.
 
 import os
 import shutil
@@ -68,6 +68,10 @@ def dl_pdfium():
     sync_cmd = f"{GClient} sync --no-history --shallow"
     print(sync_cmd)
     subprocess.run(sync_cmd, shell=True, cwd=WorkDir)
+    
+    patch_cmd = f"patch -u BUILD.gn -i ../patches/shared_lib.patch"
+    print(patch_cmd)
+    subprocess.run(patch_cmd, shell=True, cwd=PDFiumDir)
 
 
 def configure():

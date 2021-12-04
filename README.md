@@ -151,6 +151,8 @@ to simplify regular updates. However, it was still not platform specific.
 PyPDFium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
 It also adds a basic support model and a command-line interface on top of the PDFium C API
 to simplify common use cases.
+Moreover, PyPDFium2 includes facilities to build PDFium from source, to extend
+platform compatibility.
 
 
 ## Development
