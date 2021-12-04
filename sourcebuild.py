@@ -130,7 +130,9 @@ def pack(src_libpath):
 
 
 def main():
-        
+    
+    os.environ['PATH'] = os.environ['PATH'] + f":{DepotToolsDir}"
+    
     dl_depottools()
     dl_pdfium()
     
