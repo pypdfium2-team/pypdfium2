@@ -20,7 +20,7 @@ python3 -m pip install -U pypdfium2
 
 ```bash
 python3 setup_source.py bdist_wheel
-pip3 install dist/pypdfium2-${version}-py3-none-any.whl
+pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 ```
 
 

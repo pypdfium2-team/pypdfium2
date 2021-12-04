@@ -3,14 +3,22 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import distutils.util
 from setup_base import *
-from wheel.bdist_wheel import bdist_wheel
 from sourcebuild import main as sourcebuild_main
+
+
+class bdist (BDistBase):
+    def finalize_options(self):
+        BDistBase.finalize_options(self)
+        platform = distutils.util.get_platform()
+        platform = platform.replace('-','_').replace('.','_')
+        self.plat_name = platform
 
 
 def lib_setup(libname):
     setuptools.setup(
-        cmdclass = {'bdist_wheel': bdist_wheel},
+        cmdclass = {'bdist_wheel': bdist},
         package_data = {'': [libname]},
     )
 
