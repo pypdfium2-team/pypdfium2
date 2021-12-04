@@ -16,25 +16,6 @@ PDF rendering library authored by Foxit and maintained by Google.
 python3 -m pip install -U pypdfium2
 ```
 
-### Manual installation
-
-```bash
-# download binaries / header files and generate bindings
-python3 update.py
-
-# build the package that corresponds to your platform
-python3 setup_${platform_name}.py bdist_wheel
-
-# optionally, run check-wheel-contents on the package to confirm its validity
-check-wheel-contents dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
-
-# install the package
-python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
-
-# remove downloaded files and build artifacts
-bash clean.sh
-```
-
 ### Source build
 
 ```bash
@@ -195,6 +176,25 @@ PyPDFium2 contains scripts to automate the release process:
   and header files, write finished Python wheels to `dist/`, and run `check-wheel-contents`.
 * To clean up after a release, run `./clean.sh`. This will remove downloaded files and
   build artifacts.
+
+### Release packaging
+
+```bash
+# download binaries / header files and generate bindings
+python3 update.py
+
+# build the package that corresponds to your platform
+python3 setup_${platform_name}.py bdist_wheel
+
+# optionally, run check-wheel-contents on the package to confirm its validity
+check-wheel-contents dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
+
+# install the package locally
+python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
+
+# remove downloaded files and build artifacts
+bash clean.sh
+```
 
 ### Publishing the wheels
 
