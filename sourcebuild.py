@@ -51,7 +51,7 @@ Libnames = [
     'pdfium',
 ]
 
-Patches = [
+PdfiumPatches = [
     (
         join(PDFiumDir,'public','fpdfview.h'),
         join(PatchDir,'public_headers.patch'),
@@ -70,13 +70,20 @@ Patches = [
     ),
 ]
 
+DepotPatches = [
+    (
+        join(DepotToolsDir,'gclient_scm.py'),
+        join(PatchDir,'gclient_scm.patch'),
+    ),
+]
+
 
 def dl_depottools():
     
     if not os.path.isdir(WorkDir):
         os.mkdir(WorkDir)
     
-    cmd = f"git clone {DepotTools_URL}"
+    cmd = f"git clone --depth 1 {DepotTools_URL}"
     print(cmd)
     subprocess.run(cmd, shell=True, cwd=WorkDir)
 
@@ -92,13 +99,19 @@ def dl_pdfium():
     subprocess.run(sync_cmd, shell=True, cwd=WorkDir)
 
 
-def patch_pdfium():
-    
-    for target_file, patch_file in Patches:
+def _apply_patchset(patchset):
+    for target_file, patch_file in patchset:
         cmd = f"patch -u {target_file} -i {patch_file}"
         print(cmd)
-        subprocess.run(cmd, shell=True, cwd=PDFiumDir)
-    
+        subprocess.run(cmd, shell=True, cwd=WorkDir)
+
+
+def patch_depottools():
+    _apply_patchset(DepotPatches)
+
+
+def patch_pdfium():
+    _apply_patchset(PdfiumPatches)
     shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
@@ -169,6 +182,7 @@ def main():
         os.environ['PATH'] += f":{DepotToolsDir}"
     
     dl_depottools()
+    patch_depottools()
     dl_pdfium()
     patch_pdfium()
     

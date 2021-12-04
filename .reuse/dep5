@@ -19,3 +19,6 @@ License: CC-BY-4.0
 
 Files: sourcebuild/patches/*
 Copyright: 2021 Benoit Blanchon
+
+Files: sourcebuild/patches/gclient_scm.patch
+Copyright: 2021 BoLaMN
