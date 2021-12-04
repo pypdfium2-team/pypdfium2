@@ -28,6 +28,7 @@ LinuxArm64   = join(DataTree,'linux-arm64')
 LinuxArm32   = join(DataTree,'linux-arm32')
 Windows64    = join(DataTree,'windows-x64')
 Windows86    = join(DataTree,'windows-x86')
+SourceBuild  = join(DataTree,'sourcebuild')
 
 
 class BDistBase (_bdist_wheel):
@@ -57,9 +58,10 @@ def _clean():
 
 
 def _copy_bindings(platform_dir):
-    for file in glob(join(platform_dir,'*')):
-        file_basename = basename(file)
-        shutil.copy(file, join(TargetDir,file_basename))
+    platform_files = glob(join(platform_dir,'*'))
+    for file in platform_files:
+        if os.path.isfile(file):
+            shutil.copy(file, join(TargetDir, basename(file)))
 
 
 def build(lib_setup: Callable, platform_dir):

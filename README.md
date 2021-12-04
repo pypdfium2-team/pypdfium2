@@ -35,6 +35,13 @@ python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 bash clean.sh
 ```
 
+### Source build
+
+```bash
+python3 setup_source.py bdist_wheel
+pip3 install dist/pypdfium2-${version}-py3-none-any.whl
+```
+
 
 ## Examples
 
@@ -151,6 +158,8 @@ to simplify regular updates. However, it was still not platform specific.
 PyPDFium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
 It also adds a basic support model and a command-line interface on top of the PDFium C API
 to simplify common use cases.
+Moreover, PyPDFium2 includes facilities to build PDFium from source, to extend
+platform compatibility.
 
 
 ## Development

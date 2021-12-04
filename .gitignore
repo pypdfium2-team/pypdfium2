@@ -7,6 +7,10 @@ build/
 dist/
 docs/build/
 !docs/build/.gitkeep
+sourcebuild/*
+!sourcebuild/.gitkeep
+!sourcebuild/patches
+*.so
 
 **/__pycache__
 *.pyc

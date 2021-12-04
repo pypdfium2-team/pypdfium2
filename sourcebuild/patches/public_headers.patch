@@ -1,0 +1,66 @@
+diff --git a/public/cpp/fpdf_deleters.h b/public/cpp/fpdf_deleters.h
+index 633ddf5e3..3ecd19e0b 100644
+--- a/public/cpp/fpdf_deleters.h
++++ b/public/cpp/fpdf_deleters.h
+@@ -5,15 +5,15 @@
+ #ifndef PUBLIC_CPP_FPDF_DELETERS_H_
+ #define PUBLIC_CPP_FPDF_DELETERS_H_
+ 
+-#include "public/fpdf_annot.h"
+-#include "public/fpdf_dataavail.h"
+-#include "public/fpdf_edit.h"
+-#include "public/fpdf_formfill.h"
+-#include "public/fpdf_javascript.h"
+-#include "public/fpdf_structtree.h"
+-#include "public/fpdf_text.h"
+-#include "public/fpdf_transformpage.h"
+-#include "public/fpdfview.h"
++#include "../fpdf_annot.h"
++#include "../fpdf_dataavail.h"
++#include "../fpdf_edit.h"
++#include "../fpdf_formfill.h"
++#include "../fpdf_javascript.h"
++#include "../fpdf_structtree.h"
++#include "../fpdf_text.h"
++#include "../fpdf_transformpage.h"
++#include "../fpdfview.h"
+ 
+ // Custom deleters for using FPDF_* types with std::unique_ptr<>.
+ 
+diff --git a/public/cpp/fpdf_scopers.h b/public/cpp/fpdf_scopers.h
+index ff57c1b48..2ed295d88 100644
+--- a/public/cpp/fpdf_scopers.h
++++ b/public/cpp/fpdf_scopers.h
+@@ -8,7 +8,7 @@
+ #include <memory>
+ #include <type_traits>
+ 
+-#include "public/cpp/fpdf_deleters.h"
++#include "fpdf_deleters.h"
+ 
+ // Versions of FPDF types that clean up the object at scope exit.
+ 
+diff --git a/public/fpdfview.h b/public/fpdfview.h
+index e996d4a3b..b8c4b3dc2 100644
+--- a/public/fpdfview.h
++++ b/public/fpdfview.h
+@@ -176,9 +176,6 @@ typedef int FPDF_ANNOT_APPEARANCEMODE;
+ // Dictionary value types.
+ typedef int FPDF_OBJECT_TYPE;
+ 
+-#if defined(COMPONENT_BUILD)
+-// FPDF_EXPORT should be consistent with |export| in the pdfium_fuzzer
+-// template in testing/fuzzers/BUILD.gn.
+ #if defined(WIN32)
+ #if defined(FPDF_IMPLEMENTATION)
+ #define FPDF_EXPORT __declspec(dllexport)
+@@ -192,9 +189,6 @@ typedef int FPDF_OBJECT_TYPE;
+ #define FPDF_EXPORT
+ #endif  // defined(FPDF_IMPLEMENTATION)
+ #endif  // defined(WIN32)
+-#else
+-#define FPDF_EXPORT
+-#endif  // defined(COMPONENT_BUILD)
+ 
+ #if defined(WIN32) && defined(FPDFSDK_EXPORTS)
+ #define FPDF_CALLCONV __stdcall
