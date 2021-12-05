@@ -1,21 +1,21 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
-import logging
-logger = logging.getLogger(__name__)
-
 import os
 import sys
+import logging
 import argparse
-from pypdfium2 import _constants as consts
-from pypdfium2 import _helpers as helpers
 from pypdfium2 import _version
+from pypdfium2 import _helpers as helpers
+from pypdfium2 import _constants as consts
 from os.path import (
     join,
-    basename,
     abspath,
+    basename,
     splitext,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def rotation_type(string):
