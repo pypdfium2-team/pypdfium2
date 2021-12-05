@@ -171,8 +171,8 @@ def main():
         n_processes = args.processes,
     )
     
-    for index, image, suffix in renderer:
-        filename = output_base + suffix
+    for image, suffix in renderer:
+        filename = output_base + suffix + '.png'
         image.save(filename)
         image.close()
 

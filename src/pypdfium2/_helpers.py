@@ -252,7 +252,7 @@ def render_pdf(
     The other parameters are the same as for :func:`render_page`.
     
     Yields:
-        Page index (int), :class:`PIL.Image.Image`, and a filename suffix.
+        :class:`PIL.Image.Image`, and a suffix for serial enumeration of output files.
     """
     
     temporary = None
@@ -288,8 +288,8 @@ def render_pdf(
     
     with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
         for index, image in pool.map(_invoke_process_page, meta_args):
-            suffix = f"{index+1:0{n_digits}}.png"
-            yield index, image, suffix
+            suffix = f"{index+1:0{n_digits}}"
+            yield image, suffix
     
     if temporary is not None:
         temporary.close()
