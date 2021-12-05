@@ -1,15 +1,22 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
+import os
+import sys
 import math
 import ctypes
+import logging
+import tempfile
 from PIL import Image
-from typing import Optional
+import concurrent.futures
 from os.path import abspath
+from typing import Optional
 
 from pypdfium2._constants import *
 from pypdfium2._exceptions import *
 from pypdfium2 import _pypdfium as pdfium
+
+logger = logging.getLogger(__name__)
 
 
 class PdfContext:
@@ -188,3 +195,101 @@ def render_page(
     pdfium.FPDF_ClosePage(page)
     
     return pil_image
+
+
+def _process_page(
+        filename,
+        index,
+        password,
+        scale,
+        rotation,
+        background_colour,
+        render_annotations,
+        optimise_mode,
+    ) -> Image.Image:
+    
+    with PdfContext(filename, password) as pdf:
+        pil_image = render_page(
+            pdf, index,
+            scale = scale,
+            rotation = rotation,
+            background_colour = background_colour,
+            render_annotations = render_annotations,
+            optimise_mode = optimise_mode,
+        )
+    
+    return pil_image
+
+
+def _invoke_process_page(args):
+    return args[1], _process_page(*args)
+
+
+def render_pdf(
+        filename: str,
+        page_indices: list = None,
+        *,
+        password: str = None,
+        scale: float = 1,
+        rotation: int = 0,
+        background_colour: int = 0xFFFFFFFF,
+        render_annotations: bool = True,
+        optimise_mode: OptimiseMode = OptimiseMode.none,
+        n_processes = os.cpu_count(),
+    ):
+    """
+    Render certain pages of a PDF file, using a process pool executor.
+    
+    Parameters:
+        
+        filename:
+            Path to a PDF file.
+            (On Windows, a temporary copy is made if the file contains non-ascii characters.)
+        
+        page_indices:
+            A list of zero-based page indices to render.
+    
+    The other parameters are the same as for :func:`render_page`.
+    
+    Yields:
+        Page index (int), :class:`PIL.Image.Image`, and a filename suffix.
+    """
+    
+    temporary = None
+    if sys.platform.startswith('win32') and not filename.isascii():
+        logger.warning(f"Using temporary copy {temporary.name} due to issues with non-ascii filenames on Windows.")
+        temporary = tempfile.NamedTemporaryFile()
+        with open(filename, 'rb') as file_handle:
+            temporary.write(file_handle.read())
+        filename = temporary.name
+    
+    with PdfContext(filename, password) as pdf:
+        n_pages = pdfium.FPDF_GetPageCount(pdf)
+    n_digits = len(str(n_pages))
+    
+    if page_indices is None:
+        page_indices = [i for i in range(n_pages)]
+    elif any(i >= n_pages for i in page_indices):
+        raise ValueError("Out of range page index detected.")
+    
+    meta_args = []
+    for i in page_indices:
+        sub_args = [
+            filename,
+            i,
+            password,
+            scale,
+            rotation,
+            background_colour,
+            render_annotations,
+            optimise_mode,
+        ]
+        meta_args.append(sub_args)
+    
+    with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
+        for index, image in pool.map(_invoke_process_page, meta_args):
+            suffix = f"{index+1:0{n_digits}}.png"
+            yield index, image, suffix
+    
+    if temporary is not None:
+        temporary.close()
