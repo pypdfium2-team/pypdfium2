@@ -267,7 +267,7 @@ def render_pdf(
         n_pages = pdfium.FPDF_GetPageCount(pdf)
     n_digits = len(str(n_pages))
     
-    if page_indices is None:
+    if page_indices is None or len(page_indices) == 0:
         page_indices = [i for i in range(n_pages)]
     elif any(i >= n_pages for i in page_indices):
         raise ValueError("Out of range page index detected.")
