@@ -244,7 +244,7 @@ def render_pdf(
         
         filename:
             Path to a PDF file.
-            (On Windows, a temporary copy is made if the file contains non-ascii characters.)
+            (On Windows, a temporary copy is made if the path contains non-ascii characters.)
         
         page_indices:
             A list of zero-based page indices to render.
