@@ -5,12 +5,14 @@ data/
 !data/.gitkeep
 build/
 dist/
-docs/build/
+docs/build/*
 !docs/build/.gitkeep
 sourcebuild/*
-!sourcebuild/.gitkeep
 !sourcebuild/patches
+
 *.so
+*.dll
+*.dylib
 
 **/__pycache__
 *.pyc

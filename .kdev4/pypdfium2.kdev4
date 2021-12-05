@@ -2,7 +2,7 @@
 BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x12\x00p\x00y\x00p\x00d\x00f\x00i\x00u\x00m\x002)
 
 [Filters]
-size=10
+size=12
 
 [Filters][0]
 inclusive=0
@@ -13,6 +13,16 @@ targets=2
 inclusive=0
 pattern=__pycache__
 targets=2
+
+[Filters][10]
+inclusive=1
+pattern=sourcebuild/patches/
+targets=3
+
+[Filters][11]
+inclusive=1
+pattern=*.patch
+targets=3
 
 [Filters][2]
 inclusive=0
