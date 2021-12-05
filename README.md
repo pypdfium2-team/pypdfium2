@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-## PyPDFium2
+# PyPDFium2
 
 [PyPDFium2](https://github.com/pypdfium2-team/pypdfium2) is a Python 3 binding to
 [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), the liberal-licensed
@@ -16,7 +16,27 @@ PDF rendering library authored by Foxit and maintained by Google.
 python3 -m pip install -U pypdfium2
 ```
 
-### Source build
+### Manual installation
+
+The following steps require `git`, `ctypesgen` and `gcc` to be installed and
+available in `PATH`.
+
+#### Package locally
+
+This will download a pre-built binary for PDFium, generate the bindings and
+build a wheel.
+
+```bash
+python3 update.py
+python3 setup_${platform_name}.py bdist_wheel
+python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
+```
+
+#### Source build
+
+If you are using an architecture where no pre-compiled package is available, it is possible
+to build PDFium from source. However, this is a complex process that can vary depending on
+the host system, and it may take a long time.
 
 ```bash
 python3 setup_source.py bdist_wheel
@@ -176,25 +196,6 @@ PyPDFium2 contains scripts to automate the release process:
   and header files, write finished Python wheels to `dist/`, and run `check-wheel-contents`.
 * To clean up after a release, run `./clean.sh`. This will remove downloaded files and
   build artifacts.
-
-### Release packaging
-
-```bash
-# download binaries / header files and generate bindings
-python3 update.py
-
-# build the package that corresponds to your platform
-python3 setup_${platform_name}.py bdist_wheel
-
-# optionally, run check-wheel-contents on the package to confirm its validity
-check-wheel-contents dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
-
-# install the package locally
-python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
-
-# remove downloaded files and build artifacts
-bash clean.sh
-```
 
 ### Publishing the wheels
 
