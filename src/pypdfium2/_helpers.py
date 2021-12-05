@@ -218,11 +218,11 @@ def _process_page(
             optimise_mode = optimise_mode,
         )
     
-    return pil_image
+    return index, pil_image
 
 
 def _invoke_process_page(args):
-    return args[1], _process_page(*args)
+    return _process_page(*args)
 
 
 def render_pdf(
