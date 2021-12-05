@@ -32,12 +32,12 @@ GClient = join(DepotToolsDir,'gclient')
 GN      = join(DepotToolsDir,'gn')
 Ninja   = join(DepotToolsDir,'ninja')
 
-Configuration = """
+Configuration = """\
 is_debug = false
 pdf_is_standalone = true
 pdf_enable_v8 = false
 pdf_enable_xfa = false
-use_custom_libcxx = true
+use_custom_libcxx = true\
 """
 
 Libnames = [
@@ -71,6 +71,11 @@ def dl_depottools():
     cmd = f"git clone --depth 1 {DepotTools_URL}"
     print(cmd)
     subprocess.run(cmd, shell=True, cwd=WorkDir)
+    
+    if sys.platform.startswith('win32'):
+        os.environ['PATH'] += f";{DepotToolsDir}"
+    else:
+        os.environ['PATH'] += f":{DepotToolsDir}"
 
 
 def dl_pdfium():
@@ -138,6 +143,7 @@ def pack(src_libpath):
         os.mkdir(TargetDir)
     
     # assumption: filename is ctypesgen-recognisable
+    # we could also rename according to the host platform ...
     target_libpath = join(TargetDir, basename(src_libpath))
     shutil.copy(src_libpath, target_libpath)
     
@@ -158,11 +164,6 @@ def pack(src_libpath):
 
 
 def main():
-    
-    if sys.platform.startswith('win32'):
-        os.environ['PATH'] += f";{DepotToolsDir}"
-    else:
-        os.environ['PATH'] += f":{DepotToolsDir}"
     
     dl_depottools()
     patch_depottools()
