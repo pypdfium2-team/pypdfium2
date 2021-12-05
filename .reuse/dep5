@@ -18,7 +18,9 @@ Copyright: 2021 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
 
 Files: sourcebuild/patches/*
-Copyright: 2021 Benoit Blanchon
+Copyright: 2021 Benoît Blanchon
+License: 
 
 Files: sourcebuild/patches/gclient_scm.patch
 Copyright: 2021 BoLaMN
+License: 
