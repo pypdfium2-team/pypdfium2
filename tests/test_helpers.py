@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
-from .configuration import TestFiles
+from .conftest import TestFiles
 from pypdfium2 import _helpers as helpers
 from pypdfium2 import _exceptions as exceptions
 from pypdfium2 import _pypdfium as pdfium
