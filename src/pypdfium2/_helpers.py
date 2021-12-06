@@ -252,7 +252,8 @@ def render_pdf(
     The other parameters are the same as for :func:`render_page`.
     
     Yields:
-        :class:`PIL.Image.Image`, and a suffix for serial enumeration of output files.
+        Tuple[:class:`PIL.Image.Image`, str]
+        (A PIL image, and a string for serial enumeration of output files.)
     """
     
     temporary = None
