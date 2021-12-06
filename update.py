@@ -88,14 +88,14 @@ def clear_data():
         gitkeep.write('')
 
 
-def download_releases(latest_version, DownloadFiles):
+def download_releases(latest_version, download_files):
     
     base_url = f"{ReleaseURL}{latest_version}/"
     archives = []
     
     threads = []
     
-    for dirname, filename in DownloadFiles.items():
+    for dirname, filename in download_files.items():
         
         file_url = base_url + filename
         dest_dir = join(DataTree, dirname)
@@ -125,9 +125,9 @@ def unpack_archives(archives):
         os.remove(file)
 
 
-def generate_bindings(DownloadFiles):
+def generate_bindings(download_files):
     
-    for dirname in DownloadFiles.keys():
+    for dirname in download_files.keys():
         
         platform_dir = join(DataTree, dirname)
         build_dir = join(platform_dir, 'build_tar')
@@ -197,28 +197,28 @@ def get_download_files(args):
     if platforms is None or len(platforms) == 0:
         return ReleaseFiles
     
-    DownloadFiles = {}
+    download_files = {}
     for plat_name in platforms:
         if plat_name in ReleaseFiles:
-            DownloadFiles[plat_name] = ReleaseFiles[plat_name]
+            download_files[plat_name] = ReleaseFiles[plat_name]
         else:
             available_keys = [k for k in ReleaseFiles.keys()]
             raise ValueError(f"Unknown platform name '{plat_name}'. Available keys are {available_keys}.")
     
-    return DownloadFiles
+    return download_files
 
 
 def main():
     args = parse_args()
-    DownloadFiles = get_download_files(args)
+    download_files = get_download_files(args)
     
     latest_version = get_latest_version()
     handle_versions(latest_version)
     clear_data()
     
-    archives = download_releases(latest_version, DownloadFiles)
+    archives = download_releases(latest_version, download_files)
     unpack_archives(archives)
-    generate_bindings(DownloadFiles)
+    generate_bindings(download_files)
 
 
 if __name__ == '__main__':
