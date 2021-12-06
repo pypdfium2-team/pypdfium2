@@ -12,6 +12,7 @@ from os.path import (
 )
 import shutil
 import tarfile
+import argparse
 import threading
 import subprocess
 from urllib import request
@@ -22,13 +23,13 @@ VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 DataTree     = join(SourceTree,'data')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
 ReleaseFiles = {
-    'pdfium-mac-arm64.tgz'    : 'darwin-arm64',
-    'pdfium-mac-x64.tgz'      : 'darwin-x64',
-    'pdfium-linux-arm.tgz'    : 'linux-arm32',
-    'pdfium-linux-arm64.tgz'  : 'linux-arm64',
-    'pdfium-linux-x64.tgz'    : 'linux-x64',
-    'pdfium-win-x64.tgz'      : 'windows-x64',
-    'pdfium-win-x86.tgz'      : 'windows-x86',
+    'darwin-arm64' : 'pdfium-mac-arm64.tgz',
+    'darwin-x64'   : 'pdfium-mac-x64.tgz',
+    'linux-arm32'  : 'pdfium-linux-arm.tgz',
+    'linux-arm64'  : 'pdfium-linux-arm64.tgz',
+    'linux-x64'    : 'pdfium-linux-x64.tgz',
+    'windows-x64'  : 'pdfium-win-x64.tgz',
+    'windows-x86'  : 'pdfium-win-x86.tgz',
 }
 
 
@@ -87,14 +88,14 @@ def clear_data():
         gitkeep.write('')
 
 
-def download_releases(latest_version):
+def download_releases(latest_version, DownloadFiles):
     
     base_url = f"{ReleaseURL}{latest_version}/"
     archives = []
     
     threads = []
     
-    for filename, dirname in ReleaseFiles.items():
+    for dirname, filename in DownloadFiles.items():
         
         file_url = base_url + filename
         dest_dir = join(DataTree, dirname)
@@ -124,9 +125,9 @@ def unpack_archives(archives):
         os.remove(file)
 
 
-def generate_bindings():
+def generate_bindings(DownloadFiles):
     
-    for dirname in ReleaseFiles.values():
+    for dirname in DownloadFiles.keys():
         
         platform_dir = join(DataTree, dirname)
         build_dir = join(platform_dir, 'build_tar')
@@ -178,13 +179,46 @@ def generate_bindings():
             file_handle.write(text)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description = "Download pre-built PDFium packages and generate the bindings,",
+    )
+    parser.add_argument(
+        '--platforms', '-p',
+        metavar = 'P',
+        nargs = '*',
+    )
+    return parser.parse_args()
+
+
+def get_download_files(args):
+    
+    platforms = args.platforms
+    if platforms is None or len(platforms) == 0:
+        return ReleaseFiles
+    
+    DownloadFiles = {}
+    for plat_name in platforms:
+        if plat_name in ReleaseFiles:
+            DownloadFiles[plat_name] = ReleaseFiles[plat_name]
+        else:
+            available_keys = [k for k in ReleaseFiles.keys()]
+            raise ValueError(f"Unknown platform name '{plat_name}'. Available keys are {available_keys}.")
+    
+    return DownloadFiles
+
+
 def main():
+    args = parse_args()
+    DownloadFiles = get_download_files(args)
+    
     latest_version = get_latest_version()
     handle_versions(latest_version)
     clear_data()
-    archives = download_releases(latest_version)
+    
+    archives = download_releases(latest_version, DownloadFiles)
     unpack_archives(archives)
-    generate_bindings()
+    generate_bindings(DownloadFiles)
 
 
 if __name__ == '__main__':
