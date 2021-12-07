@@ -18,6 +18,7 @@ import subprocess
 from urllib import request
 
 
+HomeDir = os.path.expanduser('~')
 SourceTree   = dirname(realpath(__file__))
 VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 DataTree     = join(SourceTree,'data')
@@ -125,6 +126,15 @@ def unpack_archives(archives):
         os.remove(file)
 
 
+def _strip_paths(bindings_file, platform_dir):
+    with open(bindings_file, 'r') as file_reader:
+        text = file_reader.read()
+        text = text.replace(platform_dir, '.')
+        text = text.replace(HomeDir, '~')
+    with open(bindings_file, 'w') as file_writer:
+        file_writer.write(text)
+
+
 def generate_bindings(download_files):
     
     for dirname in download_files.keys():
@@ -161,9 +171,8 @@ def generate_bindings(download_files):
         dest_binpath = join(platform_dir, bin_name)
         
         shutil.move(new_binpath, dest_binpath)
-        strip_dir = os.path.abspath('.')
         
-        ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {strip_dir} -L . {header_files} -o {bindings_file}"
+        ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {platform_dir} -L . {header_files} -o {bindings_file}"
         subprocess.run(
             ctypesgen_cmd,
             stdout = subprocess.PIPE,
@@ -173,10 +182,7 @@ def generate_bindings(download_files):
         
         shutil.rmtree(build_dir)
         
-        with open(bindings_file, 'r+') as file_handle:
-            text = file_handle.read()
-            text = text.replace(strip_dir, '.')
-            file_handle.write(text)
+        _strip_paths(bindings_file, platform_dir)
 
 
 def parse_args():
