@@ -15,6 +15,7 @@ from os.path import (
     dirname,
     basename,
 )
+import update as pdfium_update
 
 
 HomeDir       = os.path.expanduser('~')
@@ -160,9 +161,11 @@ def find_lib(srcname=None, directory=BuildDir):
 
 def pack(src_libpath, destname=None):
     
-    if len(os.listdir(OutputDir)) > 0:
-        shutil.rmtree(OutputDir)
-    if not os.path.isdir(OutputDir):
+    if os.path.isdir(OutputDir):
+        if len(os.listdir(OutputDir)) > 0:
+            shutil.rmtree(OutputDir)
+            os.mkdir(OutputDir)
+    else:
         os.mkdir(OutputDir)
     
     if destname is None:
@@ -186,6 +189,8 @@ def pack(src_libpath, destname=None):
         cwd    = OutputDir,
         shell  = True,
     )
+    
+    pdfium_update._strip_paths(bindings_file, OutputDir)
 
 
 def parse_args():
