@@ -5,7 +5,7 @@
 import os
 import distutils.util
 from setup_base import *
-import sourcebuild
+import build as build_pdfium
 
 
 class bdist (BDistBase):
@@ -23,10 +23,15 @@ def lib_setup(libname):
     )
 
 
+def get_binary():
+    libpath = build_pdfium.find_lib(directory=SB_OutputDir)
+    return os.path.basename(libpath)
+
+
 if __name__ == '__main__':
     
-    libname = sourcebuild.main()
-    build(lambda: lib_setup(libname), SourceBuild)
+    SB_OutputDir = build_pdfium.OutputDir
+    libname = get_binary()
     
-    binary = join(SourceTree,'src','pypdfium2',libname)
-    os.remove(binary)
+    build(lambda: lib_setup(libname), SB_OutputDir)
+    binary = join(SourceTree, 'src', 'pypdfium2', libname)
