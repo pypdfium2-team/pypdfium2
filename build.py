@@ -7,6 +7,7 @@
 import os
 import sys
 import shutil
+import argparse
 import subprocess
 from os.path import (
     join,
@@ -23,7 +24,7 @@ PatchDir      = join(WorkDir,'patches')
 DepotToolsDir = join(WorkDir,'depot_tools')
 PDFiumDir     = join(WorkDir,'pdfium')
 BuildDir      = join(PDFiumDir,'out')
-TargetDir     = join(SourceTree,'data','sourcebuild')
+OutputDir     = join(SourceTree,'data','sourcebuild')
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
@@ -32,7 +33,7 @@ GClient = join(DepotToolsDir,'gclient')
 GN      = join(DepotToolsDir,'gn')
 Ninja   = join(DepotToolsDir,'ninja')
 
-Configuration = """\
+DefaultConfig = """\
 is_debug = false
 pdf_is_standalone = true
 pdf_enable_v8 = false
@@ -47,7 +48,7 @@ Libnames = [
     'libpdfium.dylib',
     'pdfium.dll',
     'libpdfium.dll',
-    'libpdfium'
+    'libpdfium',
     'pdfium',
 ]
 
@@ -68,17 +69,28 @@ def dl_depottools():
     if not os.path.isdir(WorkDir):
         os.mkdir(WorkDir)
     
-    cmd = f"git clone --depth 1 {DepotTools_URL}"
-    print(cmd)
-    subprocess.run(cmd, shell=True, cwd=WorkDir)
+    if os.path.isdir(DepotToolsDir):
+        download = False
+        print("Skipping DepotTools download as the directory already exists.")
+    else:
+        download = True
+        cmd = f"git clone --depth 1 {DepotTools_URL} {DepotToolsDir}"
+        print(cmd)
+        subprocess.run(cmd, shell=True, cwd=WorkDir)
     
     if sys.platform.startswith('win32'):
         os.environ['PATH'] += f";{DepotToolsDir}"
     else:
         os.environ['PATH'] += f":{DepotToolsDir}"
+    
+    return download
 
 
 def dl_pdfium():
+    
+    if os.path.isdir(PDFiumDir):
+        print("Skipping PDFium download as the directory already exists.")
+        return False
     
     config_cmd = f"{GClient} config --unmanaged {PDFium_URL}"
     print(config_cmd)
@@ -87,6 +99,8 @@ def dl_pdfium():
     sync_cmd = f"{GClient} sync --no-history --shallow"
     print(sync_cmd)
     subprocess.run(sync_cmd, shell=True, cwd=WorkDir)
+    
+    return True
 
 
 def _apply_patchset(patchset, cwd):
@@ -103,13 +117,13 @@ def patch_pdfium():
     shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
-def configure():
+def configure(config):
     
     if not os.path.exists(BuildDir):
         os.mkdir(BuildDir)
     
     with open(join(BuildDir,'args.gn'), 'w') as args_handle:
-        args_handle.write(Configuration)
+        args_handle.write(config)
     
     gen_cmd = f"{GN} gen {BuildDir}"
     print(gen_cmd)
@@ -122,61 +136,100 @@ def build():
     subprocess.run(build_cmd, shell=True, cwd=PDFiumDir)
 
 
-def find_lib():
+def find_lib(srcname=None, directory=BuildDir):
     
-    lib = None
+    if srcname is not None:
+        path = join(BuildDir, srcname)
+        if os.path.isfile(path):
+            return path
+        else:
+            print("Warning: The file of given srcname does not exist.", file=sys.stderr)
+    
+    libpath = None
     
     for lname in Libnames:
-        path = join(BuildDir,lname)
+        path = join(directory, lname)
         if os.path.isfile(path):
-            lib = path
+            libpath = path
     
-    if lib is None:
+    if libpath is None:
         raise RuntimeError("Build artifact not found.")
     
-    return lib
+    return libpath
 
 
-def pack(src_libpath):
+def pack(src_libpath, destname=None):
     
-    if not os.path.isdir(TargetDir):
-        os.mkdir(TargetDir)
+    if len(os.listdir(OutputDir)) > 0:
+        shutil.rmtree(OutputDir)
+    if not os.path.isdir(OutputDir):
+        os.mkdir(OutputDir)
     
-    # assumption: filename is ctypesgen-recognisable
-    # we could also rename according to the host platform ...
-    target_libpath = join(TargetDir, basename(src_libpath))
-    shutil.copy(src_libpath, target_libpath)
+    if destname is None:
+        destname = basename(src_libpath)
+    
+    destpath = join(OutputDir, destname)
+    shutil.copy(src_libpath, destpath)
     
     src_headers = join(PDFiumDir,'public')
-    target_headers = join(TargetDir,'include')
+    target_headers = join(OutputDir,'include')
+    
     shutil.copytree(src_headers, target_headers)
     
-    header_files = join(TargetDir,'include','*.h')
-    bindings_file = join(TargetDir,'_pypdfium.py')
+    header_files = join(OutputDir,'include','*.h')
+    bindings_file = join(OutputDir,'_pypdfium.py')
     
-    ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {TargetDir} -L . {header_files} -o {bindings_file}"
+    ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {OutputDir} -L . {header_files} -o {bindings_file}"
     subprocess.run(
         ctypesgen_cmd,
         stdout = subprocess.PIPE,
-        cwd    = TargetDir,
+        cwd    = OutputDir,
         shell  = True,
     )
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description = "A script to automate building PDFium from source and generating ctypesgen bindings.",
+    )
+    parser.add_argument(
+        '--argfile', '-a',
+        help = "A file containing custom PDFium build configuration, to be evaluated by `gn gen`.",
+    )
+    parser.add_argument(
+        '--srcname', '-s',
+        help = "File name of the generated PDFium binary.",
+    )
+    parser.add_argument(
+        '--destname', '-d',
+        help = "Rename the binary to a different file name.",
+    )
+    return parser.parse_args()
+
+
 def main():
     
-    dl_depottools()
-    patch_depottools()
-    dl_pdfium()
-    patch_pdfium()
+    args = parse_args()
     
-    configure()
+    if args.argfile is None:
+        config = DefaultConfig
+    else:
+        with open(abspath(args.argfile), 'r') as file_handle:
+            config = file_handle.read()
+    
+    depot_dl_done = dl_depottools()
+    if depot_dl_done:
+        patch_depottools()
+    
+    pdfium_dl_done = dl_pdfium()
+    if pdfium_dl_done:
+        patch_pdfium()
+    
+    configure(config)
     build()
     
-    libpath = find_lib()
-    pack(libpath)
-    
-    return basename(libpath)
+    libpath = find_lib(args.srcname)
+    pack(libpath, args.destname)
 
 
 if __name__ == '__main__':

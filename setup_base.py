@@ -59,9 +59,10 @@ def _clean():
 
 def _copy_bindings(platform_dir):
     platform_files = glob(join(platform_dir,'*'))
-    for file in platform_files:
-        if os.path.isfile(file):
-            shutil.copy(file, join(TargetDir, basename(file)))
+    for src in platform_files:
+        if os.path.isfile(src):
+            dest = join(TargetDir, basename(src))
+            shutil.copy(src, dest)
 
 
 def build(lib_setup: Callable, platform_dir):
