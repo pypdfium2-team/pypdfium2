@@ -65,6 +65,14 @@ DepotPatches = [
 ]
 
 
+def run_cmd(command, cwd):
+    print(command)
+    subprocess.run(command, cwd=cwd, shell=True)
+
+def _skip_dl_info(target):
+    print(f"Skipping {target} download as the directory already exists.")
+
+
 def dl_depottools():
     
     if not os.path.isdir(WorkDir):
@@ -72,12 +80,10 @@ def dl_depottools():
     
     if os.path.isdir(DepotToolsDir):
         download = False
-        print("Skipping DepotTools download as the directory already exists.")
+        _skip_dl_info("DepotTools")
     else:
         download = True
-        cmd = f"git clone --depth 1 {DepotTools_URL} {DepotToolsDir}"
-        print(cmd)
-        subprocess.run(cmd, shell=True, cwd=WorkDir)
+        run_cmd(f"git clone --depth 1 {DepotTools_URL} {DepotToolsDir}", cwd=WorkDir)
     
     if sys.platform.startswith('win32'):
         os.environ['PATH'] += f";{DepotToolsDir}"
@@ -90,25 +96,19 @@ def dl_depottools():
 def dl_pdfium():
     
     if os.path.isdir(PDFiumDir):
-        print("Skipping PDFium download as the directory already exists.")
-        return False
+        performed_dl = False
+        _skip_dl_info("PDFium")
+    else:
+        performed_dl = True
+        run_cmd(f"{GClient} config --unmanaged {PDFium_URL}", cwd=WorkDir)
+        run_cmd(f"{GClient} sync --no-history --shallow", cwd=WorkDir)
     
-    config_cmd = f"{GClient} config --unmanaged {PDFium_URL}"
-    print(config_cmd)
-    subprocess.run(config_cmd, shell=True, cwd=WorkDir)
-    
-    sync_cmd = f"{GClient} sync --no-history --shallow"
-    print(sync_cmd)
-    subprocess.run(sync_cmd, shell=True, cwd=WorkDir)
-    
-    return True
+    return performed_dl
 
 
 def _apply_patchset(patchset, cwd):
     for patch in patchset:
-        cmd = f"git apply -v {patch}"
-        print(cmd)
-        subprocess.run(cmd, shell=True, cwd=cwd)
+        run_cmd(f"git apply -v {patch}", cwd=cwd)
 
 def patch_depottools():
     _apply_patchset(DepotPatches, DepotToolsDir)
@@ -126,15 +126,11 @@ def configure(config):
     with open(join(BuildDir,'args.gn'), 'w') as args_handle:
         args_handle.write(config)
     
-    gen_cmd = f"{GN} gen {BuildDir}"
-    print(gen_cmd)
-    subprocess.run(gen_cmd, shell=True, cwd=PDFiumDir)
+    run_cmd(f"{GN} gen {BuildDir}", cwd=PDFiumDir)
 
 
 def build():
-    build_cmd = f"{Ninja} -C {BuildDir} pdfium"
-    print(build_cmd)
-    subprocess.run(build_cmd, shell=True, cwd=PDFiumDir)
+    run_cmd(f"{Ninja} -C {BuildDir} pdfium", cwd=PDFiumDir)
 
 
 def find_lib(srcname=None, directory=BuildDir):
