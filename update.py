@@ -180,9 +180,8 @@ def generate_bindings(download_files):
             shell  = True,
         )
         
-        shutil.rmtree(build_dir)
-        
         _strip_paths(bindings_file, platform_dir)
+        shutil.rmtree(build_dir)
 
 
 def parse_args():

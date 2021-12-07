@@ -175,7 +175,8 @@ def pack(src_libpath, destname=None):
     
     shutil.copytree(src_headers, target_headers)
     
-    header_files = join(OutputDir,'include','*.h')
+    include_dir = join(OutputDir,'include')
+    header_files = join(include_dir,'*.h')
     bindings_file = join(OutputDir,'_pypdfium.py')
     
     ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {OutputDir} -L . {header_files} -o {bindings_file}"
@@ -187,6 +188,7 @@ def pack(src_libpath, destname=None):
     )
     
     pdfium_update._strip_paths(bindings_file, OutputDir)
+    shutil.rmtree(include_dir)
 
 
 def parse_args():
