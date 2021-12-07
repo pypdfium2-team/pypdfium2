@@ -47,7 +47,7 @@ Libnames = [
     'libpdfium.dylib',
     'pdfium.dll',
     'libpdfium.dll',
-    'libpdfium'
+    'libpdfium',
     'pdfium',
 ]
 
