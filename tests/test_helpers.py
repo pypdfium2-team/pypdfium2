@@ -1,33 +1,71 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
+import io
 import pytest
+import pathlib
 from .conftest import TestFiles
 from pypdfium2 import _helpers as helpers
 from pypdfium2 import _exceptions as exceptions
 from pypdfium2 import _pypdfium as pdfium
 
 
-def _check_pdf(pdf, page_count=1):
-    assert isinstance(pdf, pdfium.FPDF_DOCUMENT)
-    assert pdfium.FPDF_GetPageCount(pdf) == page_count
+def _open_pdf(file_or_data, password=None, page_count=1):
+    with helpers.PdfContext(file_or_data, password) as pdf:
+        assert isinstance(pdf, pdfium.FPDF_DOCUMENT)
+        assert pdfium.FPDF_GetPageCount(pdf) == page_count
 
 
-def test_pdfcontext():
-    with helpers.PdfContext(TestFiles.test_render) as pdf:
-        _check_pdf(pdf)
-
-def test_open_encrypted():
-    with helpers.PdfContext(TestFiles.test_encrypted, 'test_user') as pdf:
-        _check_pdf(pdf)
-    with helpers.PdfContext(TestFiles.test_encrypted, 'test_owner') as pdf:
-        _check_pdf(pdf)
+def test_pdfct_str():
+    in_path = str(TestFiles.test_render)
+    assert isinstance(in_path, str)
+    _open_pdf(in_path)
 
 
-def test_open_encrypted_fail():
-    with pytest.raises(exceptions.LoadPdfError, match="Missing or wrong password."):
-        with helpers.PdfContext(TestFiles.test_encrypted, 'string') as pdf:
-            pass
+def test_pdfct_pathlib():
+    in_path = TestFiles.test_render
+    assert isinstance(in_path, pathlib.Path)
+    _open_pdf(in_path)
+
+
+def test_pdfct_bytestring():
+    with open(TestFiles.test_render, 'rb') as file:
+        data = file.read()
+        assert isinstance(data, bytes)
+    _open_pdf(data)
+
+
+def test_pdfct_bytesio():
+    with open(TestFiles.test_render, 'rb') as file:
+        buffer = io.BytesIO(file.read())
+        assert isinstance(buffer, io.BytesIO)
+    _open_pdf(buffer)
+    assert buffer.closed == False
+    assert buffer.tell() == 0
+    buffer.close()
+
+
+def test_pdfct_bufreader():
+    with open(TestFiles.test_render, 'rb') as buf_reader:
+        assert isinstance(buf_reader, io.BufferedReader)
+        _open_pdf(buf_reader)
+        assert buf_reader.closed == False
+        assert buf_reader.tell() == 0
+
+
+def test_pdfct_encrypted():
+    _open_pdf(TestFiles.test_encrypted, 'test_user')
+    _open_pdf(TestFiles.test_encrypted, 'test_owner')
+    with open(TestFiles.test_encrypted, 'rb') as buf_reader:
+        _open_pdf(buf_reader, password='test_user')
+
+
+def test_pdfct_encrypted_fail():
+    pw_err_context = pytest.raises(exceptions.LoadPdfError, match="Missing or wrong password.")
+    with pw_err_context:
+        _open_pdf(TestFiles.test_encrypted)
+    with pw_err_context:
+        _open_pdf(TestFiles.test_encrypted, 'string')
 
 
 @pytest.mark.parametrize(

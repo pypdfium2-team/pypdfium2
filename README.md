@@ -198,6 +198,10 @@ PyPDFium2 contains scripts to automate the release process:
 * To clean up after a release, run `./clean.sh`. This will remove downloaded files and
   build artifacts.
 
+### Testing
+
+Run `pytest -sv` on the `tests` directory.
+
 ### Publishing the wheels
 
 * You may want to upload to [TestPyPI](https://test.pypi.org/legacy/) first to ensure

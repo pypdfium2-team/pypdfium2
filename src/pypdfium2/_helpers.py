@@ -1,16 +1,18 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
+import io
 import os
 import sys
 import math
 import ctypes
 import logging
+import pathlib
 import tempfile
 from PIL import Image
 import concurrent.futures
 from os.path import abspath
-from typing import Optional
+from typing import Union, Optional
 
 from pypdfium2._constants import *
 from pypdfium2._exceptions import *
@@ -22,12 +24,12 @@ logger = logging.getLogger(__name__)
 class PdfContext:
     """
     Context manager to open (and automatically close again) a PDFium document
-    from a file path.
+    from a file path or in-memory data.
     
     Parameters:
         
-        file_path:
-            File path string to a PDF document.
+        file_or_data:
+            The input PDF document, as file path or in-memory data.
         
         password:
             A password to unlock the document, if encrypted.
@@ -39,13 +41,35 @@ class PdfContext:
     # On Windows, FPDF_LoadDocument() does not support filenames with multi-byte characters
     # https://bugs.chromium.org/p/pdfium/issues/detail?id=682
     
-    def __init__(self, file_path: str, password: Optional[str] = None):
-        self.file_path = abspath(str(file_path))
+    def __init__(
+            self,
+            file_or_data: Union[str, pathlib.Path, bytes, io.BytesIO, io.BufferedReader],
+            password: Optional[str] = None
+        ):
         self.password = password
+        self.filepath = None
+        self.data = None
+        if isinstance(file_or_data, str):
+            self.filepath = abspath(file_or_data)
+        elif isinstance(file_or_data, pathlib.Path):
+            self.filepath = str(file_or_data.resolve())
+        elif isinstance(file_or_data, bytes):
+            self.data = file_or_data
+        elif isinstance(file_or_data, (io.BytesIO, io.BufferedReader)):
+            self.data = file_or_data.read()
+            file_or_data.seek(0)
+        else:
+            raise ValueError("`file_or_data` must be a file path, bytes, io.BytesIO, or io.BufferedReader.")
     
     def __enter__(self) -> pdfium.FPDF_DOCUMENT:    
         
-        self.pdf = pdfium.FPDF_LoadDocument(self.file_path, self.password)
+        if self.filepath is not None:
+            self.pdf = pdfium.FPDF_LoadDocument(self.filepath, self.password)
+        elif self.data is not None:
+            self.pdf = pdfium.FPDF_LoadMemDocument(self.data, len(self.data), self.password)
+        else:
+            raise RuntimeError("Internal error: Neither data nor filepath set.")
+        
         page_count = pdfium.FPDF_GetPageCount(self.pdf)
         
         if page_count < 1:

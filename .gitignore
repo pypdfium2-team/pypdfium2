@@ -14,6 +14,7 @@ sourcebuild/*
 *.dll
 *.dylib
 
+.vscode
 **/__pycache__
 *.pyc
 *.egg-info
