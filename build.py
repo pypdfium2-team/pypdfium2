@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Attempt to build PDFium from source. This may take very long.
+# Last confirmed to work on 2021-12-07
 
 import os
 import sys
