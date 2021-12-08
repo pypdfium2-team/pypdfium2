@@ -44,7 +44,7 @@ class PdfContext:
     def __init__(
             self,
             file_or_data: Union[str, pathlib.Path, bytes, io.BytesIO, io.BufferedReader],
-            password: Optional[str] = None
+            password: Optional[ Union[str, bytes] ] = None
         ):
         self.password = password
         self.filepath = None

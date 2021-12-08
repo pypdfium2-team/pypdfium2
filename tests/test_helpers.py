@@ -56,6 +56,8 @@ def test_pdfct_bufreader():
 def test_pdfct_encrypted():
     _open_pdf(TestFiles.test_encrypted, 'test_user')
     _open_pdf(TestFiles.test_encrypted, 'test_owner')
+    _open_pdf(TestFiles.test_encrypted, 'test_user'.encode('ascii'))
+    _open_pdf(TestFiles.test_encrypted, 'test_user'.encode('UTF-8'))
     with open(TestFiles.test_encrypted, 'rb') as buf_reader:
         _open_pdf(buf_reader, password='test_user')
 
@@ -66,6 +68,10 @@ def test_pdfct_encrypted_fail():
         _open_pdf(TestFiles.test_encrypted)
     with pw_err_context:
         _open_pdf(TestFiles.test_encrypted, 'string')
+    with pw_err_context:
+        _open_pdf(TestFiles.test_encrypted, 'string'.encode('ascii'))
+    with pw_err_context:
+        _open_pdf(TestFiles.test_encrypted, 'string'.encode('UTF-8'))
 
 
 @pytest.mark.parametrize(
