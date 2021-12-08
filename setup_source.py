@@ -34,4 +34,5 @@ if __name__ == '__main__':
     libname = get_binary()
     
     build(lambda: lib_setup(libname), SB_OutputDir)
-    binary = join(SourceTree, 'src', 'pypdfium2', libname)
+    binary_path = join(SourceTree, 'src', 'pypdfium2', libname)
+    os.remove(binary_path)
