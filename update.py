@@ -19,7 +19,7 @@ import subprocess
 from urllib import request
 
 
-HomeDir = os.path.expanduser('~')
+HomeDir      = os.path.expanduser('~')
 SourceTree   = dirname(realpath(__file__))
 VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 DataTree     = join(SourceTree,'data')
@@ -35,20 +35,20 @@ ReleaseFiles = {
 }
 
 
-def __version_pos(version_content, variable):
+def _version_pos(version_content, variable):
     expression = variable + ' = '
     pos_var = version_content.index(expression) + len(expression)
     pos_lineend = len(version_content[:pos_var]) + version_content[pos_var:].index('\n')
     return pos_var, pos_lineend
 
 def _get_version(version_content, variable):
-    pos_var, pos_lineend = __version_pos(version_content, variable)
+    pos_var, pos_lineend = _version_pos(version_content, variable)
     value = version_content[pos_var:pos_lineend]
     version = int(value)
     return version
 
 def _set_version(version_content, variable, new_version):
-    pos_var, pos_lineend = __version_pos(version_content, variable)
+    pos_var, pos_lineend = _version_pos(version_content, variable)
     new_vc = version_content[:pos_var] + str(new_version) + version_content[pos_lineend:]
     return new_vc
 
