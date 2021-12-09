@@ -128,7 +128,7 @@ def _translate_rotation(rotation: int):
 
 def render_page(
         pdf: pdfium.FPDF_DOCUMENT,
-        page_index: int,
+        page_index: int = 0,
         *,
         scale: float = 1,
         rotation: int = 0,
