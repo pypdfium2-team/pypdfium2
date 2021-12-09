@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Attempt to build PDFium from source. This may take very long.
-# Last confirmed to work on 2021-12-07
+# Last confirmed to work on 2021-12-09
 
 import os
 import sys
@@ -70,20 +70,24 @@ def run_cmd(command, cwd):
     print(command)
     subprocess.run(command, cwd=cwd, shell=True)
 
-def _skip_dl_info(target):
-    print(f"Skipping {target} download as the directory already exists.")
 
-
-def dl_depottools():
+def dl_depottools(do_sync):
     
     if not os.path.isdir(WorkDir):
         os.mkdir(WorkDir)
     
+    is_update = True
+    
     if os.path.isdir(DepotToolsDir):
-        download = False
-        _skip_dl_info("DepotTools")
+        if do_sync:
+            print("DepotTools: Revert and update ...")
+            run_cmd(f"git reset --hard HEAD", cwd=DepotToolsDir)
+            run_cmd(f"git pull {DepotTools_URL}", cwd=DepotToolsDir)
+        else:
+            print("DepotTools: Using existing repository as-is.")
+            is_update = False
     else:
-        download = True
+        print("DepotTools: Download ...")
         run_cmd(f"git clone --depth 1 {DepotTools_URL} {DepotToolsDir}", cwd=WorkDir)
     
     if sys.platform.startswith('win32'):
@@ -91,21 +95,26 @@ def dl_depottools():
     else:
         os.environ['PATH'] += f":{DepotToolsDir}"
     
-    return download
+    return is_update
 
-
-def dl_pdfium():
+def dl_pdfium(do_sync):
+    
+    is_update = True
     
     if os.path.isdir(PDFiumDir):
-        performed_dl = False
-        _skip_dl_info("PDFium")
+        if do_sync:
+            print("PDFium: Revert / Sync  ...")
+            run_cmd(f"{GClient} revert", cwd=WorkDir)
+        else:
+            print("PDFium: Using existing repository as-is.")
+            is_update = False
     else:
-        performed_dl = True
+        print("PDFium: Download ...")
         run_cmd(f"{GClient} config --unmanaged {PDFium_URL}", cwd=WorkDir)
         run_cmd(f"{GClient} sync --no-history --shallow", cwd=WorkDir)
     
-    return performed_dl
-
+    return is_update
+    
 
 def _apply_patchset(patchset, cwd):
     for patch in patchset:
@@ -194,7 +203,7 @@ def pack(src_libpath, destname=None):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description = "A script to automate building PDFium from source and generating ctypesgen bindings.",
+        description = "A script to automate building PDFium from source and generating ctypesgen bindings."
     )
     parser.add_argument(
         '--argfile', '-a',
@@ -207,6 +216,11 @@ def parse_args():
     parser.add_argument(
         '--destname', '-d',
         help = "Rename the binary to a different file name.",
+    )
+    parser.add_argument(
+        '--update', '-u',
+        action = 'store_true',
+        help = "Update existing repositories, removing local changes.",
     )
     return parser.parse_args()
 
@@ -221,11 +235,11 @@ def main():
         with open(abspath(args.argfile), 'r') as file_handle:
             config = file_handle.read()
     
-    depot_dl_done = dl_depottools()
+    depot_dl_done = dl_depottools(args.update)
     if depot_dl_done:
         patch_depottools()
     
-    pdfium_dl_done = dl_pdfium()
+    pdfium_dl_done = dl_pdfium(args.update)
     if pdfium_dl_done:
         patch_pdfium()
     
