@@ -10,8 +10,9 @@ ResourceDir = TestDir / 'resources'
 OutputDir   = TestDir / 'output'
 
 class TestFiles:
-    test_render    = ResourceDir / 'test_render.pdf'
-    test_encrypted = ResourceDir / 'test_encrypted.pdf'
+    render    = ResourceDir / 'test_render.pdf'
+    encrypted = ResourceDir / 'test_encrypted.pdf'
+    multipage = ResourceDir / 'test_multipage.pdf'
 
 
 def test_paths():

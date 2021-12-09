@@ -92,7 +92,7 @@ class PdfContext:
             self.data = file_or_data.read()
             file_or_data.seek(0)
         else:
-            raise ValueError("`file_or_data` must be a file path, bytes, io.BytesIO, or io.BufferedReader.")
+            raise ValueError(f"`file_or_data` must be a file path, bytes or a byte buffer, but it is {type(file_or_data)}.")
     
     def __enter__(self) -> pdfium.FPDF_DOCUMENT:    
         

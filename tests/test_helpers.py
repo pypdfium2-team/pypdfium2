@@ -34,26 +34,26 @@ def _rotate_image(image, rotation):
 
 
 def test_pdfct_str():
-    in_path = str(TestFiles.test_render)
+    in_path = str(TestFiles.render)
     assert isinstance(in_path, str)
     _open_pdf(in_path)
 
 
 def test_pdfct_pathlib():
-    in_path = TestFiles.test_render
+    in_path = TestFiles.render
     assert isinstance(in_path, pathlib.Path)
     _open_pdf(in_path)
 
 
 def test_pdfct_bytestring():
-    with open(TestFiles.test_render, 'rb') as file:
+    with open(TestFiles.render, 'rb') as file:
         data = file.read()
         assert isinstance(data, bytes)
     _open_pdf(data)
 
 
 def test_pdfct_bytesio():
-    with open(TestFiles.test_render, 'rb') as file:
+    with open(TestFiles.render, 'rb') as file:
         buffer = io.BytesIO(file.read())
         assert isinstance(buffer, io.BytesIO)
     _open_pdf(buffer)
@@ -63,7 +63,7 @@ def test_pdfct_bytesio():
 
 
 def test_pdfct_bufreader():
-    with open(TestFiles.test_render, 'rb') as buf_reader:
+    with open(TestFiles.render, 'rb') as buf_reader:
         assert isinstance(buf_reader, io.BufferedReader)
         _open_pdf(buf_reader)
         assert buf_reader.closed == False
@@ -71,24 +71,24 @@ def test_pdfct_bufreader():
 
 
 def test_pdfct_encrypted():
-    _open_pdf(TestFiles.test_encrypted, 'test_user')
-    _open_pdf(TestFiles.test_encrypted, 'test_owner')
-    _open_pdf(TestFiles.test_encrypted, 'test_user'.encode('ascii'))
-    _open_pdf(TestFiles.test_encrypted, 'test_user'.encode('UTF-8'))
-    with open(TestFiles.test_encrypted, 'rb') as buf_reader:
+    _open_pdf(TestFiles.encrypted, 'test_user')
+    _open_pdf(TestFiles.encrypted, 'test_owner')
+    _open_pdf(TestFiles.encrypted, 'test_user'.encode('ascii'))
+    _open_pdf(TestFiles.encrypted, 'test_user'.encode('UTF-8'))
+    with open(TestFiles.encrypted, 'rb') as buf_reader:
         _open_pdf(buf_reader, password='test_user')
 
 
 def test_pdfct_encrypted_fail():
     pw_err_context = pytest.raises(exceptions.LoadPdfError, match="Missing or wrong password.")
     with pw_err_context:
-        _open_pdf(TestFiles.test_encrypted)
+        _open_pdf(TestFiles.encrypted)
     with pw_err_context:
-        _open_pdf(TestFiles.test_encrypted, 'string')
+        _open_pdf(TestFiles.encrypted, 'string')
     with pw_err_context:
-        _open_pdf(TestFiles.test_encrypted, 'string'.encode('ascii'))
+        _open_pdf(TestFiles.encrypted, 'string'.encode('ascii'))
     with pw_err_context:
-        _open_pdf(TestFiles.test_encrypted, 'string'.encode('UTF-8'))
+        _open_pdf(TestFiles.encrypted, 'string'.encode('UTF-8'))
 
 
 @pytest.mark.parametrize(
@@ -105,9 +105,9 @@ def test_translate_rotation(test_input, expected):
     assert translated == expected
 
 
-def test_render_normal():
+def test_render_page_normal():
     
-    with helpers.PdfContext(TestFiles.test_render) as pdf:
+    with helpers.PdfContext(TestFiles.render) as pdf:
         pil_image = helpers.render_page(pdf, 0)
     
     assert pil_image.mode == 'RGB'
@@ -120,14 +120,14 @@ def test_render_normal():
     pil_image.close()
 
 
-def test_render_encrypted():
+def test_render_page_encrypted():
     
-    with helpers.PdfContext(TestFiles.test_encrypted, 'test_user') as pdf:
+    with helpers.PdfContext(TestFiles.encrypted, 'test_user') as pdf:
         pil_image_a = helpers.render_page(pdf, 0)
     assert pil_image_a.mode == 'RGB'
     assert pil_image_a.size == (596, 842)
     
-    with helpers.PdfContext(TestFiles.test_encrypted, 'test_owner') as pdf:
+    with helpers.PdfContext(TestFiles.encrypted, 'test_owner') as pdf:
         pil_image_b = helpers.render_page(pdf, 0)
     assert pil_image_b.mode == 'RGB'
     assert pil_image_b.size == (596, 842)
@@ -138,9 +138,9 @@ def test_render_encrypted():
     pil_image_b.close()
 
 
-def test_render_alpha():
+def test_render_page_alpha():
     
-    with helpers.PdfContext(TestFiles.test_render) as pdf:
+    with helpers.PdfContext(TestFiles.render) as pdf:
         pil_image = helpers.render_page(
             pdf, 0,
             background_colour = None,
@@ -157,9 +157,9 @@ def test_render_alpha():
     pil_image.close()
 
 
-def test_render_rotation():
+def test_render_page_rotation():
     
-    with helpers.PdfContext(TestFiles.test_render) as pdf:
+    with helpers.PdfContext(TestFiles.render) as pdf:
         
         image_0 = helpers.render_page(
             pdf, 0,
@@ -192,3 +192,12 @@ def test_render_rotation():
         image_270.close()
         
         image_0.close()
+
+
+def test_render_pdf():
+    i = 1
+    for image, suffix in helpers.render_pdf(TestFiles.multipage):
+        assert isinstance(image, Image.Image)
+        assert suffix == str(i)
+        image.close()
+        i += 1
