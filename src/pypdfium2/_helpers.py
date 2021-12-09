@@ -21,6 +21,39 @@ from pypdfium2 import _pypdfium as pdfium
 logger = logging.getLogger(__name__)
 
 
+def handle_pdfium_error(valid_state: bool = True):
+    """
+    Check the last PDFium error code and raise pythonic exceptions accordingly.
+    
+    Parameters:
+        valid_state:
+            If :data:`False`, also raise an exception if :func:`FPDF_getLastError` returns
+            :attr:`FPDF_ERR_SUCCESS`.
+    """
+    
+    last_error = pdfium.FPDF_GetLastError()
+    
+    if last_error == pdfium.FPDF_ERR_SUCCESS:
+        if not valid_state:
+            raise LoadPdfError(f"Even though no errors were reported, something invalid happened.")
+    elif last_error == pdfium.FPDF_ERR_UNKNOWN:
+        raise LoadPdfError("An unknown error occurred whilst attempting to load the document.")
+    elif last_error == pdfium.FPDF_ERR_FILE:
+        raise LoadPdfError("The file could not be found or opened.")
+    elif last_error == pdfium.FPDF_ERR_FORMAT:
+        raise LoadPdfError("The file is not a PDF.")
+    elif last_error == pdfium.FPDF_ERR_PASSWORD:
+        raise LoadPdfError("Missing or wrong password.")
+    elif last_error == pdfium.FPDF_ERR_SECURITY:
+        raise LoadPdfError("The document uses an unsupported security scheme.")
+    elif last_error == pdfium.FPDF_ERR_PAGE:
+        raise LoadPageError("Page not found or content error")
+    else:
+        raise ValueError(f"Unknown PDFium error code {last_error}.")
+    
+    return last_error
+
+
 class PdfContext:
     """
     Context manager to open (and automatically close again) a PDFium document
@@ -71,24 +104,8 @@ class PdfContext:
             raise RuntimeError("Internal error: Neither data nor filepath set.")
         
         page_count = pdfium.FPDF_GetPageCount(self.pdf)
-        
         if page_count < 1:
-            
-            last_error = pdfium.FPDF_GetLastError()
-            if last_error == pdfium.FPDF_ERR_SUCCESS:
-                raise LoadPdfError(f"Even though no errors were reported, page count is invalid.")
-            elif last_error == pdfium.FPDF_ERR_UNKNOWN:
-                raise LoadPdfError("An unknown error occurred whilst attempting to load the document.")
-            elif last_error == pdfium.FPDF_ERR_FILE:
-                raise LoadPdfError("The file could not be found or opened.")
-            elif last_error == pdfium.FPDF_ERR_FORMAT:
-                raise LoadPdfError("The file is not a PDF.")
-            elif last_error == pdfium.FPDF_ERR_PASSWORD:
-                raise LoadPdfError("Missing or wrong password.")
-            elif last_error == pdfium.FPDF_ERR_SECURITY:
-                raise LoadPdfError("The document uses an unsupported security scheme.")
-            else:
-                raise LoadPdfError(f"Unknown PDFium error code {last_error}.")
+            handle_pdfium_error(valid_state=False)
         
         return self.pdf
     

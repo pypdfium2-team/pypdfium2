@@ -2,10 +2,22 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-class LoadPdfError (RuntimeError):
+class PdfiumError (RuntimeError):
+    """
+    An exception from the PDFium library.
+    """
+    pass
+
+
+class LoadPdfError (PdfiumError):
     """
     Raised if ``FPDF_GetPageCount()`` returns a value less than 1.
     """
+    pass
+
+
+class LoadPageError (PdfiumError):
+    """ Raised if PDFium fails to load a page. """
     pass
 
 
