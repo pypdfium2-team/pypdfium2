@@ -68,6 +68,8 @@ CLI documentation: https://pypdfium2.readthedocs.io/en/latest/cli.html
 
 ### Using the support model
 
+Render a single page:
+
 ```python3
 import pypdfium2 as pdfium
 
@@ -85,7 +87,16 @@ with pdfium.PdfContext(filename) as pdf:
 pil_image.save("out.png")
 ```
 
-Support model documentation: https://pypdfium2.readthedocs.io/en/latest/api.html
+Render multiple pages concurrently (in this case, the whole document):
+
+```python3
+import pypdfium2 as pdfium
+
+for image, suffix in pdfium.render_pdf(filename):
+    image.save(f'out_{suffix}.png')
+```
+
+Support model documentation: https://pypdfium2.readthedocs.io/en/latest/support_api.html
 
 
 ### Using the PDFium API
