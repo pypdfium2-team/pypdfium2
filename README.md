@@ -277,3 +277,9 @@ The following approaches have been considered to work around this limitation in 
   
   This concept is currently used for the `render_pdf()` support model of PyPDFium2 (see
   [`_helpers.py`](src/pypdfium2/_helpers.py)).
+
+  
+## Thanks
+
+Patches to PDFium and DepotTools originate from the [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/)
+repository. Many thanks to @bblanchon and @BoLaMN.
