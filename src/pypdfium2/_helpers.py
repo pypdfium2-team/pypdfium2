@@ -27,8 +27,8 @@ def handle_pdfium_error(valid_state: bool = True):
     
     Parameters:
         valid_state:
-            If :data:`False`, also raise an exception if :func:`FPDF_getLastError` returns
-            :attr:`FPDF_ERR_SUCCESS`.
+            If :data:`False`, also raise an exception if :func:`FPDF_GetLastError`
+            returns :attr:`FPDF_ERR_SUCCESS`.
     """
     
     last_error = pdfium.FPDF_GetLastError()
@@ -68,7 +68,7 @@ class PdfContext:
             A password to unlock the document, if encrypted.
     
     Returns:
-        ``FPDF_DOCUMENT``
+        :class:`FPDF_DOCUMENT`
     """
     
     # On Windows, FPDF_LoadDocument() does not support filenames with multi-byte characters
