@@ -127,9 +127,10 @@ def unpack_archives(archives):
         os.remove(file)
 
 
-def _strip_paths(bindings_file, platform_dir):
+def postprocess_bindings(bindings_file, platform_dir):
     with open(bindings_file, 'r') as file_reader:
         text = file_reader.read()
+        text = text.split('\n"""\n', maxsplit=1)[1]
         text = text.replace(platform_dir, '.')
         text = text.replace(HomeDir, '~')
     with open(bindings_file, 'w') as file_writer:
@@ -181,7 +182,7 @@ def generate_bindings(download_files):
             shell  = True,
         )
         
-        _strip_paths(bindings_file, platform_dir)
+        postprocess_bindings(bindings_file, platform_dir)
         shutil.rmtree(build_dir)
 
 

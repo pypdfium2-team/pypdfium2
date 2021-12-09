@@ -16,7 +16,7 @@ from os.path import (
     dirname,
     basename,
 )
-import update as pdfium_update
+from update import postprocess_bindings
 
 
 HomeDir       = os.path.expanduser('~')
@@ -197,7 +197,7 @@ def pack(src_libpath, destname=None):
         shell  = True,
     )
     
-    pdfium_update._strip_paths(bindings_file, OutputDir)
+    postprocess_bindings(bindings_file, OutputDir)
     shutil.rmtree(include_dir)
 
 
