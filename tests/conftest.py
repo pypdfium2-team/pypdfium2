@@ -5,7 +5,9 @@ import pytest
 from pathlib import Path
 
 
-ResourceDir = Path(__file__).parent.resolve() / 'resources'
+TestDir     = Path(__file__).parent.resolve()
+ResourceDir = TestDir / 'resources'
+OutputDir   = TestDir / 'output'
 
 class TestFiles:
     test_render    = ResourceDir / 'test_render.pdf'
@@ -22,7 +24,3 @@ def test_paths():
             file = getattr(TestFiles, attr_name)
             print(file)
             assert file.exists()
-
-
-if __name__ == '__main__':
-    test_paths()

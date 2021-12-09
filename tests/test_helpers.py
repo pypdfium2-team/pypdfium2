@@ -4,7 +4,8 @@
 import io
 import pytest
 import pathlib
-from .conftest import TestFiles
+from PIL import Image
+from .conftest import TestFiles, OutputDir
 from pypdfium2 import _helpers as helpers
 from pypdfium2 import _exceptions as exceptions
 from pypdfium2 import _pypdfium as pdfium
@@ -14,6 +15,22 @@ def _open_pdf(file_or_data, password=None, page_count=1):
     with helpers.PdfContext(file_or_data, password) as pdf:
         assert isinstance(pdf, pdfium.FPDF_DOCUMENT)
         assert pdfium.FPDF_GetPageCount(pdf) == page_count
+
+
+def _rotate_image(image, rotation):
+    
+    # PIL rotates counter-clockwise
+    
+    if rotation == 0:
+        output = image
+    elif rotation == 90:
+        output = image.transpose(Image.ROTATE_270)
+    elif rotation == 180:
+        output = image.transpose(Image.ROTATE_180)
+    elif rotation == 270:
+        output = image.transpose(Image.ROTATE_90)
+    
+    return output
 
 
 def test_pdfct_str():
@@ -138,3 +155,40 @@ def test_render_alpha():
     assert pil_image.getpixel( (150, 570) ) == (128, 0, 128, 255)
     
     pil_image.close()
+
+
+def test_render_rotation():
+    
+    with helpers.PdfContext(TestFiles.test_render) as pdf:
+        
+        image_0 = helpers.render_page(
+            pdf, 0,
+            rotation = 0
+        )
+        image_0.save(OutputDir/'rotate_0.png')
+        
+        image_90 = helpers.render_page(
+            pdf, 0,
+            rotation = 90
+        )
+        image_90 = _rotate_image(image_90, 270)
+        image_90.save(OutputDir/'rotate_90.png')
+        image_90.close()
+        
+        image_180 = helpers.render_page(
+            pdf, 0,
+            rotation = 180
+        )
+        image_180 = _rotate_image(image_180, 180)
+        image_180.save(OutputDir/'rotate_180.png')
+        image_180.close()
+        
+        image_270 = helpers.render_page(
+            pdf, 0,
+            rotation = 270
+        )
+        image_270 = _rotate_image(image_270, 90)
+        image_270.save(OutputDir/'rotate_270.png')
+        image_270.close()
+        
+        image_0.close()

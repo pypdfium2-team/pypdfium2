@@ -26,3 +26,4 @@ pdfium.dll
 pdfium.dylib
 
 tests/.pytest_cache
+tests/output/
