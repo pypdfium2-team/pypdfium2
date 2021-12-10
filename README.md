@@ -248,35 +248,8 @@ If your issue is caused by the bindings generator, refer to the
 ### Non-ascii file paths on Windows
 
 On Windows, PDFium currently is not able to open documents with file names containing multi-byte, non-ascii
-characters. This bug is [reported since March 2017](https://bugs.chromium.org/p/pdfium/issues/detail?id=682).
-However, the PDFium development team so far has not given it much attention. The cause of the issue
-is known and the structure for a fix was proposed, but it has not been applied yet.
-
-The following approaches have been considered to work around this limitation in PyPDFium2:
-
-* Using `FPDF_LoadMemDocument()` rather than `FPDF_LoadDocument()` is not possible due to issues with
-  concurrent access to the same file. Moreover, it would be less efficient as the whole document has
-  to be loaded into memory. This makes it impractical for large files.
-* `FPDF_LoadCustomDocument()` is not a solution, since mapping the complex file reading callback to Python
-  is hardly feasible. Furthermore, there would likely be the same problem with concurrent access.
-* Creating a tempfile with a compatible name would be possible, but cannot be done in `PdfContext` itself:
-  For faster rendering, you usually set up a multiprocessing pool or a concurrent future. This means
-  each process has to initialise its own `PdfContext`. If an automatic tempfile workaround were implemented
-  in `PdfContext`, this would mean that each process creates its own temporary copy of the file, which
-  would be highly inefficient. The tempfile should be created only once for all pages, not for each page
-  separately. The workaround could be done somewhat like this:
-  
-  ```python3
-  import sys
-  
-  if sys.platform.startswith('win32') and not filename.isascii():
-      # create a temporary copy and remap the file name
-      # (str.isascii() requires at least Python 3.7)
-      ...
-  ```
-  
-  This concept is currently used for the `render_pdf()` support model of PyPDFium2 (see
-  [`_helpers.py`](src/pypdfium2/_helpers.py)).
+characters. This issue is [confirmed upstream](https://bugs.chromium.org/p/pdfium/issues/detail?id=682), but
+has not been addressed yet.
 
   
 ## Thanks
