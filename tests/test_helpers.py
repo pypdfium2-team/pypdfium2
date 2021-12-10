@@ -195,9 +195,15 @@ def test_render_page_rotation():
 
 
 def test_render_pdf():
-    i = 1
+    
+    with helpers.PdfContext(TestFiles.multipage) as pdf:
+        n_pages = pdfium.FPDF_GetPageCount(pdf)
+        
+    n_digits = len(str(n_pages))
+    i = 0
+    
     for image, suffix in helpers.render_pdf(TestFiles.multipage):
         assert isinstance(image, Image.Image)
-        assert suffix == str(i)
+        assert suffix == f"{i+1:0{n_digits}}"
         image.close()
         i += 1
