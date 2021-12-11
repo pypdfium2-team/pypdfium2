@@ -15,6 +15,7 @@ sourcebuild/*
 *.dylib
 
 .vscode
+.pytest_cache
 **/__pycache__
 *.pyc
 *.egg-info
@@ -25,5 +26,4 @@ pdfium
 pdfium.dll
 pdfium.dylib
 
-tests/.pytest_cache
 tests/output/
