@@ -130,7 +130,7 @@ def unpack_archives(archives):
 def postprocess_bindings(bindings_file, platform_dir):
     with open(bindings_file, 'r') as file_reader:
         text = file_reader.read()
-        text = text.split('\n"""\n', maxsplit=1)[1]
+        #text = text.split('\n"""\n', maxsplit=1)[1]
         text = text.replace(platform_dir, '.')
         text = text.replace(HomeDir, '~')
     with open(bindings_file, 'w') as file_writer:
