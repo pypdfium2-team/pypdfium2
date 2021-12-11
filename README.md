@@ -38,6 +38,8 @@ If you are using an architecture where no pre-compiled package is available, it 
 to build PDFium from source. However, this is a complex process that can vary depending on
 the host system, and it may take a long time.
 
+Please make sure you have all build dependencies installed (see [`DEPS.txt`](DEPS.txt)).
+
 ```bash
 python3 build.py
 python3 setup_source.py bdist_wheel
