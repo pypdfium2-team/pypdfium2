@@ -21,12 +21,12 @@ from pypdfium2 import _pypdfium as pdfium
 logger = logging.getLogger(__name__)
 
 
-def handle_pdfium_error(valid_state: bool = True):
+def handle_pdfium_error(valid: bool = True):
     """
-    Check the last PDFium error code and raise pythonic exceptions accordingly.
+    Check the last PDFium error code and raise an exception accordingly.
     
     Parameters:
-        valid_state:
+        valid:
             If :data:`False`, also raise an exception if :func:`FPDF_GetLastError`
             returns :attr:`FPDF_ERR_SUCCESS`.
     """
@@ -34,20 +34,20 @@ def handle_pdfium_error(valid_state: bool = True):
     last_error = pdfium.FPDF_GetLastError()
     
     if last_error == pdfium.FPDF_ERR_SUCCESS:
-        if not valid_state:
+        if not valid:
             raise LoadPdfError(f"Even though no errors were reported, something invalid happened.")
     elif last_error == pdfium.FPDF_ERR_UNKNOWN:
-        raise LoadPdfError("An unknown error occurred whilst attempting to load the document.")
+        raise LoadPdfError("An unknown error occurred.")
     elif last_error == pdfium.FPDF_ERR_FILE:
         raise LoadPdfError("The file could not be found or opened.")
     elif last_error == pdfium.FPDF_ERR_FORMAT:
-        raise LoadPdfError("The file is not a PDF.")
+        raise LoadPdfError("Data format error.")
     elif last_error == pdfium.FPDF_ERR_PASSWORD:
         raise LoadPdfError("Missing or wrong password.")
     elif last_error == pdfium.FPDF_ERR_SECURITY:
-        raise LoadPdfError("The document uses an unsupported security scheme.")
+        raise LoadPdfError("Unsupported security scheme.")
     elif last_error == pdfium.FPDF_ERR_PAGE:
-        raise LoadPageError("Page not found or content error")
+        raise LoadPageError("Page not found or content error.")
     else:
         raise ValueError(f"Unknown PDFium error code {last_error}.")
     
@@ -105,7 +105,7 @@ class PdfContext:
         
         page_count = pdfium.FPDF_GetPageCount(self.pdf)
         if page_count < 1:
-            handle_pdfium_error(valid_state=False)
+            handle_pdfium_error(False)
         
         return self.pdf
     
