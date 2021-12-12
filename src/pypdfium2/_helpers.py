@@ -14,6 +14,7 @@ import concurrent.futures
 from os.path import abspath
 from typing import Union, Optional
 
+from pypdfium2._types import *
 from pypdfium2._constants import *
 from pypdfium2._exceptions import *
 from pypdfium2 import _pypdfium as pdfium
@@ -338,41 +339,99 @@ def render_pdf(
         temporary.close()
 
 
+
+class OutlineItem:
+    
+    def __init__(
+            self,
+            level      = None,
+            title      = None,
+            page_index = None,
+            view_mode  = None,
+            view_pos   = None,
+        ):
+        
+        self.level      = level
+        self.title      = title
+        self.page_index = page_index
+        self.view_mode  = view_mode
+        self.view_pos   = view_pos
+
+
+def _translate_viewmode(viewmode):
+    if viewmode == pdfium.PDFDEST_VIEW_UNKNOWN_MODE:
+        return ViewMode.Unknown
+    elif viewmode == pdfium.PDFDEST_VIEW_XYZ:
+        return ViewMode.XYZ
+    elif viewmode == pdfium.PDFDEST_VIEW_FIT:
+        return ViewMode.Fit
+    elif viewmode == pdfium.PDFDEST_VIEW_FITH:
+        return ViewMode.FitH
+    elif viewmode == pdfium.PDFDEST_VIEW_FITV:
+        return ViewMode.FitV
+    elif viewmode == pdfium.PDFDEST_VIEW_FITR:
+        return ViewMode.FitR
+    elif viewmode == pdfium.PDFDEST_VIEW_FITB:
+        return ViewMode.FitB
+    elif viewmode == pdfium.PDFDEST_VIEW_FITBH:
+        return ViewMode.FitBH
+    elif viewmode == pdfium.PDFDEST_VIEW_FITBV:
+        return ViewMode.FitBV
+
+
 def _get_toc_entry(pdf, bookmark, level):
     
-    # get title
+    # title
     t_buflen = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
     t_buffer = ctypes.create_string_buffer(t_buflen)
     pdfium.FPDFBookmark_GetTitle(bookmark, t_buffer, t_buflen)
     title = t_buffer.raw[:t_buflen].decode('utf-16-le')[:-1]
     
-    # get page index
+    # page index
     dest = pdfium.FPDFBookmark_GetDest(pdf, bookmark)
     page_index = pdfium.FPDFDest_GetDestPageIndex(pdf, dest)
     
-    entry = (level, title, page_index)
+    # viewport
+    n_params = ctypes.c_ulong()
+    view_pos = ArrayFSFloat4()
+    view_mode = pdfium.FPDFDest_GetView(dest, n_params, view_pos)
+    n_params = n_params.value
+    view_pos = list(view_pos)[:n_params]
+    view_mode = _translate_viewmode(view_mode)
     
-    return entry
+    item = OutlineItem()
+    item.level = level
+    item.title = title
+    item.page_index = page_index
+    item.view_mode = view_mode
+    item.view_pos = view_pos
+    
+    return item
 
 
 def get_toc(pdf, parent=None, level=0):
     
-    items = []
     bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, parent)
     
     while bookmark:
         
-        entry = _get_toc_entry(pdf, bookmark, level)
-        items.append(entry)
+        item = _get_toc_entry(pdf, bookmark, level)
+        yield item
         
-        kids = get_toc(pdf, bookmark, level=level+1)
-        items.extend(kids)
+        for child in get_toc(pdf, bookmark, level=level+1):
+            yield child
         
         bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
-    
-    return items
 
 
 def print_toc(toc):
-    for level, title, page in toc:
-        print('    '*level, f"{title} -> {page}")
+    
+    for item in toc:
+        
+        level = item.level
+        title = item.title
+        pagenum = item.page_index + 1
+        view_mode = item.view_mode
+        view_pos = item.view_pos
+        
+        print('    '*level, f"{title} -> {pagenum}  # {view_mode} {view_pos}")

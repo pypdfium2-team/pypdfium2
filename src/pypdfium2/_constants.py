@@ -9,3 +9,15 @@ class OptimiseMode (Enum):
     none = 0          #: Do not use any optimisations
     lcd_display = 1   #: Optimise for LCD displays
     printing = 2      #: Optimise for printing
+
+
+class ViewMode (Enum):
+    Unknown = 0
+    XYZ     = 1
+    Fit     = 2
+    FitH    = 3
+    FitV    = 4
+    FitR    = 5
+    FitB    = 6
+    FitBH   = 7
+    FitBV   = 8
