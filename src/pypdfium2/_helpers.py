@@ -336,3 +336,43 @@ def render_pdf(
     
     if temporary is not None:
         temporary.close()
+
+
+def _get_toc_entry(pdf, bookmark, level):
+    
+    # get title
+    t_buflen = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
+    t_buffer = ctypes.create_string_buffer(t_buflen)
+    pdfium.FPDFBookmark_GetTitle(bookmark, t_buffer, t_buflen)
+    title = t_buffer.raw[:t_buflen].decode('utf-16-le')[:-1]
+    
+    # get page index
+    dest = pdfium.FPDFBookmark_GetDest(pdf, bookmark)
+    page_index = pdfium.FPDFDest_GetDestPageIndex(pdf, dest)
+    
+    entry = (level, title, page_index)
+    
+    return entry
+
+
+def get_toc(pdf, parent=None, level=0):
+    
+    items = []
+    bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, parent)
+    
+    while bookmark:
+        
+        entry = _get_toc_entry(pdf, bookmark, level)
+        items.append(entry)
+        
+        kids = get_toc(pdf, bookmark, level=level+1)
+        items.extend(kids)
+        
+        bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
+    
+    return items
+
+
+def print_toc(toc):
+    for level, title, page in toc:
+        print('    '*level, f"{title} -> {page}")
