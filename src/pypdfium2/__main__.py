@@ -133,6 +133,11 @@ def parse_args(args=sys.argv[1:]):
         help = "The number of processes to use for rendering. Defaults to the number of CPU cores."
     )
     parser.add_argument(
+        '--show-toc',
+        action = 'store_true',
+        help = "Print the table of contents of a PDF document."
+    )
+    parser.add_argument(
         '--version', '-v',
         action = 'store_true',
         help = "Show the program version and exit."
@@ -151,6 +156,12 @@ def main():
     
     if args.pdffile is None:
         raise ValueError("An input file is required.")
+    
+    if args.show_toc:
+        with helpers.PdfContext(abspath(args.pdffile)) as pdf:
+            toc = helpers.get_toc(pdf)
+            helpers.print_toc(toc)
+        sys.exit()
     
     if args.prefix is None:
         prefix = splitext(basename(args.pdffile))[0] + '_'
