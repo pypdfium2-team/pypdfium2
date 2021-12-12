@@ -58,7 +58,7 @@ def handle_pdfium_error(valid: bool = True):
 def open_pdf(
         file_or_data: Union[str, pathlib.Path, bytes, io.BytesIO, io.BufferedReader],
         password: Optional[ Union[str, bytes] ] = None
-    ):
+    ) -> pdfium.FPDF_DOCUMENT:
     """
     Open a PDFium document from a file path or in-memory data.
     Can be closed with ``pdfium.FPDF_CloseDocument(pdf)``.
@@ -121,7 +121,7 @@ class PdfContext:
         ):
         self.pdf = open_pdf(file_or_data, password)
     
-    def __enter__(self) -> pdfium.FPDF_DOCUMENT:
+    def __enter__(self):
         return self.pdf
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
