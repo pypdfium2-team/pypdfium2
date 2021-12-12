@@ -55,10 +55,13 @@ def handle_pdfium_error(valid: bool = True):
     return last_error
 
 
-class PdfContext:
+def open_pdf(
+        file_or_data: Union[str, pathlib.Path, bytes, io.BytesIO, io.BufferedReader],
+        password: Optional[ Union[str, bytes] ] = None
+    ):
     """
-    Context manager to open (and automatically close again) a PDFium document
-    from a file path or in-memory data.
+    Open a PDFium document from a file path or in-memory data.
+    Can be closed with ``pdfium.FPDF_CloseDocument(pdf)``.
     
     Parameters:
         
@@ -75,39 +78,50 @@ class PdfContext:
     # On Windows, FPDF_LoadDocument() does not support filenames with multi-byte characters
     # https://bugs.chromium.org/p/pdfium/issues/detail?id=682
     
+    filepath = None
+    data = None
+    
+    if isinstance(file_or_data, str):
+        filepath = abspath(file_or_data)
+    elif isinstance(file_or_data, pathlib.Path):
+        filepath = str(file_or_data.resolve())
+    elif isinstance(file_or_data, bytes):
+        data = file_or_data
+    elif isinstance(file_or_data, (io.BytesIO, io.BufferedReader)):
+        data = file_or_data.read()
+        file_or_data.seek(0)
+    else:
+        raise ValueError(f"`file_or_data` must be a file path, bytes or a byte buffer, but it is {type(file_or_data)}.")
+    
+    if filepath is not None:
+        pdf = pdfium.FPDF_LoadDocument(filepath, password)
+    elif data is not None:
+        pdf = pdfium.FPDF_LoadMemDocument(data, len(data), password)
+    else:
+        raise RuntimeError("Internal error: Neither data nor filepath set.")
+    
+    page_count = pdfium.FPDF_GetPageCount(pdf)
+    if page_count < 1:
+        handle_pdfium_error(False)
+    
+    return pdf
+
+
+class PdfContext:
+    """
+    Context manager to open and automatically close again a PDFium document.
+    
+    Constructor parameters are the same as for :func:`open_pdf`.
+    """
+    
     def __init__(
             self,
-            file_or_data: Union[str, pathlib.Path, bytes, io.BytesIO, io.BufferedReader],
-            password: Optional[ Union[str, bytes] ] = None
+            file_or_data,
+            password = None,
         ):
-        self.password = password
-        self.filepath = None
-        self.data = None
-        if isinstance(file_or_data, str):
-            self.filepath = abspath(file_or_data)
-        elif isinstance(file_or_data, pathlib.Path):
-            self.filepath = str(file_or_data.resolve())
-        elif isinstance(file_or_data, bytes):
-            self.data = file_or_data
-        elif isinstance(file_or_data, (io.BytesIO, io.BufferedReader)):
-            self.data = file_or_data.read()
-            file_or_data.seek(0)
-        else:
-            raise ValueError(f"`file_or_data` must be a file path, bytes or a byte buffer, but it is {type(file_or_data)}.")
+        self.pdf = open_pdf(file_or_data, password)
     
-    def __enter__(self) -> pdfium.FPDF_DOCUMENT:    
-        
-        if self.filepath is not None:
-            self.pdf = pdfium.FPDF_LoadDocument(self.filepath, self.password)
-        elif self.data is not None:
-            self.pdf = pdfium.FPDF_LoadMemDocument(self.data, len(self.data), self.password)
-        else:
-            raise RuntimeError("Internal error: Neither data nor filepath set.")
-        
-        page_count = pdfium.FPDF_GetPageCount(self.pdf)
-        if page_count < 1:
-            handle_pdfium_error(False)
-        
+    def __enter__(self) -> pdfium.FPDF_DOCUMENT:
         return self.pdf
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
