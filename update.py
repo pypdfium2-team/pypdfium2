@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Download the PDFium binaries and generate ctypes bindings
-# Last confirmed to work on 2021-12-08
+# Last confirmed to work on 2021-12-13
 
 import os
 from os.path import (
