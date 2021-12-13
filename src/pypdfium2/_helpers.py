@@ -12,7 +12,13 @@ import tempfile
 from PIL import Image
 import concurrent.futures
 from os.path import abspath
-from typing import Union, Optional
+from typing import (
+    Union,
+    Optional,
+    Sequence,
+    Iterator,
+    Tuple,
+)
 
 from pypdfium2._types import *
 from pypdfium2._constants import *
@@ -22,7 +28,7 @@ from pypdfium2 import _pypdfium as pdfium
 logger = logging.getLogger(__name__)
 
 
-def handle_pdfium_error(valid: bool = True):
+def handle_pdfium_error(valid: bool = True) -> int:
     """
     Check the last PDFium error code and raise an exception accordingly.
     
@@ -30,6 +36,9 @@ def handle_pdfium_error(valid: bool = True):
         valid:
             If :data:`False`, also raise an exception if :func:`FPDF_GetLastError`
             returns :attr:`FPDF_ERR_SUCCESS`.
+    
+    Returns:
+        The error code as returned by PDFium.
     """
     
     last_error = pdfium.FPDF_GetLastError()
@@ -60,13 +69,16 @@ def open_pdf(
         password: Optional[ Union[str, bytes] ] = None
     ) -> pdfium.FPDF_DOCUMENT:
     """
-    Open a PDFium document from a file path or in-memory data.
-    Can be closed with ``pdfium.FPDF_CloseDocument(pdf)``.
+    Open a PDFium document from a file path or in-memory data. Can be closed with
+    ``pdfium.FPDF_CloseDocument(pdf)``.
     
     Parameters:
         
         file_or_data:
             The input PDF document, as file path or in-memory data.
+            
+            (On Windows, file paths with multi-byte characters don't work due to a
+            `PDFium issue <https://bugs.chromium.org/p/pdfium/issues/detail?id=682>`_.)
         
         password:
             A password to unlock the document, if encrypted.
@@ -74,9 +86,6 @@ def open_pdf(
     Returns:
         :class:`FPDF_DOCUMENT`
     """
-    
-    # On Windows, FPDF_LoadDocument() does not support filenames with multi-byte characters
-    # https://bugs.chromium.org/p/pdfium/issues/detail?id=682
     
     filepath = None
     data = None
@@ -128,7 +137,11 @@ class PdfContext:
         pdfium.FPDF_CloseDocument(self.pdf)
 
 
-def _translate_rotation(rotation: int):
+def _translate_rotation(rotation: int) -> int:
+    """
+    Convert a rotation value in degrees to a PDFium rotation constant.
+    """
+    
     if rotation == 0:
         return 0
     elif rotation == 90:
@@ -149,10 +162,11 @@ def render_page(
         rotation: int = 0,
         background_colour: int = 0xFFFFFFFF,
         render_annotations: bool = True,
+        greyscale: bool = False,
         optimise_mode: OptimiseMode = OptimiseMode.none,
     ) -> Image.Image:
     """
-    Rasterise a PDF page using PDFium.
+    Rasterise a single PDF page using PDFium.
     
     Parameters:
         
@@ -189,6 +203,9 @@ def render_page(
         render_annotations:
             Whether to render page annotations.
         
+        greyscale:
+            Whether to render in greyscale mode (no colours).
+        
         optimise_mode:
             Optimise rendering for LCD displays or for printing.
     
@@ -217,8 +234,11 @@ def render_page(
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, background_colour)
     
     render_flags = 0x00
+    
     if render_annotations:
         render_flags |= pdfium.FPDF_ANNOT
+    if greyscale:
+        render_flags |= pdfium.FPDF_GRAYSCALE
     
     if optimise_mode is OptimiseMode.none:
         pass
@@ -243,7 +263,13 @@ def render_page(
     
     pil_image = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
     
-    if background_colour is not None:
+    if greyscale:
+        if background_colour is None:
+            pil_image = pil_image.convert("LA")
+        else:
+            pil_image = pil_image.convert("L")
+    
+    elif background_colour is not None:
         pil_image = pil_image.convert("RGB")
     
     if bitmap is not None:
@@ -261,6 +287,7 @@ def _process_page(
         rotation,
         background_colour,
         render_annotations,
+        greyscale,
         optimise_mode,
     ) -> Image.Image:
     
@@ -271,6 +298,7 @@ def _process_page(
             rotation = rotation,
             background_colour = background_colour,
             render_annotations = render_annotations,
+            greyscale = greyscale,
             optimise_mode = optimise_mode,
         )
     
@@ -290,26 +318,24 @@ def render_pdf(
         rotation: int = 0,
         background_colour: int = 0xFFFFFFFF,
         render_annotations: bool = True,
+        greyscale: bool = False,
         optimise_mode: OptimiseMode = OptimiseMode.none,
-        n_processes = os.cpu_count(),
-    ):
+        n_processes: int = os.cpu_count(),
+    ) -> Iterator[ Tuple[Image.Image, str] ]:
     """
     Render certain pages of a PDF file, using a process pool executor.
     
     Parameters:
-        
         filename:
             Path to a PDF file.
             (On Windows, a temporary copy is made if the path contains non-ascii characters.)
-        
         page_indices:
             A list of zero-based page indices to render.
     
     The other parameters are the same as for :func:`render_page`.
     
     Yields:
-        Tuple[:class:`PIL.Image.Image`, str]
-        (A PIL image, and a string for serial enumeration of output files.)
+        A PIL image, and a string for serial enumeration of output files.
     """
     
     temporary = None
@@ -339,6 +365,7 @@ def render_pdf(
             rotation,
             background_colour,
             render_annotations,
+            greyscale,
             optimise_mode,
         ]
         meta_args.append(sub_args)
@@ -355,24 +382,44 @@ def render_pdf(
 
 
 class OutlineItem:
+    """
+    An entry in the table of contents ("bookmark").
+    
+    Parameters:
+        level:
+            The number of parent items.
+        title:
+            String of the bookmark.
+        page_index:
+            Zero-based index of the page the bookmark is pointing to.
+        view_mode:
+            A mode defining how to interpret the coordinates of *view_pos*.
+        view_pos:
+            Target position on the page the viewport should jump to. It is a sequence of float values
+            in PDF points. Depending on *view_mode*, it can contain between 0 and 4 coordinates.
+    """
     
     def __init__(
             self,
-            level      = None,
-            title      = None,
-            page_index = None,
-            view_mode  = None,
-            view_pos   = None,
+            level: int = None,
+            title: str = None,
+            page_index: int = None,
+            view_mode: ViewMode = None,
+            view_pos: Sequence[float] = None,
         ):
         
-        self.level      = level
-        self.title      = title
+        self.level = level
+        self.title = title
         self.page_index = page_index
-        self.view_mode  = view_mode
-        self.view_pos   = view_pos
+        self.view_mode = view_mode
+        self.view_pos = view_pos
 
 
-def _translate_viewmode(viewmode):
+def _translate_viewmode(viewmode: int) -> ViewMode:
+    """
+    Convert a PDFium view mode integer to an attribute of the ViewMode enum.
+    """
+    
     if viewmode == pdfium.PDFDEST_VIEW_UNKNOWN_MODE:
         return ViewMode.Unknown
     elif viewmode == pdfium.PDFDEST_VIEW_XYZ:
@@ -393,7 +440,14 @@ def _translate_viewmode(viewmode):
         return ViewMode.FitBV
 
 
-def _get_toc_entry(pdf, bookmark, level):
+def _get_toc_entry(
+        pdf: pdfium.FPDF_DOCUMENT,
+        bookmark: pdfium.FPDF_BOOKMARK,
+        level: int,
+    ) -> OutlineItem:
+    """
+    Analyse an outline entry ("bookmark").
+    """
     
     # title
     t_buflen = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
@@ -423,7 +477,24 @@ def _get_toc_entry(pdf, bookmark, level):
     return item
 
 
-def get_toc(pdf, parent=None, level=0, max_depth=15):
+def get_toc(
+        pdf: pdfium.FPDF_DOCUMENT,
+        parent: Optional[pdfium.FPDF_BOOKMARK] = None,
+        level: int = 0,
+        max_depth: int = 15,
+    ) -> Iterator[OutlineItem]:
+    """
+    Read the table of contents ("outline") of a PDF document.
+    
+    Parameters:
+        pdf:
+            The PDFium document of which to parse the ToC.
+        max_depth:
+            The maximum recursion depth to consider when analysing the outline.
+        
+    Yields:
+        :class:`OutlineItem`
+    """
     
     if level >= max_depth:
         raise RecusionLimitError(f"The maximum recursion level {max_depth} was exceeded.")
@@ -435,13 +506,20 @@ def get_toc(pdf, parent=None, level=0, max_depth=15):
         item = _get_toc_entry(pdf, bookmark, level)
         yield item
         
-        for child in get_toc(pdf, bookmark, level=level+1):
+        for child in get_toc(pdf, bookmark, level=level+1, max_depth=max_depth):
             yield child
         
         bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
 
 
-def print_toc(toc):
+def print_toc(toc) -> None:
+    """
+    Print the table of contents in a well-formatted manner.
+    
+    Parameters:
+        toc:
+            The iterator of the outline to display (result of :func:`get_toc`).
+    """
     
     for item in toc:
         

@@ -17,22 +17,6 @@ def _open_pdf(file_or_data, password=None, page_count=1):
         assert pdfium.FPDF_GetPageCount(pdf) == page_count
 
 
-def _rotate_image(image, rotation):
-    
-    # PIL rotates counter-clockwise
-    
-    if rotation == 0:
-        output = image
-    elif rotation == 90:
-        output = image.transpose(Image.ROTATE_270)
-    elif rotation == 180:
-        output = image.transpose(Image.ROTATE_180)
-    elif rotation == 270:
-        output = image.transpose(Image.ROTATE_90)
-    
-    return output
-
-
 def test_pdfct_str():
     in_path = str(TestFiles.render)
     assert isinstance(in_path, str)
@@ -166,12 +150,12 @@ def test_render_page_rotation():
             rotation = 0
         )
         image_0.save(OutputDir/'rotate_0.png')
+        image_0.close()
         
         image_90 = helpers.render_page(
             pdf, 0,
             rotation = 90
         )
-        image_90 = _rotate_image(image_90, 270)
         image_90.save(OutputDir/'rotate_90.png')
         image_90.close()
         
@@ -179,7 +163,6 @@ def test_render_page_rotation():
             pdf, 0,
             rotation = 180
         )
-        image_180 = _rotate_image(image_180, 180)
         image_180.save(OutputDir/'rotate_180.png')
         image_180.close()
         
@@ -187,11 +170,9 @@ def test_render_page_rotation():
             pdf, 0,
             rotation = 270
         )
-        image_270 = _rotate_image(image_270, 90)
         image_270.save(OutputDir/'rotate_270.png')
         image_270.close()
         
-        image_0.close()
 
 
 def test_render_pdf():
@@ -207,3 +188,25 @@ def test_render_pdf():
         assert suffix == f"{i+1:0{n_digits}}"
         image.close()
         i += 1
+
+
+def test_render_greyscale():
+    
+    with helpers.PdfContext(TestFiles.render) as pdf:
+        
+        image_a = helpers.render_page(
+            pdf, 0,
+            greyscale = True,
+        )
+        image_a.save(OutputDir/'greyscale.png')
+        assert image_a.mode == 'L'
+        image_a.close()
+        
+        image_b = helpers.render_page(
+            pdf, 0,
+            greyscale = True,
+            background_colour = None,
+        )
+        assert image_b.mode == 'LA'
+        image_b.save(OutputDir/'greyscale_alpha.png')
+        image_b.close()

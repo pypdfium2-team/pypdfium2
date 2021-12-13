@@ -81,5 +81,6 @@ def test_parse_args():
     assert args.background_colour == 0xFFFFFFFF
     assert args.no_annotations == False
     assert args.optimise_mode == OptimiseMode.none
+    assert args.greyscale == False
     assert args.processes == 4
     assert args.version == False

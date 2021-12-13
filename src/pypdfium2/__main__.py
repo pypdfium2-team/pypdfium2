@@ -127,6 +127,11 @@ def parse_args(args=sys.argv[1:]):
         help = "Select a rendering optimisation mode (none, lcd_display, printing)",
     )
     parser.add_argument(
+        '--greyscale',
+        action = 'store_true',
+        help = "Whether to render in greyscale mode (no colours)",
+    )
+    parser.add_argument(
         '--processes',
         default = os.cpu_count(),
         type = int,
@@ -178,6 +183,7 @@ def main():
         rotation = args.rotation,
         background_colour = args.background_colour,
         render_annotations = not args.no_annotations,
+        greyscale = args.greyscale,
         optimise_mode = args.optimise_mode,
         n_processes = args.processes,
     )
