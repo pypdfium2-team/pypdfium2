@@ -97,6 +97,7 @@ def dl_depottools(do_sync):
     
     return is_update
 
+
 def dl_pdfium(do_sync):
     
     is_update = True
