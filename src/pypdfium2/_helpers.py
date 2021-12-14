@@ -524,7 +524,7 @@ def get_toc(
 
 def print_toc(toc) -> None:
     """
-    Print the table of contents in a well-formatted manner.
+    Print the table of contents in a well-readable manner.
     
     Parameters:
         toc:
