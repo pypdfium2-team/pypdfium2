@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 
 class PdfiumError (RuntimeError):
@@ -28,3 +28,9 @@ class PageIndexError (IndexError):
 
 class RecusionLimitError (RuntimeError):
     """ Raised if a recursion depth limit is exceeded. """
+    pass
+
+
+class CircularRefError (RuntimeError):
+    """ Raised if a circular reference was detected that would result in an endless loop. """
+    pass

@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
 import os
@@ -482,6 +482,7 @@ def get_toc(
         parent: Optional[pdfium.FPDF_BOOKMARK] = None,
         level: int = 0,
         max_depth: int = 15,
+        seen: Optional[list] = None,
     ) -> Iterator[OutlineItem]:
     """
     Read the table of contents ("outline") of a PDF document.
@@ -501,12 +502,21 @@ def get_toc(
     
     bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, parent)
     
+    if seen is None:
+        seen = []
+    
     while bookmark:
+        
+        address = ctypes.addressof(bookmark.contents)
+        if address in seen:
+            raise CircularRefError("A circular bookmark reference was detected whilst parsing the table of contents.")
+        else:
+            seen.append(address)
         
         item = _get_toc_entry(pdf, bookmark, level)
         yield item
         
-        for child in get_toc(pdf, bookmark, level=level+1, max_depth=max_depth):
+        for child in get_toc(pdf, bookmark, level=level+1, max_depth=max_depth, seen=seen):
             yield child
         
         bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
