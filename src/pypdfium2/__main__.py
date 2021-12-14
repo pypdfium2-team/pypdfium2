@@ -96,7 +96,7 @@ def parse_args(args=sys.argv[1:]):
     )
     parser.add_argument(
         '--scale',
-        default = '2',
+        default = '1',
         type = float,
         help = ("Define the resolution of the output images. "
                 "By default, one PDF point (1/72in) is rendered to 1x1 pixel. "
