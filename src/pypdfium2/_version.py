@@ -3,7 +3,7 @@
 
 V_MAJOR = 0
 V_MINOR = 4
-V_PATCH = 0
+V_PATCH = 1
 V_BETA  = None
 
 V_PYPDFIUM2 = "{}.{}.{}".format(V_MAJOR, V_MINOR, V_PATCH)
