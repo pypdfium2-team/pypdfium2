@@ -81,7 +81,7 @@ Open a PDF by function:
 ```python3
 pdf = pdfium.open_pdf(filename)
 # ... work with the PDF
-pdfium.FPDF_CloseDocument(pdf)
+pdfium.close_pdf(pdf)
 ```
 
 Open a PDF by context manager:

@@ -116,6 +116,10 @@ def open_pdf(
     return pdf
 
 
+def close_pdf(pdf):
+    pdfium.FPDF_CloseDocument(pdf)
+
+
 class PdfContext:
     """
     Context manager to open and automatically close again a PDFium document.
