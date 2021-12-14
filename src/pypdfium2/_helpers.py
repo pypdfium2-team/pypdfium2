@@ -34,8 +34,8 @@ def handle_pdfium_error(valid: bool = True) -> int:
     
     Parameters:
         valid:
-            If :data:`False`, also raise an exception if :func:`FPDF_GetLastError`
-            returns :attr:`FPDF_ERR_SUCCESS`.
+            If :data:`False`, also raise an exception if ``FPDF_GetLastError``
+            returns ``FPDF_ERR_SUCCESS``.
     
     Returns:
         The error code as returned by PDFium.
@@ -84,7 +84,7 @@ def open_pdf(
             A password to unlock the document, if encrypted.
     
     Returns:
-        :class:`FPDF_DOCUMENT`
+        ``FPDF_DOCUMENT``
     """
     
     filepath = None
