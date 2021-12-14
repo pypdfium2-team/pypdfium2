@@ -70,11 +70,30 @@ CLI documentation: https://pypdfium2.readthedocs.io/en/latest/cli.html
 
 ### Using the support model
 
-Render a single page:
+Import pypdfium2:
 
 ```python3
 import pypdfium2 as pdfium
+```
 
+Open a PDF by function:
+
+```python3
+pdf = pdfium.open_pdf(filename)
+# ... work with the PDF
+pdfium.FPDF_CloseDocument(pdf)
+```
+
+Open a PDF by context manager:
+
+```python3
+with pdfium.PdfContext(filename) as pdf:
+    # ... work with the PDF
+```
+
+Render a single page:
+
+```python3
 with pdfium.PdfContext(filename) as pdf:
     pil_image = pdfium.render_page(
         pdf,
@@ -83,19 +102,28 @@ with pdfium.PdfContext(filename) as pdf:
         rotation = 0,
         background_colour = 0xFFFFFFFF,
         render_annotations = True,
+        greyscale = False,
         optimise_mode = pdfium.OptimiseMode.none,
     )
 
 pil_image.save("out.png")
+pil_image.close()
 ```
 
-Render multiple pages concurrently (in this case, the whole document):
+Render multiple pages concurrently:
 
 ```python3
-import pypdfium2 as pdfium
-
 for image, suffix in pdfium.render_pdf(filename):
     image.save(f'out_{suffix}.png')
+    image.close()
+```
+
+Read the table of contents:
+
+```python3
+with pdfium.PdfContext(filename) as pdf:
+    toc = pdfium.get_toc(pdf)
+    pdfium.print_toc(toc)
 ```
 
 Support model documentation: https://pypdfium2.readthedocs.io/en/latest/support_api.html
@@ -146,35 +174,14 @@ In case of doubts, take a look at the inline source code documentation of PDFium
 
 ## Licensing
 
-PyPDFium2 source code itself is Apache-2.0 licensed.
-The auto-generated bindings file contains BSD-3-Clause code.
+PDFium and PyPDFium2 are available by the terms and conditions of either Apache 2.0 or BSD-3-Clause, at your choice.
 
 Documentation and examples are CC-BY-4.0.
-
-PDFium is available by the terms and conditions of either Apache 2.0 or BSD-3-Clause, at your choice.
 
 Various other BSD- and MIT-style licenses apply to the dependencies of PDFium.
 
 License texts for PDFium and its dependencies are included in the file
 [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt), which is also shipped with binary re-distributions.
-
-
-## History
-
-PyPDFium2 is the successor of *pypdfium* and *pypdfium-reboot*.
-
-The initial *pypdfium* was packaged manually and did not get regular updates.
-There were no platform-specific wheels, but only a single wheel that contained
-binaries for 64-bit Linux, Windows and macOS.
-
-*pypdfium-reboot* then added a script to automate binary deployment and bindings generation
-to simplify regular updates. However, it was still not platform specific.
-
-PyPDFium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
-It also adds a basic support model and a command-line interface on top of the PDFium C API
-to simplify common use cases.
-Moreover, PyPDFium2 includes facilities to build PDFium from source, to extend
-platform compatibility.
 
 
 ## Development
@@ -258,3 +265,21 @@ has not been addressed yet.
 
 Patches to PDFium and DepotTools originate from the [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/)
 repository. Many thanks to @bblanchon and @BoLaMN.
+
+
+## History
+
+PyPDFium2 is the successor of *pypdfium* and *pypdfium-reboot*.
+
+The initial *pypdfium* was packaged manually and did not get regular updates.
+There were no platform-specific wheels, but only a single wheel that contained
+binaries for 64-bit Linux, Windows and macOS.
+
+*pypdfium-reboot* then added a script to automate binary deployment and bindings generation
+to simplify regular updates. However, it was still not platform specific.
+
+PyPDFium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
+It also adds a basic support model and a command-line interface on top of the PDFium
+C API to simplify common use cases.
+Moreover, PyPDFium2 includes facilities to build PDFium from source, to extend
+platform compatibility.
