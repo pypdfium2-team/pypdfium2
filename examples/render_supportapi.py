@@ -33,3 +33,4 @@ if __name__ == '__main__':
         
         for image, suffix in generator:
             image.save(f"out_{suffix}.png")
+            image.close()
