@@ -51,6 +51,7 @@ pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 
 ### Using the command-line interface
 
+Rasterise a PDF document:
 ```bash
 pypdfium2 -i your_file.pdf -o your_output_dir/ --scale 1 --rotation 0 --optimise-mode none
 ```
@@ -60,7 +61,12 @@ If you want to render multiple files at once, a bash `for`-loop may be suitable:
 for file in ./*.pdf; do echo "$file" && pypdfium2 -i "$file" -o your_output_dir/ --scale 2; done
 ```
 
-To obtain a list of possible command-line parameters, run
+Dump the table of contents of a PDF:
+```bash
+pypdfium2 --show-toc -i your_file.pdf
+```
+
+To obtain a full list of possible command-line parameters, run
 ```bash
 pypdfium2 --help
 ```
@@ -169,7 +175,7 @@ pdfium.FPDF_CloseDocument(doc)
 Documentation for the [PDFium API](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html)
 is available. PyPDFium2 transparently maps all PDFium classes, enums and functions to Python.
 However, there can sometimes be minor differences between Foxit and open-source PDFium.
-In case of doubts, take a look at the inline source code documentation of PDFium.
+In case of doubt, take a look at the inline source code documentation of PDFium.
 
 
 ## Licensing
