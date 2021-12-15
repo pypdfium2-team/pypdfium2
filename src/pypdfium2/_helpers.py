@@ -345,7 +345,7 @@ def _process_page(
         annotations,
         greyscale,
         optimise_mode,
-    ) -> Image.Image:
+    ) -> Tuple[int, Image.Image]:
     
     with PdfContext(file_or_bytes, password) as pdf:
         pil_image = render_page(
