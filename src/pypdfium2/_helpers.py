@@ -69,8 +69,8 @@ def open_pdf(
         password: Optional[ Union[str, bytes] ] = None
     ) -> pdfium.FPDF_DOCUMENT:
     """
-    Open a PDFium document from a file path or in-memory data. Can be closed with
-    ``pdfium.FPDF_CloseDocument(pdf)``.
+    Open a PDFium document from a file path or in-memory data. When you have finished working
+    with the document, call :func:`.close_pdf`.
     
     Parameters:
         
@@ -116,7 +116,14 @@ def open_pdf(
     return pdf
 
 
-def close_pdf(pdf):
+def close_pdf(pdf: pdfium.FPDF_DOCUMENT):
+    """
+    Close an in-memory PDFium document (alias for ``FPDF_CloseDocument()``).
+    
+    Parameters:
+        pdf:
+            The PDFium document object to close.
+    """
     pdfium.FPDF_CloseDocument(pdf)
 
 
@@ -138,7 +145,7 @@ class PdfContext:
         return self.pdf
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        pdfium.FPDF_CloseDocument(self.pdf)
+        close_pdf(self.pdf)
 
 
 def _translate_rotation(rotation: int) -> int:
