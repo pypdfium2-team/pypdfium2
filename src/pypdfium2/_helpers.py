@@ -286,11 +286,7 @@ def render_page(
     if rotation in (90, 270):
         width, height = height, width
     
-    if use_alpha:
-        bitmap = pdfium.FPDFBitmap_Create(width, height, 1)
-    else:
-        bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
-    
+    bitmap = pdfium.FPDFBitmap_Create(width, height, int(use_alpha))
     if colour is not None:
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, colour)
     
