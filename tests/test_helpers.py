@@ -96,12 +96,12 @@ def test_render_page_normal():
             pdf, 0,
         )
     
-    assert pil_image.mode == 'RGBA'
+    assert pil_image.mode == 'RGB'
     assert pil_image.size == (595, 842)
-    assert pil_image.getpixel( (0, 0) ) == (255, 255, 255, 255)
-    assert pil_image.getpixel( (150, 180) ) == (129, 212, 26, 255)
-    assert pil_image.getpixel( (150, 390) ) == (42, 96, 153, 255)
-    assert pil_image.getpixel( (150, 570) ) == (128, 0, 128, 255)
+    assert pil_image.getpixel( (0, 0) ) == (255, 255, 255)
+    assert pil_image.getpixel( (150, 180) ) == (129, 212, 26)
+    assert pil_image.getpixel( (150, 390) ) == (42, 96, 153)
+    assert pil_image.getpixel( (150, 570) ) == (128, 0, 128)
     
     pil_image.close()
 
@@ -110,12 +110,12 @@ def test_render_page_encrypted():
     
     with helpers.PdfContext(TestFiles.encrypted, 'test_user') as pdf:
         pil_image_a = helpers.render_page(pdf, 0)
-    assert pil_image_a.mode == 'RGBA'
+    assert pil_image_a.mode == 'RGB'
     assert pil_image_a.size == (596, 842)
     
     with helpers.PdfContext(TestFiles.encrypted, 'test_owner') as pdf:
         pil_image_b = helpers.render_page(pdf, 0)
-    assert pil_image_b.mode == 'RGBA'
+    assert pil_image_b.mode == 'RGB'
     assert pil_image_b.size == (596, 842)
     
     assert pil_image_a == pil_image_b
@@ -201,7 +201,7 @@ def test_render_greyscale():
             greyscale = True,
         )
         image_a.save(OutputDir/'greyscale.png')
-        assert image_a.mode == 'LA'
+        assert image_a.mode == 'L'
         image_a.close()
         
         image_b = helpers.render_page(
@@ -250,8 +250,9 @@ def test_render_bgcolour(colour):
         )
     
     px_colour = colour
-    if len(colour) == 3:
-        px_colour = tuple(list(colour) + [255])
+    if len(colour) == 4:
+        if colour[3] == 255:
+            px_colour = colour[:-1]
     
     bg_pixel = pil_image.getpixel( (0, 0) )
     assert bg_pixel == px_colour

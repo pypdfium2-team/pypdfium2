@@ -255,9 +255,24 @@ def render_page(
         :class:`PIL.Image.Image`
     """
     
+    use_alpha = True
+    
     if isinstance(colour, (tuple, list)):
-        assert len(colour) in (3, 4)
+        
+        if len(colour) == 3:
+            use_alpha = False
+        elif len(colour) == 4:
+            if colour[3] == 255:
+                use_alpha = False
+        else:
+            raise ValueError("If colour is given as a list, it must have length 3 or 4.")
+        
         colour = _colour_as_hex(*colour)
+        
+    elif isinstance(colour, int):
+        alpha_val = hex(colour)[2:4].upper()
+        if alpha_val == 'FF':
+            use_alpha = False
     
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
@@ -271,7 +286,11 @@ def render_page(
     if rotation in (90, 270):
         width, height = height, width
     
-    bitmap = pdfium.FPDFBitmap_Create(width, height, 1)
+    if use_alpha:
+        bitmap = pdfium.FPDFBitmap_Create(width, height, 1)
+    else:
+        bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
+    
     if colour is not None:
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, colour)
     
@@ -306,7 +325,13 @@ def render_page(
     pil_image = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
     
     if greyscale:
-        pil_image = pil_image.convert("LA")
+        if use_alpha:
+            pil_image = pil_image.convert("LA")
+        else:
+            pil_image = pil_image.convert("L")
+    
+    elif not use_alpha:
+        pil_image = pil_image.convert("RGB")
     
     if bitmap is not None:
         pdfium.FPDFBitmap_Destroy(bitmap)
