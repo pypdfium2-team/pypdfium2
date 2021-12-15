@@ -520,7 +520,8 @@ def get_toc(
         
         address = ctypes.addressof(bookmark.contents)
         if address in seen:
-            raise CircularRefError("A circular bookmark reference was detected whilst parsing the table of contents.")
+            logger.critical("A circular bookmark reference was detected whilst parsing the table of contents.")
+            break
         else:
             seen.append(address)
         
