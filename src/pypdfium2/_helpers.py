@@ -180,11 +180,16 @@ def _colour_as_hex(r, g, b, a=255) -> int:
     to a single value in 8888 ARGB format.
     """
     
-    for c in (r, g, b, a):
+    colours = (a, r, g, b)
+    
+    for c in colours:
         assert isinstance(c, int)
         assert 0 <= c <= 255
     
-    hxc_str = "0x" + _hex_digits(a) + _hex_digits(r) + _hex_digits(g) + _hex_digits(b)
+    hxc_str = "0x"
+    for c in colours:
+        hxc_str += _hex_digits(c)
+    
     hxc_int = int(hxc_str, 0)
     
     return hxc_int
