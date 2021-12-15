@@ -137,6 +137,8 @@ Support model documentation: https://pypdfium2.readthedocs.io/en/latest/support_
 
 ### Using the PDFium API
 
+Rendering the first page of a PDF document:
+
 ```python3
 import ctypes
 from PIL import Image
