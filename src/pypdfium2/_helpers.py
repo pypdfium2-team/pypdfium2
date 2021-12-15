@@ -394,9 +394,7 @@ def render_pdf(
     Yields:
         A PIL image, and a string for serial enumeration of output files.
     """
-    
-    temporary = None
-    
+        
     if isinstance(file_or_bytes, str):
         if sys.platform.startswith('win32') and not file_or_bytes.isascii():
             with open(file_or_bytes, 'rb') as file_handle:
@@ -432,10 +430,6 @@ def render_pdf(
             pageno = index+1
             suffix = f"{pageno:0{n_digits}}"
             yield image, suffix
-    
-    if temporary is not None:
-        temporary.close()
-
 
 
 class OutlineItem:
