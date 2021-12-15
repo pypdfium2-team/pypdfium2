@@ -13,6 +13,7 @@ class TestFiles:
     render    = ResourceDir / 'test_render.pdf'
     encrypted = ResourceDir / 'test_encrypted.pdf'
     multipage = ResourceDir / 'test_multipage.pdf'
+    bookmarks = ResourceDir / 'test_bookmarks.pdf'
 
 
 def test_paths():

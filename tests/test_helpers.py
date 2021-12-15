@@ -268,3 +268,11 @@ def test_render_bgcolour(colour):
     assert bg_pixel == px_colour
     
     pil_image.close()
+
+
+def test_read_toc():
+    
+    with helpers.PdfContext(TestFiles.bookmarks) as pdf:
+        toc = helpers.get_toc(pdf)
+        print()
+        helpers.print_toc(toc)
