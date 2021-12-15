@@ -334,7 +334,7 @@ def render_pdf(
         n_processes: int = os.cpu_count(),
     ) -> Iterator[ Tuple[Image.Image, str] ]:
     """
-    Render certain pages of a PDF file, using a process pool executor.
+    Render multiple pages of a PDF file, using a process pool executor.
     
     Parameters:
         filename:
