@@ -22,7 +22,9 @@ Copyright: 2020 Matthias Erll
 License:
 Comment:
     Obtained from: https://github.com/pikepdf/pikepdf/blob/9f1fa7baecc6db1c053a7124011d80be148a6f24/tests/resources/outlines.pdf
-    Upstream, the license for this object is set to MPL-2.0 (see https://github.com/pikepdf/pikepdf/blob/9f1fa7baecc6db1c053a7124011d80be148a6f24/debian/copyright); however, this does not really make sense for a resource file.
+    Upstream, the license for this object is set to MPL-2.0
+    (see https://github.com/pikepdf/pikepdf/blob/9f1fa7baecc6db1c053a7124011d80be148a6f24/debian/copyright).
+    However, this does not really make sense for a resource file.
 
 Files: sourcebuild/patches/*
 Copyright: 2021 Benoît Blanchon
