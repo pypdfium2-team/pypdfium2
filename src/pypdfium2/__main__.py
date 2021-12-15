@@ -109,7 +109,7 @@ def parse_args(args=sys.argv[1:]):
         help = "Rotate pages by 90, 180 or 270 degrees.",
     )
     parser.add_argument(
-        '--background-colour',
+        '--colour',
         default = '0xFFFFFFFF',
         type = hex_or_none_type,
         help = ("Page background colour as 32-bit ARGB hex string. "
@@ -181,8 +181,8 @@ def main():
         password = args.password,
         scale = args.scale,
         rotation = args.rotation,
-        background_colour = args.background_colour,
-        render_annotations = not args.no_annotations,
+        colour = args.colour,
+        annotations = not args.no_annotations,
         greyscale = args.greyscale,
         optimise_mode = args.optimise_mode,
         n_processes = args.processes,

@@ -201,8 +201,8 @@ def render_page(
         *,
         scale: float = 1,
         rotation: int = 0,
-        background_colour: Union[int, Sequence, None] = 0xFFFFFFFF,
-        render_annotations: bool = True,
+        colour: Union[int, Sequence, None] = 0xFFFFFFFF,
+        annotations: bool = True,
         greyscale: bool = False,
         optimise_mode: OptimiseMode = OptimiseMode.none,
     ) -> Image.Image:
@@ -234,15 +234,15 @@ def render_page(
         rotation:
             Rotate the page by 90, 180, or 270 degrees. Value 0 means no rotation.
         
-        background_colour:
+        colour:
             
             .. _8888 ARGB: https://en.wikipedia.org/wiki/RGBA_color_model#ARGB32
             
-            Which colour to use as background (defaults to white).
+            Which background colour to use (defaults to white).
             It can either be given as a hexadecimal integer in `8888 ARGB`_ format, or as a
             4-value sequence of ``red, green, blue, alpha`` integers ranging from 0 to 255.
         
-        render_annotations:
+        annotations:
             Whether to render page annotations.
         
         greyscale:
@@ -255,9 +255,9 @@ def render_page(
         :class:`PIL.Image.Image`
     """
     
-    if isinstance(background_colour, (tuple, list)):
-        assert len(background_colour) in (3, 4)
-        background_colour = _colour_as_hex(*background_colour)
+    if isinstance(colour, (tuple, list)):
+        assert len(colour) in (3, 4)
+        colour = _colour_as_hex(*colour)
     
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
@@ -272,12 +272,12 @@ def render_page(
         width, height = height, width
     
     bitmap = pdfium.FPDFBitmap_Create(width, height, 1)
-    if background_colour is not None:
-        pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, background_colour)
+    if colour is not None:
+        pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, colour)
     
     render_flags = 0x00
     
-    if render_annotations:
+    if annotations:
         render_flags |= pdfium.FPDF_ANNOT
     if greyscale:
         render_flags |= pdfium.FPDF_GRAYSCALE
@@ -321,8 +321,8 @@ def _process_page(
         password,
         scale,
         rotation,
-        background_colour,
-        render_annotations,
+        colour,
+        annotations,
         greyscale,
         optimise_mode,
     ) -> Image.Image:
@@ -332,8 +332,8 @@ def _process_page(
             pdf, index,
             scale = scale,
             rotation = rotation,
-            background_colour = background_colour,
-            render_annotations = render_annotations,
+            colour = colour,
+            annotations = annotations,
             greyscale = greyscale,
             optimise_mode = optimise_mode,
         )
@@ -352,8 +352,8 @@ def render_pdf(
         password: str = None,
         scale: float = 1,
         rotation: int = 0,
-        background_colour: int = 0xFFFFFFFF,
-        render_annotations: bool = True,
+        colour: int = 0xFFFFFFFF,
+        annotations: bool = True,
         greyscale: bool = False,
         optimise_mode: OptimiseMode = OptimiseMode.none,
         n_processes: int = os.cpu_count(),
@@ -399,8 +399,8 @@ def render_pdf(
             password,
             scale,
             rotation,
-            background_colour,
-            render_annotations,
+            colour,
+            annotations,
             greyscale,
             optimise_mode,
         ]

@@ -129,7 +129,7 @@ def test_render_page_alpha():
     with helpers.PdfContext(TestFiles.render) as pdf:
         pil_image = helpers.render_page(
             pdf, 0,
-            background_colour = None,
+            colour = None,
         )
     
     assert pil_image.mode == 'RGBA'
@@ -207,7 +207,7 @@ def test_render_greyscale():
         image_b = helpers.render_page(
             pdf, 0,
             greyscale = True,
-            background_colour = None,
+            colour = None,
         )
         assert image_b.mode == 'LA'
         image_b.save(OutputDir/'greyscale_alpha.png')
@@ -246,7 +246,7 @@ def test_render_bgcolour(colour):
     with helpers.PdfContext(TestFiles.render) as pdf:
         pil_image = helpers.render_page(
             pdf, 0,
-            background_colour = colour,
+            colour = colour,
         )
     
     px_colour = colour
