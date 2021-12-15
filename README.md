@@ -140,6 +140,7 @@ Support model documentation: https://pypdfium2.readthedocs.io/en/latest/support_
 Rendering the first page of a PDF document:
 
 ```python3
+import math
 import ctypes
 from PIL import Image
 import pypdfium2 as pdfium
@@ -149,8 +150,8 @@ page_count = pdfium.FPDF_GetPageCount(doc)     # get page count
 assert page_count >= 1
 
 page   = pdfium.FPDF_LoadPage(doc, 0)                # load the first page
-width  = int(pdfium.FPDF_GetPageWidthF(page)  + 0.5) # get page width
-height = int(pdfium.FPDF_GetPageHeightF(page) + 0.5) # get page height
+width  = math.ceil(pdfium.FPDF_GetPageWidthF(page))  # get page width
+height = math.ceil(pdfium.FPDF_GetPageHeightF(page)) # get page height
 
 # render to bitmap
 bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
