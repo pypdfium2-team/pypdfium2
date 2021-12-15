@@ -271,11 +271,7 @@ def render_page(
     if rotation in (90, 270):
         width, height = height, width
     
-    if background_colour is None:
-        bitmap = pdfium.FPDFBitmap_Create(width, height, 1)
-    else:
-        bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
-    
+    bitmap = pdfium.FPDFBitmap_Create(width, height, 1)
     if background_colour is not None:
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, background_colour)
     
@@ -310,13 +306,7 @@ def render_page(
     pil_image = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
     
     if greyscale:
-        if background_colour is None:
-            pil_image = pil_image.convert("LA")
-        else:
-            pil_image = pil_image.convert("L")
-    
-    elif background_colour is not None:
-        pil_image = pil_image.convert("RGB")
+        pil_image = pil_image.convert("LA")
     
     if bitmap is not None:
         pdfium.FPDFBitmap_Destroy(bitmap)
