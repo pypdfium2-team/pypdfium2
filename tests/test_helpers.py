@@ -192,6 +192,16 @@ def test_render_pdf():
         i += 1
 
 
+def test_render_pdf_bytes():
+    
+    with open(TestFiles.multipage, 'rb') as file_handle:
+        file_bytes = file_handle.read()
+    
+    for image, suffix in helpers.render_pdf(file_bytes):
+        assert isinstance(image, Image.Image)
+        assert image.mode == 'RGB'
+
+
 def test_render_greyscale():
     
     with helpers.PdfContext(TestFiles.render) as pdf:

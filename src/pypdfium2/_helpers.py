@@ -8,7 +8,6 @@ import math
 import ctypes
 import logging
 import pathlib
-import tempfile
 from PIL import Image
 import concurrent.futures
 from os.path import abspath
@@ -337,7 +336,7 @@ def render_page(
 
 
 def _process_page(
-        filename,
+        file_or_bytes,
         index,
         password,
         scale,
@@ -348,7 +347,7 @@ def _process_page(
         optimise_mode,
     ) -> Image.Image:
     
-    with PdfContext(filename, password) as pdf:
+    with PdfContext(file_or_bytes, password) as pdf:
         pil_image = render_page(
             pdf, index,
             scale = scale,
@@ -367,25 +366,26 @@ def _invoke_process_page(args):
 
 
 def render_pdf(
-        filename: str,
+        file_or_bytes: Union[str, bytes],
         page_indices: list = None,
         *,
         password: str = None,
+        n_processes: int = os.cpu_count(),
         scale: float = 1,
         rotation: int = 0,
-        colour: int = 0xFFFFFFFF,
+        colour: Union[int, Sequence, None] = 0xFFFFFFFF,
         annotations: bool = True,
         greyscale: bool = False,
         optimise_mode: OptimiseMode = OptimiseMode.none,
-        n_processes: int = os.cpu_count(),
     ) -> Iterator[ Tuple[Image.Image, str] ]:
     """
-    Render multiple pages of a PDF file, using a process pool executor.
+    Render multiple pages of a PDF document, using a process pool executor.
     
     Parameters:
-        filename:
-            Path to a PDF file.
-            (On Windows, a temporary copy is made if the path contains non-ascii characters.)
+        file_or_bytes:
+            The PDF document to render, either given as file path or as bytes.
+            On Windows, if the given file path contains non-ascii characters, the data
+            is read into memory.
         page_indices:
             A list of zero-based page indices to render.
     
@@ -396,14 +396,14 @@ def render_pdf(
     """
     
     temporary = None
-    if sys.platform.startswith('win32') and not filename.isascii():
-        logger.warning(f"Using temporary copy {temporary.name} due to issues with non-ascii filenames on Windows.")
-        temporary = tempfile.NamedTemporaryFile()
-        with open(filename, 'rb') as file_handle:
-            temporary.write(file_handle.read())
-        filename = temporary.name
     
-    with PdfContext(filename, password) as pdf:
+    if isinstance(file_or_bytes, str):
+        if sys.platform.startswith('win32') and not file_or_bytes.isascii():
+            with open(file_or_bytes, 'rb') as file_handle:
+                data = file_handle.read()
+            file_or_bytes = data
+    
+    with PdfContext(file_or_bytes, password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
     n_digits = len(str(n_pages))
     
@@ -415,7 +415,7 @@ def render_pdf(
     meta_args = []
     for i in page_indices:
         sub_args = [
-            filename,
+            file_or_bytes,
             i,
             password,
             scale,
