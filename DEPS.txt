@@ -4,6 +4,7 @@
 Runtime
 =======
 
+Python >= 3.6
 Pillow
 
 
