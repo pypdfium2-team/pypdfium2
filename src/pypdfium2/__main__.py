@@ -3,6 +3,7 @@
 
 import os
 import sys
+import ast
 import logging
 import argparse
 from pypdfium2 import _version
@@ -24,11 +25,14 @@ def rotation_type(string):
         raise ValueError(f"Invalid rotation value {rotation}")
     return rotation
 
-def hex_or_none_type(string):
+def colour_type(string):
     if string.lower() == 'none':
         return None
     else:
-        return int(string, 0)
+        evaluated = ast.literal_eval(string)
+        if not isinstance(evaluated, (int, tuple, list)):
+            raise ValueError(f"Invalid colour value {evaluated}")
+        return evaluated
 
 def optimise_mode_type(string):
     return consts.OptimiseMode[string.lower()]
@@ -111,9 +115,9 @@ def parse_args(args=sys.argv[1:]):
     parser.add_argument(
         '--colour',
         default = '0xFFFFFFFF',
-        type = hex_or_none_type,
-        help = ("Page background colour as 32-bit ARGB hex string. "
-                "Use None for an alpha channel. Defaults to white (0xFFFFFFFF)."),
+        type = colour_type,
+        help = ("Page background colour as 32-bit ARGB hex string, or as tuple of "
+                "integers from 0 to 255. Use None for alpha background."),
     )
     parser.add_argument(
         '--no-annotations',

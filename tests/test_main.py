@@ -36,8 +36,8 @@ def test_rotation_type_fail_oob():
         ("0xFFFFFFFF", 0xFFFFFFFF),
     ],
 )
-def test_hex_or_none_type(test_input, expected):
-    assert main.hex_or_none_type(test_input) == expected
+def test_colour_type(test_input, expected):
+    assert main.colour_type(test_input) == expected
 
 
 @pytest.mark.parametrize(
