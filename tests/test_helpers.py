@@ -92,7 +92,9 @@ def test_translate_rotation(test_input, expected):
 def test_render_page_normal():
     
     with helpers.PdfContext(TestFiles.render) as pdf:
-        pil_image = helpers.render_page(pdf, 0)
+        pil_image = helpers.render_page(
+            pdf, 0,
+        )
     
     assert pil_image.mode == 'RGB'
     assert pil_image.size == (595, 842)
@@ -210,3 +212,47 @@ def test_render_greyscale():
         assert image_b.mode == 'LA'
         image_b.save(OutputDir/'greyscale_alpha.png')
         image_b.close()
+
+
+@pytest.mark.parametrize(
+    "values, expected",
+    [
+        ((255, 255, 255, 255), 0xFFFFFFFF),
+        ((255, 255, 255), 0xFFFFFFFF),
+        ((0, 255, 255, 255), 0xFF00FFFF),
+        ((255, 0, 255, 255), 0xFFFF00FF),
+        ((255, 255, 0, 255), 0xFFFFFF00),
+        ((255, 255, 255, 0), 0x00FFFFFF),
+    ]
+)
+def test_colour_to_hex(values, expected):
+    colour_int = helpers._colour_as_hex(*values)
+    assert colour_int == expected
+
+
+@pytest.mark.parametrize(
+    "colour",
+    [
+        (255, 255, 255, 255),
+        (255, 255, 255),
+        (0, 255, 255),
+        (255, 0, 255),
+        (255, 255, 0),
+    ]
+)
+def test_render_bgcolour(colour):
+    
+    with helpers.PdfContext(TestFiles.render) as pdf:
+        pil_image = helpers.render_page(
+            pdf, 0,
+            background_colour = colour,
+        )
+    
+    px_colour = colour
+    if len(colour) == 4:
+        px_colour = colour[:3]
+    
+    bg_pixel = pil_image.getpixel( (0, 0) )
+    assert bg_pixel == px_colour
+    
+    pil_image.close()

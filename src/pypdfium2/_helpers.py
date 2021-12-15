@@ -165,13 +165,38 @@ def _translate_rotation(rotation: int) -> int:
         raise ValueError(f"Invalid rotation {rotation}")
 
 
+def _hex_digits(c):
+    
+    hxc = hex(c)[2:]
+    if len(hxc) == 1:
+        hxc = "0" + hxc
+    
+    return hxc
+    
+
+def _colour_as_hex(r, g, b, a=255) -> int:
+    """
+    Convert a colour given as integers of ``red, green, blue, alpha`` ranging from 0 to 255
+    to a single value in 8888 ARGB format.
+    """
+    
+    for c in (r, g, b, a):
+        assert isinstance(c, int)
+        assert 0 <= c <= 255
+    
+    hxc_str = "0x" + _hex_digits(a) + _hex_digits(r) + _hex_digits(g) + _hex_digits(b)
+    hxc_int = int(hxc_str, 0)
+    
+    return hxc_int
+
+
 def render_page(
         pdf: pdfium.FPDF_DOCUMENT,
         page_index: int = 0,
         *,
         scale: float = 1,
         rotation: int = 0,
-        background_colour: int = 0xFFFFFFFF,
+        background_colour: Union[int, Sequence, None] = 0xFFFFFFFF,
         render_annotations: bool = True,
         greyscale: bool = False,
         optimise_mode: OptimiseMode = OptimiseMode.none,
@@ -208,8 +233,9 @@ def render_page(
             
             .. _8888 ARGB: https://en.wikipedia.org/wiki/RGBA_color_model#ARGB32
             
-            A 32-bit colour value in `8888 ARGB`_ format. Defaults to white (``0xFFFFFFFF``).
-            To use an alpha channel rather than a background colour, set it to *None*.
+            Which colour to use as background (defaults to white).
+            It can either be given as a hexadecimal integer in `8888 ARGB`_ format, or as a
+            4-value sequence of ``red, green, blue, alpha`` integers ranging from 0 to 255.
         
         render_annotations:
             Whether to render page annotations.
@@ -223,6 +249,10 @@ def render_page(
     Returns:
         :class:`PIL.Image.Image`
     """
+    
+    if isinstance(background_colour, (tuple, list)):
+        assert len(background_colour) in (3, 4)
+        background_colour = _colour_as_hex(*background_colour)
     
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
