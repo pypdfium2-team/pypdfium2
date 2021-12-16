@@ -4,6 +4,7 @@
 import io
 import pytest
 import pathlib
+import logging
 from PIL import Image
 from .conftest import TestFiles, OutputDir
 from pypdfium2 import _helpers as helpers
@@ -276,3 +277,14 @@ def test_read_toc():
         toc = helpers.get_toc(pdf)
         print()
         helpers.print_toc(toc)
+
+
+def test_read_toc_circular(caplog):
+    
+    with caplog.at_level(logging.CRITICAL):
+        
+        with helpers.PdfContext(TestFiles.bookmarks_circular) as pdf:
+            toc = helpers.get_toc(pdf)
+            print()
+            helpers.print_toc(toc)
+            assert "circular bookmark reference" in caplog.text

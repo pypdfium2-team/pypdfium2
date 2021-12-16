@@ -26,6 +26,13 @@ Comment:
     (see https://github.com/pikepdf/pikepdf/blob/9f1fa7baecc6db1c053a7124011d80be148a6f24/debian/copyright).
     However, this does not really make sense for a resource file.
 
+Files: tests/resources/test_bookmarks_circular.pdf
+Copyright: 2021 PDFium Developers
+License: BSD-3-Clause OR Apache-2.0
+Comment:
+    This file is part of the PDFium test suite
+    (https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf)
+
 Files: sourcebuild/patches/*
 Copyright: 2021 Benoît Blanchon
 License: 

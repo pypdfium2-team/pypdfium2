@@ -14,6 +14,7 @@ class TestFiles:
     encrypted = ResourceDir / 'test_encrypted.pdf'
     multipage = ResourceDir / 'test_multipage.pdf'
     bookmarks = ResourceDir / 'test_bookmarks.pdf'
+    bookmarks_circular = ResourceDir / 'test_bookmarks_circular.pdf'
 
 
 def test_paths():
