@@ -427,7 +427,7 @@ def render_pdf(
     
     with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
         for index, image in pool.map(_invoke_process_page, meta_args):
-            pageno = index+1
+            pageno = index + 1
             suffix = f"{pageno:0{n_digits}}"
             yield image, suffix
 
@@ -468,7 +468,7 @@ class OutlineItem:
 
 def _translate_viewmode(viewmode: int) -> ViewMode:
     """
-    Convert a PDFium view mode integer to an attribute of the ViewMode enum.
+    Convert a PDFium view mode integer to an attribute of the :class:`.ViewMode` enum.
     """
     
     if viewmode == pdfium.PDFDEST_VIEW_UNKNOWN_MODE:
@@ -497,7 +497,7 @@ def _get_toc_entry(
         level: int,
     ) -> OutlineItem:
     """
-    Analyse an outline entry ("bookmark").
+    Convert a raw PDFium bookmark to an :class:`.OutlineItem`.
     """
     
     # title
