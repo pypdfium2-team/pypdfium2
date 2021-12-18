@@ -31,10 +31,6 @@ OutputDir     = join(SourceTree,'data','sourcebuild')
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
 
-GClient = join(DepotToolsDir,'gclient')
-GN      = join(DepotToolsDir,'gn')
-Ninja   = join(DepotToolsDir,'ninja')
-
 DefaultConfig = """\
 is_debug = false
 pdf_is_standalone = true
@@ -64,6 +60,23 @@ PdfiumPatches = [
 DepotPatches = [
     join(PatchDir,'gclient_scm.patch'),
 ]
+
+
+GClient = join(DepotToolsDir,'gclient')
+GN      = join(DepotToolsDir,'gn')
+Ninja   = join(DepotToolsDir,'ninja')
+
+
+# prefer system-provided build tools if available, because depot-tools
+# do not ship binaries for non-standard architectures
+
+_sh_gn = shutil.which('gn')
+_sh_ninja = shutil.which('ninja')
+
+if _sh_gn:
+    GN = _sh_gn
+if _sh_ninja:
+    Ninja = _sh_ninja
 
 
 def run_cmd(command, cwd):

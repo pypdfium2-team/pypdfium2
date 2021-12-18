@@ -16,6 +16,12 @@ ctypesgen
 gcc
 wheel
 
+Non-standard architectures
+--------------------------
+
+gn (generate-ninja)
+ninja (ninja-build)
+
 
 Test
 ====
