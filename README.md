@@ -18,8 +18,11 @@ python3 -m pip install -U pypdfium2
 
 ### Manual installation
 
-The following steps require `git`, `ctypesgen` and `gcc` to be installed and
-available in `PATH`.
+The following steps require the external tools `git`, `ctypesgen` and `gcc` to be
+installed and available in `PATH`. Additionally, the python package `wheel` is required.
+
+For source build, more dependencies may be necessary (see [`DEPS.txt`](DEPS.txt)).
+
 
 #### Package locally
 
@@ -34,11 +37,9 @@ python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 
 #### Source build
 
-If you are using an architecture where no pre-compiled package is available, it might be
+If you are using a platform where no pre-compiled package is available, it might be
 possible to build PDFium from source. However, this is a complex process that can vary
 depending on the host system, and it may take a long time.
-
-Please make sure you have all build dependencies installed (see [`DEPS.txt`](DEPS.txt)).
 
 ```bash
 python3 build.py
