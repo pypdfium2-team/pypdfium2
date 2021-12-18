@@ -328,8 +328,7 @@ def render_page(
     elif not use_alpha:
         pil_image = pil_image.convert("RGB")
     
-    if bitmap is not None:
-        pdfium.FPDFBitmap_Destroy(bitmap)
+    pdfium.FPDFBitmap_Destroy(bitmap)
     pdfium.FPDF_ClosePage(page)
     
     return pil_image

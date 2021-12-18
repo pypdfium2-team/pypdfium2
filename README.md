@@ -169,8 +169,7 @@ buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 
 img = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
 img.save("out.png")
 
-if bitmap is not None:
-    pdfium.FPDFBitmap_Destroy(bitmap)
+pdfium.FPDFBitmap_Destroy(bitmap)
 pdfium.FPDF_ClosePage(page)
 
 pdfium.FPDF_CloseDocument(doc)
