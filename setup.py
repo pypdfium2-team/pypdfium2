@@ -7,10 +7,10 @@ import build_pdfium
 
 
 class DefaultArgs:
-    argfile = None
-    srcname = None
+    argfile  = None
+    srcname  = None
     destname = None
-    update = False
+    update   = False
 
 
 if __name__ == '__main__':
