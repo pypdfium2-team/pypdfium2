@@ -28,10 +28,12 @@ def get_binary():
     return os.path.basename(libpath)
 
 
-if __name__ == '__main__':
-    
+def main():
     libname = get_binary()
-    
     build(lambda: lib_setup(libname), build_pdfium.OutputDir)
     binary_path = join(SourceTree, 'src', 'pypdfium2', libname)
     os.remove(binary_path)
+
+
+if __name__ == '__main__':
+    main()
