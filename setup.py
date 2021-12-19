@@ -2,10 +2,8 @@
 # SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
-import build as build_pdfium
-from setup_base import *
 import setup_source
+import build as build_pdfium
 
 
 class DefaultArgs:
