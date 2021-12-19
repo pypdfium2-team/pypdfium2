@@ -5,7 +5,7 @@
 import os
 import distutils.util
 from setup_base import *
-import build as build_pdfium
+import build_pdfium
 
 
 class bdist (BDistBase):

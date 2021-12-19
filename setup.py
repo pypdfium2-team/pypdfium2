@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import setup_source
-import build as build_pdfium
+import build_pdfium
 
 
 class DefaultArgs:
