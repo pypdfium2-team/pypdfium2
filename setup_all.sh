@@ -9,3 +9,4 @@ python3 setup_linux_arm64.py  bdist_wheel
 python3 setup_linux_arm32.py  bdist_wheel
 python3 setup_windows_x64.py  bdist_wheel
 python3 setup_windows_x86.py  bdist_wheel
+python3 setup_sdist.py sdist
