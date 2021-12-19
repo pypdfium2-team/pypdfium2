@@ -28,7 +28,16 @@ def get_binary():
     return os.path.basename(libpath)
 
 
+class DefaultArgs:
+    argfile = None
+    srcname = None
+    destname = None
+    update = False
+
+
 if __name__ == '__main__':
+    
+    build_pdfium.main(DefaultArgs)
     
     SB_OutputDir = build_pdfium.OutputDir
     libname = get_binary()
