@@ -21,8 +21,8 @@ Files: tests/resources/test_bookmarks.pdf
 Copyright: 2020 Matthias Erll
 License: MPL-2.0
 Comment:
-    Obtained from: https://github.com/pikepdf/pikepdf/blob/9f1fa7baecc6db1c053a7124011d80be148a6f24/tests/resources/outlines.pdf
-    (see https://github.com/pikepdf/pikepdf/blob/9f1fa7baecc6db1c053a7124011d80be148a6f24/debian/copyright)
+    Obtained from: https://github.com/pikepdf/pikepdf/blob/master/tests/resources/outlines.pdf
+    (see https://github.com/pikepdf/pikepdf/blob/master/debian/copyright)
 
 Files: tests/resources/test_bookmarks_circular.pdf
 Copyright: 2021 PDFium Developers
