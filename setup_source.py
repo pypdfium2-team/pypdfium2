@@ -3,17 +3,17 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import distutils.util
-from setup_base import *
+import platform
 import build_pdfium
+from setup_base import *
 
 
 class bdist (BDistBase):
     def finalize_options(self):
         BDistBase.finalize_options(self)
-        platform = distutils.util.get_platform()
-        platform = platform.replace('-','_').replace('.','_')
-        self.plat_name = platform
+        plat_name = f"{platform.system()}_{platform.machine()}".lower()
+        plat_name = plat_name.replace('-','_').replace('.','_')
+        self.plat_name = plat_name
 
 
 def lib_setup(libname):
