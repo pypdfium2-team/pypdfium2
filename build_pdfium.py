@@ -239,9 +239,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    
-    args = parse_args()
+def main(args):
     
     if args.argfile is None:
         config = DefaultConfig
@@ -265,4 +263,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(parse_args())
