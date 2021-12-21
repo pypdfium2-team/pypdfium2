@@ -12,7 +12,7 @@ class OptimiseMode (Enum):
 
 
 class ViewMode (Enum):
-    """ Modes that define how target coordinates of bookmarks should be interpreted. """
+    """ Modes that define how target coordinates of a bookmark should be interpreted. """
     Unknown = 0
     XYZ     = 1
     Fit     = 2

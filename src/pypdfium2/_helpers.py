@@ -33,7 +33,7 @@ def handle_pdfium_error(valid: bool = True) -> int:
     
     Parameters:
         valid:
-            If :data:`False`, also raise an exception if ``FPDF_GetLastError``
+            If :data:`False`, also raise an exception if ``FPDF_GetLastError()``
             returns ``FPDF_ERR_SUCCESS``.
     
     Returns:
