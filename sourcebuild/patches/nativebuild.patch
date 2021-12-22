@@ -1,18 +1,18 @@
-From 1cf0cd0c3e7ef5094c1e62eb4294661710183014 Mon Sep 17 00:00:00 2001
-Message-Id: <1cf0cd0c3e7ef5094c1e62eb4294661710183014.1640185226.git.geisserml@gmail.com>
+From a082ab067b5266647d7329b913a9af4e369cd1b7 Mon Sep 17 00:00:00 2001
+Message-Id: <a082ab067b5266647d7329b913a9af4e369cd1b7.1640186139.git.geisserml@gmail.com>
 From: geisserml <geisserml@gmail.com>
 Date: Wed, 22 Dec 2021 16:00:22 +0100
 Subject: [PATCH] Patches for native build
 
 ---
  config/chromecast/BUILD.gn |  2 +-
- config/clang/BUILD.gn      | 22 ---------------------
- config/compiler/BUILD.gn   | 40 +++++++-------------------------------
+ config/clang/BUILD.gn      | 22 --------------------
+ config/compiler/BUILD.gn   | 42 ++++++++------------------------------
  config/fuchsia/BUILD.gn    |  2 +-
  config/gcc/BUILD.gn        |  2 +-
  config/linux/BUILD.gn      |  2 +-
- config/posix/BUILD.gn      | 32 ------------------------------
- 7 files changed, 11 insertions(+), 91 deletions(-)
+ config/posix/BUILD.gn      | 32 -----------------------------
+ 7 files changed, 12 insertions(+), 92 deletions(-)
 
 diff --git a/config/chromecast/BUILD.gn b/config/chromecast/BUILD.gn
 index a4ebc98..6e07c59 100644
@@ -61,7 +61,7 @@ index 9512c66..cc8b033 100644
  }
  
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 9a193bb..5170eee 100644
+index 9a193bb..44e1b6a 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
 @@ -350,7 +350,7 @@ config("compiler") {
@@ -184,6 +184,15 @@ index 9a193bb..5170eee 100644
  }
  
  # thin_archive -----------------------------------------------------------------
+@@ -2488,7 +2462,7 @@ if (is_android || (is_chromeos_ash && is_chromeos_device)) {
+ config("default_init_stack_vars") {
+   cflags = []
+   if (init_stack_vars && is_clang && !is_nacl && !using_sanitizer) {
+-    cflags += [ "-ftrivial-auto-var-init=pattern" ]
++    cflags += [ ]
+   }
+ }
+ 
 diff --git a/config/fuchsia/BUILD.gn b/config/fuchsia/BUILD.gn
 index 4a7391f..40e3f9f 100644
 --- a/config/fuchsia/BUILD.gn
