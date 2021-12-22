@@ -61,6 +61,28 @@ DepotPatches = [
     join(PatchDir,'gclient_scm.patch'),
 ]
 
+NB_Symlinks = [
+    ('/usr/bin/clang++', 'clang'),
+    ('/usr/bin/clang++', 'clang++'),
+    ('/usr/bin/clang++', 'clang-cl'),
+    ('/usr/bin/ldd', 'ld64.lld'),
+    ('/usr/bin/ldd', 'ld.lld'),
+    ('/usr/bin/ldd', 'lld'),
+    ('/usr/bin/ldd', 'lld-link'),
+    ('/usr/bin/llvm-ar', 'llvm-ar'),
+    ('/usr/bin/llvm-nm', 'llvm-nm'),
+    ('/usr/bin/llvm-objcopy', 'llvm-objcopy'),
+    ('/usr/bin/llvm-pdbutil', 'llvm-pdbutil'),
+    ('/usr/bin/llvm-readelf', 'llvm-readelf'),
+    ('/usr/bin/llvm-readobj', 'llvm-readobj'),
+    ('/usr/bin/llvm-strip', 'llvm-strip'),
+    ('/usr/bin/llvm-symbolizer', 'llvm-symbolizer'),
+    ('/usr/bin/llvm-undname', 'llvm-undname'),
+    ('/usr/bin/wasm-ld', 'wasm-ld'),
+]
+
+NB_BinaryDir = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin')
+
 
 def run_cmd(command, cwd):
     print(command)
@@ -125,10 +147,21 @@ def patch_pdfium():
     shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
-def extra_patch_pdfium(prefer_systools):
-    if prefer_systools:
-        patch = join(PatchDir,'nativebuild.patch')
-        run_cmd(f"git apply -v {patch}", cwd=join(PDFiumDir,'build'))
+def _bins_to_symlinks():
+    
+    shutil.rmtree(NB_BinaryDir)
+    os.mkdir(NB_BinaryDir)
+    
+    for origin, target in NB_Symlinks:
+        run_cmd(f"ln -s {origin} {target}", cwd=NB_BinaryDir)
+
+
+def extra_patch_pdfium():
+    
+    patch = join(PatchDir,'nativebuild.patch')
+    run_cmd(f"git apply -v {patch}", cwd=join(PDFiumDir,'build'))
+    
+    _bins_to_symlinks()
 
 
 def configure(config, GN):
@@ -243,7 +276,7 @@ def main(args):
     pdfium_dl_done = dl_pdfium(args.update, GClient)
     if pdfium_dl_done:
         patch_pdfium()
-        extra_patch_pdfium(prefer_st)
+        if prefer_st: extra_patch_pdfium()
     
     configure(config, GN)
     build(Ninja)
