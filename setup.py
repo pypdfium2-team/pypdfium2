@@ -11,6 +11,7 @@ class DefaultArgs:
     srcname  = None
     destname = None
     update   = False
+    prefer_systools = False
 
 
 if __name__ == '__main__':
