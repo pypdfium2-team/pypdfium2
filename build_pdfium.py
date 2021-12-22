@@ -125,6 +125,12 @@ def patch_pdfium():
     shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
+def extra_patch_pdfium(prefer_systools):
+    if prefer_systools:
+        patch = join(PatchDir,'nativebuild.patch')
+        run_cmd(f"git apply -v {patch}", cwd=join(PDFiumDir,'build'))
+
+
 def configure(config, GN):
     
     if not os.path.exists(BuildDir):
@@ -237,6 +243,7 @@ def main(args):
     pdfium_dl_done = dl_pdfium(args.update, GClient)
     if pdfium_dl_done:
         patch_pdfium()
+        extra_patch_pdfium(prefer_st)
     
     configure(config, GN)
     build(Ninja)
