@@ -78,7 +78,7 @@ NB_Symlinks = [
     ('/usr/bin/llvm-strip', 'llvm-strip'),
     ('/usr/bin/llvm-symbolizer', 'llvm-symbolizer'),
     ('/usr/bin/llvm-undname', 'llvm-undname'),
-    ('/usr/bin/wasm-ld', 'wasm-ld'),
+    ('/usr/bin/ldd', 'wasm-ld'),
 ]
 
 NB_BinaryDir = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin')
