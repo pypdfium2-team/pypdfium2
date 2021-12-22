@@ -281,6 +281,7 @@ def render_page(
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
     
     page = pdfium.FPDF_LoadPage(pdf, page_index)
+    pdfium.FORM_OnAfterLoadPage(page, form_fill)
     
     width  = math.ceil(pdfium.FPDF_GetPageWidthF(page)  * scale)
     height = math.ceil(pdfium.FPDF_GetPageHeightF(page) * scale)
