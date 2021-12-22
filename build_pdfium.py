@@ -214,15 +214,15 @@ def _get_tool(tool, tool_desc, prefer_systools):
 
 def main(args):
     
-    prefer_systools = not args.no_prefer_systools
-    if prefer_systools:
+    prefer_st = args.prefer_systools
+    if prefer_st:
         print("Using system-provided binaries if available.")
     else:
         print("Using DepotTools-provided binaries.")
     
     GClient = join(DepotToolsDir,'gclient')
-    GN    = _get_tool('gn', 'generate-ninja', prefer_systools)
-    Ninja = _get_tool('ninja', 'ninja-build', prefer_systools)
+    GN    = _get_tool('gn', 'generate-ninja', prefer_st)
+    Ninja = _get_tool('ninja', 'ninja-build', prefer_st)
     
     if args.argfile is None:
         config = DefaultConfig
@@ -267,7 +267,7 @@ def parse_args():
         help = "Update existing repositories, removing local changes.",
     )
     parser.add_argument(
-        '--no-prefer-systools', '-n',
+        '--prefer-systools', '-p',
         action = 'store_true',
         help = "Use build dependencies from depot tools rather than system-provided ones.",
     )
