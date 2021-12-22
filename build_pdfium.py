@@ -62,23 +62,6 @@ DepotPatches = [
 ]
 
 
-GClient = join(DepotToolsDir,'gclient')
-GN      = join(DepotToolsDir,'gn')
-Ninja   = join(DepotToolsDir,'ninja')
-
-
-# prefer system-provided build tools if available, because depot-tools
-# do not ship binaries for non-standard architectures
-
-_sh_gn = shutil.which('gn')
-_sh_ninja = shutil.which('ninja')
-
-if _sh_gn:
-    GN = _sh_gn
-if _sh_ninja:
-    Ninja = _sh_ninja
-
-
 def run_cmd(command, cwd):
     print(command)
     subprocess.run(command, cwd=cwd, shell=True)
@@ -111,7 +94,7 @@ def dl_depottools(do_sync):
     return is_update
 
 
-def dl_pdfium(do_sync):
+def dl_pdfium(do_sync, GClient):
     
     is_update = True
     
@@ -142,7 +125,7 @@ def patch_pdfium():
     shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
-def configure(config):
+def configure(config, GN):
     
     if not os.path.exists(BuildDir):
         os.mkdir(BuildDir)
@@ -153,7 +136,7 @@ def configure(config):
     run_cmd(f"{GN} gen {BuildDir}", cwd=PDFiumDir)
 
 
-def build():
+def build(Ninja):
     run_cmd(f"{Ninja} -C {BuildDir} pdfium", cwd=PDFiumDir)
 
 
@@ -215,6 +198,53 @@ def pack(src_libpath, destname=None):
     shutil.rmtree(include_dir)
 
 
+def _get_tool(tool, tool_desc, prefer_systools):
+    
+    exe = join(DepotToolsDir, tool)
+    
+    if prefer_systools:
+        _sh_exe = shutil.which(tool)
+        if _sh_exe:
+            exe = _sh_exe
+        else:
+            print(f"Warning: Host system does not provide {tool} ({tool_desc}).", file=sys.stderr)
+    
+    return exe
+
+
+def main(args):
+    
+    prefer_systools = not args.no_prefer_systools
+    if prefer_systools:
+        print("Using system-provided binaries if available.")
+    else:
+        print("Using DepotTools-provided binaries.")
+    
+    GClient = join(DepotToolsDir,'gclient')
+    GN    = _get_tool('gn', 'generate-ninja', prefer_systools)
+    Ninja = _get_tool('ninja', 'ninja-build', prefer_systools)
+    
+    if args.argfile is None:
+        config = DefaultConfig
+    else:
+        with open(abspath(args.argfile), 'r') as file_handle:
+            config = file_handle.read()
+    
+    depot_dl_done = dl_depottools(args.update)
+    if depot_dl_done:
+        patch_depottools()
+    
+    pdfium_dl_done = dl_pdfium(args.update, GClient)
+    if pdfium_dl_done:
+        patch_pdfium()
+    
+    configure(config, GN)
+    build(Ninja)
+    
+    libpath = find_lib(args.srcname)
+    pack(libpath, args.destname)
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description = "A script to automate building PDFium from source and generating ctypesgen bindings."
@@ -236,30 +266,12 @@ def parse_args():
         action = 'store_true',
         help = "Update existing repositories, removing local changes.",
     )
+    parser.add_argument(
+        '--no-prefer-systools', '-n',
+        action = 'store_true',
+        help = "Use build dependencies from depot tools rather than system-provided ones.",
+    )
     return parser.parse_args()
-
-
-def main(args):
-    
-    if args.argfile is None:
-        config = DefaultConfig
-    else:
-        with open(abspath(args.argfile), 'r') as file_handle:
-            config = file_handle.read()
-    
-    depot_dl_done = dl_depottools(args.update)
-    if depot_dl_done:
-        patch_depottools()
-    
-    pdfium_dl_done = dl_pdfium(args.update)
-    if pdfium_dl_done:
-        patch_pdfium()
-    
-    configure(config)
-    build()
-    
-    libpath = find_lib(args.srcname)
-    pack(libpath, args.destname)
 
 
 if __name__ == '__main__':
