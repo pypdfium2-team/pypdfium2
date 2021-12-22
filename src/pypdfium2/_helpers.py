@@ -277,6 +277,9 @@ def render_page(
     if not 0 <= page_index < page_count:
         raise PageIndexError(f"Page index {page_index} is out of bounds for document with {page_count} pages.")
     
+    form_config = pdfium.FPDF_FORMFILLINFO(2)
+    form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
+    
     page = pdfium.FPDF_LoadPage(pdf, page_index)
     
     width  = math.ceil(pdfium.FPDF_GetPageWidthF(page)  * scale)
@@ -305,14 +308,17 @@ def render_page(
     else:
         raise ValueError(f"Invalid optimise_mode {optimise_mode}")
     
-    pdfium.FPDF_RenderPageBitmap(
+    render_args = [
         bitmap,
         page,
         0, 0,
         width, height,
         _translate_rotation(rotation),
         render_flags,
-    )
+    ]
+    
+    pdfium.FPDF_RenderPageBitmap(*render_args)
+    pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
     cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
     buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
@@ -328,6 +334,7 @@ def render_page(
     elif not use_alpha:
         pil_image = pil_image.convert("RGB")
     
+    pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
     pdfium.FPDFBitmap_Destroy(bitmap)
     pdfium.FPDF_ClosePage(page)
     
