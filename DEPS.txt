@@ -16,11 +16,13 @@ ctypesgen
 gcc
 wheel
 
-Non-standard architectures
---------------------------
+Native build
+------------
 
 gn (generate-ninja)
 ninja (ninja-build)
+llvm/clang
+ldd
 
 
 Test
