@@ -17,20 +17,19 @@ if __name__ == "__main__":
     
     filename = sys.argv[1]
     
-    doc = pdfium.FPDF_LoadDocument(filename, None) # load document (filename, password string)
-    page_count = pdfium.FPDF_GetPageCount(doc)     # get page count
+    doc = pdfium.FPDF_LoadDocument(filename, None)
+    page_count = pdfium.FPDF_GetPageCount(doc)
     assert page_count >= 1
     
     form_config = pdfium.FPDF_FORMFILLINFO(2)
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(doc, form_config)
     
-    page   = pdfium.FPDF_LoadPage(doc, 0)                # load the first page
+    page   = pdfium.FPDF_LoadPage(doc, 0)
     pdfium.FORM_OnAfterLoadPage(page, form_fill)
     
-    width  = math.ceil(pdfium.FPDF_GetPageWidthF(page))  # get page width
-    height = math.ceil(pdfium.FPDF_GetPageHeightF(page)) # get page height
+    width  = math.ceil(pdfium.FPDF_GetPageWidthF(page))
+    height = math.ceil(pdfium.FPDF_GetPageHeightF(page))
     
-    # render to bitmap
     bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
     pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
     
@@ -38,7 +37,6 @@ if __name__ == "__main__":
     pdfium.FPDF_RenderPageBitmap(*render_args)
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
-    # retrieve data from bitmap
     cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
     buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
     
