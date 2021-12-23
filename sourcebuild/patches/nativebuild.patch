@@ -1,0 +1,198 @@
+From 201e35760700b611fbaf601fa5391378a6bd15e4 Mon Sep 17 00:00:00 2001
+Message-Id: <201e35760700b611fbaf601fa5391378a6bd15e4.1640273023.git.geisserml@gmail.com>
+From: geisserml <geisserml@gmail.com>
+Date: Thu, 23 Dec 2021 16:23:37 +0100
+Subject: [PATCH] Nativebuild patch
+
+---
+ config/clang/BUILD.gn    | 22 ----------------------
+ config/compiler/BUILD.gn | 30 +++++++++++++++---------------
+ config/posix/BUILD.gn    | 32 --------------------------------
+ 3 files changed, 15 insertions(+), 69 deletions(-)
+
+diff --git a/config/clang/BUILD.gn b/config/clang/BUILD.gn
+index 9512c66..cc8b033 100644
+--- a/config/clang/BUILD.gn
++++ b/config/clang/BUILD.gn
+@@ -7,28 +7,6 @@ import("clang.gni")
+ config("find_bad_constructs") {
+   if (clang_use_chrome_plugins) {
+     cflags = []
+-
+-    # The plugin is built directly into clang, so there's no need to load it
+-    # dynamically.
+-    cflags += [
+-      "-Xclang",
+-      "-add-plugin",
+-      "-Xclang",
+-      "find-bad-constructs",
+-      "-Xclang",
+-      "-plugin-arg-find-bad-constructs",
+-      "-Xclang",
+-      "raw-ptr-template-as-trivial-member",
+-    ]
+-
+-    if (is_linux || is_chromeos || is_android || is_fuchsia) {
+-      cflags += [
+-        "-Xclang",
+-        "-plugin-arg-find-bad-constructs",
+-        "-Xclang",
+-        "check-ipc",
+-      ]
+-    }
+   }
+ }
+ 
+diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
+index 9a193bb..5a6ec2c 100644
+--- a/config/compiler/BUILD.gn
++++ b/config/compiler/BUILD.gn
+@@ -350,7 +350,7 @@ config("compiler") {
+     }
+ 
+     if (use_lld) {
+-      ldflags += [ "-fuse-ld=lld" ]
++      ldflags += [ ]
+       if (lld_path != "") {
+         ldflags += [ "-B$lld_path" ]
+       }
+@@ -491,7 +491,7 @@ config("compiler") {
+   }
+ 
+   if (use_icf && (!is_apple || use_lld)) {
+-    ldflags += [ "-Wl,--icf=all" ]
++    ldflags += [ ]
+   }
+ 
+   if (is_linux || is_chromeos) {
+@@ -522,9 +522,9 @@ config("compiler") {
+     if (is_win) {
+       # On Windows, we call the linker directly, instead of calling it through
+       # the driver.
+-      ldflags += [ "--color-diagnostics" ]
++      ldflags += [ ]
+     } else {
+-      ldflags += [ "-Wl,--color-diagnostics" ]
++      ldflags += [ ]
+     }
+   }
+ 
+@@ -728,11 +728,11 @@ config("compiler") {
+   # beneficial.
+   if (use_lld && !enable_call_graph_profile_sort) {
+     if (is_win) {
+-      ldflags += [ "/call-graph-profile-sort:no" ]
++      ldflags += [ ]
+     } else if (!is_apple) {
+       # TODO(thakis): Once LLD's Mach-O port basically works, implement call
+       # graph profile sorting for it, add an opt-out flag, and pass it here.
+-      ldflags += [ "-Wl,--no-call-graph-profile-sort" ]
++      ldflags += [ ]
+     }
+   }
+ 
+@@ -1218,7 +1218,7 @@ config("compiler_deterministic") {
+     } else {
+       # -ffile-compilation-dir is an alias for both -fdebug-compilation-dir=
+       # and -fcoverage-compilation-dir=.
+-      cflags += [ "-ffile-compilation-dir=." ]
++      cflags += [ ]
+     }
+     if (!is_win) {
+       # We don't use clang -cc1as on Windows (yet? https://crbug.com/762167)
+@@ -1525,18 +1525,18 @@ config("chromium_code") {
+       defines = [ "_HAS_NODISCARD" ]
+     }
+   } else {
+-    cflags = [ "-Wall" ]
++    cflags = [ ]
+     if (treat_warnings_as_errors) {
+-      cflags += [ "-Werror" ]
++      cflags += [ ]
+ 
+       # The compiler driver can sometimes (rarely) emit warnings before calling
+       # the actual linker.  Make sure these warnings are treated as errors as
+       # well.
+-      ldflags = [ "-Werror" ]
++      ldflags = [ ]
+     }
+     if (is_clang) {
+       # Enable extra warnings for chromium_code when we control the compiler.
+-      cflags += [ "-Wextra" ]
++      cflags += [ ]
+     }
+ 
+     # In Chromium code, we define __STDC_foo_MACROS in order to get the
+@@ -1625,8 +1625,8 @@ config("no_chromium_code") {
+     # GCC may emit unsuppressible warnings so don't add -Werror for no chromium
+     # code. crbug.com/589724
+     if (treat_warnings_as_errors && is_clang) {
+-      cflags += [ "-Werror" ]
+-      ldflags = [ "-Werror" ]
++      cflags += [ ]
++      ldflags = [ ]
+     }
+     if (is_clang && !is_nacl) {
+       # TODO(thakis): Remove !is_nacl once
+@@ -1737,7 +1737,7 @@ config("no_rtti") {
+ config("export_dynamic") {
+   # TODO(crbug.com/1052397): Revisit after target_os flip is completed.
+   if (is_linux || is_chromeos_lacros || export_libcxxabi_from_executables) {
+-    ldflags = [ "-rdynamic" ]
++    ldflags = [ ]
+   }
+ }
+ 
+@@ -2488,7 +2488,7 @@ if (is_android || (is_chromeos_ash && is_chromeos_device)) {
+ config("default_init_stack_vars") {
+   cflags = []
+   if (init_stack_vars && is_clang && !is_nacl && !using_sanitizer) {
+-    cflags += [ "-ftrivial-auto-var-init=pattern" ]
++    cflags += [ ]
+   }
+ }
+ 
+diff --git a/config/posix/BUILD.gn b/config/posix/BUILD.gn
+index 5d15163..999f864 100644
+--- a/config/posix/BUILD.gn
++++ b/config/posix/BUILD.gn
+@@ -24,36 +24,4 @@ config("runtime_library") {
+   cflags_objcc = []
+   defines = []
+   ldflags = []
+-
+-  if (!is_apple && sysroot != "" && current_os != "zos") {
+-    # Pass the sysroot to all C compiler variants, the assembler, and linker.
+-    sysroot_flags = [ "--sysroot=" + rebase_path(sysroot, root_build_dir) ]
+-    if (is_linux || is_chromeos) {
+-      # This is here so that all files get recompiled after a sysroot roll and
+-      # when turning the sysroot on or off. (defines are passed via the command
+-      # line, and build system rebuilds things when their commandline
+-      # changes). Nothing should ever read this define.
+-      sysroot_hash =
+-          exec_script("//build/linux/sysroot_scripts/install-sysroot.py",
+-                      [ "--print-hash=$current_cpu" ],
+-                      "trim string",
+-                      [ "//build/linux/sysroot_scripts/sysroots.json" ])
+-      defines += [ "CR_SYSROOT_HASH=$sysroot_hash" ]
+-    }
+-    asmflags += sysroot_flags
+-    ldflags += sysroot_flags
+-
+-    # When use_custom_libcxx=true, some -isystem flags get passed to
+-    # cflags_cc to set up libc++ include paths.  We want to make sure
+-    # the sysroot includes take lower precendence than the libc++
+-    # ones, so they must appear later in the command line.  However,
+-    # the gn reference states "These variant-specific versions of
+-    # cflags* will be appended on the compiler command line after
+-    # 'cflags'."  Because of this, we must set the sysroot flags for
+-    # all cflags variants instead of using 'cflags' directly.
+-    cflags_c += sysroot_flags
+-    cflags_cc += sysroot_flags
+-    cflags_objc += sysroot_flags
+-    cflags_objcc += sysroot_flags
+-  }
+ }
+-- 
+2.25.1
+
