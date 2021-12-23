@@ -42,7 +42,7 @@ possible to build PDFium from source. However, this is a complex process that ca
 depending on the host system, and it may take a long time.
 
 ```bash
-python3 build.py
+python3 build_pdfium.py
 python3 setup_source.py bdist_wheel
 pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 ```
