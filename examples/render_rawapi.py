@@ -16,31 +16,37 @@ if __name__ == "__main__":
         sys.exit()
     
     filename = sys.argv[1]
-
+    
     doc = pdfium.FPDF_LoadDocument(filename, None) # load document (filename, password string)
     page_count = pdfium.FPDF_GetPageCount(doc)     # get page count
     assert page_count >= 1
-
+    
+    form_config = pdfium.FPDF_FORMFILLINFO(2)
+    form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(doc, form_config)
+    
     page   = pdfium.FPDF_LoadPage(doc, 0)                # load the first page
+    pdfium.FORM_OnAfterLoadPage(page, form_fill)
+    
     width  = math.ceil(pdfium.FPDF_GetPageWidthF(page))  # get page width
     height = math.ceil(pdfium.FPDF_GetPageHeightF(page)) # get page height
-
+    
     # render to bitmap
     bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
     pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
-    pdfium.FPDF_RenderPageBitmap(
-        bitmap, page, 0, 0, width, height, 0, 
-        pdfium.FPDF_LCD_TEXT | pdfium.FPDF_ANNOT
-    )
-
+    
+    render_args = [bitmap, page, 0, 0, width, height, 0,  pdfium.FPDF_LCD_TEXT | pdfium.FPDF_ANNOT]
+    pdfium.FPDF_RenderPageBitmap(*render_args)
+    pdfium.FPDF_FFLDraw(form_fill, *render_args)
+    
     # retrieve data from bitmap
     cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
     buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
-
+    
     img = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
     img.save("out.png")
-
+    
     pdfium.FPDFBitmap_Destroy(bitmap)
     pdfium.FPDF_ClosePage(page)
-
+    
+    pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
     pdfium.FPDF_CloseDocument(doc)
