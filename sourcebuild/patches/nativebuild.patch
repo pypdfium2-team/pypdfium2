@@ -1,14 +1,14 @@
-From 708b3a5281b0b471b396dd726b055971f533f3da Mon Sep 17 00:00:00 2001
-Message-Id: <708b3a5281b0b471b396dd726b055971f533f3da.1640271578.git.geisserml@gmail.com>
+From 201e35760700b611fbaf601fa5391378a6bd15e4 Mon Sep 17 00:00:00 2001
+Message-Id: <201e35760700b611fbaf601fa5391378a6bd15e4.1640273023.git.geisserml@gmail.com>
 From: geisserml <geisserml@gmail.com>
-Date: Thu, 23 Dec 2021 15:59:28 +0100
+Date: Thu, 23 Dec 2021 16:23:37 +0100
 Subject: [PATCH] Nativebuild patch
 
 ---
  config/clang/BUILD.gn    | 22 ----------------------
- config/compiler/BUILD.gn | 28 ++++++++++++++--------------
+ config/compiler/BUILD.gn | 30 +++++++++++++++---------------
  config/posix/BUILD.gn    | 32 --------------------------------
- 3 files changed, 14 insertions(+), 68 deletions(-)
+ 3 files changed, 15 insertions(+), 69 deletions(-)
 
 diff --git a/config/clang/BUILD.gn b/config/clang/BUILD.gn
 index 9512c66..cc8b033 100644
@@ -44,7 +44,7 @@ index 9512c66..cc8b033 100644
  }
  
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 9a193bb..7afdfa1 100644
+index 9a193bb..5a6ec2c 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
 @@ -350,7 +350,7 @@ config("compiler") {
@@ -140,6 +140,15 @@ index 9a193bb..7afdfa1 100644
    if (is_linux || is_chromeos_lacros || export_libcxxabi_from_executables) {
 -    ldflags = [ "-rdynamic" ]
 +    ldflags = [ ]
+   }
+ }
+ 
+@@ -2488,7 +2488,7 @@ if (is_android || (is_chromeos_ash && is_chromeos_device)) {
+ config("default_init_stack_vars") {
+   cflags = []
+   if (init_stack_vars && is_clang && !is_nacl && !using_sanitizer) {
+-    cflags += [ "-ftrivial-auto-var-init=pattern" ]
++    cflags += [ ]
    }
  }
  
