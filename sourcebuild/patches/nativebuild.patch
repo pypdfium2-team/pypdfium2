@@ -1,14 +1,14 @@
-From 201e35760700b611fbaf601fa5391378a6bd15e4 Mon Sep 17 00:00:00 2001
-Message-Id: <201e35760700b611fbaf601fa5391378a6bd15e4.1640273023.git.geisserml@gmail.com>
+From cd96035154d97fce2d6fa9a632e8c777a5e1c34f Mon Sep 17 00:00:00 2001
+Message-Id: <cd96035154d97fce2d6fa9a632e8c777a5e1c34f.1640351316.git.geisserml@gmail.com>
 From: geisserml <geisserml@gmail.com>
-Date: Thu, 23 Dec 2021 16:23:37 +0100
+Date: Fri, 24 Dec 2021 14:08:29 +0100
 Subject: [PATCH] Nativebuild patch
 
 ---
  config/clang/BUILD.gn    | 22 ----------------------
  config/compiler/BUILD.gn | 30 +++++++++++++++---------------
- config/posix/BUILD.gn    | 32 --------------------------------
- 3 files changed, 15 insertions(+), 69 deletions(-)
+ config/posix/BUILD.gn    |  1 -
+ 3 files changed, 15 insertions(+), 38 deletions(-)
 
 diff --git a/config/clang/BUILD.gn b/config/clang/BUILD.gn
 index 9512c66..cc8b033 100644
@@ -153,46 +153,17 @@ index 9a193bb..5a6ec2c 100644
  }
  
 diff --git a/config/posix/BUILD.gn b/config/posix/BUILD.gn
-index 5d15163..999f864 100644
+index 5d15163..9babdb1 100644
 --- a/config/posix/BUILD.gn
 +++ b/config/posix/BUILD.gn
-@@ -24,36 +24,4 @@ config("runtime_library") {
-   cflags_objcc = []
-   defines = []
-   ldflags = []
--
--  if (!is_apple && sysroot != "" && current_os != "zos") {
--    # Pass the sysroot to all C compiler variants, the assembler, and linker.
--    sysroot_flags = [ "--sysroot=" + rebase_path(sysroot, root_build_dir) ]
--    if (is_linux || is_chromeos) {
--      # This is here so that all files get recompiled after a sysroot roll and
--      # when turning the sysroot on or off. (defines are passed via the command
--      # line, and build system rebuilds things when their commandline
--      # changes). Nothing should ever read this define.
--      sysroot_hash =
--          exec_script("//build/linux/sysroot_scripts/install-sysroot.py",
--                      [ "--print-hash=$current_cpu" ],
--                      "trim string",
--                      [ "//build/linux/sysroot_scripts/sysroots.json" ])
--      defines += [ "CR_SYSROOT_HASH=$sysroot_hash" ]
--    }
--    asmflags += sysroot_flags
+@@ -41,7 +41,6 @@ config("runtime_library") {
+       defines += [ "CR_SYSROOT_HASH=$sysroot_hash" ]
+     }
+     asmflags += sysroot_flags
 -    ldflags += sysroot_flags
--
--    # When use_custom_libcxx=true, some -isystem flags get passed to
--    # cflags_cc to set up libc++ include paths.  We want to make sure
--    # the sysroot includes take lower precendence than the libc++
--    # ones, so they must appear later in the command line.  However,
--    # the gn reference states "These variant-specific versions of
--    # cflags* will be appended on the compiler command line after
--    # 'cflags'."  Because of this, we must set the sysroot flags for
--    # all cflags variants instead of using 'cflags' directly.
--    cflags_c += sysroot_flags
--    cflags_cc += sysroot_flags
--    cflags_objc += sysroot_flags
--    cflags_objcc += sysroot_flags
--  }
- }
+ 
+     # When use_custom_libcxx=true, some -isystem flags get passed to
+     # cflags_cc to set up libc++ include paths.  We want to make sure
 -- 
 2.25.1
 
