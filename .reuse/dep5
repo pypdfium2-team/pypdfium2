@@ -43,3 +43,7 @@ Copyright: 2021 BoLaMN
 License: 
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/pull/39
+
+Files: sourcebuild/patches/nativebuild.patch
+Copyright: 2021 geisserml
+License: BSD-3-Clause OR Apache-2.0
