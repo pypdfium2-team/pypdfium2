@@ -84,10 +84,8 @@ def handle_versions(latest_version):
 
 
 def clear_data():
-    shutil.rmtree(DataTree)
-    os.mkdir(DataTree)
-    with open(join(DataTree,'.gitkeep'), 'w') as gitkeep:
-        gitkeep.write('')
+    for dirname in ReleaseFiles.keys():
+        shutil.rmtree( join(DataTree, dirname) )
 
 
 def download_releases(latest_version, download_files):
