@@ -1,15 +1,3 @@
-From cd96035154d97fce2d6fa9a632e8c777a5e1c34f Mon Sep 17 00:00:00 2001
-Message-Id: <cd96035154d97fce2d6fa9a632e8c777a5e1c34f.1640351316.git.geisserml@gmail.com>
-From: geisserml <geisserml@gmail.com>
-Date: Fri, 24 Dec 2021 14:08:29 +0100
-Subject: [PATCH] Nativebuild patch
-
----
- config/clang/BUILD.gn    | 22 ----------------------
- config/compiler/BUILD.gn | 30 +++++++++++++++---------------
- config/posix/BUILD.gn    |  1 -
- 3 files changed, 15 insertions(+), 38 deletions(-)
-
 diff --git a/config/clang/BUILD.gn b/config/clang/BUILD.gn
 index 9512c66..cc8b033 100644
 --- a/config/clang/BUILD.gn
@@ -152,18 +140,6 @@ index 9a193bb..5a6ec2c 100644
    }
  }
  
-diff --git a/config/posix/BUILD.gn b/config/posix/BUILD.gn
-index 5d15163..9babdb1 100644
---- a/config/posix/BUILD.gn
-+++ b/config/posix/BUILD.gn
-@@ -41,7 +41,6 @@ config("runtime_library") {
-       defines += [ "CR_SYSROOT_HASH=$sysroot_hash" ]
-     }
-     asmflags += sysroot_flags
--    ldflags += sysroot_flags
- 
-     # When use_custom_libcxx=true, some -isystem flags get passed to
-     # cflags_cc to set up libc++ include paths.  We want to make sure
 -- 
 2.25.1
 
