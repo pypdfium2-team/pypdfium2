@@ -13,6 +13,7 @@ from os.path import (
 )
 import shutil
 import tarfile
+import zipfile
 import argparse
 import threading
 import subprocess
@@ -24,14 +25,15 @@ SourceTree   = dirname(realpath(__file__))
 VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 DataTree     = join(SourceTree,'data')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
+ReleaseExtension = 'tgz'
 ReleaseFiles = {
-    'darwin-arm64' : 'pdfium-mac-arm64.tgz',
-    'darwin-x64'   : 'pdfium-mac-x64.tgz',
-    'linux-arm32'  : 'pdfium-linux-arm.tgz',
-    'linux-arm64'  : 'pdfium-linux-arm64.tgz',
-    'linux-x64'    : 'pdfium-linux-x64.tgz',
-    'windows-x64'  : 'pdfium-win-x64.tgz',
-    'windows-x86'  : 'pdfium-win-x86.tgz',
+    'darwin-arm64' : 'pdfium-mac-arm64',
+    'darwin-x64'   : 'pdfium-mac-x64',
+    'linux-arm32'  : 'pdfium-linux-arm',
+    'linux-arm64'  : 'pdfium-linux-arm64',
+    'linux-x64'    : 'pdfium-linux-x64',
+    'windows-x64'  : 'pdfium-win-x64',
+    'windows-x86'  : 'pdfium-win-x86',
 }
 
 
@@ -54,15 +56,18 @@ def _set_version(version_content, variable, new_version):
 
 
 def get_latest_version():
+    
     git_ls = subprocess.run(
         f'git ls-remote https://github.com/bblanchon/pdfium-binaries.git',
         stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT,
         shell  = True,
     )
+    
     git_ls = git_ls.stdout.decode('UTF-8')
     tag = git_ls.split('\t')[-1].replace('\n', '')
     version = int(tag.split('/')[-1])
+    
     return version
 
 
@@ -84,7 +89,7 @@ def handle_versions(latest_version):
 
 
 def clear_data():
-    for dirname in ReleaseFiles.keys():
+    for dirname in ReleaseFiles:
         shutil.rmtree( join(DataTree, dirname) )
 
 
@@ -95,8 +100,9 @@ def download_releases(latest_version, download_files):
     
     threads = []
     
-    for dirname, filename in download_files.items():
+    for dirname, arcname in download_files.items():
         
+        filename = f"{arcname}.{ReleaseExtension}"
         file_url = base_url + filename
         dest_dir = join(DataTree, dirname)
         if not os.path.exists(dest_dir):
@@ -119,18 +125,30 @@ def download_releases(latest_version, download_files):
 def unpack_archives(archives):
     
     for file in archives:
+        
         extraction_path = join(dirname(file), 'build_tar')
-        with tarfile.open(file) as archive:
+        
+        if ReleaseExtension == 'tgz':
+            arc_opener = tarfile.open
+        elif ReleaseExtension == 'zip':
+            arc_opener = zipfile.ZipFile
+        else:
+            raise ValueError(f"Unknown archive extension {ReleaseExtension}")
+        
+        with arc_opener(file) as archive:
             archive.extractall(extraction_path)
+        
         os.remove(file)
 
 
 def postprocess_bindings(bindings_file, platform_dir):
+    
     with open(bindings_file, 'r') as file_reader:
         text = file_reader.read()
         #text = text.split('\n"""\n', maxsplit=1)[1]
         text = text.replace(platform_dir, '.')
         text = text.replace(HomeDir, '~')
+    
     with open(bindings_file, 'w') as file_writer:
         file_writer.write(text)
 
@@ -199,7 +217,7 @@ def parse_args():
 def get_download_files(args):
     
     platforms = args.platforms
-    if platforms is None or len(platforms) == 0:
+    if platforms is None:
         return ReleaseFiles
     
     download_files = {}
@@ -214,6 +232,7 @@ def get_download_files(args):
 
 
 def main():
+    
     args = parse_args()
     download_files = get_download_files(args)
     
