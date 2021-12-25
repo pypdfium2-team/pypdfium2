@@ -39,6 +39,10 @@ pdf_enable_xfa = false
 use_custom_libcxx = true\
 """
 
+NativeBuildConfig = DefaultConfig + """
+clang_use_chrome_plugins = false\
+"""
+
 Libnames = [
     'pdfium.so',
     'libpdfium.so',
@@ -264,7 +268,10 @@ def main(args):
     Ninja = _get_tool('ninja', 'ninja-build', prefer_st)
     
     if args.argfile is None:
-        config = DefaultConfig
+        if prefer_st:
+            config = NativeBuildConfig
+        else:
+            config = DefaultConfig
     else:
         with open(abspath(args.argfile), 'r') as file_handle:
             config = file_handle.read()
