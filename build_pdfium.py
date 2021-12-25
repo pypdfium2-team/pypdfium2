@@ -320,7 +320,8 @@ def parse_args():
     parser.add_argument(
         '--prefer-systools', '-p',
         action = 'store_true',
-        help = "Use build dependencies from depot tools rather than system-provided ones.",
+        help = "Use system-provided build tools if available (rather than pre-built binaries " +
+               "from DepotTools).",
     )
     return parser.parse_args()
 
