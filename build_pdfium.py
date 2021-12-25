@@ -262,6 +262,9 @@ def _get_tool(tool, tool_desc, prefer_systools):
 def main(args):
     
     prefer_st = args.prefer_systools
+    if sys.platform.startswith('win32'):
+        prefer_st = False
+    
     if prefer_st:
         print("Using system-provided binaries if available.")
     else:
@@ -321,7 +324,7 @@ def parse_args():
         '--prefer-systools', '-p',
         action = 'store_true',
         help = "Use system-provided build tools if available (rather than pre-built binaries " +
-               "from DepotTools).",
+               "from DepotTools). This option is ignored on Windows.",
     )
     return parser.parse_args()
 
