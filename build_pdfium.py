@@ -31,20 +31,18 @@ OutputDir     = join(SourceTree,'data','sourcebuild')
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
 
-DefaultConfig = """\
+DefaultConfig = """
 is_debug = false
 pdf_is_standalone = true
 pdf_enable_v8 = false
 pdf_enable_xfa = false
-use_custom_libcxx = true\
+use_custom_libcxx = true
 """
 
 NativeBuildConfig = DefaultConfig + """
 clang_use_chrome_plugins = false
 treat_warnings_as_errors = false
 init_stack_vars = false
-use_lld = false
-use_icf = false\
 """
 
 Libnames = [
