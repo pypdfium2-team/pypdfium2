@@ -298,32 +298,46 @@ def main(args):
 
 
 def parse_args():
+    
+    # NOTE When changing arguments, it is important that you adapt :class:`DefaultArgs`
+    #      in :file:`setup.py` accordingly
+    
     parser = argparse.ArgumentParser(
-        description = "A script to automate building PDFium from source and generating ctypesgen bindings."
+        description = "A script to automate building PDFium from source and generating ctypesgen " +
+                      "bindings. If all went well, use `./setup_source bdist_wheel` to craft a python " +
+                      "package from the source build.",
     )
     parser.add_argument(
         '--argfile', '-a',
-        help = "A file containing custom PDFium build configuration, to be evaluated by `gn gen`.",
+        help = "A text file containing custom PDFium build configuration, to be evaluated by `gn gen`. " +
+               "Call `gn args --list sourcebuild/pdfium/out` to obtain a list of possible options.",
     )
     parser.add_argument(
         '--srcname', '-s',
-        help = "File name of the generated PDFium binary.",
+        help = "Name of the generated PDFium binary file. This script tries to automatically find  " +
+               "the binary, which should usually work. If it does not, however, this option may be " +
+               "used to explicitly provide the file name to look for.",
     )
     parser.add_argument(
         '--destname', '-d',
-        help = "Rename the binary to a different file name.",
+        help = "Rename the binary to a different filename. On Linux with older ctypesgen, " +
+               "this should be set to `pdfium` for library loading to work correctly.",
     )
     parser.add_argument(
         '--update', '-u',
         action = 'store_true',
-        help = "Update existing repositories, removing local changes.",
+        help = "Update existing PDFium/DepotTools repositories, removing local changes.",
     )
     parser.add_argument(
         '--prefer-systools', '-p',
         action = 'store_true',
-        help = "Use system-provided build tools if available (rather than pre-built binaries " +
-               "from DepotTools). This option is ignored on Windows.",
+        help = "Try to use system-provided tools if available, rather than pre-built binaries " +
+               "from DepotTools. Warning: This may cause the resulting PDFium binary to be less " +
+               "performant than when compiled with the official toolchain and configuration. " +
+               "Hence, the systools strategy should rather be used as a last resort if regular " +
+               "build did not work. (This option is not available on Windows.)",
     )
+    
     return parser.parse_args()
 
 
