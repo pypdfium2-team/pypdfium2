@@ -22,7 +22,7 @@ Native build
 gn (generate-ninja)
 ninja (ninja-build)
 llvm/clang
-ldd
+lld
 
 
 Test

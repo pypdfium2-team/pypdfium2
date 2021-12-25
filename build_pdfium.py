@@ -73,10 +73,10 @@ NB_Symlinks = [
     ('/usr/bin/clang++', 'clang'),
     ('/usr/bin/clang++', 'clang++'),
     ('/usr/bin/clang++', 'clang-cl'),
-    ('/usr/bin/ldd', 'ld64.lld'),
-    ('/usr/bin/ldd', 'ld.lld'),
-    ('/usr/bin/ldd', 'lld'),
-    ('/usr/bin/ldd', 'lld-link'),
+    ('/usr/bin/ld64.lld', 'ld64.lld'),
+    ('/usr/bin/ld.lld', 'ld.lld'),
+    ('/usr/bin/lld', 'lld'),
+    ('/usr/bin/lld-link', 'lld-link'),
     ('/usr/bin/llvm-ar', 'llvm-ar'),
     ('/usr/bin/llvm-nm', 'llvm-nm'),
     ('/usr/bin/llvm-objcopy', 'llvm-objcopy'),
@@ -86,7 +86,7 @@ NB_Symlinks = [
     ('/usr/bin/llvm-strip', 'llvm-strip'),
     ('/usr/bin/llvm-symbolizer', 'llvm-symbolizer'),
     ('/usr/bin/llvm-undname', 'llvm-undname'),
-    ('/usr/bin/ldd', 'wasm-ld'),
+    ('/usr/bin/wasm-ld', 'wasm-ld'),
 ]
 
 NB_BinaryDir = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin')
