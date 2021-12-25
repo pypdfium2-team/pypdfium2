@@ -1,51 +1,7 @@
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 9a193bb..5a6ec2c 100644
+index 9a193bb..0bd1baf 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
-@@ -350,7 +350,7 @@ config("compiler") {
-     }
- 
-     if (use_lld) {
--      ldflags += [ "-fuse-ld=lld" ]
-+      ldflags += [ ]
-       if (lld_path != "") {
-         ldflags += [ "-B$lld_path" ]
-       }
-@@ -491,7 +491,7 @@ config("compiler") {
-   }
- 
-   if (use_icf && (!is_apple || use_lld)) {
--    ldflags += [ "-Wl,--icf=all" ]
-+    ldflags += [ ]
-   }
- 
-   if (is_linux || is_chromeos) {
-@@ -522,9 +522,9 @@ config("compiler") {
-     if (is_win) {
-       # On Windows, we call the linker directly, instead of calling it through
-       # the driver.
--      ldflags += [ "--color-diagnostics" ]
-+      ldflags += [ ]
-     } else {
--      ldflags += [ "-Wl,--color-diagnostics" ]
-+      ldflags += [ ]
-     }
-   }
- 
-@@ -728,11 +728,11 @@ config("compiler") {
-   # beneficial.
-   if (use_lld && !enable_call_graph_profile_sort) {
-     if (is_win) {
--      ldflags += [ "/call-graph-profile-sort:no" ]
-+      ldflags += [ ]
-     } else if (!is_apple) {
-       # TODO(thakis): Once LLD's Mach-O port basically works, implement call
-       # graph profile sorting for it, add an opt-out flag, and pass it here.
--      ldflags += [ "-Wl,--no-call-graph-profile-sort" ]
-+      ldflags += [ ]
-     }
-   }
- 
 @@ -1218,7 +1218,7 @@ config("compiler_deterministic") {
      } else {
        # -ffile-compilation-dir is an alias for both -fdebug-compilation-dir=
@@ -55,40 +11,6 @@ index 9a193bb..5a6ec2c 100644
      }
      if (!is_win) {
        # We don't use clang -cc1as on Windows (yet? https://crbug.com/762167)
-@@ -1525,18 +1525,18 @@ config("chromium_code") {
-       defines = [ "_HAS_NODISCARD" ]
-     }
-   } else {
--    cflags = [ "-Wall" ]
-+    cflags = [ ]
-     if (treat_warnings_as_errors) {
--      cflags += [ "-Werror" ]
-+      cflags += [ ]
- 
-       # The compiler driver can sometimes (rarely) emit warnings before calling
-       # the actual linker.  Make sure these warnings are treated as errors as
-       # well.
--      ldflags = [ "-Werror" ]
-+      ldflags = [ ]
-     }
-     if (is_clang) {
-       # Enable extra warnings for chromium_code when we control the compiler.
--      cflags += [ "-Wextra" ]
-+      cflags += [ ]
-     }
- 
-     # In Chromium code, we define __STDC_foo_MACROS in order to get the
-@@ -1625,8 +1625,8 @@ config("no_chromium_code") {
-     # GCC may emit unsuppressible warnings so don't add -Werror for no chromium
-     # code. crbug.com/589724
-     if (treat_warnings_as_errors && is_clang) {
--      cflags += [ "-Werror" ]
--      ldflags = [ "-Werror" ]
-+      cflags += [ ]
-+      ldflags = [ ]
-     }
-     if (is_clang && !is_nacl) {
-       # TODO(thakis): Remove !is_nacl once
 @@ -1737,7 +1737,7 @@ config("no_rtti") {
  config("export_dynamic") {
    # TODO(crbug.com/1052397): Revisit after target_os flip is completed.
@@ -98,15 +20,5 @@ index 9a193bb..5a6ec2c 100644
    }
  }
  
-@@ -2488,7 +2488,7 @@ if (is_android || (is_chromeos_ash && is_chromeos_device)) {
- config("default_init_stack_vars") {
-   cflags = []
-   if (init_stack_vars && is_clang && !is_nacl && !using_sanitizer) {
--    cflags += [ "-ftrivial-auto-var-init=pattern" ]
-+    cflags += [ ]
-   }
- }
- 
 -- 
 2.25.1
-

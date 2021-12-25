@@ -40,7 +40,11 @@ use_custom_libcxx = true\
 """
 
 NativeBuildConfig = DefaultConfig + """
-clang_use_chrome_plugins = false\
+clang_use_chrome_plugins = false
+treat_warnings_as_errors = false
+init_stack_vars = false
+use_lld = false
+use_icf = false\
 """
 
 Libnames = [
