@@ -1,5 +1,5 @@
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 9a193bb..0bd1baf 100644
+index 9a193bb..61fd085 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
 @@ -1218,7 +1218,7 @@ config("compiler_deterministic") {
@@ -11,14 +11,5 @@ index 9a193bb..0bd1baf 100644
      }
      if (!is_win) {
        # We don't use clang -cc1as on Windows (yet? https://crbug.com/762167)
-@@ -1737,7 +1737,7 @@ config("no_rtti") {
- config("export_dynamic") {
-   # TODO(crbug.com/1052397): Revisit after target_os flip is completed.
-   if (is_linux || is_chromeos_lacros || export_libcxxabi_from_executables) {
--    ldflags = [ "-rdynamic" ]
-+    ldflags = [ ]
-   }
- }
- 
 -- 
 2.25.1
