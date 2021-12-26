@@ -89,8 +89,13 @@ def handle_versions(latest_version):
 
 
 def clear_data():
+    
     for dirname in ReleaseFiles:
-        shutil.rmtree( join(DataTree, dirname) )
+        
+        dirpath = join(DataTree, dirname)
+        
+        if os.path.isdir(dirpath):
+            shutil.rmtree(dirpath)
 
 
 def download_releases(latest_version, download_files):
