@@ -74,6 +74,7 @@ def open_pdf(
     Parameters:
         
         file_or_data:
+            
             The input PDF document, as file path or in-memory data.
             
             (On Windows, file paths with multi-byte characters don't work due to a
@@ -167,6 +168,7 @@ def _translate_rotation(rotation: int) -> int:
 def _hex_digits(c):
     
     hxc = hex(c)[2:]
+    
     if len(hxc) == 1:
         hxc = "0" + hxc
     
