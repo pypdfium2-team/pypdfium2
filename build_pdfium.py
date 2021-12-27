@@ -299,18 +299,19 @@ def main(args):
 
 def parse_args():
     
-    # NOTE When changing arguments, it is important that you adapt :class:`DefaultArgs`
-    #      in :file:`setup.py` accordingly
+    # NOTE When changing arguments, it is important that you adapt :class:`DefaultArgs` in 
+    #      :file:`setup.py` accordingly
     
     parser = argparse.ArgumentParser(
         description = "A script to automate building PDFium from source and generating ctypesgen " +
-                      "bindings. If all went well, use `./setup_source bdist_wheel` to craft a python " +
-                      "package from the source build.",
+                      "bindings. If all went well, use `./setup_source bdist_wheel` to craft a "   +
+                      "python package from the source build.",
     )
     parser.add_argument(
         '--argfile', '-a',
-        help = "A text file containing custom PDFium build configuration, to be evaluated by `gn gen`. " +
-               "Call `gn args --list sourcebuild/pdfium/out` to obtain a list of possible options.",
+        help = "A text file containing custom PDFium build configuration, to be evaluated by " +
+               "`gn gen`. Call `gn args --list sourcebuild/pdfium/out` to obtain a list of "   + 
+               "possible options.",
     )
     parser.add_argument(
         '--srcname', '-s',
@@ -331,10 +332,10 @@ def parse_args():
     parser.add_argument(
         '--prefer-systools', '-p',
         action = 'store_true',
-        help = "Try to use system-provided tools if available, rather than pre-built binaries " +
+        help = "Try to use system-provided tools if available, rather than pre-built binaries "   +
                "from DepotTools. Warning: This may cause the resulting PDFium binary to be less " +
-               "performant than when compiled with the official toolchain and configuration. " +
-               "Hence, the systools strategy should rather be used as a last resort if regular " +
+               "performant than when compiled with the official toolchain and configuration. "    +
+               "Hence, the systools strategy should rather be used as a last resort if regular "  +
                "build did not work. (This option is not available on Windows.)",
     )
     
