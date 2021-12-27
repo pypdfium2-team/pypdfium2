@@ -139,9 +139,11 @@ class PdfContext:
             file_or_data,
             password = None,
         ):
-        self.pdf = open_pdf(file_or_data, password)
+        self.file_or_data = file_or_data
+        self.password = password
     
     def __enter__(self):
+        self.pdf = open_pdf(self.file_or_data, self.password)
         return self.pdf
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
