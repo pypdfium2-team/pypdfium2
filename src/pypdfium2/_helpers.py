@@ -175,7 +175,7 @@ def _hex_digits(c):
     return hxc
     
 
-def _colour_as_hex(r, g, b, a=255) -> int:
+def colour_as_hex(r, g, b, a=255) -> int:
     """
     Convert a colour given as integers of ``red, green, blue, alpha`` ranging from 0 to 255
     to a single value in 8888 ARGB format.
@@ -202,7 +202,7 @@ def render_page(
         *,
         scale: float = 1,
         rotation: int = 0,
-        colour: Union[int, Sequence[int], None] = 0xFFFFFFFF,
+        colour: int = 0xFFFFFFFF,
         annotations: bool = True,
         greyscale: bool = False,
         optimise_mode: OptimiseMode = OptimiseMode.none,
@@ -239,9 +239,8 @@ def render_page(
             
             .. _8888 ARGB: https://en.wikipedia.org/wiki/RGBA_color_model#ARGB32
             
-            Which background colour to use (defaults to white).
-            It can either be given as a hexadecimal integer in `8888 ARGB`_ format, or as a
-            4-value sequence of ``red, green, blue, alpha`` integers ranging from 0 to 255.
+            The background colour to use, given as a hexadecimal integer in `8888 ARGB`_ format.
+            Defaults to white (``0xFFFFFFFF``). See also :func:`colour_as_hex`.
         
         annotations:
             Whether to render page annotations.
@@ -258,19 +257,7 @@ def render_page(
     
     use_alpha = True
     
-    if isinstance(colour, (tuple, list)):
-        
-        if len(colour) == 3:
-            use_alpha = False
-        elif len(colour) == 4:
-            if colour[3] == 255:
-                use_alpha = False
-        else:
-            raise ValueError("If colour is given as a list, it must have length 3 or 4.")
-        
-        colour = _colour_as_hex(*colour)
-        
-    elif isinstance(colour, int):
+    if colour is not None:
         alpha_val = hex(colour)[2:4].upper()
         if alpha_val == 'FF':
             use_alpha = False
@@ -397,13 +384,22 @@ def render_pdf(
             is read into memory.
         page_indices:
             A list of zero-based page indices to render.
+        colour:
+            The background colour to use, as a hexadecimal integer in 32-bit ARGB format.
+            It is also possible to provide a colour tuple, which is implicitly converted
+            using :func:`colour_as_hex`.
     
     The other parameters are the same as for :func:`render_page`.
     
     Yields:
         A PIL image, and a string for serial enumeration of output files.
     """
-        
+    
+    if isinstance(colour, (tuple, list)):
+        if len(colour) not in (3, 4):
+            raise ValueError("If colour is given as a sequence, it must have length 3 or 4.")
+        colour = colour_as_hex(*colour)
+    
     if isinstance(file_or_bytes, str):
         if sys.platform.startswith('win32') and not file_or_bytes.isascii():
             with open(file_or_bytes, 'rb') as file_handle:

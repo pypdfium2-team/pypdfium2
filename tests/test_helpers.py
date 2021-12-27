@@ -186,7 +186,11 @@ def test_render_pdf():
     n_digits = len(str(n_pages))
     i = 0
     
-    for image, suffix in helpers.render_pdf(TestFiles.multipage):
+    renderer = helpers.render_pdf(
+        TestFiles.multipage,
+        colour = (255, 255, 255),
+    )
+    for image, suffix in renderer:
         assert isinstance(image, Image.Image)
         assert suffix == f"{i+1:0{n_digits}}"
         image.close()
@@ -237,7 +241,7 @@ def test_render_greyscale():
     ]
 )
 def test_colour_to_hex(values, expected):
-    colour_int = helpers._colour_as_hex(*values)
+    colour_int = helpers.colour_as_hex(*values)
     assert colour_int == expected
 
 
@@ -257,7 +261,7 @@ def test_render_bgcolour(colour):
     with helpers.PdfContext(TestFiles.render) as pdf:
         pil_image = helpers.render_page(
             pdf, 0,
-            colour = colour,
+            colour = helpers.colour_as_hex(*colour),
         )
     
     px_colour = colour
