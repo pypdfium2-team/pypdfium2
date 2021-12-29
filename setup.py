@@ -12,6 +12,7 @@ class DefaultArgs:
     destname = None
     update   = False
     prefer_systools = False
+    systools_prefix = "/usr/bin"
 
 
 if __name__ == '__main__':
