@@ -67,26 +67,6 @@ DepotPatches = [
     join(PatchDir,'gclient_scm.patch'),
 ]
 
-NB_Symlinks = [
-    ('/usr/bin/clang++', 'clang'),
-    ('/usr/bin/clang++', 'clang++'),
-    ('/usr/bin/clang++', 'clang-cl'),
-    ('/usr/bin/ld64.lld', 'ld64.lld'),
-    ('/usr/bin/ld.lld', 'ld.lld'),
-    ('/usr/bin/lld', 'lld'),
-    ('/usr/bin/lld-link', 'lld-link'),
-    ('/usr/bin/llvm-ar', 'llvm-ar'),
-    ('/usr/bin/llvm-nm', 'llvm-nm'),
-    ('/usr/bin/llvm-objcopy', 'llvm-objcopy'),
-    ('/usr/bin/llvm-pdbutil', 'llvm-pdbutil'),
-    ('/usr/bin/llvm-readelf', 'llvm-readelf'),
-    ('/usr/bin/llvm-readobj', 'llvm-readobj'),
-    ('/usr/bin/llvm-strip', 'llvm-strip'),
-    ('/usr/bin/llvm-symbolizer', 'llvm-symbolizer'),
-    ('/usr/bin/llvm-undname', 'llvm-undname'),
-    ('/usr/bin/wasm-ld', 'wasm-ld'),
-]
-
 NB_BinaryDir = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin')
 
 
@@ -153,21 +133,25 @@ def patch_pdfium():
     shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
-def _bins_to_symlinks():
+def _bins_to_symlinks(nb_prefix):
     
-    shutil.rmtree(NB_BinaryDir)
-    os.mkdir(NB_BinaryDir)
+    binary_names = os.listdir(NB_BinaryDir)
     
-    for origin, target in NB_Symlinks:
-        run_cmd(f"ln -s {origin} {target}", cwd=NB_BinaryDir)
+    for name in binary_names:
+        
+        binary_path = join(NB_BinaryDir, name)
+        replacement = join(nb_prefix, name)
+        
+        os.remove(binary_path)
+        run_cmd(f"ln -s {replacement} {binary_path}", cwd=NB_BinaryDir)
 
 
-def extra_patch_pdfium():
+def extra_patch_pdfium(nb_prefix):
     
     patch = join(PatchDir,'nativebuild.patch')
     run_cmd(f"git apply -v {patch}", cwd=join(PDFiumDir,'build'))
     
-    _bins_to_symlinks()
+    _bins_to_symlinks(nb_prefix)
 
 
 def configure(config, GN):
@@ -286,9 +270,11 @@ def main(args):
         patch_depottools()
     
     pdfium_dl_done = dl_pdfium(args.update, GClient)
+    
     if pdfium_dl_done:
         patch_pdfium()
-        if prefer_st: extra_patch_pdfium()
+        if prefer_st:
+            extra_patch_pdfium(args.systools_prefix)
     
     configure(config, GN)
     build(Ninja)
@@ -337,6 +323,12 @@ def parse_args():
                "performant than when compiled with the official toolchain and configuration. "    +
                "Hence, the systools strategy should rather be used as a last resort if regular "  +
                "build did not work. (This option is not available on Windows.)",
+    )
+    parser.add_argument(
+        '--systools-prefix',
+        default = "/usr/bin",
+        help = "Path prefix to system-provided compilers and linkers. Only relevant for the " +
+               "systools build. Defaults to `/usr/bin`.",
     )
     
     return parser.parse_args()
