@@ -465,7 +465,7 @@ Legal Terms
  * POSSIBILITY OF SUCH DAMAGE.
  */
  
-# END openjpeg20 license note
+# END openjpeg license note
 
 
 # BEGIN zlib license
