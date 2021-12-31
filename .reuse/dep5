@@ -10,11 +10,11 @@ Source: https://github.com/pypdfium2-team/pypdfium2
 # License: ...
 
 Files: pypdfium2.kdev4 .kdev4/*
-Copyright: 2021 geisserml <geisserml@gmail.com>
+Copyright: 2022 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
 
 Files: tests/resources/*.pdf
-Copyright: 2021 geisserml <geisserml@gmail.com>
+Copyright: 2022 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
 
 Files: tests/resources/test_bookmarks.pdf
@@ -45,5 +45,5 @@ Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/pull/39
 
 Files: sourcebuild/patches/nativebuild.patch
-Copyright: 2021 geisserml
+Copyright: 2022 geisserml
 License: BSD-3-Clause OR Apache-2.0
