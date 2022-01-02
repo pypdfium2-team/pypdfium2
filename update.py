@@ -7,17 +7,19 @@
 
 import os
 from os.path import (
-    dirname,
-    realpath,
     join,
+    dirname,
+    basename,
+    realpath,
 )
 import shutil
 import tarfile
 import zipfile
 import argparse
-import threading
+import traceback
 import subprocess
 from urllib import request
+from concurrent.futures import ThreadPoolExecutor
 from setup_base import (
     Darwin64,
     DarwinArm64,
@@ -109,12 +111,24 @@ def clear_data():
             shutil.rmtree(dirpath)
 
 
+def _get_package(args):
+    
+    dirname, file_url, file_path = args
+    print(f"Downloading {file_url} -> {file_path}")
+    
+    try:
+        request.urlretrieve(file_url, file_path)
+    except Exception:
+        traceback.print_exc()
+        return None
+    
+    return dirname, file_path
+
+
 def download_releases(latest_version, download_files):
     
     base_url = f"{ReleaseURL}{latest_version}/"
-    archives = []
-    
-    threads = []
+    args = []
     
     for dirname, arcname in download_files.items():
         
@@ -126,21 +140,24 @@ def download_releases(latest_version, download_files):
         
         file_path = join(dest_dir, filename)
         
-        print(f"Downloading {file_url} -> {file_path}")
-        thread = threading.Thread(target=request.urlretrieve, args=(file_url, file_path))
-        thread.start()
-        threads.append( (thread, file_path) )
+        args.append( (dirname, file_url, file_path) )
     
-    for thread, file_path in threads:
-        thread.join()
-        archives.append(file_path)
+    archives = {}
+    
+    with ThreadPoolExecutor() as pool:
+        
+        for output in pool.map(_get_package, args):
+            
+            if output is not None:
+                dirname, file_path = output
+                archives[dirname] = file_path
     
     return archives
 
 
 def unpack_archives(archives):
     
-    for file in archives:
+    for file in archives.values():
         
         extraction_path = join(dirname(file), 'build_tar')
         
@@ -169,11 +186,11 @@ def postprocess_bindings(bindings_file, platform_dir):
         file_writer.write(text)
 
 
-def generate_bindings(download_files):
+def generate_bindings(archives): 
     
-    for dirname in download_files.keys():
+    for platform_dir in archives.keys():
         
-        platform_dir = join(DataTree, dirname)
+        dirname = basename(platform_dir)
         build_dir = join(platform_dir, 'build_tar')
         
         if dirname.startswith('windows'):
@@ -258,7 +275,7 @@ def main():
     
     archives = download_releases(latest_version, download_files)
     unpack_archives(archives)
-    generate_bindings(download_files)
+    generate_bindings(archives)
 
 
 if __name__ == '__main__':
