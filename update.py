@@ -134,12 +134,12 @@ def download_releases(latest_version, download_files):
         
         filename = f"{arcname}.{ReleaseExtension}"
         file_url = base_url + filename
+        
         dest_dir = join(DataTree, dirname)
         if not os.path.exists(dest_dir):
             os.mkdir(dest_dir)
         
         file_path = join(dest_dir, filename)
-        
         args.append( (dirname, file_url, file_path) )
     
     archives = {}
