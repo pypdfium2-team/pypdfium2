@@ -18,6 +18,16 @@ import argparse
 import threading
 import subprocess
 from urllib import request
+from setup_base import (
+    Darwin64,
+    DarwinArm64,
+    Linux64,
+    LinuxArm64,
+    LinuxArm32,
+    Windows64,
+    Windows86,
+    WindowsArm64,
+)
 
 
 HomeDir      = os.path.expanduser('~')
@@ -27,13 +37,14 @@ DataTree     = join(SourceTree,'data')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
 ReleaseExtension = 'tgz'
 ReleaseFiles = {
-    'darwin-arm64' : 'pdfium-mac-arm64',
-    'darwin-x64'   : 'pdfium-mac-x64',
-    'linux-arm32'  : 'pdfium-linux-arm',
-    'linux-arm64'  : 'pdfium-linux-arm64',
-    'linux-x64'    : 'pdfium-linux-x64',
-    'windows-x64'  : 'pdfium-win-x64',
-    'windows-x86'  : 'pdfium-win-x86',
+    Darwin64     : 'pdfium-mac-x64',
+    DarwinArm64  : 'pdfium-mac-arm64',
+    Linux64      : 'pdfium-linux-x64',
+    LinuxArm64   : 'pdfium-linux-arm64',
+    LinuxArm32   : 'pdfium-linux-arm',
+    Windows64    : 'pdfium-win-x64',
+    Windows86    : 'pdfium-win-x86',
+    WindowsArm64 : 'pdfium-win-arm64',
 }
 
 
