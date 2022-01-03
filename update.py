@@ -201,6 +201,10 @@ def generate_bindings(archives):
                 bin_dir = join(build_dir,'x64','bin')
             elif dirname.endswith('x86'):
                 bin_dir = join(build_dir,'x86','bin')
+            elif dirname.endswith('arm64'):
+                bin_dir = join(build_dir,'arm64','bin')
+            else:
+                raise ValueError("Binary directory could not be recognised.")
             
         elif dirname.startswith('darwin'):
             
