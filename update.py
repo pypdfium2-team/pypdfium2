@@ -7,17 +7,29 @@
 
 import os
 from os.path import (
-    dirname,
-    realpath,
     join,
+    dirname,
+    basename,
+    realpath,
 )
 import shutil
 import tarfile
 import zipfile
 import argparse
-import threading
+import traceback
 import subprocess
 from urllib import request
+from concurrent.futures import ThreadPoolExecutor
+from setup_base import (
+    Darwin64,
+    DarwinArm64,
+    Linux64,
+    LinuxArm64,
+    LinuxArm32,
+    Windows64,
+    Windows86,
+    WindowsArm64,
+)
 
 
 HomeDir      = os.path.expanduser('~')
@@ -27,13 +39,14 @@ DataTree     = join(SourceTree,'data')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
 ReleaseExtension = 'tgz'
 ReleaseFiles = {
-    'darwin-arm64' : 'pdfium-mac-arm64',
-    'darwin-x64'   : 'pdfium-mac-x64',
-    'linux-arm32'  : 'pdfium-linux-arm',
-    'linux-arm64'  : 'pdfium-linux-arm64',
-    'linux-x64'    : 'pdfium-linux-x64',
-    'windows-x64'  : 'pdfium-win-x64',
-    'windows-x86'  : 'pdfium-win-x86',
+    Darwin64     : 'pdfium-mac-x64',
+    DarwinArm64  : 'pdfium-mac-arm64',
+    Linux64      : 'pdfium-linux-x64',
+    LinuxArm64   : 'pdfium-linux-arm64',
+    LinuxArm32   : 'pdfium-linux-arm',
+    Windows64    : 'pdfium-win-x64',
+    Windows86    : 'pdfium-win-x86',
+    WindowsArm64 : 'pdfium-win-arm64',
 }
 
 
@@ -98,38 +111,53 @@ def clear_data():
             shutil.rmtree(dirpath)
 
 
+def _get_package(args):
+    
+    dirname, file_url, file_path = args
+    print(f"Downloading {file_url} -> {file_path}")
+    
+    try:
+        request.urlretrieve(file_url, file_path)
+    except Exception:
+        traceback.print_exc()
+        return None
+    
+    return dirname, file_path
+
+
 def download_releases(latest_version, download_files):
     
     base_url = f"{ReleaseURL}{latest_version}/"
-    archives = []
-    
-    threads = []
+    args = []
     
     for dirname, arcname in download_files.items():
         
         filename = f"{arcname}.{ReleaseExtension}"
         file_url = base_url + filename
+        
         dest_dir = join(DataTree, dirname)
         if not os.path.exists(dest_dir):
             os.mkdir(dest_dir)
         
         file_path = join(dest_dir, filename)
-        
-        print(f"Downloading {file_url} -> {file_path}")
-        thread = threading.Thread(target=request.urlretrieve, args=(file_url, file_path))
-        thread.start()
-        threads.append( (thread, file_path) )
+        args.append( (dirname, file_url, file_path) )
     
-    for thread, file_path in threads:
-        thread.join()
-        archives.append(file_path)
+    archives = {}
+    
+    with ThreadPoolExecutor() as pool:
+        
+        for output in pool.map(_get_package, args):
+            
+            if output is not None:
+                dirname, file_path = output
+                archives[dirname] = file_path
     
     return archives
 
 
 def unpack_archives(archives):
     
-    for file in archives:
+    for file in archives.values():
         
         extraction_path = join(dirname(file), 'build_tar')
         
@@ -158,11 +186,11 @@ def postprocess_bindings(bindings_file, platform_dir):
         file_writer.write(text)
 
 
-def generate_bindings(download_files):
+def generate_bindings(archives): 
     
-    for dirname in download_files.keys():
+    for platform_dir in archives.keys():
         
-        platform_dir = join(DataTree, dirname)
+        dirname = basename(platform_dir)
         build_dir = join(platform_dir, 'build_tar')
         
         if dirname.startswith('windows'):
@@ -173,6 +201,10 @@ def generate_bindings(download_files):
                 bin_dir = join(build_dir,'x64','bin')
             elif dirname.endswith('x86'):
                 bin_dir = join(build_dir,'x86','bin')
+            elif dirname.endswith('arm64'):
+                bin_dir = join(build_dir,'arm64','bin')
+            else:
+                raise ValueError("Binary directory could not be recognised.")
             
         elif dirname.startswith('darwin'):
             
@@ -247,7 +279,7 @@ def main():
     
     archives = download_releases(latest_version, download_files)
     unpack_archives(archives)
-    generate_bindings(download_files)
+    generate_bindings(archives)
 
 
 if __name__ == '__main__':

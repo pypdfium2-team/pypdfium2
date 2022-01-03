@@ -28,6 +28,7 @@ LinuxArm64   = join(DataTree,'linux-arm64')
 LinuxArm32   = join(DataTree,'linux-arm32')
 Windows64    = join(DataTree,'windows-x64')
 Windows86    = join(DataTree,'windows-x86')
+WindowsArm64 = join(DataTree,'windows-arm64')
 SourceBuild  = join(DataTree,'sourcebuild')
 
 
