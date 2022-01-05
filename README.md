@@ -204,32 +204,23 @@ License texts for PDFium and its dependencies are included in the file
 PDFium builds are retrieved from [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries).
 Python bindings are auto-generated with [ctypesgen](https://github.com/ctypesgen/ctypesgen)
 
-Currently supported architectures:
+Please see [#3](https://github.com/pypdfium2-team/pypdfium2/issues/3) to get a list of platforms
+for which binary wheels are available.
+Some wheels are not tested, unfortunately. If you have access to a theoretically supported but
+untested system, please report success or failure on the issue or discussion panel.
 
-* macOS x86_64 *
-* macOS arm64 *
-* Linux x86_64
-* Linux aarch64 (64-bit ARM) *
-* Linux armv7l (32-bit ARM hard-float, e. g. Raspberry Pi 2)
-* Windows 64bit
-* Windows 32bit *
-
-`*` Not tested yet
-
-If you have access to a theoretically supported but untested system, please report
-success or failure on the issues panel.
-
-(In case `bblanchon/pdfium-binaries` would add support for more architectures, PyPDFium2
-could be adapted easily.)
+(In case `bblanchon/pdfium-binaries` adds support for more architectures, PyPDFium2 can be
+adapted easily.)
 
 For wheel naming conventions, please see
 [Python Packaging: Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/)
-and the various referenced PEPs.
+and the various referenced PEPs. [This thread](https://discuss.python.org/t/wheel-platform-tag-for-windows/9025/5)
+may also provide helpful information.
 
 PyPDFium2 contains scripts to automate the release process:
 
-* To build wheels for all platforms, run `./release.sh`. This will download binaries
-  and header files, write finished Python wheels to `dist/`, and run `check-wheel-contents`.
+* To build the wheels, run `./release.sh`. This will download binaries and header files,
+  write finished Python binary distributions to `dist/`, and run `check-wheel-contents *.whl`.
 * To clean up after a release, run `./clean.sh`. This will remove downloaded files and
   build artifacts.
 
