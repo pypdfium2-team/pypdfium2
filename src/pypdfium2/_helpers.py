@@ -576,8 +576,15 @@ def get_toc(
         item = _get_toc_entry(pdf, bookmark, level)
         yield item
         
-        for child in get_toc(pdf, bookmark, level=level+1, max_depth=max_depth, seen=seen):
-            yield child
+        children = get_toc(
+            pdf,
+            parent = bookmark,
+            level = level + 1,
+            max_depth = max_depth,
+            seen = seen,
+        )
+        
+        yield from children
         
         bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
 
