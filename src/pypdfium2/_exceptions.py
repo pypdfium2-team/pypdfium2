@@ -24,8 +24,3 @@ class LoadPageError (PdfiumError):
 class PageIndexError (IndexError):
     """ Raised on the attempt to load an out-of-bounds page number. """
     pass
-
-
-class RecusionLimitError (RuntimeError):
-    """ Raised if a recursion depth limit is exceeded. """
-    pass
