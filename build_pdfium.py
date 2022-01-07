@@ -36,14 +36,19 @@ is_debug = false
 pdf_is_standalone = true
 pdf_enable_v8 = false
 pdf_enable_xfa = false
-use_custom_libcxx = true
 """
+
+if sys.platform.startswith('linux'):
+    DefaultConfig += 'use_custom_libcxx = true'
+elif sys.platform.startswith('win32'):
+    DefaultConfig += 'pdf_use_win32_gdi = true'
+elif sys.platform.startswith('darwin'):
+    DefaultConfig += 'mac_deployment_target = "10.11.0"'
 
 NativeBuildConfig = DefaultConfig + """
 clang_use_chrome_plugins = false
 treat_warnings_as_errors = false
-init_stack_vars = false
-"""
+init_stack_vars = false"""
 
 Libnames = [
     'pdfium.so',
@@ -264,6 +269,8 @@ def main(args):
     else:
         with open(abspath(args.argfile), 'r') as file_handle:
             config = file_handle.read()
+    
+    print("\nBuild configuration:", config, '\n')
     
     depot_dl_done = dl_depottools(args.update)
     if depot_dl_done:
