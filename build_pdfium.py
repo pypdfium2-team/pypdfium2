@@ -25,7 +25,7 @@ WorkDir       = join(SourceTree,'sourcebuild')
 PatchDir      = join(WorkDir,'patches')
 DepotToolsDir = join(WorkDir,'depot_tools')
 PDFiumDir     = join(WorkDir,'pdfium')
-BuildDir      = join(PDFiumDir,'out')
+BuildDir      = join(PDFiumDir,'out','Default')
 OutputDir     = join(SourceTree,'data','sourcebuild')
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
@@ -162,7 +162,7 @@ def extra_patch_pdfium(nb_prefix):
 def configure(config, GN):
     
     if not os.path.exists(BuildDir):
-        os.mkdir(BuildDir)
+        os.makedirs(BuildDir)
     
     with open(join(BuildDir,'args.gn'), 'w') as args_handle:
         args_handle.write(config)
@@ -303,8 +303,8 @@ def parse_args():
     parser.add_argument(
         '--argfile', '-a',
         help = "A text file containing custom PDFium build configuration, to be evaluated by " +
-               "`gn gen`. Call `gn args --list sourcebuild/pdfium/out` to obtain a list of "   + 
-               "possible options.",
+               "`gn gen`. Call `gn args --list sourcebuild/pdfium/out/Default` to obtain a "   +
+               "list of possible options.",
     )
     parser.add_argument(
         '--srcname', '-s',
