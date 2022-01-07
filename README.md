@@ -189,14 +189,14 @@ In case of doubt, take a look at the inline source code documentation of PDFium.
 
 ## Licensing
 
-PDFium and PyPDFium2 are available by the terms and conditions of either Apache 2.0 or BSD-3-Clause, at your choice.
+PDFium and PyPDFium2 are available by the terms and conditions of either Apache 2.0
+or BSD-3-Clause, at your choice.
 
-Documentation and examples are CC-BY-4.0.
+Various other open-source licenses apply to the dependencies of PDFium.
+License texts for PDFium and its dependencies are included in the file [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt),
+which is also shipped with binary redistributions.
 
-Various other BSD- and MIT-style licenses apply to the dependencies of PDFium.
-
-License texts for PDFium and its dependencies are included in the file
-[`LICENSE-PDFium.txt`](LICENSE-PDFium.txt), which is also shipped with binary re-distributions.
+Documentation and examples of PyPDFium2 are CC-BY-4.0 licensed.
 
 
 ## Development
