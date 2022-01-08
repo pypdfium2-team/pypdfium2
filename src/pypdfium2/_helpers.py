@@ -562,7 +562,7 @@ def get_toc(
     bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, parent)
     
     if seen is None:
-        seen = []
+        seen = set()
     
     while bookmark:
         
@@ -571,7 +571,7 @@ def get_toc(
             logger.critical("A circular bookmark reference was detected whilst parsing the table of contents.")
             break
         else:
-            seen.append(address)
+            seen.add(address)
         
         item = _get_toc_entry(pdf, bookmark, level)
         yield item
@@ -583,7 +583,6 @@ def get_toc(
             max_depth = max_depth,
             seen = seen,
         )
-        
         yield from children
         
         bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
