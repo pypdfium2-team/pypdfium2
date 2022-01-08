@@ -5,4 +5,5 @@
 bash clean.sh
 python3 update.py
 bash setup_all.sh
+twine check dist/*
 check-wheel-contents dist/*.whl
