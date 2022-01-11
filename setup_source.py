@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import platform
+import sysconfig
 import build_pdfium
 from setup_base import *
 
@@ -11,8 +11,9 @@ from setup_base import *
 class bdist (BDistBase):
     def finalize_options(self):
         BDistBase.finalize_options(self)
-        plat_name = f"{platform.system()}_{platform.machine()}".lower()
-        plat_name = plat_name.replace('-','_').replace('.','_')
+        plat_name = sysconfig.get_platform()
+        for char in ('-', '.'):
+            plat_name = plat_name.replace(char, '_')
         self.plat_name = plat_name
 
 
