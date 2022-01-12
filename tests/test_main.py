@@ -83,4 +83,3 @@ def test_parse_args():
     assert args.optimise_mode == OptimiseMode.none
     assert args.greyscale == False
     assert args.processes == 4
-    assert args.version == False

@@ -70,12 +70,13 @@ def pagetext_type(value):
 
 def parse_args(args=sys.argv[1:]):
     parser = argparse.ArgumentParser(
-        description = "Rasterise PDFs with PyPDFium2"
+        description = "Rasterise PDFs with PyPDFium2",
+        formatter_class = argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
         '--input', '-i',
         dest = 'pdffile',
-        default = None,
+        required = True,
         help = "Path to the PDF document to render.",
     )
     parser.add_argument(
@@ -148,8 +149,8 @@ def parse_args(args=sys.argv[1:]):
     )
     parser.add_argument(
         '--version', '-v',
-        action = 'store_true',
-        help = "Show the program version and exit."
+        action = 'version',
+        version = f"PyPDFium2 {_version.V_PYPDFIUM2}" + "\n" + f"PDFium {_version.V_LIBPDFIUM}"
     )
     return parser.parse_args(args)
 
@@ -158,13 +159,6 @@ def parse_args(args=sys.argv[1:]):
 def main():
     
     args = parse_args()
-    
-    if args.version:
-        print(f"PyPDFium2 {_version.V_PYPDFIUM2}", f"PDFium {_version.V_LIBPDFIUM}", sep='\n')
-        sys.exit()
-    
-    if args.pdffile is None:
-        raise ValueError("An input file is required.")
     
     if args.show_toc:
         with helpers.PdfContext(abspath(args.pdffile)) as pdf:
