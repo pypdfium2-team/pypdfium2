@@ -40,7 +40,7 @@ def optimise_mode_type(string):
 
 def pagetext_type(value):
     
-    if value == "":
+    if not value:
         return
     
     page_indices = []
@@ -95,17 +95,17 @@ def parse_args(args=sys.argv[1:]):
     )
     parser.add_argument(
         '--pages',
-        default = "",
+        default = None,
         type = pagetext_type,
         help = "Numbers of the pages to render. Defaults to all.",
     )
     parser.add_argument(
         '--scale',
-        default = '1',
+        default = 1,
         type = float,
-        help = ("Define the resolution of the output images. "
-                "By default, one PDF point (1/72in) is rendered to 1x1 pixel. "
-                "This factor scales the number of pixels that represent one point."),
+        help = ("Define the resolution of the output images. By default, one PDF point (1/72in) "
+                "is rendered to 1x1 pixel. This factor scales the number of pixels that represent "
+                "one point."),
     )
     parser.add_argument(
         '--rotation',
@@ -115,7 +115,7 @@ def parse_args(args=sys.argv[1:]):
     )
     parser.add_argument(
         '--colour',
-        default = '0xFFFFFFFF',
+        default = 0xFFFFFFFF,
         type = colour_type,
         help = ("Page background colour as 32-bit ARGB hex string, or as tuple of "
                 "integers from 0 to 255. Use None for alpha background."),
