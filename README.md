@@ -226,7 +226,7 @@ PyPDFium2 contains scripts to automate the release process:
 
 ### Testing
 
-Run `pytest -sv` on the `tests` directory.
+Run `pytest` on the `tests` directory.
 
 ### Publishing the wheels
 
