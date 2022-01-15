@@ -30,9 +30,9 @@ from setup_base import (
     Windows86,
     WindowsArm64,
 )
+from _packaging import postprocess_bindings
 
 
-HomeDir      = os.path.expanduser('~')
 SourceTree   = dirname(realpath(__file__))
 VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 DataTree     = join(SourceTree,'data')
@@ -172,18 +172,6 @@ def unpack_archives(archives):
             archive.extractall(extraction_path)
         
         os.remove(file)
-
-
-def postprocess_bindings(bindings_file, platform_dir):
-    
-    with open(bindings_file, 'r') as file_reader:
-        text = file_reader.read()
-        #text = text.split('\n"""\n', maxsplit=1)[1]
-        text = text.replace(platform_dir, '.')
-        text = text.replace(HomeDir, '~')
-    
-    with open(bindings_file, 'w') as file_writer:
-        file_writer.write(text)
 
 
 def generate_bindings(archives): 

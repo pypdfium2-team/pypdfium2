@@ -10,11 +10,12 @@ from os.path import (
     basename,
     exists,
 )
-from glob import glob
 import shutil
 import setuptools
+from glob import glob
 from typing import Callable
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+from _packaging import Libnames
 
 
 SourceTree = dirname(realpath(__file__))
@@ -44,11 +45,11 @@ def _clean():
     build_cache    = join(SourceTree,'build')
     bindings_file  = join(TargetDir,'_pypdfium.py')
     
-    binary_linux   = join(TargetDir,'pdfium')
-    binary_windows = join(TargetDir,'pdfium.dll')
-    binary_darwin  = join(TargetDir,'pdfium.dylib')
+    libpaths = []
+    for name in Libnames:
+        libpaths.append( join(TargetDir, name) )
     
-    files = [bindings_file, binary_linux, binary_windows, binary_darwin]
+    files = [bindings_file, *libpaths]
     
     if exists(build_cache):
         shutil.rmtree(build_cache)

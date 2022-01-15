@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # Attempt to build PDFium from source. This may take very long.
-# Last confirmed to work on 2021-12-24
+# Last confirmed to work on 2022-01-15
 
 import os
 import sys
@@ -16,7 +16,10 @@ from os.path import (
     dirname,
     basename,
 )
-from update import postprocess_bindings
+from _packaging import (
+    Libnames,
+    postprocess_bindings,
+)
 
 
 HomeDir       = os.path.expanduser('~')
@@ -49,17 +52,6 @@ NativeBuildConfig = DefaultConfig + """
 clang_use_chrome_plugins = false
 treat_warnings_as_errors = false
 init_stack_vars = false"""
-
-Libnames = [
-    'pdfium.so',
-    'libpdfium.so',
-    'pdfium.dylib',
-    'libpdfium.dylib',
-    'pdfium.dll',
-    'libpdfium.dll',
-    'libpdfium',
-    'pdfium',
-]
 
 PdfiumPatches = [
     join(PatchDir,'public_headers.patch'),
