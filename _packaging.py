@@ -1,7 +1,13 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause 
 
-import os.path
+import subprocess
+from os.path import (
+    expanduser,
+    dirname,
+    abspath,
+    join,
+)
 
 Libnames = [
     'pdfium.so',
@@ -15,7 +21,15 @@ Libnames = [
 ]
 
 
-HomeDir = os.path.expanduser('~')
+HomeDir    = expanduser('~')
+SourceTree = dirname(abspath(__file__))
+SB_Dir     = join(SourceTree,'sourcebuild')
+
+
+def run_cmd(command, cwd):
+    print(command)
+    subprocess.run(command, cwd=cwd, shell=True)
+
 
 def postprocess_bindings(bindings_file, platform_dir):
     

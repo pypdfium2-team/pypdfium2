@@ -16,20 +16,14 @@ from os.path import (
     dirname,
     basename,
 )
-from _packaging import (
-    Libnames,
-    postprocess_bindings,
-)
+from _packaging import *
 
 
-HomeDir       = os.path.expanduser('~')
-SourceTree    = dirname(abspath(__file__))
-WorkDir       = join(SourceTree,'sourcebuild')
-PatchDir      = join(WorkDir,'patches')
-DepotToolsDir = join(WorkDir,'depot_tools')
-PDFiumDir     = join(WorkDir,'pdfium')
-BuildDir      = join(PDFiumDir,'out','Default')
-OutputDir     = join(SourceTree,'data','sourcebuild')
+PatchDir       = join(SB_Dir,'patches')
+DepotToolsDir  = join(SB_Dir,'depot_tools')
+PDFiumDir      = join(SB_Dir,'pdfium')
+PDFiumBuildDir = join(PDFiumDir,'out','Default')
+OutputDir      = join(SourceTree,'data','sourcebuild')
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
@@ -67,15 +61,10 @@ DepotPatches = [
 NB_BinaryDir = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin')
 
 
-def run_cmd(command, cwd):
-    print(command)
-    subprocess.run(command, cwd=cwd, shell=True)
-
-
 def dl_depottools(do_sync):
     
-    if not os.path.isdir(WorkDir):
-        os.mkdir(WorkDir)
+    if not os.path.isdir(SB_Dir):
+        os.mkdir(SB_Dir)
     
     is_update = True
     
@@ -89,7 +78,7 @@ def dl_depottools(do_sync):
             is_update = False
     else:
         print("DepotTools: Download ...")
-        run_cmd(f"git clone --depth 1 {DepotTools_URL} {DepotToolsDir}", cwd=WorkDir)
+        run_cmd(f"git clone --depth 1 {DepotTools_URL} {DepotToolsDir}", cwd=SB_Dir)
     
     if sys.platform.startswith('win32'):
         os.environ['PATH'] += f";{DepotToolsDir}"
@@ -106,14 +95,14 @@ def dl_pdfium(do_sync, GClient):
     if os.path.isdir(PDFiumDir):
         if do_sync:
             print("PDFium: Revert / Sync  ...")
-            run_cmd(f"{GClient} revert", cwd=WorkDir)
+            run_cmd(f"{GClient} revert", cwd=SB_Dir)
         else:
             print("PDFium: Using existing repository as-is.")
             is_update = False
     else:
         print("PDFium: Download ...")
-        run_cmd(f"{GClient} config --unmanaged {PDFium_URL}", cwd=WorkDir)
-        run_cmd(f"{GClient} sync --no-history --shallow", cwd=WorkDir)
+        run_cmd(f"{GClient} config --unmanaged {PDFium_URL}", cwd=SB_Dir)
+        run_cmd(f"{GClient} sync --no-history --shallow", cwd=SB_Dir)
     
     return is_update
     
@@ -153,23 +142,23 @@ def extra_patch_pdfium(nb_prefix):
 
 def configure(config, GN):
     
-    if not os.path.exists(BuildDir):
-        os.makedirs(BuildDir)
+    if not os.path.exists(PDFiumBuildDir):
+        os.makedirs(PDFiumBuildDir)
     
-    with open(join(BuildDir,'args.gn'), 'w') as args_handle:
+    with open(join(PDFiumBuildDir,'args.gn'), 'w') as args_handle:
         args_handle.write(config)
     
-    run_cmd(f"{GN} gen {BuildDir}", cwd=PDFiumDir)
+    run_cmd(f"{GN} gen {PDFiumBuildDir}", cwd=PDFiumDir)
 
 
 def build(Ninja):
-    run_cmd(f"{Ninja} -C {BuildDir} pdfium", cwd=PDFiumDir)
+    run_cmd(f"{Ninja} -C {PDFiumBuildDir} pdfium", cwd=PDFiumDir)
 
 
-def find_lib(srcname=None, directory=BuildDir):
+def find_lib(srcname=None, directory=PDFiumBuildDir):
     
     if srcname is not None:
-        path = join(BuildDir, srcname)
+        path = join(PDFiumBuildDir, srcname)
         if os.path.isfile(path):
             return path
         else:

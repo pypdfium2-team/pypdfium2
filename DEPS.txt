@@ -15,6 +15,7 @@ git
 ctypesgen
 gcc
 wheel
+setuptools
 
 Native build
 ------------

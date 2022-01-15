@@ -30,10 +30,12 @@ from setup_base import (
     Windows86,
     WindowsArm64,
 )
-from _packaging import postprocess_bindings
+from _packaging import (
+    SourceTree,
+    postprocess_bindings,
+)
 
 
-SourceTree   = dirname(realpath(__file__))
 VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 DataTree     = join(SourceTree,'data')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
