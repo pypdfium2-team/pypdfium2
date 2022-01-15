@@ -55,9 +55,9 @@ def check_sysdeps():
 
 
 def main():
+    check_sysdeps()
     install_pydeps()
     install_ctypesgen()
-    check_sysdeps()
 
 
 if __name__ == '__main__':
