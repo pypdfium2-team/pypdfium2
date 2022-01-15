@@ -2,7 +2,7 @@
 BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x12\x00p\x00y\x00p\x00d\x00f\x00i\x00u\x00m\x002)
 
 [Filters]
-size=13
+size=18
 
 [Filters][0]
 inclusive=0
@@ -27,7 +27,32 @@ targets=1
 [Filters][12]
 inclusive=0
 pattern=.pytest_cache
-targets=3
+targets=2
+
+[Filters][13]
+inclusive=0
+pattern=**.mypy_cache
+targets=2
+
+[Filters][14]
+inclusive=0
+pattern=data/
+targets=2
+
+[Filters][15]
+inclusive=0
+pattern=dist/
+targets=2
+
+[Filters][16]
+inclusive=0
+pattern=tests/resources/
+targets=2
+
+[Filters][17]
+inclusive=0
+pattern=tests/output/
+targets=2
 
 [Filters][2]
 inclusive=0
