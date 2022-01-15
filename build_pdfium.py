@@ -257,6 +257,12 @@ def main(args):
     else:
         print("Using DepotTools-provided binaries.")
     
+    destname = args.destname
+    
+    # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
+    if destname is None and sys.platform.startswith('linux'):
+        destname = 'pdfium'
+    
     GClient = join(DepotToolsDir,'gclient')
     GN    = _get_tool('gn', 'generate-ninja', prefer_st)
     Ninja = _get_tool('ninja', 'ninja-build', prefer_st)
@@ -287,7 +293,7 @@ def main(args):
     build(Ninja)
     
     libpath = find_lib(args.srcname)
-    pack(libpath, args.destname)
+    pack(libpath, destname)
 
 
 def parse_args():
@@ -314,8 +320,7 @@ def parse_args():
     )
     parser.add_argument(
         '--destname', '-d',
-        help = "Rename the binary to a different filename. On Linux with older ctypesgen, " +
-               "this should be set to `pdfium` for library loading to work correctly.",
+        help = "Rename the binary to a different filename."
     )
     parser.add_argument(
         '--update', '-u',
