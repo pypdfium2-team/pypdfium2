@@ -34,7 +34,7 @@ OutputDir     = join(SourceTree,'data','sourcebuild')
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
 
-DefaultConfig = """
+DefaultConfig = """\
 is_debug = false
 pdf_is_standalone = true
 pdf_enable_v8 = false
@@ -268,7 +268,7 @@ def main(args):
         with open(abspath(args.argfile), 'r') as file_handle:
             config = file_handle.read()
     
-    print("\nBuild configuration:", config, '\n')
+    print(f"\nBuild configuration:\n{config}\n")
     
     depot_dl_done = dl_depottools(args.update)
     if depot_dl_done:
