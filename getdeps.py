@@ -19,6 +19,7 @@ PyDeps = [
 ]
 SysDeps = [
     'gcc',
+    'git',
 ]
 
 def install_ctypesgen():

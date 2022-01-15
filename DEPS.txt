@@ -12,10 +12,10 @@ Build
 =====
 
 git
-ctypesgen
 gcc
-wheel
 setuptools
+wheel
+ctypesgen
 
 Native build
 ------------
