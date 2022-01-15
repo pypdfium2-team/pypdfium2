@@ -288,16 +288,14 @@ def main(args):
     pack(libpath, destname)
 
 
-def parse_args():
-    
-    # NOTE When changing arguments, it is important that you adapt :class:`DefaultArgs` in 
-    #      :file:`setup.py` accordingly
+def parse_args(args=sys.argv[1:]):
     
     parser = argparse.ArgumentParser(
         description = "A script to automate building PDFium from source and generating ctypesgen " +
                       "bindings. If all went well, use `./setup_source bdist_wheel` to craft a "   +
                       "python package from the source build.",
     )
+    
     parser.add_argument(
         '--argfile', '-a',
         help = "A text file containing custom PDFium build configuration, to be evaluated by " +
@@ -335,7 +333,7 @@ def parse_args():
                "systools build. Defaults to `/usr/bin`.",
     )
     
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 if __name__ == '__main__':

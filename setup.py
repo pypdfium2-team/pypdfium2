@@ -6,15 +6,9 @@ import setup_source
 import build_pdfium
 
 
-class DefaultArgs:
-    argfile  = None
-    srcname  = None
-    destname = None
-    update   = False
-    prefer_systools = False
-    systools_prefix = "/usr/bin"
-
+sb_argv = []
 
 if __name__ == '__main__':
-    build_pdfium.main(DefaultArgs)
+    args = build_pdfium.parse_args(sb_argv)
+    build_pdfium.main(args)
     setup_source.main()
