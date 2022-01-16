@@ -13,7 +13,6 @@ import subprocess
 from os.path import (
     join,
     abspath,
-    dirname,
     basename,
 )
 from _packaging import *
