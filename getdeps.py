@@ -51,7 +51,6 @@ def check_sysdeps():
             )
         else:
             print(f"Found installation of system dependency {dep_name}")
-        
 
 
 def main():
