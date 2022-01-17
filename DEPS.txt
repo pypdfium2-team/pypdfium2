@@ -20,10 +20,12 @@ ctypesgen
 Native build
 ------------
 
-gn (generate-ninja)
-ninja (ninja-build)
+# Important: The compiler needs to be fully compliant with C++17
+
 llvm/clang
 lld
+gn (generate-ninja)
+ninja (ninja-build)
 
 
 Test
