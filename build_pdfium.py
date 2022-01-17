@@ -16,6 +16,7 @@ from os.path import (
     basename,
 )
 from _packaging import *
+import _getdeps as getdeps
 
 
 PatchDir       = join(SB_Dir,'patches')
@@ -239,6 +240,12 @@ def main(args):
     else:
         print("Using DepotTools-provided binaries.")
     
+    if args.getdeps:
+        getdeps.main(
+            prefer_st = prefer_st,
+            st_prefix = args.systools_prefix,
+        )
+    
     destname = args.destname
     
     # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
@@ -329,6 +336,11 @@ def parse_args(args=sys.argv[1:]):
         default = "/usr/bin",
         help = "Path prefix to system-provided compilers and linkers. Only relevant for the " +
                "systools build. Defaults to `/usr/bin`.",
+    )
+    parser.add_argument(
+        '--getdeps',
+        action = 'store_true',
+        help = "Check dependencies and try to install missing ones.",
     )
     
     return parser.parse_args(args)
