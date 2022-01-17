@@ -27,24 +27,26 @@ OutputDir      = join(SourceTree,'data','sourcebuild')
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
 
-DefaultConfig = """\
-is_debug = false
-pdf_is_standalone = true
-pdf_enable_v8 = false
-pdf_enable_xfa = false
-"""
+DefaultConfig = [
+    'is_debug = false',
+    'pdf_is_standalone = true',
+    'pdf_enable_v8 = false',
+    'pdf_enable_xfa = false',
+]
 
 if sys.platform.startswith('linux'):
-    DefaultConfig += 'use_custom_libcxx = true'
+    DefaultConfig += [ 'use_custom_libcxx = true' ]
 elif sys.platform.startswith('win32'):
-    DefaultConfig += 'pdf_use_win32_gdi = true'
+    DefaultConfig += [ 'pdf_use_win32_gdi = true' ]
 elif sys.platform.startswith('darwin'):
-    DefaultConfig += 'mac_deployment_target = "10.11.0"'
+    DefaultConfig += [ 'mac_deployment_target = "10.11.0"' ]
 
-NativeBuildConfig = DefaultConfig + """
-clang_use_chrome_plugins = false
-treat_warnings_as_errors = false
-init_stack_vars = false"""
+NativeBuildConfig = DefaultConfig.copy()
+NativeBuildConfig += [
+'clang_use_chrome_plugins = false',
+'treat_warnings_as_errors = false',
+'init_stack_vars = false',
+]
 
 PdfiumPatches = [
     join(PatchDir,'public_headers.patch'),
@@ -248,15 +250,23 @@ def main(args):
     Ninja = _get_tool('ninja', 'ninja-build', prefer_st)
     
     if args.argfile is None:
+        
         if prefer_st:
-            config = NativeBuildConfig
+            config_list = NativeBuildConfig
         else:
-            config = DefaultConfig
+            config_list = DefaultConfig
+        
+        config_str = ""
+        sep = ''
+        for entry in config_list:
+            config_str += sep + entry
+            sep = '\n'
+        
     else:
         with open(abspath(args.argfile), 'r') as file_handle:
-            config = file_handle.read()
+            config_str = file_handle.read()
     
-    print(f"\nBuild configuration:\n{config}\n")
+    print(f"\nBuild configuration:\n{config_str}\n")
     
     depot_dl_done = dl_depottools(args.update)
     if depot_dl_done:
@@ -269,7 +279,7 @@ def main(args):
         if prefer_st:
             extra_patch_pdfium(args.systools_prefix)
     
-    configure(config, GN)
+    configure(config_str, GN)
     build(Ninja)
     
     libpath = find_lib(args.srcname)
