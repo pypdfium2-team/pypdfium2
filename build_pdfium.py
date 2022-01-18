@@ -46,7 +46,6 @@ NativeBuildConfig = DefaultConfig.copy()
 NativeBuildConfig += [
 'clang_use_chrome_plugins = false',
 'treat_warnings_as_errors = false',
-'init_stack_vars = false',
 ]
 
 PdfiumPatches = [
@@ -135,10 +134,6 @@ def _bins_to_symlinks(nb_prefix):
 
 
 def extra_patch_pdfium(nb_prefix):
-    
-    patch = join(PatchDir,'nativebuild.patch')
-    run_cmd(f"git apply -v {patch}", cwd=join(PDFiumDir,'build'))
-    
     _bins_to_symlinks(nb_prefix)
 
 
