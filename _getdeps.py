@@ -9,7 +9,10 @@ from os.path import (
     join,
     exists,
 )
-from _packaging import SB_Dir, run_cmd
+from _packaging import (
+    SB_Dir,
+    run_cmd,
+)
 
 Ctypesgen_URL = "https://github.com/ctypesgen/ctypesgen.git"
 Ctypesgen_Dir = join(SB_Dir,'ctypesgen')
@@ -25,6 +28,7 @@ SysCommands = [
 NB_SysCommands = [
     'gn',
     'ninja',
+    'clang',
     'lld',
 ]
 
@@ -68,17 +72,6 @@ def check_sysdeps(sys_commands):
             _notify_found_sysdep(dep_name)
 
 
-def check_clang(st_prefix):
-    
-    binaries = os.listdir(st_prefix)
-    
-    clang = 'clang'
-    if any(b.startswith(clang) for b in binaries):
-        _notify_found_sysdep(clang)
-    else:
-        _notify_missing_sysdep(clang)
-
-
 def main(
         prefer_st = False,
         st_prefix = '/usr/bin',
@@ -87,7 +80,6 @@ def main(
     sys_commands = SysCommands.copy()
     if prefer_st:
         sys_commands += NB_SysCommands
-        check_clang(st_prefix)
     
     check_sysdeps(sys_commands)
     install_pydeps()
