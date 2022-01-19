@@ -19,7 +19,6 @@ from typing import (
     Tuple,
 )
 
-from pypdfium2._types import *
 from pypdfium2._constants import *
 from pypdfium2._exceptions import *
 from pypdfium2 import _pypdfium as pdfium
@@ -519,7 +518,8 @@ def _get_toc_entry(
     
     # viewport
     n_params = ctypes.c_ulong()
-    view_pos = ArrayFSFloat4()
+    FloatArray = pdfium.FS_FLOAT * 4
+    view_pos = FloatArray()
     view_mode = pdfium.FPDFDest_GetView(dest, n_params, view_pos)
     n_params = n_params.value
     view_pos = list(view_pos)[:n_params]
