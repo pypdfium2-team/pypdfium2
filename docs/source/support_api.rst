@@ -8,9 +8,13 @@ Version
 *******
 .. automodule:: pypdfium2._version
 
-Opening/Closing
-***************
+Opener/Closer
+*************
 .. automodule:: pypdfium2._helpers.opener
+
+Saver
+*****
+.. automodule:: pypdfium2._helpers.saver
 
 Page Renderer
 *************

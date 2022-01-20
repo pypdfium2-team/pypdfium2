@@ -6,13 +6,14 @@ import logging
 from pypdfium2 import _version
 from pypdfium2._pypdfium import *
 from pypdfium2._helpers.constants import *
-from pypdfium2._helpers.error_handler import *
 from pypdfium2._helpers.exceptions import *
+from pypdfium2._helpers.error_handler import *
+from pypdfium2._helpers.utilities import *
 from pypdfium2._helpers.opener import *
 from pypdfium2._helpers.page_renderer import *
 from pypdfium2._helpers.pdf_renderer import *
 from pypdfium2._helpers.toc import *
-from pypdfium2._helpers.utilities import *
+from pypdfium2._helpers.saver import *
 
 
 logger = logging.getLogger(__name__)
