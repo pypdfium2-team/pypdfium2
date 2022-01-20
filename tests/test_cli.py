@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pytest
-from pypdfium2 import __main__ as main
-from pypdfium2._constants import OptimiseMode
+from pypdfium2 import __main__ as cli
+import pypdfium2 as pdfium
 
 
 @pytest.mark.parametrize(
@@ -17,14 +17,14 @@ from pypdfium2._constants import OptimiseMode
     ],
 )
 def test_rotation_type(test_input, expected):
-    assert main.rotation_type(test_input) == expected
+    assert cli.rotation_type(test_input) == expected
 
 
 def test_rotation_type_fail_oob():
     with pytest.raises(ValueError, match="Invalid rotation value"):
-        main.rotation_type("101")
+        cli.rotation_type("101")
     with pytest.raises(ValueError, match="invalid literal for int()"):
-        main.rotation_type("string")
+        cli.rotation_type("string")
 
 
 @pytest.mark.parametrize(
@@ -37,7 +37,7 @@ def test_rotation_type_fail_oob():
     ],
 )
 def test_colour_type(test_input, expected):
-    assert main.colour_type(test_input) == expected
+    assert cli.colour_type(test_input) == expected
 
 
 @pytest.mark.parametrize(
@@ -51,7 +51,7 @@ def test_colour_type(test_input, expected):
     ],
 )
 def test_pagetext_type(test_input, expected):
-    assert main.pagetext_type(test_input) == expected
+    assert cli.pagetext_type(test_input) == expected
 
 
 def test_parse_args():
@@ -69,7 +69,7 @@ def test_parse_args():
         '--processes', '4',
     ]
     
-    args = main.parse_args(argv)
+    args = cli.parse_args(argv)
     
     assert args.pdffile == 'path/to/document.pdf'
     assert args.output == 'output_dir/'
@@ -80,6 +80,6 @@ def test_parse_args():
     assert args.rotation == 90
     assert args.colour == 0xFFFFFFFF
     assert args.no_annotations == False
-    assert args.optimise_mode == OptimiseMode.none
+    assert args.optimise_mode == pdfium.OptimiseMode.none
     assert args.greyscale == False
     assert args.processes == 4

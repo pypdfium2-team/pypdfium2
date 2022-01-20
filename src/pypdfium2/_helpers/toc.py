@@ -1,0 +1,184 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+import ctypes
+import logging
+from typing import (
+    Sequence,
+    Optional,
+    Iterator,
+)
+from pypdfium2 import _pypdfium as pdfium
+from pypdfium2._helpers.constants import ViewMode
+
+logger = logging.getLogger(__name__)
+
+
+class OutlineItem:
+    """
+    An entry in the table of contents ("bookmark").
+    
+    Parameters:
+        level:
+            The number of parent items.
+        title:
+            String of the bookmark.
+        page_index:
+            Zero-based index of the page the bookmark is pointing to.
+        view_mode:
+            A mode defining how to interpret the coordinates of *view_pos*.
+        view_pos:
+            Target position on the page the viewport should jump to. It is a sequence of float values
+            in PDF points. Depending on *view_mode*, it can contain between 0 and 4 coordinates.
+    """
+    
+    def __init__(
+            self,
+            level: int = None,
+            title: str = None,
+            page_index: int = None,
+            view_mode: ViewMode = None,
+            view_pos: Sequence[float] = None,
+        ):
+        
+        self.level = level
+        self.title = title
+        self.page_index = page_index
+        self.view_mode = view_mode
+        self.view_pos = view_pos
+
+
+def _translate_viewmode(viewmode: int) -> ViewMode:
+    """
+    Convert a PDFium view mode integer to an attribute of the :class:`.ViewMode` enum.
+    """
+    
+    if viewmode == pdfium.PDFDEST_VIEW_UNKNOWN_MODE:
+        return ViewMode.Unknown
+    elif viewmode == pdfium.PDFDEST_VIEW_XYZ:
+        return ViewMode.XYZ
+    elif viewmode == pdfium.PDFDEST_VIEW_FIT:
+        return ViewMode.Fit
+    elif viewmode == pdfium.PDFDEST_VIEW_FITH:
+        return ViewMode.FitH
+    elif viewmode == pdfium.PDFDEST_VIEW_FITV:
+        return ViewMode.FitV
+    elif viewmode == pdfium.PDFDEST_VIEW_FITR:
+        return ViewMode.FitR
+    elif viewmode == pdfium.PDFDEST_VIEW_FITB:
+        return ViewMode.FitB
+    elif viewmode == pdfium.PDFDEST_VIEW_FITBH:
+        return ViewMode.FitBH
+    elif viewmode == pdfium.PDFDEST_VIEW_FITBV:
+        return ViewMode.FitBV
+
+
+def _get_toc_entry(
+        pdf: pdfium.FPDF_DOCUMENT,
+        bookmark: pdfium.FPDF_BOOKMARK,
+        level: int,
+    ) -> OutlineItem:
+    """
+    Convert a raw PDFium bookmark to an :class:`.OutlineItem`.
+    """
+    
+    # title
+    t_buflen = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
+    t_buffer = ctypes.create_string_buffer(t_buflen)
+    pdfium.FPDFBookmark_GetTitle(bookmark, t_buffer, t_buflen)
+    title = t_buffer.raw[:t_buflen].decode('utf-16-le')[:-1]
+    
+    # page index
+    dest = pdfium.FPDFBookmark_GetDest(pdf, bookmark)
+    page_index = pdfium.FPDFDest_GetDestPageIndex(pdf, dest)
+    
+    # viewport
+    n_params = ctypes.c_ulong()
+    FloatArray = pdfium.FS_FLOAT * 4
+    view_pos = FloatArray()
+    view_mode = pdfium.FPDFDest_GetView(dest, n_params, view_pos)
+    n_params = n_params.value
+    view_pos = list(view_pos)[:n_params]
+    view_mode = _translate_viewmode(view_mode)
+    
+    item = OutlineItem()
+    item.level = level
+    item.title = title
+    item.page_index = page_index
+    item.view_mode = view_mode
+    item.view_pos = view_pos
+    
+    return item
+
+
+def get_toc(
+        pdf: pdfium.FPDF_DOCUMENT,
+        parent: Optional[pdfium.FPDF_BOOKMARK] = None,
+        level: int = 0,
+        max_depth: int = 15,
+        seen: Optional[list] = None,
+    ) -> Iterator[OutlineItem]:
+    """
+    Read the table of contents ("outline") of a PDF document.
+    
+    Parameters:
+        pdf:
+            The PDFium document of which to parse the ToC.
+        max_depth:
+            The maximum recursion depth to consider when analysing the outline.
+        
+    Yields:
+        :class:`OutlineItem`
+    """
+    
+    if level >= max_depth:
+        logger.warning("Maximum recursion depth reached.")
+        return []
+    
+    bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, parent)
+    
+    if seen is None:
+        seen = set()
+    
+    while bookmark:
+        
+        address = ctypes.addressof(bookmark.contents)
+        if address in seen:
+            logger.critical("A circular bookmark reference was detected whilst parsing the table of contents.")
+            break
+        else:
+            seen.add(address)
+        
+        item = _get_toc_entry(pdf, bookmark, level)
+        yield item
+        
+        children = get_toc(
+            pdf,
+            parent = bookmark,
+            level = level + 1,
+            max_depth = max_depth,
+            seen = seen,
+        )
+        yield from children
+        
+        bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
+
+
+def print_toc(toc) -> None:
+    """
+    Print the table of contents in a well-readable manner.
+    
+    Parameters:
+        toc:
+            The iterator of the outline to display (result of :func:`get_toc`).
+    """
+    
+    for item in toc:
+        
+        level = item.level
+        title = item.title
+        pagenum = item.page_index + 1
+        view_mode = item.view_mode
+        view_pos = item.view_pos
+        
+        print('    '*level + f"{title} -> {pagenum}  # {view_mode} {view_pos}")

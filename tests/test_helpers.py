@@ -7,13 +7,11 @@ import pathlib
 import logging
 from PIL import Image
 from .conftest import TestFiles, OutputDir
-from pypdfium2 import _helpers as helpers
-from pypdfium2 import _exceptions as exceptions
-from pypdfium2 import _pypdfium as pdfium
+import pypdfium2 as pdfium
 
 
 def _open_pdf(file_or_data, password=None, page_count=1):
-    with helpers.PdfContext(file_or_data, password) as pdf:
+    with pdfium.PdfContext(file_or_data, password) as pdf:
         assert isinstance(pdf, pdfium.FPDF_DOCUMENT)
         assert pdfium.FPDF_GetPageCount(pdf) == page_count
 
@@ -65,7 +63,7 @@ def test_pdfct_encrypted():
 
 
 def test_pdfct_encrypted_fail():
-    pw_err_context = pytest.raises(exceptions.LoadPdfError, match="Missing or wrong password.")
+    pw_err_context = pytest.raises(pdfium.LoadPdfError, match="Missing or wrong password.")
     with pw_err_context:
         _open_pdf(TestFiles.encrypted)
     with pw_err_context:
@@ -86,14 +84,14 @@ def test_pdfct_encrypted_fail():
     ]
 )
 def test_translate_rotation(test_input, expected):
-    translated = helpers._translate_rotation(test_input)
+    translated = pdfium.translate_rotation(test_input)
     assert translated == expected
 
 
 def test_render_page_normal():
     
-    with helpers.PdfContext(TestFiles.render) as pdf:
-        pil_image = helpers.render_page(
+    with pdfium.PdfContext(TestFiles.render) as pdf:
+        pil_image = pdfium.render_page(
             pdf, 0,
         )
     
@@ -109,13 +107,13 @@ def test_render_page_normal():
 
 def test_render_page_encrypted():
     
-    with helpers.PdfContext(TestFiles.encrypted, 'test_user') as pdf:
-        pil_image_a = helpers.render_page(pdf, 0)
+    with pdfium.PdfContext(TestFiles.encrypted, 'test_user') as pdf:
+        pil_image_a = pdfium.render_page(pdf, 0)
     assert pil_image_a.mode == 'RGB'
     assert pil_image_a.size == (596, 842)
     
-    with helpers.PdfContext(TestFiles.encrypted, 'test_owner') as pdf:
-        pil_image_b = helpers.render_page(pdf, 0)
+    with pdfium.PdfContext(TestFiles.encrypted, 'test_owner') as pdf:
+        pil_image_b = pdfium.render_page(pdf, 0)
     assert pil_image_b.mode == 'RGB'
     assert pil_image_b.size == (596, 842)
     
@@ -127,8 +125,8 @@ def test_render_page_encrypted():
 
 def test_render_page_alpha():
     
-    with helpers.PdfContext(TestFiles.render) as pdf:
-        pil_image = helpers.render_page(
+    with pdfium.PdfContext(TestFiles.render) as pdf:
+        pil_image = pdfium.render_page(
             pdf, 0,
             colour = None,
         )
@@ -146,30 +144,30 @@ def test_render_page_alpha():
 
 def test_render_page_rotation():
     
-    with helpers.PdfContext(TestFiles.render) as pdf:
+    with pdfium.PdfContext(TestFiles.render) as pdf:
         
-        image_0 = helpers.render_page(
+        image_0 = pdfium.render_page(
             pdf, 0,
             rotation = 0
         )
         image_0.save(OutputDir/'rotate_0.png')
         image_0.close()
         
-        image_90 = helpers.render_page(
+        image_90 = pdfium.render_page(
             pdf, 0,
             rotation = 90
         )
         image_90.save(OutputDir/'rotate_90.png')
         image_90.close()
         
-        image_180 = helpers.render_page(
+        image_180 = pdfium.render_page(
             pdf, 0,
             rotation = 180
         )
         image_180.save(OutputDir/'rotate_180.png')
         image_180.close()
         
-        image_270 = helpers.render_page(
+        image_270 = pdfium.render_page(
             pdf, 0,
             rotation = 270
         )
@@ -180,13 +178,13 @@ def test_render_page_rotation():
 
 def test_render_pdf():
     
-    with helpers.PdfContext(TestFiles.multipage) as pdf:
+    with pdfium.PdfContext(TestFiles.multipage) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
         
     n_digits = len(str(n_pages))
     i = 0
     
-    renderer = helpers.render_pdf(
+    renderer = pdfium.render_pdf(
         TestFiles.multipage,
         colour = (255, 255, 255),
     )
@@ -202,16 +200,16 @@ def test_render_pdf_bytes():
     with open(TestFiles.multipage, 'rb') as file_handle:
         file_bytes = file_handle.read()
     
-    for image, suffix in helpers.render_pdf(file_bytes):
+    for image, suffix in pdfium.render_pdf(file_bytes):
         assert isinstance(image, Image.Image)
         assert image.mode == 'RGB'
 
 
 def test_render_greyscale():
     
-    with helpers.PdfContext(TestFiles.render) as pdf:
+    with pdfium.PdfContext(TestFiles.render) as pdf:
         
-        image_a = helpers.render_page(
+        image_a = pdfium.render_page(
             pdf, 0,
             greyscale = True,
         )
@@ -219,7 +217,7 @@ def test_render_greyscale():
         assert image_a.mode == 'L'
         image_a.close()
         
-        image_b = helpers.render_page(
+        image_b = pdfium.render_page(
             pdf, 0,
             greyscale = True,
             colour = None,
@@ -241,7 +239,7 @@ def test_render_greyscale():
     ]
 )
 def test_colour_to_hex(values, expected):
-    colour_int = helpers.colour_as_hex(*values)
+    colour_int = pdfium.colour_as_hex(*values)
     assert colour_int == expected
 
 
@@ -258,10 +256,10 @@ def test_colour_to_hex(values, expected):
 )
 def test_render_bgcolour(colour):
     
-    with helpers.PdfContext(TestFiles.render) as pdf:
-        pil_image = helpers.render_page(
+    with pdfium.PdfContext(TestFiles.render) as pdf:
+        pil_image = pdfium.render_page(
             pdf, 0,
-            colour = helpers.colour_as_hex(*colour),
+            colour = pdfium.colour_as_hex(*colour),
         )
     
     px_colour = colour
@@ -277,18 +275,18 @@ def test_render_bgcolour(colour):
 
 def test_read_toc():
     
-    with helpers.PdfContext(TestFiles.bookmarks) as pdf:
-        toc = helpers.get_toc(pdf)
+    with pdfium.PdfContext(TestFiles.bookmarks) as pdf:
+        toc = pdfium.get_toc(pdf)
         print()
-        helpers.print_toc(toc)
+        pdfium.print_toc(toc)
 
 
 def test_read_toc_circular(caplog):
     
     with caplog.at_level(logging.CRITICAL):
         
-        with helpers.PdfContext(TestFiles.bookmarks_circular) as pdf:
-            toc = helpers.get_toc(pdf)
+        with pdfium.PdfContext(TestFiles.bookmarks_circular) as pdf:
+            toc = pdfium.get_toc(pdf)
             print()
-            helpers.print_toc(toc)
+            pdfium.print_toc(toc)
             assert "circular bookmark reference" in caplog.text
