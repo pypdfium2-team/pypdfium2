@@ -185,6 +185,8 @@ def generate_bindings(archives):
             target_name = 'pdfium.dylib'
         elif dirname.startswith('linux'):
             target_name = 'pdfium'
+        else:
+            raise ValueError(f"Unknown platform directory name '{dirname}'")
         
         current_name = os.listdir(bin_dir)[0]
         
