@@ -180,18 +180,7 @@ def generate_bindings(archives):
         header_files = join(build_dir,'include','*.h')
         
         if dirname.startswith('windows'):
-            
-            if dirname.endswith('x64'):
-                bin_dir = join(build_dir,'x64','bin')
-            elif dirname.endswith('x86'):
-                bin_dir = join(build_dir,'x86','bin')
-            elif dirname.endswith('arm64'):
-                bin_dir = join(build_dir,'arm64','bin')
-            else:
-                raise ValueError("Binary directory could not be recognised.")
-            
             target_name = 'pdfium.dll'
-            
         elif dirname.startswith('darwin'):
             target_name = 'pdfium.dylib'
         elif dirname.startswith('linux'):
