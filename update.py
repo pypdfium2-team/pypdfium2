@@ -128,17 +128,16 @@ def download_releases(latest_version, download_files):
     base_url = f"{ReleaseURL}{latest_version}/"
     args = []
     
-    for dirname, arcname in download_files.items():
+    for dirpath, arcname in download_files.items():
         
         filename = f"{arcname}.{ReleaseExtension}"
         file_url = base_url + filename
         
-        dest_dir = join(DataTree, dirname)
-        if not os.path.exists(dest_dir):
-            os.mkdir(dest_dir)
+        if not os.path.exists(dirpath):
+            os.mkdir(dirpath)
         
-        file_path = join(dest_dir, filename)
-        args.append( (dirname, file_url, file_path) )
+        file_path = join(dirpath, filename)
+        args.append( (dirpath, file_url, file_path) )
     
     archives = {}
     
@@ -147,8 +146,8 @@ def download_releases(latest_version, download_files):
         for output in pool.map(_get_package, args):
             
             if output is not None:
-                dirname, file_path = output
-                archives[dirname] = file_path
+                dirpath, file_path = output
+                archives[dirpath] = file_path
     
     return archives
 
