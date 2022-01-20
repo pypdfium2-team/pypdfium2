@@ -1,0 +1,15 @@
+diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
+index 9a193bb..61fd085 100644
+--- a/config/compiler/BUILD.gn
++++ b/config/compiler/BUILD.gn
+@@ -1218,7 +1218,7 @@ config("compiler_deterministic") {
+     } else {
+       # -ffile-compilation-dir is an alias for both -fdebug-compilation-dir=
+       # and -fcoverage-compilation-dir=.
+-      cflags += [ "-ffile-compilation-dir=." ]
++      cflags += [ ]
+     }
+     if (!is_win) {
+       # We don't use clang -cc1as on Windows (yet? https://crbug.com/762167)
+-- 
+2.25.1

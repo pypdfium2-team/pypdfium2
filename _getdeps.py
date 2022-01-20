@@ -14,6 +14,7 @@ from _packaging import (
     run_cmd,
 )
 
+
 Ctypesgen_URL = "https://github.com/ctypesgen/ctypesgen.git"
 Ctypesgen_Dir = join(SB_Dir,'ctypesgen')
 
@@ -31,6 +32,7 @@ NB_SysCommands = [
     'clang',
     'lld',
 ]
+
 
 def install_ctypesgen():
     
@@ -50,16 +52,6 @@ def install_pydeps():
         run_cmd(f"pip3 install {dep}", cwd=None)
 
 
-def _notify_found_sysdep(dep_name):
-    print(f"Found installation of system dependency {dep_name}")
-
-def _notify_missing_sysdep(dep_name):
-    print(
-        f"Missing system dependency: {dep_name} - please install it using your package manager.",
-        file = sys.stderr,
-    )
-
-
 def check_sysdeps(sys_commands):
     
     for dep_name in sys_commands:
@@ -67,15 +59,15 @@ def check_sysdeps(sys_commands):
         dep_binary = shutil.which(dep_name)
         
         if dep_binary is None:
-            _notify_missing_sysdep(dep_name)
+            print(
+                f"Missing system dependency: {dep_name} - please install it using your package manager.",
+                file = sys.stderr,
+            )
         else:
-            _notify_found_sysdep(dep_name)
+            print(f"Found installation of system dependency {dep_name}")
 
 
-def main(
-        prefer_st = False,
-        st_prefix = '/usr/bin',
-    ):
+def main(prefer_st=False):
     
     sys_commands = SysCommands.copy()
     if prefer_st:

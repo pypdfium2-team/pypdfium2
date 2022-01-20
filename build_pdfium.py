@@ -46,6 +46,7 @@ NativeBuildConfig = DefaultConfig.copy()
 NativeBuildConfig += [
 'clang_use_chrome_plugins = false',
 'treat_warnings_as_errors = false',
+'init_stack_vars = false',
 ]
 
 PdfiumPatches = [
@@ -120,21 +121,32 @@ def patch_pdfium():
     shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
-def _bins_to_symlinks(nb_prefix):
+def _bins_to_symlinks():
     
     binary_names = os.listdir(NB_BinaryDir)
     
     for name in binary_names:
         
         binary_path = join(NB_BinaryDir, name)
-        replacement = join(nb_prefix, name)
+        replacement = shutil.which(name)
+        
+        if replacement is None:
+            print(f"Warning: No system provided replacement available for '{name}' - " +
+                  "will keep using the version shipped with the PDFium toolchain.",
+                  file = sys.stderr,
+            )
+            continue
         
         os.remove(binary_path)
         run_cmd(f"ln -s {replacement} {binary_path}", cwd=NB_BinaryDir)
 
 
-def extra_patch_pdfium(nb_prefix):
-    _bins_to_symlinks(nb_prefix)
+def extra_patch_pdfium():
+    
+    patch = join(PatchDir,'nativebuild.patch')
+    run_cmd(f"git apply -v {patch}", cwd=join(PDFiumDir,'build'))
+    
+    _bins_to_symlinks()
 
 
 def configure(config, GN):
@@ -236,10 +248,7 @@ def main(args):
         print("Using DepotTools-provided binaries.")
     
     if args.getdeps:
-        getdeps.main(
-            prefer_st = prefer_st,
-            st_prefix = args.systools_prefix,
-        )
+        getdeps.main(prefer_st)
     
     destname = args.destname
     
@@ -278,8 +287,8 @@ def main(args):
     
     if pdfium_dl_done:
         patch_pdfium()
-        if prefer_st:
-            extra_patch_pdfium(args.systools_prefix)
+    if prefer_st:
+        extra_patch_pdfium()
     
     configure(config_str, GN)
     build(Ninja)
@@ -325,12 +334,6 @@ def parse_args(args=sys.argv[1:]):
                "performant than when compiled with the official toolchain and configuration. "    +
                "Hence, the systools strategy should rather be used as a last resort if regular "  +
                "build did not work. (This option is not available on Windows.)",
-    )
-    parser.add_argument(
-        '--systools-prefix',
-        default = "/usr/bin",
-        help = "Path prefix to system-provided compilers and linkers. Only relevant for the " +
-               "systools build. Defaults to `/usr/bin`.",
     )
     parser.add_argument(
         '--getdeps',
