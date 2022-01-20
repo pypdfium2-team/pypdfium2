@@ -20,7 +20,7 @@ import traceback
 import subprocess
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
-from setup_base import (
+from _setup_base import (
     Darwin64,
     DarwinArm64,
     Linux64,
