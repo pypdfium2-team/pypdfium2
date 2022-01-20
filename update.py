@@ -182,10 +182,11 @@ def generate_bindings(archives):
         
         dirname = basename(platform_dir)
         build_dir = join(platform_dir, 'build_tar')
+        bin_dir = join(build_dir,'lib')
+        bindings_file = join(platform_dir,'_pypdfium.py')
+        header_files = join(build_dir,'include','*.h')
         
         if dirname.startswith('windows'):
-            
-            bin_name = 'pdfium.dll'
             
             if dirname.endswith('x64'):
                 bin_dir = join(build_dir,'x64','bin')
@@ -196,26 +197,19 @@ def generate_bindings(archives):
             else:
                 raise ValueError("Binary directory could not be recognised.")
             
+            target_name = 'pdfium.dll'
+            
         elif dirname.startswith('darwin'):
-            
-            bin_name = 'pdfium.dylib'
-            bin_dir = join(build_dir,'lib')
-            
+            target_name = 'pdfium.dylib'
         elif dirname.startswith('linux'):
-            
-            bin_name = 'pdfium'
-            bin_dir = join(build_dir,'lib')
+            target_name = 'pdfium'
         
-        current_bin_name = os.listdir(bin_dir)[0]
-        bindings_file = join(platform_dir,'_pypdfium.py')
-        header_files = join(build_dir,'include','*.h')
+        current_name = os.listdir(bin_dir)[0]
         
-        current_binpath = join(bin_dir, current_bin_name)
-        new_binpath = join(bin_dir, bin_name)
-        os.rename(current_binpath, new_binpath)
-        dest_binpath = join(platform_dir, bin_name)
+        bin_path = join(bin_dir, target_name)
+        os.rename(join(bin_dir, current_name), bin_path)
         
-        shutil.move(new_binpath, dest_binpath)
+        shutil.move(bin_path, join(platform_dir, target_name))
         
         ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {platform_dir} -L . {header_files} -o {bindings_file}"
         subprocess.run(
@@ -247,13 +241,20 @@ def get_download_files(args):
     if platforms is None:
         return ReleaseFiles
     
+    short_platforms = {}
+    for key in ReleaseFiles.keys():
+        short_platforms[basename(key)] = key
+    
     download_files = {}
-    for plat_name in platforms:
-        if plat_name in ReleaseFiles:
-            download_files[plat_name] = ReleaseFiles[plat_name]
+    
+    for short_name in args.platforms:
+        
+        if short_name in short_platforms:
+            long_name = short_platforms[short_name]
+            download_files[long_name] = ReleaseFiles[long_name]
         else:
-            available_keys = [k for k in ReleaseFiles.keys()]
-            raise ValueError(f"Unknown platform name '{plat_name}'. Available keys are {available_keys}.")
+            available_keys = [k for k in short_platforms.keys()]
+            raise ValueError(f"Unknown platform name '{short_name}'. Available keys are {available_keys}.")
     
     return download_files
 
