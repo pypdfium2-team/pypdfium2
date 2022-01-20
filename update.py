@@ -111,7 +111,7 @@ def clear_data():
 
 def _get_package(args):
     
-    dirname, file_url, file_path = args
+    dirpath, file_url, file_path = args
     print(f"Downloading {file_url} -> {file_path}")
     
     try:
@@ -120,7 +120,7 @@ def _get_package(args):
         traceback.print_exc()
         return None
     
-    return dirname, file_path
+    return dirpath, file_path
 
 
 def download_releases(latest_version, download_files):
