@@ -219,9 +219,9 @@ may also provide helpful information.
 
 PyPDFium2 contains scripts to automate the release process:
 
-* To build the wheels, run `./release.sh`. This will download binaries and header files,
+* To build the wheels, run `make release`. This will download binaries and header files,
   write finished Python binary distributions to `dist/`, and run some checks.
-* To clean up after a release, run `./clean.sh`. This will remove downloaded files and
+* To clean up after a release, run `make clean`. This will remove downloaded files and
   build artifacts.
 
 ### Testing
