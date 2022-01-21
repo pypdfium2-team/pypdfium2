@@ -85,12 +85,6 @@ def render_pdf(
             raise ValueError("If colour is given as a sequence, it must have length 3 or 4.")
         colour = colour_as_hex(*colour)
     
-    if isinstance(file_or_bytes, str):
-        if sys.platform.startswith('win32') and not file_or_bytes.isascii():
-            with open(file_or_bytes, 'rb') as file_handle:
-                data = file_handle.read()
-            file_or_bytes = data
-    
     with PdfContext(file_or_bytes, password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
     n_digits = len(str(n_pages))
