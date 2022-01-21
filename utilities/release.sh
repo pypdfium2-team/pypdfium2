@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-bash clean.sh
+bash utilities/clean.sh
 python3 update.py
-bash setup_all.sh
+bash utilities/setup_all.sh
 twine check dist/*
 check-wheel-contents dist/*.whl
