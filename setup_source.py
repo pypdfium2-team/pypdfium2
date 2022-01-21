@@ -11,10 +11,7 @@ from _setup_base import *
 class bdist (BDistBase):
     def finalize_options(self):
         BDistBase.finalize_options(self)
-        plat_name = sysconfig.get_platform()
-        for char in ('-', '.'):
-            plat_name = plat_name.replace(char, '_')
-        self.plat_name = plat_name
+        self.plat_name = sysconfig.get_platform()
 
 
 def lib_setup(libname):
