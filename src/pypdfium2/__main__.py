@@ -4,19 +4,15 @@
 import os
 import sys
 import ast
-import logging
 import argparse
+import pypdfium2 as pdfium
 from pypdfium2 import _version
-from pypdfium2 import _helpers as helpers
-from pypdfium2 import _constants as consts
 from os.path import (
     join,
     abspath,
     basename,
     splitext,
 )
-
-logger = logging.getLogger(__name__)
 
 
 def rotation_type(string):
@@ -35,7 +31,7 @@ def colour_type(string):
         return evaluated
 
 def optimise_mode_type(string):
-    return consts.OptimiseMode[string.lower()]
+    return pdfium.OptimiseMode[string.lower()]
 
 
 def pagetext_type(value):
@@ -52,7 +48,7 @@ def pagetext_type(value):
             
             start, end = page_or_range.split('-')
             start = int(start) - 1
-            end   = int(end)   - 1
+            end = int(end) - 1
             
             if start < end:
                 pages = [i for i in range(start, end+1)]
@@ -161,9 +157,9 @@ def main():
     args = parse_args()
     
     if args.show_toc:
-        with helpers.PdfContext(abspath(args.pdffile)) as pdf:
-            toc = helpers.get_toc(pdf)
-            helpers.print_toc(toc)
+        with pdfium.PdfContext(abspath(args.pdffile)) as pdf:
+            toc = pdfium.get_toc(pdf)
+            pdfium.print_toc(toc)
         sys.exit()
     
     if args.prefix is None:
@@ -173,7 +169,7 @@ def main():
     
     output_base = join(abspath(args.output), prefix)
     
-    renderer = helpers.render_pdf(
+    renderer = pdfium.render_pdf(
         args.pdffile,
         args.pages,
         password = args.password,
@@ -192,6 +188,5 @@ def main():
         image.close()
 
 
-# the if-main guard is necessary for multiprocessing to work correctly
 if __name__ == '__main__':
     main()

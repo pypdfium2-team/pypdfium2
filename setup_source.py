@@ -5,7 +5,7 @@
 import os
 import sysconfig
 import build_pdfium
-from setup_base import *
+from _setup_base import *
 
 
 class bdist (BDistBase):
