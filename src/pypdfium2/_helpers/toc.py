@@ -94,8 +94,7 @@ def _get_toc_entry(
     
     # viewport
     n_params = ctypes.c_ulong()
-    FloatArray = pdfium.FS_FLOAT * 4
-    view_pos = FloatArray()
+    view_pos = (pdfium.FS_FLOAT * 4)()
     view_mode = pdfium.FPDFDest_GetView(dest, n_params, view_pos)
     n_params = n_params.value
     view_pos = list(view_pos)[:n_params]

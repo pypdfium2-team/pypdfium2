@@ -8,14 +8,13 @@ import pypdfium2 as pdfium
 
 
 def _merge_pdfs(input_paths):
-
+    
     dest_doc = pdfium.FPDF_CreateNewDocument()
     
     for in_path in reversed(input_paths):
         with pdfium.PdfContext(in_path) as src_doc:
             page_count = pdfium.FPDF_GetPageCount(src_doc)
-            IntArray = ctypes.c_int * page_count
-            page_indices = IntArray(*[i for i in range(page_count)])
+            page_indices = (ctypes.c_int * page_count)(*[i for i in range(page_count)])
             pdfium.FPDF_ImportPagesByIndex(dest_doc, src_doc, page_indices, page_count, 0)
     
     return dest_doc
