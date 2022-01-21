@@ -184,7 +184,7 @@ def test_render_pdf():
     )
     for image, suffix in renderer:
         assert isinstance(image, Image.Image)
-        assert suffix == f"{i+1:0{n_digits}}"
+        assert suffix == str(i+1).zfill(n_digits)
         image.close()
         i += 1
 
