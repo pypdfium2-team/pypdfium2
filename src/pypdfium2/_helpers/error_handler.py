@@ -22,7 +22,7 @@ def handle_pdfium_error(valid: bool = True) -> int:
     
     if last_error == pdfium.FPDF_ERR_SUCCESS:
         if not valid:
-            raise LoadPdfError(f"Even though no errors were reported, something invalid happened.")
+            raise LoadPdfError("Even though no errors were reported, something invalid happened.")
     elif last_error == pdfium.FPDF_ERR_UNKNOWN:
         raise LoadPdfError("An unknown error occurred.")
     elif last_error == pdfium.FPDF_ERR_FILE:
@@ -36,6 +36,6 @@ def handle_pdfium_error(valid: bool = True) -> int:
     elif last_error == pdfium.FPDF_ERR_PAGE:
         raise LoadPageError("Page not found or content error.")
     else:
-        raise ValueError(f"Unknown PDFium error code {last_error}.")
+        raise ValueError("Unknown PDFium error code {}.".format(last_error))
     
     return last_error

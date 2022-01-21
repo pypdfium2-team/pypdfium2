@@ -18,7 +18,7 @@ from os.path import (
 def rotation_type(string):
     rotation = int(string)
     if rotation not in (0, 90, 180, 270):
-        raise ValueError(f"Invalid rotation value {rotation}")
+        raise ValueError("Invalid rotation value {}".format(rotation))
     return rotation
 
 def colour_type(string):
@@ -27,7 +27,7 @@ def colour_type(string):
     else:
         evaluated = ast.literal_eval(string)
         if not isinstance(evaluated, (int, tuple, list)):
-            raise ValueError(f"Invalid colour value {evaluated}")
+            raise ValueError("Invalid colour value {}".format(evaluated))
         return evaluated
 
 def optimise_mode_type(string):
@@ -146,7 +146,7 @@ def parse_args(args=sys.argv[1:]):
     parser.add_argument(
         '--version', '-v',
         action = 'version',
-        version = f"PyPDFium2 {_version.V_PYPDFIUM2}" + "\n" + f"PDFium {_version.V_LIBPDFIUM}"
+        version = "PyPDFium2 {}\nPDFium {}".format(_version.V_PYPDFIUM2, _version.V_LIBPDFIUM)
     )
     return parser.parse_args(args)
 

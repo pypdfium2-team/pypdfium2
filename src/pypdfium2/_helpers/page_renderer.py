@@ -78,7 +78,9 @@ def render_page(
     
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
-        raise PageIndexError(f"Page index {page_index} is out of bounds for document with {page_count} pages.")
+        raise PageIndexError(
+            "Page index {} is out of bounds for document with {} pages.".format(page_index, page_count)
+        )
     
     form_config = pdfium.FPDF_FORMFILLINFO(2)
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
@@ -110,7 +112,7 @@ def render_page(
     elif optimise_mode is OptimiseMode.printing:
         render_flags |= pdfium.FPDF_PRINTING
     else:
-        raise ValueError(f"Invalid optimise_mode {optimise_mode}")
+        raise ValueError("Invalid optimise_mode {}".format(optimise_mode))
     
     render_args = [
         bitmap,

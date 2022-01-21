@@ -117,6 +117,5 @@ def render_pdf(
     
     with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
         for index, image in pool.map(_invoke_process_page, meta_args):
-            pageno = index + 1
-            suffix = f"{pageno:0{n_digits}}"
+            suffix = str(index+1).zfill(n_digits)
             yield image, suffix

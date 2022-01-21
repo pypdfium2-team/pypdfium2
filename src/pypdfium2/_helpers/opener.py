@@ -48,7 +48,9 @@ def open_pdf(
         data = file_or_data.read()
         file_or_data.seek(0)
     else:
-        raise ValueError(f"`file_or_data` must be a file path, bytes or a byte buffer, but it is {type(file_or_data)}.")
+        raise ValueError(
+            "`file_or_data` must be a file path, bytes or a byte buffer, but it is {}.".format( type(file_or_data) )
+        )
     
     if filepath is not None:
         pdf = pdfium.FPDF_LoadDocument(filepath, password)

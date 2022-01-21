@@ -16,7 +16,7 @@ def translate_rotation(rotation: int) -> int:
     elif rotation == 270:
         return 3
     else:
-        raise ValueError(f"Invalid rotation {rotation}") 
+        raise ValueError("Invalid rotation {}".format(rotation))
 
 
 def _hex_digits(c):

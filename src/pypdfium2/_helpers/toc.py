@@ -180,4 +180,4 @@ def print_toc(toc) -> None:
         view_mode = item.view_mode
         view_pos = item.view_pos
         
-        print('    '*level + f"{title} -> {pagenum}  # {view_mode} {view_pos}")
+        print( '    '*level + "{} -> {}  # {} {}".format(title, pagenum, view_mode, view_pos) )
