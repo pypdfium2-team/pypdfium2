@@ -49,7 +49,6 @@ def _invoke_process_page(args):
 def render_pdf(
         file_or_bytes: Union[str, bytes],
         page_indices: list = None,
-        *,
         password: str = None,
         n_processes: int = os.cpu_count(),
         scale: float = 1,

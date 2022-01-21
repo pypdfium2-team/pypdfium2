@@ -13,7 +13,6 @@ from pypdfium2._helpers.exceptions import *
 def render_page(
         pdf: pdfium.FPDF_DOCUMENT,
         page_index: int = 0,
-        *,
         scale: float = 1,
         rotation: int = 0,
         colour: int = 0xFFFFFFFF,
