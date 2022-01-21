@@ -337,9 +337,9 @@ def parse_args(args=sys.argv[1:]):
     parser.add_argument(
         '--prefer-systools', '-p',
         action = 'store_true',
-        help = "Try to use system-provided tools if available, rather than pre-built binaries "  +
-               "from DepotTools. Warning: This may or may not work, and should only be used as " +
-               "a last resort if building with the official toolchain failed. Moreover, it will" +
+        help = "Try to use system-provided tools if available, rather than pre-built binaries "   +
+               "from DepotTools. Warning: This may or may not work, and should only be used as "  +
+               "a last resort if building with the official toolchain failed. Moreover, it will " +
                "likely not work on Windows."
     )
     parser.add_argument(
