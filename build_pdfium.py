@@ -141,7 +141,7 @@ def _bins_to_symlinks():
             continue
         
         os.remove(binary_path)
-        run_cmd("ln -s {} {}".format(replacement, binary_path), cwd=NB_BinaryDir)
+        os.symlink(replacement, binary_path)
 
 
 def extra_patch_pdfium():
@@ -249,8 +249,6 @@ def _get_tool(tool, tool_desc, prefer_systools):
 def main(args):
     
     prefer_st = args.prefer_systools
-    if sys.platform.startswith('win32'):
-        prefer_st = False
     
     if prefer_st:
         print("Using system-provided binaries if available.")
@@ -339,11 +337,10 @@ def parse_args(args=sys.argv[1:]):
     parser.add_argument(
         '--prefer-systools', '-p',
         action = 'store_true',
-        help = "Try to use system-provided tools if available, rather than pre-built binaries "   +
-               "from DepotTools. Warning: This may cause the resulting PDFium binary to be less " +
-               "performant than when compiled with the official toolchain and configuration. "    +
-               "Hence, the systools strategy should rather be used as a last resort if regular "  +
-               "build did not work. (This option is not available on Windows.)",
+        help = "Try to use system-provided tools if available, rather than pre-built binaries "  +
+               "from DepotTools. Warning: This may or may not work, and should only be used as " +
+               "a last resort if building with the official toolchain failed. Moreover, it will" +
+               "likely not work on Windows."
     )
     parser.add_argument(
         '--getdeps',
