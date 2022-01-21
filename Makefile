@@ -11,9 +11,12 @@ update-all:
 setup-all:
 	bash ./utilities/setup_all.sh
 
-clean:
-	bash ./utilities/clean.sh
-
 build:
 	python3 build_pdfium.py
 	python3 setup_source.py bdist_wheel
+
+clean:
+	bash ./utilities/clean.sh
+
+compcheck:
+	python3 ./utilities/compcheck.py
