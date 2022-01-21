@@ -181,6 +181,7 @@ def generate_bindings(archives):
         
         if dirname.startswith('windows'):
             target_name = 'pdfium.dll'
+            bin_dir = join(build_dir,'bin')
         elif dirname.startswith('darwin'):
             target_name = 'pdfium.dylib'
         elif dirname.startswith('linux'):
