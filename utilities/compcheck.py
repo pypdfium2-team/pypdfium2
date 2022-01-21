@@ -19,7 +19,7 @@ def main():
             "--exclude-dir",
             "data",
         ]
-        print(command)
+        print(" ".join(command))
         subprocess.run(command, cwd=os.getcwd())
         print()
 
