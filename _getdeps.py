@@ -39,17 +39,17 @@ def install_ctypesgen():
     # prefer latest ctypesgen from git
     
     if exists(Ctypesgen_Dir):
-        run_cmd(f"git reset --hard HEAD", cwd=Ctypesgen_Dir)
-        run_cmd(f"git pull", cwd=Ctypesgen_Dir)
+        run_cmd("git reset --hard HEAD", cwd=Ctypesgen_Dir)
+        run_cmd("git pull", cwd=Ctypesgen_Dir)
     else:
-        run_cmd(f"git clone {Ctypesgen_URL}", cwd=SB_Dir)
+        run_cmd("git clone {}".format(Ctypesgen_URL), cwd=SB_Dir)
     
-    run_cmd(f"pip3 install -U . -v", cwd=Ctypesgen_Dir)
+    run_cmd("pip3 install -U . -v", cwd=Ctypesgen_Dir)
 
 
 def install_pydeps():
     for dep in PyDeps:
-        run_cmd(f"pip3 install {dep}", cwd=None)
+        run_cmd("pip3 install {}".format(dep), cwd=None)
 
 
 def check_sysdeps(sys_commands):
@@ -60,11 +60,11 @@ def check_sysdeps(sys_commands):
         
         if dep_binary is None:
             print(
-                f"Missing system dependency: {dep_name} - please install it using your package manager.",
+                "Missing system dependency: {} - please install it using your package manager.".format(dep_name),
                 file = sys.stderr,
             )
         else:
-            print(f"Found installation of system dependency {dep_name}")
+            print("Found installation of system dependency {}".format(dep_name))
 
 
 def main(prefer_st=False):

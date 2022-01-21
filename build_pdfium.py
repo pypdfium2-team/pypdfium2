@@ -73,19 +73,22 @@ def dl_depottools(do_sync):
     if os.path.isdir(DepotToolsDir):
         if do_sync:
             print("DepotTools: Revert and update ...")
-            run_cmd(f"git reset --hard HEAD", cwd=DepotToolsDir)
-            run_cmd(f"git pull {DepotTools_URL}", cwd=DepotToolsDir)
+            run_cmd("git reset --hard HEAD", cwd=DepotToolsDir)
+            run_cmd("git pull {}".format(DepotTools_URL), cwd=DepotToolsDir)
         else:
             print("DepotTools: Using existing repository as-is.")
             is_update = False
     else:
         print("DepotTools: Download ...")
-        run_cmd(f"git clone --depth 1 {DepotTools_URL} {DepotToolsDir}", cwd=SB_Dir)
+        run_cmd(
+            "git clone --depth 1 {} {}".format(DepotTools_URL, DepotToolsDir),
+            cwd = SB_Dir
+        )
     
     if sys.platform.startswith('win32'):
-        os.environ['PATH'] += f";{DepotToolsDir}"
+        os.environ['PATH'] += ";" + DepotToolsDir
     else:
-        os.environ['PATH'] += f":{DepotToolsDir}"
+        os.environ['PATH'] += ":" + DepotToolsDir
     
     return is_update
 
@@ -97,21 +100,21 @@ def dl_pdfium(do_sync, GClient):
     if os.path.isdir(PDFiumDir):
         if do_sync:
             print("PDFium: Revert / Sync  ...")
-            run_cmd(f"{GClient} revert", cwd=SB_Dir)
+            run_cmd(GClient + " revert", cwd=SB_Dir)
         else:
             print("PDFium: Using existing repository as-is.")
             is_update = False
     else:
         print("PDFium: Download ...")
-        run_cmd(f"{GClient} config --unmanaged {PDFium_URL}", cwd=SB_Dir)
-        run_cmd(f"{GClient} sync --no-history --shallow", cwd=SB_Dir)
+        run_cmd(GClient + " config --unmanaged {PDFium_URL}", cwd=SB_Dir)
+        run_cmd(GClient + " sync --no-history --shallow", cwd=SB_Dir)
     
     return is_update
     
 
 def _apply_patchset(patchset, cwd):
     for patch in patchset:
-        run_cmd(f"git apply -v {patch}", cwd=cwd)
+        run_cmd("git apply -v {}".format(patch), cwd=cwd)
 
 def patch_depottools():
     _apply_patchset(DepotPatches, DepotToolsDir)
@@ -131,20 +134,20 @@ def _bins_to_symlinks():
         replacement = shutil.which(name)
         
         if replacement is None:
-            print(f"Warning: No system provided replacement available for '{name}' - " +
+            print("Warning: No system provided replacement available for '{}' - ".format(name) +
                   "will keep using the version shipped with the PDFium toolchain.",
                   file = sys.stderr,
             )
             continue
         
         os.remove(binary_path)
-        run_cmd(f"ln -s {replacement} {binary_path}", cwd=NB_BinaryDir)
+        run_cmd("ln -s {} {}".format(replacement, binary_path), cwd=NB_BinaryDir)
 
 
 def extra_patch_pdfium():
     
     patch = join(PatchDir,'nativebuild.patch')
-    run_cmd(f"git apply -v {patch}", cwd=join(PDFiumDir,'build'))
+    run_cmd("git apply -v {}".format(patch), cwd=join(PDFiumDir,'build'))
     
     _bins_to_symlinks()
 
@@ -157,11 +160,11 @@ def configure(config, GN):
     with open(join(PDFiumBuildDir,'args.gn'), 'w') as args_handle:
         args_handle.write(config)
     
-    run_cmd(f"{GN} gen {PDFiumBuildDir}", cwd=PDFiumDir)
+    run_cmd(GN + " gen {}".format(PDFiumBuildDir), cwd=PDFiumDir)
 
 
 def build(Ninja):
-    run_cmd(f"{Ninja} -C {PDFiumBuildDir} pdfium", cwd=PDFiumDir)
+    run_cmd(Ninja + " -C {} pdfium".format(PDFiumBuildDir), cwd=PDFiumDir)
 
 
 def find_lib(srcname=None, directory=PDFiumBuildDir):
@@ -210,7 +213,11 @@ def pack(src_libpath, destname=None):
     header_files = join(include_dir,'*.h')
     bindings_file = join(OutputDir,'_pypdfium.py')
     
-    ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {OutputDir} -L . {header_files} -o {bindings_file}"
+    ctypesgen_cmd = "ctypesgen --library pdfium --strip-build-path {} -L . {} -o {}".format(
+        OutputDir,
+        header_files,
+        bindings_file,
+    )
     subprocess.run(
         ctypesgen_cmd,
         stdout = subprocess.PIPE,
@@ -231,7 +238,10 @@ def _get_tool(tool, tool_desc, prefer_systools):
         if _sh_exe:
             exe = _sh_exe
         else:
-            print(f"Warning: Host system does not provide {tool} ({tool_desc}).", file=sys.stderr)
+            print(
+                "Warning: Host system does not provide {} ({}).".format(tool, tool_desc),
+                file = sys.stderr,
+            )
     
     return exe
 
@@ -277,7 +287,7 @@ def main(args):
         with open(abspath(args.argfile), 'r') as file_handle:
             config_str = file_handle.read()
     
-    print(f"\nBuild configuration:\n{config_str}\n")
+    print("\nBuild configuration:\n{}\n".format(config_str))
     
     depot_dl_done = dl_depottools(args.update)
     if depot_dl_done:

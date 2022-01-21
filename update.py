@@ -35,7 +35,6 @@ from _packaging import (
     postprocess_bindings,
 )
 
-
 VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 DataTree     = join(SourceTree,'data')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
@@ -73,7 +72,7 @@ def _set_version(version_content, variable, new_version):
 def get_latest_version():
     
     git_ls = subprocess.run(
-        f'git ls-remote https://github.com/bblanchon/pdfium-binaries.git',
+        "git ls-remote https://github.com/bblanchon/pdfium-binaries.git",
         stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT,
         shell  = True,
@@ -112,7 +111,7 @@ def clear_data():
 def _get_package(args):
     
     dirpath, file_url, file_path = args
-    print(f"Downloading {file_url} -> {file_path}")
+    print("Downloading {} -> {}".format(file_url, file_path))
     
     try:
         request.urlretrieve(file_url, file_path)
@@ -125,12 +124,12 @@ def _get_package(args):
 
 def download_releases(latest_version, download_files):
     
-    base_url = f"{ReleaseURL}{latest_version}/"
+    base_url = "{}{}/".format(ReleaseURL, latest_version)
     args = []
     
     for dirpath, arcname in download_files.items():
         
-        filename = f"{arcname}.{ReleaseExtension}"
+        filename = "{}.{}".format(arcname, ReleaseExtension)
         file_url = base_url + filename
         
         if not os.path.exists(dirpath):
@@ -163,7 +162,7 @@ def unpack_archives(archives):
         elif ReleaseExtension == 'zip':
             arc_opener = zipfile.ZipFile
         else:
-            raise ValueError(f"Unknown archive extension {ReleaseExtension}")
+            raise ValueError("Unknown archive extension {}".format(ReleaseExtension))
         
         with arc_opener(file) as archive:
             archive.extractall(extraction_path)
@@ -206,7 +205,11 @@ def generate_bindings(archives):
         
         shutil.move(bin_path, join(platform_dir, target_name))
         
-        ctypesgen_cmd = f"ctypesgen --library pdfium --strip-build-path {platform_dir} -L . {header_files} -o {bindings_file}"
+        ctypesgen_cmd = "ctypesgen --library pdfium --strip-build-path {} -L . {} -o {}".format(
+            platform_dir,
+            header_files,
+            bindings_file,
+        )
         subprocess.run(
             ctypesgen_cmd,
             stdout = subprocess.PIPE,
@@ -249,7 +252,9 @@ def get_download_files(args):
             download_files[long_name] = ReleaseFiles[long_name]
         else:
             available_keys = [k for k in short_platforms.keys()]
-            raise ValueError(f"Unknown platform name '{short_name}'. Available keys are {available_keys}.")
+            raise ValueError(
+                "Unknown platform name '{}'. Available keys are {}.".format(short_name, available_keys)
+            )
     
     return download_files
 
