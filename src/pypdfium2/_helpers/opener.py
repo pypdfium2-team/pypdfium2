@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
-import pathlib
 from os.path import (
     abspath,
 )
@@ -15,7 +14,7 @@ from pypdfium2._helpers.error_handler import *
 
 
 def open_pdf(
-        file_or_data: Union[str, pathlib.Path, bytes, io.BytesIO, io.BufferedReader],
+        file_or_data: Union[str, bytes, io.BytesIO, io.BufferedReader],
         password: Optional[ Union[str, bytes] ] = None
     ) -> pdfium.FPDF_DOCUMENT:
     """
@@ -43,8 +42,6 @@ def open_pdf(
     
     if isinstance(file_or_data, str):
         filepath = abspath(file_or_data)
-    elif isinstance(file_or_data, pathlib.Path):
-        filepath = str(file_or_data.resolve())
     elif isinstance(file_or_data, bytes):
         data = file_or_data
     elif isinstance(file_or_data, (io.BytesIO, io.BufferedReader)):

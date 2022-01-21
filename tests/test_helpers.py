@@ -3,11 +3,11 @@
 
 import io
 import pytest
-import pathlib
 import logging
 from PIL import Image
-from .conftest import TestFiles, OutputDir
 import pypdfium2 as pdfium
+from os.path import join
+from .conftest import TestFiles, OutputDir
 
 
 def _open_pdf(file_or_data, password=None, page_count=1):
@@ -17,14 +17,8 @@ def _open_pdf(file_or_data, password=None, page_count=1):
 
 
 def test_pdfct_str():
-    in_path = str(TestFiles.render)
-    assert isinstance(in_path, str)
-    _open_pdf(in_path)
-
-
-def test_pdfct_pathlib():
     in_path = TestFiles.render
-    assert isinstance(in_path, pathlib.Path)
+    assert isinstance(in_path, str)
     _open_pdf(in_path)
 
 
@@ -150,28 +144,28 @@ def test_render_page_rotation():
             pdf, 0,
             rotation = 0
         )
-        image_0.save(OutputDir/'rotate_0.png')
+        image_0.save(join(OutputDir,'rotate_0.png'))
         image_0.close()
         
         image_90 = pdfium.render_page(
             pdf, 0,
             rotation = 90
         )
-        image_90.save(OutputDir/'rotate_90.png')
+        image_90.save(join(OutputDir,'rotate_90.png'))
         image_90.close()
         
         image_180 = pdfium.render_page(
             pdf, 0,
             rotation = 180
         )
-        image_180.save(OutputDir/'rotate_180.png')
+        image_180.save(join(OutputDir,'rotate_180.png'))
         image_180.close()
         
         image_270 = pdfium.render_page(
             pdf, 0,
             rotation = 270
         )
-        image_270.save(OutputDir/'rotate_270.png')
+        image_270.save(join(OutputDir,'rotate_270.png'))
         image_270.close()
         
 
@@ -213,7 +207,7 @@ def test_render_greyscale():
             pdf, 0,
             greyscale = True,
         )
-        image_a.save(OutputDir/'greyscale.png')
+        image_a.save(join(OutputDir,'greyscale.png'))
         assert image_a.mode == 'L'
         image_a.close()
         
@@ -223,7 +217,7 @@ def test_render_greyscale():
             colour = None,
         )
         assert image_b.mode == 'LA'
-        image_b.save(OutputDir/'greyscale_alpha.png')
+        image_b.save(join(OutputDir,'greyscale_alpha.png'))
         image_b.close()
 
 

@@ -2,32 +2,38 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import logging
-from pathlib import Path
+from os.path import (
+    join,
+    isdir,
+    isfile,
+    dirname,
+    abspath,
+)
 
 
 lib_logger = logging.getLogger('pypdfium2')
 lib_logger.addHandler(logging.StreamHandler())
 
 
-TestDir     = Path(__file__).parent.resolve()
-ResourceDir = TestDir / 'resources'
-OutputDir   = TestDir / 'output'
+TestDir     = dirname(abspath(__file__))
+ResourceDir = join(TestDir,'resources')
+OutputDir   = join(TestDir,'output')
 
 class TestFiles:
-    render    = ResourceDir / 'test_render.pdf'
-    encrypted = ResourceDir / 'test_encrypted.pdf'
-    multipage = ResourceDir / 'test_multipage.pdf'
-    bookmarks = ResourceDir / 'test_bookmarks.pdf'
-    bookmarks_circular = ResourceDir / 'test_bookmarks_circular.pdf'
+    render    = join(ResourceDir,'test_render.pdf')
+    encrypted = join(ResourceDir,'test_encrypted.pdf')
+    multipage = join(ResourceDir,'test_multipage.pdf')
+    bookmarks = join(ResourceDir,'test_bookmarks.pdf')
+    bookmarks_circular = join(ResourceDir,'test_bookmarks_circular.pdf')
 
 
 def test_paths():
     
     print(ResourceDir)
-    assert ResourceDir.is_dir()
+    assert isdir(ResourceDir)
     
     for attr_name in dir(TestFiles):
         if not attr_name.startswith('_'):
-            file = getattr(TestFiles, attr_name)
-            print(file)
-            assert file.exists()
+            filepath = getattr(TestFiles, attr_name)
+            print(filepath)
+            assert isfile(filepath)
