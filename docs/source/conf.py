@@ -21,9 +21,8 @@
 # -- Project information -----------------------------------------------------
 import time
 
-_current_year = time.strftime('%Y')
-project = 'pypdfium2'
-copyright = f'{_current_year} pypdfium2-team'
+project = "pypdfium2"
+copyright = "{} pypdfium2-team".format( time.strftime('%Y') )
 author = 'pypdfium2-team'
 
 
