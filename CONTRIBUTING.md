@@ -23,10 +23,11 @@ with your contribution, and some rules that we would like you to follow:
   
 * Type hints and code comments are appreciated wherever they improve readability.
 
-* Please try to keep compatibility with the minimum Python version defined in [`setup.cfg`][setup-cfg].
-  This means to avoid newer Python features like f-strings or keywords-only enforcement.
+* Please try to keep compatibility with the minimum supported Python version defined in
+  [`setup.cfg`][setup-cfg]. This means to avoid newer features like f-strings or keywords-only
+  enforcement.
 
-* For working with file paths, please use `os.path` / `shutil` instead of `pathlib`.
+* For working with file paths, we prefer to use `os.path` / `shutil` instead of `pathlib`.
 
 [spdx-licenses]: https://spdx.org/licenses/
 [reuse-lint]: https://pypi.org/project/reuse/
