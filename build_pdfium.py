@@ -160,11 +160,11 @@ def configure(config, GN):
     with open(join(PDFiumBuildDir,'args.gn'), 'w') as args_handle:
         args_handle.write(config)
     
-    run_cmd(GN + " gen {}".format(PDFiumBuildDir), cwd=PDFiumDir)
+    run_cmd("{} gen {}".format(GN, PDFiumBuildDir), cwd=PDFiumDir)
 
 
 def build(Ninja):
-    run_cmd(Ninja + " -C {} pdfium".format(PDFiumBuildDir), cwd=PDFiumDir)
+    run_cmd("{} -C {} pdfium".format(Ninja, PDFiumBuildDir), cwd=PDFiumDir)
 
 
 def find_lib(srcname=None, directory=PDFiumBuildDir):
