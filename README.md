@@ -30,7 +30,7 @@ This will download a pre-built binary for PDFium, generate the bindings and
 build a wheel.
 
 ```bash
-python3 update.py -p ${platform_name}
+python3 update_pdfium.py -p ${platform_name}
 python3 setup_${platform_name}.py bdist_wheel
 python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 ```

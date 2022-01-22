@@ -6,7 +6,7 @@ release:
 	bash ./utilities/release.sh
 
 update-all:
-	python3 update.py
+	python3 update_pdfium.py
 
 setup-all:
 	bash ./utilities/setup_all.sh
