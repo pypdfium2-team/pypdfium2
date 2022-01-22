@@ -1,6 +1,34 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+from pypdfium2 import _pypdfium as pdfium
+from pypdfium2._helpers.constants import ViewMode
+
+
+def translate_viewmode(viewmode: int) -> ViewMode:
+    """
+    Convert a PDFium view mode integer to an attribute of the :class:`.ViewMode` enum.
+    """
+    
+    if viewmode == pdfium.PDFDEST_VIEW_UNKNOWN_MODE:
+        return ViewMode.Unknown
+    elif viewmode == pdfium.PDFDEST_VIEW_XYZ:
+        return ViewMode.XYZ
+    elif viewmode == pdfium.PDFDEST_VIEW_FIT:
+        return ViewMode.Fit
+    elif viewmode == pdfium.PDFDEST_VIEW_FITH:
+        return ViewMode.FitH
+    elif viewmode == pdfium.PDFDEST_VIEW_FITV:
+        return ViewMode.FitV
+    elif viewmode == pdfium.PDFDEST_VIEW_FITR:
+        return ViewMode.FitR
+    elif viewmode == pdfium.PDFDEST_VIEW_FITB:
+        return ViewMode.FitB
+    elif viewmode == pdfium.PDFDEST_VIEW_FITBH:
+        return ViewMode.FitBH
+    elif viewmode == pdfium.PDFDEST_VIEW_FITBV:
+        return ViewMode.FitBV
+
 
 def translate_rotation(rotation: int) -> int:
     """

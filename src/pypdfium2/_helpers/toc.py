@@ -10,6 +10,7 @@ from typing import (
 )
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.constants import ViewMode
+from pypdfium2._helpers.utilities import translate_viewmode
 
 logger = logging.getLogger(__name__)
 
@@ -48,31 +49,6 @@ class OutlineItem:
         self.view_pos = view_pos
 
 
-def _translate_viewmode(viewmode: int) -> ViewMode:
-    """
-    Convert a PDFium view mode integer to an attribute of the :class:`.ViewMode` enum.
-    """
-    
-    if viewmode == pdfium.PDFDEST_VIEW_UNKNOWN_MODE:
-        return ViewMode.Unknown
-    elif viewmode == pdfium.PDFDEST_VIEW_XYZ:
-        return ViewMode.XYZ
-    elif viewmode == pdfium.PDFDEST_VIEW_FIT:
-        return ViewMode.Fit
-    elif viewmode == pdfium.PDFDEST_VIEW_FITH:
-        return ViewMode.FitH
-    elif viewmode == pdfium.PDFDEST_VIEW_FITV:
-        return ViewMode.FitV
-    elif viewmode == pdfium.PDFDEST_VIEW_FITR:
-        return ViewMode.FitR
-    elif viewmode == pdfium.PDFDEST_VIEW_FITB:
-        return ViewMode.FitB
-    elif viewmode == pdfium.PDFDEST_VIEW_FITBH:
-        return ViewMode.FitBH
-    elif viewmode == pdfium.PDFDEST_VIEW_FITBV:
-        return ViewMode.FitBV
-
-
 def _get_toc_entry(
         pdf: pdfium.FPDF_DOCUMENT,
         bookmark: pdfium.FPDF_BOOKMARK,
@@ -98,7 +74,7 @@ def _get_toc_entry(
     view_mode = pdfium.FPDFDest_GetView(dest, n_params, view_pos)
     n_params = n_params.value
     view_pos = list(view_pos)[:n_params]
-    view_mode = _translate_viewmode(view_mode)
+    view_mode = translate_viewmode(view_mode)
     
     item = OutlineItem()
     item.level = level
