@@ -21,8 +21,8 @@
 # -- Project information -----------------------------------------------------
 import time
 
-project = "pypdfium2"
-copyright = "{} pypdfium2-team".format( time.strftime('%Y') )
+project = 'pypdfium2'
+copyright = '{} pypdfium2-team'.format( time.strftime('%Y') )
 author = 'pypdfium2-team'
 
 
@@ -39,6 +39,7 @@ extensions = [
 ]
 
 autodoc_preserve_defaults = True
+autodoc_typehints_format = 'short'
 
 autodoc_default_options = {
     'members': True,
