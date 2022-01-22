@@ -100,14 +100,14 @@ def dl_pdfium(do_sync, GClient):
     if os.path.isdir(PDFiumDir):
         if do_sync:
             print("PDFium: Revert / Sync  ...")
-            run_cmd(GClient + " revert", cwd=SB_Dir)
+            run_cmd("{} revert".format(GClient), cwd=SB_Dir)
         else:
             print("PDFium: Using existing repository as-is.")
             is_update = False
     else:
         print("PDFium: Download ...")
-        run_cmd(GClient + " config --unmanaged {PDFium_URL}", cwd=SB_Dir)
-        run_cmd(GClient + " sync --no-history --shallow", cwd=SB_Dir)
+        run_cmd("{} config --unmanaged {}".format(GClient, PDFium_URL), cwd=SB_Dir)
+        run_cmd("{} sync --no-history --shallow".format(GClient), cwd=SB_Dir)
     
     return is_update
     
