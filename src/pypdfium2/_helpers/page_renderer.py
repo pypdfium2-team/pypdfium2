@@ -53,7 +53,7 @@ def render_page(
             .. _8888 ARGB: https://en.wikipedia.org/wiki/RGBA_color_model#ARGB32
             
             The background colour to use, given as a hexadecimal integer in `8888 ARGB`_ format.
-            Defaults to white (``0xFFFFFFFF``). See also :func:`colour_as_hex`.
+            Defaults to white (``0xFFFFFFFF``). See also :func:`.colour_as_hex`.
         
         annotations:
             Whether to render page annotations.

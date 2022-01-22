@@ -71,9 +71,9 @@ def render_pdf(
         colour:
             The background colour to use, as a hexadecimal integer in 32-bit ARGB format.
             It is also possible to provide a colour tuple, which is implicitly converted
-            using :func:`colour_as_hex`.
+            using :func:`.colour_as_hex`.
     
-    The other parameters are the same as for :func:`render_page`.
+    The other parameters are the same as for :func:`.render_page`.
     
     Yields:
         A PIL image, and a string for serial enumeration of output files.
