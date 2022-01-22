@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
+import os.path
+import ctypes
 import pytest
 import logging
 from PIL import Image
@@ -10,7 +12,7 @@ from os.path import join
 from .conftest import TestFiles, OutputDir
 
 
-def _open_pdf(file_or_data, password=None, page_count=1):
+def _load_pdf(file_or_data, password=None, page_count=1):
     with pdfium.PdfContext(file_or_data, password) as pdf:
         assert isinstance(pdf, pdfium.FPDF_DOCUMENT)
         assert pdfium.FPDF_GetPageCount(pdf) == page_count
@@ -19,21 +21,21 @@ def _open_pdf(file_or_data, password=None, page_count=1):
 def test_pdfct_str():
     in_path = TestFiles.render
     assert isinstance(in_path, str)
-    _open_pdf(in_path)
+    _load_pdf(in_path)
 
 
 def test_pdfct_bytestring():
     with open(TestFiles.render, 'rb') as file:
         data = file.read()
         assert isinstance(data, bytes)
-    _open_pdf(data)
+    _load_pdf(data)
 
 
 def test_pdfct_bytesio():
     with open(TestFiles.render, 'rb') as file:
         buffer = io.BytesIO(file.read())
         assert isinstance(buffer, io.BytesIO)
-    _open_pdf(buffer)
+    _load_pdf(buffer)
     assert buffer.closed == False
     assert buffer.tell() == 0
     buffer.close()
@@ -42,30 +44,74 @@ def test_pdfct_bytesio():
 def test_pdfct_bufreader():
     with open(TestFiles.render, 'rb') as buf_reader:
         assert isinstance(buf_reader, io.BufferedReader)
-        _open_pdf(buf_reader)
+        _load_pdf(buf_reader)
         assert buf_reader.closed == False
         assert buf_reader.tell() == 0
 
 
 def test_pdfct_encrypted():
-    _open_pdf(TestFiles.encrypted, 'test_user')
-    _open_pdf(TestFiles.encrypted, 'test_owner')
-    _open_pdf(TestFiles.encrypted, 'test_user'.encode('ascii'))
-    _open_pdf(TestFiles.encrypted, 'test_user'.encode('UTF-8'))
+    _load_pdf(TestFiles.encrypted, 'test_user')
+    _load_pdf(TestFiles.encrypted, 'test_owner')
+    _load_pdf(TestFiles.encrypted, 'test_user'.encode('ascii'))
+    _load_pdf(TestFiles.encrypted, 'test_user'.encode('UTF-8'))
     with open(TestFiles.encrypted, 'rb') as buf_reader:
-        _open_pdf(buf_reader, password='test_user')
+        _load_pdf(buf_reader, password='test_user')
 
 
 def test_pdfct_encrypted_fail():
     pw_err_context = pytest.raises(pdfium.LoadPdfError, match="Missing or wrong password.")
     with pw_err_context:
-        _open_pdf(TestFiles.encrypted)
+        _load_pdf(TestFiles.encrypted)
     with pw_err_context:
-        _open_pdf(TestFiles.encrypted, 'string')
+        _load_pdf(TestFiles.encrypted, 'string')
     with pw_err_context:
-        _open_pdf(TestFiles.encrypted, 'string'.encode('ascii'))
+        _load_pdf(TestFiles.encrypted, 'string'.encode('ascii'))
     with pw_err_context:
-        _open_pdf(TestFiles.encrypted, 'string'.encode('UTF-8'))
+        _load_pdf(TestFiles.encrypted, 'string'.encode('UTF-8'))
+
+
+def test_save_pdf_tobuffer():
+    
+    pdf = pdfium.open_pdf(TestFiles.multipage)
+    pdfium.FPDFPage_Delete(pdf, ctypes.c_int(0))
+    
+    buffer = io.BytesIO()
+    pdfium.save_pdf(pdf, buffer)
+    buffer.seek(0)
+    
+    data = buffer.read()
+    start = data[:8]
+    end = data[-6:]
+    
+    print(start, end)
+    
+    assert start == b"%PDF-1.6"
+    assert end == b"%EOF\r\n"
+    
+    pdfium.close_pdf(pdf)
+
+
+def test_save_pdf_tofile():
+    
+    src_pdf = pdfium.open_pdf(TestFiles.multipage)
+    
+    # perform n-up compositing
+    dest_pdf = pdfium.FPDF_ImportNPagesToOne(
+        src_pdf,
+        ctypes.c_float(1190),  # width
+        ctypes.c_float(1684),  # height
+        ctypes.c_size_t(2),    # number of horizontal pages
+        ctypes.c_size_t(2),    # number of vertical pages
+    )
+    
+    output_path = join(OutputDir,'n-up.pdf')
+    with open(output_path, 'wb') as file_handle:
+        pdfium.save_pdf(dest_pdf, file_handle)
+    
+    for pdf in (src_pdf, dest_pdf):
+        pdfium.close_pdf(pdf)
+    
+    assert os.path.isfile(output_path)
 
 
 @pytest.mark.parametrize(
@@ -167,7 +213,6 @@ def test_render_page_rotation():
         )
         image_270.save(join(OutputDir,'rotate_270.png'))
         image_270.close()
-        
 
 
 def test_render_pdf():
