@@ -59,7 +59,7 @@ def test_pdfct_encrypted():
 
 
 def test_pdfct_encrypted_fail():
-    pw_err_context = pytest.raises(pdfium.LoadPdfError, match="Missing or wrong password.")
+    pw_err_context = pytest.raises(pdfium.PdfiumError, match="Missing or wrong password.")
     with pw_err_context:
         _load_pdf(TestFiles.encrypted)
     with pw_err_context:
