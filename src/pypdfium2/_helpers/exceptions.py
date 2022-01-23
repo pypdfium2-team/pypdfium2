@@ -9,18 +9,6 @@ class PdfiumError (RuntimeError):
     pass
 
 
-class LoadPdfError (PdfiumError):
-    """
-    Raised if ``FPDF_GetPageCount()`` returns a value less than 1.
-    """
-    pass
-
-
-class LoadPageError (PdfiumError):
-    """ Raised if PDFium fails to load a page. """
-    pass
-
-
 class PageIndexError (IndexError):
     """ Raised on the attempt to load an out-of-bounds page number. """
     pass

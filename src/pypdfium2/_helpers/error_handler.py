@@ -22,19 +22,19 @@ def handle_pdfium_error(valid: bool = True) -> int:
     
     if last_error == pdfium.FPDF_ERR_SUCCESS:
         if not valid:
-            raise LoadPdfError("Even though no errors were reported, something invalid happened.")
+            raise PdfiumError("Even though no errors were reported, something invalid happened.")
     elif last_error == pdfium.FPDF_ERR_UNKNOWN:
-        raise LoadPdfError("An unknown error occurred.")
+        raise PdfiumError("An unknown error occurred.")
     elif last_error == pdfium.FPDF_ERR_FILE:
-        raise LoadPdfError("The file could not be found or opened.")
+        raise PdfiumError("The file could not be found or opened.")
     elif last_error == pdfium.FPDF_ERR_FORMAT:
-        raise LoadPdfError("Data format error.")
+        raise PdfiumError("Data format error.")
     elif last_error == pdfium.FPDF_ERR_PASSWORD:
-        raise LoadPdfError("Missing or wrong password.")
+        raise PdfiumError("Missing or wrong password.")
     elif last_error == pdfium.FPDF_ERR_SECURITY:
-        raise LoadPdfError("Unsupported security scheme.")
+        raise PdfiumError("Unsupported security scheme.")
     elif last_error == pdfium.FPDF_ERR_PAGE:
-        raise LoadPageError("Page not found or content error.")
+        raise PdfiumError("Page not found or content error.")
     else:
         raise ValueError("Unknown PDFium error code {}.".format(last_error))
     
