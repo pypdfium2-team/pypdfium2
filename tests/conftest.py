@@ -15,12 +15,12 @@ lib_logger = logging.getLogger('pypdfium2')
 lib_logger.addHandler(logging.StreamHandler())
 
 
-TestDir     = dirname(abspath(__file__))
+TestDir = dirname(abspath(__file__))
 ResourceDir = join(TestDir,'resources')
-OutputDir   = join(TestDir,'output')
+OutputDir = join(TestDir,'output')
 
 class TestFiles:
-    render    = join(ResourceDir,'render.pdf')
+    render = join(ResourceDir,'render.pdf')
     encrypted = join(ResourceDir,'encrypted.pdf')
     multipage = join(ResourceDir,'multipage.pdf')
     bookmarks = join(ResourceDir,'bookmarks.pdf')
