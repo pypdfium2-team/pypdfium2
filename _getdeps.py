@@ -41,7 +41,7 @@ def install_ctypesgen():
         run_cmd("git reset --hard HEAD", cwd=Ctypesgen_Dir)
         run_cmd("git pull", cwd=Ctypesgen_Dir)
     else:
-        run_cmd("git clone {}".format(Ctypesgen_URL), cwd=SB_Dir)
+        run_cmd('git clone --depth 1 "{}"'.format(Ctypesgen_URL), cwd=SB_Dir)
     
     run_cmd("pip3 install -U . -v", cwd=Ctypesgen_Dir)
 
