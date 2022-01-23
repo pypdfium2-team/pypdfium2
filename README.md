@@ -181,6 +181,9 @@ pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
 pdfium.FPDF_CloseDocument(doc)
 ```
 
+For more examples of using the raw API, take a look at the [support model source code](src/pypdfium2/_helpers)
+and the [examples directory](examples).
+
 Documentation for the [PDFium API](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html)
 is available. PyPDFium2 transparently maps all PDFium classes, enums and functions to Python.
 However, there can sometimes be minor differences between Foxit and open-source PDFium.
