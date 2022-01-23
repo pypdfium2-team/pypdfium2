@@ -36,10 +36,6 @@ Constants
 *********
 .. automodule:: pypdfium2._helpers.constants
 
-Exceptions
-**********
-.. automodule:: pypdfium2._helpers.exceptions
-
 Error Handler
 *************
 .. automodule:: pypdfium2._helpers.error_handler

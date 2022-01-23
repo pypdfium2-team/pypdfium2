@@ -7,7 +7,6 @@ from PIL import Image
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers import utilities
 from pypdfium2._helpers.constants import *
-from pypdfium2._helpers.exceptions import *
 
 
 def render_page(
@@ -77,7 +76,7 @@ def render_page(
     
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
-        raise PageIndexError(
+        raise IndexError(
             "Page index {} is out of bounds for document with {} pages.".format(page_index, page_count)
         )
     

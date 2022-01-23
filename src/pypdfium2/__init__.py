@@ -6,7 +6,6 @@ import logging
 from pypdfium2 import _version
 from pypdfium2._pypdfium import *
 from pypdfium2._helpers.constants import *
-from pypdfium2._helpers.exceptions import *
 from pypdfium2._helpers.error_handler import *
 from pypdfium2._helpers.utilities import *
 from pypdfium2._helpers.opener import *

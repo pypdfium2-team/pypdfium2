@@ -2,7 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from pypdfium2 import _pypdfium as pdfium
-from pypdfium2._helpers.exceptions import *
+
+
+class PdfiumError (RuntimeError):
+    """
+    An exception from the PDFium library.
+    """
+    pass
 
 
 def handle_pdfium_error(valid: bool = True) -> int:
