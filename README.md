@@ -207,8 +207,8 @@ Documentation and examples of PyPDFium2 are CC-BY-4.0 licensed.
 PDFium builds are retrieved from [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries).
 Python bindings are auto-generated with [ctypesgen](https://github.com/ctypesgen/ctypesgen)
 
-Please see [#3](https://github.com/pypdfium2-team/pypdfium2/issues/3) to get a list of platforms
-for which binary wheels are available.
+Please see [#3](https://github.com/pypdfium2-team/pypdfium2/issues/3) for a list of platforms
+where binary wheels are available.
 Some wheels are not tested, unfortunately. If you have access to a theoretically supported but
 untested system, please report success or failure on the issue or discussion panel.
 
