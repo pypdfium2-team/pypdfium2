@@ -63,8 +63,6 @@ def render_pdf(
     Parameters:
         file_or_bytes:
             The PDF document to render, either given as file path or as bytes.
-            On Windows, if the given file path contains non-ascii characters, the data
-            is read into memory.
         page_indices:
             A list of zero-based page indices to render.
         colour:
