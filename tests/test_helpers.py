@@ -103,7 +103,7 @@ def test_save_pdf_tobuffer():
 
 def test_save_pdf_tofile():
     
-    src_pdf = pdfium.open_pdf(TestFiles.multipage)
+    src_pdf = pdfium.open_pdf(TestFiles.cropbox)
     
     # perform n-up compositing
     dest_pdf = pdfium.FPDF_ImportNPagesToOne(
