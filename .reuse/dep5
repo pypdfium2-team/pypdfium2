@@ -31,6 +31,22 @@ Comment:
     This file is part of the PDFium test suite
     (https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf)
 
+Files: tests/resources/mediabox_missing.pdf
+Copyright: 2020 Jerome Robert
+License: GPL-3.0-or-later
+Comment:
+    The file is hand-written and not a valid PDF.
+    Obtained from: https://github.com/pdfarranger/pdfarranger/blob/main/tests/test.pdf
+    License assumed from project license and debian copyright file.
+
+Files: tests/resources/cropbox.pdf
+Copyright: 2021 Charlotte Curtis <c.f.curtis@gmail.com>
+           2022 geisserml <geisserml@gmail.com>
+License: MPL-2.0
+Comment:
+    Derived from: https://github.com/cfcurtis/pdfstitcher/blob/main/resources/testdoc.pdf
+    License assumed from project license.
+
 Files: sourcebuild/patches/*
 Copyright: 2021 Benoît Blanchon
 License: 

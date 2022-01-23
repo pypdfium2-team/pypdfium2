@@ -25,6 +25,8 @@ class TestFiles:
     multipage = join(ResourceDir,'multipage.pdf')
     bookmarks = join(ResourceDir,'bookmarks.pdf')
     bookmarks_circular = join(ResourceDir,'bookmarks_circular.pdf')
+    cropbox = join(ResourceDir,'cropbox.pdf')
+    mediabox_missing = join(ResourceDir,'mediabox_missing.pdf')
 
 
 def test_paths():
