@@ -27,8 +27,8 @@ def _get_box(
 
 def get_mediabox(page: pdfium.FPDF_PAGE) -> Tuple[float]:
     """
-    Returns the MediaBox of *page*.
-    Falls back to ANSI A if the PDF page does not define a MediaBox.
+    Returns the MediaBox of *page* in PDF canvas units (usually 1/72in).
+    Falls back to ANSI A if the page does not define a MediaBox.
     """
     
     return _get_box(
@@ -40,8 +40,8 @@ def get_mediabox(page: pdfium.FPDF_PAGE) -> Tuple[float]:
 
 def get_cropbox(page: pdfium.FPDF_PAGE) -> Tuple[float]:
     """
-    Returns the CropBox of *page*.
-    Falls back to MediaBox if the PDF page does not define a CropBox.
+    Returns the CropBox of *page* in PDF canvas units (usually 1/72in).
+    Falls back to MediaBox if the page does not define a CropBox.
     """
     
     return _get_box(

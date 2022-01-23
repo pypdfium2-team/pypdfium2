@@ -28,6 +28,10 @@ TOC Parser
 **********
 .. automodule:: pypdfium2._helpers.toc
 
+PDF Boxes
+*********
+.. automodule:: pypdfium2._helpers.boxes
+
 Utilities
 *********
 .. automodule:: pypdfium2._helpers.utilities
