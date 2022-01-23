@@ -22,6 +22,8 @@ PyPDFium2 Changelog
       demonstrated in the example [`merge_pdfs.py`](examples/merge_pdfs.py).
     * Methods `get_mediabox()` and `get_cropbox()` to retrieve PDF boxes of an `FPDF_PAGE`.
     * Made the utility functions `translate_viewmode()` and `translate_rotation()` public.
+- Removed the in-library logging setup as it could cause issues for downstream users who wish
+  to configure the pypdfium2 logger.
 - Minor optimisations to the table of contents helper functions have been made "under the hood".
 - Improved build scripts.
 - Adapted the update script to upstream changes (thanks @bblanchon).
