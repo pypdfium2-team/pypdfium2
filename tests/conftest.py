@@ -20,11 +20,11 @@ ResourceDir = join(TestDir,'resources')
 OutputDir   = join(TestDir,'output')
 
 class TestFiles:
-    render    = join(ResourceDir,'test_render.pdf')
-    encrypted = join(ResourceDir,'test_encrypted.pdf')
-    multipage = join(ResourceDir,'test_multipage.pdf')
-    bookmarks = join(ResourceDir,'test_bookmarks.pdf')
-    bookmarks_circular = join(ResourceDir,'test_bookmarks_circular.pdf')
+    render    = join(ResourceDir,'render.pdf')
+    encrypted = join(ResourceDir,'encrypted.pdf')
+    multipage = join(ResourceDir,'multipage.pdf')
+    bookmarks = join(ResourceDir,'bookmarks.pdf')
+    bookmarks_circular = join(ResourceDir,'bookmarks_circular.pdf')
 
 
 def test_paths():

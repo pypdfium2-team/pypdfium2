@@ -17,14 +17,14 @@ Files: tests/resources/*.pdf
 Copyright: 2022 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
 
-Files: tests/resources/test_bookmarks.pdf
+Files: tests/resources/bookmarks.pdf
 Copyright: 2020 Matthias Erll
 License: MPL-2.0
 Comment:
     Obtained from: https://github.com/pikepdf/pikepdf/blob/master/tests/resources/outlines.pdf
     (see https://github.com/pikepdf/pikepdf/blob/master/debian/copyright)
 
-Files: tests/resources/test_bookmarks_circular.pdf
+Files: tests/resources/bookmarks_circular.pdf
 Copyright: 2021 PDFium Developers
 License: BSD-3-Clause OR Apache-2.0
 Comment:
