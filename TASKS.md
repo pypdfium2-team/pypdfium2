@@ -3,6 +3,7 @@ PyPDFium2 Tasks
 
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
+* Pin ctypesgen to a commit considered stable in `_getdeps.py`, until upstream has made a proper release.
 * Rework the CLI to use subcommands (e. g. `pypdfium2 render`, `pypdfium2 toc`, `pypdfium2 merge`, ...). Also consider positional arguments for file input so the commands are shorter to write. Moreover, allow input of multiple files at once.
 * Support custom output formats for rendering with the CLI.
 * Improve getting and setting the version when updating binaries/bindings.
