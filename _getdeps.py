@@ -15,6 +15,7 @@ from _packaging import (
 
 
 Ctypesgen_URL = "https://github.com/ctypesgen/ctypesgen.git"
+Ctypesgen_PIN = "cef9a7ac58a50d0ae4f260abdeb75e0a71398187"
 Ctypesgen_Dir = join(SB_Dir,'ctypesgen')
 
 PyDeps = [
@@ -35,14 +36,15 @@ NB_SysCommands = [
 
 def install_ctypesgen():
     
-    # prefer latest ctypesgen from git
+    # prefer a newer version of ctypesgen
     
     if exists(Ctypesgen_Dir):
         run_cmd("git reset --hard HEAD", cwd=Ctypesgen_Dir)
-        run_cmd("git pull", cwd=Ctypesgen_Dir)
+        run_cmd("git pull {} master".format(Ctypesgen_URL), cwd=Ctypesgen_Dir)
     else:
-        run_cmd('git clone --depth 1 "{}"'.format(Ctypesgen_URL), cwd=SB_Dir)
+        run_cmd("git clone {}".format(Ctypesgen_URL), cwd=SB_Dir)
     
+    run_cmd("git checkout {}".format(Ctypesgen_PIN), cwd=Ctypesgen_Dir)
     run_cmd("pip3 install -U . -v", cwd=Ctypesgen_Dir)
 
 

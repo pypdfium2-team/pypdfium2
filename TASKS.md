@@ -7,7 +7,6 @@ PyPDFium2 Tasks
   Since most distributions are already compiling PDFium for their Chromium package anyway, it should be feasible to
   build PDFium as a dynamically linked library and add a development package containing the header files. We could
   then add a custom setup file that will create bindings using the system-provided PDFium headers.
-* Pin ctypesgen to a commit considered stable in `_getdeps.py`, until upstream has made a proper release.
 * Rework the CLI to use subcommands (e. g. `pypdfium2 render`, `pypdfium2 toc`, `pypdfium2 merge`, ...).
   Also consider positional arguments for file input so the commands are shorter to write. Moreover, allow input of
   multiple files at once.
