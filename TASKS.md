@@ -3,7 +3,7 @@ PyPDFium2 Tasks
 
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
-* Ask Linux distributors to package PDFium, as this could greatly simplify installation of PyPDFium2 for many users.
+* Ask Linux distributors to package PDFium, as this could greatly simplify the installation of PyPDFium2 for many users.
   Since most distributions are already compiling PDFium for their Chromium package anyway, it should be feasible to
   build PDFium as a dynamically linked library and add a development package containing the header files. We could
   then add a custom setup file that will create bindings using the system-provided PDFium headers.
