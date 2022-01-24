@@ -4,10 +4,10 @@
 PyPDFium2 Changelog
 ===================
 
-0.10.0 (unreleased)
+0.10.0 (2022-01-24)
 -------------------
 
-- Updated PDFium from `4835` to `xxxx`.
+- Updated PDFium from `4835` to `4849`.
 - Completely rearranged the internal structure of the support model.
   The public API should be mostly unaffected by these changes, however.
 - Adapted documentation and tests to the support model changes.
@@ -36,5 +36,6 @@ PyPDFium2 Changelog
 - Adapted the update script to upstream changes (thanks @bblanchon).
 - Moved some scripts from the root directory into `utilities/` and changed the Makefile
   accordingly.
+- Added a list of future [tasks](TASKS.md) to keep in mind.
 
 Tracking changes started with version 0.10.0, so there are no entries for older releases.
