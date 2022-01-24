@@ -91,7 +91,7 @@ def get_toc(
         parent: Optional[pdfium.FPDF_BOOKMARK] = None,
         level: int = 0,
         max_depth: int = 15,
-        seen: Optional[list] = None,
+        seen: Optional[set] = None,
     ) -> Iterator[OutlineItem]:
     """
     Read the table of contents ("outline") of a PDF document.

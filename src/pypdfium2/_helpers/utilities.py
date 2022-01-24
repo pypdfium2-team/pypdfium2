@@ -28,6 +28,8 @@ def translate_viewmode(viewmode: int) -> ViewMode:
         return ViewMode.FitBH
     elif viewmode == pdfium.PDFDEST_VIEW_FITBV:
         return ViewMode.FitBV
+    else:
+        raise ValueError("Unknown PDFium viewmode value {}".format(viewmode))
 
 
 def translate_rotation(rotation: int) -> int:
