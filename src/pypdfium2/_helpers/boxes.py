@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from ctypes import c_float, byref
-from typing import Tuple, Callable
+from typing import Sequence, Callable
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.error_handler import *
 
@@ -11,8 +11,8 @@ def _get_box(
         page: pdfium.FPDF_PAGE,
         box_function: Callable,
         fallback_function: Callable,
-    ) -> Tuple[float]:
-        
+    ) -> Sequence[float]:
+    
     left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
     
     ret_code = box_function(
@@ -25,10 +25,13 @@ def _get_box(
     return (left.value, bottom.value, right.value, top.value)
 
 
-def get_mediabox(page: pdfium.FPDF_PAGE) -> Tuple[float]:
+def get_mediabox(page: pdfium.FPDF_PAGE) -> Sequence[float]:
     """
-    Returns the MediaBox of *page* in PDF canvas units (usually 1/72in).
+    Get the MediaBox of *page* in PDF canvas units (usually 1/72in).
     Falls back to ANSI A if the page does not define a MediaBox.
+
+    Returns:
+        A tuple of four float coordinates.
     """
     
     return _get_box(
@@ -38,10 +41,13 @@ def get_mediabox(page: pdfium.FPDF_PAGE) -> Tuple[float]:
     )
 
 
-def get_cropbox(page: pdfium.FPDF_PAGE) -> Tuple[float]:
+def get_cropbox(page: pdfium.FPDF_PAGE) -> Sequence[float]:
     """
-    Returns the CropBox of *page* in PDF canvas units (usually 1/72in).
+    Get the CropBox of *page* in PDF canvas units (usually 1/72in).
     Falls back to MediaBox if the page does not define a CropBox.
+
+    Returns:
+        A tuple of four float coordinates.
     """
     
     return _get_box(
