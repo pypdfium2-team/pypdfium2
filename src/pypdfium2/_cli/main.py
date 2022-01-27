@@ -39,10 +39,10 @@ def run_cli(argv=sys.argv[1:]):
         method = merger.main,
         help = "Concatenate PDF files",
     )
-    # runner.add_subcommand(
-    #     "tile",
-    #     method = tiler.main,
-    #     help = "Perform page tiling (N-up compositing)",
-    # )
+    runner.add_subcommand(
+        "tile",
+        method = tiler.main,
+        help = "Perform page tiling (N-up compositing)",
+    )
     
     runner.run()
