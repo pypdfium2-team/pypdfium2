@@ -29,5 +29,5 @@ PyPDFium2 Tasks
 * Allow for only returning bytes rather than creating an `Image.Image` object when rendering, so that callers may use the
   data in any way they like, without having to go through an intermediate PIL object (e. g. directly inject the data into
   a GUI widget buffer).
-* Investigate what can be done regarding compatiblity with legacy setuptools versions (issue #52).
+* Investigate what can be done regarding compatibility with legacy setuptools versions (issue #52).
 * Think about further extending support for older Python versions (see changelog).
