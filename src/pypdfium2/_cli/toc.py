@@ -18,7 +18,7 @@ def parse_args(argv, prog, desc):
         '--max-depth',
         type = int,
         default = 15,
-        help = "Maximum recursion depths to consider when parsing the table of contents."
+        help = "Maximum recursion depth to consider when parsing the table of contents",
     )
     return parser.parse_args(argv)
 

@@ -114,7 +114,7 @@ def parse_args(argv, prog, desc):
     parser.add_argument(
         '--no-annotations',
         action = 'store_true',
-        help = "Option to prevent rendering of PDF annotations.",
+        help = "Option to prevent rendering of PDF annotations",
     )
     parser.add_argument(
         '--optimise-mode',
