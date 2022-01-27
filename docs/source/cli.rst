@@ -4,6 +4,24 @@
 Command-line Interface
 ======================
 
-PyPDFium2 also has a command-line interface:
+PyPDFium2 can also be used from the command-line.
 
-.. program-output:: pypdfium2 --help
+Main help
+*********
+.. program-output:: python3 -m pypdfium2 help
+
+Version
+*******
+.. program-output:: python3 -m pypdfium2 version
+
+Renderer
+********
+.. program-output:: python3 -m pypdfium2 render
+
+Table of Contents Reader
+************************
+.. program-output:: python3 -m pypdfium2 toc
+
+Merger
+******
+.. program-output:: python3 -m pypdfium2 merge

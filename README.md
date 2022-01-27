@@ -54,23 +54,21 @@ pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 
 Rasterise a PDF document:
 ```bash
-pypdfium2 -i your_file.pdf -o your_output_dir/ --scale 1 --rotation 0 --optimise-mode none
+pypdfium2 render document.pdf -o output_dir/ --scale 2 --optimise-mode none
 ```
 
-If you want to render multiple files at once, a bash `for`-loop may be suitable:
+You may also rasterise multiple files at once:
 ```bash
-for file in ./*.pdf; do echo "$file" && pypdfium2 -i "$file" -o your_output_dir/ --scale 2; done
+pypdfium2 render doc_1.pdf doc_2.pdf doc_3.pdf -o output_dir/
 ```
 
-Dump the table of contents of a PDF:
+Show the table of contents for a PDF:
 ```bash
-pypdfium2 --show-toc -i your_file.pdf
+pypdfium2 toc document.pdf
 ```
 
-To obtain a full list of possible command-line parameters, run
-```bash
-pypdfium2 --help
-```
+To obtain a list of subcommands, run `pypdfium2 --help`.
+Individual help for each subcommand is available can be accessed in the same way (`pypdfium any_subcommand --help`)
 
 CLI documentation: https://pypdfium2.readthedocs.io/en/latest/cli.html
 
