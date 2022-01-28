@@ -9,8 +9,4 @@ logger = logging.getLogger(__name__)
 
 
 FPDF_InitLibrary()
-
-def exit_handler():
-    FPDF_DestroyLibrary()
-
-atexit.register(exit_handler)
+atexit.register(FPDF_DestroyLibrary)
