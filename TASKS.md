@@ -14,7 +14,6 @@ PyPDFium2 Tasks
   import the module).
 * Add means for automatic system dependency installation on Linux. Prompt the user for the admin password using `sudo`,
   `pkexec` or similar.
-* Remove the KDevelop project from the repository.
 * Move Changelog and Contributing Guidelines into the Sphinx documentation.
 * Think about how to prevent further growth of the repository root directory.
 * Decide what to do about the kind of failed `compcheck.py` utility.
