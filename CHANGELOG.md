@@ -1,11 +1,25 @@
 <!-- SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-PyPDFium2 Changelog
-===================
+# PyPDFium2 Changelog
 
-0.10.0 (2022-01-24)
--------------------
+## 0.11.0 (unreleased)
+
+- Overhauled the command-line interface to group different tasks in subcommands.
+  It should be a lot cleaner now; easier to use and extend. These modifications make the
+  command-line API incompatible with previous releases, though.
+  In the course of this restructuring, the following functional changes were applied:
+  * Made rendering output formats customisable by providing control over the file extension
+    to use, from which the `Pillow` library will be able to automatically determine the
+    corresponding encoder.
+  * Changed the rendering parser to accept multiple files at once.
+  * Positional arguments are now used for file input.
+  * Added CLI commands for merging PDFs and performing page tiling (N-up).
+  * Temporarily removed support for working with encrypted PDFs while we are looking for a
+    suitable way to take passwords for multiple files.
+- Adapted documentation to the CLI changes.
+
+## 0.10.0 (2022-01-24)
 
 - Updated PDFium from `4835` to `4849`.
 - Completely rearranged the internal structure of the support model.

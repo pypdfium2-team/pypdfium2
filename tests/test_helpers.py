@@ -395,11 +395,11 @@ def test_cropbox_different():
         
         pages = _load_pages(pdf)
         
-        mediaboxes = [ (0, 0, 612, 792) for i in range(20)]
+        mediaboxes = [(0, 0, 612, 792) for i in range(20)]
         for i in range(12, 16):
             mediaboxes[i] = (0, 0, 419.52, 595.32)
         
-        cropboxes = [ (53, 35, 559, 757) for i in range(20)]
+        cropboxes = [(53, 35, 559, 757) for i in range(20)]
         for i in range(12, 16):
             cropboxes[i] = (48, 86, 371.52, 509.32)
         

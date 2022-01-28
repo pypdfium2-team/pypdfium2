@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pytest
-from pypdfium2 import __main__ as cli
+import os.path
 import pypdfium2 as pdfium
+from pypdfium2._cli import renderer
 
 
 @pytest.mark.parametrize(
@@ -17,14 +18,14 @@ import pypdfium2 as pdfium
     ],
 )
 def test_rotation_type(test_input, expected):
-    assert cli.rotation_type(test_input) == expected
+    assert renderer.rotation_type(test_input) == expected
 
 
 def test_rotation_type_fail_oob():
     with pytest.raises(ValueError, match="Invalid rotation value"):
-        cli.rotation_type("101")
+        renderer.rotation_type("101")
     with pytest.raises(ValueError, match="invalid literal for int()"):
-        cli.rotation_type("string")
+        renderer.rotation_type("string")
 
 
 @pytest.mark.parametrize(
@@ -37,7 +38,7 @@ def test_rotation_type_fail_oob():
     ],
 )
 def test_colour_type(test_input, expected):
-    assert cli.colour_type(test_input) == expected
+    assert renderer.colour_type(test_input) == expected
 
 
 @pytest.mark.parametrize(
@@ -51,16 +52,14 @@ def test_colour_type(test_input, expected):
     ],
 )
 def test_pagetext_type(test_input, expected):
-    assert cli.pagetext_type(test_input) == expected
+    assert renderer.pagetext_type(test_input) == expected
 
 
 def test_parse_args():
     
     argv = [
-        '-i', 'path/to/document.pdf',
+        'path/to/document.pdf',
         '-o', 'output_dir/',
-        '--password', 'test-password',
-        '--prefix', 'render_',
         '--pages', '1,4,5-7,6-4',
         '--scale', '2',
         '--rotation', '90',
@@ -69,12 +68,10 @@ def test_parse_args():
         '--processes', '4',
     ]
     
-    args = cli.parse_args(argv)
+    args = renderer.parse_args(argv, prog="", desc="")
     
-    assert args.pdffile == 'path/to/document.pdf'
-    assert args.output == 'output_dir/'
-    assert args.password == 'test-password'
-    assert args.prefix == 'render_'
+    assert args.inputs == ['path/to/document.pdf']
+    assert args.output == os.path.abspath('output_dir/')
     assert args.pages == [0, 3, 4, 5, 6, 5, 4, 3]
     assert args.scale == 2
     assert args.rotation == 90
