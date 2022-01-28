@@ -15,5 +15,8 @@ def lib_setup():
         package_data = {'': ['pdfium.dll']},
     )
 
+def main():
+    return build(lib_setup, WindowsArm64)
+
 if __name__ == '__main__':
-    build(lib_setup, WindowsArm64)
+    main()

@@ -5,6 +5,7 @@
 # Download the PDFium binaries and generate ctypes bindings
 
 import os
+import sys
 from os.path import (
     join,
     dirname,
@@ -211,7 +212,7 @@ def generate_bindings(archives):
         shutil.rmtree(build_dir)
 
 
-def parse_args():
+def parse_args(argv):
     parser = argparse.ArgumentParser(
         description = "Download pre-built PDFium packages and generate the bindings,",
     )
@@ -220,7 +221,7 @@ def parse_args():
         metavar = 'P',
         nargs = '*',
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def get_download_files(args):
@@ -249,9 +250,9 @@ def get_download_files(args):
     return download_files
 
 
-def main():
+def main(argv=sys.argv[1:]):
     
-    args = parse_args()
+    args = parse_args(argv)
     download_files = get_download_files(args)
     
     latest_version = get_latest_version()

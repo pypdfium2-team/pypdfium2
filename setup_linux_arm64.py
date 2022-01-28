@@ -15,5 +15,8 @@ def lib_setup():
         package_data = {'': ['pdfium']},
     )
 
+def main():
+    return build(lib_setup, LinuxArm64)
+
 if __name__ == '__main__':
-    build(lib_setup, LinuxArm64)
+    main()

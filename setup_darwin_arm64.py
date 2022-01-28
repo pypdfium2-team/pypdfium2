@@ -15,5 +15,8 @@ def lib_setup():
         package_data = {'': ['pdfium.dylib']},
     )
 
+def main():
+    return build(lib_setup, DarwinArm64)
+
 if __name__ == '__main__':
-    build(lib_setup, DarwinArm64)
+    main()
