@@ -16,10 +16,10 @@ import setup_windows_x64
 import setup_windows_x86
 import _getdeps as getdeps
 from os.path import join
-from _packaging import SourceTree
+from _packaging import DataTree
 
 
-StatusFile = join(SourceTree,'.setup_status.txt')
+StatusFile = join(DataTree,'setup_status.txt')
 
 def perform_presetup() -> bool:
     with open(StatusFile, 'r') as file_handle:

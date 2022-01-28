@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 data/
-!data/.gitkeep
+!data/setup_status.txt
 build/
 dist/
 docs/build/*
