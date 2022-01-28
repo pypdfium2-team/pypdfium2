@@ -21,6 +21,10 @@
 - When opening from a byte buffer, any object that implements the `.read()` method is now
   accepted (previously, only `BytesIO` and `BufferedReader` were supported). Note that we
   no longer automatically seek back to the start of the buffer.
+- Greatly improved `setup.py`: Formerly, running `pip3 install .` always triggered a source
+  build, on behalf of platforms for which no wheel is available. With this release, the code
+  was changed to detect the current platform and use pre-compiled binaries if available, with
+  source build only as fallback.
 
 ## 0.10.0 (2022-01-24)
 
