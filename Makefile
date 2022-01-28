@@ -2,6 +2,9 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0 
 
+install:
+	python3 -m pip install . -v
+
 release:
 	bash ./utilities/release.sh
 
@@ -11,12 +14,9 @@ update-all:
 setup-all:
 	bash ./utilities/setup_all.sh
 
-build:
+sourcebuild:
 	python3 build_pdfium.py
 	python3 setup_source.py bdist_wheel
 
 clean:
 	bash ./utilities/clean.sh
-
-compcheck:
-	python3 ./utilities/compcheck.py
