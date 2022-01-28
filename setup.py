@@ -70,7 +70,7 @@ class PlatformManager:
         return self._is_platform('win', 'amd64')
     
     def is_windows_x86(self):
-        return self.plat_name.startswith('win32')
+        return self._is_platform('win32', '')
 
 
 
