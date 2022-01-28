@@ -78,7 +78,7 @@ def main():
     
     # Since setuptools may run this code multiple times with different commands,
     # we have a status file to check whether pre-setup tasks have already been done.
-    # If you deliberately wish to re-run them, set the content of `.setup_status.txt`
+    # If you deliberately wish to re-run them, set the content of `data/setup_status.txt`
     # to `InitialState`.
     w_presetup = perform_presetup()
     
