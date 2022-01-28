@@ -10,7 +10,7 @@
   command-line API incompatible with previous releases, though.
   In the course of this restructuring, the following functional changes were applied:
   * Made rendering output formats customisable by providing control over the file extension to use,
-    from which the `Pillow` library will be able to automatically determine corresponding encoder.
+    from which the `Pillow` library will be able to automatically determine the corresponding encoder.
   * Changed the rendering parser to accept multiple files at once.
   * Positional arguments are now used for file input.
   * Added CLI commands for merging PDFs and performing page tiling (N-up).
