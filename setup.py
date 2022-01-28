@@ -139,7 +139,8 @@ def main():
     # and then write a wheel to `dist/` using `python3 setup_source.py bdist_wheel`
     else:
         if w_presetup:
-            build_pdfium.main( build_pdfium.parse_args() )
+            args = build_pdfium.parse_args([])
+            build_pdfium.main(args)
         setup_source.main()
 
 
