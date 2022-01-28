@@ -92,7 +92,8 @@ def parse_args(argv, prog, desc):
         default = 1,
         type = float,
         help = ("Define the resolution of the output images. By default, one PDF point (1/72in) "
-                "is rendered to 1x1 pixel. This factor scales the number of pixels that represent one point."),
+                "is rendered to 1x1 pixel. This factor scales the number of pixels that represent "
+                "one point."),
     )
     parser.add_argument(
         '--rotation',
@@ -104,10 +105,8 @@ def parse_args(argv, prog, desc):
         '--colour',
         default = 0xFFFFFFFF,
         type = colour_type,
-        help = ("Page background colour as 32-bit ARGB hex string, or as tuple of "
-                "integers from 0 to 255. Use 'none' for alpha background. Defaults to "
-                "white (255, 255, 255)."
-               ),
+        help = ("Page background colour as 32-bit ARGB hex string, or as tuple of integers "
+                "from 0 to 255. Use 'none' for alpha background. Defaults to white (255, 255, 255)."),
     )
     parser.add_argument(
         '--no-annotations',
