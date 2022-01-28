@@ -116,7 +116,7 @@ def parse_args(argv, prog, desc):
     )
     parser.add_argument(
         '--optimise-mode',
-        default = 'none',
+        default = pdfium.OptimiseMode.none,
         type = lambda string: pdfium.OptimiseMode[string.lower()],
         help = "Select a rendering optimisation mode (none, lcd_display, printing)",
     )
