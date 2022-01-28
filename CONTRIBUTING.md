@@ -19,8 +19,11 @@ with your contribution, and some rules that we would like you to follow:
                 in an inconsistent way, the Python interpreter will not be able to parse your code.
   
 * Blank lines should contain as many spaces that they stay on the correct indentation level.
-  This makes editing a lot easier.
-  
+  This makes editing a lot easier. (VS Code: Uncheck "Editor: Trim Auto Whitespace")
+
+* Files should always end with a newline character for consistency.
+  (VS Code: Check "Files: Insert Final Newline")
+
 * Type hints and code comments are appreciated wherever they improve readability.
 
 * Please try to keep compatibility with the minimum supported Python version defined in
