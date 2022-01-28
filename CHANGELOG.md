@@ -18,6 +18,9 @@
   * Temporarily removed support for working with encrypted PDFs while we are looking for a
     suitable way to take passwords for multiple files.
 - Adapted documentation to the CLI changes.
+- When opening from a byte buffer, any object that implements the `.read()` method is now
+  accepted (previously, only `BytesIO` and `BufferedReader` were supported). Note that we
+  no longer automatically seek back to the start of the buffer.
 
 ## 0.10.0 (2022-01-24)
 

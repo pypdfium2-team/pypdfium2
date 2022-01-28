@@ -47,7 +47,6 @@ def test_pdfct_bytesio():
         assert isinstance(buffer, io.BytesIO)
     _load_pdf(buffer)
     assert buffer.closed == False
-    assert buffer.tell() == 0
     buffer.close()
 
 
@@ -56,7 +55,6 @@ def test_pdfct_bufreader():
         assert isinstance(buf_reader, io.BufferedReader)
         _load_pdf(buf_reader)
         assert buf_reader.closed == False
-        assert buf_reader.tell() == 0
 
 
 def test_pdfct_encrypted():

@@ -44,9 +44,8 @@ def open_pdf(
         filepath = abspath(file_or_data)
     elif isinstance(file_or_data, bytes):
         data = file_or_data
-    elif isinstance(file_or_data, (io.BytesIO, io.BufferedReader)):
+    elif callable(getattr(file_or_data, 'read', None)):
         data = file_or_data.read()
-        file_or_data.seek(0)
     else:
         raise ValueError(
             "`file_or_data` must be a file path, bytes or a byte buffer, but it is {}.".format( type(file_or_data) )
