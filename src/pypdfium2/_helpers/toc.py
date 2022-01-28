@@ -35,11 +35,11 @@ class OutlineItem:
     
     def __init__(
             self,
-            level: int = None,
-            title: str = None,
-            page_index: int = None,
-            view_mode: ViewMode = None,
-            view_pos: Sequence[float] = None,
+            level: int,
+            title: str,
+            page_index: int,
+            view_mode: ViewMode,
+            view_pos: Sequence[float],
         ):
         
         self.level = level
@@ -76,14 +76,13 @@ def _get_toc_entry(
     view_pos = list(view_pos)[:n_params]
     view_mode = translate_viewmode(view_mode)
     
-    item = OutlineItem()
-    item.level = level
-    item.title = title
-    item.page_index = page_index
-    item.view_mode = view_mode
-    item.view_pos = view_pos
-    
-    return item
+    return OutlineItem(
+        level = level,
+        title = title,
+        page_index = page_index,
+        view_mode = view_mode,
+        view_pos = view_pos,
+    )
 
 
 def get_toc(
