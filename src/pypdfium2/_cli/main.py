@@ -15,7 +15,7 @@ from pypdfium2._cli import (
 )
 
 
-def run_cli(argv=sys.argv[1:]):
+def main(argv=sys.argv[1:]):
     
     runner = CliRunner(
         program = "PyPDFium2",
