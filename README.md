@@ -21,7 +21,7 @@ python3 -m pip install -U pypdfium2
 The following steps require the external tools `git`, `ctypesgen` and `gcc` to be
 installed and available in `PATH`. Additionally, the python package `wheel` is required.
 
-For source build, more dependencies may be necessary (see [`DEPS.txt`](DEPS.txt)).
+For source build, more dependencies may be necessary (see [`DEPS.md`](DEPS.md)).
 
 
 #### Package locally
