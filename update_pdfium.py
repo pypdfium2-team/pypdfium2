@@ -31,11 +31,11 @@ from _setup_base import (
 )
 from _packaging import (
     SourceTree,
+    DataTree,
     postprocess_bindings,
 )
 
 VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
-DataTree     = join(SourceTree,'data')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
 ReleaseExtension = 'tgz'
 ReleaseFiles = {
