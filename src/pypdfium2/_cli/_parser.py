@@ -76,7 +76,7 @@ class CliRunner:
         sep = ''
         for sub in self._subs:
             help += sep + sub.name + '\n'
-            help += " "*4 + sub.help
+            help += ' '*4 + sub.help
             sep = '\n'
         
         return help
