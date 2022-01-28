@@ -248,8 +248,8 @@ Run `pytest` on the `tests` directory.
 ## Issues
 
 Since PyPDFium2 is built using upstream binaries and an automatic bindings creator,
-issues that are not related to packaging most likely need to be addressed upstream.
-However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
+issues that are not related to packaging or support model code probably need to be
+addressed upstream. However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
 is always a good place to start if you have any problems, questions or suggestions.
 
 If the cause of an issue could be determined to be in PDFium, the problem needs to be
@@ -266,9 +266,9 @@ If your issue is caused by the bindings generator, refer to the
 
 ### Non-ascii file paths on Windows
 
-On Windows, PDFium currently is not able to open documents with file names containing multi-byte, non-ascii
-characters. This issue is [confirmed upstream](https://bugs.chromium.org/p/pdfium/issues/detail?id=682), but
-has not been addressed yet.
+On Windows, PDFium currently is not able to open documents with file names containing
+multi-byte, non-ascii characters. This issue is [confirmed upstream](https://bugs.chromium.org/p/pdfium/issues/detail?id=682),
+but has not been addressed yet.
 
   
 ## Thanks
