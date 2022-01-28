@@ -28,8 +28,4 @@ def main(argv, prog, desc):
     args = parse_args(argv, prog, desc)
     
     with pdfium.PdfContext(args.input) as pdf:
-        toc = pdfium.get_toc(
-            pdf,
-            max_depth = args.max_depth,
-        )
-        pdfium.print_toc(toc)
+        pdfium.print_toc( pdfium.get_toc(pdf, max_depth=args.max_depth) )
