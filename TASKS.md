@@ -12,8 +12,6 @@ PyPDFium2 Tasks
 * Read the version differently in setup, as shown in `PIL` and `archive-pdf-tools`, because it seems like the `attr:`
   directive (at least under some conditions) does not extract the version value literally (that is, without trying to
   import the module).
-* Change `setup.py` to use a pre-compiled platform-specific binary if available. Otherwise, try to do a source build.
-  (Maybe ask the user beforehand.) Consider a fallback to system-provided tools if regular build failed.
 * Add means for automatic system dependency installation on Linux. Prompt the user for the admin password using `sudo`,
   `pkexec` or similar.
 * Remove the KDevelop project from the repository.
