@@ -255,7 +255,7 @@ is always a good place to start if you have any problems, questions or suggestio
 If the cause of an issue could be determined to be in PDFium, the problem needs to be
 reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list).
 
-Issues related to build configuration should be discussed at
+Issues related to pre-compiled binaries should be discussed at
 [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
 
 If your issue is caused by the bindings generator, refer to the
