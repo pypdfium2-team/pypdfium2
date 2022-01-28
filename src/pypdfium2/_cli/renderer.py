@@ -27,9 +27,6 @@ def colour_type(string):
             raise ValueError("Invalid colour value {}".format(evaluated))
         return evaluated
 
-def optimise_mode_type(string):
-    return pdfium.OptimiseMode[string.lower()]
-
 
 def pagetext_type(value):
     
@@ -76,6 +73,7 @@ def parse_args(argv, prog, desc):
     parser.add_argument(
         '--output', '-o',
         type = abspath,
+        required = True,
         help = "Output directory where to place the serially numbered images",
     )
     parser.add_argument(
@@ -119,7 +117,7 @@ def parse_args(argv, prog, desc):
     parser.add_argument(
         '--optimise-mode',
         default = 'none',
-        type = optimise_mode_type,
+        type = lambda string: pdfium.OptimiseMode[string.lower()],
         help = "Select a rendering optimisation mode (none, lcd_display, printing)",
     )
     parser.add_argument(
