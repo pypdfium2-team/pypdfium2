@@ -11,7 +11,7 @@
         relies on in-place packaging without an intermediate temporary directory.
         See [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
 
-* pip3 >= 21.3
+* pip >= 21.3
 * git
 * gcc
 * setuptools
