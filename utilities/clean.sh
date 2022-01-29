@@ -7,5 +7,4 @@ rm -r __pycache__
 rm -r src/pypdfium2/__pycache__
 rm -r dist
 rm -r data/*
-touch data/.gitkeep
 echo "InitialState" > data/setup_status.txt
