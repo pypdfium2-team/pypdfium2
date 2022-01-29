@@ -33,6 +33,7 @@
   which makes it a lot less prone to errors.
 - Modernised the update script code that reads and writes the version file.
 - Updated the Makefile.
+- Removed KDevelop project files from the repository.
 
 ## 0.10.0 (2022-01-24)
 
