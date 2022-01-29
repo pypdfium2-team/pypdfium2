@@ -25,7 +25,7 @@ from os.path import (
 
 StatusFile = join(DataTree,'setup_status.txt')
 
-def check_with_presetup() -> bool:
+def check_presetup() -> bool:
     with open(StatusFile, 'r') as file_handle:
         content = file_handle.read().strip()
     if content == 'InitialState':
@@ -89,7 +89,7 @@ def main():
     # we have a status file to check whether pre-setup tasks have already been done.
     # If you deliberately wish to re-run them, set the content of `data/setup_status.txt`
     # to `InitialState`.
-    w_presetup = check_with_presetup()
+    w_presetup = check_presetup()
     
     if w_presetup:
         
