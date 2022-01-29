@@ -29,8 +29,8 @@
   build, on behalf of platforms for which no wheel is available. With this release, the code
   was changed to detect the current platform and use pre-compiled binaries if available, with
   source build only as fallback.
-- The version file is now always read literally on setup, which makes it a lot less prone to
-  errors.
+- On setup, the version file is now always read literally (i. e. without importing the module),
+  which makes it a lot less prone to errors.
 - Modernised the update script code that reads and writes the version file.
 - Updated the Makefile.
 
