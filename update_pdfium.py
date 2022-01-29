@@ -21,6 +21,8 @@ from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 from _setup_base import PlatformDirs
 from _packaging import (
+    VersionFile,
+    extract_version,
     SourceTree,
     postprocess_bindings,
 )
@@ -39,23 +41,22 @@ ReleaseFiles = {
     PlatformDirs.WindowsArm64 : 'pdfium-win-arm64',
 }
 
-
-def _version_pos(version_content, variable):
-    expression = variable + ' = '
-    pos_var = version_content.index(expression) + len(expression)
-    pos_lineend = len(version_content[:pos_var]) + version_content[pos_var:].index('\n')
-    return pos_var, pos_lineend
-
-def _get_version(version_content, variable):
-    pos_var, pos_lineend = _version_pos(version_content, variable)
-    value = version_content[pos_var:pos_lineend]
-    version = int(value)
-    return version
-
-def _set_version(version_content, variable, new_version):
-    pos_var, pos_lineend = _version_pos(version_content, variable)
-    new_vc = version_content[:pos_var] + str(new_version) + version_content[pos_lineend:]
-    return new_vc
+def _set_versions(versions_list) -> str:
+    
+    with open(VersionFile, 'r') as fh:
+        content = fh.read()
+    
+    for variable, current_ver, new_ver in versions_list:
+        
+        template = "{} = {}"
+        previous = template.format(variable, current_ver)
+        updated = template.format(variable, new_ver)
+        
+        print( "'{}' -> '{}'".format(previous, updated) )
+        content = content.replace(previous, updated)
+    
+    with open(VersionFile, 'w') as fh:
+        fh.write(content)
 
 
 def get_latest_version():
@@ -76,17 +77,18 @@ def get_latest_version():
 
 def handle_versions(latest_version):
     
-    with open(VersionFile, 'r') as file:
-        version_content = file.read()
-        v_minor = _get_version(version_content, "V_MINOR")
-        v_libpdfium = _get_version(version_content, "V_LIBPDFIUM")
+    v_minor = extract_version("V_MINOR")
+    v_libpdfium = extract_version("V_LIBPDFIUM")
     
     if v_libpdfium < latest_version:
         print("New PDFium build")
-        new_content = _set_version(version_content, "V_MINOR", v_minor+1)
-        new_content = _set_version(new_content, "V_LIBPDFIUM", latest_version)
-        with open(VersionFile, 'w') as file:
-            file.write(new_content)
+        _set_versions(
+            [
+                ("V_MINOR", v_minor, v_minor+1),
+                ("V_LIBPDFIUM", v_libpdfium, latest_version),
+            ],
+        )
+        
     else:
         print("No new PDFium build - will re-create bindings without incrementing version")
 

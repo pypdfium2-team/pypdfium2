@@ -10,5 +10,4 @@ V_PYPDFIUM2 = "{}.{}.{}".format(V_MAJOR, V_MINOR, V_PATCH)  #: PyPDFium2 version
 if V_BETA is not None:
     V_PYPDFIUM2 += "b{}".format(V_BETA)
 
-V_LIBPDFIUM = 4849
-""" PDFium library version integer (git tag) """
+V_LIBPDFIUM = 4849  #: PDFium library version integer (git tag)
