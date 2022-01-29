@@ -75,8 +75,8 @@ def _copy_bindings(platform_dir):
         
         # copy platform-specific files into the sources, excluding possible directories
         if os.path.isfile(src_path):
-            dest = join(TargetDir, basename(src_path))
-            shutil.copy(src_path, dest)
+            dest_path = join(TargetDir, basename(src_path))
+            shutil.copy(src_path, dest_path)
 
 
 def build(lib_setup: Callable, platform_dir):
