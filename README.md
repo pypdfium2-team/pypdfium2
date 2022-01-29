@@ -42,7 +42,7 @@ python3 setup_source.py bdist_wheel
 pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 ```
 
-`${version}` and `${platform_tag}` are placeholders that need to replaced with the values
+`${version}` and `${platform_tag}` are placeholders that need to be replaced with the values
 that correspond to your platform (e. g. `pypdfium2-0.11.0-py3-none-linux.whl`).
 
 In case building failed, you could try `python3 build_pdfium.py --getdeps -p` to prefer the
