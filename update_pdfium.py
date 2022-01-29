@@ -23,11 +23,9 @@ from _setup_base import PlatformDirs
 from _packaging import (
     VersionFile,
     extract_version,
-    SourceTree,
     postprocess_bindings,
 )
 
-VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
 ReleaseExtension = 'tgz'
 ReleaseFiles = {
