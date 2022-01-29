@@ -53,7 +53,7 @@ def _set_versions(*versions_list) -> str:
         updated = template.format(variable, new_ver)
         
         print( "'{}' -> '{}'".format(previous, updated) )
-        content = content.replace(previous, updated)
+        content = content.replace(previous, updated, 1)
     
     with open(VersionFile, 'w') as fh:
         fh.write(content)
