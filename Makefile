@@ -14,7 +14,7 @@ update-all:
 setup-all:
 	bash ./utilities/setup_all.sh
 
-sourcebuild:
+build:
 	python3 build_pdfium.py
 	python3 setup_source.py bdist_wheel
 
