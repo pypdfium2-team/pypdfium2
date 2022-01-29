@@ -33,3 +33,5 @@
 * make
 * importchecker
 * codespell
+* twine
+* check-wheel-contents
