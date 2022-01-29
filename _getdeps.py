@@ -19,6 +19,7 @@ Ctypesgen_PIN = "cef9a7ac58a50d0ae4f260abdeb75e0a71398187"
 Ctypesgen_Dir = join(SB_Dir,'ctypesgen')
 
 PyDeps = [
+    'pip',
     'setuptools',
     'wheel',
 ]
@@ -45,12 +46,12 @@ def install_ctypesgen():
         run_cmd("git clone {}".format(Ctypesgen_URL), cwd=SB_Dir)
     
     run_cmd("git checkout {}".format(Ctypesgen_PIN), cwd=Ctypesgen_Dir)
-    run_cmd("pip3 install -U .", cwd=Ctypesgen_Dir)
+    run_cmd("python3 -m pip install -U .", cwd=Ctypesgen_Dir)
 
 
 def install_pydeps():
     for dep in PyDeps:
-        run_cmd("pip3 install {}".format(dep), cwd=None)
+        run_cmd("python3 -m pip install -U {}".format(dep), cwd=None)
 
 
 def check_sysdeps(sys_commands):
