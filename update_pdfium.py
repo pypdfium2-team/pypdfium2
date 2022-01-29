@@ -41,7 +41,7 @@ ReleaseFiles = {
     PlatformDirs.WindowsArm64 : 'pdfium-win-arm64',
 }
 
-def _set_versions(versions_list) -> str:
+def _set_versions(*versions_list) -> str:
     
     with open(VersionFile, 'r') as fh:
         content = fh.read()
@@ -83,10 +83,8 @@ def handle_versions(latest_version):
     if v_libpdfium < latest_version:
         print("New PDFium build")
         _set_versions(
-            [
-                ("V_MINOR", v_minor, v_minor+1),
-                ("V_LIBPDFIUM", v_libpdfium, latest_version),
-            ],
+            ("V_MINOR", v_minor, v_minor+1),
+            ("V_LIBPDFIUM", v_libpdfium, latest_version),
         )
         
     else:
