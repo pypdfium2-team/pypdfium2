@@ -18,6 +18,7 @@ def lib_setup(libname):
     setuptools.setup(
         cmdclass = {'bdist_wheel': bdist},
         package_data = {'': [libname]},
+        **SetupKws,
     )
 
 

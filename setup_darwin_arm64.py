@@ -13,6 +13,7 @@ def lib_setup():
     setuptools.setup(
         cmdclass = {'bdist_wheel': bdist},
         package_data = {'': ['pdfium.dylib']},
+        **SetupKws,
     )
 
 def main():

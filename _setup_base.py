@@ -15,7 +15,10 @@ import setuptools
 from glob import glob
 from typing import Callable
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-from _packaging import Libnames
+from _packaging import (
+    Libnames,
+    get_version_namespace,
+)
 
 
 SourceTree = dirname(realpath(__file__))
@@ -32,6 +35,12 @@ class PlatformDirs:
     Windows86    = join(DataTree,'windows-x86')
     WindowsArm64 = join(DataTree,'windows-arm64')
     #SourceBuild  = join(DataTree,'sourcebuild')
+
+
+version = get_version_namespace()['V_PYPDFIUM2']
+SetupKws = dict(
+    version = version,
+)
 
 
 class BDistBase (_bdist_wheel):

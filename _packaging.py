@@ -42,3 +42,14 @@ def postprocess_bindings(bindings_file, platform_dir):
     
     with open(bindings_file, 'w') as file_writer:
         file_writer.write(text)
+
+
+def get_version_namespace():
+    
+    ver_path = join(SourceTree,'src','pypdfium2','_version.py')
+    
+    ver_namespace = {}
+    with open(ver_path) as ver_file:
+        exec(ver_file.read(), ver_namespace)
+    
+    return ver_namespace
