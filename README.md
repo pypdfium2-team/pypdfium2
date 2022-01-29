@@ -45,10 +45,10 @@ pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 `${version}` and `${platform_tag}` are placeholders that need to replaced with the values
 that correspond to your platform (e. g. `pypdfium2-0.11.0-py3-none-linux.whl`).
 
-In case building failed, you could try `python3 build_pdfium.py -p` to prefer the use of
-system-provided build tools over the toolchain PDFium ships with. This might help since the
-toolchain is limited to a curated set of platforms, as PDFium target cross-compilation for
-"non-standard" architectures. (Make sure you installed all packages from the `Native Build`
+In case building failed, you could try `python3 build_pdfium.py --getdeps -p` to prefer the
+use of system-provided build tools over the toolchain PDFium ships with. This might help
+since the toolchain is limited to a curated set of platforms, as PDFium target cross-compilation
+for "non-standard" architectures. (Make sure you installed all packages from the `Native Build`
 section of [`DEPS.md`](DEPS.md), in addition to the default requirements.)
 
 ## Examples
