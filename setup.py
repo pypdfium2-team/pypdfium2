@@ -96,7 +96,7 @@ def main():
         # automatically check/install dependencies
         getdeps.main()
         
-        # update staus file
+        # update status file
         with open(StatusFile, 'w') as file_handle:
             file_handle.write("PreSetupDone")
     
