@@ -9,14 +9,10 @@ from os.path import (
     exists,
 )
 from _packaging import (
-    SB_Dir,
+    #SB_Dir,
     run_cmd,
 )
 
-
-#Ctypesgen_URL = "https://github.com/ctypesgen/ctypesgen.git"
-#Ctypesgen_PIN = "cef9a7ac58a50d0ae4f260abdeb75e0a71398187"
-#Ctypesgen_Dir = join(SB_Dir,'ctypesgen')
 
 PyDeps = [
     'setuptools',
@@ -34,6 +30,11 @@ NB_SysCommands = [
     'clang',
     'lld',
 ]
+
+
+#Ctypesgen_URL = "https://github.com/ctypesgen/ctypesgen.git"
+#Ctypesgen_PIN = "cef9a7ac58a50d0ae4f260abdeb75e0a71398187"
+#Ctypesgen_Dir = join(SB_Dir,'ctypesgen')
 
 
 #def install_ctypesgen():
