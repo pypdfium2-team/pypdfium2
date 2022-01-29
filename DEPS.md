@@ -2,7 +2,7 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # Runtime
-* Python >= 3.6
+* Python >= 3.5
 * Pillow
 
 # Build
