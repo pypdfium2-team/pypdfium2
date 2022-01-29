@@ -31,6 +31,9 @@
   source build only as fallback.
 - On setup, the version file is now always read literally (i. e. without importing the module),
   which makes it a lot less prone to errors.
+- Added notes concerning the need for a more recent version of pip when installing from source.
+  Tried to improve compatibility with older releases of pip in the scope of what is possible.
+  See also [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
 - Modernised the update script code that reads and writes the version file.
 - Updated the Makefile.
 - Removed KDevelop project files from the repository.
