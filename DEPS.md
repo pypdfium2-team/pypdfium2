@@ -32,3 +32,4 @@
 # Utilities
 * make
 * importchecker
+* codespell
