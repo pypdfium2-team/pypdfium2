@@ -17,7 +17,7 @@ from typing import Callable
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 from _packaging import (
     Libnames,
-    get_version_namespace,
+    extract_version,
 )
 
 
@@ -37,9 +37,8 @@ class PlatformDirs:
     #SourceBuild  = join(DataTree,'sourcebuild')
 
 
-version = get_version_namespace()['V_PYPDFIUM2']
 SetupKws = dict(
-    version = version,
+    version = extract_version('V_PYPDFIUM2'),
 )
 
 
