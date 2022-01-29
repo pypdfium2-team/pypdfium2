@@ -21,6 +21,18 @@
 - When opening from a byte buffer, any object that implements the `.read()` method is now
   accepted (previously, only `BytesIO` and `BufferedReader` were supported). Note that we
   no longer automatically seek back to the start of the buffer.
+- Restructured installing the exit handler, so that its function is no longer inadvertently
+  part of the public namespace.
+- Removed the `None` defaults of the table of contents helper class `OutlineItem`. The
+  parameters are now passed at construction time.
+- Greatly improved `setup.py`: Formerly, running `pip3 install .` always triggered a source
+  build, on behalf of platforms for which no wheel is available. With this release, the code
+  was changed to detect the current platform and use pre-compiled binaries if available, with
+  source build only as fallback.
+- On setup, the version file is now always read literally (i. e. without importing the module),
+  which makes it a lot less prone to errors.
+- Modernised the update script code that reads and writes the version file.
+- Updated the Makefile.
 
 ## 0.10.0 (2022-01-24)
 

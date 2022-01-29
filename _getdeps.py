@@ -45,7 +45,7 @@ def install_ctypesgen():
         run_cmd("git clone {}".format(Ctypesgen_URL), cwd=SB_Dir)
     
     run_cmd("git checkout {}".format(Ctypesgen_PIN), cwd=Ctypesgen_Dir)
-    run_cmd("pip3 install -U . -v", cwd=Ctypesgen_Dir)
+    run_cmd("pip3 install -U .", cwd=Ctypesgen_Dir)
 
 
 def install_pydeps():

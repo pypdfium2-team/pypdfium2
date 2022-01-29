@@ -21,9 +21,11 @@ Libnames = [
 ]
 
 
-HomeDir    = expanduser('~')
-SourceTree = dirname(abspath(__file__))
-SB_Dir     = join(SourceTree,'sourcebuild')
+HomeDir     = expanduser('~')
+SourceTree  = dirname(abspath(__file__))
+DataTree    = join(SourceTree,'data')
+SB_Dir      = join(SourceTree,'sourcebuild')
+VersionFile = join(SourceTree,'src','pypdfium2','_version.py')
 
 
 def run_cmd(command, cwd):
@@ -41,3 +43,18 @@ def postprocess_bindings(bindings_file, platform_dir):
     
     with open(bindings_file, 'w') as file_writer:
         file_writer.write(text)
+
+
+def _get_ver_namespace():
+    
+    ver_namespace = {}
+    with open(VersionFile) as fh:
+        exec(fh.read(), ver_namespace)
+    
+    return ver_namespace
+
+
+_ver_namespace = _get_ver_namespace()
+
+def extract_version(variable_str):
+    return _ver_namespace[variable_str]

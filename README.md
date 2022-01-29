@@ -18,35 +18,38 @@ python3 -m pip install -U pypdfium2
 
 ### Manual installation
 
-The following steps require the external tools `git`, `ctypesgen` and `gcc` to be
-installed and available in `PATH`. Additionally, the python package `wheel` is required.
-
-For source build, more dependencies may be necessary (see [`DEPS.md`](DEPS.md)).
-
+The following steps require the system tools `git` and `gcc` to be installed and available
+in `PATH`. Python dependencies will be installed automatically for the current user.
+For more information, please refer to [`DEPS.md`](DEPS.md).
 
 #### Package locally
 
-This will download a pre-built binary for PDFium, generate the bindings and
-build a wheel.
-
+To get pre-compiled binaries, generate bindings and install PyPDFium2, you may run
 ```bash
-python3 update_pdfium.py -p ${platform_name}
-python3 setup_${platform_name}.py bdist_wheel
-python3 -m pip install -U dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
+python3 -m pip install . -v
 ```
+in the directory you downloaded the repository to. This will resort to building PDFium
+if no pre-compiled binaries are available for your platform.
 
 #### Source build
 
-If you are using a platform where no pre-compiled package is available, it might be
-possible to build PDFium from source. However, this is a complex process that can vary
-depending on the host system, and it may take a long time.
+If you wish to perform a source build regardless of whether PDFium binaries are available or not,
+you can do the following:
 
 ```bash
-python3 build_pdfium.py
+python3 build_pdfium.py --getdeps
 python3 setup_source.py bdist_wheel
 pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 ```
 
+`${version}` and `${platform_tag}` are placeholders that need to be replaced with the values
+that correspond to your platform (e. g. `pypdfium2-0.11.0-py3-none-linux.whl`).
+
+In case building failed, you could try `python3 build_pdfium.py --getdeps -p` to prefer the
+use of system-provided build tools over the toolchain PDFium ships with. This might help
+since the toolchain is limited to a curated set of platforms, as PDFium target cross-compilation
+for "non-standard" architectures. (Make sure you installed all packages from the `Native Build`
+section of [`DEPS.md`](DEPS.md), in addition to the default requirements.)
 
 ## Examples
 
@@ -245,14 +248,14 @@ Run `pytest` on the `tests` directory.
 ## Issues
 
 Since PyPDFium2 is built using upstream binaries and an automatic bindings creator,
-issues that are not related to packaging most likely need to be addressed upstream.
-However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
+issues that are not related to packaging or support model code probably need to be
+addressed upstream. However, the [PyPDFium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
 is always a good place to start if you have any problems, questions or suggestions.
 
 If the cause of an issue could be determined to be in PDFium, the problem needs to be
 reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list).
 
-Issues related to build configuration should be discussed at
+Issues related to pre-compiled binaries should be discussed at
 [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
 
 If your issue is caused by the bindings generator, refer to the
@@ -263,9 +266,9 @@ If your issue is caused by the bindings generator, refer to the
 
 ### Non-ascii file paths on Windows
 
-On Windows, PDFium currently is not able to open documents with file names containing multi-byte, non-ascii
-characters. This issue is [confirmed upstream](https://bugs.chromium.org/p/pdfium/issues/detail?id=682), but
-has not been addressed yet.
+On Windows, PDFium currently is not able to open documents with file names containing
+multi-byte, non-ascii characters. This issue is [confirmed upstream](https://bugs.chromium.org/p/pdfium/issues/detail?id=682),
+but has not been addressed yet.
 
   
 ## Thanks

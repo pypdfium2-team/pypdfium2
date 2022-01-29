@@ -14,15 +14,16 @@ from os.path import (
     abspath,
     basename,
 )
-from _packaging import *
 import _getdeps as getdeps
+from _packaging import *
+from _setup_base import PlatformDirs
 
 
 PatchDir       = join(SB_Dir,'patches')
 DepotToolsDir  = join(SB_Dir,'depot_tools')
 PDFiumDir      = join(SB_Dir,'pdfium')
 PDFiumBuildDir = join(PDFiumDir,'out','Default')
-OutputDir      = join(SourceTree,'data','sourcebuild')
+OutputDir      = PlatformDirs.SourceBuild
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
@@ -45,7 +46,7 @@ NativeBuildConfig = DefaultConfig.copy()
 NativeBuildConfig += [
 'clang_use_chrome_plugins = false',
 'treat_warnings_as_errors = false',
-'init_stack_vars = false',
+#'init_stack_vars = false',
 ]
 
 PdfiumPatches = [

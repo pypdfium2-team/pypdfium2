@@ -4,4 +4,3 @@
 sphinx >= 4.4.0
 sphinx-rtd-theme
 sphinxcontrib-programoutput
-pypdfium2

@@ -15,22 +15,31 @@ import setuptools
 from glob import glob
 from typing import Callable
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-from _packaging import Libnames
+from _packaging import (
+    Libnames,
+    extract_version,
+)
 
 
 SourceTree = dirname(realpath(__file__))
 TargetDir  = join(SourceTree,'src','pypdfium2')
 DataTree   = join(SourceTree,'data')
 
-Darwin64     = join(DataTree,'darwin-x64')
-DarwinArm64  = join(DataTree,'darwin-arm64')
-Linux64      = join(DataTree,'linux-x64')
-LinuxArm64   = join(DataTree,'linux-arm64')
-LinuxArm32   = join(DataTree,'linux-arm32')
-Windows64    = join(DataTree,'windows-x64')
-Windows86    = join(DataTree,'windows-x86')
-WindowsArm64 = join(DataTree,'windows-arm64')
-SourceBuild  = join(DataTree,'sourcebuild')
+class PlatformDirs:
+    Darwin64     = join(DataTree,'darwin-x64')
+    DarwinArm64  = join(DataTree,'darwin-arm64')
+    Linux64      = join(DataTree,'linux-x64')
+    LinuxArm64   = join(DataTree,'linux-arm64')
+    LinuxArm32   = join(DataTree,'linux-arm32')
+    Windows64    = join(DataTree,'windows-x64')
+    Windows86    = join(DataTree,'windows-x86')
+    WindowsArm64 = join(DataTree,'windows-arm64')
+    SourceBuild  = join(DataTree,'sourcebuild')
+
+
+SetupKws = dict(
+    version = extract_version('V_PYPDFIUM2'),
+)
 
 
 class BDistBase (_bdist_wheel):
@@ -60,11 +69,14 @@ def _clean():
 
 
 def _copy_bindings(platform_dir):
-    platform_files = glob(join(platform_dir,'*'))
-    for src in platform_files:
-        if os.path.isfile(src):
-            dest = join(TargetDir, basename(src))
-            shutil.copy(src, dest)
+    
+    # non-recursively collect all objects from the platform directory
+    for src_path in glob(join(platform_dir,'*')):
+        
+        # copy platform-specific files into the sources, excluding possible directories
+        if os.path.isfile(src_path):
+            dest_path = join(TargetDir, basename(src_path))
+            shutil.copy(src_path, dest_path)
 
 
 def build(lib_setup: Callable, platform_dir):

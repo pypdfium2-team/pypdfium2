@@ -13,7 +13,11 @@ def lib_setup():
     setuptools.setup(
         cmdclass = {'bdist_wheel': bdist},
         package_data = {'': ['pdfium.dll']},
+        **SetupKws,
     )
 
+def main():
+    return build(lib_setup, PlatformDirs.Windows86)
+
 if __name__ == '__main__':
-    build(lib_setup, Windows86)
+    main()

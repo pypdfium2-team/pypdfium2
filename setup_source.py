@@ -18,17 +18,18 @@ def lib_setup(libname):
     setuptools.setup(
         cmdclass = {'bdist_wheel': bdist},
         package_data = {'': [libname]},
+        **SetupKws,
     )
 
 
 def get_binary():
-    libpath = build_pdfium.find_lib(directory=build_pdfium.OutputDir)
+    libpath = build_pdfium.find_lib(directory=PlatformDirs.SourceBuild)
     return os.path.basename(libpath)
 
 
 def main():
     libname = get_binary()
-    build(lambda: lib_setup(libname), build_pdfium.OutputDir)
+    build(lambda: lib_setup(libname), PlatformDirs.SourceBuild)
     binary_path = join(SourceTree, 'src', 'pypdfium2', libname)
 
 

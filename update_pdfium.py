@@ -5,6 +5,7 @@
 # Download the PDFium binaries and generate ctypes bindings
 
 import os
+import sys
 from os.path import (
     join,
     dirname,
@@ -18,53 +19,44 @@ import traceback
 import subprocess
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
-from _setup_base import (
-    Darwin64,
-    DarwinArm64,
-    Linux64,
-    LinuxArm64,
-    LinuxArm32,
-    Windows64,
-    Windows86,
-    WindowsArm64,
-)
+from _setup_base import PlatformDirs
 from _packaging import (
+    VersionFile,
+    extract_version,
     SourceTree,
     postprocess_bindings,
 )
 
 VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
-DataTree     = join(SourceTree,'data')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
 ReleaseExtension = 'tgz'
 ReleaseFiles = {
-    Darwin64     : 'pdfium-mac-x64',
-    DarwinArm64  : 'pdfium-mac-arm64',
-    Linux64      : 'pdfium-linux-x64',
-    LinuxArm64   : 'pdfium-linux-arm64',
-    LinuxArm32   : 'pdfium-linux-arm',
-    Windows64    : 'pdfium-win-x64',
-    Windows86    : 'pdfium-win-x86',
-    WindowsArm64 : 'pdfium-win-arm64',
+    PlatformDirs.Darwin64     : 'pdfium-mac-x64',
+    PlatformDirs.DarwinArm64  : 'pdfium-mac-arm64',
+    PlatformDirs.Linux64      : 'pdfium-linux-x64',
+    PlatformDirs.LinuxArm64   : 'pdfium-linux-arm64',
+    PlatformDirs.LinuxArm32   : 'pdfium-linux-arm',
+    PlatformDirs.Windows64    : 'pdfium-win-x64',
+    PlatformDirs.Windows86    : 'pdfium-win-x86',
+    PlatformDirs.WindowsArm64 : 'pdfium-win-arm64',
 }
 
-
-def _version_pos(version_content, variable):
-    expression = variable + ' = '
-    pos_var = version_content.index(expression) + len(expression)
-    pos_lineend = len(version_content[:pos_var]) + version_content[pos_var:].index('\n')
-    return pos_var, pos_lineend
-
-def _get_version(version_content, variable):
-    pos_var, pos_lineend = _version_pos(version_content, variable)
-    value = version_content[pos_var:pos_lineend]
-    version = int(value)
-    return version
-
-def _set_version(version_content, variable, new_version):
-    pos_var, pos_lineend = _version_pos(version_content, variable)
-    new_vc = version_content[:pos_var] + str(new_version) + version_content[pos_lineend:]
-    return new_vc
+def _set_versions(versions_list) -> str:
+    
+    with open(VersionFile, 'r') as fh:
+        content = fh.read()
+    
+    for variable, current_ver, new_ver in versions_list:
+        
+        template = "{} = {}"
+        previous = template.format(variable, current_ver)
+        updated = template.format(variable, new_ver)
+        
+        print( "'{}' -> '{}'".format(previous, updated) )
+        content = content.replace(previous, updated)
+    
+    with open(VersionFile, 'w') as fh:
+        fh.write(content)
 
 
 def get_latest_version():
@@ -85,17 +77,18 @@ def get_latest_version():
 
 def handle_versions(latest_version):
     
-    with open(VersionFile, 'r') as file:
-        version_content = file.read()
-        v_minor = _get_version(version_content, "V_MINOR")
-        v_libpdfium = _get_version(version_content, "V_LIBPDFIUM")
+    v_minor = extract_version("V_MINOR")
+    v_libpdfium = extract_version("V_LIBPDFIUM")
     
     if v_libpdfium < latest_version:
         print("New PDFium build")
-        new_content = _set_version(version_content, "V_MINOR", v_minor+1)
-        new_content = _set_version(new_content, "V_LIBPDFIUM", latest_version)
-        with open(VersionFile, 'w') as file:
-            file.write(new_content)
+        _set_versions(
+            [
+                ("V_MINOR", v_minor, v_minor+1),
+                ("V_LIBPDFIUM", v_libpdfium, latest_version),
+            ],
+        )
+        
     else:
         print("No new PDFium build - will re-create bindings without incrementing version")
 
@@ -211,7 +204,7 @@ def generate_bindings(archives):
         shutil.rmtree(build_dir)
 
 
-def parse_args():
+def parse_args(argv):
     parser = argparse.ArgumentParser(
         description = "Download pre-built PDFium packages and generate the bindings,",
     )
@@ -220,7 +213,7 @@ def parse_args():
         metavar = 'P',
         nargs = '*',
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def get_download_files(args):
@@ -249,9 +242,9 @@ def get_download_files(args):
     return download_files
 
 
-def main():
+def main(argv=sys.argv[1:]):
     
-    args = parse_args()
+    args = parse_args(argv)
     download_files = get_download_files(args)
     
     latest_version = get_latest_version()

@@ -2,6 +2,9 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0 
 
+install:
+	python3 -m pip install . -v
+
 release:
 	bash ./utilities/release.sh
 
@@ -17,6 +20,3 @@ build:
 
 clean:
 	bash ./utilities/clean.sh
-
-compcheck:
-	python3 ./utilities/compcheck.py
