@@ -19,9 +19,9 @@ from _packaging import (
 #Ctypesgen_Dir = join(SB_Dir,'ctypesgen')
 
 PyDeps = [
+    'setuptools',
     'pip',
     'ctypesgen',
-    'setuptools',
     'wheel',
 ]
 SysCommands = [
