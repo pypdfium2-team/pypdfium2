@@ -22,15 +22,16 @@ SourceTree = dirname(realpath(__file__))
 TargetDir  = join(SourceTree,'src','pypdfium2')
 DataTree   = join(SourceTree,'data')
 
-Darwin64     = join(DataTree,'darwin-x64')
-DarwinArm64  = join(DataTree,'darwin-arm64')
-Linux64      = join(DataTree,'linux-x64')
-LinuxArm64   = join(DataTree,'linux-arm64')
-LinuxArm32   = join(DataTree,'linux-arm32')
-Windows64    = join(DataTree,'windows-x64')
-Windows86    = join(DataTree,'windows-x86')
-WindowsArm64 = join(DataTree,'windows-arm64')
-SourceBuild  = join(DataTree,'sourcebuild')
+class PlatformDirs:
+    Darwin64     = join(DataTree,'darwin-x64')
+    DarwinArm64  = join(DataTree,'darwin-arm64')
+    Linux64      = join(DataTree,'linux-x64')
+    LinuxArm64   = join(DataTree,'linux-arm64')
+    LinuxArm32   = join(DataTree,'linux-arm32')
+    Windows64    = join(DataTree,'windows-x64')
+    Windows86    = join(DataTree,'windows-x86')
+    WindowsArm64 = join(DataTree,'windows-arm64')
+    #SourceBuild  = join(DataTree,'sourcebuild')
 
 
 class BDistBase (_bdist_wheel):

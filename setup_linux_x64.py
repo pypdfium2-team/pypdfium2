@@ -16,7 +16,7 @@ def lib_setup():
     )
 
 def main():
-    return build(lib_setup, Linux64)
+    return build(lib_setup, PlatformDirs.Linux64)
 
 if __name__ == '__main__':
     main()

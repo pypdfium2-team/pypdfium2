@@ -22,7 +22,7 @@ PatchDir       = join(SB_Dir,'patches')
 DepotToolsDir  = join(SB_Dir,'depot_tools')
 PDFiumDir      = join(SB_Dir,'pdfium')
 PDFiumBuildDir = join(PDFiumDir,'out','Default')
-OutputDir      = join(SourceTree,'data','sourcebuild')
+OutputDir      = join(DataTree,'sourcebuild')
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"

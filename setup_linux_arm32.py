@@ -16,7 +16,7 @@ def lib_setup():
     )
 
 def main():
-    return build(lib_setup, LinuxArm32)
+    return build(lib_setup, PlatformDirs.LinuxArm32)
 
 if __name__ == '__main__':
     main()

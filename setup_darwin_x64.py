@@ -16,7 +16,7 @@ def lib_setup():
     )
 
 def main():
-    return build(lib_setup, Darwin64)
+    return build(lib_setup, PlatformDirs.Darwin64)
 
 if __name__ == '__main__':
     main()

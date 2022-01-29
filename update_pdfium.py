@@ -19,19 +19,9 @@ import traceback
 import subprocess
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
-from _setup_base import (
-    Darwin64,
-    DarwinArm64,
-    Linux64,
-    LinuxArm64,
-    LinuxArm32,
-    Windows64,
-    Windows86,
-    WindowsArm64,
-)
+from _setup_base import PlatformDirs
 from _packaging import (
     SourceTree,
-    DataTree,
     postprocess_bindings,
 )
 
@@ -39,14 +29,14 @@ VersionFile  = join(SourceTree,'src','pypdfium2','_version.py')
 ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
 ReleaseExtension = 'tgz'
 ReleaseFiles = {
-    Darwin64     : 'pdfium-mac-x64',
-    DarwinArm64  : 'pdfium-mac-arm64',
-    Linux64      : 'pdfium-linux-x64',
-    LinuxArm64   : 'pdfium-linux-arm64',
-    LinuxArm32   : 'pdfium-linux-arm',
-    Windows64    : 'pdfium-win-x64',
-    Windows86    : 'pdfium-win-x86',
-    WindowsArm64 : 'pdfium-win-arm64',
+    PlatformDirs.Darwin64     : 'pdfium-mac-x64',
+    PlatformDirs.DarwinArm64  : 'pdfium-mac-arm64',
+    PlatformDirs.Linux64      : 'pdfium-linux-x64',
+    PlatformDirs.LinuxArm64   : 'pdfium-linux-arm64',
+    PlatformDirs.LinuxArm32   : 'pdfium-linux-arm',
+    PlatformDirs.Windows64    : 'pdfium-win-x64',
+    PlatformDirs.Windows86    : 'pdfium-win-x86',
+    PlatformDirs.WindowsArm64 : 'pdfium-win-arm64',
 }
 
 

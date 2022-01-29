@@ -17,7 +17,7 @@ def lib_setup():
     )
 
 def main():
-    return build(lib_setup, Windows64)
+    return build(lib_setup, PlatformDirs.Windows64)
 
 if __name__ == '__main__':
     main()

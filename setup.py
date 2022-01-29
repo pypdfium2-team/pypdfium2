@@ -20,16 +20,7 @@ from os.path import (
     join,
     basename,
 )
-from _setup_base import (
-    Darwin64,
-    DarwinArm64,
-    Linux64,
-    LinuxArm64,
-    LinuxArm32,
-    Windows64,
-    Windows86,
-    WindowsArm64,
-)
+from _setup_base import PlatformDirs
 
 
 StatusFile = join(DataTree,'setup_status.txt')
@@ -114,35 +105,35 @@ def main():
     
     # run the corresponding setup code
     if plat.is_darwin_arm64():
-        _make_bindings(DarwinArm64, w_presetup)
+        _make_bindings(PlatformDirs.DarwinArm64, w_presetup)
         setup_darwin_arm64.main()
     
     elif plat.is_darwin_x64():
-        _make_bindings(Darwin64, w_presetup)
+        _make_bindings(PlatformDirs.Darwin64, w_presetup)
         setup_darwin_x64.main()
     
     elif plat.is_linux_arm32():
-        _make_bindings(LinuxArm32, w_presetup)
+        _make_bindings(PlatformDirs.LinuxArm32, w_presetup)
         setup_linux_arm32.main()
     
     elif plat.is_linux_arm64():
-        _make_bindings(LinuxArm64, w_presetup)
+        _make_bindings(PlatformDirs.LinuxArm64, w_presetup)
         setup_linux_arm64.main()
     
     elif plat.is_linux_x64():
-        _make_bindings(Linux64, w_presetup)
+        _make_bindings(PlatformDirs.Linux64, w_presetup)
         setup_linux_x64.main()
     
     elif plat.is_windows_arm64():
-        _make_bindings(WindowsArm64, w_presetup)
+        _make_bindings(PlatformDirs.WindowsArm64, w_presetup)
         setup_windows_arm64.main()
     
     elif plat.is_windows_x64():
-        _make_bindings(Windows64, w_presetup)
+        _make_bindings(PlatformDirs.Windows64, w_presetup)
         setup_windows_x64.main()
     
     elif plat.is_windows_x86():
-        _make_bindings(Windows86, w_presetup)
+        _make_bindings(PlatformDirs.Windows86, w_presetup)
         setup_windows_x86.main()
     
     # Platform without pre-built binaries - trying a regular sourcebuild

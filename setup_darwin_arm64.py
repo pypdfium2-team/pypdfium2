@@ -16,7 +16,7 @@ def lib_setup():
     )
 
 def main():
-    return build(lib_setup, DarwinArm64)
+    return build(lib_setup, PlatformDirs.DarwinArm64)
 
 if __name__ == '__main__':
     main()
