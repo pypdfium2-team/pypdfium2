@@ -46,7 +46,7 @@ NativeBuildConfig = DefaultConfig.copy()
 NativeBuildConfig += [
 'clang_use_chrome_plugins = false',
 'treat_warnings_as_errors = false',
-'init_stack_vars = false',
+#'init_stack_vars = false',
 ]
 
 PdfiumPatches = [
