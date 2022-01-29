@@ -16,6 +16,7 @@ lib_logger.addHandler(logging.StreamHandler())
 
 
 TestDir = dirname(abspath(__file__))
+SourceTree = dirname(TestDir)
 ResourceDir = join(TestDir,'resources')
 OutputDir = join(TestDir,'output')
 
@@ -31,8 +32,10 @@ class TestFiles:
 
 def test_paths():
     
-    print(ResourceDir)
-    assert isdir(ResourceDir)
+    dirs = (TestDir, SourceTree, ResourceDir, OutputDir)
+    for dirpath in dirs:
+        print(dirpath)
+        assert isdir(dirpath)
     
     for attr_name in dir(TestFiles):
         if not attr_name.startswith('_'):
