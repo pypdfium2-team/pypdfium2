@@ -16,11 +16,11 @@ import setup_windows_x64
 import setup_windows_x86
 import _getdeps as getdeps
 from _packaging import DataTree
+from _setup_base import PlatformDirs
 from os.path import (
     join,
     basename,
 )
-from _setup_base import PlatformDirs
 
 
 StatusFile = join(DataTree,'setup_status.txt')
