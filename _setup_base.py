@@ -34,7 +34,7 @@ class PlatformDirs:
     Windows64    = join(DataTree,'windows-x64')
     Windows86    = join(DataTree,'windows-x86')
     WindowsArm64 = join(DataTree,'windows-arm64')
-    #SourceBuild  = join(DataTree,'sourcebuild')
+    SourceBuild  = join(DataTree,'sourcebuild')
 
 
 SetupKws = dict(

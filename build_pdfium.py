@@ -14,15 +14,16 @@ from os.path import (
     abspath,
     basename,
 )
-from _packaging import *
 import _getdeps as getdeps
+from _packaging import *
+from _setup_base import PlatformDirs
 
 
 PatchDir       = join(SB_Dir,'patches')
 DepotToolsDir  = join(SB_Dir,'depot_tools')
 PDFiumDir      = join(SB_Dir,'pdfium')
 PDFiumBuildDir = join(PDFiumDir,'out','Default')
-OutputDir      = join(DataTree,'sourcebuild')
+OutputDir      = PlatformDirs.SourceBuild
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
