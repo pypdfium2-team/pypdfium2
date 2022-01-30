@@ -5,10 +5,3 @@
 
 from pypdfium2._pypdfium import *
 from pypdfium2._helpers import *
-from pypdfium2._version import (
-    V_PYPDFIUM2,
-    V_LIBPDFIUM,
-)
-
-__version__ = V_PYPDFIUM2
-__pdfium_version__ = V_LIBPDFIUM
