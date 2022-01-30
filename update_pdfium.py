@@ -6,17 +6,17 @@
 
 import os
 import sys
-from os.path import (
-    join,
-    dirname,
-    basename,
-)
 import shutil
 import tarfile
 import zipfile
 import argparse
 import traceback
 import subprocess
+from os.path import (
+    join,
+    dirname,
+    basename,
+)
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 from _setup_base import PlatformDirs
@@ -26,8 +26,8 @@ from _packaging import (
     postprocess_bindings,
 )
 
-ReleaseURL   = 'https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F'
-ReleaseExtension = 'tgz'
+ReleaseURL = "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F"
+ReleaseExtension = "tgz"
 ReleaseFiles = {
     PlatformDirs.Darwin64     : 'pdfium-mac-x64',
     PlatformDirs.DarwinArm64  : 'pdfium-mac-arm64',
@@ -39,7 +39,7 @@ ReleaseFiles = {
     PlatformDirs.WindowsArm64 : 'pdfium-win-arm64',
 }
 
-def _set_versions(*versions_list) -> str:
+def _set_versions(*versions_list):
     
     with open(VersionFile, 'r') as fh:
         content = fh.read()
