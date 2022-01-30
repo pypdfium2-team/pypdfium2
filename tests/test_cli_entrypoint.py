@@ -19,6 +19,8 @@ def test_entrypoint():
     
     namespace = {}
     exec("from {} import {}".format(module_path, method_name), namespace)
+    
+    assert method_name in namespace
     function = namespace[method_name]
     
     assert callable(function)
