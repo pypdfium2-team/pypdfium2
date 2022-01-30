@@ -13,7 +13,7 @@ PDF rendering library authored by Foxit and maintained by Google.
 ### Install from PyPI
 
 ```bash
-python3 -m pip install -U pypdfium2
+pip3 install -U pypdfium2
 ```
 
 ### Manual installation
@@ -27,7 +27,7 @@ For more information on dependencies, please refer to [`DEPS.md`](DEPS.md).
 
 To get pre-compiled binaries, generate bindings and install PyPDFium2, you may run
 ```bash
-python3 -m pip install . -v
+pip3 install . -v
 ```
 in the directory you downloaded the repository to. This will resort to building PDFium
 if no pre-compiled binaries are available for your platform.
