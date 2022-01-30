@@ -4,26 +4,23 @@
 data/
 build/
 dist/
+tests/output/
 docs/build/*
 !docs/build/.gitkeep
 sourcebuild/*
 !sourcebuild/patches
 
-*.so
-*.dll
-*.dylib
-
-.vscode
-.pytest_cache
 **/__pycache__
+**/.mypy_cache
+**/.pytest_cache
 *.pyc
+*.vscode
 *.egg-info
 *.kate-swp
 *.kdev4
 
-src/pypdfium2/_pypdfium.py
+*.so
+*.dll
+*.dylib
 pdfium
-pdfium.dll
-pdfium.dylib
-
-tests/output/
+_pypdfium.py
