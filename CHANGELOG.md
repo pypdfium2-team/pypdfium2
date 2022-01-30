@@ -35,6 +35,7 @@
 - Added notes concerning the need for a recent version of pip when installing from source.
   Tried to improve compatibility with older releases in the scope of what is possible.
   See also [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
+- Implemented automatic discovery of test resources.
 - Updated the Makefile.
 - Removed KDevelop project files from the repository.
 
