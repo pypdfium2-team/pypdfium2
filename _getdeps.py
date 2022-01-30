@@ -16,7 +16,6 @@ from _packaging import (
 
 PyDeps = [
     'setuptools',
-    'pip',
     'ctypesgen',
     'wheel',
 ]
