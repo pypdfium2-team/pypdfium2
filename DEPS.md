@@ -16,7 +16,7 @@
 
 #### Additional system packages for Native Build
 
-*Note*: The compiler needs to be fully compliant with C++17
+*Important*: The compiler needs to be fully compliant with C++17
 
 * llvm/clang
 * lld
@@ -25,15 +25,14 @@
 
 ### Python packages
 
-*Note*: It is important that you provide a recent version of pip because pypdfium2
-        relies on in-place packaging without an intermediate temporary directory.
-        See [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
-
-* pip >= 21.3
+* pip >= 21.3 [^1]
 * setuptools
 * wheel
 * ctypesgen
 
+[^1]: It is important that you provide a recent version of pip because pypdfium2
+      relies on in-place packaging without an intermediate temporary directory.
+      See [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
 
 ## Tests
 
@@ -42,9 +41,11 @@
 
 ## Documentation
 
-* sphinx
+* sphinx [^2]
 * sphinx-rtd-theme
 * sphinxcontrib-programoutput
+
+[^2]: `>= 4.4.0` recommended for full functionality.
 
 
 ## Utilities
