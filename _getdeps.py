@@ -15,7 +15,6 @@ from _packaging import (
 
 
 PyDeps = [
-    'setuptools',
     'ctypesgen',
     'wheel',
 ]
@@ -52,7 +51,7 @@ NB_SysCommands = [
 
 def install_pydeps():
     for dep in PyDeps:
-        run_cmd("python3 -m pip install -U {}".format(dep), cwd=None)
+        run_cmd("python3 -m pip install {}".format(dep), cwd=None)
 
 
 def check_sysdeps(sys_commands):
