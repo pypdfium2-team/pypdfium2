@@ -41,7 +41,7 @@ def parse_args(argv, prog, desc):
     parser.add_argument(
         '--output', '-o',
         type = os.path.abspath,
-        help = "Target pah for the new document",
+        help = "Target path for the new document",
     )
     parser.add_argument(
         '--rows', '-r',
