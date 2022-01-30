@@ -9,14 +9,14 @@
   It should be a lot cleaner now; easier to use and extend. These modifications make the
   command-line API incompatible with previous releases, though.
   In the course of this restructuring, the following functional changes were applied:
-  * Made rendering output formats customisable by providing control over the file extension
+  * Made rendering output format customisable by providing control over the file extension
     to use, from which the `Pillow` library will be able to automatically determine the
     corresponding encoder.
   * Changed the rendering parser to accept multiple files at once.
   * Positional arguments are now used for file input.
   * Added CLI commands for merging PDFs and performing page tiling (N-up).
   * Temporarily removed support for working with encrypted PDFs while we are looking for a
-    suitable way to take passwords for multiple files.
+    suitable way to take passwords of multiple files.
 - Adapted documentation to the CLI changes.
 - When opening from a byte buffer, any object that implements the `.read()` method is now
   accepted (previously, only `BytesIO` and `BufferedReader` were supported). Note that we
@@ -33,7 +33,7 @@
   which makes it a lot less prone to errors.
 - Modernised the update script code that reads and writes the version file.
 - Added notes concerning the need for a recent version of pip when installing from source.
-  Tried to improve compatibility with older releases of pip in the scope of what is possible.
+  Tried to improve compatibility with older releases in the scope of what is possible.
   See also [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
 - Updated the Makefile.
 - Removed KDevelop project files from the repository.
