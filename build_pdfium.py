@@ -33,6 +33,7 @@ DefaultConfig = [
     'pdf_is_standalone = true',
     'pdf_enable_v8 = false',
     'pdf_enable_xfa = false',
+    'treat_warnings_as_errors = false',
 ]
 
 if sys.platform.startswith('linux'):
@@ -45,7 +46,6 @@ elif sys.platform.startswith('darwin'):
 NativeBuildConfig = DefaultConfig.copy()
 NativeBuildConfig += [
 'clang_use_chrome_plugins = false',
-'treat_warnings_as_errors = false',
 #'init_stack_vars = false',
 ]
 
