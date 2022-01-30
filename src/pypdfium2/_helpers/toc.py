@@ -41,7 +41,6 @@ class OutlineItem:
             view_mode: ViewMode,
             view_pos: Sequence[float],
         ):
-        
         self.level = level
         self.title = title
         self.page_index = page_index
