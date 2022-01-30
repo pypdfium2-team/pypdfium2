@@ -321,7 +321,7 @@ def parse_args(args=sys.argv[1:]):
     )
     parser.add_argument(
         '--srcname', '-s',
-        help = "Name of the generated PDFium binary file. This script tries to automatically find  " +
+        help = "Name of the generated PDFium binary file. This script tries to automatically find "  +
                "the binary, which should usually work. If it does not, however, this option may be " +
                "used to explicitly provide the file name to look for.",
     )
