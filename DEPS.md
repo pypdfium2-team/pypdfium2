@@ -1,24 +1,20 @@
 <!-- SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-# Runtime
+## Runtime
+
 * Python >= 3.5
 * Pillow
 
-# Build
 
-*Note*: It is important that you provide a recent version of pip because pypdfium2
-        relies on in-place packaging without an intermediate temporary directory.
-        See [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
+## Build
 
-* pip >= 21.3
+### System packages
+
 * git
 * gcc
-* setuptools
-* wheel
-* ctypesgen
 
-## Native build
+#### Additional system packages for Native Build
 
 *Note*: The compiler needs to be fully compliant with C++17
 
@@ -27,15 +23,32 @@
 * gn (generate-ninja)
 * ninja (ninja-build)
 
-# Test
+### Python packages
+
+*Note*: It is important that you provide a recent version of pip because pypdfium2
+        relies on in-place packaging without an intermediate temporary directory.
+        See [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
+
+* pip >= 21.3
+* setuptools
+* wheel
+* ctypesgen
+
+
+## Tests
+
 * pytest
 
-# Documentation
+
+## Documentation
+
 * sphinx
 * sphinx-rtd-theme
 * sphinxcontrib-programoutput
 
-# Utilities
+
+## Utilities
+
 * make
 * importchecker
 * codespell
