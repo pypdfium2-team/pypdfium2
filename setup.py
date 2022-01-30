@@ -2,6 +2,10 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+from os.path import (
+    join,
+    basename,
+)
 import sysconfig
 import update_pdfium
 import build_pdfium
@@ -17,13 +21,9 @@ import setup_windows_x86
 import _getdeps as getdeps
 from _packaging import DataTree
 from _setup_base import PlatformDirs
-from os.path import (
-    join,
-    basename,
-)
 
 
-StatusFile = join(DataTree,'setup_status.txt')
+StatusFile = join(DataTree, 'setup_status.txt')
 
 def check_presetup() -> bool:
     with open(StatusFile, 'r') as file_handle:
