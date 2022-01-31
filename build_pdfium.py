@@ -328,7 +328,7 @@ def parse_args(args=sys.argv[1:]):
     )
     parser.add_argument(
         '--destname', '-d',
-        help = "Rename the binary to a different filename."
+        help = "Rename the binary to a different filename.",
     )
     parser.add_argument(
         '--update', '-u',
@@ -341,7 +341,7 @@ def parse_args(args=sys.argv[1:]):
         help = "Try to use system-provided tools if available, rather than pre-built binaries "   +
                "from DepotTools. Warning: This may or may not work, and should only be used as "  +
                "a last resort if building with the official toolchain failed. Moreover, it will " +
-               "likely not work on Windows."
+               "likely not work on Windows.",
     )
     parser.add_argument(
         '--getdeps',
