@@ -5,15 +5,16 @@
 # Attempt to build PDFium from source. This may take very long.
 
 import os
-import sys
-import shutil
-import argparse
-import subprocess
 from os.path import (
     join,
     abspath,
     basename,
 )
+import sys
+import shutil
+import argparse
+import subprocess
+
 import _getdeps as getdeps
 from _packaging import *
 from _setup_base import PlatformDirs
