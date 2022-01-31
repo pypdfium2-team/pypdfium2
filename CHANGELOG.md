@@ -3,7 +3,7 @@
 
 # PyPDFium2 Changelog
 
-## 0.11.0 (unreleased)
+## 0.11.0 (2022-01-31)
 
 - Overhauled the command-line interface to group different tasks in subcommands.
   It should be a lot cleaner now; easier to use and extend. These modifications make the
