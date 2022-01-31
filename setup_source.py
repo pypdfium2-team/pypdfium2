@@ -4,8 +4,17 @@
 
 import os
 import sysconfig
+import setuptools
 import build_pdfium
-from _setup_base import *
+from os.path import join
+
+from _packaging import SourceTree
+from _setup_base import (
+    PlatformDirs,
+    BDistBase,
+    SetupKws,
+    build,
+)
 
 
 class bdist (BDistBase):
