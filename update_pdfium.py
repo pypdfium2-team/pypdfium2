@@ -19,12 +19,14 @@ from os.path import (
 )
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
+
 from _setup_base import PlatformDirs
 from _packaging import (
     VersionFile,
     extract_version,
     postprocess_bindings,
 )
+
 
 ReleaseURL = "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F"
 ReleaseExtension = "tgz"
