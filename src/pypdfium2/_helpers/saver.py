@@ -29,7 +29,7 @@ def save_pdf(
         pdf:
             Handle to a PDFium document.
         buffer:
-            An byte buffer to capture the data. It can be anything that implements
+            A byte buffer to capture the data. It can be anything that implements
             the ``.write()`` method.
     """
     
