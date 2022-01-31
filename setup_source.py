@@ -8,7 +8,6 @@ import setuptools
 import build_pdfium
 from os.path import join
 
-from _packaging import SourceTree
 from _setup_base import (
     PlatformDirs,
     BDistBase,
@@ -39,7 +38,6 @@ def get_binary():
 def main():
     libname = get_binary()
     build(lambda: lib_setup(libname), PlatformDirs.SourceBuild)
-    binary_path = join(SourceTree, 'src', 'pypdfium2', libname)
 
 
 if __name__ == '__main__':
