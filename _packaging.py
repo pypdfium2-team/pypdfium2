@@ -10,12 +10,12 @@ from os.path import (
 )
 
 Libnames = [
-    'pdfium.so',
-    'libpdfium.so',
-    'pdfium.dylib',
     'libpdfium.dylib',
-    'pdfium.dll',
+    'pdfium.dylib',
     'libpdfium.dll',
+    'pdfium.dll',
+    'libpdfium.so',
+    'pdfium.so',
     'libpdfium',
     'pdfium',
 ]
