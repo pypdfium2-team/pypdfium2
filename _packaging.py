@@ -25,7 +25,8 @@ HomeDir     = expanduser('~')
 SourceTree  = dirname(abspath(__file__))
 DataTree    = join(SourceTree,'data')
 SB_Dir      = join(SourceTree,'sourcebuild')
-VersionFile = join(SourceTree,'src','pypdfium2','_version.py')
+ModuleDir   = join(SourceTree,'src','pypdfium2')
+VersionFile = join(ModuleDir,'_version.py')
 
 
 def run_cmd(command, cwd):

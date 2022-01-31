@@ -4,11 +4,8 @@
 
 import os
 from os.path import (
-    dirname,
-    realpath,
     join,
     basename,
-    exists,
 )
 import shutil
 import setuptools
@@ -17,13 +14,11 @@ from typing import Callable
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 from _packaging import (
     Libnames,
+    SourceTree,
+    DataTree,
+    ModuleDir,
     extract_version,
 )
-
-
-SourceTree = dirname(realpath(__file__))
-TargetDir  = join(SourceTree,'src','pypdfium2')
-DataTree   = join(SourceTree,'data')
 
 class PlatformDirs:
     Darwin64     = join(DataTree,'darwin-x64')
@@ -52,19 +47,19 @@ class BDistBase (_bdist_wheel):
 def _clean():
     
     build_cache    = join(SourceTree,'build')
-    bindings_file  = join(TargetDir,'_pypdfium.py')
+    bindings_file  = join(ModuleDir,'_pypdfium.py')
     
     libpaths = []
     for name in Libnames:
-        libpaths.append( join(TargetDir, name) )
+        libpaths.append( join(ModuleDir, name) )
     
     files = [bindings_file, *libpaths]
     
-    if exists(build_cache):
+    if os.path.exists(build_cache):
         shutil.rmtree(build_cache)
     
     for file in files:
-        if exists(file):
+        if os.path.exists(file):
             os.remove(file)
 
 
@@ -75,7 +70,7 @@ def _copy_bindings(platform_dir):
         
         # copy platform-specific files into the sources, excluding possible directories
         if os.path.isfile(src_path):
-            dest_path = join(TargetDir, basename(src_path))
+            dest_path = join(ModuleDir, basename(src_path))
             shutil.copy(src_path, dest_path)
 
 
