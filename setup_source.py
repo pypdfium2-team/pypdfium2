@@ -6,7 +6,6 @@ import os
 import sysconfig
 import setuptools
 import build_pdfium
-from os.path import join
 
 from _setup_base import (
     PlatformDirs,
