@@ -2,11 +2,12 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import sysconfig
 from os.path import (
     join,
     basename,
 )
-import sysconfig
+
 import update_pdfium
 import build_pdfium
 import setup_source
