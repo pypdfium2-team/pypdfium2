@@ -7,6 +7,7 @@ from typing import (
     Tuple,
     Sequence,
     Iterator,
+    Union,
 )
 import concurrent.futures
 from pypdfium2 import _pypdfium as pdfium
