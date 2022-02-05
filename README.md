@@ -50,7 +50,7 @@ In case building failed, you could try `python3 build_pdfium.py --getdeps -p` to
 use of system-provided build tools over the toolchain PDFium ships with. This might help
 since the toolchain is limited to a curated set of platforms, as PDFium target cross-compilation
 for "non-standard" architectures. (Make sure you installed all packages from the `Native Build`
-section of [`DEPS.md`](DEPS.md), in addition to the default requirements.)
+section of [`dependencies.md`](docs/markdown/dependencies.md), in addition to the default requirements.)
 
 ## Examples
 
