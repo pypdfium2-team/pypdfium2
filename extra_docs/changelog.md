@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-# PyPDFium2 Changelog
+# Changelog
 
 ## 0.12.0 (unreleased)
 
