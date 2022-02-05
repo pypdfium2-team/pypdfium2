@@ -17,6 +17,7 @@ For the low-level API, please also refer to the `PDFium documentation`_.
    shell_api
    dependencies
    changelog
+   contributing
 
 
 Index
