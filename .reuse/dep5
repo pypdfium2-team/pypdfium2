@@ -28,15 +28,15 @@ Files: tests/resources/bookmarks_circular.pdf
 Copyright: 2021 PDFium Developers
 License: BSD-3-Clause OR Apache-2.0
 Comment:
-    This file is part of the PDFium test suite
-    (https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf)
+    Obtained from: https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf
+    This file is part of the PDFium test suite.
 
 Files: tests/resources/mediabox_missing.pdf
 Copyright: 2020 Jerome Robert
 License: GPL-3.0-or-later
 Comment:
-    The file is hand-written and not a valid PDF.
     Obtained from: https://github.com/pdfarranger/pdfarranger/blob/main/tests/test.pdf
+    This file is hand-written and not a valid PDF.
     License assumed from project license and debian copyright file.
 
 Files: tests/resources/cropbox.pdf
@@ -52,7 +52,7 @@ Copyright: 2021 Benoît Blanchon
 License: 
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches
-    No license was concluded, but free reuse is granted: https://github.com/bblanchon/pdfium-binaries/issues/55
+    No license was concluded, but free reuse is granted (see https://github.com/bblanchon/pdfium-binaries/issues/55).
 
 Files: sourcebuild/patches/gclient_scm.patch
 Copyright: 2021 BoLaMN
