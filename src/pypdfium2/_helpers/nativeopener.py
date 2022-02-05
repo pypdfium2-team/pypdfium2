@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause 
 
-# Experimental API: Support model for PDF access with FPDF_LoadCustomDocument()
-
 import ctypes
 from os.path import abspath
 from typing import (
