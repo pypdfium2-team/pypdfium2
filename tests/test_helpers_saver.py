@@ -11,7 +11,7 @@ from .conftest import TestFiles, OutputDir
 
 def test_save_pdf_tobuffer():
     
-    pdf = pdfium.open_pdf(TestFiles.multipage)
+    pdf, ld_data = pdfium.open_pdf_auto(TestFiles.multipage)
     pdfium.FPDFPage_Delete(pdf, ctypes.c_int(0))
     
     buffer = io.BytesIO()
@@ -26,7 +26,7 @@ def test_save_pdf_tobuffer():
     assert data[:len(exp_start)] == b"%PDF-1.6"
     assert data[-len(exp_end):] == b"%EOF\r\n"
     
-    pdfium.close_pdf(pdf)
+    pdfium.close_pdf(pdf, ld_data)
 
 
 def test_save_pdf_tofile():
