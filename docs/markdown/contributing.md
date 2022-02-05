@@ -34,5 +34,5 @@ with your contribution, and some rules that we would like you to follow:
 
 [spdx-licenses]: https://spdx.org/licenses/
 [reuse-lint]: https://pypi.org/project/reuse/
-[dep5]: .reuse/dep5
-[setup-cfg]: setup.cfg
+[dep5]: ../../.reuse/dep5
+[setup-cfg]: ../../setup.cfg
