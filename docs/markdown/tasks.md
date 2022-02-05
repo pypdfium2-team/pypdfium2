@@ -1,8 +1,8 @@
 <!-- SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-PyPDFium2 Tasks
-===============
+Tasks
+=====
 
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
