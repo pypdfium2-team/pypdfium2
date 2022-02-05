@@ -10,7 +10,6 @@ Tasks
 * Add capabilities to render a certain area of a page (issue #38).
 * Create a support model for progressive rendering (`FPDF_RenderPageBitmap_Start()` & `IFSDK_PAUSE`)
 * Set the version appropriately when doing a source build (i. e. append current PDFium commit hash to version string).
-* Move Changelog and Contributing Guidelines into the Sphinx documentation.
 * Think about how to prevent further growth of the repository root directory.
 * Decide what to do about the kind of failed `compcheck.py` utility.
 * Think about further extending support for older Python versions (see changelog).
