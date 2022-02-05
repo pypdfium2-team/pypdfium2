@@ -85,17 +85,17 @@ def main(argv, prog, desc):
     width = units_to_pt(args.width, args.unit)
     height = units_to_pt(args.height, args.unit)
     
-    src_pdf = pdfium.open_pdf(args.input)
-    dest_pdf = pdfium.FPDF_ImportNPagesToOne(
-        src_pdf,
-        ctypes.c_float(width),       # output_width
-        ctypes.c_float(height),      # output_height
-        ctypes.c_size_t(args.cols),  # num_pages_on_x_axis
-        ctypes.c_size_t(args.rows),  # num_pages_on_y_axis
-    )
-    
-    with open(args.output, 'wb') as file_handle:
-        pdfium.save_pdf(dest_pdf, file_handle)
-    
-    for pdf in (src_pdf, dest_pdf):
-        pdfium.close_pdf(pdf)
+    with pdfium.PdfContext(args.input) as src_pdf:
+        
+        dest_pdf = pdfium.FPDF_ImportNPagesToOne(
+            src_pdf,
+            ctypes.c_float(width),       # output_width
+            ctypes.c_float(height),      # output_height
+            ctypes.c_size_t(args.cols),  # num_pages_on_x_axis
+            ctypes.c_size_t(args.rows),  # num_pages_on_y_axis
+        )
+        
+        with open(args.output, 'wb') as file_handle:
+            pdfium.save_pdf(dest_pdf, file_handle)
+        
+        pdfium.close_pdf(dest_pdf)

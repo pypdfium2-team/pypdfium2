@@ -31,7 +31,7 @@ def test_save_pdf_tobuffer():
 
 def test_save_pdf_tofile():
     
-    src_pdf = pdfium.open_pdf(TestFiles.cropbox)
+    src_pdf, ld_data = pdfium.open_pdf_auto(TestFiles.cropbox)
     
     # page tiling (n-up)
     dest_pdf = pdfium.FPDF_ImportNPagesToOne(
@@ -46,7 +46,7 @@ def test_save_pdf_tofile():
     with open(output_path, 'wb') as file_handle:
         pdfium.save_pdf(dest_pdf, file_handle)
     
-    for pdf in (src_pdf, dest_pdf):
-        pdfium.close_pdf(pdf)
+    pdfium.close_pdf(src_pdf, ld_data)
+    pdfium.close_pdf(dest_pdf)
     
     assert os.path.isfile(output_path)
