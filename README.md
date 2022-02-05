@@ -21,7 +21,7 @@ pip3 install -U pypdfium2
 The following steps require the system tools `git` and `gcc` to be installed and available
 in `PATH`. In addition, the Python dependencies `setuptools`, `ctypesgen` and `wheel` are
 needed. Furthermore, it is essential that you provide a recent enough version of `pip` (>= 21.3).
-For more information on dependencies, please refer to [`DEPS.md`](DEPS.md).
+For more information on dependencies, please refer to [`dependencies.md`](extra_docs/dependencies.md).
 
 #### Package locally
 

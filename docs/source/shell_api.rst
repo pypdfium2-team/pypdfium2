@@ -1,8 +1,8 @@
 .. SPDX-FileCopyrightText: 2021 geisserml <geisserml@gmail.com>
 .. SPDX-License-Identifier: CC-BY-4.0
 
-Command-line Interface
-======================
+Shell API
+=========
 
 PyPDFium2 can also be used from the command-line.
 

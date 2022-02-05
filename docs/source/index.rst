@@ -14,7 +14,9 @@ For the low-level API, please also refer to the `PDFium documentation`_.
    :caption: Table of Contents
    
    support_api
-   cli
+   shell_api
+   dependencies
+   changelog
 
 
 Index

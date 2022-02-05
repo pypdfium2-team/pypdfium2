@@ -42,8 +42,10 @@
 ## Documentation
 
 * sphinx [^2]
-* sphinx-rtd-theme
+* sphinx-rtd-theme >= 1.0
 * sphinxcontrib-programoutput
+* docutils >= 0.17
+* myst-parser
 
 [^2]: `>= 4.4.0` recommended for full functionality.
 

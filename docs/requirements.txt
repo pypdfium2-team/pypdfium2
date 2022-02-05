@@ -4,3 +4,5 @@
 sphinx >= 4.4.0
 sphinx-rtd-theme
 sphinxcontrib-programoutput
+docutils >= 0.17
+myst-parser
