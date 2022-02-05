@@ -74,7 +74,7 @@
       for this case.
 - New support models added:
     * Function `save_pdf()` to create a PDF file from an `FPDF_DOCUMENT` handle. This is
-      demonstrated in the example [`merge_pdfs.py`](examples/merge_pdfs.py).
+      demonstrated in the example [`merge_pdfs.py`](../../examples/merge_pdfs.py).
     * Methods `get_mediabox()` and `get_cropbox()` to retrieve PDF boxes of an `FPDF_PAGE`.
     * Made the utility functions `translate_viewmode()` and `translate_rotation()` public.
 - Removed the in-library logging setup as it could cause issues for downstream users who wish
@@ -91,6 +91,6 @@
 - Adapted the update script to upstream changes (thanks @bblanchon).
 - Moved some scripts from the root directory into `utilities/` and changed the Makefile
   accordingly.
-- Added a list of future [tasks](TASKS.md) to keep in mind.
+- Added a list of future [tasks](./tasks.md) to keep in mind.
 
 Tracking changes started with version 0.10.0, so there are no entries for older releases.
