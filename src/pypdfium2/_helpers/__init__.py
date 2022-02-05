@@ -7,6 +7,7 @@ from pypdfium2._helpers.constants import *
 from pypdfium2._helpers.error_handler import *
 from pypdfium2._helpers.utilities import *
 from pypdfium2._helpers.opener import *
+from pypdfium2._helpers.nativeopener import *
 from pypdfium2._helpers.page_renderer import *
 from pypdfium2._helpers.pdf_renderer import *
 from pypdfium2._helpers.toc import *

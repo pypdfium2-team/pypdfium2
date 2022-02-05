@@ -88,9 +88,9 @@ import pypdfium2 as pdfium
 Open a PDF by function:
 
 ```python3
-pdf = pdfium.open_pdf(filename)
+pdf, loader_data = pdfium.open_pdf_auto(filename)
 # ... work with the PDF
-pdfium.close_pdf(pdf)
+pdfium.close_pdf(pdf, loader_data)
 ```
 
 Open a PDF by context manager:
@@ -268,8 +268,10 @@ If your issue is caused by the bindings generator, refer to the
 ### Non-ascii file paths on Windows
 
 On Windows, PDFium currently is not able to open documents with file names containing
-multi-byte, non-ascii characters. This issue is [confirmed upstream](https://bugs.chromium.org/p/pdfium/issues/detail?id=682), but has not been addressed yet.
-Experimental work has been done in the [`widestring`](https://github.com/pypdfium2-team/pypdfium2/tree/widestring) branch of PyPDFium2 to fix these problems by patching PDFium.
+multi-byte, non-ascii characters (see [Bug 682](https://bugs.chromium.org/p/pdfium/issues/detail?id=682)).
+The [`widestring`](https://github.com/pypdfium2-team/pypdfium2/tree/widestring) branch includes a [patch](https://pdfium-review.googlesource.com/c/pdfium/+/90150) that would fix the issue in PDFium, but upstream has not merged it yet.
+
+The support model of PyPDFium2 implements a workaround to be able to load non-ascii filepaths on Windows anyway.
 
   
 ## Thanks
