@@ -13,6 +13,9 @@ for pyfile in *.py; do importchecker "$pyfile"; done
 # check for possible spelling mistakes
 codespell --skip="./sourcebuild,./docs/build,./data,./.git,__pycache__,.mypy_cache,"
 
+# check for missing spdx info
+reuse lint
+
 # download binaries and create the wheels
 python3 update_pdfium.py
 bash utilities/setup_all.sh

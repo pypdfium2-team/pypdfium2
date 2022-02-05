@@ -53,5 +53,6 @@
 * make
 * importchecker
 * codespell
+* reuse
 * twine
 * check-wheel-contents
