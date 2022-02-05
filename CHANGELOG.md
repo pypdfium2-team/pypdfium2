@@ -3,6 +3,25 @@
 
 # PyPDFium2 Changelog
 
+## 0.12.0 (unreleased)
+
+- Updated PDFium from `4861` to `xxxx`
+- Restructured file opening to finally address the Windows issues with non-ascii filenames
+  by implementing a support model for `FPDF_LoadCustomDocument()`, which allows us to do
+  file reading on the Python side if necessary.
+  For this purpose, the following changes to opener functions have been made:
+  * Added `open_pdf_buffer()` to incrementally load a document from a byte buffer.
+  * Added `open_pdf_native()` to load a PDF, with file reading being done in Python natively
+    using `open_pdf_buffer()`.
+  * Added `open_pdf_auto()`, which will use `FPDF_LoadDocument()` for regular file paths,
+    `open_pdf_native()` for non-ascii filepaths on Windows, and `open_pdf_buffer()` for bytes
+    or byte buffers.
+  * Adapted `PdfContext` to use `open_pdf_auto()`.
+  * Marked `open_pdf()` as deprecated. It should not be used anymore and may be removed
+    at some point.
+- Cleaned up some typos, unused variables and excessive imports.
+- Splitted up support model tests into separate files for improved readability and extensibility.
+
 ## 0.11.0 (2022-01-31)
 
 - Updated PDFium from `4849` to `4861`.
@@ -36,7 +55,6 @@
 - Added notes concerning the need for a recent version of pip when installing from source.
   Tried to improve compatibility with older releases in the scope of what is possible.
   See also [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
-- Implemented automatic discovery of test resources.
 - Added test cases to ensure existence of version aliases and correctness of CLI entry point
   configuration.
 - Updated the Makefile.

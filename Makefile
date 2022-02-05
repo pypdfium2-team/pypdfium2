@@ -5,6 +5,9 @@
 install:
 	python3 -m pip install . -v
 
+test:
+	pytest tests/
+
 release:
 	bash ./utilities/release.sh
 
