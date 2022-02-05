@@ -3,6 +3,7 @@
 
 import io
 import sys
+import warnings
 from os.path import abspath
 from typing import (
     Union,
@@ -141,6 +142,11 @@ def open_pdf(
     This function is deprecated and only included for backward compatibility.
     Please use :class:`.PdfContext` or :func:`.open_pdf_auto` instead.
     """
+    
+    warnings.warn(
+        "open_pdf() is deprecated and scheduled for removal - please use open_pdf_auto() instead.",
+        DeprecationWarning
+    )
     
     filepath = None
     data = None
