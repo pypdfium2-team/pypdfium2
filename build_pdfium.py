@@ -193,11 +193,8 @@ def find_lib(srcname=None, directory=PDFiumBuildDir):
 def pack(src_libpath, destname=None):
     
     if os.path.isdir(OutputDir):
-        if len(os.listdir(OutputDir)) > 0:
-            shutil.rmtree(OutputDir)
-            os.mkdir(OutputDir)
-    else:
-        os.mkdir(OutputDir)
+        shutil.rmtree(OutputDir)
+    os.mkdir(OutputDir)
     
     if destname is None:
         destname = basename(src_libpath)
