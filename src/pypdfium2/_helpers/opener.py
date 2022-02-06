@@ -61,7 +61,7 @@ def open_pdf_auto(
     ) -> Tuple[pdfium.FPDF_DOCUMENT, Optional[LoaderData]]:
     """    
     Open a document from a file path or in-memory data. If you are not able to use the context
-    manager :class:`PdfContext`, this is the recommended function to use for document opening.
+    manager :class:`.PdfContext`, this is the recommended function to use for document opening.
     
     If the input is a regular file path, ``FPDF_LoadDocument()`` will be used.
     If on Windows, file paths that contain non-ascii characters will be loaded using
@@ -79,7 +79,7 @@ def open_pdf_auto(
         file access data.
     
     Warning:
-        Callers **MUST** ensure that the :class:`LoaderData` object remain available for as
+        Callers **MUST** ensure that the :class:`.LoaderData` object remain available for as
         long as they work with the PDF. This means it has to be accessed again when done with
         processing, to prevent Python from automatically deleting the object. This can be
         achieved by passing it as second parameter to :func:`.close_pdf`, which is also required
