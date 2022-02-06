@@ -11,6 +11,7 @@ Version
 Opener/Closer
 *************
 .. automodule:: pypdfium2._helpers.opener
+.. automodule:: pypdfium2._helpers.nativeopener
 
 Saver
 *****
