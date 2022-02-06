@@ -85,10 +85,7 @@
   keywords-only enforcement, and `pathlib` across the package. The minimum required Python
   version is now 3.5. (It might be possible to further reduce the requirement by moving type
   hints from the actual code into docstrings.)
-- We no longer implicitly read the data of files with non-ascii paths to bytes on Windows in
-  `render_pdf()`, mainly because `str.isascii()` requires at least Python 3.7. Callers may
-  implement the workaround if desired.
-- Minor optimisations to the table of contents helper functions have been made "under the hood".
+- Minor optimisations to the table of contents helper functions have been made.
 - Improved build scripts.
 - Adapted the update script to upstream changes (thanks @bblanchon).
 - Moved some scripts from the root directory into `utilities/` and changed the Makefile
