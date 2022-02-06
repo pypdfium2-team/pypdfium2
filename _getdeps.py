@@ -4,14 +4,7 @@
 
 import sys
 import shutil
-#from os.path import (
-#    join,
-#    exists,
-#)
-from _packaging import (
-    #SB_Dir,
-    run_cmd,
-)
+from _packaging import run_cmd
 
 
 PyDeps = [
@@ -28,25 +21,6 @@ NB_SysCommands = [
     'clang',
     'lld',
 ]
-
-
-#Ctypesgen_URL = "https://github.com/ctypesgen/ctypesgen.git"
-#Ctypesgen_PIN = "cef9a7ac58a50d0ae4f260abdeb75e0a71398187"
-#Ctypesgen_Dir = join(SB_Dir,'ctypesgen')
-
-
-#def install_ctypesgen():
-    
-    ## get a newer version of ctypesgen
-    
-    #if exists(Ctypesgen_Dir):
-        #run_cmd("git reset --hard HEAD", cwd=Ctypesgen_Dir)
-        #run_cmd("git pull {} master".format(Ctypesgen_URL), cwd=Ctypesgen_Dir)
-    #else:
-        #run_cmd("git clone {}".format(Ctypesgen_URL), cwd=SB_Dir)
-    
-    #run_cmd("git checkout {}".format(Ctypesgen_PIN), cwd=Ctypesgen_Dir)
-    #run_cmd("python3 -m pip install -U .", cwd=Ctypesgen_Dir)
 
 
 def install_pydeps():
@@ -77,7 +51,6 @@ def main(prefer_st=False):
     
     check_sysdeps(sys_commands)
     install_pydeps()
-    #install_ctypesgen()
 
 
 if __name__ == '__main__':
