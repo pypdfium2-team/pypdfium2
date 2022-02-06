@@ -85,7 +85,7 @@ def open_pdf_auto(
         achieved by passing it as second parameter to :func:`.close_pdf`, which is also required
         to close the opened file buffer.
         If attempting to access the ``FPDF_DOCUMENT`` handle after the loader data has been deleted,
-        a segmentation fault will occur.
+        a segmentation fault would occur.
     """
     
     if isinstance(input_obj, bytes):

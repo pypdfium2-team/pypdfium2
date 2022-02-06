@@ -25,7 +25,7 @@ def render_page(
     Parameters:
         
         pdf:
-            A PDFium document (can be obtained with :class:`.PdfContext` or :func:`.open_pdf`).
+            A PDFium document (can be obtained with :class:`.PdfContext` or :func:`.open_pdf_auto`).
         
         page_index:
             Zero-based index of the page to render.
