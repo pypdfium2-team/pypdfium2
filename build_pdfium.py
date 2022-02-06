@@ -306,9 +306,9 @@ def main(args):
 def parse_args(args=sys.argv[1:]):
     
     parser = argparse.ArgumentParser(
-        description = "A script to automate building PDFium from source and generating ctypesgen " +
-                      "bindings. If all went well, use `./setup_source bdist_wheel` to craft a "   +
-                      "python package from the source build.",
+        description = "A script to automate building PDFium from source and generating bindings " +
+                      "with ctypesgen. If all went well, use `./setup_source bdist_wheel` to "    +
+                      "craft a python package from the source build.",
     )
     
     parser.add_argument(
