@@ -138,8 +138,9 @@ def render_page(
     elif not use_alpha:
         pil_image = pil_image.convert("RGB")
     
-    pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
     pdfium.FPDFBitmap_Destroy(bitmap)
+    pdfium.FORM_OnBeforeClosePage(page, form_fill)
     pdfium.FPDF_ClosePage(page)
+    pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
     
     return pil_image
