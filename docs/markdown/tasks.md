@@ -8,6 +8,8 @@ Tasks
 
 * Allow for only returning bytes rather than creating an `Image.Image` object when rendering, so that callers may use the data in any way they like, without having to go through an intermediate PIL object (e. g. directly inject the data into a GUI widget buffer).
 * Add capabilities to render a certain area of a page (issue #38).
+* Use FPDFBitmap_CreateEx() and the FPDFBitmap_XXX macros for rendering with custom pixel format, to avoid the necessity of converting with PIL afterwards.
+* Add missing call to FORM_OnBeforeClosePage(). Also think about possibly using FPDFPage_Flatten() instead of FPDF_FFLDraw().
 * Create a support model for progressive rendering (`FPDF_RenderPageBitmap_Start()` & `IFSDK_PAUSE`)
 * Set the version appropriately when doing a source build (i. e. append current PDFium commit hash to version string).
 * Sourcebuild: regroup patches to be operating system specific.
