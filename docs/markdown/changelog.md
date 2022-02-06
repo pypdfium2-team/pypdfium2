@@ -11,7 +11,7 @@
   file reading on the Python side if necessary.
   For this purpose, the following changes to opener functions have been made:
   * Added `open_pdf_buffer()` to incrementally load a document from a byte buffer.
-  * Added `open_pdf_native()` to load a PDF, with file reading being done in Python natively
+  * Added `open_pdf_native()` to load a PDF file, with reading being done in Python natively
     using `open_pdf_buffer()`.
   * Added `open_pdf_auto()`, which will use `FPDF_LoadDocument()` for regular file paths,
     `open_pdf_native()` for non-ascii filepaths on Windows, and `open_pdf_buffer()` for bytes
