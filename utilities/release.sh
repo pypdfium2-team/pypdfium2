@@ -8,6 +8,8 @@ bash utilities/clean.sh
 # check for unused imports
 importchecker src/
 importchecker tests/
+importchecker examples/
+importchecker docs/source/conf.py
 for pyfile in *.py; do importchecker "$pyfile"; done
 
 # check for possible spelling mistakes
