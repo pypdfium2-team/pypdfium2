@@ -66,7 +66,7 @@ def open_pdf_auto(
     If the input is a regular file path, ``FPDF_LoadDocument()`` will be used.
     If on Windows, file paths that contain non-ascii characters will be loaded using
     :func:`.open_pdf_native`.
-    If the input is bytes or a byte buffer, :func:`.open_pdf_bytes` will be used.
+    If the input is bytes or a byte buffer, :func:`.open_pdf_buffer` will be used.
     
     Parameters:
         input_obj:
