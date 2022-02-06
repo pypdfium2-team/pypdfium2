@@ -131,8 +131,7 @@ def open_pdf_native(
     widestring filepaths on Windows. However, it may be slower to a certain extent due to
     object conversions between C and Python involved in the callback.
     
-    Please refer to :func:`.open_pdf_auto` for parameter and return documentation.
-    **The same warnings apply!**
+    See also :func:`.open_pdf_auto`. **The same warnings apply!**
     """
     
     file_handle = open(abspath(filepath), 'rb')
