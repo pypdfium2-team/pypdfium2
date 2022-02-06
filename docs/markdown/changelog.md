@@ -19,6 +19,8 @@
   * Adapted `PdfContext` to use `open_pdf_auto()`.
   * Marked `open_pdf()` as deprecated. It should not be used anymore and may be removed
     at some point.
+- Improved the command line interface to list help and version commands in the main help.
+  Also made the internals more flexible to allow multiple names for the same command.
 - Moved changelog, dependencies, contributing, and tasks files into `docs/markdown/`.
   They are now included in the Sphinx documentation using `myst-parser`.
 - Splitted up support model tests into separate files for improved readability and extensibility.
