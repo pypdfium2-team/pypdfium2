@@ -36,11 +36,11 @@ class _SubcommandItem:
     
     def __init__(
             self,
-            name: str,
+            names: Sequence[str],
             method: Callable,
             help: str = "",
         ):
-        self.name = name
+        self.names = names
         self.method = method
         self.help = help
 
@@ -65,18 +65,41 @@ class CliRunner:
         self._subs.append( _SubcommandItem(*args, **kws) )
     
     
+    @staticmethod
+    def _get_cmd_help(flags, message) -> str:
+        
+        help = ''
+        
+        sep = ''
+        for flag in flags:
+            help += sep + flag
+            sep = ', '
+        
+        if len(flags) > 1:
+            help = '({})'.format(help)
+        
+        help += '\n' + ' '*4 + message
+        
+        return help
+    
+    
     def _get_help(self) -> str:
         
-        help = ""
+        help = ''
         
-        # header: program name, version, and description
-        help += "{} {}".format(self.program, self.version) + '\n'
+        help += '{} {}'.format(self.program, self.version) + '\n'
         help += self.description + '\n'*2
+        
+        help += self._get_cmd_help(
+            HelpFlags, "Show the main help an exit",
+        ) + '\n'
+        help += self._get_cmd_help(
+            VersionFlags, "Show the versions of bindings and library",
+        ) + '\n'
         
         sep = ''
         for sub in self._subs:
-            help += sep + sub.name + '\n'
-            help += ' '*4 + sub.help
+            help += sep + self._get_cmd_help(sub.names, sub.help)
             sep = '\n'
         
         return help
@@ -97,11 +120,11 @@ class CliRunner:
         sc_found = False
         
         for sub in self._subs:
-            if main_arg.lower() == sub.name.lower():
+            if main_arg.lower() in sub.names:
                 sc_found = True
                 sub.method(
                     argv = self.argv[1:],
-                    prog = "pypdfium2 {}".format(sub.name),
+                    prog = "pypdfium2 {}".format(main_arg),
                     desc = sub.help,
                 )
         
