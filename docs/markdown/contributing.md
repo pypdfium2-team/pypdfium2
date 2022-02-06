@@ -30,7 +30,10 @@ with your contribution, and some rules that we would like you to follow:
   [`setup.cfg`][setup-cfg]. This means to avoid newer features like f-strings or keywords-only
   enforcement.
 
-* For working with file paths, we prefer to use `os.path` / `shutil` instead of `pathlib`.
+* For working with file paths, we prefer to use `os.path` / `shutil` / `glob` instead of `pathlib`.
+
+* In the module itself, no relative imports must be used. Absolute imports are preferable.
+  Outside the `src/` directory, realative imports are allowed, though.
 
 [spdx-licenses]: https://spdx.org/licenses/
 [reuse-lint]: https://pypi.org/project/reuse/
