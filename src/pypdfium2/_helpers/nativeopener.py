@@ -96,7 +96,7 @@ def open_pdf_buffer(
     buffer.seek(0, 2)
     file_len = buffer.tell()
     buffer.seek(0)
-        
+    
     FuncType = ctypes.CFUNCTYPE(
         # restype
         ctypes.c_int,
