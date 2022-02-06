@@ -80,7 +80,7 @@ def open_pdf_auto(
     
     Warning:
         Callers **MUST** ensure that the :class:`.LoaderData` object remain available for as
-        long as they work with the PDF. This means it has to be accessed again when done with
+        long as they work with the PDF. That means it has to be accessed again when done with
         processing, to prevent Python from automatically deleting the object. This can be
         achieved by passing it as second parameter to :func:`.close_pdf`, which is also required
         to close the opened file buffer.
