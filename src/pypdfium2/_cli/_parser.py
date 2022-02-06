@@ -87,7 +87,7 @@ class CliRunner:
         return help
     
     
-    def _get_help(self) -> str:
+    def _get_main_help(self) -> str:
         
         help = ''
         
@@ -112,7 +112,7 @@ class CliRunner:
     def run(self):
 
         if len(self.argv) < 1 or self.argv[0] in HelpFlags:
-            print(self._get_help())
+            print(self._get_main_help())
             sys.exit()
         
         main_arg = self.argv[0]
