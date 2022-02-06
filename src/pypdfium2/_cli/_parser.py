@@ -124,7 +124,7 @@ class CliRunner:
         sc_found = False
         
         for sub in self._subs:
-            if main_arg.lower() in sub.names:
+            if main_arg.lower() in [n.lower() for n in sub.names]:
                 sc_found = True
                 sub.method(
                     argv = self.argv[1:],
