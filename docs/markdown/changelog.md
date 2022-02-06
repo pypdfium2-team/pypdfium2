@@ -85,7 +85,7 @@
   keywords-only enforcement, and `pathlib` across the package. The minimum required Python
   version is now 3.5. (It might be possible to further reduce the requirement by moving type
   hints from the actual code into docstrings.)
-- Minor optimisations to the table of contents helper functions have been made.
+- Minor optimisations have been made to the table of contents helper functions.
 - Improved build scripts.
 - Adapted the update script to upstream changes (thanks @bblanchon).
 - Moved some scripts from the root directory into `utilities/` and changed the Makefile
