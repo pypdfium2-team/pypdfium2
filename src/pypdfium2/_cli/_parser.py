@@ -6,6 +6,7 @@ import argparse
 from typing import (
     Callable,
     Sequence,
+    Union,
 )
 
 
@@ -36,11 +37,14 @@ class _SubcommandItem:
     
     def __init__(
             self,
-            names: Sequence[str],
+            names: Union[str, Sequence[str]],
             method: Callable,
             help: str = "",
         ):
-        self.names = names
+        if isinstance(names, str):
+            self.names = (names, )
+        else:
+            self.names = names
         self.method = method
         self.help = help
 

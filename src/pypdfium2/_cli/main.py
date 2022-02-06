@@ -25,22 +25,22 @@ def main(argv=sys.argv[1:]):
     )
     
     runner.add_subcommand(
-        ("render", ),
+        "render",
         method = renderer.main,
         help = "Rasteries pages of a PDF file",
     )
     runner.add_subcommand(
-        ("toc", ),
+        "toc",
         method = toc.main,
         help = "Show the table of contents for a PDF document",
     )
     runner.add_subcommand(
-        ("merge", ),
+        "merge",
         method = merger.main,
         help = "Concatenate PDF files",
     )
     runner.add_subcommand(
-        ("tile", ),
+        "tile",
         method = tiler.main,
         help = "Perform page tiling (N-up compositing)",
     )
