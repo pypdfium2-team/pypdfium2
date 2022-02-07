@@ -65,6 +65,11 @@ class LoaderData:
         self.reader_instance = reader_instance
     
     def close(self):
+        
+        # access the reader variable again to make sure that even a heavily optimising
+        # interpreter would not prematurely delete the object
+        id(self.reader_instance)
+        
         if self.file_handle is not None:
             self.file_handle.close()
 
