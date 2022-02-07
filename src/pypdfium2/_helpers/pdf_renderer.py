@@ -8,6 +8,7 @@ from typing import (
     Sequence,
     Iterator,
     Union,
+    BinaryIO,
 )
 import concurrent.futures
 from pypdfium2 import _pypdfium as pdfium
@@ -17,7 +18,7 @@ from pypdfium2._helpers.utilities import colour_as_hex
 
 
 def _process_page(
-        file_or_bytes,
+        input_obj,
         index,
         password,
         scale,
@@ -28,7 +29,7 @@ def _process_page(
         optimise_mode,
     ) -> Tuple[int, Image.Image]:
     
-    with PdfContext(file_or_bytes, password) as pdf:
+    with PdfContext(input_obj, password) as pdf:
         pil_image = render_page(
             pdf, index,
             scale = scale,
@@ -47,7 +48,7 @@ def _invoke_process_page(args):
 
 
 def render_pdf(
-        file_or_bytes: Union[str, bytes],
+        input_obj: Union[str, bytes, BinaryIO],
         page_indices: list = None,
         password: str = None,
         n_processes: int = os.cpu_count(),
@@ -62,8 +63,8 @@ def render_pdf(
     Render multiple pages of a PDF document, using a process pool executor.
     
     Parameters:
-        file_or_bytes:
-            The PDF document to render, either given as file path or as bytes.
+        input_obj:
+            The PDF document to render. It may be given as file path, bytes, or byte buffer.
         page_indices:
             A list of zero-based page indices to render.
         colour:
@@ -82,7 +83,7 @@ def render_pdf(
             raise ValueError("If colour is given as a sequence, it must have length 3 or 4.")
         colour = colour_as_hex(*colour)
     
-    with PdfContext(file_or_bytes, password) as pdf:
+    with PdfContext(input_obj, password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
     n_digits = len(str(n_pages))
     
@@ -94,7 +95,7 @@ def render_pdf(
     meta_args = []
     for i in page_indices:
         sub_args = [
-            file_or_bytes,
+            input_obj,
             i,
             password,
             scale,
