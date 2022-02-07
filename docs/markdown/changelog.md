@@ -3,9 +3,9 @@
 
 # Changelog
 
-## 0.12.0 (unreleased)
+## 0.12.0 (2022-02-07)
 
-- Updated PDFium from `4861` to `xxxx`
+- Updated PDFium from `4861` to `4874`
 - Restructured file opening to finally address the Windows issues with non-ascii filenames
   by implementing a support model for `FPDF_LoadCustomDocument()`, which allows us to do
   file reading on the Python side if necessary.
