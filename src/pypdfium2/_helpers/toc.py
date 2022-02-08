@@ -148,11 +148,12 @@ def print_toc(toc) -> None:
     """
     
     for item in toc:
-        
-        level = item.level
-        title = item.title
-        pagenum = item.page_index + 1
-        view_mode = item.view_mode
-        view_pos = item.view_pos
-        
-        print( '    '*level + "{} -> {}  # {} {}".format(title, pagenum, view_mode, view_pos) )
+        print(
+            '    ' * item.level +
+            "{} -> {}  # {} {}".format(
+                item.title,
+                item.page_index + 1,
+                item.view_mode,
+                item.view_pos,
+            )
+        )

@@ -140,12 +140,15 @@ Read the table of contents:
 doc = pdfium.PdfDocument(filepath)
 
 for item in doc.get_toc():
-    level = item.level
-    title = item.title
-    pagenum = item.page_index + 1
-    view_mode = item.view_mode
-    view_pos = item.view_pos
-    print( '    '*level + "{} -> {}  # {} {}".format(title, pagenum, view_mode, view_pos) )
+    print(
+        '    ' * item.level +
+        "{} -> {}  # {} {}".format(
+            item.title,
+            item.page_index + 1,
+            item.view_mode,
+            item.view_pos,
+        )
+    )
     
 doc.close()
 ```
