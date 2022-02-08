@@ -8,7 +8,6 @@ Tasks
 
 * Allow for only returning bytes rather than creating an `Image.Image` object when rendering, so that callers may use the data in any way they like (e. g. directly inject into a GUI widget buffer), without having to go through an intermediate PIL object.
 * Add capabilities to render a certain area of a page (issue #38).
-* Use `FPDFBitmap_CreateEx()` and the `FPDFBitmap_XXX` macros for rendering with custom pixel format, to avoid the necessity of converting with PIL afterwards.
 * Add test case for rendering a PDF with interactive forms.
 * Think about the possibility of using `FPDFPage_Flatten()` rather than `FPDF_FFLDraw()` and all the extra commands that it needs.
 * Create a support model for progressive rendering (`FPDF_RenderPageBitmap_Start()` & `IFSDK_PAUSE`)
