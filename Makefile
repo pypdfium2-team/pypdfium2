@@ -23,3 +23,9 @@ build:
 
 clean:
 	bash ./utilities/clean.sh
+
+render-docs:
+	sphinx-build ./docs/source ./docs/build/html
+
+open-docs:
+	xdg-open ./docs/build/html/index.html

@@ -71,8 +71,8 @@ Show the table of contents for a PDF:
 pypdfium2 toc document.pdf
 ```
 
-To obtain a list of subcommands, run `pypdfium2 --help`.
-Individual help for each subcommand is available can be accessed in the same way (`pypdfium any_subcommand --help`)
+To obtain a list of subcommands, run `pypdfium2 help`.
+Individual help for each subcommand is available can be accessed in the same way (`pypdfium any_subcommand help`)
 
 CLI documentation: https://pypdfium2.readthedocs.io/en/stable/cli.html
 
@@ -85,19 +85,26 @@ Import pypdfium2:
 import pypdfium2 as pdfium
 ```
 
-Open a PDF by function:
-
+Open a PDF as object:
 ```python3
-pdf, loader_data = pdfium.open_pdf_auto(filename)
-# ... work with the PDF
-pdfium.close_pdf(pdf, loader_data)
+doc = pdfium.PdfDocument(filename)
+# ... use methods provided by the helper class
+pdf = doc.raw
+# ... work with the actual PDFium document handle
+doc.close()
 ```
 
-Open a PDF by context manager:
-
+Open a PDF via context manager:
 ```python3
 with pdfium.PdfContext(filename) as pdf:
-    # ... work with the PDF
+    # ... work with the pdf
+```
+
+Open a PDF by low-level function:
+```python3
+pdf, loader_data = pdfium.open_pdf_auto(filename)
+# ... work with the pdf
+pdfium.close_pdf(pdf, loader_data)
 ```
 
 Render a single page:
@@ -130,9 +137,10 @@ for image, suffix in pdfium.render_pdf(filename):
 Read the table of contents:
 
 ```python3
-with pdfium.PdfContext(filename) as pdf:
-    toc = pdfium.get_toc(pdf)
-    pdfium.print_toc(toc)
+doc = pdfium.PdfDocument(filepath)
+toc = doc.get_toc()
+pdfium.print_toc(toc)
+doc.close()
 ```
 
 Support model documentation: https://pypdfium2.readthedocs.io/en/stable/support_api.html

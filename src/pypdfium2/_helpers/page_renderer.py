@@ -5,8 +5,8 @@ import math
 import ctypes
 from PIL import Image
 from pypdfium2 import _pypdfium as pdfium
-from pypdfium2._helpers import utilities
-from pypdfium2._helpers.constants import *
+from pypdfium2._helpers.constants import OptimiseMode
+from pypdfium2._helpers.utilities import translate_rotation
 
 
 def render_page(
@@ -117,7 +117,7 @@ def render_page(
         page,
         0, 0,
         width, height,
-        utilities.translate_rotation(rotation),
+        translate_rotation(rotation),
         render_flags,
     ]
     
