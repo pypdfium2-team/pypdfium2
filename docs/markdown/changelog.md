@@ -6,6 +6,9 @@
 ## 0.13.0 (unreleased)
 
 - Updated PDFium from `4874` to `xxxx`
+- In `render_page()`, the bitmap is now directly initialised with the right colour format,
+  rather than always using RGBA and converting afterwards. This improves performance when
+  rendering without alpha channel, especially for greyscale.
 - Installed a new support model class `PdfDocument` on top of the separate helper functions,
   for object oriented document access. This should be easier to use and more like the API of
   other Python PDF libraries.
