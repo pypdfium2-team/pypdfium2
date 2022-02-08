@@ -48,7 +48,9 @@ def test_pdfdoc_save():
     pdfium.FPDFPage_Delete(doc.raw, 0)
     buffer = io.BytesIO()
     doc.save(buffer)
+    doc.close()
     assert buffer.tell() > 100000
+    buffer.close()
 
 
 def _compare_numarray(array, expected):
