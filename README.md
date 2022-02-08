@@ -138,7 +138,6 @@ Read the table of contents:
 
 ```python3
 doc = pdfium.PdfDocument(filepath)
-
 for item in doc.get_toc():
     print(
         '    ' * item.level +
@@ -149,7 +148,6 @@ for item in doc.get_toc():
             item.view_pos,
         )
     )
-    
 doc.close()
 ```
 
