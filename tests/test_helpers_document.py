@@ -8,6 +8,7 @@ from .conftest import (
     TestFiles,
     iterate_testfiles,
 )
+from pypdfium2._cli.toc import print_toc
 
 
 def _pdfdoc_load(input_obj):
@@ -119,5 +120,5 @@ def test_pdfdoc_gettoc_maxdepth():
 
 def test_pdfdoc_gettoc_print():
     doc = pdfium.PdfDocument(TestFiles.bookmarks)
-    pdfium.print_toc( doc.get_toc(max_depth=1) )
+    print_toc( doc.get_toc(max_depth=1) )
     doc.close()

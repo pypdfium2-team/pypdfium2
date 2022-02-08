@@ -23,9 +23,24 @@ def parse_args(argv, prog, desc):
     return parser.parse_args(argv)
 
 
+def print_bookmark(item):
+    print(
+        '    ' * item.level +
+        "{} -> {}  # {} {}".format(
+            item.title,
+            item.page_index + 1,
+            item.view_mode,
+            item.view_pos,
+        )
+    )
+
+def print_toc(toc):
+    for item in toc:
+        print_bookmark(item)
+
+
 def main(argv, prog, desc):
-    
     args = parse_args(argv, prog, desc)
-    
-    with pdfium.PdfContext(args.input) as pdf:
-        pdfium.print_toc( pdfium.get_toc(pdf, max_depth=args.max_depth) )
+    doc = pdfium.PdfDocument(args.input)
+    print_toc( doc.get_toc() )
+    doc.close()

@@ -3,6 +3,7 @@
 
 import ctypes
 import logging
+import warnings
 from typing import (
     Sequence,
     Optional,
@@ -140,12 +141,14 @@ def get_toc(
 
 def print_toc(toc) -> None:
     """
-    Print the table of contents in a well-readable manner.
-    
-    Parameters:
-        toc:
-            The iterator of the outline to display (result of :func:`get_toc`).
+    This function is deprecated and scheduled for removal.
+    Please use custom code to print the table of contents.
     """
+    
+    warnings.warn(
+        "print_toc() is scheduled for removal - please use custom code instead.",
+        DeprecationWarning
+    )
     
     for item in toc:
         print(

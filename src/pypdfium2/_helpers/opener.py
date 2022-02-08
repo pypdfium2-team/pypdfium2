@@ -109,12 +109,12 @@ def open_pdf(
         password: Union[str, bytes] = None,
     ) -> pdfium.FPDF_DOCUMENT:
     """
-    This function is deprecated and only included for backward compatibility.
+    This function is deprecated and scheduled for removal.
     Please use :class:`.PdfContext` or :func:`.open_pdf_auto` instead.
     """
     
     warnings.warn(
-        "open_pdf() is deprecated and scheduled for removal - please use open_pdf_auto() instead.",
+        "open_pdf() is scheduled for removal - please use open_pdf_auto() instead.",
         DeprecationWarning
     )
     
