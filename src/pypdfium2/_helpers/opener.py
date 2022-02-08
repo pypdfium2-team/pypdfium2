@@ -16,36 +16,6 @@ from pypdfium2._helpers.nativeopener import *
 from pypdfium2._helpers.error_handler import *
 
 
-class PdfContext:
-    """
-    Context manager to open and automatically close again a PDFium document.
-    It internally uses :func:`.open_pdf_auto` and :func:`.close_pdf`.
-    This is the safest and most convenient way to open a document using PyPDFium2.
-    
-    Parameters:
-        input_obj:
-            File path to a PDF document, bytes, or a byte buffer.
-        password:
-            A password to unlock the document, if encrypted.
-    """
-    
-    def __init__(
-            self,
-            input_obj,
-            password = None,
-        ):
-        self.input_obj = input_obj
-        self.password = password
-        self.ld_data = None
-    
-    def __enter__(self):
-        self.pdf, self.ld_data = open_pdf_auto(self.input_obj, self.password)
-        return self.pdf
-    
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        close_pdf(self.pdf, self.ld_data)
-
-
 def _str_isascii(string):
     try:
         tmp = string.encode('ascii')
@@ -82,8 +52,8 @@ def open_pdf_auto(
         Callers **MUST** ensure that the :class:`.LoaderData` object remain available for as
         long as they work with the PDF. That means it has to be accessed again when done with
         processing, to prevent Python from automatically deleting the object. This can be
-        achieved by passing it as second parameter to :func:`.close_pdf`, which is also required
-        to close the opened file buffer.
+        achieved by passing it as second parameter to :func:`.close_pdf`, which is also necessary
+        to release the acquired file buffer.
         If attempting to access the ``FPDF_DOCUMENT`` handle after the loader data has been deleted,
         a segmentation fault would occur.
     """

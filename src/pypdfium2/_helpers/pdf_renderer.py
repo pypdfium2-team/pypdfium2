@@ -12,9 +12,10 @@ from typing import (
 )
 import concurrent.futures
 from pypdfium2 import _pypdfium as pdfium
-from pypdfium2._helpers.opener import *
-from pypdfium2._helpers.page_renderer import *
+from pypdfium2._helpers.classes import PdfContext
+from pypdfium2._helpers.constants import OptimiseMode
 from pypdfium2._helpers.utilities import colour_as_hex
+from pypdfium2._helpers.page_renderer import render_page
 
 
 def _process_page(

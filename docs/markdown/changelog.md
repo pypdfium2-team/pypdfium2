@@ -3,6 +3,15 @@
 
 # Changelog
 
+## 0.13.0 (unreleased)
+
+- Updated PDFium from `4874` to `xxxx`
+- Installed a new support model class `PdfDocument` on top of the separate helper functions,
+  for object oriented document access. This should be easier to use and more like the API of
+  other Python PDF libraries.
+- Added documentation commands to the main Makefile.
+- Fixed link on the PyPI page to point at the stable documentation, not the development build.
+
 ## 0.12.0 (2022-02-07)
 
 - Updated PDFium from `4861` to `4874`

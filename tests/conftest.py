@@ -31,6 +31,22 @@ class TestFiles:
     nonascii = join(ResourceDir,'nonascii_tênfilechứakýtựéèáàçß 发短信.pdf')
 
 
+def iterate_testfiles(skip_encrypted=True):
+    
+    encrypted = (TestFiles.encrypted, )
+    
+    for attr_name in dir(TestFiles):
+        
+        if attr_name.startswith('_'):
+            continue
+        
+        member = getattr(TestFiles, attr_name)
+        if skip_encrypted and member in encrypted:
+            continue
+        
+        yield member
+
+
 def test_paths():
     
     dirs = (TestDir, SourceTree, ResourceDir, OutputDir)
@@ -38,8 +54,6 @@ def test_paths():
         print(dirpath)
         assert os.path.isdir(dirpath)
     
-    for attr_name in dir(TestFiles):
-        if not attr_name.startswith('_'):
-            filepath = getattr(TestFiles, attr_name)
-            print(attr_name.ljust(20), filepath)
-            assert os.path.isfile(filepath)
+    for filepath in iterate_testfiles(False):
+        print(filepath)
+        assert os.path.isfile(filepath)

@@ -13,3 +13,4 @@ from pypdfium2._helpers.pdf_renderer import *
 from pypdfium2._helpers.toc import *
 from pypdfium2._helpers.saver import *
 from pypdfium2._helpers.boxes import *
+from pypdfium2._helpers.classes import *

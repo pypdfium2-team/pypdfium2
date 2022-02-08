@@ -88,7 +88,7 @@ def get_toc(
         pdf: pdfium.FPDF_DOCUMENT,
         parent: Optional[pdfium.FPDF_BOOKMARK] = None,
         level: int = 0,
-        max_depth: int = 15,
+        max_depth: int = None,
         seen: Optional[set] = None,
     ) -> Iterator[OutlineItem]:
     """
@@ -103,6 +103,9 @@ def get_toc(
     Yields:
         :class:`OutlineItem`
     """
+    
+    if max_depth is None:
+        max_depth = 15
     
     if level >= max_depth:
         #logger.warning("Maximum recursion depth reached.")
