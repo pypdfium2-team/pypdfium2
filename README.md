@@ -138,8 +138,15 @@ Read the table of contents:
 
 ```python3
 doc = pdfium.PdfDocument(filepath)
-toc = doc.get_toc()
-pdfium.print_toc(toc)
+
+for item in doc.get_toc():
+    level = item.level
+    title = item.title
+    pagenum = item.page_index + 1
+    view_mode = item.view_mode
+    view_pos = item.view_pos
+    print( '    '*level + "{} -> {}  # {} {}".format(title, pagenum, view_mode, view_pos) )
+    
 doc.close()
 ```
 
