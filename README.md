@@ -85,7 +85,7 @@ Import pypdfium2:
 import pypdfium2 as pdfium
 ```
 
-Open a PDF as object:
+Open a PDF using the helper class `PdfDocument`:
 ```python3
 doc = pdfium.PdfDocument(filename)
 # ... use methods provided by the helper class
@@ -94,13 +94,13 @@ pdf = doc.raw
 doc.close()
 ```
 
-Open a PDF via context manager:
+Open a PDF using the context manager `PdfContext`:
 ```python3
 with pdfium.PdfContext(filename) as pdf:
     # ... work with the pdf
 ```
 
-Open a PDF by low-level function:
+Open a PDF using the function `open_pdf_auto()`:
 ```python3
 pdf, loader_data = pdfium.open_pdf_auto(filename)
 # ... work with the pdf
