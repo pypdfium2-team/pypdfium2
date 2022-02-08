@@ -9,6 +9,31 @@ from pypdfium2._helpers.constants import OptimiseMode
 from pypdfium2._helpers.utilities import translate_rotation
 
 
+def _get_use_alpha(colour):
+    
+    use_alpha = True
+    
+    if colour is not None:
+        alpha_val = hex(colour)[2:4].upper()
+        if alpha_val == 'FF':
+            use_alpha = False
+    
+    return use_alpha
+
+
+def _get_pixel_fmt(use_alpha, greyscale):
+    
+    pixel_fmt = "RGBA", "BGRA", pdfium.FPDFBitmap_BGRA
+    
+    if not use_alpha:
+        if greyscale:
+            pixel_fmt = "L", "L", pdfium.FPDFBitmap_Gray
+        else:
+            pixel_fmt = "RGB", "BGR", pdfium.FPDFBitmap_BGR
+    
+    return pixel_fmt
+
+
 def render_page(
         pdf: pdfium.FPDF_DOCUMENT,
         page_index: int = 0,
@@ -67,18 +92,14 @@ def render_page(
         :class:`PIL.Image.Image`
     """
     
-    use_alpha = True
-    
-    if colour is not None:
-        alpha_val = hex(colour)[2:4].upper()
-        if alpha_val == 'FF':
-            use_alpha = False
-    
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
         raise IndexError(
             "Page index {} is out of bounds for document with {} pages.".format(page_index, page_count)
         )
+    
+    use_alpha = _get_use_alpha(colour)
+    px_target, px_source, px_pdfium = _get_pixel_fmt(use_alpha, greyscale)
     
     form_config = pdfium.FPDF_FORMFILLINFO(2)
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
@@ -92,7 +113,13 @@ def render_page(
     if rotation in (90, 270):
         width, height = height, width
     
-    bitmap = pdfium.FPDFBitmap_Create(width, height, int(use_alpha))
+    bitmap = pdfium.FPDFBitmap_CreateEx(
+        width,
+        height,
+        px_pdfium,
+        None,
+        width * len(px_source),
+    )
     if colour is not None:
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, colour)
     
@@ -127,16 +154,10 @@ def render_page(
     cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
     buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
     
-    pil_image = Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
+    pil_image = Image.frombuffer(px_target, (width, height), buffer.contents, "raw", px_source, 0, 1)
     
-    if greyscale:
-        if use_alpha:
-            pil_image = pil_image.convert("LA")
-        else:
-            pil_image = pil_image.convert("L")
-    
-    elif not use_alpha:
-        pil_image = pil_image.convert("RGB")
+    if greyscale and use_alpha:
+        pil_image = pil_image.convert("LA")
     
     pdfium.FPDFBitmap_Destroy(bitmap)
     pdfium.FORM_OnBeforeClosePage(page, form_fill)
