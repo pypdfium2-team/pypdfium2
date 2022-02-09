@@ -13,7 +13,6 @@ Tasks
 * Create a support model for progressive rendering (`FPDF_RenderPageBitmap_Start()` & `IFSDK_PAUSE`)
 * Set the version appropriately when doing a source build (i. e. append current PDFium commit hash to version string).
 * Sourcebuild: regroup patches to be operating system specific.
-* Decide what to do about the kind of failed `compcheck.py` utility.
 * Think about further extending support for older Python versions (see changelog).
 * Create a `.readthedocs.yaml` configuration file (issue #32).
 * Look into setting up Github Actions CI.
