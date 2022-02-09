@@ -156,9 +156,6 @@ def render_page(
     
     pil_image = Image.frombuffer(px_target, (width, height), buffer.contents, "raw", px_source, 0, 1)
     
-    if greyscale and use_alpha:
-        pil_image = pil_image.convert("LA")
-    
     pdfium.FPDFBitmap_Destroy(bitmap)
     pdfium.FORM_OnBeforeClosePage(page, form_fill)
     pdfium.FPDF_ClosePage(page)
