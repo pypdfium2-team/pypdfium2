@@ -78,12 +78,6 @@ class PlatformManager:
         return self._is_platform('win32', '')
 
 
-# function to generate bindings, if doing pre-setup
-def _make_bindings(platform_dir, w_presetup):
-    if w_presetup:
-        update_pdfium.main( ['-p', basename(platform_dir)] )
-
-
 def main():
     
     # Since setuptools may run this code multiple times with different commands,
@@ -91,6 +85,11 @@ def main():
     # If you deliberately wish to re-run them, set the content of `data/setup_status.txt`
     # to `InitialState`.
     w_presetup = check_presetup()
+    
+    # nested function to generate bindings, if doing pre-setup
+    def _make_bindings(platform_dir):
+        if w_presetup:
+            update_pdfium.main( ['-p', basename(platform_dir)] )
     
     if w_presetup:
         
@@ -106,35 +105,35 @@ def main():
     
     # run the corresponding setup code
     if plat.is_darwin_arm64():
-        _make_bindings(PlatformDirs.DarwinArm64, w_presetup)
+        _make_bindings(PlatformDirs.DarwinArm64)
         setup_darwin_arm64.main()
     
     elif plat.is_darwin_x64():
-        _make_bindings(PlatformDirs.Darwin64, w_presetup)
+        _make_bindings(PlatformDirs.Darwin64)
         setup_darwin_x64.main()
     
     elif plat.is_linux_arm32():
-        _make_bindings(PlatformDirs.LinuxArm32, w_presetup)
+        _make_bindings(PlatformDirs.LinuxArm32)
         setup_linux_arm32.main()
     
     elif plat.is_linux_arm64():
-        _make_bindings(PlatformDirs.LinuxArm64, w_presetup)
+        _make_bindings(PlatformDirs.LinuxArm64)
         setup_linux_arm64.main()
     
     elif plat.is_linux_x64():
-        _make_bindings(PlatformDirs.Linux64, w_presetup)
+        _make_bindings(PlatformDirs.Linux64)
         setup_linux_x64.main()
     
     elif plat.is_windows_arm64():
-        _make_bindings(PlatformDirs.WindowsArm64, w_presetup)
+        _make_bindings(PlatformDirs.WindowsArm64)
         setup_windows_arm64.main()
     
     elif plat.is_windows_x64():
-        _make_bindings(PlatformDirs.Windows64, w_presetup)
+        _make_bindings(PlatformDirs.Windows64)
         setup_windows_x64.main()
     
     elif plat.is_windows_x86():
-        _make_bindings(PlatformDirs.Windows86, w_presetup)
+        _make_bindings(PlatformDirs.Windows86)
         setup_windows_x86.main()
     
     # Platform without pre-built binaries - trying a regular sourcebuild
