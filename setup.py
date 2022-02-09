@@ -2,12 +2,14 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import _getdeps as getdeps
+getdeps.main()
+
 import sysconfig
 from os.path import (
     join,
     basename,
 )
-
 import update_pdfium
 import build_pdfium
 import setup_source
@@ -19,7 +21,6 @@ import setup_linux_x64
 import setup_windows_arm64
 import setup_windows_x64
 import setup_windows_x86
-import _getdeps as getdeps
 from _packaging import DataTree
 from _setup_base import PlatformDirs
 
@@ -92,10 +93,6 @@ def main():
             update_pdfium.main( ['-p', basename(platform_dir)] )
     
     if w_presetup:
-        
-        # automatically check/install dependencies
-        getdeps.main()
-        
         # update status file
         with open(StatusFile, 'w') as file_handle:
             file_handle.write("PreSetupDone")
