@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-# Contributing Guidelines
+# Contributing
 
 Contributions and improvements to PyPDFium2 are very welcome. Here are a few instructions to help you
 with your contribution, and some rules that we would like you to follow:
