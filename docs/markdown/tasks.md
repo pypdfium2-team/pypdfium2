@@ -6,7 +6,7 @@ Tasks
 
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
-* Allow for only returning bytes rather than creating an `Image.Image` object when rendering, so that callers may use the data in any way they like (e. g. directly inject into a GUI widget buffer), without having to go through an intermediate PIL object.
+* Allow for only returning bytes rather than creating an `Image.Image` object when rendering, so that callers may use the data in any way they like (e. g. directly inject into a GUI widget buffer), without having to go through an intermediate PIL object. Depending on how we will implement this, API breaking changes might be involved.
 * Add capabilities to render a certain area of a page (issue #38).
 * Add test case for rendering a PDF with interactive forms.
 * Think about the possibility of using `FPDFPage_Flatten()` rather than `FPDF_FFLDraw()` and all the extra commands that it needs.
