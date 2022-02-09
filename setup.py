@@ -89,13 +89,15 @@ def main():
     
     # nested function to generate bindings, if doing pre-setup
     def _make_bindings(platform_dir):
+        
         if w_presetup:
+            
             update_pdfium.main( ['-p', basename(platform_dir)] )
+            
+            # update status file
+            with open(StatusFile, 'w') as file_handle:
+                file_handle.write("PreSetupDone")
     
-    if w_presetup:
-        # update status file
-        with open(StatusFile, 'w') as file_handle:
-            file_handle.write("PreSetupDone")
     
     # tooling to determine the current platform
     plat = PlatformManager()
