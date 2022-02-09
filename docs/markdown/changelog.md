@@ -13,6 +13,7 @@
   for object oriented document access. This should be easier to use and more like the API of
   other Python PDF libraries.
 - Added documentation commands to the main Makefile.
+- Improved compliance with the `reuse` standard.
 - Fixed link on the PyPI page to point at the stable documentation, not the development build.
 
 ## 0.12.0 (2022-02-07)
