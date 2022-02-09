@@ -12,9 +12,11 @@
 - Installed a new support model class `PdfDocument` on top of the separate helper functions,
   for object oriented document access. This should be easier to use and more like the API of
   other Python PDF libraries.
+- Fixed `setup.py` to always call `getdeps` first, before other imports that already require
+  packages that `getdeps` should install.
+- Fixed link on the PyPI page to point at the stable documentation, not the development build.
 - Added documentation commands to the main Makefile.
 - Improved compliance with the `reuse` standard.
-- Fixed link on the PyPI page to point at the stable documentation, not the development build.
 
 ## 0.12.0 (2022-02-07)
 
