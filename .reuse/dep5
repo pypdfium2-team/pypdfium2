@@ -19,44 +19,48 @@ License: CC-BY-4.0
 
 Files: tests/resources/bookmarks.pdf
 Copyright: 2020 Matthias Erll
-License: MPL-2.0
+License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/pikepdf/pikepdf/blob/master/tests/resources/outlines.pdf
-    (see https://github.com/pikepdf/pikepdf/blob/master/debian/copyright)
+    No individual license stated for this data file. Project license is MPL-2.0.
+    (https://github.com/pikepdf/pikepdf/blob/master/debian/copyright says "License assumed from LICENSE.txt in project root.")
 
 Files: tests/resources/bookmarks_circular.pdf
 Copyright: 2021 PDFium Developers
 License: BSD-3-Clause OR Apache-2.0
 Comment:
     Obtained from: https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf
-    This file is part of the PDFium test suite.
 
 Files: tests/resources/mediabox_missing.pdf
 Copyright: 2020 Jerome Robert
-License: GPL-3.0-or-later
+License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/pdfarranger/pdfarranger/blob/main/tests/test.pdf
-    This file is hand-written and not a valid PDF.
-    License assumed from project license and debian copyright file.
+    No individual license stated for this data file. Project license is GPL-3.0-or-later.
 
 Files: tests/resources/cropbox.pdf
 Copyright: 2021 Charlotte Curtis <c.f.curtis@gmail.com>
            2022 geisserml <geisserml@gmail.com>
-License: MPL-2.0
+License: LicenseRef-FairUse
 Comment:
     Derived from: https://github.com/cfcurtis/pdfstitcher/blob/main/resources/testdoc.pdf
-    License assumed from project license.
+    No individual license stated for this data file. Project license is MPL-2.0.
 
-Files: sourcebuild/patches/*
+Files: sourcebuild/patches/gclient_scm.patch
+       sourcebuild/patches/public_headers.patch
+       sourcebuild/patches/rc_compiler.patch
+       sourcebuild/patches/resources.rc
+       sourcebuild/patches/shared_library.patch
+       sourcebuild/patches/widestring.patch
 Copyright: 2021 Benoît Blanchon
-License: 
+License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches
-    No license was concluded, but free reuse is granted (see https://github.com/bblanchon/pdfium-binaries/issues/55).
+    For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
 
 Files: sourcebuild/patches/gclient_scm.patch
 Copyright: 2021 BoLaMN
-License: 
+License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/pull/39
 
