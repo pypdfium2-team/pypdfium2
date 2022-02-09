@@ -5,6 +5,7 @@
 import sys
 import shutil
 from _packaging import run_cmd
+from importlib.util import find_spec
 
 
 PyDeps = [
@@ -25,7 +26,8 @@ NB_SysCommands = [
 
 def install_pydeps():
     for dep in PyDeps:
-        run_cmd("python3 -m pip install {}".format(dep), cwd=None)
+        if not find_spec(dep):
+            run_cmd("python3 -m pip install {}".format(dep), cwd=None)
 
 
 def check_sysdeps(sys_commands):
