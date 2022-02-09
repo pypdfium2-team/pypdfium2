@@ -167,7 +167,7 @@ def test_render_greyscale():
             greyscale = True,
             colour = None,
         )
-        assert image_b.mode == 'LA'
+        assert image_b.mode == 'RGBA'
         image_b.save(join(OutputDir,'greyscale_alpha.png'))
         image_b.close()
 
