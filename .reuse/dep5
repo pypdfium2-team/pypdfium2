@@ -13,7 +13,10 @@ Files: data/setup_status.txt
 Copyright: 2022 geisserml <geisserml@gmail.com>
 License: Apache-2.0 OR BSD-3-Clause
 
-Files: tests/resources/*.pdf
+Files: tests/resources/render.pdf
+       tests/resources/multipage.pdf
+       tests/resources/encrypted.pdf
+       tests/resources/nonascii_tênfilechứakýtựéèáàçß 发短信.pdf
 Copyright: 2022 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
 
