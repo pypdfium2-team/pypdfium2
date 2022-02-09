@@ -58,7 +58,7 @@ section of [`dependencies.md`](docs/markdown/dependencies.md), in addition to th
 
 Rasterise a PDF document:
 ```bash
-pypdfium2 render document.pdf -o output_dir/ --scale 2 --optimise-mode none
+pypdfium2 render document.pdf -o output_dir/ --scale 3
 ```
 
 You may also rasterise multiple files at once:
