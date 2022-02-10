@@ -13,7 +13,7 @@ importchecker docs/source/conf.py
 for pyfile in *.py; do importchecker "$pyfile"; done
 
 # check for possible spelling mistakes
-codespell --skip="./sourcebuild,./docs/build,./data,./.git,__pycache__,.mypy_cache,"
+codespell --skip="./sourcebuild,./docs/build,./data,./.git,__pycache__,.mypy_cache," -L tabe,splitted
 
 # check for missing spdx info
 reuse lint
