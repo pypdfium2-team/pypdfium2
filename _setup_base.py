@@ -94,7 +94,7 @@ def _get_tag(plat_dir):
     elif plat_dir is PlatformDirs.SourceBuild:
         return sysconfig.get_platform()
     else:
-        raise ValueError( "Unkown platform directory {}".format(plat_dir) )
+        raise ValueError( "Unknown platform directory {}".format(plat_dir) )
 
    
 SetupKws = dict(
