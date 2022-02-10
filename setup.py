@@ -2,15 +2,9 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import sysconfig
 from os.path import join, basename
 from _packaging import DataTree
 
-
-# Since setuptools may run this code multiple times with different commands,
-# we have a status file to check whether pre-setup tasks have already been done.
-# If you deliberately wish to re-run them, set the content of `data/setup_status.txt`
-# to `InitialState`.
 
 StatusFile = join(DataTree, 'setup_status.txt')
 
@@ -30,13 +24,13 @@ def presetup_done():
 
 W_Presetup = check_presetup()
 
-
-# Automatically install missing packaging dependencies, if doing pre-setup
-# No imports of non-stdlib dependencies may happen until this check, otherwise getdeps
-# would be completely pointless
 if W_Presetup:
-    import _getdeps as getdeps
-    getdeps.main()
+    import _getdeps
+    _getdeps.main()
+
+
+import sysconfig
+from _setup_base import PlatformDirs, wheel_for
 
 
 class PlatformManager:
@@ -57,93 +51,56 @@ class PlatformManager:
     
     def is_darwin_arm64(self):
         return self._is_platform('macosx', 'arm64')
-    
     def is_darwin_x64(self):
         return self._is_platform('macosx', 'x86_64')
-    
     def is_linux_arm32(self):
         return self._is_platform('linux', 'armv7l')
-    
     def is_linux_arm64(self):
         return self._is_platform('linux', 'aarch64')
-    
     def is_linux_x64(self):
         return self._is_platform('linux', 'x86_64')
-    
     def is_windows_arm64(self):
-        return self._is_platform('win', 'arm64')
-    
+        return self._is_platform('win', 'arm64')    
     def is_windows_x64(self):
         return self._is_platform('win', 'amd64')
-    
     def is_windows_x86(self):
         return self._is_platform('win32', '')
 
 
-# function to generate bindings, if doing pre-setup
-def _make_bindings(platform_dir):
+def _setup(platform_dir):
     if W_Presetup:
         import update_pdfium
         update_pdfium.main( ['-p', basename(platform_dir)] )
+    wheel_for(platform_dir)
 
 
 def main():    
     
-    # platform tooling
     plat = PlatformManager()
-    from _setup_base import PlatformDirs
     
-    # run the corresponding setup code
     if plat.is_darwin_arm64():
-        _make_bindings(PlatformDirs.DarwinArm64)
-        import setup_darwin_arm64
-        setup_darwin_arm64.main()
-    
+        _setup(PlatformDirs.DarwinArm64)
     elif plat.is_darwin_x64():
-        _make_bindings(PlatformDirs.Darwin64)
-        import setup_darwin_x64
-        setup_darwin_x64.main()
-    
+        _setup(PlatformDirs.Darwin64)
     elif plat.is_linux_arm32():
-        _make_bindings(PlatformDirs.LinuxArm32)
-        import setup_linux_arm32
-        setup_linux_arm32.main()
-    
+        _setup(PlatformDirs.LinuxArm32)
     elif plat.is_linux_arm64():
-        _make_bindings(PlatformDirs.LinuxArm64)
-        import setup_linux_arm64
-        setup_linux_arm64.main()
-    
+        _setup(PlatformDirs.LinuxArm64)
     elif plat.is_linux_x64():
-        _make_bindings(PlatformDirs.Linux64)
-        import setup_linux_x64
-        setup_linux_x64.main()
-    
+        _setup(PlatformDirs.Linux64)
     elif plat.is_windows_arm64():
-        _make_bindings(PlatformDirs.WindowsArm64)
-        import setup_windows_arm64
-        setup_windows_arm64.main()
-    
+        _setup(PlatformDirs.WindowsArm64)
     elif plat.is_windows_x64():
-        _make_bindings(PlatformDirs.Windows64)
-        import setup_windows_x64
-        setup_windows_x64.main()
-    
+        _setup(PlatformDirs.Windows64)
     elif plat.is_windows_x86():
-        _make_bindings(PlatformDirs.Windows86)
-        import setup_windows_x86
-        setup_windows_x86.main()
-    
+        _setup(PlatformDirs.Windows86)
     else:
         # Platform without pre-built binaries - trying a regular sourcebuild
-        
         if W_Presetup:
             import build_pdfium
             args = build_pdfium.parse_args([])
             build_pdfium.main(args)
-        
-        import setup_source
-        setup_source.main()
+        wheel_for(PlatformDirs.SourceBuild)
     
     presetup_done()
 
