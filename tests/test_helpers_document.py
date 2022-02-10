@@ -3,11 +3,11 @@
 
 import io
 from PIL import Image
-import pypdfium2 as pdfium
 from .conftest import (
     TestFiles,
     iterate_testfiles,
 )
+import pypdfium2 as pdfium
 from pypdfium2._cli.toc import print_toc
 
 
