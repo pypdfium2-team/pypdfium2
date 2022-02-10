@@ -85,7 +85,6 @@ def _make_bindings(platform_dir):
     if W_Presetup:
         import update_pdfium
         update_pdfium.main( ['-p', basename(platform_dir)] )
-        presetup_done()
 
 
 def main():    
@@ -145,6 +144,8 @@ def main():
         
         import setup_source
         setup_source.main()
+    
+    presetup_done()
 
 
 if __name__ == '__main__':
