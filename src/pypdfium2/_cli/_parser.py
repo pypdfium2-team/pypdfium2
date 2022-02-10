@@ -49,7 +49,7 @@ class _SubcommandItem:
         self.help = help
 
 
-class CliRunner:
+class CliParser:
     
     def __init__(
             self,

@@ -6,7 +6,7 @@ from pypdfium2._version import (
     V_PYPDFIUM2,
     V_LIBPDFIUM,
 )
-from pypdfium2._cli._parser import CliRunner
+from pypdfium2._cli._parser import CliParser
 from pypdfium2._cli import (
     renderer,
     toc,
@@ -17,32 +17,32 @@ from pypdfium2._cli import (
 
 def main(argv=sys.argv[1:]):
     
-    runner = CliRunner(
+    parser = CliParser(
         program = "PyPDFium2",
         version = "{} (libpdfium {})".format(V_PYPDFIUM2, V_LIBPDFIUM),
         description = "Command line interface to the PyPDFium2 Python library",
         argv = argv,
     )
     
-    runner.add_subcommand(
+    parser.add_subcommand(
         "render",
         method = renderer.main,
         help = "Rasteries pages of a PDF file",
     )
-    runner.add_subcommand(
+    parser.add_subcommand(
         "toc",
         method = toc.main,
         help = "Show the table of contents for a PDF document",
     )
-    runner.add_subcommand(
+    parser.add_subcommand(
         "merge",
         method = merger.main,
         help = "Concatenate PDF files",
     )
-    runner.add_subcommand(
+    parser.add_subcommand(
         "tile",
         method = tiler.main,
         help = "Perform page tiling (N-up compositing)",
     )
     
-    runner.run()
+    parser.run()
