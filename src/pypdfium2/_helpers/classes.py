@@ -8,7 +8,6 @@ from pypdfium2._helpers import (
     pdf_renderer,
     page_renderer,
 )
-from pypdfium2 import _pypdfium as pdfium
 
 
 class PdfContext:
