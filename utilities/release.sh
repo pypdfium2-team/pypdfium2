@@ -23,7 +23,7 @@ python3 -m pip install . -v
 python3 -m pytest tests/
 
 # download binaries and create the wheels
-python3 update_pdfium.py
+python3 platform_setup/update_pdfium.py
 bash utilities/setup_all.sh
 
 # ensure validity of the generated wheels

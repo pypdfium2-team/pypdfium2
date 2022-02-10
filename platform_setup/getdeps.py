@@ -4,8 +4,8 @@
 
 import sys
 import shutil
-from _packaging import run_cmd
 from importlib.util import find_spec
+from platform_setup.packaging_base import run_cmd
 
 
 SysCommands = [

@@ -20,8 +20,8 @@ from os.path import (
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
-from _setup_base import PlatformDirs
-from _packaging import (
+from platform_setup.setup_base import PlatformDirs
+from platform_setup.packaging_base import (
     VersionFile,
     extract_version,
     postprocess_bindings,

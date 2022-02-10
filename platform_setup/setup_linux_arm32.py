@@ -2,8 +2,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import setuptools
-from _setup_base import SetupKws
+from setup_base import PlatformDirs, wheel_for
 
-if __name__ == '__main__':
-    setuptools.setup(**SetupKws)
+wheel_for(PlatformDirs.LinuxArm32)

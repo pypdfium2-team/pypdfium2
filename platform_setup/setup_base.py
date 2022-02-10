@@ -12,7 +12,8 @@ import sysconfig
 import setuptools
 from glob import glob
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-from _packaging import (
+
+from platform_setup.packaging_base import (
     Libnames,
     SourceTree,
     DataTree,

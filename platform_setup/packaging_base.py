@@ -24,7 +24,7 @@ Libnames = [
 
 
 HomeDir     = expanduser('~')
-SourceTree  = dirname(abspath(__file__))
+SourceTree  = dirname(dirname(abspath(__file__)))
 DataTree    = join(SourceTree,'data')
 SB_Dir      = join(SourceTree,'sourcebuild')
 ModuleDir   = join(SourceTree,'src','pypdfium2')
