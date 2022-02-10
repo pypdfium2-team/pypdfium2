@@ -3,8 +3,8 @@
 
 import logging
 import pypdfium2 as pdfium
-from .conftest import TestFiles
 from pypdfium2._cli.toc import print_toc
+from .conftest import TestFiles
 
 
 def test_read_toc():

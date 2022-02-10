@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2021 Adam Huganir <adam@huganir.com>
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: CC-BY-4.0 
+# SPDX-License-Identifier: CC-BY-4.0
 
 install:
 	python3 -m pip install . -v
