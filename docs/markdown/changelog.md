@@ -14,6 +14,7 @@
   other Python PDF libraries.
 - Fixed `setup.py` to always call `getdeps` first, before other imports that already require
   packages that `getdeps` should install.
+- Restructured platform-specific setup to greatly reduce code duplication.
 - Fixed link on the PyPI page to point at the stable documentation, not the development build.
 - Added documentation commands to the main Makefile.
 - Improved compliance with the `reuse` standard.
