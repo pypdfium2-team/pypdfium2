@@ -2,28 +2,15 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import _getdeps as getdeps
-getdeps.main()
-
 import sysconfig
-from os.path import (
-    join,
-    basename,
-)
-import update_pdfium
-import build_pdfium
-import setup_source
-import setup_darwin_arm64
-import setup_darwin_x64
-import setup_linux_arm32
-import setup_linux_arm64
-import setup_linux_x64
-import setup_windows_arm64
-import setup_windows_x64
-import setup_windows_x86
+from os.path import join, basename
 from _packaging import DataTree
-from _setup_base import PlatformDirs
 
+
+# Since setuptools may run this file multiple times with different commands,
+# we have a status file to check whether pre-setup tasks have already been done.
+# If you deliberately wish to re-run them, set the content of `data/setup_status.txt`
+# to `InitialState`.
 
 StatusFile = join(DataTree, 'setup_status.txt')
 
@@ -36,6 +23,20 @@ def check_presetup() -> bool:
         return False
     else:
         raise ValueError( "Invalid content in setup status file: '{}'".format(content) )
+
+def presetup_done():
+    with open(StatusFile, 'w') as file_handle:
+        file_handle.write("PreSetupDone")
+
+W_Presetup = check_presetup()
+
+
+# Automatically install missing packaging dependencies, if doing pre-setup
+# No imports of non-stdlib dependencies may happen until this check, otherwise getdeps
+# would be completely pointless
+if W_Presetup:
+    import _getdeps as getdeps
+    getdeps.main()
 
 
 class PlatformManager:
@@ -79,69 +80,70 @@ class PlatformManager:
         return self._is_platform('win32', '')
 
 
-def main():
+# function to generate bindings, if doing pre-setup
+def _make_bindings(platform_dir):
+    if W_Presetup:
+        import update_pdfium
+        update_pdfium.main( ['-p', basename(platform_dir)] )
+        presetup_done()
+
+
+def main():    
     
-    # Since setuptools may run this code multiple times with different commands,
-    # we have a status file to check whether pre-setup tasks have already been done.
-    # If you deliberately wish to re-run them, set the content of `data/setup_status.txt`
-    # to `InitialState`.
-    w_presetup = check_presetup()
-    
-    # nested function to generate bindings, if doing pre-setup
-    def _make_bindings(platform_dir):
-        
-        if w_presetup:
-            
-            update_pdfium.main( ['-p', basename(platform_dir)] )
-            
-            # update status file
-            with open(StatusFile, 'w') as file_handle:
-                file_handle.write("PreSetupDone")
-    
-    
-    # tooling to determine the current platform
+    # platform tooling
     plat = PlatformManager()
+    from _setup_base import PlatformDirs
     
     # run the corresponding setup code
     if plat.is_darwin_arm64():
         _make_bindings(PlatformDirs.DarwinArm64)
+        import setup_darwin_arm64
         setup_darwin_arm64.main()
     
     elif plat.is_darwin_x64():
         _make_bindings(PlatformDirs.Darwin64)
+        import setup_darwin_x64
         setup_darwin_x64.main()
     
     elif plat.is_linux_arm32():
         _make_bindings(PlatformDirs.LinuxArm32)
+        import setup_linux_arm32
         setup_linux_arm32.main()
     
     elif plat.is_linux_arm64():
         _make_bindings(PlatformDirs.LinuxArm64)
+        import setup_linux_arm64
         setup_linux_arm64.main()
     
     elif plat.is_linux_x64():
         _make_bindings(PlatformDirs.Linux64)
+        import setup_linux_x64
         setup_linux_x64.main()
     
     elif plat.is_windows_arm64():
         _make_bindings(PlatformDirs.WindowsArm64)
+        import setup_windows_arm64
         setup_windows_arm64.main()
     
     elif plat.is_windows_x64():
         _make_bindings(PlatformDirs.Windows64)
+        import setup_windows_x64
         setup_windows_x64.main()
     
     elif plat.is_windows_x86():
         _make_bindings(PlatformDirs.Windows86)
+        import setup_windows_x86
         setup_windows_x86.main()
     
-    # Platform without pre-built binaries - trying a regular sourcebuild
-    # In case it does not work, you may want to attempt a native build (`./build_pdfium -p`),
-    # and then write a wheel to `dist/` using `python3 setup_source.py bdist_wheel`
     else:
-        if w_presetup:
+        # Platform without pre-built binaries - trying a regular sourcebuild
+        
+        if W_Presetup:
+            import build_pdfium
             args = build_pdfium.parse_args([])
             build_pdfium.main(args)
+        
+        import setup_source
         setup_source.main()
 
 

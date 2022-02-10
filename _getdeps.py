@@ -8,10 +8,6 @@ from _packaging import run_cmd
 from importlib.util import find_spec
 
 
-PyDeps = [
-    'ctypesgen',
-    'wheel',
-]
 SysCommands = [
     'git',
     'gcc',
@@ -24,10 +20,21 @@ NB_SysCommands = [
 ]
 
 
+def _pip_install(pkg):
+    run_cmd("python3 -m pip install {}".format(pkg), cwd=None)
+
+def _install_ctypesgen():
+    if not shutil.which('ctypesgen') or not find_spec('ctypesgen'):
+        _pip_install('ctypesgen')
+
+def _install_wheel():
+    if not find_spec('wheel'):
+        _pip_install('wheel')
+
+
 def install_pydeps():
-    for dep in PyDeps:
-        if not find_spec(dep):
-            run_cmd("python3 -m pip install {}".format(dep), cwd=None)
+    _install_ctypesgen()
+    _install_wheel()
 
 
 def check_sysdeps(sys_commands):
