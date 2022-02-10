@@ -7,7 +7,7 @@ from os.path import join, basename
 from _packaging import DataTree
 
 
-# Since setuptools may run this file multiple times with different commands,
+# Since setuptools may run this code multiple times with different commands,
 # we have a status file to check whether pre-setup tasks have already been done.
 # If you deliberately wish to re-run them, set the content of `data/setup_status.txt`
 # to `InitialState`.
