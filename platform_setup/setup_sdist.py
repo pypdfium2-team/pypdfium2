@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import setuptools
-from _setup_base import SetupKws
+from platform_setup.setup_base import SetupKws
 
 if __name__ == '__main__':
     setuptools.setup(**SetupKws)

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from os.path import join, basename
-from _packaging import DataTree
+from platform_setup.packaging_base import DataTree
 
 
 StatusFile = join(DataTree, 'setup_status.txt')
@@ -25,12 +25,12 @@ def presetup_done():
 W_Presetup = check_presetup()
 
 if W_Presetup:
-    import _getdeps
-    _getdeps.main()
+    from platform_setup import getdeps
+    getdeps.main()
 
 
 import sysconfig
-from _setup_base import PlatformDirs, wheel_for
+from platform_setup.setup_base import PlatformDirs, wheel_for
 
 
 class PlatformManager:
@@ -69,7 +69,7 @@ class PlatformManager:
 
 def _setup(platform_dir):
     if W_Presetup:
-        import update_pdfium
+        from platform_setup import update_pdfium
         update_pdfium.main( ['-p', basename(platform_dir)] )
     wheel_for(platform_dir)
 
@@ -97,7 +97,7 @@ def main():
     else:
         # Platform without pre-built binaries - trying a regular sourcebuild
         if W_Presetup:
-            import build_pdfium
+            from platform_setup import build_pdfium
             args = build_pdfium.parse_args([])
             build_pdfium.main(args)
         wheel_for(PlatformDirs.SourceBuild)

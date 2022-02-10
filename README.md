@@ -27,7 +27,7 @@ For more information on dependencies, please refer to [`dependencies.md`](docs/m
 
 To get pre-compiled binaries, generate bindings and install PyPDFium2, you may run
 ```bash
-pip3 install . -v
+make install
 ```
 in the directory you downloaded the repository to. This will resort to building PDFium
 if no pre-compiled binaries are available for your platform.
@@ -38,8 +38,7 @@ If you wish to perform a source build regardless of whether PDFium binaries are 
 you can do the following:
 
 ```bash
-python3 build_pdfium.py --getdeps
-python3 setup_source.py bdist_wheel
+make build
 pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 ```
 

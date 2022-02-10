@@ -12,14 +12,14 @@ release:
 	bash ./utilities/release.sh
 
 update-all:
-	python3 update_pdfium.py
+	python3 platform_setup/update_pdfium.py
 
 setup-all:
 	bash ./utilities/setup_all.sh
 
 build:
-	python3 build_pdfium.py
-	python3 setup_source.py bdist_wheel
+	python3 platform_setup/build_pdfium.py
+	python3 platform_setup/setup_source.py bdist_wheel
 
 clean:
 	bash ./utilities/clean.sh
