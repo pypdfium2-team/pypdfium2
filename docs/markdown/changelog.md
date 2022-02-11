@@ -17,9 +17,12 @@
 - Restructured platform-specific setup to greatly reduce code duplication.
 - Moved setup-related code into an own directory, to be able to use cleaner imports, and to
   avoid messing up the root directory of the repository.
+- Adapted the Makefile to setup changes and added documentation commands.
+- Improvements related to license files:
+  - Made the repository fully compliant with the `reuse` standard.
+  - Moved the PDFium wheel license into the `LICENSES/` directory and removed its embedded
+    copies of `Apache-2.0` and `BSD-3-Clause` since they are duplicates.
 - Fixed link on the PyPI page to point at the stable documentation, not the development build.
-- Added documentation commands to the main Makefile.
-- Improved compliance with the `reuse` standard.
 
 ## 0.12.0 (2022-02-07)
 

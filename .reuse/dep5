@@ -13,6 +13,16 @@ Files: data/setup_status.txt
 Copyright: 2022 geisserml <geisserml@gmail.com>
 License: Apache-2.0 OR BSD-3-Clause
 
+Files: pdfium
+       pdfium.dll
+       pdfium.dylib
+       docs/markdown/.about_wheel_license.md
+Copyright: 2022 PDFium developers
+License: (Apache-2.0 OR BSD-3-Clause) AND LicenseRef-PdfiumThirdParty
+Comment:
+    `.about_wheel_license.md` is a description file which exists only to state that
+    `LicenseRef-PdfiumThirdParty` is used.
+
 Files: tests/resources/render.pdf
        tests/resources/multipage.pdf
        tests/resources/encrypted.pdf
