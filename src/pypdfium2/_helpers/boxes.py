@@ -4,7 +4,6 @@
 from ctypes import c_float, byref
 from typing import Sequence, Callable
 from pypdfium2 import _pypdfium as pdfium
-from pypdfium2._helpers.error_handler import *
 
 
 def _get_box(
@@ -37,7 +36,7 @@ def get_mediabox(page: pdfium.FPDF_PAGE) -> Sequence[float]:
     return _get_box(
         page,
         pdfium.FPDFPage_GetMediaBox,
-        lambda _page: (0, 0, 612, 792),
+        lambda _p: (0, 0, 612, 792),
     )
 
 
