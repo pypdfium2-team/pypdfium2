@@ -52,7 +52,6 @@ def translate_rotation(rotation: int) -> int:
 def _hex_digits(c):
     
     hxc = hex(c)[2:]
-    
     if len(hxc) == 1:
         hxc = "0" + hxc
     
@@ -66,9 +65,7 @@ def colour_as_hex(r, g, b, a=255) -> int:
     """
     
     colours = (a, r, g, b)
-    
     for c in colours:
-        assert isinstance(c, int)
         assert 0 <= c <= 255
     
     hxc_str = "0x"
