@@ -5,5 +5,4 @@
 import setuptools
 from platform_setup.setup_base import SetupKws
 
-if __name__ == '__main__':
-    setuptools.setup(**SetupKws)
+setuptools.setup(**SetupKws)
