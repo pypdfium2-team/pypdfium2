@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause 
 
-# Non-stdlib imports not allowed in this file, as it is imported in setup.py prior to the getdeps call
+# Non-stdlib imports not allowed in this file, as it is imported prior to the getdeps call
 
 import subprocess
 from os.path import (
