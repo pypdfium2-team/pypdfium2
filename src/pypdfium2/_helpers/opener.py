@@ -7,18 +7,24 @@ import warnings
 from os.path import abspath
 from typing import (
     Union,
+    Tuple,
     Optional,
     BinaryIO,
 )
 
 from pypdfium2 import _pypdfium as pdfium
-from pypdfium2._helpers.nativeopener import *
-from pypdfium2._helpers.error_handler import *
+from pypdfium2._helpers.nativeopener import (
+    LoaderData,
+    is_buffer,
+    open_pdf_buffer,
+    open_pdf_native,
+)
+from pypdfium2._helpers.error_handler import handle_pdfium_error
 
 
 def _str_isascii(string):
     try:
-        tmp = string.encode('ascii')
+        string.encode('ascii')
     except UnicodeEncodeError:
         return False
     else:

@@ -9,7 +9,7 @@ from typing import (
     BinaryIO,
 )
 from pypdfium2 import _pypdfium as pdfium
-from pypdfium2._helpers.error_handler import *
+from pypdfium2._helpers.error_handler import handle_pdfium_error
 
 
 def is_buffer(obj) -> bool:
