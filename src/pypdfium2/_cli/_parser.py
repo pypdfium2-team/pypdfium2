@@ -128,7 +128,7 @@ class CliParser:
                 sc_found = True
                 sub.method(
                     argv = self.argv[1:],
-                    prog = "pypdfium2 {}".format(main_arg),
+                    prog = "{} {}".format(self.program, main_arg),
                     desc = sub.help,
                 )
         

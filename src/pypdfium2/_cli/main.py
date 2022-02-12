@@ -18,7 +18,7 @@ from pypdfium2._cli import (
 def main(argv=sys.argv[1:]):
     
     parser = CliParser(
-        program = "PyPDFium2",
+        program = "pypdfium2",
         version = "{} (libpdfium {})".format(V_PYPDFIUM2, V_LIBPDFIUM),
         description = "Command line interface to the PyPDFium2 Python library",
         argv = argv,
