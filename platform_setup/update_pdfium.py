@@ -17,6 +17,7 @@ from os.path import (
     dirname,
     basename,
 )
+from glob import glob
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
@@ -159,15 +160,27 @@ def unpack_archives(archives):
         os.remove(file)
 
 
+def _get_header_files(build_dir):
+    
+    headers_str = ''
+    sep = ''
+    
+    for file in sorted(glob( join(build_dir,'include','*.h') )):
+        headers_str += sep + '"{}"'.format(file)
+        sep = ' '
+    
+    return headers_str
+
+
 def generate_bindings(archives): 
     
     for platform_dir in archives.keys():
         
         dirname = basename(platform_dir)
-        build_dir = join(platform_dir, 'build_tar')
+        build_dir = join(platform_dir,'build_tar')
         bin_dir = join(build_dir,'lib')
         bindings_file = join(platform_dir,'_pypdfium.py')
-        header_files = join(build_dir,'include','*.h')
+        header_files = _get_header_files(build_dir)
         
         if dirname.startswith('windows'):
             target_name = 'pdfium.dll'
@@ -186,11 +199,12 @@ def generate_bindings(archives):
         
         shutil.move(bin_path, join(platform_dir, target_name))
         
-        ctypesgen_cmd = "ctypesgen --library pdfium --strip-build-path {} -L . {} -o {}".format(
+        ctypesgen_cmd = 'ctypesgen --library pdfium --strip-build-path "{}" -L . {} -o "{}"'.format(
             platform_dir,
             header_files,
             bindings_file,
         )
+        #print(ctypesgen_cmd)
         subprocess.run(
             ctypesgen_cmd,
             stdout = subprocess.PIPE,
