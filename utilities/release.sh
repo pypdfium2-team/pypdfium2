@@ -6,11 +6,7 @@
 bash utilities/clean.sh
 
 # check for unused imports
-importchecker src/
-importchecker tests/
-importchecker examples/
-importchecker docs/source/conf.py
-for pyfile in *.py; do importchecker "$pyfile"; done
+find . -path ./sourcebuild -prune -o -name '*.py' -print |xargs -n 1 importchecker
 
 # check for possible spelling mistakes
 codespell --skip="./sourcebuild,./docs/build,./data,./.git,__pycache__,.mypy_cache," -L tabe,splitted
