@@ -2,8 +2,12 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# imports prior to getdeps call (non-stdlib dependencies forbidden)
+
+import sysconfig
 from os.path import join, basename
-from platform_setup.packaging_base import DataTree
+from platform_setup import getdeps
+from platform_setup.packaging_base import DataTree, PlatformDirs
 
 
 StatusFile = join(DataTree, 'setup_status.txt')
@@ -25,12 +29,13 @@ def presetup_done():
 W_Presetup = check_presetup()
 
 if W_Presetup:
-    from platform_setup import getdeps
     getdeps.main()
 
 
-import sysconfig
-from platform_setup.setup_base import PlatformDirs, wheel_for
+# imports after getdeps call (non-stdlib dependencies allowed)
+
+from platform_setup.setup_base import wheel_for
+from platform_setup import build_pdfium, update_pdfium
 
 
 class PlatformManager:
@@ -69,12 +74,11 @@ class PlatformManager:
 
 def _setup(platform_dir):
     if W_Presetup:
-        from platform_setup import update_pdfium
         update_pdfium.main( ['-p', basename(platform_dir)] )
     wheel_for(platform_dir)
 
 
-def main():    
+def main():
     
     plat = PlatformManager()
     
@@ -97,7 +101,6 @@ def main():
     else:
         # Platform without pre-built binaries - trying a regular sourcebuild
         if W_Presetup:
-            from platform_setup import build_pdfium
             args = build_pdfium.parse_args([])
             build_pdfium.main(args)
         wheel_for(PlatformDirs.SourceBuild)
