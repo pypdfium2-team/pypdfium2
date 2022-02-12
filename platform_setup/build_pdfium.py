@@ -21,7 +21,7 @@ from platform_setup.packaging_base import (
     Libnames,
     PlatformDirs,
     run_cmd,
-    postprocess_bindings,
+    call_ctypesgen,
 )
 
 
@@ -207,28 +207,10 @@ def pack(src_libpath, destname=None):
     destpath = join(OutputDir, destname)
     shutil.copy(src_libpath, destpath)
     
-    src_headers = join(PDFiumDir,'public')
-    target_headers = join(OutputDir,'include')
-    
-    shutil.copytree(src_headers, target_headers)
-    
     include_dir = join(OutputDir,'include')
-    header_files = join(include_dir,'*.h')
-    bindings_file = join(OutputDir,'_pypdfium.py')
+    shutil.copytree(join(PDFiumDir,'public'), include_dir)
     
-    ctypesgen_cmd = "ctypesgen --library pdfium --strip-build-path {} -L . {} -o {}".format(
-        OutputDir,
-        header_files,
-        bindings_file,
-    )
-    subprocess.run(
-        ctypesgen_cmd,
-        stdout = subprocess.PIPE,
-        cwd    = OutputDir,
-        shell  = True,
-    )
-    
-    postprocess_bindings(bindings_file, OutputDir)
+    call_ctypesgen(OutputDir, include_dir)
     shutil.rmtree(include_dir)
 
 

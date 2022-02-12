@@ -25,7 +25,7 @@ from platform_setup.packaging_base import (
     PlatformDirs,
     VersionFile,
     extract_version,
-    postprocess_bindings,
+    call_ctypesgen,
 )
 
 
@@ -160,27 +160,13 @@ def unpack_archives(archives):
         os.remove(file)
 
 
-def _get_header_files(build_dir):
-    
-    headers_str = ''
-    sep = ''
-    
-    for file in sorted(glob( join(build_dir,'include','*.h') )):
-        headers_str += sep + '"{}"'.format(file)
-        sep = ' '
-    
-    return headers_str
-
-
 def generate_bindings(archives): 
     
     for platform_dir in archives.keys():
         
-        dirname = basename(platform_dir)
         build_dir = join(platform_dir,'build_tar')
         bin_dir = join(build_dir,'lib')
-        bindings_file = join(platform_dir,'_pypdfium.py')
-        header_files = _get_header_files(build_dir)
+        dirname = basename(platform_dir)
         
         if dirname.startswith('windows'):
             target_name = 'pdfium.dll'
@@ -193,26 +179,9 @@ def generate_bindings(archives):
             raise ValueError("Unknown platform directory name '{}'".format(dirname))
         
         current_name = os.listdir(bin_dir)[0]
+        shutil.move(join(bin_dir, current_name), join(platform_dir, target_name))
         
-        bin_path = join(bin_dir, target_name)
-        os.rename(join(bin_dir, current_name), bin_path)
-        
-        shutil.move(bin_path, join(platform_dir, target_name))
-        
-        ctypesgen_cmd = 'ctypesgen --library pdfium --strip-build-path "{}" -L . {} -o "{}"'.format(
-            platform_dir,
-            header_files,
-            bindings_file,
-        )
-        #print(ctypesgen_cmd)
-        subprocess.run(
-            ctypesgen_cmd,
-            stdout = subprocess.PIPE,
-            cwd    = platform_dir,
-            shell  = True,
-        )
-        
-        postprocess_bindings(bindings_file, platform_dir)
+        call_ctypesgen(platform_dir, join(build_dir,'include'))
         shutil.rmtree(build_dir)
 
 

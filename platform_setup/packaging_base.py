@@ -4,6 +4,7 @@
 # Non-stdlib imports not allowed in this file, as it is imported prior to the getdeps call
 
 import subprocess
+from glob import glob
 from os.path import (
     expanduser,
     dirname,
@@ -48,7 +49,29 @@ def run_cmd(command, cwd):
     subprocess.run(command, cwd=cwd, shell=True)
 
 
-def postprocess_bindings(bindings_file, platform_dir):
+def call_ctypesgen(platform_dir, include_dir):
+    
+    headers_str = ''
+    sep = ''
+    
+    for file in sorted(glob( join(include_dir,'*.h') )):
+        headers_str += sep + '"{}"'.format(file)
+        sep = ' '
+    
+    bindings_file = join(platform_dir,'_pypdfium.py')
+    
+    ctypesgen_cmd = 'ctypesgen --library pdfium --strip-build-path "{}" -L . {} -o "{}"'.format(
+        platform_dir,
+        headers_str,
+        bindings_file,
+    )
+    #print(ctypesgen_cmd)
+    subprocess.run(
+        ctypesgen_cmd,
+        stdout = subprocess.PIPE,
+        cwd    = platform_dir,
+        shell  = True,
+    )
     
     with open(bindings_file, 'r') as file_reader:
         text = file_reader.read()
