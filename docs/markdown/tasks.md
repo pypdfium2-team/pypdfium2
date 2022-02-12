@@ -12,7 +12,6 @@ Tasks
 * Think about the possibility of using `FPDFPage_Flatten()` rather than `FPDF_FFLDraw()` and all the extra commands that it needs.
 * Create a support model for progressive rendering (`FPDF_RenderPageBitmap_Start()` & `IFSDK_PAUSE`)
 * Set the version appropriately when doing a source build (i. e. append current PDFium commit hash to version string).
-* Packaging code: move `PlatformDirs` from `setup_base` to `packaging_base`.
 * Sourcebuild: regroup patches to be operating system specific.
 * Think about further extending support for older Python versions (see changelog).
 * Create a `.readthedocs.yaml` configuration file (issue #32).

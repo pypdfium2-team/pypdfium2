@@ -16,8 +16,13 @@ import argparse
 import subprocess
 
 from platform_setup import getdeps
-from platform_setup.packaging_base import *
-from platform_setup.setup_base import PlatformDirs
+from platform_setup.packaging_base import (
+    SB_Dir,
+    Libnames,
+    PlatformDirs,
+    run_cmd,
+    postprocess_bindings,
+)
 
 
 PatchDir       = join(SB_Dir,'patches')

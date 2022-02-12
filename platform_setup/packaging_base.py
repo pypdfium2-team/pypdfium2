@@ -31,6 +31,18 @@ ModuleDir   = join(SourceTree,'src','pypdfium2')
 VersionFile = join(ModuleDir,'_version.py')
 
 
+class PlatformDirs:
+    Darwin64     = join(DataTree,'darwin-x64')
+    DarwinArm64  = join(DataTree,'darwin-arm64')
+    Linux64      = join(DataTree,'linux-x64')
+    LinuxArm64   = join(DataTree,'linux-arm64')
+    LinuxArm32   = join(DataTree,'linux-arm32')
+    Windows64    = join(DataTree,'windows-x64')
+    Windows86    = join(DataTree,'windows-x86')
+    WindowsArm64 = join(DataTree,'windows-arm64')
+    SourceBuild  = join(DataTree,'sourcebuild')
+
+
 def run_cmd(command, cwd):
     print(command)
     subprocess.run(command, cwd=cwd, shell=True)
