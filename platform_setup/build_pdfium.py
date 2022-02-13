@@ -13,7 +13,6 @@ from os.path import (
 import sys
 import shutil
 import argparse
-import subprocess
 
 from platform_setup import getdeps
 from platform_setup.packaging_base import (

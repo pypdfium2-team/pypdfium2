@@ -17,7 +17,6 @@ from os.path import (
     dirname,
     basename,
 )
-from glob import glob
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
