@@ -15,7 +15,7 @@ codespell --skip="./sourcebuild,./docs/build,./data,./.git,__pycache__,.mypy_cac
 reuse lint
 
 # install project locally and run the test suite
-python3 -m pip install . -v
+bash utilities/install.sh
 python3 -m pytest tests/
 
 # download binaries and create the wheels

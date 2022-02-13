@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 install:
-	python3 -m pip install . -v
-	printf "InitialState" > platform_setup/setup_status.txt
+	bash utilities/install.sh
 
 test:
 	python3 -m pytest tests/

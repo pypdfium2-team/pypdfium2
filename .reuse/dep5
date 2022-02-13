@@ -9,7 +9,7 @@ Source: https://github.com/pypdfium2-team/pypdfium2
 # Copyright: $YEAR $NAME <$CONTACT>
 # License: ...
 
-Files: data/setup_status.txt
+Files: platform_setup/setup_status.txt
 Copyright: 2022 geisserml <geisserml@gmail.com>
 License: Apache-2.0 OR BSD-3-Clause
 
