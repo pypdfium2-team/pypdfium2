@@ -122,7 +122,7 @@ def download_releases(latest_version, download_files):
         file_url = base_url + filename
         
         if not os.path.exists(dirpath):
-            os.mkdir(dirpath)
+            os.makedirs(dirpath)
         
         file_path = join(dirpath, filename)
         args.append( (dirpath, file_url, file_path) )

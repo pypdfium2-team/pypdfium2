@@ -71,7 +71,7 @@ NB_BinaryDir = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin'
 def dl_depottools(do_sync):
     
     if not os.path.isdir(SB_Dir):
-        os.mkdir(SB_Dir)
+        os.makedirs(SB_Dir)
     
     is_update = True
     
@@ -198,7 +198,7 @@ def pack(src_libpath, destname=None):
     
     if os.path.isdir(OutputDir):
         shutil.rmtree(OutputDir)
-    os.mkdir(OutputDir)
+    os.makedirs(OutputDir)
     
     if destname is None:
         destname = basename(src_libpath)
