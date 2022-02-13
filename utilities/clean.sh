@@ -5,3 +5,4 @@
 rm -r src/pypdfium2.egg-info/
 rm -r dist
 rm -r data/*
+rm tests/output/*
