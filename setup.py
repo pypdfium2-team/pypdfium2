@@ -7,10 +7,10 @@
 import sysconfig
 from os.path import join, basename
 from platform_setup import getdeps
-from platform_setup.packaging_base import DataTree, PlatformDirs
+from platform_setup.packaging_base import SourceTree, PlatformDirs
 
 
-StatusFile = join(DataTree, 'setup_status.txt')
+StatusFile = join(SourceTree, 'platform_setup', 'setup_status.txt')
 
 def check_presetup() -> bool:
     with open(StatusFile, 'r') as file_handle:
