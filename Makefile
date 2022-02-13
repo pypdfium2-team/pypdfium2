@@ -4,7 +4,7 @@
 
 install:
 	python3 -m pip install . -v
-	echo "InitialState" > data/setup_status.txt
+	printf "InitialState" > data/setup_status.txt
 
 test:
 	python3 -m pytest tests/

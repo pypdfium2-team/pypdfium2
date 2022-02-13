@@ -5,4 +5,4 @@
 rm -r src/pypdfium2.egg-info/
 rm -r dist
 rm -r data/*
-echo "InitialState" > data/setup_status.txt
+printf "InitialState" > data/setup_status.txt
