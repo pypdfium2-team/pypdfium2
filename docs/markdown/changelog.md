@@ -3,9 +3,9 @@
 
 # Changelog
 
-## 0.13.0 (unreleased)
+## 0.13.0 (2022-02-14)
 
-- Updated PDFium from `4874` to `xxxx`
+- Updated PDFium from `4874` to `4888`
 - In `render_page()`, the bitmap is now directly initialised with the right colour format,
   rather than always using RGBA and converting afterwards. This is expected to improve performance
   when rendering without alpha channel, in particular for greyscale.
