@@ -10,38 +10,6 @@ from pypdfium2._helpers import (
 )
 
 
-class PdfContext:
-    """
-    Context manager to open and automatically close again a PDFium document.
-    
-    Parameters:
-        input_obj: The file or data to load using :func:`.open_pdf_auto`.
-        password: A password to unlock the PDF, if encrypted.
-    
-    Returns:
-        ``FPDF_DOCUMENT`` handle to the raw PDFium object.
-    """
-    
-    def __init__(
-            self,
-            input_obj,
-            password = None,
-        ):
-        self.input_obj = input_obj
-        self.password = password
-        self.ld_data = None
-    
-    def __enter__(self):
-        self.pdf, self.ld_data = opener.open_pdf_auto(
-            self.input_obj,
-            password = self.password,
-        )
-        return self.pdf
-    
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        opener.close_pdf(self.pdf, self.ld_data)
-
-
 class PdfDocument:
     """
     Document class that maps the functional support model to an object-oriented API,
