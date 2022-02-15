@@ -25,8 +25,8 @@ from platform_setup.packaging_base import (
 def _get_bdist(whl_tag):
     
     class bdist (_bdist_wheel):
-        def __init__(self, *args, **kwargs):
-            _bdist_wheel.__init__(self, *args, **kwargs)
+        def finalize_options(self, *args, **kwargs):
+            _bdist_wheel.finalize_options(self, *args, **kwargs)
             self.python_tag = 'py3'
             self.plat_name = whl_tag
             self.plat_name_supplied = True
@@ -36,8 +36,8 @@ def _get_bdist(whl_tag):
 
 def _clean():
     
-    build_cache    = join(SourceTree,'build')
-    bindings_file  = join(ModuleDir,'_pypdfium.py')
+    build_cache = join(SourceTree,'build')
+    bindings_file = join(ModuleDir,'_pypdfium.py')
     
     libpaths = []
     for name in Libnames:
@@ -64,17 +64,22 @@ def _copy_bindings(platform_dir):
             shutil.copy(src_path, dest_path)
 
 
+def _get_linux_tag(arch):
+    # we would like to add `.manylinux2014_{}` as second tag, but `wheel` would automatically replace the dot, unfortunately (related discussion: https://github.com/pypa/wheel/issues/407)
+    return "manylinux_2_17_{}".format(arch)
+
+
 def _get_tag(plat_dir):
     if plat_dir is PlatformDirs.Darwin64:
         return 'macosx_10_11_x86_64'
     elif plat_dir is PlatformDirs.DarwinArm64:
         return 'macosx_11_0_arm64'
     elif plat_dir is PlatformDirs.Linux64:
-        return 'manylinux_2_17_x86_64'
+        return _get_linux_tag('x86_64')
     elif plat_dir is PlatformDirs.LinuxArm64:
-        return 'manylinux_2_17_aarch64'
+        return _get_linux_tag('aarch64')
     elif plat_dir is PlatformDirs.LinuxArm32:
-        return 'manylinux_2_17_armv7l'
+        return _get_linux_tag('armv7l')
     elif plat_dir is PlatformDirs.Windows64:
         return 'win_amd64'
     elif plat_dir is PlatformDirs.Windows86:
