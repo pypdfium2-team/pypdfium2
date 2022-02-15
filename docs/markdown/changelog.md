@@ -3,7 +3,7 @@
 
 # Changelog
 
-## 0.13.1 (2022-02-14)
+## 0.13.1 (2022-02-15)
 
 - Fixed a logical issue related to the internal class definitions and imports: `PdfContext`
   should be defined in `opener.py` rather than `classes.py`, since `PdfDocument` already
