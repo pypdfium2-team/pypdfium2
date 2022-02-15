@@ -3,6 +3,14 @@
 
 # Changelog
 
+## 0.13.1 (2022-02-14)
+
+- Fixed a logical issue related to the internal class definitions and imports: `PdfContext`
+  should be defined in `opener.py` rather than `classes.py`, since `PdfDocument` already
+  requires importing components that use `PdfContext`, causing a possible circularity.
+  While the Python interpreter seems to have automatically resolved these conflicts and the
+  test suite passed, this has been a logical mistake to be addressed with this patch release.
+
 ## 0.13.0 (2022-02-14)
 
 - Updated PDFium from `4874` to `4888`
