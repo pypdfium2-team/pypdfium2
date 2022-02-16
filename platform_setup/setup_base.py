@@ -109,9 +109,12 @@ def _get_tags(plat_dir):
 def _rename_wheel(temp_tag, actual_tag):
     
     dist_dir = join(SourceTree, 'dist')
-        
+    if not os.path.isdir(dist_dir):
+        return
+    
     found_names = [f for f in os.listdir(dist_dir) if temp_tag in f]
-    assert len(found_names) == 1
+    if not found_names:
+        return
     
     src_path = join(dist_dir, found_names[0])
     assert os.path.isfile(src_path)
