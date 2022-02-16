@@ -33,6 +33,11 @@
 * ctypesgen [^2]
 
 
+## Packaging
+
+* setuptools-scm [^3]
+
+
 ## Tests
 
 * pytest
@@ -64,3 +69,5 @@
 [^2]: You are strongly encouraged to install the latest ctypesgen from git main,
       as lots of important improvements have been done since the last release on
       PyPI, which is rather outdated.
+
+[^3]: Required to create the `sdist` package.
