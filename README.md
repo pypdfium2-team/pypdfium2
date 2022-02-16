@@ -288,7 +288,7 @@ If your issue is caused by the bindings generator, refer to the
 ### Non-ascii file paths on Windows
 
 On Windows, the `FPDF_LoadDocument()` method of PDFium currently is not able to open documents with file paths containing multi-byte, non-ascii characters (see [Bug 682](https://bugs.chromium.org/p/pdfium/issues/detail?id=682)).
-The [`widestring`](https://github.com/pypdfium2-team/pypdfium2/tree/widestring) branch includes a [patch](https://pdfium-review.googlesource.com/c/pdfium/+/90150) that would fix the issue in PDFium, but upstream has not merged it yet.
+There is a [patch](https://pdfium-review.googlesource.com/c/pdfium/+/90693/) that might fix the issue, but it has not been merged yet.
 
 The support model of PyPDFium2 implements a workaround using `FPDF_LoadCustomDocument()` to be able to process non-ascii filepaths on Windows anyway.
 
