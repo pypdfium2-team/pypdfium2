@@ -5,7 +5,7 @@
 
 ## 0.14.0 (unreleased, scheduled for 2022-02-21)
 
-- Updated PDFium from `4888` to `xxxx`
+- Updated PDFium from `4888` to `xxxx`.
 - Tweaked wheel tags to ensure recognition of the binary distributions for supported platforms.
   Restructured related code that assigns the tags.
 
@@ -19,7 +19,7 @@
 
 ## 0.13.0 (2022-02-14)
 
-- Updated PDFium from `4874` to `4888`
+- Updated PDFium from `4874` to `4888`.
 - In `render_page()`, the bitmap is now directly initialised with the right colour format,
   rather than always using RGBA and converting afterwards. This is expected to improve performance
   when rendering without alpha channel, in particular for greyscale.
@@ -40,7 +40,7 @@
 
 ## 0.12.0 (2022-02-07)
 
-- Updated PDFium from `4861` to `4874`
+- Updated PDFium from `4861` to `4874`.
 - Restructured file opening to finally address the Windows issues with non-ascii filenames
   by implementing a support model for `FPDF_LoadCustomDocument()`, which allows us to do
   file reading on the Python side if necessary.
