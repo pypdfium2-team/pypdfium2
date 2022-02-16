@@ -76,11 +76,6 @@ def _copy_bindings(platform_dir):
             shutil.copy(src_path, dest_path)
 
 
-SetupKws = dict(
-    version = extract_version('V_PYPDFIUM2'),
-)
-
-
 def _get_mac_tag(arch):
     return 'macosx_10_11_{}.macosx_11_0_{}'.format(arch, arch)
 
@@ -125,6 +120,10 @@ def _rename_wheel(temp_tag, actual_tag):
     print( "Renaming wheel: {} -> {}".format(src_path, dest_path) )
     os.rename(src_path, dest_path)
     
+
+SetupKws = dict(
+    version = extract_version('V_PYPDFIUM2'),
+)
 
 
 def wheel_for(platform_dir):
