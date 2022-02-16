@@ -25,11 +25,16 @@ from platform_setup.packaging_base import (
 def _get_bdist(whl_tag):
     
     class bdist (_bdist_wheel):
-        def finalize_options(self, *args, **kwargs):
-            _bdist_wheel.finalize_options(self, *args, **kwargs)
-            self.python_tag = 'py3'
-            self.plat_name = whl_tag
+        
+        def finalize_options(self, *args, **kws):
+            _bdist_wheel.finalize_options(self, *args, **kws)
             self.plat_name_supplied = True
+        
+        def get_tag(self, *args, **kws):
+            python, abi, plat = _bdist_wheel.get_tag(self, *args, **kws)
+            python = 'py3'
+            plat = whl_tag
+            return python, abi, plat
     
     return bdist
 
@@ -83,43 +88,27 @@ def _get_linux_tag(arch):
     return 'manylinux_2_17_{}.manylinux2014_{}'.format(arch, arch)
 
 
-def _get_tags(plat_dir):
+def _get_tag(plat_dir):
     if plat_dir is PlatformDirs.Darwin64:
-        return _get_mac_tag('x86_64'), 'macosx_10_11_x86_64'
+        return _get_mac_tag('x86_64')
     elif plat_dir is PlatformDirs.DarwinArm64:
-        return _get_mac_tag('arm64'), 'macosx_11_0_arm64'
+        return _get_mac_tag('arm64')
     elif plat_dir is PlatformDirs.Linux64:
-        return _get_linux_tag('x86_64'), 'manylinux_2_17_x86_64'
+        return _get_linux_tag('x86_64')
     elif plat_dir is PlatformDirs.LinuxArm64:
-        return _get_linux_tag('aarch64'), 'manylinux_2_17_aarch64'
+        return _get_linux_tag('aarch64')
     elif plat_dir is PlatformDirs.LinuxArm32:
-        return _get_linux_tag('armv7l'), 'manylinux_2_17_armv7l'
+        return _get_linux_tag('armv7l')
     elif plat_dir is PlatformDirs.Windows64:
-        return 'win_amd64', None
+        return 'win_amd64'
     elif plat_dir is PlatformDirs.Windows86:
-        return 'win32', None
+        return 'win32'
     elif plat_dir is PlatformDirs.WindowsArm64:
-        return 'win_arm64', None
+        return 'win_arm64'
     elif plat_dir is PlatformDirs.SourceBuild:
-        return sysconfig.get_platform(), None
+        return sysconfig.get_platform()
     else:
         raise ValueError( "Unknown platform directory {}".format(plat_dir) )
-
-
-def _rename_wheel(temp_tag, actual_tag):
-    
-    dist_dir = join(SourceTree, 'dist')
-    assert os.path.isdir(dist_dir)
-    
-    found_names = [f for f in os.listdir(dist_dir) if temp_tag in f]
-    assert len(found_names) == 1
-    
-    src_path = join(dist_dir, found_names[0])
-    assert os.path.isfile(src_path)
-    dest_path = src_path.replace(temp_tag, actual_tag, 1)
-    
-    print( "Renaming wheel: {} -> {}".format(src_path, dest_path) )
-    os.rename(src_path, dest_path)
     
 
 SetupKws = dict(
@@ -129,30 +118,12 @@ SetupKws = dict(
 
 def mkwheel(platform_dir):
     
-    actual_tag, temp_tag = _get_tags(platform_dir)
-    if temp_tag is None:
-        bdist_entry = _get_bdist(actual_tag)
-    else:
-        bdist_entry = _get_bdist(temp_tag)
-    
-    extra_kws = dict(
-        cmdclass = {'bdist_wheel': bdist_entry},
-    )
-    mkwheel_install(platform_dir, extra_kws)
-    
-    if temp_tag is not None:
-        _rename_wheel(temp_tag, actual_tag)
-
-
-def mkwheel_install(platform_dir, extra_kws=None):
-    
-    if extra_kws is None:
-        extra_kws = dict()
+    tag = _get_tag(platform_dir)
     
     with CleanerContext():
         _copy_bindings(platform_dir)
         setuptools.setup(
             package_data = {'': Libnames},
-            **extra_kws,
+            cmdclass = {'bdist_wheel': _get_bdist(tag)},
             **SetupKws,
         )
