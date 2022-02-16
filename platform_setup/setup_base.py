@@ -64,45 +64,67 @@ def _copy_bindings(platform_dir):
             shutil.copy(src_path, dest_path)
 
 
-def _get_linux_tag(arch):
-    # we would like to add `.manylinux2014_{}` as second tag, but `wheel` would automatically replace the dot, unfortunately (related discussion: https://github.com/pypa/wheel/issues/407)
-    return "manylinux_2_17_{}".format(arch)
-
-
-def _get_tag(plat_dir):
-    if plat_dir is PlatformDirs.Darwin64:
-        return 'macosx_10_11_x86_64'
-    elif plat_dir is PlatformDirs.DarwinArm64:
-        return 'macosx_11_0_arm64'
-    elif plat_dir is PlatformDirs.Linux64:
-        return _get_linux_tag('x86_64')
-    elif plat_dir is PlatformDirs.LinuxArm64:
-        return _get_linux_tag('aarch64')
-    elif plat_dir is PlatformDirs.LinuxArm32:
-        return _get_linux_tag('armv7l')
-    elif plat_dir is PlatformDirs.Windows64:
-        return 'win_amd64'
-    elif plat_dir is PlatformDirs.Windows86:
-        return 'win32'
-    elif plat_dir is PlatformDirs.WindowsArm64:
-        return 'win_arm64'
-    elif plat_dir is PlatformDirs.SourceBuild:
-        return sysconfig.get_platform()
-    else:
-        raise ValueError( "Unknown platform directory {}".format(plat_dir) )
-
-   
 SetupKws = dict(
     version = extract_version('V_PYPDFIUM2'),
 )
 
+
+def _get_tags(plat_dir):
+    if plat_dir is PlatformDirs.Darwin64:
+        return 'tmp_d64', 'macosx_10_11_x86_64.macosx_11_0_x86_64'
+    elif plat_dir is PlatformDirs.DarwinArm64:
+        return 'tmp_darm64', 'macosx_10_11_arm64.macosx_11_0_arm64'
+    elif plat_dir is PlatformDirs.Linux64:
+        return 'tmp_l64', 'manylinux_2_17_x86_64.manylinux2014_x86_64'
+    elif plat_dir is PlatformDirs.LinuxArm64:
+        return 'tmp_larm64', 'manylinux_2_17_aarch64.manylinux2014_aarch64'
+    elif plat_dir is PlatformDirs.LinuxArm32:
+        return 'tmp_larm32', 'manylinux_2_17_armv7l.manylinux2014_armv7l'
+    elif plat_dir is PlatformDirs.Windows64:
+        return None, 'win_amd64'
+    elif plat_dir is PlatformDirs.Windows86:
+        return None, 'win32'
+    elif plat_dir is PlatformDirs.WindowsArm64:
+        return None, 'win_arm64'
+    elif plat_dir is PlatformDirs.SourceBuild:
+        return None, sysconfig.get_platform()
+    else:
+        raise ValueError( "Unknown platform directory {}".format(plat_dir) )
+
+
+def _rename_wheel(temp_tag, actual_tag):
+    
+    dist_dir = join(SourceTree, 'dist')
+        
+    found_names = [f for f in os.listdir(dist_dir) if temp_tag in f]
+    assert len(found_names) == 1
+    
+    src_path = join(dist_dir, found_names[0])
+    assert os.path.isfile(src_path)
+    dest_path = src_path.replace(temp_tag, actual_tag, 1)
+    
+    print( "Renaming wheel: {} -> {}".format(src_path, dest_path) )
+    os.rename(src_path, dest_path)
+    
+
+
 def wheel_for(platform_dir):
+    
+    temp_tag, actual_tag = _get_tags(platform_dir)
+    if temp_tag is not None:
+        bdist_entry = _get_bdist(temp_tag)
+    else:
+        bdist_entry = _get_bdist(actual_tag)
+    
     _clean()
     _copy_bindings(platform_dir)
-    tag = _get_tag(platform_dir)
+    
     setuptools.setup(
-        cmdclass = {'bdist_wheel': _get_bdist(tag)},
+        cmdclass = {'bdist_wheel': bdist_entry},
         package_data = {'': Libnames},
         **SetupKws,
     )
+    
     _clean()
+    if temp_tag is not None:
+        _rename_wheel(temp_tag, actual_tag)
