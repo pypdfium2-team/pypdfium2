@@ -85,15 +85,15 @@ def _get_linux_tag(arch):
 
 def _get_tags(plat_dir):
     if plat_dir is PlatformDirs.Darwin64:
-        return _get_mac_tag('x86_64'), 'tmp_d64'
+        return _get_mac_tag('x86_64'), 'macosx_10_11_x86_64'
     elif plat_dir is PlatformDirs.DarwinArm64:
-        return _get_mac_tag('arm64'), 'tmp_darm64'
+        return _get_mac_tag('arm64'), 'macosx_11_0_arm64'
     elif plat_dir is PlatformDirs.Linux64:
-        return _get_linux_tag('x86_64'), 'tmp_l64'
+        return _get_linux_tag('x86_64'), 'manylinux_2_17_x86_64'
     elif plat_dir is PlatformDirs.LinuxArm64:
-        return _get_linux_tag('aarch64'), 'tmp_larm64'
+        return _get_linux_tag('aarch64'), 'manylinux_2_17_aarch64'
     elif plat_dir is PlatformDirs.LinuxArm32:
-        return _get_linux_tag('armv7l'), 'tmp_larm32'
+        return _get_linux_tag('armv7l'), 'manylinux_2_17_armv7l'
     elif plat_dir is PlatformDirs.Windows64:
         return 'win_amd64', None
     elif plat_dir is PlatformDirs.Windows86:
