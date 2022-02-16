@@ -8,6 +8,9 @@ install:
 test:
 	python3 -m pytest tests/
 
+check:
+	bash ./utilities/check.sh
+
 release:
 	bash ./utilities/release.sh
 
