@@ -34,7 +34,7 @@ if W_Presetup:
 
 # imports after getdeps call (non-stdlib dependencies allowed)
 
-from platform_setup.setup_base import wheel_for
+from platform_setup.setup_base import mkwheel_install
 from platform_setup import build_pdfium, update_pdfium
 
 
@@ -75,7 +75,7 @@ class PlatformManager:
 def _setup(platform_dir):
     if W_Presetup:
         update_pdfium.main( ['-p', basename(platform_dir)] )
-    wheel_for(platform_dir)
+    mkwheel_install(platform_dir)
 
 
 def main():
@@ -103,7 +103,7 @@ def main():
         if W_Presetup:
             args = build_pdfium.parse_args([])
             build_pdfium.main(args)
-        wheel_for(PlatformDirs.SourceBuild)
+        mkwheel_install(PlatformDirs.SourceBuild)
     
     presetup_done()
 

@@ -109,12 +109,10 @@ def _get_tags(plat_dir):
 def _rename_wheel(temp_tag, actual_tag):
     
     dist_dir = join(SourceTree, 'dist')
-    if not os.path.isdir(dist_dir):
-        return
+    assert os.path.isdir(dist_dir)
     
     found_names = [f for f in os.listdir(dist_dir) if temp_tag in f]
-    if not found_names:
-        return
+    assert len(found_names) == 1
     
     src_path = join(dist_dir, found_names[0])
     assert os.path.isfile(src_path)
@@ -129,7 +127,7 @@ SetupKws = dict(
 )
 
 
-def wheel_for(platform_dir):
+def mkwheel(platform_dir):
     
     actual_tag, temp_tag = _get_tags(platform_dir)
     if temp_tag is None:
@@ -137,13 +135,24 @@ def wheel_for(platform_dir):
     else:
         bdist_entry = _get_bdist(temp_tag)
     
-    with CleanerContext():
-        _copy_bindings(platform_dir)
-        setuptools.setup(
-            cmdclass = {'bdist_wheel': bdist_entry},
-            package_data = {'': Libnames},
-            **SetupKws,
-        )
+    extra_kws = dict(
+        cmdclass = {'bdist_wheel': bdist_entry},
+    )
+    mkwheel_install(platform_dir, extra_kws)
     
     if temp_tag is not None:
         _rename_wheel(temp_tag, actual_tag)
+
+
+def mkwheel_install(platform_dir, extra_kws=None):
+    
+    if extra_kws is None:
+        extra_kws = dict()
+    
+    with CleanerContext():
+        _copy_bindings(platform_dir)
+        setuptools.setup(
+            package_data = {'': Libnames},
+            **extra_kws,
+            **SetupKws,
+        )
