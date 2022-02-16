@@ -6,8 +6,7 @@
 ## 0.14.0 (unreleased, scheduled for 2022-02-21)
 
 - Updated PDFium from `4888` to `xxxx`.
-- Tweaked wheel tags to ensure recognition of the binary distributions for supported platforms.
-  Restructured related code that assigns the tags.
+- Tweaked wheel tags to improve compatibility. Restructured related code that assigns the tags.
 
 ## 0.13.1 (2022-02-15)
 
