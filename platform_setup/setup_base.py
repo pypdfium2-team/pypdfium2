@@ -129,10 +129,10 @@ SetupKws = dict(
 def wheel_for(platform_dir):
     
     actual_tag, temp_tag = _get_tags(platform_dir)
-    if temp_tag is not None:
-        bdist_entry = _get_bdist(temp_tag)
-    else:
+    if temp_tag is None:
         bdist_entry = _get_bdist(actual_tag)
+    else:
+        bdist_entry = _get_bdist(temp_tag)
     
     with CleanerContext():
         _copy_bindings(platform_dir)
