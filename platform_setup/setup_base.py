@@ -53,6 +53,18 @@ def _clean():
             os.remove(file)
 
 
+class CleanerContext:
+    
+    def __init__(self):
+        pass
+    
+    def __enter__(self):
+        _clean()
+    
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        _clean()
+
+
 def _copy_bindings(platform_dir):
     
     # non-recursively collect all objects from the platform directory
@@ -123,15 +135,13 @@ def wheel_for(platform_dir):
     else:
         bdist_entry = _get_bdist(actual_tag)
     
-    _clean()
-    _copy_bindings(platform_dir)
+    with CleanerContext():
+        _copy_bindings(platform_dir)
+        setuptools.setup(
+            cmdclass = {'bdist_wheel': bdist_entry},
+            package_data = {'': Libnames},
+            **SetupKws,
+        )
     
-    setuptools.setup(
-        cmdclass = {'bdist_wheel': bdist_entry},
-        package_data = {'': Libnames},
-        **SetupKws,
-    )
-    
-    _clean()
     if temp_tag is not None:
         _rename_wheel(temp_tag, actual_tag)
