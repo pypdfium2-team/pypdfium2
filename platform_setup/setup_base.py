@@ -69,25 +69,32 @@ SetupKws = dict(
 )
 
 
+def _get_mac_tag(arch):
+    return 'macosx_10_11_{}.macosx_11_0_{}'.format(arch, arch)
+
+def _get_linux_tag(arch):
+    return 'manylinux_2_17_{}.manylinux2014_{}'.format(arch, arch)
+
+
 def _get_tags(plat_dir):
     if plat_dir is PlatformDirs.Darwin64:
-        return 'tmp_d64', 'macosx_10_11_x86_64.macosx_11_0_x86_64'
+        return _get_mac_tag('x86_64'), 'tmp_d64'
     elif plat_dir is PlatformDirs.DarwinArm64:
-        return 'tmp_darm64', 'macosx_10_11_arm64.macosx_11_0_arm64'
+        return _get_mac_tag('arm64'), 'tmp_darm64'
     elif plat_dir is PlatformDirs.Linux64:
-        return 'tmp_l64', 'manylinux_2_17_x86_64.manylinux2014_x86_64'
+        return _get_linux_tag('x86_64'), 'tmp_l64'
     elif plat_dir is PlatformDirs.LinuxArm64:
-        return 'tmp_larm64', 'manylinux_2_17_aarch64.manylinux2014_aarch64'
+        return _get_linux_tag('aarch64'), 'tmp_larm64'
     elif plat_dir is PlatformDirs.LinuxArm32:
-        return 'tmp_larm32', 'manylinux_2_17_armv7l.manylinux2014_armv7l'
+        return _get_linux_tag('armv7l'), 'tmp_larm32'
     elif plat_dir is PlatformDirs.Windows64:
-        return None, 'win_amd64'
+        return 'win_amd64', None
     elif plat_dir is PlatformDirs.Windows86:
-        return None, 'win32'
+        return 'win32', None
     elif plat_dir is PlatformDirs.WindowsArm64:
-        return None, 'win_arm64'
+        return 'win_arm64', None
     elif plat_dir is PlatformDirs.SourceBuild:
-        return None, sysconfig.get_platform()
+        return sysconfig.get_platform(), None
     else:
         raise ValueError( "Unknown platform directory {}".format(plat_dir) )
 
@@ -110,7 +117,7 @@ def _rename_wheel(temp_tag, actual_tag):
 
 def wheel_for(platform_dir):
     
-    temp_tag, actual_tag = _get_tags(platform_dir)
+    actual_tag, temp_tag = _get_tags(platform_dir)
     if temp_tag is not None:
         bdist_entry = _get_bdist(temp_tag)
     else:
