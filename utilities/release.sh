@@ -2,20 +2,22 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# clean up
+echo "Cleaning up..."
 bash utilities/clean.sh
 
-# run checks
+echo "Running checks..."
 bash utilities/check.sh
 
-# install project locally and run the test suite
+echo "Installing library locally..."
 bash utilities/install.sh
+echo "Running test suite..."
 python3 -m pytest tests/
 
-# download binaries and create the wheels
+echo "Downloading binaries..."
 python3 platform_setup/update_pdfium.py
+echo "Creating packages..."
 bash utilities/setup_all.sh
 
-# ensure validity of the generated wheels
+echo "Confirming validity of generated packages..."
 twine check dist/*
 check-wheel-contents dist/*.whl
