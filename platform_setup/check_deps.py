@@ -7,7 +7,13 @@ import shutil
 from importlib.util import find_spec
 from platform_setup.packaging_base import run_cmd
 
-
+PyPackages = [
+    'build',
+    'wheel',
+    'ctypesgen',
+    'setuptools',
+    'setuptools-scm',
+]
 SysCommands = [
     'git',
     'gcc',
@@ -23,18 +29,17 @@ NB_SysCommands = [
 def _pip_install(pkg):
     run_cmd("python3 -m pip install {}".format(pkg), cwd=None)
 
-def _install_ctypesgen():
-    if not shutil.which('ctypesgen') or not find_spec('ctypesgen'):
-        _pip_install('ctypesgen')
-
-def _install_wheel():
-    if not find_spec('wheel'):
-        _pip_install('wheel')
-
 
 def install_pydeps():
-    _install_ctypesgen()
-    _install_wheel()
+    
+    for pkg in PyPackages:
+        if not find_spec(pkg):
+            _pip_install(pkg)
+    
+    # uninstalling ctypesgen sometimes leaves parts behind, which makes the command unavailable,
+    # but `find_spec()` would still consider the library installed
+    if not shutil.which('ctypesgen'):
+        _pip_install('ctypesgen')
 
 
 def check_sysdeps(sys_commands):

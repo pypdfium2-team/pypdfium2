@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+[build-system]
+build-backend = "setuptools.build_meta:__legacy__"
+requires = [
+    "setuptools>=46.1.0",
+    "setuptools-scm",
+    "build",
+    "wheel",
+    "ctypesgen",
+]
+
+# pytest configuration
+[tool.pytest.ini_options]
+addopts = "--capture=no --verbose"

@@ -14,7 +14,7 @@ import sys
 import shutil
 import argparse
 
-from platform_setup import getdeps
+from platform_setup import check_deps
 from platform_setup.packaging_base import (
     SB_Dir,
     Libnames,
@@ -239,8 +239,8 @@ def main(args):
     else:
         print("Using DepotTools-provided binaries.")
     
-    if args.getdeps:
-        getdeps.main(prefer_st)
+    if args.check_deps:
+        check_deps.main(prefer_st)
     
     destname = args.destname
     
@@ -327,9 +327,9 @@ def parse_args(args=sys.argv[1:]):
                "likely not work on Windows.",
     )
     parser.add_argument(
-        '--getdeps',
+        '--check-deps',
         action = 'store_true',
-        help = "Check dependencies and try to install missing ones.",
+        help = "Check whether all required system dependencies are installed.",
     )
     
     return parser.parse_args(args)

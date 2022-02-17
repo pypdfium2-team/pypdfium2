@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 install:
-	bash utilities/install.sh
+	bash ./utilities/install.sh
 
 test:
 	python3 -m pytest tests/
@@ -11,18 +11,20 @@ test:
 check:
 	bash ./utilities/check.sh
 
-release:
-	bash ./utilities/release.sh
-
 update-all:
 	python3 platform_setup/update_pdfium.py
 
 setup-all:
 	bash ./utilities/setup_all.sh
 
+release:
+	bash ./utilities/release.sh
+
 build:
-	python3 platform_setup/build_pdfium.py
-	python3 platform_setup/setup_source.py bdist_wheel
+	python3 platform_setup/build_pdfium.py --check-deps
+	PYP_TARGET_PLATFORM="sourcebuild" python3 -m build -n -x --wheel
+	PYP_TARGET_PLATFORM="sourcebuild" python3 -m pip install . -v --no-build-isolation
+	printf "InitialState" > platform_setup/setup_status.txt
 
 clean:
 	bash ./utilities/clean.sh
