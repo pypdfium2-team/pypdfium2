@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 [build-system]
-build-backend = "setuptools.build_meta:__legacy__"
+build-backend = "setuptools.build_meta"
 requires = [
     "setuptools>=46.1.0",
     "setuptools-scm",
