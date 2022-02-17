@@ -44,6 +44,7 @@ def packaging_handler():
 def install_handler():
     
     from os.path import join, basename
+    from platform_setup import check_deps
     from platform_setup.packaging_base import SourceTree, PlatformDirs
 
 
@@ -64,6 +65,8 @@ def install_handler():
             file_handle.write("PreSetupDone")
 
     W_Presetup = check_presetup()
+    if W_Presetup:
+        check_deps.main()
     
     
     import sysconfig
