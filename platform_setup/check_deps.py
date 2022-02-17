@@ -33,7 +33,7 @@ def _pip_install(pkg):
 def install_pydeps():
     
     for pkg in PyPackages:
-        if not find_spec(pkg):
+        if not find_spec( pkg.replace('-', '_') ):
             _pip_install(pkg)
     
     # uninstalling ctypesgen sometimes leaves parts behind, which makes the command unavailable,
