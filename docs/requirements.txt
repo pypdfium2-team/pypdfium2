@@ -1,8 +1,0 @@
-# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
-
-sphinx >= 4.4.0
-sphinx-rtd-theme
-sphinxcontrib-programoutput
-docutils >= 0.17
-myst-parser
