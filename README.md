@@ -19,8 +19,8 @@ pip3 install -U pypdfium2
 ### Manual installation
 
 The following steps require the system tools `git` and `gcc` to be installed and available
-in `PATH`. In addition, the Python dependencies `setuptools`, `ctypesgen` and `wheel` are
-needed. Furthermore, it is essential that you provide a recent enough version of `pip` (>= 21.3).
+in `PATH`. In addition, the Python dependencies `setuptools`, `wheel`, `build`, and `ctypesgen`
+are needed. Also make sure that your `pip` version is up-to-date.
 For more information, please refer to [`dependencies.md`](docs/markdown/dependencies.md).
 
 #### Package locally
@@ -36,20 +36,14 @@ if no pre-compiled binaries are available for your platform.
 
 If you wish to perform a source build regardless of whether PDFium binaries are available or not,
 you can do the following:
-
 ```bash
 make build
-pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
 ```
-
-`${version}` and `${platform_tag}` are placeholders that need to be replaced with the values
-that correspond to your platform (e. g. `pypdfium2-0.11.0-py3-none-linux.whl`).
 
 In case building failed, you could try
 ```bash
 python3 platform_setup/build_pdfium.py -p
-python3 platform_setup/setup_source.py bdist_wheel
-pip3 install dist/pypdfium2-${version}-py3-none-${platform_tag}.whl
+PYP_TARGET_PLATFORM="sourcebuild" python3 -m pip install . -v --no-build-isolation
 ```
 to prefer the use of system-provided build tools over the toolchain PDFium ships with. The problem is
 that the toolchain is limited to a curated set of platforms, as PDFium target cross-compilation for
@@ -251,7 +245,7 @@ PyPDFium2 contains scripts to automate the release process:
 
 ### Testing
 
-Run `pytest` on the `tests` directory.
+Run `make test`.
 
 ### Publishing the wheels
 

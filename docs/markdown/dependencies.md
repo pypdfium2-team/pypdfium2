@@ -27,15 +27,12 @@
 
 ### Python packages
 
-* pip >= 21.3 [^1]
+* pip [^1]
 * setuptools
+* setuptools-scm [^2]
+* build
+* ctypesgen [^3]
 * wheel
-* ctypesgen [^2]
-
-
-## Packaging
-
-* setuptools-scm [^3]
 
 
 ## Tests
@@ -62,12 +59,9 @@
 * check-wheel-contents
 
 
-[^1]: It is important that you provide a recent version of pip because pypdfium2
-      relies on in-place packaging without an intermediate temporary directory.
-      See [issue #56](https://github.com/pypdfium2-team/pypdfium2/issues/56).
+[^1]: A recent version of pip is strongly recommended.
 
-[^2]: You are strongly encouraged to install the latest ctypesgen from git main,
-      as lots of important improvements have been done since the last release on
-      PyPI, which is rather outdated.
+[^2]: Required for the `sdist` target to include all required files.
 
-[^3]: Required to create the `sdist` package.
+[^3]: You are encouraged to install the latest ctypesgen from git main, as lots of important
+      improvements have been done since the last release on PyPI, which is rather outdated.

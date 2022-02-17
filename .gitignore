@@ -19,9 +19,8 @@ sourcebuild/*
 *.egg-info
 *.kate-swp
 *.kdev4
+.python-version
 
 *.so
 *.dll
 *.dylib
-pdfium
-_pypdfium.py
