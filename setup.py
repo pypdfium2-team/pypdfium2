@@ -150,8 +150,9 @@ def install_handler():
         _setup(PlatformDirs.Windows86)
     else:
         # Platform without pre-built binaries - try a regular sourcebuild
-        args = build_pdfium.parse_args([])
-        build_pdfium.main(args)
+        if W_Presetup:
+            args = build_pdfium.parse_args([])
+            build_pdfium.main(args)
         mkwheel(PlatformDirs.SourceBuild)
     
     presetup_done()
