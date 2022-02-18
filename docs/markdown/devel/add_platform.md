@@ -40,5 +40,23 @@ This document is intended to outline the steps required to support a new platfor
     Inspect it with an archiver tool to ensure the `pypdfium2` directory contains all stuff from
     `src/pypdfium2/`, the bindings file `_pypdfium.py`, and the PDFium binary (one-of `pdfium`,
     `pdfium.dylib`, `pdfium.dll`).
-  * Finally, run `make release`. When done, confirm that the new platform wheel is present in
-    `dist/`, and that all sanity checks passed (`twine check` and `check-wheel-contents`).
+  * Run `make release`. When done, confirm that there were no errors, the new platform wheel
+    is present in `dist/`, and all sanity checks passed (`twine check` and `check-wheel-contents`).
+  * Finally, create an entry for the next release in `docs/markdown/changelog.md` and note that you
+    added support for a new platform.
+  * Make a new branch, add and commit your changes:
+    ```bash
+    # replace `new_platform` with any name of your liking
+    git branch new_platform; git checkout new_platform
+    # show changed files
+    git status
+    # stage the changes
+    git add file_1 file_2 ...  # or `git add *`
+    # create the commit
+    git commit -m "Added support for new platform xyz" -m "(longer description, if necessary)"
+    ```
+  * Submit a Pull Request:
+    ```bash
+    # Using the interactive GitHub CLI
+    gh pr create
+    ```
