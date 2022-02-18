@@ -62,3 +62,5 @@ This document is intended to outline the steps required to support a new platfor
     # Using the interactive GitHub CLI
     gh pr create
     ```
+  * At best, install the created wheel on the target platform, run the test suite (`python3 -m pytest`)
+    and report success or failiure.
