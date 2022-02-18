@@ -106,7 +106,10 @@ def _get_tag(plat_dir):
     elif plat_dir is PlatformDirs.WindowsArm64:
         return 'win_arm64'
     elif plat_dir is PlatformDirs.SourceBuild:
-        return sysconfig.get_platform()
+        tag = sysconfig.get_platform()
+        for char in ('-', '.'):
+            tag = tag.replace(char, '_')
+        return tag
     else:
         raise ValueError( "Unknown platform directory {}".format(plat_dir) )
     
