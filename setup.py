@@ -76,11 +76,11 @@ def install_handler():
             return False
         else:
             raise ValueError( "Invalid content in setup status file: '{}'".format(content) )
-
+    
     def presetup_done():
         with open(StatusFile, 'w') as file_handle:
             file_handle.write("PreSetupDone")
-
+    
     W_Presetup = check_presetup()
     if W_Presetup:
         check_deps.main()
