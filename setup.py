@@ -24,7 +24,6 @@ def include_platform_setup():
     module = importlib.util.module_from_spec(spec)
     
     sys.modules[mod_name] = module
-    spec.loader.exec_module(module)
 
 
 def packaging_handler():    
