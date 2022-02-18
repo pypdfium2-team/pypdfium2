@@ -44,17 +44,19 @@ This document is intended to outline the steps required to support a new platfor
     is present in `dist/`, and all sanity checks passed (`twine check` and `check-wheel-contents`).
   * Finally, create an entry for the next release in `docs/markdown/changelog.md` and note that you
     added support for a new platform.
-  * Make a new branch, add and commit your changes:
+  * Make a new branch, add and commit your changes. Example:
     ```bash
     # replace `new_platform` with any name of your liking
+    # (if you are the maintainer yourself and intend to push the changes directly into main, feel free to skip this step and the pull request)
     git branch new_platform; git checkout new_platform
     # show changed files
     git status
     # stage the changes
     git add file_1 file_2 ...  # or `git add *`
-    # create the commit
+    # create a commit
     git commit -m "Added support for new platform xyz" -m "(longer description, if necessary)"
     ```
+    (It may be more convenient to use a GUI such as `git-cola`, `qgit`, or `GitAhead`)
   * Submit a Pull Request:
     ```bash
     # Using the interactive GitHub CLI
