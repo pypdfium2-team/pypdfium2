@@ -2,16 +2,21 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
+import sysconfig
+import setuptools
+from os.path import (
+    join,
+    basename,
+)
 
-def packaging_handler():
-    
-    import os
+
+def packaging_handler():    
     
     target = os.environ.get("PYP_TARGET_PLATFORM", None)
     if target in (None, "auto"):
         return True
     
-    import setuptools
     from platform_setup.setup_base import mkwheel, SetupKws
     from platform_setup.packaging_base import PlatformDirs
     
@@ -43,13 +48,12 @@ def packaging_handler():
 
 def install_handler():
     
-    from os.path import join, basename
     from platform_setup import check_deps
     from platform_setup.packaging_base import SourceTree, PlatformDirs
-
-
+    
+    
     StatusFile = join(SourceTree, 'platform_setup', 'setup_status.txt')
-
+    
     def check_presetup() -> bool:
         with open(StatusFile, 'r') as file_handle:
             content = file_handle.read().strip()
@@ -69,7 +73,6 @@ def install_handler():
         check_deps.main()
     
     
-    import sysconfig
     from platform_setup import build_pdfium, update_pdfium
     from platform_setup.setup_base import mkwheel
     
@@ -133,7 +136,7 @@ def install_handler():
     elif plat.is_windows_x86():
         _setup(PlatformDirs.Windows86)
     else:
-        # Platform without pre-built binaries - trying a regular sourcebuild
+        # Platform without pre-built binaries - try a regular sourcebuild
         args = build_pdfium.parse_args([])
         build_pdfium.main(args)
         mkwheel(PlatformDirs.SourceBuild)
