@@ -3,12 +3,28 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import sys
 import sysconfig
 import setuptools
+import importlib.util
 from os.path import (
     join,
+    abspath,
+    dirname,
     basename,
 )
+
+
+def include_platform_setup():
+    
+    mod_name = 'platform_setup'
+    PlatSetupInit = join(dirname(abspath(__file__)), mod_name, '__init__.py')
+    
+    spec = importlib.util.spec_from_file_location(mod_name, PlatSetupInit)
+    module = importlib.util.module_from_spec(spec)
+    
+    sys.modules[mod_name] = module
+    spec.loader.exec_module(module)
 
 
 def packaging_handler():    
@@ -145,6 +161,7 @@ def install_handler():
 
 
 def main():
+    include_platform_setup()
     cont = packaging_handler()
     if cont:
         install_handler()
