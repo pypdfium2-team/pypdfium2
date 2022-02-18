@@ -42,16 +42,15 @@ def _get_bdist(whl_tag):
 def _clean():
     
     build_cache = join(SourceTree,'build')
-    bindings_file = join(ModuleDir,'_pypdfium.py')
+    if os.path.exists(build_cache):
+        shutil.rmtree(build_cache)
     
     libpaths = []
     for name in Libnames:
         libpaths.append( join(ModuleDir, name) )
     
-    files = [bindings_file, *libpaths]
+    files = [join(ModuleDir,'_pypdfium.py'), *libpaths]
     
-    if os.path.exists(build_cache):
-        shutil.rmtree(build_cache)
     
     for file in files:
         if os.path.exists(file):
