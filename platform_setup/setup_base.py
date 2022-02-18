@@ -31,10 +31,7 @@ def _get_bdist(whl_tag):
             self.plat_name_supplied = True
         
         def get_tag(self, *args, **kws):
-            python, abi, plat = _bdist_wheel.get_tag(self, *args, **kws)
-            python = 'py3'
-            plat = whl_tag
-            return python, abi, plat
+            return 'py3', 'none', whl_tag
     
     return bdist
 
@@ -50,7 +47,6 @@ def _clean():
         libpaths.append( join(ModuleDir, name) )
     
     files = [join(ModuleDir,'_pypdfium.py'), *libpaths]
-    
     
     for file in files:
         if os.path.exists(file):
