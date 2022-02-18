@@ -6,7 +6,7 @@ echo "Checking for unused imports..."
 find . -path ./sourcebuild -prune -o -name '*.py' -print |xargs -n 1 importchecker
 
 echo "Checking for spelling mistakes..."
-codespell --skip="./sourcebuild,./docs/build,./data,./.git,__pycache__,.mypy_cache," -L tabe,splitted
+codespell --skip="./sourcebuild,./docs/build,./data,./.git,__pycache__,.mypy_cache," -L "tabe,splitted"
 
 echo "Checking for missing license/copyright information..."
 reuse lint 
