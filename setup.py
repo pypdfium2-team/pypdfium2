@@ -21,9 +21,7 @@ def include_platform_setup():
     PlatSetupInit = join(dirname(abspath(__file__)), mod_name, '__init__.py')
     
     spec = importlib.util.spec_from_file_location(mod_name, PlatSetupInit)
-    module = importlib.util.module_from_spec(spec)
-    
-    sys.modules[mod_name] = module
+    sys.modules[mod_name] = importlib.util.module_from_spec(spec)
 
 
 def packaging_handler():    
