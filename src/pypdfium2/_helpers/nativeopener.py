@@ -37,8 +37,8 @@ class _reader_class:
         self.buffer = buffer
     
     def __call__(self, param, position, p_buf, size):
-        self.buffer.seek(position)
         c_buf = (ctypes.c_char * size).from_address( ctypes.addressof(p_buf.contents) )
+        self.buffer.seek(position)
         self.buffer.readinto(c_buf)
         return 1
 
