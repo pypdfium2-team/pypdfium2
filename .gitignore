@@ -24,6 +24,3 @@ sourcebuild/*
 *.so
 *.dll
 *.dylib
-
-src/pypdfium2/pdfium
-src/pypdfium2/_pypdfium2.py
