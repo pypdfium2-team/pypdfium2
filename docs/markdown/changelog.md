@@ -8,6 +8,7 @@
 - Updated PDFium from `4888` to `xxxx`.
 - Tweaked wheel tags to improve compatibility. Changed related code that assigns the tags.
 - Completely reworked the setup infrastructure to achieve PEP 517 compliance.
+  Thanks to Anderson Bravalheri for the invaluable help.
 - Improved configuration for readthedocs.
 
 ## 0.13.1 (2022-02-15)
