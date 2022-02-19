@@ -19,10 +19,25 @@ Index
 
 .. toctree::
    :maxdepth: 2
-   :caption: Table of Contents
+   :caption: Usage
    
    support_api
    shell_api
    dependencies
-   contributing
+   planned_changes
+
+
+.. put changelog into an isolated toctree with depth 1 to prevent it from blowing up the table of contents
+.. toctree::
+   :maxdepth: 1
+   :caption: Changelog
+   
    changelog
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Development
+   
+   contributing
+   add_platform
