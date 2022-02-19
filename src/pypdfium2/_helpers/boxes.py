@@ -32,57 +32,32 @@ def get_mediabox(page: pdfium.FPDF_PAGE) -> Sequence[float]:
     Returns:
         A tuple of four float coordinates.
     """
-    
-    return _get_box(
-        page,
-        pdfium.FPDFPage_GetMediaBox,
-        lambda _p: (0, 0, 612, 792),
-    )
+    return _get_box( page, pdfium.FPDFPage_GetMediaBox, lambda _p: (0, 0, 612, 792) )
 
 
 def get_cropbox(page):
     """
     Get the CropBox of *page* (Fallback: :func:`get_mediabox`)
     """
-    
-    return _get_box(
-        page,
-        pdfium.FPDFPage_GetCropBox,
-        get_mediabox,
-    )
+    return _get_box( page, pdfium.FPDFPage_GetCropBox, get_mediabox )
 
 
 def get_bleedbox(page):
     """
     Get the BleedBox of *page* (Fallback: :func:`get_cropbox`)
     """
-    
-    return _get_box(
-        page,
-        pdfium.FPDFPage_GetBleedBox,
-        get_cropbox,
-    )
+    return _get_box( page, pdfium.FPDFPage_GetBleedBox, get_cropbox )
 
 
 def get_trimbox(page):
     """
     Get the TrimBox of *page* (Fallback: :func:`get_cropbox`)
     """
-    
-    return _get_box(
-        page,
-        pdfium.FPDFPage_GetTrimBox,
-        get_cropbox,
-    )
+    return _get_box( page, pdfium.FPDFPage_GetTrimBox, get_cropbox )
 
 
 def get_artbox(page):
     """
     Get the ArtBox of *page* (Fallback: :func:`get_cropbox`)
     """
-    
-    return _get_box(
-        page,
-        pdfium.FPDFPage_GetArtBox,
-        get_cropbox,
-    )
+    return _get_box( page, pdfium.FPDFPage_GetArtBox, get_cropbox )
