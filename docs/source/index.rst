@@ -14,7 +14,7 @@ For the low-level API, please also refer to the `PDFium`_ and :mod:`ctypes` docu
    :maxdepth: 2
    :caption: Usage
    
-   support_api
+   python_api
    shell_api
    planned_changes
 
