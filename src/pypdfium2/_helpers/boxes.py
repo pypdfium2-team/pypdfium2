@@ -27,7 +27,7 @@ def _get_box(
 def get_mediabox(page: pdfium.FPDF_PAGE) -> Sequence[float]:
     """
     Get the MediaBox of *page* in PDF canvas units (usually 1/72in).
-    Falls back to ANSI A if the page does not define a MediaBox.
+    Falls back to ANSI A (0, 0, 612, 792) if the page does not define a MediaBox.
 
     Returns:
         A tuple of four float coordinates.
@@ -40,17 +40,49 @@ def get_mediabox(page: pdfium.FPDF_PAGE) -> Sequence[float]:
     )
 
 
-def get_cropbox(page: pdfium.FPDF_PAGE) -> Sequence[float]:
+def get_cropbox(page):
     """
-    Get the CropBox of *page* in PDF canvas units (usually 1/72in).
-    Falls back to MediaBox if the page does not define a CropBox.
-
-    Returns:
-        A tuple of four float coordinates.
+    Get the CropBox of *page* (Fallback: :func:`get_mediabox`)
     """
     
     return _get_box(
         page,
         pdfium.FPDFPage_GetCropBox,
         get_mediabox,
+    )
+
+
+def get_bleedbox(page):
+    """
+    Get the BleedBox of *page* (Fallback: :func:`get_cropbox`)
+    """
+    
+    return _get_box(
+        page,
+        pdfium.FPDFPage_GetBleedBox,
+        get_cropbox,
+    )
+
+
+def get_trimbox(page):
+    """
+    Get the TrimBox of *page* (Fallback: :func:`get_cropbox`)
+    """
+    
+    return _get_box(
+        page,
+        pdfium.FPDFPage_GetTrimBox,
+        get_cropbox,
+    )
+
+
+def get_artbox(page):
+    """
+    Get the ArtBox of *page* (Fallback: :func:`get_cropbox`)
+    """
+    
+    return _get_box(
+        page,
+        pdfium.FPDFPage_GetArtBox,
+        get_cropbox,
     )

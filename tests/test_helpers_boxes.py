@@ -24,13 +24,22 @@ def _check_boxes(pages, mediaboxes, cropboxes):
     
     assert len(pages) == len(mediaboxes) == len(cropboxes)
     
-    #print("Testing mediaboxes ...")
     for page, exp_mediabox in zip(pages, mediaboxes):
         _assert_boxes_eq(pdfium.get_mediabox(page), exp_mediabox)
         
-    #print("Testing cropboxes ...")
     for page, exp_cropbox in zip(pages, cropboxes):
         _assert_boxes_eq(pdfium.get_cropbox(page), exp_cropbox)
+    
+    # todo: add test files that actually contain BleedBox, TrimBox, and ArtBox
+    
+    for page, exp_bleedbox in zip(pages, cropboxes):
+        _assert_boxes_eq(pdfium.get_bleedbox(page), exp_bleedbox)
+    
+    for page, exp_trimbox in zip(pages, cropboxes):
+        _assert_boxes_eq(pdfium.get_trimbox(page), exp_trimbox)
+    
+    for page, exp_artbox in zip(pages, cropboxes):
+        _assert_boxes_eq(pdfium.get_artbox(page), exp_artbox)
 
 
 def test_boxes_normal():
