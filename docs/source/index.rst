@@ -35,8 +35,8 @@ For the low-level API, please also refer to the `PDFium`_ and :mod:`ctypes` docu
    changelog
 
 
-Index
------
+Indices
+-------
 
 * :ref:`genindex`
 * :ref:`modindex`
