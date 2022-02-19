@@ -26,7 +26,7 @@ Index
    planned_changes
 
 
-.. put changelog into an isolated toctree with depth 1 to prevent it from blowing up the table of contents
+.. put changelog in an isolated toctree with depth 1 to prevent it from blowing up the table of contents
 
 .. toctree::
    :maxdepth: 1
