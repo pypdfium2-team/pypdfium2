@@ -80,11 +80,26 @@ def _get_linux_tag(arch):
     return 'manylinux_2_17_{}.manylinux2014_{}'.format(arch, arch)
 
 
+def _get_mac_tag(arch, *versions):
+    
+    assert len(versions) > 0
+    
+    template = 'macosx_{}_{}'
+    
+    tag = ''
+    sep = ''
+    for v in versions:
+        tag += sep + template.format(v, arch)
+        sep = '.'
+    
+    return tag
+
+
 def _get_tag(plat_dir):
     if plat_dir is PlatformDirs.Darwin64:
-        return 'macosx_10_11_x86_64.macosx_11_0_x86_64'
+        return _get_mac_tag('x86_64', '10_11', '11_0')
     elif plat_dir is PlatformDirs.DarwinArm64:
-        return 'macosx_11_0_arm64'
+        return _get_mac_tag('arm64', '11_0')
     elif plat_dir is PlatformDirs.Linux64:
         return _get_linux_tag('x86_64')
     elif plat_dir is PlatformDirs.LinuxArm64:
