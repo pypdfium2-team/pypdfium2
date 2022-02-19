@@ -27,7 +27,12 @@ NB_SysCommands = [
 
 
 def _pip_install(pkg):
-    run_cmd("python3 -m pip install {}".format(pkg), cwd=None)
+    
+    exe = sys.executable
+    if not exe:
+        exe = "python3"
+    
+    run_cmd("{} -m pip install {}".format(exe, pkg), cwd=None)
 
 
 def install_pydeps():
