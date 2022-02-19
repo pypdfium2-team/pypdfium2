@@ -76,18 +76,15 @@ def _copy_bindings(platform_dir):
             shutil.copy(src_path, dest_path)
 
 
-def _get_mac_tag(arch):
-    return 'macosx_10_11_{}.macosx_11_0_{}'.format(arch, arch)
-
 def _get_linux_tag(arch):
     return 'manylinux_2_17_{}.manylinux2014_{}'.format(arch, arch)
 
 
 def _get_tag(plat_dir):
     if plat_dir is PlatformDirs.Darwin64:
-        return _get_mac_tag('x86_64')
+        return 'macosx_10_11_x86_64.macosx_11_0_x86_64'
     elif plat_dir is PlatformDirs.DarwinArm64:
-        return _get_mac_tag('arm64')
+        return 'macosx_11_0_arm64'
     elif plat_dir is PlatformDirs.Linux64:
         return _get_linux_tag('x86_64')
     elif plat_dir is PlatformDirs.LinuxArm64:
