@@ -72,7 +72,7 @@ pypdfium2 toc document.pdf
 To obtain a list of subcommands, run `pypdfium2 help`.
 Individual help for each subcommand is available can be accessed in the same way (`pypdfium any_subcommand help`)
 
-CLI documentation: https://pypdfium2.readthedocs.io/en/stable/cli.html
+CLI documentation: https://pypdfium2.readthedocs.io/en/stable/shell_api.html
 
 
 ### Using the support model
@@ -149,7 +149,7 @@ for item in doc.get_toc():
 doc.close()
 ```
 
-Support model documentation: https://pypdfium2.readthedocs.io/en/stable/support_api.html
+Support model documentation: https://pypdfium2.readthedocs.io/en/latest/python_api.html
 
 
 ### Using the PDFium API
