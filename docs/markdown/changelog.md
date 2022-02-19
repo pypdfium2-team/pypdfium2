@@ -14,7 +14,6 @@
   * Restructured the table of contents.
   * Created a `.readthedocs.yaml` configuration, mainly to make the documentation builder
     use PEP 517 compliant setup.
-  
 
 ## 0.13.1 (2022-02-15)
 
