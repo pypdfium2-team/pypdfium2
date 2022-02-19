@@ -19,15 +19,6 @@ For the low-level API, please also refer to the `PDFium documentation`_.
    planned_changes
 
 
-.. put changelog in an isolated toctree with depth 1 to prevent it from blowing up the table of contents
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Changelog
-   
-   changelog
-
-
 .. toctree::
    :maxdepth: 2
    :caption: Development
@@ -35,6 +26,13 @@ For the low-level API, please also refer to the `PDFium documentation`_.
    dependencies
    contributing
    add_platform
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Changelog
+   
+   changelog
 
 
 Index
