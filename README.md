@@ -149,7 +149,7 @@ for item in doc.get_toc():
 doc.close()
 ```
 
-Support model documentation: https://pypdfium2.readthedocs.io/en/latest/python_api.html
+Support model documentation: https://pypdfium2.readthedocs.io/en/stable/python_api.html
 
 
 ### Using the PDFium API
