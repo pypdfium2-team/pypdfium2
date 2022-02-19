@@ -9,7 +9,12 @@
 - Tweaked wheel tags to improve compatibility. Changed related code that assigns the tags.
 - Completely reworked the setup infrastructure to achieve PEP 517 compliance.
   Thanks to Anderson Bravalheri for the invaluable help.
-- Improved configuration for readthedocs.
+- Improved documentation:
+  * Wrote instructions on how to add support for a new platform.
+  * Restructured the table of contents.
+  * Created a `.readthedocs.yaml` configuration, mainly to make the documentation builder
+    use PEP 517 compliant setup.
+  
 
 ## 0.13.1 (2022-02-15)
 
@@ -35,8 +40,8 @@
   avoid messing up the root directory of the repository.
 - Adapted the Makefile to setup changes and added documentation commands.
 - Improvements related to license files:
-  - Made the repository fully compliant with the `reuse` standard.
-  - Moved the PDFium wheel license into the `LICENSES/` directory and removed its embedded
+  * Made the repository fully compliant with the `reuse` standard.
+  * Moved the PDFium wheel license into the `LICENSES/` directory and removed its embedded
     copies of `Apache-2.0` and `BSD-3-Clause` since they are duplicates.
 - Fixed link on the PyPI page to point at the stable documentation, not the development build.
 
