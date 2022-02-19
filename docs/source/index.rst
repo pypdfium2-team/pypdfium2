@@ -10,13 +10,6 @@ Welcome to the documentation for the support model of PyPDFium2.
 For the low-level API, please also refer to the `PDFium documentation`_.
 
 
-Index
------
-
-* :ref:`genindex`
-* :ref:`modindex`
-
-
 .. toctree::
    :maxdepth: 2
    :caption: Usage
@@ -42,3 +35,10 @@ Index
    dependencies
    contributing
    add_platform
+
+
+Index
+-----
+
+* :ref:`genindex`
+* :ref:`modindex`
