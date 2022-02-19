@@ -11,6 +11,8 @@
 - Tweaked wheel tags to improve compatibility. Changed related code that assigns the tags.
 - Completely reworked the setup infrastructure to achieve PEP 517 compliance.
   Thanks to Anderson Bravalheri for the invaluable help.
+- Fixed automatic dependency installation for platforms where the Python executable is not
+  named `python3`.
 - Improved documentation:
   * Wrote instructions on how to add support for a new platform.
   * Restructured the table of contents.
