@@ -23,11 +23,11 @@ Index
    
    support_api
    shell_api
-   dependencies
    planned_changes
 
 
 .. put changelog into an isolated toctree with depth 1 to prevent it from blowing up the table of contents
+
 .. toctree::
    :maxdepth: 1
    :caption: Changelog
@@ -39,5 +39,6 @@ Index
    :maxdepth: 2
    :caption: Development
    
+   dependencies
    contributing
    add_platform
