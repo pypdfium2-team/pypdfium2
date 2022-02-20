@@ -2,6 +2,9 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
+# Tell make that all our targets are not associated with files
+.PHONY: install test check update-all setup-all release build clean docs-build docs-open
+
 install:
 	bash ./utilities/install.sh
 
@@ -26,8 +29,8 @@ build:
 clean:
 	bash ./utilities/clean.sh
 
-render-docs:
+docs-build:
 	sphinx-build ./docs/source ./docs/build/html
 
-open-docs:
+docs-open:
 	xdg-open ./docs/build/html/index.html
