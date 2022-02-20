@@ -11,7 +11,8 @@ This document is intended to outline the steps required to support a new platfor
   that represents the path to a platform directory in `data/`, following the existing
   naming patterns.
 * Insert a corresponding entry into the `ReleaseFiles` dictionary in `platform_setup/update_pdfium.py`.
-  The key is the `PlatformDirs` attribute, while the value is the name of the file to download (without extension).
+  The key is the `PlatformDirs` attribute, while the value is the name of the file to download
+  (without extension).
 * Add the new wheel tag to the `_get_tag()` function of `platform_setup/setup_base.py`.
   Usually, these platform tags match or are derived from the return of `sysconfig.get_platform()`
   on a device of the platform in question. While Windows generally matches `sysconfig.get_platform()`,
@@ -33,7 +34,8 @@ This document is intended to outline the steps required to support a new platfor
     export PYP_TARGET_PLATFORM="platform_name"
     # download the binary package and call ctypesgen
     python3 platform_setup/update_pdfium.py -p $PYP_TARGET_PLATFORM
-    # craft the wheel (-n: no isolation, -x: skip dependency check)
+    # craft the wheel, according to the target platform environment variable
+    # (-n: no isolation, -x: skip dependency check)
     python3 -m build -n -x --wheel
     ```
   * If all went well, a wheel for the new platform should have been written to `dist/`.
@@ -47,7 +49,8 @@ This document is intended to outline the steps required to support a new platfor
   * Make a new branch, add and commit your changes. Example:
     ```bash
     # replace `new_platform` with any name of your liking
-    # (if you are the maintainer yourself and intend to push the changes directly into main, feel free to skip this step and the pull request)
+    # (if you are the maintainer yourself and intend to push the changes directly into main,
+    # feel free to skip this step and the pull request)
     git branch new_platform; git checkout new_platform
     # show changed files
     git status
@@ -62,5 +65,5 @@ This document is intended to outline the steps required to support a new platfor
     # Using the interactive GitHub CLI
     gh pr create
     ```
-  * At best, install the created wheel on the target platform, run the test suite (`python3 -m pytest tests/`)
-    and report success or failure.
+  * At best, install the created wheel on the target platform, run the test suite
+    (`python3 -m pytest tests/`) and report success or failure.
