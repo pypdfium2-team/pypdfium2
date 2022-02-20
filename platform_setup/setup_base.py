@@ -97,9 +97,9 @@ def _get_mac_tag(arch, *versions):
 
 def _get_tag(plat_dir):
     if plat_dir is PlatformDirs.Darwin64:
-        return _get_mac_tag('x86_64', '10_11', '11_0')
+        return _get_mac_tag('x86_64', '10_11', '11_0', '12_0')
     elif plat_dir is PlatformDirs.DarwinArm64:
-        return _get_mac_tag('arm64', '11_0')
+        return _get_mac_tag('arm64', '11_0', '12_0')
     elif plat_dir is PlatformDirs.Linux64:
         return _get_linux_tag('x86_64')
     elif plat_dir is PlatformDirs.LinuxArm64:
