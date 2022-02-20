@@ -16,7 +16,7 @@ License: Apache-2.0 OR BSD-3-Clause
 Files: pdfium
        pdfium.dll
        pdfium.dylib
-       docs/markdown/.about_wheel_license.md
+       docs/markdown/devel/.about_wheel_license.md
 Copyright: 2022 PDFium developers
 License: (Apache-2.0 OR BSD-3-Clause) AND LicenseRef-PdfiumThirdParty
 Comment:
