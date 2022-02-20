@@ -122,8 +122,8 @@ def install_handler():
             return self._is_platform('win', 'amd64')
         def is_windows_x86(self):
             return self._is_platform('win32', '')
-
-
+    
+    
     def _setup(platform_dir):
         if W_Presetup:
             update_pdfium.main( ['-p', basename(platform_dir)] )
