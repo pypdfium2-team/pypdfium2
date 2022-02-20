@@ -22,20 +22,6 @@ from platform_setup.packaging_base import (
 )
 
 
-def _get_bdist(whl_tag):
-    
-    class bdist (_bdist_wheel):
-        
-        def finalize_options(self, *args, **kws):
-            _bdist_wheel.finalize_options(self, *args, **kws)
-            self.plat_name_supplied = True
-        
-        def get_tag(self, *args, **kws):
-            return 'py3', 'none', whl_tag
-    
-    return bdist
-
-
 def _clean():
     
     build_cache = join(SourceTree,'build')
@@ -51,18 +37,6 @@ def _clean():
     for file in files:
         if os.path.exists(file):
             os.remove(file)
-
-
-class CleanerContext:
-    
-    def __init__(self):
-        pass
-    
-    def __enter__(self):
-        _clean()
-    
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        _clean()
 
 
 def _copy_bindings(platform_dir):
@@ -119,7 +93,21 @@ def _get_tag(plat_dir):
         return tag
     else:
         raise ValueError( "Unknown platform directory {}".format(plat_dir) )
+
+
+def _get_bdist(platform_dir):
     
+    class bdist (_bdist_wheel):
+        
+        def finalize_options(self, *args, **kws):
+            _bdist_wheel.finalize_options(self, *args, **kws)
+            self.plat_name_supplied = True
+        
+        def get_tag(self, *args, **kws):
+            return 'py3', 'none', _get_tag(platform_dir)
+    
+    return bdist
+
 
 SetupKws = dict(
     version = extract_version('V_PYPDFIUM2'),
@@ -128,12 +116,13 @@ SetupKws = dict(
 
 def mkwheel(platform_dir):
     
-    tag = _get_tag(platform_dir)
+    _clean()
+    _copy_bindings(platform_dir)
     
-    with CleanerContext():
-        _copy_bindings(platform_dir)
-        setuptools.setup(
-            package_data = {'': Libnames},
-            cmdclass = {'bdist_wheel': _get_bdist(tag)},
-            **SetupKws,
-        )
+    setuptools.setup(
+        package_data = {'': Libnames},
+        cmdclass = {'bdist_wheel': _get_bdist(platform_dir)},
+        **SetupKws,
+    )
+    
+    _clean()
