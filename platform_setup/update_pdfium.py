@@ -53,7 +53,8 @@ def _set_versions(*versions_list):
         updated = template.format(variable, new_ver)
         
         print( "'{}' -> '{}'".format(previous, updated) )
-        content = content.replace(previous, updated, 1)
+        assert content.count(previous) == 1
+        content = content.replace(previous, updated)
     
     with open(VersionFile, 'w') as fh:
         fh.write(content)
@@ -65,7 +66,7 @@ def get_latest_version():
         "git ls-remote https://github.com/bblanchon/pdfium-binaries.git",
         stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT,
-        shell  = True,
+        shell = True,
     )
     
     git_ls = git_ls.stdout.decode('UTF-8')
@@ -177,8 +178,10 @@ def generate_bindings(archives):
         else:
             raise ValueError("Unknown platform directory name '{}'".format(dirname))
         
-        current_name = os.listdir(bin_dir)[0]
-        shutil.move(join(bin_dir, current_name), join(platform_dir, target_name))
+        items = os.listdir(bin_dir)
+        assert len(items) == 1
+        
+        shutil.move(join(bin_dir, items[0]), join(platform_dir, target_name))
         
         call_ctypesgen(platform_dir, join(build_dir,'include'))
         shutil.rmtree(build_dir)
