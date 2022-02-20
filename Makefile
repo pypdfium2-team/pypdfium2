@@ -21,10 +21,7 @@ release:
 	bash ./utilities/release.sh
 
 build:
-	python3 platform_setup/build_pdfium.py --check-deps
-	PYP_TARGET_PLATFORM="sourcebuild" python3 -m build -n -x --wheel
-	PYP_TARGET_PLATFORM="sourcebuild" python3 -m pip install . -v --no-build-isolation
-	printf "InitialState" > platform_setup/setup_status.txt
+	bash ./utilities/build.sh
 
 clean:
 	bash ./utilities/clean.sh
