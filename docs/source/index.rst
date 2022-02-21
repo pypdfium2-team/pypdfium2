@@ -15,6 +15,7 @@ For the low-level API, please also refer to the `PDFium`_ and :mod:`ctypes` docu
    :caption: Usage
    
    python_api
+   pdfium_api
    shell_api
    planned_changes
 
