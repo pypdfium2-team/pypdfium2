@@ -15,13 +15,14 @@ Preable = """\
 
 import argparse
 import importlib
-from inspect import isclass
 
 
 def main(
         module_name,
         exclude_libs,
         exclude_members,
+        exclude_prefices,
+        exclude_suffices,
         title,
         output_file,
     ):
@@ -37,13 +38,11 @@ def main(
     module = importlib.import_module(module_name)
     members = dir(module)
     
-    exclude_prefices = ['_', 'struct_', 'enum_']
-    
     for member_str in members:
         
         if any(member_str.startswith(p) for p in exclude_prefices):
             continue
-        if member_str.endswith('_t__'):
+        if any(member_str.endswith(s) for s in exclude_suffices):
             continue
         if member_str.endswith('_') and member_str[:-1] in members:
             continue
@@ -55,8 +54,6 @@ def main(
         
         if callable(member):
             content += ".. autofunction:: {}".format(member_path)
-        elif isclass(member):
-            content += ".. autoclass:: {}".format(member_path)
         else:
             content += ".. data:: {}\n    :value: {}".format(member_path, member)
         
@@ -78,14 +75,26 @@ def parse_args():
     parser.add_argument(
         '--exclude-libs',
         nargs = '*',
-        help = "Libraries of which to exclude all members",
+        help = "Libraries to exclude that are imported using a wildcard in the module to document.",
         default = ['ctypes'],
     )
     parser.add_argument(
         '--exclude-members',
         nargs = '*',
         default = ['sys', 'ctypes', 're', 'os', 'glob', 'platform'],
-        help = "Members to exclude",
+        help = "Full names of members to exclude",
+    )
+    parser.add_argument(
+        '--exclude-prefices',
+        nargs = '*',
+        default = ['_', 'struct_', 'enum_'],
+        help = "Prefices of members to exclude",
+    )
+    parser.add_argument(
+        '--exclude-suffices',
+        nargs = '*',
+        default = ['_t__'],
+        help = "Suffices of members to exclude",
     )
     parser.add_argument(
         '--title',
@@ -106,6 +115,8 @@ def run_main():
         module_name = args.module_name,
         exclude_libs = args.exclude_libs,
         exclude_members = args.exclude_members,
+        exclude_prefices = args.exclude_prefices,
+        exclude_suffices = args.exclude_suffices,
         title = args.title,
         output_file = args.output_file,
     )
