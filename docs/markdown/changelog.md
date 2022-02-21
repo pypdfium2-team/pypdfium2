@@ -3,21 +3,22 @@
 
 # Changelog
 
-## 0.14.0 (unreleased, scheduled for 2022-02-21)
+## 0.14.0 (2022-02-21)
 
 - Updated PDFium from `4888` to `4901`.
 - Completed support model for PDF boxes (new functions `get_bleedbox()`, `get_trimbox()`,
   and `get_artbox()`)
+- Fixed automatic dependency installation for platforms where the Python executable is not
+  named `python3`.
 - Tweaked wheel tags to improve compatibility. Changed related code that assigns the tags.
 - Completely reworked the setup infrastructure to achieve PEP 517 compliance.
   Thanks to Anderson Bravalheri for the invaluable help.
-- Fixed automatic dependency installation for platforms where the Python executable is not
-  named `python3`.
 - Improved documentation:
   * Wrote instructions on how to add support for a new platform.
   * Restructured the table of contents.
   * Created a `.readthedocs.yaml` configuration, mainly to make the documentation builder
     use PEP 517 compliant setup.
+- General clean-up and lots of minor enhancements.
 
 ## 0.13.1 (2022-02-15)
 
