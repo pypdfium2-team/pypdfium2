@@ -12,16 +12,16 @@ from os.path import (
     join,
 )
 
-Libnames = [
-    'libpdfium.dylib',
+Libnames = (
+    'pdfium',
     'pdfium.dylib',
-    'libpdfium.dll',
     'pdfium.dll',
     'libpdfium.so',
     'pdfium.so',
     'libpdfium',
-    'pdfium',
-]
+    'libpdfium.dylib',
+    'libpdfium.dll',
+)
 
 
 HomeDir     = expanduser('~')

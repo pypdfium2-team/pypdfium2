@@ -7,23 +7,23 @@ import shutil
 from importlib.util import find_spec
 from platform_setup.packaging_base import run_cmd
 
-PyPackages = [
+PyPackages = (
     'build',
     'wheel',
     'ctypesgen',
     'setuptools',
     'setuptools-scm',
-]
-SysCommands = [
+)
+SysCommands = (
     'git',
     'gcc',
-]
-NB_SysCommands = [
+)
+NB_SysCommands = (
     'gn',
     'ninja',
     'clang',
     'lld',
-]
+)
 
 
 def _pip_install(pkg):
@@ -64,7 +64,7 @@ def check_sysdeps(sys_commands):
 
 def main(prefer_st=False):
     
-    sys_commands = SysCommands.copy()
+    sys_commands = SysCommands
     if prefer_st:
         sys_commands += NB_SysCommands
     
