@@ -5,7 +5,7 @@
 
 ## 0.14.0 (unreleased, scheduled for 2022-02-21)
 
-- Updated PDFium from `4888` to `xxxx`.
+- Updated PDFium from `4888` to `4901`.
 - Completed support model for PDF boxes (new functions `get_bleedbox()`, `get_trimbox()`,
   and `get_artbox()`)
 - Tweaked wheel tags to improve compatibility. Changed related code that assigns the tags.
