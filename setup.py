@@ -26,8 +26,8 @@ def include_platform_setup():
 
 def packaging_handler():    
     
-    target = os.environ.get("PYP_TARGET_PLATFORM", None)
-    if target in (None, "auto"):
+    target = os.environ.get('PYP_TARGET_PLATFORM', None)
+    if target in (None, 'auto'):
         return True
     
     from platform_setup.setup_base import mkwheel, SetupKws
@@ -79,7 +79,7 @@ def install_handler():
     
     def presetup_done():
         with open(StatusFile, 'w') as file_handle:
-            file_handle.write("PreSetupDone")
+            file_handle.write('PreSetupDone')
     
     W_Presetup = check_presetup()
     if W_Presetup:
