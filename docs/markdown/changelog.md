@@ -6,8 +6,10 @@
 
 ## 0.15.0 (unreleased, scheduled for 2022-02-28)
 
-- Improved Python API of the build and update scripts. The main functions can now be
-  invoked directly, without the need for argparse.
+- Improved build and update scripts:
+  * Enhanced Python API accessibility so that the main functions can now be invoked directly,
+    without the need for argparse.
+  * Modified commands to ensure that paths or links are properly wrapped in double quotes.
 
 
 ## 0.14.0 (2022-02-21)
