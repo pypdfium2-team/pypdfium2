@@ -6,7 +6,6 @@ Tasks
 
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
-* Add a better interface to call `update_pdfium` and `build_pdfium` without argparse.
 * Move development section of the Readme into a dedicated file and add some more information.
 * Add a ctypes primer explaining how to interoperate with the PDFium C API.
 * Allow for only returning bytes rather than creating an `Image.Image` object when rendering, so that callers may use the data in any way they like (e. g. directly inject into a GUI widget buffer), without having to go through an intermediate PIL object. Depending on how we will implement this, API breaking changes might be involved.

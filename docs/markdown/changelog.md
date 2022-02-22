@@ -3,6 +3,13 @@
 
 # Changelog
 
+
+## 0.15.0 (unreleased, scheduled for 2022-02-28)
+
+- Improved Python API of the build and update scripts. The main functions can now be
+  invoked directly, without the need for argparse.
+
+
 ## 0.14.0 (2022-02-21)
 
 - Updated PDFium from `4888` to `4901`.
@@ -20,6 +27,7 @@
     use PEP 517 compliant setup.
 - General clean-up and lots of minor enhancements.
 
+
 ## 0.13.1 (2022-02-15)
 
 - Fixed a logical issue related to the internal class definitions and imports: `PdfContext`
@@ -27,6 +35,7 @@
   requires importing components that use `PdfContext`, causing a possible circularity.
   While the Python interpreter seems to have automatically resolved these conflicts and the
   test suite passed, this has been a logical mistake to be addressed with this patch release.
+
 
 ## 0.13.0 (2022-02-14)
 
@@ -48,6 +57,7 @@
   * Moved the PDFium wheel license into the `LICENSES/` directory and removed its embedded
     copies of `Apache-2.0` and `BSD-3-Clause` since they are duplicates.
 - Fixed link on the PyPI page to point at the stable documentation, not the development build.
+
 
 ## 0.12.0 (2022-02-07)
 
@@ -71,6 +81,7 @@
   They are now included in the Sphinx documentation using `myst-parser`.
 - Splitted up support model tests into separate files for improved readability and extensibility.
 - Cleaned up some typos, unused variables and excessive imports.
+
 
 ## 0.11.0 (2022-01-31)
 
@@ -109,6 +120,7 @@
   configuration.
 - Updated the Makefile.
 - Removed KDevelop project files from the repository.
+
 
 ## 0.10.0 (2022-01-24)
 

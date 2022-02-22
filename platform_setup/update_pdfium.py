@@ -187,21 +187,8 @@ def generate_bindings(archives):
         shutil.rmtree(build_dir)
 
 
-def parse_args(argv):
-    parser = argparse.ArgumentParser(
-        description = "Download pre-built PDFium packages and generate the bindings,",
-    )
-    parser.add_argument(
-        '--platforms', '-p',
-        metavar = 'P',
-        nargs = '*',
-    )
-    return parser.parse_args(argv)
-
-
-def get_download_files(args):
+def get_download_files(platforms):
     
-    platforms = args.platforms
     if platforms is None:
         return ReleaseFiles
     
@@ -211,7 +198,7 @@ def get_download_files(args):
     
     download_files = {}
     
-    for short_name in args.platforms:
+    for short_name in platforms:
         
         if short_name in short_platforms:
             long_name = short_platforms[short_name]
@@ -225,10 +212,9 @@ def get_download_files(args):
     return download_files
 
 
-def main(argv=sys.argv[1:]):
+def main(platforms):
     
-    args = parse_args(argv)
-    download_files = get_download_files(args)
+    download_files = get_download_files(platforms)
     
     latest_version = get_latest_version()
     handle_versions(latest_version)
@@ -239,5 +225,24 @@ def main(argv=sys.argv[1:]):
     generate_bindings(archives)
 
 
+def parse_args(argv):
+    parser = argparse.ArgumentParser(
+        description = "Download pre-built PDFium packages and generate bindings",
+    )
+    parser.add_argument(
+        '--platforms', '-p',
+        metavar = 'P',
+        nargs = '*',
+    )
+    return parser.parse_args(argv)
+
+
+def run_cli(argv=sys.argv[1:]):
+    args = parse_args(argv)
+    return main(
+        platforms = args.platforms,
+    )
+
+
 if __name__ == '__main__':
-    main()
+    run_cli()
