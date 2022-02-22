@@ -126,7 +126,7 @@ def install_handler():
     
     def _setup(platform_dir):
         if W_Presetup:
-            update_pdfium.main( ['-p', basename(platform_dir)] )
+            update_pdfium.main( [basename(platform_dir)] )
         mkwheel(platform_dir)
     
     
@@ -151,8 +151,7 @@ def install_handler():
     else:
         # Platform without pre-built binaries - try a regular sourcebuild
         if W_Presetup:
-            args = build_pdfium.parse_args([])
-            build_pdfium.main(args)
+            build_pdfium.main()
         mkwheel(PlatformDirs.SourceBuild)
     
     presetup_done()

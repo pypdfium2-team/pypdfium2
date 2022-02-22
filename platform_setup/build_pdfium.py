@@ -230,31 +230,34 @@ def _get_tool(tool, tool_desc, prefer_systools):
     return exe
 
 
-def main(args):
+def main(
+        b_argfile = None,
+        b_srcname = None,
+        b_destname = None,
+        b_update = False,
+        b_checkdeps = False,
+        b_nativebuild = False,
+    ):
     
-    prefer_st = args.prefer_systools
+    # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
+    if b_destname is None and sys.platform.startswith('linux'):
+        b_destname = 'pdfium'
     
-    if prefer_st:
+    if b_nativebuild:
         print("Using system-provided binaries if available.")
     else:
         print("Using DepotTools-provided binaries.")
     
-    if args.check_deps:
-        check_deps.main(prefer_st)
-    
-    destname = args.destname
-    
-    # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
-    if destname is None and sys.platform.startswith('linux'):
-        destname = 'pdfium'
+    if b_checkdeps:
+        check_deps.main(b_nativebuild)    
     
     GClient = join(DepotToolsDir,'gclient')
-    GN    = _get_tool('gn', 'generate-ninja', prefer_st)
-    Ninja = _get_tool('ninja', 'ninja-build', prefer_st)
+    GN    = _get_tool('gn', 'generate-ninja', b_nativebuild)
+    Ninja = _get_tool('ninja', 'ninja-build', b_nativebuild)
     
-    if args.argfile is None:
+    if b_argfile is None:
         
-        if prefer_st:
+        if b_nativebuild:
             config_list = NativeBuildConfig
         else:
             config_list = DefaultConfig
@@ -266,35 +269,34 @@ def main(args):
             sep = '\n'
         
     else:
-        with open(abspath(args.argfile), 'r') as file_handle:
+        with open(abspath(b_argfile), 'r') as file_handle:
             config_str = file_handle.read()
     
     print("\nBuild configuration:\n{}\n".format(config_str))
     
-    depot_dl_done = dl_depottools(args.update)
+    depot_dl_done = dl_depottools(b_update)
     if depot_dl_done:
         patch_depottools()
     
-    pdfium_dl_done = dl_pdfium(args.update, GClient)
+    pdfium_dl_done = dl_pdfium(b_update, GClient)
     
     if pdfium_dl_done:
         patch_pdfium()
-    if prefer_st:
+    if b_nativebuild:
         extra_patch_pdfium()
     
     configure(config_str, GN)
     build(Ninja)
     
-    libpath = find_lib(args.srcname)
-    pack(libpath, destname)
+    libpath = find_lib(b_srcname)
+    pack(libpath, b_destname)
 
 
-def parse_args(args=sys.argv[1:]):
+def parse_args(argv):
     
     parser = argparse.ArgumentParser(
         description = "A script to automate building PDFium from source and generating bindings " +
-                      "with ctypesgen. If all went well, use `./setup_source bdist_wheel` to "    +
-                      "craft a python package from the source build.",
+                      "with ctypesgen.",
     )
     
     parser.add_argument(
@@ -319,6 +321,12 @@ def parse_args(args=sys.argv[1:]):
         help = "Update existing PDFium/DepotTools repositories, removing local changes.",
     )
     parser.add_argument(
+        '--check-deps',
+        action = 'store_true',
+        help = "Check that all required dependencies are installed. (Automatically installs " +
+               "missing Python packages, complains about missing system dependencies.)",
+    )
+    parser.add_argument(
         '--prefer-systools', '-p',
         action = 'store_true',
         help = "Try to use system-provided tools if available, rather than pre-built binaries "   +
@@ -326,14 +334,21 @@ def parse_args(args=sys.argv[1:]):
                "a last resort if building with the official toolchain failed. Moreover, it will " +
                "likely not work on Windows.",
     )
-    parser.add_argument(
-        '--check-deps',
-        action = 'store_true',
-        help = "Check whether all required system dependencies are installed.",
+    
+    return parser.parse_args(argv)
+
+
+def run_cli(argv=sys.argv[1:]):
+    args = parse_args(argv)
+    return main(
+        b_argfile = args.argfile,
+        b_srcname = args.srcname,
+        b_destname = args.destname,
+        b_update = args.update,
+        b_checkdeps = args.check_deps,
+        b_nativebuild = args.prefer_systools,
     )
     
-    return parser.parse_args(args)
-
 
 if __name__ == '__main__':
-    main(parse_args())
+    run_cli()
