@@ -86,7 +86,7 @@ def call_ctypesgen(platform_dir, include_dir):
 def _get_ver_namespace():
     
     ver_namespace = {}
-    with open(VersionFile) as fh:
+    with open(VersionFile, 'r') as fh:
         exec(fh.read(), ver_namespace)
     
     return ver_namespace
