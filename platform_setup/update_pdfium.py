@@ -78,14 +78,14 @@ def get_latest_version():
 
 def handle_versions(latest_version):
     
-    v_minor = extract_version("V_MINOR")
-    v_libpdfium = extract_version("V_LIBPDFIUM")
+    v_minor = extract_version('V_MINOR')
+    v_libpdfium = extract_version('V_LIBPDFIUM')
     
     if v_libpdfium < latest_version:
         print("New PDFium build")
         _set_versions(
-            ("V_MINOR", v_minor, v_minor+1),
-            ("V_LIBPDFIUM", v_libpdfium, latest_version),
+            ('V_MINOR', v_minor, v_minor+1),
+            ('V_LIBPDFIUM', v_libpdfium, latest_version),
         )
         
     else:
