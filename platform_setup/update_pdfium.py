@@ -27,8 +27,8 @@ from platform_setup.packaging_base import (
     call_ctypesgen,
 )
 
-
-ReleaseURL = "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F"
+ReleaseRepo = "https://github.com/bblanchon/pdfium-binaries"
+ReleaseURL = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseExtension = "tgz"
 ReleaseFiles = {
     PlatformDirs.Darwin64     : 'pdfium-mac-x64',
@@ -63,7 +63,7 @@ def _set_versions(*versions_list):
 def get_latest_version():
     
     git_ls = subprocess.run(
-        "git ls-remote https://github.com/bblanchon/pdfium-binaries.git",
+        'git ls-remote "{}.git"'.format(ReleaseRepo),
         stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT,
         shell = True,
