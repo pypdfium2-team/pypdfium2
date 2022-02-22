@@ -78,15 +78,15 @@ def dl_depottools(do_sync):
     if os.path.isdir(DepotToolsDir):
         if do_sync:
             print("DepotTools: Revert and update ...")
-            run_cmd("git reset --hard HEAD", cwd=DepotToolsDir)
-            run_cmd("git pull {}".format(DepotTools_URL), cwd=DepotToolsDir)
+            run_cmd('git reset --hard HEAD', cwd=DepotToolsDir)
+            run_cmd('git pull "{}"'.format(DepotTools_URL), cwd=DepotToolsDir)
         else:
             print("DepotTools: Using existing repository as-is.")
             is_update = False
     else:
         print("DepotTools: Download ...")
         run_cmd(
-            "git clone --depth 1 {} {}".format(DepotTools_URL, DepotToolsDir),
+            'git clone --depth 1 "{}" "{}"'.format(DepotTools_URL, DepotToolsDir),
             cwd = SB_Dir
         )
     
@@ -105,21 +105,21 @@ def dl_pdfium(do_sync, GClient):
     if os.path.isdir(PDFiumDir):
         if do_sync:
             print("PDFium: Revert / Sync  ...")
-            run_cmd("{} revert".format(GClient), cwd=SB_Dir)
+            run_cmd('"{}" revert'.format(GClient), cwd=SB_Dir)
         else:
             print("PDFium: Using existing repository as-is.")
             is_update = False
     else:
         print("PDFium: Download ...")
-        run_cmd("{} config --unmanaged {}".format(GClient, PDFium_URL), cwd=SB_Dir)
-        run_cmd("{} sync --no-history --shallow".format(GClient), cwd=SB_Dir)
+        run_cmd('"{}" config --unmanaged "{}"'.format(GClient, PDFium_URL), cwd=SB_Dir)
+        run_cmd('"{}" sync --no-history --shallow'.format(GClient), cwd=SB_Dir)
     
     return is_update
     
 
 def _apply_patchset(patchset, cwd):
     for patch in patchset:
-        run_cmd("git apply -v {}".format(patch), cwd=cwd)
+        run_cmd('git apply -v "{}"'.format(patch), cwd=cwd)
 
 def patch_depottools():
     _apply_patchset(DepotPatches, DepotToolsDir)
@@ -152,7 +152,7 @@ def _bins_to_symlinks():
 def extra_patch_pdfium():
     
     patch = join(PatchDir,'nativebuild.patch')
-    run_cmd("git apply -v {}".format(patch), cwd=join(PDFiumDir,'build'))
+    run_cmd('git apply -v "{}"'.format(patch), cwd=join(PDFiumDir,'build'))
     
     _bins_to_symlinks()
 
@@ -165,11 +165,11 @@ def configure(config, GN):
     with open(join(PDFiumBuildDir,'args.gn'), 'w') as args_handle:
         args_handle.write(config)
     
-    run_cmd("{} gen {}".format(GN, PDFiumBuildDir), cwd=PDFiumDir)
+    run_cmd('"{}" gen "{}"'.format(GN, PDFiumBuildDir), cwd=PDFiumDir)
 
 
 def build(Ninja):
-    run_cmd("{} -C {} pdfium".format(Ninja, PDFiumBuildDir), cwd=PDFiumDir)
+    run_cmd('"{}" -C "{}" pdfium'.format(Ninja, PDFiumBuildDir), cwd=PDFiumDir)
 
 
 def find_lib(srcname=None, directory=PDFiumBuildDir):
