@@ -18,15 +18,12 @@ class _writer_class:
         return 1
 
 
-def save_pdf(
-        pdf: pdfium.FPDF_DOCUMENT,
-        buffer,
-    ) -> None:
+def save_pdf(pdf, buffer):
     """
     Write the data of a PDFium document into an output buffer.
     
     Parameters:
-        pdf:
+        pdf (``FPDF_DOCUMENT``):
             Handle to a PDFium document.
         buffer:
             A byte buffer to capture the data. It may be anything that implements

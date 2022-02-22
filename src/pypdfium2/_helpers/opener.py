@@ -5,16 +5,9 @@ import io
 import sys
 import warnings
 from os.path import abspath
-from typing import (
-    Union,
-    Tuple,
-    Optional,
-    BinaryIO,
-)
 
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.nativeopener import (
-    LoaderData,
     is_buffer,
     open_pdf_buffer,
     open_pdf_native,
@@ -63,10 +56,7 @@ def _str_isascii(string):
         return True
 
 
-def open_pdf_auto(
-        input_obj: Union[str, bytes, BinaryIO],
-        password: Union[str, bytes] = None,
-    ) -> Tuple[pdfium.FPDF_DOCUMENT, Optional[LoaderData]]:
+def open_pdf_auto(input_obj, password=None):
     """    
     Open a document from a file path or in-memory data.
     
@@ -76,14 +66,15 @@ def open_pdf_auto(
     If the input is bytes or a byte buffer, :func:`.open_pdf_buffer` will be used.
     
     Parameters:
-        input_obj:
+        input_obj (str | bytes | typing.BinaryIO):
             File path to a PDF document, bytes, or a byte buffer.
-        password:
+        password (str | bytes | None):
             A password to unlock the document, if encrypted.
     
     Returns:
         The handle to a PDFium document, and a :class:`.LoaderData` object to store associated
-        file access data.
+        file access data. The latter may be :data:`None` if no custom file access was required.
+        (``Tuple[pdfium.FPDF_DOCUMENT, Optional[LoaderData]]``)
     
     Warning:
         Callers **MUST** ensure that the :class:`.LoaderData` object remain available for as
@@ -121,17 +112,14 @@ def open_pdf_auto(
     
 
 
-def close_pdf(
-        pdf: pdfium.FPDF_DOCUMENT,
-        loader_data: LoaderData = None,
-    ):
+def close_pdf(pdf, loader_data=None):
     """
     Close an in-memory PDFium document.
     
     Parameters:
-        pdf:
+        pdf (``FPDF_DOCUMENT``):
             The PDFium document object to close using ``FPDF_CloseDocument()``.
-        loader_data:
+        loader_data (LoaderData):
             A :class:`.LoaderData` object, as returned by :func:`.open_pdf_auto`,
             :func:`.open_pdf_buffer` or :func:`.open_pdf_native`.
     """
@@ -141,13 +129,17 @@ def close_pdf(
 
 
 
-def open_pdf(
-        input_obj: Union[str, bytes, BinaryIO],
-        password: Union[str, bytes] = None,
-    ) -> pdfium.FPDF_DOCUMENT:
+def open_pdf(input_obj, password=None):
     """
     This function is deprecated and scheduled for removal.
     Please use :func:`.open_pdf_auto` or :class:`.PdfDocument` instead.
+    
+    Parameters:
+        input_obj (str | bytes | typing.BinaryIO):
+        password (str | bytes | None):
+    
+    Returns:
+        ``pdfium.FPDF_DOCUMENT``
     """
     
     warnings.warn(

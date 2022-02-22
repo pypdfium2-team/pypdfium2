@@ -35,27 +35,27 @@ def _get_pixel_fmt(use_alpha, greyscale):
 
 
 def render_page(
-        pdf: pdfium.FPDF_DOCUMENT,
-        page_index: int = 0,
-        scale: float = 1,
-        rotation: int = 0,
-        colour: int = 0xFFFFFFFF,
-        annotations: bool = True,
-        greyscale: bool = False,
-        optimise_mode: OptimiseMode = OptimiseMode.none,
-    ) -> Image.Image:
+        pdf,
+        page_index = 0,
+        scale = 1,
+        rotation = 0,
+        colour = 0xFFFFFFFF,
+        annotations = True,
+        greyscale = False,
+        optimise_mode = OptimiseMode.none,
+    ):
     """
     Rasterise a single PDF page using PDFium.
     
     Parameters:
         
-        pdf:
+        pdf (``FPDF_DOCUMENT``):
             A raw PDFium document handle.
         
-        page_index:
+        page_index (int):
             Zero-based index of the page to render.
         
-        scale:
+        scale (float):
             
             Define the quality (or size) of the image.
             
@@ -69,23 +69,23 @@ def render_page(
             conjunction with an other PDF library, you may want to check for a possible
             ``/UserUnit`` in the page dictionary and multiply this scale factor with it.
         
-        rotation:
+        rotation (int):
             Rotate the page by 90, 180, or 270 degrees. Value 0 means no rotation.
         
-        colour:
+        colour (int):
             
             .. _8888 ARGB: https://en.wikipedia.org/wiki/RGBA_color_model#ARGB32
             
             The background colour to use, given as a hexadecimal integer in `8888 ARGB`_ format.
             Defaults to white (``0xFFFFFFFF``). See also :func:`.colour_as_hex`.
         
-        annotations:
+        annotations (bool):
             Whether to render page annotations.
         
-        greyscale:
+        greyscale (bool):
             Whether to render in greyscale mode (no colours).
         
-        optimise_mode:
+        optimise_mode (OptimiseMode):
             Optimise rendering for LCD displays or for printing.
     
     Returns:

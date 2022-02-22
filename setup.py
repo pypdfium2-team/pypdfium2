@@ -51,7 +51,7 @@ def install_handler():
     
     StatusFile = join(SourceTree, 'platform_setup', 'setup_status.txt')
     
-    def check_presetup() -> bool:
+    def check_presetup():
         with open(StatusFile, 'r') as file_handle:
             content = file_handle.read().strip()
         if content == 'InitialState':

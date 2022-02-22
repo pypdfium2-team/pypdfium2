@@ -2,14 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-from PIL import Image
-from typing import (
-    Tuple,
-    Sequence,
-    Iterator,
-    Union,
-    BinaryIO,
-)
 import concurrent.futures
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.opener import PdfContext
@@ -28,7 +20,7 @@ def _process_page(
         annotations,
         greyscale,
         optimise_mode,
-    ) -> Tuple[int, Image.Image]:
+    ):
     
     with PdfContext(input_obj, password) as pdf:
         pil_image = render_page(
@@ -49,26 +41,26 @@ def _invoke_process_page(args):
 
 
 def render_pdf(
-        input_obj: Union[str, bytes, BinaryIO],
-        page_indices: list = None,
-        password: str = None,
-        n_processes: int = os.cpu_count(),
-        scale: float = 1,
-        rotation: int = 0,
-        colour: Union[int, Sequence[int], None] = 0xFFFFFFFF,
-        annotations: bool = True,
-        greyscale: bool = False,
-        optimise_mode: OptimiseMode = OptimiseMode.none,
-    ) -> Iterator[ Tuple[Image.Image, str] ]:
+        input_obj,
+        page_indices = None,
+        password = None,
+        n_processes = os.cpu_count(),
+        scale = 1,
+        rotation = 0,
+        colour = 0xFFFFFFFF,
+        annotations = True,
+        greyscale = False,
+        optimise_mode = OptimiseMode.none,
+    ):
     """
     Render multiple pages of a PDF document, using a process pool executor.
     
     Parameters:
-        input_obj:
+        input_obj (str | bytes | typing.BinaryIO):
             The PDF document to render. It may be given as file path, bytes, or byte buffer.
-        page_indices:
+        page_indices (list):
             A list of zero-based page indices to render.
-        colour:
+        colour (int | typing.Sequence[int] | None):
             The background colour to use, as a hexadecimal integer in 32-bit ARGB format.
             It is also possible to provide a colour tuple, which is implicitly converted
             using :func:`.colour_as_hex`.

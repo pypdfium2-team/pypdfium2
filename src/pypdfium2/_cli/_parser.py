@@ -3,11 +3,6 @@
 
 import sys
 import argparse
-from typing import (
-    Callable,
-    Sequence,
-    Union,
-)
 
 
 HelpFlags = ('help', '--help', '-h', '/h', '?', '/?')
@@ -37,9 +32,9 @@ class _SubcommandItem:
     
     def __init__(
             self,
-            names: Union[str, Sequence[str]],
-            method: Callable,
-            help: str = "",
+            names,
+            method,
+            help = "",
         ):
         if isinstance(names, str):
             self.names = (names, )
@@ -53,10 +48,10 @@ class CliParser:
     
     def __init__(
             self,
-            program: str,
-            version: str,
-            description: str,
-            argv: Sequence[str] = sys.argv,
+            program,
+            version,
+            description,
+            argv = sys.argv,
         ):
         self.program = program
         self.version = version
@@ -70,7 +65,7 @@ class CliParser:
     
     
     @staticmethod
-    def _get_cmd_help(flags, message) -> str:
+    def _get_cmd_help(flags, message):
         
         help = ''
         
@@ -87,7 +82,7 @@ class CliParser:
         return help
     
     
-    def _get_main_help(self) -> str:
+    def _get_main_help(self):
         
         help = ''
         
