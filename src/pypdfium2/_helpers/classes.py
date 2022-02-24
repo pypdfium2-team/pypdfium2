@@ -59,22 +59,22 @@ class PdfDocument:
             max_depth = max_depth,
         )
     
-    def render_pdf(self, **kwargs):
+    def render_pdf(self, **kws):
         """
         Incrementally render multiple pages (see :func:`.render_pdf`).
         """
         yield from pdf_renderer.render_pdf(
             self._input_obj,
             password = self._password,
-            **kwargs
+            **kws
         )
     
-    def render_page(self, index, **kwargs):
+    def render_page(self, index, **kws):
         """
         Render a single page (see :func:`.render_page`).
         """
         return page_renderer.render_page(
             self._pdf,
             page_index = index,
-            **kwargs
+            **kws
         )
