@@ -132,7 +132,7 @@ def open_pdf_native(
     """    
     Open a PDF document from a file path, managing all file access natively in Python using
     :func:`.open_pdf_buffer`, without having to load the whole file into memory at once.
-    This ensures independence from file access in PDFium, which currently has issues with
+    This ensures independence from file access in PDFium, which used to have issues with
     widestring paths on Windows. However, it may be slower to a certain extent due to object
     conversions between C and Python involved in the callback.
     
