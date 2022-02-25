@@ -24,10 +24,8 @@ if __name__ == "__main__":
     form_config = pdfium.FPDF_FORMFILLINFO(2)
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(doc, form_config)
     
-    page   = pdfium.FPDF_LoadPage(doc, 0)
-    pdfium.FORM_OnAfterLoadPage(page, form_fill)
-    
-    width  = math.ceil(pdfium.FPDF_GetPageWidthF(page))
+    page = pdfium.FPDF_LoadPage(doc, 0)
+    width = math.ceil(pdfium.FPDF_GetPageWidthF(page))
     height = math.ceil(pdfium.FPDF_GetPageHeightF(page))
     
     bitmap = pdfium.FPDFBitmap_Create(width, height, 0)
