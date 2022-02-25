@@ -12,6 +12,11 @@ formats:
 sphinx:
    configuration: docs/source/conf.py
 
+build:
+  os: ubuntu-20.04
+  tools:
+    python: "3.9"
+
 python:
   install:
     - method: pip
