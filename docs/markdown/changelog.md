@@ -12,7 +12,7 @@
   * Modified commands to ensure that paths or links are properly wrapped in double quotes.
 - Updated setup configuration:
   * We are now using `setup_requires` for setup dependencies, rather than a custom `build`
-    group in `extra_requires`.
+    group in `extras_require`.
   * Explicitly blacklisted Python 3.7.6 and 3.8.1 as incompatible due to a regression in CPython
     that broke ctypesgen-created string handling code.
 
