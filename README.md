@@ -286,7 +286,7 @@ A [patch](https://pdfium-review.googlesource.com/c/pdfium/+/90693/) has been mer
 
 The support model of PyPDFium2 implements a workaround using `FPDF_LoadCustomDocument()` to be able to process non-ascii filepaths on Windows anyway.
 
-  
+
 ## Thanks
 
 Patches to PDFium and DepotTools originate from the [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/)
