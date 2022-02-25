@@ -74,7 +74,7 @@ def install_handler():
     from platform_setup.setup_base import mkwheel
     
     
-    class PlatformManager:
+    class HostPlatform:
         
         def __init__(self):
             
@@ -84,28 +84,11 @@ def install_handler():
             
             self.plat_name = plat_name
         
-        def _is_platform(self, start, end):
+        def is_platform(self, start, end):
             if self.plat_name.startswith(start):
                 if self.plat_name.endswith(end):
                     return True
             return False
-        
-        def is_darwin_arm64(self):
-            return self._is_platform('macosx', 'arm64')
-        def is_darwin_x64(self):
-            return self._is_platform('macosx', 'x86_64')
-        def is_linux_arm32(self):
-            return self._is_platform('linux', 'armv7l')
-        def is_linux_arm64(self):
-            return self._is_platform('linux', 'aarch64')
-        def is_linux_x64(self):
-            return self._is_platform('linux', 'x86_64')
-        def is_windows_arm64(self):
-            return self._is_platform('win', 'arm64')    
-        def is_windows_x64(self):
-            return self._is_platform('win', 'amd64')
-        def is_windows_x86(self):
-            return self._is_platform('win32', '')
     
     
     def _setup(pl_name):
@@ -114,23 +97,23 @@ def install_handler():
         mkwheel(pl_name)
     
     
-    plat = PlatformManager()
+    host = HostPlatform()
     
-    if plat.is_darwin_arm64():
+    if host.is_platform('macosx', 'arm64'):
         _setup(PlatformNames.darwin_arm64)
-    elif plat.is_darwin_x64():
+    elif host.is_platform('macosx', 'x86_64'):
         _setup(PlatformNames.darwin_x64)
-    elif plat.is_linux_arm32():
+    elif host.is_platform('linux', 'armv7l'):
         _setup(PlatformNames.linux_arm32)
-    elif plat.is_linux_arm64():
+    elif host.is_platform('linux', 'aarch64'):
         _setup(PlatformNames.linux_arm64)
-    elif plat.is_linux_x64():
+    elif host.is_platform('linux', 'x86_64'):
         _setup(PlatformNames.linux_x64)
-    elif plat.is_windows_arm64():
+    elif host.is_platform('win', 'arm64'):
         _setup(PlatformNames.windows_arm64)
-    elif plat.is_windows_x64():
+    elif host.is_platform('win', 'amd64'):
         _setup(PlatformNames.windows_x64)
-    elif plat.is_windows_x86():
+    elif host.is_platform('win32', ''):
         _setup(PlatformNames.windows_x86)
     else:
         # Platform without pre-built binaries - try a regular sourcebuild
