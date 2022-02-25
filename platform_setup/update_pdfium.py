@@ -33,8 +33,8 @@ ReleaseNames = {
     PlatformNames.linux_arm64   : 'pdfium-linux-arm64',
     PlatformNames.linux_arm32   : 'pdfium-linux-arm',
     PlatformNames.windows_x64   : 'pdfium-win-x64',
-    PlatformNames.windows_arm64 : 'pdfium-win-arm64',
     PlatformNames.windows_x86   : 'pdfium-win-x86',
+    PlatformNames.windows_arm64 : 'pdfium-win-arm64',
 }
 
 def _set_versions(*versions_list):
