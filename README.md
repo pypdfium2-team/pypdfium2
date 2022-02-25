@@ -279,6 +279,12 @@ If your issue is caused by the bindings generator, refer to the
 
 ## Known limitations
 
+### Incompatibility with CPython 3.7.6 and 3.8.1
+
+PyPDFium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a
+[regression in CPython](https://github.com/python/cpython/pull/16799#issuecomment-612353119)
+that broke ctypesgen-created string handling code.
+
 ### Non-ascii file paths on Windows
 
 On Windows, the `FPDF_LoadDocument()` function of PDFium used not to be able to open documents with file paths containing multi-byte, non-ascii characters (see [Bug 682](https://bugs.chromium.org/p/pdfium/issues/detail?id=682)).
