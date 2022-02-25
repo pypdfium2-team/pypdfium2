@@ -18,7 +18,8 @@ from platform_setup import check_deps
 from platform_setup.packaging_base import (
     SB_Dir,
     Libnames,
-    PlatformDirs,
+    DataTree,
+    PlatformNames,
     run_cmd,
     call_ctypesgen,
 )
@@ -28,7 +29,7 @@ PatchDir       = join(SB_Dir,'patches')
 DepotToolsDir  = join(SB_Dir,'depot_tools')
 PDFiumDir      = join(SB_Dir,'pdfium')
 PDFiumBuildDir = join(PDFiumDir,'out','Default')
-OutputDir      = PlatformDirs.SourceBuild
+OutputDir      = join(DataTree, PlatformNames.sourcebuild)
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"

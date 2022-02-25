@@ -8,21 +8,17 @@ import os
 import sys
 import shutil
 import tarfile
-import zipfile
 import argparse
 import traceback
 import subprocess
-from os.path import (
-    join,
-    dirname,
-    basename,
-)
+from os.path import join
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
 from platform_setup.packaging_base import (
-    PlatformDirs,
+    DataTree,
     VersionFile,
+    PlatformNames,
     extract_version,
     call_ctypesgen,
 )
@@ -30,15 +26,15 @@ from platform_setup.packaging_base import (
 ReleaseRepo = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseExtension = "tgz"
-ReleaseFiles = {
-    PlatformDirs.Darwin64     : 'pdfium-mac-x64',
-    PlatformDirs.DarwinArm64  : 'pdfium-mac-arm64',
-    PlatformDirs.Linux64      : 'pdfium-linux-x64',
-    PlatformDirs.LinuxArm64   : 'pdfium-linux-arm64',
-    PlatformDirs.LinuxArm32   : 'pdfium-linux-arm',
-    PlatformDirs.Windows64    : 'pdfium-win-x64',
-    PlatformDirs.Windows86    : 'pdfium-win-x86',
-    PlatformDirs.WindowsArm64 : 'pdfium-win-arm64',
+ReleaseNames = {
+    PlatformNames.darwin_x64    : 'pdfium-mac-x64',
+    PlatformNames.darwin_arm64  : 'pdfium-mac-arm64',
+    PlatformNames.linux_x64     : 'pdfium-linux-x64',
+    PlatformNames.linux_arm64   : 'pdfium-linux-arm64',
+    PlatformNames.linux_arm32   : 'pdfium-linux-arm',
+    PlatformNames.windows_x64   : 'pdfium-win-x64',
+    PlatformNames.windows_arm64 : 'pdfium-win-arm64',
+    PlatformNames.windows_x86   : 'pdfium-win-x86',
 }
 
 def _set_versions(*versions_list):
@@ -92,10 +88,10 @@ def handle_versions(latest_version):
         print("No new PDFium build - will re-create bindings without incrementing version")
 
 
-def clear_data():
-    for dirpath in ReleaseFiles:
-        if os.path.isdir(dirpath):
-            shutil.rmtree(dirpath)
+def clear_data(download_files):
+    for pl_dir in download_files:
+        if os.path.isdir(pl_dir):
+            shutil.rmtree(pl_dir)
 
 
 def _get_package(args):
@@ -145,12 +141,10 @@ def unpack_archives(archives):
     
     for file in archives.values():
         
-        extraction_path = join(dirname(file), 'build_tar')
+        extraction_path = join(os.path.dirname(file), 'build_tar')
         
         if ReleaseExtension == 'tgz':
             arc_opener = tarfile.open
-        elif ReleaseExtension == 'zip':
-            arc_opener = zipfile.ZipFile
         else:
             raise ValueError("Unknown archive extension {}".format(ReleaseExtension))
         
@@ -166,7 +160,7 @@ def generate_bindings(archives):
         
         build_dir = join(platform_dir,'build_tar')
         bin_dir = join(build_dir,'lib')
-        dirname = basename(platform_dir)
+        dirname = os.path.basename(platform_dir)
         
         if dirname.startswith('windows'):
             target_name = 'pdfium.dll'
@@ -189,24 +183,19 @@ def generate_bindings(archives):
 
 def get_download_files(platforms):
     
+    avail_keys = [k for k in ReleaseNames.keys()]
     if platforms is None:
-        return ReleaseFiles
-    
-    short_platforms = {}
-    for key in ReleaseFiles.keys():
-        short_platforms[basename(key)] = key
+        platforms = avail_keys
     
     download_files = {}
     
-    for short_name in platforms:
+    for pl_name in platforms:
         
-        if short_name in short_platforms:
-            long_name = short_platforms[short_name]
-            download_files[long_name] = ReleaseFiles[long_name]
+        if pl_name in ReleaseNames:
+            download_files[ join(DataTree, pl_name) ] = ReleaseNames[pl_name]
         else:
-            available_keys = [k for k in short_platforms.keys()]
             raise ValueError(
-                "Unknown platform name '{}'. Available keys are {}.".format(short_name, available_keys)
+                "Unknown platform name '{}'. Available keys are {}.".format(pl_name, avail_keys)
             )
     
     return download_files
@@ -218,7 +207,7 @@ def main(platforms):
     
     latest_version = get_latest_version()
     handle_versions(latest_version)
-    clear_data()
+    clear_data(download_files)
     
     archives = download_releases(latest_version, download_files)
     unpack_archives(archives)

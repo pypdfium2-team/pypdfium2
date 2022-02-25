@@ -31,28 +31,12 @@ def packaging_handler():
         return True
     
     from platform_setup.setup_base import mkwheel, SetupKws
-    from platform_setup.packaging_base import PlatformDirs
+    from platform_setup.packaging_base import PlatformNames
     
-    if target == 'darwin_arm64':
-        mkwheel(PlatformDirs.DarwinArm64)
-    elif target == 'darwin_x64':
-        mkwheel(PlatformDirs.Darwin64)
-    elif target == 'linux_arm32':
-        mkwheel(PlatformDirs.LinuxArm32)
-    elif target == 'linux_arm64':
-        mkwheel(PlatformDirs.LinuxArm64)
-    elif target == 'linux_x64':
-        mkwheel(PlatformDirs.Linux64)
-    elif target == 'windows_arm64':
-        mkwheel(PlatformDirs.WindowsArm64)
-    elif target == 'windows_x64':
-        mkwheel(PlatformDirs.Windows64)
-    elif target == 'windows_x86':
-        mkwheel(PlatformDirs.Windows86)
-    elif target == 'sourcebuild':
-        mkwheel(PlatformDirs.SourceBuild)
-    elif target == 'sdist':
+    if target == 'sdist':
         setuptools.setup(**SetupKws)
+    elif hasattr(PlatformNames, target):
+        mkwheel( getattr(PlatformNames, target) )
     else:
         raise ValueError( "Invalid deployment target '{}'".format(target) )
     
@@ -62,7 +46,7 @@ def packaging_handler():
 def install_handler():
     
     from platform_setup import check_deps
-    from platform_setup.packaging_base import SourceTree, PlatformDirs
+    from platform_setup.packaging_base import SourceTree, PlatformNames
     
     
     StatusFile = join(SourceTree, 'platform_setup', 'setup_status.txt')
@@ -124,35 +108,35 @@ def install_handler():
             return self._is_platform('win32', '')
     
     
-    def _setup(platform_dir):
+    def _setup(pl_name):
         if W_Presetup:
-            update_pdfium.main( [basename(platform_dir)] )
-        mkwheel(platform_dir)
+            update_pdfium.main( [basename(pl_name)] )
+        mkwheel(pl_name)
     
     
     plat = PlatformManager()
     
     if plat.is_darwin_arm64():
-        _setup(PlatformDirs.DarwinArm64)
+        _setup(PlatformNames.darwin_arm64)
     elif plat.is_darwin_x64():
-        _setup(PlatformDirs.Darwin64)
+        _setup(PlatformNames.darwin_x64)
     elif plat.is_linux_arm32():
-        _setup(PlatformDirs.LinuxArm32)
+        _setup(PlatformNames.linux_arm32)
     elif plat.is_linux_arm64():
-        _setup(PlatformDirs.LinuxArm64)
+        _setup(PlatformNames.linux_arm64)
     elif plat.is_linux_x64():
-        _setup(PlatformDirs.Linux64)
+        _setup(PlatformNames.linux_x64)
     elif plat.is_windows_arm64():
-        _setup(PlatformDirs.WindowsArm64)
+        _setup(PlatformNames.windows_arm64)
     elif plat.is_windows_x64():
-        _setup(PlatformDirs.Windows64)
+        _setup(PlatformNames.windows_x64)
     elif plat.is_windows_x86():
-        _setup(PlatformDirs.Windows86)
+        _setup(PlatformNames.windows_x86)
     else:
         # Platform without pre-built binaries - try a regular sourcebuild
         if W_Presetup:
             build_pdfium.main()
-        mkwheel(PlatformDirs.SourceBuild)
+        mkwheel(PlatformNames.sourcebuild)
     
     presetup_done()
 

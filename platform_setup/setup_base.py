@@ -15,9 +15,10 @@ from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
 from platform_setup.packaging_base import (
     Libnames,
+    DataTree,
     SourceTree,
     ModuleDir,
-    PlatformDirs,
+    PlatformNames,
     extract_version,
 )
 
@@ -39,10 +40,10 @@ def _clean():
             os.remove(file)
 
 
-def _copy_bindings(platform_dir):
+def _copy_bindings(pl_name):
     
     # non-recursively collect all objects from the platform directory
-    for src_path in glob(join(platform_dir,'*')):
+    for src_path in glob(join(DataTree, pl_name, '*')):
         
         # copy platform-specific files into the sources, excluding possible directories
         if os.path.isfile(src_path):
@@ -69,33 +70,33 @@ def _get_mac_tag(arch, *versions):
     return tag
 
 
-def _get_tag(plat_dir):
-    if plat_dir is PlatformDirs.Darwin64:
+def _get_tag(pl_name):
+    if pl_name == PlatformNames.darwin_x64:
         return _get_mac_tag('x86_64', '10_11', '11_0', '12_0')
-    elif plat_dir is PlatformDirs.DarwinArm64:
+    elif pl_name == PlatformNames.darwin_arm64:
         return _get_mac_tag('arm64', '11_0', '12_0')
-    elif plat_dir is PlatformDirs.Linux64:
+    elif pl_name == PlatformNames.linux_x64:
         return _get_linux_tag('x86_64')
-    elif plat_dir is PlatformDirs.LinuxArm64:
+    elif pl_name == PlatformNames.linux_arm64:
         return _get_linux_tag('aarch64')
-    elif plat_dir is PlatformDirs.LinuxArm32:
+    elif pl_name == PlatformNames.linux_arm32:
         return _get_linux_tag('armv7l')
-    elif plat_dir is PlatformDirs.Windows64:
+    elif pl_name == PlatformNames.windows_x64:
         return 'win_amd64'
-    elif plat_dir is PlatformDirs.Windows86:
-        return 'win32'
-    elif plat_dir is PlatformDirs.WindowsArm64:
+    elif pl_name == PlatformNames.windows_arm64:
         return 'win_arm64'
-    elif plat_dir is PlatformDirs.SourceBuild:
+    elif pl_name == PlatformNames.windows_x86:
+        return 'win32'
+    elif pl_name == PlatformNames.sourcebuild:
         tag = sysconfig.get_platform()
         for char in ('-', '.'):
             tag = tag.replace(char, '_')
         return tag
     else:
-        raise ValueError( "Unknown platform directory {}".format(plat_dir) )
+        raise ValueError( "Unknown platform directory {}".format(pl_name) )
 
 
-def _get_bdist(platform_dir):
+def _get_bdist(pl_name):
     
     class bdist (_bdist_wheel):
         
@@ -104,7 +105,7 @@ def _get_bdist(platform_dir):
             self.plat_name_supplied = True
         
         def get_tag(self, *args, **kws):
-            return 'py3', 'none', _get_tag(platform_dir)
+            return 'py3', 'none', _get_tag(pl_name)
     
     return bdist
 
@@ -114,14 +115,14 @@ SetupKws = dict(
 )
 
 
-def mkwheel(platform_dir):
+def mkwheel(pl_name):
     
     _clean()
-    _copy_bindings(platform_dir)
+    _copy_bindings(pl_name)
     
     setuptools.setup(
         package_data = {'': Libnames},
-        cmdclass = {'bdist_wheel': _get_bdist(platform_dir)},
+        cmdclass = {'bdist_wheel': _get_bdist(pl_name)},
         **SetupKws,
     )
     
