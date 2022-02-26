@@ -3,16 +3,11 @@
 
 import ctypes
 from os.path import abspath
-from typing import (
-    Union,
-    Tuple,
-    BinaryIO,
-)
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.error_handler import handle_pdfium_error
 
 
-def is_buffer(obj) -> bool:
+def is_buffer(obj):
     """
     Check whether an object is a byte buffer that implements ``seek()``, ``tell()``,
     and ``readinto()``.
@@ -74,23 +69,20 @@ class LoaderData:
             self.file_handle.close()
 
 
-def open_pdf_buffer(
-        buffer: BinaryIO,
-        password: Union[str, bytes] = None,
-    ) -> Tuple[pdfium.FPDF_DOCUMENT, LoaderData]:
+def open_pdf_buffer(buffer, password=None):
     """
     Open a PDF document incrementally from a byte buffer using ``FPDF_LoadCustomDocument()`` and
     a ctypes callback function.
     
     Parameters:
-        buffer:
+        buffer (typing.BinaryIO):
             A byte buffer as defined in :func:`.is_buffer`.
-        password:
+        password (str | bytes | None):
             A password to unlock the document, if encrypted.
     
     Returns:
         The handle to a PDFium document, and a :class:`.LoaderData` object to store associated
-        file access data.
+        file access data (``Tuple[pdfium.FPDF_DOCUMENT, LoaderData]``).
     
     See also :func:`.open_pdf_auto`. **The same warnings apply!**
     """
@@ -125,16 +117,20 @@ def open_pdf_buffer(
     return pdf, ld_data
 
 
-def open_pdf_native(
-        filepath: str,
-        password: Union[str, bytes] = None,
-    ) -> Tuple[pdfium.FPDF_DOCUMENT, LoaderData]:
+def open_pdf_native(filepath, password=None):
     """    
     Open a PDF document from a file path, managing all file access natively in Python using
     :func:`.open_pdf_buffer`, without having to load the whole file into memory at once.
     This ensures independence from file access in PDFium, which used to have issues with
     widestring paths on Windows. However, it may be slower to a certain extent due to object
     conversions between C and Python involved in the callback.
+    
+    Parameters:
+        filepath (str):
+        password (str | bytes | None):
+    
+    Returns:
+        ``Tuple[pdfium.FPDF_DOCUMENT, LoaderData]``
     
     See also :func:`.open_pdf_auto`. **The same warnings apply!**
     """

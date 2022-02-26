@@ -4,13 +4,7 @@
 import ctypes
 import logging
 import warnings
-from typing import (
-    Sequence,
-    Optional,
-    Iterator,
-)
 from pypdfium2 import _pypdfium as pdfium
-from pypdfium2._helpers.constants import ViewMode
 from pypdfium2._helpers.utilities import translate_viewmode
 
 logger = logging.getLogger(__name__)
@@ -21,26 +15,26 @@ class OutlineItem:
     An entry in the table of contents ("bookmark").
     
     Parameters:
-        level:
+        level (int):
             The number of parent items.
-        title:
+        title (str):
             String of the bookmark.
-        page_index:
+        page_index (int):
             Zero-based index of the page the bookmark is pointing to.
-        view_mode:
+        view_mode (ViewMode):
             A mode defining how to interpret the coordinates of *view_pos*.
-        view_pos:
+        view_pos (typing.Sequence[float]):
             Target position on the page the viewport should jump to. It is a sequence of float values
             in PDF points. Depending on *view_mode*, it can contain between 0 and 4 coordinates.
     """
     
     def __init__(
             self,
-            level: int,
-            title: str,
-            page_index: int,
-            view_mode: ViewMode,
-            view_pos: Sequence[float],
+            level,
+            title,
+            page_index,
+            view_mode,
+            view_pos,
         ):
         self.level = level
         self.title = title
@@ -49,11 +43,7 @@ class OutlineItem:
         self.view_pos = view_pos
 
 
-def _get_toc_entry(
-        pdf: pdfium.FPDF_DOCUMENT,
-        bookmark: pdfium.FPDF_BOOKMARK,
-        level: int,
-    ) -> OutlineItem:
+def _get_toc_entry(pdf, bookmark, level):
     """
     Convert a raw PDFium bookmark to an :class:`.OutlineItem`.
     """
@@ -86,19 +76,19 @@ def _get_toc_entry(
 
 
 def get_toc(
-        pdf: pdfium.FPDF_DOCUMENT,
-        parent: Optional[pdfium.FPDF_BOOKMARK] = None,
-        level: int = 0,
-        max_depth: int = None,
-        seen: Optional[set] = None,
-    ) -> Iterator[OutlineItem]:
+        pdf,
+        parent = None,
+        level = 0,
+        max_depth = None,
+        seen = None,
+    ):
     """
     Read the table of contents ("outline") of a PDF document.
     
     Parameters:
-        pdf:
+        pdf (``FPDF_DOCUMENT``):
             The PDFium document of which to parse the ToC.
-        max_depth:
+        max_depth (int):
             The maximum recursion depth to consider when analysing the outline.
         
     Yields:
@@ -139,7 +129,7 @@ def get_toc(
         bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
 
 
-def print_toc(toc) -> None:
+def print_toc(toc):
     """
     This function is deprecated and scheduled for removal.
     Please use custom code to print the table of contents.

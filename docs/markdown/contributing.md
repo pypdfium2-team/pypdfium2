@@ -20,10 +20,10 @@ with your contribution, and some rules that we would like you to follow:
   This makes editing a lot easier. (VS Code: Uncheck "Editor: Trim Auto Whitespace")
 * Files should always end with a newline character for consistency.
   (VS Code: Check "Files: Insert Final Newline")
-* Type hints and code comments are appreciated wherever they improve readability.
+* Code comments are appreciated wherever they improve readability.
 * Please try to keep compatibility with the minimum supported Python version defined in
   [`setup.cfg`][setup-cfg]. This means to avoid newer features like f-strings or keywords-only
-  enforcement.
+  enforcement. We also do not use type hints at the moment.
 * For working with file paths, we prefer to use `os.path` / `shutil` / `glob` instead of `pathlib`.
 * In the module itself, no relative imports must be used. Absolute imports are preferable.
   Outside the `src/` directory, realative imports are allowed, though.

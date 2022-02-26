@@ -5,9 +5,15 @@ from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.constants import ViewMode
 
 
-def translate_viewmode(viewmode: int) -> ViewMode:
+def translate_viewmode(viewmode):
     """
     Convert a PDFium view mode integer to an attribute of the :class:`.ViewMode` enum.
+    
+    Parameters:
+        viewmode (int): PDFium view mode integer.
+    
+    Returns:
+        :class:`.ViewMode`
     """
     
     if viewmode == pdfium.PDFDEST_VIEW_UNKNOWN_MODE:
@@ -32,9 +38,15 @@ def translate_viewmode(viewmode: int) -> ViewMode:
         raise ValueError("Unknown PDFium viewmode value {}".format(viewmode))
 
 
-def translate_rotation(rotation: int) -> int:
+def translate_rotation(rotation):
     """
     Convert a rotation value in degrees to a PDFium rotation constant.
+    
+    Parameters:
+        rotation (int): Rotation value in degrees (0, 90, 180, 270).
+    
+    Returns:
+        int - A PDFium rotation constant (0, 1, 2, 3).
     """
     
     if rotation == 0:
@@ -58,10 +70,10 @@ def _hex_digits(c):
     return hxc
     
 
-def colour_as_hex(r, g, b, a=255) -> int:
+def colour_as_hex(r, g, b, a=255):
     """
     Convert a colour given as integers of ``red, green, blue, alpha`` ranging from 0 to 255
-    to a single value in 8888 ARGB format.
+    to a single integer in 32-bit ARGB format.
     """
     
     colours = (a, r, g, b)

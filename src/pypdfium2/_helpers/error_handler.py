@@ -11,17 +11,17 @@ class PdfiumError (RuntimeError):
     pass
 
 
-def handle_pdfium_error(valid: bool = True) -> int:
+def handle_pdfium_error(valid=True):
     """
     Check the last PDFium error code and raise an exception accordingly.
     
     Parameters:
-        valid:
+        valid (bool):
             If :data:`False`, also raise an exception if ``FPDF_GetLastError()``
             returns ``FPDF_ERR_SUCCESS``.
     
     Returns:
-        The error code as returned by PDFium.
+        int - The error code as returned by PDFium.
     """
     
     last_error = pdfium.FPDF_GetLastError()
