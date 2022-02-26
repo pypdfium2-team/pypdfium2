@@ -32,7 +32,7 @@ def _pip_install(pkg):
     if not exe:
         exe = "python3"
     
-    run_cmd('"{}" -m pip install {}'.format(exe, pkg), cwd=None)
+    run_cmd('"{}" -m pip install "{}"'.format(exe, pkg), cwd=None)
 
 
 def install_pydeps():
