@@ -48,7 +48,6 @@ def install_handler():
     from platform_setup import check_deps
     from platform_setup.packaging_base import SourceTree, PlatformNames
     
-    
     StatusFile = join(SourceTree, 'platform_setup', 'setup_status.txt')
     
     def check_presetup():
@@ -72,15 +71,12 @@ def install_handler():
     from platform_setup import build_pdfium, update_pdfium
     from platform_setup.setup_base import mkwheel
     
-    
     class HostPlatform:
         
         def __init__(self):
-            
             plat_name = sysconfig.get_platform().lower()
             for char in ('-', '.'):
                 plat_name = plat_name.replace(char, '_')
-            
             self.plat_name = plat_name
         
         def is_platform(self, start, end):
@@ -89,11 +85,9 @@ def install_handler():
                     return True
             return False
     
-    
     def _setup(pl_name):
         if W_Presetup: update_pdfium.main( [basename(pl_name)] )
         mkwheel(pl_name)
-    
     
     host = HostPlatform()
     
@@ -125,7 +119,6 @@ def main():
     include_platform_setup()
     cont = packaging_handler()
     if cont: install_handler()
-
 
 if __name__ == '__main__':
     main()
