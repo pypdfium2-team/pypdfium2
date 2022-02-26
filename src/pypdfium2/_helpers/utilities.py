@@ -13,7 +13,7 @@ def translate_viewmode(viewmode):
         viewmode (int): PDFium view mode integer.
     
     Returns:
-        :class:`ViewMode`
+        :class:`.ViewMode`
     """
     
     if viewmode == pdfium.PDFDEST_VIEW_UNKNOWN_MODE:
