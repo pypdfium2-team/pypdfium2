@@ -23,6 +23,7 @@ from platform_setup.packaging_base import (
     call_ctypesgen,
 )
 
+
 ReleaseRepo = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseExtension = "tgz"
@@ -36,6 +37,7 @@ ReleaseNames = {
     PlatformNames.windows_x86   : 'pdfium-win-x86',
     PlatformNames.windows_arm64 : 'pdfium-win-arm64',
 }
+
 
 def _set_versions(*versions_list):
     
