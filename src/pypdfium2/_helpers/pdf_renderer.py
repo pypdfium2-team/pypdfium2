@@ -58,7 +58,7 @@ def render_pdf(
     Parameters:
         input_obj (str | bytes | typing.BinaryIO):
             The PDF document to render. It may be given as file path, bytes, or byte buffer.
-        page_indices (Sequence[int]):
+        page_indices (typing.Sequence[int]):
             A list of zero-based page indices to render.
         colour (int | typing.Sequence[int] | None):
             The background colour to use, as a hexadecimal integer in 32-bit ARGB format.
