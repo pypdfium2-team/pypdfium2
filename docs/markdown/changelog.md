@@ -18,6 +18,8 @@
     group in `extras_require`.
   * Explicitly blacklisted Python 3.7.6 and 3.8.1 as incompatible due to a regression in CPython
     that broke ctypesgen-created string handling code.
+- Started moving type hints from code into docstrings. This makes the function headers easier
+  to read and would help running the library with older versions of Python.
 
 
 ## 0.14.0 (2022-02-21)
