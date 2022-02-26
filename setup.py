@@ -66,8 +66,7 @@ def install_handler():
             file_handle.write('PreSetupDone')
     
     W_Presetup = check_presetup()
-    if W_Presetup:
-        check_deps.main()
+    if W_Presetup: check_deps.main()
     
     
     from platform_setup import build_pdfium, update_pdfium
@@ -92,8 +91,7 @@ def install_handler():
     
     
     def _setup(pl_name):
-        if W_Presetup:
-            update_pdfium.main( [basename(pl_name)] )
+        if W_Presetup: update_pdfium.main( [basename(pl_name)] )
         mkwheel(pl_name)
     
     
@@ -117,8 +115,7 @@ def install_handler():
         _setup(PlatformNames.windows_x86)
     else:
         # Platform without pre-built binaries - try a regular sourcebuild
-        if W_Presetup:
-            build_pdfium.main()
+        if W_Presetup: build_pdfium.main()
         mkwheel(PlatformNames.sourcebuild)
     
     presetup_done()
@@ -127,8 +124,7 @@ def install_handler():
 def main():
     include_platform_setup()
     cont = packaging_handler()
-    if cont:
-        install_handler()
+    if cont: install_handler()
 
 
 if __name__ == '__main__':
