@@ -20,7 +20,7 @@ This document is intended to outline the steps required to support a new platfor
   Please see related Python documentation, look at the release files of other projects on PyPI that
   support this platform, or ask at `discuss.python.org` if you cannot determine the tag.
   To the author's knowledge, there is no comprehensive list of all possible wheel tags, unfortunately.
-* In `setup.py`, modify `install_handler()`: Add a function to `PlatformManager` to recognise host
+* In `setup.py`, modify `install_handler()`: Add a function to the `HostPlatform` class to recognise
   systems of the platform in question, then add the check to the `if/elif` tree.
 * In `utilities/setup_all.sh`, insert the new platform identifier into the `whl_targets` array.
 * Test your changes:
