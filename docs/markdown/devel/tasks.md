@@ -16,4 +16,4 @@ Tasks
 * Set the version appropriately when doing a source build (i. e. append current PDFium commit hash to version string).
 * Sourcebuild: regroup patches to be operating system specific.
 * Look into setting up Github Actions CI.
-* Ask Linux distributors to package PDFium, as this could greatly simplify the installation of PyPDFium2 for many users. Since most distributions are already compiling PDFium for their Chromium package anyway, it should be feasible to build PDFium as a dynamically linked library and add a development package containing the header files. We could then add a custom setup file that will create bindings using the system-provided PDFium headers.
+* Ask Linux distributors to package PDFium, as this could greatly simplify the installation of PyPDFium2 for many users. Since most distributions are already compiling PDFium for their Chromium package anyway, it should be feasible to build PDFium as a dynamically linked library and add a development package containing the header files. To prepare, we should add means to plug in PDFium headers from an arbitrary location using a custom setup environment variable (PDFIUM_INCLUDE_DIR or something).
