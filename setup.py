@@ -24,7 +24,7 @@ def include_platform_setup():
     sys.modules[mod_name] = importlib.util.module_from_spec(spec)
 
 
-def packaging_handler():    
+def packaging_handler():
     
     target = os.environ.get('PYP_TARGET_PLATFORM', None)
     if target in (None, 'auto'):
