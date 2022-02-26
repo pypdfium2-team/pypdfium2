@@ -9,10 +9,7 @@ def _get_box(page, box_function, fallback_function):
     
     left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
     
-    ret_code = box_function(
-        page,
-        byref(left), byref(bottom), byref(right), byref(top),
-    )
+    ret_code = box_function(page, byref(left), byref(bottom), byref(right), byref(top))
     if not ret_code:
         return fallback_function(page)
     
