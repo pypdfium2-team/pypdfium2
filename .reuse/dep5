@@ -59,24 +59,23 @@ Comment:
     Derived from: https://github.com/cfcurtis/pdfstitcher/blob/main/resources/testdoc.pdf
     No individual license stated for this data file. Project license is MPL-2.0.
 
-Files: sourcebuild/patches/gclient_scm.patch
-       sourcebuild/patches/public_headers.patch
-       sourcebuild/patches/rc_compiler.patch
-       sourcebuild/patches/resources.rc
-       sourcebuild/patches/shared_library.patch
-       sourcebuild/patches/widestring.patch
+Files: sourcebuild/patches/pdfium/public_headers.patch
+       sourcebuild/patches/pdfium/shared_library.patch
+       sourcebuild/patches/pdfium/win/build.patch
+       sourcebuild/patches/pdfium/win/pdfium.patch
+       sourcebuild/patches/pdfium/win/resources.rc
 Copyright: 2021 Benoît Blanchon
 License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches
     For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
 
-Files: sourcebuild/patches/gclient_scm.patch
+Files: sourcebuild/patches/depottools/gclient_scm.patch
 Copyright: 2021 BoLaMN
 License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/pull/39
 
-Files: sourcebuild/patches/nativebuild.patch
-Copyright: 2022 geisserml
+Files: sourcebuild/patches/pdfium/nativebuild.patch
+Copyright: 2022 geisserml <geisserml@gmail.com>
 License: BSD-3-Clause OR Apache-2.0
