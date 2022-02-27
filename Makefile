@@ -20,6 +20,7 @@ setup-all:
 release:
 	bash ./utilities/release.sh
 
+.PHONY: build
 build:
 	bash ./utilities/build.sh
 
