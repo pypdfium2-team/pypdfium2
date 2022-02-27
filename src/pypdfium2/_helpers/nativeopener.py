@@ -118,7 +118,7 @@ def open_pdf_buffer(buffer, password=None):
 
 
 def open_pdf_native(filepath, password=None):
-    """    
+    """
     Open a PDF document from a file path, managing all file access natively in Python using
     :func:`.open_pdf_buffer`, without having to load the whole file into memory at once.
     This ensures independence from file access in PDFium, which used to have issues with

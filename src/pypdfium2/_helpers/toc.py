@@ -99,7 +99,6 @@ def get_toc(
         max_depth = 15
     
     if level >= max_depth:
-        #logger.warning("Maximum recursion depth reached.")
         return []
     
     bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, parent)

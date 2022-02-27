@@ -85,7 +85,7 @@ def handle_versions(latest_version):
             ('V_MINOR', v_minor, v_minor+1),
             ('V_LIBPDFIUM', v_libpdfium, latest_version),
         )
-        
+    
     else:
         print("No new PDFium build - will re-create bindings without incrementing version")
 
@@ -230,9 +230,7 @@ def parse_args(argv):
 
 def run_cli(argv=sys.argv[1:]):
     args = parse_args(argv)
-    return main(
-        platforms = args.platforms,
-    )
+    return main(args.platforms)
 
 
 if __name__ == '__main__':

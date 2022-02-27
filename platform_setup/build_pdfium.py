@@ -116,7 +116,7 @@ def dl_pdfium(do_sync, GClient):
         run_cmd('"{}" sync --no-history --shallow'.format(GClient), cwd=SB_Dir)
     
     return is_update
-    
+
 
 def _apply_patchset(patchset, cwd):
     for patch in patchset:

@@ -99,10 +99,10 @@ def open_pdf_auto(input_obj, password=None):
             pdf = pdfium.FPDF_LoadDocument(input_obj, password)
             if pdfium.FPDF_GetPageCount(pdf) < 1:
                 handle_pdfium_error(False)
-        
+    
     elif is_buffer(input_obj):
         pdf, ld_data = open_pdf_buffer(input_obj, password)
-        
+    
     else:
         raise ValueError(
             "Input must be a file path, bytes or a byte buffer, but it is {}.".format( type(input_obj) )
