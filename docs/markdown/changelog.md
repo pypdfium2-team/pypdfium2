@@ -10,9 +10,10 @@
 - Improved build and update scripts:
   * Enhanced Python API accessibility so that the main functions can now be invoked directly,
     without the need for argparse.
-  * Modified commands to ensure that paths or links are properly wrapped in double quotes.
   * Simplified code related to platform names and corresponding data directories to achieve
     more flexibility and reduce complexity.
+  * Modified commands to ensure that paths or links are properly wrapped in double quotes.
+  * Regrouped patches to be operating system specific.
 - Updated setup configuration:
   * We are now using `setup_requires` for setup dependencies, rather than a custom `build`
     group in `extras_require`.

@@ -30,9 +30,25 @@ DepotToolsDir  = join(SB_Dir,'depot_tools')
 PDFiumDir      = join(SB_Dir,'pdfium')
 PDFiumBuildDir = join(PDFiumDir,'out','Default')
 OutputDir      = join(DataTree, PlatformNames.sourcebuild)
+NB_BinaryDir   = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin')
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
+
+DepotPatches = [
+    (join(PatchDir,'depottools','gclient_scm.patch'), DepotToolsDir),
+]
+PdfiumMainPatches = [
+    (join(PatchDir,'pdfium','public_headers.patch'), PDFiumDir),
+    (join(PatchDir,'pdfium','shared_library.patch'), PDFiumDir),
+]
+PdfiumWinPatches = [
+    (join(PatchDir,'pdfium','win','pdfium.patch'), PDFiumDir),
+    (join(PatchDir,'pdfium','win','build.patch'), join(PDFiumDir,'build')),
+]
+PdfiumNativebuildPatches = [
+    (join(PatchDir,'pdfium','nativebuild.patch'), join(PDFiumDir,'build')),
+]
 
 DefaultConfig = [
     'is_debug = false',
@@ -50,23 +66,7 @@ elif sys.platform.startswith('darwin'):
     DefaultConfig += [ 'mac_deployment_target = "10.11.0"' ]
 
 NativeBuildConfig = DefaultConfig.copy()
-NativeBuildConfig += [
-'clang_use_chrome_plugins = false',
-#'init_stack_vars = false',
-]
-
-PdfiumPatches = [
-    join(PatchDir,'public_headers.patch'),
-    join(PatchDir,'rc_compiler.patch'),
-    join(PatchDir,'shared_library.patch'),
-    join(PatchDir,'widestring.patch'),
-]
-
-DepotPatches = [
-    join(PatchDir,'gclient_scm.patch'),
-]
-
-NB_BinaryDir = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin')
+NativeBuildConfig += [ 'clang_use_chrome_plugins = false' ]
 
 
 def dl_depottools(do_sync):
@@ -118,18 +118,6 @@ def dl_pdfium(do_sync, GClient):
     return is_update
 
 
-def _apply_patchset(patchset, cwd):
-    for patch in patchset:
-        run_cmd('git apply -v "{}"'.format(patch), cwd=cwd)
-
-def patch_depottools():
-    _apply_patchset(DepotPatches, DepotToolsDir)
-
-def patch_pdfium():
-    _apply_patchset(PdfiumPatches, PDFiumDir)
-    shutil.copy(join(PatchDir,'resources.rc'), join(PDFiumDir,'resources.rc'))
-
-
 def _bins_to_symlinks():
     
     binary_names = os.listdir(NB_BinaryDir)
@@ -150,12 +138,29 @@ def _bins_to_symlinks():
         os.symlink(replacement, binary_path)
 
 
-def extra_patch_pdfium():
+def _apply_patchset(patchset):
+    for patch, cwd in patchset:
+        run_cmd('git apply -v "{}"'.format(patch), cwd=cwd)
+
+
+def patch_depottools():
+    _apply_patchset(DepotPatches)
+
+
+def patch_pdfium(b_nativebuild):
     
-    patch = join(PatchDir,'nativebuild.patch')
-    run_cmd('git apply -v "{}"'.format(patch), cwd=join(PDFiumDir,'build'))
+    _apply_patchset(PdfiumMainPatches)
     
-    _bins_to_symlinks()
+    if sys.platform.startswith('win32'):
+        _apply_patchset(PdfiumWinPatches)
+        shutil.copy(
+            join(PatchDir,'pdfium','win','resources.rc'),
+            join(PDFiumDir,'resources.rc'),
+        )
+    
+    if b_nativebuild:
+        _apply_patchset(PdfiumNativebuildPatches)
+        _bins_to_symlinks()
 
 
 def configure(config, GN):
@@ -247,7 +252,7 @@ def main(
     if b_nativebuild:
         print("Using system-provided binaries if available.")
     else:
-        print("Using DepotTools-provided binaries.")
+        print("Using binaries of the PDFium toolchain.")
     
     if b_checkdeps:
         check_deps.main(b_nativebuild)    
@@ -282,9 +287,7 @@ def main(
     pdfium_dl_done = dl_pdfium(b_update, GClient)
     
     if pdfium_dl_done:
-        patch_pdfium()
-    if b_nativebuild:
-        extra_patch_pdfium()
+        patch_pdfium(b_nativebuild)
     
     configure(config_str, GN)
     build(Ninja)

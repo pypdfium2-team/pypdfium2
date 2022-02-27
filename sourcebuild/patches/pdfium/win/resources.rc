@@ -7,13 +7,13 @@ BEGIN
         BLOCK "040904E4"
         BEGIN
             VALUE "CompanyName",      "Google Inc."
-            VALUE "FileDescription",  "PDFium (compiled by github.com/pypdfium2-team)"
+            VALUE "FileDescription",  "PDFium"
             VALUE "FileVersion",      "$VERSION"
             VALUE "InternalName",     "pdfium"
             VALUE "OriginalFilename", "pdfium.dll"
             VALUE "ProductName",      "pdfium"
             VALUE "ProductVersion",   "$VERSION"
-            VALUE "LegalCopyright",   "Copyright 2021 PDFium Authors."
+            VALUE "LegalCopyright",   "Copyright 2022 PDFium Authors."
         END
     END
 
