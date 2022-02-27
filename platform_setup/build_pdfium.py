@@ -118,7 +118,16 @@ def dl_pdfium(do_sync, GClient):
     return is_update
 
 
-def _bins_to_symlinks():
+def _apply_patchset(patchset):
+    for patch, cwd in patchset:
+        run_cmd('git apply -v "{}"'.format(patch), cwd=cwd)
+
+
+def patch_depottools():
+    _apply_patchset(DepotPatches)
+
+
+def _replace_binaries():
     
     binary_names = os.listdir(NB_BinaryDir)
     
@@ -138,16 +147,7 @@ def _bins_to_symlinks():
         os.symlink(replacement, binary_path)
 
 
-def _apply_patchset(patchset):
-    for patch, cwd in patchset:
-        run_cmd('git apply -v "{}"'.format(patch), cwd=cwd)
-
-
-def patch_depottools():
-    _apply_patchset(DepotPatches)
-
-
-def patch_pdfium(b_nativebuild):
+def patch_pdfium():
     
     _apply_patchset(PdfiumMainPatches)
     
@@ -157,10 +157,11 @@ def patch_pdfium(b_nativebuild):
             join(PatchDir,'pdfium','win','resources.rc'),
             join(PDFiumDir,'resources.rc'),
         )
-    
-    if b_nativebuild:
-        _apply_patchset(PdfiumNativebuildPatches)
-        _bins_to_symlinks()
+
+
+def patch_pdfium_nativebuild():
+    _apply_patchset(PdfiumNativebuildPatches)
+    _replace_binaries()
 
 
 def configure(config, GN):
@@ -250,12 +251,12 @@ def main(
         b_destname = 'pdfium'
     
     if b_nativebuild:
-        print("Using system-provided binaries if available.")
+        print("Using binaries provided by the system, if available.")
     else:
-        print("Using binaries of the PDFium toolchain.")
+        print("Using binaries provided by the PDFium toolchain.")
     
     if b_checkdeps:
-        check_deps.main(b_nativebuild)    
+        check_deps.main(b_nativebuild)
     
     GClient = join(DepotToolsDir,'gclient')
     GN    = _get_tool('gn', 'generate-ninja', b_nativebuild)
@@ -287,7 +288,9 @@ def main(
     pdfium_dl_done = dl_pdfium(b_update, GClient)
     
     if pdfium_dl_done:
-        patch_pdfium(b_nativebuild)
+        patch_pdfium()
+    if b_nativebuild:
+        patch_pdfium_nativebuild()
     
     configure(config_str, GN)
     build(Ninja)
