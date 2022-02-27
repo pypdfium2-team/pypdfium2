@@ -91,10 +91,8 @@ def dl_depottools(do_sync):
             cwd = SB_Dir
         )
     
-    if sys.platform.startswith('win32'):
-        os.environ['PATH'] += ";" + DepotToolsDir
-    else:
-        os.environ['PATH'] += ":" + DepotToolsDir
+    sep = ';' if sys.platform.startswith('win32') else ':'
+    os.environ['PATH'] += sep + DepotToolsDir
     
     return is_update
 
