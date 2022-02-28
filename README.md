@@ -280,7 +280,7 @@ If your issue is caused by the bindings generator, refer to the
 ### Incompatibility with CPython 3.7.6 and 3.8.1
 
 PyPDFium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a
-[regression in CPython](https://github.com/python/cpython/pull/16799#issuecomment-612353119)
+[regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119)
 that broke ctypesgen-created string handling code.
 
 ### Non-ascii file paths on Windows
