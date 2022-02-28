@@ -5,14 +5,10 @@
 # Attempt to build PDFium from source. This may take very long.
 
 import os
-from os.path import (
-    join,
-    abspath,
-    basename,
-)
 import sys
 import shutil
 import argparse
+from os.path import join
 
 from platform_setup import check_deps
 from platform_setup.packaging_base import (
@@ -206,7 +202,7 @@ def pack(src_libpath, destname=None):
     os.makedirs(OutputDir)
     
     if destname is None:
-        destname = basename(src_libpath)
+        destname = os.path.basename(src_libpath)
     
     destpath = join(OutputDir, destname)
     shutil.copy(src_libpath, destpath)
@@ -262,10 +258,9 @@ def main(
     
     if b_argfile is None:
         
+        config_list = DefaultConfig
         if b_nativebuild:
             config_list = NativeBuildConfig
-        else:
-            config_list = DefaultConfig
         
         config_str = ""
         sep = ''
@@ -274,7 +269,7 @@ def main(
             sep = '\n'
         
     else:
-        with open(abspath(b_argfile), 'r') as file_handle:
+        with open(os.path.abspath(b_argfile), 'r') as file_handle:
             config_str = file_handle.read()
     
     print("\nBuild configuration:\n{}\n".format(config_str))
