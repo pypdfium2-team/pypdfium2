@@ -72,9 +72,17 @@ def _hex_digits(c):
 
 def colour_as_hex(r, g, b, a=255):
     """
-    Convert a colour given as integers of ``red, green, blue, alpha`` ranging from 0 to 255
+    Convert a colour given as values of red, green, blue, and alpha ranging from 0 to 255
     to a single integer in 32-bit ARGB format.
+    
+    Returns:
+        int, bool – The colour integer, and a logical value that is :data:`True` if an alpha
+        channel is needed, or :data:`False` if it is not needed.
     """
+    
+    use_alpha = True
+    if a == 255:
+        use_alpha = False
     
     colours = (a, r, g, b)
     for c in colours:
@@ -86,4 +94,4 @@ def colour_as_hex(r, g, b, a=255):
     
     hxc_int = int(hxc_str, 0)
     
-    return hxc_int
+    return hxc_int, use_alpha

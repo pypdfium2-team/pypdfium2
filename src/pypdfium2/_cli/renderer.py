@@ -19,13 +19,22 @@ def rotation_type(string):
     return rotation
 
 def colour_type(string):
+    
     if string.lower() == 'none':
         return None
+    
     else:
-        evaluated = ast.literal_eval(string)
-        if not isinstance(evaluated, (int, tuple, list)):
-            raise ValueError("Invalid colour value {}".format(evaluated))
-        return evaluated
+        
+        colour = ast.literal_eval(string)
+        
+        if not isinstance(colour, (tuple, list)):
+            raise ValueError( "Invalid colour type {}. Must be list or tuple.".format(type(colour)) )
+        if not len(colour) in (3, 4):
+            raise ValueError("Invalid number of colour values. Must be 3 or 4.")
+        if not all(isinstance(val, int) and 0 <= val <= 255 for val in colour):
+            raise ValueError("Colour values must be integers ranging from 0 to 255.")
+        
+        return colour
 
 
 def pagetext_type(value):
@@ -103,10 +112,11 @@ def parse_args(argv, prog, desc):
     )
     parser.add_argument(
         '--colour',
-        default = 0xFFFFFFFF,
+        default = (255, 255, 255, 255),
         type = colour_type,
-        help = ("Page background colour as 32-bit ARGB hex string, or as tuple of integers "
-                "from 0 to 255. Use 'none' for alpha background. Defaults to white (255, 255, 255)."),
+        help = ("Page background colour. Defaults to white. It can be given in RGBA format as a "
+                "sequence of integers ranging from 0 to 255, or it may be 'none' for transparent "
+                "background.")
     )
     parser.add_argument(
         '--no-annotations',
