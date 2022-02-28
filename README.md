@@ -42,7 +42,7 @@ make build
 
 In case building failed, you could try
 ```bash
-python3 platform_setup/build_pdfium.py -p --check-deps
+python3 platform_setup/build_pdfium.py --nativebuild --check-deps
 PYP_TARGET_PLATFORM="sourcebuild" python3 -m pip install . -v --no-build-isolation
 ```
 to prefer the use of system-provided build tools over the toolchain PDFium ships with. The problem is
