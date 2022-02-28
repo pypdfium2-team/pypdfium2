@@ -51,6 +51,7 @@ DefaultConfig = [
     'pdf_is_standalone = true',
     'pdf_enable_v8 = false',
     'pdf_enable_xfa = false',
+    'pdf_use_skia = false',
     'treat_warnings_as_errors = false',
 ]
 
