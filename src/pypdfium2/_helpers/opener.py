@@ -3,8 +3,6 @@
 
 import io
 import sys
-import warnings
-from os.path import abspath
 
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.nativeopener import (
@@ -127,43 +125,3 @@ def close_pdf(pdf, loader_data=None):
     pdfium.FPDF_CloseDocument(pdf)
     if loader_data is not None:
         loader_data.close()
-
-
-
-def open_pdf(input_obj, password=None):
-    """
-    This function is deprecated and scheduled for removal.
-    Please use :func:`.open_pdf_auto` or :class:`.PdfDocument` instead.
-    """
-    
-    warnings.warn(
-        "open_pdf() is scheduled for removal - please use open_pdf_auto() instead.",
-        DeprecationWarning
-    )
-    
-    filepath = None
-    data = None
-    
-    if isinstance(input_obj, str):
-        filepath = abspath(input_obj)
-    elif isinstance(input_obj, bytes):
-        data = input_obj
-    elif callable(getattr(input_obj, 'read', None)):
-        data = input_obj.read()
-    else:
-        raise ValueError(
-            "Input must be a file path, bytes or a byte buffer, but it is {}.".format( type(input_obj) )
-        )
-    
-    if (filepath is not None) and (data is None):
-        pdf = pdfium.FPDF_LoadDocument(filepath, password)
-    elif (data is not None) and (filepath is None):
-        pdf = pdfium.FPDF_LoadMemDocument(data, len(data), password)
-    else:
-        assert False
-    
-    page_count = pdfium.FPDF_GetPageCount(pdf)
-    if page_count < 1:
-        handle_pdfium_error(False)
-    
-    return pdf

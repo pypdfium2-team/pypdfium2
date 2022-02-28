@@ -3,7 +3,6 @@
 
 import ctypes
 import logging
-import warnings
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.utilities import translate_viewmode
 
@@ -126,26 +125,3 @@ def get_toc(
         )
         
         bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
-
-
-def print_toc(toc):
-    """
-    This function is deprecated and scheduled for removal.
-    Please use custom code to print the table of contents.
-    """
-    
-    warnings.warn(
-        "print_toc() is scheduled for removal - please use custom code instead.",
-        DeprecationWarning
-    )
-    
-    for item in toc:
-        print(
-            '    ' * item.level +
-            "{} -> {}  # {} {}".format(
-                item.title,
-                item.page_index + 1,
-                item.view_mode,
-                item.view_pos,
-            )
-        )
