@@ -27,11 +27,9 @@ NB_SysCommands = (
 
 
 def _pip_install(pkg):
-    
     exe = sys.executable
     if not exe:
         exe = "python3"
-    
     run_cmd('"{}" -m pip install "{}"'.format(exe, pkg), cwd=None)
 
 
@@ -49,17 +47,18 @@ def install_pydeps():
 
 def check_sysdeps(sys_commands):
     
+    missing = []
+    found = []
+    
     for dep_name in sys_commands:
-        
-        dep_binary = shutil.which(dep_name)
-        
-        if dep_binary is None:
-            print(
-                "Missing system dependency: {} - please install it using your package manager.".format(dep_name),
-                file = sys.stderr,
-            )
+        if shutil.which(dep_name):
+            found.append(dep_name)
         else:
-            print("Found installation of system dependency {}".format(dep_name))
+            missing.append(dep_name)
+    
+    print( "Found system dependencies: {}".format(found) )
+    if len(missing) > 0:
+        print( "Missing system dependencies: {}".format(missing) )
 
 
 def main(prefer_st=False):
