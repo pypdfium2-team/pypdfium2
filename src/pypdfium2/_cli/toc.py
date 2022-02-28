@@ -22,21 +22,17 @@ def parse_args(argv, prog, desc):
     )
     return parser.parse_args(argv)
 
-
-def print_bookmark(item):
-    print(
-        '    ' * item.level +
-        "{} -> {}  # {} {}".format(
-            item.title,
-            item.page_index + 1,
-            item.view_mode,
-            item.view_pos,
-        )
-    )
-
 def print_toc(toc):
     for item in toc:
-        print_bookmark(item)
+        print(
+            '    ' * item.level +
+            "{} -> {}  # {} {}".format(
+                item.title,
+                item.page_index + 1,
+                item.view_mode,
+                item.view_pos,
+            )
+        )
 
 
 def main(argv, prog, desc):
