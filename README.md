@@ -286,7 +286,7 @@ that broke ctypesgen-created string handling code.
 ### Non-ascii file paths on Windows
 
 On Windows, the `FPDF_LoadDocument()` function of PDFium used not to be able to open documents with file paths containing multi-byte, non-ascii characters (see [Bug 682](https://bugs.chromium.org/p/pdfium/issues/detail?id=682)).
-A [patch](https://pdfium-review.googlesource.com/c/pdfium/+/90693/) has been merged that is supposed to fix the issue, but is not sufficiently tested yet.
+A [patch](https://pdfium-review.googlesource.com/c/pdfium/+/90693/) has been merged that is supposed to fix the issue, but it is not sufficiently tested yet.
 
 The support model of PyPDFium2 implements a workaround using `FPDF_LoadCustomDocument()` to be able to process non-ascii filepaths on Windows anyway.
 
