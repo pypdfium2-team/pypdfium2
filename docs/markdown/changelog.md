@@ -4,9 +4,9 @@
 # Changelog
 
 
-## 0.15.0 (unreleased, scheduled for 2022-02-28)
+## 0.15.0 (2022-02-28)
 
-- Updated PDFium from `4901` to `xxxx`.
+- Updated PDFium from `4901` to `4915`.
 - Improved build and update scripts:
   * Enhanced Python API accessibility so that the main functions can now be invoked directly,
     without the need for argparse.
