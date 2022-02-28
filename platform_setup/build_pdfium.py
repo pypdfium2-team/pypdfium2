@@ -321,13 +321,13 @@ def parse_args(argv):
         help = "Update existing PDFium/DepotTools repositories, removing local changes.",
     )
     parser.add_argument(
-        '--check-deps',
+        '--check-deps', '-c',
         action = 'store_true',
         help = "Check that all required dependencies are installed. (Automatically installs " +
                "missing Python packages, complains about missing system dependencies.)",
     )
     parser.add_argument(
-        '--prefer-systools', '-p',
+        '--nativebuild', '-n',
         action = 'store_true',
         help = "Try to use system-provided tools if available, rather than pre-built binaries "   +
                "from DepotTools. Warning: This may or may not work, and should only be used as "  +
@@ -346,7 +346,7 @@ def run_cli(argv=sys.argv[1:]):
         b_destname = args.destname,
         b_update = args.update,
         b_checkdeps = args.check_deps,
-        b_nativebuild = args.prefer_systools,
+        b_nativebuild = args.nativebuild,
     )
     
 
