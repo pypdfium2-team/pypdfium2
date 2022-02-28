@@ -4,6 +4,4 @@
 Planned Changes
 ===============
 
-The following API-breaking changes are planned or in consideration:
-
-* In `render_page()` and `render_pdf()`, only accept tuples for the colour argument, not hexadecimal integers.
+At the moment, no API breaking changes are planned.

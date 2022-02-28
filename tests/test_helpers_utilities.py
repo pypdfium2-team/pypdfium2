@@ -22,14 +22,13 @@ def test_translate_rotation(test_input, expected):
 @pytest.mark.parametrize(
     "values, expected",
     [
-        ((255, 255, 255, 255), 0xFFFFFFFF),
-        ((255, 255, 255), 0xFFFFFFFF),
-        ((0, 255, 255, 255), 0xFF00FFFF),
-        ((255, 0, 255, 255), 0xFFFF00FF),
-        ((255, 255, 0, 255), 0xFFFFFF00),
-        ((255, 255, 255, 0), 0x00FFFFFF),
+        ((255, 255, 255, 255), (0xFFFFFFFF, False)),
+        ((255, 255, 255), (0xFFFFFFFF, False)),
+        ((0, 255, 255, 255), (0xFF00FFFF, False)),
+        ((255, 0, 255, 255), (0xFFFF00FF, False)),
+        ((255, 255, 0, 255), (0xFFFFFF00, False)),
+        ((255, 255, 255, 0), (0x00FFFFFF, True)),
     ]
 )
 def test_colour_to_hex(values, expected):
-    colour_int = pdfium.colour_as_hex(*values)
-    assert colour_int == expected
+    assert pdfium.colour_as_hex(*values) == expected

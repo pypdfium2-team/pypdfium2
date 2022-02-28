@@ -6,7 +6,6 @@ import concurrent.futures
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.opener import PdfContext
 from pypdfium2._helpers.constants import OptimiseMode
-from pypdfium2._helpers.utilities import colour_as_hex
 from pypdfium2._helpers.page_renderer import render_page
 
 
@@ -47,7 +46,7 @@ def render_pdf(
         n_processes = os.cpu_count(),
         scale = 1,
         rotation = 0,
-        colour = 0xFFFFFFFF,
+        colour = (255, 255, 255, 255),
         annotations = True,
         greyscale = False,
         optimise_mode = OptimiseMode.none,
@@ -60,10 +59,6 @@ def render_pdf(
             The PDF document to render. It may be given as file path, bytes, or byte buffer.
         page_indices (typing.Sequence[int]):
             A list of zero-based page indices to render.
-        colour (int | typing.Sequence[int] | None):
-            The background colour to use, as a hexadecimal integer in 32-bit ARGB format.
-            It is also possible to provide a colour tuple, which is implicitly converted
-            using :func:`.colour_as_hex`.
     
     The other parameters are the same as for :func:`.render_page`.
     
@@ -71,10 +66,10 @@ def render_pdf(
         A PIL image, and a string for serial enumeration of output files.
     """
     
-    if isinstance(colour, (tuple, list)):
-        if len(colour) not in (3, 4):
-            raise ValueError("If colour is given as a sequence, it must have length 3 or 4.")
-        colour = colour_as_hex(*colour)
+    if not len(colour) in (3, 4):
+        raise ValueError("Invalid number of colour values. Must be 3 or 4.")
+    if not all(isinstance(val, int) and 0 <= val <= 255 for val in colour):
+        raise ValueError("Colour values must be integers ranging from 0 to 255.")
     
     with PdfContext(input_obj, password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)

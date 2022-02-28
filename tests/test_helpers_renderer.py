@@ -188,7 +188,7 @@ def test_render_bgcolour(colour):
     with pdfium.PdfContext(TestFiles.render) as pdf:
         pil_image = pdfium.render_page(
             pdf, 0,
-            colour = pdfium.colour_as_hex(*colour),
+            colour = colour,
         )
     
     px_colour = colour

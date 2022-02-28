@@ -33,8 +33,6 @@ def test_rotation_type_fail_oob():
     [
         ("None", None),
         ("none", None),
-        ("10", 10),
-        ("0xFFFFFFFF", 0xFFFFFFFF),
     ],
 )
 def test_colour_type(test_input, expected):
@@ -63,7 +61,7 @@ def test_parse_args():
         '--pages', '1,4,5-7,6-4',
         '--scale', '2',
         '--rotation', '90',
-        '--colour', '0xFFFFFFFF',
+        '--colour', '(255, 255, 255, 255)',
         '--optimise-mode', 'none',
         '--processes', '4',
     ]
@@ -75,7 +73,7 @@ def test_parse_args():
     assert args.pages == [0, 3, 4, 5, 6, 5, 4, 3]
     assert args.scale == 2
     assert args.rotation == 90
-    assert args.colour == 0xFFFFFFFF
+    assert args.colour == (255, 255, 255, 255)
     assert args.no_annotations == False
     assert args.optimise_mode == pdfium.OptimiseMode.none
     assert args.greyscale == False
