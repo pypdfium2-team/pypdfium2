@@ -90,6 +90,7 @@ def render_page(
         fpdf_colour, use_alpha = colour_as_hex(*colour)
     
     px_target, px_source, px_pdfium = _get_pixel_fmt(use_alpha, greyscale)
+    n_px_values = len(px_source)
     
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
@@ -114,7 +115,7 @@ def render_page(
         height,
         px_pdfium,
         None,
-        width * len(px_source),
+        width * n_px_values,
     )
     if fpdf_colour is not None:
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, fpdf_colour)
@@ -148,7 +149,7 @@ def render_page(
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
     cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
-    buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+    buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * n_px_values)))
     
     pil_image = Image.frombuffer(px_target, (width, height), buffer.contents, "raw", px_source, 0, 1)
     
