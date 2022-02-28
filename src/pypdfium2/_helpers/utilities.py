@@ -46,7 +46,7 @@ def translate_rotation(rotation):
         rotation (int): Rotation value in degrees (0, 90, 180, 270).
     
     Returns:
-        int - A PDFium rotation constant (0, 1, 2, 3).
+        int – A PDFium rotation constant (0, 1, 2, 3).
     """
     
     if rotation == 0:
