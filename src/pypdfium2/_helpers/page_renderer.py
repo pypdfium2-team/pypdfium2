@@ -6,19 +6,10 @@ import ctypes
 from PIL import Image
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.constants import OptimiseMode
-from pypdfium2._helpers.utilities import translate_rotation
-
-
-def _get_use_alpha(colour):
-    
-    use_alpha = True
-    
-    if colour is not None:
-        alpha_val = hex(colour)[2:4].upper()
-        if alpha_val == 'FF':
-            use_alpha = False
-    
-    return use_alpha
+from pypdfium2._helpers.utilities import (
+    colour_as_hex,
+    translate_rotation,
+)
 
 
 def _get_pixel_fmt(use_alpha, greyscale):
@@ -39,7 +30,7 @@ def render_page(
         page_index = 0,
         scale = 1,
         rotation = 0,
-        colour = 0xFFFFFFFF,
+        colour = (255, 255, 255, 255),
         annotations = True,
         greyscale = False,
         optimise_mode = OptimiseMode.none,
@@ -72,12 +63,13 @@ def render_page(
         rotation (int):
             Rotate the page by 90, 180, or 270 degrees. Value 0 means no rotation.
         
-        colour (int):
-            
-            .. _8888 ARGB: https://en.wikipedia.org/wiki/RGBA_color_model#ARGB32
-            
-            The background colour to use, given as a hexadecimal integer in `8888 ARGB`_ format.
-            Defaults to white (``0xFFFFFFFF``). See also :func:`.colour_as_hex`.
+        colour (None | typing.Tuple[int, int, int, Optional[int]]):
+            Page background colour. Defaults to white.
+            It can either be :data:`None`, or values of red, green, blue, and alpha ranging from 0 to 255.
+            If :data:`None`, the bitmap will not be filled with a colour, resulting in transparent
+            background.
+            For RGB, 0 will include nothing of the colour in question, while 255 will completely
+            include it. For Alpha, 0 means full transparency, while 255 means no transparency.
         
         annotations (bool):
             Whether to render page annotations.
@@ -92,14 +84,18 @@ def render_page(
         :class:`PIL.Image.Image`
     """
     
+    if colour is None:
+        fpdf_colour, use_alpha = None, True
+    else:
+        fpdf_colour, use_alpha = colour_as_hex(*colour)
+    
+    px_target, px_source, px_pdfium = _get_pixel_fmt(use_alpha, greyscale)
+    
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
         raise IndexError(
             "Page index {} is out of bounds for document with {} pages.".format(page_index, page_count)
         )
-    
-    use_alpha = _get_use_alpha(colour)
-    px_target, px_source, px_pdfium = _get_pixel_fmt(use_alpha, greyscale)
     
     form_config = pdfium.FPDF_FORMFILLINFO(2)
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
@@ -120,8 +116,8 @@ def render_page(
         None,
         width * len(px_source),
     )
-    if colour is not None:
-        pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, colour)
+    if fpdf_colour is not None:
+        pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, fpdf_colour)
     
     render_flags = 0x00
     

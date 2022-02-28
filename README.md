@@ -114,7 +114,7 @@ with pdfium.PdfContext(filename) as pdf:
         page_index = 0,
         scale = 1,
         rotation = 0,
-        colour = 0xFFFFFFFF,
+        colour = (255, 255, 255, 255),
         annotations = True,
         greyscale = False,
         optimise_mode = pdfium.OptimiseMode.none,

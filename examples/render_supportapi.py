@@ -24,7 +24,7 @@ if __name__ == '__main__':
         page_indices = page_indices,
         scale = 1,
         rotation = 0,
-        colour = 0xFFFFFFFF,
+        colour = (255, 255, 255, 255),
         annotations = True,
         greyscale = False,
         optimise_mode = pdfium.OptimiseMode.none,
