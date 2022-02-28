@@ -66,6 +66,11 @@ def render_pdf(
         A PIL image, and a string for serial enumeration of output files.
     """
     
+    if not len(colour) in (3, 4):
+        raise ValueError("Invalid number of colour values. Must be 3 or 4.")
+    if not all(isinstance(val, int) and 0 <= val <= 255 for val in colour):
+        raise ValueError("Colour values must be integers ranging from 0 to 255.")
+    
     with PdfContext(input_obj, password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
     n_digits = len(str(n_pages))
