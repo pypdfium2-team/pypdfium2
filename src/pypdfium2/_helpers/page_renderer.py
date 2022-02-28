@@ -63,7 +63,7 @@ def render_page(
         rotation (int):
             Rotate the page by 90, 180, or 270 degrees. Value 0 means no rotation.
         
-        colour (None | typing.Tuple[int, int, int, Optional[int]]):
+        colour (None | typing.Tuple[int, int, int, typing.Optional[int]]):
             Page background colour. Defaults to white.
             It can either be :data:`None`, or values of red, green, blue, and alpha ranging from 0 to 255.
             If :data:`None`, the bitmap will not be filled with a colour, resulting in transparent
