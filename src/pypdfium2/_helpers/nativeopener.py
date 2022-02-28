@@ -47,8 +47,7 @@ class LoaderData:
         file_handle:
             File buffer that implements the ``close()`` method.
         reader_instance:
-            The callable object for file access (a :class:`._reader_class` instance
-            wrapped with the corresponding :func:`ctypes.CFUNCTYPE`).
+            File access callable that must remain available for as long as the PDF is worked with.
     """
     
     def __init__(
@@ -81,8 +80,7 @@ def open_pdf_buffer(buffer, password=None):
             A password to unlock the document, if encrypted.
     
     Returns:
-        The handle to a PDFium document, and a :class:`.LoaderData` object to store associated
-        file access data (``Tuple[pdfium.FPDF_DOCUMENT, LoaderData]``).
+        ``Tuple[pdfium.FPDF_DOCUMENT, LoaderData]``
     
     See also :func:`.open_pdf_auto`. **The same warnings apply!**
     """
@@ -127,7 +125,9 @@ def open_pdf_native(filepath, password=None):
     
     Parameters:
         filepath (str):
+            File path to a PDF document.
         password (str | bytes | None):
+            A password to unlock the document, if encrypted.
     
     Returns:
         ``Tuple[pdfium.FPDF_DOCUMENT, LoaderData]``

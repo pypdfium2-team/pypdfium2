@@ -72,9 +72,9 @@ def open_pdf_auto(input_obj, password=None):
             A password to unlock the document, if encrypted.
     
     Returns:
+        ``Tuple[pdfium.FPDF_DOCUMENT, Optional[LoaderData]]`` –
         The handle to a PDFium document, and a :class:`.LoaderData` object to store associated
         file access data. The latter may be :data:`None` if no custom file access was required.
-        (``Tuple[pdfium.FPDF_DOCUMENT, Optional[LoaderData]]``)
     
     Warning:
         Callers **MUST** ensure that the :class:`.LoaderData` object remain available for as
@@ -120,9 +120,10 @@ def close_pdf(pdf, loader_data=None):
         pdf (``FPDF_DOCUMENT``):
             The PDFium document object to close using ``FPDF_CloseDocument()``.
         loader_data (LoaderData):
-            A :class:`.LoaderData` object, as returned by :func:`.open_pdf_auto`,
-            :func:`.open_pdf_buffer` or :func:`.open_pdf_native`.
+            Object that stores custom file access data associated to the PDF, as returned by
+            :func:`.open_pdf_auto`, :func:`.open_pdf_buffer`, or :func:`.open_pdf_native`.
     """
+    
     pdfium.FPDF_CloseDocument(pdf)
     if loader_data is not None:
         loader_data.close()
@@ -133,13 +134,6 @@ def open_pdf(input_obj, password=None):
     """
     This function is deprecated and scheduled for removal.
     Please use :func:`.open_pdf_auto` or :class:`.PdfDocument` instead.
-    
-    Parameters:
-        input_obj (str | bytes | typing.BinaryIO):
-        password (str | bytes | None):
-    
-    Returns:
-        ``pdfium.FPDF_DOCUMENT``
     """
     
     warnings.warn(
