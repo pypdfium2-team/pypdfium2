@@ -4,4 +4,5 @@
 Planned Changes
 ===============
 
-At the moment, no API breaking changes are planned.
+The following API breaking changes are planned:
+* Remove the deprecated alias `render_page()` (replaced by `render_page_topil()`).

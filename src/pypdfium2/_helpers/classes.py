@@ -69,9 +69,29 @@ class PdfDocument:
             **kws
         )
     
+    def render_page_tobytes(self, index, **kws):
+        """
+        Render a single page to bytes (see :func:`.render_page_tobytes`).
+        """
+        return page_renderer.render_page_tobytes(
+            self._pdf,
+            page_index = index,
+            **kws
+        )
+    
+    def render_page_topil(self, index, **kws):
+        """
+        Render a single page to a :mod:`PIL` image (see :func:`.render_page_topil`).
+        """
+        return page_renderer.render_page_topil(
+            self._pdf,
+            page_index = index,
+            **kws
+        )
+    
     def render_page(self, index, **kws):
         """
-        Render a single page (see :func:`.render_page`).
+        Deprecated alias for :func:`.render_page_topil`.
         """
         return page_renderer.render_page(
             self._pdf,

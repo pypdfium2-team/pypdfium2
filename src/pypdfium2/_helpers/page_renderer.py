@@ -3,7 +3,7 @@
 
 import math
 import ctypes
-from PIL import Image
+import warnings
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.constants import OptimiseMode
 from pypdfium2._helpers.utilities import (
@@ -11,21 +11,28 @@ from pypdfium2._helpers.utilities import (
     translate_rotation,
 )
 
+try:
+    from PIL import Image
+except ImportError:
+    have_pil = False
+else:
+    have_pil = True
 
-def _get_pixel_fmt(use_alpha, greyscale):
+
+def _get_pixelformat(use_alpha, greyscale):
     
-    pixel_fmt = "RGBA", "BGRA", pdfium.FPDFBitmap_BGRA
+    px = "BGRA", pdfium.FPDFBitmap_BGRA
     
     if not use_alpha:
         if greyscale:
-            pixel_fmt = "L", "L", pdfium.FPDFBitmap_Gray
+            px = "L", pdfium.FPDFBitmap_Gray
         else:
-            pixel_fmt = "RGB", "BGR", pdfium.FPDFBitmap_BGR
+            px = "BGR", pdfium.FPDFBitmap_BGR
     
-    return pixel_fmt
+    return px
 
 
-def render_page(
+def render_page_tobytes(
         pdf,
         page_index = 0,
         scale = 1,
@@ -36,7 +43,7 @@ def render_page(
         optimise_mode = OptimiseMode.none,
     ):
     """
-    Rasterise a single PDF page using PDFium.
+    Render a single PDF page to bytes using PDFium.
     
     Parameters:
         
@@ -47,15 +54,11 @@ def render_page(
             Zero-based index of the page to render.
         
         scale (float):
-            
             Define the quality (or size) of the image.
-            
             By default, one PDF point (1/72in) is rendered to 1x1 pixel. This factor scales the
             number of pixels that represent one point.
-            
             Higher values increase quality, file size and rendering duration, while lower values
             reduce them.
-            
             Note that UserUnit is not taken into account, so if you are using PyPDFium2 in
             conjunction with an other PDF library, you may want to check for a possible
             ``/UserUnit`` in the page dictionary and multiply this scale factor with it.
@@ -81,7 +84,10 @@ def render_page(
             Optimise rendering for LCD displays or for printing.
     
     Returns:
-        :class:`PIL.Image.Image`
+        :class:`bytes`, :class:`str`, ``Tuple[int, int]`` – Bitmap data, used colour format,
+        and image size in pixels (width, height).
+        The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters
+        *colour* and *greyscale*.
     """
     
     if colour is None:
@@ -89,8 +95,8 @@ def render_page(
     else:
         fpdf_colour, use_alpha = colour_as_hex(*colour)
     
-    px_target, px_source, px_pdfium = _get_pixel_fmt(use_alpha, greyscale)
-    n_px_values = len(px_source)
+    px_format, px_pdfium = _get_pixelformat(use_alpha, greyscale)
+    n_px_values = len(px_format)
     
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
@@ -148,14 +154,51 @@ def render_page(
     pdfium.FPDF_RenderPageBitmap(*render_args)
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
-    cbuffer = pdfium.FPDFBitmap_GetBuffer(bitmap)
-    buffer = ctypes.cast(cbuffer, ctypes.POINTER(ctypes.c_ubyte * (width * height * n_px_values)))
-    
-    pil_image = Image.frombuffer(px_target, (width, height), buffer.contents, "raw", px_source, 0, 1)
+    cbuf_pointer = pdfium.FPDFBitmap_GetBuffer(bitmap)
+    cbuf_array = ctypes.cast(cbuf_pointer, ctypes.POINTER(ctypes.c_ubyte * (width * height * n_px_values)))
+    data = bytes(cbuf_array.contents)
     
     pdfium.FPDFBitmap_Destroy(bitmap)
     pdfium.FORM_OnBeforeClosePage(page, form_fill)
     pdfium.FPDF_ClosePage(page)
     pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
     
-    return pil_image
+    return data, px_format, (width, height)
+
+
+def render_page_topil(*args, **kws):
+    """
+    Render a single page to a :mod:`PIL` image.
+    Parameters are the same as for :func:`render_page_tobytes`.
+    
+    Returns:
+        :class:`PIL.Image.Image`
+    """
+    
+    if not have_pil:
+        raise RuntimeError("Pillow library needs to be installed for method render_page_topil().")
+    
+    data, px_source, size = render_page_tobytes(*args, **kws)
+    
+    if px_source == 'BGRA':
+        px_target = 'RGBA'
+    elif px_source == 'BGR':
+        px_target = 'RGB'
+    elif px_source == 'L':
+        px_target = 'L'
+    else:
+        raise ValueError( "Invalid colour format '{}'".format(px_source) )
+    
+    return Image.frombytes(px_target, size, data, "raw", px_source, 0, 1)
+
+
+def render_page(*args, **kws):
+    """
+    Deprecated alias for :func:`render_page_topil`.
+    """
+    
+    warnings.warn(
+        "render_page() is a deprecated alias that will be removed. Use render_page_topil() instead.",
+        DeprecationWarning
+    )
+    return render_page_topil(*args, **kws)
