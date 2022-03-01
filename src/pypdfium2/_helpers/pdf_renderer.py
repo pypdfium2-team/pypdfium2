@@ -9,7 +9,6 @@ from pypdfium2._helpers.constants import OptimiseMode
 from pypdfium2._helpers.page_renderer import (
     render_page_tobytes,
     render_page_topil,
-    render_page,
 )
 
 
@@ -116,10 +115,3 @@ def render_pdf_topil(*args, **kws):
         :class:`PIL.Image.Image`, :class:`str`
     """
     yield from _render_pdf_base(render_page_topil, *args, **kws)
-
-
-def render_pdf(*args, **kws):
-    """
-    Deprecated alias for :func:`.render_pdf_topil`.
-    """
-    yield from _render_pdf_base(render_page, *args, **kws)
