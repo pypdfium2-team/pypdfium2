@@ -45,7 +45,6 @@ source_suffix = {
 }
 
 autodoc_preserve_defaults = True
-#autodoc_typehints_format = 'short'
 
 autodoc_default_options = {
     'members': True,
