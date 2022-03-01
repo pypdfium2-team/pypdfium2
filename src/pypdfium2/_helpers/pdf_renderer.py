@@ -101,8 +101,8 @@ def render_pdf_tobytes(*args, **kws):
     The other parameters are the same as for :func:`.render_page_tobytes`.
     
     Yields:
-        tuple, str – The return of `.render_page_tobytes`, and a string for serial enumeration
-        of output files.
+        :class:`tuple`, :class:`str` – The return of :func:`.render_page_tobytes`, and a
+        string for serial enumeration of output files.
     """
     yield from _render_pdf_base(render_page_tobytes, *args, **kws)
 

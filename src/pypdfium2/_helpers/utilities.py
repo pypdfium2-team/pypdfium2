@@ -46,7 +46,7 @@ def translate_rotation(rotation):
         rotation (int): Rotation value in degrees (0, 90, 180, 270).
     
     Returns:
-        int – A PDFium rotation constant (0, 1, 2, 3).
+        :class:`int` – A PDFium rotation constant (0, 1, 2, 3).
     """
     
     if rotation == 0:
@@ -76,8 +76,8 @@ def colour_as_hex(r, g, b, a=255):
     to a single integer in 32-bit ARGB format.
     
     Returns:
-        int, bool – The colour integer, and a logical value that is :data:`True` if an alpha
-        channel is needed, or :data:`False` if it is not needed.
+        :class:`int`, :class:`bool` – The colour integer, and a logical value that is
+        :data:`True` if an alpha channel is needed, or :data:`False` if it is not needed.
     """
     
     use_alpha = True
