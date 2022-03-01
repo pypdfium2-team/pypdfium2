@@ -148,10 +148,7 @@ def patch_pdfium():
     
     if sys.platform.startswith('win32'):
         _apply_patchset(PdfiumWinPatches)
-        shutil.copy(
-            join(PatchDir,'pdfium','win','resources.rc'),
-            join(PDFiumDir,'resources.rc'),
-        )
+        shutil.copy(join(PatchDir,'pdfium','win','resources.rc'), join(PDFiumDir,'resources.rc'))
 
 
 def patch_pdfium_nativebuild():
