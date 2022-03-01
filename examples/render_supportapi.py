@@ -19,7 +19,7 @@ if __name__ == '__main__':
     
     page_indices = [i for i in range(n_pages)]
     
-    generator = pdfium.render_pdf(
+    generator = pdfium.render_pdf_topil(
         filename,
         page_indices = page_indices,
         scale = 1,
