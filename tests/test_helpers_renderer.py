@@ -10,7 +10,7 @@ from .conftest import TestFiles, OutputDir
 
 def _check_render_normal(pdf):
     
-    pil_image = pdfium.render_page(pdf, 0)
+    pil_image = pdfium.render_page_topil(pdf, 0)
     
     assert pil_image.mode == 'RGB'
     assert pil_image.size == (595, 842)
@@ -36,19 +36,19 @@ def test_render_page_bytes():
 
 def test_render_nonascii():
     with pdfium.PdfContext(TestFiles.nonascii) as pdf:
-        pil_image = pdfium.render_page(pdf, 0)
+        pil_image = pdfium.render_page_topil(pdf, 0)
         pil_image.save( join(OutputDir,'render_nonascii.png') )
 
 
 def _check_render_encrypted(file_or_data):
     
     with pdfium.PdfContext(file_or_data, 'test_user') as pdf:
-        pil_image_a = pdfium.render_page(pdf, 0)
+        pil_image_a = pdfium.render_page_topil(pdf, 0)
     assert pil_image_a.mode == 'RGB'
     assert pil_image_a.size == (596, 842)
     
     with pdfium.PdfContext(file_or_data, 'test_owner') as pdf:
-        pil_image_b = pdfium.render_page(pdf, 0)
+        pil_image_b = pdfium.render_page_topil(pdf, 0)
     assert pil_image_b.mode == 'RGB'
     assert pil_image_b.size == (596, 842)
     
@@ -70,7 +70,7 @@ def test_render_page_encrypted_bytes():
 def test_render_page_alpha():
     
     with pdfium.PdfContext(TestFiles.render) as pdf:
-        pil_image = pdfium.render_page(
+        pil_image = pdfium.render_page_topil(
             pdf, 0,
             colour = None,
         )
@@ -90,28 +90,28 @@ def test_render_page_rotation():
     
     with pdfium.PdfContext(TestFiles.render) as pdf:
         
-        image_0 = pdfium.render_page(
+        image_0 = pdfium.render_page_topil(
             pdf, 0,
             rotation = 0
         )
         image_0.save(join(OutputDir,'rotate_0.png'))
         image_0.close()
         
-        image_90 = pdfium.render_page(
+        image_90 = pdfium.render_page_topil(
             pdf, 0,
             rotation = 90
         )
         image_90.save(join(OutputDir,'rotate_90.png'))
         image_90.close()
         
-        image_180 = pdfium.render_page(
+        image_180 = pdfium.render_page_topil(
             pdf, 0,
             rotation = 180
         )
         image_180.save(join(OutputDir,'rotate_180.png'))
         image_180.close()
         
-        image_270 = pdfium.render_page(
+        image_270 = pdfium.render_page_topil(
             pdf, 0,
             rotation = 270
         )
@@ -127,7 +127,7 @@ def test_render_pdf():
     n_digits = len(str(n_pages))
     i = 0
     
-    renderer = pdfium.render_pdf(
+    renderer = pdfium.render_pdf_topil(
         TestFiles.multipage,
         colour = (255, 255, 255),
     )
@@ -143,7 +143,7 @@ def test_render_pdf_bytes():
     with open(TestFiles.multipage, 'rb') as file_handle:
         file_bytes = file_handle.read()
     
-    for image, suffix in pdfium.render_pdf(file_bytes):
+    for image, suffix in pdfium.render_pdf_topil(file_bytes):
         assert isinstance(image, Image.Image)
         assert isinstance(suffix, str)
         assert image.mode == 'RGB'
@@ -154,7 +154,7 @@ def test_render_greyscale():
     
     with pdfium.PdfContext(TestFiles.render) as pdf:
         
-        image_a = pdfium.render_page(
+        image_a = pdfium.render_page_topil(
             pdf, 0,
             greyscale = True,
         )
@@ -162,7 +162,7 @@ def test_render_greyscale():
         assert image_a.mode == 'L'
         image_a.close()
         
-        image_b = pdfium.render_page(
+        image_b = pdfium.render_page_topil(
             pdf, 0,
             greyscale = True,
             colour = None,
@@ -186,7 +186,7 @@ def test_render_greyscale():
 def test_render_bgcolour(colour):
     
     with pdfium.PdfContext(TestFiles.render) as pdf:
-        pil_image = pdfium.render_page(
+        pil_image = pdfium.render_page_topil(
             pdf, 0,
             colour = colour,
         )
