@@ -2,13 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
-import sys
-
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.nativeopener import (
     is_buffer,
     open_pdf_buffer,
-    open_pdf_native,
 )
 from pypdfium2._helpers.error_handler import handle_pdfium_error
 
@@ -45,22 +42,11 @@ class PdfContext:
         close_pdf(self.pdf, self.ld_data)
 
 
-def _str_isascii(string):
-    try:
-        string.encode('ascii')
-    except UnicodeEncodeError:
-        return False
-    else:
-        return True
-
-
 def open_pdf_auto(input_obj, password=None):
     """    
     Open a document from a file path or in-memory data.
     
-    If the input is a regular file path, ``FPDF_LoadDocument()`` will be used.
-    If on Windows, file paths that contain non-ascii characters will be loaded using
-    :func:`.open_pdf_native`.
+    If the input is a file path, ``FPDF_LoadDocument()`` will be used.
     If the input is bytes or a byte buffer, :func:`.open_pdf_buffer` will be used.
     
     Parameters:
@@ -87,27 +73,20 @@ def open_pdf_auto(input_obj, password=None):
     if isinstance(input_obj, bytes):
         input_obj = io.BytesIO(input_obj)
     
-    
     ld_data = None
     
     if isinstance(input_obj, str):
-        if sys.platform.startswith('win32') and not _str_isascii(input_obj):
-            pdf, ld_data = open_pdf_native(input_obj, password)
-        else:
-            pdf = pdfium.FPDF_LoadDocument(input_obj, password)
-            if pdfium.FPDF_GetPageCount(pdf) < 1:
-                handle_pdfium_error(False)
-    
+        pdf = pdfium.FPDF_LoadDocument(input_obj, password)
+        if pdfium.FPDF_GetPageCount(pdf) < 1:
+            handle_pdfium_error(False)
     elif is_buffer(input_obj):
         pdf, ld_data = open_pdf_buffer(input_obj, password)
-    
     else:
         raise ValueError(
             "Input must be a file path, bytes or a byte buffer, but it is {}.".format( type(input_obj) )
         )
     
     return pdf, ld_data
-    
 
 
 def close_pdf(pdf, loader_data=None):
