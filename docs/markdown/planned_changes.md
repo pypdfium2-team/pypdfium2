@@ -5,4 +5,5 @@ Planned Changes
 ===============
 
 The following API breaking changes are planned:
-* Remove the deprecated alias `render_page()` (replaced by `render_page_topil()`).
+* Remove the deprecated aliases `render_page()` and `render_pdf()` (replaced by `render_page_topil()`
+  and `render_pdf_topil()`).

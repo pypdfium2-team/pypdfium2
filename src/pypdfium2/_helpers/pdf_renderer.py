@@ -6,10 +6,15 @@ import concurrent.futures
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.opener import PdfContext
 from pypdfium2._helpers.constants import OptimiseMode
-from pypdfium2._helpers.page_renderer import render_page
+from pypdfium2._helpers.page_renderer import (
+    render_page_tobytes,
+    render_page_topil,
+    render_page,
+)
 
 
 def _process_page(
+        render_meth,
         input_obj,
         index,
         password,
@@ -22,7 +27,7 @@ def _process_page(
     ):
     
     with PdfContext(input_obj, password) as pdf:
-        pil_image = render_page(
+        result = render_meth(
             pdf, index,
             scale = scale,
             rotation = rotation,
@@ -32,14 +37,15 @@ def _process_page(
             optimise_mode = optimise_mode,
         )
     
-    return index, pil_image
+    return index, result
 
 
 def _invoke_process_page(args):
     return _process_page(*args)
 
 
-def render_pdf(
+def _render_pdf_base(
+        render_meth,
         input_obj,
         page_indices = None,
         password = None,
@@ -51,25 +57,6 @@ def render_pdf(
         greyscale = False,
         optimise_mode = OptimiseMode.none,
     ):
-    """
-    Render multiple pages of a PDF document, using a process pool executor.
-    
-    Parameters:
-        input_obj (str | bytes | typing.BinaryIO):
-            The PDF document to render. It may be given as file path, bytes, or byte buffer.
-        page_indices (typing.Sequence[int]):
-            A list of zero-based page indices to render.
-    
-    The other parameters are the same as for :func:`.render_page`.
-    
-    Yields:
-        A PIL image, and a string for serial enumeration of output files.
-    """
-    
-    if not len(colour) in (3, 4):
-        raise ValueError("Invalid number of colour values. Must be 3 or 4.")
-    if not all(isinstance(val, int) and 0 <= val <= 255 for val in colour):
-        raise ValueError("Colour values must be integers ranging from 0 to 255.")
     
     with PdfContext(input_obj, password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
@@ -83,6 +70,7 @@ def render_pdf(
     meta_args = []
     for i in page_indices:
         sub_args = [
+            render_meth,
             input_obj,
             i,
             password,
@@ -99,3 +87,39 @@ def render_pdf(
         for index, image in pool.map(_invoke_process_page, meta_args):
             suffix = str(index+1).zfill(n_digits)
             yield image, suffix
+
+
+def render_pdf_tobytes(*args, **kws):
+    """
+    Render multiple pages of a PDF to bytes, using a process pool executor.
+    
+    Parameters:
+        input_obj (str | bytes | typing.BinaryIO):
+            The PDF document to render. It may be given as file path, bytes, or byte buffer.
+        page_indices (typing.Sequence[int]):
+            A list of zero-based page indices to render.
+    
+    The other parameters are the same as for :func:`.render_page_tobytes`.
+    
+    Yields:
+        tuple, str – The return of `.render_page_tobytes`, and a string for serial enumeration
+        of output files.
+    """
+    yield from _render_pdf_base(render_page_tobytes, *args, **kws)
+
+
+def render_pdf_topil(*args, **kws):
+    """
+    Render multiple pages of a PDF to :mod:`PIL` images. Similar to :func:`.render_pdf_tobytes`.
+    
+    Yields:
+        :class:`PIL.Image.Image`, :class:`str`
+    """
+    yield from _render_pdf_base(render_page_topil, *args, **kws)
+
+
+def render_pdf(*args, **kws):
+    """
+    Deprecated alias for :func:`.render_pdf_topil`.
+    """
+    yield from _render_pdf_base(render_page, *args, **kws)
