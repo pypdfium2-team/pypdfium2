@@ -35,7 +35,7 @@ def test_pdfdoc_renderpdf():
     doc = pdfium.PdfDocument(TestFiles.multipage)
     
     i = 0
-    for image, suffix in doc.render_pdf():
+    for image, suffix in doc.render_pdf_topil():
         assert isinstance(image, Image.Image)
         assert isinstance(suffix, str)
         i+= 1

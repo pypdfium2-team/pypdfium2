@@ -3,7 +3,6 @@
 
 import math
 import ctypes
-import warnings
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers.constants import OptimiseMode
 from pypdfium2._helpers.utilities import (
@@ -190,15 +189,3 @@ def render_page_topil(*args, **kws):
         raise ValueError( "Invalid colour format '{}'".format(px_source) )
     
     return Image.frombytes(px_target, size, data, "raw", px_source, 0, 1)
-
-
-def render_page(*args, **kws):
-    """
-    Deprecated alias for :func:`render_page_topil`.
-    """
-    
-    warnings.warn(
-        "render_page() is a deprecated alias that will be removed. Use render_page_topil() instead.",
-        DeprecationWarning
-    )
-    return render_page_topil(*args, **kws)

@@ -59,16 +59,6 @@ class PdfDocument:
             max_depth = max_depth,
         )
     
-    def render_pdf(self, **kws):
-        """
-        Incrementally render multiple pages (see :func:`.render_pdf`).
-        """
-        yield from pdf_renderer.render_pdf(
-            self._input_obj,
-            password = self._password,
-            **kws
-        )
-    
     def render_page_tobytes(self, index, **kws):
         """
         Render a single page to bytes (see :func:`.render_page_tobytes`).
@@ -76,6 +66,16 @@ class PdfDocument:
         return page_renderer.render_page_tobytes(
             self._pdf,
             page_index = index,
+            **kws
+        )
+    
+    def render_pdf_tobytes(self, **kws):
+        """
+        Incrementally render multiple pages to bytes (see :func:`.render_pdf_tobytes`).
+        """
+        yield from pdf_renderer.render_pdf_tobytes(
+            self._input_obj,
+            password = self._password,
             **kws
         )
     
@@ -89,12 +89,12 @@ class PdfDocument:
             **kws
         )
     
-    def render_page(self, index, **kws):
+    def render_pdf_topil(self, **kws):
         """
-        Deprecated alias for :func:`.render_page_topil`.
+        Incrementally render multiple pages to :mod:`PIL` images (see :func:`.render_pdf_topil`).
         """
-        return page_renderer.render_page(
-            self._pdf,
-            page_index = index,
+        yield from pdf_renderer.render_pdf_topil(
+            self._input_obj,
+            password = self._password,
             **kws
         )
