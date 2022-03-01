@@ -14,6 +14,8 @@
     similarly, `render_pdf_topil()` and `render_pdf_tobytes()` supersede `render_pdf()`.
   * In `render_page_...()` and `render_pdf_...()`, we now only accept RGBA tuples
     for the colour parameter.
+- Removed workarounds for non-ascii filepaths on Windows. The issues with `FPDF_LoadDocument()`
+  should be fixed since PDFium `4915`.
 
 
 ## 0.15.0 (2022-02-28)
