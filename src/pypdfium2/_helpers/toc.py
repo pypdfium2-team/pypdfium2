@@ -82,14 +82,14 @@ def get_toc(
         seen = None,
     ):
     """
-    Read the table of contents ("outline") of a PDF document.
+    Parse the outline ("table of contents") of a PDF document.
     
     Parameters:
         pdf (``FPDF_DOCUMENT``):
-            The PDFium document of which to parse the ToC.
+            The PDFium document of which to read the outline.
         max_depth (int):
-            The maximum recursion depth to consider when analysing the outline.
-        
+            The maximum recursion depth to consider when analysing the table of contents.
+    
     Yields:
         :class:`OutlineItem`
     """
