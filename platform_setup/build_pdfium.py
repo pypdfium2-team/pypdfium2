@@ -263,7 +263,7 @@ def main(
         if b_nativebuild:
             config_list = NativeBuildConfig
         
-        config_str = ""
+        config_str = ''
         sep = ''
         for entry in config_list:
             config_str += sep + entry
