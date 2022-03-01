@@ -9,7 +9,11 @@
 - Updated PDFium from `4915` to `xxxx`
 - API breaking changes:
   * Removed deprecated members `open_pdf()` and `print_toc()`.
-  * In `render_page()` and `render_pdf()`, we now only accept RGBA tuples.
+  * Restructured rendering functions to provide multiple different output types:
+    `render_page_topil()` and `render_page_tobytes()` supersede `render_page()`;
+    similarly, `render_pdf_topil()` and `render_pdf_tobytes()` supersede `render_pdf()`.
+  * In `render_page_...()` and `render_pdf_...()`, we now only accept RGBA tuples
+    for the colour parameter.
 
 
 ## 0.15.0 (2022-02-28)

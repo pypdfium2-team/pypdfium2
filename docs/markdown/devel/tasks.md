@@ -6,11 +6,13 @@ Tasks
 
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
+* Increase test coverage. Probably need to overhaul testing completely. We would like to have
+  a test for every single passage of the support model code. Some automated tests for the setup
+  infrastructure would also be nice.
+* Add test case for rendering a PDF with interactive forms.
 * Move development section of the Readme into a dedicated file and add some more information.
 * Add a ctypes primer explaining how to interoperate with the PDFium C API.
-* Allow for only returning bytes rather than creating an `Image.Image` object when rendering, so that callers may use the data in any way they like (e. g. directly inject into a GUI widget buffer), without having to go through an intermediate PIL object. Depending on how we will implement this, API breaking changes might be involved.
 * Add capabilities to render a certain area of a page (issue #38).
-* Add test case for rendering a PDF with interactive forms.
 * Think about the possibility of using `FPDFPage_Flatten()` rather than `FPDF_FFLDraw()` and all the extra commands that it needs.
 * Create a support model for progressive rendering (`FPDF_RenderPageBitmap_Start()` & `IFSDK_PAUSE`)
 * Set the version appropriately when doing a source build (i. e. append current PDFium commit hash to version string).

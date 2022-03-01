@@ -109,7 +109,7 @@ Render a single page:
 
 ```python3
 with pdfium.PdfContext(filename) as pdf:
-    pil_image = pdfium.render_page(
+    pil_image = pdfium.render_page_topil(
         pdf,
         page_index = 0,
         scale = 1,
@@ -127,7 +127,7 @@ pil_image.close()
 Render multiple pages concurrently:
 
 ```python3
-for image, suffix in pdfium.render_pdf(filename):
+for image, suffix in pdfium.render_pdf_topil(filename):
     image.save(f'out_{suffix}.png')
     image.close()
 ```

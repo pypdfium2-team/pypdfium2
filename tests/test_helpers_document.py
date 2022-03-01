@@ -25,7 +25,7 @@ def test_pdfdoc_loadfiles():
 
 def test_pdfdoc_renderpage():
     doc = pdfium.PdfDocument(TestFiles.render)
-    image = doc.render_page(0)
+    image = doc.render_page_topil(0)
     assert isinstance(image, Image.Image)
     doc.close()
 

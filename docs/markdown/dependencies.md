@@ -6,7 +6,7 @@
 ## Runtime
 
 * Python >= 3.5
-* Pillow
+* Pillow (optional)
 
 
 ## Build
@@ -28,7 +28,7 @@
 ### Python packages
 
 * pip [^1]
-* setuptools
+* setuptools [^1]
 * setuptools-scm [^2]
 * build
 * ctypesgen [^3]
@@ -59,7 +59,7 @@
 * check-wheel-contents
 
 
-[^1]: A recent version of pip is strongly recommended.
+[^1]: A recent version is strongly recommended.
 
 [^2]: Required for the `sdist` target to include all required files.
 
