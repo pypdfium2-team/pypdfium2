@@ -21,7 +21,7 @@ def handle_pdfium_error(valid=True):
             returns ``FPDF_ERR_SUCCESS``.
     
     Returns:
-        int – The error code as returned by PDFium.
+        :class:`int` – The error code as returned by PDFium.
     """
     
     last_error = pdfium.FPDF_GetLastError()
