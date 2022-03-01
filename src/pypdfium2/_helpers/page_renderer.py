@@ -18,17 +18,24 @@ else:
     have_pil = True
 
 
-def _get_pixelformat(use_alpha, greyscale):
+def _get_clformat(use_alpha, greyscale):
     
-    px = "BGRA", pdfium.FPDFBitmap_BGRA
+    px = 'BGRA', pdfium.FPDFBitmap_BGRA
     
     if not use_alpha:
         if greyscale:
-            px = "L", pdfium.FPDFBitmap_Gray
+            px = 'L', pdfium.FPDFBitmap_Gray
         else:
-            px = "BGR", pdfium.FPDFBitmap_BGR
+            px = 'BGR', pdfium.FPDFBitmap_BGR
     
     return px
+
+
+_clformat_pil = {
+    'BGRA': 'RGBA',
+    'BGR': 'RGB',
+    'L': 'L',
+}
 
 
 def render_page_tobytes(
@@ -94,8 +101,8 @@ def render_page_tobytes(
     else:
         fpdf_colour, use_alpha = colour_as_hex(*colour)
     
-    px_format, px_pdfium = _get_pixelformat(use_alpha, greyscale)
-    n_px_values = len(px_format)
+    cl_format, cl_pdfium = _get_clformat(use_alpha, greyscale)
+    n_colours = len(cl_format)
     
     page_count = pdfium.FPDF_GetPageCount(pdf)
     if not 0 <= page_index < page_count:
@@ -118,9 +125,9 @@ def render_page_tobytes(
     bitmap = pdfium.FPDFBitmap_CreateEx(
         width,
         height,
-        px_pdfium,
+        cl_pdfium,
         None,
-        width * n_px_values,
+        width * n_colours,
     )
     if fpdf_colour is not None:
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, fpdf_colour)
@@ -154,7 +161,7 @@ def render_page_tobytes(
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
     cbuf_pointer = pdfium.FPDFBitmap_GetBuffer(bitmap)
-    cbuf_array = ctypes.cast(cbuf_pointer, ctypes.POINTER(ctypes.c_ubyte * (width * height * n_px_values)))
+    cbuf_array = ctypes.cast(cbuf_pointer, ctypes.POINTER(ctypes.c_ubyte * (width * height * n_colours)))
     data = bytes(cbuf_array.contents)
     
     pdfium.FPDFBitmap_Destroy(bitmap)
@@ -162,7 +169,7 @@ def render_page_tobytes(
     pdfium.FPDF_ClosePage(page)
     pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
     
-    return data, px_format, (width, height)
+    return data, cl_format, (width, height)
 
 
 def render_page_topil(*args, **kws):
@@ -177,15 +184,5 @@ def render_page_topil(*args, **kws):
     if not have_pil:
         raise RuntimeError("Pillow library needs to be installed for method render_page_topil().")
     
-    data, px_source, size = render_page_tobytes(*args, **kws)
-    
-    if px_source == 'BGRA':
-        px_target = 'RGBA'
-    elif px_source == 'BGR':
-        px_target = 'RGB'
-    elif px_source == 'L':
-        px_target = 'L'
-    else:
-        raise ValueError( "Invalid colour format '{}'".format(px_source) )
-    
-    return Image.frombytes(px_target, size, data, "raw", px_source, 0, 1)
+    data, cl_format, size = render_page_tobytes(*args, **kws)
+    return Image.frombytes(_clformat_pil[cl_format], size, data, "raw", cl_format, 0, 1)
