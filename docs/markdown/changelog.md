@@ -169,7 +169,7 @@
     * Made the utility functions `translate_viewmode()` and `translate_rotation()` public.
 - Removed the in-library logging setup as it could cause issues for downstream users who wish
   to configure the pypdfium2 logger.
-- Started backporting PyPDFium2 to older Python versions by removing all uses of f-strings,
+- Started backporting pypdfium2 to older Python versions by removing all uses of f-strings,
   keywords-only enforcement, and `pathlib` across the package. The minimum required Python
   version is now 3.5. (It might be possible to further reduce the requirement by moving type
   hints from the actual code into docstrings.)

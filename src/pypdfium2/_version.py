@@ -6,7 +6,7 @@ V_MINOR = 15
 V_PATCH = 0
 V_BETA = None
 
-V_PYPDFIUM2 = "{}.{}.{}".format(V_MAJOR, V_MINOR, V_PATCH)  #: PyPDFium2 version string
+V_PYPDFIUM2 = "{}.{}.{}".format(V_MAJOR, V_MINOR, V_PATCH)  #: pypdfium2 version string
 if V_BETA is not None:
     V_PYPDFIUM2 += "b{}".format(V_BETA)
 

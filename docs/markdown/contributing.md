@@ -3,10 +3,10 @@
 
 # Contributing
 
-Contributions and improvements to PyPDFium2 are very welcome. Here are a few instructions to help you
+Contributions and improvements to pypdfium2 are very welcome. Here are a few instructions to help you
 with your contribution, and some rules that we would like you to follow:
 
-* PyPDFium2 adheres to the [SPDX standard][spdx-licenses] for license and copyright headers.
+* pypdfium2 adheres to the [SPDX standard][spdx-licenses] for license and copyright headers.
   If you create new files, please always add such a header. For binary files, you may add a
   corresponding section in [`.reuse/dep5`][dep5] (this is equivalent to a Debian copyright file).
   If you edit an existing file, please add your name and the current year to its copyright header,
