@@ -10,7 +10,7 @@
 - API breaking changes:
   * Removed deprecated members `open_pdf()` and `print_toc()`.
   * Restructured rendering functions to provide multiple different output types:
-    `render_page_topil()` and `render_page_tobytes()` supersede `render_page()`; similarly, `render_pdf_topil()` and `render_pdf_tobytes()` supersede `render_pdf()`.
+    `render_page_topil()` and `render_page_tobytes()` replace `render_page()`; similarly, `render_pdf_topil()` and `render_pdf_tobytes()` replace `render_pdf()`.
   * In `render_page_...()` and `render_pdf_...()`, we now only accept RGBA tuples for the colour parameter.
 - The Pillow dependency is now optional in the core library.
 - Removed workarounds for non-ascii filepaths on Windows. The issues with `FPDF_LoadDocument()` should be fixed since PDFium `4915`. Thanks to Lei Zhang and Tom Sepez of PDFium team.
