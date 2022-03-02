@@ -22,7 +22,7 @@ def _merge_pdfs(input_paths):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description = "Merge PDF files with PyPDFium2.",
+        description = "Merge PDF files with pypdfium2.",
     )
     parser.add_argument(
         'input_paths',

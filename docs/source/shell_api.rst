@@ -4,7 +4,7 @@
 Shell API
 =========
 
-PyPDFium2 can also be used from the command-line.
+pypdfium2 can also be used from the command-line.
 
 
 Main help

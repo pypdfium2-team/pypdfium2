@@ -20,7 +20,7 @@ def main(argv=sys.argv[1:]):
     parser = CliParser(
         program = "pypdfium2",
         version = "{} (libpdfium {})".format(V_PYPDFIUM2, V_LIBPDFIUM),
-        description = "Command line interface to the PyPDFium2 Python library",
+        description = "Command line interface to the pypdfium2 Python library",
         argv = argv,
     )
     

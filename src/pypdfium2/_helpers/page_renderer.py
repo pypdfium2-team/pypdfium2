@@ -65,7 +65,7 @@ def render_page_tobytes(
             number of pixels that represent one point.
             Higher values increase quality, file size and rendering duration, while lower values
             reduce them.
-            Note that UserUnit is not taken into account, so if you are using PyPDFium2 in
+            Note that UserUnit is not taken into account, so if you are using pypdfium2 in
             conjunction with an other PDF library, you may want to check for a possible
             ``/UserUnit`` in the page dictionary and multiply this scale factor with it.
         
