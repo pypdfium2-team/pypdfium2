@@ -193,7 +193,7 @@ Documentation for the [PDFium API](https://developers.foxit.com/resources/pdf-sd
 
 PDFium and pypdfium2 are available by the terms and conditions of either Apache 2.0 or BSD-3-Clause, at your choice.
 
-Various other open-source licenses apply to the dependencies of PDFium. License texts for PDFium and its dependencies are included in the file [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt), which is also shipped with binary redistributions.
+Various other open-source licenses apply to the dependencies of PDFium. License texts for PDFium and its dependencies are included in the file [`LicenseRef-PdfiumThirdParty.txt`](LICENSES/LicenseRef-PdfiumThirdParty.txt), which is also shipped with binary redistributions.
 
 Documentation and examples of pypdfium2 are CC-BY-4.0 licensed.
 
