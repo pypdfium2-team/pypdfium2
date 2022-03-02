@@ -182,7 +182,7 @@ def render_page_topil(*args, **kws):
     """
     
     if not have_pil:
-        raise RuntimeError("Pillow library needs to be installed for method render_page_topil().")
+        raise RuntimeError("Pillow library needs to be installed for render_page_topil().")
     
     data, cl_format, size = render_page_tobytes(*args, **kws)
     return Image.frombytes(_clformat_pil[cl_format], size, data, "raw", cl_format, 0, 1)
