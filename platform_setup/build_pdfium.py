@@ -8,7 +8,15 @@ import os
 import sys
 import shutil
 import argparse
+import importlib.util
 from os.path import join
+
+
+def _include_module():
+    PlatSetupInit = join(os.path.dirname(os.path.abspath(__file__)), '__init__.py')
+    spec = importlib.util.spec_from_file_location('platform_setup', PlatSetupInit)
+    sys.modules['platform_setup'] = importlib.util.module_from_spec(spec)
+if __name__ == '__main__': _include_module()
 
 from platform_setup import check_deps
 from platform_setup.packaging_base import (
