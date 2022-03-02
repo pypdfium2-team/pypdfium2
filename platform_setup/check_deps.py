@@ -2,10 +2,15 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import sys
 import shutil
-from importlib.util import find_spec
+import importlib.util
+
+if __name__ == '__main__': sys.modules['platform_setup'] = importlib.util.module_from_spec( importlib.util.spec_from_file_location('platform_setup', os.path.join(os.path.dirname(os.path.abspath(__file__)), '__init__.py')) )
+
 from platform_setup.packaging_base import run_cmd
+
 
 PyPackages = (
     'build',
@@ -36,7 +41,7 @@ def _pip_install(pkg):
 def install_pydeps():
     
     for pkg in PyPackages:
-        if not find_spec( pkg.replace('-', '_') ):
+        if not importlib.util.find_spec( pkg.replace('-', '_') ):
             _pip_install(pkg)
     
     # uninstalling ctypesgen sometimes leaves parts behind, which makes the command unavailable,
