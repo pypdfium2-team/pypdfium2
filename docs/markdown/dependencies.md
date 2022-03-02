@@ -63,5 +63,4 @@
 
 [^2]: Required for the `sdist` target to include all required files.
 
-[^3]: You are encouraged to install the latest ctypesgen from git main, as lots of important
-      improvements have been done since the last release on PyPI, which is rather outdated.
+[^3]: You are encouraged to install the latest ctypesgen from git main, as lots of important improvements have been done since the last release on PyPI, which is rather outdated.

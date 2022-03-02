@@ -60,11 +60,7 @@ def call_ctypesgen(platform_dir, include_dir):
     
     bindings_file = join(platform_dir,'_pypdfium.py')
     
-    ctypesgen_cmd = 'ctypesgen --library pdfium --strip-build-path "{}" -L . {} -o "{}"'.format(
-        platform_dir,
-        headers_str,
-        bindings_file,
-    )
+    ctypesgen_cmd = 'ctypesgen --library pdfium --strip-build-path "{}" -L . {} -o "{}"'.format(platform_dir, headers_str, bindings_file)
     subprocess.run(
         ctypesgen_cmd,
         stdout = subprocess.PIPE,

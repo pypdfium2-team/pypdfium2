@@ -61,13 +61,9 @@ def render_page_tobytes(
         
         scale (float):
             Define the quality (or size) of the image.
-            By default, one PDF point (1/72in) is rendered to 1x1 pixel. This factor scales the
-            number of pixels that represent one point.
-            Higher values increase quality, file size and rendering duration, while lower values
-            reduce them.
-            Note that UserUnit is not taken into account, so if you are using pypdfium2 in
-            conjunction with an other PDF library, you may want to check for a possible
-            ``/UserUnit`` in the page dictionary and multiply this scale factor with it.
+            By default, one PDF point (1/72in) is rendered to 1x1 pixel. This factor scales the number of pixels that represent one point.
+            Higher values increase quality, file size and rendering duration, while lower values reduce them.
+            Note that UserUnit is not taken into account, so if you are using pypdfium2 in conjunction with an other PDF library, you may want to check for a possible ``/UserUnit`` in the page dictionary and multiply this scale factor with it.
         
         rotation (int):
             Rotate the page by 90, 180, or 270 degrees. Value 0 means no rotation.
@@ -75,10 +71,8 @@ def render_page_tobytes(
         colour (None | typing.Tuple[int, int, int, typing.Optional[int]]):
             Page background colour. Defaults to white.
             It can either be :data:`None`, or values of red, green, blue, and alpha ranging from 0 to 255.
-            If :data:`None`, the bitmap will not be filled with a colour, resulting in transparent
-            background.
-            For RGB, 0 will include nothing of the colour in question, while 255 will completely
-            include it. For Alpha, 0 means full transparency, while 255 means no transparency.
+            If :data:`None`, the bitmap will not be filled with a colour, resulting in transparent background.
+            For RGB, 0 will include nothing of the colour in question, while 255 will completely include it. For Alpha, 0 means full transparency, while 255 means no transparency.
         
         annotations (bool):
             Whether to render page annotations.
@@ -90,10 +84,8 @@ def render_page_tobytes(
             Optimise rendering for LCD displays or for printing.
     
     Returns:
-        :class:`bytes`, :class:`str`, ``Tuple[int, int]`` – Bitmap data, used colour format,
-        and image size in pixels (width, height).
-        The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters
-        *colour* and *greyscale*.
+        :class:`bytes`, :class:`str`, ``Tuple[int, int]`` – Bitmap data, used colour format, and image size in pixels (width, height).
+        The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
     """
     
     if colour is None:
@@ -174,8 +166,7 @@ def render_page_tobytes(
 
 def render_page_topil(*args, **kws):
     """
-    Render a single page to a :mod:`PIL` image.
-    Parameters are the same as for :func:`render_page_tobytes`.
+    Render a single page to a :mod:`PIL` image. Parameters are the same as for :func:`render_page_tobytes`.
     
     Returns:
         :class:`PIL.Image.Image`

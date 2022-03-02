@@ -24,8 +24,7 @@ def is_buffer(obj):
 
 class _reader_class:
     """
-    Class that implements the callback for ``FPDF_FILEACCESS.m_GetBlock()``, to incrementally
-    read file data from a buffer.
+    Class that implements the callback for ``FPDF_FILEACCESS.m_GetBlock()``, to incrementally read file data from a buffer.
     """
     
     def __init__(self, buffer):
@@ -40,8 +39,7 @@ class _reader_class:
 
 class LoaderData:
     """
-    Class to store data associated to an ``FPDF_DOCUMENT`` that was opened using
-    ``FPDF_LoadCustomDocument()``.
+    Class to store data associated to an ``FPDF_DOCUMENT`` that was opened using ``FPDF_LoadCustomDocument()``.
     
     Parameters:
         file_handle:
@@ -70,8 +68,7 @@ class LoaderData:
 
 def open_pdf_buffer(buffer, password=None):
     """
-    Open a PDF document incrementally from a byte buffer using ``FPDF_LoadCustomDocument()`` and
-    a ctypes callback function.
+    Open a PDF document incrementally from a byte buffer using ``FPDF_LoadCustomDocument()`` and a ctypes callback function.
     
     Parameters:
         buffer (typing.BinaryIO):
@@ -117,9 +114,7 @@ def open_pdf_buffer(buffer, password=None):
 
 def open_pdf_native(filepath, password=None):
     """
-    Open a PDF document from a file path, managing all file access natively in Python using
-    :func:`.open_pdf_buffer`, without having to load the whole file into memory at once.
-    This provides more independence from file access in PDFium.
+    Open a PDF document from a file path, managing all file access natively in Python using :func:`.open_pdf_buffer`, without having to load the whole file into memory at once. This provides more independence from file access in PDFium.
     
     Parameters:
         filepath (str):

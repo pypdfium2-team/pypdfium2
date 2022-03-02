@@ -23,8 +23,7 @@ class OutlineItem:
         view_mode (ViewMode):
             A mode defining how to interpret the coordinates of *view_pos*.
         view_pos (typing.Sequence[float]):
-            Target position on the page the viewport should jump to. It is a sequence of float values
-            in PDF points. Depending on *view_mode*, it can contain between 0 and 4 coordinates.
+            Target position on the page the viewport should jump to. It is a sequence of float values in PDF points. Depending on *view_mode*, it can contain between 0 and 4 coordinates.
     """
     
     def __init__(

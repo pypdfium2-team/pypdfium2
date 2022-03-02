@@ -12,8 +12,7 @@ from pypdfium2._helpers import (
 
 class PdfDocument:
     """
-    Document class that maps the functional support model to an object-oriented API,
-    unifying the separate helpers.
+    Document class that maps the functional support model to an object-oriented API, unifying the separate helpers.
     
     Parameters:
         input_obj: The file or data to load using :func:`.open_pdf_auto`.
@@ -39,8 +38,7 @@ class PdfDocument:
     
     def close(self):
         """
-        Close the document to release allocated memory. This method must be called when
-        done with processing the PDF.
+        Close the document to release allocated memory. This method must be called when done with processing the PDF.
         """
         return opener.close_pdf(self._pdf, self._ld_data)
     

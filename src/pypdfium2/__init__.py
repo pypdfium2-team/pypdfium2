@@ -8,10 +8,8 @@ from pypdfium2._namespace import *
 
 logger = logging.getLogger(__name__)
 
-
 __version__ = _version.V_PYPDFIUM2
 __pdfium_version__ = _version.V_LIBPDFIUM
-
 
 FPDF_InitLibrary()
 atexit.register(FPDF_DestroyLibrary)
