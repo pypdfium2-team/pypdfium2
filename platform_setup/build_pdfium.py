@@ -87,10 +87,7 @@ def dl_depottools(do_sync):
             is_update = False
     else:
         print("DepotTools: Download ...")
-        run_cmd(
-            'git clone --depth 1 "{}" "{}"'.format(DepotTools_URL, DepotToolsDir),
-            cwd = SB_Dir
-        )
+        run_cmd('git clone --depth 1 "{}" "{}"'.format(DepotTools_URL, DepotToolsDir), cwd=SB_Dir)
     
     sep = ';' if sys.platform.startswith('win32') else ':'
     os.environ['PATH'] += sep + DepotToolsDir
@@ -249,7 +246,7 @@ def main(
         check_deps.main(b_nativebuild)
     
     GClient = join(DepotToolsDir,'gclient')
-    GN    = _get_tool('gn', 'generate-ninja', b_nativebuild)
+    GN = _get_tool('gn', 'generate-ninja', b_nativebuild)
     Ninja = _get_tool('ninja', 'ninja-build', b_nativebuild)
     
     if b_argfile is None:
