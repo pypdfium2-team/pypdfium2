@@ -18,9 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 def _include_module():
-    PlatSetupInit = join(os.path.dirname(os.path.abspath(__file__)), '__init__.py')
-    spec = importlib.util.spec_from_file_location('platform_setup', PlatSetupInit)
-    sys.modules['platform_setup'] = importlib.util.module_from_spec(spec)
+    sys.modules['platform_setup'] = importlib.util.module_from_spec( importlib.util.spec_from_file_location('platform_setup', join(os.path.dirname(os.path.abspath(__file__)), '__init__.py')) )
 if __name__ == '__main__': _include_module()
 
 from platform_setup.packaging_base import (
