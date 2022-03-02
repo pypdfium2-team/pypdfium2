@@ -3,9 +3,7 @@
 
 # pypdfium2
 
-[pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is a Python 3 binding to
-[PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), the liberal-licensed
-PDF rendering library authored by Foxit and maintained by Google.
+[pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is a Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), the liberal-licensed PDF rendering library authored by Foxit and maintained by Google.
 
 
 ## Install/Update
@@ -18,10 +16,7 @@ pip3 install -U pypdfium2
 
 ### Manual installation
 
-The following steps require the system tools `git` and `gcc` to be installed and available
-in `PATH`. In addition, the Python dependencies `setuptools`, `setuptools-scm` `wheel`, `build`,
-and `ctypesgen` are needed. Also make sure that your `pip` version is up-to-date.
-For more information, please refer to [`dependencies.md`](docs/markdown/dependencies.md).
+The following steps require the system tools `git` and `gcc` to be installed and available in `PATH`. In addition, the Python dependencies `setuptools`, `setuptools-scm` `wheel`, `build`, and `ctypesgen` are needed. Also make sure that your `pip` version is up-to-date. For more information, please refer to [`dependencies.md`](docs/markdown/dependencies.md).
 
 #### Package locally
 
@@ -29,13 +24,11 @@ To get pre-compiled binaries, generate bindings and install pypdfium2, you may r
 ```bash
 make install
 ```
-in the directory you downloaded the repository to. This will resort to building PDFium
-if no pre-compiled binaries are available for your platform.
+in the directory you downloaded the repository to. This will resort to building PDFium if no pre-compiled binaries are available for your platform.
 
 #### Source build
 
-If you wish to perform a source build regardless of whether PDFium binaries are available or not,
-you can do the following:
+If you wish to perform a source build regardless of whether PDFium binaries are available or not, you can do the following:
 ```bash
 make build
 ```
@@ -45,10 +38,7 @@ In case building failed, you could try
 python3 platform_setup/build_pdfium.py --nativebuild --check-deps
 PYP_TARGET_PLATFORM="sourcebuild" python3 -m pip install . -v --no-build-isolation
 ```
-to prefer the use of system-provided build tools over the toolchain PDFium ships with. The problem is
-that the toolchain is limited to a curated set of platforms, as PDFium target cross-compilation for
-"non-standard" architectures. (Make sure you installed all packages from the `Native Build` section
-of [`dependencies.md`](docs/markdown/dependencies.md), in addition to the default requirements.)
+to prefer the use of system-provided build tools over the toolchain PDFium ships with. The problem is that the toolchain is limited to a curated set of platforms, as PDFium target cross-compilation for "non-standard" architectures. (Make sure you installed all packages from the `Native Build` section of [`dependencies.md`](docs/markdown/dependencies.md), in addition to the default requirements.)
 
 ## Examples
 
@@ -69,8 +59,7 @@ Show the table of contents for a PDF:
 pypdfium2 toc document.pdf
 ```
 
-To obtain a list of subcommands, run `pypdfium2 help`.
-Individual help for each subcommand is available can be accessed in the same way (`pypdfium any_subcommand help`)
+To obtain a list of subcommands, run `pypdfium2 help`. Individual help for each subcommand is available can be accessed in the same way (`pypdfium any_subcommand help`)
 
 CLI documentation: https://pypdfium2.readthedocs.io/en/stable/shell_api.html
 
@@ -195,51 +184,33 @@ pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
 pdfium.FPDF_CloseDocument(doc)
 ```
 
-For more examples of using the raw API, take a look at the [support model source code](src/pypdfium2/_helpers)
-and the [examples directory](examples).
+For more examples of using the raw API, take a look at the [support model source code](src/pypdfium2/_helpers) and the [examples directory](examples).
 
-Documentation for the [PDFium API](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html)
-is available. pypdfium2 transparently maps all PDFium classes, enums and functions to Python.
-However, there can sometimes be minor differences between Foxit and open-source PDFium.
-In case of doubt, take a look at the inline source code documentation of PDFium.
+Documentation for the [PDFium API](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html) is available. pypdfium2 transparently maps all PDFium classes, enums and functions to Python. However, there can sometimes be minor differences between Foxit and open-source PDFium. In case of doubt, take a look at the inline source code documentation of PDFium.
 
 
 ## Licensing
 
-PDFium and pypdfium2 are available by the terms and conditions of either Apache 2.0
-or BSD-3-Clause, at your choice.
+PDFium and pypdfium2 are available by the terms and conditions of either Apache 2.0 or BSD-3-Clause, at your choice.
 
-Various other open-source licenses apply to the dependencies of PDFium.
-License texts for PDFium and its dependencies are included in the file [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt),
-which is also shipped with binary redistributions.
+Various other open-source licenses apply to the dependencies of PDFium. License texts for PDFium and its dependencies are included in the file [`LICENSE-PDFium.txt`](LICENSE-PDFium.txt), which is also shipped with binary redistributions.
 
 Documentation and examples of pypdfium2 are CC-BY-4.0 licensed.
 
 
 ## Development
 
-PDFium builds are retrieved from [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries).
-Python bindings are auto-generated with [ctypesgen](https://github.com/ctypesgen/ctypesgen)
+PDFium builds are retrieved from [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries). Python bindings are auto-generated with [ctypesgen](https://github.com/ctypesgen/ctypesgen)
 
-Please see [#3](https://github.com/pypdfium2-team/pypdfium2/issues/3) for a list of platforms
-where binary wheels are available.
-Some wheels are not tested, unfortunately. If you have access to a theoretically supported but
-untested system, please report success or failure on the issue or discussion panel.
+Please see [#3](https://github.com/pypdfium2-team/pypdfium2/issues/3) for a list of platforms where binary wheels are available.
+Some wheels are not tested, unfortunately. If you have access to a theoretically supported but untested system, please report success or failure on the issue or discussion panel.
 
-(In case `bblanchon/pdfium-binaries` adds support for more architectures, pypdfium2 can be
-adapted easily.)
-
-For wheel naming conventions, please see
-[Python Packaging: Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/)
-and the various referenced PEPs. [This thread](https://discuss.python.org/t/wheel-platform-tag-for-windows/9025/5)
-may also provide helpful information.
+For wheel naming conventions, please see [Python Packaging: Platform compatibility tags](https://packaging.python.org/specifications/platform-compatibility-tags/) and the various referenced PEPs. [This thread](https://discuss.python.org/t/wheel-platform-tag-for-windows/9025/5) may also provide helpful information.
 
 pypdfium2 contains scripts to automate the release process:
 
-* To build the wheels, run `make release`. This will download binaries and header files,
-  write finished Python binary distributions to `dist/`, and run some checks.
-* To clean up after a release, run `make clean`. This will remove downloaded files and
-  build artifacts.
+* To build the wheels, run `make release`. This will download binaries and header files, write finished Python binary distributions to `dist/`, and run some checks.
+* To clean up after a release, run `make clean`. This will remove downloaded files and build artifacts.
 
 ### Testing
 
@@ -247,8 +218,7 @@ Run `make test`.
 
 ### Publishing the wheels
 
-* You may want to upload to [TestPyPI](https://test.pypi.org/legacy/) first to ensure
-  everything works as expected:
+* You may want to upload to [TestPyPI](https://test.pypi.org/legacy/) first to ensure everything works as expected:
   ```bash
   twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
   ```
@@ -260,49 +230,33 @@ Run `make test`.
 
 ## Issues
 
-Since pypdfium2 is built using upstream binaries and an automatic bindings creator,
-issues that are not related to packaging or support model code probably need to be
-addressed upstream. However, the [pypdfium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues)
-is always a good place to start if you have any problems, questions or suggestions.
+Since pypdfium2 is built using upstream binaries and an automatic bindings creator, issues that are not related to packaging or support model code probably need to be addressed upstream. However, the [pypdfium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues) is always a good place to start if you have any problems, questions or suggestions.
 
-If the cause of an issue could be determined to be in PDFium, the problem needs to be
-reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list).
+If the cause of an issue could be determined to be in PDFium, the problem needs to be reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list).
 
-Issues related to pre-compiled binaries should be discussed at
-[pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
+Issues related to pre-compiled binaries should be discussed at [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
 
-If your issue is caused by the bindings generator, refer to the
-[ctypesgen bug tracker](https://github.com/ctypesgen/ctypesgen/issues).
+If your issue is caused by the bindings generator, refer to the [ctypesgen bug tracker](https://github.com/ctypesgen/ctypesgen/issues).
 
 
 ## Known limitations
 
 ### Incompatibility with CPython 3.7.6 and 3.8.1
 
-pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a
-[regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119)
-that broke ctypesgen-created string handling code.
+pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that broke ctypesgen-created string handling code.
 
 
 ## Thanks
 
-Patches to PDFium and DepotTools originate from the [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/)
-repository. Many thanks to @bblanchon and @BoLaMN.
+Patches to PDFium and DepotTools originate from the [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/) repository. Many thanks to @bblanchon and @BoLaMN.
 
 
 ## History
 
 pypdfium2 is the successor of *pypdfium* and *pypdfium-reboot*.
 
-The initial *pypdfium* was packaged manually and did not get regular updates.
-There were no platform-specific wheels, but only a single wheel that contained
-binaries for 64-bit Linux, Windows and macOS.
+The initial *pypdfium* was packaged manually and did not get regular updates. There were no platform-specific wheels, but only a single wheel that contained binaries for 64-bit Linux, Windows and macOS.
 
-*pypdfium-reboot* then added a script to automate binary deployment and bindings generation
-to simplify regular updates. However, it was still not platform specific.
+*pypdfium-reboot* then added a script to automate binary deployment and bindings generation to simplify regular updates. However, it was still not platform specific.
 
-pypdfium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels.
-It also adds a basic support model and a command-line interface on top of the PDFium
-C API to simplify common use cases.
-Moreover, pypdfium2 includes facilities to build PDFium from source, to extend
-platform compatibility.
+pypdfium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels. It also adds a basic support model and a command-line interface on top of the PDFium C API to simplify common use cases. Moreover, pypdfium2 includes facilities to build PDFium from source, to extend platform compatibility.

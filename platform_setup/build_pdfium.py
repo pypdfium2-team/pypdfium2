@@ -136,10 +136,7 @@ def _replace_binaries():
         replacement = shutil.which(name)
         
         if replacement is None:
-            print("Warning: No system provided replacement available for '{}' - ".format(name) +
-                  "will keep using the version shipped with the PDFium toolchain.",
-                  file = sys.stderr,
-            )
+            print("Warning: No system provided replacement available for '{}' - will keep using the version shipped with the PDFium toolchain.".format(name), file=sys.stderr)
             continue
         
         os.remove(binary_path)
@@ -225,10 +222,7 @@ def _get_tool(tool, tool_desc, prefer_systools):
         if _sh_exe:
             exe = _sh_exe
         else:
-            print(
-                "Warning: Host system does not provide {} ({}).".format(tool, tool_desc),
-                file = sys.stderr,
-            )
+            print("Warning: Host system does not provide {} ({}).".format(tool, tool_desc), file=sys.stderr)
     
     return exe
 
@@ -297,21 +291,16 @@ def main(
 def parse_args(argv):
     
     parser = argparse.ArgumentParser(
-        description = "A script to automate building PDFium from source and generating bindings " +
-                      "with ctypesgen.",
+        description = "A script to automate building PDFium from source and generating bindings with ctypesgen.",
     )
     
     parser.add_argument(
         '--argfile', '-a',
-        help = "A text file containing custom PDFium build configuration, to be evaluated by " +
-               "`gn gen`. Call `gn args --list sourcebuild/pdfium/out/Default` to obtain a "   +
-               "list of possible options.",
+        help = "A text file containing custom PDFium build configuration, to be evaluated by `gn gen`. Call `gn args --list sourcebuild/pdfium/out/Default` to obtain a list of possible options.",
     )
     parser.add_argument(
         '--srcname', '-s',
-        help = "Name of the generated PDFium binary file. This script tries to automatically find "  +
-               "the binary, which should usually work. If it does not, however, this option may be " +
-               "used to explicitly provide the file name to look for.",
+        help = "Name of the generated PDFium binary file. This script tries to automatically find the binary, which should usually work. If it does not, however, this option may be used to explicitly provide the file name to look for.",
     )
     parser.add_argument(
         '--destname', '-d',
@@ -325,16 +314,12 @@ def parse_args(argv):
     parser.add_argument(
         '--check-deps', '-c',
         action = 'store_true',
-        help = "Check that all required dependencies are installed. (Automatically installs " +
-               "missing Python packages, complains about missing system dependencies.)",
+        help = "Check that all required dependencies are installed. (Automatically installs missing Python packages, complains about missing system dependencies.)",
     )
     parser.add_argument(
         '--nativebuild', '-n',
         action = 'store_true',
-        help = "Try to use system-provided tools if available, rather than pre-built binaries "   +
-               "from DepotTools. Warning: This may or may not work, and should only be used as "  +
-               "a last resort if building with the official toolchain failed. Moreover, it will " +
-               "likely not work on Windows.",
+        help = "Try to use system-provided tools if available, rather than pre-built binaries from DepotTools. Warning: This may or may not work, and should only be used as a last resort if building with the official toolchain failed. Moreover, it will likely not work on Windows.",
     )
     
     return parser.parse_args(argv)
