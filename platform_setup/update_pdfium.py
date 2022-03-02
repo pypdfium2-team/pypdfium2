@@ -17,7 +17,7 @@ from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
 
-if __name__ == '__main__': sys.modules['platform_setup'] = importlib.util.module_from_spec( importlib.util.spec_from_file_location('platform_setup', os.path.join(os.path.dirname(os.path.abspath(__file__)), '__init__.py')) )
+if __name__ == '__main__': sys.modules['platform_setup'] = importlib.util.module_from_spec( importlib.util.spec_from_file_location('platform_setup', join(os.path.dirname(os.path.abspath(__file__)), '__init__.py')) )
 
 from platform_setup.packaging_base import (
     DataTree,
