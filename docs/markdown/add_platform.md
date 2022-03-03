@@ -10,7 +10,7 @@ This document is intended to outline the steps required to support a new platfor
 * Add a new attribute to the class `PlatformNames` in `platform_setup/packaging_base.py`, following the existing naming patterns.
 * Insert a corresponding entry into the `ReleaseNames` dictionary in `platform_setup/update_pdfium.py`. The key is the `PlatformNames` attribute, while the value is the name of the file to download (without extension).
 * Add the new wheel tag to the `_get_tag()` function of `platform_setup/setup_base.py`. Usually, these platform tags match or are derived from the return of `sysconfig.get_platform()` on a device of the platform in question. While Windows generally matches `sysconfig.get_platform()`, there are the `manylinux` and `musllinux` standards for Linux. Sometimes you may even have to use multiple tags (e. g. `macos_10_xx_{arch}.macos_11_xx_{arch}`). Please see related Python documentation, look at the release files of other projects on PyPI that support this platform, or ask at `discuss.python.org` if you cannot determine the tag. To the author's knowledge, there is no comprehensive list of all possible wheel tags, unfortunately.
-* In `setup.py`, modify `install_handler()`: Add a function to the `HostPlatform` class to recognise systems of the platform in question, then add the check to the `if/elif` tree.
+* In `setup.py`, modify `install_handler()`: Add a check to recognise the new host platform and call `_setup()` with the corresponding `PlatformName` attribute as argument.
 * In `utilities/setup_all.sh`, insert the new platform identifier into the `whl_targets` array.
 * Test your changes:
   * Run something like this:
