@@ -120,12 +120,13 @@ class CliParser:
         
         for sub in self._subs:
             if main_arg.lower() in [n.lower() for n in sub.names]:
-                sc_found = True
                 sub.method(
                     argv = self.argv[1:],
                     prog = "{} {}".format(self.program, main_arg),
                     desc = sub.help,
                 )
+                sc_found = True
+                break
         
         if not sc_found:
             print("Error: Argument '{}' is not a valid subcommand".format(main_arg), file=sys.stderr)
