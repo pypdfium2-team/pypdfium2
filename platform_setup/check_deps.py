@@ -44,7 +44,7 @@ def install_pydeps():
         if not importlib.util.find_spec( pkg.replace('-', '_') ):
             _pip_install(pkg)
     
-    # uninstalling ctypesgen sometimes leaves parts behind, which makes the command unavailable, but `find_spec()` would still consider the library installed
+    # Uninstalling ctypesgen sometimes leaves parts behind. In this case, `find_spec()` would still consider the library installed, although the command is unavailable.
     if not shutil.which('ctypesgen'):
         _pip_install('ctypesgen')
 
