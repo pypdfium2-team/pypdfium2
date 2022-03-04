@@ -38,6 +38,23 @@ _clformat_pil = {
 }
 
 
+class BitmapDataHolder:
+    """
+    Class to store raw bitmap data.
+    
+    Parameters:
+        bm_handle (``FPDF_BITMAP``): Handle a to PDFium bitmap.
+        bm_data (``c_ubyte_Array_[N]``): Direct ctypes bitmap data.
+    """
+    
+    def __init__(self, bm_handle, bm_data):
+        self.bm_handle = bm_handle
+        self.bm_data = bm_data
+    
+    def close(self):
+        pdfium.FPDFBitmap_Destroy(self.bm_handle)
+
+
 def render_page_tobytes(
         pdf,
         page_index = 0,
@@ -84,7 +101,11 @@ def render_page_tobytes(
             Optimise rendering for LCD displays or for printing.
     
     Returns:
-        :class:`bytes`, :class:`str`, ``Tuple[int, int]`` – Bitmap data, used colour format, and image size in pixels (width, height).
+    
+        :class:`BitmapDataHolder`, :class:`str`, ``Tuple[int, int]`` – Bitmap data, used colour format, and image size in pixels (width, height).
+        
+        The bitmap data is a handler object which stores a raw ctypes byte array in the ``bm_data`` attribute. ``bytes(data_holder.bm_data)`` may be used to convert it to Python bytes. When you have finished working with ``bm_data``, call :meth:`BitmapDataHolder.close` to release allocated memory.
+        
         The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
     """
     
@@ -138,14 +159,13 @@ def render_page_tobytes(
     
     cbuf_pointer = pdfium.FPDFBitmap_GetBuffer(bitmap)
     cbuf_array = ctypes.cast(cbuf_pointer, ctypes.POINTER(ctypes.c_ubyte * (width*height*n_colours)))
-    data = bytes(cbuf_array.contents)
+    data_holder = BitmapDataHolder(bitmap, cbuf_array.contents)
     
-    pdfium.FPDFBitmap_Destroy(bitmap)
     pdfium.FORM_OnBeforeClosePage(page, form_fill)
     pdfium.FPDF_ClosePage(page)
     pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
     
-    return data, cl_format, (width, height)
+    return data_holder, cl_format, (width, height)
 
 
 def render_page_topil(*args, **kws):
@@ -159,5 +179,8 @@ def render_page_topil(*args, **kws):
     if not have_pil:
         raise RuntimeError("Pillow library needs to be installed for render_page_topil().")
     
-    data, cl_format, size = render_page_tobytes(*args, **kws)
-    return Image.frombytes(_clformat_pil[cl_format], size, data, "raw", cl_format, 0, 1)
+    data_holder, cl_format, size = render_page_tobytes(*args, **kws)
+    pil_image = Image.frombytes(_clformat_pil[cl_format], size, data_holder.bm_data, "raw", cl_format, 0, 1)
+    data_holder.close()
+    
+    return pil_image
