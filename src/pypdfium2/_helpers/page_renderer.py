@@ -52,7 +52,7 @@ class BitmapDataHolder:
         self.bm_array = bm_array
     
     def get_data(self):
-        """ Retrieve the raw ctypes data ``bm_array.contents`` (``c_ubyte_Array_[N]``). """
+        """ Retrieve the raw ctypes data from ``bm_array.contents`` (``c_ubyte_Array_[N]``). """
         return self.bm_array.contents
     
     def close(self):
