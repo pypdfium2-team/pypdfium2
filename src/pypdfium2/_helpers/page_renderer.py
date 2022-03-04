@@ -140,14 +140,14 @@ def render_page_tobytes(
     else:
         raise ValueError("Invalid optimise_mode {}".format(optimise_mode))
     
-    render_args = [
+    render_args = (
         bitmap,
         page,
         0, 0,
         width, height,
         translate_rotation(rotation),
         render_flags,
-    ]
+    )
     
     pdfium.FPDF_RenderPageBitmap(*render_args)
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
