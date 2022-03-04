@@ -7,6 +7,7 @@ Tasks
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
 * Rename `translate_...()` utility functions to something shorter. Maybe switch to dictionaries?
+* Consider pathways to avoid data copying in `page_renderer()`. Perhaps it would be possible to create a storage class containing the data and bitmap handle?
 * Increase test coverage. Probably need to overhaul testing completely. We would like to have a test for every single passage of the support model code. Some automated tests for the setup infrastructure would also be nice.
 * Add test case for rendering a PDF with interactive forms.
 * Move development section of the Readme into a dedicated file and add some more information.
