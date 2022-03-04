@@ -43,15 +43,20 @@ class BitmapDataHolder:
     Class to store bitmap handle and raw data.
     
     Parameters:
-        bm_handle (``FPDF_BITMAP``): Handle a to PDFium bitmap.
-        bm_data (``c_ubyte_Array_[N]``): Direct ctypes bitmap data.
+        bm_handle (``FPDF_BITMAP``): Handle to a PDFium bitmap.
+        bm_array (``LP_c_ubyte_Array_[N]``): ctypes bitmap data.
     """
     
-    def __init__(self, bm_handle, bm_data):
+    def __init__(self, bm_handle, bm_array):
         self.bm_handle = bm_handle
-        self.bm_data = bm_data
+        self.bm_array = bm_array
+    
+    def get_data(self):
+        """ Retrieve the raw ctypes data ``bm_array.contents`` (``c_ubyte_Array_[N]``). """
+        return self.bm_array.contents
     
     def close(self):
+        """ Release resources associated to the bitmap. """
         pdfium.FPDFBitmap_Destroy(self.bm_handle)
 
 
@@ -104,7 +109,7 @@ def render_page_tobytes(
     
         :class:`BitmapDataHolder`, :class:`str`, ``Tuple[int, int]`` – Bitmap data, used colour format, and image size.
         
-        The bitmap data is a handler object which stores a raw ctypes byte array in the ``bm_data`` attribute. ``bytes(data_holder.bm_data)`` may be used to acquire an independent copy of the data as Python bytes. When you have finished working with ``bm_data``, call :meth:`BitmapDataHolder.close` to release allocated memory.
+        The bitmap data is a handler object. Call :meth:`BitmapDataHolder.get_data` to obtain the raw ctypes byte array. ``bytes(data_holder.get_data())`` may be used to acquire an independent copy of the data as Python bytes. When you have finished working with the ctypes byte array, call :meth:`BitmapDataHolder.close` to release allocated memory.
         
         The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
         
@@ -161,7 +166,7 @@ def render_page_tobytes(
     
     cbuf_pointer = pdfium.FPDFBitmap_GetBuffer(bitmap)
     cbuf_array = ctypes.cast(cbuf_pointer, ctypes.POINTER(ctypes.c_ubyte * (width*height*n_colours)))
-    data_holder = BitmapDataHolder(bitmap, cbuf_array.contents)
+    data_holder = BitmapDataHolder(bitmap, cbuf_array)
     
     pdfium.FORM_OnBeforeClosePage(page, form_fill)
     pdfium.FPDF_ClosePage(page)
@@ -182,7 +187,7 @@ def render_page_topil(*args, **kws):
         raise RuntimeError("Pillow library needs to be installed for render_page_topil().")
     
     data_holder, cl_format, size = render_page_tobytes(*args, **kws)
-    pil_image = Image.frombytes(_clformat_pil[cl_format], size, data_holder.bm_data, "raw", cl_format, 0, 1)
+    pil_image = Image.frombytes(_clformat_pil[cl_format], size, data_holder.get_data(), "raw", cl_format, 0, 1)
     data_holder.close()
     
     return pil_image
