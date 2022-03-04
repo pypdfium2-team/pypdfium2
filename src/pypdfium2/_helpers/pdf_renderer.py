@@ -4,12 +4,9 @@
 import os
 import concurrent.futures
 from pypdfium2 import _pypdfium as pdfium
+from pypdfium2._helpers import page_renderer
 from pypdfium2._helpers.opener import PdfContext
 from pypdfium2._helpers.constants import OptimiseMode
-from pypdfium2._helpers.page_renderer import (
-    render_page_tobytes,
-    render_page_topil,
-)
 
 
 def _process_page(
@@ -103,7 +100,7 @@ def render_pdf_tobytes(*args, **kws):
     Yields:
         :class:`tuple`, :class:`str` – The return of :func:`.render_page_tobytes`, and a string for serial enumeration of output files.
     """
-    yield from _render_pdf_base(render_page_tobytes, *args, **kws)
+    yield from _render_pdf_base(page_renderer.render_page_tobytes, *args, **kws)
 
 
 def render_pdf_topil(*args, **kws):
@@ -113,4 +110,4 @@ def render_pdf_topil(*args, **kws):
     Yields:
         :class:`PIL.Image.Image`, :class:`str`
     """
-    yield from _render_pdf_base(render_page_topil, *args, **kws)
+    yield from _render_pdf_base(page_renderer.render_page_topil, *args, **kws)
