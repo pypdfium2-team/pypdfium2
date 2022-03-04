@@ -40,7 +40,7 @@ _clformat_pil = {
 
 class BitmapDataHolder:
     """
-    Class to store raw bitmap data.
+    Class to store bitmap handle and raw data.
     
     Parameters:
         bm_handle (``FPDF_BITMAP``): Handle a to PDFium bitmap.
