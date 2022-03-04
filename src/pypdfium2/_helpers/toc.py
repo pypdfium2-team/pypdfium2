@@ -60,8 +60,7 @@ def _get_toc_entry(pdf, bookmark, level):
     n_params = ctypes.c_ulong()
     view_pos = (pdfium.FS_FLOAT * 4)()
     view_mode = pdfium.FPDFDest_GetView(dest, n_params, view_pos)
-    n_params = n_params.value
-    view_pos = list(view_pos)[:n_params]
+    view_pos = list(view_pos)[:n_params.value]
     view_mode = translate_viewmode(view_mode)
     
     return OutlineItem(
@@ -77,7 +76,7 @@ def get_toc(
         pdf,
         parent = None,
         level = 0,
-        max_depth = None,
+        max_depth = 15,
         seen = None,
     ):
     """
@@ -92,9 +91,6 @@ def get_toc(
     Yields:
         :class:`OutlineItem`
     """
-    
-    if max_depth is None:
-        max_depth = 15
     
     if level >= max_depth:
         return []

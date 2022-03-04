@@ -48,14 +48,11 @@ class PdfDocument:
         """
         return saver.save_pdf(self._pdf, *args, **kws)
     
-    def get_toc(self, max_depth=None):
+    def get_toc(self, **kws):
         """
         Incrementally read the document's table of contents (see :func:`.get_toc`).
         """
-        yield from toc.get_toc(
-            self._pdf,
-            max_depth = max_depth,
-        )
+        yield from toc.get_toc(self._pdf, **kws)
     
     def render_page_tobytes(self, index, **kws):
         """
