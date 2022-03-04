@@ -4,4 +4,5 @@
 Planned Changes
 ===============
 
-At the moment, no API breaking changes are planned.
+The following API-breaking changes are planned or in consideration:
+* Rename some utility functions or make them private.
