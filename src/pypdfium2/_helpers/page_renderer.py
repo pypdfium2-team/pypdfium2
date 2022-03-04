@@ -44,16 +44,16 @@ class BitmapDataHolder:
     
     Parameters:
         bm_handle (``FPDF_BITMAP``): Handle to a PDFium bitmap.
-        bm_array (``LP_c_ubyte_Array_[N]``): ctypes bitmap data.
+        bm_array_ptr (``LP_c_ubyte_Array_[N]``): Pointer to ctypes bitmap data.
     """
     
-    def __init__(self, bm_handle, bm_array):
+    def __init__(self, bm_handle, bm_array_ptr):
         self.bm_handle = bm_handle
-        self.bm_array = bm_array
+        self.bm_array_ptr = bm_array_ptr
     
     def get_data(self):
-        """ Retrieve the raw ctypes data from ``bm_array.contents`` (``c_ubyte_Array_[N]``). """
-        return self.bm_array.contents
+        """ Retrieve the raw ctypes data from ``bm_array_ptr.contents`` (``c_ubyte_Array_[N]``). """
+        return self.bm_array_ptr.contents
     
     def close(self):
         """ Release resources associated to the bitmap. """
