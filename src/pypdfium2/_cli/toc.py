@@ -26,7 +26,7 @@ def print_toc(toc):
     for item in toc:
         print(
             '    ' * item.level +
-            "{} -> {}  # {} {}".format(
+            '{} -> {}  # {} {}'.format(
                 item.title,
                 item.page_index + 1,
                 item.view_mode,
