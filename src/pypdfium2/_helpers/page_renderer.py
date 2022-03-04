@@ -108,24 +108,16 @@ def render_page_tobytes(
     page = pdfium.FPDF_LoadPage(pdf, page_index)
     pdfium.FORM_OnAfterLoadPage(page, form_fill)
     
-    width  = math.ceil(pdfium.FPDF_GetPageWidthF(page)  * scale)
+    width = math.ceil(pdfium.FPDF_GetPageWidthF(page) * scale)
     height = math.ceil(pdfium.FPDF_GetPageHeightF(page) * scale)
-    
     if rotation in (90, 270):
         width, height = height, width
     
-    bitmap = pdfium.FPDFBitmap_CreateEx(
-        width,
-        height,
-        cl_pdfium,
-        None,
-        width * n_colours,
-    )
+    bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, None, width*n_colours)
     if fpdf_colour is not None:
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, fpdf_colour)
     
     render_flags = 0x00
-    
     if annotations:
         render_flags |= pdfium.FPDF_ANNOT
     if greyscale:
@@ -140,20 +132,12 @@ def render_page_tobytes(
     else:
         raise ValueError("Invalid optimise_mode {}".format(optimise_mode))
     
-    render_args = (
-        bitmap,
-        page,
-        0, 0,
-        width, height,
-        translate_rotation(rotation),
-        render_flags,
-    )
-    
+    render_args = (bitmap, page, 0, 0, width, height, translate_rotation(rotation), render_flags)
     pdfium.FPDF_RenderPageBitmap(*render_args)
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
     cbuf_pointer = pdfium.FPDFBitmap_GetBuffer(bitmap)
-    cbuf_array = ctypes.cast(cbuf_pointer, ctypes.POINTER(ctypes.c_ubyte * (width * height * n_colours)))
+    cbuf_array = ctypes.cast(cbuf_pointer, ctypes.POINTER(ctypes.c_ubyte * (width*height*n_colours)))
     data = bytes(cbuf_array.contents)
     
     pdfium.FPDFBitmap_Destroy(bitmap)
