@@ -4,7 +4,7 @@
 # Changelog
 
 
-## 1.0.0b1 (scheduled for 2022-03-07)
+## Next
 
 - Updated PDFium from `4915` to `xxxx`
 - API breaking changes:
