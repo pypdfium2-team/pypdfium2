@@ -40,7 +40,7 @@ _clformat_pil = {
 
 class BitmapDataHolder:
     """
-    Class to store bitmap handle and raw data.
+    Class to store a bitmap handle and the pointer to its data.
     
     Parameters:
         bm_handle (``FPDF_BITMAP``): Handle to a PDFium bitmap.
@@ -164,9 +164,9 @@ def render_page_tobytes(
     pdfium.FPDF_RenderPageBitmap(*render_args)
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
-    cbuf_pointer = pdfium.FPDFBitmap_GetBuffer(bitmap)
-    cbuf_array = ctypes.cast(cbuf_pointer, ctypes.POINTER(ctypes.c_ubyte * (width*height*n_colours)))
-    data_holder = BitmapDataHolder(bitmap, cbuf_array)
+    cbuf_ptr = pdfium.FPDFBitmap_GetBuffer(bitmap)
+    cbuf_array_ptr = ctypes.cast(cbuf_ptr, ctypes.POINTER(ctypes.c_ubyte * (width*height*n_colours)))
+    data_holder = BitmapDataHolder(bitmap, cbuf_array_ptr)
     
     pdfium.FORM_OnBeforeClosePage(page, form_fill)
     pdfium.FPDF_ClosePage(page)
