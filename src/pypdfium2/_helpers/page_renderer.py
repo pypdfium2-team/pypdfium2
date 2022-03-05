@@ -109,7 +109,7 @@ def render_page_tobytes(
     
         :class:`BitmapDataHolder`, :class:`str`, ``Tuple[int, int]`` – Bitmap data, used colour format, and image size.
         
-        The bitmap data is a handler object. Call :meth:`BitmapDataHolder.get_data` to obtain the raw ctypes byte array. ``bytes(data_holder.get_data())`` may be used to acquire an independent copy of the data as Python bytes. When you have finished working with the ctypes byte array, call :meth:`BitmapDataHolder.close` to release allocated memory.
+        The bitmap data is a wrapper object. Call :meth:`BitmapDataHolder.get_data` to obtain the raw ctypes byte array. ``bytes(data_holder.get_data())`` may be used to acquire an independent copy of the data as Python bytes. When you have finished working with the ctypes byte array, call :meth:`BitmapDataHolder.close` to release allocated memory.
         
         The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
         
