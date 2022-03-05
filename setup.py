@@ -48,25 +48,18 @@ def install_handler():
     from platform_setup import check_deps
     from platform_setup.packaging_base import SourceTree, PlatformNames
     
-    StatusFile = join(SourceTree, 'platform_setup', 'setup_status.txt')
+    StatusFile = join(SourceTree, 'platform_setup', '.presetup_done.txt')
     
     def check_presetup():
-        with open(StatusFile, 'r') as file_handle:
-            content = file_handle.read().strip()
-        if content == 'InitialState':
-            return True
-        elif content == 'PreSetupDone':
+        if os.path.exists(StatusFile):
             return False
         else:
-            raise ValueError( "Invalid content in setup status file: '{}'".format(content) )
-    
-    def presetup_done():
-        with open(StatusFile, 'w') as file_handle:
-            file_handle.write('PreSetupDone')
+            os.mknod(StatusFile)
+            return True
     
     W_Presetup = check_presetup()
-    if W_Presetup: check_deps.main()
-    
+    if W_Presetup:
+        check_deps.main()
     
     from platform_setup import build_pdfium, update_pdfium
     from platform_setup.setup_base import mkwheel
@@ -111,8 +104,6 @@ def install_handler():
         # Platform without pre-built binaries - try a regular sourcebuild
         if W_Presetup: build_pdfium.main()
         mkwheel(PlatformNames.sourcebuild)
-    
-    presetup_done()
 
 
 def main():

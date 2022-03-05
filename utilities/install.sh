@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 python3 -m pip install . -v --no-build-isolation
-printf "InitialState" > platform_setup/setup_status.txt
+unlink platform_setup/.presetup_done.txt

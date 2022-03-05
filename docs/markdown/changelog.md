@@ -15,6 +15,7 @@
 - The Pillow dependency is now optional in the core library.
 - Removed workarounds for non-ascii filepaths on Windows. The issues with `FPDF_LoadDocument()` should be fixed since PDFium `4915`. Thanks to Lei Zhang and Tom Sepez of PDFium team.
 - Added some boilerplate code to setup scripts to make sure imports always work when the file is invoked directly.
+- Improved setup status tracking.
 - Started removing manual line breaks to simplify editing. Any decent text editor or diff tool should provide automatic word wrap.
 
 

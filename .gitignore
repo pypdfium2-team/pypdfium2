@@ -20,6 +20,7 @@ sourcebuild/*
 *.kate-swp
 *.kdev4
 .python-version
+.presetup_done.txt
 
 *.so
 *.dll
