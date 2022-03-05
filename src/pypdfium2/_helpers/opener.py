@@ -56,11 +56,11 @@ def open_pdf_auto(input_obj, password=None):
             A password to unlock the document, if encrypted.
     
     Returns:
-        ``Tuple[pdfium.FPDF_DOCUMENT, Optional[LoaderData]]`` –
-        The handle to a PDFium document, and a :class:`.LoaderData` object to store associated file access data. The latter may be :data:`None` if no custom file access was required.
+        ``Tuple[pdfium.FPDF_DOCUMENT, Optional[LoaderDataHolder]]`` –
+        The handle to a PDFium document, and a :class:`.LoaderDataHolder` object to store associated file access data. The latter may be :data:`None` if no custom file access was required.
     
     Warning:
-        Callers **MUST** ensure that the :class:`.LoaderData` object remain available for as long as they work with the PDF. That means it has to be accessed again when done with processing, to prevent Python from automatically deleting the object. This can be achieved by passing it as second parameter to :func:`.close_pdf`, which is also necessary to release the acquired file buffer. If attempting to access the ``FPDF_DOCUMENT`` handle after the loader data has been deleted, a segmentation fault would occur.
+        Callers **MUST** ensure that the :class:`.LoaderDataHolder` object remain available for as long as they work with the PDF. That means it has to be accessed again when done with processing, to prevent Python from automatically deleting the object. This can be achieved by passing it as second parameter to :func:`.close_pdf`, which is also necessary to release the acquired file buffer. If attempting to access the ``FPDF_DOCUMENT`` handle after the loader data has been deleted, a segmentation fault would occur.
     """
     
     if isinstance(input_obj, bytes):
@@ -89,7 +89,7 @@ def close_pdf(pdf, loader_data=None):
     Parameters:
         pdf (``FPDF_DOCUMENT``):
             The PDFium document object to close using ``FPDF_CloseDocument()``.
-        loader_data (LoaderData):
+        loader_data (LoaderDataHolder):
             Object that stores custom file access data associated to the PDF, as returned by :func:`.open_pdf_auto`, :func:`.open_pdf_buffer`, or :func:`.open_pdf_native`.
     """
     

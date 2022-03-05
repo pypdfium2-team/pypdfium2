@@ -37,7 +37,7 @@ class _reader_class:
         return 1
 
 
-class LoaderData:
+class LoaderDataHolder:
     """
     Class to store data associated to an ``FPDF_DOCUMENT`` that was opened using ``FPDF_LoadCustomDocument()``.
     
@@ -77,7 +77,7 @@ def open_pdf_buffer(buffer, password=None):
             A password to unlock the document, if encrypted.
     
     Returns:
-        ``Tuple[pdfium.FPDF_DOCUMENT, LoaderData]``
+        ``Tuple[pdfium.FPDF_DOCUMENT, LoaderDataHolder]``
     
     See also :func:`.open_pdf_auto`. **The same warnings apply!**
     """
@@ -104,7 +104,7 @@ def open_pdf_buffer(buffer, password=None):
     fileaccess.m_GetBlock = FuncType( _reader_class(buffer) )
     
     pdf = pdfium.FPDF_LoadCustomDocument(ctypes.byref(fileaccess), password)
-    ld_data = LoaderData(buffer, fileaccess.m_GetBlock)
+    ld_data = LoaderDataHolder(buffer, fileaccess.m_GetBlock)
     
     if pdfium.FPDF_GetPageCount(pdf) < 1:
         handle_pdfium_error(False)
@@ -123,7 +123,7 @@ def open_pdf_native(filepath, password=None):
             A password to unlock the document, if encrypted.
     
     Returns:
-        ``Tuple[pdfium.FPDF_DOCUMENT, LoaderData]``
+        ``Tuple[pdfium.FPDF_DOCUMENT, LoaderDataHolder]``
     
     See also :func:`.open_pdf_auto`. **The same warnings apply!**
     """
