@@ -132,9 +132,7 @@ def render_page_tobytes(
     
     form_config = pdfium.FPDF_FORMFILLINFO(2)
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
-    
     page = pdfium.FPDF_LoadPage(pdf, page_index)
-    pdfium.FORM_OnAfterLoadPage(page, form_fill)
     
     width = math.ceil(pdfium.FPDF_GetPageWidthF(page) * scale)
     height = math.ceil(pdfium.FPDF_GetPageHeightF(page) * scale)
@@ -168,7 +166,6 @@ def render_page_tobytes(
     cbuf_array_ptr = ctypes.cast(cbuf_ptr, ctypes.POINTER(ctypes.c_ubyte * (width*height*n_colours)))
     data_holder = BitmapDataHolder(bitmap, cbuf_array_ptr)
     
-    pdfium.FORM_OnBeforeClosePage(page, form_fill)
     pdfium.FPDF_ClosePage(page)
     pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
     
