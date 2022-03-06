@@ -311,7 +311,7 @@ def parse_args(argv):
     
     parser.add_argument(
         '--argfile', '-a',
-        help = "A text file containing custom PDFium build configuration, to be evaluated by `gn gen`. Call `gn args --list sourcebuild/pdfium/out/Default` to obtain a list of possible options.",
+        help = "A text file containing custom PDFium build configuration, to be evaluated by `gn gen`. Call `gn args --list out/Default/` in `sourcebuild/pdfium/` to obtain a list of possible options.",
     )
     parser.add_argument(
         '--srcname', '-s',
