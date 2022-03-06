@@ -59,19 +59,11 @@ DefaultConfig = [
     'pdf_use_skia = false',
     'treat_warnings_as_errors = false',
 ]
-if sys.platform.startswith('linux'):
-    DefaultConfig += [ 'use_custom_libcxx = true' ]
-elif sys.platform.startswith('win32'):
-    DefaultConfig += [ 'pdf_use_win32_gdi = true' ]
-elif sys.platform.startswith('darwin'):
-    DefaultConfig += [ 'mac_deployment_target = "10.11.0"' ]
-
 NativebuildConfig = [
     'clang_use_chrome_plugins = false',
     #'init_stack_vars = false',
     #'use_cxx11 = true',
 ]
-
 SyslibsConfig = [
     'use_system_freetype = true',
     'use_system_lcms2 = true',
@@ -81,7 +73,13 @@ SyslibsConfig = [
     'use_system_zlib = true',
     'sysroot = "/"',
 ]
-if sys.platform.startswith('darwin'):
+
+if sys.platform.startswith('linux'):
+    DefaultConfig += [ 'use_custom_libcxx = true' ]
+elif sys.platform.startswith('win32'):
+    DefaultConfig += [ 'pdf_use_win32_gdi = true' ]
+elif sys.platform.startswith('darwin'):
+    DefaultConfig += [ 'mac_deployment_target = "10.11.0"' ]
     SyslibsConfig += [ 'use_system_xcode = true' ]
 
 
