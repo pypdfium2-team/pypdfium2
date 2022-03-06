@@ -59,7 +59,6 @@ DefaultConfig = [
     'pdf_use_skia = false',
     'treat_warnings_as_errors = false',
 ]
-
 if sys.platform.startswith('linux'):
     DefaultConfig += [ 'use_custom_libcxx = true' ]
 elif sys.platform.startswith('win32'):
@@ -67,8 +66,23 @@ elif sys.platform.startswith('win32'):
 elif sys.platform.startswith('darwin'):
     DefaultConfig += [ 'mac_deployment_target = "10.11.0"' ]
 
-NativeBuildConfig = DefaultConfig.copy()
-NativeBuildConfig += [ 'clang_use_chrome_plugins = false' ]
+NativebuildConfig = [
+    'clang_use_chrome_plugins = false',
+    #'init_stack_vars = false',
+    #'use_cxx11 = true',
+]
+
+SyslibsConfig = [
+    'use_system_freetype = true',
+    'use_system_lcms2 = true',
+    'use_system_libjpeg = true',
+    'use_system_libopenjpeg2 = true',
+    'use_system_libpng = true',
+    'use_system_zlib = true',
+    'sysroot = "/"',
+]
+if sys.platform.startswith('darwin'):
+    SyslibsConfig += [ 'use_system_xcode = true' ]
 
 
 def dl_depottools(do_sync):
@@ -232,6 +246,7 @@ def main(
         b_update = False,
         b_checkdeps = False,
         b_nativebuild = False,
+        b_use_syslibs = False,
     ):
     
     # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
@@ -252,9 +267,12 @@ def main(
     
     if b_argfile is None:
         
-        config_list = DefaultConfig
+        config_list = DefaultConfig.copy()
+        if b_use_syslibs:
+            os.environ['PKG_CONFIG_PATH'] = '/usr/lib/x86_64-linux-gnu/pkgconfig'
+            config_list += SyslibsConfig
         if b_nativebuild:
-            config_list = NativeBuildConfig
+            config_list += NativebuildConfig
         
         config_str = ''
         sep = ''
@@ -319,6 +337,11 @@ def parse_args(argv):
         action = 'store_true',
         help = "Try to use system-provided tools if available, rather than pre-built binaries from the PDFium toolchain. Warning: This may or may not work, and should only be used as last resort if the regular build strategy failed.",
     )
+    parser.add_argument(
+        '--use-syslibs', '-l',
+        action = 'store_true',
+        help = "Use system libraries instead of those bundled with PDFium.",
+    )
     
     return parser.parse_args(argv)
 
@@ -332,6 +355,7 @@ def run_cli(argv=sys.argv[1:]):
         b_update = args.update,
         b_checkdeps = args.check_deps,
         b_nativebuild = args.nativebuild,
+        b_use_syslibs = args.use_syslibs,
     )
     
 
