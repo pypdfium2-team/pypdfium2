@@ -2,7 +2,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Attempt to build PDFium from source. This may take very long.
+# Attempt to download and build PDFium from source. This may take very long.
+# Only tested on Linux with glibc. Might not work on other platforms.
 
 import os
 import sys
@@ -29,7 +30,7 @@ PatchDir       = join(SB_Dir,'patches')
 DepotToolsDir  = join(SB_Dir,'depot_tools')
 PDFiumDir      = join(SB_Dir,'pdfium')
 PDFiumBuildDir = join(PDFiumDir,'out','Default')
-OutputDir      = join(DataTree, PlatformNames.sourcebuild)
+OutputDir      = join(DataTree,PlatformNames.sourcebuild)
 NB_BinaryDir   = join(PDFiumDir,'third_party','llvm-build','Release+Asserts','bin')
 
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
@@ -316,7 +317,7 @@ def parse_args(argv):
     parser.add_argument(
         '--nativebuild', '-n',
         action = 'store_true',
-        help = "Try to use system-provided tools if available, rather than pre-built binaries from DepotTools. Warning: This may or may not work, and should only be used as a last resort if building with the official toolchain failed. Moreover, it will likely not work on Windows.",
+        help = "Try to use system-provided tools if available, rather than pre-built binaries from the PDFium toolchain. Warning: This may or may not work, and should only be used as last resort if the regular build strategy failed.",
     )
     
     return parser.parse_args(argv)
