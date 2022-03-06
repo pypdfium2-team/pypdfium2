@@ -51,36 +51,40 @@ PdfiumNativebuildPatches = [
     (join(PatchDir,'pdfium','nativebuild.patch'), join(PDFiumDir,'build')),
 ]
 
-DefaultConfig = [
-    'is_debug = false',
-    'pdf_is_standalone = true',
-    'pdf_enable_v8 = false',
-    'pdf_enable_xfa = false',
-    'pdf_use_skia = false',
-    'treat_warnings_as_errors = false',
-]
-NativebuildConfig = [
-    'clang_use_chrome_plugins = false',
-    #'init_stack_vars = false',
-    #'use_cxx11 = true',
-]
-SyslibsConfig = [
-    'use_system_freetype = true',
-    'use_system_lcms2 = true',
-    'use_system_libjpeg = true',
-    'use_system_libopenjpeg2 = true',
-    'use_system_libpng = true',
-    'use_system_zlib = true',
-    'sysroot = "/"',
-]
-
+DefaultConfig = {
+    'is_debug': False,
+    'treat_warnings_as_errors': False,
+    'pdf_is_standalone': True,
+    'pdf_enable_v8': False,
+    'pdf_enable_xfa': False,
+    'pdf_use_skia': False,
+}
 if sys.platform.startswith('linux'):
-    DefaultConfig += [ 'use_custom_libcxx = true' ]
+    DefaultConfig['use_custom_libcxx'] = True
 elif sys.platform.startswith('win32'):
-    DefaultConfig += [ 'pdf_use_win32_gdi = true' ]
+    DefaultConfig['pdf_use_win32_gdi'] = True
 elif sys.platform.startswith('darwin'):
-    DefaultConfig += [ 'mac_deployment_target = "10.11.0"' ]
-    SyslibsConfig += [ 'use_system_xcode = true' ]
+    DefaultConfig['mac_deployment_target'] = '10.11.0'
+
+NativebuildConfig = {
+    'clang_use_chrome_plugins': False,
+    #'init_stack_vars': False,
+    #'use_cxx11': False,
+}
+
+SyslibsConfig = {
+    'use_system_freetype': True,
+    'use_system_lcms2': True,
+    'use_system_libjpeg': True,
+    'use_system_libopenjpeg2': True,
+    'use_system_libpng': True,
+    'use_system_zlib': True,
+    'sysroot': '/',
+}
+if sys.platform.startswith('linux'):
+    SyslibsConfig['use_custom_libcxx'] = False
+elif sys.platform.startswith('darwin'):
+    SyslibsConfig['use_system_xcode'] = True
 
 
 def dl_depottools(do_sync):
@@ -237,6 +241,22 @@ def _get_tool(tool, tool_desc, prefer_systools):
     return exe
 
 
+def _create_config_str(config_dict):
+    
+    config_str = ''
+    sep = ''
+    
+    for key, value in config_dict.items():
+        config_str += sep + '{} = '.format(key)
+        if isinstance(value, bool):
+            config_str += str(value).lower()
+        else:
+            config_str += '"{}"'.format(value)
+        sep = '\n'
+    
+    return config_str
+
+
 def main(
         b_argfile = None,
         b_srcname = None,
@@ -264,18 +284,12 @@ def main(
     Ninja = _get_tool('ninja', 'ninja-build', b_nativebuild)
     
     if b_argfile is None:
-        
-        config_list = DefaultConfig.copy()
-        if b_use_syslibs:
-            config_list += SyslibsConfig
+        config_dict = DefaultConfig.copy()
         if b_nativebuild:
-            config_list += NativebuildConfig
-        
-        config_str = ''
-        sep = ''
-        for entry in config_list:
-            config_str += sep + entry
-            sep = '\n'
+            config_dict.update(NativebuildConfig)
+        if b_use_syslibs:
+            config_dict.update(SyslibsConfig)
+        config_str = _create_config_str(config_dict)
         
     else:
         with open(os.path.abspath(b_argfile), 'r') as file_handle:
