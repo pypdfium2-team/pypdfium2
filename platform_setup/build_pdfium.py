@@ -338,7 +338,7 @@ def parse_args(argv):
         help = "Try to use system-provided tools if available, rather than pre-built binaries from the PDFium toolchain. Warning: This may or may not work, and should only be used as last resort if the regular build strategy failed.",
     )
     parser.add_argument(
-        '--use-syslibs',
+        '--use-syslibs', '-l',
         action = 'store_true',
         help = "Use system libraries instead of those bundled with PDFium.",
     )
