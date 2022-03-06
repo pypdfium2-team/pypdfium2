@@ -269,7 +269,6 @@ def main(
         
         config_list = DefaultConfig.copy()
         if b_use_syslibs:
-            os.environ['PKG_CONFIG_PATH'] = '/usr/lib/x86_64-linux-gnu/pkgconfig'
             config_list += SyslibsConfig
         if b_nativebuild:
             config_list += NativebuildConfig
@@ -340,7 +339,7 @@ def parse_args(argv):
     parser.add_argument(
         '--use-syslibs', '-l',
         action = 'store_true',
-        help = "Use system libraries instead of those bundled with PDFium.",
+        help = "Use system libraries instead of those bundled with PDFium. (Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng and zlib are installed, and that $PKG_CONFIG_PATH is set correctly (e. g. to /usr/lib/x86_64-linux-gnu/pkgconfig)",
     )
     
     return parser.parse_args(argv)
