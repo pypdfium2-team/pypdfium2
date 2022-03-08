@@ -178,7 +178,7 @@ def render_page_tobytes(*args, **kws):
     Render a single page to bytes. Parameters are the same as for :func:`render_page_base`.
     
     Returns:
-         bytes, str, Tuple[int, int]
+         :class:`bytes`, :class:`str`, Tuple[int, int]
     """
     data_holder, cl_format, size = render_page_base(*args, **kws)
     data = bytes( data_holder.get_data() )
