@@ -60,7 +60,7 @@ class BitmapDataHolder:
         pdfium.FPDFBitmap_Destroy(self.bm_handle)
 
 
-def render_page_tobytes(
+def render_page_base(
         pdf,
         page_index = 0,
         scale = 1,
@@ -71,7 +71,8 @@ def render_page_tobytes(
         optimise_mode = OptimiseMode.none,
     ):
     """
-    Render a single PDF page to bytes using PDFium.
+    Render a single PDF page to ctypes data using PDFium.
+    Base function for :func:`.render_pdf_tobytes` and :func:`.render_pdf_topil`
     
     Parameters:
         
@@ -107,7 +108,7 @@ def render_page_tobytes(
     
     Returns:
     
-        :class:`BitmapDataHolder`, :class:`str`, ``Tuple[int, int]`` – Bitmap data, used colour format, and image size.
+        :class:`BitmapDataHolder`, :class:`str`, ``Tuple[int, int]`` – Bitmap data holder, used colour format, and image size.
         
         The bitmap data is a wrapper object. Call :meth:`BitmapDataHolder.get_data` to obtain the raw ctypes byte array. ``bytes(data_holder.get_data())`` may be used to acquire an independent copy of the data as Python bytes. When you have finished working with the ctypes byte array, call :meth:`BitmapDataHolder.close` to release allocated memory.
         
@@ -172,9 +173,22 @@ def render_page_tobytes(
     return data_holder, cl_format, (width, height)
 
 
+def render_page_tobytes(*args, **kws):
+    """
+    Render a single page to bytes. Parameters are the same as for :func:`render_page_base`.
+    
+    Returns:
+         :class:`bytes`, :class:`str`, Tuple[int, int]
+    """
+    data_holder, cl_format, size = render_page_base(*args, **kws)
+    data = bytes( data_holder.get_data() )
+    data_holder.close()
+    return data, cl_format, size
+
+
 def render_page_topil(*args, **kws):
     """
-    Render a single page to a :mod:`PIL` image. Parameters are the same as for :func:`render_page_tobytes`.
+    Render a single page to a :mod:`PIL` image. Parameters are the same as for :func:`render_page_base`.
     
     Returns:
         :class:`PIL.Image.Image`
@@ -183,7 +197,7 @@ def render_page_topil(*args, **kws):
     if not have_pil:
         raise RuntimeError("Pillow library needs to be installed for render_page_topil().")
     
-    data_holder, cl_format, size = render_page_tobytes(*args, **kws)
+    data_holder, cl_format, size = render_page_base(*args, **kws)
     pil_image = Image.frombytes(_clformat_pil[cl_format], size, data_holder.get_data(), "raw", cl_format, 0, 1)
     data_holder.close()
     

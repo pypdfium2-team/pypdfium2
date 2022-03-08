@@ -138,7 +138,7 @@ def test_render_pdf():
         i += 1
 
 
-def test_render_pdf_bytes():
+def test_render_pdf_frombytes():
     
     with open(TestFiles.multipage, 'rb') as file_handle:
         file_bytes = file_handle.read()
@@ -200,3 +200,25 @@ def test_render_bgcolour(colour):
     assert bg_pixel == px_colour
     
     pil_image.close()
+
+
+def _abstest_render_tobytes(img_info):
+    data, cl_format, size = img_info
+    assert isinstance(data, bytes)
+    assert isinstance(cl_format, str)
+    assert 1 <= len(cl_format) <= 4
+    assert all (c in ('RGBLA') for c in cl_format)
+    assert len(size) == 2
+    assert all(isinstance(s, int) for s in size)
+    assert len(data) == size[0] * size[1] * len(cl_format)
+
+
+def test_render_page_tobytes():
+    with pdfium.PdfContext(TestFiles.render) as pdf:
+        _abstest_render_tobytes( pdfium.render_page_tobytes(pdf, 0) )
+
+
+def test_render_pdf_tobytes():
+    for img_info, num in pdfium.render_pdf_tobytes(TestFiles.multipage):
+        _abstest_render_tobytes(img_info)
+        assert num.isdigit()

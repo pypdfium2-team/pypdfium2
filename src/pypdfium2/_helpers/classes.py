@@ -64,6 +64,16 @@ class PdfDocument:
             **kws
         )
     
+    def render_pdf_tobytes(self, **kws):
+        """
+        Incrementally render multiple pages to bytes (see :func:`.render_pdf_tobytes`).
+        """
+        yield from pdf_renderer.render_pdf_tobytes(
+            self._input_obj,
+            password = self._password,
+            **kws
+        )
+    
     def render_page_topil(self, index, **kws):
         """
         Render a single page to a :mod:`PIL` image (see :func:`.render_page_topil`).

@@ -4,6 +4,11 @@
 # Changelog
 
 
+## 1.0.0b2 (2022-03-08)
+
+- Fixed `render_pdf_tobytes()`: The previous version of `render_page_tobytes()` returned a `BitmapDataHolder` object, which contains data that is not picklable. This broke concurrent processing in `render_pdf_tobytes()`. Therefore, `render_page_tobytes()` was changed to actually return bytes. The previous behaviour is now available with `render_page_base()`. Also made `render_pdf_base()` public.
+
+
 ## 1.0.0b1 (2022-03-08)
 
 - Updated PDFium from `4915` to `4929`
