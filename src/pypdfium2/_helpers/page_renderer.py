@@ -72,7 +72,7 @@ def render_page_base(
     ):
     """
     Render a single PDF page to ctypes data using PDFium.
-    Base function for :func:`.render_pdf_tobytes` and :func:`.render_pdf_topil`
+    Base function for :func:`.render_pdf_tobytes` and :func:`.render_pdf_topil`.
     
     Parameters:
         
