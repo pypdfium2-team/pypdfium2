@@ -93,6 +93,8 @@ def install_handler():
         _setup(PlatformNames.linux_arm64)
     elif host.is_platform('linux', 'x86_64'):
         _setup(PlatformNames.linux_x64)
+    elif host.is_platform('linux', 'i686'):
+        _setup(PlatformNames.linux_x86)
     elif host.is_platform('win', 'arm64'):
         _setup(PlatformNames.windows_arm64)
     elif host.is_platform('win', 'amd64'):

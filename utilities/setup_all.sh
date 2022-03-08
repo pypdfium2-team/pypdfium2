@@ -11,6 +11,7 @@ whl_targets=(
     "linux_arm64"
     "linux_arm32"
     "linux_x64"
+    "linux_x86"
     "windows_arm64"
     "windows_x64"
     "windows_x86"
