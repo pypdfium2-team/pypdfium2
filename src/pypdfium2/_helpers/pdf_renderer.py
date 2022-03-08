@@ -99,14 +99,14 @@ def render_pdf_base(
 
 def render_pdf_tobytes(*args, **kws):
     """
-    Render multiple pages of a PDF to bytes. See :func:`.render_page_tobytes`
+    Render multiple pages of a PDF to bytes. See :func:`.render_pdf_base` and :func:`.render_page_tobytes`.
     """
     yield from render_pdf_base(page_renderer.render_page_tobytes, *args, **kws)
 
 
 def render_pdf_topil(*args, **kws):
     """
-    Render multiple pages of a PDF to :mod:`PIL` images. See :func:`.render_page_topil`.
+    Render multiple pages of a PDF to :mod:`PIL` images. See :func:`.render_pdf_base` and :func:`.render_page_topil`.
     
     Yields:
         :class:`PIL.Image.Image`, :class:`str`
