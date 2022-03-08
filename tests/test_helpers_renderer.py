@@ -221,4 +221,4 @@ def test_render_page_tobytes():
 def test_render_pdf_tobytes():
     for img_info, num in pdfium.render_pdf_tobytes(TestFiles.multipage):
         _abstest_render_tobytes(img_info)
-        assert num.isalnum()
+        assert num.isdigit()
