@@ -100,6 +100,9 @@ def render_pdf_base(
 def render_pdf_tobytes(*args, **kws):
     """
     Render multiple pages of a PDF to bytes. See :func:`.render_pdf_base` and :func:`.render_page_tobytes`.
+    
+    Yields:
+        :class:`tuple`, :class:`str`
     """
     yield from render_pdf_base(page_renderer.render_page_tobytes, *args, **kws)
 
