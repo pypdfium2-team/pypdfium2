@@ -40,7 +40,7 @@ def _invoke_process_page(args):
     return _process_page(*args)
 
 
-def _render_pdf_base(
+def render_pdf_base(
         render_meth,
         input_obj,
         page_indices = None,
@@ -53,6 +53,18 @@ def _render_pdf_base(
         greyscale = False,
         optimise_mode = OptimiseMode.none,
     ):
+    """
+    Render multiple pages of a PDF using an arbitrary render method.
+    Base function for :func:`render_pdf_tobytes` and :func:`render_pdf_topil`
+    
+    Parameters:
+        input_obj (str | bytes | typing.BinaryIO):
+            The PDF document to render. It may be given as file path, bytes, or byte buffer.
+        page_indices (typing.Sequence[int]):
+            A list of zero-based page indices to render.
+    
+    The other parameters are the same as for :func:`.render_page_tobytes`.
+    """
     
     with PdfContext(input_obj, password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
@@ -85,24 +97,6 @@ def _render_pdf_base(
             yield image, suffix
 
 
-def render_pdf_tobytes(*args, **kws):
-    """
-    Render multiple pages of a PDF to bytes, using a process pool executor.
-    
-    Parameters:
-        input_obj (str | bytes | typing.BinaryIO):
-            The PDF document to render. It may be given as file path, bytes, or byte buffer.
-        page_indices (typing.Sequence[int]):
-            A list of zero-based page indices to render.
-    
-    The other parameters are the same as for :func:`.render_page_tobytes`.
-    
-    Yields:
-        :class:`tuple`, :class:`str` – The return of :func:`.render_page_tobytes`, and a string for serial enumeration of output files.
-    """
-    yield from _render_pdf_base(page_renderer.render_page_tobytes, *args, **kws)
-
-
 def render_pdf_topil(*args, **kws):
     """
     Render multiple pages of a PDF to :mod:`PIL` images. Similar to :func:`.render_pdf_tobytes`.
@@ -110,4 +104,4 @@ def render_pdf_topil(*args, **kws):
     Yields:
         :class:`PIL.Image.Image`, :class:`str`
     """
-    yield from _render_pdf_base(page_renderer.render_page_topil, *args, **kws)
+    yield from render_pdf_base(page_renderer.render_page_topil, *args, **kws)
