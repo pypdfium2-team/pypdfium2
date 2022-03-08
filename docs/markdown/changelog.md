@@ -4,9 +4,9 @@
 # Changelog
 
 
-## Next
+## 1.0.0b1 (2022-03-08)
 
-- Updated PDFium from `4915` to `xxxx`
+- Updated PDFium from `4915` to `4929`
 - API breaking changes:
   * Removed deprecated members `open_pdf()` and `print_toc()`.
   * Restructured rendering functions to provide multiple different output types:
