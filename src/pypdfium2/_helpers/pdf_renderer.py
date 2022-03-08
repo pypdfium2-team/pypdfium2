@@ -54,8 +54,8 @@ def render_pdf_base(
         optimise_mode = OptimiseMode.none,
     ):
     """
-    Render multiple pages of a PDF using an arbitrary render method.
-    Base function for :func:`render_pdf_tobytes` and :func:`render_pdf_topil`
+    Rasterise multiple pages of a PDF using an arbitrary page rendering method.
+    Base function for :func:`render_pdf_tobytes` and :func:`render_pdf_topil`.
     
     Parameters:
         input_obj (str | bytes | typing.BinaryIO):
@@ -63,7 +63,7 @@ def render_pdf_base(
         page_indices (typing.Sequence[int]):
             A list of zero-based page indices to render.
     
-    The other parameters are the same as for :func:`.render_page_tobytes`.
+    The other parameters are the same as for :func:`.render_page_base`.
     """
     
     with PdfContext(input_obj, password) as pdf:
@@ -97,9 +97,16 @@ def render_pdf_base(
             yield image, suffix
 
 
+def render_pdf_tobytes(*args, **kws):
+    """
+    Render multiple pages of a PDF to bytes. See  :func:`.render_page_tobytes`
+    """
+    yield from render_pdf_base(page_renderer.render_page_tobytes, *args, **kws)
+
+
 def render_pdf_topil(*args, **kws):
     """
-    Render multiple pages of a PDF to :mod:`PIL` images. Similar to :func:`.render_pdf_tobytes`.
+    Render multiple pages of a PDF to :mod:`PIL` images. See :func:`.render_page_topil`.
     
     Yields:
         :class:`PIL.Image.Image`, :class:`str`
