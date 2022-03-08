@@ -175,7 +175,7 @@ def render_page_base(
 
 def render_page_tobytes(*args, **kws):
     """
-    Render a single page to bytes. Parameters are the same as for :func:`render_page_base`.
+    Render a single page to bytes. Parameters are the same as for :func:`.render_page_base`.
     
     Returns:
          :class:`bytes`, :class:`str`, Tuple[int, int]
@@ -188,7 +188,7 @@ def render_page_tobytes(*args, **kws):
 
 def render_page_topil(*args, **kws):
     """
-    Render a single page to a :mod:`PIL` image. Parameters are the same as for :func:`render_page_base`.
+    Render a single page to a :mod:`PIL` image. Parameters are the same as for :func:`.render_page_base`.
     
     Returns:
         :class:`PIL.Image.Image`

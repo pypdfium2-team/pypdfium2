@@ -55,7 +55,7 @@ def render_pdf_base(
     ):
     """
     Rasterise multiple pages of a PDF using an arbitrary page rendering method.
-    Base function for :func:`render_pdf_tobytes` and :func:`render_pdf_topil`.
+    Base function for :func:`.render_pdf_tobytes` and :func:`.render_pdf_topil`.
     
     Parameters:
         input_obj (str | bytes | typing.BinaryIO):
