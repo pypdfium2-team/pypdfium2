@@ -69,7 +69,7 @@ elif sys.platform.startswith('darwin'):
 NativebuildConfig = {
     'clang_use_chrome_plugins': False,
     #'init_stack_vars': False,
-    #'use_cxx11': False,
+    #'use_cxx11': True,
 }
 
 SyslibsConfig = {
