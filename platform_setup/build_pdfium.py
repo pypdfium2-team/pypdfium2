@@ -119,6 +119,7 @@ def dl_pdfium(do_sync, GClient):
     if os.path.isdir(PDFiumDir):
         if do_sync:
             print("PDFium: Revert / Sync  ...")
+            run_cmd('git reset --hard HEAD', cwd=PDFiumDir)
             run_cmd('"{}" revert'.format(GClient), cwd=SB_Dir)
         else:
             print("PDFium: Using existing repository as-is.")
