@@ -19,7 +19,7 @@
 - Enhancements to `build_pdfium.py`:
   * Improved configuration handling to use dictionaries rather than lists. This is a lot more elegant and flexible.
   * Added an option to dynamically link against system libraries instead of statically linking against bundled dependencies.
-  * Integrated a patches to speed up downloading by skipping unnecessary dependencies (such as Skia or V8).
+  * Integrated a patch to speed up downloading by skipping unnecessary dependencies (such as Skia or V8).
   * Improved finding of system llvm/lld binaries for native build.
 - Improved setup status tracking.
 - Started removing manual line breaks to simplify editing. Any decent text editor or diff tool should provide automatic word wrap.
