@@ -43,7 +43,7 @@ For a sample implementation, see [Pull Request #92](https://github.com/pypdfium2
     (It may be more convenient to use a GUI such as `git-cola`, `qgit`, or `GitAhead`)
   * Submit a Pull Request:
     ```bash
-    # Using the interactive GitHub CLI
+    # using the interactive GitHub CLI
     gh pr create
     ```
   * At best, install the created wheel on the target platform, run the test suite (`python3 -m pytest tests/`) and report success or failure.
