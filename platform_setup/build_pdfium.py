@@ -148,16 +148,38 @@ def patch_depottools():
     _apply_patchset(DepotPatches)
 
 
+def _find_latest_llvm():
+    
+    usr_lib = '/usr/lib'
+    llvm_prefix = 'llvm-'
+    
+    latest = None
+    for dirname in os.listdir(usr_lib):
+        if not os.path.isdir( join(usr_lib, dirname) ):
+            continue
+        if not dirname.startswith('llvm-'):
+            continue
+        version = int(dirname.split('-')[-1])
+        if (latest is None) or (version > latest):
+            latest = version
+    
+    assert latest is not None
+    latest = str(latest)
+    
+    return join(usr_lib, llvm_prefix+latest, 'bin')
+    
+
 def _replace_binaries():
     
     binary_names = os.listdir(NB_BinaryDir)
+    llvm_dir = _find_latest_llvm()
     
     for name in binary_names:
         
         binary_path = join(NB_BinaryDir, name)
-        replacement = shutil.which(name)
+        replacement = join(llvm_dir, name)
         
-        if replacement is None:
+        if not os.path.isfile(replacement):
             print("Warning: No system provided replacement available for '{}' - will keep using the version shipped with the PDFium toolchain.".format(name), file=sys.stderr)
             continue
         

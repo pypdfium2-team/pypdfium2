@@ -18,12 +18,15 @@
 
 #### Additional system packages for Native Build
 
-*Important*: The compiler needs to be fully compliant with C++17
 
 * llvm/clang
 * lld
 * gn (generate-ninja)
 * ninja (ninja-build)
+
+*Important notes*:
+- If you have multiple versions of llvm, make sure the latest version also has a corresponding lld install!
+- A C++17 compliant compiler is highly recommended.
 
 ### Python packages
 
