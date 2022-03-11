@@ -11,7 +11,7 @@
 ### Install from PyPI
 
 ```bash
-pip3 install -U pypdfium2
+pip3 install --no-build-isolation -U pypdfium2
 ```
 
 ### Manual installation
