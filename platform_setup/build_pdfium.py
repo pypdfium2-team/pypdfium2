@@ -136,9 +136,9 @@ def dl_pdfium(do_update, revision, GClient):
         print("PDFium: Download ...")
         run_cmd('"{}" config --unmanaged "{}"'.format(GClient, PDFium_URL), cwd=SB_Dir)
         run_cmd('git clone --depth 1 "{}"'.format(PDFium_URL), cwd=SB_Dir)
-        _apply_patchset(PdfiumSkipDepsPatches)
     
     if is_sync:
+        _apply_patchset(PdfiumSkipDepsPatches)
         run_cmd('"{}" sync --revision "origin/{}" --no-history --shallow'.format(GClient, revision), cwd=SB_Dir)
     
     return is_sync
