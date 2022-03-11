@@ -34,8 +34,8 @@
 * setuptools [^1]
 * setuptools-scm [^2]
 * build
-* ctypesgen [^3]
 * wheel
+* ctypesgen [^3]
 
 
 ## Tests
