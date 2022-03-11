@@ -150,6 +150,8 @@ def patch_depottools():
 
 def _find_latest_llvm():
     
+    # prerequisites: llvm resides in /usr/lib, and there is a corresponding lld installed for the latest llvm
+    
     usr_lib = '/usr/lib'
     llvm_prefix = 'llvm-'
     
@@ -167,7 +169,7 @@ def _find_latest_llvm():
     latest = str(latest)
     
     return join(usr_lib, llvm_prefix+latest, 'bin')
-    
+
 
 def _replace_binaries():
     
