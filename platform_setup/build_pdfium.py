@@ -173,19 +173,18 @@ def _find_latest_llvm():
 
 def _replace_binaries():
     
-    binary_names = os.listdir(NB_BinaryDir)
     llvm_dir = _find_latest_llvm()
     
-    for name in binary_names:
+    for name in os.listdir(NB_BinaryDir):
         
         binary_path = join(NB_BinaryDir, name)
         replacement = join(llvm_dir, name)
+        os.remove(binary_path)
         
         if not os.path.isfile(replacement):
-            print("Warning: No system provided replacement available for '{}' - will keep using the version shipped with the PDFium toolchain.".format(name), file=sys.stderr)
+            print("Warning: No system provided replacement available for '{}'.".format(name), file=sys.stderr)
             continue
         
-        os.remove(binary_path)
         os.symlink(replacement, binary_path)
 
 
