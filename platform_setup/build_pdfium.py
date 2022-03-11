@@ -37,7 +37,7 @@ DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.g
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
 
 DepotPatches = [
-    (join(PatchDir,'depottools','gclient_scm.patch'), DepotToolsDir),
+    (join(PatchDir,'depot_tools','gclient_scm.patch'), DepotToolsDir),
 ]
 PdfiumMainPatches = [
     (join(PatchDir,'pdfium','public_headers.patch'), PDFiumDir),
@@ -49,6 +49,9 @@ PdfiumWinPatches = [
 ]
 PdfiumNativebuildPatches = [
     (join(PatchDir,'pdfium','nativebuild.patch'), join(PDFiumDir,'build')),
+]
+PdfiumSkipDepsPatches = [
+    (join(PatchDir,'pdfium','skip_deps.patch'), PDFiumDir),
 ]
 
 DefaultConfig = {
@@ -87,7 +90,7 @@ elif sys.platform.startswith('darwin'):
     SyslibsConfig['use_system_xcode'] = True
 
 
-def dl_depottools(do_sync):
+def dl_depottools(do_update):
     
     if not os.path.isdir(SB_Dir):
         os.makedirs(SB_Dir)
@@ -95,7 +98,7 @@ def dl_depottools(do_sync):
     is_update = True
     
     if os.path.isdir(DepotToolsDir):
-        if do_sync:
+        if do_update:
             print("DepotTools: Revert and update ...")
             run_cmd('git reset --hard HEAD', cwd=DepotToolsDir)
             run_cmd('git pull "{}"'.format(DepotTools_URL), cwd=DepotToolsDir)
@@ -112,29 +115,33 @@ def dl_depottools(do_sync):
     return is_update
 
 
-def dl_pdfium(do_sync, GClient):
-    
-    is_update = True
-    
-    if os.path.isdir(PDFiumDir):
-        if do_sync:
-            print("PDFium: Revert / Sync  ...")
-            run_cmd('git reset --hard HEAD', cwd=PDFiumDir)
-            run_cmd('"{}" revert'.format(GClient), cwd=SB_Dir)
-        else:
-            print("PDFium: Using existing repository as-is.")
-            is_update = False
-    else:
-        print("PDFium: Download ...")
-        run_cmd('"{}" config --unmanaged "{}"'.format(GClient, PDFium_URL), cwd=SB_Dir)
-        run_cmd('"{}" sync --no-history --shallow'.format(GClient), cwd=SB_Dir)
-    
-    return is_update
-
-
 def _apply_patchset(patchset):
     for patch, cwd in patchset:
         run_cmd('git apply -v "{}"'.format(patch), cwd=cwd)
+
+
+def dl_pdfium(do_update, revision, GClient):
+    
+    is_sync = True
+    
+    if os.path.isdir(PDFiumDir):
+        if do_update:
+            print("PDFium: Revert / Sync  ...")
+            for dir in (PDFiumDir, join(PDFiumDir,'build')):
+                run_cmd('git reset --hard HEAD'.format(GClient), cwd=dir)
+        else:
+            is_sync = False
+            print("PDFium: Using existing repository as-is.")
+    else:
+        print("PDFium: Download ...")
+        run_cmd('"{}" config --unmanaged "{}"'.format(GClient, PDFium_URL), cwd=SB_Dir)
+        run_cmd('git clone --depth 1 "{}"'.format(PDFium_URL), cwd=SB_Dir)
+        _apply_patchset(PdfiumSkipDepsPatches)
+    
+    if is_sync:
+        run_cmd('"{}" sync --revision "origin/{}" --no-history --shallow'.format(GClient, revision), cwd=SB_Dir)
+    
+    return is_sync
 
 
 def patch_depottools():
@@ -266,7 +273,11 @@ def main(
         b_checkdeps = False,
         b_nativebuild = False,
         b_use_syslibs = False,
+        b_revision = None,
     ):
+    
+    if b_revision is None:
+        b_revision = 'main'
     
     # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
     if b_destname is None and sys.platform.startswith('linux'):
@@ -302,7 +313,7 @@ def main(
     if depot_dl_done:
         patch_depottools()
     
-    pdfium_dl_done = dl_pdfium(b_update, GClient)
+    pdfium_dl_done = dl_pdfium(b_update, b_revision, GClient)
     
     if pdfium_dl_done:
         patch_pdfium()
@@ -354,6 +365,10 @@ def parse_args(argv):
         action = 'store_true',
         help = "Use system libraries instead of those bundled with PDFium. (Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng and zlib are installed, and that $PKG_CONFIG_PATH is set correctly (e. g. to /usr/lib/x86_64-linux-gnu/pkgconfig)",
     )
+    parser.add_argument(
+        '--revision', '-r',
+        help = "PDFium revision to check out (defaults to main).",
+    )
     
     return parser.parse_args(argv)
 
@@ -368,6 +383,7 @@ def run_cli(argv=sys.argv[1:]):
         b_checkdeps = args.check_deps,
         b_nativebuild = args.nativebuild,
         b_use_syslibs = args.use_syslibs,
+        b_revision = args.revision,
     )
     
 
