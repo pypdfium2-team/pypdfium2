@@ -109,8 +109,7 @@ def dl_depottools(do_update):
         print("DepotTools: Download ...")
         run_cmd('git clone --depth 1 "{}" "{}"'.format(DepotTools_URL, DepotToolsDir), cwd=SB_Dir)
     
-    sep = ';' if sys.platform.startswith('win32') else ':'
-    os.environ['PATH'] += sep + DepotToolsDir
+    os.environ['PATH'] += os.pathsep + DepotToolsDir
     
     return is_update
 
