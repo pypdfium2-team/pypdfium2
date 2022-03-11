@@ -66,12 +66,13 @@ Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches
     For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
 
-Files: sourcebuild/patches/depottools/gclient_scm.patch
+Files: sourcebuild/patches/depot_tools/gclient_scm.patch
 Copyright: 2021 BoLaMN
 License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/pull/39
 
 Files: sourcebuild/patches/pdfium/nativebuild.patch
+       sourcebuild/patches/pdfium/skip_deps.patch
 Copyright: 2022 geisserml <geisserml@gmail.com>
 License: BSD-3-Clause OR Apache-2.0
