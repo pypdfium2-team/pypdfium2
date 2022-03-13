@@ -271,7 +271,7 @@ def _get_tool(tool, tool_desc, prefer_systools):
     return exe
 
 
-def _create_config_str(config_dict):
+def _serialise_config(config_dict):
     
     config_str = ''
     sep = ''
@@ -280,8 +280,10 @@ def _create_config_str(config_dict):
         config_str += sep + '{} = '.format(key)
         if isinstance(value, bool):
             config_str += str(value).lower()
-        else:
+        elif isinstance(value, str):
             config_str += '"{}"'.format(value)
+        else:
+            raise TypeError( "Not sure how to serialise type {}".format(type(value)) )
         sep = '\n'
     
     return config_str
@@ -323,7 +325,7 @@ def main(
             config_dict.update(NativebuildConfig)
         if b_use_syslibs:
             config_dict.update(SyslibsConfig)
-        config_str = _create_config_str(config_dict)
+        config_str = _serialise_config(config_dict)
         
     else:
         with open(os.path.abspath(b_argfile), 'r') as file_handle:
