@@ -149,25 +149,27 @@ def patch_depottools():
 
 def _find_latest_llvm():
     
-    # prerequisites: llvm resides in /usr/lib, and there is a corresponding lld installed for the latest llvm
+    # assuming there is a corresponding lld installed for the latest llvm
     
-    usr_lib = '/usr/lib'
     llvm_prefix = 'llvm-'
-    
     latest = None
-    for dirname in os.listdir(usr_lib):
-        if not os.path.isdir( join(usr_lib, dirname) ):
-            continue
-        if not dirname.startswith('llvm-'):
-            continue
-        version = int(dirname.split('-')[-1])
-        if (latest is None) or (version > latest):
-            latest = version
+    libdir = None
     
-    assert latest is not None
+    for search_dir in ('/usr/lib', '/usr/local/lib'):
+        for entry in os.listdir(search_dir):
+            if not os.path.isdir( join(search_dir, entry) ):
+                continue
+            if not entry.startswith('llvm-'):
+                continue
+            version = int(entry.split('-')[-1])
+            if (latest is None) or (version > latest):
+                latest = version
+                libdir = search_dir
+    
+    assert None not in (latest, libdir)
     latest = str(latest)
     
-    return join(usr_lib, llvm_prefix+latest, 'bin')
+    return join(libdir, llvm_prefix+latest, 'bin')
 
 
 def _replace_binaries():
