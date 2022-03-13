@@ -77,7 +77,7 @@ def render_pdf_base(
     
     meta_args = []
     for i in page_indices:
-        sub_args = [
+        sub_args = (
             render_meth,
             input_obj,
             i,
@@ -88,7 +88,7 @@ def render_pdf_base(
             annotations,
             greyscale,
             optimise_mode,
-        ]
+        )
         meta_args.append(sub_args)
     
     with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
