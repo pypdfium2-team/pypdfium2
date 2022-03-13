@@ -175,6 +175,7 @@ def _find_latest_llvm():
 def _replace_binaries():
     
     llvm_dir = _find_latest_llvm()
+    not_found = []
     
     for name in os.listdir(NB_BinaryDir):
         
@@ -183,10 +184,13 @@ def _replace_binaries():
         os.remove(binary_path)
         
         if not os.path.isfile(replacement):
-            print("Warning: No system provided replacement available for '{}'.".format(name), file=sys.stderr)
+            not_found.append(name)
             continue
         
         os.symlink(replacement, binary_path)
+    
+    if len(not_found) > 0:
+        print("Warning: No system-provided replacements available for {}".format(not_found), file=sys.stderr)
 
 
 def patch_pdfium():
