@@ -58,8 +58,7 @@ def install_handler():
             return True
     
     W_Presetup = check_presetup()
-    if W_Presetup:
-        check_deps.main()
+    if W_Presetup: check_deps.main()
     
     from platform_setup import build_pdfium, update_pdfium
     from platform_setup.setup_base import mkwheel
