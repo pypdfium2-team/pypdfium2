@@ -29,13 +29,9 @@ def _clean():
     if os.path.exists(build_cache):
         shutil.rmtree(build_cache)
     
-    libpaths = []
-    for name in Libnames:
-        libpaths.append( join(ModuleDir, name) )
+    delete_files = [join(ModuleDir, n) for n in (*Libnames, '_pypdfium.py')]
     
-    files = [join(ModuleDir,'_pypdfium.py'), *libpaths]
-    
-    for file in files:
+    for file in delete_files:
         if os.path.exists(file):
             os.remove(file)
 
