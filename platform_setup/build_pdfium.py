@@ -62,19 +62,11 @@ DefaultConfig = {
     'pdf_enable_xfa': False,
     'pdf_use_skia': False,
 }
-if sys.platform.startswith('linux'):
-    DefaultConfig['use_custom_libcxx'] = True
-elif sys.platform.startswith('win32'):
-    DefaultConfig['pdf_use_win32_gdi'] = True
-elif sys.platform.startswith('darwin'):
-    DefaultConfig['mac_deployment_target'] = '10.11.0'
-
 NativebuildConfig = {
     'clang_use_chrome_plugins': False,
     'init_stack_vars': False,
     'use_cxx11': True,
 }
-
 SyslibsConfig = {
     'use_system_freetype': True,
     'use_system_lcms2': True,
@@ -84,10 +76,15 @@ SyslibsConfig = {
     'use_system_zlib': True,
     'sysroot': '/',
 }
+
 if sys.platform.startswith('linux'):
+    DefaultConfig['use_custom_libcxx'] = True
     SyslibsConfig['use_custom_libcxx'] = False
 elif sys.platform.startswith('darwin'):
+    DefaultConfig['mac_deployment_target'] = '10.11.0'
     SyslibsConfig['use_system_xcode'] = True
+elif sys.platform.startswith('win32'):
+    DefaultConfig['pdf_use_win32_gdi'] = True
 
 
 def dl_depottools(do_update):
