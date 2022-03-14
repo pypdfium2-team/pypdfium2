@@ -198,6 +198,12 @@ Various other open-source licenses apply to the dependencies of PDFium. License 
 Documentation and examples of pypdfium2 are CC-BY-4.0 licensed.
 
 
+## In Use
+
+* The [doctr](https://mindee.github.io/doctr/) OCR library uses pypdfium2 to rasterise PDF documents.
+* The [Extract-URLs](https://github.com/elescamilla/Extract-URLs/) project extracts URLs from PDFs using pypdfium2.
+
+
 ## Development
 
 PDFium builds are retrieved from [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries). Python bindings are auto-generated with [ctypesgen](https://github.com/ctypesgen/ctypesgen)
