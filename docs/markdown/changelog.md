@@ -4,17 +4,17 @@
 # Changelog
 
 
-## 1.0.0 (Next)
+## 1.0.0 (2022-03-14)
 
 - Updated PDFium from `4915` to `4943`
-- API breaking changes:
+- Added support for Linux x86 platform (i686).
+- API-breaking changes:
   * Removed deprecated members `open_pdf()` and `print_toc()`.
   * Restructured rendering functions to provide multiple different output types:
     `render_page_topil()` and `render_page_tobytes()` replace `render_page()`; similarly, `render_pdf_topil()` and `render_pdf_tobytes()` replace `render_pdf()`.
     These functions are derived from `render_page_base()` and `render_pdf_base()`, respectively.
   * In `render_page_...()` and `render_pdf_...()`, we now only accept RGBA tuples for the colour parameter.
 - The Pillow dependency is now optional in the core library.
-- Added support for Linux x86 platform (i686).
 - Removed workarounds for non-ascii filepaths on Windows. The issues with `FPDF_LoadDocument()` should be fixed since PDFium `4915`. Thanks to Lei Zhang and Tom Sepez of PDFium team.
 - Added some boilerplate code to setup scripts to make sure imports always work when the file is invoked directly.
 - Enhancements to `build_pdfium.py`:
