@@ -26,7 +26,7 @@ def save_pdf(pdf, buffer):
         pdf (``FPDF_DOCUMENT``):
             Handle to a PDFium document.
         buffer:
-            A byte buffer to capture the data. It may be anything that implements the ``.write()`` method.
+            A byte buffer to capture the data. It may be anything that implements the ``write()`` method.
     """
     
     WriteFunctype = ctypes.CFUNCTYPE(
