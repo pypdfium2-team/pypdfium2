@@ -73,6 +73,8 @@ def _get_tag(pl_name):
         return _get_mac_tag('arm64', '11_0', '12_0')
     elif pl_name == PlatformNames.linux_x64:
         return _get_linux_tag('x86_64')
+    elif pl_name == PlatformNames.linux_x86:
+        return _get_linux_tag('i686')
     elif pl_name == PlatformNames.linux_arm64:
         return _get_linux_tag('aarch64')
     elif pl_name == PlatformNames.linux_arm32:

@@ -36,6 +36,7 @@ class PlatformNames:
     darwin_x64    = 'darwin_x64'
     darwin_arm64  = 'darwin_arm64'
     linux_x64     = 'linux_x64'
+    linux_x86     = 'linux_x86'
     linux_arm64   = 'linux_arm64'
     linux_arm32   = 'linux_arm32'
     windows_x64   = 'windows_x64'
