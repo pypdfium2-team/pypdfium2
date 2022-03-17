@@ -97,14 +97,14 @@ def dl_depottools(do_update):
     if os.path.isdir(DepotToolsDir):
         if do_update:
             print("DepotTools: Revert and update ...")
-            run_cmd('git reset --hard HEAD', cwd=DepotToolsDir)
-            run_cmd('git pull "{}"'.format(DepotTools_URL), cwd=DepotToolsDir)
+            run_cmd(['git', 'reset', '--hard', 'HEAD'], cwd=DepotToolsDir)
+            run_cmd(['git', 'pull', DepotTools_URL], cwd=DepotToolsDir)
         else:
             print("DepotTools: Using existing repository as-is.")
             is_update = False
     else:
         print("DepotTools: Download ...")
-        run_cmd('git clone --depth 1 "{}" "{}"'.format(DepotTools_URL, DepotToolsDir), cwd=SB_Dir)
+        run_cmd(['git', 'clone', '--depth', '1', DepotTools_URL, DepotToolsDir], cwd=SB_Dir)
     
     os.environ['PATH'] += os.pathsep + DepotToolsDir
     
@@ -113,7 +113,7 @@ def dl_depottools(do_update):
 
 def _apply_patchset(patchset):
     for patch, cwd in patchset:
-        run_cmd('git apply -v "{}"'.format(patch), cwd=cwd)
+        run_cmd(['git', 'apply', '-v', patch], cwd=cwd)
 
 
 def dl_pdfium(do_update, revision, GClient):
@@ -124,18 +124,18 @@ def dl_pdfium(do_update, revision, GClient):
         if do_update:
             print("PDFium: Revert / Sync  ...")
             for dir in (PDFiumDir, join(PDFiumDir,'build')):
-                run_cmd('git reset --hard HEAD', cwd=dir)
+                run_cmd(['git', 'reset', '--hard', 'HEAD'], cwd=dir)
         else:
             is_sync = False
             print("PDFium: Using existing repository as-is.")
     else:
         print("PDFium: Download ...")
-        run_cmd('"{}" config --unmanaged "{}"'.format(GClient, PDFium_URL), cwd=SB_Dir)
-        run_cmd('git clone --depth 1 "{}"'.format(PDFium_URL), cwd=SB_Dir)
+        run_cmd([GClient, 'config', '--unmanaged', PDFium_URL], cwd=SB_Dir)
+        run_cmd(['git', 'clone', '--depth', '1', PDFium_URL], cwd=SB_Dir)
     
     if is_sync:
         _apply_patchset(PdfiumSkipDepsPatches)
-        run_cmd('"{}" sync --revision "origin/{}" --no-history --shallow'.format(GClient, revision), cwd=SB_Dir)
+        run_cmd([GClient, 'sync', '--revision', 'origin/{}'.format(revision), '--no-history', '--shallow'], cwd=SB_Dir)
     
     return is_sync
 
@@ -212,11 +212,11 @@ def configure(config, GN):
     with open(join(PDFiumBuildDir,'args.gn'), 'w') as args_handle:
         args_handle.write(config)
     
-    run_cmd('"{}" gen "{}"'.format(GN, PDFiumBuildDir), cwd=PDFiumDir)
+    run_cmd([GN, 'gen', PDFiumBuildDir], cwd=PDFiumDir)
 
 
 def build(Ninja):
-    run_cmd('"{}" -C "{}" pdfium'.format(Ninja, PDFiumBuildDir), cwd=PDFiumDir)
+    run_cmd([Ninja, '-C', PDFiumBuildDir, 'pdfium'], cwd=PDFiumDir)
 
 
 def find_lib(srcname=None, directory=PDFiumBuildDir):
