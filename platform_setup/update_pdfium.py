@@ -23,6 +23,7 @@ from platform_setup.packaging_base import (
     DataTree,
     VersionFile,
     PlatformNames,
+    run_cmd,
     extract_version,
     call_ctypesgen,
 )
@@ -65,7 +66,7 @@ def _set_versions(*versions_list):
 
 def get_latest_version():
     
-    git_ls = subprocess.run(['git', 'ls-remote', '{}.git'.format(ReleaseRepo)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    git_ls = run_cmd(['git', 'ls-remote', '{}.git'.format(ReleaseRepo)], cwd=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
     git_ls = git_ls.stdout.decode('UTF-8')
     tag = git_ls.split('\t')[-1].replace('\n', '')

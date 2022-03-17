@@ -45,9 +45,9 @@ class PlatformNames:
     sourcebuild   = 'sourcebuild'
 
 
-def run_cmd(command, cwd):
+def run_cmd(command, cwd, **kwargs):
     print(command)
-    subprocess.run(command, cwd=cwd)
+    return subprocess.run(command, cwd=cwd, **kwargs)
 
 
 def call_ctypesgen(platform_dir, include_dir):
@@ -55,7 +55,7 @@ def call_ctypesgen(platform_dir, include_dir):
     bindings_file = join(platform_dir,'_pypdfium.py')
     
     ctypesgen_cmd = ['ctypesgen', '--library', 'pdfium', '--strip-build-path', platform_dir, '-L', '.'] + sorted(glob( join(include_dir,'*.h') )) + ['-o', bindings_file]
-    subprocess.run(ctypesgen_cmd, stdout=subprocess.PIPE, cwd=platform_dir)
+    run_cmd(ctypesgen_cmd, cwd=platform_dir)
     
     with open(bindings_file, 'r') as file_reader:
         text = file_reader.read()
