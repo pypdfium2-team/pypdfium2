@@ -7,7 +7,7 @@
 ## 1.1.0 (scheduled for 2022-03-21)
 
 - Updated PDFium from `4943` to `XXXX`.
-- Improved style of subprocess calls to use lists rather than strings. This is more elegant and safer in terms of whitespace handling.
+- Improved style of subprocess calls to use lists rather than strings. This is more elegant, and safer in terms of whitespace handling.
 
 
 ## 1.0.0 (2022-03-14)
