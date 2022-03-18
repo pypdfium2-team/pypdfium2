@@ -9,18 +9,7 @@ from pypdfium2._helpers.opener import PdfContext
 from pypdfium2._helpers.constants import OptimiseMode
 
 
-def _process_page(
-        render_meth,
-        input_obj,
-        index,
-        password,
-        scale,
-        rotation,
-        colour,
-        annotations,
-        greyscale,
-        optimise_mode,
-    ):
+def _process_page(render_meth, input_obj, index, password, scale, rotation, colour, annotations, greyscale, optimise_mode):
     
     with PdfContext(input_obj, password) as pdf:
         result = render_meth(
@@ -75,24 +64,10 @@ def render_pdf_base(
     elif any(i >= n_pages for i in page_indices):
         raise ValueError("Out of range page index detected.")
     
-    meta_args = []
-    for i in page_indices:
-        sub_args = (
-            render_meth,
-            input_obj,
-            i,
-            password,
-            scale,
-            rotation,
-            colour,
-            annotations,
-            greyscale,
-            optimise_mode,
-        )
-        meta_args.append(sub_args)
+    args = [(render_meth, input_obj, i, password, scale, rotation, colour, annotations, greyscale, optimise_mode) for i in page_indices]
     
     with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
-        for index, image in pool.map(_invoke_process_page, meta_args):
+        for index, image in pool.map(_invoke_process_page, args):
             suffix = str(index+1).zfill(n_digits)
             yield image, suffix
 
