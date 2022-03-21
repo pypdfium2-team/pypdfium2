@@ -70,7 +70,7 @@ NativebuildConfig = {
 SyslibsConfig = {
     'use_system_freetype': True,
     'use_system_lcms2': True,
-    'use_system_libjpeg': True,
+    #'use_system_libjpeg': True,
     'use_system_libopenjpeg2': True,
     'use_system_libpng': True,
     'use_system_zlib': True,
