@@ -4,6 +4,11 @@
 # Changelog
 
 
+# 1.2.0 (scheduled for 2022-03-28)
+
+- Updated PDFium from `4955` to `XXXX`.
+
+
 ## 1.1.0 (2022-03-21)
 
 - Updated PDFium from `4943` to `4955`.
