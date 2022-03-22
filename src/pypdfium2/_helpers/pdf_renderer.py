@@ -61,7 +61,7 @@ def render_pdf_base(
     
     if page_indices is None or len(page_indices) == 0:
         page_indices = [i for i in range(n_pages)]
-    elif any(i >= n_pages for i in page_indices):
+    if not all(0 <= i < n_pages for i in page_indices):
         raise ValueError("Out of range page index detected.")
     
     args = [(render_meth, input_obj, i, password, scale, rotation, colour, annotations, greyscale, optimise_mode) for i in page_indices]
