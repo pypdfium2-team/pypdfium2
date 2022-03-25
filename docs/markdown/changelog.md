@@ -4,7 +4,7 @@
 # Changelog
 
 
-# 1.2.0 (scheduled for 2022-03-28)
+## 1.2.0 (scheduled for 2022-03-28)
 
 - Updated PDFium from `4955` to `XXXX`.
 - Fixed running `setup.py` on Windows by not using `os.mknod()`, which is only available on Unix-like systems.
