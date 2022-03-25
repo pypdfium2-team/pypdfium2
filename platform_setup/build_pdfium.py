@@ -260,9 +260,11 @@ def pack(src_libpath, destname=None):
     shutil.rmtree(include_dir)
 
 
-def _get_tool(tool, tool_desc, prefer_systools):
+def _get_tool(tool, tool_desc, prefer_systools, win_append):
     
     exe = join(DepotToolsDir, tool)
+    if sys.platform.startswith('win32'):
+        exe += win_append
     
     if prefer_systools:
         _sh_exe = shutil.which(tool)
@@ -318,9 +320,9 @@ def main(
     if b_checkdeps:
         check_deps.main(b_nativebuild)
     
-    GClient = join(DepotToolsDir,'gclient')
-    GN = _get_tool('gn', 'generate-ninja', b_nativebuild)
-    Ninja = _get_tool('ninja', 'ninja-build', b_nativebuild)
+    GClient = _get_tool('gclient', 'gclient', b_nativebuild, '.bat')
+    GN = _get_tool('gn', 'generate-ninja', b_nativebuild, '.bat')
+    Ninja = _get_tool('ninja', 'ninja-build', b_nativebuild, '.exe')
     
     if b_argfile is None:
         config_dict = DefaultConfig.copy()
