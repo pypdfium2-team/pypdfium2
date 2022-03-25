@@ -8,6 +8,7 @@
 
 - Updated PDFium from `4955` to `XXXX`.
 - Fixed running `setup.py` on Windows by not using `os.mknod()`, which is only available on Unix-like systems.
+- Addressed some Windows-specific issues with the build script.
 
 
 ## 1.1.0 (2022-03-21)
