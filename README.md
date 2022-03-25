@@ -257,6 +257,10 @@ The `FPDF_LoadMemDocument()` function to open PDF documents from bytes behaves w
 Tests fail and the output files look quite broken if all file opening is directed through this function. It is hard to determine which external component involved is causing these issues.
 The recommended way for document access are the support models `PdfDocument` or `PdfContext`, which use `FPDF_LoadCustomDocument()` for bytes or byte buffers, and `FPDF_LoadDocument()` for file paths.
 
+### Problems with `FPDFPage_Delete()`
+
+While `FPDFPage_Delete()` first seems to reduce page count properly, the changes are not actually applied when saving the document. See issue [#96](https://github.com/pypdfium2-team/pypdfium2/issues/96).
+
 
 ## Thanks
 
