@@ -251,12 +251,6 @@ If your issue is caused by the bindings generator, refer to the [ctypesgen bug t
 
 pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that broke ctypesgen-created string handling code.
 
-### Problems with `FPDF_LoadMemDocument()`
-
-The `FPDF_LoadMemDocument()` function to open PDF documents from bytes behaves weirdly.
-Tests fail and the output files look quite broken if all file opening is directed through this function. It is hard to determine which external component involved is causing these issues.
-The recommended way for document access are the support models `PdfDocument` or `PdfContext`, which use `FPDF_LoadCustomDocument()` for bytes or byte buffers, and `FPDF_LoadDocument()` for file paths.
-
 ### Problems with `FPDFPage_Delete()`
 
 While `FPDFPage_Delete()` first seems to reduce page count properly, the changes are not actually applied when saving the document. See issue [#96](https://github.com/pypdfium2-team/pypdfium2/issues/96).
