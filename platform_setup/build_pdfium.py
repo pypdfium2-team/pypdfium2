@@ -264,7 +264,7 @@ def _get_tool(tool, prefer_systools, win_append):
     
     exe = join(DepotToolsDir, tool)
     if sys.platform.startswith('win32'):
-        exe += win_append
+        exe += '.' + win_append
     
     if prefer_systools:
         _sh_exe = shutil.which(tool)
@@ -320,9 +320,9 @@ def main(
     if b_checkdeps:
         check_deps.main(b_nativebuild)
     
-    GClient = _get_tool('gclient', b_nativebuild, '.bat')
-    GN = _get_tool('gn', b_nativebuild, '.bat')
-    Ninja = _get_tool('ninja', b_nativebuild, '.exe')
+    GClient = _get_tool('gclient', b_nativebuild, 'bat')
+    GN = _get_tool('gn', b_nativebuild, 'bat')
+    Ninja = _get_tool('ninja', b_nativebuild, 'exe')
     
     if b_argfile is None:
         config_dict = DefaultConfig.copy()
