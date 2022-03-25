@@ -54,7 +54,8 @@ def install_handler():
         if os.path.exists(StatusFile):
             return False
         else:
-            os.mknod(StatusFile)
+            with open(StatusFile, 'w') as fh:
+                fh.write('')
             return True
     
     W_Presetup = check_presetup()
