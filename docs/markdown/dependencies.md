@@ -40,6 +40,7 @@
 
 * Powershell
 * Visual Studio
+* Windows SDK
 
 
 ## Tests
@@ -49,7 +50,7 @@
 
 ## Documentation
 
-* sphinx (>= 4.4.0 recommended)
+* sphinx
 * sphinx-rtd-theme >= 1.0
 * sphinxcontrib-programoutput
 * docutils >= 0.17
