@@ -11,13 +11,21 @@
 
 ## Build
 
+### Python packages
+
+* pip [^1]
+* setuptools [^1]
+* setuptools-scm [^2]
+* build
+* wheel
+* ctypesgen [^3]
+
 ### System packages
 
 * git
 * gcc
 
-#### Additional system packages for Native Build
-
+#### Nativebuild Extras
 
 * llvm/clang
 * lld
@@ -28,14 +36,10 @@
 - If you have multiple versions of llvm, make sure the latest version also has a corresponding lld install!
 - A C++17 compliant compiler is highly recommended.
 
-### Python packages
+#### Windows Extras
 
-* pip [^1]
-* setuptools [^1]
-* setuptools-scm [^2]
-* build
-* wheel
-* ctypesgen [^3]
+* Powershell
+* Visual Studio
 
 
 ## Tests
