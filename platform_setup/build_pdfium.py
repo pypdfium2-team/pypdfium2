@@ -325,7 +325,7 @@ def main(
     Ninja = _get_tool('ninja', b_nativebuild, 'exe')
     
     if sys.platform.startswith('win32'):
-        os.environ['DEPOT_TOOLS_WIN_TOOLCHAIN'] = 0
+        os.environ['DEPOT_TOOLS_WIN_TOOLCHAIN'] = "0"
     
     if b_argfile is None:
         config_dict = DefaultConfig.copy()
