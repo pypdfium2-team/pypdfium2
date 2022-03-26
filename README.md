@@ -87,13 +87,6 @@ with pdfium.PdfContext(filename) as pdf:
     # ... work with the pdf
 ```
 
-Open a PDF using the function `open_pdf_auto()`:
-```python3
-pdf, loader_data = pdfium.open_pdf_auto(filename)
-# ... work with the pdf
-pdfium.close_pdf(pdf, loader_data)
-```
-
 Render a single page:
 
 ```python3
@@ -117,7 +110,7 @@ Render multiple pages concurrently:
 
 ```python3
 for image, suffix in pdfium.render_pdf_topil(filename):
-    image.save(f'out_{suffix}.png')
+    image.save( 'out_{}.png'.format(suffix) )
     image.close()
 ```
 
