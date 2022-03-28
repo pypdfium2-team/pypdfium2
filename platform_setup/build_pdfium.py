@@ -50,9 +50,6 @@ PdfiumWinPatches = [
 PdfiumNativebuildPatches = [
     (join(PatchDir,'pdfium','nativebuild.patch'), join(PDFiumDir,'build')),
 ]
-PdfiumSkipDepsPatches = [
-    (join(PatchDir,'pdfium','skip_deps.patch'), PDFiumDir),
-]
 
 DefaultConfig = {
     'is_debug': False,
@@ -134,7 +131,6 @@ def dl_pdfium(do_update, revision, GClient):
         run_cmd(['git', 'clone', '--depth', '1', PDFium_URL], cwd=SB_Dir)
     
     if is_sync:
-        _apply_patchset(PdfiumSkipDepsPatches)
         run_cmd([GClient, 'sync', '--revision', 'origin/{}'.format(revision), '--no-history', '--shallow'], cwd=SB_Dir)
     
     return is_sync
@@ -260,13 +256,13 @@ def pack(src_libpath, destname=None):
     shutil.rmtree(include_dir)
 
 
-def _get_tool(tool, prefer_systools, win_append):
+def _get_tool(tool, win_append, is_nativebuild):
     
     exe = join(DepotToolsDir, tool)
     if sys.platform.startswith('win32'):
         exe += '.' + win_append
     
-    if prefer_systools:
+    if is_nativebuild:
         _sh_exe = shutil.which(tool)
         if _sh_exe:
             exe = _sh_exe
@@ -320,9 +316,9 @@ def main(
     if b_checkdeps:
         check_deps.main(b_nativebuild)
     
-    GClient = _get_tool('gclient', b_nativebuild, 'bat')
-    GN = _get_tool('gn', b_nativebuild, 'bat')
-    Ninja = _get_tool('ninja', b_nativebuild, 'exe')
+    GClient = _get_tool('gclient', 'bat', b_nativebuild)
+    GN = _get_tool('gn', 'bat', b_nativebuild)
+    Ninja = _get_tool('ninja', 'exe', b_nativebuild)
     
     if sys.platform.startswith('win32'):
         os.environ['DEPOT_TOOLS_WIN_TOOLCHAIN'] = "0"
