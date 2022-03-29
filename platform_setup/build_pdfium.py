@@ -120,15 +120,13 @@ def dl_pdfium(do_update, revision, GClient):
     if os.path.isdir(PDFiumDir):
         if do_update:
             print("PDFium: Revert / Sync  ...")
-            for dir in (PDFiumDir, join(PDFiumDir,'build')):
-                run_cmd(['git', 'reset', '--hard', 'HEAD'], cwd=dir)
+            run_cmd([GClient, 'revert'], cwd=SB_Dir)
         else:
             is_sync = False
             print("PDFium: Using existing repository as-is.")
     else:
         print("PDFium: Download ...")
         run_cmd([GClient, 'config', '--unmanaged', PDFium_URL], cwd=SB_Dir)
-        run_cmd(['git', 'clone', '--depth', '1', PDFium_URL], cwd=SB_Dir)
     
     if is_sync:
         run_cmd([GClient, 'sync', '--revision', 'origin/{}'.format(revision), '--no-history', '--shallow'], cwd=SB_Dir)
