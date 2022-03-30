@@ -314,7 +314,7 @@ def main(
     if b_checkdeps:
         check_deps.main(b_nativebuild)
     
-    GClient = _get_tool('gclient', 'bat', b_nativebuild)
+    GClient = _get_tool('gclient', 'bat', False)
     GN = _get_tool('gn', 'bat', b_nativebuild)
     Ninja = _get_tool('ninja', 'exe', b_nativebuild)
     
