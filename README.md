@@ -244,10 +244,6 @@ If your issue is caused by the bindings generator, refer to the [ctypesgen bug t
 
 pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that broke ctypesgen-created string handling code.
 
-### Problems with `FPDFPage_Delete()`
-
-While `FPDFPage_Delete()` first seems to reduce page count properly, the changes are not actually applied when saving the document. See issue [#96](https://github.com/pypdfium2-team/pypdfium2/issues/96).
-
 
 ## Thanks
 

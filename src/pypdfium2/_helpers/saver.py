@@ -41,4 +41,4 @@ def save_pdf(pdf, buffer):
     filewrite = pdfium.FPDF_FILEWRITE()
     filewrite.WriteBlock = WriteFunctype( _writer_class(buffer) )
     
-    pdfium.FPDF_SaveAsCopy(pdf, ctypes.byref(filewrite), pdfium.FPDF_INCREMENTAL)
+    pdfium.FPDF_SaveAsCopy(pdf, ctypes.byref(filewrite), pdfium.FPDF_NO_INCREMENTAL)
