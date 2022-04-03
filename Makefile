@@ -17,8 +17,8 @@ update-all:
 setup-all:
 	bash ./utilities/setup_all.sh
 
-release:
-	bash ./utilities/release.sh
+packaging:
+	bash ./utilities/packaging.sh
 
 .PHONY: build
 build:

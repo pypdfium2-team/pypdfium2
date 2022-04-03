@@ -1,0 +1,72 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Release
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  
+  release:
+    
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    
+    steps:
+      
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+      
+      - name: Install/update dependencies
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -U setuptools setuptools-scm build wheel
+          python3 -m pip install -U pillow pytest importchecker codespell reuse twine check-wheel-contents
+      
+      - name: Check out ctypesgen
+        uses: actions/checkout@v3
+        with:
+          repository: ctypesgen/ctypesgen
+          ref: 'fd495e5edb2f69e5407774f8937a1d62cd33fe55'
+          path: ctypesgen
+      
+      - name: Install ctypesgen
+        run: |
+          pushd ctypesgen
+          python3 -m pip install .
+          popd
+      
+      - name: Check out pypdfium2
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          fetch-depth: 0
+      
+      - name: Run packaging script
+        run: make packaging
+      
+      - name: Prepare release description
+        run: |
+          CURRENT_TAG=$(git describe --abbrev=0 --tags)
+          PREVIOUS_TAG=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
+          echo "Release ${CURRENT_TAG}" > RELEASE.md
+          printf "\n### Changes\nCommits between \`$PREVIOUS_TAG\` and \`$CURRENT_TAG\`:\n" >> RELEASE.md
+          git log $PREVIOUS_TAG..$CURRENT_TAG --pretty=format:'* %h %s' >> RELEASE.md
+      
+      - name: Publish to GitHub
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'dist/*'
+          bodyFile: 'RELEASE.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Publish to TestPyPI
+        run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
+      
+      #- name: Publish to PyPI
+        #run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
