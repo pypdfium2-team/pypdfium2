@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Release
-on: workflow_dispatch
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   
@@ -46,6 +49,21 @@ jobs:
       
       - name: Run packaging script
         run: make packaging
+      
+      - name: Prepare release description
+        run: |
+          CURRENT_TAG=$(git describe --abbrev=0 --tags)
+          PREVIOUS_TAG=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
+          echo "Release ${CURRENT_TAG}" > RELEASE.md
+          printf "\n### Changes\nCommits between \`$PREVIOUS_TAG\` and \`$CURRENT_TAG\`:\n" >> RELEASE.md
+          git log $PREVIOUS_TAG..$CURRENT_TAG --pretty=format:'* %h: %s' >> RELEASE.md
+      
+      - name: Publish to GitHub
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'dist/*'
+          bodyFile: 'RELEASE.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Publish to TestPyPI
         run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
