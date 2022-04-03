@@ -61,7 +61,8 @@ jobs:
           artifacts: 'dist/*'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: $(git describe --abbrev=0 --tags)
+          name: pypdfium2 ${{ CURRENT_TAG }}
+          tag: ${{ CURRENT_TAG }}
       
       - name: Publish to TestPyPI
         run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
