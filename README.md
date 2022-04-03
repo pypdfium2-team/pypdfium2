@@ -219,8 +219,7 @@ Run `make test`.
 
 Starting from version 1.3.0, the release process will be automated using a CI workflow that pushes to GitHub, TestPyPI and PyPI.
 To do a release, first run `make release` locally to check that everything works as expected. Then add, commit and push possible changes to the version file.
-Finally, trigger the `Release` workflow from the GitHub Actions panel and monitor its progress.
-
+Finally, add and push a tag to trigger the `Release` workflow, and monitor its process using the GitHub Actions panel.
 
 ## Issues
 
