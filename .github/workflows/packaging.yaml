@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Run packaging script
-
-# trigger manually, no inputs
 on: workflow_dispatch
 
 jobs:
+  
   packaging:
+    
     runs-on: ubuntu-latest
     steps:
       
@@ -42,4 +42,4 @@ jobs:
       
       - name: Run packaging script
         run: |
-          make release
+          make packaging
