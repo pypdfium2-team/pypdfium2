@@ -6,7 +6,7 @@ on: workflow_dispatch
 
 jobs:
   
-  packaging:
+  release:
     
     runs-on: ubuntu-latest
     strategy:
