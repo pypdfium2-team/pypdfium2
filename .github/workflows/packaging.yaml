@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Run packaging script
+
+# trigger manually, no inputs
+on: workflow_dispatch
+
+jobs:
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+      
+      - name: Install/update dependencies
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -U setuptools setuptools-scm build wheel
+          python3 -m pip install -U pillow pytest importchecker codespell reuse twine check-wheel-contents
+      
+      - name: Check out ctypesgen
+        uses: actions/checkout@v3
+        with:
+          repository: ctypesgen/ctypesgen
+          ref: 'fd495e5edb2f69e5407774f8937a1d62cd33fe55'
+          path: ctypesgen
+      
+      - name: Install ctypesgen
+        run: |
+          pushd ctypesgen
+          python3 -m pip install .
+          popd
+      
+      - name: Check out pypdfium2
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+      
+      - name: Run packaging script
+        run: |
+          make release
