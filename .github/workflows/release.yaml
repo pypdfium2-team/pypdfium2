@@ -2,7 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Release
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag for Publish to GitHub
+        required: true
 
 jobs:
   
@@ -61,8 +66,8 @@ jobs:
           artifacts: 'dist/*'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: pypdfium2 ${{ CURRENT_TAG }}
-          tag: ${{ CURRENT_TAG }}
+          name: pypdfium2 ${{ github.events.inputs.tag }}
+          tag: ${{ github.events.inputs.tag }}
       
       - name: Publish to TestPyPI
         run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
