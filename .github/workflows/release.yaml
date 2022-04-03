@@ -56,7 +56,7 @@ jobs:
           PREVIOUS_TAG=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
           echo "Release ${CURRENT_TAG}" > RELEASE.md
           printf "\n### Changes\nCommits between \`$PREVIOUS_TAG\` and \`$CURRENT_TAG\`:\n" >> RELEASE.md
-          git log $PREVIOUS_TAG..$CURRENT_TAG --pretty=format:'* %h: %s' >> RELEASE.md
+          git log $PREVIOUS_TAG..$CURRENT_TAG --pretty=format:'* %h %s' >> RELEASE.md
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
