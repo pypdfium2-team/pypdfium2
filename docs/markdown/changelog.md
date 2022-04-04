@@ -4,9 +4,9 @@
 # Changelog
 
 
-## 1.3.0 (scheduled for 2022-04-04)
+## 1.3.0 (2022-04-04)
 
-- Updated PDFium from `4969` to `XXXX`
+- Updated PDFium from `4969` to `4983`
 - Fixed downloading or updating PDFium in the source build script, which was broken because of the `skip_deps` patch. The purpose of this patch was to speed up downloading, but we now removed it to avoid breakage when the upstream `DEPS` file changes.
 - Fixed `save_pdf()` to include deletions. We wrongly used the `FPDF_INCREMENTAL` flag, which meant that only additions or modifications were saved. The function is now changed to use the correct flag `FPDF_NO_INCREMENTAL`.
 - Added a GitHub workflow to largely automate the release process.
