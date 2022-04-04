@@ -4,7 +4,7 @@
 # Changelog
 
 
-# 1.4.0 (scheduled for 2022-04-11)
+## 1.4.0 (scheduled for 2022-04-11)
 
 - Updated PDFium from `4983` to `XXXX`.
 - Added a GitHub workflow to test the PyPI release wheels on different platforms.
