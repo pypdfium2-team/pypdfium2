@@ -48,7 +48,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [fedora_latest]
-        cpu: [armv7, aarch64]  # aarch64 takes much longer than armv7 (~7min vs. >30min)
+        cpu: [armv7, aarch64]
     
     runs-on: ubuntu-latest
     name: ${{ matrix.os }} ${{ matrix.cpu }} (emulated)
