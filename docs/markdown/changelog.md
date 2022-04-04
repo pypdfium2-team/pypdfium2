@@ -17,6 +17,8 @@
 - Fixed `save_pdf()` to include deletions. We wrongly used the `FPDF_INCREMENTAL` flag, which meant that only additions or modifications were saved. The function is now changed to use the correct flag `FPDF_NO_INCREMENTAL`.
 - Added a GitHub workflow to largely automate the release process.
 
+*Releases since 1.3.0 are uploaded using GitHub Actions CI.*
+
 
 ## 1.2.0 (2022-03-28)
 
@@ -51,6 +53,8 @@
   * Improved finding of system llvm/lld binaries for native build.
 - Improved setup status tracking.
 - Started removing manual line breaks to simplify editing. Any decent text editor or diff tool should provide automatic word wrap.
+
+*Releases since 1.0.0 have git tags so that you can easily determine the corresponding commit.*
 
 
 ## 0.15.0 (2022-02-28)
@@ -159,4 +163,4 @@
 - Moved some scripts from the root directory into `utilities/` and changed the Makefile accordingly.
 - Added a list of future [tasks](./tasks.md) to keep in mind.
 
-Tracking changes started with version 0.10.0, so there are no entries for older releases.
+*Tracking changes started with version 0.10.0, so there are no entries for older releases.*
