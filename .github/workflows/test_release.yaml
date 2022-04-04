@@ -2,11 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Test Release
-on:
-  workflow_dispatch:
-  push:
-    tags:
-      - '*'
+on: workflow_dispatch
 
 jobs:
 
