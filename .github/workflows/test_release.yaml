@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Test release
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+jobs:
+
+  test-release:
+  
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, ubuntu-18.04, windows-2022, windows-2019, macos-11, macos-10.15]
+        py: ['3.6', '3.7', '3.8', '3.9', '3.10']
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.py }}
+      
+      - name: Install/update setup dependencies
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -U setuptools
+      
+      - name: Install pypdfium2
+        run: python3 -m pip install -U pypdfium2
+      
+      - name: Install test dependencies
+        run: python3 -m pip install -U pillow pytest
+      
+      - name: Check out pypdfium2 repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+      
+      - name: Run tests
+        run: make test
