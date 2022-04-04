@@ -13,7 +13,7 @@ Contributions and improvements to pypdfium2 are very welcome. Here are a few ins
 * Code comments are appreciated wherever they improve readability.
 * Please try to keep compatibility with the minimum supported Python version defined in [`setup.cfg`][setup-cfg]. This means to avoid newer features like f-strings or keywords-only enforcement. We also do not use type hints at the moment.
 * For working with file paths, we prefer to use `os.path` / `shutil` / `glob` instead of `pathlib`.
-* In the module itself, no relative imports must be used. Absolute imports are preferable. Outside the `src/` directory, realative imports are allowed, though.
+* In the module itself, no relative imports must be used. Absolute imports are preferable in general.
 
 [spdx-licenses]: https://spdx.org/licenses/
 [reuse-lint]: https://pypi.org/project/reuse/
