@@ -3,10 +3,9 @@
 
 name: Release
 on:
-  workflow_dispatch:
-  # push:
-  #   tags:
-  #     - '*'
+  push:
+    tags:
+      - '*'
 
 jobs:
   
