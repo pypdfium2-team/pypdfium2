@@ -38,7 +38,7 @@ def packaging_handler():
     elif hasattr(PlatformNames, target):
         mkwheel( getattr(PlatformNames, target) )
     else:
-        raise ValueError( "Invalid deployment target '{}'".format(target) )
+        raise ValueError("Invalid deployment target '%s'" % target)
     
     return False
 

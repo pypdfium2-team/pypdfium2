@@ -75,7 +75,7 @@ class CliParser:
             sep = ', '
         
         if len(flags) > 1:
-            help = '({})'.format(help)
+            help = '(%s)' % help
         
         help += '\n' + ' '*4 + message
         
@@ -86,15 +86,11 @@ class CliParser:
         
         help = ''
         
-        help += '{} {}'.format(self.program, self.version) + '\n'
+        help += '%s %s' % (self.program, self.version) + '\n'
         help += self.description + '\n'*2
         
-        help += self._get_cmd_help(
-            HelpFlags, "Show the main help an exit",
-        ) + '\n'
-        help += self._get_cmd_help(
-            VersionFlags, "Show the versions of bindings and library",
-        ) + '\n'
+        help += self._get_cmd_help(HelpFlags, "Show the main help an exit") + '\n'
+        help += self._get_cmd_help(VersionFlags, "Show the versions of bindings and library") + '\n'
         
         sep = ''
         for sub in self._subs:
@@ -113,7 +109,7 @@ class CliParser:
         main_arg = self.argv[0]
         
         if main_arg in VersionFlags:
-            print( "{} {}".format(self.program, self.version) )
+            print("%s %s" % (self.program, self.version))
             sys.exit()
         
         sc_found = False
@@ -122,11 +118,11 @@ class CliParser:
             if main_arg.lower() in [n.lower() for n in sub.names]:
                 sub.method(
                     argv = self.argv[1:],
-                    prog = "{} {}".format(self.program, main_arg),
+                    prog = "%s %s" % (self.program, main_arg),
                     desc = sub.help,
                 )
                 sc_found = True
                 break
         
         if not sc_found:
-            print("Error: Argument '{}' is not a valid subcommand".format(main_arg), file=sys.stderr)
+            print("Error: Argument '%s' is not a valid subcommand" % main_arg, file=sys.stderr)

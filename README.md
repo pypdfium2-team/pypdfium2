@@ -110,7 +110,7 @@ Render multiple pages concurrently:
 
 ```python3
 for image, suffix in pdfium.render_pdf_topil(filename):
-    image.save( 'out_{}.png'.format(suffix) )
+    image.save('out_%s.png' % suffix)
     image.close()
 ```
 
@@ -208,7 +208,7 @@ For wheel naming conventions, please see [Python Packaging: Platform compatibili
 
 pypdfium2 contains scripts to automate the release process:
 
-* To build the wheels, run `make release`. This will download binaries and header files, write finished Python binary distributions to `dist/`, and run some checks.
+* To build the wheels, run `make packaging`. This will download binaries and header files, write finished Python binary distributions to `dist/`, and run some checks.
 * To clean up after a release, run `make clean`. This will remove downloaded files and build artifacts.
 
 ### Testing
@@ -218,7 +218,7 @@ Run `make test`.
 ### Publishing
 
 Starting from version 1.3.0, the release process will be automated using a CI workflow that pushes to GitHub, TestPyPI and PyPI.
-To do a release, first run `make release` locally to check that everything works as expected. Then add, commit and push possible changes to the version file.
+To do a release, first run `make packaging` locally to check that everything works as expected. Then add, commit and push possible changes to the version file.
 Finally, add and push a tag to trigger the `Release` workflow, and monitor its process using the GitHub Actions panel:
 ```bash
 git tag -a A.B.C

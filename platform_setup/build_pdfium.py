@@ -129,7 +129,7 @@ def dl_pdfium(do_update, revision, GClient):
         run_cmd([GClient, 'config', '--unmanaged', PDFium_URL], cwd=SB_Dir)
     
     if is_sync:
-        run_cmd([GClient, 'sync', '--revision', 'origin/{}'.format(revision), '--no-history', '--shallow'], cwd=SB_Dir)
+        run_cmd([GClient, 'sync', '--revision', 'origin/%s' % revision, '--no-history', '--shallow'], cwd=SB_Dir)
     
     return is_sync
 
@@ -181,7 +181,7 @@ def _replace_binaries():
         os.symlink(replacement, binary_path)
     
     if len(not_found) > 0:
-        print("Warning: No system-provided replacements available for {}".format(not_found), file=sys.stderr)
+        print("Warning: No system-provided replacements available for %s" % not_found, file=sys.stderr)
 
 
 def patch_pdfium():
@@ -265,7 +265,7 @@ def _get_tool(tool, win_append, is_nativebuild):
         if _sh_exe:
             exe = _sh_exe
         else:
-            print("Warning: Host system does not provide '{}'".format(tool), file=sys.stderr)
+            print("Warning: Host system does not provide '%s'" % tool, file=sys.stderr)
     
     return exe
 
@@ -276,13 +276,13 @@ def _serialise_config(config_dict):
     sep = ''
     
     for key, value in config_dict.items():
-        config_str += sep + '{} = '.format(key)
+        config_str += sep + '%s = ' % key
         if isinstance(value, bool):
             config_str += str(value).lower()
         elif isinstance(value, str):
-            config_str += '"{}"'.format(value)
+            config_str += '"%s"' % value
         else:
-            raise TypeError( "Not sure how to serialise type {}".format(type(value)) )
+            raise TypeError("Not sure how to serialise type %s" % type(value))
         sep = '\n'
     
     return config_str
@@ -333,7 +333,7 @@ def main(
         with open(os.path.abspath(b_argfile), 'r') as file_handle:
             config_str = file_handle.read()
     
-    print("\nBuild configuration:\n{}\n".format(config_str))
+    print("\nBuild configuration:\n%s\n" % config_str)
     
     depot_dl_done = dl_depottools(b_update)
     if depot_dl_done:

@@ -52,11 +52,11 @@ def _set_versions(*versions_list):
     
     for variable, current_ver, new_ver in versions_list:
         
-        template = "{} = {}"
-        previous = template.format(variable, current_ver)
-        updated = template.format(variable, new_ver)
+        template = "%s = %s"
+        previous = template % (variable, current_ver)
+        updated = template % (variable, new_ver)
         
-        print( "'{}' -> '{}'".format(previous, updated) )
+        print("'%s' -> '%s'" % (previous, updated))
         assert content.count(previous) == 1
         content = content.replace(previous, updated)
     
@@ -66,7 +66,7 @@ def _set_versions(*versions_list):
 
 def get_latest_version():
     
-    git_ls = run_cmd(['git', 'ls-remote', '{}.git'.format(ReleaseRepo)], cwd=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    git_ls = run_cmd(['git', 'ls-remote', '%s.git' % ReleaseRepo], cwd=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
     git_ls = git_ls.stdout.decode('UTF-8')
     tag = git_ls.split('\t')[-1].replace('\n', '')
@@ -100,7 +100,7 @@ def clear_data(download_files):
 def _get_package(args):
     
     dirpath, file_url, file_path = args
-    print("Downloading {} -> {}".format(file_url, file_path))
+    print("Downloading %s -> %s" % (file_url, file_path))
     
     try:
         request.urlretrieve(file_url, file_path)
@@ -113,12 +113,12 @@ def _get_package(args):
 
 def download_releases(latest_version, download_files):
     
-    base_url = "{}{}/".format(ReleaseURL, latest_version)
+    base_url = "%s%s/" % (ReleaseURL, latest_version)
     args = []
     
     for dirpath, arcname in download_files.items():
         
-        filename = "{}.{}".format(arcname, ReleaseExtension)
+        filename = "%s.%s" % (arcname, ReleaseExtension)
         file_url = base_url + filename
         
         if not os.path.exists(dirpath):
@@ -149,7 +149,7 @@ def unpack_archives(archives):
         if ReleaseExtension == 'tgz':
             arc_opener = tarfile.open
         else:
-            raise ValueError("Unknown archive extension {}".format(ReleaseExtension))
+            raise ValueError("Unknown archive extension '%s'" % ReleaseExtension)
         
         with arc_opener(file) as archive:
             archive.extractall(extraction_path)
@@ -173,7 +173,7 @@ def generate_bindings(archives):
         elif dirname.startswith('linux'):
             target_name = 'pdfium'
         else:
-            raise ValueError("Unknown platform directory name '{}'".format(dirname))
+            raise ValueError("Unknown platform directory name '%s'" % dirname)
         
         items = os.listdir(bin_dir)
         assert len(items) == 1
@@ -197,9 +197,7 @@ def get_download_files(platforms):
         if pl_name in ReleaseNames:
             download_files[ join(DataTree, pl_name) ] = ReleaseNames[pl_name]
         else:
-            raise ValueError(
-                "Unknown platform name '{}'. Available keys are {}.".format(pl_name, avail_keys)
-            )
+            raise ValueError("Unknown platform name '%s'. Available keys are %s." % (pl_name, avail_keys))
     
     return download_files
 

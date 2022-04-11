@@ -66,7 +66,7 @@ def test_open_native():
     pdfium.FPDFPage_Delete(pdf, 1)
     page = pdfium.FPDF_LoadPage(pdf, 0)
     rotation = pdfium.FPDFPage_GetRotation(page)
-    print( "Page {} has rotation {}".format(page, rotation) )
+    print("Page %s has rotation %s" % (page, rotation))
     pdfium.FPDF_ClosePage(page)
     
     pdfium.close_pdf(pdf, ld_data)

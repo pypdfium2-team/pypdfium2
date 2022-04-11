@@ -57,9 +57,9 @@ def check_sysdeps(sys_commands):
         else:
             missing.append(dep_name)
     
-    print( "Found system dependencies: {}".format(found) )
+    print("Found system dependencies: %s" % found)
     if len(missing) > 0:
-        print( "Missing system dependencies: {}".format(missing) )
+        print("Missing system dependencies: %s" % missing)
 
 
 def main(prefer_st=False):

@@ -48,19 +48,19 @@ def _copy_bindings(pl_name):
 
 
 def _get_linux_tag(arch):
-    return 'manylinux_2_17_{}.manylinux2014_{}'.format(arch, arch)
+    return 'manylinux_2_17_%s.manylinux2014_%s' % (arch, arch)
 
 
 def _get_mac_tag(arch, *versions):
     
     assert len(versions) > 0
     
-    template = 'macosx_{}_{}'
+    template = 'macosx_%s_%s'
     
     tag = ''
     sep = ''
     for v in versions:
-        tag += sep + template.format(v, arch)
+        tag += sep + template % (v, arch)
         sep = '.'
     
     return tag
@@ -91,7 +91,7 @@ def _get_tag(pl_name):
             tag = tag.replace(char, '_')
         return tag
     else:
-        raise ValueError( "Unknown platform directory {}".format(pl_name) )
+        raise ValueError("Unknown platform directory %s" % pl_name)
 
 
 def _get_bdist(pl_name):

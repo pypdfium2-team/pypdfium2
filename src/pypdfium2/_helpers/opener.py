@@ -75,7 +75,7 @@ def open_pdf_auto(input_obj, password=None):
     elif is_buffer(input_obj):
         pdf, ld_data = open_pdf_buffer(input_obj, password)
     else:
-        raise ValueError( "Input must be a file path, bytes or a byte buffer, but it is {}.".format(type(input_obj)) )
+        raise ValueError("Input must be a file path, bytes or a byte buffer, but it is %s." % type(input_obj))
     
     return pdf, ld_data
 
