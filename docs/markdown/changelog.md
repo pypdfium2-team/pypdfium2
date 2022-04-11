@@ -4,6 +4,12 @@
 # Changelog
 
 
+## 1.5.0 (scheduled for 2022-04-18)
+
+- Updated PDFium from `4997` to `XXXX`.
+- Changed string formatting from `"{}".format(...)` to `"%s" % (...)`.
+
+
 ## 1.4.0 (2022-04-11)
 
 - Updated PDFium from `4983` to `4997`.
