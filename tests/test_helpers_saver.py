@@ -23,8 +23,8 @@ def test_save_pdf_tobuffer():
     exp_start = b"%PDF-1.6"
     exp_end = b"%EOF\r\n"
     
-    assert data[:len(exp_start)] == b"%PDF-1.6"
-    assert data[-len(exp_end):] == b"%EOF\r\n"
+    assert data[:len(exp_start)] == exp_start
+    assert data[-len(exp_end):] == exp_end
     
     pdfium.close_pdf(pdf, ld_data)
 
