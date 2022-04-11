@@ -224,6 +224,7 @@ Finally, add and push a tag to trigger the `Release` workflow, and monitor its p
 git tag -a A.B.C
 git push --tags
 ```
+Always make sure the information in `src/pypdfium2/_version.py` matches with the tag!
 
 ## Issues
 
