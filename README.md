@@ -231,8 +231,9 @@ Always make sure the information in `src/pypdfium2/_version.py` matches with the
 Since pypdfium2 is built using upstream binaries and an automatic bindings creator, issues that are not related to packaging or support model code probably need to be addressed upstream. However, the [pypdfium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues) is always a good place to start if you have any problems, questions or suggestions.
 
 If the cause of an issue could be determined to be in PDFium, the problem needs to be reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list).
+For discussion and general questions, also consider joining the [PDFium mailing list](https://groups.google.com/g/pdfium/).
 
-Issues related to pre-compiled binaries should be discussed at [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
+Issues related to pre-compiled packages should be discussed at [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
 
 If your issue is caused by the bindings generator, refer to the [ctypesgen bug tracker](https://github.com/ctypesgen/ctypesgen/issues).
 
