@@ -16,7 +16,7 @@ from os.path import (
 def rotation_type(string):
     rotation = int(string)
     if rotation not in (0, 90, 180, 270):
-        raise ValueError("Invalid rotation value {}".format(rotation))
+        raise ValueError("Invalid rotation value %s" % rotation)
     return rotation
 
 
@@ -30,7 +30,7 @@ def colour_type(string):
         colour = ast.literal_eval(string)
         
         if not isinstance(colour, (tuple, list)):
-            raise ValueError( "Invalid colour type {}. Must be list or tuple.".format(type(colour)) )
+            raise ValueError("Invalid colour type %s. Must be list or tuple." % type(colour))
         if not len(colour) in (3, 4):
             raise ValueError("Invalid number of colour values. Must be 3 or 4.")
         if not all(isinstance(val, int) and 0 <= val <= 255 for val in colour):
@@ -163,6 +163,6 @@ def main(argv, prog, desc):
         )
         
         for image, suffix in renderer:
-            output_path = "{}.{}".format(join(args.output, prefix+suffix), args.format)
+            output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
             image.save(output_path)
             image.close()

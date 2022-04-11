@@ -35,7 +35,7 @@ def translate_viewmode(viewmode):
     elif viewmode == pdfium.PDFDEST_VIEW_FITBV:
         return ViewMode.FitBV
     else:
-        raise ValueError("Unknown PDFium viewmode value {}".format(viewmode))
+        raise ValueError("Unknown PDFium viewmode value %s" % viewmode)
 
 
 def translate_rotation(rotation):
@@ -58,7 +58,7 @@ def translate_rotation(rotation):
     elif rotation == 270:
         return 3
     else:
-        raise ValueError("Invalid rotation {}".format(rotation))
+        raise ValueError("Invalid rotation %s" % rotation)
 
 
 def _hex_digits(c):

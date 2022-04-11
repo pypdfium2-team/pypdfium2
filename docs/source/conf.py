@@ -22,8 +22,8 @@
 import time
 
 project = 'pypdfium2'
-copyright = '{} pypdfium2-team'.format( time.strftime('%Y') )
 author = 'pypdfium2-team'
+copyright = '%s %s' % (time.strftime('%Y'), author)
 
 
 # -- General configuration ---------------------------------------------------

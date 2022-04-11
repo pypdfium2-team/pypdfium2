@@ -18,7 +18,7 @@ def test_entrypoint():
     method_name = entry_point[1]
     
     namespace = {}
-    exec("from {} import {}".format(module_path, method_name), namespace)
+    exec("from %s import %s" % (module_path, method_name), namespace)
     
     assert method_name in namespace
     function = namespace[method_name]

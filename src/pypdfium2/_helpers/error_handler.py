@@ -41,6 +41,6 @@ def handle_pdfium_error(valid=True):
     elif last_error == pdfium.FPDF_ERR_PAGE:
         raise PdfiumError("Page not found or content error.")
     else:
-        raise ValueError("Unknown PDFium error code {}.".format(last_error))
+        raise ValueError("Unknown PDFium error code %s" % last_error)
     
     return last_error

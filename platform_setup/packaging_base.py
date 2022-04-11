@@ -46,7 +46,7 @@ class PlatformNames:
 
 
 def run_cmd(command, cwd, **kwargs):
-    print('{} ("{}")'.format(command, cwd))
+    print('%s ("%s")' % (command, cwd))
     return subprocess.run(command, cwd=cwd, **kwargs)
 
 

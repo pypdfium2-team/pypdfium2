@@ -25,7 +25,7 @@ def units_to_pt(value, unit: Units):
     elif unit is Units.MM:
         return (value*72) / 25.4
     else:
-        raise ValueError("Invalid unit type {}".format(unit))
+        raise ValueError("Invalid unit type %s" % unit)
 
 
 def parse_args(argv, prog, desc):
