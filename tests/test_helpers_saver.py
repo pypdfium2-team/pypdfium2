@@ -15,12 +15,12 @@ def test_save_pdf_tobuffer():
     pdfium.FPDFPage_Delete(pdf, ctypes.c_int(0))
     
     buffer = io.BytesIO()
-    pdfium.save_pdf(pdf, buffer)
+    pdfium.save_pdf(pdf, buffer, version=17)
     buffer.seek(0)
     
     data = buffer.read()
     
-    exp_start = b"%PDF-1.6"
+    exp_start = b"%PDF-1.7"
     exp_end = b"%EOF\r\n"
     
     assert data[:len(exp_start)] == exp_start

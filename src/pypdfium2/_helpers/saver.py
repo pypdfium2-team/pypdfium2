@@ -18,15 +18,18 @@ class _writer_class:
         return 1
 
 
-def save_pdf(pdf, buffer):
+def save_pdf(pdf, buffer, version=None):
     """
     Write the data of a PDFium document into an output buffer.
     
     Parameters:
         pdf (``FPDF_DOCUMENT``):
             Handle to a PDFium document.
-        buffer:
+        buffer (typing.BinaryIO):
             A byte buffer to capture the data. It may be anything that implements the ``write()`` method.
+        version (typing.Optional[int]):
+            The PDF version to use, given as an integer (14 for 1.4, 15 for 1.5, ...).
+            If :data:`None`, PDFium will set a version automatically.
     """
     
     WriteFunctype = ctypes.CFUNCTYPE(
@@ -41,4 +44,8 @@ def save_pdf(pdf, buffer):
     filewrite = pdfium.FPDF_FILEWRITE()
     filewrite.WriteBlock = WriteFunctype( _writer_class(buffer) )
     
-    pdfium.FPDF_SaveAsCopy(pdf, ctypes.byref(filewrite), pdfium.FPDF_NO_INCREMENTAL)
+    saveargs = (pdf, ctypes.byref(filewrite), pdfium.FPDF_NO_INCREMENTAL)
+    if version is None:
+        pdfium.FPDF_SaveAsCopy(*saveargs)
+    else:
+        pdfium.FPDF_SaveWithVersion(*saveargs, version)
