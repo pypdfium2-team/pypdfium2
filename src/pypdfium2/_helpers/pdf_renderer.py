@@ -57,13 +57,13 @@ def render_pdf_base(
     
     with PdfContext(input_obj, password) as pdf:
         n_pages = pdfium.FPDF_GetPageCount(pdf)
-    n_digits = len(str(n_pages))
     
     if page_indices is None or len(page_indices) == 0:
         page_indices = [i for i in range(n_pages)]
     if not all(0 <= i < n_pages for i in page_indices):
         raise ValueError("Out of range page index detected.")
     
+    n_digits = len( str(max(page_indices)) )
     args = [(render_meth, input_obj, i, password, scale, rotation, colour, annotations, greyscale, optimise_mode) for i in page_indices]
     
     with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
