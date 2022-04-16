@@ -46,9 +46,6 @@ def open_pdf_auto(input_obj, password=None):
     """    
     Open a document from a file path or in-memory data.
     
-    If the input is a file path, ``FPDF_LoadDocument()`` will be used.
-    If the input is bytes or a byte buffer, :func:`.open_pdf_buffer` will be used.
-    
     Parameters:
         input_obj (str | bytes | typing.BinaryIO):
             File path to a PDF document, bytes, or a byte buffer.
@@ -57,22 +54,23 @@ def open_pdf_auto(input_obj, password=None):
     
     Returns:
         ``Tuple[pdfium.FPDF_DOCUMENT, Optional[LoaderDataHolder]]`` –
-        The handle to a PDFium document, and a :class:`.LoaderDataHolder` object to store associated file access data. The latter may be :data:`None` if no custom file access was required.
+        The handle to a PDFium document, and optionally a loader data object to store associated buffer data.
     
     Warning:
-        Callers **MUST** ensure that the :class:`.LoaderDataHolder` object remain available for as long as they work with the PDF. That means it has to be accessed again when done with processing, to prevent Python from automatically deleting the object. This can be achieved by passing it as second parameter to :func:`.close_pdf`, which is also necessary to release the acquired file buffer. If attempting to access the ``FPDF_DOCUMENT`` handle after the loader data has been deleted, a segmentation fault would occur.
+        Callers **MUST** ensure that the loader data object remain available for as long as they work with the PDF. That means it has to be accessed again when done with processing, to prevent Python from automatically deleting the object. This can be achieved by passing it as second parameter to :func:`.close_pdf`, which is also necessary to release the acquired file buffer. If attempting to access the ``FPDF_DOCUMENT`` handle after the loader data has been deleted, a segmentation fault would occur.
     """
     
+    ld_data = None
     if isinstance(input_obj, bytes):
         input_obj = io.BytesIO(input_obj)
     
-    ld_data = None
-    
     if isinstance(input_obj, str):
+        # file path -> use FPDF_LoadDocument()
         pdf = pdfium.FPDF_LoadDocument(input_obj, password)
         if pdfium.FPDF_GetPageCount(pdf) < 1:
             handle_pdfium_error(False)
     elif is_buffer(input_obj):
+        # byte buffer -> use open_pdf_buffer()
         pdf, ld_data = open_pdf_buffer(input_obj, password)
     else:
         raise ValueError("Input must be a file path, bytes or a byte buffer, but it is %s." % type(input_obj))
@@ -87,8 +85,8 @@ def close_pdf(pdf, loader_data=None):
     Parameters:
         pdf (``FPDF_DOCUMENT``):
             The PDFium document object to close using ``FPDF_CloseDocument()``.
-        loader_data (LoaderDataHolder):
-            Object that stores custom file access data associated to the PDF, as returned by :func:`.open_pdf_auto`, :func:`.open_pdf_buffer`, or :func:`.open_pdf_native`.
+        loader_data (typing.Optional[LoaderDataHolder]):
+            Object that stores custom file access data associated to the PDF.
     """
     
     pdfium.FPDF_CloseDocument(pdf)
