@@ -34,6 +34,8 @@ def render_pdf_base(
             The PDF document to render. It may be given as file path, bytes, or byte buffer.
         page_indices (typing.Sequence[int]):
             A list of zero-based page indices to render.
+        n_processes (int):
+            The number of rendering processes to run in parallel (defaults to :func:`os.cpu_count`).
     
     The other parameters are the same as for :func:`.render_page_base`.
     """
