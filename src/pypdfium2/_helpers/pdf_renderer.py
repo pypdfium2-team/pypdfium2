@@ -63,7 +63,7 @@ def render_pdf_base(
     if not all(0 <= i < n_pages for i in page_indices):
         raise ValueError("Out of range page index detected.")
     
-    n_digits = len( str(max(page_indices)) )
+    n_digits = len(str( max(page_indices)+1 ))
     args = [(render_meth, input_obj, i, password, scale, rotation, colour, annotations, greyscale, optimise_mode) for i in page_indices]
     
     with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
