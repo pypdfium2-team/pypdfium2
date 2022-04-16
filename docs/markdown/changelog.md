@@ -9,7 +9,8 @@
 - Updated PDFium from `4997` to `XXXX`.
 - Changed string formatting from `"{}".format(...)` to `"%s" % (...)`.
 - Added an option to save documents at a specific PDF version.
-- Notable style improvements to the implementation of concurrency in `pdf_renderer.py`.
+- Notable style improvements were applied to the implementation of concurrency in `pdf_renderer.py`.
+- In `render_pdf_base()`, the amount of zeros prepended to the serial number is now adaptive to the `page_indices` parameter.
 
 
 ## 1.4.0 (2022-04-11)
