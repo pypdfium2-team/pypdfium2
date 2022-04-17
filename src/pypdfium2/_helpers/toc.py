@@ -42,9 +42,7 @@ class OutlineItem:
 
 
 def _get_toc_entry(pdf, bookmark, level):
-    """
-    Convert a raw PDFium bookmark to an :class:`.OutlineItem`.
-    """
+    """ Convert a raw PDFium bookmark to an :class:`.OutlineItem`. """
     
     # title
     t_buflen = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
