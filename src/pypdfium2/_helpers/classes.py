@@ -37,27 +37,19 @@ class PdfDocument:
         return self._pdf
     
     def close(self):
-        """
-        Close the document to release allocated memory. This method must be called when done with processing the PDF.
-        """
+        """ Close the document to release allocated memory. This method must be called when done with processing the PDF. """
         return opener.close_pdf(self._pdf, self._ld_data)
     
     def save(self, *args, **kws):
-        """
-        Save the PDF into an output byte buffer (see :func:`.save_pdf`).
-        """
+        """ Save the PDF into an output byte buffer (see :func:`.save_pdf`). """
         return saver.save_pdf(self._pdf, *args, **kws)
     
     def get_toc(self, **kws):
-        """
-        Incrementally read the document's table of contents (see :func:`.get_toc`).
-        """
+        """ Incrementally read the document's table of contents (see :func:`.get_toc`). """
         yield from toc.get_toc(self._pdf, **kws)
     
     def render_page_tobytes(self, index, **kws):
-        """
-        Render a single page to bytes (see :func:`.render_page_tobytes`).
-        """
+        """ Render a single page to bytes (see :func:`.render_page_tobytes`). """
         return page_renderer.render_page_tobytes(
             self._pdf,
             page_index = index,
@@ -65,9 +57,7 @@ class PdfDocument:
         )
     
     def render_pdf_tobytes(self, **kws):
-        """
-        Incrementally render multiple pages to bytes (see :func:`.render_pdf_tobytes`).
-        """
+        """ Incrementally render multiple pages to bytes (see :func:`.render_pdf_tobytes`). """
         yield from pdf_renderer.render_pdf_tobytes(
             self._input_obj,
             password = self._password,
@@ -75,9 +65,7 @@ class PdfDocument:
         )
     
     def render_page_topil(self, index, **kws):
-        """
-        Render a single page to a :mod:`PIL` image (see :func:`.render_page_topil`).
-        """
+        """ Render a single page to a :mod:`PIL` image (see :func:`.render_page_topil`). """
         return page_renderer.render_page_topil(
             self._pdf,
             page_index = index,
@@ -85,9 +73,7 @@ class PdfDocument:
         )
     
     def render_pdf_topil(self, **kws):
-        """
-        Incrementally render multiple pages to :mod:`PIL` images (see :func:`.render_pdf_topil`).
-        """
+        """ Incrementally render multiple pages to :mod:`PIL` images (see :func:`.render_pdf_topil`). """
         yield from pdf_renderer.render_pdf_topil(
             self._input_obj,
             password = self._password,
