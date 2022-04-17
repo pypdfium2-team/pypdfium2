@@ -39,20 +39,14 @@ _clformat_pil = {
 
 
 class BitmapDataHolder:
-    """
-    Class to store a bitmap handle and the pointer to its data.
-    
-    Parameters:
-        bm_handle (``FPDF_BITMAP``): Handle to a PDFium bitmap.
-        bm_array_ptr (``LP_c_ubyte_Array_[N]``): Pointer to ctypes bitmap data.
-    """
+    """ Class to store a PDFium bitmap handle and the pointer to its data. """
     
     def __init__(self, bm_handle, bm_array_ptr):
         self.bm_handle = bm_handle
         self.bm_array_ptr = bm_array_ptr
     
     def get_data(self):
-        """ Retrieve the raw ctypes data from ``bm_array_ptr.contents`` (``c_ubyte_Array_[N]``). """
+        """ Retrieve the raw bitmap data as a ctypes ubyte array. """
         return self.bm_array_ptr.contents
     
     def close(self):
@@ -72,7 +66,7 @@ def render_page_base(
     ):
     """
     Render a single PDF page to ctypes data using PDFium.
-    Base function for :func:`.render_pdf_tobytes` and :func:`.render_pdf_topil`.
+    This is the base function for :func:`.render_pdf_tobytes` and :func:`.render_pdf_topil`.
     
     Parameters:
         
@@ -110,7 +104,7 @@ def render_page_base(
     
         :class:`BitmapDataHolder`, :class:`str`, ``Tuple[int, int]`` – Bitmap data holder, used colour format, and image size.
         
-        Call :meth:`BitmapDataHolder.get_data` to obtain the raw ctypes byte array. ``bytes(data_holder.get_data())`` may be used to acquire an independent copy of the data as Python bytes. When you have finished working with the ctypes byte array, call :meth:`BitmapDataHolder.close` to release allocated memory.
+        Call :meth:`BitmapDataHolder.get_data` to obtain the raw ctypes ubyte array. ``bytes(data_holder.get_data())`` may be used to acquire an independent copy of the data as Python bytes. When you have finished working with the ctypes ubyte array, call :meth:`BitmapDataHolder.close` to release allocated memory.
         
         The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
         

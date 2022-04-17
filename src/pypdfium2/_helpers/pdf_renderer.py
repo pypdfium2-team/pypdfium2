@@ -33,11 +33,13 @@ def render_pdf_base(
         input_obj (str | bytes | typing.BinaryIO):
             The PDF document to render. It may be given as file path, bytes, or byte buffer.
         page_indices (typing.Sequence[int]):
-            A list of zero-based page indices to render.
+            A list of zero-based indices of the pages to render.
+        password (typing.Optional[str | bytes]):
+            A password to unlock the document, if encrypted.
         n_processes (int):
             The number of rendering processes to run in parallel (defaults to :func:`os.cpu_count`).
-    
-    The other parameters are the same as for :func:`.render_page_base`.
+        kws (dict):
+            Additional parameters to be passed to :func:`.render_page_base`.
     """
     
     with PdfContext(input_obj, password) as pdf:

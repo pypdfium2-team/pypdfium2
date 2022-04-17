@@ -23,7 +23,6 @@ def get_mediabox(page):
     
     Parameters:
         page (``FPDF_PAGE``): PDFium page object handle.
-    
     Returns:
         A tuple of four float coordinates.
     """

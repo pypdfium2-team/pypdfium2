@@ -49,7 +49,7 @@ def open_pdf_auto(input_obj, password=None):
     Parameters:
         input_obj (str | bytes | typing.BinaryIO):
             File path to a PDF document, bytes, or a byte buffer.
-        password (str | bytes | None):
+        password (typing.Optional[str | bytes]):
             A password to unlock the document, if encrypted.
     
     Returns:

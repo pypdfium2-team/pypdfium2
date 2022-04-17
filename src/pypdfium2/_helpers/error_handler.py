@@ -5,9 +5,7 @@ from pypdfium2 import _pypdfium as pdfium
 
 
 class PdfiumError (RuntimeError):
-    """
-    An exception from the PDFium library.
-    """
+    """ An exception from the PDFium library. """
     pass
 
 
@@ -18,7 +16,6 @@ def handle_pdfium_error(valid=True):
     Parameters:
         valid (bool):
             If :data:`False`, also raise an exception if ``FPDF_GetLastError()`` returns ``FPDF_ERR_SUCCESS``.
-    
     Returns:
         :class:`int` – The error code as returned by PDFium.
     """

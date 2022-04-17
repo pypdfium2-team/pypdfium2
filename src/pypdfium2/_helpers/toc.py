@@ -87,7 +87,6 @@ def get_toc(
             The PDFium document of which to read the outline.
         max_depth (int):
             The maximum recursion depth to consider when analysing the table of contents.
-    
     Yields:
         :class:`OutlineItem`
     """

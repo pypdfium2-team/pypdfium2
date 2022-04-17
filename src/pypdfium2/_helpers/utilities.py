@@ -11,7 +11,6 @@ def translate_viewmode(viewmode):
     
     Parameters:
         viewmode (int): PDFium view mode integer.
-    
     Returns:
         :class:`.ViewMode`
     """
@@ -44,7 +43,6 @@ def translate_rotation(rotation):
     
     Parameters:
         rotation (int): Rotation value in degrees (0, 90, 180, 270).
-    
     Returns:
         :class:`int` – A PDFium rotation constant (0, 1, 2, 3).
     """
