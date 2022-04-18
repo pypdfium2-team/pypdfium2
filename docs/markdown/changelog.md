@@ -4,7 +4,7 @@
 # Changelog
 
 
-## 1.5.0 (scheduled for 2022-04-18)
+## 1.5.0 (scheduled for ???)
 
 - Updated PDFium from `4997` to `XXXX`.
 - Changed string formatting from `"{}".format(...)` to `"%s" % (...)`.
@@ -12,6 +12,7 @@
 - In `pdf_renderer.py`, notable style improvements were applied to the implementation of concurrency.
 - In `render_pdf_base()`, the amount of zeros prepended to the serial number is now adaptive to the `page_indices` parameter.
 - Revised parts of the documentation.
+- Added a Python script to create release notes in a more flexible way in the GitHub workflow.
 
 
 ## 1.4.0 (2022-04-11)
