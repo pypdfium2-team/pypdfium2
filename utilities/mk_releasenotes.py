@@ -28,12 +28,14 @@ TagsList = _generate_tags_list()
 
 def get_tag(n_descends, skip_beta=False):
     
-    for i, line in enumerate(TagsList):
+    i = 0
+    for line in TagsList:
         tag = line.split('/')[-1].strip()
         if skip_beta and 'b' in tag:
             continue
         if i >= n_descends:
             break
+        i += 1
     
     return tag
 
