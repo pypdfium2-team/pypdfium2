@@ -4,9 +4,9 @@
 # Changelog
 
 
-## 1.5.0 (scheduled for ???)
+## 1.4.1 (2022-04-18)
 
-- Updated PDFium from `4997` to `XXXX`.
+- PDFium was not updated since the upstream build failed.
 - Changed string formatting from `"{}".format(...)` to `"%s" % (...)`.
 - Added an option to save documents at a specific PDF version.
 - In `pdf_renderer.py`, notable style improvements were applied to the implementation of concurrency.
