@@ -4,15 +4,21 @@
 # Changelog
 
 
+## 1.5.0 (2022-04-18)
+
+- Updated PDFium from `4997` to `5010`.
+
+
 ## 1.4.1 (2022-04-18)
 
-- PDFium was not updated since the upstream build failed.
 - Changed string formatting from `"{}".format(...)` to `"%s" % (...)`.
 - Added an option to save documents at a specific PDF version.
 - In `pdf_renderer.py`, notable style improvements were applied to the implementation of concurrency.
 - In `render_pdf_base()`, the amount of zeros prepended to the serial number is now adaptive to the `page_indices` parameter.
 - Revised parts of the documentation.
 - Added a Python script to create release notes in a more flexible way in the GitHub workflow.
+
+*After an initial build failure at pdfium-binaries, we had decided to publish a release without updating PDFium. Since the build failure was fixed shortly afterwards, there were two releases on 2022-04-18. Their support model code is identical, though.*
 
 
 ## 1.4.0 (2022-04-11)
