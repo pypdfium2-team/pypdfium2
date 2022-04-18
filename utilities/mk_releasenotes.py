@@ -26,7 +26,7 @@ def _generate_tags_list():
 TagsList = _generate_tags_list()
 
 
-def get_tag(n_descends, skip_beta=True):
+def get_tag(n_descends, skip_beta=False):
     
     for i, line in enumerate(TagsList):
         tag = line.split('/')[-1].strip()
@@ -40,7 +40,7 @@ def get_tag(n_descends, skip_beta=True):
 
 def main():
     
-    current_tag, prev_tag = get_tag(0), get_tag(1)
+    current_tag, prev_tag = get_tag(0), get_tag(1, True)
     print(current_tag, prev_tag)
     
     relnotes = "Release %s\n\n" % current_tag
