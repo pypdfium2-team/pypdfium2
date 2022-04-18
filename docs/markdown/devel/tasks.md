@@ -6,7 +6,6 @@
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
 * Workflows
-    - Create release description with a Python script
     - Restructure workflow so that it can be run without the publishing part
     - Make it possible to run test_release on wheels that are not published yet (will probably need upload-artifact and download-artifact actions)
     - Set up CodeQL (see `Code security and analysis -> Code scanning` in the settings)
