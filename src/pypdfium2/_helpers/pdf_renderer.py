@@ -2,19 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import functools
 import concurrent.futures
 from pypdfium2 import _pypdfium as pdfium
 from pypdfium2._helpers import page_renderer
 from pypdfium2._helpers.opener import PdfContext
 
 
-def _process_page(render_meth, input_obj, index, password, **kws):
+def _process_page(index, render_meth, input_obj, password, **kws):
     with PdfContext(input_obj, password) as pdf:
         result = render_meth(pdf, index, **kws)
     return index, result
-
-def _invoke_process_page(kws):
-    return _process_page(**kws)
 
 
 def render_pdf_base(
@@ -51,10 +49,10 @@ def render_pdf_base(
         raise ValueError("Out of range page index detected.")
     
     n_digits = len(str( max(page_indices)+1 ))
-    arguments = [dict(render_meth=render_meth, input_obj=input_obj, index=i, password=password, **kws) for i in page_indices]
+    invoke_renderer = functools.partial(_process_page, render_meth=render_meth, input_obj=input_obj, password=password, **kws)
     
     with concurrent.futures.ProcessPoolExecutor(n_processes) as pool:
-        for index, image in pool.map(_invoke_process_page, arguments):
+        for index, image in pool.map(invoke_renderer, page_indices):
             suffix = str(index+1).zfill(n_digits)
             yield image, suffix
 
