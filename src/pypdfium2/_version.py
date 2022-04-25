@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 V_MAJOR = 1
-V_MINOR = 5
+V_MINOR = 6
 V_PATCH = 0
 V_BETA = None
 
@@ -12,4 +12,4 @@ if V_BETA is not None:
     V_PYPDFIUM2 += "b%s" % V_BETA
 
 #: PDFium library version integer (git tag)
-V_LIBPDFIUM = 5010
+V_LIBPDFIUM = 5024

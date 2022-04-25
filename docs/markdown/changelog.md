@@ -4,9 +4,9 @@
 # Changelog
 
 
-## 1.6.0 (scheduled for 2022-04-25)
+## 1.6.0 (2022-04-25)
 
-- Updated PDFium from `5010` to `????`.
+- Updated PDFium from `5010` to `5024`.
 - Removed the undocumented version aliases `__version__` and `__pdfium_version__`. Please use `V_PYPDFIUM2` and `V_LIBPDFIUM` instead.
 - Added a project description to the [GitHub organisation page](https://github.com/pypdfium2-team).
 
