@@ -4,7 +4,7 @@
 # Changelog
 
 
-## 1.7.0 (2022-05-02)
+## 1.7.0 (scheduled for 2022-05-02)
 
 - Updated PDFium from `5024` to `????`.
 - Improved integration of custom setup tooling.
