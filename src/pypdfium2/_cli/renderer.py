@@ -23,8 +23,8 @@ def rotation_type(string):
 def colour_type(string):
     
     if string.lower() == 'none':
-        return None
-        
+        return
+    
     else:
         
         colour = ast.literal_eval(string)

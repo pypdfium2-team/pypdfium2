@@ -5,21 +5,18 @@
 # Download the PDFium binaries and generate ctypes bindings
 
 import os
-from os.path import join
 import sys
 import shutil
 import tarfile
 import argparse
 import traceback
 import subprocess
-import importlib.util
 from urllib import request
+from os.path import join, abspath, dirname
 from concurrent.futures import ThreadPoolExecutor
 
-
-if __name__ == '__main__': sys.modules['platform_setup'] = importlib.util.module_from_spec( importlib.util.spec_from_file_location('platform_setup', join(os.path.dirname(os.path.abspath(__file__)), '__init__.py')) )
-
-from platform_setup.packaging_base import (
+sys.path.insert(0, dirname(dirname(abspath(__file__))))
+from pl_setup.packaging_base import (
     DataTree,
     VersionFile,
     PlatformNames,
@@ -100,13 +97,13 @@ def clear_data(download_files):
 def _get_package(args):
     
     dirpath, file_url, file_path = args
-    print("Downloading %s -> %s" % (file_url, file_path))
+    print("'%s' -> '%s'" % (file_url, file_path))
     
     try:
         request.urlretrieve(file_url, file_path)
     except Exception:
         traceback.print_exc()
-        return None
+        return
     
     return dirpath, file_path
 

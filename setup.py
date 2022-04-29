@@ -6,7 +6,6 @@ import os
 import sys
 import sysconfig
 import setuptools
-import importlib.util
 from os.path import (
     join,
     abspath,
@@ -14,14 +13,7 @@ from os.path import (
     basename,
 )
 
-
-def include_platform_setup():
-    
-    mod_name = 'platform_setup'
-    PlatSetupInit = join(dirname(abspath(__file__)), mod_name, '__init__.py')
-    
-    spec = importlib.util.spec_from_file_location(mod_name, PlatSetupInit)
-    sys.modules[mod_name] = importlib.util.module_from_spec(spec)
+sys.path.insert(0, join(dirname(abspath(__file__)), 'setupsrc'))
 
 
 def packaging_handler():
@@ -30,8 +22,8 @@ def packaging_handler():
     if target in (None, 'auto'):
         return True
     
-    from platform_setup.setup_base import mkwheel, SetupKws
-    from platform_setup.packaging_base import PlatformNames
+    from pl_setup.setup_base import mkwheel, SetupKws
+    from pl_setup.packaging_base import PlatformNames
     
     if target == 'sdist':
         setuptools.setup(**SetupKws)
@@ -45,10 +37,10 @@ def packaging_handler():
 
 def install_handler():
     
-    from platform_setup import check_deps
-    from platform_setup.packaging_base import SourceTree, PlatformNames
+    from pl_setup import check_deps
+    from pl_setup.packaging_base import SourceTree, PlatformNames
     
-    StatusFile = join(SourceTree, 'platform_setup', '.presetup_done.txt')
+    StatusFile = join(SourceTree, 'setupsrc', 'pl_setup', '.presetup_done.txt')
     
     def check_presetup():
         if os.path.exists(StatusFile):
@@ -61,8 +53,8 @@ def install_handler():
     W_Presetup = check_presetup()
     if W_Presetup: check_deps.main()
     
-    from platform_setup import build_pdfium, update_pdfium
-    from platform_setup.setup_base import mkwheel
+    from pl_setup import build_pdfium, update_pdfium
+    from pl_setup.setup_base import mkwheel
     
     class HostPlatform:
         
@@ -109,7 +101,6 @@ def install_handler():
 
 
 def main():
-    include_platform_setup()
     cont = packaging_handler()
     if cont: install_handler()
 

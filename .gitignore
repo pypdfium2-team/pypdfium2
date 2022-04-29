@@ -19,8 +19,8 @@ sourcebuild/*
 *.egg-info
 *.kate-swp
 *.kdev4
-.python-version
-.presetup_done.txt
+*.python-version
+*.presetup_done.txt
 
 *.so
 *.dll
