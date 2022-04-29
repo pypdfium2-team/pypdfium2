@@ -97,13 +97,13 @@ def clear_data(download_files):
 def _get_package(args):
     
     dirpath, file_url, file_path = args
-    print("Downloading %s -> %s" % (file_url, file_path))
+    print("'%s' -> '%s'" % (file_url, file_path))
     
     try:
         request.urlretrieve(file_url, file_path)
     except Exception:
         traceback.print_exc()
-        return None
+        return
     
     return dirpath, file_path
 
