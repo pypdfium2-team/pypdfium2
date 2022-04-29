@@ -6,13 +6,13 @@ install:
 	bash ./utilities/install.sh
 
 test:
-	python3 -m pytest tests/
+	python3 -m pytest ./tests/
 
 check:
 	bash ./utilities/check.sh
 
 update-all:
-	python3 platform_setup/update_pdfium.py
+	python3 ./setupsrc/pl_setup/update_pdfium.py
 
 setup-all:
 	bash ./utilities/setup_all.sh
