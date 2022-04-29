@@ -1,8 +1,7 @@
 <!-- SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-Adding a new platform
-=====================
+# Adding a new platform
 
 This document is intended to outline the steps required to support a new platform in `pypdfium2` that was added to the builds from `pdfium-binaries`.
 
