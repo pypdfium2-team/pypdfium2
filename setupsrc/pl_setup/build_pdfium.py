@@ -154,9 +154,8 @@ def _find_latest_llvm():
                 libdir = search_dir
     
     assert None not in (latest, libdir)
-    latest = str(latest)
     
-    return join(libdir, llvm_prefix+latest, 'bin')
+    return join(libdir, llvm_prefix+str(latest), 'bin')
 
 
 def _replace_binaries():
