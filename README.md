@@ -35,7 +35,7 @@ make build
 
 In case building failed, you could try
 ```bash
-python3 platform_setup/build_pdfium.py --nativebuild --check-deps
+python3 setupsrc/pl_setup/build_pdfium.py --nativebuild --check-deps
 PYP_TARGET_PLATFORM="sourcebuild" python3 -m pip install . -v --no-build-isolation
 ```
 to prefer the use of system-provided build tools over the toolchain PDFium ships with. The problem is that the toolchain is limited to a curated set of platforms, as PDFium target cross-compilation for "non-standard" architectures. (Make sure you installed all packages from the `Nativebuild Extras` section of [`dependencies.md`](docs/markdown/dependencies.md), in addition to the default requirements.)

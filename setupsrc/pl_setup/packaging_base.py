@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause 
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # Non-stdlib imports not allowed in this file, as it is imported prior to the check_deps call
 
@@ -25,7 +25,7 @@ Libnames = (
 
 
 HomeDir     = expanduser('~')
-SourceTree  = dirname(dirname(abspath(__file__)))
+SourceTree  = dirname(dirname(dirname(abspath(__file__))))
 DataTree    = join(SourceTree,'data')
 SB_Dir      = join(SourceTree,'sourcebuild')
 ModuleDir   = join(SourceTree,'src','pypdfium2')

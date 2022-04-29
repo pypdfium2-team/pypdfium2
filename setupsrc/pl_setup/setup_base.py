@@ -3,17 +3,16 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-from os.path import (
-    join,
-    basename,
-)
+import sys
 import shutil
 import sysconfig
 import setuptools
 from glob import glob
+from os.path import join, abspath, dirname, basename
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
-from platform_setup.packaging_base import (
+sys.path.insert(0, dirname(dirname(abspath(__file__))))
+from pl_setup.packaging_base import (
     Libnames,
     DataTree,
     SourceTree,

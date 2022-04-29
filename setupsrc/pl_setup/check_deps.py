@@ -2,14 +2,13 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
 import sys
 import shutil
 import importlib.util
+from os.path import abspath, dirname
 
-if __name__ == '__main__': sys.modules['platform_setup'] = importlib.util.module_from_spec( importlib.util.spec_from_file_location('platform_setup', os.path.join(os.path.dirname(os.path.abspath(__file__)), '__init__.py')) )
-
-from platform_setup.packaging_base import run_cmd
+sys.path.insert(0, dirname(dirname(abspath(__file__))))
+from pl_setup.packaging_base import run_cmd
 
 
 PyPackages = (
