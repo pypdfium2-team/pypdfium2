@@ -68,4 +68,5 @@ jobs:
           run: |
             python3 -m pip install pypdfium2
             git clone --depth 1 "https://github.com/pypdfium2-team/pypdfium2.git"
-            cd pypdfium2; pytest
+            cd pypdfium2
+            python3 -m pytest ./tests/
