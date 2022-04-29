@@ -146,7 +146,7 @@ def _find_latest_llvm():
         for entry in os.listdir(search_dir):
             if not os.path.isdir( join(search_dir, entry) ):
                 continue
-            if not entry.startswith('llvm-'):
+            if not entry.startswith(llvm_prefix):
                 continue
             version = int(entry.split('-')[-1])
             if (latest is None) or (version > latest):
