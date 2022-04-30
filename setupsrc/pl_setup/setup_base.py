@@ -49,6 +49,9 @@ def _copy_bindings(pl_name):
 def _get_linux_tag(arch):
     return 'manylinux_2_17_%s.manylinux2014_%s' % (arch, arch)
 
+def _get_musllinux_tag(arch):
+    return 'musllinux_1_2_%s' % (arch)
+
 
 def _get_mac_tag(arch, *versions):
     
@@ -78,6 +81,10 @@ def _get_tag(pl_name):
         return _get_linux_tag('aarch64')
     elif pl_name == PlatformNames.linux_arm32:
         return _get_linux_tag('armv7l')
+    elif pl_name == PlatformNames.musllinux_x64:
+        return _get_musllinux_tag('x86_64')
+    elif pl_name == PlatformNames.musllinux_x86:
+        return _get_musllinux_tag('i686')
     elif pl_name == PlatformNames.windows_x64:
         return 'win_amd64'
     elif pl_name == PlatformNames.windows_arm64:

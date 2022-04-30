@@ -88,6 +88,11 @@ def install_handler():
         _setup(PlatformNames.linux_x64)
     elif host.is_platform('linux', 'i686'):
         _setup(PlatformNames.linux_x86)
+    # TODO find out how to recognise musllinux hosts
+    elif host.is_platform():
+        pass
+    elif host.is_platform():
+        pass
     elif host.is_platform('win', 'arm64'):
         _setup(PlatformNames.windows_arm64)
     elif host.is_platform('win', 'amd64'):

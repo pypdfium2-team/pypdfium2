@@ -36,6 +36,8 @@ ReleaseNames = {
     PlatformNames.linux_x86     : 'pdfium-linux-x86',
     PlatformNames.linux_arm64   : 'pdfium-linux-arm64',
     PlatformNames.linux_arm32   : 'pdfium-linux-arm',
+    PlatformNames.musllinux_x64 : 'pdfium-linux-musl-x64',
+    PlatformNames.musllinux_x86 : 'pdfium-linux-musl-x86',
     PlatformNames.windows_x64   : 'pdfium-win-x64',
     PlatformNames.windows_x86   : 'pdfium-win-x86',
     PlatformNames.windows_arm64 : 'pdfium-win-arm64',
