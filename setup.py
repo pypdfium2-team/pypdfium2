@@ -76,8 +76,8 @@ def install_handler():
                     return True
             return False
         
-        def is_libc(self, libc):
-            return self.libc_name == libc
+        def is_libc(self, *libc_names):
+            return any(self.libc_name == l for l in libc_names)
     
     def _setup(pl_name):
         if W_Presetup: update_pdfium.main( [basename(pl_name)] )
@@ -97,9 +97,9 @@ def install_handler():
         _setup(PlatformNames.linux_x64)
     elif host.is_platform('linux', 'i686') and host.is_libc('glibc'):
         _setup(PlatformNames.linux_x86)
-    elif host.is_platform('linux', 'x86_64') and host.is_libc('musl'):
+    elif host.is_platform('linux', 'x86_64') and host.is_libc('musl', ''):
         _setup(PlatformNames.musllinux_x64)
-    elif host.is_platform('linux', 'i686') and host.is_libc('musl'):
+    elif host.is_platform('linux', 'i686') and host.is_libc('musl', ''):
         _setup(PlatformNames.musllinux_x86)
     elif host.is_platform('win', 'arm64'):
         _setup(PlatformNames.windows_arm64)
