@@ -91,11 +91,10 @@ def get_toc(
     
     if level >= max_depth:
         return []
-    
-    bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, parent)
-    
     if seen is None:
         seen = set()
+    
+    bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, parent)
     
     while bookmark:
         
@@ -107,7 +106,6 @@ def get_toc(
             seen.add(address)
         
         yield _get_toc_entry(pdf, bookmark, level)
-        
         yield from get_toc(
             pdf,
             parent = bookmark,
