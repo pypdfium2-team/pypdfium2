@@ -116,22 +116,16 @@ def download_releases(latest_version, download_files):
     args = []
     
     for dirpath, arcname in download_files.items():
-        
-        filename = "%s.%s" % (arcname, ReleaseExtension)
-        file_url = base_url + filename
-        
         if not os.path.exists(dirpath):
             os.makedirs(dirpath)
-        
+        filename = "%s.%s" % (arcname, ReleaseExtension)
+        file_url = base_url + filename
         file_path = join(dirpath, filename)
         args.append( (dirpath, file_url, file_path) )
     
     archives = {}
-    
-    with ThreadPoolExecutor() as pool:
-        
+    with ThreadPoolExecutor( len(args) ) as pool:
         for output in pool.map(_get_package, args):
-            
             if output is not None:
                 dirpath, file_path = output
                 archives[dirpath] = file_path
@@ -143,13 +137,12 @@ def unpack_archives(archives):
     
     for file in archives.values():
         
-        extraction_path = join(os.path.dirname(file), 'build_tar')
-        
         if ReleaseExtension == 'tgz':
             arc_opener = tarfile.open
         else:
             raise ValueError("Unknown archive extension '%s'" % ReleaseExtension)
         
+        extraction_path = join(os.path.dirname(file), 'build_tar')
         with arc_opener(file) as archive:
             archive.extractall(extraction_path)
         
@@ -190,9 +183,7 @@ def get_download_files(platforms):
         platforms = avail_keys
     
     download_files = {}
-    
     for pl_name in platforms:
-        
         if pl_name in ReleaseNames:
             download_files[ join(DataTree, pl_name) ] = ReleaseNames[pl_name]
         else:
