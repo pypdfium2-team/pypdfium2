@@ -5,7 +5,6 @@
 
 (These are various tasks for the maintainer to keep in mind, in no specific order.)
 
-* musllinux: adapt the documentation (https://github.com/pypdfium2-team/.github/blob/main/profile/README.md and https://github.com/pypdfium2-team/pypdfium2/issues/3)
 * Workflows
     - Restructure workflow so that it can be run without the publishing part
     - Make it possible to run test_release on wheels that are not published yet (will probably need upload-artifact and download-artifact actions)
