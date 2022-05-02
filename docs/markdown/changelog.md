@@ -4,9 +4,9 @@
 # Changelog
 
 
-## 1.7.0 (scheduled for 2022-05-02)
+## 1.7.0 (2022-05-02)
 
-- Updated PDFium from `5024` to `????`.
+- Updated PDFium from `5024` to `5038`.
 - Improved integration of custom setup tooling.
 - Added musllinux wheels for x64 and x86.
 
