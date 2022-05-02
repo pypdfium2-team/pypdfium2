@@ -14,6 +14,7 @@ sourcebuild/*
 **/__pycache__
 **/.mypy_cache
 **/.pytest_cache
+**/.hypothesis
 *.pyc
 *.vscode
 *.egg-info
