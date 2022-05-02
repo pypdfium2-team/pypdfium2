@@ -8,7 +8,6 @@ from ..conftest import TestFiles
 
 
 def test_read_toc():
-    
     with pdfium.PdfContext(TestFiles.bookmarks) as pdf:
         toc = pdfium.get_toc(pdf)
         print()
