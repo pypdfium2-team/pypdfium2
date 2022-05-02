@@ -169,7 +169,7 @@ def generate_bindings(archives):
             bin_dir = join(build_dir,'bin')
         elif dirname.startswith('darwin'):
             target_name = 'pdfium.dylib'
-        elif dirname.startswith('linux'):
+        elif 'linux' in dirname:
             target_name = 'pdfium'
         else:
             raise ValueError("Unknown platform directory name '%s'" % dirname)
