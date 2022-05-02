@@ -4,6 +4,7 @@
 
 import os
 import sys
+import platform
 import sysconfig
 import setuptools
 from os.path import (
@@ -59,16 +60,24 @@ def install_handler():
     class HostPlatform:
         
         def __init__(self):
+            
             plat_name = sysconfig.get_platform().lower()
             for char in ('-', '.'):
                 plat_name = plat_name.replace(char, '_')
             self.plat_name = plat_name
+            
+            self.libc_name = None
+            if self.plat_name.startswith('linux'):
+                self.libc_name = platform.libc_ver()[0]
         
         def is_platform(self, start, end):
             if self.plat_name.startswith(start):
                 if self.plat_name.endswith(end):
                     return True
             return False
+        
+        def is_libc(self, *libc_names):
+            return any(self.libc_name == l for l in libc_names)
     
     def _setup(pl_name):
         if W_Presetup: update_pdfium.main( [basename(pl_name)] )
@@ -84,10 +93,14 @@ def install_handler():
         _setup(PlatformNames.linux_arm32)
     elif host.is_platform('linux', 'aarch64'):
         _setup(PlatformNames.linux_arm64)
-    elif host.is_platform('linux', 'x86_64'):
+    elif host.is_platform('linux', 'x86_64') and host.is_libc('glibc'):
         _setup(PlatformNames.linux_x64)
-    elif host.is_platform('linux', 'i686'):
+    elif host.is_platform('linux', 'i686') and host.is_libc('glibc'):
         _setup(PlatformNames.linux_x86)
+    elif host.is_platform('linux', 'x86_64') and host.is_libc('musl', ''):
+        _setup(PlatformNames.musllinux_x64)
+    elif host.is_platform('linux', 'i686') and host.is_libc('musl', ''):
+        _setup(PlatformNames.musllinux_x86)
     elif host.is_platform('win', 'arm64'):
         _setup(PlatformNames.windows_arm64)
     elif host.is_platform('win', 'amd64'):

@@ -39,6 +39,8 @@ class PlatformNames:
     linux_x86     = 'linux_x86'
     linux_arm64   = 'linux_arm64'
     linux_arm32   = 'linux_arm32'
+    musllinux_x64 = 'musllinux_x64'
+    musllinux_x86 = 'musllinux_x86'
     windows_x64   = 'windows_x64'
     windows_x86   = 'windows_x86'
     windows_arm64 = 'windows_arm64'

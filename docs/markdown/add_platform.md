@@ -5,7 +5,7 @@
 
 This document is intended to outline the steps required to support a new platform in `pypdfium2` that was added to the builds from `pdfium-binaries`.
 
-For a sample implementation, see [Pull Request #92](https://github.com/pypdfium2-team/pypdfium2/pull/92), which added support for `linux_x86`.
+For practical examples, see [Pull Request #92](https://github.com/pypdfium2-team/pypdfium2/pull/92/files) (`linux_x86`), or [Pull Request #104](https://github.com/pypdfium2-team/pypdfium2/pull/104/files) (`musllinux_x64`, `musllinux_x86`).
 
 * Add a new attribute to the class `PlatformNames` in `packaging_base.py`, following the existing naming patterns.
 * Insert a corresponding entry into the `ReleaseNames` dictionary in `update_pdfium.py`. The key is the `PlatformNames` attribute, while the value is the name of the file to download (without extension).

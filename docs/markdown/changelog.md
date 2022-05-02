@@ -8,6 +8,7 @@
 
 - Updated PDFium from `5024` to `????`.
 - Improved integration of custom setup tooling.
+- Added musllinux wheels for x64 and x86.
 
 
 ## 1.6.0 (2022-04-25)
