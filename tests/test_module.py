@@ -4,9 +4,16 @@
 import pkg_resources
 import inspect
 import configparser
-from os.path import join
+from os.path import join, isdir, isfile
 from pypdfium2 import V_PYPDFIUM2, V_LIBPDFIUM
-from .conftest import SourceTree
+from .conftest import *
+
+
+def test_testpaths():
+    for dirpath in (TestDir, SourceTree, ResourceDir, OutputDir):
+        assert isdir(dirpath)
+    for filepath in iterate_testfiles(False):
+        assert isfile(filepath)
 
 
 def test_versions():
