@@ -6,7 +6,7 @@ import os
 import ctypes
 from os.path import join
 import pypdfium2 as pdfium
-from .conftest import TestFiles, OutputDir
+from ..conftest import TestFiles, OutputDir
 
 
 def test_save_pdf_tobuffer():

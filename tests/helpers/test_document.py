@@ -3,7 +3,7 @@
 
 import io
 from PIL import Image
-from .conftest import (
+from ..conftest import (
     TestFiles,
     iterate_testfiles,
 )

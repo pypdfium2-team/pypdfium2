@@ -1,10 +1,17 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause 
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import pkg_resources
 import inspect
 import configparser
 from os.path import join
+from pypdfium2 import V_PYPDFIUM2, V_LIBPDFIUM
 from .conftest import SourceTree
+
+
+def test_versions():
+    assert V_PYPDFIUM2 == pkg_resources.get_distribution('pypdfium2').version
+    assert V_LIBPDFIUM > 5000 
 
 
 def test_entrypoint():    

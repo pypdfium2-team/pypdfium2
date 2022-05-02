@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2 as pdfium
-from .conftest import TestFiles
+from ..conftest import TestFiles
 
 
 def _load_pages(pdf):

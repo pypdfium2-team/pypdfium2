@@ -4,7 +4,7 @@
 import logging
 import pypdfium2 as pdfium
 from pypdfium2._cli.toc import print_toc
-from .conftest import TestFiles
+from ..conftest import TestFiles
 
 
 def test_read_toc():

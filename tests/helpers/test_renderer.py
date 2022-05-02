@@ -5,7 +5,7 @@ import pytest
 from PIL import Image
 from os.path import join
 import pypdfium2 as pdfium
-from .conftest import TestFiles, OutputDir
+from ..conftest import TestFiles, OutputDir
 
 
 def _check_render_normal(pdf):

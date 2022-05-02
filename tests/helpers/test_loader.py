@@ -4,7 +4,7 @@
 import io
 import pytest
 import pypdfium2 as pdfium
-from .conftest import TestFiles
+from ..conftest import TestFiles
 
 
 def _load_pdfct(file_or_data, password=None, page_count=1):
