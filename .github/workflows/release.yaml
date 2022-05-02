@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ctypesgen/ctypesgen
-          ref: 'fd495e5edb2f69e5407774f8937a1d62cd33fe55'
+          ref: '2120dbf9a5086a21c48e5a002b1f274f3716b7ec'
           path: ctypesgen
       
       - name: Install ctypesgen
