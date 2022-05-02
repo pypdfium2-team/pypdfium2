@@ -22,12 +22,6 @@ SysCommands = (
     'git',
     'gcc',
 )
-NB_SysCommands = (
-    'gn',
-    'ninja',
-    'clang',
-    'lld',
-)
 
 
 def _pip_install(pkg):
@@ -61,13 +55,8 @@ def check_sysdeps(sys_commands):
         print("Missing system dependencies: %s" % missing)
 
 
-def main(prefer_st=False):
-    
-    sys_commands = SysCommands
-    if prefer_st:
-        sys_commands += NB_SysCommands
-    
-    check_sysdeps(sys_commands)
+def main():
+    check_sysdeps(SysCommands)
     install_pydeps()
 
 
