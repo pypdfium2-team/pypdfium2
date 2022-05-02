@@ -43,9 +43,6 @@ PdfiumWinPatches = [
     (join(PatchDir,'pdfium','win','pdfium.patch'), PDFiumDir),
     (join(PatchDir,'pdfium','win','build.patch'), join(PDFiumDir,'build')),
 ]
-PdfiumNativebuildPatches = [
-    (join(PatchDir,'pdfium','nativebuild.patch'), join(PDFiumDir,'build')),
-]
 
 DefaultConfig = {
     'is_debug': False,
