@@ -4,7 +4,7 @@
 V_MAJOR = 1
 V_MINOR = 7
 V_PATCH = 0
-V_BETA = None
+V_BETA = 1
 
 #: pypdfium2 version string
 V_PYPDFIUM2 = "%s.%s.%s" % (V_MAJOR, V_MINOR, V_PATCH)
