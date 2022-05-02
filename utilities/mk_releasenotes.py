@@ -30,7 +30,7 @@ def get_tag(TagsList, n_descends, skip_beta=False):
     i = 0
     for line in TagsList:
         tag = line.split('/')[-1].strip()
-        if skip_beta and 'b' in tag:
+        if skip_beta and i > 0 and 'b' in tag:
             continue
         if i >= n_descends:
             break
