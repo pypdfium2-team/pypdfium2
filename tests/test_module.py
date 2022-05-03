@@ -1,9 +1,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import pkg_resources
-import inspect
 import configparser
+import pkg_resources
 from os.path import join, isdir, isfile
 from pypdfium2 import V_PYPDFIUM2, V_LIBPDFIUM
 from .conftest import *
@@ -33,9 +32,7 @@ def test_entrypoint():
     
     namespace = {}
     exec("from %s import %s" % (module_path, method_name), namespace)
-    
     assert method_name in namespace
-    function = namespace[method_name]
     
+    function = namespace[method_name]
     assert callable(function)
-    print( inspect.signature(function) )

@@ -22,14 +22,14 @@ sys.path.insert(0, join(SourceTree,'setupsrc'))
 
 
 class TestFiles:
-    render = join(ResourceDir,'render.pdf')
-    encrypted = join(ResourceDir,'encrypted.pdf')
-    multipage = join(ResourceDir,'multipage.pdf')
-    bookmarks = join(ResourceDir,'bookmarks.pdf')
+    render             = join(ResourceDir,'render.pdf')
+    encrypted          = join(ResourceDir,'encrypted.pdf')
+    multipage          = join(ResourceDir,'multipage.pdf')
+    bookmarks          = join(ResourceDir,'bookmarks.pdf')
     bookmarks_circular = join(ResourceDir,'bookmarks_circular.pdf')
-    cropbox = join(ResourceDir,'cropbox.pdf')
-    mediabox_missing = join(ResourceDir,'mediabox_missing.pdf')
-    nonascii = join(ResourceDir,'nonascii_tênfilechứakýtựéèáàçß 发短信.pdf')
+    cropbox            = join(ResourceDir,'cropbox.pdf')
+    mediabox_missing   = join(ResourceDir,'mediabox_missing.pdf')
+    nonascii           = join(ResourceDir,'nonascii_tênfilechứakýtựéèáàçß 发短信.pdf')
 
 
 def iterate_testfiles(skip_encrypted=True):
