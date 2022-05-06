@@ -268,7 +268,7 @@ Sadly, mainstream Linux distributors did not create an own package for PDFium, w
 ## Thanks to
 
 * Benoît Blanchon ([PDFium patches](sourcebuild/patches/))
-* Anurag Bansal (Support model for text insertion)
+* Anurag Bansal (Support model for [text insertion](src/pypdfium2/_helpers/textinserter.py))
 * Anderson Bravalheri (Help with achieving PEP 517/518 compliance)
 * Lei Zhang and Thomas Sepez (Windows-specific fixes concerning `FPDF_LoadDocument()`)
 
