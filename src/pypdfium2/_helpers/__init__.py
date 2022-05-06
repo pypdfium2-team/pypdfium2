@@ -14,3 +14,4 @@ from pypdfium2._helpers.toc import *
 from pypdfium2._helpers.saver import *
 from pypdfium2._helpers.boxes import *
 from pypdfium2._helpers.classes import *
+from pypdfium2._helpers.textinserter import *
