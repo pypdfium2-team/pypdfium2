@@ -6,7 +6,11 @@
 ## Runtime
 
 * Python >= 3.5
-* Pillow (optional)
+
+### Optional
+
+* Pillow
+* uharfbuzz
 
 
 ## Build
