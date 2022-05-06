@@ -2,10 +2,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import sys
 from os.path import join
 import pypdfium2 as pdfium
-import pytest
 from ..conftest import ResourceDir, OutputDir
 
 
