@@ -238,6 +238,14 @@ If your issue is caused by the bindings generator, refer to the [ctypesgen bug t
 pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that broke ctypesgen-created string handling code.
 
 
+## Thanks to
+
+* Benoît Blanchon ([PDFium patches](sourcebuild/patches/))
+* Anurag Bansal (Support model for [text insertion](src/pypdfium2/_helpers/textinserter.py))
+* Anderson Bravalheri (Help with achieving PEP 517/518 compliance)
+* Lei Zhang and Thomas Sepez (Windows-specific fixes concerning `FPDF_LoadDocument()`)
+
+
 ## Fun facts
 
 If you are on Linux, have a recent version of LibreOffice installed, and insist on saving as much disk space as anyhow possible, you can remove the PDFium binary shipped with pypdfium2 and create a symbolic link to the one provided by LibreOffice. This is not recommended, but the following proof-of-concept steps demonstrate that it is possible.
@@ -263,14 +271,6 @@ ln -s /usr/lib/libreoffice/program/libpdfiumlo.so pdfium
 ```
 
 Sadly, mainstream Linux distributors did not create an own package for PDFium, which causes it to be installed separately with every single program that uses it.
-
-
-## Thanks to
-
-* Benoît Blanchon ([PDFium patches](sourcebuild/patches/))
-* Anurag Bansal (Support model for [text insertion](src/pypdfium2/_helpers/textinserter.py))
-* Anderson Bravalheri (Help with achieving PEP 517/518 compliance)
-* Lei Zhang and Thomas Sepez (Windows-specific fixes concerning `FPDF_LoadDocument()`)
 
 
 ## History
