@@ -265,9 +265,12 @@ ln -s /usr/lib/libreoffice/program/libpdfiumlo.so pdfium
 Sadly, mainstream Linux distributors did not create an own package for PDFium, which causes it to be installed separately with every single program that uses it.
 
 
-## Thanks
+## Thanks to
 
-Patches to PDFium and DepotTools originate from the [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/) repository. Many thanks to @bblanchon and @BoLaMN.
+* Benoît Blanchon ([PDFium patches](sourcebuild/patches/))
+* Anurag Bansal (Support model for text insertion)
+* Anderson Bravalheri (Help with achieving PEP 517/518 compliance)
+* Lei Zhang and Thomas Sepez (Windows-specific fixes concerning `FPDF_LoadDocument()`)
 
 
 ## History
