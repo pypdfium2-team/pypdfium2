@@ -26,7 +26,7 @@ def insert_text(
         font_is_cid,
     ):
     """
-    Insert text into a PDF page at a specified position. This function supports Asian scripts such as hindi.
+    Insert text into a PDF page at a specified position. This function supports Asian scripts such as Hindi.
     There is no position validation, so make sure the text will be within page boundaries.
     ``uharfbuzz`` is required as an additional dependency.
     
