@@ -28,24 +28,19 @@ class _reader_class:
 
 class LoaderDataHolder:
     
-    def __init__(
-            self,
-            file_handle = None,
-            reader_instance = None,
-        ):
-        self.file_handle = file_handle
-        self.reader_instance = reader_instance
+    def __init__(self, reader_func, buffer, autoclose):
+        self.reader_func = reader_func
+        self.buffer = buffer
+        self.autoclose = autoclose
     
     def close(self):
-        
         # access the reader variable again to make sure that even a heavily optimising interpreter would not prematurely delete the object
-        id(self.reader_instance)
-        
-        if self.file_handle is not None:
-            self.file_handle.close()
+        id(self.reader_func)
+        if self.autoclose:
+            self.buffer.close()
 
 
-def open_pdf_buffer(buffer, password=None):
+def open_pdf_buffer(buffer, password=None, autoclose=False):
     
     if not is_buffer(buffer):
         raise ValueError("Buffer must implement the methods seek(), tell(), and readinto().")
@@ -69,7 +64,7 @@ def open_pdf_buffer(buffer, password=None):
     fileaccess.m_GetBlock = FuncType( _reader_class(buffer) )
     
     pdf = pdfium.FPDF_LoadCustomDocument(ctypes.byref(fileaccess), password)
-    ld_data = LoaderDataHolder(buffer, fileaccess.m_GetBlock)
+    ld_data = LoaderDataHolder(fileaccess.m_GetBlock, buffer, autoclose)
     
     if pdfium.FPDF_GetPageCount(pdf) < 1:
         handle_pdfium_error(False)
@@ -78,5 +73,5 @@ def open_pdf_buffer(buffer, password=None):
 
 
 def open_pdf_native(filepath, password=None):
-    file_handle = open(abspath(filepath), 'rb')
-    return open_pdf_buffer(file_handle, password)
+    file_handle = open(abspath(filepath), "rb")
+    return open_pdf_buffer(file_handle, password=password, autoclose=True)
