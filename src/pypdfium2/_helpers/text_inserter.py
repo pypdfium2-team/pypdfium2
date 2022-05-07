@@ -44,7 +44,7 @@ class FontInfo:
 
 def open_pdffont(pdf, font_info):
     """
-    Create a PDFium font object handle.
+    Create a PDFium font object handle. When you have finished working with the font, call :func:`.close_pdffont`.
     
     Parameters:
         pdf (``FPDF_DOCUMENT``):
