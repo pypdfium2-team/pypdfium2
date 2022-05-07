@@ -35,6 +35,10 @@ Document Renderer
 *****************
 .. automodule:: pypdfium2._helpers.pdf_renderer
 
+Text Inserter
+*************
+.. automodule:: pypdfium2._helpers.text_inserter
+
 TOC Parser
 **********
 .. automodule:: pypdfium2._helpers.toc

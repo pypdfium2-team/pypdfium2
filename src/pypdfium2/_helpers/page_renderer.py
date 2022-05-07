@@ -4,6 +4,7 @@
 import math
 import ctypes
 from pypdfium2 import _pypdfium as pdfium
+from pypdfium2._helpers.opener import open_page
 from pypdfium2._helpers.constants import OptimiseMode
 from pypdfium2._helpers.utilities import (
     colour_as_hex,
@@ -119,13 +120,9 @@ def render_page_base(
     cl_format, cl_pdfium = _get_clformat(use_alpha, greyscale)
     n_colours = len(cl_format)
     
-    page_count = pdfium.FPDF_GetPageCount(pdf)
-    if not 0 <= page_index < page_count:
-        raise IndexError("Page index %s is out of bounds for document with %s pages." % (page_index, page_count))
-    
     form_config = pdfium.FPDF_FORMFILLINFO(2)
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
-    page = pdfium.FPDF_LoadPage(pdf, page_index)
+    page = open_page(pdf, page_index)
     
     width = math.ceil(pdfium.FPDF_GetPageWidthF(page) * scale)
     height = math.ceil(pdfium.FPDF_GetPageHeightF(page) * scale)

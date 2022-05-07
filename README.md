@@ -238,6 +238,19 @@ If your issue is caused by the bindings generator, refer to the [ctypesgen bug t
 pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that broke ctypesgen-created string handling code.
 
 
+## Thanks to
+
+* [Anurag Bansal](https://github.com/banagg) (Support model for [text insertion](src/pypdfium2/_helpers/textinserter.py))
+* [Benoît Blanchon](https://github.com/bblanchon) ([PDFium patches](sourcebuild/patches/))
+* [Anderson Bravalheri](https://github.com/abravalheri) (Help with achieving PEP 517/518 compliance)
+* [Tim Head](https://github.com/betatim) (Original idea for PDFium Python bindings with ctypesgen in `wowpng`)
+* [Yinlin Hu](https://github.com/YinlinHu) (`pypdfium` prototype and `kuafu` PDF viewer)
+* [Adam Huganir](https://github.com/adam-huganir) (Initial help and suggestions)
+* [Mike Kroutikov](https://github.com/mkroutikov) (Examples on how to use PDFium with ctypes in `redstork` and `pdfbrain`)
+* [Peter Saalbrink](https://github.com/petersaalbrink) (Code style improvements to `pdf_renderer`)
+* [Lei Zhang](https://github.com/leizleiz) and [Thomas Sepez](https://github.com/tsepez) (Windows-specific fixes concerning `FPDF_LoadDocument()`)
+
+
 ## Fun facts
 
 If you are on Linux, have a recent version of LibreOffice installed, and insist on saving as much disk space as anyhow possible, you can remove the PDFium binary shipped with pypdfium2 and create a symbolic link to the one provided by LibreOffice. This is not recommended, but the following proof-of-concept steps demonstrate that it is possible.
@@ -263,11 +276,6 @@ ln -s /usr/lib/libreoffice/program/libpdfiumlo.so pdfium
 ```
 
 Sadly, mainstream Linux distributors did not create an own package for PDFium, which causes it to be installed separately with every single program that uses it.
-
-
-## Thanks
-
-Patches to PDFium and DepotTools originate from the [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/) repository. Many thanks to @bblanchon and @BoLaMN.
 
 
 ## History

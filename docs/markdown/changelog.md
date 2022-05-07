@@ -4,6 +4,14 @@
 # Changelog
 
 
+## 1.8.0 (scheduled for 2022-05-09)
+
+- Updated PDFium from `5038` to `????`
+- Added support model for text insertion. Special thanks to Anurag Bansal.
+- Created an `open_page()` function to avoid internal duplication. This basically is a wrapper around `FPDF_LoadPage()`, for page index validation.
+- Improved the cedits section in the Readme.
+
+
 ## 1.7.0 (2022-05-02)
 
 - Updated PDFium from `5024` to `5038`.
@@ -75,7 +83,7 @@
     These functions are derived from `render_page_base()` and `render_pdf_base()`, respectively.
   * In `render_page_...()` and `render_pdf_...()`, we now only accept RGBA tuples for the colour parameter.
 - The Pillow dependency is now optional in the core library.
-- Removed workarounds for non-ascii filepaths on Windows. The issues with `FPDF_LoadDocument()` should be fixed since PDFium `4915`. Thanks to Lei Zhang and Tom Sepez of PDFium team.
+- Removed workarounds for non-ascii filepaths on Windows. The issues with `FPDF_LoadDocument()` should be fixed since PDFium `4915`. Thanks to Lei Zhang and Thomas Sepez of PDFium team.
 - Added some boilerplate code to setup scripts to make sure imports always work when the file is invoked directly.
 - Enhancements to `build_pdfium.py`:
   * Improved configuration handling to use dictionaries rather than lists. This is a lot more elegant and flexible.

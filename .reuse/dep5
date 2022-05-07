@@ -55,6 +55,12 @@ Comment:
     Derived from: https://github.com/cfcurtis/pdfstitcher/blob/main/resources/testdoc.pdf
     No individual license stated for this data file. Project license is MPL-2.0.
 
+Files: tests/resources/NotoSans-Regular.ttf
+Copyright: 2022 Google Inc.
+License: OFL-1.1
+Comment:
+    Obtained from: https://fonts.google.com/noto/specimen/Noto+Sans
+
 Files: sourcebuild/patches/pdfium/public_headers.patch
        sourcebuild/patches/pdfium/shared_library.patch
        sourcebuild/patches/pdfium/win/build.patch

@@ -92,3 +92,24 @@ def close_pdf(pdf, loader_data=None):
     pdfium.FPDF_CloseDocument(pdf)
     if loader_data is not None:
         loader_data.close()
+
+
+def open_page(pdf, page_index):
+    """
+    Get a handle to the page at a certain index.
+    
+    Parameters:
+        pdf (``FPDF_DOCUMENT``):
+            PDFium document handle.
+        page_index (int):
+            Zero-based index of the page to load.
+    
+    Returns:
+        ``FPDF_PAGE``
+    """
+    
+    page_count = pdfium.FPDF_GetPageCount(pdf)
+    if not 0 <= page_index < page_count:
+        raise IndexError("Page index %s is out of bounds for document with %s pages." % (page_index, page_count))
+    
+    return pdfium.FPDF_LoadPage(pdf, page_index)
