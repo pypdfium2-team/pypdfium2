@@ -37,7 +37,7 @@ Document Renderer
 
 Text Inserter
 *************
-.. automodule:: pypdfium2._helpers.textinserter
+.. automodule:: pypdfium2._helpers.text_inserter
 
 TOC Parser
 **********
