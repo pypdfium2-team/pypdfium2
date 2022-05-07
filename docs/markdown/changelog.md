@@ -4,6 +4,14 @@
 # Changelog
 
 
+## 1.8.0 (scheduled for 2022-05-09)
+
+- Updated PDFium from `5038` to `????`
+- Added support model for text insertion. Special thanks to Anurag Bansal.
+- Created an `open_page()` function to avoid internal duplication. This basically is a wrapper around `FPDF_LoadPage()`, for page index validation.
+- Improved the cedits section in the Readme.
+
+
 ## 1.7.0 (2022-05-02)
 
 - Updated PDFium from `5024` to `5038`.
