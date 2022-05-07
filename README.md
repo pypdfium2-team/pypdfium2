@@ -240,12 +240,15 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 ## Thanks to
 
-* Anurag Bansal (Support model for [text insertion](src/pypdfium2/_helpers/textinserter.py))
-* Benoît Blanchon ([PDFium patches](sourcebuild/patches/))
-* Anderson Bravalheri (Help with achieving PEP 517/518 compliance)
-* Yinlin Hu (Initial idea and `pypdfium` prototype)
-* Peter Saalbrink (Code style improvements to `pdf_renderer`)
-* Lei Zhang and Thomas Sepez (Windows-specific fixes concerning `FPDF_LoadDocument()`)
+* [Anurag Bansal](https://github.com/banagg) (Support model for [text insertion](src/pypdfium2/_helpers/textinserter.py))
+* [Benoît Blanchon](https://github.com/bblanchon) ([PDFium patches](sourcebuild/patches/))
+* [Anderson Bravalheri](https://github.com/abravalheri) (Help with achieving PEP 517/518 compliance)
+* [Yinlin Hu](https://github.com/YinlinHu) (`pypdfium` prototype and `kuafu` PDF viewer)
+* [Tim Head](https://github.com/betatim) (Original idea for PDFium Python bindings with ctypesgen in `wowpng`)
+* [Adam Huganir](https://github.com/adam-huganir) (Initial help and suggestions)
+* [Mike Kroutikov](https://github.com/mkroutikov) (Examples on how to use PDFium with ctypes in `redstork` and `pdfbrain`)
+* [Peter Saalbrink](https://github.com/petersaalbrink) (Code style improvements to `pdf_renderer`)
+* [Lei Zhang](https://github.com/leizleiz) and [Thomas Sepez](https://github.com/tsepez) (Windows-specific fixes concerning `FPDF_LoadDocument()`)
 
 
 ## Fun facts
