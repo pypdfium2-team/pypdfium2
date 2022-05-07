@@ -7,6 +7,7 @@ from pypdfium2._helpers import (
     toc,
     pdf_renderer,
     page_renderer,
+    text_inserter,
 )
 
 
@@ -50,32 +51,20 @@ class PdfDocument:
     
     def render_page_tobytes(self, index, **kws):
         """ Render a single page to bytes (see :func:`.render_page_tobytes`). """
-        return page_renderer.render_page_tobytes(
-            self._pdf,
-            page_index = index,
-            **kws
-        )
+        return page_renderer.render_page_tobytes(self._pdf, page_index=index, **kws)
     
     def render_pdf_tobytes(self, **kws):
         """ Incrementally render multiple pages to bytes (see :func:`.render_pdf_tobytes`). """
-        yield from pdf_renderer.render_pdf_tobytes(
-            self._input_obj,
-            password = self._password,
-            **kws
-        )
+        yield from pdf_renderer.render_pdf_tobytes(self._input_obj, password=self._password, **kws)
     
     def render_page_topil(self, index, **kws):
         """ Render a single page to a :mod:`PIL` image (see :func:`.render_page_topil`). """
-        return page_renderer.render_page_topil(
-            self._pdf,
-            page_index = index,
-            **kws
-        )
+        return page_renderer.render_page_topil(self._pdf, page_index=index, **kws)
     
     def render_pdf_topil(self, **kws):
         """ Incrementally render multiple pages to :mod:`PIL` images (see :func:`.render_pdf_topil`). """
-        yield from pdf_renderer.render_pdf_topil(
-            self._input_obj,
-            password = self._password,
-            **kws
-        )
+        yield from pdf_renderer.render_pdf_topil(self._input_obj, password=self._password, **kws)
+    
+    def insert_text(self, index, **kws):
+        """ Insert text into a page (see :func:`.insert_text`). """
+        return text_inserter.insert_text(self._pdf, page_index=index, **kws)
