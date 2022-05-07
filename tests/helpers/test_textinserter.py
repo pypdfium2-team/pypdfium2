@@ -20,6 +20,7 @@ def test_insert_hindi():
         is_cid = True,
     )
     pdf_font = pdfium.open_pdffont(pdf, font_info)
+    
     pdfium.insert_text(
         pdf, 0,
         text = "मैं घोषणा, पुष्टि और सहमत हूँ कि:",
@@ -29,6 +30,16 @@ def test_insert_hindi():
         font_info = font_info,
         pdf_font = pdf_font,
     )
+    pdfium.insert_text(
+        pdf, 0,
+        text = "Latin letters test.",
+        pos_x = 100,
+        pos_y = 600,
+        font_size = 30,
+        font_info = font_info,
+        pdf_font = pdf_font,
+    )
+    
     pdfium.close_pdffont(pdf_font)
     
     with open(join(OutputDir, "text_hindi.pdf"), "wb") as buffer:
