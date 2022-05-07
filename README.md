@@ -240,9 +240,11 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 ## Thanks to
 
-* Benoît Blanchon ([PDFium patches](sourcebuild/patches/))
 * Anurag Bansal (Support model for [text insertion](src/pypdfium2/_helpers/textinserter.py))
+* Benoît Blanchon ([PDFium patches](sourcebuild/patches/))
 * Anderson Bravalheri (Help with achieving PEP 517/518 compliance)
+* Yinlin Hu (Initial idea and `pypdfium` prototype)
+* Peter Saalbrink (Code style improvements to `pdf_renderer`)
 * Lei Zhang and Thomas Sepez (Windows-specific fixes concerning `FPDF_LoadDocument()`)
 
 
