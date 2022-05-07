@@ -19,11 +19,11 @@ class FontInfo:
     Object to load font data and store associated information.
     
     Parameters:
-        filepath (str):
+        path (str):
             File path of the font to use.
-        font_type (int):
+        type (int):
             Type of the given font (``FPDF_FONT_TYPE1`` or ``FPDF_FONT_TRUETYPE``).
-        font_is_cid (bool):
+        is_cid (bool):
             :data:`True` if the font is a CID font, :data:`False` otherwise.
     """
     
