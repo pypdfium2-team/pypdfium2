@@ -120,9 +120,7 @@ def insert_text(
     harfbuzz.shape(font_info.hb_font, hb_buffer, hb_features)
     
     start_point = pos_x
-    
     for info, pos in zip(hb_buffer.glyph_infos, hb_buffer.glyph_positions):
-        
         pdf_textobj = pdfium.FPDFPageObj_CreateTextObj(pdf, pdf_font, font_size)
         pdfium.FPDFText_SetCharcodes(pdf_textobj, ctypes.c_uint32(info.codepoint), 1)
         pdfium.FPDFPageObj_Transform(
