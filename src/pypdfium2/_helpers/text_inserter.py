@@ -29,14 +29,17 @@ class FontInfo:
     
     def __init__(self, path, type, is_cid):
         
+        if not have_harfbuzz:
+            raise RuntimeError("Font helpers require uharfbuzz to be installed.")
+        
         self.path = path
         self.type = type
         self.is_cid = is_cid
         
-        with open(path, "rb") as fh:
+        with open(self.path, "rb") as fh:
             self.data = fh.read()
         
-        self.hb_blob = harfbuzz.Blob.from_file_path(path)
+        self.hb_blob = harfbuzz.Blob.from_file_path(self.path)
         self.hb_face = harfbuzz.Face(self.hb_blob)
         self.hb_font = harfbuzz.Font(self.hb_face)
         self.hb_scale = self.hb_font.scale[0]
@@ -107,9 +110,6 @@ def insert_text(
         pdf_font (``FPDF_FONT``):
             PDFium font object handle.
     """
-    
-    if not have_harfbuzz:
-        raise RuntimeError("Function insert_text() requires uharfbuzz to be installed.")
     
     page = open_page(pdf, page_index)
     

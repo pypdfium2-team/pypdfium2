@@ -3,19 +3,20 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from os.path import join
+from importlib.util import find_spec
+import pytest
 import pypdfium2 as pdfium
 from ..conftest import ResourceDir, OutputDir
 
 
-NotoSans = join(ResourceDir, "NotoSans-Regular.ttf")
-
-def test_insert_hindi():
+@pytest.mark.skipif(not find_spec("uharfbuzz"), reason="uharfbuzz is not installed")
+def test_insert_text():
     
     pdf = pdfium.FPDF_CreateNewDocument()
     pdfium.FPDFPage_New(pdf, 0, 500, 800)
     
     font_info = pdfium.FontInfo(
-        NotoSans,
+        join(ResourceDir, "NotoSans-Regular.ttf"),
         type = pdfium.FPDF_FONT_TRUETYPE,
         is_cid = True,
     )
@@ -42,5 +43,5 @@ def test_insert_hindi():
     
     pdfium.close_pdffont(pdf_font)
     
-    with open(join(OutputDir, "text_hindi.pdf"), "wb") as buffer:
+    with open(join(OutputDir, "text_insertion.pdf"), "wb") as buffer:
         pdfium.save_pdf(pdf, buffer, version=17)
