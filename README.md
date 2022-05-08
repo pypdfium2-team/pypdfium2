@@ -240,7 +240,7 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 ## Thanks to
 
-* [Anurag Bansal](https://github.com/banagg) (Support model for [text insertion](src/pypdfium2/_helpers/textinserter.py))
+* [Anurag Bansal](https://github.com/banagg) (Support model for [text insertion](src/pypdfium2/_helpers/text_inserter.py))
 * [Benoît Blanchon](https://github.com/bblanchon) ([PDFium patches](sourcebuild/patches/))
 * [Anderson Bravalheri](https://github.com/abravalheri) (Help with achieving PEP 517/518 compliance)
 * [Tim Head](https://github.com/betatim) (Original idea for PDFium Python bindings with ctypesgen in `wowpng`)
