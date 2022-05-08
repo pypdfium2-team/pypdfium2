@@ -11,6 +11,7 @@
 - Created an `open_page()` function to avoid internal duplication. This basically is a wrapper around `FPDF_LoadPage()`, for page index validation.
 - Improved the cedits section in the Readme.
 - Made automatic buffer closure optional for `open_pdf_buffer()`.
+- Enhanced integration of markdown files into the Sphinx documentation.
 
 
 ## 1.7.0 (2022-05-02)

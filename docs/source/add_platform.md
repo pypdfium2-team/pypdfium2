@@ -25,7 +25,7 @@ For practical examples, see [Pull Request #92](https://github.com/pypdfium2-team
     ```
   * If all went well, a wheel for the new platform should have been written to `dist/`. Inspect it with an archiver tool to ensure the `pypdfium2` directory contains all stuff from `src/pypdfium2/`, the bindings file `_pypdfium.py`, and the PDFium binary (one-of `pdfium`, `pdfium.dylib`, `pdfium.dll`).
   * Run `make release`. When done, confirm that there were no errors, the new platform wheel is present in `dist/`, and all sanity checks passed (`twine check` and `check-wheel-contents`).
-  * Finally, create an entry for the next release in `docs/markdown/changelog.md` and note that you added support for a new platform.
+  * Finally, create an entry for the next release in `docs/source/changelog.md` and note that you added support for a new platform.
   * Make a new branch, add and commit your changes. Example:
     ```bash
     # replace `new_platform` with any name of your liking

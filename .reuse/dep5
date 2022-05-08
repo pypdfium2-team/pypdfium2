@@ -12,7 +12,7 @@ Source: https://github.com/pypdfium2-team/pypdfium2
 Files: pdfium
        pdfium.dll
        pdfium.dylib
-       docs/markdown/devel/.about_wheel_license.md
+       docs/devel/.about_wheel_license.md
 Copyright: 2022 PDFium developers
 License: (Apache-2.0 OR BSD-3-Clause) AND LicenseRef-PdfiumThirdParty
 Comment:
