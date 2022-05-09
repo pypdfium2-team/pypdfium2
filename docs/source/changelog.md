@@ -202,6 +202,6 @@
 - Improved build scripts.
 - Adapted the update script to upstream changes (thanks @bblanchon).
 - Moved some scripts from the root directory into `utilities/` and changed the Makefile accordingly.
-- Added a list of future [tasks](./tasks.md) to keep in mind.
+- Added a list of future [tasks](../devel/tasks.md) to keep in mind.
 
 *Tracking changes started with version 0.10.0, so there are no entries for older releases.*
