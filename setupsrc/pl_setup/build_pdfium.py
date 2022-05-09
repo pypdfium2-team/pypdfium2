@@ -209,7 +209,6 @@ def _serialise_config(config_dict):
 
 
 def main(
-        b_argfile = None,
         b_srcname = None,
         b_destname = None,
         b_update = False,
@@ -231,18 +230,6 @@ def main(
     if sys.platform.startswith('win32'):
         os.environ['DEPOT_TOOLS_WIN_TOOLCHAIN'] = "0"
     
-    if b_argfile is None:
-        config_dict = DefaultConfig.copy()
-        if b_use_syslibs:
-            config_dict.update(SyslibsConfig)
-        config_str = _serialise_config(config_dict)
-        
-    else:
-        with open(os.path.abspath(b_argfile), 'r') as file_handle:
-            config_str = file_handle.read()
-    
-    print("\nBuild configuration:\n%s\n" % config_str)
-    
     depot_dl_done = dl_depottools(b_update)
     if depot_dl_done:
         patch_depottools()
@@ -251,9 +238,14 @@ def main(
     if pdfium_dl_done:
         patch_pdfium()
     
+    config_dict = DefaultConfig.copy()
+    if b_use_syslibs:
+        config_dict.update(SyslibsConfig)
+    config_str = _serialise_config(config_dict)
+    print("\nBuild configuration:\n%s\n" % config_str)
+    
     configure(config_str, GN)
     build(Ninja)
-    
     libpath = find_lib(b_srcname)
     pack(libpath, b_destname)
 
@@ -264,10 +256,6 @@ def parse_args(argv):
         description = "A script to automate building PDFium from source and generating bindings with ctypesgen.",
     )
     
-    parser.add_argument(
-        '--argfile', '-a',
-        help = "A text file containing custom PDFium build configuration, to be evaluated by `gn gen`. Call `gn args --list out/Default/` in `sourcebuild/pdfium/` to obtain a list of possible options.",
-    )
     parser.add_argument(
         '--srcname', '-s',
         help = "Name of the generated PDFium binary file. This script tries to automatically find the binary, which should usually work. If it does not, however, this option may be used to explicitly provide the file name to look for.",
@@ -284,7 +272,7 @@ def parse_args(argv):
     parser.add_argument(
         '--use-syslibs', '-l',
         action = 'store_true',
-        help = "Use system libraries instead of those bundled with PDFium. (Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng and zlib are installed, and that $PKG_CONFIG_PATH is set correctly (e. g. to /usr/lib/x86_64-linux-gnu/pkgconfig)",
+        help = "Use system libraries instead of those bundled with PDFium. (Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng and zlib are installed, and that $PKG_CONFIG_PATH is set correctly (e. g. to `/usr/lib/x86_64-linux-gnu/pkgconfig`)",
     )
     parser.add_argument(
         '--revision', '-r',
@@ -297,7 +285,6 @@ def parse_args(argv):
 def run_cli(argv=sys.argv[1:]):
     args = parse_args(argv)
     return main(
-        b_argfile = args.argfile,
         b_srcname = args.srcname,
         b_destname = args.destname,
         b_update = args.update,
