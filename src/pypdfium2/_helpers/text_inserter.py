@@ -16,54 +16,46 @@ else:
 
 class FontInfo:
     """
-    Object to load font data and store associated information.
+    Object to cache harfbuzz font data.
     
     Parameters:
-        path (str):
+        font_path (str):
             File path of the font to use.
-        type (int):
-            Type of the given font (``FPDF_FONT_TYPE1`` or ``FPDF_FONT_TRUETYPE``).
-        is_cid (bool):
-            :data:`True` if the font is a CID font, :data:`False` otherwise.
     """
     
-    def __init__(self, path, type, is_cid):
-        
+    def __init__(self, font_path):
         if not have_harfbuzz:
             raise RuntimeError("Font helpers require uharfbuzz to be installed.")
-        
-        self.path = path
-        self.type = type
-        self.is_cid = is_cid
-        
-        with open(self.path, "rb") as fh:
-            self.data = fh.read()
-        
-        self.hb_blob = harfbuzz.Blob.from_file_path(self.path)
+        self.hb_blob = harfbuzz.Blob.from_file_path(font_path)
         self.hb_face = harfbuzz.Face(self.hb_blob)
         self.hb_font = harfbuzz.Font(self.hb_face)
         self.hb_scale = self.hb_font.scale[0]
 
 
-def open_pdffont(pdf, font_info):
+def open_pdffont(pdf, font_path, type, is_cid):
     """
     Create a PDFium font object handle. When you have finished working with the font, call :func:`.close_pdffont`.
     
     Parameters:
         pdf (``FPDF_DOCUMENT``):
             PDFium document handle.
-        font_info (FontInfo):
-            Font data and information.
-    
+        font_path (str):
+            File path of the font to use.
+        type (int):
+            Type of the given font (``FPDF_FONT_TYPE1`` or ``FPDF_FONT_TRUETYPE``).
+        is_cid (bool):
+            :data:`True` if the font is a CID font, :data:`False` otherwise.
     Returns:
         ``FPDF_FONT``
     """
+    with open(font_path, "rb") as fh:
+        data = fh.read()
     return pdfium.FPDFText_LoadFont(
         pdf,
-        ctypes.cast(font_info.data, ctypes.POINTER(ctypes.c_uint8)),
-        len(font_info.data),
-        font_info.type,
-        font_info.is_cid,
+        ctypes.cast(data, ctypes.POINTER(ctypes.c_uint8)),
+        len(data),
+        type,
+        is_cid,
     )
 
 

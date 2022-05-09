@@ -15,12 +15,13 @@ def test_insert_text():
     pdf = pdfium.FPDF_CreateNewDocument()
     pdfium.FPDFPage_New(pdf, 0, 500, 800)
     
-    font_info = pdfium.FontInfo(
-        join(ResourceDir, "NotoSans-Regular.ttf"),
+    NotoSans = join(ResourceDir, "NotoSans-Regular.ttf")
+    font_info = pdfium.FontInfo(NotoSans)
+    pdf_font = pdfium.open_pdffont(
+        pdf, NotoSans,
         type = pdfium.FPDF_FONT_TRUETYPE,
         is_cid = True,
     )
-    pdf_font = pdfium.open_pdffont(pdf, font_info)
     
     pdfium.insert_text(
         pdf, 0,
