@@ -218,14 +218,9 @@ def main(
     
     if b_revision is None:
         b_revision = 'main'
-    
     # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
     if b_destname is None and sys.platform.startswith('linux'):
         b_destname = 'pdfium'
-    
-    GClient = _get_tool('gclient', 'bat')
-    GN      = _get_tool('gn', 'bat')
-    Ninja   = _get_tool('ninja', 'exe')
     
     if sys.platform.startswith('win32'):
         os.environ['DEPOT_TOOLS_WIN_TOOLCHAIN'] = "0"
@@ -233,6 +228,10 @@ def main(
     depot_dl_done = dl_depottools(b_update)
     if depot_dl_done:
         patch_depottools()
+    
+    GClient = _get_tool('gclient', 'bat')
+    GN      = _get_tool('gn', 'bat')
+    Ninja   = _get_tool('ninja', 'exe')
     
     pdfium_dl_done = dl_pdfium(b_update, b_revision, GClient)
     if pdfium_dl_done:
