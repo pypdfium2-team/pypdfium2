@@ -4,13 +4,14 @@
 # Changelog
 
 
-## 1.8.0 (scheduled for 2022-05-09)
+## 1.8.0 (2022-05-09)
 
-- Updated PDFium from `5038` to `????`
+- Updated PDFium from `5038` to `5052`.
 - Added support model for text insertion. Special thanks to Anurag Bansal.
-- Created an `open_page()` function to avoid internal duplication. This basically is a wrapper around `FPDF_LoadPage()`, for page index validation.
-- Improved the cedits section in the Readme.
+- Created a new function `open_page()`, mainly to avoid internal duplication. This basically is a wrapper around `FPDF_LoadPage()` with page index validation.
+- Improved cedits section in the Readme.
 - Made automatic buffer closure optional for `open_pdf_buffer()`.
+- Slightly tweaked the build script.
 - Enhanced integration of markdown files into the Sphinx documentation.
 
 
