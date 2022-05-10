@@ -34,12 +34,6 @@ def test_render_page_bytes():
         _check_render_normal(pdf)
 
 
-def test_render_nonascii():
-    with pdfium.PdfContext(TestFiles.nonascii) as pdf:
-        pil_image = pdfium.render_page_topil(pdf, 0)
-        pil_image.save( join(OutputDir,'render_nonascii.png') )
-
-
 def _check_render_encrypted(file_or_data):
     
     with pdfium.PdfContext(file_or_data, 'test_user') as pdf:

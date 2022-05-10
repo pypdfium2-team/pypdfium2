@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause 
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
 import os
@@ -11,7 +11,7 @@ from ..conftest import TestFiles, OutputDir
 
 def test_save_pdf_tobuffer():
     
-    pdf, ld_data = pdfium.open_pdf_auto(TestFiles.multipage)
+    pdf, ld_data = pdfium.open_pdf_auto(TestFiles.render)
     pdfium.FPDFPage_Delete(pdf, ctypes.c_int(0))
     
     buffer = io.BytesIO()
@@ -31,7 +31,7 @@ def test_save_pdf_tobuffer():
 
 def test_save_pdf_tofile():
     
-    src_pdf, ld_data = pdfium.open_pdf_auto(TestFiles.cropbox)
+    src_pdf, ld_data = pdfium.open_pdf_auto(TestFiles.multipage)
     
     # page tiling (n-up)
     dest_pdf = pdfium.FPDF_ImportNPagesToOne(

@@ -2,8 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
-import pytest
+import shutil
+import tempfile
+from os.path import join
 import pypdfium2 as pdfium
+import pytest
 from ..conftest import TestFiles
 
 
@@ -62,15 +65,16 @@ def test_open_native():
     
     pdf, ld_data = pdfium.open_pdf_native(TestFiles.multipage)
     
-    # ensure that accessing the PDF works
     pdfium.FPDFPage_Delete(pdf, 1)
     page = pdfium.FPDF_LoadPage(pdf, 0)
     rotation = pdfium.FPDFPage_GetRotation(page)
-    print("Page %s has rotation %s" % (page, rotation))
     pdfium.FPDF_ClosePage(page)
     
     pdfium.close_pdf(pdf, ld_data)
 
 
 def test_open_nonascii_pdfct():
-    _load_pdfct(TestFiles.nonascii)
+    with tempfile.TemporaryDirectory(prefix="pypdfium2_") as tempdir:
+        nonascii_file = join(tempdir,"nonascii_tênfilechứakýtựéèáàçß 发短信.pdf")
+        shutil.copy(TestFiles.render, nonascii_file)
+        _load_pdfct(nonascii_file)
