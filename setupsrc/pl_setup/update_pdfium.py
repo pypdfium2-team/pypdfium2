@@ -64,14 +64,9 @@ def _set_versions(*versions_list):
 
 
 def get_latest_version():
-    
-    git_ls = run_cmd(['git', 'ls-remote', '%s.git' % ReleaseRepo], cwd=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    
-    git_ls = git_ls.stdout.decode('UTF-8')
-    tag = git_ls.split('\t')[-1].replace('\n', '')
-    version = int(tag.split('/')[-1])
-    
-    return version
+    git_ls = run_cmd(['git', 'ls-remote', '%s.git' % ReleaseRepo], cwd=None, capture=True)
+    tag = git_ls.split('\t')[-1]
+    return int( tag.split('/')[-1] )
 
 
 def handle_versions(latest_version):

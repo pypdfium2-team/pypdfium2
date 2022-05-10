@@ -51,7 +51,7 @@ jobs:
         run: make packaging
       
       - name: Prepare release description
-        run: python3 utilities/mk_releasenotes.py
+        run: python3 setupsrc/pl_setup/mk_releasenotes.py
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1

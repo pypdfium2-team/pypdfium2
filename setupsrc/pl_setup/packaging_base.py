@@ -47,9 +47,17 @@ class PlatformNames:
     sourcebuild   = 'sourcebuild'
 
 
-def run_cmd(command, cwd, **kwargs):
+def run_cmd(command, cwd, capture=False, **kwargs):
+    
     print('%s ("%s")' % (command, cwd))
-    return subprocess.run(command, cwd=cwd, **kwargs)
+    if capture:
+        kwargs.update( dict(stdout=subprocess.PIPE, stderr=subprocess.STDOUT) )
+    
+    comp_process = subprocess.run(command, cwd=cwd, **kwargs)
+    if capture:
+        return comp_process.stdout.decode('UTF-8').strip()
+    else:
+        return comp_process
 
 
 def call_ctypesgen(platform_dir, include_dir):
