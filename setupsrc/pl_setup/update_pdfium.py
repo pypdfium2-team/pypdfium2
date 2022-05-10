@@ -10,7 +10,6 @@ import shutil
 import tarfile
 import argparse
 import traceback
-import subprocess
 from urllib import request
 from os.path import join, abspath, dirname
 from concurrent.futures import ThreadPoolExecutor
