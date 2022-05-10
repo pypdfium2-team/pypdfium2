@@ -24,3 +24,6 @@ def test_boxes():
         
         for page, box_func, exp_box in test_cases:
             assert approx( box_func(page) ) == exp_box
+        
+        for page in (page_a, page_b):
+            pdfium.FPDF_ClosePage(page)
