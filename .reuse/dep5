@@ -19,13 +19,6 @@ Comment:
     `.about_wheel_license.md` is a description file which exists only to state that
     `LicenseRef-PdfiumThirdParty` is used.
 
-Files: tests/resources/render.pdf
-       tests/resources/multipage.pdf
-       tests/resources/encrypted.pdf
-       tests/resources/nonascii_tênfilechứakýtựéèáàçß 发短信.pdf
-Copyright: 2022 geisserml <geisserml@gmail.com>
-License: CC-BY-4.0
-
 Files: tests/resources/bookmarks.pdf
 Copyright: 2020 Matthias Erll
 License: LicenseRef-FairUse
@@ -35,25 +28,22 @@ Comment:
     (https://github.com/pikepdf/pikepdf/blob/master/debian/copyright says "License assumed from LICENSE.txt in project root.")
 
 Files: tests/resources/bookmarks_circular.pdf
-Copyright: 2021 PDFium Developers
+Copyright: 2022 PDFium Developers
 License: BSD-3-Clause OR Apache-2.0
 Comment:
     Obtained from: https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf
 
-Files: tests/resources/mediabox_missing.pdf
-Copyright: 2020 Jerome Robert
-License: LicenseRef-FairUse
-Comment:
-    Obtained from: https://github.com/pdfarranger/pdfarranger/blob/main/tests/test.pdf
-    No individual license stated for this data file. Project license is GPL-3.0-or-later.
-
-Files: tests/resources/cropbox.pdf
-Copyright: 2021 Charlotte Curtis <c.f.curtis@gmail.com>
+Files: tests/resources/boxes.in
+       tests/resources/boxes.pdf
+Copyright: 2022 PDFium Developers
            2022 geisserml <geisserml@gmail.com>
-License: LicenseRef-FairUse
-Comment:
-    Derived from: https://github.com/cfcurtis/pdfstitcher/blob/main/resources/testdoc.pdf
-    No individual license stated for this data file. Project license is MPL-2.0.
+License: BSD-3-Clause OR Apache-2.0
+
+Files: tests/resources/render.pdf
+       tests/resources/multipage.pdf
+       tests/resources/encrypted.pdf
+Copyright: 2022 geisserml <geisserml@gmail.com>
+License: CC-BY-4.0
 
 Files: tests/resources/NotoSans-Regular.ttf
 Copyright: 2022 Google Inc.
@@ -66,7 +56,7 @@ Files: sourcebuild/patches/pdfium/public_headers.patch
        sourcebuild/patches/pdfium/win/build.patch
        sourcebuild/patches/pdfium/win/pdfium.patch
        sourcebuild/patches/pdfium/win/resources.rc
-Copyright: 2021 Benoît Blanchon
+Copyright: 2022 Benoît Blanchon
 License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches

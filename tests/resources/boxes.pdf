@@ -1,0 +1,102 @@
+%PDF-1.7
+% ò¤ô
+1 0 obj <<
+  /Type /Catalog
+  /Pages 2 0 R
+>>
+endobj
+2 0 obj <<
+  /Type /Pages
+  /Count 2
+  /Kids [
+    3 0 R
+    4 0 R
+  ]
+>>
+endobj
+% Page index 0 (fallback test)
+3 0 obj <<
+  /Type /Page
+  /Parent 2 0 R
+  /Resources <<
+    /Font <</F1 15 0 R>>
+  >>
+  /Contents [21 0 R]
+>>
+endobj
+% Page index 1 (boxes test)
+4 0 obj <<
+  /Type /Page
+  /Parent 2 0 R
+  /Resources  <<
+    /Font <</F1 15 0 R>>
+  >>
+  /Contents [22 0 R]
+  /MediaBox [0 0 595 842]
+  /CropBox [10 10 585 832]
+  /BleedBox [20 20 575 822]
+  /TrimBox [30 30 565 812]
+  /ArtBox [40 40 555 802]
+>>
+endobj
+% Font resource
+15 0 obj <<
+  /Type /Font
+  /Subtype /Type1
+  /BaseFont /Arial
+>>
+endobj
+% Content for page 0
+21 0 obj <<
+  /Length 0
+>>
+stream
+BT
+/F1 20 Tf
+100 600 TD (Page1)Tj
+ET
+endstream
+endobj
+% Content for page 1
+22 0 obj <<
+  /Length 0
+>>
+stream
+BT
+/F1 20 Tf
+100 600 TD (Page2)Tj
+ET
+endstream
+endobj
+xref
+0 23
+0000000000 65535 f 
+0000000015 00000 n 
+0000000068 00000 n 
+0000000180 00000 n 
+0000000326 00000 n 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000595 00000 n 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000000 65535 f 
+0000000689 00000 n 
+0000000798 00000 n 
+trailer <<
+  /Root 1 0 R
+  /Size 23
+>>
+startxref
+886
+%%EOF
