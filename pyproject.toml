@@ -11,6 +11,6 @@ requires = [
     "ctypesgen",
 ]
 
-# pytest configuration
-[tool.pytest.ini_options]
-addopts = "--capture=no --verbose"
+## pytest configuration
+# [tool.pytest.ini_options]
+# addopts = "--capture=no --verbose"
