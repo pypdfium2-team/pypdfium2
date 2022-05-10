@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2 as pdfium
+from pytest import approx
 from ..conftest import TestFiles
 
 
@@ -13,26 +14,23 @@ def _close_pages(pages):
     for page in pages:
         pdfium.FPDF_ClosePage(page)
 
-def _assert_boxes_eq(box, expected):
-    assert type(box) is type(expected)
-    assert tuple( [round(val, 4) for val in box] ) == expected
-
 
 def _check_boxes(pages, mediaboxes, cropboxes):
     
     assert len(pages) == len(mediaboxes) == len(cropboxes)
     
-    # todo: add test files that actually contain BleedBox, TrimBox, and ArtBox
-    for page, exp_mediabox in zip(pages, mediaboxes):
-        _assert_boxes_eq(pdfium.get_mediabox(page), exp_mediabox)
-    for page, exp_cropbox in zip(pages, cropboxes):
-        _assert_boxes_eq(pdfium.get_cropbox(page), exp_cropbox)
-    for page, exp_bleedbox in zip(pages, cropboxes):
-        _assert_boxes_eq(pdfium.get_bleedbox(page), exp_bleedbox)
-    for page, exp_trimbox in zip(pages, cropboxes):
-        _assert_boxes_eq(pdfium.get_trimbox(page), exp_trimbox)
-    for page, exp_artbox in zip(pages, cropboxes):
-        _assert_boxes_eq(pdfium.get_artbox(page), exp_artbox)
+    # todo: add test file that actually contains all boxes
+    test_cases = [
+        (pdfium.get_mediabox, mediaboxes),
+        (pdfium.get_cropbox, cropboxes),
+        (pdfium.get_bleedbox, cropboxes),
+        (pdfium.get_trimbox, cropboxes),
+        (pdfium.get_artbox, cropboxes),
+    ]
+    
+    for func, boxes in test_cases:
+        for page, exp_box in zip(pages, boxes):
+            assert approx( func(page) ) == exp_box
 
 
 def test_boxes_normal():
