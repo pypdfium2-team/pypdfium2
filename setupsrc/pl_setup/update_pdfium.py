@@ -18,9 +18,9 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
     DataTree,
     VersionFile,
+    VerNamespace,
     PlatformNames,
     run_cmd,
-    extract_version,
     call_ctypesgen,
 )
 
@@ -70,8 +70,8 @@ def get_latest_version():
 
 def handle_versions(latest_version):
     
-    v_minor = extract_version('V_MINOR')
-    v_libpdfium = extract_version('V_LIBPDFIUM')
+    v_minor = VerNamespace['V_MINOR']
+    v_libpdfium = VerNamespace['V_LIBPDFIUM']
     
     if v_libpdfium < latest_version:
         print("New PDFium build")

@@ -18,7 +18,7 @@ from pl_setup.packaging_base import (
     SourceTree,
     ModuleDir,
     PlatformNames,
-    extract_version,
+    VerNamespace,
 )
 
 
@@ -115,7 +115,7 @@ def _get_bdist(pl_name):
 
 
 SetupKws = dict(
-    version = extract_version('V_PYPDFIUM2'),
+    version = VerNamespace['V_PYPDFIUM2'],
 )
 
 

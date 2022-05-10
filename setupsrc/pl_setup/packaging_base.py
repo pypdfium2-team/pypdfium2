@@ -3,6 +3,7 @@
 
 # Non-stdlib imports not allowed in this file, as it is imported prior to the check_deps call
 
+import shutil
 import subprocess
 from glob import glob
 from os.path import (
@@ -64,7 +65,7 @@ def call_ctypesgen(platform_dir, include_dir):
     
     bindings_file = join(platform_dir,'_pypdfium.py')
     
-    ctypesgen_cmd = ['ctypesgen', '--library', 'pdfium', '--strip-build-path', platform_dir, '-L', '.'] + sorted(glob( join(include_dir,'*.h') )) + ['-o', bindings_file]
+    ctypesgen_cmd = [shutil.which('ctypesgen'), '--library', 'pdfium', '--strip-build-path', platform_dir, '-L', '.'] + sorted(glob( join(include_dir,'*.h') )) + ['-o', bindings_file]
     run_cmd(ctypesgen_cmd, cwd=platform_dir)
     
     with open(bindings_file, 'r') as file_reader:
@@ -77,15 +78,9 @@ def call_ctypesgen(platform_dir, include_dir):
 
 
 def _get_ver_namespace():
-    
     ver_namespace = {}
     with open(VersionFile, 'r') as fh:
         exec(fh.read(), ver_namespace)
-    
     return ver_namespace
 
-
-_ver_namespace = _get_ver_namespace()
-
-def extract_version(variable_str):
-    return _ver_namespace[variable_str]
+VerNamespace = _get_ver_namespace()
