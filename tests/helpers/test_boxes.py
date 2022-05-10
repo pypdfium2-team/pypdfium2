@@ -14,12 +14,12 @@ def test_boxes():
         page_b = pdfium.open_page(pdf, 1)
         
         test_cases = [
-            (page_a, pdfium.get_mediabox, (0, 0, 612, 792)),
-            (page_b, pdfium.get_mediabox, (0, 0, 595, 842)),
-            (page_b, pdfium.get_cropbox, (10, 10, 585, 832)),
+            (page_a, pdfium.get_mediabox, (0,  0,  612, 792)),
+            (page_b, pdfium.get_mediabox, (0,  0,  595, 842)),
+            (page_b, pdfium.get_cropbox,  (10, 10, 585, 832)),
             (page_b, pdfium.get_bleedbox, (20, 20, 575, 822)),
-            (page_b, pdfium.get_trimbox, (30, 30, 565, 812)),
-            (page_b, pdfium.get_artbox, (40, 40, 555, 802)),
+            (page_b, pdfium.get_trimbox,  (30, 30, 565, 812)),
+            (page_b, pdfium.get_artbox,   (40, 40, 555, 802)),
         ]
         
         for page, box_func, exp_box in test_cases:

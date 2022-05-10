@@ -10,14 +10,19 @@ from ..conftest import TestFiles, OutputDir
 
 def _check_render_normal(pdf):
     
+    pixels = [
+        [(0,   0  ), (255, 255, 255)],
+        [(150, 180), (129, 212, 26 )],
+        [(150, 390), (42,  96,  153)],
+        [(150, 570), (128, 0,   128)],
+    ]
+    
     pil_image = pdfium.render_page_topil(pdf, 0)
     
     assert pil_image.mode == 'RGB'
     assert pil_image.size == (595, 842)
-    assert pil_image.getpixel( (0, 0) ) == (255, 255, 255)
-    assert pil_image.getpixel( (150, 180) ) == (129, 212, 26)
-    assert pil_image.getpixel( (150, 390) ) == (42, 96, 153)
-    assert pil_image.getpixel( (150, 570) ) == (128, 0, 128)
+    for pos, exp_value in pixels:
+        assert pil_image.getpixel(pos) == exp_value
     
     pil_image.close()
 
@@ -63,6 +68,14 @@ def test_render_page_encrypted_bytes():
 
 def test_render_page_alpha():
     
+    pixels = [
+        [(0,   0  ), (0,   0,   0,   0  )],
+        [(62,  66 ), (0,   0,   0,   186)],
+        [(150, 180), (129, 212, 26,  255)],
+        [(150, 390), (42,  96,  153, 255)],
+        [(150, 570), (128, 0,   128, 255)],
+    ]
+    
     with pdfium.PdfContext(TestFiles.render) as pdf:
         pil_image = pdfium.render_page_topil(
             pdf, 0,
@@ -71,11 +84,8 @@ def test_render_page_alpha():
     
     assert pil_image.mode == 'RGBA'
     assert pil_image.size == (595, 842)
-    assert pil_image.getpixel( (0, 0) ) == (0, 0, 0, 0)
-    assert pil_image.getpixel( (62, 66) ) == (0, 0, 0, 186)
-    assert pil_image.getpixel( (150, 180) ) == (129, 212, 26, 255)
-    assert pil_image.getpixel( (150, 390) ) == (42, 96, 153, 255)
-    assert pil_image.getpixel( (150, 570) ) == (128, 0, 128, 255)
+    for pos, exp_value in pixels:
+        assert pil_image.getpixel(pos) == exp_value
     
     pil_image.close()
 
@@ -170,11 +180,11 @@ def test_render_greyscale():
     "colour",
     [
         (255, 255, 255, 255),
-        (60, 70, 80, 100),
+        (60,  70,  80,  100),
         (255, 255, 255),
-        (0, 255, 255),
-        (255, 0, 255),
-        (255, 255, 0),
+        (0,   255, 255),
+        (255, 0,   255),
+        (255, 255, 0  ),
     ]
 )
 def test_render_bgcolour(colour):
@@ -201,7 +211,7 @@ def _abstest_render_tobytes(img_info):
     assert isinstance(data, bytes)
     assert isinstance(cl_format, str)
     assert 1 <= len(cl_format) <= 4
-    assert all (c in ('RGBLA') for c in cl_format)
+    assert all(c in ('RGBLA') for c in cl_format)
     assert len(size) == 2
     assert all(isinstance(s, int) for s in size)
     assert len(data) == size[0] * size[1] * len(cl_format)
