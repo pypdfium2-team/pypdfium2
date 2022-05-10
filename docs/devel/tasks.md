@@ -12,7 +12,6 @@
     - Add a new workflow to test the build script
 * Rename `translate_...()` utility functions to something shorter. Maybe switch to dictionaries?
 * Increase test coverage. Probably need to overhaul testing completely. We would like to have a test for every single passage of the support model code. Some automated tests for the setup infrastructure would also be nice.
-* In the PDF boxes test, use `pytest.approx()` instead of the homebrewed solution.
 * Add test case for rendering a PDF with interactive forms.
 * Move development section of the Readme into a dedicated file and add some more information.
 * Add a ctypes primer explaining how to interoperate with the PDFium C API.

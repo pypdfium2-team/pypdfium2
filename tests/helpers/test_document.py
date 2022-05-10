@@ -7,6 +7,7 @@ from ..conftest import (
     TestFiles,
     iterate_testfiles,
 )
+from pytest import approx
 import pypdfium2 as pdfium
 from pypdfium2._cli.toc import print_toc
 
@@ -54,24 +55,11 @@ def test_pdfdoc_save():
     buffer.close()
 
 
-def _compare_numarray(array, expected):
-    assert type(array) is type(expected)
-    assert len(array) == len(expected)
-    for val_a, val_b in zip(array, expected):
-        assert round(val_a) == val_b
-
-
-def _compare_bookmark(
-        bookmark,
-        title,
-        page_index,
-        view_mode,
-        view_pos,
-    ):
+def _compare_bookmark(bookmark, title, page_index, view_mode, view_pos):
     assert bookmark.title == title
     assert bookmark.page_index == page_index
     assert bookmark.view_mode == view_mode
-    _compare_numarray(bookmark.view_pos, view_pos)
+    approx(bookmark.view_pos) == view_pos
 
 
 def test_pdfdoc_gettoc():
@@ -85,7 +73,7 @@ def test_pdfdoc_gettoc():
         title = "One",
         page_index = 0,
         view_mode = pdfium.ViewMode.XYZ,
-        view_pos = [89, 758, 0],
+        view_pos = (89, 758, 0),
     )
     
     # check common values
@@ -100,7 +88,7 @@ def test_pdfdoc_gettoc():
         title = "Three-B",
         page_index = 1,
         view_mode = pdfium.ViewMode.XYZ,
-        view_pos = [89, 657, 0]
+        view_pos = (89, 657, 0),
     )
     
     doc.close()
@@ -112,7 +100,8 @@ def test_pdfdoc_gettoc_maxdepth():
     toc = doc.get_toc(max_depth=1)
     
     i = 0
-    for bookmark in toc: i+= 1
+    for bookmark in toc:
+        i+= 1
     assert i == 3
     
     doc.close()
