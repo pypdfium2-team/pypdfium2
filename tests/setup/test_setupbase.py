@@ -25,12 +25,18 @@ ExpectedTags = (
 
 
 def test_expected_tags():
+    
     n_platforms = 0
-    for member in dir(PlatformNames):
-        if member.startswith('_'):
+    for attr in dir(PlatformNames):
+        if attr.startswith('_'):
             continue
         n_platforms += 1
+    
     assert n_platforms == len(ExpectedTags)
+    
+    for platform, tag in ExpectedTags:
+        assert hasattr(PlatformNames, platform)
+        assert isinstance(tag, str)
 
 
 def test_get_tag():
