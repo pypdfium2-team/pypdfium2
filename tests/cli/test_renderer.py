@@ -8,17 +8,15 @@ import pypdfium2 as pdfium
 from pypdfium2._cli import renderer
 
 
-@pytest.mark.parametrize(
-    "test_input, expected",
-    [
+def test_rotation_type():
+    test_cases = [
         ("0", 0),
         ("90", 90),
         ("180", 180),
         ("270", 270),
-    ],
-)
-def test_rotation_type(test_input, expected):
-    assert renderer.rotation_type(test_input) == expected
+    ]
+    for input, expectation in test_cases:
+        assert renderer.rotation_type(input) == expectation
 
 
 def test_rotation_type_fail_oob():
@@ -28,29 +26,25 @@ def test_rotation_type_fail_oob():
         renderer.rotation_type("string")
 
 
-@pytest.mark.parametrize(
-    "test_input, expected",
-    [
+def test_colour_type():
+    test_cases = [
         ("None", None),
         ("none", None),
-    ],
-)
-def test_colour_type(test_input, expected):
-    assert renderer.colour_type(test_input) == expected
+    ]
+    for input, expectation in test_cases:
+        assert renderer.colour_type(input) == expectation
 
 
-@pytest.mark.parametrize(
-    "test_input, expected",
-    [
+def test_pagetext_type():
+    test_cases = [
         ("", None),
         ("1,2", [0, 1]),
         ("3-5", [2, 3, 4]),
         ("5-3", [4, 3, 2]),
         ("1", [0]),
-    ],
-)
-def test_pagetext_type(test_input, expected):
-    assert renderer.pagetext_type(test_input) == expected
+    ]
+    for input, expectation in test_cases:
+        assert renderer.pagetext_type(input) == expectation
 
 
 def test_parse_args():
