@@ -298,7 +298,7 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
-def run_cli(argv=sys.argv[1:]):
+def main_cli(argv=sys.argv[1:]):
     args = parse_args(argv)
     return main(
         b_srcname = args.srcname,
@@ -310,4 +310,4 @@ def run_cli(argv=sys.argv[1:]):
     
 
 if __name__ == '__main__':
-    run_cli()
+    main_cli()
