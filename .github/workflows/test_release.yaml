@@ -23,16 +23,11 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       
-      - name: Install/update setup dependencies
+      - name: Install/update packages
         run: |
           python3 -m pip install -U pip
-          python3 -m pip install -U setuptools
-      
-      - name: Install pypdfium2
-        run: python3 -m pip install -U pypdfium2
-      
-      - name: Install test dependencies
-        run: python3 -m pip install -U pillow pytest
+          python3 -m pip install -U setuptools wheel
+          python3 -m pip install -U pypdfium2 pillow pytest
       
       - name: Check out pypdfium2 repository
         uses: actions/checkout@v3
@@ -40,7 +35,7 @@ jobs:
           repository: ${{ github.repository }}
       
       - name: Run tests
-        run: python3 -m pytest ./tests/ -k "not setup"
+        run: make test
   
   test-release-arm:
     
@@ -64,9 +59,9 @@ jobs:
           githubToken: ${{ github.token }}
           install: |
             dnf -y update
-            dnf -y install git python3-pip python3-pytest python3-pillow
+            dnf -y install git python3-pip python3-wheel python3-pytest python3-pillow
           run: |
             python3 -m pip install pypdfium2
             git clone --depth 1 "https://github.com/pypdfium2-team/pypdfium2.git"
             cd pypdfium2
-            python3 -m pytest ./tests/ -k "not setup"
+            python3 -m pytest ./tests/
