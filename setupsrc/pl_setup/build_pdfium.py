@@ -9,6 +9,7 @@ import os
 import sys
 import shutil
 import argparse
+import urllib.request
 from os.path import join, abspath, dirname
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
@@ -96,6 +97,20 @@ def dl_depottools(do_update):
     return is_update
 
 
+def _dl_unbundler():
+    
+    # Download missing tools for unbundle/replace_gn_files.py
+    
+    tool_url = "https://raw.githubusercontent.com/chromium/chromium/main/tools/generate_shim_headers/generate_shim_headers.py"
+    tool_dir = join(PDFiumDir,"tools","generate_shim_headers")
+    tool_file = join(tool_dir, "generate_shim_headers.py")
+    
+    if not os.path.isdir(tool_dir):
+        os.makedirs(tool_dir)
+    if not os.path.exists(tool_file):
+        urllib.request.urlretrieve(tool_url, tool_file)
+
+
 def dl_pdfium(do_update, revision, GClient):
     
     is_sync = True
@@ -113,6 +128,7 @@ def dl_pdfium(do_update, revision, GClient):
     
     if is_sync:
         run_cmd([GClient, 'sync', '--revision', 'origin/%s' % revision, '--no-history', '--shallow'], cwd=SB_Dir)
+        _dl_unbundler()
     
     return is_sync
 
@@ -240,6 +256,7 @@ def main(
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
         config_dict.update(SyslibsConfig)
+        run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     config_str = _serialise_config(config_dict)
     print("\nBuild configuration:\n%s\n" % config_str)
     
@@ -271,7 +288,7 @@ def parse_args(argv):
     parser.add_argument(
         '--use-syslibs', '-l',
         action = 'store_true',
-        help = "Use system libraries instead of those bundled with PDFium. (Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng and zlib are installed, and that $PKG_CONFIG_PATH is set correctly (e. g. to `/usr/lib/x86_64-linux-gnu/pkgconfig`)",
+        help = "Use system libraries instead of those bundled with PDFium. (Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng, zlib and icuuc are installed, and that $PKG_CONFIG_PATH is set correctly (e. g. to `/usr/lib/x86_64-linux-gnu/pkgconfig`)",
     )
     parser.add_argument(
         '--revision', '-r',
