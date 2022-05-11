@@ -43,9 +43,9 @@ ReleaseNames = {
 }
 
 
-def _set_versions(*versions_list):
+def _set_versions(ver_file, *versions_list):
     
-    with open(VersionFile, 'r') as fh:
+    with open(ver_file, 'r') as fh:
         content = fh.read()
     
     for variable, current_ver, new_ver in versions_list:
@@ -58,7 +58,7 @@ def _set_versions(*versions_list):
         assert content.count(previous) == 1
         content = content.replace(previous, updated)
     
-    with open(VersionFile, 'w') as fh:
+    with open(ver_file, 'w') as fh:
         fh.write(content)
 
 
@@ -68,16 +68,17 @@ def get_latest_version():
     return int( tag.split('/')[-1] )
 
 
-def handle_versions(latest_version):
+def handle_versions(ver_file, latest_version):
     
-    v_minor = VerNamespace['V_MINOR']
-    v_libpdfium = VerNamespace['V_LIBPDFIUM']
+    v_minor = VerNamespace["V_MINOR"]
+    v_libpdfium = VerNamespace["V_LIBPDFIUM"]
     
     if v_libpdfium < latest_version:
         print("New PDFium build")
         _set_versions(
-            ('V_MINOR', v_minor, v_minor+1),
-            ('V_LIBPDFIUM', v_libpdfium, latest_version),
+            ver_file,
+            ("V_MINOR", v_minor, v_minor+1),
+            ("V_LIBPDFIUM", v_libpdfium, latest_version),
         )
     
     else:
@@ -107,7 +108,7 @@ def _get_package(args):
 def download_releases(latest_version, download_files):
     
     base_url = "%s%s/" % (ReleaseURL, latest_version)
-    args = []
+    args_list = []
     
     for dirpath, arcname in download_files.items():
         if not os.path.exists(dirpath):
@@ -115,11 +116,11 @@ def download_releases(latest_version, download_files):
         filename = "%s.%s" % (arcname, ReleaseExtension)
         file_url = base_url + filename
         file_path = join(dirpath, filename)
-        args.append( (dirpath, file_url, file_path) )
+        args_list.append( (dirpath, file_url, file_path) )
     
     archives = {}
-    with ThreadPoolExecutor( len(args) ) as pool:
-        for output in pool.map(_get_package, args):
+    with ThreadPoolExecutor( len(args_list) ) as pool:
+        for output in pool.map(_get_package, args_list):
             if output is not None:
                 dirpath, file_path = output
                 archives[dirpath] = file_path
@@ -131,7 +132,7 @@ def unpack_archives(archives):
     
     for file in archives.values():
         
-        if ReleaseExtension == 'tgz':
+        if ReleaseExtension == "tgz":
             arc_opener = tarfile.open
         else:
             raise ValueError("Unknown archive extension '%s'" % ReleaseExtension)
@@ -191,7 +192,7 @@ def main(platforms):
     download_files = get_download_files(platforms)
     
     latest_version = get_latest_version()
-    handle_versions(latest_version)
+    handle_versions(VersionFile, latest_version)
     clear_data(download_files)
     
     archives = download_releases(latest_version, download_files)

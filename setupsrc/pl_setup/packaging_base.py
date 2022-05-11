@@ -77,10 +77,10 @@ def call_ctypesgen(platform_dir, include_dir):
         file_writer.write(text)
 
 
-def _get_ver_namespace():
+def _get_ver_namespace(ver_file):
     ver_namespace = {}
-    with open(VersionFile, 'r') as fh:
+    with open(ver_file, 'r') as fh:
         exec(fh.read(), ver_namespace)
     return ver_namespace
 
-VerNamespace = _get_ver_namespace()
+VerNamespace = _get_ver_namespace(VersionFile)

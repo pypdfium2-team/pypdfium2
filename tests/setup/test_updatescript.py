@@ -1,8 +1,16 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import shutil
+import tempfile
+from os.path import join
 from pl_setup import update_pdfium as fpdf_up
-from pl_setup.packaging_base import PlatformNames
+from pl_setup.packaging_base import (
+    PlatformNames,
+    VersionFile,
+    VerNamespace,
+    _get_ver_namespace,
+)
 from ..conftest import pl_names
 
 
@@ -20,4 +28,25 @@ def test_releasenames():
         assert prefix == "pdfium"
         assert system in ("linux", "musllinux", "mac", "win")
         assert cpu in ("x64", "x86", "arm64", "arm")
-        
+
+
+def test_setversion():
+    
+    tempdir = tempfile.TemporaryDirectory()
+    tmp_versionfile = join(tempdir.name, "tmp_versionfile.py")
+    shutil.copy(VersionFile, tmp_versionfile)
+    
+    target_version = VerNamespace["V_LIBPDFIUM"] + 10
+    fpdf_up.handle_versions(tmp_versionfile, target_version)
+    new_vernsp = _get_ver_namespace(tmp_versionfile)
+    
+    assert new_vernsp["V_LIBPDFIUM"] == target_version
+    assert new_vernsp["V_MINOR"] == VerNamespace["V_MINOR"] + 1
+    
+    tempdir.cleanup()
+
+
+def test_getversion():
+    latest = fpdf_up.get_latest_version()
+    assert latest > 5000
+    assert latest >= VerNamespace["V_LIBPDFIUM"]
