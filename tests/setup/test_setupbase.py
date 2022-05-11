@@ -6,6 +6,7 @@ from wheel.bdist_wheel import bdist_wheel
 import pytest
 from pl_setup import setup_base
 from pl_setup.packaging_base import PlatformNames, VerNamespace
+from ..conftest import pl_names
 
 
 ExpectedTags = (
@@ -25,15 +26,7 @@ ExpectedTags = (
 
 
 def test_expected_tags():
-    
-    n_platforms = 0
-    for attr in dir(PlatformNames):
-        if attr.startswith('_'):
-            continue
-        n_platforms += 1
-    
-    assert n_platforms == len(ExpectedTags)
-    
+    assert len(pl_names) == len(ExpectedTags)
     for platform, tag in ExpectedTags:
         assert hasattr(PlatformNames, platform)
         assert isinstance(tag, str)
@@ -43,18 +36,15 @@ def test_get_tag():
     for platform, tag in ExpectedTags:
         assert setup_base._get_tag(platform) == tag
 
-
 def test_unknown_tag():
     plat_dir = "win_amd74"
     with pytest.raises(ValueError, match="Unknown platform directory %s" % plat_dir):
         setup_base._get_tag(plat_dir)
 
-
 def test_get_bdist():
     for platform, tag in ExpectedTags:
         bdist_cls = setup_base._get_bdist(platform)
         assert issubclass(bdist_cls, bdist_wheel)
-
 
 def test_setupkws():
     assert "version" in setup_base.SetupKws

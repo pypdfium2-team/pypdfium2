@@ -10,7 +10,7 @@ from pathlib import Path
 from os.path import join, isfile
 from concurrent.futures import ThreadPoolExecutor
 import pytest
-from ..conftest import SourceTree
+from ..conftest import SourceTree, pl_names
 from pl_setup import packaging_base as pkg_base
 
 
@@ -18,20 +18,15 @@ def test_libnames():
     for name in pkg_base.Libnames:
         assert "pdfium" in name
 
-
 def test_platformnames():
-    for member in dir(pkg_base.PlatformNames):
-        if member.startswith('_'):
-            continue
+    for member in pl_names:
         assert member == getattr(pkg_base.PlatformNames, member)
-
 
 def test_version_namespace():
     vars = ("V_MAJOR", "V_MINOR", "V_PATCH", "V_BETA", "V_PYPDFIUM2", "V_LIBPDFIUM")
     for var in vars:
         assert var in pkg_base.VerNamespace
         assert isinstance(pkg_base.VerNamespace[var], (str, int, type(None)))
-
 
 def test_paths():
     assert pkg_base.HomeDir == str( Path.home() )
@@ -54,7 +49,6 @@ def test_run_cmd():
 
 def _get_header(url_prefix, include_dir, filename):
     return urllib.request.urlretrieve(url_prefix+filename, join(include_dir.name, filename))
-
 
 @pytest.mark.skipif(not shutil.which("ctypesgen"), reason="ctypesgen not installed")
 def test_call_ctypesgen():
