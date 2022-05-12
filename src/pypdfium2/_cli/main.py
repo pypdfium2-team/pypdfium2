@@ -27,7 +27,7 @@ def main(argv=sys.argv[1:]):
     parser.add_subcommand(
         "render",
         method = renderer.main,
-        help = "Rasteries pages of a PDF file",
+        help = "Rasterise pages of a PDF file",
     )
     parser.add_subcommand(
         "toc",
