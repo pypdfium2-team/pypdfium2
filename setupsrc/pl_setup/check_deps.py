@@ -25,7 +25,7 @@ SysCommands = (
 
 
 def _pip_install(pkg):
-    run_cmd([sys.executable, '-m', 'pip', 'install', pkg], cwd=None)
+    run_cmd([sys.executable, '-m', 'pip', 'install', '--user', pkg], cwd=None)
 
 
 def install_pydeps():
