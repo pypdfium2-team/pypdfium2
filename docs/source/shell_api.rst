@@ -9,41 +9,41 @@ pypdfium2 can also be used from the command-line.
 
 Main help
 *********
-``pypdfium2 help``
+``pypdfium2 --help``
 
-.. program-output:: python3 -m pypdfium2 help
+.. program-output:: pypdfium2 --help
 
 
 Version
 *******
-``pypdfium2 version``
+``pypdfium2 --version``
 
-.. program-output:: python3 -m pypdfium2 version
+.. program-output:: pypdfium2 --version
 
 
 Renderer
 ********
-``pypdfium2 render``
+``pypdfium2 render --help``
 
-.. program-output:: python3 -m pypdfium2 render
+.. program-output:: pypdfium2 render --help
 
 
 Table of Contents Reader
 ************************
-``pypdfium2 toc``
+``pypdfium2 toc --help``
 
-.. program-output:: python3 -m pypdfium2 toc
+.. program-output:: pypdfium2 toc --help
 
 
 Merger
 ******
-``pypdfium2 merge``
+``pypdfium2 merge --help``
 
-.. program-output:: python3 -m pypdfium2 merge
+.. program-output:: pypdfium2 merge --help
 
 
 Page Tiler
 **********
-``pypdfium2 tile``
+``pypdfium2 tile --help``
 
-.. program-output:: python3 -m pypdfium2 tile
+.. program-output:: pypdfium2 tile --help

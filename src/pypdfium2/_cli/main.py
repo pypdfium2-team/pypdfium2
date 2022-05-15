@@ -1,48 +1,61 @@
+# PYTHON_ARGCOMPLETE_OK
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import sys
+import argparse
 from pypdfium2._version import (
     V_PYPDFIUM2,
     V_LIBPDFIUM,
 )
-from pypdfium2._cli._parser import CliParser
 from pypdfium2._cli import (
-    renderer,
+    render,
     toc,
-    merger,
-    tiler,
+    merge,
+    tile,
+)
+
+try:
+    import argcomplete
+except ImportError:
+    have_argcomplete = False
+else:
+    have_argcomplete = True
+
+
+Subcommands = dict(
+    render = render,
+    toc = toc,
+    merge = merge,
+    tile = tile,
 )
 
 
-def main(argv=sys.argv[1:]):
+def parse_args(argv=sys.argv[1:]):
     
-    parser = CliParser(
-        program = "pypdfium2",
-        version = "%s (libpdfium %s)" % (V_PYPDFIUM2, V_LIBPDFIUM),
+    parser = argparse.ArgumentParser(
+        prog = "pypdfium2",
         description = "Command line interface to the pypdfium2 Python library",
-        argv = argv,
+    )
+    parser.add_argument(
+        "--version", "-v",
+        action = "version",
+        version = "pypdfium2 %s (libpdfium %s)" % (V_PYPDFIUM2, V_LIBPDFIUM),
     )
     
-    parser.add_subcommand(
-        "render",
-        method = renderer.main,
-        help = "Rasterise pages of a PDF file",
+    subparsers = parser.add_subparsers(
+        dest = "subcommand",
+        required = True,
     )
-    parser.add_subcommand(
-        "toc",
-        method = toc.main,
-        help = "Show the table of contents for a PDF document",
-    )
-    parser.add_subcommand(
-        "merge",
-        method = merger.main,
-        help = "Concatenate PDF files",
-    )
-    parser.add_subcommand(
-        "tile",
-        method = tiler.main,
-        help = "Perform page tiling (N-up compositing)",
-    )
+    for cmd in Subcommands.values():
+        cmd.attach_parser(subparsers)
     
-    parser.run()
+    if have_argcomplete:
+        argcomplete.autocomplete(parser)
+    
+    return parser.parse_args(argv)
+
+
+def main():
+    args = parse_args()
+    Subcommands[args.subcommand].main(args)

@@ -5,7 +5,8 @@
 import pytest
 import os.path
 import pypdfium2 as pdfium
-from pypdfium2._cli import renderer
+from pypdfium2._cli import main
+from pypdfium2._cli import render
 
 
 def test_rotation_type():
@@ -16,14 +17,14 @@ def test_rotation_type():
         ("270", 270),
     ]
     for input, expectation in test_cases:
-        assert renderer.rotation_type(input) == expectation
+        assert render.rotation_type(input) == expectation
 
 
 def test_rotation_type_fail_oob():
     with pytest.raises(ValueError, match="Invalid rotation value"):
-        renderer.rotation_type("101")
+        render.rotation_type("101")
     with pytest.raises(ValueError, match="invalid literal for int()"):
-        renderer.rotation_type("string")
+        render.rotation_type("string")
 
 
 def test_colour_type():
@@ -32,7 +33,7 @@ def test_colour_type():
         ("none", None),
     ]
     for input, expectation in test_cases:
-        assert renderer.colour_type(input) == expectation
+        assert render.colour_type(input) == expectation
 
 
 def test_pagetext_type():
@@ -44,12 +45,13 @@ def test_pagetext_type():
         ("1", [0]),
     ]
     for input, expectation in test_cases:
-        assert renderer.pagetext_type(input) == expectation
+        assert render.pagetext_type(input) == expectation
 
 
 def test_parse_args():
     
     argv = [
+        'render',
         'path/to/document.pdf',
         '-o', 'output_dir/',
         '--pages', '1,4,5-7,6-4',
@@ -60,7 +62,7 @@ def test_parse_args():
         '--processes', '4',
     ]
     
-    args = renderer.parse_args(argv, prog="", desc="")
+    args = main.parse_args(argv)
     
     assert args.inputs == ['path/to/document.pdf']
     assert args.output == os.path.abspath('output_dir/')
