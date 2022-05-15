@@ -2,13 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from pypdfium2 import _namespace as pdfium
-from pypdfium2._cli._parser import ArgParser
 
 
-def parse_args(argv, prog, desc):
-    parser = ArgParser(
-        prog = prog,
-        description = desc,
+def attach_parser(subparsers):
+    parser = subparsers.add_parser(
+        'toc',
+        help = "Show a PDF document's table of contents",
     )
     parser.add_argument(
         'input',
@@ -20,7 +19,7 @@ def parse_args(argv, prog, desc):
         default = 15,
         help = "Maximum recursion depth to consider when parsing the table of contents",
     )
-    return parser.parse_args(argv)
+
 
 def print_toc(toc):
     for item in toc:
@@ -35,8 +34,7 @@ def print_toc(toc):
         )
 
 
-def main(argv, prog, desc):
-    args = parse_args(argv, prog, desc)
+def main(args):
     doc = pdfium.PdfDocument(args.input)
     print_toc( doc.get_toc() )
     doc.close()

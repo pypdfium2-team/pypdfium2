@@ -4,7 +4,6 @@
 import os
 import ast
 from pypdfium2 import _namespace as pdfium
-from pypdfium2._cli._parser import ArgParser
 from os.path import (
     join,
     abspath,
@@ -69,13 +68,11 @@ def pagetext_type(value):
     return page_indices
 
 
-def parse_args(argv, prog, desc):
-    
-    parser = ArgParser(
-        prog = prog,
-        description = desc,
+def attach_parser(subparsers):
+    parser = subparsers.add_parser(
+        "render",
+        help = "Rasterise pages of a PDF file",
     )
-    
     parser.add_argument(
         'inputs',
         nargs = '+',
@@ -138,14 +135,10 @@ def parse_args(argv, prog, desc):
         type = int,
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)"
     )
-    
-    return parser.parse_args(argv)
 
 
-def main(argv, prog, desc):
-    
-    args = parse_args(argv, prog, desc)
-    
+def main(args):
+        
     for input_path in args.inputs:
         
         prefix = splitext(basename(input_path))[0] + '_'

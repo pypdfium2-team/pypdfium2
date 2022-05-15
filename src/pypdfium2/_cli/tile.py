@@ -5,7 +5,6 @@ import ctypes
 import os.path
 from enum import Enum
 from pypdfium2 import _namespace as pdfium
-from pypdfium2._cli._parser import ArgParser
 
 
 class Units (Enum):
@@ -28,11 +27,10 @@ def units_to_pt(value, unit: Units):
         raise ValueError("Invalid unit type %s" % unit)
 
 
-def parse_args(argv, prog, desc):
-    
-    parser = ArgParser(
-        prog = prog,
-        description = desc,
+def attach_parser(subparsers):
+    parser = subparsers.add_parser(
+        'tile',
+        help = "Perform page tiling (N-up compositing)",
     )
     parser.add_argument(
         'input',
@@ -40,6 +38,7 @@ def parse_args(argv, prog, desc):
     )
     parser.add_argument(
         '--output', '-o',
+        required = True,
         type = os.path.abspath,
         help = "Target path for the new document",
     )
@@ -72,15 +71,10 @@ def parse_args(argv, prog, desc):
         default = Units.MM,
         type = lambda string: Units[string.upper()],
         help = "Unit for target width and height (pt, mm, cm, in)",
-    )
-    
-    return parser.parse_args(argv)
-    
+    )    
 
 
-def main(argv, prog, desc):
-    
-    args = parse_args(argv, prog, desc)
+def main(args):
     
     width = units_to_pt(args.width, args.unit)
     height = units_to_pt(args.height, args.unit)
