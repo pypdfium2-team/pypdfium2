@@ -15,7 +15,6 @@
 * Add test case for rendering a PDF with interactive forms.
 * Move development section of the Readme into a dedicated file and add some more information.
 * Add a ctypes primer explaining how to interoperate with the PDFium C API.
-* Add capabilities to render a certain area of a page (issue #38).
 * Take a look at the functions for progressive rendering (`FPDF_RenderPageBitmap_Start()` & `IFSDK_PAUSE`)
 * Set the version appropriately when doing a source build (i. e. append current PDFium commit hash to version string).
 * sourcebuild/win: fix dynamic values in resources.rc
