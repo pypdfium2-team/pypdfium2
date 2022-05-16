@@ -40,7 +40,7 @@ def colour_type(string):
 
 def crop_type(string):
     crop = ast.literal_eval(string)
-    if not isinstance(crop, (tuple, list)) and len(crop) != 4 and not all(isinstance(c, (int, float)) for c in crop):
+    if not isinstance(crop, (tuple, list)) or len(crop) != 4 or not all(isinstance(c, (int, float)) for c in crop):
         raise ValueError("Crop must be a list of four numbers.")
     return crop
 
