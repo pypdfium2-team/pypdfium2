@@ -102,7 +102,7 @@ def render_page_base(
         optimise_mode (OptimiseMode):
             Optimise rendering for LCD displays or for printing.
         
-        crop (typing.Sequence[float]):
+        crop (typing.Sequence[int|float]):
             Amount in PDF canvas units to cut off from page borders (left, bottom, right, top).
             Crop is applied after rotation.
     
