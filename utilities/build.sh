@@ -6,5 +6,5 @@ set -v
 
 python3 ./setupsrc/pl_setup/build_pdfium.py
 export PYP_TARGET_PLATFORM="sourcebuild"
-python3 -m build -n -x --wheel
 bash ./utilities/install.sh
+#python3 -m build -n -x --wheel

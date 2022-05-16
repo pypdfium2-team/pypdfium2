@@ -10,6 +10,11 @@
 - Significantly improved maintainability of the command-line interface by using argparse subparsers instead of a custom implementation.
 - Integrated optional support for shell auto-completion using `argcomplete`.
 - Added capabilities to determine bookmark state (open/closed) to the TOC parser. Thanks to PDFium Team for reviewing/merging the CL.
+- Improved tests for PDF boxes, setup, and table of contents code.
+- Integrated the release notes script into setup code.
+- Added means to build PDFium with system-provided ICU.
+- Fixed `make build`.
+- Blocked `pip==22.1` in CI due to a regression related to `--no-build-isolation`.
 
 
 ## 1.8.0 (2022-05-09)
