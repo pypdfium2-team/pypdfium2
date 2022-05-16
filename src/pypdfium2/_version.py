@@ -3,7 +3,7 @@
 
 V_MAJOR = 1
 V_MINOR = 9
-V_PATCH = 0
+V_PATCH = 1
 V_BETA = None
 
 #: pypdfium2 version string

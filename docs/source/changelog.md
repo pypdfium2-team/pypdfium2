@@ -4,6 +4,11 @@
 # Changelog
 
 
+## 1.9.1 (2022-05-16)
+
+- Bugfix release to address incompatibility of the CLI with Python 3.6, caused by recent changes.
+
+
 ## 1.9.0 (2022-05-16)
 
 - Updated PDFium from `5052` to `5065`.
