@@ -134,9 +134,9 @@ def render_page_base(
     if rotation in (90, 270):
         src_width, src_height = src_height, src_width
     
-    crop = [c*scale for c in crop]
-    width  = src_width  - math.ceil(crop[0] + crop[2])
-    height = src_height - math.ceil(crop[1] + crop[3])
+    crop = [math.ceil(c*scale) for c in crop]
+    width  = src_width  - crop[0] - crop[2]
+    height = src_height - crop[1] - crop[3]
     if any(d < 1 for d in (width, height)):
         raise ValueError("Crop exceeds page dimensions (in px): width %s, height %s, crop %s" % (src_width, src_height, crop))
     
@@ -159,7 +159,7 @@ def render_page_base(
     else:
         raise ValueError("Invalid optimise_mode %s" % optimise_mode)
     
-    render_args = (bitmap, page, -math.ceil(crop[0]), -math.ceil(crop[3]), src_width, src_height, translate_rotation(rotation), render_flags)
+    render_args = (bitmap, page, -crop[0], -crop[3], src_width, src_height, translate_rotation(rotation), render_flags)
     pdfium.FPDF_RenderPageBitmap(*render_args)
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
