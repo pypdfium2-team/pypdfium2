@@ -4,9 +4,9 @@
 # Changelog
 
 
-## 1.9.0 (sched 2022-05-16)
+## 1.9.0 (2022-05-16)
 
-- Updated PDFium from `5052` to `XXXX`.
+- Updated PDFium from `5052` to `5065`.
 - Significantly improved maintainability of the command-line interface by using argparse subparsers instead of a custom implementation.
 - Integrated optional support for shell auto-completion using `argcomplete`.
 - Added capabilities to determine bookmark state (open/closed) to the TOC parser. Thanks to PDFium Team for reviewing/merging the CL.
