@@ -104,6 +104,7 @@ def render_page_base(
         
         crop (typing.Sequence[float]):
             Amount in canvas units to cut off from page borders (left, bottom, right, top).
+            Crop is applied after rotation.
     
     Returns:
     
@@ -136,6 +137,8 @@ def render_page_base(
     crop = [c*scale for c in crop]
     width  = math.ceil(src_width  - (crop[0] + crop[2]))
     height = math.ceil(src_height - (crop[1] + crop[3]))
+    if any(d < 1 for d in (width, height)):
+        raise ValueError("Crop exceeds page dimensions (in px): width %s, height %s, crop %s" % (src_width, src_height, crop))
     
     bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, None, width*n_colours)
     if fpdf_colour is not None:
