@@ -135,8 +135,8 @@ def render_page_base(
         src_width, src_height = src_height, src_width
     
     crop = [c*scale for c in crop]
-    width  = math.ceil(src_width  - (crop[0] + crop[2]))
-    height = math.ceil(src_height - (crop[1] + crop[3]))
+    width  = src_width  - math.ceil(crop[0] + crop[2])
+    height = src_height - math.ceil(crop[1] + crop[3])
     if any(d < 1 for d in (width, height)):
         raise ValueError("Crop exceeds page dimensions (in px): width %s, height %s, crop %s" % (src_width, src_height, crop))
     
