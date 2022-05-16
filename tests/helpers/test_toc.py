@@ -8,11 +8,12 @@ from pypdfium2._cli.toc import print_toc
 from ..conftest import TestFiles
 
 
-def _compare_bookmark(bookmark, title, page_index, view_mode, view_pos):
+def _compare_bookmark(bookmark, title, page_index, view_mode, view_pos, is_closed):
     assert bookmark.title == title
     assert bookmark.page_index == page_index
     assert bookmark.view_mode == view_mode
-    approx(bookmark.view_pos) == view_pos
+    assert approx(bookmark.view_pos, rel=0.01) == view_pos
+    assert bookmark.is_closed == is_closed
 
 
 def test_gettoc():
@@ -27,6 +28,7 @@ def test_gettoc():
         page_index = 0,
         view_mode = pdfium.ViewMode.XYZ,
         view_pos = (89, 758, 0),
+        is_closed = True,
     )
     
     # check common values
@@ -42,6 +44,7 @@ def test_gettoc():
         page_index = 1,
         view_mode = pdfium.ViewMode.XYZ,
         view_pos = (89, 657, 0),
+        is_closed = False
     )
     
     doc.close()
