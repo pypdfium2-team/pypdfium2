@@ -25,6 +25,7 @@ def print_toc(toc):
     for item in toc:
         print(
             '    ' * item.level +
+            '[{}] '.format('-' if item.is_closed else '+') +
             '{} -> {}  # {} {}'.format(
                 item.title,
                 item.page_index + 1,

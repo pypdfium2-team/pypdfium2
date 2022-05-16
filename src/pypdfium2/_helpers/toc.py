@@ -18,6 +18,8 @@ class OutlineItem:
             The number of parent items.
         title (str):
             String of the bookmark.
+        is_closed (bool):
+            Whether child items are hidden by default.
         page_index (int):
             Zero-based index of the page the bookmark is pointing to.
         view_mode (ViewMode):
@@ -30,12 +32,14 @@ class OutlineItem:
             self,
             level,
             title,
+            is_closed,
             page_index,
             view_mode,
             view_pos,
         ):
         self.level = level
         self.title = title
+        self.is_closed = is_closed
         self.page_index = page_index
         self.view_mode = view_mode
         self.view_pos = view_pos
@@ -54,6 +58,9 @@ def _get_toc_entry(pdf, bookmark, level):
     dest = pdfium.FPDFBookmark_GetDest(pdf, bookmark)
     page_index = pdfium.FPDFDest_GetDestPageIndex(pdf, dest)
     
+    # state
+    is_closed = pdfium.FPDFBookmark_GetCount(bookmark) < 0
+    
     # viewport
     n_params = ctypes.c_ulong()
     view_pos = (pdfium.FS_FLOAT * 4)()
@@ -64,6 +71,7 @@ def _get_toc_entry(pdf, bookmark, level):
     return OutlineItem(
         level = level,
         title = title,
+        is_closed = is_closed,
         page_index = page_index,
         view_mode = view_mode,
         view_pos = view_pos,
