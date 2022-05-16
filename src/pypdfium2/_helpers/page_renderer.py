@@ -64,6 +64,7 @@ def render_page_base(
         annotations = True,
         greyscale = False,
         optimise_mode = OptimiseMode.none,
+        crop = (0, 0, 0, 0),
     ):
     """
     Render a single PDF page to ctypes data using PDFium.
@@ -100,6 +101,9 @@ def render_page_base(
         
         optimise_mode (OptimiseMode):
             Optimise rendering for LCD displays or for printing.
+        
+        crop (typing.Sequence[float]):
+            Amount in canvas units to cut off from page borders (left, bottom, right, top).
     
     Returns:
     
@@ -124,10 +128,14 @@ def render_page_base(
     form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
     page = open_page(pdf, page_index)
     
-    width = math.ceil(pdfium.FPDF_GetPageWidthF(page) * scale)
-    height = math.ceil(pdfium.FPDF_GetPageHeightF(page) * scale)
+    src_width  = math.ceil(pdfium.FPDF_GetPageWidthF(page)  * scale)
+    src_height = math.ceil(pdfium.FPDF_GetPageHeightF(page) * scale)
     if rotation in (90, 270):
-        width, height = height, width
+        src_width, src_height = src_height, src_width
+    
+    crop = [c*scale for c in crop]
+    width  = math.ceil(src_width  - (crop[0] + crop[2]))
+    height = math.ceil(src_height - (crop[1] + crop[3]))
     
     bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, None, width*n_colours)
     if fpdf_colour is not None:
@@ -148,7 +156,7 @@ def render_page_base(
     else:
         raise ValueError("Invalid optimise_mode %s" % optimise_mode)
     
-    render_args = (bitmap, page, 0, 0, width, height, translate_rotation(rotation), render_flags)
+    render_args = (bitmap, page, -math.ceil(crop[0]), -math.ceil(crop[3]), src_width, src_height, translate_rotation(rotation), render_flags)
     pdfium.FPDF_RenderPageBitmap(*render_args)
     pdfium.FPDF_FFLDraw(form_fill, *render_args)
     
