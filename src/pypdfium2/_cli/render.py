@@ -38,6 +38,13 @@ def colour_type(string):
         return colour
 
 
+def crop_type(string):
+    crop = ast.literal_eval(string)
+    if not isinstance(crop, (tuple, list)) and len(crop) != 4 and not all(isinstance(c, (int, float)) for c in crop):
+        raise ValueError("Crop must be a list of four numbers.")
+    return crop
+
+
 def pagetext_type(value):
     
     if not value:
@@ -130,6 +137,12 @@ def attach_parser(subparsers):
         help = "Whether to render in greyscale mode (no colours)",
     )
     parser.add_argument(
+        '--crop',
+        type = crop_type,
+        default = (0, 0, 0, 0),
+        help = "Amount to crop from (left, bottom, right, top)"
+    )
+    parser.add_argument(
         '--processes',
         default = os.cpu_count(),
         type = int,
@@ -152,6 +165,7 @@ def main(args):
             annotations = not args.no_annotations,
             greyscale = args.greyscale,
             optimise_mode = args.optimise_mode,
+            crop = args.crop,
             n_processes = args.processes,
         )
         
