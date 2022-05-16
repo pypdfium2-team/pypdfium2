@@ -43,10 +43,7 @@ def parse_args(argv=sys.argv[1:]):
         version = "pypdfium2 %s (libpdfium %s)" % (V_PYPDFIUM2, V_LIBPDFIUM),
     )
     
-    subparsers = parser.add_subparsers(
-        dest = "subcommand",
-        required = True,
-    )
+    subparsers = parser.add_subparsers(dest="subcommand")
     for cmd in Subcommands.values():
         cmd.attach_parser(subparsers)
     
@@ -58,4 +55,7 @@ def parse_args(argv=sys.argv[1:]):
 
 def main():
     args = parse_args()
+    if not args.subcommand:
+        print("One of the following subcommands must be given: %s" % [sc for sc in Subcommands.keys()])
+        return
     Subcommands[args.subcommand].main(args)
