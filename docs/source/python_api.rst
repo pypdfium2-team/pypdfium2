@@ -19,9 +19,10 @@ Object oriented API
 Functional API
 ==============
 
-Opener/Closer
-*************
+Opener
+******
 .. automodule:: pypdfium2._helpers.opener
+    :exclude-members: open_pdf_auto, close_pdf
 
 Saver
 *****

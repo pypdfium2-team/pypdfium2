@@ -10,38 +10,6 @@ from pypdfium2._helpers.nativeopener import (
 from pypdfium2._helpers.error_handler import handle_pdfium_error
 
 
-class PdfContext:
-    """
-    Context manager to open and automatically close again a PDFium document.
-    
-    Parameters:
-        input_obj: The file or data to load using :func:`.open_pdf_auto`.
-        password: A password to unlock the PDF, if encrypted.
-    
-    Returns:
-        ``FPDF_DOCUMENT`` handle to the raw PDFium object.
-    """
-    
-    def __init__(
-            self,
-            input_obj,
-            password = None,
-        ):
-        self.input_obj = input_obj
-        self.password = password
-        self.ld_data = None
-    
-    def __enter__(self):
-        self.pdf, self.ld_data = open_pdf_auto(
-            self.input_obj,
-            password = self.password,
-        )
-        return self.pdf
-    
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        close_pdf(self.pdf, self.ld_data)
-
-
 def open_pdf_auto(input_obj, password=None):
     """    
     Open a document from a file path or in-memory data.
@@ -94,9 +62,41 @@ def close_pdf(pdf, loader_data=None):
         loader_data.close()
 
 
+class PdfContext:
+    """
+    Context manager to open and automatically close again a PDFium document.
+    
+    Parameters:
+        input_obj: The file or data to load.
+        password: A password to unlock the PDF, if encrypted.
+    
+    Returns:
+        ``FPDF_DOCUMENT`` handle to the raw PDFium object.
+    """
+    
+    def __init__(
+            self,
+            input_obj,
+            password = None,
+        ):
+        self.input_obj = input_obj
+        self.password = password
+        self.ld_data = None
+    
+    def __enter__(self):
+        self.pdf, self.ld_data = open_pdf_auto(
+            self.input_obj,
+            password = self.password,
+        )
+        return self.pdf
+    
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        close_pdf(self.pdf, self.ld_data)
+
+
 def open_page(pdf, page_index):
     """
-    Get a handle to the page at a certain index.
+    Get a handle to the page at a certain index. When you have finished working with the page, call ``FPDF_ClosePage()``.
     
     Parameters:
         pdf (``FPDF_DOCUMENT``):

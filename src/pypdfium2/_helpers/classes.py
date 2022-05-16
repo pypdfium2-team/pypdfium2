@@ -16,7 +16,7 @@ class PdfDocument:
     Document class that maps the functional support model to an object-oriented API, unifying the separate helpers.
     
     Parameters:
-        input_obj: The file or data to load using :func:`.open_pdf_auto`.
+        input_obj: The file or data to load.
         password: A password to unlock the PDF, if encrypted.
     """
     

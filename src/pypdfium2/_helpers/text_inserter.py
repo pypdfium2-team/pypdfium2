@@ -125,3 +125,4 @@ def insert_text(
         start_point += (pos.x_advance / font_info.hb_scale) * font_size
     
     pdfium.FPDFPage_GenerateContent(page)
+    pdfium.FPDF_ClosePage(page)
