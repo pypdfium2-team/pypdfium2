@@ -12,7 +12,7 @@ from pypdfium2._helpers.utilities import (
 )
 
 try:
-    from PIL import Image
+    import PIL.Image
 except ImportError:
     have_pil = False
 else:
@@ -198,7 +198,7 @@ def render_page_topil(*args, **kws):
         raise RuntimeError("Pillow library needs to be installed for render_page_topil().")
     
     data_holder, cl_format, size = render_page_base(*args, **kws)
-    pil_image = Image.frombytes(_clformat_pil[cl_format], size, data_holder.get_data(), "raw", cl_format, 0, 1)
+    pil_image = PIL.Image.frombytes(_clformat_pil[cl_format], size, data_holder.get_data(), "raw", cl_format, 0, 1)
     data_holder.close()
     
     return pil_image
