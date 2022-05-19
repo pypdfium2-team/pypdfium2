@@ -154,8 +154,6 @@ def main(args):
         
     for input_path in args.inputs:
         
-        prefix = splitext(basename(input_path))[0] + '_'
-        
         renderer = pdfium.render_pdf_topil(
             input_path,
             page_indices = args.pages,
@@ -169,6 +167,7 @@ def main(args):
             n_processes = args.processes,
         )
         
+        prefix = splitext(basename(input_path))[0] + '_'
         for image, suffix in renderer:
             output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
             image.save(output_path)
