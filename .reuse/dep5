@@ -39,9 +39,18 @@ Copyright: 2022 PDFium Developers
            2022 geisserml <geisserml@gmail.com>
 License: BSD-3-Clause OR Apache-2.0
 
+Files: tests/resources/images.pdf
+Copyright: 2022 geisserml <geisserml@gmail.com>
+           2022 Johannes Schauer Marin Rodrigues <josch@mister-muffin.de>
+License: LicenseRef-FairUse
+Comments:
+    Contains `mono.png` from the img2pdf test suite.
+
 Files: tests/resources/render.pdf
        tests/resources/multipage.pdf
        tests/resources/encrypted.pdf
+       tests/resources/text.pdf
+       tests/resources/empty.pdf
 Copyright: 2022 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
 

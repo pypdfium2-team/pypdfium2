@@ -24,6 +24,9 @@ class TestFiles:
     bookmarks          = join(ResourceDir,'bookmarks.pdf')
     bookmarks_circular = join(ResourceDir,'bookmarks_circular.pdf')
     boxes              = join(ResourceDir,'boxes.pdf')
+    text               = join(ResourceDir,'text.pdf')
+    empty              = join(ResourceDir,'empty.pdf')
+    images             = join(ResourceDir,'images.pdf')
 
 
 def iterate_testfiles(skip_encrypted=True):

@@ -11,12 +11,12 @@ Version
 .. automodule:: pypdfium2._version
 
 
-Object oriented API
-===================
+Unified API
+===========
 .. automodule:: pypdfium2._helpers.classes
 
 
-Functional API
+Individual API
 ==============
 
 Opener
@@ -39,6 +39,16 @@ Document Renderer
 Text Inserter
 *************
 .. automodule:: pypdfium2._helpers.text_inserter
+
+Text Extractor
+**************
+.. versionadded:: 1.10.0
+.. automodule:: pypdfium2._helpers.text_extractor
+
+Page Objects
+************
+.. versionadded:: 1.10.0
+.. automodule:: pypdfium2._helpers.pageobjects
 
 TOC Parser
 **********

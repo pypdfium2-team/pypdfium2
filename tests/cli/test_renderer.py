@@ -7,6 +7,7 @@ import os.path
 import pypdfium2 as pdfium
 from pypdfium2._cli import main
 from pypdfium2._cli import render
+from pypdfium2._cli._parsers import pagetext_type
 
 
 def test_rotation_type():
@@ -45,7 +46,7 @@ def test_pagetext_type():
         ("1", [0]),
     ]
     for input, expectation in test_cases:
-        assert render.pagetext_type(input) == expectation
+        assert pagetext_type(input) == expectation
 
 
 def test_parse_args():
