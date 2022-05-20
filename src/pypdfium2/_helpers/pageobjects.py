@@ -32,9 +32,9 @@ def filter_pageobjs(page_objects, obj_type):
 
 def locate_pageobj(page_object):
     """
-    Iterate over a sequence of page objects and locate them on the page.
+    Get the bounding box of a page object.
     
-    Yields:
+    Returns:
         Coordinates for (left, bottom, right, top).
     """
     left, bottom, right, top = [ctypes.c_float() for _i in range(4)]
