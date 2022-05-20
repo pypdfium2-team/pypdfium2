@@ -3,13 +3,14 @@
 
 import os
 import ast
-from pypdfium2 import _namespace as pdfium
 from os.path import (
     join,
     abspath,
     basename,
     splitext,
 )
+from pypdfium2 import _namespace as pdfium
+from pypdfium2._cli._parsers import pagetext_type
 
 
 def rotation_type(string):
@@ -20,21 +21,16 @@ def rotation_type(string):
 
 
 def colour_type(string):
-    
     if string.lower() == 'none':
         return
-    
     else:
-        
         colour = ast.literal_eval(string)
-        
         if not isinstance(colour, (tuple, list)):
             raise ValueError("Invalid colour type %s. Must be list or tuple." % type(colour))
         if not len(colour) in (3, 4):
             raise ValueError("Invalid number of colour values. Must be 3 or 4.")
         if not all(isinstance(val, int) and 0 <= val <= 255 for val in colour):
             raise ValueError("Colour values must be integers ranging from 0 to 255.")
-        
         return colour
 
 
@@ -43,36 +39,6 @@ def crop_type(string):
     if not isinstance(crop, (tuple, list)) or len(crop) != 4 or not all(isinstance(c, (int, float)) for c in crop):
         raise ValueError("Crop must be a list of four numbers.")
     return crop
-
-
-def pagetext_type(value):
-    
-    if not value:
-        return
-    
-    page_indices = []
-    splitted = value.split(',')
-    
-    for page_or_range in splitted:
-        
-        if '-' in page_or_range:
-            
-            start, end = page_or_range.split('-')
-            start = int(start) - 1
-            end = int(end) - 1
-            
-            if start < end:
-                pages = [i for i in range(start, end+1)]
-            else:
-                pages = [i for i in range(start, end-1, -1)]
-            
-            page_indices.extend(pages)
-        
-        else:
-            
-            page_indices.append(int(page_or_range) - 1)
-    
-    return page_indices
 
 
 def attach_parser(subparsers):

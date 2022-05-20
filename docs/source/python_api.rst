@@ -1,26 +1,18 @@
 .. SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 .. SPDX-License-Identifier: CC-BY-4.0
 
-==========
 Python API
 ==========
 
 
 Version
-=======
+*******
 .. automodule:: pypdfium2._version
 
 
-Object oriented API
-===================
-.. automodule:: pypdfium2._helpers.classes
-
-
-Functional API
-==============
-
 Opener
 ******
+.. automodule:: pypdfium2._helpers.classes
 .. automodule:: pypdfium2._helpers.opener
     :exclude-members: open_pdf_auto, close_pdf
 
@@ -40,6 +32,16 @@ Text Inserter
 *************
 .. automodule:: pypdfium2._helpers.text_inserter
 
+Text Extractor
+**************
+.. versionadded:: 1.10.0
+.. automodule:: pypdfium2._helpers.text_extractor
+
+Page Objects
+************
+.. versionadded:: 1.10.0
+.. automodule:: pypdfium2._helpers.pageobjects
+
 TOC Parser
 **********
 .. automodule:: pypdfium2._helpers.toc
@@ -58,6 +60,6 @@ Error Handler
 
 
 Constants
-=========
+*********
 
 .. automodule:: pypdfium2._helpers.constants

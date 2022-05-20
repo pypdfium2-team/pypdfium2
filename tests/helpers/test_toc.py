@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import logging
-from pytest import approx
+import pytest
 import pypdfium2 as pdfium
 from pypdfium2._cli.toc import print_toc
 from ..conftest import TestFiles
@@ -12,7 +12,7 @@ def _compare_bookmark(bookmark, title, page_index, view_mode, view_pos, is_close
     assert bookmark.title == title
     assert bookmark.page_index == page_index
     assert bookmark.view_mode == view_mode
-    assert approx(bookmark.view_pos, rel=0.01) == view_pos
+    assert pytest.approx(bookmark.view_pos, abs=1) == view_pos
     assert bookmark.is_closed == is_closed
 
 

@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause 
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from pypdfium2._helpers import (
     opener,
@@ -8,12 +8,14 @@ from pypdfium2._helpers import (
     pdf_renderer,
     page_renderer,
     text_inserter,
+    text_extractor,
 )
+from pypdfium2 import _pypdfium as pdfium
 
 
 class PdfDocument:
     """
-    Document class that maps the functional support model to an object-oriented API, unifying the separate helpers.
+    Document helper class.
     
     Parameters:
         input_obj: The file or data to load.
@@ -32,6 +34,10 @@ class PdfDocument:
             password = self._password,
         )
     
+    def __len__(self):
+        """ Get the number of pages the PDF has. """
+        return pdfium.FPDF_GetPageCount(self._pdf)
+    
     @property
     def raw(self):
         """ Get the raw PDFium ``FPDF_DOCUMENT`` handle. """
@@ -44,6 +50,14 @@ class PdfDocument:
     def save(self, *args, **kws):
         """ Save the PDF into an output byte buffer (see :func:`.save_pdf`). """
         return saver.save_pdf(self._pdf, *args, **kws)
+    
+    def get_page(self, index):
+        """ Get the page at *index* (``FPDF_PAGE``). """
+        return opener.open_page(self._pdf, index)
+    
+    def get_textpage(self, index):
+        """ Get the text page at *index* (:class:`.PdfTextPage`). """
+        return text_extractor.PdfTextPage(self.get_page(index), close_input=True)
     
     def get_toc(self, **kws):
         """ Incrementally read the document's table of contents (see :func:`.get_toc`). """

@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import pytest
 import pypdfium2 as pdfium
-from pytest import approx
 from ..conftest import TestFiles
 
 
@@ -23,7 +23,7 @@ def test_boxes():
         ]
         
         for page, box_func, exp_box in test_cases:
-            assert approx( box_func(page) ) == exp_box
+            assert pytest.approx( box_func(page) ) == exp_box
         
         for page in (page_a, page_b):
             pdfium.FPDF_ClosePage(page)

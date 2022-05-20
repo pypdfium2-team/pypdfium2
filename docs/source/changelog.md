@@ -4,6 +4,14 @@
 # Changelog
 
 
+## 1.10.0 (sched 2022-??-??)
+
+- Updated PDFium from `5065` to `????`.
+- Added cropping capabilities to the rendering engine.
+- Added a support model for text extraction. Thanks to Mike Kroutikov for the `pdf_text_page` example in `pdfbrain`.
+- Added a support model for locating page objects. Thanks to the `doctr` project for the idea.
+
+
 ## 1.9.1 (2022-05-16)
 
 - Bugfix release to address incompatibility of the CLI with Python 3.6, caused by recent changes.

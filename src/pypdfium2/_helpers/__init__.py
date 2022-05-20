@@ -15,3 +15,5 @@ from pypdfium2._helpers.saver import *
 from pypdfium2._helpers.boxes import *
 from pypdfium2._helpers.classes import *
 from pypdfium2._helpers.text_inserter import *
+from pypdfium2._helpers.text_extractor import *
+from pypdfium2._helpers.pageobjects import *

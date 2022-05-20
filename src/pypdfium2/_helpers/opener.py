@@ -96,7 +96,7 @@ class PdfContext:
 
 def open_page(pdf, page_index):
     """
-    Get a handle to the page at a certain index. When you have finished working with the page, call ``FPDF_ClosePage()``.
+    Get a handle to the page at a certain index. When you have finished working with the page, call :func:`.close_page`.
     
     Parameters:
         pdf (``FPDF_DOCUMENT``):
@@ -113,3 +113,11 @@ def open_page(pdf, page_index):
         raise IndexError("Page index %s is out of bounds for document with %s pages." % (page_index, page_count))
     
     return pdfium.FPDF_LoadPage(pdf, page_index)
+
+
+def close_page(page):
+    """
+    Close a PDFium page object (``FPDF_PAGE``) to release allocated memory.
+    This is a wrapper around ``FPDF_ClosePage()``.
+    """
+    return pdfium.FPDF_ClosePage(page)

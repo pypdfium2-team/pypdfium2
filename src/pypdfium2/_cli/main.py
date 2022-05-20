@@ -13,6 +13,8 @@ from pypdfium2._cli import (
     toc,
     merge,
     tile,
+    extract_text,
+    find_pageobjects,
 )
 
 try:
@@ -23,12 +25,14 @@ else:
     have_argcomplete = True
 
 
-Subcommands = dict(
-    render = render,
-    toc = toc,
-    merge = merge,
-    tile = tile,
-)
+Subcommands = {
+    "render": render,
+    "toc": toc,
+    "merge": merge,
+    "tile": tile,
+    "extract-text": extract_text,
+    "find-pageobjects": find_pageobjects,
+}
 
 
 def parse_args(argv=sys.argv[1:]):
