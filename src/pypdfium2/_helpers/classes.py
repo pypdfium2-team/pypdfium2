@@ -35,6 +35,7 @@ class PdfDocument:
         )
     
     def __len__(self):
+        """ Get the number of pages the PDF has. """
         return pdfium.FPDF_GetPageCount(self._pdf)
     
     @property
