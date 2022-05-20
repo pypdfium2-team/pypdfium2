@@ -29,7 +29,6 @@ autodoc_default_options = {
     'members': True,
     'undoc-members': True,
     'member-order': 'bysource',
-    'special-members': "__len__",
 }
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),

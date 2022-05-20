@@ -13,6 +13,7 @@ Version
 Opener
 ******
 .. automodule:: pypdfium2._helpers.classes
+    :special-members: __len__
 .. automodule:: pypdfium2._helpers.opener
     :exclude-members: open_pdf_auto, close_pdf
 
