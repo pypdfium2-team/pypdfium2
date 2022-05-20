@@ -15,7 +15,7 @@ from pypdfium2 import _pypdfium as pdfium
 
 class PdfDocument:
     """
-    Document class that maps the functional support model to an object-oriented API, unifying the separate helpers.
+    Document helper class.
     
     Parameters:
         input_obj: The file or data to load.

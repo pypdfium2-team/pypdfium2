@@ -1,26 +1,18 @@
 .. SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 .. SPDX-License-Identifier: CC-BY-4.0
 
-==========
 Python API
 ==========
 
 
 Version
-=======
+*******
 .. automodule:: pypdfium2._version
 
 
-Unified API
-===========
-.. automodule:: pypdfium2._helpers.classes
-
-
-Individual API
-==============
-
 Opener
 ******
+.. automodule:: pypdfium2._helpers.classes
 .. automodule:: pypdfium2._helpers.opener
     :exclude-members: open_pdf_auto, close_pdf
 
@@ -68,6 +60,6 @@ Error Handler
 
 
 Constants
-=========
+*********
 
 .. automodule:: pypdfium2._helpers.constants

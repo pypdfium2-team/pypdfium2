@@ -4,7 +4,7 @@
 # Changelog
 
 
-## 1.10.0 (sched 2022-05-23)
+## 1.10.0 (sched 2022-??-??)
 
 - Updated PDFium from `5065` to `????`.
 - Added cropping capabilities to the rendering engine.
