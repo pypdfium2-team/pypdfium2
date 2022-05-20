@@ -31,11 +31,11 @@ def test_save_pdf_tobuffer():
 
 def test_save_pdf_tofile():
     
-    src_pdf, ld_data = pdfium.open_pdf_auto(TestFiles.multipage)
+    src_doc = pdfium.PdfDocument(TestFiles.multipage)
     
     # page tiling (n-up)
     dest_pdf = pdfium.FPDF_ImportNPagesToOne(
-        src_pdf,
+        src_doc.raw,
         ctypes.c_float(1190),  # width
         ctypes.c_float(1684),  # height
         ctypes.c_size_t(2),    # number of horizontal pages
@@ -46,7 +46,7 @@ def test_save_pdf_tofile():
     with open(output_path, 'wb') as file_handle:
         pdfium.save_pdf(dest_pdf, file_handle)
     
-    pdfium.close_pdf(src_pdf, ld_data)
+    src_doc.close()
     pdfium.close_pdf(dest_pdf)
     
     assert os.path.isfile(output_path)

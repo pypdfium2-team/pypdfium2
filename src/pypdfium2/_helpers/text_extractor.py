@@ -56,9 +56,7 @@ class PdfTextPage:
         return text
     
     def count_chars(self):
-        """
-        Returns the number of characters on the page.
-        """
+        """ Returns the number of characters on the page. """
         return pdfium.FPDFText_CountChars(self._textpage)
     
     def count_rects(self, index=0, count=0):
