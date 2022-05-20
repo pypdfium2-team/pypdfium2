@@ -41,15 +41,7 @@ class PdfTextPage:
         if top == 0:
             top = height
         
-        area_conditions = (
-            (0 <= left   <  width),
-            (0 <= bottom <  height),
-            (0 <  right  <= width),
-            (0 <  top    <= height),
-            (left   < right),
-            (bottom < top),
-        )
-        if not all(area_conditions):
+        if not (0 <= left < right <= width) or not (0 <= bottom < top <= height):
             raise ValueError("Invalid page area requested.")
         
         args = (self._textpage, left, top, right, bottom)
