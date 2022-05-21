@@ -47,3 +47,17 @@ Page Tiler
 ``pypdfium2 tile --help``
 
 .. program-output:: pypdfium2 tile --help
+
+
+Text Extractor
+**************
+``pypdfium2 extract-text --help``
+
+.. program-output:: pypdfium2 extract-text --help
+
+
+Page Object Finder
+******************
+``pypdfium2 find-pageobjects --help``
+
+.. program-output:: pypdfium2 find-pageobjects --help
