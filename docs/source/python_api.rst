@@ -51,10 +51,6 @@ PDF Boxes
 *********
 .. automodule:: pypdfium2._helpers.boxes
 
-Utilities
-*********
-.. automodule:: pypdfium2._helpers.utilities
-
 Error Handler
 *************
 .. automodule:: pypdfium2._helpers.error_handler
