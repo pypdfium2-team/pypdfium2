@@ -37,7 +37,7 @@ def locate_pageobj(page_object):
     Returns:
         Coordinates for (left, bottom, right, top).
     """
-    left, bottom, right, top = [ctypes.c_float() for _i in range(4)]
+    left, bottom, right, top = [ctypes.c_float() for _ in range(4)]
     ret_code = pdfium.FPDFPageObj_GetBounds(page_object, *[ctypes.byref(coord) for coord in (left, bottom, right, top)])
     if not ret_code:
         raise RuntimeError("Locating the page object failed")

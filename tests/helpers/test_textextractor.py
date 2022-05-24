@@ -7,12 +7,22 @@ import pypdfium2 as pdfium
 
 
 @pytest.fixture
-def textpage():
+def doc():
     doc = pdfium.PdfDocument(TestFiles.text)
-    textpage = doc.get_textpage(0)
+    yield doc
+    doc.close()
+
+@pytest.fixture
+def page(doc):
+    page = doc.get_page(0)
+    yield page
+    pdfium.close_page(page)
+
+@pytest.fixture
+def textpage(page):
+    textpage = pdfium.PdfTextPage(page)
     yield textpage
     textpage.close()
-    doc.close()
 
 
 def test_gettext_page(textpage):
@@ -23,8 +33,16 @@ def test_gettext_page(textpage):
     assert text.endswith("\r\nofficia deserunt mollit anim id est laborum.")
 
 
-def test_getrects(textpage):
-    rects = textpage.get_rects()
+@pytest.mark.parametrize("loose", [False, True])
+def test_getcharbox(textpage, loose):
+    for index in range( textpage.count_chars() ):
+        box = textpage.get_charbox(index, loose=loose)
+        assert all( isinstance(val, (int, float)) for val in box )
+        assert box[0] <= box[2] and box[1] <= box[3]
+
+
+def test_getrectboxes(textpage):
+    rects = textpage.get_rectboxes()
     
     first_rect = next(rects)
     assert pytest.approx(first_rect, abs=1) == [58, 767, 258, 782]
@@ -51,7 +69,7 @@ def test_textpage_empty():
     textpage = doc.get_textpage(0)
     
     assert textpage.get_text() == ""
-    assert [r for r in textpage.get_rects()] == []
+    assert [r for r in textpage.get_rectboxes()] == []
     
     textpage.close()
     doc.close()
@@ -73,3 +91,43 @@ def test_area_oob(textpage):
     for area in areas:
         with pytest.raises(ValueError, match="Invalid page area requested."):
             textpage.get_text(*area)
+
+
+def test_search_text(textpage):
+    searcher = textpage.search("labor")
+    assert isinstance(searcher, pdfium.TextSearcher)
+    
+    occ_1a = searcher.get_next()
+    occ_2a = searcher.get_next()
+    occ_3a = searcher.get_next()
+    
+    occ_4a = searcher.get_next()
+    
+    occ_2b = searcher.get_prev()
+    occ_1b = searcher.get_prev()
+    
+    for occ in (occ_1a, occ_2a, occ_3a):
+        for box in occ:
+            assert all(isinstance(val, (int, float)) for val in box)
+            assert len(box) == 4
+            assert box[0] <= box[2]
+            assert box[1] <= box[3]
+    
+    assert occ_1a == occ_1b and occ_2a == occ_2b
+    assert occ_4a is None
+    
+    searcher.close()
+
+
+def test_get_index(page, textpage):
+    
+    height = pdfium.FPDF_GetPageHeightF(page)
+    x, y = (60, height-66)
+    
+    n_chars = textpage.count_chars()
+    index = textpage.get_index(x, y, 5, 5)
+    assert index < n_chars and index == 0
+    
+    charbox = textpage.get_charbox(index)
+    char = textpage.get_text(*charbox)
+    assert char == "L"

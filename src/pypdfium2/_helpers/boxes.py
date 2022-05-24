@@ -7,7 +7,7 @@ from pypdfium2 import _pypdfium as pdfium
 
 def _get_box(page, box_function, fallback_function):
     
-    left, bottom, right, top = [c_float() for _i in range(4)]
+    left, bottom, right, top = [c_float() for _ in range(4)]
     
     ret_code = box_function(page, byref(left), byref(bottom), byref(right), byref(top))
     if not ret_code:
