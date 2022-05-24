@@ -116,7 +116,7 @@ class PdfTextPage:
         
         n_chars = self.count_chars()
         if not 0 <= index < n_chars:
-            raise ValueError("Character index %s out of bounds. The maximum index is %d." % (index, n_chars-1))
+            raise ValueError("Character index %s is out of bounds. The maximum index is %d." % (index, n_chars-1))
         
         if loose:
             rect = pdfium.FS_RECTF()
@@ -163,6 +163,9 @@ class PdfTextPage:
         Returns:
             :class:`.TextSearcher`
         """
+        
+        if len(text) == 0:
+            raise ValueError("Text length must be >0.")
         
         flags = 0
         if match_case:

@@ -69,7 +69,19 @@ def test_textpage_empty():
     textpage = doc.get_textpage(0)
     
     assert textpage.get_text() == ""
+    assert textpage.count_chars() == 0
+    assert textpage.count_rects() == 0
+    assert textpage.get_index(0, 0, 0, 0) is None
     assert [r for r in textpage.get_rectboxes()] == []
+    
+    searcher = textpage.search("a")
+    assert searcher.get_next() is None
+    searcher.close()
+    
+    with pytest.raises(ValueError, match="Character index 0 is out of bounds. The maximum index is -1."):
+        textpage.get_charbox(0)
+    with pytest.raises(ValueError, match="Text length must be >0."):
+        textpage.search("")
     
     textpage.close()
     doc.close()
