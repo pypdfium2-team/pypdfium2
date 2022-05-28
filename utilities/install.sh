@@ -5,4 +5,4 @@
 set -v
 
 python3 -m pip install . -v --no-build-isolation
-unlink ./setupsrc/pl_setup/.presetup_done.txt
+rm -f data/.presetup_done.txt

@@ -12,31 +12,31 @@ from pl_setup.packaging_base import run_cmd
 
 
 PyPackages = (
-    'build',
-    'wheel',
-    'ctypesgen',
-    'setuptools',
-    'setuptools-scm',
+    "build",
+    "wheel",
+    "ctypesgen",
+    "setuptools",
+    "setuptools-scm",
 )
 SysCommands = (
-    'git',
-    'gcc',
+    "git",
+    "gcc",
 )
 
 
 def _pip_install(pkg):
-    run_cmd([sys.executable, '-m', 'pip', 'install', pkg], cwd=None)
+    run_cmd([sys.executable, "-m", "pip", "install", pkg], cwd=None)
 
 
 def install_pydeps():
     
     for pkg in PyPackages:
-        if not importlib.util.find_spec( pkg.replace('-', '_') ):
+        if not importlib.util.find_spec( pkg.replace("-", "_") ):
             _pip_install(pkg)
     
     # Uninstalling ctypesgen sometimes leaves parts behind. In this case, `find_spec()` would still consider the library installed, although the command is unavailable.
-    if not shutil.which('ctypesgen'):
-        _pip_install('ctypesgen')
+    if not shutil.which("ctypesgen"):
+        _pip_install("ctypesgen")
 
 
 def check_sysdeps(sys_commands):
@@ -60,5 +60,5 @@ def main():
     install_pydeps()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

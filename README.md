@@ -16,7 +16,9 @@ pip3 install --no-build-isolation -U pypdfium2
 
 ### Manual installation
 
-The following steps require the system tools `git` and `gcc` to be installed and available in `PATH`. In addition, the Python dependencies `setuptools`, `setuptools-scm` `wheel`, `build`, and `ctypesgen` are needed. Also make sure that your `pip` version is up-to-date. For more information, please refer to [`dependencies.md`](docs/source/dependencies.md).
+The following steps require the system tools `git` and `gcc` to be installed and available in `PATH`.
+For Python setup and runtime dependencies, please refer to [`setup.cfg`](./setup.cfg).
+It is recommended to install `ctypesgen` from the latest sources (`git master`).
 
 #### Package locally
 
@@ -32,6 +34,9 @@ If you wish to perform a source build regardless of whether PDFium binaries are 
 ```bash
 make build
 ```
+
+Depending on the operating system, additional dependencies may need to be installed beforehand.
+
 
 ## Examples
 
@@ -61,67 +66,77 @@ CLI documentation: https://pypdfium2.readthedocs.io/en/stable/shell_api.html
 
 Import pypdfium2:
 
-```python3
+```python
 import pypdfium2 as pdfium
 ```
 
-Open a PDF using the helper class `PdfDocument`:
-```python3
-doc = pdfium.PdfDocument(filename)
-# ... use methods provided by the helper class
-pdf = doc.raw
-# ... work with the actual PDFium document handle
-doc.close()
-```
+Open a PDF using the helper class `PdfDocument` (supports file paths, bytes, and byte buffers):
 
-Open a PDF using the context manager `PdfContext`:
-```python3
-with pdfium.PdfContext(filename) as pdf:
-    # ... work with the pdf
+```python
+pdf = pdfium.PdfDocument(filepath)
+print(pdf)
+# Work with the helper class
+print(pdf.raw)
+# Work with the raw PDFium object handle
+pdf.close()
 ```
 
 Render a single page:
 
-```python3
-with pdfium.PdfContext(filename) as pdf:
-    pil_image = pdfium.render_page_topil(
-        pdf,
-        page_index = 0,
-        scale = 1,
-        rotation = 0,
-        colour = (255, 255, 255, 255),
-        annotations = True,
-        greyscale = False,
-        optimise_mode = pdfium.OptimiseMode.none,
-    )
+```python
+pdf = pdfium.PdfDocument(filepath)
+page = pdf.get_page(0)
 
+pil_image = page.render_topil(
+    scale = 1,
+    rotation = 0,
+    crop = (0, 0, 0, 0),
+    colour = (255, 255, 255, 255),
+    annotations = True,
+    greyscale = False,
+    optimise_mode = pdfium.OptimiseMode.NONE,
+)
 pil_image.save("out.png")
-pil_image.close()
+
+[g.close() for g in (pil_image, page, pdf)]
 ```
 
 Render multiple pages concurrently:
 
-```python3
-for image, suffix in pdfium.render_pdf_topil(filename):
-    image.save('out_%s.png' % suffix)
+```python
+pdf = pdfium.PdfDocument(filepath)
+
+n_pages = len(pdf)
+page_indices = [i for i in range(n_pages)]
+renderer = pdf.render_topil(
+    page_indices = page_indices,
+)
+
+for image, index in zip(renderer, page_indices):
+    image.save('out_%s.jpg' % str(index).zfill(n_pages))
     image.close()
+
+pdf.close()
 ```
 
 Read the table of contents:
 
-```python3
-doc = pdfium.PdfDocument(filepath)
-for item in doc.get_toc():
+```python
+pdf = pdfium.PdfDocument(filepath)
+
+for item in pdf.get_toc():
     print(
         '    ' * item.level +
-        "{} -> {}  # {} {}".format(
+        '[{}] '.format('-' if item.is_closed else '+') +
+        '{} -> {}  # {} {}'.format(
             item.title,
             item.page_index + 1,
             item.view_mode,
             item.view_pos,
         )
     )
-doc.close()
+
+pdf.close()
 ```
 
 Support model documentation: https://pypdfium2.readthedocs.io/en/stable/python_api.html
@@ -131,15 +146,16 @@ Support model documentation: https://pypdfium2.readthedocs.io/en/stable/python_a
 
 Rendering the first page of a PDF document:
 
-```python3
+```python
 import math
 import ctypes
+import os.path
 from PIL import Image
 import pypdfium2 as pdfium
 
-filename = "your/path/to/document.pdf"
+filepath = os.path.abspath("tests/resources/render.pdf")
 
-doc = pdfium.FPDF_LoadDocument(filename, None)
+doc = pdfium.FPDF_LoadDocument(filepath, None)
 page_count = pdfium.FPDF_GetPageCount(doc)
 assert page_count >= 1
 
@@ -170,7 +186,7 @@ pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
 pdfium.FPDF_CloseDocument(doc)
 ```
 
-For more examples of using the raw API, take a look at the [support model source code](src/pypdfium2/_helpers) and the [examples directory](examples).
+For more examples of using the raw API, take a look at the [support model source code](src/pypdfium2/_helpers).
 
 Documentation for the [PDFium API](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html) is available. pypdfium2 transparently maps all PDFium classes, enums and functions to Python. However, there can sometimes be minor differences between Foxit and open-source PDFium. In case of doubt, take a look at the inline source code documentation of PDFium.
 
@@ -186,8 +202,9 @@ Documentation and examples of pypdfium2 are CC-BY-4.0 licensed.
 
 ## In Use
 
-* The [doctr](https://mindee.github.io/doctr/) OCR library uses pypdfium2 to rasterise PDF documents.
-* The [Extract-URLs](https://github.com/elescamilla/Extract-URLs/) project extracts URLs from PDFs using pypdfium2.
+* The [doctr](https://mindee.github.io/doctr/) OCR library uses pypdfium2 to rasterise PDFs.
+* [Extract-URLs](https://github.com/elescamilla/Extract-URLs/) use pypdfium2 to extract URLs from PDF documents.
+* [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) compares pypdfium2's text extraction capabilities with other libraries.
 
 
 ## Development
@@ -213,7 +230,7 @@ Run `make test`.
 The release process is automated using a CI workflow that pushes to GitHub, TestPyPI and PyPI.
 To do a release, first run `make packaging` locally to check that everything works as expected.
 If all went well, upload changes to the version file and push a new tag to trigger the `Release` woirkflow.
-Always make sure the information in `src/pypdfium2/_version.py` matches with the tag!
+Always make sure the information in `src/pypdfium2/version.py` matches with the tag!
 ```bash
 git tag -a A.B.C
 git push --tags
@@ -241,15 +258,16 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 ## Thanks to
 
-* [Anurag Bansal](https://github.com/banagg) (Support model for [text insertion](src/pypdfium2/_helpers/text_inserter.py))
-* [Benoît Blanchon](https://github.com/bblanchon) ([PDFium patches](sourcebuild/patches/))
-* [Anderson Bravalheri](https://github.com/abravalheri) (Help with achieving PEP 517/518 compliance)
-* [Tim Head](https://github.com/betatim) (Original idea for PDFium Python bindings with ctypesgen in `wowpng`)
-* [Yinlin Hu](https://github.com/YinlinHu) (`pypdfium` prototype and `kuafu` PDF viewer)
-* [Adam Huganir](https://github.com/adam-huganir) (Initial help and suggestions)
-* [Mike Kroutikov](https://github.com/mkroutikov) (Examples on how to use PDFium with ctypes in `redstork` and `pdfbrain`)
-* [Peter Saalbrink](https://github.com/petersaalbrink) (Code style improvements to `pdf_renderer`)
-* [Lei Zhang](https://github.com/leizleiz) and [Thomas Sepez](https://github.com/tsepez) (Windows-specific fixes concerning `FPDF_LoadDocument()`)
+* [Anurag Bansal](https://github.com/banagg): Support model for text insertion (`PdfPage.insert_text()`).
+* [Benoît Blanchon](https://github.com/bblanchon): Author of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](sourcebuild/patches/).
+* [Anderson Bravalheri](https://github.com/abravalheri): Help with achieving PEP 517/518 compliance.
+* [Tim Head](https://github.com/betatim): Original idea for PDFium Python bindings with ctypesgen in `wowpng`.
+* [Yinlin Hu](https://github.com/YinlinHu): `pypdfium` prototype and `kuafu` PDF viewer.
+* [Adam Huganir](https://github.com/adam-huganir): Initial help and suggestions.
+* [kobaltcore](https://github.com/kobaltcore): Bug fix for `PdfDocument.save()`.
+* [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium with ctypes in `redstork` and `pdfbrain`.
+* [Peter Saalbrink](https://github.com/petersaalbrink): Code style improvements to the multipage renderer.
+* [Lei Zhang](https://github.com/leizleiz) and [Thomas Sepez](https://github.com/tsepez): Windows-specific fixes concerning `FPDF_LoadDocument()`.
 
 
 ## Fun facts

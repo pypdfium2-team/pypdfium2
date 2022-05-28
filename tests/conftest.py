@@ -3,7 +3,7 @@
 
 import sys
 import logging
-from os.path import join, dirname, abspath
+from os.path import join, dirname, abspath, isdir, isfile
 
 lib_logger = logging.getLogger('pypdfium2')
 lib_logger.addHandler(logging.StreamHandler())
@@ -18,15 +18,25 @@ from pl_setup.packaging_base import PlatformNames
 
 
 class TestFiles:
-    render             = join(ResourceDir,'render.pdf')
-    encrypted          = join(ResourceDir,'encrypted.pdf')
-    multipage          = join(ResourceDir,'multipage.pdf')
-    bookmarks          = join(ResourceDir,'bookmarks.pdf')
-    bookmarks_circular = join(ResourceDir,'bookmarks_circular.pdf')
-    boxes              = join(ResourceDir,'boxes.pdf')
-    text               = join(ResourceDir,'text.pdf')
-    empty              = join(ResourceDir,'empty.pdf')
-    images             = join(ResourceDir,'images.pdf')
+    render        = join(ResourceDir,'render.pdf')
+    encrypted     = join(ResourceDir,'encrypted.pdf')
+    multipage     = join(ResourceDir,'multipage.pdf')
+    toc           = join(ResourceDir,'toc.pdf')
+    toc_viewmodes = join(ResourceDir,'toc_viewmodes.pdf')
+    toc_maxdepth  = join(ResourceDir,'toc_maxdepth.pdf')
+    toc_circular  = join(ResourceDir,'toc_circular.pdf')
+    box_fallback  = join(ResourceDir,'box_fallback.pdf')
+    text          = join(ResourceDir,'text.pdf')
+    empty         = join(ResourceDir,'empty.pdf')
+    images        = join(ResourceDir,'images.pdf')
+
+
+ExpRenderPixels = (
+    ( (0,   0  ), (255, 255, 255) ),
+    ( (150, 180), (129, 212, 26 ) ),
+    ( (150, 390), (42,  96,  153) ),
+    ( (150, 570), (128, 0,   128) ),
+)
 
 
 def iterate_testfiles(skip_encrypted=True):
@@ -40,7 +50,7 @@ def iterate_testfiles(skip_encrypted=True):
         yield member
 
 
-def get_members(cls):
+def _get_attrs(cls):
     members = []
     for attr in dir(cls):
         if attr.startswith('_'):
@@ -48,5 +58,14 @@ def get_members(cls):
         members.append(attr)
     return members
 
+def get_members(cls):
+    return [getattr(cls, a) for a in _get_attrs(cls)]
 
-pl_names = get_members(PlatformNames)
+pl_names = _get_attrs(PlatformNames)
+
+
+def test_testpaths():
+    for dirpath in (TestDir, SourceTree, ResourceDir, OutputDir):
+        assert isdir(dirpath)
+    for filepath in iterate_testfiles(False):
+        assert isfile(filepath)

@@ -3,17 +3,7 @@
 
 # full support model namespace
 
-from pypdfium2._helpers.constants import *
-from pypdfium2._helpers.error_handler import *
-from pypdfium2._helpers.utilities import *
-from pypdfium2._helpers.opener import *
-from pypdfium2._helpers.nativeopener import *
-from pypdfium2._helpers.page_renderer import *
-from pypdfium2._helpers.pdf_renderer import *
-from pypdfium2._helpers.toc import *
-from pypdfium2._helpers.saver import *
-from pypdfium2._helpers.boxes import *
-from pypdfium2._helpers.classes import *
-from pypdfium2._helpers.text_inserter import *
-from pypdfium2._helpers.text_extractor import *
-from pypdfium2._helpers.pageobjects import *
+from pypdfium2._helpers.misc import *
+from pypdfium2._helpers.document import *
+from pypdfium2._helpers.page import *
+from pypdfium2._helpers.textpage import *

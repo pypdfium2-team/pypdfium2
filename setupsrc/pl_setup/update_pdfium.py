@@ -17,11 +17,11 @@ from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
     DataTree,
-    VersionFile,
     VerNamespace,
     PlatformNames,
     run_cmd,
     call_ctypesgen,
+    set_version,
 )
 
 
@@ -29,60 +29,45 @@ ReleaseRepo = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseExtension = "tgz"
 ReleaseNames = {
-    PlatformNames.darwin_x64    : 'pdfium-mac-x64',
-    PlatformNames.darwin_arm64  : 'pdfium-mac-arm64',
-    PlatformNames.linux_x64     : 'pdfium-linux-x64',
-    PlatformNames.linux_x86     : 'pdfium-linux-x86',
-    PlatformNames.linux_arm64   : 'pdfium-linux-arm64',
-    PlatformNames.linux_arm32   : 'pdfium-linux-arm',
-    PlatformNames.musllinux_x64 : 'pdfium-linux-musl-x64',
-    PlatformNames.musllinux_x86 : 'pdfium-linux-musl-x86',
-    PlatformNames.windows_x64   : 'pdfium-win-x64',
-    PlatformNames.windows_x86   : 'pdfium-win-x86',
-    PlatformNames.windows_arm64 : 'pdfium-win-arm64',
+    PlatformNames.darwin_x64    : "pdfium-mac-x64",
+    PlatformNames.darwin_arm64  : "pdfium-mac-arm64",
+    PlatformNames.linux_x64     : "pdfium-linux-x64",
+    PlatformNames.linux_x86     : "pdfium-linux-x86",
+    PlatformNames.linux_arm64   : "pdfium-linux-arm64",
+    PlatformNames.linux_arm32   : "pdfium-linux-arm",
+    PlatformNames.musllinux_x64 : "pdfium-linux-musl-x64",
+    PlatformNames.musllinux_x86 : "pdfium-linux-musl-x86",
+    PlatformNames.windows_x64   : "pdfium-win-x64",
+    PlatformNames.windows_x86   : "pdfium-win-x86",
+    PlatformNames.windows_arm64 : "pdfium-win-arm64",
 }
 
 
-def _set_versions(ver_file, *versions_list):
-    
-    with open(ver_file, 'r') as fh:
-        content = fh.read()
-    
-    for variable, current_ver, new_ver in versions_list:
-        
-        template = "%s = %s"
-        previous = template % (variable, current_ver)
-        updated = template % (variable, new_ver)
-        
-        print("'%s' -> '%s'" % (previous, updated))
-        assert content.count(previous) == 1
-        content = content.replace(previous, updated)
-    
-    with open(ver_file, 'w') as fh:
-        fh.write(content)
-
-
 def get_latest_version():
-    git_ls = run_cmd(['git', 'ls-remote', '%s.git' % ReleaseRepo], cwd=None, capture=True)
-    tag = git_ls.split('\t')[-1]
-    return int( tag.split('/')[-1] )
+    git_ls = run_cmd(["git", "ls-remote", "%s.git" % ReleaseRepo], cwd=None, capture=True)
+    tag = git_ls.split("\t")[-1]
+    return int( tag.split("/")[-1] )
 
 
-def handle_versions(ver_file, latest_version):
+def handle_versions(latest_version):
     
     v_minor = VerNamespace["V_MINOR"]
     v_libpdfium = VerNamespace["V_LIBPDFIUM"]
+    is_sourcebuild = VerNamespace["IS_SOURCEBUILD"]
     
-    if v_libpdfium < latest_version:
-        print("New PDFium build")
-        _set_versions(
-            ver_file,
-            ("V_MINOR", v_minor, v_minor+1),
-            ("V_LIBPDFIUM", v_libpdfium, latest_version),
-        )
-    
+    if is_sourcebuild:
+        print("Switching from sourcebuild to pre-built binaries.")
+        set_version("IS_SOURCEBUILD", False)
     else:
-        print("No new PDFium build - will re-create bindings without incrementing version")
+        assert v_libpdfium.isnumeric()
+        if int(v_libpdfium) < latest_version:
+            print("New PDFium build")
+            set_version("V_MINOR", v_minor+1)
+        else:
+            print("No new PDFium build - will re-create bindings without incrementing version")
+    
+    if v_libpdfium != str(latest_version):
+        set_version("V_LIBPDFIUM", str(latest_version))
 
 
 def clear_data(download_files):
@@ -137,7 +122,7 @@ def unpack_archives(archives):
         else:
             raise ValueError("Unknown archive extension '%s'" % ReleaseExtension)
         
-        extraction_path = join(os.path.dirname(file), 'build_tar')
+        extraction_path = join(os.path.dirname(file), "build_tar")
         with arc_opener(file) as archive:
             archive.extractall(extraction_path)
         
@@ -148,17 +133,17 @@ def generate_bindings(archives):
     
     for platform_dir in archives.keys():
         
-        build_dir = join(platform_dir,'build_tar')
-        bin_dir = join(build_dir,'lib')
+        build_dir = join(platform_dir,"build_tar")
+        bin_dir = join(build_dir, "lib")
         dirname = os.path.basename(platform_dir)
         
-        if dirname.startswith('windows'):
-            target_name = 'pdfium.dll'
-            bin_dir = join(build_dir,'bin')
-        elif dirname.startswith('darwin'):
-            target_name = 'pdfium.dylib'
-        elif 'linux' in dirname:
-            target_name = 'pdfium'
+        if dirname.startswith("windows"):
+            target_name = "pdfium.dll"
+            bin_dir = join(build_dir, "bin")
+        elif dirname.startswith("darwin"):
+            target_name = "pdfium.dylib"
+        elif "linux" in dirname:
+            target_name = "pdfium"
         else:
             raise ValueError("Unknown platform directory name '%s'" % dirname)
         
@@ -167,7 +152,7 @@ def generate_bindings(archives):
         
         shutil.move(join(bin_dir, items[0]), join(platform_dir, target_name))
         
-        call_ctypesgen(platform_dir, join(build_dir,'include'))
+        call_ctypesgen(platform_dir, join(build_dir, "include"))
         shutil.rmtree(build_dir)
 
 
@@ -192,7 +177,7 @@ def main(platforms):
     download_files = get_download_files(platforms)
     
     latest_version = get_latest_version()
-    handle_versions(VersionFile, latest_version)
+    handle_versions(latest_version)
     clear_data(download_files)
     
     archives = download_releases(latest_version, download_files)
@@ -205,9 +190,9 @@ def parse_args(argv):
         description = "Download pre-built PDFium packages and generate bindings",
     )
     parser.add_argument(
-        '--platforms', '-p',
-        metavar = 'P',
-        nargs = '*',
+        "--platforms", "-p",
+        metavar = "P",
+        nargs = "*",
     )
     return parser.parse_args(argv)
 
@@ -217,5 +202,5 @@ def run_cli(argv=sys.argv[1:]):
     return main(args.platforms)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_cli()
