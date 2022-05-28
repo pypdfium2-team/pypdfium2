@@ -4,6 +4,14 @@
 # Changelog
 
 
+## 2.0.0 (sched 2022-??-??)
+
+- Updated PDFium from `5079` to `????`.
+- Completely re-implemented the support model to make the API easier to use and fix some structural issues. Several new features were added on the way.
+- Improved the opener code to load bytes input with `FPDF_LoadMemDocument()`.
+- Extended test coverage.
+
+
 ## 1.11.0 (2022-06-01)
 
 - Updated PDFium from `5079` to `5092`.

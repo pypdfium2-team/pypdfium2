@@ -25,30 +25,6 @@ def attach_parser(subparsers):
         help = "Page numbers to include (defaults to all)",
         type = pagetext_type,
     )
-    parser.add_argument(
-        "--left",
-        type = int,
-        default = 0,
-        help = "Left coordinate of the area to search for text.",
-    )
-    parser.add_argument(
-        "--bottom",
-        type = int,
-        default = 0,
-        help = "Bottom coordinate of the area to search for text.",
-    )
-    parser.add_argument(
-        "--right",
-        type = int,
-        default = 0,
-        help = "Right coordinate of the area to search for text.",
-    )
-    parser.add_argument(
-        "--top",
-        type = int,
-        default = 0,
-        help = "Top coordinate of the area to search for text.",
-    )
 
 
 def main(args):
@@ -59,14 +35,13 @@ def main(args):
     
     sep = ''
     for index in args.pages:
-        textpage = doc.get_textpage(index)
-        text = textpage.get_text(
-            left = args.left,
-            bottom = args.bottom,
-            right = args.right,
-            top = args.top,
-        )
+        page = doc.get_page(index)
+        textpage = page.get_textpage()
+        
+        text = textpage.get_text()
+        page.close()
         textpage.close()
+        
         print(sep + "# Page %s\n" % (index+1) + text)
         sep = '\n'
     

@@ -30,7 +30,7 @@ SourceTree  = dirname(dirname(dirname(abspath(__file__))))
 DataTree    = join(SourceTree,'data')
 SB_Dir      = join(SourceTree,'sourcebuild')
 ModuleDir   = join(SourceTree,'src','pypdfium2')
-VersionFile = join(ModuleDir,'_version.py')
+VersionFile = join(ModuleDir,'version.py')
 
 
 class PlatformNames:
@@ -77,10 +77,32 @@ def call_ctypesgen(platform_dir, include_dir):
         file_writer.write(text)
 
 
-def _get_ver_namespace(ver_file):
-    ver_namespace = {}
-    with open(ver_file, 'r') as fh:
-        exec(fh.read(), ver_namespace)
-    return ver_namespace
+def _get_version_ns():
+    ver_ns = {}
+    with open(VersionFile, 'r') as fh:
+        exec(fh.read(), ver_ns)
+    ver_ns = {k: v for k, v in ver_ns.items() if not k.startswith('_')}
+    return ver_ns
 
-VerNamespace = _get_ver_namespace(VersionFile)
+VerNamespace = _get_version_ns()
+
+
+def set_version(variable, new_ver):
+    
+    with open(VersionFile, 'r') as fh:
+        content = fh.read()
+    
+    if isinstance(new_ver, str):
+        template = '%s = "%s"'
+    else:
+        template = '%s = %s'
+    previous = template % (variable, VerNamespace[variable])
+    updated = template % (variable, new_ver)
+    
+    print("'%s' -> '%s'" % (previous, updated))
+    assert content.count(previous) == 1
+    content = content.replace(previous, updated)
+    VerNamespace[variable] = new_ver
+    
+    with open(VersionFile, 'w') as fh:
+        fh.write(content)

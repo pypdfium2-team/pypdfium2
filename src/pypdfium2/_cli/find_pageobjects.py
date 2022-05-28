@@ -4,15 +4,9 @@
 import os.path
 from pypdfium2 import _namespace as pdfium
 from pypdfium2._cli._parsers import pagetext_type
-
-
-NameToObjtype = dict(
-    unknown = pdfium.FPDF_PAGEOBJ_UNKNOWN,
-    text    = pdfium.FPDF_PAGEOBJ_TEXT,
-    path    = pdfium.FPDF_PAGEOBJ_PATH,
-    image   = pdfium.FPDF_PAGEOBJ_IMAGE,
-    shading = pdfium.FPDF_PAGEOBJ_SHADING,
-    form    = pdfium.FPDF_PAGEOBJ_FORM,
+from pypdfium2._helpers._utils import (
+    ObjtypeToConst,
+    ObjtypeToName,
 )
 
 
@@ -36,9 +30,10 @@ def attach_parser(subparsers):
         help = "The pages to search (defaults to all)",
     )
     parser.add_argument(
-        "--type",
+        "--types",
+        nargs = "+",
         required = True,
-        choices = [k for k in NameToObjtype.keys()],
+        choices = [k for k in ObjtypeToConst.keys()],
         help = "Object types to consider",
     )
 
@@ -46,15 +41,16 @@ def attach_parser(subparsers):
 def main(args):
     
     doc = pdfium.PdfDocument(args.input, args.password)
-    args.type = NameToObjtype[args.type]
+    args.types = [ObjtypeToConst[t] for t in args.types]
     if args.pages is None:
         args.pages = [i for i in range(len(doc))]
     
     for index in args.pages:
         page = doc.get_page(index)
-        pageobjs = pdfium.get_pageobjs(page)
-        for obj in pdfium.filter_pageobjs(pageobjs, args.type):
-            print( pdfium.locate_pageobj(obj) )
-        pdfium.close_page(page)
+        for obj in page.get_objects():
+            type = obj.get_type()
+            if type in args.types:
+                print(ObjtypeToName[type], obj.get_pos())
+        page.close()
     
     doc.close()

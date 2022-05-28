@@ -1,72 +1,92 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import pytest
-from PIL import Image
+import math
+import logging
+import PIL.Image
 from os.path import join
+import pytest
 import pypdfium2 as pdfium
-from ..conftest import TestFiles, OutputDir
+from ..conftest import TestFiles, OutputDir, ExpRenderPixels
 
 
-def _check_render_normal(pdf):
-    
-    pixels = [
-        [(0,   0  ), (255, 255, 255)],
-        [(150, 180), (129, 212, 26 )],
-        [(150, 390), (42,  96,  153)],
-        [(150, 570), (128, 0,   128)],
+@pytest.fixture
+def sample_page():
+    pdf = pdfium.PdfDocument(TestFiles.render)
+    page = pdf.get_page(0)
+    yield page
+    [g.close() for g in (page, pdf)]
+
+
+@pytest.fixture
+def multipage_doc():
+    pdf = pdfium.PdfDocument(TestFiles.multipage)
+    yield pdf
+    pdf.close()
+
+
+def _check_pixels(pil_image, pixels):
+    for pos, value in pixels:
+        assert pil_image.getpixel(pos) == value
+
+
+@pytest.mark.parametrize(
+    ("name", "crop", "scale", "rotation"),
+    [   
+        ["01_r0",      (0,   0,   0,   0  ), 0.25, 0,   ],
+        ["02_r90",     (0,   0,   0,   0  ), 0.5,  90,  ],
+        ["03_r180",    (0,   0,   0,   0  ), 0.75, 180, ],
+        ["04_r270",    (0,   0,   0,   0  ), 1,    270, ],
+        ["05_cl",      (100, 0,   0,   0  ), 0.5,  0,   ],
+        ["06_cb",      (0,   100, 0,   0  ), 0.5,  0,   ],
+        ["07_cr",      (0,   0,   100, 0  ), 0.5,  0,   ],
+        ["08_ct",      (0,   0,   0,   100), 0.5,  0,   ],
+        ["09_r90_cb",  (0,   100,  0,  0  ), 0.5,  90,  ],
+        ["10_r180_cr", (0,   0,   100, 0  ), 0.5,  180, ],
+        ["11_r270_ct", (0,   0,   0,   100), 0.5,  270, ],
     ]
+)
+def test_render_page_transform(sample_page, name, crop, scale, rotation):
+    pil_image = sample_page.render_topil(
+        crop = crop,
+        scale = scale,
+        rotation = rotation,
+    )
+    pil_image.save( join(OutputDir, "%s.jpg" % name) )
+    assert pil_image.mode == "RGB"
     
-    pil_image = pdfium.render_page_topil(pdf, 0)
+    c_left, c_bottom, c_right, c_top = [math.ceil(c*scale) for c in crop]
+    w = math.ceil(595*scale)
+    h = math.ceil(842*scale)
+    if rotation in (90, 270):
+        w, h = h, w
     
-    assert pil_image.mode == 'RGB'
-    assert pil_image.size == (595, 842)
-    for pos, exp_value in pixels:
-        assert pil_image.getpixel(pos) == exp_value
+    c_w = w - c_left - c_right
+    c_h = h - c_bottom - c_top
+    assert pil_image.size == (c_w, c_h)
     
+    pixels = []
+    for (x, y), value in ExpRenderPixels:
+        x, y = round(x*scale), round(y*scale)
+        if rotation in (90, 270):
+            x, y = y, x
+        if rotation == 90:
+            x = w-1 - x
+        elif rotation == 180:
+            x = w-1 - x
+            y = h-1 - y
+        elif rotation == 270:
+            y = h-1 - y
+        x -= c_left
+        y -= c_top
+        if 0 <= x < c_w and 0 <= y < c_h:
+            pixels.append( ((x, y), value) )
+    
+    _check_pixels(pil_image, pixels)
     pil_image.close()
 
 
-def test_render_page_filepath():
-    with pdfium.PdfContext(TestFiles.render) as pdf:
-        _check_render_normal(pdf)
-
-
-def test_render_page_bytes():
-    with open(TestFiles.render, 'rb') as fh:
-        data = fh.read()
-    with pdfium.PdfContext(data) as pdf:
-        _check_render_normal(pdf)
-
-
-def _check_render_encrypted(file_or_data):
-    
-    with pdfium.PdfContext(file_or_data, 'test_user') as pdf:
-        pil_image_a = pdfium.render_page_topil(pdf, 0)
-    assert pil_image_a.mode == 'RGB'
-    assert pil_image_a.size == (596, 842)
-    
-    with pdfium.PdfContext(file_or_data, 'test_owner') as pdf:
-        pil_image_b = pdfium.render_page_topil(pdf, 0)
-    assert pil_image_b.mode == 'RGB'
-    assert pil_image_b.size == (596, 842)
-    
-    assert pil_image_a == pil_image_b
-    
-    pil_image_a.close()
-    pil_image_b.close()
-
-
-def test_render_page_encypted_file():
-    _check_render_encrypted(TestFiles.encrypted)
-
-def test_render_page_encrypted_bytes():
-    with open(TestFiles.encrypted, 'rb') as fh:
-        data = fh.read()
-    _check_render_encrypted(data)
-
-
-def test_render_page_alpha():
+def test_render_page_alpha(sample_page):
     
     pixels = [
         [(0,   0  ), (0,   0,   0,   0  )],
@@ -75,14 +95,9 @@ def test_render_page_alpha():
         [(150, 390), (42,  96,  153, 255)],
         [(150, 570), (128, 0,   128, 255)],
     ]
+    pil_image = sample_page.render_topil(colour=None)
     
-    with pdfium.PdfContext(TestFiles.render) as pdf:
-        pil_image = pdfium.render_page_topil(
-            pdf, 0,
-            colour = None,
-        )
-    
-    assert pil_image.mode == 'RGBA'
+    assert pil_image.mode == "RGBA"
     assert pil_image.size == (595, 842)
     for pos, exp_value in pixels:
         assert pil_image.getpixel(pos) == exp_value
@@ -90,90 +105,27 @@ def test_render_page_alpha():
     pil_image.close()
 
 
-def test_render_page_rotation():
-    
-    with pdfium.PdfContext(TestFiles.render) as pdf:
-        
-        image_0 = pdfium.render_page_topil(
-            pdf, 0,
-            rotation = 0
-        )
-        image_0.save(join(OutputDir,'rotate_0.png'))
-        image_0.close()
-        
-        image_90 = pdfium.render_page_topil(
-            pdf, 0,
-            rotation = 90
-        )
-        image_90.save(join(OutputDir,'rotate_90.png'))
-        image_90.close()
-        
-        image_180 = pdfium.render_page_topil(
-            pdf, 0,
-            rotation = 180
-        )
-        image_180.save(join(OutputDir,'rotate_180.png'))
-        image_180.close()
-        
-        image_270 = pdfium.render_page_topil(
-            pdf, 0,
-            rotation = 270
-        )
-        image_270.save(join(OutputDir,'rotate_270.png'))
-        image_270.close()
+def test_render_page_greyscale(sample_page):
 
-
-def test_render_pdf():
-    
-    with pdfium.PdfContext(TestFiles.multipage) as pdf:
-        n_pages = pdfium.FPDF_GetPageCount(pdf)
-        
-    n_digits = len(str(n_pages))
-    i = 0
-    
-    renderer = pdfium.render_pdf_topil(
-        TestFiles.multipage,
-        colour = (255, 255, 255),
+    image_a = sample_page.render_topil(
+        greyscale = True,
+        scale = 0.5
     )
-    for image, suffix in renderer:
-        assert isinstance(image, Image.Image)
-        assert suffix == str(i+1).zfill(n_digits)
-        image.close()
-        i += 1
-
-
-def test_render_pdf_frombytes():
+    assert image_a.size == (298, 421)
+    assert image_a.mode == "L"
+    image_a.save(join(OutputDir, "greyscale.png"))
+    image_a.close()
     
-    with open(TestFiles.multipage, 'rb') as file_handle:
-        file_bytes = file_handle.read()
-    
-    for image, suffix in pdfium.render_pdf_topil(file_bytes):
-        assert isinstance(image, Image.Image)
-        assert isinstance(suffix, str)
-        assert image.mode == 'RGB'
-        image.close()
-
-
-def test_render_greyscale():
-    
-    with pdfium.PdfContext(TestFiles.render) as pdf:
-        
-        image_a = pdfium.render_page_topil(
-            pdf, 0,
-            greyscale = True,
-        )
-        image_a.save(join(OutputDir,'greyscale.png'))
-        assert image_a.mode == 'L'
-        image_a.close()
-        
-        image_b = pdfium.render_page_topil(
-            pdf, 0,
-            greyscale = True,
-            colour = None,
-        )
-        assert image_b.mode == 'RGBA'
-        image_b.save(join(OutputDir,'greyscale_alpha.png'))
-        image_b.close()
+    # PDFium currently doesn't support LA, hence greyscale + alpha rendering results in RGBA
+    image_b = sample_page.render_topil(
+        greyscale = True,
+        colour = None,
+        scale = 0.5
+    )
+    assert image_b.size == (298, 421)
+    assert image_b.mode == "RGBA"
+    image_b.save(join(OutputDir, "greyscale_alpha.png"))
+    image_b.close()
 
 
 @pytest.mark.parametrize(
@@ -187,13 +139,10 @@ def test_render_greyscale():
         (255, 255, 0  ),
     ]
 )
-def test_render_bgcolour(colour):
+def test_render_page_bgcolour(colour, sample_page):
     
-    with pdfium.PdfContext(TestFiles.render) as pdf:
-        pil_image = pdfium.render_page_topil(
-            pdf, 0,
-            colour = colour,
-        )
+    pil_image = sample_page.render_topil(colour=colour, scale=0.5)
+    assert pil_image.size == (298, 421)
     
     px_colour = colour
     if len(colour) == 4:
@@ -206,23 +155,85 @@ def test_render_bgcolour(colour):
     pil_image.close()
 
 
-def _abstest_render_tobytes(img_info):
-    data, cl_format, size = img_info
-    assert isinstance(data, bytes)
-    assert isinstance(cl_format, str)
-    assert 1 <= len(cl_format) <= 4
-    assert all(c in ('RGBLA') for c in cl_format)
-    assert len(size) == 2
-    assert all(isinstance(s, int) for s in size)
-    assert len(data) == size[0] * size[1] * len(cl_format)
+def test_render_page_tobytes(sample_page):
+    
+    bytedata, cl_format, size = sample_page.render_tobytes(scale=0.5)
+    
+    assert isinstance(bytedata, bytes)
+    assert cl_format == "BGR"
+    assert size == (298, 421)
+    assert len(bytedata) == size[0] * size[1] * len(cl_format)
+    
+    pil_image = PIL.Image.frombytes("RGB", size, bytedata, "raw", "BGR")
+    assert pil_image.mode == "RGB"
+    assert pil_image.size == (298, 421)
+    assert isinstance(pil_image, PIL.Image.Image)
+    pil_image.close()
 
 
-def test_render_page_tobytes():
-    with pdfium.PdfContext(TestFiles.render) as pdf:
-        _abstest_render_tobytes( pdfium.render_page_tobytes(pdf, 0) )
+@pytest.fixture
+def render_pdf_topil(multipage_doc):
+    
+    i = 0
+    renderer = multipage_doc.render_topil(
+        scale=0.5, greyscale=True,
+    )
+    imgs = []
+    
+    for image, index in renderer:
+        assert index == i
+        assert isinstance(image, PIL.Image.Image)
+        assert image.mode == "L"
+        imgs.append(image)
+        i += 1
+    
+    assert i == len(imgs) == 3
+    yield imgs
+    [image.close() for image in imgs]
 
 
-def test_render_pdf_tobytes():
-    for img_info, num in pdfium.render_pdf_tobytes(TestFiles.multipage):
-        _abstest_render_tobytes(img_info)
-        assert num.isdigit()
+@pytest.fixture
+def render_pdf_tobytes(multipage_doc):
+    
+    i = 0
+    renderer = multipage_doc.render_tobytes(
+        scale=0.5, greyscale=True,
+    )
+    imgs = []
+    
+    for (imgdata, cl_format, size), index in renderer:
+        assert index == i
+        assert cl_format == "L"
+        assert isinstance(imgdata, bytes)
+        assert len(imgdata) == size[0] * size[1] * len(cl_format)
+        pil_image = PIL.Image.frombytes("L", size, imgdata, "raw", "L")
+        imgs.append(pil_image)
+        i += 1
+    
+    assert i == len(imgs) == 3
+    yield imgs
+    [image.close() for image in imgs]
+
+
+def test_render_pdf(render_pdf_topil, render_pdf_tobytes):
+    for image_a, image_b in zip(render_pdf_topil, render_pdf_tobytes):
+        assert image_a == image_b
+
+
+def test_render_pdf_new(caplog):
+    
+    pdf = pdfium.PdfDocument.new()
+    page = pdf.new_page(50, 100)
+    
+    with caplog.at_level(logging.WARNING):
+        renderer = pdf.render_topil()
+        image, _ = next(renderer)
+    
+    warning = "Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data."
+    assert warning in caplog.text
+    
+    assert isinstance(image, PIL.Image.Image)
+    assert image.mode == "RGB"
+    assert image.size == (50, 100)
+    
+    [g.close() for g in (image, page, pdf)]

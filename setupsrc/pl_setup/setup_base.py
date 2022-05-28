@@ -16,8 +16,8 @@ from pl_setup.packaging_base import (
     DataTree,
     SourceTree,
     ModuleDir,
-    PlatformNames,
     VerNamespace,
+    PlatformNames,
 )
 
 

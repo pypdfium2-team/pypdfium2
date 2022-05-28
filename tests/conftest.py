@@ -18,15 +18,25 @@ from pl_setup.packaging_base import PlatformNames
 
 
 class TestFiles:
-    render             = join(ResourceDir,'render.pdf')
-    encrypted          = join(ResourceDir,'encrypted.pdf')
-    multipage          = join(ResourceDir,'multipage.pdf')
-    bookmarks          = join(ResourceDir,'bookmarks.pdf')
-    bookmarks_circular = join(ResourceDir,'bookmarks_circular.pdf')
-    boxes              = join(ResourceDir,'boxes.pdf')
-    text               = join(ResourceDir,'text.pdf')
-    empty              = join(ResourceDir,'empty.pdf')
-    images             = join(ResourceDir,'images.pdf')
+    render        = join(ResourceDir,'render.pdf')
+    encrypted     = join(ResourceDir,'encrypted.pdf')
+    multipage     = join(ResourceDir,'multipage.pdf')
+    toc           = join(ResourceDir,'toc.pdf')
+    toc_viewmodes = join(ResourceDir,'toc_viewmodes.pdf')
+    toc_maxdepth  = join(ResourceDir,'toc_maxdepth.pdf')
+    toc_circular  = join(ResourceDir,'toc_circular.pdf')
+    box_fallback  = join(ResourceDir,'box_fallback.pdf')
+    text          = join(ResourceDir,'text.pdf')
+    empty         = join(ResourceDir,'empty.pdf')
+    images        = join(ResourceDir,'images.pdf')
+
+
+ExpRenderPixels = (
+    ( (0,   0  ), (255, 255, 255) ),
+    ( (150, 180), (129, 212, 26 ) ),
+    ( (150, 390), (42,  96,  153) ),
+    ( (150, 570), (128, 0,   128) ),
+)
 
 
 def iterate_testfiles(skip_encrypted=True):

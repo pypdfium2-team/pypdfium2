@@ -10,27 +10,22 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import SourceTree, run_cmd
 
 
-Git = shutil.which('git')
 RepositoryURL = 'https://github.com/pypdfium2-team/pypdfium2'
 
-
-def run_default(command):
-    return run_cmd(command, cwd=SourceTree, capture=True)
 
 def get_url(tag):
     return RepositoryURL + '/tree/%s' % tag
 
-def generate_tags_list():
-    tags_str = run_default([Git, 'for-each-ref', '--sort=creatordate', '--format', '%(refname)', 'refs/tags'])
+def generate_tags_list(Git, count=10):
+    tags_str = run_cmd([Git, 'for-each-ref', '--count=%s' % count, '--sort=-creatordate', '--format', '%(refname)', 'refs/tags'], cwd=SourceTree, capture=True)
     tags_list = tags_str.split('\n')
-    tags_list.reverse()
     return tags_list
 
 
-def get_tag(TagsList, n_descends, skip_beta=False):
+def get_tag(tags_list, n_descends, skip_beta=False):
     
     i = 0
-    for line in TagsList:
+    for line in tags_list:
         tag = line.split('/')[-1].strip()
         if skip_beta and i > 0 and 'b' in tag:
             continue
@@ -43,13 +38,14 @@ def get_tag(TagsList, n_descends, skip_beta=False):
 
 def main():
     
-    TagsList = generate_tags_list()
-    current_tag, prev_tag = get_tag(TagsList, 0), get_tag(TagsList, 1, True)
+    Git = shutil.which('git')
+    tags_list = generate_tags_list(Git)
+    current_tag, prev_tag = get_tag(tags_list, 0), get_tag(tags_list, 1, True)
     print(current_tag, prev_tag)
     
     relnotes = "Release %s\n\n" % current_tag
     relnotes += "### Changes\n\nCommits between [`%s`](%s) and [`%s`](%s):\n\n" % (prev_tag, get_url(prev_tag), current_tag, get_url(current_tag))
-    relnotes += run_default([Git, 'log', '%s..%s' % (prev_tag, current_tag), "--pretty=format:* %H %s"])
+    relnotes += run_cmd([Git, 'log', '%s..%s' % (prev_tag, current_tag), "--pretty=format:* %H %s"], cwd=SourceTree, capture=True)
     relnotes += '\n'
     
     with open(join(SourceTree, 'RELEASE.md'), 'w') as fh:

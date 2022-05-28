@@ -21,21 +21,7 @@ def attach_parser(subparsers):
     )
 
 
-def print_toc(toc):
-    for item in toc:
-        print(
-            '    ' * item.level +
-            '[{}] '.format('-' if item.is_closed else '+') +
-            '{} -> {}  # {} {}'.format(
-                item.title,
-                item.page_index + 1,
-                item.view_mode,
-                item.view_pos,
-            )
-        )
-
-
 def main(args):
     doc = pdfium.PdfDocument(args.input)
-    print_toc( doc.get_toc() )
+    doc.print_toc( doc.get_toc() )
     doc.close()

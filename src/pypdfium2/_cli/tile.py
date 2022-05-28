@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import ctypes
 import os.path
 from enum import Enum
 from pypdfium2 import _namespace as pdfium
@@ -79,17 +78,15 @@ def main(args):
     width = units_to_pt(args.width, args.unit)
     height = units_to_pt(args.height, args.unit)
     
-    with pdfium.PdfContext(args.input) as src_pdf:
-        
-        dest_pdf = pdfium.FPDF_ImportNPagesToOne(
-            src_pdf,
-            ctypes.c_float(width),       # output_width
-            ctypes.c_float(height),      # output_height
-            ctypes.c_size_t(args.cols),  # num_pages_on_x_axis
-            ctypes.c_size_t(args.rows),  # num_pages_on_y_axis
-        )
-        
-        with open(args.output, 'wb') as file_handle:
-            pdfium.save_pdf(dest_pdf, file_handle)
-        
-        pdfium.close_pdf(dest_pdf)
+    src_doc = pdfium.PdfDocument(args.input)
+    raw_dest = pdfium.FPDF_ImportNPagesToOne(
+        src_doc.raw,
+        width, height,
+        args.cols, args.rows,
+    )
+    dest_doc = pdfium.PdfDocument(raw_dest)
+    with open(args.output, "wb") as buffer:
+        dest_doc.save(buffer)
+    
+    dest_doc.close()
+    src_doc.close()

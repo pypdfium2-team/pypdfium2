@@ -1,13 +1,20 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import sysconfig
-from wheel.bdist_wheel import bdist_wheel
 import pytest
-from pl_setup import setup_base
-from pl_setup.packaging_base import PlatformNames, VerNamespace
-from ..conftest import pl_names
+import sysconfig
+from pathlib import Path
+from wheel.bdist_wheel import bdist_wheel
+from pl_setup import (
+    setup_base,
+    packaging_base as pkg_base,
+)
+from pl_setup.packaging_base import PlatformNames
+from pl_setup import update_pdfium as fpdf_up
+from .conftest import pl_names, SourceTree
 
+
+# setup_base
 
 ExpectedTags = (
     (PlatformNames.darwin_x64,    "macosx_10_11_x86_64.macosx_11_0_x86_64.macosx_12_0_x86_64"),
@@ -46,6 +53,33 @@ def test_get_bdist():
         bdist_cls = setup_base._get_bdist(platform)
         assert issubclass(bdist_cls, bdist_wheel)
 
-def test_setupkws():
-    assert "version" in setup_base.SetupKws
-    assert setup_base.SetupKws["version"] == VerNamespace["V_PYPDFIUM2"]
+
+# packaging_base
+
+def test_libnames():
+    for name in pkg_base.Libnames:
+        assert "pdfium" in name
+
+def test_platformnames():
+    for member in pl_names:
+        assert member == getattr(pkg_base.PlatformNames, member)
+
+def test_paths():
+    assert pkg_base.HomeDir == str( Path.home() )
+    assert pkg_base.SourceTree == SourceTree
+    assert pkg_base.DataTree == str( Path(SourceTree) / "data" )
+    assert pkg_base.SB_Dir == str( Path(SourceTree) / "sourcebuild" )
+    assert pkg_base.ModuleDir == str( Path(SourceTree) / "src" / "pypdfium2" )
+    assert pkg_base.VersionFile == str( Path(pkg_base.ModuleDir) / "version.py" )
+
+
+# update_pdfium
+
+def test_releasenames():
+    assert len(fpdf_up.ReleaseNames) == len(pl_names) - 1
+    for key, value in fpdf_up.ReleaseNames.items():
+        assert hasattr(PlatformNames, key)
+        prefix, system, cpu = value.replace("linux-musl", "musllinux").split("-", maxsplit=3)
+        assert prefix == "pdfium"
+        assert system in ("linux", "musllinux", "mac", "win")
+        assert cpu in ("x64", "x86", "arm64", "arm")

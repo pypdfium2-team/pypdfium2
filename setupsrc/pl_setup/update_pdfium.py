@@ -17,11 +17,11 @@ from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
     DataTree,
-    VersionFile,
     VerNamespace,
     PlatformNames,
     run_cmd,
     call_ctypesgen,
+    set_version,
 )
 
 
@@ -43,46 +43,31 @@ ReleaseNames = {
 }
 
 
-def _set_versions(ver_file, *versions_list):
-    
-    with open(ver_file, 'r') as fh:
-        content = fh.read()
-    
-    for variable, current_ver, new_ver in versions_list:
-        
-        template = "%s = %s"
-        previous = template % (variable, current_ver)
-        updated = template % (variable, new_ver)
-        
-        print("'%s' -> '%s'" % (previous, updated))
-        assert content.count(previous) == 1
-        content = content.replace(previous, updated)
-    
-    with open(ver_file, 'w') as fh:
-        fh.write(content)
-
-
 def get_latest_version():
     git_ls = run_cmd(['git', 'ls-remote', '%s.git' % ReleaseRepo], cwd=None, capture=True)
     tag = git_ls.split('\t')[-1]
     return int( tag.split('/')[-1] )
 
 
-def handle_versions(ver_file, latest_version):
+def handle_versions(latest_version):
     
     v_minor = VerNamespace["V_MINOR"]
     v_libpdfium = VerNamespace["V_LIBPDFIUM"]
+    is_sourcebuild = VerNamespace["IS_SOURCEBUILD"]
     
-    if v_libpdfium < latest_version:
-        print("New PDFium build")
-        _set_versions(
-            ver_file,
-            ("V_MINOR", v_minor, v_minor+1),
-            ("V_LIBPDFIUM", v_libpdfium, latest_version),
-        )
-    
+    if is_sourcebuild:
+        print("Switching from sourcebuild to pre-built binaries.")
+        set_version("IS_SOURCEBUILD", False)
     else:
-        print("No new PDFium build - will re-create bindings without incrementing version")
+        assert v_libpdfium.isnumeric()
+        if int(v_libpdfium) < latest_version:
+            print("New PDFium build")
+            set_version("V_MINOR", v_minor+1)
+        else:
+            print("No new PDFium build - will re-create bindings without incrementing version")
+    
+    if v_libpdfium != str(latest_version):
+        set_version("V_LIBPDFIUM", str(latest_version))
 
 
 def clear_data(download_files):
@@ -192,7 +177,7 @@ def main(platforms):
     download_files = get_download_files(platforms)
     
     latest_version = get_latest_version()
-    handle_versions(VersionFile, latest_version)
+    handle_versions(latest_version)
     clear_data(download_files)
     
     archives = download_releases(latest_version, download_files)

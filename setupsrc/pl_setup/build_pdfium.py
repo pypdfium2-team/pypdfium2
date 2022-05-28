@@ -17,9 +17,11 @@ from pl_setup.packaging_base import (
     SB_Dir,
     Libnames,
     DataTree,
+    VerNamespace,
     PlatformNames,
     run_cmd,
     call_ctypesgen,
+    set_version,
 )
 
 
@@ -71,6 +73,8 @@ elif sys.platform.startswith('darwin'):
     SyslibsConfig['use_system_xcode'] = True
 elif sys.platform.startswith('win32'):
     DefaultConfig['pdf_use_win32_gdi'] = True
+
+Git = shutil.which("git")
 
 
 def dl_depottools(do_update):
@@ -133,6 +137,33 @@ def dl_pdfium(do_update, revision, GClient):
     return is_sync
 
 
+def get_version_info():
+    head_commit = run_cmd([Git, 'rev-parse', '--short', 'HEAD'], cwd=PDFiumDir, capture=True)
+    refs_string = run_cmd([Git, 'ls-remote', '--heads', PDFium_URL, 'chromium/*'], capture=True, cwd=None)
+    latest = refs_string.split('\n')[-1]
+    tag_commit, ref = latest.split('\t')
+    tag = ref.split('/')[-1]
+    return head_commit, tag_commit[:7], tag
+
+
+def update_version(head_commit, tag_commit, tag):
+    
+    is_sourcebuild = VerNamespace['IS_SOURCEBUILD']
+    curr_libversion = VerNamespace['V_LIBPDFIUM']
+    
+    print("Current head %s, latest tagged commit %s (%s)" % (head_commit, tag_commit, tag))
+    if head_commit == tag_commit:
+        new_libversion = tag
+    else:
+        new_libversion = head_commit
+    
+    if not is_sourcebuild:
+        print("Switching from pre-built binaries to source build.")
+        set_version('IS_SOURCEBUILD', True)
+    if curr_libversion != new_libversion:
+        set_version('V_LIBPDFIUM', new_libversion)
+
+
 def _apply_patchset(patchset):
     for patch, cwd in patchset:
         run_cmd(['git', 'apply', '-v', patch], cwd=cwd)
@@ -155,8 +186,8 @@ def configure(config, GN):
     run_cmd([GN, 'gen', PDFiumBuildDir], cwd=PDFiumDir)
 
 
-def build(Ninja):
-    run_cmd([Ninja, '-C', PDFiumBuildDir, 'pdfium'], cwd=PDFiumDir)
+def build(Ninja, target):
+    run_cmd([Ninja, '-C', PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
 def find_lib(srcname=None, directory=PDFiumBuildDir):
@@ -230,10 +261,13 @@ def main(
         b_update = False,
         b_use_syslibs = False,
         b_revision = None,
+        b_target = None,
     ):
     
     if b_revision is None:
         b_revision = 'main'
+    if b_target is None:
+        b_target = 'pdfium'
     # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
     if b_destname is None and sys.platform.startswith('linux'):
         b_destname = 'pdfium'
@@ -253,6 +287,8 @@ def main(
     if pdfium_dl_done:
         patch_pdfium()
     
+    update_version( *get_version_info() )
+    
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
         config_dict.update(SyslibsConfig)
@@ -261,7 +297,7 @@ def main(
     print("\nBuild configuration:\n%s\n" % config_str)
     
     configure(config_str, GN)
-    build(Ninja)
+    build(Ninja, b_target)
     libpath = find_lib(b_srcname)
     pack(libpath, b_destname)
 
@@ -294,6 +330,10 @@ def parse_args(argv):
         '--revision', '-r',
         help = "PDFium revision to check out (defaults to main).",
     )
+    parser.add_argument(
+        '--target', "-t",
+        help = "PDFium build target (defaults to `pdfium`). Use `pdfium_all` to also build tests."
+    )
     
     return parser.parse_args(argv)
 
@@ -306,6 +346,7 @@ def main_cli(argv=sys.argv[1:]):
         b_update = args.update,
         b_use_syslibs = args.use_syslibs,
         b_revision = args.revision,
+        b_target = args.target,
     )
     
 

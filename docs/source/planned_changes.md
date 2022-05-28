@@ -3,4 +3,4 @@
 
 # Planned Changes
 
-The next release will be API-breaking, switching completely to an object-oriented support model.
+Currently, no API breaking changes are planned.

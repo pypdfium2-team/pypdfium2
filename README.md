@@ -16,7 +16,9 @@ pip3 install --no-build-isolation -U pypdfium2
 
 ### Manual installation
 
-The following steps require the system tools `git` and `gcc` to be installed and available in `PATH`. In addition, the Python dependencies `setuptools`, `setuptools-scm` `wheel`, `build`, and `ctypesgen` are needed. Also make sure that your `pip` version is up-to-date. For more information, please refer to [`dependencies.md`](docs/source/dependencies.md).
+The following steps require the system tools `git` and `gcc` to be installed and available in `PATH`.
+For Python setup and runtime dependencies, please refer to [`setup.cfg`](./setup.cfg).
+It is recommended to install `ctypesgen` from the latest sources (`git master`).
 
 #### Package locally
 
@@ -32,6 +34,9 @@ If you wish to perform a source build regardless of whether PDFium binaries are 
 ```bash
 make build
 ```
+
+Depending on the operating system, additional dependencies may need to be installed beforehand.
+
 
 ## Examples
 
@@ -61,67 +66,68 @@ CLI documentation: https://pypdfium2.readthedocs.io/en/stable/shell_api.html
 
 Import pypdfium2:
 
-```python3
+```python
 import pypdfium2 as pdfium
 ```
 
-Open a PDF using the helper class `PdfDocument`:
-```python3
-doc = pdfium.PdfDocument(filename)
-# ... use methods provided by the helper class
-pdf = doc.raw
-# ... work with the actual PDFium document handle
-doc.close()
-```
+Open a PDF using the helper class `PdfDocument` (supports file paths, bytes, and byte buffers):
 
-Open a PDF using the context manager `PdfContext`:
-```python3
-with pdfium.PdfContext(filename) as pdf:
-    # ... work with the pdf
+```python
+pdf = pdfium.PdfDocument(filepath)
+print(pdf)
+# Work with the helper class
+print(pdf.raw)
+# Work with the raw PDFium object handle
+pdf.close()
 ```
 
 Render a single page:
 
-```python3
-with pdfium.PdfContext(filename) as pdf:
-    pil_image = pdfium.render_page_topil(
-        pdf,
-        page_index = 0,
-        scale = 1,
-        rotation = 0,
-        colour = (255, 255, 255, 255),
-        annotations = True,
-        greyscale = False,
-        optimise_mode = pdfium.OptimiseMode.none,
-    )
-
+```python
+pdf = pdfium.PdfDocument(filepath)
+page = pdf.get_page(0)
+pil_image = page.render_topil(
+    scale = 1,
+    rotation = 0,
+    crop = (0, 0, 0, 0),
+    colour = (255, 255, 255, 255),
+    annotations = True,
+    greyscale = False,
+    optimise_mode = pdfium.OptimiseMode.NONE,
+)
 pil_image.save("out.png")
 pil_image.close()
+page.close()
+pdf.close()
 ```
 
 Render multiple pages concurrently:
 
-```python3
-for image, suffix in pdfium.render_pdf_topil(filename):
-    image.save('out_%s.png' % suffix)
+```python
+pdf = pdfium.PdfDocument(filepath)
+n_pages = len(pdf)
+for image, index in pdf.render_topil():
+    image.save('out_%s.jpg' % str(index).zfill(n_pages))
     image.close()
+pdf.close()
 ```
 
 Read the table of contents:
 
-```python3
-doc = pdfium.PdfDocument(filepath)
-for item in doc.get_toc():
+```python
+pdf = pdfium.PdfDocument(filepath)
+for item in pdf.get_toc():
     print(
         '    ' * item.level +
-        "{} -> {}  # {} {}".format(
+        '[{}] '.format('-' if item.is_closed else '+') +
+        '{} -> {}  # {} {}'.format(
             item.title,
             item.page_index + 1,
             item.view_mode,
-            item.view_pos,
+            [round(c, n_digits) for c in item.view_pos],
         )
     )
-doc.close()
+pdf.close()
 ```
 
 Support model documentation: https://pypdfium2.readthedocs.io/en/stable/python_api.html
@@ -131,7 +137,7 @@ Support model documentation: https://pypdfium2.readthedocs.io/en/stable/python_a
 
 Rendering the first page of a PDF document:
 
-```python3
+```python
 import math
 import ctypes
 from PIL import Image
@@ -186,8 +192,9 @@ Documentation and examples of pypdfium2 are CC-BY-4.0 licensed.
 
 ## In Use
 
-* The [doctr](https://mindee.github.io/doctr/) OCR library uses pypdfium2 to rasterise PDF documents.
-* The [Extract-URLs](https://github.com/elescamilla/Extract-URLs/) project extracts URLs from PDFs using pypdfium2.
+* The [doctr](https://mindee.github.io/doctr/) OCR library uses pypdfium2 to rasterise PDFs.
+* [Extract-URLs](https://github.com/elescamilla/Extract-URLs/) use pypdfium2 to extract URLs from PDF documents.
+* [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) compares pypdfium2's text extraction capabilities with other libraries.
 
 
 ## Development
@@ -213,7 +220,7 @@ Run `make test`.
 The release process is automated using a CI workflow that pushes to GitHub, TestPyPI and PyPI.
 To do a release, first run `make packaging` locally to check that everything works as expected.
 If all went well, upload changes to the version file and push a new tag to trigger the `Release` woirkflow.
-Always make sure the information in `src/pypdfium2/_version.py` matches with the tag!
+Always make sure the information in `src/pypdfium2/version.py` matches with the tag!
 ```bash
 git tag -a A.B.C
 git push --tags
