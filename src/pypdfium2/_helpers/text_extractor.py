@@ -52,7 +52,7 @@ class PdfTextPage:
         
         c_array = (ctypes.c_ushort * (n_chars+1))()
         pdfium.FPDFText_GetBoundedText(*args, ctypes.cast(c_array, ctypes.POINTER(ctypes.c_ushort)), n_chars)
-        text = bytes(c_array).decode("utf-16-le")[:-1]
+        text = bytes(c_array).decode("utf-16-le", errors="ignore")[:-1]
         
         return text
     
