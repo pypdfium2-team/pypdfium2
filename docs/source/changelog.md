@@ -4,6 +4,12 @@
 # Changelog
 
 
+## 1.11.0 (2022-06-01)
+
+- Updated PDFium from `5079` to `5092`.
+- In the text extractor, avoid decoding errors on malformed documents by using `errors="ignore"`.
+
+
 ## 1.10.0 (2022-05-25)
 
 - Updated PDFium from `5065` to `5079`.
