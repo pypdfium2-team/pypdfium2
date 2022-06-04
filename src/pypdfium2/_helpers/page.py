@@ -108,7 +108,10 @@ class PdfPage:
         self._set_box(pdfium.FPDFPage_SetMediaBox, l, b, r, t)
     
     def get_cropbox(self):
-        """ Returns: The page's CropBox. Fallback: MediaBox. """
+        """
+        Returns:
+            The page's CropBox (If not defined, falls back to MediaBox).
+        """
         return self._get_box(pdfium.FPDFPage_GetCropBox, self.get_mediabox)
     
     def set_cropbox(self, l, b, r, t):
@@ -116,7 +119,10 @@ class PdfPage:
         self._set_box(pdfium.FPDFPage_SetCropBox, l, b, r, t)
     
     def get_bleedbox(self):
-        """ Returns: The page's BleedBox. Fallback: CropBox. """
+        """
+        Returns:
+            The page's BleedBox (If not defined, falls back to CropBox).
+        """
         return self._get_box(pdfium.FPDFPage_GetBleedBox, self.get_cropbox)
     
     def set_bleedbox(self, l, b, r, t):
@@ -124,7 +130,10 @@ class PdfPage:
         self._set_box(pdfium.FPDFPage_SetBleedBox, l, b, r, t)
     
     def get_trimbox(self):
-        """ Returns: The page's TrimBox. Fallback: CropBox. """
+        """
+        Returns:
+            The page's TrimBox (If not defined, falls back to CropBox).
+        """
         return self._get_box(pdfium.FPDFPage_GetTrimBox, self.get_cropbox)
     
     def set_trimbox(self, l, b, r, t):
@@ -132,7 +141,10 @@ class PdfPage:
         self._set_box(pdfium.FPDFPage_SetTrimBox, l, b, r, t)
     
     def get_artbox(self):
-        """ Returns: The page's ArtBox. Fallback: CropBox. """
+        """
+        Returns:
+            The page's ArtBox (If not defined, falls back to CropBox).
+        """
         return self._get_box(pdfium.FPDFPage_GetArtBox, self.get_cropbox)
     
     def set_artbox(self, l, b, r, t):

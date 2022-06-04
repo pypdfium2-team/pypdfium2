@@ -55,7 +55,7 @@ ColourMapping = {
     "L":    "L",
 }
 
-#: Get the view mode string that corresponds to a PDFium view mode constants (``PDFDEST_VIEW_...``).
+#: Get the view mode string that corresponds to a PDFium view mode constant (``PDFDEST_VIEW_...``).
 ViewmodeMapping = {
     pdfium.PDFDEST_VIEW_XYZ:   "XYZ",
     pdfium.PDFDEST_VIEW_FIT:   "Fit",
@@ -89,7 +89,7 @@ ObjtypeToName = {
     pdfium.FPDF_PAGEOBJ_FORM:    "form",
 }
 
-#: Get the object type constant that corresponds to an object type string
+#: Get the object type constant that corresponds to an object type string (inversion of :data:`.ObjtypeToName`)
 ObjtypeToConst = {v: k for k, v in ObjtypeToName.items()}
 
 #: Get the PDFium rotation constant that corresponds to a rotation value in degrees.

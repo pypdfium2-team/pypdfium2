@@ -109,7 +109,7 @@ class PdfDocument:
         Parameters:
             buffer (typing.BinaryIO):
                 A byte buffer to capture the data.
-                It may be any object that implements the ``write()`` method.
+                It may be any object implementing the ``write()`` method.
             version (typing.Optional[int]):
                  The PDF version to use, given as an integer (14 for 1.4, 15 for 1.5, ...).
                  If :data:`None`, PDFium will set a version automatically.
@@ -276,10 +276,10 @@ class PdfDocument:
         Print a table of contents.
         
         Parameters:
-            toc (typing.Iterable[toc]):
+            toc (typing.Iterable[OutlineItem]):
                 Sequence of outline items to show.
             n_digits (int):
-                Number of digits to which viewport coordinates shall be rounded.
+                The number of digits to which viewport coordinates shall be rounded.
         """
         
         for item in toc:
@@ -328,6 +328,7 @@ class PdfDocument:
         Parameters:
             page_indices (typing.Optional[typing.Sequence[int]]):
                 A sequence of zero-based indices of the pages to render.
+                If :data:`None`, all pages will be included.
             n_processes (int):
                 Target number of parallel processes.
             kwargs (dict):
@@ -364,6 +365,8 @@ class PdfDocument:
         """
         Concurrently render pages to bytes.
         
+        See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
+        
         Yields:
             (:class:`tuple`, :class:`int`) - Result of :meth:`.PdfPage.render_tobytes`, and page index.
         """
@@ -374,6 +377,8 @@ class PdfDocument:
         *Requires* :mod:`PIL`.
         
         Concurrently render pages to PIL images.
+        
+        See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
         
         Yields:
             (:class:`PIL.Image.Image`, :class:`int`) – PIL image, and page index.
