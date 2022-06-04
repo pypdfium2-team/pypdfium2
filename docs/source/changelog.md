@@ -4,13 +4,13 @@
 # Changelog
 
 
-## 2.0.0 (sched 2022-??-??)
+## 2.0.0 (sched 2022-06-??)
 
 *This release has deeply changed the support model API in a way that is incompatible with previous releases.*
 
-- Updated PDFium from `5079` to `????`.
+- Updated PDFium from `5092` to `????`.
 - Entirely re-implemented the support model to improve the API and fix some structural issues.
-  * All support models are now object-oriented. This has numerous advantages, for example simpler method calls, a cleaner namespace and the possibility to nicely cache data.
+  * All helpers are now object-oriented. This has numerous advantages, for example simpler method calls, a cleaner namespace and the possibility to nicely cache data.
   * A page helper class was added to avoid repeated loading and closing of pages in separate functions.
     It also provides new getters and setters for rotation and PDF boxes.
   * Text pages can now only be loaded from pages and not documents, as they require a regular page as initialisation parameter.
@@ -24,6 +24,8 @@
   * Command-line interfaces were adapted to the new API.
   * The Sphinx documentation has been thoroughly overhauled.
 - The version file now gets updated accordingly when building from source.
+- Added an option to set a custom PDFium build target, which can be useful to include PDFium tests when compiling, for instance.
+- Made the release note script more elegant.
 - The test suite has been rearranged, improved and extended.
 
 
