@@ -29,24 +29,24 @@ ReleaseRepo = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseExtension = "tgz"
 ReleaseNames = {
-    PlatformNames.darwin_x64    : 'pdfium-mac-x64',
-    PlatformNames.darwin_arm64  : 'pdfium-mac-arm64',
-    PlatformNames.linux_x64     : 'pdfium-linux-x64',
-    PlatformNames.linux_x86     : 'pdfium-linux-x86',
-    PlatformNames.linux_arm64   : 'pdfium-linux-arm64',
-    PlatformNames.linux_arm32   : 'pdfium-linux-arm',
-    PlatformNames.musllinux_x64 : 'pdfium-linux-musl-x64',
-    PlatformNames.musllinux_x86 : 'pdfium-linux-musl-x86',
-    PlatformNames.windows_x64   : 'pdfium-win-x64',
-    PlatformNames.windows_x86   : 'pdfium-win-x86',
-    PlatformNames.windows_arm64 : 'pdfium-win-arm64',
+    PlatformNames.darwin_x64    : "pdfium-mac-x64",
+    PlatformNames.darwin_arm64  : "pdfium-mac-arm64",
+    PlatformNames.linux_x64     : "pdfium-linux-x64",
+    PlatformNames.linux_x86     : "pdfium-linux-x86",
+    PlatformNames.linux_arm64   : "pdfium-linux-arm64",
+    PlatformNames.linux_arm32   : "pdfium-linux-arm",
+    PlatformNames.musllinux_x64 : "pdfium-linux-musl-x64",
+    PlatformNames.musllinux_x86 : "pdfium-linux-musl-x86",
+    PlatformNames.windows_x64   : "pdfium-win-x64",
+    PlatformNames.windows_x86   : "pdfium-win-x86",
+    PlatformNames.windows_arm64 : "pdfium-win-arm64",
 }
 
 
 def get_latest_version():
-    git_ls = run_cmd(['git', 'ls-remote', '%s.git' % ReleaseRepo], cwd=None, capture=True)
-    tag = git_ls.split('\t')[-1]
-    return int( tag.split('/')[-1] )
+    git_ls = run_cmd(["git", "ls-remote", "%s.git" % ReleaseRepo], cwd=None, capture=True)
+    tag = git_ls.split("\t")[-1]
+    return int( tag.split("/")[-1] )
 
 
 def handle_versions(latest_version):
@@ -122,7 +122,7 @@ def unpack_archives(archives):
         else:
             raise ValueError("Unknown archive extension '%s'" % ReleaseExtension)
         
-        extraction_path = join(os.path.dirname(file), 'build_tar')
+        extraction_path = join(os.path.dirname(file), "build_tar")
         with arc_opener(file) as archive:
             archive.extractall(extraction_path)
         
@@ -133,17 +133,17 @@ def generate_bindings(archives):
     
     for platform_dir in archives.keys():
         
-        build_dir = join(platform_dir,'build_tar')
-        bin_dir = join(build_dir,'lib')
+        build_dir = join(platform_dir,"build_tar")
+        bin_dir = join(build_dir, "lib")
         dirname = os.path.basename(platform_dir)
         
-        if dirname.startswith('windows'):
-            target_name = 'pdfium.dll'
-            bin_dir = join(build_dir,'bin')
-        elif dirname.startswith('darwin'):
-            target_name = 'pdfium.dylib'
-        elif 'linux' in dirname:
-            target_name = 'pdfium'
+        if dirname.startswith("windows"):
+            target_name = "pdfium.dll"
+            bin_dir = join(build_dir, "bin")
+        elif dirname.startswith("darwin"):
+            target_name = "pdfium.dylib"
+        elif "linux" in dirname:
+            target_name = "pdfium"
         else:
             raise ValueError("Unknown platform directory name '%s'" % dirname)
         
@@ -152,7 +152,7 @@ def generate_bindings(archives):
         
         shutil.move(join(bin_dir, items[0]), join(platform_dir, target_name))
         
-        call_ctypesgen(platform_dir, join(build_dir,'include'))
+        call_ctypesgen(platform_dir, join(build_dir, "include"))
         shutil.rmtree(build_dir)
 
 
@@ -190,9 +190,9 @@ def parse_args(argv):
         description = "Download pre-built PDFium packages and generate bindings",
     )
     parser.add_argument(
-        '--platforms', '-p',
-        metavar = 'P',
-        nargs = '*',
+        "--platforms", "-p",
+        metavar = "P",
+        nargs = "*",
     )
     return parser.parse_args(argv)
 
@@ -202,5 +202,5 @@ def run_cli(argv=sys.argv[1:]):
     return main(args.platforms)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_cli()
