@@ -16,17 +16,17 @@ class PdfTextPage:
     
     @property
     def raw(self):
-        """ Get the raw PDFium ``FPDF_TEXTPAGE`` handle. """
+        """ :class:`.FPDF_TEXTPAGE` – The raw PDFium text page object handle. """
         return self._textpage
     
     @property
     def page(self):
-        """ Get the :class:`.PdfPage` object this text page belongs to. """
+        """ :class:`.PdfPage` – The page this text page belongs to. """
         return self._page
     
     @property
     def pdf(self):
-        """ Get the :class:`.PdfDocument` object this text page belongs to. """
+        """ :class:`.PdfDocument` – The document this text page belongs to. """
         return self._pdf
     
     def close(self):
@@ -44,7 +44,7 @@ class PdfTextPage:
         See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
         
         Returns:
-            The text on the page area in question, or an empty string if no text was found.
+            :class:`str` – The text on the page area in question, or an empty string if no text was found.
         """
         
         width, height = self.page.get_size()
@@ -69,17 +69,20 @@ class PdfTextPage:
     
     
     def count_chars(self):
-        """ Returns the number of characters on the page. """
+        """
+        Returns:
+            :class:`int` – The number of characters on the page.
+        """
         return pdfium.FPDFText_CountChars(self._textpage)
     
     
     def count_rects(self, index=0, count=0):
         """
-        Returns the number of text rectangles on the page.
-        
         Parameters:
             index (int): Character index at which to start.
             count (int): Character count to consider (defaults to :meth:`.count_chars`).
+        Returns:
+            :class:`int` – The number of text rectangles on the page.
         """
         n_chars = self.count_chars()
         if n_chars == 0:
@@ -103,7 +106,7 @@ class PdfTextPage:
         
         Returns:
             The index (:class:`int`) of the character at or nearby the point (x, y).
-            Returns :data:`None` if there is no character or an error occurred.
+            May be :data:`None` if there is no character or an error occurred.
         """
         index = pdfium.FPDFText_GetCharIndexAtPos(self._textpage, x, y, x_tol, y_tol)
         if index < 0:
@@ -214,6 +217,7 @@ class PdfTextSearcher:
     
     @property
     def textpage(self):
+        """ :class:`.PdfTextPage` – The text page this searching helper belongs to. """
         return self._textpage
     
     def _get_occurrence(self, find_func):

@@ -44,7 +44,7 @@ class PdfPage:
     
     @property
     def pdf(self):
-        """ :class:`.PdfDocument` – The document helper object associated to this page. """
+        """ :class:`.PdfDocument` – The document this page belongs to. """
         return self._pdf
     
     def close(self):
