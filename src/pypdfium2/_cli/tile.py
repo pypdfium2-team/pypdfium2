@@ -78,15 +78,14 @@ def main(args):
     width = units_to_pt(args.width, args.unit)
     height = units_to_pt(args.height, args.unit)
     
-    src_doc = pdfium.PdfDocument(args.input)
+    src_pdf = pdfium.PdfDocument(args.input)
     raw_dest = pdfium.FPDF_ImportNPagesToOne(
-        src_doc.raw,
+        src_pdf.raw,
         width, height,
         args.cols, args.rows,
     )
-    dest_doc = pdfium.PdfDocument(raw_dest)
+    dest_pdf = pdfium.PdfDocument(raw_dest)
     with open(args.output, "wb") as buffer:
-        dest_doc.save(buffer)
+        dest_pdf.save(buffer)
     
-    dest_doc.close()
-    src_doc.close()
+    [g.close() for g in (dest_pdf, src_pdf)]

@@ -35,12 +35,12 @@ def main(args):
     
     sep = ''
     for index in args.pages:
+        
         page = doc.get_page(index)
         textpage = page.get_textpage()
-        
         text = textpage.get_text()
-        page.close()
-        textpage.close()
+        
+        [g.close() for g in (textpage, page)]
         
         print(sep + "# Page %s\n" % (index+1) + text)
         sep = '\n'
