@@ -236,8 +236,7 @@ class PdfTextSearcher:
     def get_next(self):
         """
         Returns:
-            A list of bounding boxes for the next occurrence,
-            or :data:`None` if the last occurrence was passed.
+            A list of bounding boxes for the next occurrence, or :data:`None` if the last occurrence was passed.
         """
         return self._get_occurrence(pdfium.FPDFText_FindNext)
     

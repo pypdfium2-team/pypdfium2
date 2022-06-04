@@ -139,7 +139,7 @@ def dl_pdfium(do_update, revision, GClient):
 
 def get_version_info():
     head_commit = run_cmd([Git, "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
-    refs_string = run_cmd([Git, "ls-remote", "--heads", PDFium_URL, "chromium/*"], capture=True, cwd=None)
+    refs_string = run_cmd([Git, "ls-remote", "--heads", PDFium_URL, "chromium/*"], cwd=None, capture=True)
     latest = refs_string.split("\n")[-1]
     tag_commit, ref = latest.split("\t")
     tag = ref.split("/")[-1]
