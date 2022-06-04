@@ -41,7 +41,7 @@ def install_handler():
     from pl_setup import check_deps
     from pl_setup.packaging_base import SourceTree, PlatformNames
     
-    StatusFile = join(SourceTree, 'setupsrc', 'pl_setup', '.presetup_done.txt')
+    StatusFile = join(SourceTree, 'data', '.presetup_done.txt')
     
     def check_presetup():
         if os.path.exists(StatusFile):
