@@ -7,7 +7,7 @@ import pypdfium2._pypdfium as pdfium
 
 
 class PdfTextPage:
-    """ Support model for PDF text extraction. """
+    """ Text extraction helper class. """
     
     def __init__(self, textpage, page, pdf):
         self._textpage = textpage
@@ -214,7 +214,7 @@ class PdfTextPage:
         
 
 class PdfTextSearcher:
-    """ Helper class to search text. """
+    """ Text searcher helper class. """
     
     def __init__(self, search, textpage):
         self._search = search

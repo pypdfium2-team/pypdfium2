@@ -32,6 +32,7 @@ else:
 
 
 class PdfPage:
+    """ Page helper class. """
     
     def __init__(self, page, pdf):
         self._page = page
@@ -407,6 +408,7 @@ class BitmapDataHolder:
 
 
 class PdfPageObject:
+    """ Page object helper class. """
     
     def __init__(self, pageobj):
         self._pageobj = pageobj

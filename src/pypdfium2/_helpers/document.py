@@ -400,7 +400,7 @@ class _writer_class:
 
 
 class HarfbuzzFont:
-    """ Helper class to store harfbuzz font data. """
+    """ Harfbuzz font data helper class. """
     
     def __init__(self, font_path):
         if not have_harfbuzz:
@@ -412,7 +412,7 @@ class HarfbuzzFont:
 
 
 class PdfFont:
-    """ Helper class to store PDF font data. """
+    """ PDF font data helper class. """
     
     def __init__(self, pdf_font, font_data):
         self._pdf_font = pdf_font
