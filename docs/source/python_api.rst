@@ -34,8 +34,7 @@ Miscellaneous
 PDFium
 ******
 
-This is an assortment of PDFium members referenced in this documentation.
-PDFium has far more attributes than what is listed here, though.
+This is an assortment of PDFium members referenced in this documentation. PDFium has far more attributes than what is listed here, though.
 
 .. class:: pypdfium2.FPDF_DOCUMENT
 .. class:: pypdfium2.FPDF_PAGE

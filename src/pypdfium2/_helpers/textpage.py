@@ -123,7 +123,6 @@ class PdfTextPage:
                 Slot of the character to work with, in the page's character array.
             loose (bool):
                 If True, the entire glyph bounds will be covered, without taking the actual glyph shape into account.
-        
         Returns:
             Values for left, bottom, right and top in PDF canvas units.
         """
@@ -152,7 +151,7 @@ class PdfTextPage:
         Get the bounding boxes of text rectangles in the requested scope.
         
         Yields:
-            Coordinates for (left, bottom, right, top).
+            Coordinates for (left, bottom, right, top), as :class:`float` values.
         """
         n_rects = self.count_rects(index, count)
         for index in range(n_rects):
@@ -162,6 +161,12 @@ class PdfTextPage:
     
     
     def get_links(self):
+        """
+        Iterate through web links on the page.
+        
+        Yields:
+            :class:`str` – A web link string.
+        """
         
         links = pdfium.FPDFLink_LoadWebLinks(self._textpage)
         n_links = pdfium.FPDFLink_CountWebLinks(links)

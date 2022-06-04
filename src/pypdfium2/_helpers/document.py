@@ -74,9 +74,7 @@ class PdfDocument:
     
     @property
     def raw(self):
-        """
-        :class:`.FPDF_DOCUMENT` – The raw PDFium document object handle.
-        """
+        """ :class:`.FPDF_DOCUMENT` – The raw PDFium document object handle. """
         return self._pdf
     
     @classmethod
