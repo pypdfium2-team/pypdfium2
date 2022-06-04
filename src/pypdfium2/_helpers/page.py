@@ -60,19 +60,31 @@ class PdfPage:
     
     
     def get_width(self):
-        """ Returns: :class:`float` – Page width (horizontal size). """
+        """
+        Returns:
+            :class:`float` – Page width (horizontal size).
+        """
         return pdfium.FPDF_GetPageWidthF(self._page)
     
     def get_height(self):
-        """ Returns: :class:`float` – Page height (vertical size). """
+        """
+        Returns:
+            :class:`float` – Page height (vertical size).
+        """
         return pdfium.FPDF_GetPageHeightF(self._page)
     
     def get_size(self):
-        """ Returns: (:class:`float`, :class:`float`) – Tuple of page width and height. """
+        """
+        Returns:
+            (:class:`float`, :class:`float`) – Tuple of page width and height.
+        """
         return (self.get_width(), self.get_height())
     
     def get_rotation(self):
-        """ Returns: :class:`int` – Clockwise page rotation in degrees. """
+        """
+        Returns:
+            :class:`int` – Clockwise page rotation in degrees.
+        """
         return RotationToDegrees[ pdfium.FPDFPage_GetRotation(self._page) ]
     
     def set_rotation(self, rotation):
