@@ -235,15 +235,17 @@ class PdfTextSearcher:
     
     def get_next(self):
         """
-        Get a list of bounding boxes for the next occurrence.
-        Returns :data:`None` if the last occurrence was passed.
+        Returns:
+            A list of bounding boxes for the next occurrence,
+            or :data:`None` if the last occurrence was passed.
         """
         return self._get_occurrence(pdfium.FPDFText_FindNext)
     
     def get_prev(self):
         """
-        Get a list of bounding boxes for the previous occurrence (i. e. the one before the last valid occurrence).
-        Returns :data:`None` if the first occurrence was passed.
+        Returns:
+            A list of bounding boxes for the previous occurrence (i. e. the one before the last valid occurrence),
+            or :data:`None` if the first occurrence was passed.
         """
         return self._get_occurrence(pdfium.FPDFText_FindPrev)
     

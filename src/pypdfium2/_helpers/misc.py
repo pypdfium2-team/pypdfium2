@@ -62,7 +62,7 @@ def handle_error():
     If it indicates success, nothing will be done. Otherwise, a :class:`.PdfiumError` will be raised accordingly.
     
     Important:
-        This error handler should only be called to determine the error cause of a recent failure detected by return code.
+        This error handler should only be called to determine the cause of a recent failure detected by return code.
         Otherwise, it could happen that a previously caught exception is re-raised.
     """
     
