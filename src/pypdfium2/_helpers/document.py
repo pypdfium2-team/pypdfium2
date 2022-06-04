@@ -295,7 +295,11 @@ class PdfDocument:
             )
     
     
-    def _implicit_save(self):
+    def update_sources(self):
+        """
+        Update the input sources to the document's current state by saving to bytes and setting them as new input.
+        If you modified the document, you'll want to call this method before doing concurrent rendering, as it uses the input sources.
+        """
         buffer = io.BytesIO()
         self.save(buffer)
         buffer.seek(0)
@@ -339,7 +343,7 @@ class PdfDocument:
         
         if isinstance(self._input_data, pdfium.FPDF_DOCUMENT):
             logger.warning("Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data.")
-            self._implicit_save()
+            self.update_sources()
         
         n_pages = len(self)
         
