@@ -150,7 +150,7 @@ class PdfDocument:
             index (int):
                 Suggested zero-based index at which the page will be inserted.
                 If *index* is less or equal to zero, the page will be inserted at the beginning.
-                If *index* is larger that the document's current last index, the page will be appened to the end.
+                If *index* is larger that the document's current last index, the page will be appended to the end.
         
         Returns:
             :class:`.PdfPage` – The newly created page.
