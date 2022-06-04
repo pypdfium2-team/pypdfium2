@@ -263,7 +263,7 @@ class PdfPage:
                 Whether to render in greyscale mode (no colours).
             
             optimise_mode (OptimiseMode):
-                Optimise rendering for LCD displays or for printing.
+                How to optimise page rendering.
             
             crop (typing.Sequence[float]):
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top).
