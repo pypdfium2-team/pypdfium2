@@ -35,18 +35,19 @@ def test_get_colourformat(use_alpha, greyscale, cl_src, cl_dest, cl_const):
 
 
 @pytest.mark.parametrize(
-    ["values", "cl_value", "use_alpha"],
+    ["values", "cl_abgr", "cl_argb", "use_alpha"],
     [
-        ((255, 255, 255),      0xFFFFFFFF, False),
-        ((255, 255, 255, 255), 0xFFFFFFFF, False),
-        ((0,   255, 255, 255), 0xFF00FFFF, False),
-        ((255, 0,   255, 255), 0xFFFF00FF, False),
-        ((255, 255, 0,   255), 0xFFFFFF00, False),
-        ((255, 255, 255, 0  ), 0x00FFFFFF, True ),
+        ((255, 255, 255),      0xFFFFFFFF, 0xFFFFFFFF, False),
+        ((255, 255, 255, 255), 0xFFFFFFFF, 0xFFFFFFFF, False),
+        ((255, 255, 255, 0  ), 0x00FFFFFF, 0x00FFFFFF, True ),
+        ((0,   255, 255, 255), 0xFFFFFF00, 0xFF00FFFF, False),
+        ((255, 0,   255, 255), 0xFFFF00FF, 0xFFFF00FF, False),
+        ((255, 255, 0,   255), 0xFF00FFFF, 0xFFFFFF00, False),
     ]
 )
-def test_colour_tohex(values, cl_value, use_alpha):
-    assert colour_tohex(*values) == (cl_value, use_alpha)
+def test_colour_tohex(values, cl_abgr, cl_argb, use_alpha):
+    assert colour_tohex(*values, greyscale=False) == (cl_abgr, use_alpha)
+    assert colour_tohex(*values, greyscale=True)  == (cl_argb, use_alpha)
 
 
 @pytest.mark.parametrize(
