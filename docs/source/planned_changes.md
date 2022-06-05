@@ -3,4 +3,4 @@
 
 # Planned Changes
 
-Currently, no API breaking changes are planned.
+Currently, no API-breaking changes are planned.
