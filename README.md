@@ -96,9 +96,7 @@ pil_image = page.render_topil(
     optimise_mode = pdfium.OptimiseMode.NONE,
 )
 pil_image.save("out.png")
-pil_image.close()
-page.close()
-pdf.close()
+[g.close() for g in (pil_image, page, pdf)]
 ```
 
 Render multiple pages concurrently:
@@ -124,7 +122,7 @@ for item in pdf.get_toc():
             item.title,
             item.page_index + 1,
             item.view_mode,
-            [round(c, n_digits) for c in item.view_pos],
+            item.view_pos,
         )
     )
 pdf.close()
@@ -140,12 +138,13 @@ Rendering the first page of a PDF document:
 ```python
 import math
 import ctypes
+import os.path
 from PIL import Image
 import pypdfium2 as pdfium
 
-filename = "your/path/to/document.pdf"
+filepath = os.path.abspath("tests/resources/render.pdf")
 
-doc = pdfium.FPDF_LoadDocument(filename, None)
+doc = pdfium.FPDF_LoadDocument(filepath, None)
 page_count = pdfium.FPDF_GetPageCount(doc)
 assert page_count >= 1
 
