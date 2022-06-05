@@ -52,7 +52,7 @@ def test_render_page_transform(sample_page, name, crop, scale, rotation):
         scale = scale,
         rotation = rotation,
     )
-    pil_image.save( join(OutputDir, "%s.jpg" % name) )
+    pil_image.save( join(OutputDir, "%s.png" % name) )
     assert pil_image.mode == "RGB"
     
     c_left, c_bottom, c_right, c_top = [math.ceil(c*scale) for c in crop]
@@ -169,7 +169,7 @@ def test_render_page_tobytes(sample_page):
     assert pil_image.mode == "RGB"
     assert pil_image.size == (298, 421)
     assert isinstance(pil_image, PIL.Image.Image)
-    pil_image.save( join(OutputDir, "render_bytes.jpg") )
+    pil_image.save( join(OutputDir, "render_bytes.png") )
     pil_image.close()
 
 
