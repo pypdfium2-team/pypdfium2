@@ -10,23 +10,23 @@
 
 - Updated PDFium from `5092` to `????`.
 - Entirely re-implemented the support model to improve the API and fix some structural issues.
-  * All helpers are now object-oriented. This has numerous advantages, for example simpler method calls, a cleaner namespace and the possibility to nicely cache data.
+  * All helpers are now object-oriented. This has numerous advantages, including simpler method calls, a cleaner namespace and the possibility to nicely cache internal data.
   * A page helper class was added to avoid repeated loading and closing of pages in separate functions.
     It also provides new getters and setters for rotation and PDF boxes.
-  * Text pages can now only be loaded from pages and not documents, as they require a regular page as initialisation parameter.
-    The previous API would load and close the page implicitly, which is inefficient if callers need to work with the regular page as well.
-  * The table of contents reader now passes through PDFium's viewmode constants instead of converting to attributes of a custom enum, to reduce duplication.
-  * The document helper class can now be initialised from a raw `FPDF_DOCUMENT` handle, which allows seamless interoperability with the low-level PDFium API.
-  * Bytes input is now opened properly using `FPDF_LoadMemDocument()` rather than `FPDF_LoadCustomDocument()`, to avoid unnecessary callbacks.
+  * Text pages can not be loaded from document objects anymore, as they require a regular page as initialisation parameter.
+    The previous API would load and close the regular page implicitly, which is inefficient if callers need to work with it as well.
   * Link extraction features were added to the text page helper class.
-  * The multipage renderer was improved to return a page index rather than a string suffix, to avoid unnecessary computation for callers who do not need the suffix.
+  * The table of contents reader now passes through PDFium's viewmode constants instead of converting to attributes of a custom enum, to reduce duplication.
+  * The document helper class can now be initialised from a raw `FPDF_DOCUMENT` handle, which allows for seamless interoperability with lower-level PDFium functions.
+  * Bytes input is now opened properly using `FPDF_LoadMemDocument()`.
+  * The multipage renderer was improved to return a page index rather than a string suffix.
   * Internal utilities have been rearranged, and error handling has been improved.
   * Command-line interfaces were adapted to the new API.
   * The Sphinx documentation has been thoroughly overhauled.
 - The version file now gets updated accordingly when building from source.
-- Added an option to set a custom PDFium build target, which can be useful to include PDFium tests when compiling, for instance.
-- Made the release note script more elegant.
 - The test suite has been rearranged, improved and extended.
+- Added an option to set a custom PDFium build target, which can be useful to also compile PDFium tests.
+- Made the release notes script more elegant.
 
 
 ## 1.11.0 (2022-06-01)
