@@ -250,7 +250,7 @@
     * `LoadPdfError` and `LoadPageError` were removed. The more general `PdfiumError` is now raised instead. This is because the exception handler may be used universally for more situations than just loading PDF documents or pages.
     * `PageIndexError` was replaced with `IndexError`. A custom exception seemed unnecessary for this case.
 - New support models added:
-    * Function `save_pdf()` to create a PDF file from an `FPDF_DOCUMENT` handle. This is demonstrated in the example [`merge_pdfs.py`].
+    * Function `save_pdf()` to create a PDF file from an `FPDF_DOCUMENT` handle. This is demonstrated in the example `merge_pdfs.py`.
     * Methods `get_mediabox()` and `get_cropbox()` to retrieve PDF boxes of an `FPDF_PAGE`.
     * Made the utility functions `translate_viewmode()` and `translate_rotation()` public.
 - Removed the in-library logging setup as it could cause issues for downstream users who wish to configure the pypdfium2 logger.
@@ -259,6 +259,6 @@
 - Improved build scripts.
 - Adapted the update script to upstream changes (thanks @bblanchon).
 - Moved some scripts from the root directory into `utilities/` and changed the Makefile accordingly.
-- Added a list of future [tasks] to keep in mind.
+- Added a list of future tasks to keep in mind.
 
 *Tracking changes started with version 0.10.0, so there are no entries for older releases.*
