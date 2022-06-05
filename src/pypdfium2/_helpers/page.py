@@ -275,6 +275,10 @@ class PdfPage:
             rotation (int):
                 A rotation value in degrees (0, 90, 180, or 270), in addition to page rotation.
             
+            crop (typing.Tuple[float, float, float, float]):
+                Amount in PDF canvas units to cut off from page borders (left, bottom, right, top).
+                Crop is applied after rotation.
+            
             colour (typing.Optional[ typing.Tuple[int, int, int, typing.Optional[int]] ]):
                 Page background colour. Defaults to white.
                 It can either be :data:`None`, or values of red, green, blue, and alpha ranging from 0 to 255.
@@ -289,10 +293,6 @@ class PdfPage:
             
             optimise_mode (OptimiseMode):
                 How to optimise page rendering.
-            
-            crop (typing.Sequence[float]):
-                Amount in PDF canvas units to cut off from page borders (left, bottom, right, top).
-                Crop is applied after rotation.
         
         Returns:
             (BitmapDataHolder, str, (int, int)):

@@ -3,7 +3,7 @@
 
 import sys
 import logging
-from os.path import join, dirname, abspath
+from os.path import join, dirname, abspath, isdir, isfile
 
 lib_logger = logging.getLogger('pypdfium2')
 lib_logger.addHandler(logging.StreamHandler())
@@ -58,5 +58,11 @@ def get_members(cls):
         members.append(attr)
     return members
 
-
 pl_names = get_members(PlatformNames)
+
+
+def test_testpaths():
+    for dirpath in (TestDir, SourceTree, ResourceDir, OutputDir):
+        assert isdir(dirpath)
+    for filepath in iterate_testfiles(False):
+        assert isfile(filepath)

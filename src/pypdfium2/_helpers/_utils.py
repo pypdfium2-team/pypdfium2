@@ -9,7 +9,7 @@ def colour_tohex(r, g, b, a=255):
     Convert an RGBA colour specified by four integers ranging from 0 to 255 to a single ARGB32 value.
     
     Returns:
-        (int, bool) – The colour value, and a boolean signifying if an alpha channel is needed.
+        (int, bool): The colour value, and a boolean signifying if an alpha channel is needed.
     """
     
     use_alpha = True
@@ -34,7 +34,7 @@ def get_colourformat(use_alpha, greyscale):
     Get the required colour format according to the boolean values of *use_alpha* and *greyscale*.
     
     Returns:
-        (str, int) – The colour format as string, and as PDFium colour format constant (``FPDFBitmap_...``).
+        (str, int): The colour format as string, and as PDFium colour format constant (``FPDFBitmap_...``).
     """
     
     px = "BGRA", pdfium.FPDFBitmap_BGRA
