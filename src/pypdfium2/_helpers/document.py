@@ -74,7 +74,7 @@ class PdfDocument:
     
     @property
     def raw(self):
-        """ :class:`.FPDF_DOCUMENT` – The raw PDFium document object handle. """
+        """ FPDF_DOCUMENT: The raw PDFium document object handle. """
         return self._pdf
     
     @classmethod
@@ -83,7 +83,7 @@ class PdfDocument:
         Create a new, empty document.
         
         Returns:
-            :class:`.PdfDocument`
+            PdfDocument:
         """
         new_pdf = pdfium.FPDF_CreateNewDocument()
         return cls(new_pdf)
@@ -151,7 +151,7 @@ class PdfDocument:
                 If *index* is larger that the document's current last index, the page will be appended to the end.
         
         Returns:
-            :class:`.PdfPage` – The newly created page.
+            PdfPage: The newly created page.
         """
         raw_page = pdfium.FPDFPage_New(self._pdf, index, width, height)
         return PdfPage(raw_page, self)
@@ -164,7 +164,7 @@ class PdfDocument:
     def get_page(self, index):
         """
         Returns:
-            :class:`.PdfPage` – The page at *index*.
+            PdfPage: The page at *index*.
         """
         self._verify_index(index)
         raw_page = pdfium.FPDF_LoadPage(self._pdf, index)
@@ -183,7 +183,7 @@ class PdfDocument:
             is_cid (bool):
                 State whether the given font is a CID font or not.
         Returns:
-            :class:`.PdfFont`
+            PdfFont:
         """
         
         with open(font_path, "rb") as fh:
@@ -368,11 +368,10 @@ class PdfDocument:
     def render_tobytes(self, **kwargs):
         """
         Concurrently render pages to bytes.
-        
         See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
         
         Yields:
-            (:class:`tuple`, :class:`int`) - Result of :meth:`.PdfPage.render_tobytes`, and page index.
+            (:class:`tuple`, :class:`int`): Result of :meth:`.PdfPage.render_tobytes`, and page index.
         """
         yield from self._render_base("bytes", **kwargs)
     
@@ -381,11 +380,10 @@ class PdfDocument:
         *Requires* :mod:`PIL`.
         
         Concurrently render pages to PIL images.
-        
         See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
         
         Yields:
-            (:class:`PIL.Image.Image`, :class:`int`) – PIL image, and page index.
+            (:class:`PIL.Image.Image`, :class:`int`): PIL image, and page index.
         """
         yield from self._render_base("pil", **kwargs)
 
@@ -424,7 +422,7 @@ class PdfFont:
     
     @property
     def raw(self):
-        """ :class:`.FPDF_FONT` – The raw PDFium font object handle. """
+        """ FPDF_FONT: The raw PDFium font object handle. """
         return self._pdf_font
     
     def close(self):

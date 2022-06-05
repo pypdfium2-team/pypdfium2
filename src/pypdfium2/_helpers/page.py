@@ -40,12 +40,12 @@ class PdfPage:
     
     @property
     def raw(self):
-        """ :class:`.FPDF_PAGE` – The raw PDFium page object handle. """
+        """ FPDF_PAGE: The raw PDFium page object handle. """
         return self._page
     
     @property
     def pdf(self):
-        """ :class:`.PdfDocument` – The document this page belongs to. """
+        """ PdfDocument: The document this page belongs to. """
         return self._pdf
     
     def close(self):
@@ -63,28 +63,28 @@ class PdfPage:
     def get_width(self):
         """
         Returns:
-            :class:`float` – Page width (horizontal size).
+            float: Page width (horizontal size).
         """
         return pdfium.FPDF_GetPageWidthF(self._page)
     
     def get_height(self):
         """
         Returns:
-            :class:`float` – Page height (vertical size).
+            float: Page height (vertical size).
         """
         return pdfium.FPDF_GetPageHeightF(self._page)
     
     def get_size(self):
         """
         Returns:
-            (:class:`float`, :class:`float`) – Tuple of page width and height.
+            (float, float): Page width and height.
         """
         return (self.get_width(), self.get_height())
     
     def get_rotation(self):
         """
         Returns:
-            :class:`int` – Clockwise page rotation in degrees.
+            int: Clockwise page rotation in degrees.
         """
         return RotationToDegrees[ pdfium.FPDFPage_GetRotation(self._page) ]
     
@@ -168,7 +168,7 @@ class PdfPage:
     def get_textpage(self):
         """
         Returns:
-            :class:`.PdfTextPage` – The text page that corresponds to this page.
+            PdfTextPage: The text page that corresponds to this page.
         """
         textpage = pdfium.FPDFText_LoadPage(self._page)
         if not textpage:
@@ -231,7 +231,7 @@ class PdfPage:
     def count_objects(self):
         """
         Returns:
-            :class:`int` – The number of page objects on this page.
+            int: The number of page objects on this page.
         """
         return pdfium.FPDFPage_CountObjects(self._page)
     
@@ -262,7 +262,7 @@ class PdfPage:
         ):
         """
         Rasterise the page to a ctypes ubyte array.
-        This is the base function for :func:`.render_pdf_tobytes` and :func:`.render_pdf_topil`.
+        This is the base function for :func:`.render_tobytes` and :func:`.render_topil`.
         
         Parameters:
             
@@ -295,14 +295,10 @@ class PdfPage:
                 Crop is applied after rotation.
         
         Returns:
-        
-            :class:`BitmapDataHolder`, :class:`str`, (:class:`int`, :class:`int`) – Bitmap data holder, colour format, and size.
-            
-            Call :meth:`BitmapDataHolder.get_data` to obtain the raw ctypes array. ``bytes(data_holder.get_data())`` may be used to acquire an independent copy of the data as Python bytes. When you have finished working with the ctypes array, call :meth:`BitmapDataHolder.close` to release allocated memory.
-            
+            (BitmapDataHolder, str, (int, int)):
+            Bitmap data holder, colour format, and image size.
             The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
-            
-            The image size is given in pixels as a tuple (width, height).
+            Image size is given in pixels as a tuple of width and height.
         """
         
         if colour is None:
@@ -364,7 +360,7 @@ class PdfPage:
         Rasterise the page to bytes. Parameters are the same as for :meth:`.render_base`.
         
         Returns:
-            (:class:`bytes`, :class:`str`, (:class:`int`, :class:`int`)) – Image data, colour format, and size.
+            (bytes, str, (int, int)): Image data, colour format, and size.
         """
         
         data_holder, cl_format, size = self.render_base(*args, **kwargs)
@@ -381,7 +377,7 @@ class PdfPage:
         Rasterise the page to a PIL image. Parameters are the same as for :meth:`.render_base`.
         
         Returns:
-            :class:`PIL.Image.Image`
+            PIL.Image.Image:
         """
         
         if not have_pil:
@@ -429,6 +425,6 @@ class PdfPageObject:
     def get_type(self):
         """
         Returns:
-            The type of the object (``FPDF_PAGEOBJ_...``).
+            int: The type of the object (``FPDF_PAGEOBJ_...``).
         """
         return pdfium.FPDFPageObj_GetType(self._pageobj)

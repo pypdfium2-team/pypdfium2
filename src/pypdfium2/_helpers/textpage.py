@@ -16,17 +16,17 @@ class PdfTextPage:
     
     @property
     def raw(self):
-        """ :class:`.FPDF_TEXTPAGE` – The raw PDFium text page object handle. """
+        """ FPDF_TEXTPAGE: The raw PDFium text page object handle. """
         return self._textpage
     
     @property
     def page(self):
-        """ :class:`.PdfPage` – The page this text page belongs to. """
+        """ PdfPage: The page this text page belongs to. """
         return self._page
     
     @property
     def pdf(self):
-        """ :class:`.PdfDocument` – The document this text page belongs to. """
+        """ PdfDocument: The document this text page belongs to. """
         return self._pdf
     
     def close(self):
@@ -44,7 +44,7 @@ class PdfTextPage:
         See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
         
         Returns:
-            :class:`str` – The text on the page area in question, or an empty string if no text was found.
+            str: The text on the page area in question, or an empty string if no text was found.
         """
         
         width, height = self.page.get_size()
@@ -71,7 +71,7 @@ class PdfTextPage:
     def count_chars(self):
         """
         Returns:
-            :class:`int` – The number of characters on the page.
+            int: The number of characters on the page.
         """
         return pdfium.FPDFText_CountChars(self._textpage)
     
@@ -82,7 +82,7 @@ class PdfTextPage:
             index (int): Character index at which to start.
             count (int): Character count to consider (defaults to :meth:`.count_chars`).
         Returns:
-            :class:`int` – The number of text rectangles on the page.
+            int: The number of text rectangles on the page.
         """
         n_chars = self.count_chars()
         if n_chars == 0:
@@ -105,7 +105,7 @@ class PdfTextPage:
             y_tol (float): Vertical tolerance.
         
         Returns:
-            The index (:class:`int`) of the character at or nearby the point (x, y).
+            typing.Optional[int]: The index of the character at or nearby the point (x, y).
             May be :data:`None` if there is no character or an error occurred.
         """
         index = pdfium.FPDFText_GetCharIndexAtPos(self._textpage, x, y, x_tol, y_tol)
@@ -165,7 +165,7 @@ class PdfTextPage:
         Iterate through web links on the page.
         
         Yields:
-            :class:`str` – A web link string.
+            :class:`str`: A web link string.
         """
         
         links = pdfium.FPDFLink_LoadWebLinks(self._textpage)
@@ -195,7 +195,7 @@ class PdfTextPage:
             match_whole_word (bool):
                 If :data:`True`, substring occurrences will be ignored (e. g. `cat` would not match `category`).
         Returns:
-            :class:`.PdfTextSearcher`
+            PdfTextSearcher:
         """
         
         if len(text) == 0:
@@ -222,7 +222,7 @@ class PdfTextSearcher:
     
     @property
     def textpage(self):
-        """ :class:`.PdfTextPage` – The text page this searching helper belongs to. """
+        """ PdfTextPage: The text page this searching helper belongs to. """
         return self._textpage
     
     def _get_occurrence(self, find_func):
