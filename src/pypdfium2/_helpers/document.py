@@ -297,8 +297,8 @@ class PdfDocument:
     
     def update_sources(self):
         """
-        Update the input sources to the document's current state by saving to bytes and setting them as new input.
-        If you modified the document, you'll want to call this method before doing concurrent rendering, as it uses the input sources.
+        Update the input sources to the document's current state by saving to bytes and setting the result as new input.
+        If you modified the document, you'll want to call this method before doing concurrent rendering, which uses the input sources.
         """
         buffer = io.BytesIO()
         self.save(buffer)
