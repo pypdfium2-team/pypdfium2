@@ -4,9 +4,9 @@
 import pypdfium2._pypdfium as pdfium
 
 
-def colour_tohex(r, g, b, a=255):
+def colour_tohex(r, g, b, a=255, greyscale=False):
     """
-    Convert an RGBA colour specified by four integers ranging from 0 to 255 to a single ARGB32 value.
+    Convert an RGBA colour specified by four integers ranging from 0 to 255 to a single value.
     
     Returns:
         (int, bool): The colour value, and a boolean signifying if an alpha channel is needed.
@@ -16,7 +16,10 @@ def colour_tohex(r, g, b, a=255):
     if a == 255:
         use_alpha = False
     
-    colours = (a, r, g, b)
+    if greyscale and not use_alpha:
+        colours = (a, r, g, b)
+    else:
+        colours = (a, b, g, r)
     for col in colours:
         assert 0 <= col <= 255
     

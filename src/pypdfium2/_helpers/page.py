@@ -304,7 +304,7 @@ class PdfPage:
         if colour is None:
             fpdf_colour, use_alpha = None, True
         else:
-            fpdf_colour, use_alpha = colour_tohex(*colour)
+            fpdf_colour, use_alpha = colour_tohex(*colour, greyscale=greyscale)
         
         cl_format, cl_pdfium = get_colourformat(use_alpha, greyscale)
         n_colours = len(cl_format)
@@ -328,6 +328,8 @@ class PdfPage:
             pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, fpdf_colour)
         
         render_flags = 0
+        if cl_pdfium != pdfium.FPDFBitmap_Gray:
+            render_flags |= pdfium.FPDF_REVERSE_BYTE_ORDER
         if annotations:
             render_flags |= pdfium.FPDF_ANNOT
         if greyscale:
@@ -352,7 +354,7 @@ class PdfPage:
         
         pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
         
-        return data_holder, cl_format, (width, height)
+        return data_holder, ColourMapping[cl_format], (width, height)
     
     
     def render_tobytes(self, *args, **kwargs):
@@ -384,7 +386,7 @@ class PdfPage:
             raise RuntimeError("Pillow library needs to be installed for render_topil().")
         
         data_holder, cl_format, size = self.render_base(*args, **kwargs)
-        pil_image = PIL.Image.frombytes(ColourMapping[cl_format], size, data_holder.get_data(), "raw", cl_format, 0, 1)
+        pil_image = PIL.Image.frombytes(cl_format, size, data_holder.get_data(), "raw", cl_format, 0, 1)
         data_holder.close()
         
         return pil_image

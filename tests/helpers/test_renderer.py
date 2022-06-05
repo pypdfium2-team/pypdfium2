@@ -129,19 +129,20 @@ def test_render_page_greyscale(sample_page):
 
 
 @pytest.mark.parametrize(
-    "colour",
+    ["name", "colour"],
     [
-        (255, 255, 255, 255),
-        (60,  70,  80,  100),
-        (255, 255, 255),
-        (0,   255, 255),
-        (255, 0,   255),
-        (255, 255, 0  ),
+        ("1", (255, 255, 255, 255)),
+        ("2", (60,  70,  80,  100)),
+        ("3", (255, 255, 255)),
+        ("4", (0,   255, 255)),
+        ("5", (255, 0,   255)),
+        ("6", (255, 255, 0  )),
     ]
 )
-def test_render_page_bgcolour(colour, sample_page):
+def test_render_page_bgcolour(name, colour, sample_page):
     
     pil_image = sample_page.render_topil(colour=colour, scale=0.5)
+    pil_image.save( join(OutputDir, "bgcolour_%s.png" % name) )
     assert pil_image.size == (298, 421)
     
     px_colour = colour
@@ -160,14 +161,15 @@ def test_render_page_tobytes(sample_page):
     bytedata, cl_format, size = sample_page.render_tobytes(scale=0.5)
     
     assert isinstance(bytedata, bytes)
-    assert cl_format == "BGR"
+    assert cl_format == "RGB"
     assert size == (298, 421)
     assert len(bytedata) == size[0] * size[1] * len(cl_format)
     
-    pil_image = PIL.Image.frombytes("RGB", size, bytedata, "raw", "BGR")
+    pil_image = PIL.Image.frombytes("RGB", size, bytedata, "raw", cl_format)
     assert pil_image.mode == "RGB"
     assert pil_image.size == (298, 421)
     assert isinstance(pil_image, PIL.Image.Image)
+    pil_image.save( join(OutputDir, "render_bytes.jpg") )
     pil_image.close()
 
 
