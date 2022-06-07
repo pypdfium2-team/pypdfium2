@@ -10,10 +10,9 @@ from pypdfium2._helpers.misc import raise_error
 class PdfTextPage:
     """ Text extraction helper class. """
     
-    def __init__(self, textpage, page, pdf):
+    def __init__(self, textpage, page):
         self._textpage = textpage
         self._page = page
-        self._pdf = pdf
     
     @property
     def raw(self):
@@ -24,11 +23,6 @@ class PdfTextPage:
     def page(self):
         """ PdfPage: The page this text page belongs to. """
         return self._page
-    
-    @property
-    def pdf(self):
-        """ PdfDocument: The document this text page belongs to. """
-        return self._pdf
     
     def close(self):
         """

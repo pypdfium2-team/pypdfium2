@@ -156,7 +156,6 @@ def test_hierarchy():
     assert isinstance(textpage, pdfium.PdfTextPage)
     assert isinstance(textpage.raw, pdfium.FPDF_TEXTPAGE)
     assert textpage.page is page
-    assert textpage.pdf is pdf
     
     searcher = textpage.search("abcd")
     assert isinstance(searcher, pdfium.PdfTextSearcher)

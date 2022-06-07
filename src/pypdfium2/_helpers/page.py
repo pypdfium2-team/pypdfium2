@@ -176,7 +176,7 @@ class PdfPage:
         textpage = pdfium.FPDFText_LoadPage(self._page)
         if not textpage:
             raise_error("Loading the text page failed")
-        return PdfTextPage(textpage, self, self._pdf)
+        return PdfTextPage(textpage, self)
     
     
     def insert_text(
