@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import re
 import pytest
 import sysconfig
 import configparser
@@ -67,7 +68,7 @@ def test_get_tag():
 
 def test_unknown_tag():
     plat_dir = "win_amd74"
-    with pytest.raises(ValueError, match="Unknown platform directory %s" % plat_dir):
+    with pytest.raises(ValueError, match=re.escape("Unknown platform directory %s" % plat_dir)):
         setup_base._get_tag(plat_dir)
 
 def test_get_bdist():

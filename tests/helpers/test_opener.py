@@ -135,9 +135,9 @@ def test_open_new():
 def test_open_invalid():
     with pytest.raises(TypeError):
         pdf = pdfium.PdfDocument()
-    with pytest.raises(TypeError, match="The input must be a file path string, bytes, or a byte buffer, but 'int' was given."):
+    with pytest.raises(TypeError, match=re.escape("The input must be a file path string, bytes, or a byte buffer, but 'int' was given.")):
         pdf = pdfium.PdfDocument(123)
-    with pytest.raises(FileNotFoundError, match="File does not exist: '%s'" % abspath("invalid/path")):
+    with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
         pdf = pdfium.PdfDocument("invalid/path")
 
 

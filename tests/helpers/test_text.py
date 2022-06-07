@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import re
 import pytest
 from os.path import join
 from importlib.util import find_spec
@@ -82,7 +83,7 @@ def test_gettext_area_oob(textpage):
         (0, 100, 0, 50), # bottom higher than top
     ]
     for area in areas:
-        with pytest.raises(ValueError, match="Invalid page area requested."):
+        with pytest.raises(ValueError, match=re.escape("Invalid page area requested.")):
             textpage.get_text(*area)
 
 
@@ -140,9 +141,9 @@ def test_textpage_empty():
     assert searcher.get_next() is None
     searcher.close()
     
-    with pytest.raises(ValueError, match="Character index 0 is out of bounds. The maximum index is -1."):
+    with pytest.raises(ValueError, match=re.escape("Character index 0 is out of bounds. The maximum index is -1.")):
         textpage.get_charbox(0)
-    with pytest.raises(ValueError, match="Text length must be >0."):
+    with pytest.raises(ValueError, match=re.escape("Text length must be >0.")):
         textpage.search("")
     
     [g.close() for g in (textpage, page, pdf)]
