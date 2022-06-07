@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import sys
+import logging
 import argparse
 from pypdfium2.version import (
     V_PYPDFIUM2,
@@ -64,8 +65,13 @@ def parse_args(argv=sys.argv[1:]):
 
 
 def main():
+    
+    lib_logger = logging.getLogger("pypdfium2")
+    lib_logger.addHandler(logging.StreamHandler())
+    
     args = parse_args()
     if not args.subcommand:
         print("One of the following subcommands must be given: %s" % [sc for sc in Subcommands.keys()])
         return
+    
     Subcommands[args.subcommand].main(args)
