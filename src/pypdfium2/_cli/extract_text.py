@@ -33,7 +33,7 @@ def main(args):
     if args.pages is None:
         args.pages = [i for i in range(len(doc))]
     
-    sep = ''
+    sep = ""
     for index in args.pages:
         
         page = doc.get_page(index)
@@ -43,6 +43,6 @@ def main(args):
         [g.close() for g in (textpage, page)]
         
         print(sep + "# Page %s\n" % (index+1) + text)
-        sep = '\n'
+        sep = "\n"
     
     doc.close()

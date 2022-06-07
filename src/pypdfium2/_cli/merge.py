@@ -21,16 +21,16 @@ def _merge_files(input_paths):
 
 def attach_parser(subparsers):
     parser = subparsers.add_parser(
-        'merge',
+        "merge",
         help = "Concatenate PDF files",
     )
     parser.add_argument(
-        'inputs',
-        nargs = '+',
+        "inputs",
+        nargs = "+",
         help = "A sequence of PDF files to concatenate",
     )
     parser.add_argument(
-        '--output', '-o',
+        "--output", "-o",
         required = True,
         help = "Target path for the output document",
     )

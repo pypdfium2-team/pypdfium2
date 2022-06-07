@@ -6,15 +6,15 @@ from pypdfium2 import _namespace as pdfium
 
 def attach_parser(subparsers):
     parser = subparsers.add_parser(
-        'toc',
+        "toc",
         help = "Show a PDF document's table of contents",
     )
     parser.add_argument(
-        'input',
+        "input",
         help = "PDF document of which to print the outline",
     )
     parser.add_argument(
-        '--max-depth',
+        "--max-depth",
         type = int,
         default = 15,
         help = "Maximum recursion depth to consider when parsing the table of contents",

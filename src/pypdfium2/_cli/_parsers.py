@@ -8,13 +8,13 @@ def pagetext_type(value):
         return
     
     page_indices = []
-    splitted = value.split(',')
+    splitted = value.split(",")
     
     for page_or_range in splitted:
         
-        if '-' in page_or_range:
+        if "-" in page_or_range:
             
-            start, end = page_or_range.split('-')
+            start, end = page_or_range.split("-")
             start = int(start) - 1
             end = int(end) - 1
             

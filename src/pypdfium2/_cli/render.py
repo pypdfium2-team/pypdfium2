@@ -21,7 +21,7 @@ def rotation_type(string):
 
 
 def colour_type(string):
-    if string.lower() == 'none':
+    if string.lower() == "none":
         return
     else:
         colour = ast.literal_eval(string)
@@ -47,76 +47,76 @@ def attach_parser(subparsers):
         help = "Rasterise pages of a PDF file",
     )
     parser.add_argument(
-        'inputs',
-        nargs = '+',
+        "inputs",
+        nargs = "+",
         help = "PDF documents to render",
     )
     parser.add_argument(
-        '--output', '-o',
+        "--output", "-o",
         type = abspath,
         required = True,
         help = "Output directory where to place the serially numbered images",
     )
     parser.add_argument(
-        '--format', '-f',
-        default = 'jpg',
+        "--format", "-f",
+        default = "jpg",
         help = "File extension of the image format to use",
     )
     parser.add_argument(
-        '--pages',
+        "--pages",
         default = None,
         type = pagetext_type,
         help = "Numbers of the pages to render (defaults to all)",
     )
     parser.add_argument(
-        '--scale',
+        "--scale",
         default = 1,
         type = float,
         help = "Define the resolution of the output images. By default, one PDF point (1/72in) is rendered to 1x1 pixel. This factor scales the number of pixels that represent one point.",
     )
     parser.add_argument(
-        '--rotation',
+        "--rotation",
         default = 0,
         type = rotation_type,
         help = "Rotate pages by 90, 180 or 270 degrees",
     )
     parser.add_argument(
-        '--colour',
+        "--colour",
         default = (255, 255, 255, 255),
         type = colour_type,
         help = "Page background colour. Defaults to white. It can be given in RGBA format as a sequence of integers ranging from 0 to 255, or it may be 'none' for transparent background."
     )
     parser.add_argument(
-        '--no-annotations',
-        action = 'store_true',
+        "--no-annotations",
+        action = "store_true",
         help = "Option to prevent rendering of PDF annotations",
     )
     parser.add_argument(
-        '--optimise-mode',
+        "--optimise-mode",
         default = pdfium.OptimiseMode.NONE,
         type = lambda string: pdfium.OptimiseMode[string.upper()],
         help = "Select a rendering optimisation mode (none, lcd_display, printing)",
     )
     parser.add_argument(
-        '--greyscale',
-        action = 'store_true',
+        "--greyscale",
+        action = "store_true",
         help = "Whether to render in greyscale mode (no colours)",
     )
     parser.add_argument(
-        '--crop',
+        "--crop",
         type = crop_type,
         default = (0, 0, 0, 0),
         help = "Amount to crop from (left, bottom, right, top)"
     )
     parser.add_argument(
-        '--no-antialias',
-        nargs = '+',
+        "--no-antialias",
+        nargs = "+",
         default = (),
         choices = ("text", "image", "path"),
         help = "Item types that shall not be smoothed",
     )
     parser.add_argument(
-        '--processes',
+        "--processes",
         default = os.cpu_count(),
         type = int,
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)"
@@ -148,7 +148,7 @@ def main(args):
             n_processes = args.processes,
         )
         
-        prefix = splitext(basename(input_path))[0] + '_'
+        prefix = splitext(basename(input_path))[0] + "_"
         for image, index in zip(renderer, page_indices):
             suffix = str(index+1).zfill(n_digits)
             output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)

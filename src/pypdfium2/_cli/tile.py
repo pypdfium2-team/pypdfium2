@@ -28,45 +28,45 @@ def units_to_pt(value, unit: Units):
 
 def attach_parser(subparsers):
     parser = subparsers.add_parser(
-        'tile',
+        "tile",
         help = "Perform page tiling (N-up compositing)",
     )
     parser.add_argument(
-        'input',
+        "input",
         help = "PDF file on which to perform N-up compositing",
     )
     parser.add_argument(
-        '--output', '-o',
+        "--output", "-o",
         required = True,
         type = os.path.abspath,
         help = "Target path for the new document",
     )
     parser.add_argument(
-        '--rows', '-r',
+        "--rows", "-r",
         type = int,
         required = True,
         help = "Number of rows (horizontal tiles)",
     )
     parser.add_argument(
-        '--cols', '-c',
+        "--cols", "-c",
         type = int,
         required = True,
         help = "Number of columns (vertical tiles)",
     )
     parser.add_argument(
-        '--width',
+        "--width",
         type = float,
         required = True,
         help = "Target width",
     )
     parser.add_argument(
-        '--height',
+        "--height",
         type = float,
         required = True,
         help = "Target height",
     )
     parser.add_argument(
-        '--unit', '-u',
+        "--unit", "-u",
         default = Units.MM,
         type = lambda string: Units[string.upper()],
         help = "Unit for target width and height (pt, mm, cm, in)",
