@@ -223,6 +223,11 @@ class PdfTextSearcher:
         self._textpage = textpage
     
     @property
+    def raw(self):
+        """ FPDF_SCHHANDLE: The raw PDFium searcher handle. """
+        return self._search
+    
+    @property
     def textpage(self):
         """ PdfTextPage: The text page this searching helper belongs to. """
         return self._textpage

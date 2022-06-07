@@ -41,6 +41,7 @@ This is an assortment of PDFium members referenced in this documentation.
 .. class:: pypdfium2.FPDF_DOCUMENT
 .. class:: pypdfium2.FPDF_PAGE
 .. class:: pypdfium2.FPDF_TEXTPAGE
+.. class:: pypdfium2.FPDF_SCHHANDLE
 .. class:: pypdfium2.FPDF_FONT
 .. data:: pypdfium2.FPDF_FONT_TYPE1
 .. data:: pypdfium2.FPDF_FONT_TRUETYPE
