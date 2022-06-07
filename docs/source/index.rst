@@ -20,15 +20,6 @@ For the low-level API, please also refer to the `PDFium`_ and :mod:`ctypes` docu
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Development
-   
-   dependencies
-   contributing
-   add_platform
-
-
-.. toctree::
    :maxdepth: 1
    :caption: Changelog
    

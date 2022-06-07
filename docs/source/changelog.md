@@ -4,6 +4,31 @@
 # Changelog
 
 
+## 2.0.0 (sched 2022-06-??)
+
+*This release has deeply changed the support model API in a way that is incompatible with previous releases.*
+
+- Updated PDFium from `5092` to `????`.
+- Entirely re-implemented the support model to improve the API and fix some structural issues.
+  * All helpers are now object-oriented. This has numerous advantages, including simpler method calls, a cleaner namespace and the possibility to nicely cache internal data.
+  * A page helper class was added to avoid repeated loading and closing of pages in separate functions.
+    It also provides new getters and setters for rotation and PDF boxes.
+  * Text pages can not be loaded from document objects anymore, as they require a regular page as initialisation parameter.
+    The previous API would load and close the regular page implicitly, which is inefficient if callers need to work with it as well.
+  * Link extraction features were added to the text page helper class.
+  * The table of contents reader now passes through PDFium's viewmode constants instead of converting to attributes of a custom enum, to reduce duplication.
+  * The document helper class can now be initialised from a raw `FPDF_DOCUMENT` handle, which allows for seamless interoperability with lower-level PDFium functions.
+  * Bytes input is now opened properly using `FPDF_LoadMemDocument()`.
+  * The multipage renderer now does not return a string suffix anymore, only the result object.
+  * Internal utilities have been rearranged, and error handling has been improved.
+  * Command-line interfaces were adapted to the new API.
+  * The Sphinx documentation has been thoroughly overhauled.
+- The version file now gets updated accordingly when building from source.
+- The test suite has been rearranged, improved and extended.
+- Added an option to set a custom PDFium build target, which can be useful to also compile PDFium tests.
+- Made the release notes script more elegant.
+
+
 ## 1.11.0 (2022-06-01)
 
 - Updated PDFium from `5079` to `5092`.
@@ -225,7 +250,7 @@
     * `LoadPdfError` and `LoadPageError` were removed. The more general `PdfiumError` is now raised instead. This is because the exception handler may be used universally for more situations than just loading PDF documents or pages.
     * `PageIndexError` was replaced with `IndexError`. A custom exception seemed unnecessary for this case.
 - New support models added:
-    * Function `save_pdf()` to create a PDF file from an `FPDF_DOCUMENT` handle. This is demonstrated in the example [`merge_pdfs.py`](../../examples/merge_pdfs.py).
+    * Function `save_pdf()` to create a PDF file from an `FPDF_DOCUMENT` handle. This is demonstrated in the example `merge_pdfs.py`.
     * Methods `get_mediabox()` and `get_cropbox()` to retrieve PDF boxes of an `FPDF_PAGE`.
     * Made the utility functions `translate_viewmode()` and `translate_rotation()` public.
 - Removed the in-library logging setup as it could cause issues for downstream users who wish to configure the pypdfium2 logger.
@@ -234,6 +259,6 @@
 - Improved build scripts.
 - Adapted the update script to upstream changes (thanks @bblanchon).
 - Moved some scripts from the root directory into `utilities/` and changed the Makefile accordingly.
-- Added a list of future [tasks](../devel/tasks.md) to keep in mind.
+- Added a list of future tasks to keep in mind.
 
 *Tracking changes started with version 0.10.0, so there are no entries for older releases.*

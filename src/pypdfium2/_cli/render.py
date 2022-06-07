@@ -59,7 +59,7 @@ def attach_parser(subparsers):
     )
     parser.add_argument(
         '--format', '-f',
-        default = 'png',
+        default = 'jpg',
         help = "File extension of the image format to use",
     )
     parser.add_argument(
@@ -93,8 +93,8 @@ def attach_parser(subparsers):
     )
     parser.add_argument(
         '--optimise-mode',
-        default = pdfium.OptimiseMode.none,
-        type = lambda string: pdfium.OptimiseMode[string.lower()],
+        default = pdfium.OptimiseMode.NONE,
+        type = lambda string: pdfium.OptimiseMode[string.upper()],
         help = "Select a rendering optimisation mode (none, lcd_display, printing)",
     )
     parser.add_argument(
@@ -120,21 +120,31 @@ def main(args):
         
     for input_path in args.inputs:
         
-        renderer = pdfium.render_pdf_topil(
-            input_path,
-            page_indices = args.pages,
+        pdf = pdfium.PdfDocument(input_path)
+        if args.pages:
+            page_indices = args.pages
+        else:
+            page_indices = [i for i in range(len(pdf))]
+        
+        n_digits = len(str( max(page_indices)+1 ))
+        
+        renderer = pdf.render_topil(
+            page_indices = page_indices,
             scale = args.scale,
             rotation = args.rotation,
+            crop = args.crop,
             colour = args.colour,
             annotations = not args.no_annotations,
             greyscale = args.greyscale,
             optimise_mode = args.optimise_mode,
-            crop = args.crop,
             n_processes = args.processes,
         )
         
         prefix = splitext(basename(input_path))[0] + '_'
-        for image, suffix in renderer:
+        for image, index in zip(renderer, page_indices):
+            suffix = str(index+1).zfill(n_digits)
             output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
             image.save(output_path)
             image.close()
+        
+        pdf.close()

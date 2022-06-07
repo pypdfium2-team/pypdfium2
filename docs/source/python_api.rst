@@ -4,59 +4,28 @@
 Python API
 ==========
 
+.. Warning::
+    * PDFium is not thread-safe. If you need to parallelise tasks, use processes instead of threads.
+    * Attempting to work with an object after it has been closed will result in a segmentation fault.
 
 Version
 *******
-.. automodule:: pypdfium2._version
+.. automodule:: pypdfium2.version
 
-
-Opener
-******
-.. automodule:: pypdfium2._helpers.classes
+Document
+********
+.. automodule:: pypdfium2._helpers.document
     :special-members: __len__
-.. automodule:: pypdfium2._helpers.opener
-    :exclude-members: open_pdf_auto, close_pdf
+    :private-members: _render_base
 
-Saver
-*****
-.. automodule:: pypdfium2._helpers.saver
+Page
+****
+.. automodule:: pypdfium2._helpers.page
 
-Page Renderer
-*************
-.. automodule:: pypdfium2._helpers.page_renderer
-
-Document Renderer
-*****************
-.. automodule:: pypdfium2._helpers.pdf_renderer
-
-Text Inserter
-*************
-.. automodule:: pypdfium2._helpers.text_inserter
-
-Text Extractor
-**************
-.. versionadded:: 1.10.0
-.. automodule:: pypdfium2._helpers.text_extractor
-
-Page Objects
-************
-.. versionadded:: 1.10.0
-.. automodule:: pypdfium2._helpers.pageobjects
-
-TOC Parser
-**********
-.. automodule:: pypdfium2._helpers.toc
-
-PDF Boxes
+Text Page
 *********
-.. automodule:: pypdfium2._helpers.boxes
+.. automodule:: pypdfium2._helpers.textpage
 
-Error Handler
+Miscellaneous
 *************
-.. automodule:: pypdfium2._helpers.error_handler
-
-
-Constants
-*********
-
-.. automodule:: pypdfium2._helpers.constants
+.. automodule:: pypdfium2._helpers.misc

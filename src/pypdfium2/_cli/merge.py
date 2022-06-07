@@ -5,17 +5,18 @@ import ctypes
 from pypdfium2 import _namespace as pdfium
 
 
-def _merge_pdfs(input_paths):
+def _merge_files(input_paths):
     
-    dest_doc = pdfium.FPDF_CreateNewDocument()
+    dest_pdf = pdfium.PdfDocument.new()
     
     for in_path in reversed(input_paths):
-        with pdfium.PdfContext(in_path) as src_doc:
-            page_count = pdfium.FPDF_GetPageCount(src_doc)
-            page_indices = (ctypes.c_int * page_count)(*[i for i in range(page_count)])
-            pdfium.FPDF_ImportPagesByIndex(dest_doc, src_doc, page_indices, page_count, 0)
+        src_pdf = pdfium.PdfDocument(in_path)
+        n_pages = len(src_pdf)
+        page_indices = (ctypes.c_int * n_pages)(*[i for i in range(n_pages)])
+        pdfium.FPDF_ImportPagesByIndex(dest_pdf.raw, src_pdf.raw, page_indices, n_pages, 0)
+        src_pdf.close()
     
-    return dest_doc
+    return dest_pdf
 
 
 def attach_parser(subparsers):
@@ -36,6 +37,7 @@ def attach_parser(subparsers):
 
 
 def main(args):
-    merged_doc = _merge_pdfs(args.inputs)
-    with open(args.output, 'wb') as file_handle:
-        pdfium.save_pdf(merged_doc, file_handle)
+    merged_pdf = _merge_files(args.inputs)
+    with open(args.output, 'wb') as buffer:
+        merged_pdf.save(buffer)
+    merged_pdf.close()
