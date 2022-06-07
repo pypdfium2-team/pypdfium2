@@ -22,10 +22,11 @@ jobs:
         with:
           python-version: '3.9'
       
-      - name: Install/update setup dependencies
+      - name: Install/update dependencies
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -U setuptools setuptools-scm build wheel
+          python3 -m pip install -U pillow pytest importchecker codespell reuse twine check-wheel-contents
       
       - name: Check out ctypesgen
         uses: actions/checkout@v3
@@ -45,9 +46,6 @@ jobs:
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0
-      
-      - name: Install pypdfium2 and dependencies
-        run: pip3 install -U .[converters,inserttext,test,utilities]
       
       - name: Run packaging script
         run: make packaging
