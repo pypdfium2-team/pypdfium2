@@ -109,6 +109,13 @@ def attach_parser(subparsers):
         help = "Amount to crop from (left, bottom, right, top)"
     )
     parser.add_argument(
+        '--no-antialias',
+        nargs = '+',
+        default = (),
+        choices = ("text", "image", "path"),
+        help = "Item types that shall not be smoothed",
+    )
+    parser.add_argument(
         '--processes',
         default = os.cpu_count(),
         type = int,
@@ -137,6 +144,7 @@ def main(args):
             annotations = not args.no_annotations,
             greyscale = args.greyscale,
             optimise_mode = args.optimise_mode,
+            no_antialias = args.no_antialias,
             n_processes = args.processes,
         )
         
