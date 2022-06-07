@@ -55,10 +55,6 @@ class PdfPage:
         """
         Close the page to release allocated memory.
         This function shall be called when finished working with the object.
-        
-        Warning:
-            If a page was closed once, it remains closed within its document handle, even if :meth:`.PdfDocument.get_page` is called again on the same index.
-            Retrieving the page from a new document handle will work, however.
         """
         pdfium.FPDF_ClosePage(self._page)
     
