@@ -60,6 +60,9 @@ def raise_error(msg):
     """
     Raise a :class:`.PdfiumError` annotated with the description of PDFium's current error code.
     
+    Note:
+        This function shall be called if the return value of a PDFium call indicates failure.
+    
     Parameters:
         msg (str): The error message explaining the problem.
     """
