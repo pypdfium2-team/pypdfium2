@@ -3,6 +3,7 @@
 
 import io
 import os
+import os.path
 import ctypes
 import logging
 import functools
@@ -65,6 +66,11 @@ class PdfDocument:
         self._file_strategy = file_strategy
         
         if isinstance(self._orig_input, str):
+            
+            self._orig_input = os.path.abspath( os.path.expanduser(self._orig_input) )
+            if not os.path.isfile(self._orig_input):
+                raise FileNotFoundError("File does not exist: '%s'" % self._orig_input)
+            
             if self._file_strategy is FileAccess.NATIVE:
                 pass
             elif self._file_strategy is FileAccess.BUFFER:
@@ -75,7 +81,7 @@ class PdfDocument:
                 self._actual_input = buf.read()
                 buf.close()
             else:
-                raise ValueError("An invalid file access strategy was given: %s" % self._file_strategy)
+                raise ValueError("An invalid file access strategy was given: '%s'" % self._file_strategy)
         
         if isinstance(self._actual_input, pdfium.FPDF_DOCUMENT):
             self._pdf = self._actual_input

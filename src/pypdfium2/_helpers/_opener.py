@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import ctypes
-from os.path import abspath, expanduser, isfile
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.misc import raise_error
 
@@ -50,13 +49,6 @@ def is_input_buffer(maybe_buffer):
         return False
 
 
-def open_pdf_file(filepath, password=None):
-    filepath = abspath( expanduser(filepath) )
-    if not isfile(filepath):
-        raise FileNotFoundError("File does not exist: '%s'" % filepath)
-    return pdfium.FPDF_LoadDocument(filepath, password)
-
-
 def open_pdf_buffer(buffer, password=None, autoclose=False):
     
     buffer.seek(0, 2)
@@ -87,8 +79,9 @@ def open_pdf_bytes(bytedata, password=None):
 
 def open_pdf(input_data, password=None, autoclose=False):
     
+    ld_data = None
     if isinstance(input_data, str):
-        pdf, ld_data = open_pdf_file(input_data, password), None
+        pdf = pdfium.FPDF_LoadDocument(input_data, password)
     elif isinstance(input_data, bytes):
         pdf, ld_data = open_pdf_bytes(input_data, password)
     elif is_input_buffer(input_data):
