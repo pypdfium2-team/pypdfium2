@@ -42,18 +42,18 @@ class PdfDocument:
             A byte buffer is defined as an object that implements the methods ``seek()``, ``tell()`` and ``readinto()``.
         password (str | bytes):
             A password to unlock the PDF, if encrypted.
-        autoclose (bool):
-            If set to :data:`True` and a byte buffer was provided as input, :meth:`.close` will not only close the PDFium document, but also the input source.
         file_access (FileAccess):
             Define how files shall be opened internally. This parameter is ignored if *input_data* is not a file path.
+        autoclose (bool):
+            If set to :data:`True` and a byte buffer was provided as input, :meth:`.close` will not only close the PDFium document, but also the input source.
     """
     
     def __init__(
             self,
             input_data,
             password = None,
-            autoclose = False,
             file_access = FileAccess.NATIVE,
+            autoclose = False,
         ):
         
         self._orig_input = input_data
@@ -62,8 +62,8 @@ class PdfDocument:
         self._ld_data = None
         
         self._password = password
-        self._autoclose = autoclose
         self._file_access = file_access
+        self._autoclose = autoclose
         
         if isinstance(self._orig_input, str):
             
