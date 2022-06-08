@@ -34,9 +34,6 @@ OutputDir      = join(DataTree, PlatformNames.sourcebuild)
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
 
-DepotPatches = [
-    (join(PatchDir, "depot_tools", "gclient_scm.patch"), DepotToolsDir),
-]
 PdfiumMainPatches = [
     (join(PatchDir, "pdfium", "public_headers.patch"), PDFiumDir),
     (join(PatchDir, "pdfium", "shared_library.patch"), PDFiumDir),
@@ -167,9 +164,6 @@ def _apply_patchset(patchset):
     for patch, cwd in patchset:
         run_cmd(["git", "apply", "-v", patch], cwd=cwd)
 
-def patch_depottools():
-    _apply_patchset(DepotPatches)
-
 def patch_pdfium():
     _apply_patchset(PdfiumMainPatches)
     if sys.platform.startswith("win32"):
@@ -274,9 +268,7 @@ def main(
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
     
-    depot_dl_done = dl_depottools(b_update)
-    if depot_dl_done:
-        patch_depottools()
+    dl_depottools(b_update)
     
     GClient = _get_tool("gclient", "bat")
     GN      = _get_tool("gn", "bat")
