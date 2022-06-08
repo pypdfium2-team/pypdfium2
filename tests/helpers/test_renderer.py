@@ -171,68 +171,6 @@ def test_render_page_tobytes(sample_page):
     pil_image.close()
 
 
-@pytest.fixture
-def render_pdf_topil(multipage_doc):
-    
-    renderer = multipage_doc.render_topil(
-        scale=0.5, greyscale=True,
-    )
-    imgs = []
-    
-    for image in renderer:
-        assert isinstance(image, PIL.Image.Image)
-        assert image.mode == "L"
-        imgs.append(image)
-    
-    assert len(imgs) == 3
-    yield imgs
-    [image.close() for image in imgs]
-
-
-@pytest.fixture
-def render_pdf_tobytes(multipage_doc):
-    
-    renderer = multipage_doc.render_tobytes(
-        scale=0.5, greyscale=True,
-    )
-    imgs = []
-    
-    for imgdata, cl_format, size in renderer:
-        assert cl_format == "L"
-        assert isinstance(imgdata, bytes)
-        assert len(imgdata) == size[0] * size[1] * len(cl_format)
-        pil_image = PIL.Image.frombytes("L", size, imgdata, "raw", "L")
-        imgs.append(pil_image)
-    
-    assert len(imgs) == 3
-    yield imgs
-    [image.close() for image in imgs]
-
-
-def test_render_pdf(render_pdf_topil, render_pdf_tobytes):
-    for image_a, image_b in zip(render_pdf_topil, render_pdf_tobytes):
-        assert image_a == image_b
-
-
-def test_render_pdf_new(caplog):
-    
-    pdf = pdfium.PdfDocument.new()
-    page = pdf.new_page(50, 100)
-    
-    with caplog.at_level(logging.WARNING):
-        renderer = pdf.render_topil()
-        image = next(renderer)
-    
-    warning = "Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data."
-    assert warning in caplog.text
-    
-    assert isinstance(image, PIL.Image.Image)
-    assert image.mode == "RGB"
-    assert image.size == (50, 100)
-    
-    [g.close() for g in (image, page, pdf)]
-
-
 def test_render_page_optimisation(sample_page):
     
     modes = get_members(pdfium.OptimiseMode)
@@ -259,3 +197,81 @@ def test_render_page_noantialias(sample_page):
     )
     assert isinstance(pil_image, PIL.Image.Image)
     pil_image.close()
+
+
+@pytest.fixture
+def render_pdffile_topil(multipage_doc):
+    
+    renderer = multipage_doc.render_topil(
+        scale=0.5, greyscale=True,
+    )
+    imgs = []
+    
+    for image in renderer:
+        assert isinstance(image, PIL.Image.Image)
+        assert image.mode == "L"
+        imgs.append(image)
+    
+    assert len(imgs) == 3
+    yield imgs
+    [image.close() for image in imgs]
+
+
+@pytest.fixture
+def render_pdffile_tobytes(multipage_doc):
+    
+    renderer = multipage_doc.render_tobytes(
+        scale=0.5, greyscale=True,
+    )
+    imgs = []
+    
+    for imgdata, cl_format, size in renderer:
+        assert cl_format == "L"
+        assert isinstance(imgdata, bytes)
+        assert len(imgdata) == size[0] * size[1] * len(cl_format)
+        pil_image = PIL.Image.frombytes("L", size, imgdata, "raw", "L")
+        imgs.append(pil_image)
+    
+    assert len(imgs) == 3
+    yield imgs
+    [image.close() for image in imgs]
+
+
+def test_render_pdffile(render_pdf_topil, render_pdf_tobytes):
+    for image_a, image_b in zip(render_pdf_topil, render_pdf_tobytes):
+        assert image_a == image_b
+
+
+def test_render_pdf_new(caplog):
+    
+    pdf = pdfium.PdfDocument.new()
+    page = pdf.new_page(50, 100)
+    
+    with caplog.at_level(logging.WARNING):
+        renderer = pdf.render_topil()
+        image = next(renderer)
+    
+    warning = "Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data."
+    assert warning in caplog.text
+    
+    assert isinstance(image, PIL.Image.Image)
+    assert image.mode == "RGB"
+    assert image.size == (50, 100)
+    
+    [g.close() for g in (image, page, pdf)]
+
+
+def test_render_pdfbuffer():
+    pass
+
+
+def test_render_pdfbytes():
+    pass
+
+
+def test_render_pdffile_asbuffer():
+    pass
+
+
+def test_render_pdffile_asbytes():
+    pass
