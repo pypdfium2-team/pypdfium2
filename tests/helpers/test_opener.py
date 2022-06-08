@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import io
 import re
 import shutil
 import tempfile
@@ -8,7 +9,7 @@ import pytest
 import PIL.Image
 from os.path import join, abspath
 import pypdfium2 as pdfium
-from ..conftest import TestFiles, ExpRenderPixels
+from ..conftest import TestFiles, ExpRenderPixels, get_members
 
 
 def _check_general(pdf, n_pages=1):
@@ -31,8 +32,9 @@ def _check_render(pdf):
 
 
 @pytest.fixture
-def open_filepath():
+def open_filepath_native():
     pdf = pdfium.PdfDocument(TestFiles.render)
+    assert pdf._file_strategy is pdfium.FileAccess.NATIVE
     _check_general(pdf)
     yield _check_render(pdf)
     pdf.close()
@@ -67,10 +69,14 @@ def open_buffer():
     buffer.close()
 
 
-def test_opener_inputtypes(open_filepath, open_bytes, open_buffer):
-    for img in (open_filepath, open_bytes, open_buffer):
-        assert isinstance(img, PIL.Image.Image)
-    assert open_filepath == open_bytes == open_buffer
+def test_opener_inputtypes(open_filepath_native, open_bytes, open_buffer):
+    first_image = open_filepath_native
+    other_images = (
+        open_bytes,
+        open_buffer,
+    )
+    assert isinstance(first_image, PIL.Image.Image)
+    assert all(first_image == other for other in other_images)
 
 
 def test_open_buffer_autoclose():
@@ -81,6 +87,30 @@ def test_open_buffer_autoclose():
     
     pdf.close()
     assert buffer.closed is True
+
+
+def test_open_filepath_buffer():
+    
+    pdf = pdfium.PdfDocument(TestFiles.render, file_strategy=pdfium.FileAccess.BUFFER)
+    
+    assert pdf._orig_input == TestFiles.render
+    assert isinstance(pdf._actual_input, io.BufferedReader)
+    assert pdf._autoclose is True
+    _check_general(pdf)
+    
+    pdf.close()
+    assert pdf._actual_input.closed is True
+
+
+def test_open_filepath_bytes():
+    
+    pdf = pdfium.PdfDocument(TestFiles.render, file_strategy=pdfium.FileAccess.BYTES)
+    
+    assert pdf._orig_input == TestFiles.render
+    assert isinstance(pdf._actual_input, bytes)
+    _check_general(pdf)
+    
+    pdf.close()
 
 
 def test_open_encrypted():
@@ -133,12 +163,16 @@ def test_open_new():
 
 
 def test_open_invalid():
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match=re.escape("__init__() missing 1 required positional argument: 'input_data'")):
         pdf = pdfium.PdfDocument()
     with pytest.raises(TypeError, match=re.escape("The input must be a file path string, bytes, or a byte buffer, but 'int' was given.")):
         pdf = pdfium.PdfDocument(123)
     with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
         pdf = pdfium.PdfDocument("invalid/path")
+    with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
+        pdf = pdfium.PdfDocument("invalid/path", file_strategy=pdfium.FileAccess.BUFFER)
+    with pytest.raises(ValueError, match=re.escape("An invalid file access strategy was given: 'abcd'")):
+        pdf = pdfium.PdfDocument(TestFiles.empty, file_strategy="abcd")
 
 
 def test_hierarchy():
