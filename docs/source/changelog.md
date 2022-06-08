@@ -11,6 +11,7 @@
 - Updated PDFium from `5092` to `????`.
 - Entirely re-implemented the support model to improve the API and fix some structural issues.
   * All helpers are now object-oriented. This has numerous advantages, including simpler method calls, a cleaner namespace and the possibility to nicely cache internal data.
+  * Opening was improved so that any available PDFium loader can now be selected by callers.
   * A page helper class was added to avoid repeated loading and closing of pages in separate functions.
     It also provides new getters and setters for rotation and PDF boxes.
   * Text pages can not be loaded from document objects anymore, as they require a regular page as initialisation parameter.
@@ -18,7 +19,6 @@
   * Link extraction features were added to the text page helper class.
   * The table of contents reader now passes through PDFium's viewmode constants instead of converting to attributes of a custom enum, to reduce duplication.
   * The document helper class can now be initialised from a raw `FPDF_DOCUMENT` handle, which allows for seamless interoperability with lower-level PDFium functions.
-  * Bytes input is now opened properly using `FPDF_LoadMemDocument()`.
   * The multipage renderer now does not return a string suffix anymore, only the result object.
   * Internal utilities have been rearranged, and error handling has been improved.
   * Command-line interfaces were adapted to the new API.
