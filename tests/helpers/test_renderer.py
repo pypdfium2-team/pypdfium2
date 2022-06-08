@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import io
 import math
 import logging
 import PIL.Image
@@ -171,68 +172,6 @@ def test_render_page_tobytes(sample_page):
     pil_image.close()
 
 
-@pytest.fixture
-def render_pdf_topil(multipage_doc):
-    
-    renderer = multipage_doc.render_topil(
-        scale=0.5, greyscale=True,
-    )
-    imgs = []
-    
-    for image in renderer:
-        assert isinstance(image, PIL.Image.Image)
-        assert image.mode == "L"
-        imgs.append(image)
-    
-    assert len(imgs) == 3
-    yield imgs
-    [image.close() for image in imgs]
-
-
-@pytest.fixture
-def render_pdf_tobytes(multipage_doc):
-    
-    renderer = multipage_doc.render_tobytes(
-        scale=0.5, greyscale=True,
-    )
-    imgs = []
-    
-    for imgdata, cl_format, size in renderer:
-        assert cl_format == "L"
-        assert isinstance(imgdata, bytes)
-        assert len(imgdata) == size[0] * size[1] * len(cl_format)
-        pil_image = PIL.Image.frombytes("L", size, imgdata, "raw", "L")
-        imgs.append(pil_image)
-    
-    assert len(imgs) == 3
-    yield imgs
-    [image.close() for image in imgs]
-
-
-def test_render_pdf(render_pdf_topil, render_pdf_tobytes):
-    for image_a, image_b in zip(render_pdf_topil, render_pdf_tobytes):
-        assert image_a == image_b
-
-
-def test_render_pdf_new(caplog):
-    
-    pdf = pdfium.PdfDocument.new()
-    page = pdf.new_page(50, 100)
-    
-    with caplog.at_level(logging.WARNING):
-        renderer = pdf.render_topil()
-        image = next(renderer)
-    
-    warning = "Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data."
-    assert warning in caplog.text
-    
-    assert isinstance(image, PIL.Image.Image)
-    assert image.mode == "RGB"
-    assert image.size == (50, 100)
-    
-    [g.close() for g in (image, page, pdf)]
-
-
 def test_render_page_optimisation(sample_page):
     
     modes = get_members(pdfium.OptimiseMode)
@@ -259,3 +198,136 @@ def test_render_page_noantialias(sample_page):
     )
     assert isinstance(pil_image, PIL.Image.Image)
     pil_image.close()
+
+
+@pytest.fixture
+def render_pdffile_topil(multipage_doc):
+    
+    renderer = multipage_doc.render_topil(
+        scale=0.5, greyscale=True,
+    )
+    imgs = []
+    
+    for image in renderer:
+        assert isinstance(image, PIL.Image.Image)
+        assert image.mode == "L"
+        imgs.append(image)
+    
+    assert len(imgs) == 3
+    yield imgs
+    [image.close() for image in imgs]
+
+
+@pytest.fixture
+def render_pdffile_tobytes(multipage_doc):
+    
+    renderer = multipage_doc.render_tobytes(
+        scale=0.5, greyscale=True,
+    )
+    imgs = []
+    
+    for imgdata, cl_format, size in renderer:
+        assert cl_format == "L"
+        assert isinstance(imgdata, bytes)
+        assert len(imgdata) == size[0] * size[1] * len(cl_format)
+        pil_image = PIL.Image.frombytes("L", size, imgdata, "raw", "L")
+        imgs.append(pil_image)
+    
+    assert len(imgs) == 3
+    yield imgs
+    [image.close() for image in imgs]
+
+
+def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes):
+    for image_a, image_b in zip(render_pdffile_topil, render_pdffile_tobytes):
+        assert image_a == image_b
+
+
+def test_render_pdf_new(caplog):
+    
+    pdf = pdfium.PdfDocument.new()
+    page = pdf.new_page(50, 100)
+    
+    with caplog.at_level(logging.WARNING):
+        renderer = pdf.render_topil()
+        image = next(renderer)
+    
+    warning = "Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data."
+    assert warning in caplog.text
+    
+    assert isinstance(image, PIL.Image.Image)
+    assert image.mode == "RGB"
+    assert image.size == (50, 100)
+    
+    [g.close() for g in (image, page, pdf)]
+
+
+def test_render_pdfbuffer(caplog):
+    
+    buffer = open(TestFiles.render, "rb")
+    pdf = pdfium.PdfDocument(buffer)
+    assert pdf._orig_input is buffer
+    assert pdf._actual_input is buffer
+    assert pdf._rendering_input is None
+    
+    with caplog.at_level(logging.WARNING):
+        for image in pdf.render_topil(scale=0.5):
+            assert isinstance(image, PIL.Image.Image)
+    
+    assert isinstance(pdf._rendering_input, bytes)
+    warning = "Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly."
+    assert warning in caplog.text
+    
+    pdf.close()
+    buffer.close()
+
+
+def test_render_pdfbytes():
+    
+    with open(TestFiles.render, "rb") as fh:
+        data = fh.read()
+    
+    pdf = pdfium.PdfDocument(data)
+    assert pdf._orig_input is data
+    assert pdf._actual_input is data
+    assert pdf._rendering_input is None
+    for image in pdf.render_topil(scale=0.5):
+        assert isinstance(image, PIL.Image.Image)
+    assert isinstance(pdf._rendering_input, bytes)
+    
+    pdf.close()
+
+
+def test_render_pdffile_asbuffer():
+    
+    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BUFFER)
+    
+    assert pdf._orig_input == TestFiles.render
+    assert isinstance(pdf._actual_input, io.BufferedReader)
+    assert pdf._rendering_input is None
+    assert pdf._file_access is pdfium.FileAccess.BUFFER
+    
+    for image in pdf.render_topil(scale=0.5):
+        assert isinstance(image, PIL.Image.Image)
+    
+    # Not sure how to test that the requested file access strategy is actually used when constructing the new PdfDocument objects
+    assert pdf._rendering_input == TestFiles.render
+    
+    pdf.close()
+    assert pdf._actual_input.closed is True
+
+
+def test_render_pdffile_asbytes():
+    
+    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BYTES)
+    
+    assert pdf._orig_input == TestFiles.render
+    assert isinstance(pdf._actual_input, bytes)
+    assert pdf._rendering_input is None
+    assert pdf._file_access is pdfium.FileAccess.BYTES
+    
+    for image in pdf.render_topil(scale=0.5):
+        assert isinstance(image, PIL.Image.Image)
+    assert pdf._rendering_input == TestFiles.render
+    
+    pdf.close()
