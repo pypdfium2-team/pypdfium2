@@ -310,8 +310,9 @@ class PdfDocument:
     
     def update_rendering_input(self):
         """
-        Update the rendering input sources to the document's current state by saving to bytes and setting the result as new input.
-        If you modified the document, you may want to call this method before doing concurrent rendering.
+        Update the input sources for concurrent rendering to the document's current state
+        by saving to bytes and setting the result as new input.
+        If you modified the document, you may want to call this method before :meth:`._render_base`.
         """
         buffer = io.BytesIO()
         self.save(buffer)
