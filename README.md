@@ -261,6 +261,7 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 * [Anurag Bansal](https://github.com/banagg): Support model for text insertion (`PdfPage.insert_text()`).
 * [Benoît Blanchon](https://github.com/bblanchon): Author of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](sourcebuild/patches/).
 * [Anderson Bravalheri](https://github.com/abravalheri): Help with achieving PEP 517/518 compliance.
+* [Bastian Germann](https://github.com/bgermann): Help with inclusion of PDFium third-party licenses.
 * [Tim Head](https://github.com/betatim): Original idea for PDFium Python bindings with ctypesgen in `wowpng`.
 * [Yinlin Hu](https://github.com/YinlinHu): `pypdfium` prototype and `kuafu` PDF viewer.
 * [Adam Huganir](https://github.com/adam-huganir): Initial help and suggestions.

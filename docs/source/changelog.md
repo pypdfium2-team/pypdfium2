@@ -26,6 +26,7 @@
 - The version file now gets updated accordingly when building from source.
 - The test suite has been rearranged, improved and extended.
 - Added an option to set a custom PDFium build target, which can be useful to also compile PDFium tests.
+- Added the missing libtiff license to PDFium third-party licenses.
 - Made the release notes script more elegant.
 
 
