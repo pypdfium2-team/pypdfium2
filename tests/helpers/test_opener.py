@@ -9,7 +9,7 @@ import pytest
 import PIL.Image
 from os.path import join, abspath
 import pypdfium2 as pdfium
-from ..conftest import TestFiles, ExpRenderPixels, get_members
+from ..conftest import TestFiles, ExpRenderPixels
 
 
 def _check_general(pdf, n_pages=1):
