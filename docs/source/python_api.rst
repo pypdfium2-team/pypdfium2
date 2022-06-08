@@ -35,13 +35,13 @@ PDFium
 
 This is an assortment of PDFium members referenced in this documentation.
 
-.. function:: pypdfium2.FPDF_LoadDocument
-.. function:: pypdfium2.FPDF_LoadMemDocument
-.. function:: pypdfium2.FPDF_LoadCustomDocument
-.. class:: pypdfium2.FPDF_DOCUMENT
-.. class:: pypdfium2.FPDF_PAGE
-.. class:: pypdfium2.FPDF_TEXTPAGE
-.. class:: pypdfium2.FPDF_SCHHANDLE
-.. class:: pypdfium2.FPDF_FONT
-.. data:: pypdfium2.FPDF_FONT_TYPE1
-.. data:: pypdfium2.FPDF_FONT_TRUETYPE
+.. function:: FPDF_LoadDocument
+.. function:: FPDF_LoadMemDocument
+.. function:: FPDF_LoadCustomDocument
+.. class:: FPDF_DOCUMENT
+.. class:: FPDF_PAGE
+.. class:: FPDF_TEXTPAGE
+.. class:: FPDF_SCHHANDLE
+.. class:: FPDF_FONT
+.. data:: FPDF_FONT_TYPE1
+.. data:: FPDF_FONT_TRUETYPE

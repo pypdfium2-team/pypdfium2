@@ -25,6 +25,7 @@ extensions = [
     "myst_parser",
 ]
 
+add_module_names = False
 autodoc_preserve_defaults = True
 autodoc_default_options = {
     "members": True,
