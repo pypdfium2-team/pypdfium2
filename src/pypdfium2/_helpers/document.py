@@ -9,10 +9,17 @@ import functools
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers._opener import open_pdf
 from pypdfium2._helpers._utils import ViewmodeMapping
-from pypdfium2._helpers.misc import OutlineItem, raise_error
+from pypdfium2._helpers._opener import (
+    open_pdf,
+    is_input_buffer,
+)
 from pypdfium2._helpers.page import PdfPage
+from pypdfium2._helpers.misc import (
+    OutlineItem,
+    raise_error,
+    FileAccess,
+)
 
 try:
     import uharfbuzz as harfbuzz
@@ -36,23 +43,8 @@ class PdfDocument:
             A password to unlock the PDF, if encrypted.
         autoclose (bool):
             If set to :data:`True` and a byte buffer was provided as input, :meth:`.close` will not only close the PDFium document, but also the input source.
-    
-    .. list-table:: Overview of internal loading strategies
-        :header-rows: 1
-        :widths: auto
-        
-        * - Input type
-          - Strategy
-          - Data access
-        * - File path
-          - :func:`.FPDF_LoadDocument()`
-          - The file is opened by PDFium in C/C++.
-        * - Bytes
-          - :func:`.FPDF_LoadMemDocument()`
-          - The data gets passed to PDFium at once.
-        * - Byte buffer
-          - :func:`.FPDF_LoadCustomDocument()`
-          - The buffer is read incrementally via callback function.
+        file_strategy (FileAccess):
+            Define how files shall be opened internally. This parameter is ignored if *input_data* is not a file path.
     """
     
     def __init__(
@@ -60,15 +52,35 @@ class PdfDocument:
             input_data,
             password = None,
             autoclose = False,
+            file_strategy = FileAccess.NATIVE,
         ):
         
-        self._input_data = input_data
-        self._password = password
+        self._orig_input = input_data
+        self._actual_input = input_data
+        self._rendering_input = None
         self._ld_data = None
-        if isinstance(input_data, pdfium.FPDF_DOCUMENT):
-            self._pdf = input_data
+        
+        self._password = password
+        self._autoclose = autoclose
+        self._file_strategy = file_strategy
+        
+        if isinstance(self._orig_input, str):
+            if self._file_strategy is FileAccess.NATIVE:
+                pass
+            elif self._file_strategy is FileAccess.BUFFER:
+                self._actual_input = open(self._orig_input, "rb")
+                self._autoclose = True
+            elif self._file_strategy is FileAccess.BYTES:
+                buf = open(self._orig_input, "rb")
+                self._actual_input = buf.read()
+                buf.close()
+            else:
+                raise ValueError("An invalid file access strategy was given: %s" % self._file_strategy)
+        
+        if isinstance(self._actual_input, pdfium.FPDF_DOCUMENT):
+            self._pdf = self._actual_input
         else:
-            self._pdf, self._ld_data = open_pdf(input_data, password, autoclose)
+            self._pdf, self._ld_data = open_pdf(self._actual_input, self._password, self._autoclose)
     
     @property
     def raw(self):
@@ -290,21 +302,25 @@ class PdfDocument:
             )
     
     
-    def update_sources(self):
+    def update_rendering_input(self):
         """
-        Update the input sources to the document's current state by saving to bytes and setting the result as new input.
-        If you modified the document, you'll want to call this method before doing concurrent rendering, which uses the input sources.
+        Update the rendering input sources to the document's current state by saving to bytes and setting the result as new input.
+        If you modified the document, you may want to call this method before doing concurrent rendering.
         """
         buffer = io.BytesIO()
         self.save(buffer)
         buffer.seek(0)
-        self._input_data = buffer.read()
+        self._rendering_input = buffer.read()
         buffer.close()
     
     
     @classmethod
-    def _process_page(cls, index, renderer_name, input_data, password, **kwargs):
-        pdf = cls(input_data, password)
+    def _process_page(cls, index, renderer_name, input_data, password, file_strategy, **kwargs):
+        pdf = cls(
+            input_data,
+            password = password,
+            file_strategy = file_strategy,
+        )
         page = pdf.get_page(index)
         result = getattr(page, "render_to"+renderer_name)(**kwargs)
         [g.close() for g in (page, pdf)]
@@ -336,9 +352,16 @@ class PdfDocument:
             :data:`typing.Any`: Implementation-specific result object.
         """
         
-        if isinstance(self._input_data, pdfium.FPDF_DOCUMENT):
-            logger.warning("Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data.")
-            self.update_sources()
+        if self._rendering_input is None:
+            if isinstance(self._orig_input, pdfium.FPDF_DOCUMENT):
+                logger.warning("Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data.")
+                self.update_rendering_input()
+            elif is_input_buffer(self._orig_input):
+                logger.warning("Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly.")
+                self._orig_input.seek(0)
+                self._rendering_input = self._orig_input.read()
+            else:
+                self._rendering_input = self._orig_input
         
         n_pages = len(self)
         
@@ -350,8 +373,9 @@ class PdfDocument:
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
             renderer_name = renderer_name,
-            input_data = self._input_data,
+            input_data = self._rendering_input,
             password = self._password,
+            file_strategy = self._file_strategy,
             **kwargs
         )
         

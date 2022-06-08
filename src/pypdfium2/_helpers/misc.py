@@ -13,6 +13,13 @@ class OptimiseMode (enum.Enum):
     PRINTING = 2     #: Optimise for printing.
 
 
+class FileAccess (enum.Enum):
+    """ Different ways how files can be loaded. """
+    NATIVE = 0  #: :func:`.FPDF_LoadDocument`: Let PDFium open the file in C/C++.
+    BUFFER = 1  #: :func:`.FPDF_LoadCustomDocument`: Acquire a Python file buffer that is read incrementally by callback function.
+    BYTES  = 2  #: :func:`.FPDF_LoadMemDocument`: Read the whole file and pass its data to PDFium at once.
+
+
 class OutlineItem:
     """
     Class to store information about an entry in the table of contents ("bookmark").
