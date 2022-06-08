@@ -6,8 +6,8 @@ pypdfium2
 
 .. _PDFium: https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html
 
-Welcome to the documentation for the support model of pypdfium2.
-For the low-level API, please also refer to the `PDFium`_ and :mod:`ctypes` documentation.
+| Welcome to the documentation for the support model of pypdfium2.
+| Concerning the low-level API, please also refer to the documentation for `PDFium`_ and :mod:`ctypes`.
 
 
 .. toctree::
@@ -17,7 +17,6 @@ For the low-level API, please also refer to the `PDFium`_ and :mod:`ctypes` docu
    python_api
    shell_api
    planned_changes
-
 
 .. toctree::
    :maxdepth: 1
