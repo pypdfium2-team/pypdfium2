@@ -44,7 +44,7 @@ class PdfDocument:
             A password to unlock the PDF, if encrypted.
         autoclose (bool):
             If set to :data:`True` and a byte buffer was provided as input, :meth:`.close` will not only close the PDFium document, but also the input source.
-        file_strategy (FileAccess):
+        file_access (FileAccess):
             Define how files shall be opened internally. This parameter is ignored if *input_data* is not a file path.
     """
     
@@ -53,7 +53,7 @@ class PdfDocument:
             input_data,
             password = None,
             autoclose = False,
-            file_strategy = FileAccess.NATIVE,
+            file_access = FileAccess.NATIVE,
         ):
         
         self._orig_input = input_data
@@ -63,7 +63,7 @@ class PdfDocument:
         
         self._password = password
         self._autoclose = autoclose
-        self._file_strategy = file_strategy
+        self._file_access = file_access
         
         if isinstance(self._orig_input, str):
             
@@ -71,17 +71,17 @@ class PdfDocument:
             if not os.path.isfile(self._orig_input):
                 raise FileNotFoundError("File does not exist: '%s'" % self._orig_input)
             
-            if self._file_strategy is FileAccess.NATIVE:
+            if self._file_access is FileAccess.NATIVE:
                 pass
-            elif self._file_strategy is FileAccess.BUFFER:
+            elif self._file_access is FileAccess.BUFFER:
                 self._actual_input = open(self._orig_input, "rb")
                 self._autoclose = True
-            elif self._file_strategy is FileAccess.BYTES:
+            elif self._file_access is FileAccess.BYTES:
                 buf = open(self._orig_input, "rb")
                 self._actual_input = buf.read()
                 buf.close()
             else:
-                raise ValueError("An invalid file access strategy was given: '%s'" % self._file_strategy)
+                raise ValueError("An invalid file access strategy was given: '%s'" % self._file_access)
         
         if isinstance(self._actual_input, pdfium.FPDF_DOCUMENT):
             self._pdf = self._actual_input
@@ -321,11 +321,11 @@ class PdfDocument:
     
     
     @classmethod
-    def _process_page(cls, index, renderer_name, input_data, password, file_strategy, **kwargs):
+    def _process_page(cls, index, renderer_name, input_data, password, file_access, **kwargs):
         pdf = cls(
             input_data,
             password = password,
-            file_strategy = file_strategy,
+            file_access = file_access,
         )
         page = pdf.get_page(index)
         result = getattr(page, "render_to"+renderer_name)(**kwargs)
@@ -381,7 +381,7 @@ class PdfDocument:
             renderer_name = renderer_name,
             input_data = self._rendering_input,
             password = self._password,
-            file_strategy = self._file_strategy,
+            file_access = self._file_access,
             **kwargs
         )
         

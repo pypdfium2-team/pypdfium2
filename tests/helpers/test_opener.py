@@ -34,7 +34,7 @@ def _check_render(pdf):
 @pytest.fixture
 def open_filepath_native():
     pdf = pdfium.PdfDocument(TestFiles.render)
-    assert pdf._file_strategy is pdfium.FileAccess.NATIVE
+    assert pdf._file_access is pdfium.FileAccess.NATIVE
     _check_general(pdf)
     yield _check_render(pdf)
     pdf.close()
@@ -91,7 +91,7 @@ def test_open_buffer_autoclose():
 
 def test_open_filepath_buffer():
     
-    pdf = pdfium.PdfDocument(TestFiles.render, file_strategy=pdfium.FileAccess.BUFFER)
+    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BUFFER)
     
     assert pdf._orig_input == TestFiles.render
     assert isinstance(pdf._actual_input, io.BufferedReader)
@@ -104,7 +104,7 @@ def test_open_filepath_buffer():
 
 def test_open_filepath_bytes():
     
-    pdf = pdfium.PdfDocument(TestFiles.render, file_strategy=pdfium.FileAccess.BYTES)
+    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BYTES)
     
     assert pdf._orig_input == TestFiles.render
     assert isinstance(pdf._actual_input, bytes)
@@ -170,9 +170,9 @@ def test_open_invalid():
     with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
         pdf = pdfium.PdfDocument("invalid/path")
     with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
-        pdf = pdfium.PdfDocument("invalid/path", file_strategy=pdfium.FileAccess.BUFFER)
+        pdf = pdfium.PdfDocument("invalid/path", file_access=pdfium.FileAccess.BUFFER)
     with pytest.raises(ValueError, match=re.escape("An invalid file access strategy was given: 'abcd'")):
-        pdf = pdfium.PdfDocument(TestFiles.empty, file_strategy="abcd")
+        pdf = pdfium.PdfDocument(TestFiles.empty, file_access="abcd")
 
 
 def test_hierarchy():
