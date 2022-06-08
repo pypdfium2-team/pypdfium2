@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+__all__ = ["V_PYPDFIUM2", "V_LIBPDFIUM", "IS_SOURCEBUILD"]
+
 V_MAJOR = 2
 V_MINOR = 0
 V_PATCH = 0

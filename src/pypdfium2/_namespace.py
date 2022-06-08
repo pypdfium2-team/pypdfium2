@@ -5,8 +5,4 @@
 
 from pypdfium2._pypdfium import *
 from pypdfium2._helpers import *
-from pypdfium2.version import (
-    V_PYPDFIUM2,
-    V_LIBPDFIUM,
-    IS_SOURCEBUILD,
-)
+from pypdfium2.version import *
