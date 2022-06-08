@@ -126,9 +126,9 @@ pdf = pdfium.PdfDocument(filepath)
 
 for item in pdf.get_toc():
     print(
-        '    ' * item.level +
-        '[{}] '.format('-' if item.is_closed else '+') +
-        '{} -> {}  # {} {}'.format(
+        "    " * item.level +
+        "[%s] " % ("-" if item.is_closed else "+") +
+        "%s -> %s  # %s %s" % (
             item.title,
             item.page_index + 1,
             item.view_mode,
