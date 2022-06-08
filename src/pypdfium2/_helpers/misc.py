@@ -6,18 +6,18 @@ import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers._utils import ErrorMapping
 
 
+class FileAccess (enum.Enum):
+    """ Different ways how files can be loaded. """
+    NATIVE = 0  #: :func:`.FPDF_LoadDocument` - Let PDFium open the file in C/C++.
+    BUFFER = 1  #: :func:`.FPDF_LoadCustomDocument` - Acquire a Python file buffer that is read incrementally by callback function.
+    BYTES  = 2  #: :func:`.FPDF_LoadMemDocument` - Read the whole file into memory and pass the data to PDFium at once.
+
+
 class OptimiseMode (enum.Enum):
     """ Modes defining how page rendering shall be optimised. """
     NONE = 0         #: No optimisation.
     LCD_DISPLAY = 1  #: Optimise for LCD displays (via subpixel rendering).
     PRINTING = 2     #: Optimise for printing.
-
-
-class FileAccess (enum.Enum):
-    """ Different ways how files can be loaded. """
-    NATIVE = 0  #: :func:`.FPDF_LoadDocument`: Let PDFium open the file in C/C++.
-    BUFFER = 1  #: :func:`.FPDF_LoadCustomDocument`: Acquire a Python file buffer that is read incrementally by callback function.
-    BYTES  = 2  #: :func:`.FPDF_LoadMemDocument`: Read the whole file and pass its data to PDFium at once.
 
 
 class OutlineItem:
