@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import io
 import math
 import logging
 import PIL.Image
@@ -237,8 +238,8 @@ def render_pdffile_tobytes(multipage_doc):
     [image.close() for image in imgs]
 
 
-def test_render_pdffile(render_pdf_topil, render_pdf_tobytes):
-    for image_a, image_b in zip(render_pdf_topil, render_pdf_tobytes):
+def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes):
+    for image_a, image_b in zip(render_pdffile_topil, render_pdffile_tobytes):
         assert image_a == image_b
 
 
@@ -261,17 +262,72 @@ def test_render_pdf_new(caplog):
     [g.close() for g in (image, page, pdf)]
 
 
-def test_render_pdfbuffer():
-    pass
+def test_render_pdfbuffer(caplog):
+    
+    buffer = open(TestFiles.render, "rb")
+    pdf = pdfium.PdfDocument(buffer)
+    assert pdf._orig_input is buffer
+    assert pdf._actual_input is buffer
+    assert pdf._rendering_input is None
+    
+    with caplog.at_level(logging.WARNING):
+        for image in pdf.render_topil(scale=0.5):
+            assert isinstance(image, PIL.Image.Image)
+    
+    assert isinstance(pdf._rendering_input, bytes)
+    warning = "Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly."
+    assert warning in caplog.text
+    
+    pdf.close()
+    buffer.close()
 
 
 def test_render_pdfbytes():
-    pass
+    
+    with open(TestFiles.render, "rb") as fh:
+        data = fh.read()
+    
+    pdf = pdfium.PdfDocument(data)
+    assert pdf._orig_input is data
+    assert pdf._actual_input is data
+    assert pdf._rendering_input is None
+    for image in pdf.render_topil(scale=0.5):
+        assert isinstance(image, PIL.Image.Image)
+    assert isinstance(pdf._rendering_input, bytes)
+    
+    pdf.close()
 
 
 def test_render_pdffile_asbuffer():
-    pass
+    
+    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BUFFER)
+    
+    assert pdf._orig_input == TestFiles.render
+    assert isinstance(pdf._actual_input, io.BufferedReader)
+    assert pdf._rendering_input is None
+    assert pdf._file_access is pdfium.FileAccess.BUFFER
+    
+    for image in pdf.render_topil(scale=0.5):
+        assert isinstance(image, PIL.Image.Image)
+    
+    # Not sure how to test that the requested file access strategy is actually used when constructing the new PdfDocument objects
+    assert pdf._rendering_input == TestFiles.render
+    
+    pdf.close()
+    assert pdf._actual_input.closed is True
 
 
 def test_render_pdffile_asbytes():
-    pass
+    
+    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BYTES)
+    
+    assert pdf._orig_input == TestFiles.render
+    assert isinstance(pdf._actual_input, bytes)
+    assert pdf._rendering_input is None
+    assert pdf._file_access is pdfium.FileAccess.BYTES
+    
+    for image in pdf.render_topil(scale=0.5):
+        assert isinstance(image, PIL.Image.Image)
+    assert pdf._rendering_input == TestFiles.render
+    
+    pdf.close()
