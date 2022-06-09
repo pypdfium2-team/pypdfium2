@@ -30,7 +30,7 @@ def _check_namespace(V_MAJOR, V_MINOR, V_PATCH, V_BETA, V_PYPDFIUM2, V_LIBPDFIUM
     assert V_PYPDFIUM2.count(".") == 2
     if not IS_SOURCEBUILD:
         assert V_LIBPDFIUM.isnumeric()
-    if V_BETA:
+    if V_BETA is not None:
         assert "b" in V_PYPDFIUM2
         assert V_BETA >= 1
     
