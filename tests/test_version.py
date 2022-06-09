@@ -4,13 +4,17 @@
 import copy
 import shutil
 import tempfile
-import pkg_resources
 from os.path import join
 import pypdfium2.version as pdfium_ver
 from pl_setup import setup_base
 import pl_setup.packaging_base as pkg_base
 import pl_setup.update_pdfium as fpdf_up
 import pl_setup.build_pdfium as fpdf_build
+
+try:
+    from importlib.metadata import version as dist_version
+except ImportError:
+    from importlib_metadata import version as dist_version
 
 
 def _check_namespace(V_MAJOR, V_MINOR, V_PATCH, V_BETA, V_PYPDFIUM2, V_LIBPDFIUM, IS_SOURCEBUILD):
@@ -40,7 +44,7 @@ def test_current_version():
     assert setup_base.SetupKws["version"] == pkg_base.VerNamespace["V_PYPDFIUM2"]
 
 def test_installed_version():
-    assert pkg_resources.get_distribution('pypdfium2').version == pdfium_ver.V_PYPDFIUM2
+    assert dist_version('pypdfium2') == pdfium_ver.V_PYPDFIUM2
 
 
 def _test_change(method, exp_items):
