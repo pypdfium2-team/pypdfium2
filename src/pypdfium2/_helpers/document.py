@@ -46,6 +46,16 @@ class PdfDocument:
             Define how files shall be opened internally. This parameter is ignored if *input_data* is not a file path.
         autoclose (bool):
             If set to :data:`True` and a byte buffer was provided as input, :meth:`.close` will not only close the PDFium document, but also the input source.
+    
+    Hint:
+        * :func:`len` may be called to get a document's number of pages.
+        * Looping over a document will yield its pages from beginning to end.
+        * Pages may be loaded using list index access.
+        * :class:`PdfDocument` implements the context manager API, hence documents can be used in a ``with`` block, where :meth:`.close` will be called automatically on exit.
+    
+    Note:
+        :class:`.PdfDocument` does not implement a page cache. This is to ensure correct behaviour in case the order of pages is modified using the raw API.
+        Therefore, it is up to the caller to cache pages appropriately and avoid inefficient repated loading/closing of pages.
     """
     
     def __init__(
@@ -59,11 +69,12 @@ class PdfDocument:
         self._orig_input = input_data
         self._actual_input = input_data
         self._rendering_input = None
-        self._ld_data = None
-        
         self._password = password
         self._file_access = file_access
         self._autoclose = autoclose
+        
+        self._is_closed = False
+        self._ld_data = None
         
         if isinstance(self._orig_input, str):
             
@@ -88,6 +99,43 @@ class PdfDocument:
         else:
             self._pdf, self._ld_data = open_pdf(self._actual_input, self._password, self._autoclose)
     
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
+    
+    def __len__(self):
+        return pdfium.FPDF_GetPageCount(self._pdf)
+    
+    def __iter__(self):
+        for i in range( len(self) ):
+            yield self.get_page(i)
+    
+    def __getitem__(self, i):
+        return self.get_page(i)
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, *_):
+        self.close()
+    
+    
+    def close(self):
+        """
+        Close the document to release allocated memory.
+        This function shall be called when finished working with the object.
+        """
+        if self._is_closed:
+            return
+        
+        pdfium.FPDF_CloseDocument(self._pdf)
+        if self._ld_data is not None:
+            self._ld_data.close()
+        
+        self._is_closed = True
+    
     @property
     def raw(self):
         """ FPDF_DOCUMENT: The raw PDFium document object handle. """
@@ -101,19 +149,6 @@ class PdfDocument:
         """
         new_pdf = pdfium.FPDF_CreateNewDocument()
         return cls(new_pdf)
-    
-    def __len__(self):
-        """ Get the document's number of pages (using :func:`len`) """
-        return pdfium.FPDF_GetPageCount(self._pdf)
-    
-    def close(self):
-        """
-        Close the document to release allocated memory.
-        This function shall be called when finished working with the object.
-        """
-        pdfium.FPDF_CloseDocument(self._pdf)
-        if self._ld_data is not None:
-            self._ld_data.close()
     
     
     def save(self, buffer, version=None):
@@ -149,7 +184,7 @@ class PdfDocument:
         if not 0 <= index < n_pages:
             raise IndexError("Page index %s is out of bounds for document with %s pages." % (index, n_pages))
     
-    def new_page(self, width, height, index=0):
+    def new_page(self, width, height, index=None):
         """
         Insert a new, empty page into the document.
         
@@ -158,14 +193,16 @@ class PdfDocument:
                 Target page width (horizontal size).
             height (float):
                 Target page height (vertical size).
-            index (int):
+            index (typing.Optional[int]):
                 Suggested zero-based index at which the page will be inserted.
                 If *index* is less or equal to zero, the page will be inserted at the beginning.
-                If *index* is larger that the document's current last index, the page will be appended to the end.
+                If *index* is :data:`None` or greater than the document's current last index, the page will be appended to the end.
         
         Returns:
             PdfPage: The newly created page.
         """
+        if index is None:
+            index = len(self)
         raw_page = pdfium.FPDFPage_New(self._pdf, index, width, height)
         return PdfPage(raw_page, self)
     
@@ -450,16 +487,23 @@ class PdfFont:
     def __init__(self, pdf_font, font_data):
         self._pdf_font = pdf_font
         self._font_data = font_data
+        self._is_closed = False
+    
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
+    
+    def close(self):
+        """ Close the font to release allocated memory. This function shall be called when finished working with the object. """
+        if self._is_closed:
+            return
+        pdfium.FPDFFont_Close(self._pdf_font)
+        id(self._font_data)
+        self._is_closed = True
     
     @property
     def raw(self):
         """ FPDF_FONT: The raw PDFium font object handle. """
         return self._pdf_font
-    
-    def close(self):
-        """
-        Close the font to release allocated memory.
-        This function shall be called when finished working with the object.
-        """
-        pdfium.FPDFFont_Close(self._pdf_font)
-        id(self._font_data)

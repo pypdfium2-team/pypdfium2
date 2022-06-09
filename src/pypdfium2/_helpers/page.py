@@ -40,6 +40,20 @@ class PdfPage:
     def __init__(self, page, pdf):
         self._page = page
         self._pdf = pdf
+        self._is_closed = False
+    
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
+    
+    def close(self):
+        """ Close the page to release allocated memory. This function shall be called when finished working with the object. """
+        if self._is_closed:
+            return
+        pdfium.FPDF_ClosePage(self._page)
+        self._is_closed = True
     
     @property
     def raw(self):
@@ -50,14 +64,6 @@ class PdfPage:
     def pdf(self):
         """ PdfDocument: The document this page belongs to. """
         return self._pdf
-    
-    def close(self):
-        """
-        Close the page to release allocated memory.
-        This function shall be called when finished working with the object.
-        """
-        pdfium.FPDF_ClosePage(self._page)
-    
     
     def get_width(self):
         """

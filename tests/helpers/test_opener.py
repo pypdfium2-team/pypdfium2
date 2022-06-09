@@ -33,10 +33,13 @@ def _check_render(pdf):
 
 @pytest.fixture
 def open_filepath_native():
+    
     pdf = pdfium.PdfDocument(TestFiles.render)
     assert pdf._file_access is pdfium.FileAccess.NATIVE
+    
     _check_general(pdf)
     yield _check_render(pdf)
+    
     pdf.close()
 
 
@@ -82,6 +85,7 @@ def test_opener_inputtypes(open_filepath_native, open_bytes, open_buffer):
 def test_open_buffer_autoclose():
     
     buffer = open(TestFiles.render, "rb")
+    
     pdf = pdfium.PdfDocument(buffer, autoclose=True)
     _check_general(pdf)
     
@@ -175,7 +179,30 @@ def test_open_invalid():
         pdf = pdfium.PdfDocument(TestFiles.empty, file_access="abcd")
 
 
-def test_hierarchy():
+def test_doc_extras():
+    
+    with pdfium.PdfDocument(TestFiles.empty, file_access=pdfium.FileAccess.BUFFER) as pdf:
+        assert isinstance(pdf, pdfium.PdfDocument)
+        len(pdf) == 1
+    assert isinstance(pdf._actual_input, io.BufferedReader)
+    assert pdf._actual_input.closed is True
+    
+    with pdfium.PdfDocument.new() as pdf:
+        
+        assert isinstance(pdf, pdfium.PdfDocument)
+        assert len(pdf) == 0
+        
+        sizes = [(50, 100), (100, 150), (150, 200)]
+        for size in sizes:
+            page = pdf.new_page(*size)
+            page.close()
+        for size, page in zip(sizes, pdf):
+            assert isinstance(page, pdfium.PdfPage)
+            assert size == page.get_size()
+            page.close()
+
+
+def test_object_hierarchy():
     
     pdf = pdfium.PdfDocument(TestFiles.empty)
     assert isinstance(pdf, pdfium.PdfDocument)

@@ -15,7 +15,6 @@ Version
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
-    :special-members: __len__
     :private-members: _render_base
 
 Page
