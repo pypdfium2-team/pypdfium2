@@ -4,11 +4,11 @@
 # Changelog
 
 
-## 2.0.0 (sched 2022-06-??)
+## 2.0.0 (sched 2022-06-09)
 
 *This release has deeply changed the support model API in a way that is incompatible with previous releases.*
 
-- Updated PDFium from `5092` to `????`.
+- Updated PDFium from `5092` to `5104`.
 - Entirely re-implemented the support model to improve the API and fix some structural issues.
   * All helpers are now object-oriented. This has numerous advantages, including simpler method calls, a cleaner namespace and the possibility to nicely cache internal data.
   * Opening was improved so that any available PDFium loader can now be selected by callers.
