@@ -53,7 +53,7 @@ def test_colour_tohex(values, cl_value, use_alpha):
     ["prefix", "mapping"],
     [
         ("PDFDEST_VIEW_", ViewmodeMapping),
-        ("FPDF_ERR", ErrorMapping),
+        ("FPDF_ERR_", ErrorMapping),
         ("FPDF_PAGEOBJ_", ObjtypeToName),
     ]
 )

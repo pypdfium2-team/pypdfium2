@@ -44,7 +44,7 @@ def test_current_version():
     assert setup_base.SetupKws["version"] == pkg_base.VerNamespace["V_PYPDFIUM2"]
 
 def test_installed_version():
-    assert dist_version('pypdfium2') == pdfium_ver.V_PYPDFIUM2
+    assert dist_version("pypdfium2") == pdfium_ver.V_PYPDFIUM2
 
 
 def _test_change(method, exp_items):
