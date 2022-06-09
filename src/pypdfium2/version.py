@@ -6,7 +6,7 @@ __all__ = ["V_PYPDFIUM2", "V_LIBPDFIUM", "IS_SOURCEBUILD"]
 V_MAJOR = 2
 V_MINOR = 0
 V_PATCH = 0
-V_BETA = 2
+V_BETA = 3
 
 #: pypdfium2 version string.
 V_PYPDFIUM2 = "%s.%s.%s" % (V_MAJOR, V_MINOR, V_PATCH)
