@@ -39,12 +39,12 @@ def install_pydeps():
         _pip_install("ctypesgen")
 
 
-def check_sysdeps(sys_commands):
+def check_sysdeps():
     
     missing = []
     found = []
     
-    for dep_name in sys_commands:
+    for dep_name in SysCommands:
         if shutil.which(dep_name):
             found.append(dep_name)
         else:
@@ -56,7 +56,7 @@ def check_sysdeps(sys_commands):
 
 
 def main():
-    check_sysdeps(SysCommands)
+    check_sysdeps()
     install_pydeps()
 
 
