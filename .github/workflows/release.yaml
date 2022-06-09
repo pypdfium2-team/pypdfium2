@@ -44,23 +44,17 @@ jobs:
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0
-          path: pypdfium2
       
       - name: Install/update pypdfium2 dependencies
         run: |
-          cd pypdfium2/
           python3 -m pip install -U .[utilities,test,inserttext,converters]
           rm -rf ./data/.presetup_done.txt
       
       - name: Run packaging script
-        run: |
-          cd pypdfium2/
-          make packaging
+        run: make packaging
       
       - name: Prepare release description
-        run:
-          cd pypdfium2/
-          python3 setupsrc/pl_setup/mk_releasenotes.py
+        run: python3 setupsrc/pl_setup/mk_releasenotes.py
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
