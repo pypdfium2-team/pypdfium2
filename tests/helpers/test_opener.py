@@ -165,7 +165,7 @@ def test_open_new():
 def test_open_invalid():
     with pytest.raises(TypeError, match=re.escape("__init__() missing 1 required positional argument: 'input_data'")):
         pdf = pdfium.PdfDocument()
-    with pytest.raises(TypeError, match=re.escape("The input must be a file path string, bytes, or a byte buffer, but 'int' was given.")):
+    with pytest.raises(TypeError, match=re.escape("Invalid input type 'int'")):
         pdf = pdfium.PdfDocument(123)
     with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
         pdf = pdfium.PdfDocument("invalid/path")

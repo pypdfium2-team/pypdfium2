@@ -87,7 +87,7 @@ def open_pdf(input_data, password=None, autoclose=False):
     elif is_input_buffer(input_data):
         pdf, ld_data = open_pdf_buffer(input_data, password, autoclose)
     else:
-        raise TypeError("The input must be a file path string, bytes, or a byte buffer, but '%s' was given." % type(input_data).__name__)
+        raise TypeError("Invalid input type '%s'" % type(input_data).__name__)
     
     if pdfium.FPDF_GetPageCount(pdf) < 1:
         raise_error("Loading the document failed")
