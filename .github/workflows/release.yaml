@@ -22,11 +22,10 @@ jobs:
         with:
           python-version: '3.9'
       
-      - name: Install/update dependencies
+      - name: Install/update setup dependencies
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -U setuptools setuptools-scm build wheel
-          python3 -m pip install -U pillow uharfbuzz pytest importchecker codespell reuse twine check-wheel-contents
       
       - name: Check out ctypesgen
         uses: actions/checkout@v3
@@ -37,21 +36,31 @@ jobs:
       
       - name: Install ctypesgen
         run: |
-          pushd ctypesgen
+          cd ctypesgen/
           python3 -m pip install .
-          popd
       
       - name: Check out pypdfium2
         uses: actions/checkout@v3
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0
+          path: pypdfium2
+      
+      - name: Install/update pypdfium2 dependencies
+        run: |
+          cd pypdfium2/
+          python3 -m pip install -U .[utilities,test,inserttext,converters]
+          rm -rf ./data/.presetup_done.txt
       
       - name: Run packaging script
-        run: make packaging
+        run: |
+          cd pypdfium2/
+          make packaging
       
       - name: Prepare release description
-        run: python3 setupsrc/pl_setup/mk_releasenotes.py
+        run:
+          cd pypdfium2/
+          python3 setupsrc/pl_setup/mk_releasenotes.py
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
