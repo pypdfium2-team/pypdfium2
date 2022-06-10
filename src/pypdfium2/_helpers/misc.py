@@ -7,10 +7,29 @@ from pypdfium2._helpers._utils import ErrorMapping
 
 
 class FileAccess (enum.Enum):
-    """ Different ways how files can be loaded. """
-    NATIVE = 0  #: :func:`.FPDF_LoadDocument` - Let PDFium open the file in C/C++.
-    BUFFER = 1  #: :func:`.FPDF_LoadCustomDocument` - Acquire a Python file buffer that is read incrementally by callback function.
-    BYTES  = 2  #: :func:`.FPDF_LoadMemDocument` - Read the whole file into memory and pass the data to PDFium at once.
+    """
+    Different ways how files can be loaded.
+    
+    .. list-table:: Overview of file access modes
+        :header-rows: 1
+        :widths: auto
+        
+        * - Mode
+          - PDFium loader
+          - Comment
+        * - :attr:`.NATIVE`
+          - :func:`.FPDF_LoadDocument`
+          - File access managed by PDFium in C/C++.
+        * - :attr:`.BUFFER`
+          - :func:`.FPDF_LoadCustomDocument`
+          - Data read incrementally from Python file buffer.
+        * - :attr:`.BYTES`
+          - :func:`.FPDF_LoadMemDocument`
+          - Data loaded into memory and passed to PDFium at once.
+    """
+    NATIVE = 0
+    BUFFER = 1
+    BYTES  = 2
 
 
 class OptimiseMode (enum.Enum):
