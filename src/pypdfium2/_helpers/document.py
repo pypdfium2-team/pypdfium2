@@ -53,7 +53,6 @@ class PdfDocument:
         * Looping over a document will yield its pages from beginning to end.
         * Pages may be loaded using list index access.
         * The ``del`` keyword and list index access may be used to delete pages.
-        * The ``in`` keyword may be used to check if a page is contained in this PDF.
     
     Note:
         :class:`.PdfDocument` does not implement a page cache. This is to ensure correct behaviour in case the order of pages is modified using the raw API.
@@ -113,12 +112,6 @@ class PdfDocument:
     
     def __delitem__(self, i):
         self.del_page(i)
-    
-    def __contains__(self, page):
-        if isinstance(page, PdfPage) and page.pdf is self:
-            return True
-        else:
-            return False
     
     def __enter__(self):
         return self
