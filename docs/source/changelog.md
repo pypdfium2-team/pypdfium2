@@ -4,7 +4,7 @@
 # Changelog
 
 
-## 2.0.0 (sched 2022-06-09)
+## 2.0.0 (2022-06-09)
 
 *This release has deeply changed the support model API in a way that is incompatible with previous releases.*
 

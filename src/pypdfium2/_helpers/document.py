@@ -46,6 +46,13 @@ class PdfDocument:
             Define how files shall be opened internally. This parameter is ignored if *input_data* is not a file path.
         autoclose (bool):
             If set to :data:`True` and a byte buffer was provided as input, :meth:`.close` will not only close the PDFium document, but also the input source.
+    
+    Hint:
+        * :func:`len` may be called to get a document's number of pages.
+    
+    Note:
+        :class:`.PdfDocument` does not implement a page cache. This is to ensure correct behaviour in case the order of pages is modified using the raw API.
+        Therefore, it is up to the caller to cache pages appropriately and avoid inefficient repated loading/closing of pages.
     """
     
     def __init__(
@@ -149,7 +156,7 @@ class PdfDocument:
         if not 0 <= index < n_pages:
             raise IndexError("Page index %s is out of bounds for document with %s pages." % (index, n_pages))
     
-    def new_page(self, width, height, index=0):
+    def new_page(self, width, height, index=None):
         """
         Insert a new, empty page into the document.
         
@@ -158,14 +165,16 @@ class PdfDocument:
                 Target page width (horizontal size).
             height (float):
                 Target page height (vertical size).
-            index (int):
+            index (typing.Optional[int]):
                 Suggested zero-based index at which the page will be inserted.
                 If *index* is less or equal to zero, the page will be inserted at the beginning.
-                If *index* is larger that the document's current last index, the page will be appended to the end.
+                If *index* is :data:`None` or larger that the document's current last index, the page will be appended to the end.
         
         Returns:
             PdfPage: The newly created page.
         """
+        if index is None:
+            index = len(self)
         raw_page = pdfium.FPDFPage_New(self._pdf, index, width, height)
         return PdfPage(raw_page, self)
     
@@ -194,9 +203,9 @@ class PdfDocument:
             type (int):
                 A constant signifying the type of the given font (:data:`.FPDF_FONT_TYPE1` or :data:`.FPDF_FONT_TRUETYPE`).
             is_cid (bool):
-                State whether the given font is a CID font or not.
+                Whether the given font is a CID font or not.
         Returns:
-            PdfFont: A font helper object.
+            PdfFont: A PDF font helper object.
         """
         
         with open(font_path, "rb") as fh:

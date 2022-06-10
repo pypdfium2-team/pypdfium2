@@ -7,6 +7,7 @@ Python API
 .. Warning::
     * PDFium is not thread-safe. If you need to parallelise tasks, use processes instead of threads.
     * Attempting to work with an object after it has been closed will result in a segmentation fault.
+    * Not calling the ``close()`` methods as required may lead to memory leaks.
 
 Version
 *******
@@ -15,7 +16,6 @@ Version
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
-    :special-members: __len__
     :private-members: _render_base
 
 Page
