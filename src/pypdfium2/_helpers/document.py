@@ -109,6 +109,15 @@ class PdfDocument:
     def __getitem__(self, i):
         return self.get_page(i)
     
+    def __delitem__(self, i):
+        self.del_page(i)
+    
+    def __contains__(self, page):
+        if isinstance(page, PdfPage) and page.pdf is self:
+            return True
+        else:
+            return False
+    
     def __enter__(self):
         return self
     
