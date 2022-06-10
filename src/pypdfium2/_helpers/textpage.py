@@ -15,17 +15,8 @@ class PdfTextPage:
         self._page = page
         self._is_closed = False
     
-    def __del__(self):
-        try:
-            self.close()
-        except Exception:
-            pass
-    
     def close(self):
-        """
-        Close the text page to release allocated memory.
-        This method shall be called when finished working with the text page.
-        """
+        """ Close the text page to release allocated memory. This method shall be called when finished working with the text page. """
         if self._is_closed:
             return
         pdfium.FPDFText_ClosePage(self._textpage)
@@ -225,12 +216,6 @@ class PdfTextSearcher:
         self._search = search
         self._textpage = textpage
         self._is_closed = False
-    
-    def __del__(self):
-        try:
-            self.close()
-        except Exception:
-            pass
     
     def close(self):
         """ Close the search structure to release allocated memory. This method shall be called when done with text searching. """

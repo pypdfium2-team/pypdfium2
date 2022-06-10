@@ -99,12 +99,6 @@ class PdfDocument:
         else:
             self._pdf, self._ld_data = open_pdf(self._actual_input, self._password, self._autoclose)
     
-    def __del__(self):
-        try:
-            self.close()
-        except Exception:
-            pass
-    
     def __len__(self):
         return pdfium.FPDF_GetPageCount(self._pdf)
     
@@ -123,10 +117,7 @@ class PdfDocument:
     
     
     def close(self):
-        """
-        Close the document to release allocated memory.
-        This function shall be called when finished working with the object.
-        """
+        """ Close the document to release allocated memory. This function shall be called when finished working with the object. """
         if self._is_closed:
             return
         
@@ -488,12 +479,6 @@ class PdfFont:
         self._pdf_font = pdf_font
         self._font_data = font_data
         self._is_closed = False
-    
-    def __del__(self):
-        try:
-            self.close()
-        except Exception:
-            pass
     
     def close(self):
         """ Close the font to release allocated memory. This function shall be called when finished working with the object. """

@@ -42,12 +42,6 @@ class PdfPage:
         self._pdf = pdf
         self._is_closed = False
     
-    def __del__(self):
-        try:
-            self.close()
-        except Exception:
-            pass
-    
     def close(self):
         """ Close the page to release allocated memory. This function shall be called when finished working with the object. """
         if self._is_closed:
