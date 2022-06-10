@@ -49,9 +49,11 @@ class PdfDocument:
     
     Hint:
         * :func:`len` may be called to get a document's number of pages.
+        * :class:`PdfDocument` implements the context manager API, hence documents can be used in a ``with`` block, where :meth:`.close` will be called automatically on exit.
         * Looping over a document will yield its pages from beginning to end.
         * Pages may be loaded using list index access.
-        * :class:`PdfDocument` implements the context manager API, hence documents can be used in a ``with`` block, where :meth:`.close` will be called automatically on exit.
+        * The ``del`` keyword and list index access may be used to delete pages.
+        * The ``in`` keyword may be used to check if a page is contained in this PDF.
     
     Note:
         :class:`.PdfDocument` does not implement a page cache. This is to ensure correct behaviour in case the order of pages is modified using the raw API.
