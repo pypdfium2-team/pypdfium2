@@ -128,5 +128,3 @@ def mkwheel(pl_name):
         cmdclass = {'bdist_wheel': _get_bdist(pl_name)},
         **SetupKws,
     )
-    
-    _clean()

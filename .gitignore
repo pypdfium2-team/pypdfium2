@@ -4,12 +4,16 @@
 build/
 dist/
 tests/output/
-data/*
+data/
 !data/.gitkeep
-docs/build/*
+
+docs/build/
 !docs/build/.gitkeep
-sourcebuild/*
+sourcebuild/
 !sourcebuild/patches
+
+src/pypdfium2/_pypdfium.py
+src/pypdfium2/pdfium
 
 **/__pycache__
 **/.mypy_cache
