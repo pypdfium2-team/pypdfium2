@@ -20,7 +20,10 @@ whl_targets=(
 )
 for target in ${whl_targets[*]}; do
     echo "$target"
+    rm -rf build/
     PYP_TARGET_PLATFORM="$target" python3 -m build -n -x --wheel
+    rm -rf build/
+    pushd src/pypdfium2/; rm -f _pypdfium.py pdfium pdfium.dll pdfium.dylib; popd
 done
 
 # package source distribution

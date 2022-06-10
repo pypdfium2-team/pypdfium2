@@ -36,13 +36,12 @@ def _clean():
 
 def _copy_bindings(pl_name):
     
-    # non-recursively collect all objects from the platform directory
-    for src_path in glob(join(DataTree, pl_name, '*')):
-        
-        # copy platform-specific files into the sources, excluding possible directories
-        if os.path.isfile(src_path):
-            dest_path = join(ModuleDir, basename(src_path))
-            shutil.copy(src_path, dest_path)
+    files = [f for f in glob(join(DataTree, pl_name, '*')) if os.path.isfile(f)]
+    assert len(files) == 2
+    
+    for src_path in files:
+        dest_path = join(ModuleDir, basename(src_path))
+        shutil.copy(src_path, dest_path)
 
 
 def _get_linux_tag(arch):
