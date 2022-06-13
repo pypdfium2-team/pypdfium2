@@ -143,18 +143,26 @@ def test_open_encrypted():
 
 
 def test_open_nonascii():
-    with tempfile.TemporaryDirectory(prefix="pypdfium2_") as tempdir:
-        nonascii_file = join(tempdir, "tên file chứakýtự éèáàçß 发短信.pdf")
-        shutil.copy(TestFiles.render, nonascii_file)
-        pdf = pdfium.PdfDocument(nonascii_file)
-        _check_general(pdf)
-        pdf.close()
+    
+    tempdir = tempfile.TemporaryDirectory(prefix="pypdfium2_")
+    nonascii_file = join(tempdir.name, "tên file chứakýtự éèáàçß 发短信.pdf")
+    shutil.copy(TestFiles.render, nonascii_file)
+    
+    pdf = pdfium.PdfDocument(nonascii_file)
+    _check_general(pdf)
+    pdf.close()
+    
+    tempdir.cleanup()
 
 
 def test_open_new():
     
-    dest_pdf = pdfium.PdfDocument.new()
     src_pdf = pdfium.PdfDocument(TestFiles.multipage)
+    dest_pdf = pdfium.PdfDocument.new()
+    assert isinstance(dest_pdf._orig_input, pdfium.FPDF_DOCUMENT)
+    assert dest_pdf._orig_input is dest_pdf._actual_input
+    assert dest_pdf._rendering_input is None
+    assert dest_pdf._ld_data is None
     
     pdfium.FPDF_ImportPages(dest_pdf.raw, src_pdf.raw, b"1, 3", 0)
     assert len(dest_pdf) == 2
@@ -175,7 +183,7 @@ def test_open_invalid():
         pdf = pdfium.PdfDocument(TestFiles.empty, file_access="abcd")
 
 
-def test_hierarchy():
+def test_object_hierarchy():
     
     pdf = pdfium.PdfDocument(TestFiles.empty)
     assert isinstance(pdf, pdfium.PdfDocument)
@@ -197,3 +205,34 @@ def test_hierarchy():
     assert searcher.textpage is textpage
     
     [g.close() for g in (searcher, textpage, page, pdf)]
+
+
+def test_doc_extras():
+    
+    with pdfium.PdfDocument(TestFiles.empty, file_access=pdfium.FileAccess.BUFFER) as pdf:
+        assert isinstance(pdf, pdfium.PdfDocument)
+        assert len(pdf) == 1
+        page = pdf[0]
+        assert isinstance(page, pdfium.PdfPage)
+        page.close()
+    assert isinstance(pdf._actual_input, io.BufferedReader)
+    assert pdf._actual_input.closed is True
+    
+    with pdfium.PdfDocument.new() as pdf:
+        
+        assert isinstance(pdf, pdfium.PdfDocument)
+        assert len(pdf) == 0
+        
+        sizes = [(50, 100), (100, 150), (150, 200)]
+        for size in sizes:
+            page = pdf.new_page(*size)
+            page.close()
+        for size, page in zip(sizes, pdf):
+            assert isinstance(page, pdfium.PdfPage)
+            assert size == page.get_size()
+            page.close()
+        
+        del pdf[0]
+        page = pdf[0]
+        assert page.get_size() == (100, 150)
+        page.close()

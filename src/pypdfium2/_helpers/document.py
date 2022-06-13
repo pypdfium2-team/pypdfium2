@@ -49,9 +49,13 @@ class PdfDocument:
     
     Hint:
         * :func:`len` may be called to get a document's number of pages.
+        * :class:`PdfDocument` implements the context manager API, hence documents can be used in a ``with`` block, where :meth:`.close` will be called automatically on exit.
+        * Looping over a document will yield its pages from beginning to end.
+        * Pages may be loaded using list index access.
+        * The ``del`` keyword and list index access may be used to delete pages.
     
     Note:
-        :class:`.PdfDocument` does not implement a page cache. This is to ensure correct behaviour in case the order of pages is modified using the raw API.
+        :class:`.PdfDocument` does not implement a page cache. This is to ensure correct behaviour in case the order or number of pages is modified using the raw API.
         Therefore, it is up to the caller to cache pages appropriately and avoid inefficient repated loading/closing of pages.
     """
     
@@ -95,6 +99,27 @@ class PdfDocument:
         else:
             self._pdf, self._ld_data = open_pdf(self._actual_input, self._password, self._autoclose)
     
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, *_):
+        self.close()
+    
+    def __len__(self):
+        return pdfium.FPDF_GetPageCount(self._pdf)
+    
+    def __iter__(self):
+        for i in range( len(self) ):
+            yield self.get_page(i)
+    
+    def __getitem__(self, i):
+        return self.get_page(i)
+    
+    def __delitem__(self, i):
+        self.del_page(i)
+    
+    
     @property
     def raw(self):
         """ FPDF_DOCUMENT: The raw PDFium document object handle. """
@@ -108,10 +133,6 @@ class PdfDocument:
         """
         new_pdf = pdfium.FPDF_CreateNewDocument()
         return cls(new_pdf)
-    
-    def __len__(self):
-        """ Get the document's number of pages (using :func:`len`) """
-        return pdfium.FPDF_GetPageCount(self._pdf)
     
     def close(self):
         """
