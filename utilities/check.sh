@@ -5,5 +5,5 @@
 set -v
 
 find . -path ./sourcebuild -prune -o -name '*.py' -print |xargs -n 1 importchecker
-codespell --skip="./sourcebuild,./docs/build,./data,./.git,__pycache__,.mypy_cache," -L "tabe,splitted"
+codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sourcebuild,./dist,./.git,__pycache__,.mypy_cache,.hypothesis" -L "tabe,splitted"
 reuse lint 
