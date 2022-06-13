@@ -7,18 +7,18 @@ Shell API
 pypdfium2 can also be used from the command-line.
 
 
-Main help
-*********
-``pypdfium2 --help``
-
-.. program-output:: pypdfium2 --help
-
-
 Version
 *******
 ``pypdfium2 --version``
 
 .. program-output:: pypdfium2 --version
+
+
+Main help
+*********
+``pypdfium2 --help``
+
+.. program-output:: pypdfium2 --help
 
 
 Renderer
