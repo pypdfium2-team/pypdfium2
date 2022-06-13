@@ -4,6 +4,16 @@
 # Changelog
 
 
+## 2.1.0 (2022-06-13)
+
+- Updated PDFium from `5104` to `5117`.
+- Tweaked the setup code to enable the possibility of performing an editable install using `pip3 install -e .`,
+  which is very convenient for development to avoid the necessity of repeated re-installing.
+- Improved `PdfDocument.new_page()` to append to the end by default, rather than insert to the beginning.
+- Implemented several special methods for `PdfDocument`, including context manager API, looping, and index access.
+- Enhanced the documentation.
+
+
 ## 2.0.0 (2022-06-09)
 
 *This release has deeply changed the support model API in a way that is incompatible with previous releases.*
