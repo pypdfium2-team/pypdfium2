@@ -14,6 +14,7 @@
 
 ### Tests
 * Add test case for rendering a PDF with interactive forms.
+* Find a better replacement for `importchecker`.
 
 ### Documentation
 * Move development section of the Readme into a dedicated file and add some more information.
