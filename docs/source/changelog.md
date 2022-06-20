@@ -4,6 +4,12 @@
 # Changelog
 
 
+## 2.2.0 (2022-06-20)
+
+- Updated PDFium from `5117` to `5131`.
+- Slightly improved gitignore rules.
+- Hid distutils deprecation warnings in test suite, caused by the import of `wheel` in setup scripts.
+
 ## 2.1.0 (2022-06-13)
 
 - Updated PDFium from `5104` to `5117`.
