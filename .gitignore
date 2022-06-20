@@ -22,6 +22,7 @@ src/pypdfium2/pdfium
 *.pyc
 *.vscode
 *.egg-info
+*.eggs
 *.kate-swp
 *.kdev4
 *.python-version

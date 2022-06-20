@@ -10,3 +10,10 @@ requires = [
     "wheel",
     "ctypesgen",
 ]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # capture distutils deprecation warning triggered by importing the "wheel" package
+    # we are currently not aware of any other way to exert precise control on wheel tags
+    "ignore:The distutils package is deprecated:DeprecationWarning",
+]
