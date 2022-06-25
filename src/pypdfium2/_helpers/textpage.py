@@ -4,7 +4,7 @@
 import ctypes
 from ctypes import c_double
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers.misc import raise_error
+from pypdfium2._helpers.misc import PdfiumError
 
 
 class PdfTextPage:
@@ -137,7 +137,7 @@ class PdfTextPage:
             left, bottom, right, top = left.value, bottom.value, right.value, top.value
         
         if not ret_code:
-            raise_error("Retrieving the char box failed")
+            raise PdfiumError("Retrieving the char box failed")
         
         return left, bottom, right, top
     

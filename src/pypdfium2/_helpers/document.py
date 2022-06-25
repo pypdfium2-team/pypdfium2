@@ -18,8 +18,8 @@ from pypdfium2._helpers._opener import (
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.misc import (
     OutlineItem,
-    raise_error,
     FileAccess,
+    PdfiumError,
 )
 
 try:
@@ -169,7 +169,7 @@ class PdfDocument:
             success = pdfium.FPDF_SaveWithVersion(*saveargs, version)
         
         if not success:
-            raise_error("Saving the document failed")
+            raise PdfiumError("Saving the document failed")
     
     
     def _verify_index(self, index):

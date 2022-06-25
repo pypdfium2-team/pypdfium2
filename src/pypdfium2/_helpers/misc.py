@@ -86,8 +86,10 @@ def raise_error(msg):
     """
     Raise a :class:`.PdfiumError` annotated with the description of PDFium's current error code.
     
-    Note:
-        This function shall be called if the return value of a PDFium call indicates failure.
+    Warning:
+        This shall be called only if a PDFium call failed according to return code **and**
+        :func:`.FPDF_GetLastError()` is mentioned in the documentation for the function in question.
+        Currently, :func:`.raise_error` is only applicable to document loading APIs.
     
     Parameters:
         msg (str): The error message explaining the problem.

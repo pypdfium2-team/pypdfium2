@@ -38,6 +38,7 @@ This is an assortment of PDFium members referenced in this documentation.
 .. function:: FPDF_LoadDocument
 .. function:: FPDF_LoadMemDocument
 .. function:: FPDF_LoadCustomDocument
+.. function:: FPDF_GetLastError
 .. class:: FPDF_DOCUMENT
 .. class:: FPDF_PAGE
 .. class:: FPDF_TEXTPAGE

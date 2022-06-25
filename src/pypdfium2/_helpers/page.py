@@ -15,8 +15,8 @@ from pypdfium2._helpers._utils import (
     RotationToDegrees,
 )
 from pypdfium2._helpers.misc import (
-    raise_error,
     OptimiseMode,
+    PdfiumError,
 )
 
 try:
@@ -171,7 +171,7 @@ class PdfPage:
         """
         textpage = pdfium.FPDFText_LoadPage(self._page)
         if not textpage:
-            raise_error("Loading the text page failed")
+            raise PdfiumError("Loading the text page failed")
         return PdfTextPage(textpage, self)
     
     
@@ -427,7 +427,7 @@ class PdfPageObject:
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         ret_code = pdfium.FPDFPageObj_GetBounds(self._pageobj, byref(left), byref(bottom), byref(right), byref(top))
         if not ret_code:
-            raise_error("Locating the page object failed")
+            raise PdfiumError("Locating the page object failed")
         return (left.value, bottom.value, right.value, top.value)
     
     def get_type(self):
