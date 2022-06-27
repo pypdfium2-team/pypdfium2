@@ -56,13 +56,19 @@ jobs:
         run: |
           python3 setupsrc/pl_setup/mk_releasenotes.py
       
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          RELEASE_TAG=$(git describe --abbrev=0)
+          echo "::set-output name=release_tag::$RELEASE_TAG"
+      
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
         with:
           artifacts: 'dist/*'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ git describe --abbrev=0 }}
+          tag: ${{ steps.get_tag.outputs.release_tag }}
       
       # - name: Publish to TestPyPI
       #   run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
