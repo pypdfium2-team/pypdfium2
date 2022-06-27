@@ -4,6 +4,7 @@
 
 import sys
 import time
+import copy
 import shutil
 from os.path import (
     join,
@@ -32,8 +33,6 @@ def update_version():
     if v_before == v_after:
         pkg_base.set_version("V_PATCH", 1)
         pkg_base.set_version("V_BETA", None)
-    
-    return (pkg_base.VerNamespace, pkg_base.get_version_ns())
 
 
 def update_changelog(prev_ns, curr_ns):
@@ -71,7 +70,9 @@ def set_tag(curr_ns):
 
 
 def main():
-    prev_ns, curr_ns = update_version()
+    prev_ns = copy.deepcopy(pkg_base.VerNamespace)
+    update_version()
+    curr_ns = pkg_base.get_version_ns()
     update_changelog(prev_ns, curr_ns)
     set_tag(curr_ns)
 
