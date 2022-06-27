@@ -15,6 +15,8 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 import pl_setup.packaging_base as pkg_base
 import pl_setup.update_pdfium as fpdf_up
 
+Changelog = join(pkg_base.SourceTree, "docs", "source", "changelog.md")
+
 
 def run_cmd(*args, **kws):
     return pkg_base.run_cmd(*args, **kws, cwd=pkg_base.SourceTree)
@@ -35,8 +37,6 @@ def update_version():
 
 
 def update_changelog(prev_ns, curr_ns):
-    
-    Changelog = join(pkg_base.SourceTree, "docs", "source", "changelog.md")
     
     message = 3*"\n" + "## %s (%s)\n - " % (
         curr_ns["V_PYPDFIUM2"],
@@ -59,12 +59,15 @@ def update_changelog(prev_ns, curr_ns):
 
 def set_tag(curr_ns):
     Git = shutil.which("git")
+    run_cmd([Git, "add", Changelog, pkg_base.VersionFile])
+    run_cmd([Git, "commit", "-m", "[autorelease] update changelog and version file"])
+    # TODO push commit
     run_cmd([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
     # TODO push tag
-    run_cmd([Git, "checkout", "stable"])
-    run_cmd([Git, "rebase", "main"])
+    # run_cmd([Git, "checkout", "stable"])
+    # run_cmd([Git, "rebase", "main"])
     # TODO push update to stable branch
-    run_cmd([Git, "checkout", "main"])
+    # run_cmd([Git, "checkout", "main"])
 
 
 def main():
