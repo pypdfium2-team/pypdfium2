@@ -46,7 +46,7 @@ jobs:
       
       - name: Install/update pypdfium2 dependencies
         run: |
-          python3 -m pip install -U .[utilities,test,inserttext,converters]
+          python3 -m pip install -U .[test,inserttext,converters,utilities]
           rm -rf ./data/.presetup_done.txt
       
       - name: Run packaging script
