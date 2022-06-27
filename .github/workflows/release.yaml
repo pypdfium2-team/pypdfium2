@@ -53,7 +53,9 @@ jobs:
         run: make packaging
       
       - name: Prepare release description
-        run: python3 setupsrc/pl_setup/mk_releasenotes.py
+        run: |
+          python3 setupsrc/pl_setup/mk_releasenotes.py
+          export RELEASE_TAG=$(git describe --abbrev=0)
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
@@ -61,7 +63,7 @@ jobs:
           artifacts: 'dist/*'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: $(git describe --abbrev=0)
+          tag: ${{ env.RELEASE_TAG }}
       
       # - name: Publish to TestPyPI
       #   run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
