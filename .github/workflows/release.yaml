@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# Important: A suitable tag must be set before this workflow is triggered!
 name: Release
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
 
 jobs:
   

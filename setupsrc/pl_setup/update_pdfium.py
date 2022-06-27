@@ -63,6 +63,8 @@ def handle_versions(latest_version):
         if int(v_libpdfium) < latest_version:
             print("New PDFium build")
             set_version("V_MINOR", v_minor+1)
+            set_version("V_PATCH", 0)
+            set_version("V_BETA", None)
         else:
             print("No new PDFium build - will re-create bindings without incrementing version")
     
