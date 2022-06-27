@@ -4,30 +4,6 @@
 # Changelog
 
 
-## 2.3.6 (2022-06-27)
- - No PDFium update (autorelease).
-
-
-## 2.3.5 (2022-06-27)
- - No PDFium update (autorelease).
-
-
-## 2.3.4 (2022-06-27)
- - No PDFium update (autorelease).
-
-
-## 2.3.3 (2022-06-27)
- - No PDFium update (autorelease).
-
-
-## 2.3.2 (2022-06-27)
- - No PDFium update (autorelease).
-
-
-## 2.3.1 (2022-06-27)
- - No PDFium update (autorelease).
-
-
 ## 2.3.0 (2022-06-27)
 
 - Updated PDFium from `5131` to `5145`.
