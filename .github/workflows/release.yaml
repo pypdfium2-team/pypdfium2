@@ -55,15 +55,15 @@ jobs:
       - name: Prepare release description
         run: python3 setupsrc/pl_setup/mk_releasenotes.py
       
-      # - name: Publish to GitHub
-      #   uses: ncipollo/release-action@v1
-      #   with:
-      #     artifacts: 'dist/*'
-      #     bodyFile: 'RELEASE.md'
-      #     token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to GitHub
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'dist/*'
+          bodyFile: 'RELEASE.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
       
-      # - name: Publish to TestPyPI
-      #   run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
+      - name: Publish to TestPyPI
+        run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
       
-      # - name: Publish to PyPI
-      #   run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
+      - name: Publish to PyPI
+        run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
