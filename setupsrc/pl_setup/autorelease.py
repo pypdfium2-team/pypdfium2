@@ -16,8 +16,8 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 import pl_setup.packaging_base as pkg_base
 import pl_setup.update_pdfium as fpdf_up
 
-Changelog = join(pkg_base.SourceTree, "docs", "source", "changelog.md")
 
+Changelog = join(pkg_base.SourceTree, "docs", "source", "changelog.md")
 
 def run_cmd(*args, **kws):
     return pkg_base.run_cmd(*args, **kws, cwd=pkg_base.SourceTree)
@@ -32,7 +32,6 @@ def update_version():
     v_after = pkg_base.VerNamespace["V_MINOR"]
     if v_before == v_after:
         pkg_base.set_version("V_PATCH", pkg_base.VerNamespace["V_PATCH"]+1)
-        pkg_base.set_version("V_BETA", None)
 
 
 def update_changelog(prev_ns, curr_ns):
