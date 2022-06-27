@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Autorelease
+on:
+  schedule:
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+jobs:
+  autorelease:
+    name: Perform a fully automatic release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run autorelease script
+        run: |
+          # TODO git authentication
+          python3 setupsrc/pl_setup/autorelease.py
