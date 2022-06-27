@@ -4,6 +4,13 @@
 # Changelog
 
 
+## 2.3.0 (2022-06-27)
+
+- Updated PDFium from `5131` to `5145`.
+- Improved error handling.
+- Updated a comment regarding the `wheel` package.
+
+
 ## 2.2.0 (2022-06-20)
 
 - Updated PDFium from `5117` to `5131`.
