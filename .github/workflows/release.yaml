@@ -53,8 +53,7 @@ jobs:
         run: make packaging
       
       - name: Prepare release description
-        run: |
-          python3 setupsrc/pl_setup/mk_releasenotes.py
+        run: python3 setupsrc/pl_setup/mk_releasenotes.py
       
       - name: Get latest tag
         id: get_tag
