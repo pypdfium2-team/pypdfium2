@@ -108,9 +108,10 @@ def install_handler():
     elif host.is_platform("win32", ""):
         _setup(PlatformNames.windows_x86)
     else:
-        # Platform without pre-built binaries - try a regular sourcebuild
-        if W_Presetup: build_pdfium.main()
-        mkwheel(PlatformNames.sourcebuild)
+        raise RuntimeError("No pre-built binaries available for platform '%s' with libc implementation '%s'. You can attempt a source bulid, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Cross-compilation might be possible, though. Please get in touch with the project maintainers." % (host.plat_name, host.libc_name))
+        # Comment out the line above and comment in the lines below to activate implicit source build for unsupported platforms on `pip install -v .`
+        # if W_Presetup: build_pdfium.main()
+        # mkwheel(PlatformNames.sourcebuild)
 
 
 def main():
