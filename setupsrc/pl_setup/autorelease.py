@@ -58,14 +58,15 @@ def update_changelog(prev_ns, curr_ns):
 
 def set_tag(curr_ns):
     Git = shutil.which("git")
+    # not sure if pushes will work in the github action
     run_cmd([Git, "add", Changelog, pkg_base.VersionFile])
     run_cmd([Git, "commit", "-m", "[autorelease] update changelog and version file"])
-    # TODO push commit
+    run_cmd([Git, "push"])
     run_cmd([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
-    # TODO push tag
+    run_cmd([Git, "push", "--tags"])
     run_cmd([Git, "checkout", "stable"])
     run_cmd([Git, "rebase", "main"])
-    # TODO push update to stable branch
+    run_cmd([Git, "push"])
     run_cmd([Git, "checkout", "main"])
 
 
