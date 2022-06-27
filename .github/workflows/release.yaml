@@ -70,8 +70,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.get_tag.outputs.release_tag }}
       
-      # - name: Publish to TestPyPI
-      #   run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
+      - name: Publish to TestPyPI
+        run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
       
-      # - name: Publish to PyPI
-      #   run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
+      - name: Publish to PyPI
+        run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
