@@ -4,6 +4,10 @@
 # Changelog
 
 
+## 2.3.6 (2022-06-27)
+ - No PDFium update (autorelease).
+
+
 ## 2.3.5 (2022-06-27)
  - No PDFium update (autorelease).
 
