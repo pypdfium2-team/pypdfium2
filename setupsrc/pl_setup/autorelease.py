@@ -64,10 +64,10 @@ def set_tag(curr_ns):
     # TODO push commit
     run_cmd([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
     # TODO push tag
-    # run_cmd([Git, "checkout", "stable"])
-    # run_cmd([Git, "rebase", "main"])
+    run_cmd([Git, "checkout", "stable"])
+    run_cmd([Git, "rebase", "main"])
     # TODO push update to stable branch
-    # run_cmd([Git, "checkout", "main"])
+    run_cmd([Git, "checkout", "main"])
 
 
 def main():
