@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Autorelease
+on:
+  schedule:
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+jobs:
+  autorelease:
+    name: Perform a fully automatic release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Check out pypdfium2
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          fetch-depth: 0
+      - name: Configure git
+        run: |
+          git config user.email "geisserml@gmail.com"
+          git config user.name "geisserml"
+      - name: Run autorelease script
+        run: python3 setupsrc/pl_setup/autorelease.py
+      - name: Trigger release
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Release
+          token: ${{ secrets.AUTORELEASE_TOKEN }}

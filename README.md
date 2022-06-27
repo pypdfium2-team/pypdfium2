@@ -225,18 +225,6 @@ pypdfium2 contains scripts to automate the release process:
 
 Run `make test`.
 
-### Publishing
-
-The release process is automated using a CI workflow that pushes to GitHub, TestPyPI and PyPI.
-To do a release, first run `make packaging` locally to check that everything works as expected.
-If all went well, upload changes to the version file and push a new tag to trigger the `Release` woirkflow.
-Always make sure the information in `src/pypdfium2/version.py` matches with the tag!
-```bash
-git tag -a A.B.C
-git push --tags
-```
-Once a new version is released, update the `stable` branch to point at the commit of the latest tag.
-
 ## Issues
 
 Since pypdfium2 is built using upstream binaries and an automatic bindings creator, issues that are not related to packaging or support model code probably need to be addressed upstream. However, the [pypdfium2 issues panel](https://github.com/pypdfium2-team/pypdfium2/issues) is always a good place to start if you have any problems, questions or suggestions.
