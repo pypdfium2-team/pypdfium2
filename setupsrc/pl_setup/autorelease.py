@@ -36,10 +36,7 @@ def update_version():
 
 def update_changelog(prev_ns, curr_ns):
     
-    message = 3*"\n" + "## %s (%s)\n - " % (
-        curr_ns["V_PYPDFIUM2"],
-        time.strftime("%Y-%m-%d"),
-    )
+    message = 3*"\n" + "## %s (%s)\n\n- " % (curr_ns["V_PYPDFIUM2"], time.strftime("%Y-%m-%d"))
     if prev_ns["V_LIBPDFIUM"] != curr_ns["V_LIBPDFIUM"]:
         message += "Updated PDFium from `%s` to `%s`" % (prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"])
     else:
