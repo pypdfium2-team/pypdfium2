@@ -5,7 +5,11 @@
 
 
 ## 2.3.1 (2022-06-27)
- - No PDFium update (autorelease).
+
+*This version was pushed to test the new autorelease feature. Its non-setup code is virtually identical with release 2.3.0, though.*
+
+- No PDFium update (autorelease).
+- Tweaked setup code and GitHub workflows to perform a fully automatic release every monday at 12 o'clock.
 
 
 ## 2.3.0 (2022-06-27)
