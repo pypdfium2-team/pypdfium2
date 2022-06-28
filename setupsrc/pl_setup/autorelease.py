@@ -18,6 +18,7 @@ import pl_setup.update_pdfium as fpdf_up
 
 
 Changelog = join(pkg_base.SourceTree, "docs", "source", "changelog.md")
+ChangelogStaging = join(pkg_base.SourceTree, "docs", "devel", "changelog_staging.md")
 
 def run_cmd(*args, **kws):
     return pkg_base.run_cmd(*args, **kws, cwd=pkg_base.SourceTree)
@@ -36,25 +37,35 @@ def update_version():
 
 def update_changelog(prev_ns, curr_ns):
     
-    message = 3*"\n" + "## %s (%s)\n\n- " % (curr_ns["V_PYPDFIUM2"], time.strftime("%Y-%m-%d"))
+    pdfium_msg = "## %s (%s)\n\n- " % (curr_ns["V_PYPDFIUM2"], time.strftime("%Y-%m-%d"))
     if prev_ns["V_LIBPDFIUM"] != curr_ns["V_LIBPDFIUM"]:
-        message += "Updated PDFium from `%s` to `%s`" % (prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"])
+        pdfium_msg += "Updated PDFium from `%s` to `%s`" % (prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"])
     else:
-        message += "No PDFium update"
-    message += " (autorelease)."
+        pdfium_msg += "No PDFium update"
+    pdfium_msg += " (autorelease)."
+    
+    with open(ChangelogStaging, "r") as fh:
+        content = fh.read()
+        pos = content.index("\n", content.index("# Changelog")) + 1
+        header = content[:pos].strip() + "\n"
+        devel_msg = content[pos:].strip()
+        if devel_msg: devel_msg += "\n"
+    with open(ChangelogStaging, "w") as fh:
+        fh.write(header)
     
     with open(Changelog, "r") as fh:
         content = fh.read()
-        exp = "# Changelog"
-        pos = content.index(exp) + len(exp)
-        content = content[:pos] + message + content[pos:]
+        pos = content.index("\n", content.index("# Changelog")) + 1
+        part_a = content[:pos].strip()
+        part_b = content[pos:].strip()
+        content = part_a + "\n\n\n" + pdfium_msg + "\n" + devel_msg + "\n\n" + part_b + "\n"
     with open(Changelog, "w") as fh:
         fh.write(content)
 
 
 def set_tag(curr_ns):
     Git = shutil.which("git")
-    run_cmd([Git, "add", Changelog, pkg_base.VersionFile])
+    run_cmd([Git, "add", Changelog, ChangelogStaging, pkg_base.VersionFile])
     run_cmd([Git, "commit", "-m", "[autorelease] update changelog and version file"])
     run_cmd([Git, "push"])
     run_cmd([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
