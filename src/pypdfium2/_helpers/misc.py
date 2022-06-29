@@ -78,7 +78,7 @@ class OutlineItem:
 
 
 class PdfiumError (RuntimeError):
-    """ A PDFium exception forwarded by :func:`.raise_error` """
+    """ An exception from the PDFium library, detected by function return code. """
     pass
 
 
