@@ -13,29 +13,39 @@ from os.path import (
 )
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
-import pl_setup.packaging_base as pkg_base
-import pl_setup.update_pdfium as fpdf_up
+from pl_setup.packaging_base import (
+    run_cmd,
+    set_version,
+    get_version_ns,
+    VersionFile,
+    VerNamespace,
+    SourceTree,
+)
+from pl_setup.update_pdfium import (
+    get_latest_version,
+    handle_versions,
+)
 
 
-Changelog = join(pkg_base.SourceTree, "docs", "source", "changelog.md")
-ChangelogStaging = join(pkg_base.SourceTree, "docs", "devel", "changelog_staging.md")
+Changelog = join(SourceTree, "docs", "source", "changelog.md")
+ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
 
 def run_cmd(*args, **kws):
-    return pkg_base.run_cmd(*args, **kws, cwd=pkg_base.SourceTree)
+    return run_cmd(*args, **kws, cwd=SourceTree)
 
 
-def update_version():
+def do_versioning():
     
-    v_before = pkg_base.VerNamespace["V_MINOR"]
-    latest = fpdf_up.get_latest_version()
-    fpdf_up.handle_versions(latest)
+    v_before = VerNamespace["V_MINOR"]
+    latest = get_latest_version()
+    handle_versions(latest)
     
-    v_after = pkg_base.VerNamespace["V_MINOR"]
+    v_after = VerNamespace["V_MINOR"]
     if v_before == v_after:
-        pkg_base.set_version("V_PATCH", pkg_base.VerNamespace["V_PATCH"]+1)
+        set_version("V_PATCH", VerNamespace["V_PATCH"]+1)
 
 
-def update_changelog(prev_ns, curr_ns):
+def log_changes(prev_ns, curr_ns):
     
     pdfium_msg = "## %s (%s)\n\n- " % (curr_ns["V_PYPDFIUM2"], time.strftime("%Y-%m-%d"))
     if prev_ns["V_LIBPDFIUM"] != curr_ns["V_LIBPDFIUM"]:
@@ -63,9 +73,9 @@ def update_changelog(prev_ns, curr_ns):
         fh.write(content)
 
 
-def set_tag(curr_ns):
+def push_changes(curr_ns):
     Git = shutil.which("git")
-    run_cmd([Git, "add", Changelog, ChangelogStaging, pkg_base.VersionFile])
+    run_cmd([Git, "add", Changelog, ChangelogStaging, VersionFile])
     run_cmd([Git, "commit", "-m", "[autorelease] update changelog and version file"])
     run_cmd([Git, "push"])
     run_cmd([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
@@ -77,11 +87,11 @@ def set_tag(curr_ns):
 
 
 def main():
-    prev_ns = copy.deepcopy(pkg_base.VerNamespace)
-    update_version()
-    curr_ns = pkg_base.get_version_ns()
-    update_changelog(prev_ns, curr_ns)
-    set_tag(curr_ns)
+    prev_ns = copy.deepcopy(VerNamespace)
+    do_versioning()
+    curr_ns = get_version_ns()
+    log_changes(prev_ns, curr_ns)
+    push_changes(curr_ns)
 
 
 if __name__ == "__main__":
