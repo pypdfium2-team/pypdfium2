@@ -39,7 +39,7 @@ class PdfDocument:
     Parameters:
         input_data (str | bytes | typing.BinaryIO | FPDF_DOCUMENT):
             The input PDF given as file path, bytes, byte buffer, or raw PDFium document handle.
-            A byte buffer is defined as an object that implements the methods ``seek()``, ``tell()`` and ``readinto()``.
+            A byte buffer is defined as an object that implements the methods ``seek()``, ``tell()``, ``read()`` and ``readinto()``.
         password (str | bytes):
             A password to unlock the PDF, if encrypted.
         file_access (FileAccess):
