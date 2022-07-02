@@ -97,7 +97,7 @@ class PdfDocument:
         if isinstance(self._actual_input, pdfium.FPDF_DOCUMENT):
             self._pdf = self._actual_input
         else:
-            self._pdf, self._ld_data = open_pdf(self._actual_input, self._password, self._autoclose)
+            self._pdf, self._ld_data = open_pdf(self._actual_input, self._password)
     
     
     def __enter__(self):
@@ -142,6 +142,8 @@ class PdfDocument:
         pdfium.FPDF_CloseDocument(self._pdf)
         if self._ld_data is not None:
             self._ld_data.close()
+        if self._autoclose and is_input_buffer(self._actual_input):
+            self._actual_input.close()
     
     
     def save(self, buffer, version=None):

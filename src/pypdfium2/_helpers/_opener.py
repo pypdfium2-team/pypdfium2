@@ -8,17 +8,13 @@ from pypdfium2._helpers.misc import raise_error
 
 class BufferDataHolder:
     
-    def __init__(self, reader_func, buffer, autoclose):
+    def __init__(self, reader_func, buffer):
         self.reader_func = reader_func
         self.buffer = buffer
-        self.autoclose = autoclose
     
     def close(self):
         id(self.reader_func)
-        if self.autoclose:
-            self.buffer.close()
-        else:
-            id(self.buffer)
+        id(self.buffer)
 
 
 class ByteDataHolder:
@@ -49,7 +45,7 @@ def is_input_buffer(maybe_buffer):
         return False
 
 
-def open_pdf_buffer(buffer, password=None, autoclose=False):
+def open_pdf_buffer(buffer, password=None):
     
     buffer.seek(0, 2)
     file_len = buffer.tell()
@@ -62,11 +58,7 @@ def open_pdf_buffer(buffer, password=None, autoclose=False):
     fileaccess.m_GetBlock = FuncType( ReaderClass(buffer) )
     
     pdf = pdfium.FPDF_LoadCustomDocument(ctypes.byref(fileaccess), password)
-    ld_data = BufferDataHolder(
-        reader_func = fileaccess.m_GetBlock,
-        buffer = buffer,
-        autoclose = autoclose,
-    )
+    ld_data = BufferDataHolder(fileaccess.m_GetBlock, buffer)
     
     return pdf, ld_data
 
@@ -77,7 +69,7 @@ def open_pdf_bytes(bytedata, password=None):
     return pdf, ld_data
 
 
-def open_pdf(input_data, password=None, autoclose=False):
+def open_pdf(input_data, password=None):
     
     ld_data = None
     if isinstance(input_data, str):
@@ -85,7 +77,7 @@ def open_pdf(input_data, password=None, autoclose=False):
     elif isinstance(input_data, bytes):
         pdf, ld_data = open_pdf_bytes(input_data, password)
     elif is_input_buffer(input_data):
-        pdf, ld_data = open_pdf_buffer(input_data, password, autoclose)
+        pdf, ld_data = open_pdf_buffer(input_data, password)
     else:
         raise TypeError("Invalid input type '%s'" % type(input_data).__name__)
     
