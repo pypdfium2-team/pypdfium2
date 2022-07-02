@@ -43,7 +43,7 @@ class PdfDocument:
         password (str | bytes):
             A password to unlock the PDF, if encrypted.
         file_access (FileAccess):
-            Define how files shall be opened internally. This parameter is ignored if *input_data* is not a file path.
+            This parameter may be used to control how files are opened internally. It is ignored if *input_data* is not a file path.
         autoclose (bool):
             If set to :data:`True` and a byte buffer was provided as input, :meth:`.close` will not only close the PDFium document, but also the input source.
     
