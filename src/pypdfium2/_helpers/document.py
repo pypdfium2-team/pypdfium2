@@ -395,8 +395,10 @@ class PdfDocument:
                 self.update_rendering_input()
             elif is_input_buffer(self._orig_input):
                 logger.warning("Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly.")
+                cursor = self._orig_input.tell()
                 self._orig_input.seek(0)
                 self._rendering_input = self._orig_input.read()
+                self._orig_input.seek(cursor)
             else:
                 self._rendering_input = self._orig_input
         
