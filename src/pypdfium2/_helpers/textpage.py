@@ -204,10 +204,10 @@ class PdfTextPage:
             flags |= pdfium.FPDF_MATCHWHOLEWORD
         
         enc_text = text.encode("utf-16-le") + b"\x00\x00"
-        text_pointer = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_uint16))
+        text_pointer = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
         search = pdfium.FPDFText_FindStart(self._textpage, text_pointer, flags, index)
         return PdfTextSearcher(search, self)
-        
+
 
 class PdfTextSearcher:
     """ Text searcher helper class. """
