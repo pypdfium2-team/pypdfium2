@@ -66,9 +66,9 @@ def log_changes(prev_ns, curr_ns):
     with open(Changelog, "r") as fh:
         content = fh.read()
         pos = content.index("\n", content.index("# Changelog")) + 1
-        part_a = content[:pos].strip()
+        part_a = content[:pos].strip() + "\n"
         part_b = content[pos:].strip()
-        content = part_a + "\n\n\n" + pdfium_msg + "\n" + devel_msg + "\n\n" + part_b + "\n"
+        content = part_a + "\n\n" + pdfium_msg + "\n" + devel_msg + "\n\n" + part_b + "\n"
     with open(Changelog, "w") as fh:
         fh.write(content)
 
