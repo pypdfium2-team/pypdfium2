@@ -3,7 +3,7 @@
 
 # Changelog for next release
 
-- Improved changelog integration of automatic releases.
+- The changelog is now better integrated with automatic releases, and the manual summary is also shown on the GitHub release page.
 - Disabled implicit source build in `setup.py`, which used to be the fallback if no pre-built binaries
   are available for the host platform. Now, an exception is raised instead.
 - Subtle improvements were applied to the handling of input buffers (providing `read()` beside `readinto()` is now explicitly required).

@@ -7,7 +7,11 @@ import shutil
 from os.path import dirname, abspath, join
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
-from pl_setup.packaging_base import SourceTree, run_cmd
+from pl_setup.packaging_base import (
+    SourceTree,
+    run_cmd,
+    get_changelog_staging,
+)
 
 
 RepositoryURL = "https://github.com/pypdfium2-team/pypdfium2"
@@ -41,7 +45,11 @@ def main():
     print(current_tag, prev_tag)
     
     relnotes = "Release %s\n\n" % current_tag
-    relnotes += "### Changes\n\nCommits between [`%s`](%s) and [`%s`](%s):\n\n" % (prev_tag, get_url(prev_tag), current_tag, get_url(current_tag))
+    relnotes += "## Changes\n\n"
+    relnotes += "### Manual Summary\n\n"
+    relnotes += get_changelog_staging() + "\n"
+    relnotes += "### Git History\n\n"
+    relnotes += "Commits between [`%s`](%s) and [`%s`](%s):\n\n" % (prev_tag, get_url(prev_tag), current_tag, get_url(current_tag))
     relnotes += run_cmd([Git, "log", "%s..%s" % (prev_tag, current_tag), "--pretty=format:* %H %s"], cwd=SourceTree, capture=True)
     relnotes += "\n"
     

@@ -7,7 +7,6 @@ import time
 import copy
 import shutil
 from os.path import (
-    join,
     abspath,
     dirname,
 )
@@ -17,6 +16,9 @@ from pl_setup.packaging_base import (
     run_cmd,
     set_version,
     get_version_ns,
+    get_changelog_staging,
+    Changelog,
+    ChangelogStaging,
     VersionFile,
     VerNamespace,
     SourceTree,
@@ -27,10 +29,7 @@ from pl_setup.update_pdfium import (
 )
 
 
-Changelog = join(SourceTree, "docs", "source", "changelog.md")
-ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
-
-def run_cmd(*args, **kws):
+def run(*args, **kws):
     return run_cmd(*args, **kws, cwd=SourceTree)
 
 
@@ -54,14 +53,7 @@ def log_changes(prev_ns, curr_ns):
         pdfium_msg += "No PDFium update"
     pdfium_msg += " (autorelease)."
     
-    with open(ChangelogStaging, "r") as fh:
-        content = fh.read()
-        pos = content.index("\n", content.index("# Changelog")) + 1
-        header = content[:pos].strip() + "\n"
-        devel_msg = content[pos:].strip()
-        if devel_msg: devel_msg += "\n"
-    with open(ChangelogStaging, "w") as fh:
-        fh.write(header)
+    devel_msg = get_changelog_staging(flush=True)
     
     with open(Changelog, "r") as fh:
         content = fh.read()
@@ -75,15 +67,15 @@ def log_changes(prev_ns, curr_ns):
 
 def push_changes(curr_ns):
     Git = shutil.which("git")
-    run_cmd([Git, "add", Changelog, ChangelogStaging, VersionFile])
-    run_cmd([Git, "commit", "-m", "[autorelease] update changelog and version file"])
-    run_cmd([Git, "push"])
-    run_cmd([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
-    run_cmd([Git, "push", "--tags"])
-    run_cmd([Git, "checkout", "stable"])
-    run_cmd([Git, "rebase", "main"])
-    run_cmd([Git, "push"])
-    run_cmd([Git, "checkout", "main"])
+    run([Git, "add", Changelog, ChangelogStaging, VersionFile])
+    run([Git, "commit", "-m", "[autorelease] update changelog and version file"])
+    run([Git, "push"])
+    run([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
+    run([Git, "push", "--tags"])
+    run([Git, "checkout", "stable"])
+    run([Git, "rebase", "main"])
+    run([Git, "push"])
+    run([Git, "checkout", "main"])
 
 
 def main():
