@@ -1,14 +1,17 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Important: A suitable tag must be set before this workflow is triggered!
-name: Release
+name: Autorelease
 on:
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+  # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
+  schedule:
+    - cron: '0 12 * * 1'
   workflow_dispatch:
 
 jobs:
   
-  release:
+  autorelease:
     
     runs-on: ubuntu-latest
     strategy:
@@ -55,14 +58,8 @@ jobs:
           RELEASE_TAG=$(git describe --abbrev=0)
           echo "::set-output name=release_tag::$RELEASE_TAG"
       
-      - name: Prepare release description
-        run: python3 setupsrc/pl_setup/mk_releasenotes.py --flush
-      
-      - name: Push update to changelog_staging
-        run: |
-          git add docs/devel/changelog_staging.md
-          git commit -m "[autorelease] clean up changelog_staging"
-          git push
+      - name: Run autorelease script
+        run: python3 setupsrc/pl_setup/autorelease.py
       
       - name: Install/update pypdfium2 dependencies
         run: |

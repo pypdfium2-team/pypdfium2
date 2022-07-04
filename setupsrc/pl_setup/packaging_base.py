@@ -33,6 +33,7 @@ ModuleDir   = join(SourceTree, "src", "pypdfium2")
 VersionFile = join(ModuleDir, "version.py")
 Changelog   = join(SourceTree, "docs", "source", "changelog.md")
 ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
+RepositoryURL = "https://github.com/pypdfium2-team/pypdfium2"
 
 
 class PlatformNames:
@@ -77,23 +78,6 @@ def call_ctypesgen(platform_dir, include_dir):
     
     with open(bindings_file, "w") as file_writer:
         file_writer.write(text)
-
-
-def get_changelog_staging(flush=False):
-    
-    with open(ChangelogStaging, "r") as fh:
-        content = fh.read()
-        pos = content.index("\n", content.index("# Changelog")) + 1
-        header = content[:pos].strip() + "\n"
-        devel_msg = content[pos:].strip()
-        if devel_msg:
-            devel_msg += "\n"
-    
-    if flush:
-        with open(ChangelogStaging, "w") as fh:
-            fh.write(header)
-    
-    return devel_msg
 
 
 def get_version_ns():
