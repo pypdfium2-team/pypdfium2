@@ -83,13 +83,13 @@ def log_changes(summary, prev_ns, curr_ns):
 def push_changes(curr_ns):
     run_local([Git, "add", Changelog, ChangelogStaging, VersionFile])
     run_local([Git, "commit", "-m", "[autorelease] update changelog and version file"])
-    # run_local([Git, "push"])
+    run_local([Git, "push"])
     run_local([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
-    # run_local([Git, "push", "--tags"])
-    # run_local([Git, "checkout", "stable"])
-    # run_local([Git, "rebase", "main"])
-    # run_local([Git, "push"])
-    # run_local([Git, "checkout", "main"])
+    run_local([Git, "push", "--tags"])
+    run_local([Git, "checkout", "stable"])
+    run_local([Git, "rebase", "main"])
+    run_local([Git, "push"])
+    run_local([Git, "checkout", "main"])
 
 
 def link_for_tag(tag):
