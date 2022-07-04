@@ -57,6 +57,8 @@ def main():
     if args.flush:
         changelog_kws["flush"] = True
     summary = get_changelog_staging(**changelog_kws)
+    if summary:
+        summary += "\n"
     
     Git = shutil.which("git")
     tags_list = generate_tags_list(Git)
@@ -66,9 +68,10 @@ def main():
     relnotes = "Release %s\n\n" % current_tag
     relnotes += "## Changes\n\n"
     relnotes += "### Manual Summary\n\n"
-    relnotes += summary + "\n"
-    relnotes += "### Git History\n\n"
-    relnotes += "Commits between [`%s`](%s) and [`%s`](%s):\n\n" % (prev_tag, get_url(prev_tag), current_tag, get_url(current_tag))
+    relnotes += summary
+    relnotes += "### Git History\n\nCommits between "
+    relnotes += "[`%s`](%s) and [`%s`](%s) " % (prev_tag, get_url(prev_tag), current_tag, get_url(current_tag))
+    relnotes += "(latest commit first):\n\n"
     relnotes += run_cmd([Git, "log", "%s..%s" % (prev_tag, current_tag), "--pretty=format:* %H %s"], cwd=SourceTree, capture=True)
     relnotes += "\n"
     
