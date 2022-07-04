@@ -18,7 +18,6 @@ from pl_setup.packaging_base import (
     get_version_ns,
     get_changelog_staging,
     Changelog,
-    ChangelogStaging,
     VersionFile,
     VerNamespace,
     SourceTree,
@@ -67,7 +66,7 @@ def log_changes(prev_ns, curr_ns):
 
 def push_changes(curr_ns):
     Git = shutil.which("git")
-    run([Git, "add", Changelog, ChangelogStaging, VersionFile])
+    run([Git, "add", Changelog, VersionFile])
     run([Git, "commit", "-m", "[autorelease] update changelog and version file"])
     run([Git, "push"])
     run([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
