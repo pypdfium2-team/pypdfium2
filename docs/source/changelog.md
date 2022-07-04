@@ -4,6 +4,12 @@
 # Changelog
 
 
+## 2.4.1 (2022-07-04)
+
+- No PDFium update (autorelease).
+- The manual summary of changes is now shown on the GitHub release page as well.
+
+
 ## 2.4.0 (2022-07-04)
 
 - Updated PDFium from `5145` to `5159` (autorelease).
