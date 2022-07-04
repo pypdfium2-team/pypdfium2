@@ -16,8 +16,8 @@ def colour_tohex(r, g, b, a=255):
         if not (0 <= col <= 255):
             raise ValueError("Colour value exceeds boundaries (must be >=0 and <=255)")
     
-    use_alpha = (a != 255)
     hex_int = (a << 24) | (r << 16) | (g << 8) | b
+    use_alpha = (a != 255)
     
     return hex_int, use_alpha
 
