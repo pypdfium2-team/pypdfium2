@@ -53,7 +53,7 @@ def log_changes(prev_ns, curr_ns):
         pdfium_msg += "No PDFium update"
     pdfium_msg += " (autorelease)."
     
-    devel_msg = get_changelog_staging(flush=True)
+    devel_msg = get_changelog_staging()
     
     with open(Changelog, "r") as fh:
         content = fh.read()

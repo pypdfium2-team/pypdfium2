@@ -4,6 +4,7 @@
 
 import sys
 import shutil
+import argparse
 from os.path import dirname, abspath, join
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
@@ -37,7 +38,25 @@ def get_tag(tags_list, n_descends, skip_beta=False):
     return tag
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description = "Release note generator script.",
+    )
+    parser.add_argument(
+        "--flush",
+        action = "store_true",
+        help = "Clean up `changelog_staging.md` after extracting its content.",
+    )
+    return parser.parse_args()
+
+
 def main():
+    
+    args = parse_args()
+    changelog_kws = dict()
+    if args.flush:
+        changelog_kws["flush"] = True
+    summary = get_changelog_staging(**changelog_kws)
     
     Git = shutil.which("git")
     tags_list = generate_tags_list(Git)
@@ -47,7 +66,7 @@ def main():
     relnotes = "Release %s\n\n" % current_tag
     relnotes += "## Changes\n\n"
     relnotes += "### Manual Summary\n\n"
-    relnotes += get_changelog_staging() + "\n"
+    relnotes += summary + "\n"
     relnotes += "### Git History\n\n"
     relnotes += "Commits between [`%s`](%s) and [`%s`](%s):\n\n" % (prev_tag, get_url(prev_tag), current_tag, get_url(current_tag))
     relnotes += run_cmd([Git, "log", "%s..%s" % (prev_tag, current_tag), "--pretty=format:* %H %s"], cwd=SourceTree, capture=True)

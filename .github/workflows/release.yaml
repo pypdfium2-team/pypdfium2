@@ -44,6 +44,26 @@ jobs:
           repository: ${{ github.repository }}
           fetch-depth: 0
       
+      - name: Configure git
+        run: |
+          git config user.email "geisserml@gmail.com"
+          git config user.name "geisserml"
+      
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          RELEASE_TAG=$(git describe --abbrev=0)
+          echo "::set-output name=release_tag::$RELEASE_TAG"
+      
+      - name: Prepare release description
+        run: python3 setupsrc/pl_setup/mk_releasenotes.py --flush
+      
+      - name: Push update to changelog_staging
+        run: |
+          git add docs/devel/changelog_staging.md
+          git commit -m "[autorelease] clean up changelog_staging"
+          git push
+      
       - name: Install/update pypdfium2 dependencies
         run: |
           python3 -m pip install -U .[utilities,test,inserttext,converters]
@@ -51,15 +71,6 @@ jobs:
       
       - name: Run packaging script
         run: make packaging
-      
-      - name: Prepare release description
-        run: python3 setupsrc/pl_setup/mk_releasenotes.py
-      
-      - name: Get latest tag
-        id: get_tag
-        run: |
-          RELEASE_TAG=$(git describe --abbrev=0)
-          echo "::set-output name=release_tag::$RELEASE_TAG"
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
