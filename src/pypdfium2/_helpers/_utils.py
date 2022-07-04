@@ -12,19 +12,12 @@ def colour_tohex(r, g, b, a=255):
         (int, bool): The colour value, and a boolean signifying if an alpha channel is needed.
     """
     
-    use_alpha = True
-    if a == 255:
-        use_alpha = False
+    for col in (a, r, g, b):
+        if not (0 <= col <= 255):
+            raise ValueError("Colour value exceeds boundaries (must be >=0 and <=255)")
     
-    colours = (a, r, g, b)
-    for col in colours:
-        assert 0 <= col <= 255
-    
-    hex_str = "0x"
-    for col in colours:
-        hex_str += hex(col)[2:].zfill(2)
-    
-    hex_int = int(hex_str, 0)
+    use_alpha = (a != 255)
+    hex_int = (a << 24) | (r << 16) | (g << 8) | b
     
     return hex_int, use_alpha
 
