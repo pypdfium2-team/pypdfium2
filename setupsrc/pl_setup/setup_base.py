@@ -105,6 +105,7 @@ def _get_bdist(pl_name):
         def finalize_options(self, *args, **kws):
             _bdist_wheel.finalize_options(self, *args, **kws)
             self.plat_name_supplied = True
+            self.root_is_pure = False
         
         def get_tag(self, *args, **kws):
             return 'py3', 'none', _get_tag(pl_name)
