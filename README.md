@@ -259,33 +259,6 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 * [Lei Zhang](https://github.com/leizleiz) and [Thomas Sepez](https://github.com/tsepez): Windows-specific fixes concerning `FPDF_LoadDocument()`.
 
 
-## Fun facts
-
-If you are on Linux, have a recent version of LibreOffice installed, and insist on saving as much disk space as anyhow possible, you can remove the PDFium binary shipped with pypdfium2 and create a symbolic link to the one provided by LibreOffice. This is not recommended, but the following proof-of-concept steps demonstrate that it is possible.
-(If using this strategy, it is likely that certain newer methods such as `FPDF_ImportNPagesToOne()` will not be available yet, since the PDFium build of LibreOffice may be a bit older.)
-
-```bash
-# Find out where the pypdfium2 installation is located
-python3 -m pip show pypdfium2 |grep Location
-
-# Now go to the path you happen to determine
-# If pypdfium2 was installed locally (without root privileges), the path will look somewhat like this
-cd ~/.local/lib/python3.8/site-packages/
-
-# Descend into the pypdfium2 directory
-cd pypdfium2/
-
-# Delete the current PDFium binary
-rm pdfium
-
-# Create a symbolic link to the PDFium binary of LibreOffice
-# The path might differ depending on the distribution - this is what applies for Ubuntu 20.04
-ln -s /usr/lib/libreoffice/program/libpdfiumlo.so pdfium
-```
-
-Sadly, mainstream Linux distributors did not create an own package for PDFium, which causes it to be installed separately with every single program that uses it.
-
-
 ## History
 
 pypdfium2 is the successor of *pypdfium* and *pypdfium-reboot*.
