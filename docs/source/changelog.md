@@ -4,6 +4,14 @@
 # Changelog
 
 
+## 2.5.0 (2022-07-11)
+
+- Updated PDFium from `5159` to `5173` (autorelease).
+- Wheels are now correctly flagged as impure, for they contain a binary extension.
+- Merged `trigger.yaml` into `release.yaml` workflow, and `mk_releasenotes.py` into `autorelease.py`, which significantly simplifies the code base.
+- Changed autorelease schedule from 12 to 10 o'clock UTC.
+
+
 ## 2.4.1 (2022-07-04)
 
 - No PDFium update (autorelease).
