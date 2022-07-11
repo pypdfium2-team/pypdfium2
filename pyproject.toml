@@ -4,11 +4,11 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
-    "setuptools",
+    "setuptools>=46.1.0",
     "setuptools-scm",
     "build",
-    "wheel @ git+https://github.com/pypa/wheel.git@9d4264d2f23ea44dd85639a27fa6b284261921cd",
-    "ctypesgen @ git+https://github.com/ctypesgen/ctypesgen.git@2120dbf9a5086a21c48e5a002b1f274f3716b7ec",
+    "wheel",
+    "ctypesgen",
 ]
 
 [tool.pytest.ini_options]
