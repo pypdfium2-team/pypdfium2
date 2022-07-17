@@ -36,7 +36,7 @@ PDFium
 This is an assortment of PDFium members referenced in this documentation.
 
 .. function:: FPDF_LoadDocument
-.. function:: FPDF_LoadMemDocument
+.. function:: FPDF_LoadMemDocument64
 .. function:: FPDF_LoadCustomDocument
 .. function:: FPDF_GetLastError
 .. class:: FPDF_DOCUMENT

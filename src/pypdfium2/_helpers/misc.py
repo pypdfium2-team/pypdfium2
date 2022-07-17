@@ -24,7 +24,7 @@ class FileAccess (enum.Enum):
           - :func:`.FPDF_LoadCustomDocument`
           - Data read incrementally from Python file buffer.
         * - :attr:`.BYTES`
-          - :func:`.FPDF_LoadMemDocument`
+          - :func:`.FPDF_LoadMemDocument64`
           - Data loaded into memory and passed to PDFium at once.
     """
     NATIVE = 0

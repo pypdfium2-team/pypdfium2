@@ -64,7 +64,7 @@ def open_pdf_buffer(buffer, password=None):
 
 
 def open_pdf_bytes(bytedata, password=None):
-    pdf = pdfium.FPDF_LoadMemDocument(bytedata, len(bytedata), password)
+    pdf = pdfium.FPDF_LoadMemDocument64(bytedata, len(bytedata), password)
     ld_data = ByteDataHolder(bytedata)
     return pdf, ld_data
 
