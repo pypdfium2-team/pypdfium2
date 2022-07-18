@@ -4,6 +4,14 @@
 # Changelog
 
 
+## 2.6.0 (2022-07-18)
+
+- Updated PDFium from `5173` to `5187` (autorelease).
+- Switched from `FPDF_LoadMemDocument()` to `FPDF_LoadMemDocument64()`. The latter uses `size_t` rather than `int` to avoid integer overflows on huge files.
+- Pinned `ctypesgen` to a more recent stable commit in `pyproject.toml`, as the release is fairly outdated. Suggested pinning of `wheel` by code comment.
+- Updated planned changes.
+
+
 ## 2.5.0 (2022-07-11)
 
 - Updated PDFium from `5159` to `5173` (autorelease).
