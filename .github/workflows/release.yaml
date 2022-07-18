@@ -52,13 +52,13 @@ jobs:
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
       
-      - name: Run autorelease script
-        run: python3 setupsrc/pl_setup/autorelease.py
-      
       - name: Install/update pypdfium2 dependencies
         run: |
           python3 -m pip install -U .[utilities,test,inserttext,converters]
           rm -rf ./data/.presetup_done.txt
+      
+      - name: Run autorelease script
+        run: python3 setupsrc/pl_setup/autorelease.py
       
       - name: Run packaging script
         run: make packaging
