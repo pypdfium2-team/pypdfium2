@@ -10,10 +10,3 @@ requires = [
     "wheel @ git+https://github.com/pypa/wheel.git@9d4264d2f23ea44dd85639a27fa6b284261921cd",
     "ctypesgen @ git+https://github.com/ctypesgen/ctypesgen.git@2120dbf9a5086a21c48e5a002b1f274f3716b7ec",
 ]
-
-# [tool.pytest.ini_options]
-# filterwarnings = [
-#     # capture distutils deprecation warning triggered by importing the "wheel" package
-#     # this has already been fixed in wheel's main branch, but the release still imports distutils
-#     "ignore:The distutils package is deprecated:DeprecationWarning",
-# ]
