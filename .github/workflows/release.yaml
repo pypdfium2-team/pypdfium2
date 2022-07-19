@@ -24,23 +24,6 @@ jobs:
         with:
           python-version: '3.10'
       
-      - name: Install/update setup dependencies
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U setuptools setuptools-scm build wheel
-      
-      - name: Check out ctypesgen
-        uses: actions/checkout@v3
-        with:
-          repository: ctypesgen/ctypesgen
-          ref: '2120dbf9a5086a21c48e5a002b1f274f3716b7ec'
-          path: ctypesgen
-      
-      - name: Install ctypesgen
-        run: |
-          cd ctypesgen/
-          python3 -m pip install .
-      
       - name: Check out pypdfium2
         uses: actions/checkout@v3
         with:
@@ -52,8 +35,12 @@ jobs:
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
       
-      - name: Install/update pypdfium2 dependencies
+      - name: Install/update dependencies
         run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -U setuptools setuptools-scm build
+          python3 -m pip install git+https://github.com/pypa/wheel.git@9d4264d2f23ea44dd85639a27fa6b284261921cd
+          python3 -m pip install git+https://github.com/ctypesgen/ctypesgen.git@2120dbf9a5086a21c48e5a002b1f274f3716b7ec
           python3 -m pip install -U .[utilities,test,inserttext,converters]
           rm -rf ./data/.presetup_done.txt
       
