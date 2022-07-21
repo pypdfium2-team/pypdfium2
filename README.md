@@ -57,7 +57,7 @@ Show the table of contents for a PDF:
 pypdfium2 toc document.pdf
 ```
 
-To obtain a list of subcommands, run `pypdfium2 help`. Individual help for each subcommand is available can be accessed in the same way (`pypdfium any_subcommand help`)
+To obtain a list of subcommands, run `pypdfium2 --help`. Individual help for each subcommand can be accessed in the same way (`pypdfium2 subcommand --help`)
 
 CLI documentation: https://pypdfium2.readthedocs.io/en/stable/shell_api.html
 
