@@ -16,12 +16,12 @@ pypdfium2
    
    python_api
    shell_api
-   planned_changes
 
 .. toctree::
    :maxdepth: 1
-   :caption: Changelog
+   :caption: Progress
    
+   planned_changes
    changelog
 
 
