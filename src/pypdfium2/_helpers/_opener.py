@@ -39,10 +39,7 @@ class ReaderClass:
 
 
 def is_input_buffer(maybe_buffer):
-    if all( callable(getattr(maybe_buffer, a, None)) for a in ("seek", "tell", "read", "readinto") ):
-        return True
-    else:
-        return False
+    return all( callable(getattr(maybe_buffer, a, None)) for a in ("seek", "tell", "read", "readinto") )
 
 
 def open_pdf_buffer(buffer, password=None):
