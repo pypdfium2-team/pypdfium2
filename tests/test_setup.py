@@ -22,10 +22,10 @@ from .conftest import pl_names, SourceTree
 def test_entrypoint():
     
     setup_cfg = configparser.ConfigParser()
-    setup_cfg.read( join(SourceTree,'setup.cfg') )
-    console_scripts = setup_cfg['options.entry_points']['console_scripts']
+    setup_cfg.read( join(SourceTree, "setup.cfg") )
+    console_scripts = setup_cfg["options.entry_points"]["console_scripts"]
     
-    entry_point = console_scripts.split('=')[-1].strip().split(':')
+    entry_point = console_scripts.split("=")[-1].strip().split(":")
     module_path = entry_point[0]
     method_name = entry_point[1]
     

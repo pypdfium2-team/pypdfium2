@@ -5,30 +5,30 @@ import sys
 import logging
 from os.path import join, dirname, abspath, isdir, isfile
 
-lib_logger = logging.getLogger('pypdfium2')
+lib_logger = logging.getLogger("pypdfium2")
 lib_logger.addHandler(logging.StreamHandler())
 
 TestDir     = dirname(abspath(__file__))
 SourceTree  = dirname(TestDir)
-ResourceDir = join(TestDir,'resources')
-OutputDir   = join(TestDir,'output')
+ResourceDir = join(TestDir, "resources")
+OutputDir   = join(TestDir, "output")
 
-sys.path.insert(0, join(SourceTree,'setupsrc'))
+sys.path.insert(0, join(SourceTree, "setupsrc"))
 from pl_setup.packaging_base import PlatformNames
 
 
 class TestFiles:
-    render        = join(ResourceDir,'render.pdf')
-    encrypted     = join(ResourceDir,'encrypted.pdf')
-    multipage     = join(ResourceDir,'multipage.pdf')
-    toc           = join(ResourceDir,'toc.pdf')
-    toc_viewmodes = join(ResourceDir,'toc_viewmodes.pdf')
-    toc_maxdepth  = join(ResourceDir,'toc_maxdepth.pdf')
-    toc_circular  = join(ResourceDir,'toc_circular.pdf')
-    box_fallback  = join(ResourceDir,'box_fallback.pdf')
-    text          = join(ResourceDir,'text.pdf')
-    empty         = join(ResourceDir,'empty.pdf')
-    images        = join(ResourceDir,'images.pdf')
+    render        = join(ResourceDir, "render.pdf")
+    encrypted     = join(ResourceDir, "encrypted.pdf")
+    multipage     = join(ResourceDir, "multipage.pdf")
+    toc           = join(ResourceDir, "toc.pdf")
+    toc_viewmodes = join(ResourceDir, "toc_viewmodes.pdf")
+    toc_maxdepth  = join(ResourceDir, "toc_maxdepth.pdf")
+    toc_circular  = join(ResourceDir, "toc_circular.pdf")
+    box_fallback  = join(ResourceDir, "box_fallback.pdf")
+    text          = join(ResourceDir, "text.pdf")
+    empty         = join(ResourceDir, "empty.pdf")
+    images        = join(ResourceDir, "images.pdf")
 
 
 ExpRenderPixels = (
@@ -42,7 +42,7 @@ ExpRenderPixels = (
 def iterate_testfiles(skip_encrypted=True):
     encrypted = (TestFiles.encrypted, )
     for attr_name in dir(TestFiles):
-        if attr_name.startswith('_'):
+        if attr_name.startswith("_"):
             continue
         member = getattr(TestFiles, attr_name)
         if skip_encrypted and member in encrypted:
@@ -53,7 +53,7 @@ def iterate_testfiles(skip_encrypted=True):
 def _get_attrs(cls):
     members = []
     for attr in dir(cls):
-        if attr.startswith('_'):
+        if attr.startswith("_"):
             continue
         members.append(attr)
     return members

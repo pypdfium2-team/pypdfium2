@@ -23,11 +23,11 @@ from pl_setup.packaging_base import (
 
 def _clean():
     
-    build_cache = join(SourceTree,'build')
+    build_cache = join(SourceTree, "build")
     if os.path.exists(build_cache):
         shutil.rmtree(build_cache)
     
-    delete_files = [join(ModuleDir, n) for n in (*Libnames, '_pypdfium.py')]
+    delete_files = [join(ModuleDir, n) for n in (*Libnames, "_pypdfium.py")]
     
     for file in delete_files:
         if os.path.exists(file):
@@ -45,54 +45,54 @@ def _copy_bindings(pl_name):
 
 
 def _get_linux_tag(arch):
-    return 'manylinux_2_17_%s.manylinux2014_%s' % (arch, arch)
+    return "manylinux_2_17_%s.manylinux2014_%s" % (arch, arch)
 
 def _get_musllinux_tag(arch):
-    return 'musllinux_1_2_%s' % (arch)
+    return "musllinux_1_2_%s" % (arch)
 
 
 def _get_mac_tag(arch, *versions):
     
     assert len(versions) > 0
     
-    template = 'macosx_%s_%s'
+    template = "macosx_%s_%s"
     
-    tag = ''
-    sep = ''
+    tag = ""
+    sep = ""
     for v in versions:
         tag += sep + template % (v, arch)
-        sep = '.'
+        sep = "."
     
     return tag
 
 
 def _get_tag(pl_name):
     if pl_name == PlatformNames.darwin_x64:
-        return _get_mac_tag('x86_64', '10_11', '11_0', '12_0')
+        return _get_mac_tag("x86_64", "10_11", "11_0", "12_0")
     elif pl_name == PlatformNames.darwin_arm64:
-        return _get_mac_tag('arm64', '11_0', '12_0')
+        return _get_mac_tag("arm64", "11_0", "12_0")
     elif pl_name == PlatformNames.linux_x64:
-        return _get_linux_tag('x86_64')
+        return _get_linux_tag("x86_64")
     elif pl_name == PlatformNames.linux_x86:
-        return _get_linux_tag('i686')
+        return _get_linux_tag("i686")
     elif pl_name == PlatformNames.linux_arm64:
-        return _get_linux_tag('aarch64')
+        return _get_linux_tag("aarch64")
     elif pl_name == PlatformNames.linux_arm32:
-        return _get_linux_tag('armv7l')
+        return _get_linux_tag("armv7l")
     elif pl_name == PlatformNames.musllinux_x64:
-        return _get_musllinux_tag('x86_64')
+        return _get_musllinux_tag("x86_64")
     elif pl_name == PlatformNames.musllinux_x86:
-        return _get_musllinux_tag('i686')
+        return _get_musllinux_tag("i686")
     elif pl_name == PlatformNames.windows_x64:
-        return 'win_amd64'
+        return "win_amd64"
     elif pl_name == PlatformNames.windows_arm64:
-        return 'win_arm64'
+        return "win_arm64"
     elif pl_name == PlatformNames.windows_x86:
-        return 'win32'
+        return "win32"
     elif pl_name == PlatformNames.sourcebuild:
         tag = sysconfig.get_platform()
-        for char in ('-', '.'):
-            tag = tag.replace(char, '_')
+        for char in ("-", "."):
+            tag = tag.replace(char, "_")
         return tag
     else:
         raise ValueError("Unknown platform directory %s" % pl_name)
@@ -108,13 +108,13 @@ def _get_bdist(pl_name):
             self.root_is_pure = False
         
         def get_tag(self, *args, **kws):
-            return 'py3', 'none', _get_tag(pl_name)
+            return "py3", "none", _get_tag(pl_name)
     
     return bdist
 
 
 SetupKws = dict(
-    version = VerNamespace['V_PYPDFIUM2'],
+    version = VerNamespace["V_PYPDFIUM2"],
 )
 
 
@@ -124,7 +124,7 @@ def mkwheel(pl_name):
     _copy_bindings(pl_name)
     
     setuptools.setup(
-        package_data = {'': Libnames},
-        cmdclass = {'bdist_wheel': _get_bdist(pl_name)},
+        package_data = {"": Libnames},
+        cmdclass = {"bdist_wheel": _get_bdist(pl_name)},
         **SetupKws,
     )

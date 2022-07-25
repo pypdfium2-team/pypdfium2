@@ -59,7 +59,7 @@ def run_cmd(command, cwd, capture=False, **kwargs):
     
     comp_process = subprocess.run(command, cwd=cwd, **kwargs)
     if capture:
-        return comp_process.stdout.decode("UTF-8").strip()
+        return comp_process.stdout.decode("utf-8").strip()
     else:
         return comp_process
 
