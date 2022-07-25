@@ -6,7 +6,9 @@
 
 ## 2.7.1 (2022-07-25)
 
-- No PDFium update (autorelease).
+*Due to a mishap in the workflow, this release got wrongly numbered as 2.7.1 while there was no 2.7.0 release. This also caused problems with the release description on GitHub. We apologise for the inconveniences.*
+
+- Updated PDFium from `5187` to `5200` (autorelease).
 - Improved release workflow.
 - Documentation corrections.
 - Enabled pinning of `wheel` and removed related warning filter in `pyproject.toml`.
