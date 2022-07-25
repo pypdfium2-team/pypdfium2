@@ -2,7 +2,3 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # Changelog for next release
-
-- Improved release workflow.
-- Documentation corrections.
-- Enabled pinning of `wheel` and removed related warning filter in `pyproject.toml`.

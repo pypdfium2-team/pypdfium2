@@ -4,6 +4,14 @@
 # Changelog
 
 
+## 2.7.1 (2022-07-25)
+
+- No PDFium update (autorelease).
+- Improved release workflow.
+- Documentation corrections.
+- Enabled pinning of `wheel` and removed related warning filter in `pyproject.toml`.
+
+
 ## 2.6.0 (2022-07-18)
 
 - Updated PDFium from `5173` to `5187` (autorelease).
