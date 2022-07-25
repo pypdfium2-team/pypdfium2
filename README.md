@@ -98,7 +98,7 @@ pil_image = page.render_topil(
 )
 pil_image.save("out.png")
 
-[g.close() for g in (pil_image, page, pdf)]
+for g in (pil_image, page, pdf): g.close()
 ```
 
 Render multiple pages concurrently:

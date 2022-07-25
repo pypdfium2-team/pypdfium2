@@ -22,7 +22,7 @@ def textpage(doc):
     textpage = page.get_textpage()
     assert isinstance(textpage, pdfium.PdfTextPage)
     yield textpage
-    [g.close() for g in (textpage, page)]
+    for g in (textpage, page): g.close()
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def linkpage(doc):
     page = doc.get_page(1)
     linkpage = page.get_textpage()
     yield linkpage
-    [g.close() for g in (linkpage, page)]
+    for g in (linkpage, page): g.close()
 
 
 def test_gettext(textpage):
@@ -146,7 +146,7 @@ def test_textpage_empty():
     with pytest.raises(ValueError, match=re.escape("Text length must be >0.")):
         textpage.search("")
     
-    [g.close() for g in (textpage, page, pdf)]
+    for g in (textpage, page, pdf): g.close()
 
 
 def test_get_links(linkpage):
@@ -202,4 +202,4 @@ def test_insert_text():
     with open(join(OutputDir, "text_insertion.pdf"), "wb") as buffer:
         pdf.save(buffer, version=17)
     
-    [g.close() for g in (textpage, page, pdf_font, pdf)]
+    for g in (textpage, page, pdf_font, pdf): g.close()

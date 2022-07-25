@@ -16,7 +16,7 @@ def sample_page():
     pdf = pdfium.PdfDocument(TestFiles.render)
     page = pdf.get_page(0)
     yield page
-    [g.close() for g in (page, pdf)]
+    for g in (page, pdf): g.close()
 
 
 @pytest.fixture
@@ -215,7 +215,7 @@ def render_pdffile_topil(multipage_doc):
     
     assert len(imgs) == 3
     yield imgs
-    [image.close() for image in imgs]
+    for g in imgs: g.close()
 
 
 @pytest.fixture
@@ -235,7 +235,7 @@ def render_pdffile_tobytes(multipage_doc):
     
     assert len(imgs) == 3
     yield imgs
-    [image.close() for image in imgs]
+    for g in imgs: g.close()
 
 
 def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes):
@@ -259,7 +259,7 @@ def test_render_pdf_new(caplog):
     assert image.mode == "RGB"
     assert image.size == (50, 100)
     
-    [g.close() for g in (image, page, pdf)]
+    for g in (image, page, pdf): g.close()
 
 
 def test_render_pdfbuffer(caplog):
@@ -278,8 +278,7 @@ def test_render_pdfbuffer(caplog):
     warning = "Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly."
     assert warning in caplog.text
     
-    pdf.close()
-    buffer.close()
+    for g in (pdf, buffer): g.close()
 
 
 def test_render_pdfbytes():

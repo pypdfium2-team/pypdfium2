@@ -88,4 +88,4 @@ def main(args):
     with open(args.output, "wb") as buffer:
         dest_pdf.save(buffer)
     
-    [g.close() for g in (dest_pdf, src_pdf)]
+    for g in (dest_pdf, src_pdf): g.close()

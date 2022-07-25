@@ -167,7 +167,7 @@ def test_open_new():
     pdfium.FPDF_ImportPages(dest_pdf.raw, src_pdf.raw, b"1, 3", 0)
     assert len(dest_pdf) == 2
     
-    [g.close() for g in (dest_pdf, src_pdf)]
+    for g in (dest_pdf, src_pdf): g.close()
 
 
 def test_open_invalid():
@@ -204,7 +204,7 @@ def test_object_hierarchy():
     assert isinstance(searcher.raw, pdfium.FPDF_SCHHANDLE)
     assert searcher.textpage is textpage
     
-    [g.close() for g in (searcher, textpage, page, pdf)]
+    for g in (searcher, textpage, page, pdf): g.close()
 
 
 def test_doc_extras():

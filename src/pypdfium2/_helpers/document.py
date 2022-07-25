@@ -362,7 +362,7 @@ class PdfDocument:
         )
         page = pdf.get_page(index)
         result = getattr(page, "render_to"+renderer_name)(**kwargs)
-        [g.close() for g in (page, pdf)]
+        for g in (page, pdf): g.close()
         return result, index
     
     
