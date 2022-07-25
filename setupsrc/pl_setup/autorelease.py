@@ -87,7 +87,7 @@ def push_changes(curr_ns):
     run_local([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
     run_local([Git, "push", "--tags"])
     run_local([Git, "checkout", "stable"])
-    run_local([Git, "rebase", "main"])
+    run_local([Git, "reset", "--hard", "main"])
     run_local([Git, "push"])
     run_local([Git, "checkout", "main"])
 

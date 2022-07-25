@@ -9,7 +9,6 @@
 * Switch rendering to `FPDF_RenderPageBitmapWithMatrix()` (more flexible, easier cropping, maybe possibility to add margins and flip), and use `FPDFPage_Flatten()` for form rendering as there apparently is no matrix rendering counterpart to `FPDF_FFLDraw()`.
 
 ### Setup Infrastructure
-* In the autorelease script, force-update the stable branch.
 * sourcebuild/win: fix dynamic values in `resources.rc`.
 * PDFium's build system is over-complex because of the tight integration with Chromium. Just getting the sources takes unusually long due to the huge toolchains. That's why it would be good if we could create a custom CMake build system for PDFium, so as to speed up the process and shrink the dependency tree. We should still keep the current build script for PDFium contributing, though.
 
