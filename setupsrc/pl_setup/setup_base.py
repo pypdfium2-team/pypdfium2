@@ -67,6 +67,9 @@ def _get_mac_tag(arch, *versions):
 
 
 def _get_tag(pl_name):
+    # It looks like pip >= 20.3 now accepts macOS wheels with a lower major version than the host system (that is, at least for 10 on 11).
+    # Anyway, even if it's fixed now, we definitely still need to support older releases of pip
+    # We're intrigued why other major libraries (e. g. pikepdf, pymupdf - both using cibuildwheel) are not doing multi-version tagging for macOS while they still have compatibility tags for manylinux2014.
     if pl_name == PlatformNames.darwin_x64:
         return _get_mac_tag("x86_64", "10_11", "11_0", "12_0")
     elif pl_name == PlatformNames.darwin_arm64:
