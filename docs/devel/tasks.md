@@ -10,6 +10,7 @@
 
 ### Setup Infrastructure
 * Pythonise `setup_all.sh` so that we can just iterate over the members of `PlatformNames`.
+* Add means to the autorelease script for incrementing the major version when we want to.
 * sourcebuild/win: fix dynamic values in `resources.rc`.
 * PDFium's build system is over-complex because of the tight integration with Chromium. Just getting the sources takes unusually long due to the huge toolchains. That's why it would be good if we could create a custom CMake build system for PDFium, so as to speed up the process and shrink the dependency tree. We should still keep the current build script for PDFium contributing, though.
 
