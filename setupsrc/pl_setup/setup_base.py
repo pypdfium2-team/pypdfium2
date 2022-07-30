@@ -17,7 +17,7 @@ from pl_setup.packaging_base import (
     ModuleDir,
     VerNamespace,
     PlatformNames,
-    clean_artifacts,
+    clean_artefacts,
 )
 
 
@@ -110,7 +110,7 @@ SetupKws = dict(
 
 def mkwheel(pl_name):
     
-    clean_artifacts()
+    clean_artefacts()
     _copy_bindings(pl_name)
     
     setuptools.setup(

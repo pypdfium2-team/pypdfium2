@@ -94,7 +94,7 @@ def call_ctypesgen(platform_dir, include_dir):
         file_writer.write(text)
 
 
-def clean_artifacts():
+def clean_artefacts():
     
     build_cache = join(SourceTree, "build")
     if exists(build_cache):
