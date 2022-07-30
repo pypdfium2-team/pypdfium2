@@ -177,7 +177,7 @@ class PdfDocument:
         filewrite = pdfium.FPDF_FILEWRITE()
         filewrite.WriteBlock = WriteFunctype( _writer_class(buffer) )
         
-        saveargs = (self._pdf, ctypes.byref(filewrite), pdfium.FPDF_NO_INCREMENTAL)
+        saveargs = (self._pdf, filewrite, pdfium.FPDF_NO_INCREMENTAL)
         if version is None:
             success = pdfium.FPDF_SaveAsCopy(*saveargs)
         else:
@@ -263,7 +263,7 @@ class PdfDocument:
         t_buflen = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
         t_buffer = ctypes.create_string_buffer(t_buflen)
         pdfium.FPDFBookmark_GetTitle(bookmark, t_buffer, t_buflen)
-        title = t_buffer.raw[:t_buflen].decode('utf-16-le')[:-1]
+        title = t_buffer.raw.decode('utf-16-le')[:-1]
         
         is_closed = pdfium.FPDFBookmark_GetCount(bookmark) < 0
         dest = pdfium.FPDFBookmark_GetDest(self._pdf, bookmark)

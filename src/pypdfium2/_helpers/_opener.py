@@ -54,7 +54,7 @@ def open_pdf_buffer(buffer, password=None):
     fileaccess.m_FileLen = file_len
     fileaccess.m_GetBlock = FuncType( ReaderClass(buffer) )
     
-    pdf = pdfium.FPDF_LoadCustomDocument(ctypes.byref(fileaccess), password)
+    pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, password)
     ld_data = BufferDataHolder(fileaccess.m_GetBlock, buffer)
     
     return pdf, ld_data
@@ -70,6 +70,7 @@ def open_pdf(input_data, password=None):
     
     ld_data = None
     if isinstance(input_data, str):
+        # filename and password are utf-8 encoded
         pdf = pdfium.FPDF_LoadDocument(input_data, password)
     elif isinstance(input_data, bytes):
         pdf, ld_data = open_pdf_bytes(input_data, password)

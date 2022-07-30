@@ -29,6 +29,7 @@ from pl_setup.packaging_base import (
 )
 from pl_setup.update_pdfium import get_latest_version
 
+# TODO let temporary autorelease control files be in the project root directory
 AutoreleaseDir = join(SourceTree, "autorelease")
 MajorUpdate = join(AutoreleaseDir, "majorupdate.txt")
 BetaUpdate = join(AutoreleaseDir, "betaupdate.txt")
