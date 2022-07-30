@@ -36,6 +36,7 @@ VersionFile = join(ModuleDir, "version.py")
 Changelog   = join(SourceTree, "docs", "source", "changelog.md")
 ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
 RepositoryURL = "https://github.com/pypdfium2-team/pypdfium2"
+SetupTargetVar = "PYP_TARGET_PLATFORM"
 
 
 class PlatformNames:

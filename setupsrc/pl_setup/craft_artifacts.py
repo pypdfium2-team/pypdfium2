@@ -9,10 +9,11 @@ from os.path import dirname, abspath
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
     run_cmd,
-    AllPlatNames,
-    PlatformNames,
-    SourceTree,
     clean_artifacts,
+    PlatformNames,
+    AllPlatNames,
+    SourceTree,
+    SetupTargetVar,
 )
 
 
@@ -34,12 +35,12 @@ def main():
     pl_names.remove(PlatformNames.sourcebuild)
     
     clean_artifacts()
-    os.environ["PYP_TARGET_PLATFORM"] = "sdist"
+    os.environ[SetupTargetVar] = "sdist"
     _run_build(["--sdist"])
     clean_artifacts()
     
     for plat in pl_names:
-        os.environ["PYP_TARGET_PLATFORM"] = plat
+        os.environ[SetupTargetVar] = plat
         _run_build(["--wheel"])
         clean_artifacts()
 

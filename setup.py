@@ -15,16 +15,20 @@ from os.path import (
 )
 
 sys.path.insert(0, join(dirname(abspath(__file__)), "setupsrc"))
+from pl_setup.packaging_base import (
+    PlatformNames,
+    SourceTree,
+    SetupTargetVar,
+)
 
 
 def packaging_handler():
     
-    target = os.environ.get("PYP_TARGET_PLATFORM", None)
+    target = os.environ.get(SetupTargetVar, None)
     if target in (None, "auto"):
         return True
     
     from pl_setup.setup_base import mkwheel, SetupKws
-    from pl_setup.packaging_base import PlatformNames
     
     if target == "sdist":
         setuptools.setup(**SetupKws)
@@ -39,11 +43,9 @@ def packaging_handler():
 def install_handler():
     
     from pl_setup import check_deps
-    from pl_setup.packaging_base import SourceTree, PlatformNames
-    
-    StatusFile = join(SourceTree, "data", ".presetup_done.txt")
     
     def check_presetup():
+        StatusFile = join(SourceTree, "data", ".presetup_done.txt")
         if os.path.exists(StatusFile):
             return False
         else:
@@ -54,7 +56,7 @@ def install_handler():
     W_Presetup = check_presetup()
     if W_Presetup: check_deps.main()
     
-    from pl_setup import build_pdfium, update_pdfium
+    from pl_setup import update_pdfium  #, build_pdfium
     from pl_setup.setup_base import mkwheel
     
     class HostPlatform:
