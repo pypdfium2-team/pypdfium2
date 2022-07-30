@@ -14,7 +14,7 @@ from pl_setup import (
 )
 from pl_setup.packaging_base import PlatformNames
 from pl_setup import update_pdfium as fpdf_up
-from .conftest import pl_names, SourceTree
+from .conftest import AllPlatNames, SourceTree
 
 
 # module
@@ -56,7 +56,7 @@ ExpectedTags = (
 
 
 def test_expected_tags():
-    assert len(pl_names) == len(ExpectedTags)
+    assert len(AllPlatNames) == len(ExpectedTags)
     for platform, tag in ExpectedTags:
         assert hasattr(PlatformNames, platform)
         assert isinstance(tag, str)
@@ -84,8 +84,9 @@ def test_libnames():
         assert "pdfium" in name
 
 def test_platformnames():
-    for member in pl_names:
-        assert member == getattr(pkg_base.PlatformNames, member)
+    # make sure variable names and values are identical
+    for name in AllPlatNames:
+        assert name == getattr(pkg_base.PlatformNames, name)
 
 def test_paths():
     assert pkg_base.HomeDir == str( Path.home() )
@@ -99,7 +100,7 @@ def test_paths():
 # update_pdfium
 
 def test_releasenames():
-    assert len(fpdf_up.ReleaseNames) == len(pl_names) - 1
+    assert len(fpdf_up.ReleaseNames) == len(AllPlatNames)-1
     for key, value in fpdf_up.ReleaseNames.items():
         assert hasattr(PlatformNames, key)
         prefix, system, cpu = value.replace("linux-musl", "musllinux").split("-", maxsplit=3)

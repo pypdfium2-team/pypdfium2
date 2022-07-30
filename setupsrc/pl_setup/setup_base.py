@@ -14,24 +14,11 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
     Libnames,
     DataTree,
-    SourceTree,
     ModuleDir,
     VerNamespace,
     PlatformNames,
+    clean_artifacts,
 )
-
-
-def _clean():
-    
-    build_cache = join(SourceTree, "build")
-    if os.path.exists(build_cache):
-        shutil.rmtree(build_cache)
-    
-    delete_files = [join(ModuleDir, n) for n in (*Libnames, "_pypdfium.py")]
-    
-    for file in delete_files:
-        if os.path.exists(file):
-            os.remove(file)
 
 
 def _copy_bindings(pl_name):
@@ -123,7 +110,7 @@ SetupKws = dict(
 
 def mkwheel(pl_name):
     
-    _clean()
+    clean_artifacts()
     _copy_bindings(pl_name)
     
     setuptools.setup(

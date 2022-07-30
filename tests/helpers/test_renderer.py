@@ -8,7 +8,8 @@ import PIL.Image
 from os.path import join
 import pytest
 import pypdfium2 as pdfium
-from ..conftest import TestFiles, OutputDir, ExpRenderPixels, get_members
+from ..conftest import TestFiles, OutputDir, ExpRenderPixels
+from pl_setup.packaging_base import get_members
 
 
 @pytest.fixture

@@ -6,5 +6,6 @@
 - Added a new option `rm_security` to `PdfDocument.save()`.
 - Added support for password-protected PDFs in the CLI subcommands `merge`, `render`, `tile` and `toc`.
 - Corrected the release workflow to avoid incrementing minor version twice.
+- Rewrote package building script with python.
 - The stable branch is now always updated, even if it contains commits that are not in main.
 - Various code style improvements.

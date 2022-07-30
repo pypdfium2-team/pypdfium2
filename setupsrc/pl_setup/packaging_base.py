@@ -3,11 +3,13 @@
 
 # Non-stdlib imports not allowed in this file, as it is imported prior to the check_deps call
 
+import os
 import shutil
 import subprocess
 from glob import glob
 from os.path import (
     join,
+    exists,
     abspath,
     dirname,
     expanduser,
@@ -64,6 +66,17 @@ def run_cmd(command, cwd, capture=False, **kwargs):
         return comp_process
 
 
+def get_members(cls):
+    members = []
+    for attr in dir(cls):
+        if attr.startswith("_"):
+            continue
+        members.append( getattr(cls, attr) )
+    return members
+
+AllPlatNames = get_members(PlatformNames)
+
+
 def call_ctypesgen(platform_dir, include_dir):
     
     bindings_file = join(platform_dir, "_pypdfium.py")
@@ -78,6 +91,18 @@ def call_ctypesgen(platform_dir, include_dir):
     
     with open(bindings_file, "w") as file_writer:
         file_writer.write(text)
+
+
+def clean_artifacts():
+    
+    build_cache = join(SourceTree, "build")
+    if exists(build_cache):
+        shutil.rmtree(build_cache)
+    
+    deletable_files = [join(ModuleDir, n) for n in (*Libnames, "_pypdfium.py")]
+    for file in deletable_files:
+        if exists(file):
+            os.remove(file)
 
 
 def get_version_ns():

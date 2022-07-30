@@ -14,7 +14,7 @@ ResourceDir = join(TestDir, "resources")
 OutputDir   = join(TestDir, "output")
 
 sys.path.insert(0, join(SourceTree, "setupsrc"))
-from pl_setup.packaging_base import PlatformNames
+from pl_setup.packaging_base import AllPlatNames
 
 
 class TestFiles:
@@ -48,20 +48,6 @@ def iterate_testfiles(skip_encrypted=True):
         if skip_encrypted and member in encrypted:
             continue
         yield member
-
-
-def _get_attrs(cls):
-    members = []
-    for attr in dir(cls):
-        if attr.startswith("_"):
-            continue
-        members.append(attr)
-    return members
-
-def get_members(cls):
-    return [getattr(cls, a) for a in _get_attrs(cls)]
-
-pl_names = _get_attrs(PlatformNames)
 
 
 def test_testpaths():

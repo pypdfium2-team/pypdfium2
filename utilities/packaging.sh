@@ -11,7 +11,7 @@ bash utilities/install.sh
 python3 -m pytest tests/
 
 python3 ./setupsrc/pl_setup/update_pdfium.py
-bash utilities/setup_all.sh
+python3 ./setupsrc/pl_setup/craft_artifacts.py
 
 twine check dist/*
 check-wheel-contents dist/*.whl
