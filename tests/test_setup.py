@@ -12,9 +12,9 @@ from pl_setup import (
     setup_base,
     packaging_base as pkg_base,
 )
-from pl_setup.packaging_base import PlatformNames
 from pl_setup import update_pdfium as fpdf_up
-from .conftest import AllPlatNames, SourceTree
+from pl_setup.packaging_base import PlatformNames, AllPlatNames
+from .conftest import SourceTree
 
 
 # module

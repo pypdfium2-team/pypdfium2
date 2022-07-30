@@ -14,7 +14,6 @@ ResourceDir = join(TestDir, "resources")
 OutputDir   = join(TestDir, "output")
 
 sys.path.insert(0, join(SourceTree, "setupsrc"))
-from pl_setup.packaging_base import AllPlatNames
 
 
 class TestFiles:

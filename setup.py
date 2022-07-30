@@ -110,7 +110,7 @@ def install_handler():
     elif host.is_platform("win32", ""):
         _setup(PlatformNames.windows_x86)
     else:
-        raise RuntimeError("No pre-built binaries available for platform '%s' with libc implementation '%s'. You can attempt a source bulid, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Doing cross-compilation or using a different build system might be possible, though. Please get in touch with the project maintainers." % (host.plat_name, host.libc_name))
+        raise RuntimeError("No pre-built binaries available for platform '%s' with libc implementation '%s'. You can attempt a source build, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Doing cross-compilation or using a different build system might be possible, though. Please get in touch with the project maintainers." % (host.plat_name, host.libc_name))
         # if W_Presetup: build_pdfium.main()
         # mkwheel(PlatformNames.sourcebuild)
 
