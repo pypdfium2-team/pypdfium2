@@ -17,6 +17,7 @@
 * Find a better replacement for `importchecker`.
 
 ### Documentation
+* Update/rewrite the Readme. It's a bit outdated in parts.
 * Move development section of the Readme into a dedicated file and add some more information.
 * Add a ctypes primer explaining how to interoperate with the PDFium C API.
 
