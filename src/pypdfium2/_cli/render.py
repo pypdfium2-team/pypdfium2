@@ -52,6 +52,11 @@ def attach_parser(subparsers):
         help = "PDF documents to render",
     )
     parser.add_argument(
+        "--passwords",
+        nargs = "*",
+        help = "A sequence of passwords to unlock encrypted PDFs. The value is ignored for non-encrypted documents, where any placeholder may be used.",
+    )
+    parser.add_argument(
         "--output", "-o",
         type = abspath,
         required = True,
@@ -124,10 +129,13 @@ def attach_parser(subparsers):
 
 
 def main(args):
+    
+    if not args.passwords:
+        args.passwords = [None for _ in args.inputs]
+    
+    for input_path, password in zip(args.inputs, args.passwords):
         
-    for input_path in args.inputs:
-        
-        pdf = pdfium.PdfDocument(input_path)
+        pdf = pdfium.PdfDocument(input_path, password=password)
         if args.pages:
             page_indices = args.pages
         else:
