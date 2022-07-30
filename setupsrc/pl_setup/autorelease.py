@@ -2,12 +2,15 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import sys
 import time
 import copy
 import shutil
+import argparse
 from os.path import (
     join,
+    exists,
     abspath,
     dirname,
 )
@@ -24,10 +27,11 @@ from pl_setup.packaging_base import (
     VersionFile,
     VerNamespace,
 )
-from pl_setup.update_pdfium import (
-    get_latest_version,
-    handle_versions,
-)
+from pl_setup.update_pdfium import get_latest_version
+
+AutoreleaseDir = join(SourceTree, "autorelease")
+MajorUpdate = join(AutoreleaseDir, "majorupdate.txt")
+BetaUpdate = join(AutoreleaseDir, "betaupdate.txt")
 
 
 def run_local(*args, **kws):
@@ -36,13 +40,36 @@ def run_local(*args, **kws):
 
 def do_versioning():
     
-    v_before = VerNamespace["V_MINOR"]
-    latest = get_latest_version()
-    handle_versions(latest)
+    # sourcebuild version changes must never be checked into version control
+    # autorelease can't work with that state because it needs information about the previous release for its version changes
+    assert not VerNamespace["IS_SOURCEBUILD"]
+    assert VerNamespace["V_LIBPDFIUM"].isnumeric()
     
-    v_after = VerNamespace["V_MINOR"]
-    if v_before == v_after:
+    latest = get_latest_version()
+    v_libpdfium = int(VerNamespace["V_LIBPDFIUM"])
+    
+    # current libpdfium version mustn't be larger than determined latest, or something went badly wrong
+    assert v_libpdfium <= latest
+    
+    if exists(MajorUpdate):
+        set_version("V_MAJOR", VerNamespace["V_MAJOR"]+1)
+        set_version("V_MINOR", 0)
+        set_version("V_PATCH", 0)
+        set_version("V_LIBPDFIUM", str(latest))
+        os.remove(MajorUpdate)
+    elif v_libpdfium < latest:
+        set_version("V_MINOR", VerNamespace["V_MINOR"]+1)
+        set_version("V_PATCH", 0)
+        set_version("V_LIBPDFIUM", str(latest))
+    else:
         set_version("V_PATCH", VerNamespace["V_PATCH"]+1)
+    
+    if exists(BetaUpdate):
+        v_beta = VerNamespace["V_BETA"]
+        if v_beta is None:
+            v_beta = 0
+        set_version("V_BETA", v_beta+1)
+        os.remove(BetaUpdate)
 
 
 def get_summary():
@@ -81,7 +108,7 @@ def log_changes(summary, prev_ns, curr_ns):
 
 
 def push_changes(curr_ns):
-    run_local([Git, "add", Changelog, ChangelogStaging, VersionFile])
+    run_local([Git, "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
     run_local([Git, "commit", "-m", "[autorelease] update changelog and version file"])
     run_local([Git, "push"])
     run_local([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
@@ -117,6 +144,11 @@ def make_releasenotes(summary, prev_ns, curr_ns):
 
 
 def main():
+    
+    parser = argparse.ArgumentParser(
+        description = "Automatic update script for pypdfium2, to be run in the CI release workflow."
+    )
+    args = parser.parse_args()
     
     global Git
     Git = shutil.which("git")

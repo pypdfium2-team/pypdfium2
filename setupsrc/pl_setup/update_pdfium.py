@@ -49,27 +49,16 @@ def get_latest_version():
     return int( tag.split("/")[-1] )
 
 
-def handle_versions(latest_version):
+def handle_versions(latest):
     
-    v_minor = VerNamespace["V_MINOR"]
     v_libpdfium = VerNamespace["V_LIBPDFIUM"]
     is_sourcebuild = VerNamespace["IS_SOURCEBUILD"]
     
     if is_sourcebuild:
         print("Switching from sourcebuild to pre-built binaries.")
         set_version("IS_SOURCEBUILD", False)
-    else:
-        assert v_libpdfium.isnumeric()
-        if int(v_libpdfium) < latest_version:
-            print("New PDFium build")
-            set_version("V_MINOR", v_minor+1)
-            set_version("V_PATCH", 0)
-            set_version("V_BETA", None)
-        else:
-            print("No new PDFium build - will re-create bindings without incrementing version")
-    
-    if v_libpdfium != str(latest_version):
-        set_version("V_LIBPDFIUM", str(latest_version))
+    if v_libpdfium != latest:
+        set_version("V_LIBPDFIUM", latest)
 
 
 def clear_data(download_files):
@@ -178,11 +167,11 @@ def main(platforms):
     
     download_files = get_download_files(platforms)
     
-    latest_version = get_latest_version()
-    handle_versions(latest_version)
+    latest = get_latest_version()
+    handle_versions(str(latest))
     clear_data(download_files)
     
-    archives = download_releases(latest_version, download_files)
+    archives = download_releases(latest, download_files)
     unpack_archives(archives)
     generate_bindings(archives)
 
