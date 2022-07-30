@@ -38,14 +38,13 @@ def run_local(*args, **kws):
     return run_cmd(*args, **kws, cwd=SourceTree)
 
 
-def do_versioning():
+def do_versioning(latest):
     
     # sourcebuild version changes must never be checked into version control
     # autorelease can't work with that state because it needs information about the previous release for its version changes
     assert not VerNamespace["IS_SOURCEBUILD"]
     assert VerNamespace["V_LIBPDFIUM"].isnumeric()
     
-    latest = get_latest_version()
     v_libpdfium = int(VerNamespace["V_LIBPDFIUM"])
     
     # current libpdfium version mustn't be larger than determined latest, or something went badly wrong
@@ -172,7 +171,8 @@ def main():
     Git = shutil.which("git")
     
     prev_ns = copy.deepcopy(VerNamespace)
-    do_versioning()
+    latest = get_latest_version()
+    do_versioning(latest)
     curr_ns = get_version_ns()
     
     summary = get_summary()
