@@ -107,15 +107,22 @@ def log_changes(summary, prev_ns, curr_ns):
         fh.write(content)
 
 
-def push_changes(curr_ns):
+def vcs_checkin(curr_ns, publish=False):
+    
     run_local([Git, "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
     run_local([Git, "commit", "-m", "[autorelease] update changelog and version file"])
-    run_local([Git, "push"])
+    if publish:
+        run_local([Git, "push"])
+    
     run_local([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
-    run_local([Git, "push", "--tags"])
+    if publish:
+        run_local([Git, "push", "--tags"])
+    
     run_local([Git, "checkout", "stable"])
     run_local([Git, "reset", "--hard", "main"])
-    run_local([Git, "push"])
+    if publish:
+        run_local([Git, "push"])
+    
     run_local([Git, "checkout", "main"])
 
 
@@ -145,8 +152,19 @@ def make_releasenotes(summary, prev_ns, curr_ns):
 
 def main():
     
+    # The `--checkin` and `--publish` options exist to avoid accidential repository changes or even pushes, and to simplify testing this script.
     parser = argparse.ArgumentParser(
         description = "Automatic update script for pypdfium2, to be run in the CI release workflow."
+    )
+    parser.add_argument(
+        "--checkin",
+        action = "store_true",
+        help = "Allow running modifying git commands (commit, tag, reset)."
+    )
+    parser.add_argument(
+        "--publish",
+        action = "store_true",
+        help = "Allow pushing changes to the public repository. Takes no effect if `--checkin` is not given.",
     )
     args = parser.parse_args()
     
@@ -159,7 +177,8 @@ def main():
     
     summary = get_summary()
     log_changes(summary, prev_ns, curr_ns)
-    push_changes(curr_ns)
+    if args.checkin:
+        vcs_checkin(curr_ns, publish=args.publish)
     make_releasenotes(summary, prev_ns, curr_ns)
 
 
