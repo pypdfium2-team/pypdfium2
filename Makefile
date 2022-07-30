@@ -15,7 +15,7 @@ update-all:
 	python3 ./setupsrc/pl_setup/update_pdfium.py
 
 setup-all:
-	python3 ./setupsrc/pl_setup/craft_artifacts.py
+	python3 ./setupsrc/pl_setup/craft_packages.py
 
 packaging:
 	bash ./utilities/packaging.sh
