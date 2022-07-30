@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import ctypes
 from pypdfium2 import _namespace as pdfium
 
 
@@ -52,6 +51,6 @@ def main(args):
     
     merged_pdf = _merge_files(args.inputs, args.passwords)
     with open(args.output, "wb") as buffer:
-        merged_pdf.save(buffer, rm_security=True)
+        merged_pdf.save(buffer)
     
     merged_pdf.close()
