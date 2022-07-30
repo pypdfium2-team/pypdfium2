@@ -52,25 +52,11 @@ DefaultConfig = {
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
 }
-SyslibsConfig = {
-    "use_system_freetype": True,
-    "use_system_lcms2": True,
-    # "use_system_libjpeg": True,
-    "use_system_libopenjpeg2": True,
-    "use_system_libpng": True,
-    "use_system_zlib": True,
-    "sysroot": "/",
-}
 
-if sys.platform.startswith("linux"):
-    SyslibsConfig["use_custom_libcxx"] = False
-elif sys.platform.startswith("darwin"):
+if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.11.0"
-    SyslibsConfig["use_system_xcode"] = True
 elif sys.platform.startswith("win32"):
     DefaultConfig["pdf_use_win32_gdi"] = True
-
-Git = shutil.which("git")
 
 
 def dl_depottools(do_update):
@@ -83,35 +69,21 @@ def dl_depottools(do_update):
     if os.path.isdir(DepotToolsDir):
         if do_update:
             print("DepotTools: Revert and update ...")
-            run_cmd(["git", "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
-            run_cmd(["git", "pull", DepotTools_URL], cwd=DepotToolsDir)
+            run_cmd([Git, "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
+            run_cmd([Git, "pull", DepotTools_URL], cwd=DepotToolsDir)
         else:
             print("DepotTools: Using existing repository as-is.")
             is_update = False
     else:
         print("DepotTools: Download ...")
-        run_cmd(["git", "clone", "--depth", "1", DepotTools_URL, DepotToolsDir], cwd=SB_Dir)
+        run_cmd([Git, "clone", "--depth", "1", DepotTools_URL, DepotToolsDir], cwd=SB_Dir)
     
     os.environ["PATH"] += os.pathsep + DepotToolsDir
     
     return is_update
 
 
-def _dl_unbundler():
-    
-    # Download missing tools for unbundle/replace_gn_files.py
-    
-    tool_url = "https://raw.githubusercontent.com/chromium/chromium/main/tools/generate_shim_headers/generate_shim_headers.py"
-    tool_dir = join(PDFiumDir,"tools","generate_shim_headers")
-    tool_file = join(tool_dir, "generate_shim_headers.py")
-    
-    if not os.path.isdir(tool_dir):
-        os.makedirs(tool_dir)
-    if not os.path.exists(tool_file):
-        urllib.request.urlretrieve(tool_url, tool_file)
-
-
-def dl_pdfium(do_update, revision, GClient):
+def dl_pdfium(do_update, revision):
     
     is_sync = True
     
@@ -128,7 +100,6 @@ def dl_pdfium(do_update, revision, GClient):
     
     if is_sync:
         run_cmd([GClient, "sync", "--revision", "origin/%s" % revision, "--no-history", "--shallow"], cwd=SB_Dir)
-        _dl_unbundler()
     
     return is_sync
 
@@ -162,7 +133,7 @@ def update_version(head_commit, tag_commit, tag):
 
 def _apply_patchset(patchset):
     for patch, cwd in patchset:
-        run_cmd(["git", "apply", "-v", patch], cwd=cwd)
+        run_cmd([Git, "apply", "-v", patch], cwd=cwd)
 
 def patch_pdfium():
     _apply_patchset(PdfiumMainPatches)
@@ -171,7 +142,7 @@ def patch_pdfium():
         shutil.copy(join(PatchDir, "pdfium", "win", "resources.rc"), join(PDFiumDir, "resources.rc"))
 
 
-def configure(config, GN):
+def configure(config):
     if not os.path.exists(PDFiumBuildDir):
         os.makedirs(PDFiumBuildDir)
     with open(join(PDFiumBuildDir, "args.gn"), "w") as args_handle:
@@ -179,7 +150,7 @@ def configure(config, GN):
     run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
 
 
-def build(Ninja, target):
+def build(target):
     run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
@@ -252,10 +223,12 @@ def main(
         b_srcname = None,
         b_destname = None,
         b_update = False,
-        b_use_syslibs = False,
         b_revision = None,
         b_target = None,
     ):
+    
+    global Git
+    Git = shutil.which("git")
     
     if b_revision is None:
         b_revision = "main"
@@ -270,25 +243,23 @@ def main(
     
     dl_depottools(b_update)
     
+    global GClient, GN, Ninja
     GClient = _get_tool("gclient", "bat")
     GN      = _get_tool("gn", "bat")
     Ninja   = _get_tool("ninja", "exe")
     
-    pdfium_dl_done = dl_pdfium(b_update, b_revision, GClient)
+    pdfium_dl_done = dl_pdfium(b_update, b_revision)
     if pdfium_dl_done:
         patch_pdfium()
     
     update_version( *get_version_info() )
     
     config_dict = DefaultConfig.copy()
-    if b_use_syslibs:
-        config_dict.update(SyslibsConfig)
-        run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     config_str = _serialise_config(config_dict)
     print("\nBuild configuration:\n%s\n" % config_str)
     
-    configure(config_str, GN)
-    build(Ninja, b_target)
+    configure(config_str)
+    build(b_target)
     libpath = find_lib(b_srcname)
     pack(libpath, b_destname)
 
@@ -313,11 +284,6 @@ def parse_args(argv):
         help = "Update existing PDFium/DepotTools repositories, removing local changes.",
     )
     parser.add_argument(
-        "--use-syslibs", "-l",
-        action = "store_true",
-        help = "Use system libraries instead of those bundled with PDFium. (Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng, zlib and icuuc are installed, and that $PKG_CONFIG_PATH is set correctly (e. g. to `/usr/lib/x86_64-linux-gnu/pkgconfig`)",
-    )
-    parser.add_argument(
         "--revision", "-r",
         help = "PDFium revision to check out (defaults to main).",
     )
@@ -335,7 +301,6 @@ def main_cli(argv=sys.argv[1:]):
         b_srcname = args.srcname,
         b_destname = args.destname,
         b_update = args.update,
-        b_use_syslibs = args.use_syslibs,
         b_revision = args.revision,
         b_target = args.target,
     )
