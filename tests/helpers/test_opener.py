@@ -142,6 +142,16 @@ def test_open_encrypted():
         pdf.close()
 
 
+@pytest.mark.parametrize(
+    "file_access",
+    [pdfium.FileAccess.NATIVE, pdfium.FileAccess.BYTES, pdfium.FileAccess.BUFFER]
+)
+def test_open_nonencrypted_with_password(file_access):
+    pdf = pdfium.PdfDocument(TestFiles.render, password="irrelevant", file_access=file_access)
+    _check_general(pdf)
+    pdf.close()
+
+
 def test_open_nonascii():
     
     tempdir = tempfile.TemporaryDirectory(prefix="pypdfium2_")
