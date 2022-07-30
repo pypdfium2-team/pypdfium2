@@ -36,6 +36,10 @@ def attach_parser(subparsers):
         help = "PDF file on which to perform N-up compositing",
     )
     parser.add_argument(
+        "--password",
+        help = "Password to unlock the PDF, if encrypted"
+    )
+    parser.add_argument(
         "--output", "-o",
         required = True,
         type = os.path.abspath,
@@ -78,7 +82,7 @@ def main(args):
     width = units_to_pt(args.width, args.unit)
     height = units_to_pt(args.height, args.unit)
     
-    src_pdf = pdfium.PdfDocument(args.input)
+    src_pdf = pdfium.PdfDocument(args.input, password=args.password)
     raw_dest = pdfium.FPDF_ImportNPagesToOne(
         src_pdf.raw,
         width, height,

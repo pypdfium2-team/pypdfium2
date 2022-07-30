@@ -29,7 +29,7 @@ def attach_parser(subparsers):
 
 def main(args):
     
-    doc = pdfium.PdfDocument(args.input, args.password)
+    doc = pdfium.PdfDocument(args.input, password=args.password)
     if args.pages is None:
         args.pages = [i for i in range(len(doc))]
     

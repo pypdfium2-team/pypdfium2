@@ -40,7 +40,7 @@ def attach_parser(subparsers):
 
 def main(args):
     
-    doc = pdfium.PdfDocument(args.input, args.password)
+    doc = pdfium.PdfDocument(args.input, password=args.password)
     args.types = [ObjtypeToConst[t] for t in args.types]
     if args.pages is None:
         args.pages = [i for i in range(len(doc))]

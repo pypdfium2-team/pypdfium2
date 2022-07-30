@@ -14,6 +14,10 @@ def attach_parser(subparsers):
         help = "PDF document of which to print the outline",
     )
     parser.add_argument(
+        "--password",
+        help = "Password to unlock the PDF, if encrypted"
+    )
+    parser.add_argument(
         "--max-depth",
         type = int,
         default = 15,
@@ -22,6 +26,6 @@ def attach_parser(subparsers):
 
 
 def main(args):
-    pdf = pdfium.PdfDocument(args.input)
+    pdf = pdfium.PdfDocument(args.input, password=args.password)
     pdf.print_toc( pdf.get_toc() )
     pdf.close()
