@@ -8,7 +8,7 @@ from os.path import join
 import pypdfium2.version as pdfium_ver
 from pl_setup import setup_base
 import pl_setup.packaging_base as pkg_base
-import pl_setup.update_pdfium as fpdf_up
+# import pl_setup.update_pdfium as fpdf_up
 import pl_setup.build_pdfium as fpdf_build
 
 try:
@@ -63,6 +63,8 @@ def _test_change(method, exp_items):
 
 def test_setversion():
     
+    # TODO test autorelease.do_versioning() and update_pdfium.handle_versions()
+    
     tempdir = tempfile.TemporaryDirectory()
     orig_vfile = pkg_base.VersionFile
     tmp_vfile = join(tempdir.name, "tmp_versionfile.py")
@@ -81,15 +83,6 @@ def test_setversion():
         pkg_base.set_version(key, value)
     
     _test_change(lambda: None, exp_items)
-    _test_change(lambda: fpdf_up.handle_versions(5005), exp_items)
-    
-    _test_change(
-        lambda: fpdf_up.handle_versions(5010),
-        [
-            ("V_MINOR", 1),
-            ("V_LIBPDFIUM", "5010"),
-        ]
-    )
     _test_change(
         lambda: fpdf_build.update_version("abcdefg", "1234567", "5012"),
         [
@@ -101,13 +94,6 @@ def test_setversion():
         lambda: fpdf_build.update_version("1234567", "1234567", "5012"),
         [
             ("V_LIBPDFIUM", "5012"),
-        ]
-    )
-    _test_change(
-        lambda: fpdf_up.handle_versions(5010),
-        [
-            ("IS_SOURCEBUILD", False),
-            ("V_LIBPDFIUM", "5010"),
         ]
     )
     
