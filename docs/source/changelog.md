@@ -6,10 +6,14 @@
 
 ## 2.7.2 (2022-08-01)
 
+*PDFium was not updated with this release due to an upstream build failure (HTTP 503 error when trying to get the tag).*
+
 - No PDFium update (autorelease).
 - Added a new option `rm_security` to `PdfDocument.save()`.
 - Added support for password-protected PDFs in the CLI subcommands `merge`, `render`, `tile` and `toc`.
 - Corrected the release workflow to avoid incrementing minor version twice.
+- Added a proper way for updating the major version or setting a beta tag with automatic releases.
+  Moved most versioning logic from the update script to autorelease on the way.
 - Rewrote package building script with python.
 - The stable branch is now always updated, even if it contains commits that are not in main.
 - Various code style improvements.
