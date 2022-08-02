@@ -2,11 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Autorelease
+
 on:
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
-  schedule:
-    - cron: '0 10 * * 1'
+  
+  ## temporarily disabled, see https://github.com/pypdfium2-team/pypdfium2/discussions/123#discussioncomment-3309157
+  # schedule:
+    # - cron: '0 10 * * 1'
+  
   workflow_dispatch:
 
 jobs:
