@@ -4,6 +4,11 @@
 # Changelog
 
 
+## 2.8.0 (2022-08-02)
+
+- Updated PDFium from `5200` to `5215` (autorelease).
+
+
 ## 2.7.2 (2022-08-01)
 
 *PDFium was not updated with this release due to an upstream build failure (HTTP 503 error when trying to get the tag).*

@@ -4,8 +4,8 @@
 __all__ = ["V_PYPDFIUM2", "V_LIBPDFIUM", "IS_SOURCEBUILD"]
 
 V_MAJOR = 2
-V_MINOR = 7
-V_PATCH = 2
+V_MINOR = 8
+V_PATCH = 0
 V_BETA = None
 
 #: pypdfium2 version string.
@@ -14,7 +14,7 @@ if V_BETA is not None:
     V_PYPDFIUM2 += "b%s" % V_BETA
 
 #: PDFium library version string (git tag or commit hash).
-V_LIBPDFIUM = "5200"
+V_LIBPDFIUM = "5215"
 
 #: Whether the included PDFium binary was built from source locally (:data:`True`) or downloaded from pdfium-binaries (:data:`False`).
 IS_SOURCEBUILD = False
