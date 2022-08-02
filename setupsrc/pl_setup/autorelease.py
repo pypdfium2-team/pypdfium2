@@ -106,7 +106,7 @@ def log_changes(summary, prev_ns, curr_ns):
         fh.write(content)
 
 
-def vcs_checkin(curr_ns, publish=False):
+def register_changes(curr_ns, publish=False):
     
     run_local([Git, "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
     run_local([Git, "commit", "-m", "[autorelease] update changelog and version file"])
@@ -178,7 +178,7 @@ def main():
     summary = get_summary()
     log_changes(summary, prev_ns, curr_ns)
     if args.checkin:
-        vcs_checkin(curr_ns, publish=args.publish)
+        register_changes(curr_ns, publish=args.publish)
     make_releasenotes(summary, prev_ns, curr_ns)
 
 
