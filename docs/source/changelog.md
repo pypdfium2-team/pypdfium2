@@ -4,6 +4,11 @@
 # Changelog
 
 
+## 2.10.0 (2022-08-15)
+
+- Updated PDFium from `5226` to `5241` (autorelease).
+
+
 ## 2.9.0 (2022-08-08)
 
 - Updated PDFium from `5215` to `5226` (autorelease).
