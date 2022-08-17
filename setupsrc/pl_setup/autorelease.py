@@ -61,6 +61,7 @@ def do_versioning(latest):
         set_version("V_PATCH", 0)
         set_version("V_LIBPDFIUM", str(latest))
     else:
+        # TODO check if there are any new commits compared to the previous release - if not, stop
         set_version("V_PATCH", VerNamespace["V_PATCH"]+1)
     
     if exists(BetaUpdate):
@@ -107,6 +108,8 @@ def log_changes(summary, prev_ns, curr_ns):
 
 
 def register_changes(curr_ns, publish=False):
+    
+    # TODO move push commands into the release workflow - run them only after successful wheel building, to avoid possible breakage
     
     run_local([Git, "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
     run_local([Git, "commit", "-m", "[autorelease] update changelog and version file"])
