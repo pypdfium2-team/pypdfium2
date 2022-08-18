@@ -177,27 +177,36 @@ def test_insert_text():
     )
     
     message_a = "मैं घोषणा, पुष्टि और सहमत हूँ कि:"
+    posx_a = 50
+    posy_a = height - 75
+    fs_a = 25
+    
     message_b = "Latin letters test."
+    posx_b = 50
+    posy_b = height - 150
+    fs_b = 30
+    
     page.insert_text(
         text = message_a,
-        pos_x = 50,
-        pos_y = height-75,
-        font_size = 25,
+        pos_x = posx_a,
+        pos_y = posy_a,
+        font_size = fs_a,
         hb_font = hb_font,
         pdf_font = pdf_font,
     )
     page.insert_text(
         text = message_b,
-        pos_x = 50,
-        pos_y = height-150,
-        font_size = 30,
+        pos_x = posx_b,
+        pos_y = posy_b,
+        font_size = fs_b,
         hb_font = hb_font,
         pdf_font = pdf_font,
     )
     
-    # NOTE Extraction of hindi text currently fails (PDFium issue, confirmed with Chromium)
     textpage = page.get_textpage()
-    assert textpage.get_text(left=50, bottom=height-150, top=height-120) == message_b
+    # extraction of message_a xfails - it looks like no PDF software can reconstruct this text correctly
+    # assert textpage.get_text(left=posx_a, bottom=posy_a, top=posy_a+fs_a) == "मၝघोषणाᆸपुჹ\u10cbऔर सहमत ီ\r\nँჸकᇆ"
+    assert textpage.get_text(left=posx_b, bottom=posy_b, top=posy_b+fs_b) == message_b
     
     with open(join(OutputDir, "text_insertion.pdf"), "wb") as buffer:
         pdf.save(buffer, version=17)
