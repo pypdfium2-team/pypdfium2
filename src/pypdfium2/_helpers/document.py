@@ -159,7 +159,7 @@ class PdfDocument:
         return int(version.value)
     
     
-    def save(self, buffer, version=None, rm_security=False):
+    def save(self, buffer, version=None):
         """
         Save the document into an output buffer, at its current state.
         
@@ -170,9 +170,6 @@ class PdfDocument:
             version (typing.Optional[int]):
                  The PDF version to use, given as an integer (14 for 1.4, 15 for 1.5, ...).
                  If :data:`None`, PDFium will set a version automatically.
-            rm_security (bool):
-                If this option is :data:`True` and an encrypted PDF is saved, its password protection will be removed.
-                Otherwise, encryption will be retained.
         """
         
         WriteFunctype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(pdfium.FPDF_FILEWRITE), ctypes.POINTER(None), ctypes.c_ulong)
@@ -180,11 +177,7 @@ class PdfDocument:
         filewrite = pdfium.FPDF_FILEWRITE()
         filewrite.WriteBlock = WriteFunctype( _writer_class(buffer) )
         
-        flags = pdfium.FPDF_NO_INCREMENTAL
-        if rm_security:
-            flags |= pdfium.FPDF_REMOVE_SECURITY
-        
-        saveargs = (self._pdf, ctypes.byref(filewrite), flags)
+        saveargs = (self._pdf, ctypes.byref(filewrite), pdfium.FPDF_NO_INCREMENTAL)
         if version is None:
             success = pdfium.FPDF_SaveAsCopy(*saveargs)
         else:
