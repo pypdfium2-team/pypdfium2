@@ -146,6 +146,19 @@ class PdfDocument:
             self._actual_input.close()
     
     
+    def get_version(self):
+        """
+        Returns:
+            typing.Optional[int]: The PDF version of the document (14 for 1.4, 15 for 1.5, ...),
+            or :data:`None` if the version could not be determined (e. g. because the document was created using :meth:`PdfDocument.new`).
+        """
+        version = ctypes.c_int()
+        success = pdfium.FPDF_GetFileVersion(self._pdf, version)
+        if not success:
+            return
+        return int(version.value)
+    
+    
     def save(self, buffer, version=None, rm_security=False):
         """
         Save the document into an output buffer, at its current state.

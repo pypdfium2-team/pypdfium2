@@ -15,6 +15,9 @@ from ..conftest import TestFiles, ExpRenderPixels
 def _check_general(pdf, n_pages=1):
     assert isinstance(pdf, pdfium.PdfDocument)
     assert len(pdf) == n_pages
+    version = pdf.get_version()
+    assert isinstance(version, int)
+    assert 10 < version < 30
 
 
 def _check_render(pdf):
@@ -167,13 +170,17 @@ def test_open_nonascii():
 
 def test_open_new():
     
-    src_pdf = pdfium.PdfDocument(TestFiles.multipage)
     dest_pdf = pdfium.PdfDocument.new()
-    assert isinstance(dest_pdf._orig_input, pdfium.FPDF_DOCUMENT)
-    assert dest_pdf._orig_input is dest_pdf._actual_input
+    
+    assert isinstance(dest_pdf, pdfium.PdfDocument)
+    assert isinstance(dest_pdf.raw, pdfium.FPDF_DOCUMENT)
+    assert dest_pdf.raw is dest_pdf._orig_input is dest_pdf._actual_input
     assert dest_pdf._rendering_input is None
     assert dest_pdf._ld_data is None
     
+    assert dest_pdf.get_version() is None
+    
+    src_pdf = pdfium.PdfDocument(TestFiles.multipage)
     pdfium.FPDF_ImportPages(dest_pdf.raw, src_pdf.raw, b"1, 3", 0)
     assert len(dest_pdf) == 2
     
