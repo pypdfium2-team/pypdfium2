@@ -108,14 +108,19 @@ SetupKws = dict(
 )
 
 
+class BinaryDistribution (setuptools.Distribution):
+    def has_ext_modules(self):
+        return True
+
+
 def mkwheel(pl_name):
     
     clean_artefacts()
     _copy_bindings(pl_name)
     
     setuptools.setup(
-        has_ext_modules = lambda: True,
         package_data = {"": Libnames},
         cmdclass = {"bdist_wheel": _get_bdist(pl_name)},
+        distclass = BinaryDistribution,
         **SetupKws,
     )
