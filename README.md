@@ -264,8 +264,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   # short form
   array_object = (c_type * array_length)()
   ```
-  Example: Getting view mode and target position from a destination object (`FPDF_DEST`) returned by some other function.
+  Example: Getting view mode and target position from a destination object returned by some other function.
   ```python
+  # (Assuming `dest` is an FPDF_DEST)
   n_params = ctypes.c_ulong()
   # Create a C array to store up to four coordinates
   view_pos = (pdfium.FS_FLOAT * 4)()
@@ -277,6 +278,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 * For string output parameters, callers needs to provide a sufficiently long, pre-initialised buffer.
   Example: Getting the title string of a bookmark.
   ```python
+  # (Assuming `bookmark` is an FPDF_BOOKMARK)
   # First call to get the required number of bytes (not characters!)
   # For this function, space for a NUL terminator is included already
   n_bytes = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
@@ -291,10 +293,12 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   title = buffer.raw.decode('utf-16-le')[:-1]
   ```
   `ctypes.create_string_buffer()` works for functions that take a pointer to the first object of a `char` or `void` array.
-  However, some functions need a pointer to `unsigned short` instead, where initialising the buffer and getting its data works a bit differently:
+  However, some functions need a pointer to `unsigned short` instead, where initialising the buffer and getting its data works a bit differently.
+  Example: Extracting text in given boundaries.
   ```python
+  # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set to int or float values)
   # Store common arguments for the two function calls
-  args = (self._textpage, left, top, right, bottom)
+  args = (textpage, left, top, right, bottom)
   # Get the expected number of characters (not bytes!). Return an empty string if no characters were found.
   n_characters = pdfium.FPDFText_GetBoundedText(*args, None, 0)
   if n_characters <= 0:
