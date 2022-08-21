@@ -241,7 +241,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
       FPDF_LoadDocument.argtypes = [FPDF_STRING, FPDF_BYTESTRING]
       FPDF_LoadDocument.restype = FPDF_DOCUMENT
   ```
-  For instance, Python `str` or `bytes` are converted to `FPDF_STRING` implicitly. If a `str` is provided, its `utf-8` encoding will be used.
+  For instance, Python `str` or `bytes` are converted to `FPDF_STRING` implicitly. If a `str` is provided, its UTF-8 encoding will be used.
 
 [^7]: From the auto-generated bindings file, which is not part of the repository. It is built into wheels, or created on installation. If you have an editable install, the bindings file may be found at `src/_pypdfium.py`.
 
@@ -281,14 +281,14 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
   # First call to get the required number of bytes (not characters!)
-  # With this function, space for a NUL terminator is included already
+  # With this function, space for a null terminator is included already
   n_bytes = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
   # Initialisation of the string buffer
   # Internally, this will create a C char array of length `n_bytes` (1 char is 1 byte wide)
   buffer = ctypes.create_string_buffer(n_bytes)
   # Second call with the actual buffer
   pdfium.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
-  # Decode bytes to str and cut off the terminating NUL character
+  # Decode bytes to str and cut off the null terminator
   # The docs for the function in question indicate which decoder to use (usually: UTF-16LE)
   # You might want to pass `errors="ignore"` to skip possible encoding errors without raising an exception
   title = buffer.raw.decode('utf-16-le')[:-1]
@@ -297,7 +297,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   The above pattern applies to functions that require type `char`.
   However, some functions use `unsigned short` instead, which works a bit differently.
   Concerning functions that take a typeless pointer (`void`) for a string buffer, it is recommended to judge which approach to use depending on whether the function returns the number of bytes or characters.
-  In principle, you could use either approach, provided that you allocate enough memory (2 bytes per character for UTF-16LE) and types match in the end.
+  In principle, you could use either approach, provided that you allocate enough memory (2 bytes per character for UTF-16) and types match in the end.
   
   Example: Extracting text in given boundaries.
   ```python
@@ -308,28 +308,30 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   n_characters = pdfium.FPDFText_GetBoundedText(*args, None, 0)
   if n_characters <= 0:
       return ""
-  # Initialise an array of `unsigned short` slots for the characters, plus a NUL terminator
+  # Initialise an array of `unsigned short` slots for the characters, plus a null terminator
   c_array = (ctypes.c_ushort * (n_characters+1))()
   pdfium.FPDFText_GetBoundedText(*args, c_array, n_characters)
-  # Convert the c_ushort array to bytes and decode them, cutting off the NUL terminator
+  # Convert the c_ushort array to bytes and decode them, cutting off the null terminator
   text = bytes(c_array).decode("utf-16-le")[:-1]
   ```
 
 * Not only are there different ways of string output that need to be handled according to the requirements of the function in question.
-  String input, too, can work differently depending on encoding, NUL termination, and type.
+  String input, too, can work differently depending on encoding, null termination, and type.
   If a function takes a UTF-8 encoded `FPDF_STRING` or `FPDF_BYTESTRING` (e. g. `FPDF_LoadDocument()`), you may simply pass the Python string, and bindings code will handle the rest.
-  However, functions such as `FPDFText_FindStart()` demand a UTF-16-LE encoded string with NUL terminator, given as a pointer to the first element of an `unsigned short` array:
+  However, some functions have special needs.
+  For instance, `FPDFText_FindStart()` demands a UTF-16LE encoded string with null terminator, given as a pointer to the first element of an `unsigned short` array:
   ```python
   # (Assuming `text` is a str and `textpage` an FPDF_TEXTPAGE)
-  # encode to UTF-16LE and add the NUL terminator
+  # encode to UTF-16LE and add the null terminator
   enc_text = text.encode("utf-16-le") + b"\x00\x00"
-  # obtain a pointer to `enc_text` typed as c_ushort
+  # obtain a pointer of type c_ushort to `enc_text`
   text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
   search = pdfium.FPDFText_FindStart(textpage, text_ptr, 0, index)
   ```
 
-* Supposing you have a C memory buffer allocated by PDFium, you will commonly get a pointer to the first item of the byte array.
-  If you wish to read the data, you need to re-interpret this pointer using `ctypes.cast()` to encompass the whole array:
+* Suppose you have a C memory buffer allocated by PDFium and wish to read its data.
+  PDFium will provide you with a pointer to the first item of the byte array.
+  To access the data, you'll want to re-interpret the pointer using `ctypes.cast()` to encompass the whole array:
   ```python
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
   first_item = pdfium.FPDFBitmap_GetBuffer(bitmap)
@@ -359,7 +361,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, None)
   while bookmark:
       # bookmark is a pointer, so we need to use its `contents` attribute to get the object the pointer refers to
-      # (otherwise we'd only get the memory address of the pointer itself, which is useless as each call creates a new pointer)
+      # (otherwise we'd only get the memory address of the pointer itself, which would result in undefined behaviour)
       address = ctypes.addressof(bookmark.contents)
       if address in seen:
           break  # circular reference detected
@@ -372,9 +374,10 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 <!-- TODO
 * getting a python object by memory address (reverting id())
-* casting
 * callbacks
-* object lifetime
+* notes on object lifetime
+* at least one complete example (e. g. rendering a document)
+* warn about possible corruption or segfaults in case of improper API use
 -->
 
 
@@ -396,13 +399,15 @@ pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by in
 
 ## Development
 
-<!-- TODO - possibly use a separate file? -->
+<!-- TODO -->
 
 ### Testing
 
 <!-- TODO -->
 
 ### Issues
+
+<!-- TODO rewrite -->
 
 Since pypdfium2 is built using external binaries and an automatic bindings creator, issues that are not related to packaging or support model code likely need to be addressed upstream. However, the [issue](https://github.com/pypdfium2-team/pypdfium2/issues) or [discussion](https://github.com/pypdfium2-team/pypdfium2/discussions) panels are always a good place to start if you have any problems, questions or suggestions.
 
@@ -460,6 +465,6 @@ Inspired by *wowpng*, the first known proof of concept Python binding to PDFium 
 
 pypdfium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels and consolidate the setup scripts. Further additions include ...
 * A CI workflow to automatically release new wheels every Monday
-* Support models that wrap the raw PDFium/ctypes API
+* Support models that conveniently wrap the raw PDFium/ctypes API
 * Test code
 * A script to build PDFium from source
