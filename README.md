@@ -276,6 +276,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   ```
 
 * For string output parameters, callers needs to provide a sufficiently long, pre-initialised buffer.
+  
   Example: Getting the title string of a bookmark.
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
@@ -292,10 +293,12 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   # You might want to pass `errors="ignore"` to skip possible encoding errors without raising an exception
   title = buffer.raw.decode('utf-16-le')[:-1]
   ```
+  
   The above pattern applies to functions that require type `char`.
-  However, some functions use `unsigned long` instead, which works a bit differently.
+  However, some functions use `unsigned short` instead, which works a bit differently.
   Concerning functions that take a typeless pointer (`void`) for a string buffer, it is recommended to judge which approach to use depending on whether the function returns the number of bytes or characters.
   In principle, you could use either approach, provided that you allocate enough memory (2 bytes per character for UTF-16LE) and types match in the end.
+  
   Example: Extracting text in given boundaries.
   ```python
   # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set to int or float values)
@@ -310,6 +313,19 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   pdfium.FPDFText_GetBoundedText(*args, c_array, n_characters)
   # Convert the c_ushort array to bytes and decode them, cutting off the NUL terminator
   text = bytes(c_array).decode("utf-16-le")[:-1]
+  ```
+
+* Not only are there different ways of string output that need to be handled according to the requirements of the function in question.
+  String input, too, can work differently depending on encoding, NUL termination, and type.
+  If a function takes a UTF-8 encoded `FPDF_STRING` or `FPDF_BYTESTRING` (e. g. `FPDF_LoadDocument()`), you may simply pass the Python string, and bindings code will handle the rest.
+  However, functions such as `FPDFText_FindStart()` have special needs and demand a UTF-16-LE encoded string with NUL terminator, passed as a pointer to the first element of an `unsigned short` array.
+  ```python
+  # `text` is a str, `textpage` an FPDF_TEXTPAGE
+  # encode to UTF-16LE and add the NUL terminator
+  enc_text = text.encode("utf-16-le") + b"\x00\x00"
+  # obtain a pointer to `enc_text` typed as c_ushort
+  text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
+  search = pdfium.FPDFText_FindStart(textpage, text_ptr, 0, index)
   ```
 
 * If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help you because `ctypes` does not have original object return (OOR),
@@ -333,7 +349,6 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 <!-- TODO
 * getting a python object by memory address (reverting id())
-* inputting NUL-terminated UTF-16LE strings
 * casting
 * callbacks
 * writing into a C buffer
