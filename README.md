@@ -280,7 +280,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
   # First call to get the required number of bytes (not characters!)
-  # For this function, space for a NUL terminator is included already
+  # With this function, space for a NUL terminator is included already
   n_bytes = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
   # Initialisation of the string buffer
   # Internally, this will create a C char array of length `n_bytes` (1 char is 1 byte wide)
@@ -288,12 +288,14 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   # Second call with the actual buffer
   pdfium.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
   # Decode bytes to str and cut off the terminating NUL character
-  # The docs for the function in question indicate which encoding is used (usually: UTF-16LE)
+  # The docs for the function in question indicate which decoder to use (usually: UTF-16LE)
   # You might want to pass `errors="ignore"` to skip possible encoding errors without raising an exception
   title = buffer.raw.decode('utf-16-le')[:-1]
   ```
-  `ctypes.create_string_buffer()` works for functions that take a pointer to the first object of a `char` or `void` array.
-  However, some functions need a pointer to `unsigned short` instead, where initialising the buffer and getting its data works a bit differently.
+  The above pattern applies to functions that require type `char`.
+  However, some functions use `unsigned long` instead, which works a bit differently.
+  Concerning functions that take a typeless pointer (`void`) for a string buffer, it is recommended to judge which approach to use depending on whether the function returns the number of bytes or characters.
+  In principle, you could use either approach, provided that you allocate enough memory (2 bytes per character for UTF-16LE) and types match in the end.
   Example: Extracting text in given boundaries.
   ```python
   # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set to int or float values)
