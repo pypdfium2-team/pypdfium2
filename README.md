@@ -275,7 +275,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   view_pos = list(view_pos)[:n_params.value]
   ```
 
-* For string output parameters, callers needs to provide a sufficiently long, pre-initialised buffer.
+* For string output parameters, callers needs to provide a sufficiently long, pre-allocated buffer.
   
   Example: Getting the title string of a bookmark.
   ```python
@@ -318,9 +318,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 * Not only are there different ways of string output that need to be handled according to the requirements of the function in question.
   String input, too, can work differently depending on encoding, NUL termination, and type.
   If a function takes a UTF-8 encoded `FPDF_STRING` or `FPDF_BYTESTRING` (e. g. `FPDF_LoadDocument()`), you may simply pass the Python string, and bindings code will handle the rest.
-  However, functions such as `FPDFText_FindStart()` have special needs and demand a UTF-16-LE encoded string with NUL terminator, passed as a pointer to the first element of an `unsigned short` array.
+  However, functions such as `FPDFText_FindStart()` demand a UTF-16-LE encoded string with NUL terminator, given as a pointer to the first element of an `unsigned short` array:
   ```python
-  # `text` is a str, `textpage` an FPDF_TEXTPAGE
+  # (Assuming `text` is a str and `textpage` an FPDF_TEXTPAGE)
   # encode to UTF-16LE and add the NUL terminator
   enc_text = text.encode("utf-16-le") + b"\x00\x00"
   # obtain a pointer to `enc_text` typed as c_ushort
@@ -332,8 +332,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   i. e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^8] That's why you'll want to use `ctypes.addressof()` to get the memory addresses of the underlying C object.
   For instance, this is used to avoid infinite loops on circular bookmark references when iterating through the document outline:
   ```python
+  # (Assuming `pdf` is an FPDF_DOCUMENT)
   seen = set()
-  bookmark = pdfium.FPDFBookmark_GetFirstChild(self._pdf, parent)
+  bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, None)
   while bookmark:
       # bookmark is a pointer, so we need to use its `contents` attribute to get the object the pointer refers to
       # (otherwise we'd only get the memory address of the pointer itself, which is useless as each call creates a new pointer)
@@ -342,7 +343,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
           break  # circular reference detected
       else:
           seen.add(address)
-      bookmark = pdfium.FPDFBookmark_GetNextSibling(self._pdf, bookmark)
+      bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
   ```
 
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
