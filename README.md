@@ -334,20 +334,20 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
   first_item = pdfium.FPDFBitmap_GetBuffer(bitmap)
   buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * size))
-  data = bytes(buffer.contents)  # buffer as python bytes (independant copy)
+  # buffer as ctypes array (referencing the original buffer, will be unavailable as soon as the bitmap is destroyed)
+  c_array = buffer.contents
+  # buffer as python bytes (independant copy)
+  data = bytes(c_array)
   ```
 
-* Now that we have covered transferring data from a C buffer to Python, you may be interested in how to write Python data into a C buffer:
+* Writing data from Python into a C buffer works in a similar fashion:
   ```python
-  # (Assuming `c_buffer_ptr` is a pointer to a C buffer to write into,
-  #  and `py_buffer` a Python byte buffer (io.BufferedReader or similar))
-  # Get the memory address the pointer refers to (first item of the byte array)
-  address = ctypes.addressof(c_buffer_ptr.contents)
-  # Get a writable ctypes array at the given place in memory
-  c_buffer = (ctypes.c_char * size).from_address(address)
-  # Read from `py_buffer` directly into `c_buffer`, until `c_buffer` is full or `py_buffer` has reached its end
-  # If the data is not in memory yet and read just now, this is a zero-copy operation
-  n_bytes = py_buffer.readinto(c_buffer)  # returns the number of bytes read
+  # (Assuming `first_item` is a pointer to the first item of a C buffer to write into,
+  # `size` the number of bytes it can store, and `py_buffer` a Python byte buffer)
+  c_buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_char * size))
+  # Read from the Python buffer, starting at its current position, directly into the C buffer
+  # (until the target is full or the source has reached its end)
+  n_bytes = py_buffer.readinto(c_buffer.contents)  # returns the number of bytes read
   ```
 
 * If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help you because `ctypes` does not have original object return (OOR),

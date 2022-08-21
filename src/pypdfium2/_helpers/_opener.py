@@ -32,9 +32,9 @@ class ReaderClass:
         self._buffer = buffer
     
     def __call__(self, _, position, p_buf, size):
-        c_buf = (ctypes.c_char * size).from_address( ctypes.addressof(p_buf.contents) )
+        c_buf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
         self._buffer.seek(position)
-        self._buffer.readinto(c_buf)
+        self._buffer.readinto(c_buf.contents)
         return 1
 
 
