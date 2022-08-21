@@ -3,10 +3,10 @@
 
 # Tasks
 
-These are various tasks for the maintainer to keep in mind, in no specific order.
+These are various tasks for the maintainer to keep in mind, in no specific order
 
 ### Main Code
-* Make the bindings file `_pypdfium.py` public.
+* Make the bindings file `_pypdfium.py` public
 * Make members of `_utils.py` public (move into `misc.py`)
 * Address points listed in [`planned_changes.md`](../source/planned_changes.md)
 * Investigate other PDFium rendering functions. Ideally, we would want to add margins, flip and colour schemes. Also consider making form rendering optional.
@@ -22,7 +22,8 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest)
 * update_pdfium: don't skip missing artefacts by default, abort instead
 * craft_packages: add means to skip platforms for which artefacts are missing
-* setup: improve error messages if binaries/bindings are not present in the platform directory
+* setup: improve error messages if binaries/bindings are not present in the platform directory - consider downloading missing binaries implicitly on installation
+* setup: improve binary updating procedure by tracking version of currently present binaries - also consider updating outdated binaries implicitly, or at least do something against the possible mismatch with the version file
 * further switch to global variables where it makes sense
 * sourcebuild/win: fix dynamic values in `resources.rc`
 

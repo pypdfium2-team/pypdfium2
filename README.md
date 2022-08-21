@@ -60,7 +60,7 @@ They do not represent standardised solutions, but are specific to this project.
   If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts.
   If set to `sdist`, no platform-dependant files will be injected, so as to create a source distribution.
 
-* The presence of the file `data/.presetup_done.txt` is used to decide if setup code should download binaries and create bindings, or if existing artefacts should be used instead, as re-creating them may not be desirable with every single run.[^5] Consequently, this file needs to be removed if you wish to update the artefacts with the next installation. We are planning to make this procedure more obvious in the future.
+* The presence of the file `data/.presetup_done.txt` is used to decide if setup code should download binaries and create bindings, or if existing artefacts should be used instead, as re-creating them may not be desirable with every single run.[^5] Consequently, this file needs to be removed if you wish to update the artefacts with the next installation. We are planning to improve this process in the future.
 
 [^1]: Replacing PDFium's toolchain with a leaner and more elegant build system that is designed to run on any host platform constitutes a long-standing task. This would be required to be able to reliably perform a local source build when installing an `sdist` package. If you have the time and expertise to set up such a build system, please start a repository and inform us about it.
 
@@ -345,10 +345,10 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 * Writing data from Python into a C buffer works in a similar fashion:
   ```python
   # (Assuming `first_item` is a pointer to the first item of a C buffer to write into,
-  # `size` the number of bytes it can store, and `py_buffer` a Python byte buffer)
+  #  `size` the number of bytes it can store, and `py_buffer` a Python byte buffer)
   c_buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_char * size))
   # Read from the Python buffer, starting at its current position, directly into the C buffer
-  # (until the target is full or the source has reached its end)
+  # (until the target is full or the end of the source is reached)
   n_bytes = py_buffer.readinto(c_buffer.contents)  # returns the number of bytes read
   ```
 
