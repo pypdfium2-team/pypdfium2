@@ -10,7 +10,10 @@ import functools
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers._utils import ViewmodeMapping
+from pypdfium2._helpers._utils import (
+    ViewmodeMapping,
+    get_functype,
+)
 from pypdfium2._helpers._opener import (
     open_pdf,
     is_input_buffer,
@@ -172,10 +175,8 @@ class PdfDocument:
                  If :data:`None`, PDFium will set a version automatically.
         """
         
-        WriteFunctype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(pdfium.FPDF_FILEWRITE), ctypes.POINTER(None), ctypes.c_ulong)
-        
         filewrite = pdfium.FPDF_FILEWRITE()
-        filewrite.WriteBlock = WriteFunctype( _writer_class(buffer) )
+        filewrite.WriteBlock = get_functype(pdfium.FPDF_FILEWRITE, "WriteBlock")( _writer_class(buffer) )
         
         saveargs = (self._pdf, filewrite, pdfium.FPDF_NO_INCREMENTAL)
         if version is None:
