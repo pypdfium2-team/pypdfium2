@@ -328,6 +328,28 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   search = pdfium.FPDFText_FindStart(textpage, text_ptr, 0, index)
   ```
 
+* Supposing you have a C memory buffer allocated by PDFium, you will commonly get a pointer to the first item of the byte array.
+  If you wish to read the data, you need to re-interpret this pointer using `ctypes.cast()` to encompass the whole array:
+  ```python
+  # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
+  first_item = pdfium.FPDFBitmap_GetBuffer(bitmap)
+  buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * size))
+  data = bytes(buffer.contents)  # buffer as python bytes (independant copy)
+  ```
+
+* Now that we have covered transferring data from a C buffer to Python, you may be interested in how to write Python data into a C buffer:
+  ```python
+  # (Assuming `c_buffer_ptr` is a pointer to a C buffer to write into,
+  #  and `py_buffer` a Python byte buffer (io.BufferedReader or similar))
+  # Get the memory address the pointer refers to (first item of the byte array)
+  address = ctypes.addressof(c_buffer_ptr.contents)
+  # Get a writable ctypes array at the given place in memory
+  c_buffer = (ctypes.c_char * size).from_address(address)
+  # Read from `py_buffer` directly into `c_buffer`, until `c_buffer` is full or `py_buffer` has reached its end
+  # If the data is not in memory yet and read just now, this is a zero-copy operation
+  n_bytes = py_buffer.readinto(c_buffer)  # returns the number of bytes read
+  ```
+
 * If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help you because `ctypes` does not have original object return (OOR),
   i. e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^8] That's why you'll want to use `ctypes.addressof()` to get the memory addresses of the underlying C object.
   For instance, this is used to avoid infinite loops on circular bookmark references when iterating through the document outline:
@@ -352,8 +374,6 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 * getting a python object by memory address (reverting id())
 * casting
 * callbacks
-* writing into a C buffer
-* reading from a C buffer
 * object lifetime
 -->
 
