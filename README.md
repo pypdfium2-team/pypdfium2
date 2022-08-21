@@ -330,11 +330,13 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
 <!-- TODO
+* getting a python object by memory address (reverting id())
+* inputting NUL-terminated UTF-16LE strings
 * casting
 * callbacks
-* inputting NUL-terminated UTF-16LE strings
 * writing into a C buffer
 * reading from a C buffer
+* object lifetime
 -->
 
 
