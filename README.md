@@ -118,6 +118,7 @@ Here are some examples of using the support model API.
       )
   ```
 
+<!-- TODO update example to convert object type integer to string ASA ObjtypeToName is public -->
 * Load a page to work with
   ```python
   page = pdf[0]  # or pdf.get_page(0)
@@ -372,9 +373,18 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
+<!-- TODO update example ASA get_functype() is public -->
+* In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks accross Python/C language boundaries.
+  ```python
+  # TODO first example with callable object
+  ```
+  ```python
+  # TODO second example with regular function, getting a Python object by memory address (reverting id())
+  ```
+
+[^9]: e. g. incremental reading/writing, pausing of progressive tasks, ...
+
 <!-- TODO
-* getting a python object by memory address (reverting id())
-* callbacks
 * notes on object lifetime
 * at least one complete example (e. g. rendering a document)
 * warn about possible corruption or segfaults in case of improper API use
@@ -434,7 +444,7 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 *Your project uses pypdfium2, but is not part of the list yet? Please let us know!*
 
 
-## Thanks to[^9]
+## Thanks to[^10]
 
 <!-- order: alphabetical by surname -->
 
@@ -452,7 +462,7 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 *If you have somehow contributed to this project but we forgot to mention you here, feel encouraged to help us correct this oversight.*
 
-[^9]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
+[^10]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
 
 
 ## History
