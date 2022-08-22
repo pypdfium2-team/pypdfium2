@@ -4,3 +4,5 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Rewrote the project's `README.md`. Added more support model examples and an extensive guide regarding the raw PDFium/ctypes API.
+- Improved support model code style while writing the raw API guide.
