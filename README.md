@@ -62,7 +62,7 @@ However, some optional support model features require additional packages:
 
 ### Setup magic
 
-As pypdfium2 uses external binaries, there are a few special ways of controling setup behaviour.
+As pypdfium2 uses external binaries, there are a few special ways of controlling setup behaviour.
 They do not represent standardised solutions, but are specific to this project.
 
 * The environment variable `PYP_TARGET_PLATFORM` defines which binaries to include.
@@ -385,7 +385,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
 <!-- TODO suggest using get_functype() once it is public -->
-* In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks accross Python/C language boundaries.
+* In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks across Python/C language boundaries.
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
   ```python

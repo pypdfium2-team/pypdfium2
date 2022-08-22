@@ -16,10 +16,13 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 
 ### Setup Infrastructure
 * Add a `MANIFEST.in` file to avoid being dependant on the presence of `setuptools-scm`
-* update_pdfium: only generate the bindings file once for all platforms.
-* autorelease: move push steps into the workflow file so it is only done after successful wheel building
-* autorelease: address further inline TODOs
+* deps/wheel: consider switching back to the release (on behalf of Python 3.6)
+* deps/ctypesgen: consider tracking the master branch
+* autorelease/workflow: move push steps into the workflow file so it is only done after successful wheel building
+* autorelease: address inline TODOs
+* update_pdfium: accept `auto` for `--platform` argument
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest)
+* update_pdfium: only generate the bindings file once for all platforms
 * update_pdfium: don't skip missing artefacts by default, abort instead
 * craft_packages: add means to skip platforms for which artefacts are missing
 * setup: improve error messages if binaries/bindings are not present in the platform directory - consider downloading missing binaries implicitly on installation
@@ -36,8 +39,9 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 * Add a ctypes primer explaining how to interoperate with the PDFium C API
 
 ### GitHub Workflows
-* Restructure workflow so that it can be run without the publishing part
-* Make it possible to run test_release on wheels that are not published yet (will probably need upload-artifact and download-artifact actions)
+* release: restructure so that it can be run without the publishing part
+* test_release: make it possible to run this workflow on wheels that are not published yet (will probably need upload-artifact and download-artifact actions)
+* test_release: add `pypy` interpreter
 * Add a new workflow to test the build script
 * Set up CodeQL (see `Code security and analysis -> Code scanning` in the settings)
 

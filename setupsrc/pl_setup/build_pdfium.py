@@ -9,7 +9,6 @@ import os
 import sys
 import shutil
 import argparse
-import urllib.request
 from os.path import join, abspath, dirname
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
