@@ -49,17 +49,6 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
   There is no conda package yet.
   So far, pypdfium2 has not been included in any operating system repositories. While we are interested in cooperation with external package maintainers to make this possible, the authors of this project have no control over and are not responsible for third-party distributions of pypdfium2.
 
-### Runtime Dependencies
-
-pypdfium2 does not have any mandatory runtime dependencies apart from Python and its standard library.
-
-However, some optional support model features require additional packages:
-* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module name `PIL`) is a highly pouplar imaging library for Python.
-  pypdfium2 provides convenience functions to directly return PIL image objects when dealing with raster graphics.
-  If you do not mean to use PIL, this is entirely optional and you may get the image data as bytes instead.
-* [`uharfbuzz`](https://github.com/harfbuzz/uharfbuzz) is a text shaping engine used by text insertion helpers, to support foreign writing systems.
-  If you do not care about this, you may insert text using the raw PDFium API functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependant on uharfbuzz.
-
 ### Setup magic
 
 As pypdfium2 uses external binaries, there are a few special ways of controlling setup behaviour.
@@ -72,6 +61,17 @@ They do not represent standardised solutions, but are specific to this project.
   If set to `sdist`, no platform-dependant files will be injected, so as to create a source distribution.
 
 * The presence of the file `data/.presetup_done.txt` is used to decide if setup code should download binaries and create bindings, or if existing artefacts should be used instead, as re-creating them may not be desirable with every single run.[^5] Consequently, this file needs to be removed if you wish to update the artefacts with the next installation. We are planning to improve this process in the future.
+
+### Runtime Dependencies
+
+pypdfium2 does not have any mandatory runtime dependencies apart from Python and its standard library.
+
+However, some optional support model features require additional packages:
+* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module name `PIL`) is a highly pouplar imaging library for Python.
+  pypdfium2 provides convenience functions to directly return PIL image objects when dealing with raster graphics.
+  If you do not mean to use PIL, this is entirely optional and you may get the image data as bytes instead.
+* [`uharfbuzz`](https://github.com/harfbuzz/uharfbuzz) is a text shaping engine used by text insertion helpers, to support foreign writing systems.
+  If you do not care about this, you may insert text using the raw PDFium API functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependant on uharfbuzz.
 
 [^1]: Replacing PDFium's toolchain with a leaner and more elegant build system that is designed to run on any host platform constitutes a long-standing task. This would be required to be able to reliably perform a local source build when installing an `sdist` package. If you have the time and expertise to set up such a build system, please start a repository and inform us about it.
 
