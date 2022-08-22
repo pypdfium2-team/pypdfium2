@@ -375,9 +375,38 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 <!-- TODO update example ASA get_functype() is public -->
 * In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks accross Python/C language boundaries.
+  
+  Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
   ```python
-  # TODO first example with callable object
+  # Factory class to create callable objects holding a reference to a Python buffer
+  class _reader_class:
+    
+    def __init__(self, py_buffer):
+        self.py_buffer = py_buffer
+    
+    def __call__(self, _, position, p_buf, size):
+        c_buffer = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
+        self.py_buffer.seek(position)
+        self.py_buffer.readinto(c_buffer.contents)
+        return 1
+  
+  # (Assuming py_buffer is a Python file buffer, e. g. io.BufferedReader)
+  # Get the length of the buffer
+  py_buffer.seek(0, 2)
+  file_len = py_buffer.tell()
+  py_buffer.seek(0)
+  
+  # Set up an interface structure for custom file access
+  fileaccess = pdfium.FPDF_FILEACCESS()
+  fileaccess.m_FileLen = file_len
+  # CFUNCTYPE declaration copied from the bindings file (for some reason, this is not applied automatically)
+  functype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
+  # Instantiate a callable object, wrapped with the CFUNCTYPE declaration
+  fileaccess.m_GetBlock = functype( _reader_class(py_buffer) )
+  # Finally, load the document
+  pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, None)
   ```
+  
   ```python
   # TODO second example with regular function, getting a Python object by memory address (reverting id())
   ```
