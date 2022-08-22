@@ -310,7 +310,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   The above pattern applies to functions that require type `char`.
   However, some functions use `unsigned short` instead, which works a bit differently.
   Concerning functions that take a typeless pointer (`void`) for a string buffer, it is recommended to check whether the function returns the number of bytes or characters and use the corresponding approach.
-  In principle, the two patterns are exchangable provided that you allocate enough memory (2 bytes per character for UTF-16) and types match in the end.
+  In principle, the two patterns are exchangeable provided that you allocate enough memory (2 bytes per character for UTF-16) and types match in the end.
   
   Example B: Extracting text in given boundaries.
   ```python
