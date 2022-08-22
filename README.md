@@ -323,8 +323,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   For instance, `FPDFText_FindStart()` demands a UTF-16LE encoded string with null terminator, given as a pointer to the first element of an `unsigned short` array:
   ```python
   # (Assuming `text` is a str and `textpage` an FPDF_TEXTPAGE)
-  # encode to UTF-16LE and add the null terminator
-  enc_text = text.encode("utf-16-le") + b"\x00\x00"
+  # add the null terminator and encode as UTF-16LE
+  enc_text = (text + "\x00").encode("utf-16-le")
   # obtain a pointer of type c_ushort to `enc_text`
   text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
   search = pdfium.FPDFText_FindStart(textpage, text_ptr, 0, index)
