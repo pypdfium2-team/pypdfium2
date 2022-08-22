@@ -373,7 +373,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
-<!-- TODO update example ASA get_functype() is public -->
+<!-- TODO update examples ASA get_functype() is public -->
 * In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks accross Python/C language boundaries.
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
@@ -385,10 +385,11 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
         self.py_buffer = py_buffer
     
     def __call__(self, _, position, p_buf, size):
+        # Write data from Python buffer into C buffer, as explained before
         c_buffer = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
         self.py_buffer.seek(position)
         self.py_buffer.readinto(c_buffer.contents)
-        return 1
+        return 1  # non-zero return code for success
   
   # (Assuming py_buffer is a Python file buffer, e. g. io.BufferedReader)
   # Get the length of the buffer
@@ -407,11 +408,33 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, None)
   ```
   
+  While callable objects are quite convenient for tasks like this, they are a peculiarity of Python.
+  That's why file access structure and callback are actually designed to hold a pointer to the caller's buffer.
+  Using this approach is possible, but more complicated as we can't just set and get a Python object.
+  Hence, we need to pass the memory address of the buffer object and dereference that in the callback:
   ```python
-  # TODO second example with regular function, getting a Python object by memory address (reverting id())
+  # Declare a function decorated with the CFUNCTYPE
+  @ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
+  def _reader_func(param, position, p_buf, size):
+      # Dereference the memory address
+      py_buffer = ctypes.cast(param, ctypes.py_object).value
+      # The rest works as usual
+      c_buffer = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
+      py_buffer.seek(position)
+      py_buffer.readinto(c_buffer.contents)
+      return 1
+  
+  # When setting up the file access structure, do the following things differently:
+  # Just reference the function instead of creating a callable object
+  fileaccess.m_GetBlock = _reader_func
+  # Set the m_Param field to the memory address of the buffer, to be dereferenced later
+  # This value will be passed to the callback as first argument
+  # (Note: It's an implementation detail of CPython that the return value of id(obj)
+  #  corresponds to the memory address of the object, so this is kind of flaky)
+  fileaccess.m_Param = id(buffer)
   ```
 
-[^9]: e. g. incremental reading/writing, pausing of progressive tasks, ...
+[^9]: e. g. incremental reading/writing, progress bars, pausing of progressive tasks, ...
 
 <!-- TODO
 * notes on object lifetime
