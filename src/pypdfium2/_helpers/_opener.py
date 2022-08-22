@@ -4,6 +4,7 @@
 import ctypes
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.misc import raise_error
+from pypdfium2._helpers._utils import get_functype
 
 
 class BufferDataHolder:
@@ -26,15 +27,15 @@ class ByteDataHolder:
         id(self.bytedata)
 
 
-class ReaderClass:
+class _reader_class:
     
     def __init__(self, buffer):
         self._buffer = buffer
     
     def __call__(self, _, position, p_buf, size):
-        c_buf = (ctypes.c_char * size).from_address( ctypes.addressof(p_buf.contents) )
+        c_buf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
         self._buffer.seek(position)
-        self._buffer.readinto(c_buf)
+        self._buffer.readinto(c_buf.contents)
         return 1
 
 
@@ -48,13 +49,11 @@ def open_pdf_buffer(buffer, password=None):
     file_len = buffer.tell()
     buffer.seek(0)
     
-    FuncType = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
-    
     fileaccess = pdfium.FPDF_FILEACCESS()
     fileaccess.m_FileLen = file_len
-    fileaccess.m_GetBlock = FuncType( ReaderClass(buffer) )
+    fileaccess.m_GetBlock = get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")( _reader_class(buffer) )
     
-    pdf = pdfium.FPDF_LoadCustomDocument(ctypes.byref(fileaccess), password)
+    pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, password)
     ld_data = BufferDataHolder(fileaccess.m_GetBlock, buffer)
     
     return pdf, ld_data
@@ -70,6 +69,7 @@ def open_pdf(input_data, password=None):
     
     ld_data = None
     if isinstance(input_data, str):
+        # filename and password are utf-8 encoded
         pdf = pdfium.FPDF_LoadDocument(input_data, password)
     elif isinstance(input_data, bytes):
         pdf, ld_data = open_pdf_bytes(input_data, password)

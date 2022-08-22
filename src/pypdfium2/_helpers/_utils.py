@@ -41,6 +41,19 @@ def get_colourformat(use_alpha, greyscale):
     return px
 
 
+def get_functype(struct, funcname):
+    """
+    Parameters:
+        struct (ctypes.Structure): A structure (e. g. ``FPDF_FILEWRITE``).
+        funcname (str): Name of the callback function to implement (e. g. ``WriteBlock``).
+    Returns:
+        A :meth:`ctypes.CFUNCTYPE` instance to wrap the callback function.
+        For some reason, this is not done automatically, although the information is present in the bindings file.
+        This is a convenience function to retrieve the declaration.
+    """
+    return {k: v for k, v in struct._fields_}[funcname]
+
+
 def _invert_dict(dictionary):
     """
     Returns:

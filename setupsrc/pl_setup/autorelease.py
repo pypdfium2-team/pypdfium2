@@ -29,6 +29,7 @@ from pl_setup.packaging_base import (
 )
 from pl_setup.update_pdfium import get_latest_version
 
+# TODO let temporary autorelease control files be in the project root directory
 AutoreleaseDir = join(SourceTree, "autorelease")
 MajorUpdate = join(AutoreleaseDir, "majorupdate.txt")
 BetaUpdate = join(AutoreleaseDir, "betaupdate.txt")
@@ -134,6 +135,8 @@ def link_for_tag(tag):
 
 def make_releasenotes(summary, prev_ns, curr_ns):
     
+    # TODO include PDFium commit log
+    
     prev_ver = prev_ns["V_PYPDFIUM2"]
     curr_ver = curr_ns["V_PYPDFIUM2"]
     
@@ -154,7 +157,7 @@ def make_releasenotes(summary, prev_ns, curr_ns):
 
 def main():
     
-    # The `--checkin` and `--publish` options exist to avoid accidential repository changes or even pushes, and to simplify testing this script.
+    # The `--checkin` and `--publish` options exist to avoid accidental repository changes or even pushes, and to simplify testing this script.
     parser = argparse.ArgumentParser(
         description = "Automatic update script for pypdfium2, to be run in the CI release workflow."
     )

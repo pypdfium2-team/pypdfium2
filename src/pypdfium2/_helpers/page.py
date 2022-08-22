@@ -4,7 +4,7 @@
 
 import math
 import ctypes
-from ctypes import c_float, byref
+from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers._utils import (
@@ -94,7 +94,7 @@ class PdfPage:
     
     def _get_box(self, box_func, fallback_func):
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = box_func(self._page, byref(left), byref(bottom), byref(right), byref(top))
+        ret_code = box_func(self._page, left, bottom, right, top)
         if not ret_code:
             return fallback_func()
         return (left.value, bottom.value, right.value, top.value)
@@ -425,7 +425,7 @@ class PdfPageObject:
             A tuple of four :class:`float` coordinates for left, bottom, right, and top.
         """
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = pdfium.FPDFPageObj_GetBounds(self._pageobj, byref(left), byref(bottom), byref(right), byref(top))
+        ret_code = pdfium.FPDFPageObj_GetBounds(self._pageobj, left, bottom, right, top)
         if not ret_code:
             raise PdfiumError("Locating the page object failed")
         return (left.value, bottom.value, right.value, top.value)

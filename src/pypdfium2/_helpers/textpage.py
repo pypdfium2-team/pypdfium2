@@ -57,7 +57,7 @@ class PdfTextPage:
             return ""
         
         c_array = (ctypes.c_ushort * (n_chars+1))()
-        pdfium.FPDFText_GetBoundedText(*args, ctypes.cast(c_array, ctypes.POINTER(ctypes.c_ushort)), n_chars)
+        pdfium.FPDFText_GetBoundedText(*args, c_array, n_chars)
         text = bytes(c_array).decode("utf-16-le", errors="ignore")[:-1]
         
         return text
@@ -152,7 +152,7 @@ class PdfTextPage:
         n_rects = self.count_rects(index, count)
         for index in range(n_rects):
             left, top, right, bottom = c_double(), c_double(), c_double(), c_double()
-            pdfium.FPDFText_GetRect(self._textpage, index, *[ctypes.byref(coord) for coord in (left, top, right, bottom)])
+            pdfium.FPDFText_GetRect(self._textpage, index, left, top, right, bottom)
             yield (left.value, bottom.value, right.value, top.value)
     
     
@@ -203,7 +203,7 @@ class PdfTextPage:
         if match_whole_word:
             flags |= pdfium.FPDF_MATCHWHOLEWORD
         
-        enc_text = text.encode("utf-16-le") + b"\x00\x00"
+        enc_text = (text + "\x00").encode("utf-16-le")
         text_pointer = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
         search = pdfium.FPDFText_FindStart(self._textpage, text_pointer, flags, index)
         return PdfTextSearcher(search, self)
