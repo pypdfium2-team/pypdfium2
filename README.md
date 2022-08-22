@@ -226,7 +226,6 @@ permission_flags = pdfium.FPDF_GetDocPermission(pdf.raw)
 has_transparency = pdfium.FPDFPage_HasTransparency(page.raw)
 ```
 
-
 ### Raw PDFium API
 
 While helper classes conveniently wrap the raw PDFium API, it may still be accessed directly and is publicly exposed in the main namespace of pypdfium2.
@@ -552,11 +551,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   pdfium.FPDF_CloseDocument(pdf)
   ```
 
-
-### [Command-line Interface](https://pypdfium2.readthedocs.io/en/stable/shell_api.html)
-
-<!-- TODO -->
-
+<!-- TODO command-line interface -->
 
 ## Licensing
 
@@ -568,18 +563,11 @@ Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSE
 
 pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by including [SPDX](https://spdx.org/licenses/) headers in source files, and license information for data files in [`.reuse/dep5`](.reuse/dep5).
 
+<!-- TODO development, testing -->
 
-## Development
+## Issues
 
-<!-- TODO -->
-
-### Testing
-
-<!-- TODO -->
-
-### Issues
-
-<!-- TODO rewrite -->
+<!-- TODO rewrite section -->
 
 Since pypdfium2 is built using external binaries and an automatic bindings creator, issues that are not related to packaging or support model code likely need to be addressed upstream. However, the [issue](https://github.com/pypdfium2-team/pypdfium2/issues) or [discussion](https://github.com/pypdfium2-team/pypdfium2/discussions) panels are always a good place to start if you have any problems, questions or suggestions.
 
