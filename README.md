@@ -26,7 +26,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
     # In the directory containing the source code of pypdfium2
     python3 -m pip install .
     ```
-
+  
   * With a locally built PDFium binary
     ```bash
     python3 setupsrc/pl_setup/build_pdfium.py
@@ -68,10 +68,10 @@ pypdfium2 does not have any mandatory runtime dependencies apart from Python and
 
 However, some optional support model features require additional packages:
 * [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module name `PIL`) is a highly pouplar imaging library for Python.
-  pypdfium2 provides convenience functions to directly return PIL image objects when dealing with raster graphics.
+  pypdfium2 provides convenience methods to directly return PIL image objects when dealing with raster graphics.
   If you do not mean to use PIL, this is entirely optional and you may get the image data as bytes instead.
 * [`uharfbuzz`](https://github.com/harfbuzz/uharfbuzz) is a text shaping engine used by text insertion helpers, to support foreign writing systems.
-  If you do not care about this, you may insert text using the raw PDFium API functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependant on uharfbuzz.
+  If you do not care about this, you may insert text using the raw PDFium functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependant on uharfbuzz.
 
 [^1]: Replacing PDFium's toolchain with a leaner and more elegant build system that is designed to run on any host platform constitutes a long-standing task. This would be required to be able to reliably perform a local source build when installing an `sdist` package. If you have the time and expertise to set up such a build system, please start a repository and inform us about it.
 
@@ -97,7 +97,7 @@ Here are some examples of using the support model API.
 
 * Open a PDF using the helper class `PdfDocument` (supports file path strings, bytes, and byte buffers)
   ```python
-  pdf = pdfium.PdfDocument(filepath)
+  pdf = pdfium.PdfDocument("./path/to/document.pdf")
   version = pdf.get_version()  # get the PDF standard version
   n_pages = len(pdf)  # get the number of pages in the document
   ```
@@ -114,6 +114,7 @@ Here are some examples of using the support model API.
       image.close()
   ```
 
+<!-- TODO convert view mode integer to string -->
 * Read the table of contents
   ```python
   for item in pdf.get_toc():
@@ -129,7 +130,7 @@ Here are some examples of using the support model API.
       )
   ```
 
-<!-- TODO update example to convert object type integer to string once the dict in question is public -->
+<!-- TODO convert object type integer to string -->
 * Load a page to work with
   ```python
   page = pdf[0]  # or pdf.get_page(0)
@@ -161,7 +162,7 @@ Here are some examples of using the support model API.
 
 * Work with text
   ```python
-  # Load a corresponding text page
+  # Load a text page helper
   textpage = page.get_textpage()
   
   # Extract text from the whole page
@@ -174,7 +175,8 @@ Here are some examples of using the support model API.
   
   # Locate text on the page
   searcher = textpage.search("something", match_case=False, match_whole_word=False)
-  first_occurrence = searcher.get_next()  # list of bounding boxes (left, right, bottom, top)
+  # This will be a list of bounding boxes of the form (left, right, bottom, top)
+  first_occurrence = searcher.get_next()
   ```
 
 * Release allocated memory by closing finished objects
@@ -184,16 +186,16 @@ Here are some examples of using the support model API.
       garbage.close()
   ```
 
-* Create a new, empty PDF
+* Create a new PDF with an empty A4 sized page
   ```python
   pdf = pdfium.PdfDocument.new()
-  width, height = (595, 842)  # A4
+  width, height = (595, 842)
   page = pdf.new_page(width, height)
   ```
 
 * Add text content
   ```python
-  NotoSans = ".../NotoSans-Regular.ttf"
+  NotoSans = "./tests/resources/NotoSans-Regular.ttf"
   hb_font = pdfium.HarfbuzzFont(NotoSans)
   pdf_font = pdf.add_font(
       NotoSans,
@@ -233,7 +235,7 @@ As the vast majority of PDFium members is prefixed with `FPDF`, they are clearly
 
 For PDFium documentation, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^6]
 A large variety of examples on how to interface with the raw API using [`ctypes`](https://docs.python.org/3/library/ctypes.html) is already provided with [support model source code](src/pypdfium2/_helpers).
-Nonetheless, the following guide may be helpful to get started with the raw API.
+Nonetheless, the following guide may be helpful to get started with the raw API, especially for developers who are not familiar with `ctypes` yet.
 
 [^6]: Unfortunately, no recent HTML-rendered documentation is available for PDFium at the moment. While large parts of the old [Foxit docs](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html) still seem similar to PDFium's current API, many modifications and new functions are actually missing, which can be confusing.
 
@@ -257,7 +259,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 [^7]: From the auto-generated bindings file, which is not part of the repository. It is built into wheels, or created on installation. If you have an editable install, the bindings file may be found at `src/_pypdfium.py`.
 
 * While some functions are quite easy to use, things soon get more complex.
-  For a start, function parameters are not only used for input, but also for output:
+  First of all, function parameters are not only used for input, but also for output:
   ```python
   # Initialise an integer object (defaults to 0)
   c_version = ctypes.c_int()
@@ -288,7 +290,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 * For string output parameters, callers needs to provide a sufficiently long, pre-allocated buffer.
   
-  Example: Getting the title string of a bookmark.
+  Example A: Getting the title string of a bookmark.
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
   # First call to get the required number of bytes (not characters!)
@@ -307,10 +309,10 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   
   The above pattern applies to functions that require type `char`.
   However, some functions use `unsigned short` instead, which works a bit differently.
-  Concerning functions that take a typeless pointer (`void`) for a string buffer, it is recommended to judge which approach to use depending on whether the function returns the number of bytes or characters.
-  In principle, you could use either approach, provided that you allocate enough memory (2 bytes per character for UTF-16) and types match in the end.
+  Concerning functions that take a typeless pointer (`void`) for a string buffer, it is recommended to check whether the function returns the number of bytes or characters and use the corresponding approach.
+  In principle, the two patterns are exchangable provided that you allocate enough memory (2 bytes per character for UTF-16) and types match in the end.
   
-  Example: Extracting text in given boundaries.
+  Example B: Extracting text in given boundaries.
   ```python
   # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set to int or float values)
   # Store common arguments for the two function calls
@@ -329,15 +331,14 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 * Not only are there different ways of string output that need to be handled according to the requirements of the function in question.
   String input, too, can work differently depending on encoding, null termination, and type.
   If a function takes a UTF-8 encoded `FPDF_STRING` or `FPDF_BYTESTRING` (e. g. `FPDF_LoadDocument()`), you may simply pass the Python string, and bindings code will handle the rest.
-  However, some functions have special needs.
-  For instance, `FPDFText_FindStart()` demands a UTF-16LE encoded string with null terminator, given as a pointer to the first element of an `unsigned short` array:
+  However, some functions have special needs. For instance, `FPDFText_FindStart()` demands a UTF-16LE encoded string with null terminator, given as a pointer to an `unsigned short` array:
   ```python
   # (Assuming `text` is a str and `textpage` an FPDF_TEXTPAGE)
-  # add the null terminator and encode as UTF-16LE
+  # Add the null terminator and encode as UTF-16LE
   enc_text = (text + "\x00").encode("utf-16-le")
-  # obtain a pointer of type c_ushort to `enc_text`
+  # Obtain a pointer of type c_ushort to `enc_text`
   text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
-  search = pdfium.FPDFText_FindStart(textpage, text_ptr, 0, index)
+  search = pdfium.FPDFText_FindStart(textpage, text_ptr, 0, 0)
   ```
 
 * Suppose you have a C memory buffer allocated by PDFium and wish to read its data.
@@ -347,9 +348,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
   first_item = pdfium.FPDFBitmap_GetBuffer(bitmap)
   buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * size))
-  # buffer as ctypes array (referencing the original buffer, will be unavailable as soon as the bitmap is destroyed)
+  # Buffer as ctypes array (referencing the original buffer, will be unavailable as soon as the bitmap is destroyed)
   c_array = buffer.contents
-  # buffer as python bytes (independant copy)
+  # Buffer as Python bytes (independant copy)
   data = bytes(c_array)
   ```
 
@@ -372,7 +373,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, None)
   while bookmark:
       # bookmark is a pointer, so we need to use its `contents` attribute to get the object the pointer refers to
-      # (otherwise we'd only get the memory address of the pointer itself, which would result in undefined behaviour)
+      # (otherwise we'd only get the memory address of the pointer itself, which would result in random behaviour)
       address = ctypes.addressof(bookmark.contents)
       if address in seen:
           break  # circular reference detected
@@ -383,7 +384,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
-<!-- TODO suggest using get_functype() once it is public -->
+<!-- TODO consider suggesting get_functype() once it is public -->
 * In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks across Python/C language boundaries.
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
@@ -420,8 +421,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   
   While callable objects are quite convenient for tasks like this, they are a peculiarity of Python.
   That's why file access structure and callback are actually designed to hold a pointer to the caller's buffer.
-  Using this approach is possible, but more complicated as we can't just set and get a Python object.
-  Hence, we need to pass the memory address of the buffer object and dereference that in the callback:
+  Using this approach is possible, but more complicated as we can't just set and get a Python object because things get passed through C.
+  Hence, we'd need to pass the memory address of the buffer object and dereference that in the callback:
   ```python
   # Declare a function decorated with the CFUNCTYPE
   @ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
@@ -435,12 +436,12 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
       return 1
   
   # When setting up the file access structure, do the following things differently:
-  # Just reference the function instead of creating a callable object
+  # A) Just reference the function instead of creating a callable object
   fileaccess.m_GetBlock = _reader_func
-  # Set the m_Param field to the memory address of the buffer, to be dereferenced later
+  # B) Set the m_Param field to the memory address of the buffer, to be dereferenced later
   # This value will be passed to the callback as first argument
   # (Note: It's an implementation detail of CPython that the return value of id(obj)
-  #  corresponds to the memory address of the object, so this is kind of flaky)
+  #  corresponds to the object's memory address, so this is kind of flaky)
   fileaccess.m_Param = id(buffer)
   ```
 
