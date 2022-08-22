@@ -45,7 +45,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
 
 * Installing an unofficial distribution
   
-  To the authors' knowledge, there currently are no other distributions of pypdfium2 apart from the official releases on PyPI and GitHub.
+  To the authors' knowledge, there currently are no other distributions of pypdfium2 apart from the official wheel releases on PyPI and GitHub.
   There is no conda package yet.
   So far, pypdfium2 has not been included in any operating system repositories. While we are interested in cooperation with external package maintainers to make this possible, the authors of this project have no control over and are not responsible for third-party distributions of pypdfium2.
 
@@ -436,10 +436,47 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 [^9]: e. g. incremental reading/writing, progress bars, pausing of progressive tasks, ...
 
+* When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
+  
+  If resources need to remain valid after the time of a function call, PDFium documentation usually indicates this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segmentation fault).
+
+  For instance, the documentation on `FPDF_LoadCustomDocument()` states that
+  > The application must keep the file resources |pFileAccess| points to valid until the returned FPDF_DOCUMENT is closed. |pFileAccess| itself does not need to outlive the FPDF_DOCUMENT.
+  
+  This means that the callback function and the Python buffer need to be kept alive as long as the `FPDF_DOCUMENT` is used.
+  This can be achieved by referencing these objects in an accompanying class, e. g.
+  
+  ```python
+  class PdfDataHolder:
+      
+      def __init__(self, buffer, function):
+          self.buffer = buffer
+          self.function = function
+      
+      def close(self):
+          # Make sure both objects remain available until this function is called
+          # In theory, a heavily optimising interpreter might be able to detect that
+          # `self.function` is an unused reference and clean it up, so add a no-op id()
+          # call to enforce that the resource stays in memory
+          id(self.function)
+          self.buffer.close()
+  
+  # ... set up an FPDF_FILEACCESS structure
+  
+  # (Assuming `py_buffer` is the buffer and `fileaccess` the FPDF_FILEACCESS interface)
+  data_holder = PdfDataHolder(py_buffer, fileaccess.m_GetBlock)
+  pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, None)
+  
+  # ... work with the pdf
+  
+  # Close the PDF to free resources
+  pdfium.FPDF_CloseDocument(pdf)
+  # Close the data holder, to keep the object and its references alive up to this point, as well as to release the buffer
+  data_holder.close()
+  ```
+  
 <!-- TODO
-* notes on object lifetime
-* at least one complete example (e. g. rendering a document)
-* warn about possible corruption or segfaults in case of improper API use
+* add at least one complete example (e. g. rendering a document)
 -->
 
 
