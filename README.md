@@ -129,7 +129,7 @@ Here are some examples of using the support model API.
       )
   ```
 
-<!-- TODO update example to convert object type integer to string ASA ObjtypeToName is public -->
+<!-- TODO update example to convert object type integer to string once the dict in question is public -->
 * Load a page to work with
   ```python
   page = pdf[0]  # or pdf.get_page(0)
@@ -384,7 +384,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
 
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
-<!-- TODO update examples ASA get_functype() is public -->
+<!-- TODO suggest using get_functype() once it is public -->
 * In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks accross Python/C language boundaries.
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
@@ -485,10 +485,72 @@ Nonetheless, the following guide may be helpful to get started with the raw API.
   # Close the data holder, to keep the object and its references alive up to this point, as well as to release the buffer
   data_holder.close()
   ```
+
+* Finally, let's finish this guide with an example on how to render the first page of a document to a `PIL` image in `RGBA` colour format.
+  ```python
+  import math
+  import ctypes
+  import os.path
+  import PIL.Image
+  import pypdfium2 as pdfium
   
-<!-- TODO
-* add at least one complete example (e. g. rendering a document)
--->
+  # Load the document
+  filepath = os.path.abspath("tests/resources/render.pdf")
+  pdf = pdfium.FPDF_LoadDocument(filepath, None)
+  
+  # Check page count to make sure it was loaded correctly
+  page_count = pdfium.FPDF_GetPageCount(pdf)
+  assert page_count >= 1
+  
+  # Load the first page and get its dimensions
+  page = pdfium.FPDF_LoadPage(pdf, 0)
+  width  = math.ceil(pdfium.FPDF_GetPageWidthF(page))
+  height = math.ceil(pdfium.FPDF_GetPageHeightF(page))
+  
+  # Create a bitmap
+  use_alpha = False  # We don't render with transparent background
+  bitmap = pdfium.FPDFBitmap_Create(width, height, int(use_alpha))
+  # Fill the whole bitmap with a white background
+  # The colour is given as a 32-bit integer in ARGB format (8 bits per channel)
+  pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
+  
+  # Store common rendering arguments
+  render_args = (
+      bitmap,  # the bitmap
+      page,    # the page
+      # positions and sizes are to be given in pixels and may exceed the bitmap
+      0,       # left start position
+      0,       # top start position
+      width,   # horizontal size
+      height,  # vertical size
+      0,       # rotation (as constant, not in degrees!)
+      pdfium.FPDF_LCD_TEXT | pdfium.FPDF_ANNOT,  # rendering flags, combined with binary or
+  )
+  
+  # Render the page
+  pdfium.FPDF_RenderPageBitmap(*render_args)
+  
+  # Set up a form environment and render forms
+  form_config = pdfium.FPDF_FORMFILLINFO(2)
+  form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
+  pdfium.FPDF_FFLDraw(form_fill, *render_args)
+  
+  # Get a pointer to the first item of the buffer
+  first_item = pdfium.FPDFBitmap_GetBuffer(bitmap)
+  # Re-interpret the pointer to encompass the whole buffer
+  buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+  
+  # Create a PIL image from the buffer contents
+  img = PIL.Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
+  # Save it as file
+  img.save("out.png")
+  
+  # Free resources
+  pdfium.FPDFBitmap_Destroy(bitmap)
+  pdfium.FPDF_ClosePage(page)
+  pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
+  pdfium.FPDF_CloseDocument(pdf)
+  ```
 
 
 ### [Command-line Interface](https://pypdfium2.readthedocs.io/en/stable/shell_api.html)
