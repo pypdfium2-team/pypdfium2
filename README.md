@@ -66,7 +66,7 @@ They do not represent standardised solutions, but are specific to this project.
 
 [^2]: pypdfium2 still has a fallback mechanism, though it might not be entirely reliable.
 
-[^3]: Possible scenarios include using a locally modified version of a dependency, or needing to supply a dependency built from a certain commit (in situations where it is not actionable to modify `pyproject.toml` manually, e. g. an installation script).
+[^3]: Possible scenarios include using a locally modified version of a dependency, or supplying a dependency built from a certain commit (while not changing the code)
 
 [^4]: This is mainly of internal interest for packaging, so that wheels can be crafted for any platform without access to a native host.
 
