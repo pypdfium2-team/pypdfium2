@@ -364,24 +364,6 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   n_bytes = py_buffer.readinto(c_buffer.contents)  # returns the number of bytes read
   ```
 
-* If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help you because `ctypes` does not have original object return (OOR),
-  i. e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^8] That's why you'll want to use `ctypes.addressof()` to get the memory addresses of the underlying C object.
-  For instance, this is used to avoid infinite loops on circular bookmark references when iterating through the document outline:
-  ```python
-  # (Assuming `pdf` is an FPDF_DOCUMENT)
-  seen = set()
-  bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, None)
-  while bookmark:
-      # bookmark is a pointer, so we need to use its `contents` attribute to get the object the pointer refers to
-      # (otherwise we'd only get the memory address of the pointer itself, which would result in random behaviour)
-      address = ctypes.addressof(bookmark.contents)
-      if address in seen:
-          break  # circular reference detected
-      else:
-          seen.add(address)
-      bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
-  ```
-
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
 <!-- TODO consider suggesting get_functype() once it is public -->
@@ -485,6 +467,24 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Close the data holder, to keep the object itself and thereby the objects it
   # references alive up to this point, as well as to release the buffer
   data_holder.close()
+  ```
+
+* If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help you because `ctypes` does not have original object return (OOR),
+  i. e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^8] That's why you'll want to use `ctypes.addressof()` to get the memory addresses of the underlying C object.
+  For instance, this is used to avoid infinite loops on circular bookmark references when iterating through the document outline:
+  ```python
+  # (Assuming `pdf` is an FPDF_DOCUMENT)
+  seen = set()
+  bookmark = pdfium.FPDFBookmark_GetFirstChild(pdf, None)
+  while bookmark:
+      # bookmark is a pointer, so we need to use its `contents` attribute to get the object the pointer refers to
+      # (otherwise we'd only get the memory address of the pointer itself, which would result in random behaviour)
+      address = ctypes.addressof(bookmark.contents)
+      if address in seen:
+          break  # circular reference detected
+      else:
+          seen.add(address)
+      bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
   ```
 
 * Finally, let's finish this guide with an example on how to render the first page of a document to a `PIL` image in `RGBA` colour format.
