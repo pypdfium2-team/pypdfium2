@@ -43,6 +43,7 @@ ReleaseNames = {
 }
 
 
+# TODO move to packaging_base
 def get_latest_version():
     git_ls = run_cmd(["git", "ls-remote", "%s.git" % ReleaseRepo], cwd=None, capture=True)
     tag = git_ls.split("\t")[-1]
