@@ -482,7 +482,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
   # Close the PDF to free resources
   pdfium.FPDF_CloseDocument(pdf)
-  # Close the data holder, to keep the object and its references alive up to this point, as well as to release the buffer
+  # Close the data holder, to keep the object itself and thereby the objects it
+  # references alive up to this point, as well as to release the buffer
   data_holder.close()
   ```
 
