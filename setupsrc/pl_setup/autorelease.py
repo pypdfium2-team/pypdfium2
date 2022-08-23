@@ -121,19 +121,27 @@ def register_changes(curr_ns):
     run_local([Git, "checkout", "main"])
 
 
-def _get_log(url, cwd, ver_a, ver_b, prefix=""):
-    log = ""
-    log += "Commits between `%s` and `%s` (latest commit first):\n\n" % (ver_a, ver_b)
-    log += run_cmd([Git, "log", "%s..%s" % (prefix+ver_a, prefix+ver_b), "--pretty=format:* [`%h`]({}/%H) %s".format(url)], capture=True, cwd=cwd)
-    return log
-
-
 def _get_pdfium_history():
     if not exists(PdfiumHistoryDir):
         # get a cut-down clone of pdfium that only contains the commit history
         run_cmd([Git, "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, basename(PdfiumHistoryDir)], cwd=SB_Dir)
     else:
         run_cmd([Git, "pull"], cwd=PdfiumHistoryDir)
+
+
+def _get_log(cwd, url, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
+    log = ""
+    log += "Commits between [`%s`](%s) and [`%s`](%s) " % (
+        ver_a, url+prefix_ver+ver_a,
+        ver_b, url+prefix_ver+ver_b,
+    )
+    log += "(latest commit first):\n\n"
+    log += run_cmd([Git, "log",
+        "%s..%s" % (prefix_tag+ver_a, prefix_tag+ver_b),
+        "--pretty=format:* [`%h`]({}%H) %s".format(url+prefix_commit)],
+        capture=True, cwd=cwd,
+    )
+    return log
 
 
 def make_releasenotes(summary, prev_ns, curr_ns):
@@ -147,13 +155,22 @@ def make_releasenotes(summary, prev_ns, curr_ns):
         relnotes += summary + "\n"
     
     relnotes += "### Log\n\n"
-    relnotes += _get_log(RepositoryURL+"/commit", SourceTree, prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"]) + "\n"
+    relnotes += _get_log(
+        SourceTree, RepositoryURL,
+        prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
+        "/tree/", "/commit/", "",
+    )
+    relnotes += "\n"
     
     if int(prev_ns["V_LIBPDFIUM"]) < int(curr_ns["V_LIBPDFIUM"]):
         _get_pdfium_history()
         relnotes += "\n## PDFium\n\n"
         relnotes += "### Log\n\n"
-        relnotes += _get_log(PDFium_URL+"/+", PdfiumHistoryDir, prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"], prefix="origin/chromium/")
+        relnotes += _get_log(
+            PdfiumHistoryDir, PDFium_URL,
+            prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"],
+            "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
+        )
         relnotes += "\n"
     
     with open(join(SourceTree, "RELEASE.md"), "w") as fh:
