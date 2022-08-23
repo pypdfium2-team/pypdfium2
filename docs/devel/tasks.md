@@ -16,7 +16,6 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 
 ### Setup Infrastructure
 * Add a `MANIFEST.in` file to avoid being dependant on the presence of `setuptools-scm`
-* autorelease/workflow: move push steps into the workflow file so it is only done after successful wheel building
 * autorelease: address inline TODOs
 * update_pdfium: accept `auto` for `--platform` argument
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest)

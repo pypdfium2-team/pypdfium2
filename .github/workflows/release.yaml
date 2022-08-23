@@ -55,6 +55,15 @@ jobs:
       - name: Run packaging script
         run: make packaging
       
+      - name: Push autorelease changes
+        run: |
+          git checkout main
+          git push
+          git push --tags
+          git checkout stable
+          git push
+          git checkout main
+      
       - name: Get latest tag
         id: get_tag
         run: |
