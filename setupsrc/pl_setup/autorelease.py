@@ -130,6 +130,7 @@ def _get_log(url, cwd, ver_a, ver_b, prefix=""):
 
 def _get_pdfium_history():
     if not exists(PdfiumHistoryDir):
+        # get a cut-down clone of pdfium that only contains the commit history
         run_cmd([Git, "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, basename(PdfiumHistoryDir)], cwd=SB_Dir)
     else:
         run_cmd([Git, "pull"], cwd=PdfiumHistoryDir)
@@ -137,21 +138,23 @@ def _get_pdfium_history():
 
 def make_releasenotes(summary, prev_ns, curr_ns):
     
-    # Get a cut-down clone of PDFium that only contains the commit history
-    _get_pdfium_history()
-    
     relnotes = ""
     relnotes += "# Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
     relnotes += "## pypdfium2\n\n"
     relnotes += "### Summary\n\n"
+    
     if summary:
         relnotes += summary + "\n"
+    
     relnotes += "### Log\n\n"
-    relnotes += _get_log(RepositoryURL+"/commit", SourceTree, prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"]) + "\n\n"
-    relnotes += "## PDFium\n\n"
-    relnotes += "### Log\n\n"
-    relnotes += _get_log(PDFium_URL+"/+", PdfiumHistoryDir, prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"], prefix="origin/chromium/")
-    relnotes += "\n"
+    relnotes += _get_log(RepositoryURL+"/commit", SourceTree, prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"]) + "\n"
+    
+    if int(prev_ns["V_LIBPDFIUM"]) < int(curr_ns["V_LIBPDFIUM"]):
+        _get_pdfium_history()
+        relnotes += "\n## PDFium\n\n"
+        relnotes += "### Log\n\n"
+        relnotes += _get_log(PDFium_URL+"/+", PdfiumHistoryDir, prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"], prefix="origin/chromium/")
+        relnotes += "\n"
     
     with open(join(SourceTree, "RELEASE.md"), "w") as fh:
         fh.write(relnotes)
