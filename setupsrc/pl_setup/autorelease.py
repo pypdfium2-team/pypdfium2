@@ -13,6 +13,7 @@ from os.path import (
     exists,
     abspath,
     dirname,
+    basename,
 )
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
@@ -21,6 +22,8 @@ from pl_setup.packaging_base import (
     set_version,
     get_version_ns,
     SourceTree,
+    SB_Dir,
+    PDFium_URL,
     RepositoryURL,
     Changelog,
     ChangelogStaging,
@@ -29,6 +32,8 @@ from pl_setup.packaging_base import (
 )
 from pl_setup.update_pdfium import get_latest_version
 
+
+PdfiumHistoryDir = join(SB_Dir, "pdfium_history")
 AutoreleaseDir = join(SourceTree, "autorelease")
 UpdateMajor = join(AutoreleaseDir, "update_major.txt")
 UpdateBeta  = join(AutoreleaseDir, "update_beta.txt")
@@ -116,26 +121,36 @@ def register_changes(curr_ns):
     run_local([Git, "checkout", "main"])
 
 
-def link_for_tag(tag):
-    return RepositoryURL + "/tree/%s" % tag
+def _get_log(url, cwd, ver_a, ver_b, prefix=""):
+    log = ""
+    log += "Commits between `%s` and `%s` (latest commit first):\n\n" % (ver_a, ver_b)
+    log += run_cmd([Git, "log", "%s..%s" % (prefix+ver_a, prefix+ver_b), "--pretty=format:* [`%h`]({}/%H) %s".format(url)], capture=True, cwd=cwd)
+    return log
+
+
+def _get_pdfium_history():
+    if not exists(PdfiumHistoryDir):
+        run_cmd([Git, "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, basename(PdfiumHistoryDir)], cwd=SB_Dir)
+    else:
+        run_cmd([Git, "pull"], cwd=PdfiumHistoryDir)
 
 
 def make_releasenotes(summary, prev_ns, curr_ns):
     
-    # TODO include PDFium commit log
+    # Get a cut-down clone of PDFium that only contains the commit history
+    _get_pdfium_history()
     
-    prev_ver = prev_ns["V_PYPDFIUM2"]
-    curr_ver = curr_ns["V_PYPDFIUM2"]
-    
-    relnotes = "Release %s\n\n" % curr_ver
-    relnotes += "## Changes\n\n"
-    relnotes += "### Manual Summary\n\n"
+    relnotes = ""
+    relnotes += "# Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
+    relnotes += "## pypdfium2\n\n"
+    relnotes += "### Summary\n\n"
     if summary:
         relnotes += summary + "\n"
-    relnotes += "### Git History\n\nCommits between "
-    relnotes += "[`%s`](%s) and [`%s`](%s) " % (prev_ver, link_for_tag(prev_ver), curr_ver, link_for_tag(curr_ver))
-    relnotes += "(latest commit first):\n\n"
-    relnotes += run_local([Git, "log", "%s..%s" % (prev_ver, curr_ver), "--pretty=format:* %H %s"], capture=True)
+    relnotes += "### Log\n\n"
+    relnotes += _get_log(RepositoryURL+"/commit", SourceTree, prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"]) + "\n\n"
+    relnotes += "## PDFium\n\n"
+    relnotes += "### Log\n\n"
+    relnotes += _get_log(PDFium_URL+"/+", PdfiumHistoryDir, prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"], prefix="origin/chromium/")
     relnotes += "\n"
     
     with open(join(SourceTree, "RELEASE.md"), "w") as fh:

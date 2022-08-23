@@ -35,8 +35,10 @@ ModuleDir   = join(SourceTree, "src", "pypdfium2")
 VersionFile = join(ModuleDir, "version.py")
 Changelog   = join(SourceTree, "docs", "source", "changelog.md")
 ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
-RepositoryURL = "https://github.com/pypdfium2-team/pypdfium2"
 SetupTargetVar = "PYP_TARGET_PLATFORM"
+RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
+DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools"
+PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
 
 
 class PlatformNames:

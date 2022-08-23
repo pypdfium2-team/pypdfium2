@@ -17,6 +17,8 @@ from pl_setup.packaging_base import (
     Libnames,
     DataTree,
     VerNamespace,
+    PDFium_URL,
+    DepotTools_URL,
     PlatformNames,
     run_cmd,
     call_ctypesgen,
@@ -29,9 +31,6 @@ DepotToolsDir  = join(SB_Dir, "depot_tools")
 PDFiumDir      = join(SB_Dir, "pdfium")
 PDFiumBuildDir = join(PDFiumDir, "out", "Default")
 OutputDir      = join(DataTree, PlatformNames.sourcebuild)
-
-DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
-PDFium_URL     = "https://pdfium.googlesource.com/pdfium.git"
 
 PdfiumMainPatches = [
     (join(PatchDir, "pdfium", "public_headers.patch"), PDFiumDir),
