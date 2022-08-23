@@ -55,7 +55,7 @@ def _get_mac_tag(arch, *versions):
 
 def _get_tag(pl_name):
     # pip>=20.3 now accepts macOS wheels tagged as 10_x on 11_x. Not sure what applies to 12_x.
-    # Let's retain multi-version tagging for improved compatibility all the same.
+    # Let's retain multi-version tagging for broader compatibility all the same.
     if pl_name == PlatformNames.darwin_x64:
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.11.0"`
         return _get_mac_tag("x86_64", "10_11", "11_0", "12_0")
