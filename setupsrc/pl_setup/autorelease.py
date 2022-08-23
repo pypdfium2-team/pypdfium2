@@ -29,10 +29,9 @@ from pl_setup.packaging_base import (
 )
 from pl_setup.update_pdfium import get_latest_version
 
-# TODO let temporary autorelease control files be in the project root directory
 AutoreleaseDir = join(SourceTree, "autorelease")
-MajorUpdate = join(AutoreleaseDir, "majorupdate.txt")
-BetaUpdate = join(AutoreleaseDir, "betaupdate.txt")
+UpdateMajor = join(AutoreleaseDir, "update_major.txt")
+UpdateBeta  = join(AutoreleaseDir, "update_beta.txt")
 
 
 def run_local(*args, **kws):
@@ -51,12 +50,12 @@ def do_versioning(latest):
     # current libpdfium version mustn't be larger than determined latest, or something went badly wrong
     assert v_libpdfium <= latest
     
-    if exists(MajorUpdate):
+    if exists(UpdateMajor):
         set_version("V_MAJOR", VerNamespace["V_MAJOR"]+1)
         set_version("V_MINOR", 0)
         set_version("V_PATCH", 0)
         set_version("V_LIBPDFIUM", str(latest))
-        os.remove(MajorUpdate)
+        os.remove(UpdateMajor)
     elif v_libpdfium < latest:
         set_version("V_MINOR", VerNamespace["V_MINOR"]+1)
         set_version("V_PATCH", 0)
@@ -65,12 +64,12 @@ def do_versioning(latest):
         # TODO check if there are any new commits compared to the previous release - if not, stop
         set_version("V_PATCH", VerNamespace["V_PATCH"]+1)
     
-    if exists(BetaUpdate):
+    if exists(UpdateBeta):
         v_beta = VerNamespace["V_BETA"]
         if v_beta is None:
             v_beta = 0
         set_version("V_BETA", v_beta+1)
-        os.remove(BetaUpdate)
+        os.remove(UpdateBeta)
 
 
 def get_summary():
