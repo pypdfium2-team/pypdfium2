@@ -24,6 +24,7 @@ def _run_build(args):
 def main():
     
     # TODO restore in-tree artefacts from editable install
+    # TODO use shared variable for sdist setup target
     
     parser = argparse.ArgumentParser(
         description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`. (This script does not take any arguments.)",
