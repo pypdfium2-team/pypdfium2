@@ -38,7 +38,8 @@ jobs:
       - name: Install/update dependencies
         run: |
           python3 -m pip install -U pip
-          python3 -m pip install -U setuptools setuptools-scm build wheel
+          python3 -m pip install -U setuptools setuptools-scm build
+          python3 -m pip install --force-reinstall git+https://github.com/pypa/wheel.git@9d4264d2f23ea44dd85639a27fa6b284261921cd
           python3 -m pip install git+https://github.com/ctypesgen/ctypesgen.git@master
           python3 -m pip install -U .[utilities,test,inserttext,converters]
       
