@@ -17,6 +17,7 @@ from os.path import (
 )
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
+from pl_setup.update_pdfium import get_latest_version
 from pl_setup.packaging_base import (
     run_cmd,
     set_version,
@@ -29,7 +30,6 @@ from pl_setup.packaging_base import (
     VersionFile,
     VerNamespace,
 )
-from pl_setup.update_pdfium import get_latest_version
 
 
 AutoreleaseDir = join(SourceTree, "autorelease")
