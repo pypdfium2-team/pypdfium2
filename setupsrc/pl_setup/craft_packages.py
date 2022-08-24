@@ -23,8 +23,7 @@ def _run_build(args):
 
 def main():
     
-    # This script cleans up any artefacts in src/ and currently does not restore them
-    # i. e. if you were using an editable install, you'll have to re-run it (or emplace the artefacts manually)
+    # TODO restore in-tree artefacts from editable install
     
     parser = argparse.ArgumentParser(
         description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`. (This script does not take any arguments.)",
