@@ -295,8 +295,8 @@ class PdfPage:
                 A list of item types that shall not be smoothed (text, image, path).
         
         Returns:
-            (BitmapDataHolder, str, (int, int)):
-            Bitmap data holder, colour format, and image size.
+            (ctypes.c_ubyte_Array_N, str, (int, int)):
+            Ctypes array, colour format, and image size.
             The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
             Image size is given in pixels as a tuple of width and height.
         """
@@ -323,7 +323,8 @@ class PdfPage:
         if any(d < 1 for d in (width, height)):
             raise ValueError("Crop exceeds page dimensions (in px): width %s, height %s, crop %s" % (src_width, src_height, crop))
         
-        bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, None, width*n_colours)
+        buffer = (ctypes.c_ubyte * (width*height*n_colours))()
+        bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, width*n_colours)
         if fpdf_colour is not None:
             pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, fpdf_colour)
         
@@ -353,14 +354,12 @@ class PdfPage:
         render_args = (bitmap, self._page, -crop[0], -crop[3], src_width, src_height, RotationToConst[rotation], render_flags)
         pdfium.FPDF_RenderPageBitmap(*render_args)
         pdfium.FPDF_FFLDraw(form_fill, *render_args)
-        
-        cbuf_ptr = pdfium.FPDFBitmap_GetBuffer(bitmap)
-        cbuf_array_ptr = ctypes.cast(cbuf_ptr, ctypes.POINTER(ctypes.c_ubyte * (width*height*n_colours)))
-        data_holder = BitmapDataHolder(bitmap, cbuf_array_ptr)
-        
         pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
         
-        return data_holder, cl_format, (width, height)
+        # No need to call FPDFBitmap_Destroy() because we're using an external buffer.
+        # Python will take care of freeing the memory when `buffer` isn't referenced anymore.
+        
+        return buffer, cl_format, (width, height)
     
     
     def render_tobytes(self, *args, **kwargs):
@@ -370,12 +369,8 @@ class PdfPage:
         Returns:
             (bytes, str, (int, int)): Image data, colour format, and size.
         """
-        
-        data_holder, cl_format, size = self.render_base(*args, **kwargs)
-        data = bytes( data_holder.get_data() )
-        data_holder.close()
-        
-        return data, cl_format, size
+        c_array, cl_format, size = self.render_base(*args, **kwargs)
+        return bytes(c_array), cl_format, size
     
     
     def render_topil(self, *args, **kwargs):
@@ -391,24 +386,10 @@ class PdfPage:
         if not have_pil:
             raise RuntimeError("Pillow library needs to be installed for render_topil().")
         
-        data_holder, cl_format, size = self.render_base(*args, **kwargs)
-        pil_image = PIL.Image.frombytes(ColourMapping[cl_format], size, data_holder.get_data(), "raw", cl_format, 0, 1)
-        data_holder.close()
+        c_array, cl_format, size = self.render_base(*args, **kwargs)
+        pil_image = PIL.Image.frombytes(ColourMapping[cl_format], size, c_array, "raw", cl_format, 0, 1)
         
         return pil_image
-
-
-class BitmapDataHolder:
-    
-    def __init__(self, bm_handle, bm_array_ptr):
-        self.bm_handle = bm_handle
-        self.bm_array_ptr = bm_array_ptr
-    
-    def get_data(self):
-        return self.bm_array_ptr.contents
-    
-    def close(self):
-        pdfium.FPDFBitmap_Destroy(self.bm_handle)
 
 
 class PdfPageObject:
