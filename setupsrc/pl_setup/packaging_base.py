@@ -37,8 +37,8 @@ Changelog   = join(SourceTree, "docs", "source", "changelog.md")
 ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
 SetupTargetVar = "PYP_TARGET_PLATFORM"
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
-DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
+DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 
 
 class PlatformNames:
