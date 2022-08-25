@@ -589,7 +589,8 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 ## In Use
 
-* The [doctr](https://mindee.github.io/doctr/) OCR library uses pypdfium2 to rasterise PDFs.
+* [doctr](https://mindee.github.io/doctr/), an OCR library powered by deep learning, uses pypdfium2 to rasterise PDFs.
+* [EDS-PDF](https://github.com/aphp/edspdf), a PDF text extraction framework, also uses pypdfium2 for rendering.
 * [Extract-URLs](https://github.com/elescamilla/Extract-URLs/) use pypdfium2 to extract URLs from PDF documents.
 * [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) compares pypdfium2's text extraction capabilities with other libraries.
 
