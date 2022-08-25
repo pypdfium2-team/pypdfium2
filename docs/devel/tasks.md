@@ -15,7 +15,7 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 * Consolidate and extend the support model
 
 ### Setup Infrastructure
-* Add a `MANIFEST.in` file to avoid being dependant on the presence of `setuptools-scm`
+* packaging_base: use a class for `VerNamespace` so it can be flushed more easily
 * autorelease: address inline TODOs
 * update_pdfium: accept `auto` for `--platform` argument
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest)
@@ -24,6 +24,7 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 * craft_packages: add means to skip platforms for which artefacts are missing
 * setup: improve error messages if binaries/bindings are not present in the platform directory - consider downloading missing binaries implicitly on installation
 * setup: improve binary updating procedure by tracking version of currently present binaries - also consider updating outdated binaries implicitly, or at least do something against the possible mismatch with the version file
+* add a `MANIFEST.in` file to avoid being dependant on the presence of `setuptools-scm`
 * further switch to global variables where it makes sense
 * sourcebuild/win: fix dynamic values in `resources.rc`
 
