@@ -17,11 +17,11 @@ from os.path import (
 )
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
-from pl_setup.update_pdfium import get_latest_version
 from pl_setup.packaging_base import (
     run_cmd,
     set_version,
     get_version_ns,
+    get_latest_version,
     SourceTree,
     PDFium_URL,
     RepositoryURL,
@@ -110,7 +110,7 @@ def log_changes(summary, prev_ns, curr_ns):
         fh.write(content)
 
 
-def register_changes(curr_ns):
+def register_changes(Git, curr_ns):
     run_local([Git, "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
     run_local([Git, "commit", "-m", "[autorelease] update changelog and version file"])
     run_local([Git, "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
@@ -119,7 +119,7 @@ def register_changes(curr_ns):
     run_local([Git, "checkout", "main"])
 
 
-def _get_log(cwd, url, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
+def _get_log(Git, cwd, url, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
     log = ""
     log += "Commits between [`%s`](%s) and [`%s`](%s) " % (
         ver_a, url+prefix_ver+ver_a,
@@ -134,7 +134,7 @@ def _get_log(cwd, url, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
     return log
 
 
-def make_releasenotes(summary, prev_ns, curr_ns):
+def make_releasenotes(Git, summary, prev_ns, curr_ns):
     
     relnotes = ""
     relnotes += "# Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
@@ -146,7 +146,7 @@ def make_releasenotes(summary, prev_ns, curr_ns):
     
     relnotes += "### Log\n\n"
     relnotes += _get_log(
-        SourceTree, RepositoryURL,
+        Git, SourceTree, RepositoryURL,
         prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
         "/tree/", "/commit/", "",
     )
@@ -157,7 +157,7 @@ def make_releasenotes(summary, prev_ns, curr_ns):
         with tempfile.TemporaryDirectory() as tempdir:
             run_cmd([Git, "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tempdir)
             pdfium_log = _get_log(
-                join(tempdir, "pdfium_history"), PDFium_URL,
+                Git, join(tempdir, "pdfium_history"), PDFium_URL,
                 prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"],
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
             )
@@ -183,19 +183,18 @@ def main():
     )
     args = parser.parse_args()
     
-    global Git
     Git = shutil.which("git")
     
     prev_ns = copy.deepcopy(VerNamespace)
-    latest = get_latest_version()
+    latest = get_latest_version(Git)
     do_versioning(latest)
     curr_ns = get_version_ns()
     
     summary = get_summary()
     log_changes(summary, prev_ns, curr_ns)
     if args.checkin:
-        register_changes(curr_ns)
-    make_releasenotes(summary, prev_ns, curr_ns)
+        register_changes(Git, curr_ns)
+    make_releasenotes(Git, summary, prev_ns, curr_ns)
 
 
 if __name__ == "__main__":

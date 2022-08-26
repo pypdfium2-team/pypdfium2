@@ -39,6 +39,8 @@ SetupTargetVar = "PYP_TARGET_PLATFORM"
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
+ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 
 
 class PlatformNames:
@@ -56,6 +58,21 @@ class PlatformNames:
     sourcebuild   = "sourcebuild"
 
 
+ReleaseNames = {
+    PlatformNames.darwin_x64    : "pdfium-mac-x64",
+    PlatformNames.darwin_arm64  : "pdfium-mac-arm64",
+    PlatformNames.linux_x64     : "pdfium-linux-x64",
+    PlatformNames.linux_x86     : "pdfium-linux-x86",
+    PlatformNames.linux_arm64   : "pdfium-linux-arm64",
+    PlatformNames.linux_arm32   : "pdfium-linux-arm",
+    PlatformNames.musllinux_x64 : "pdfium-linux-musl-x64",
+    PlatformNames.musllinux_x86 : "pdfium-linux-musl-x86",
+    PlatformNames.windows_x64   : "pdfium-win-x64",
+    PlatformNames.windows_x86   : "pdfium-win-x86",
+    PlatformNames.windows_arm64 : "pdfium-win-arm64",
+}
+
+
 def run_cmd(command, cwd, capture=False, **kwargs):
     
     print('%s ("%s")' % (command, cwd))
@@ -69,15 +86,10 @@ def run_cmd(command, cwd, capture=False, **kwargs):
         return comp_process
 
 
-def get_members(cls):
-    members = []
-    for attr in dir(cls):
-        if attr.startswith("_"):
-            continue
-        members.append( getattr(cls, attr) )
-    return members
-
-AllPlatNames = get_members(PlatformNames)
+def get_latest_version(Git):
+    git_ls = run_cmd([Git, "ls-remote", "%s.git" % ReleaseRepo], cwd=None, capture=True)
+    tag = git_ls.split("\t")[-1]
+    return int( tag.split("/")[-1] )
 
 
 def call_ctypesgen(platform_dir, include_dir):
@@ -137,3 +149,14 @@ def set_version(variable, new_ver):
     
     with open(VersionFile, "w") as fh:
         fh.write(content)
+
+
+def get_members(cls):
+    members = []
+    for attr in dir(cls):
+        if attr.startswith("_"):
+            continue
+        members.append( getattr(cls, attr) )
+    return members
+
+AllPlatNames = get_members(PlatformNames)

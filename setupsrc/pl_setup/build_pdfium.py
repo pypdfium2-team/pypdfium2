@@ -33,12 +33,12 @@ PDFiumBuildDir = join(PDFiumDir, "out", "Default")
 OutputDir      = join(DataTree, PlatformNames.sourcebuild)
 
 PdfiumMainPatches = [
-    (join(PatchDir, "pdfium", "public_headers.patch"), PDFiumDir),
-    (join(PatchDir, "pdfium", "shared_library.patch"), PDFiumDir),
+    (join(PatchDir, "public_headers.patch"), PDFiumDir),
+    (join(PatchDir, "shared_library.patch"), PDFiumDir),
 ]
 PdfiumWinPatches = [
-    (join(PatchDir, "pdfium", "win", "pdfium.patch"), PDFiumDir),
-    (join(PatchDir, "pdfium", "win", "build.patch"), join(PDFiumDir, "build")),
+    (join(PatchDir, "win", "pdfium.patch"), PDFiumDir),
+    (join(PatchDir, "win", "build.patch"), join(PDFiumDir, "build")),
 ]
 
 DefaultConfig = {
@@ -57,7 +57,7 @@ elif sys.platform.startswith("win32"):
     DefaultConfig["pdf_use_win32_gdi"] = True
 
 
-def dl_depottools(do_update):
+def dl_depottools(Git, do_update):
     
     if not os.path.isdir(SB_Dir):
         os.makedirs(SB_Dir)
@@ -81,7 +81,7 @@ def dl_depottools(do_update):
     return is_update
 
 
-def dl_pdfium(do_update, revision):
+def dl_pdfium(GClient, do_update, revision):
     
     is_sync = True
     
@@ -102,7 +102,7 @@ def dl_pdfium(do_update, revision):
     return is_sync
 
 
-def get_version_info():
+def get_version_info(Git):
     head_commit = run_cmd([Git, "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
     refs_string = run_cmd([Git, "ls-remote", "--heads", PDFium_URL, "chromium/*"], cwd=None, capture=True)
     latest = refs_string.split("\n")[-1]
@@ -129,18 +129,18 @@ def update_version(head_commit, tag_commit, tag):
         set_version("V_LIBPDFIUM", new_libversion)
 
 
-def _apply_patchset(patchset):
+def _apply_patchset(Git, patchset):
     for patch, cwd in patchset:
         run_cmd([Git, "apply", "-v", patch], cwd=cwd)
 
-def patch_pdfium():
-    _apply_patchset(PdfiumMainPatches)
+def patch_pdfium(Git):
+    _apply_patchset(Git, PdfiumMainPatches)
     if sys.platform.startswith("win32"):
-        _apply_patchset(PdfiumWinPatches)
+        _apply_patchset(Git, PdfiumWinPatches)
         shutil.copy(join(PatchDir, "pdfium", "win", "resources.rc"), join(PDFiumDir, "resources.rc"))
 
 
-def configure(config):
+def configure(GN, config):
     if not os.path.exists(PDFiumBuildDir):
         os.makedirs(PDFiumBuildDir)
     with open(join(PDFiumBuildDir, "args.gn"), "w") as args_handle:
@@ -148,7 +148,7 @@ def configure(config):
     run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
 
 
-def build(target):
+def build(Ninja, target):
     run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
@@ -192,14 +192,14 @@ def pack(src_libpath, destname=None):
     shutil.rmtree(include_dir)
 
 
-def _get_tool(tool, win_append):
+def get_tool(tool, win_append):
     exe = join(DepotToolsDir, tool)
     if sys.platform.startswith("win32"):
         exe += "." + win_append
     return exe
 
 
-def _serialise_config(config_dict):
+def serialise_config(config_dict):
     
     config_str = ""
     sep = ""
@@ -225,7 +225,6 @@ def main(
         b_target = None,
     ):
     
-    global Git
     Git = shutil.which("git")
     
     if b_revision is None:
@@ -239,25 +238,25 @@ def main(
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
     
-    dl_depottools(b_update)
+    dl_depottools(Git, b_update)
     
-    global GClient, GN, Ninja
-    GClient = _get_tool("gclient", "bat")
-    GN      = _get_tool("gn", "bat")
-    Ninja   = _get_tool("ninja", "exe")
+    GClient = get_tool("gclient", "bat")
+    GN      = get_tool("gn", "bat")
+    Ninja   = get_tool("ninja", "exe")
     
-    pdfium_dl_done = dl_pdfium(b_update, b_revision)
+    pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
     if pdfium_dl_done:
-        patch_pdfium()
+        patch_pdfium(Git)
     
-    update_version( *get_version_info() )
+    ver_info = get_version_info(Git)
+    update_version(*ver_info)
     
     config_dict = DefaultConfig.copy()
-    config_str = _serialise_config(config_dict)
+    config_str = serialise_config(config_dict)
     print("\nBuild configuration:\n%s\n" % config_str)
     
-    configure(config_str)
-    build(b_target)
+    configure(GN, config_str)
+    build(Ninja, b_target)
     libpath = find_lib(b_srcname)
     pack(libpath, b_destname)
 

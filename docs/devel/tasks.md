@@ -25,7 +25,6 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 * setup: improve error messages if binaries/bindings are not present in the platform directory - consider downloading missing binaries implicitly on installation
 * setup: improve binary updating procedure by tracking version of currently present binaries - also consider updating outdated binaries implicitly, or at least do something against the possible mismatch with the version file
 * add a `MANIFEST.in` file to avoid being dependant on the presence of `setuptools-scm`
-* further switch to global variables where it makes sense
 * sourcebuild/win: fix dynamic values in `resources.rc`
 
 ### Tests
