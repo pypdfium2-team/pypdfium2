@@ -15,18 +15,9 @@ from os.path import (
     expanduser,
 )
 
-Libnames = (
-    "pdfium",
-    "pdfium.dylib",
-    "pdfium.dll",
-    "libpdfium.so",
-    "pdfium.so",
-    "libpdfium",
-    "libpdfium.dylib",
-    "libpdfium.dll",
-)
+# TODO move shared components to this file, move local components back to their only users
 
-
+# TODO improve consistency of variable names
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
 DataTree    = join(SourceTree, "data")
@@ -41,6 +32,18 @@ PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
+
+
+Libnames = (
+    "pdfium",
+    "pdfium.dylib",
+    "pdfium.dll",
+    "libpdfium.so",
+    "pdfium.so",
+    "libpdfium",
+    "libpdfium.dylib",
+    "libpdfium.dll",
+)
 
 
 class PlatformNames:

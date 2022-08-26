@@ -154,6 +154,7 @@ def make_releasenotes(Git, summary, prev_ns, curr_ns):
     
     if int(prev_ns["V_LIBPDFIUM"]) < int(curr_ns["V_LIBPDFIUM"]):
         
+        # FIXME is there a faster way to get pdfium's commit log?
         with tempfile.TemporaryDirectory() as tempdir:
             run_cmd([Git, "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tempdir)
             pdfium_log = _get_log(
