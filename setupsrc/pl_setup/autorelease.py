@@ -41,17 +41,32 @@ def run_local(*args, **kws):
     return run_cmd(*args, **kws, cwd=SourceTree)
 
 
-def do_versioning(latest):
+def _check_py_updates(Git, v_pypdfium2):
+    # see if pypdfium2 code was updated by checking if the latest commit is tagged
+    tag = run_local([Git, "tag", "--list", "--contains", "HEAD"], capture=True)
+    if tag == "":
+        return True   # untagged -> new commits since previous release
+    elif tag == v_pypdfium2:
+        return False  # tagged with previous version -> no new commits
+    else:
+        assert False  # tagged but not with previous version -> invalid state
+
+
+def do_versioning(Git, latest):
     
     # sourcebuild version changes must never be checked into version control
-    # autorelease can't work with that state because it needs information about the previous release for its version changes
+    # (autorelease can't work with that state because it needs information about the previous release for its version changes)
     assert not VerNamespace["IS_SOURCEBUILD"]
     assert VerNamespace["V_LIBPDFIUM"].isnumeric()
-    
     v_libpdfium = int(VerNamespace["V_LIBPDFIUM"])
+    # the current libpdfium version must never be larger than the determined latest
+    assert not v_libpdfium > latest
     
-    # current libpdfium version mustn't be larger than determined latest, or something went badly wrong
-    assert v_libpdfium <= latest
+    c_updates = (v_libpdfium < latest)
+    py_updates = _check_py_updates(Git, VerNamespace["V_PYPDFIUM2"])
+    
+    if not c_updates and not py_updates:
+        raise RuntimeError("Neither pypdfium2 code nor pdfium binaries updated. Making a new release would be pointless.")
     
     if exists(UpdateMajor):
         set_version("V_MAJOR", VerNamespace["V_MAJOR"]+1)
@@ -59,12 +74,11 @@ def do_versioning(latest):
         set_version("V_PATCH", 0)
         set_version("V_LIBPDFIUM", str(latest))
         os.remove(UpdateMajor)
-    elif v_libpdfium < latest:
+    elif c_updates:
         set_version("V_MINOR", VerNamespace["V_MINOR"]+1)
         set_version("V_PATCH", 0)
         set_version("V_LIBPDFIUM", str(latest))
     else:
-        # TODO check if there are any new commits compared to the previous release - if not, stop
         set_version("V_PATCH", VerNamespace["V_PATCH"]+1)
     
     if exists(UpdateBeta):
@@ -188,7 +202,7 @@ def main():
     
     prev_ns = copy.deepcopy(VerNamespace)
     latest = get_latest_version(Git)
-    do_versioning(latest)
+    do_versioning(Git, latest)
     curr_ns = get_version_ns()
     
     summary = get_summary()
