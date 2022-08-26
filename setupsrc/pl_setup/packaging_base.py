@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Non-stdlib imports not allowed in this file, as it is imported prior to the check_deps call
+# No external dependencies shall be imported in this file
 
 import os
 import shutil
+import platform
+import sysconfig
 import subprocess
 from glob import glob
 from os.path import (
@@ -74,6 +76,41 @@ ReleaseNames = {
     PlatformNames.windows_x86   : "pdfium-win-x86",
     PlatformNames.windows_arm64 : "pdfium-win-arm64",
 }
+
+
+class HostPlatform:
+    
+    def __init__(self):
+        # `libc_ver()` currently returns an empty string on libc implementations other than glibc - hence, we assume musl if it's not glibc
+        # FIXME is there some function to actually detect musl?
+        self.platform = sysconfig.get_platform().lower().replace("-", "_").replace(".", "_")
+        self.libc = platform.libc_ver()[0]
+        self.is_glibc = (self.libc == "glibc")
+    
+    def _is_plat(self, start, end):
+        return self.platform.startswith(start) and self.platform.endswith(end)
+    
+    def get_name(self):
+        if self._is_plat("macosx", "arm64"):
+            return PlatformNames.darwin_arm64
+        elif self._is_plat("macosx", "x86_64"):
+            return PlatformNames.darwin_x64
+        elif self._is_plat("linux", "armv7l"):
+            return PlatformNames.linux_arm32
+        elif self._is_plat("linux", "aarch64"):
+            return PlatformNames.linux_arm64
+        elif self._is_plat("linux", "x86_64"):
+            return PlatformNames.linux_x64 if self.is_glibc else PlatformNames.musllinux_x64
+        elif self._is_plat("linux", "i686"):
+            return PlatformNames.linux_x86 if self.is_glibc else PlatformNames.musllinux_x86
+        elif self._is_plat("win", "arm64"):
+            return PlatformNames.windows_arm64
+        elif self._is_plat("win", "amd64"):
+            return PlatformNames.windows_x64
+        elif self._is_plat("win32", ""):
+            return PlatformNames.windows_x86
+        else:
+            return None
 
 
 def run_cmd(command, cwd, capture=False, **kwargs):
