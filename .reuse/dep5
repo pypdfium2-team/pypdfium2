@@ -65,11 +65,11 @@ License: OFL-1.1
 Comment:
     Obtained from: https://fonts.google.com/noto/specimen/Noto+Sans
 
-Files: sourcebuild/patches/pdfium/public_headers.patch
-       sourcebuild/patches/pdfium/shared_library.patch
-       sourcebuild/patches/pdfium/win/build.patch
-       sourcebuild/patches/pdfium/win/pdfium.patch
-       sourcebuild/patches/pdfium/win/resources.rc
+Files: sourcebuild/patches/public_headers.patch
+       sourcebuild/patches/shared_library.patch
+       sourcebuild/patches/win/build.patch
+       sourcebuild/patches/win/pdfium.patch
+       sourcebuild/patches/win/resources.rc
 Copyright: 2022 Benoît Blanchon
 License: LicenseRef-FairUse
 Comment:
