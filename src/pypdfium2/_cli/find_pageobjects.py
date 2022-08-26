@@ -33,7 +33,7 @@ def attach_parser(subparsers):
         "--types",
         nargs = "+",
         required = True,
-        choices = [k for k in ObjtypeToConst.keys()],
+        choices = list(ObjtypeToConst.keys()),
         help = "Object types to consider",
     )
 

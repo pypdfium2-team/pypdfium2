@@ -18,6 +18,7 @@ from pl_setup.packaging_base import (
     PlatformNames,
     SourceTree,
     SetupTargetVar,
+    SdistTarget,
 )
 
 StatusFile = join(SourceTree, "data", ".presetup_done.txt")
@@ -57,7 +58,7 @@ def packaging_handler(target):
     
     from pl_setup.setup_base import mkwheel, SetupKws
     
-    if target == "sdist":
+    if target == SdistTarget:
         setuptools.setup(**SetupKws)
     elif hasattr(PlatformNames, target):
         mkwheel( getattr(PlatformNames, target) )

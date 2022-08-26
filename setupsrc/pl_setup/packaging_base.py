@@ -17,9 +17,9 @@ from os.path import (
     expanduser,
 )
 
-# TODO move shared components to this file, move local components back to their only users
-
+# TODO think about variables to move in/out
 # TODO improve consistency of variable names
+
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
 DataTree    = join(SourceTree, "data")
@@ -29,6 +29,7 @@ VersionFile = join(ModuleDir, "version.py")
 Changelog   = join(SourceTree, "docs", "source", "changelog.md")
 ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
 SetupTargetVar = "PYP_TARGET_PLATFORM"
+SdistTarget    = "sdist"
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
@@ -76,6 +77,8 @@ ReleaseNames = {
     PlatformNames.windows_x86   : "pdfium-win-x86",
     PlatformNames.windows_arm64 : "pdfium-win-arm64",
 }
+
+BinaryPlatforms = list(ReleaseNames.keys())
 
 
 class HostPlatform:
@@ -189,14 +192,3 @@ def set_version(variable, new_ver):
     
     with open(VersionFile, "w") as fh:
         fh.write(content)
-
-
-def get_members(cls):
-    members = []
-    for attr in dir(cls):
-        if attr.startswith("_"):
-            continue
-        members.append( getattr(cls, attr) )
-    return members
-
-AllPlatNames = get_members(PlatformNames)

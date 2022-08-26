@@ -10,10 +10,10 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
     run_cmd,
     clean_artefacts,
-    PlatformNames,
-    AllPlatNames,
+    BinaryPlatforms,
     SourceTree,
     SetupTargetVar,
+    SdistTarget,
 )
 
 
@@ -24,22 +24,18 @@ def _run_build(args):
 def main():
     
     # TODO restore in-tree artefacts from editable install
-    # TODO use shared variable for sdist setup target
     
     parser = argparse.ArgumentParser(
         description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`. (This script does not take any arguments.)",
     )
     args = parser.parse_args()
     
-    pl_names = AllPlatNames.copy()
-    pl_names.remove(PlatformNames.sourcebuild)
-    
     clean_artefacts()
-    os.environ[SetupTargetVar] = "sdist"
+    os.environ[SetupTargetVar] = SdistTarget
     _run_build(["--sdist"])
     clean_artefacts()
     
-    for plat in pl_names:
+    for plat in BinaryPlatforms:
         os.environ[SetupTargetVar] = plat
         _run_build(["--wheel"])
         clean_artefacts()

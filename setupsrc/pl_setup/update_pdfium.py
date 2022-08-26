@@ -19,6 +19,7 @@ from pl_setup.packaging_base import (
     DataTree,
     VerNamespace,
     ReleaseNames,
+    BinaryPlatforms,
     ReleaseURL,
     set_version,
     get_latest_version,
@@ -117,18 +118,9 @@ def generate_bindings(Ctypesgen, archives):
 
 
 def get_download_files(platforms):
-    
-    avail_keys = [k for k in ReleaseNames.keys()]
-    if platforms is None:
-        platforms = avail_keys
-    
     download_files = {}
     for pl_name in platforms:
-        if pl_name in ReleaseNames:
-            download_files[ join(DataTree, pl_name) ] = ReleaseNames[pl_name]
-        else:
-            raise ValueError("Unknown platform name '%s'. Available keys are %s." % (pl_name, avail_keys))
-    
+        download_files[ join(DataTree, pl_name) ] = ReleaseNames[pl_name]
     return download_files
 
 
@@ -150,12 +142,14 @@ def main(platforms):
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(
-        description = "Download pre-built PDFium packages and generate bindings",
+        description = "Download pre-built PDFium packages and generate bindings. Available platform identifiers: %s" % BinaryPlatforms,
     )
     parser.add_argument(
         "--platforms", "-p",
-        metavar = "P",
-        nargs = "*",
+        metavar = "identifier",
+        choices = BinaryPlatforms,
+        default = BinaryPlatforms,
+        nargs = "+",
     )
     return parser.parse_args(argv)
 

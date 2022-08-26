@@ -49,6 +49,15 @@ def iterate_testfiles(skip_encrypted=True):
         yield member
 
 
+def get_members(cls):
+    members = []
+    for attr in dir(cls):
+        if attr.startswith("_"):
+            continue
+        members.append( getattr(cls, attr) )
+    return members
+
+
 def test_testpaths():
     for dirpath in (TestDir, SourceTree, ResourceDir, OutputDir):
         assert isdir(dirpath)

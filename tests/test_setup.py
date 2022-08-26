@@ -12,9 +12,17 @@ from pl_setup import (
     setup_base,
     packaging_base as pkg_base,
 )
-from pl_setup import update_pdfium as fpdf_up
-from pl_setup.packaging_base import PlatformNames, AllPlatNames
-from .conftest import SourceTree
+from pl_setup.packaging_base import (
+    PlatformNames,
+    BinaryPlatforms,
+    ReleaseNames,
+)
+from .conftest import SourceTree, get_members
+
+
+@pytest.fixture
+def all_platnames():
+    return list( get_members(PlatformNames) )
 
 
 # module
@@ -55,8 +63,8 @@ ExpectedTags = (
 )
 
 
-def test_expected_tags():
-    assert len(AllPlatNames) == len(ExpectedTags)
+def test_expected_tags(all_platnames):
+    assert len(all_platnames) == len(ExpectedTags)
     for platform, tag in ExpectedTags:
         assert hasattr(PlatformNames, platform)
         assert isinstance(tag, str)
@@ -72,7 +80,7 @@ def test_unknown_tag():
         setup_base._get_tag(plat_dir)
 
 def test_get_bdist():
-    for platform, tag in ExpectedTags:
+    for platform, _ in ExpectedTags:
         bdist_cls = setup_base._get_bdist(platform)
         assert issubclass(bdist_cls, bdist_wheel)
 
@@ -83,10 +91,10 @@ def test_libnames():
     for name in pkg_base.Libnames:
         assert "pdfium" in name
 
-def test_platformnames():
+def test_platformnames(all_platnames):
     # make sure variable names and values are identical
-    for name in AllPlatNames:
-        assert name == getattr(pkg_base.PlatformNames, name)
+    for name in all_platnames:
+        assert name == getattr(PlatformNames, name)
 
 def test_paths():
     assert pkg_base.HomeDir == str( Path.home() )
@@ -99,9 +107,10 @@ def test_paths():
 
 # update_pdfium
 
-def test_releasenames():
-    assert len(fpdf_up.ReleaseNames) == len(AllPlatNames)-1
-    for key, value in fpdf_up.ReleaseNames.items():
+def test_releasenames(all_platnames):
+    assert len(ReleaseNames) == len(BinaryPlatforms) == len(all_platnames) - 1
+    for key, value in ReleaseNames.items():
+        assert key in BinaryPlatforms
         assert hasattr(PlatformNames, key)
         prefix, system, cpu = value.replace("linux-musl", "musllinux").split("-", maxsplit=3)
         assert prefix == "pdfium"
