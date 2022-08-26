@@ -92,11 +92,11 @@ def get_latest_version(Git):
     return int( tag.split("/")[-1] )
 
 
-def call_ctypesgen(platform_dir, include_dir):
+def call_ctypesgen(Ctypesgen, platform_dir, include_dir):
     
     bindings_file = join(platform_dir, "_pypdfium.py")
     
-    ctypesgen_cmd = [shutil.which("ctypesgen"), "--library", "pdfium", "--strip-build-path", platform_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings_file]
+    ctypesgen_cmd = [Ctypesgen, "--library", "pdfium", "--strip-build-path", platform_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings_file]
     run_cmd(ctypesgen_cmd, cwd=platform_dir)
     
     with open(bindings_file, "r") as file_reader:

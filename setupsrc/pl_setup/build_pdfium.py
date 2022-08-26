@@ -173,7 +173,7 @@ def find_lib(srcname=None, directory=PDFiumBuildDir):
     return libpath
 
 
-def pack(src_libpath, destname=None):
+def pack(Ctypesgen, src_libpath, destname=None):
     
     if os.path.isdir(OutputDir):
         shutil.rmtree(OutputDir)
@@ -188,7 +188,7 @@ def pack(src_libpath, destname=None):
     include_dir = join(OutputDir, "include")
     shutil.copytree(join(PDFiumDir, "public"), include_dir)
     
-    call_ctypesgen(OutputDir, include_dir)
+    call_ctypesgen(Ctypesgen, OutputDir, include_dir)
     shutil.rmtree(include_dir)
 
 
@@ -226,6 +226,7 @@ def main(
     ):
     
     Git = shutil.which("git")
+    Ctypesgen = shutil.which("ctypesgen")
     
     if b_revision is None:
         b_revision = "main"
@@ -258,7 +259,7 @@ def main(
     configure(GN, config_str)
     build(Ninja, b_target)
     libpath = find_lib(b_srcname)
-    pack(libpath, b_destname)
+    pack(Ctypesgen, libpath, b_destname)
 
 
 def parse_args(argv):
