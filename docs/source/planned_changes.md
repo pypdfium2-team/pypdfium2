@@ -4,6 +4,4 @@
 # Planned Changes
 
 The following API breaking changes are being considered for the next major release:
-
-* Removal of the public function `raise_error()`, given that it is only usable for document loading APIs which are sufficiently managed by support models anyway.
 * Rendering parameters might change, especially the anti-aliasing options.

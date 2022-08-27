@@ -3,8 +3,12 @@
 
 import ctypes
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers.misc import raise_error
-from pypdfium2._helpers._utils import get_functype
+from pypdfium2._helpers.misc import PdfiumError
+from pypdfium2._helpers._utils import (
+    get_functype,
+    ErrorMapping,
+)
+
 
 
 class BufferDataHolder:
@@ -79,6 +83,8 @@ def open_pdf(input_data, password=None):
         raise TypeError("Invalid input type '%s'" % type(input_data).__name__)
     
     if pdfium.FPDF_GetPageCount(pdf) < 1:
-        raise_error("Loading the document failed")
+        err_code = pdfium.FPDF_GetLastError()
+        pdfium_msg = ErrorMapping.get(err_code, "Error code %s" % err_code)
+        raise PdfiumError("Loading the document failed (PDFium: %s)" % pdfium_msg)
     
     return pdf, ld_data

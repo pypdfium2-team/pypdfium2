@@ -2,8 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import enum
-import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers._utils import ErrorMapping
+
+
+class PdfiumError (RuntimeError):
+    """ An exception from the PDFium library, detected by function return code. """
+    pass
 
 
 class FileAccess (enum.Enum):
@@ -75,27 +78,3 @@ class OutlineItem:
         self.page_index = page_index
         self.view_mode = view_mode
         self.view_pos = view_pos
-
-
-class PdfiumError (RuntimeError):
-    """ An exception from the PDFium library, detected by function return code. """
-    pass
-
-
-def raise_error(msg):
-    """
-    Raise a :class:`.PdfiumError` annotated with the description of PDFium's current error code.
-    
-    Warning:
-        This shall be called only if a PDFium call failed according to return code **and**
-        :func:`.FPDF_GetLastError()` is mentioned in the documentation for the function in question.
-        Currently, :func:`.raise_error` is only applicable to document loading APIs.
-    
-    Parameters:
-        msg (str): The error message explaining the problem.
-    """
-    
-    err_code = pdfium.FPDF_GetLastError()
-    pdfium_msg = ErrorMapping.get(err_code, "Error code %s" % err_code)
-    
-    raise PdfiumError("%s (PDFium: %s)" % (msg, pdfium_msg))
