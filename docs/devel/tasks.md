@@ -8,9 +8,7 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 ### Main Code
 * Make the bindings file `_pypdfium.py` public
 * Make members of `_utils.py` public (move into `misc.py`)
-* Address points listed in [`planned_changes.md`](../source/planned_changes.md)
 * Investigate other PDFium rendering functions. Ideally, we would want to add margins, flip and colour schemes. Also consider making form rendering optional.
-* Implement `no_antialias` differently (probably it'd be best to provide separate options for each)
 * Read up what `FPDFPage_Flatten()` does and if we could use it somehow
 * Consolidate and extend the support model
 

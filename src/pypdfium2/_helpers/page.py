@@ -255,7 +255,9 @@ class PdfPage:
             annotations = True,
             greyscale = False,
             optimise_mode = OptimiseMode.NONE,
-            no_antialias = (),
+            no_smoothtext = False,
+            no_smoothimage = False,
+            no_smoothpath = False,
         ):
         """
         Rasterise the page to a ctypes ubyte array.
@@ -293,8 +295,14 @@ class PdfPage:
             optimise_mode (OptimiseMode):
                 How to optimise page rendering.
             
-            no_antialias (typing.Sequence[str]):
-                A list of item types that shall not be smoothed (text, image, path).
+            no_smoothtext (bool):
+                Disable anti-aliasing of text. Implicitly wipes out :attr:`.OptimiseMode.LCD_DISPLAY`.
+            
+            no_smoothimage (bool):
+                Disable anti-aliasing of images.
+            
+            no_smoothpath (bool):
+                Disable anti-aliasing of paths.
         
         Returns:
             (``ctypes.c_ubyte_Array_%d``, str, (int, int)):
@@ -336,12 +344,11 @@ class PdfPage:
             render_flags |= pdfium.FPDF_ANNOT
         if greyscale:
             render_flags |= pdfium.FPDF_GRAYSCALE
-        
-        if "text" in no_antialias:
+        if no_smoothtext:
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHTEXT
-        if "image" in no_antialias:
+        if no_smoothimage:
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHIMAGE
-        if "path" in no_antialias:
+        if no_smoothpath:
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHPATH
         
         if optimise_mode is OptimiseMode.NONE:

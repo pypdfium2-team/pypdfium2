@@ -3,5 +3,5 @@
 
 # Planned Changes
 
-The following API breaking changes are being considered for the next major release:
-* Rendering parameters might change, especially the anti-aliasing options.
+<!-- The following API breaking changes are being considered for the next major release: -->
+Currently, no API breaking changes are planned.

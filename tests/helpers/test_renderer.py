@@ -198,7 +198,9 @@ def test_render_page_optimisation(sample_page):
 
 def test_render_page_noantialias(sample_page):
     pil_image = sample_page.render_topil(
-        no_antialias = ("text", "image", "path"),
+        no_smoothtext  = True,
+        no_smoothimage = True,
+        no_smoothpath  = True,
         scale = 0.5,
     )
     assert isinstance(pil_image, PIL.Image.Image)

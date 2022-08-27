@@ -141,9 +141,7 @@ def main(args):
         else:
             page_indices = [i for i in range(len(pdf))]
         
-        n_digits = len(str( max(page_indices)+1 ))
-        
-        renderer = pdf.render_topil(
+        kwargs = dict(
             page_indices = page_indices,
             scale = args.scale,
             rotation = args.rotation,
@@ -152,11 +150,15 @@ def main(args):
             annotations = not args.no_annotations,
             greyscale = args.greyscale,
             optimise_mode = args.optimise_mode,
-            no_antialias = args.no_antialias,
             n_processes = args.processes,
         )
+        for type in args.no_antialias:
+            kwargs["no_smooth%s" % type] = True
         
+        renderer = pdf.render_topil(**kwargs)
         prefix = splitext(basename(input_path))[0] + "_"
+        n_digits = len(str( max(page_indices)+1 ))
+        
         for image, index in zip(renderer, page_indices):
             suffix = str(index+1).zfill(n_digits)
             output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
