@@ -41,17 +41,16 @@ def install_handler(w_presetup):
     host = HostPlatform()
     pl_name = host.get_name()
     
-    if pl_name is not None:
-        assert hasattr(PlatformNames, pl_name)
-        if w_presetup:
-            update_pdfium.main([pl_name])
-        mkwheel(pl_name)
-    else:
+    if pl_name is None:
         # If PDFium had a proper build system, we could trigger a source build here
         raise RuntimeError(
             "No pre-built binaries available for platform '%s' with libc implementation '%s'. " % (host.platform, host.libc) +
             "You can attempt a source build, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Doing cross-compilation or using a different build system might be possible, though. Please get in touch with the project maintainers."
         )
+    
+    if w_presetup:
+        update_pdfium.main([pl_name])
+    mkwheel(pl_name)
 
 
 def packaging_handler(target):
