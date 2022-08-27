@@ -152,7 +152,7 @@ class PdfDocument:
     def get_version(self):
         """
         Returns:
-            typing.Optional[int]: The PDF version of the document (14 for 1.4, 15 for 1.5, ...),
+            int | None: The PDF version of the document (14 for 1.4, 15 for 1.5, ...),
             or :data:`None` if the version could not be determined (e. g. because the document was created using :meth:`PdfDocument.new`).
         """
         version = ctypes.c_int()
@@ -170,7 +170,7 @@ class PdfDocument:
             buffer (typing.BinaryIO):
                 A byte buffer to capture the data.
                 It may be any object implementing the ``write()`` method.
-            version (typing.Optional[int]):
+            version (int | None):
                  The PDF version to use, given as an integer (14 for 1.4, 15 for 1.5, ...).
                  If :data:`None`, PDFium will set a version automatically.
         """
@@ -202,7 +202,7 @@ class PdfDocument:
                 Target page width (horizontal size).
             height (float):
                 Target page height (vertical size).
-            index (typing.Optional[int]):
+            index (int | None):
                 Suggested zero-based index at which the page will be inserted.
                 If *index* is less or equal to zero, the page will be inserted at the beginning.
                 If *index* is :data:`None` or larger that the document's current last index, the page will be appended to the end.
@@ -394,7 +394,7 @@ class PdfDocument:
         The order of results matches the order of given page indices.
         
         Parameters:
-            page_indices (typing.Optional[typing.Sequence[int]]):
+            page_indices (typing.Sequence[int] | None):
                 A sequence of zero-based indices of the pages to render.
                 If :data:`None`, all pages will be included.
             n_processes (int):

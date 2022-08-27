@@ -276,11 +276,13 @@ class PdfPage:
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top).
                 Crop is applied after rotation.
             
-            colour (typing.Optional[ typing.Tuple[int, int, int, typing.Optional[int]] ]):
+            colour (typing.Tuple[int, int, int, int] | typing.Tuple[int, int, int] | None):
                 Page background colour. Defaults to white.
-                It can either be :data:`None`, or values of red, green, blue, and alpha ranging from 0 to 255.
                 If :data:`None`, the bitmap will not be filled with a colour, resulting in transparent background.
-                For RGB, 0 will include nothing of the colour in question, while 255 will completely include it. For Alpha, 0 means full transparency, while 255 means no transparency.
+                Otherwise, *colour* shall be a list of values for red, green, blue, and optionally alpha, ranging from 0 to 255.
+                If alpha is not given, it defaults to 255.
+                For RGB, 0 will include nothing of the colour in question, while 255 will fully include it.
+                For Alpha, 0 means full transparency, while 255 means no transparency.
             
             annotations (bool):
                 Whether to render page annotations.
@@ -295,7 +297,7 @@ class PdfPage:
                 A list of item types that shall not be smoothed (text, image, path).
         
         Returns:
-            (ctypes.c_ubyte_Array_N, str, (int, int)):
+            (``ctypes.c_ubyte_Array_%d``, str, (int, int)):
             Ctypes array, colour format, and image size.
             The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
             Image size is given in pixels as a tuple of width and height.

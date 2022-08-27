@@ -50,7 +50,7 @@ class OutlineItem:
             String of the bookmark.
         is_closed (bool):
             If :data:`True`, child items shall be hidden by default.
-        page_index (int):
+        page_index (int | None):
             Zero-based index of the page the bookmark points to.
         view_mode (int):
             A view mode constant (``PDFDEST_VIEW_...``) defining how the coordinates of *view_pos* shall be interpreted.

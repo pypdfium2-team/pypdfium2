@@ -100,7 +100,7 @@ class PdfTextPage:
             y_tol (float): Vertical tolerance.
         
         Returns:
-            typing.Optional[int]: The index of the character at or nearby the point (x, y).
+            int | None: The index of the character at or nearby the point (x, y).
             May be :data:`None` if there is no character or an error occurred.
         """
         index = pdfium.FPDFText_GetCharIndexAtPos(self._textpage, x, y, x_tol, y_tol)
