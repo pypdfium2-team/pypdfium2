@@ -50,6 +50,11 @@ class PdfDocument:
         autoclose (bool):
             If set to :data:`True` and a byte buffer was provided as input, :meth:`.close` will not only close the PDFium document, but also the input source.
     
+    Raises:
+        PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
+        FileNotFoundError: Raised if an invalid or non-existent file path was given.
+        TypeError: Raised if an invalid file access strategy was given.
+    
     Hint:
         * :func:`len` may be called to get a document's number of pages.
         * :class:`PdfDocument` implements the context manager API, hence documents can be used in a ``with`` block, where :meth:`.close` will be called automatically on exit.
@@ -94,8 +99,10 @@ class PdfDocument:
                 buf = open(self._orig_input, "rb")
                 self._actual_input = buf.read()
                 buf.close()
+            elif not isinstance(self._file_access, FileAccess):
+                raise TypeError("Invalid file_access type. Expected `FileAccess`, but got `%s`." % type(self._file_access).__name__)
             else:
-                raise ValueError("An invalid file access strategy was given: '%s'" % self._file_access)
+                assert False  # unhandled file access strategy (hypothetical internal error)
         
         if isinstance(self._actual_input, pdfium.FPDF_DOCUMENT):
             self._pdf = self._actual_input

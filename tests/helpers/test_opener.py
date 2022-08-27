@@ -196,7 +196,7 @@ def test_open_invalid():
         pdf = pdfium.PdfDocument("invalid/path")
     with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
         pdf = pdfium.PdfDocument("invalid/path", file_access=pdfium.FileAccess.BUFFER)
-    with pytest.raises(ValueError, match=re.escape("An invalid file access strategy was given: 'abcd'")):
+    with pytest.raises(TypeError, match=re.escape("Invalid file_access type. Expected `FileAccess`, but got `str`.")):
         pdf = pdfium.PdfDocument(TestFiles.empty, file_access="abcd")
 
 
