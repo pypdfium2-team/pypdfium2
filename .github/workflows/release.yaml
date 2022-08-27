@@ -5,8 +5,9 @@ name: Autorelease
 on:
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
-  schedule:
-    - cron: '0 10 * * 1'
+  # (Schedule temporarily disabled as the next release will increment major version and may need more time)
+  # schedule:
+  #   - cron: '0 10 * * 1'
   workflow_dispatch:
 
 jobs:
