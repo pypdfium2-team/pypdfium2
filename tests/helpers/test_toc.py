@@ -66,7 +66,7 @@ def test_gettoc_circular(toc_circular_doc, caplog):
     _compare_bookmark(
         next(toc),
         title = "A Good Beginning",
-        page_index = -1,
+        page_index = None,
         view_mode = pdfium.PDFDEST_VIEW_UNKNOWN_MODE,
         view_pos = [],
         is_closed = False,
@@ -74,7 +74,7 @@ def test_gettoc_circular(toc_circular_doc, caplog):
     _compare_bookmark(
         next(toc),
         title = "A Good Ending",
-        page_index = -1,
+        page_index = None,
         view_mode = pdfium.PDFDEST_VIEW_UNKNOWN_MODE,
         view_pos = [],
         is_closed = False,
@@ -118,8 +118,8 @@ TocResult_A = """\
 """
 
 TocResult_B = """\
-[+] A Good Beginning -> 0  # Unknown []
-[+] A Good Ending -> 0  # Unknown []
+[+] A Good Beginning -> ?  # ? []
+[+] A Good Ending -> ?  # ? []
 """
 
 TocResult_C = """\

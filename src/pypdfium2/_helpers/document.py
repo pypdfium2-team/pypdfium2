@@ -269,6 +269,8 @@ class PdfDocument:
         is_closed = pdfium.FPDFBookmark_GetCount(bookmark) < 0
         dest = pdfium.FPDFBookmark_GetDest(self._pdf, bookmark)
         page_index = pdfium.FPDFDest_GetDestPageIndex(self._pdf, dest)
+        if page_index == -1:
+            page_index = None
         
         n_params = ctypes.c_ulong()
         view_pos = (pdfium.FS_FLOAT * 4)()
@@ -347,7 +349,7 @@ class PdfDocument:
                 "[%s] " % ("-" if item.is_closed else "+") +
                 "%s -> %s  # %s %s" % (
                     item.title,
-                    item.page_index+1,
+                    item.page_index+1 if item.page_index is not None else "?",
                     ViewmodeMapping[item.view_mode],
                     [round(c, n_digits) for c in item.view_pos],
                 )

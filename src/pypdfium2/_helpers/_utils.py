@@ -79,7 +79,7 @@ ViewmodeMapping = {
     pdfium.PDFDEST_VIEW_FITB:  "FitB",
     pdfium.PDFDEST_VIEW_FITBH: "FitBH",
     pdfium.PDFDEST_VIEW_FITBV: "FitBV",
-    pdfium.PDFDEST_VIEW_UNKNOWN_MODE: "Unknown",
+    pdfium.PDFDEST_VIEW_UNKNOWN_MODE: "?",
 }
 
 #: Convert a PDFium error constant (``FPDF_ERR_...``) to string.
