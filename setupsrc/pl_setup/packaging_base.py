@@ -17,8 +17,7 @@ from os.path import (
     expanduser,
 )
 
-# TODO think about variables to move in/out
-# TODO improve consistency of variable names
+# TODO improve consistency of variable names; think about variables to move in/out
 
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
@@ -87,8 +86,10 @@ class HostPlatform:
         # `libc_ver()` currently returns an empty string on libc implementations other than glibc - hence, we assume musl if it's not glibc
         # FIXME is there some function to actually detect musl?
         self.platform = sysconfig.get_platform().lower().replace("-", "_").replace(".", "_")
-        self.libc = platform.libc_ver()[0]
-        self.is_glibc = (self.libc == "glibc")
+        self.libc_info, self.is_glibc = None, None
+        if self.platform.startswith("linux"):
+            self.libc_info = platform.libc_ver()
+            self.is_glibc = (self.libc_info[0] == "glibc")
     
     def _is_plat(self, start, end):
         return self.platform.startswith(start) and self.platform.endswith(end)

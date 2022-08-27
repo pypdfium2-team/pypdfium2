@@ -44,7 +44,7 @@ def install_handler(w_presetup):
     if pl_name is None:
         # If PDFium had a proper build system, we could trigger a source build here
         raise RuntimeError(
-            "No pre-built binaries available for platform '%s' with libc implementation '%s'. " % (host.platform, host.libc) +
+            "No pre-built binaries available for platform '%s' with libc implementation '%s'. " % (host.platform, host.libc_info) +
             "You can attempt a source build, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Doing cross-compilation or using a different build system might be possible, though. Please get in touch with the project maintainers."
         )
     
