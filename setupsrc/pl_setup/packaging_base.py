@@ -85,14 +85,14 @@ class HostPlatform:
     def __init__(self):
         # `libc_ver()` currently returns an empty string on libc implementations other than glibc - hence, we assume musl if it's not glibc
         # FIXME is there some function to actually detect musl?
-        self.platform = sysconfig.get_platform().lower().replace("-", "_").replace(".", "_")
+        self.plat_info = sysconfig.get_platform().lower().replace("-", "_").replace(".", "_")
         self.libc_info, self.is_glibc = None, None
-        if self.platform.startswith("linux"):
+        if self.plat_info.startswith("linux"):
             self.libc_info = platform.libc_ver()
             self.is_glibc = (self.libc_info[0] == "glibc")
     
     def _is_plat(self, start, end):
-        return self.platform.startswith(start) and self.platform.endswith(end)
+        return self.plat_info.startswith(start) and self.plat_info.endswith(end)
     
     def get_name(self):
         if self._is_plat("macosx", "arm64"):
