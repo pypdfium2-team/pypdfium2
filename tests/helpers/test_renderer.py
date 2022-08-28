@@ -4,8 +4,9 @@
 import io
 import math
 import logging
-import PIL.Image
 from os.path import join
+import numpy
+import PIL.Image
 import pytest
 import pypdfium2 as pdfium
 from ..conftest import (
@@ -254,9 +255,30 @@ def render_pdffile_tobytes(multipage_doc):
     for g in imgs: g.close()
 
 
-def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes):
-    for image_a, image_b in zip(render_pdffile_topil, render_pdffile_tobytes):
-        assert image_a == image_b
+@pytest.fixture
+def render_pdffile_tonumpy(multipage_doc):
+    
+    renderer = multipage_doc.render_tonumpy(scale=0.5, rev_byteorder=True)
+    imgs = []
+    
+    for array, cl_format in renderer:
+        assert cl_format == "RGB"
+        assert isinstance(array, numpy.ndarray)
+        # print(array)
+        pil_image = PIL.Image.fromarray(array, mode=cl_format)
+        imgs.append(pil_image)
+    
+    # for i, img in enumerate(imgs):
+    #     img.save(join(OutputDir, "numpy_%s.png" % i))
+    
+    assert len(imgs) == 3
+    yield imgs
+    for g in imgs: g.close()
+
+
+def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes, render_pdffile_tonumpy):
+    for a, b, c in zip(render_pdffile_topil, render_pdffile_tobytes, render_pdffile_tonumpy):
+        assert a == b == c
 
 
 def test_render_pdf_new(caplog):

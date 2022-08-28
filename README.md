@@ -69,7 +69,7 @@ pypdfium2 does not have any mandatory runtime dependencies apart from Python and
 However, some optional support model features require additional packages:
 * [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module name `PIL`) is a highly pouplar imaging library for Python.
   pypdfium2 provides convenience methods to directly return PIL image objects when dealing with raster graphics.
-  If you do not mean to use PIL, this is entirely optional and you may get the image data as bytes instead.
+* [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. Similar to `Pillow`, pypdfium2 provides helpers to get raster graphics in the form of multidimensional numpy arrays.
 * [`uharfbuzz`](https://github.com/harfbuzz/uharfbuzz) is a text shaping engine used by text insertion helpers, to support foreign writing systems.
   If you do not care about this, you may insert text using the raw PDFium functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependant on uharfbuzz.
 

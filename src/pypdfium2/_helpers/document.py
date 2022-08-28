@@ -474,6 +474,18 @@ class PdfDocument:
             :class:`PIL.Image.Image`: PIL image.
         """
         yield from self._render_base("pil", **kwargs)
+    
+    def render_tonumpy(self, **kwargs):
+        """
+        *Requires* :mod:`numpy`.
+        
+        Concurrently render pages to NumPy arrays.
+        See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
+        
+        Yields:
+            (:class:`numpy.ndarray`, str): NumPy array, and colour format.
+        """
+        yield from self._render_base("numpy", **kwargs)
 
 
 class _writer_class:

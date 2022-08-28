@@ -33,6 +33,13 @@ except ImportError:
 else:
     have_pil = True
 
+try:
+    import numpy
+except ImportError:
+    have_numpy = False
+else:
+    have_numpy = True
+
 
 class PdfPage:
     """ Page helper class. """
@@ -213,7 +220,7 @@ class PdfPage:
         
         start_point = pos_x
         for info, pos in zip(hb_buffer.glyph_infos, hb_buffer.glyph_positions):
-            pdf_textobj = pdfium.FPDFPageObj_CreateTextObj(self._pdf.raw, pdf_font.raw, font_size)
+            pdf_textobj = pdfium.FPDFPageObj_CreateTextObj(self.pdf.raw, pdf_font.raw, font_size)
             pdfium.FPDFText_SetCharcodes(pdf_textobj, ctypes.c_uint32(info.codepoint), 1)
             pdfium.FPDFPageObj_Transform(
                 pdf_textobj,
@@ -403,20 +410,43 @@ class PdfPage:
     
     def render_tobytes(self, **kwargs):
         """
-        Rasterise the page to bytes. Parameters are the same as for :meth:`.render_base`.
+        Rasterise the page to bytes. Parameters match :meth:`.render_base`.
         
         Returns:
             (bytes, str, (int, int)): Image data, colour format, and size.
         """
-        c_array, cl_format, size = self.render_base(**kwargs)
-        return bytes(c_array), cl_format, size
+        c_array, *args = self.render_base(**kwargs)
+        return bytes(c_array), *args
+    
+    
+    def render_tonumpy(self, **kwargs):
+        """
+        *Requires* :mod:`numpy`.
+        
+        Rasterise the page to a NumPy array. Parameters match :meth:`.render_base`.
+        
+        Returns:
+            (numpy.ndarray, str): NumPy array, and colour format.
+        """
+        
+        if not have_numpy:
+            raise RuntimeError("Numpy library needs to be installed for render_tonumpy().")
+        
+        c_array, cl_format, (width, height) = self.render_base(**kwargs)
+        np_array = numpy.ndarray(
+            shape = (height, width, len(cl_format)),
+            dtype = numpy.uint8,
+            buffer = c_array,
+        )
+        
+        return np_array, cl_format
     
     
     def render_topil(self, **kwargs):
         """
         *Requires* :mod:`PIL`.
         
-        Rasterise the page to a PIL image. Parameters are the same as for :meth:`.render_base`.
+        Rasterise the page to a PIL image. Parameters match :meth:`.render_base`.
         
         Returns:
             PIL.Image.Image: An image of the page.
