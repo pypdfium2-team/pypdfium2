@@ -401,18 +401,18 @@ class PdfPage:
         return buffer, cl_string, (width, height)
     
     
-    def render_tobytes(self, *args, **kwargs):
+    def render_tobytes(self, **kwargs):
         """
         Rasterise the page to bytes. Parameters are the same as for :meth:`.render_base`.
         
         Returns:
             (bytes, str, (int, int)): Image data, colour format, and size.
         """
-        c_array, cl_format, size = self.render_base(*args, **kwargs)
+        c_array, cl_format, size = self.render_base(**kwargs)
         return bytes(c_array), cl_format, size
     
     
-    def render_topil(self, *args, **kwargs):
+    def render_topil(self, **kwargs):
         """
         *Requires* :mod:`PIL`.
         
@@ -425,7 +425,7 @@ class PdfPage:
         if not have_pil:
             raise RuntimeError("Pillow library needs to be installed for render_topil().")
         
-        c_array, cl_src, size = self.render_base(*args, **kwargs)
+        c_array, cl_src, size = self.render_base(**kwargs)
         
         cl_mapping = {
             "BGRA": "RGBA",
