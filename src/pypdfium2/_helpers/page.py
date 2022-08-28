@@ -271,7 +271,7 @@ class PdfPage:
             
             scale (float):
                 This parameter defines the resolution of the image.
-                Technically speaking, it is a factor sacling the number of pixels that represent a length of 1 PDF canvas unit (equivalent to 1/72 of an inch by default). [1]_
+                Technically speaking, it is a factor scaling the number of pixels that represent the length of 1 PDF canvas unit (equivalent to 1/72 of an inch by default). [1]_
                 
                 .. [1] Since PDF 1.6, pages may define a so-called user unit. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. pypdfium2 currently does not take this into account.
                 

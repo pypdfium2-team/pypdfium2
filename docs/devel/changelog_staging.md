@@ -7,7 +7,7 @@
 
 - Support model
     *API-breaking changes*
-    - PDFium is now provied with an external, python-allocated buffer for rendering. This has numerous advantages, most notably that callers don't need to free resources anymore. `PdfPage.render_base()` now directly returns a ctypes ubyte array; `BitmapDataHolder` has been removed.
+    - PDFium is now provided with an external, python-allocated buffer for rendering. This has numerous advantages, most notably that callers don't need to free resources anymore. `PdfPage.render_base()` now directly returns a ctypes ubyte array; `BitmapDataHolder` has been removed.
     - Changed rendering parameters
         - `annotations` was renamed to `draw_annots`
         - `colour` now only takes a list of 4 values for simplicity - it may not be a list of 3 values or `None` anymore
