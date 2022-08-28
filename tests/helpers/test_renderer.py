@@ -172,6 +172,25 @@ def test_render_page_bgcolour(colour, sample_page):
 @pytest.mark.parametrize(
     "rev_byteorder", [False, True]
 )
+def test_render_page_tonumpy(rev_byteorder, sample_page):
+    
+    array, cl_format = sample_page.render_tonumpy(rev_byteorder=rev_byteorder)
+    assert isinstance(array, numpy.ndarray)
+    if rev_byteorder:
+        assert cl_format == "RGB"
+    else:
+        assert cl_format == "BGR"
+    
+    for (x, y), value in ExpRenderPixels:
+        if rev_byteorder:
+            assert tuple(array[y][x]) == value
+        else:
+            assert tuple(array[y][x]) == tuple(reversed(value))
+
+
+@pytest.mark.parametrize(
+    "rev_byteorder", [False, True]
+)
 def test_render_page_tobytes(rev_byteorder, sample_page):
     
     bytedata, cl_format, size = sample_page.render_tobytes(scale=0.5, rev_byteorder=rev_byteorder)
