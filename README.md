@@ -148,13 +148,20 @@ Here are some examples of using the support model API.
 * Render a single page
   ```python
   image = page.render_topil(
-      scale = 1,  # 72dpi resolution
-      rotation = 0,  # no additional rotation
-      crop = (0, 0, 0, 0),  # no crop (left, right, bottom, top)
+      scale = 1,              # 72dpi resolution
+      rotation = 0,           # no additional rotation
+      crop = (0, 0, 0, 0),    # no crop (left, right, bottom, top)
       colour = (255, 255, 255, 255),  # RGBA background colour (white)
-      annotations = True,  # show annotations
-      greyscale = False,  # render coloured
-      optimise_mode = pdfium.OptimiseMode.NONE,  # no subpixel rendering
+      greyscale = False,      # render coloured
+      optimise_mode = OptimiseMode.NONE,  # no supbixel rendering
+      draw_annots = True,     # show annotations
+      draw_forms = True,      # show forms
+      no_smoothtext = False,  # anti-alias text
+      no_smoothimage = False, # anti-alias images
+      no_smoothpath = False,  # anti-alias paths
+      rev_byteorder = False,  # do not reverse byte order
+      extra_flags = 0,        # no additional PDFium flags
+      memory_limit = 2**30,   # maximum allocation (1 GiB)
   )
   image.show()
   image.close()

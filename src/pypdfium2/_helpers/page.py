@@ -261,7 +261,7 @@ class PdfPage:
             no_smoothpath = False,
             rev_byteorder = False,
             extra_flags = 0,
-            memory_limit = 2 ** 30,
+            memory_limit = 2**30,
         ):
         """
         Rasterise the page to a ctypes ubyte array.
