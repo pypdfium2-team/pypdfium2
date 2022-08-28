@@ -94,7 +94,12 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--no-annotations",
         action = "store_true",
-        help = "Option to prevent rendering of PDF annotations",
+        help = "Prevent rendering of PDF annotations",
+    )
+    parser.add_argument(
+        "--no-forms",
+        action = "store_true",
+        help = "Prevent rendering of PDF forms",
     )
     parser.add_argument(
         "--optimise-mode",
@@ -119,6 +124,11 @@ def attach_parser(subparsers):
         default = (),
         choices = ("text", "image", "path"),
         help = "Item types that shall not be smoothed",
+    )
+    parser.add_argument(
+        "--rev-byteorder",
+        action = "store_true",
+        help = "Render with reverse byte order internally, i. e. RGB(A) instead of BGR(A). The result should be completely identical."
     )
     parser.add_argument(
         "--processes",
@@ -147,9 +157,11 @@ def main(args):
             rotation = args.rotation,
             crop = args.crop,
             colour = args.colour,
-            annotations = not args.no_annotations,
             greyscale = args.greyscale,
             optimise_mode = args.optimise_mode,
+            draw_annots = not args.no_annotations,
+            draw_forms = not args.no_forms,
+            rev_byteorder = args.rev_byteorder,
             n_processes = args.processes,
         )
         for type in args.no_antialias:
