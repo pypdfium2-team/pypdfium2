@@ -8,9 +8,9 @@ from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers._utils import (
-    colour_tohex,
-    get_colourformat,
-    ColourMapping,
+    colour_helper,
+    BitmapFormatToStr,
+    BitmapFormatToStrReverse,
     RotationToConst,
     RotationToDegrees,
 )
@@ -252,12 +252,16 @@ class PdfPage:
             rotation = 0,
             crop = (0, 0, 0, 0),
             colour = (255, 255, 255, 255),
-            annotations = True,
             greyscale = False,
             optimise_mode = OptimiseMode.NONE,
+            draw_annots = True,
+            draw_forms = True,
             no_smoothtext = False,
             no_smoothimage = False,
             no_smoothpath = False,
+            rev_byteorder = False,
+            extra_flags = 0,
+            memory_limit = 2 ** 30,
         ):
         """
         Rasterise the page to a ctypes ubyte array.
@@ -266,11 +270,11 @@ class PdfPage:
         Parameters:
             
             scale (float):
-                Define the quality (or size) of the image.
-                By default, one PDF point (1/72in) is rendered to 1x1 pixel. This factor scales the number of pixels that represent one point.
-                Higher values increase quality, file size and rendering duration, while lower values reduce them.
-                Note that UserUnit is not taken into account, so if you are using pypdfium2 in conjunction with an other PDF library, you may want to check for a possible ``/UserUnit`` in the page dictionary and multiply this scale factor with it.
-            
+                This parameter defines the resolution of the image.
+                Technically speaking, it is a factor sacling the number of pixels that represent a length of 1 PDF canvas unit (equivalent to 1/72 of an inch by default). [1]_
+                
+                .. [1] Since PDF 1.6, pages may define a so-called user unit. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. pypdfium2 currently does not take this into account.
+                
             rotation (int):
                 A rotation value in degrees (0, 90, 180, or 270), in addition to page rotation.
             
@@ -278,22 +282,22 @@ class PdfPage:
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top).
                 Crop is applied after rotation.
             
-            colour (typing.Tuple[int, int, int, int] | typing.Tuple[int, int, int] | None):
-                Page background colour. Defaults to white.
-                If :data:`None`, the bitmap will not be filled with a colour, resulting in transparent background.
-                Otherwise, *colour* shall be a list of values for red, green, blue, and optionally alpha, ranging from 0 to 255.
-                If alpha is not given, it defaults to 255.
+            colour (typing.Tuple[int, int, int, int]):
+                Page background colour. Shall be a list of values for red, green, blue and alpha, ranging from 0 to 255.
                 For RGB, 0 will include nothing of the colour in question, while 255 will fully include it.
                 For Alpha, 0 means full transparency, while 255 means no transparency.
-            
-            annotations (bool):
-                Whether to render page annotations.
             
             greyscale (bool):
                 Whether to render in greyscale mode (no colours).
             
             optimise_mode (OptimiseMode):
                 How to optimise page rendering.
+            
+            draw_annots (bool):
+                Whether to render page annotations.
+            
+            draw_forms (bool):
+                Whether to render form fields.
             
             no_smoothtext (bool):
                 Disable anti-aliasing of text. Implicitly wipes out :attr:`.OptimiseMode.LCD_DISPLAY`.
@@ -303,24 +307,39 @@ class PdfPage:
             
             no_smoothpath (bool):
                 Disable anti-aliasing of paths.
-        
+            
+            rev_byteorder (bool):
+                By default, the output pixel format will be ``BGR(A)``.
+                This option may be used to render with reversed byte order, leading to ``RGB(A)`` output instead.
+                ``L`` is unaffected.
+            
+            extra_flags (int):
+                Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
+            
+            memory_limit (int | None):
+                Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
+                If the limit is exceeded, a :exc:`RuntimeError` will be raised.
+                If :data:`None` or 0, this function may allocate arbitrary amounts of memory as far as Python and the OS permit.
+            
         Returns:
             (``ctypes.c_ubyte_Array_%d``, str, (int, int)):
             Ctypes array, colour format, and image size.
-            The colour format can be ``BGRA``, ``BGR``, or ``L``, depending on the parameters *colour* and *greyscale*.
+            The colour format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, or ``L``, depending on the parameters *colour*, *greyscale* and *rev_byteorder*.
             Image size is given in pixels as a tuple of width and height.
+        
+        Hint:
+            To convert a DPI value to a scale factor, divide it by 72.
+        Note:
+            The ctypes array is allocated by Python (not PDFium), so we don't need to care about freeing memory.
         """
         
-        if colour is None:
-            fpdf_colour, use_alpha = None, True
+        c_colour, cl_pdfium, rev_byteorder = colour_helper(*colour, greyscale, rev_byteorder)
+        
+        if rev_byteorder:
+            cl_string = BitmapFormatToStrReverse[cl_pdfium]
         else:
-            fpdf_colour, use_alpha = colour_tohex(*colour)
-        
-        cl_format, cl_pdfium = get_colourformat(use_alpha, greyscale)
-        n_colours = len(cl_format)
-        
-        form_config = pdfium.FPDF_FORMFILLINFO(2)
-        form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(self._pdf.raw, form_config)
+            cl_string = BitmapFormatToStr[cl_pdfium]
+        n_channels = len(cl_string)
         
         src_width  = math.ceil(self.get_width()  * scale)
         src_height = math.ceil(self.get_height() * scale)
@@ -333,23 +352,32 @@ class PdfPage:
         if any(d < 1 for d in (width, height)):
             raise ValueError("Crop exceeds page dimensions (in px): width %s, height %s, crop %s" % (src_width, src_height, crop))
         
-        buffer = (ctypes.c_ubyte * (width*height*n_colours))()
-        bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, width*n_colours)
-        if fpdf_colour is not None:
-            pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, fpdf_colour)
+        stride = width * n_channels  # number of bytes per row
+        n_bytes = stride * height    # total number of bytes
+        if memory_limit and n_bytes > memory_limit:
+            raise RuntimeError(
+                "Planned allocation of %s bytes exceeds the defined limit of %s. " % (n_bytes, memory_limit) +
+                "Consider adjusting the *memory_limit* parameter."
+            )
+        
+        buffer = (ctypes.c_ubyte * n_bytes)()
+        bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
+        if colour[3] > 0:
+            pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_colour)
         
         render_flags = 0
-        
-        if annotations:
-            render_flags |= pdfium.FPDF_ANNOT
         if greyscale:
             render_flags |= pdfium.FPDF_GRAYSCALE
+        if draw_annots:
+            render_flags |= pdfium.FPDF_ANNOT
         if no_smoothtext:
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHTEXT
         if no_smoothimage:
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHIMAGE
         if no_smoothpath:
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHPATH
+        if rev_byteorder:
+            render_flags |= pdfium.FPDF_REVERSE_BYTE_ORDER
         
         if optimise_mode is OptimiseMode.NONE:
             pass
@@ -360,15 +388,17 @@ class PdfPage:
         else:
             raise ValueError("Invalid optimise_mode %s" % optimise_mode)
         
+        render_flags |= extra_flags
+        
         render_args = (bitmap, self._page, -crop[0], -crop[3], src_width, src_height, RotationToConst[rotation], render_flags)
         pdfium.FPDF_RenderPageBitmap(*render_args)
-        pdfium.FPDF_FFLDraw(form_fill, *render_args)
-        pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
         
-        # No need to call FPDFBitmap_Destroy() because we're using an external buffer.
-        # Python will take care of freeing the memory when `buffer` isn't referenced anymore.
+        if draw_forms:
+            form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(self.pdf.raw, pdfium.FPDF_FORMFILLINFO(2))
+            pdfium.FPDF_FFLDraw(form_fill, *render_args)
+            pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
         
-        return buffer, cl_format, (width, height)
+        return buffer, cl_string, (width, height)
     
     
     def render_tobytes(self, *args, **kwargs):
@@ -395,9 +425,18 @@ class PdfPage:
         if not have_pil:
             raise RuntimeError("Pillow library needs to be installed for render_topil().")
         
-        c_array, cl_format, size = self.render_base(*args, **kwargs)
-        pil_image = PIL.Image.frombytes(ColourMapping[cl_format], size, c_array, "raw", cl_format, 0, 1)
+        c_array, cl_src, size = self.render_base(*args, **kwargs)
         
+        cl_mapping = {
+            "BGRA": "RGBA",
+            "BGR":  "RGB",
+        }
+        if cl_src in cl_mapping:
+            cl_dst = cl_mapping[cl_src]
+        else:
+            cl_dst = cl_src
+        
+        pil_image = PIL.Image.frombytes(cl_dst, size, c_array, "raw", cl_src, 0, 1)
         return pil_image
 
 

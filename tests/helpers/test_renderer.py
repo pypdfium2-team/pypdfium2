@@ -101,37 +101,44 @@ def test_render_page_alpha(sample_page):
         [(150, 390), (42,  96,  153, 255)],
         [(150, 570), (128, 0,   128, 255)],
     ]
-    pil_image = sample_page.render_topil(colour=None)
+    kwargs = dict(colour=(0, 0, 0, 0))
+    image = sample_page.render_topil(**kwargs)
+    image_rev = sample_page.render_topil(**kwargs, rev_byteorder=True)
     
-    assert pil_image.mode == "RGBA"
-    assert pil_image.size == (595, 842)
+    assert image == image_rev
+    assert image.mode == "RGBA"
+    assert image.size == (595, 842)
     for pos, exp_value in pixels:
-        assert pil_image.getpixel(pos) == exp_value
+        assert image.getpixel(pos) == exp_value
     
-    pil_image.close()
+    image.save(join(OutputDir, "coloured_alpha.png"))
+    for g in (image, image_rev): g.close()
 
 
 def test_render_page_greyscale(sample_page):
 
-    image_a = sample_page.render_topil(
+    kwargs = dict(
         greyscale = True,
-        scale = 0.5
+        scale = 0.5,
     )
-    assert image_a.size == (298, 421)
-    assert image_a.mode == "L"
-    image_a.save(join(OutputDir, "greyscale.png"))
-    image_a.close()
+    image = sample_page.render_topil(**kwargs)
+    image_rev = sample_page.render_topil(**kwargs, rev_byteorder=True)
+    assert image == image_rev
+    assert image.size == (298, 421)
+    assert image.mode == "L"
+    image.save(join(OutputDir, "greyscale.png"))
+    for g in (image, image_rev): g.close()
     
     # PDFium currently doesn't support LA, hence greyscale + alpha rendering results in RGBA
-    image_b = sample_page.render_topil(
+    image = sample_page.render_topil(
         greyscale = True,
-        colour = None,
-        scale = 0.5
+        colour = (0, 0, 0, 0),
+        scale = 0.5,
     )
-    assert image_b.size == (298, 421)
-    assert image_b.mode == "RGBA"
-    image_b.save(join(OutputDir, "greyscale_alpha.png"))
-    image_b.close()
+    assert image.size == (298, 421)
+    assert image.mode == "RGBA"
+    image.save(join(OutputDir, "greyscale_alpha.png"))
+    image.close()
 
 
 @pytest.mark.parametrize(
@@ -139,38 +146,44 @@ def test_render_page_greyscale(sample_page):
     [
         (255, 255, 255, 255),
         (60,  70,  80,  100),
-        (255, 255, 255),
-        (0,   255, 255),
-        (255, 0,   255),
-        (255, 255, 0  ),
+        (255, 255, 255, 255),
+        (0,   255, 255, 255),
+        (255, 0,   255, 255),
+        (255, 255, 0,   255),
     ]
 )
 def test_render_page_bgcolour(colour, sample_page):
     
-    pil_image = sample_page.render_topil(colour=colour, scale=0.5)
-    assert pil_image.size == (298, 421)
+    kwargs = dict(colour=colour, scale=0.5)
+    image = sample_page.render_topil(**kwargs)
+    image_rev = sample_page.render_topil(**kwargs, rev_byteorder=True)
+    assert image == image_rev
     
-    px_colour = colour
-    if len(colour) == 4:
-        if colour[3] == 255:
-            px_colour = colour[:-1]
+    bg_pixel = image.getpixel( (0, 0) )
+    if colour[3] == 255:
+        colour = colour[:-1]
+    assert image.size == (298, 421)
+    assert bg_pixel == colour
     
-    bg_pixel = pil_image.getpixel( (0, 0) )
-    assert bg_pixel == px_colour
-    
-    pil_image.close()
+    image.close()
 
 
-def test_render_page_tobytes(sample_page):
+@pytest.mark.parametrize(
+    "rev_byteorder", [False, True]
+)
+def test_render_page_tobytes(rev_byteorder, sample_page):
     
-    bytedata, cl_format, size = sample_page.render_tobytes(scale=0.5)
+    bytedata, cl_format, size = sample_page.render_tobytes(scale=0.5, rev_byteorder=rev_byteorder)
     
     assert isinstance(bytedata, bytes)
-    assert cl_format == "BGR"
     assert size == (298, 421)
     assert len(bytedata) == size[0] * size[1] * len(cl_format)
+    if rev_byteorder:
+        assert cl_format == "RGB"
+    else:
+        assert cl_format == "BGR"
     
-    pil_image = PIL.Image.frombytes("RGB", size, bytedata, "raw", "BGR")
+    pil_image = PIL.Image.frombytes("RGB", size, bytedata, "raw", cl_format)
     assert pil_image.mode == "RGB"
     assert pil_image.size == (298, 421)
     assert isinstance(pil_image, PIL.Image.Image)
@@ -210,14 +223,12 @@ def test_render_page_noantialias(sample_page):
 @pytest.fixture
 def render_pdffile_topil(multipage_doc):
     
-    renderer = multipage_doc.render_topil(
-        scale=0.5, greyscale=True,
-    )
+    renderer = multipage_doc.render_topil(scale=0.5)
     imgs = []
     
     for image in renderer:
         assert isinstance(image, PIL.Image.Image)
-        assert image.mode == "L"
+        assert image.mode == "RGB"
         imgs.append(image)
     
     assert len(imgs) == 3
@@ -228,16 +239,14 @@ def render_pdffile_topil(multipage_doc):
 @pytest.fixture
 def render_pdffile_tobytes(multipage_doc):
     
-    renderer = multipage_doc.render_tobytes(
-        scale=0.5, greyscale=True,
-    )
+    renderer = multipage_doc.render_tobytes(scale=0.5)
     imgs = []
     
     for imgdata, cl_format, size in renderer:
-        assert cl_format == "L"
+        assert cl_format == "BGR"
         assert isinstance(imgdata, bytes)
         assert len(imgdata) == size[0] * size[1] * len(cl_format)
-        pil_image = PIL.Image.frombytes("L", size, imgdata, "raw", "L")
+        pil_image = PIL.Image.frombytes("RGB", size, imgdata, "raw", "BGR")
         imgs.append(pil_image)
     
     assert len(imgs) == 3
