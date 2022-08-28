@@ -25,8 +25,8 @@ def colour_helper(r, g, b, a, greyscale, rev_byteorder):
     else:
         channels = (a, r, g, b)
     
-    shift = 24
     c_colour = 0
+    shift = 24
     for c in channels:
         c_colour |= c << shift
         shift -= 8

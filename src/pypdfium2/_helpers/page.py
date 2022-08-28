@@ -272,7 +272,7 @@ class PdfPage:
         ):
         """
         Rasterise the page to a ctypes ubyte array.
-        This is the base function for :func:`.render_tobytes` and :func:`.render_topil`.
+        This is the base method for :meth:`.render_tobytes`, :meth:`.render_tonumpy` and :meth:`.render_topil`.
         
         Parameters:
             
@@ -329,9 +329,9 @@ class PdfPage:
                 If :data:`None` or 0, this function may allocate arbitrary amounts of memory as far as Python and the OS permit.
             
         Returns:
-            (``ctypes.c_ubyte_Array_%d``, str, (int, int)):
+            (ctypes.c_ubyte array, str, (int, int)):
             Ctypes array, colour format, and image size.
-            The colour format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, or ``L``, depending on the parameters *colour*, *greyscale* and *rev_byteorder*.
+            The colour format may be ``BGR/RGB``, ``BGRA/RGBA``, or ``L``, depending on the parameters *colour*, *greyscale* and *rev_byteorder*.
             Image size is given in pixels as a tuple of width and height.
         
         Hint:
@@ -359,8 +359,8 @@ class PdfPage:
         if any(d < 1 for d in (width, height)):
             raise ValueError("Crop exceeds page dimensions (in px): width %s, height %s, crop %s" % (src_width, src_height, crop))
         
-        stride = width * n_channels  # number of bytes per row
-        n_bytes = stride * height    # total number of bytes
+        stride = width * n_channels
+        n_bytes = stride * height
         if memory_limit and n_bytes > memory_limit:
             raise RuntimeError(
                 "Planned allocation of %s bytes exceeds the defined limit of %s. " % (n_bytes, memory_limit) +
@@ -372,7 +372,7 @@ class PdfPage:
         if colour[3] > 0:
             pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_colour)
         
-        render_flags = 0
+        render_flags = extra_flags
         if greyscale:
             render_flags |= pdfium.FPDF_GRAYSCALE
         if draw_annots:
@@ -394,8 +394,6 @@ class PdfPage:
             render_flags |= pdfium.FPDF_PRINTING
         else:
             raise ValueError("Invalid optimise_mode %s" % optimise_mode)
-        
-        render_flags |= extra_flags
         
         render_args = (bitmap, self._page, -crop[0], -crop[3], src_width, src_height, RotationToConst[rotation], render_flags)
         pdfium.FPDF_RenderPageBitmap(*render_args)
@@ -435,7 +433,7 @@ class PdfPage:
         c_array, cl_format, (width, height) = self.render_base(**kwargs)
         np_array = numpy.ndarray(
             shape = (height, width, len(cl_format)),
-            dtype = numpy.uint8,
+            dtype = numpy.ubyte,
             buffer = c_array,
         )
         
