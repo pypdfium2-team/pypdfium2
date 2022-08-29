@@ -19,6 +19,8 @@ def colour_helper(r, g, b, a, greyscale, rev_byteorder):
         else:
             px_format = pdfium.FPDFBitmap_BGR
     
+    # TODO split function here, so we can use colour conversion separately
+    
     if rev_byteorder:
         # colour is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
         channels = (a, b, g, r)
