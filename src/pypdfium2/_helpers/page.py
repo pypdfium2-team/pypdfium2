@@ -428,7 +428,7 @@ class PdfPage:
         """
         
         if not have_numpy:
-            raise RuntimeError("Numpy library needs to be installed for render_tonumpy().")
+            raise RuntimeError("NumPy library needs to be installed for render_tonumpy().")
         
         c_array, cl_format, (width, height) = self.render_base(**kwargs)
         np_array = numpy.ndarray(
