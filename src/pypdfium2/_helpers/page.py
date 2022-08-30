@@ -42,7 +42,13 @@ else:
 
 
 class PdfPage:
-    """ Page helper class. """
+    """
+    Page helper class.
+    
+    Note:
+        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGE` object.
+        * The :attr:`.pdf` attribute stores the :class:`.PdfDocument` object this page belongs to.
+    """
     
     def __init__(self, page, pdf):
         self.raw = page
@@ -518,7 +524,12 @@ class ColorScheme:
 
 
 class PdfPageObject:
-    """ Page object helper class. """
+    """
+    Page object helper class.
+    
+    Note:
+        The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGEOBJECT`.
+    """
     
     def __init__(self, pageobj):
         self.raw = pageobj

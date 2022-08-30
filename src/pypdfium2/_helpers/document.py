@@ -61,6 +61,9 @@ class PdfDocument:
         * Looping over a document will yield its pages from beginning to end.
         * Pages may be loaded using list index access.
         * The ``del`` keyword and list index access may be used to delete pages.
+    
+    Note:
+        The :attr:`.raw` attribute stores the underlying :class:`FPDF_DOCUMENT` object.
     """
     
     def __init__(
@@ -506,7 +509,12 @@ class HarfbuzzFont:
 
 
 class PdfFont:
-    """ PDF font data helper class. """
+    """
+    PDF font data helper class.
+    
+    Note:
+        The :attr:`.raw` attribute stores the underlying :class:`FPDF_FONT` object.
+    """
     
     def __init__(self, pdf_font, font_data):
         self.raw = pdf_font

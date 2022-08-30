@@ -8,7 +8,13 @@ from pypdfium2._helpers.misc import PdfiumError
 
 
 class PdfTextPage:
-    """ Text extraction helper class. """
+    """
+    Text extraction helper class.
+    
+    Note:
+        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_TEXTPAGE` object.
+        * The :attr:`.page` attribute stores the :class:`.PdfPage` this text page belongs to.
+    """
     
     def __init__(self, textpage, page):
         self.raw = textpage
@@ -200,7 +206,13 @@ class PdfTextPage:
 
 
 class PdfTextSearcher:
-    """ Text searcher helper class. """
+    """
+    Text searcher helper class.
+    
+    Note:
+        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_SCHHANDLE` object.
+        * The :attr:`.textpage` attribute stores the :class:`.PdfTextPage` this searcher belongs to.
+    """
     
     def __init__(self, search, textpage):
         self.raw = search
