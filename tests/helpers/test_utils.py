@@ -5,7 +5,7 @@ import pytest
 import pypdfium2 as pdfium
 from pypdfium2._helpers._utils import *
 
-# TODO test colour_helper
+# TODO test color_helper
 
 
 @pytest.mark.parametrize(

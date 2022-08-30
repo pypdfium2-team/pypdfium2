@@ -9,7 +9,7 @@ import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers._utils import (
     get_functype,
-    colour_tohex,
+    color_tohex,
     get_bitmap_format,
     RotationToConst,
     RotationToDegrees,
@@ -259,8 +259,8 @@ class PdfPage:
             rotation = 0,
             crop = (0, 0, 0, 0),
             greyscale = False,
-            colour = (255, 255, 255, 255),
-            colour_scheme = None,
+            color = (255, 255, 255, 255),
+            color_scheme = None,
             fill_to_stroke = False,
             optimise_mode = OptimiseMode.NONE,
             draw_annots = True,
@@ -292,19 +292,19 @@ class PdfPage:
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top).
                 Crop is applied after rotation.
             
-            colour (typing.Tuple[int, int, int, int]):
-                Page background colour. Shall be a list of values for red, green, blue and alpha, ranging from 0 to 255.
-                For RGB, 0 will include nothing of the colour in question, while 255 will fully include it.
+            color (typing.Tuple[int, int, int, int]):
+                Page background color. Shall be a list of values for red, green, blue and alpha, ranging from 0 to 255.
+                For RGB, 0 will include nothing of the color in question, while 255 will fully include it.
                 For Alpha, 0 means full transparency, while 255 means no transparency.
             
-            colour_scheme (ColourScheme | None):
-                A custom colour scheme for rendering, defining fill and stroke colours for paths and text.
+            color_scheme (ColorScheme | None):
+                A custom color scheme for rendering, defining fill and stroke colors for paths and text.
             
             fill_to_stroke (bool):
-                Whether fill paths need to be stroked. This option is ignored if *colour_scheme* is :data:`None`.
+                Whether fill paths need to be stroked. This option is ignored if *color_scheme* is :data:`None`.
             
             greyscale (bool):
-                Whether to render in greyscale mode (no colours).
+                Whether to render in greyscale mode (no colors).
             
             optimise_mode (OptimiseMode):
                 How to optimise page rendering.
@@ -343,8 +343,8 @@ class PdfPage:
             
         Returns:
             (ctypes.c_ubyte array, str, (int, int)):
-            Ctypes array, colour format, and image size.
-            The colour format may be ``BGR/RGB``, ``BGRA/RGBA``, or ``L``, depending on the parameters *colour*, *greyscale* and *rev_byteorder*.
+            Ctypes array, color format, and image size.
+            The color format may be ``BGR/RGB``, ``BGRA/RGBA``, or ``L``, depending on the parameters *color*, *greyscale* and *rev_byteorder*.
             Image size is given in pixels as a tuple of width and height.
         
         Hint:
@@ -353,8 +353,8 @@ class PdfPage:
             The ctypes array is allocated by Python (not PDFium), so we don't need to care about freeing memory.
         """
         
-        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(colour, greyscale, rev_byteorder)
-        c_colour = colour_tohex(colour, rev_byteorder)
+        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder)
+        c_color = color_tohex(color, rev_byteorder)
         n_channels = len(cl_string)
         
         src_width  = math.ceil(self.get_width()  * scale)
@@ -378,8 +378,8 @@ class PdfPage:
         
         buffer = (ctypes.c_ubyte * n_bytes)()
         bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
-        if colour[3] > 0:
-            pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_colour)
+        if color[3] > 0:
+            pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_color)
         
         render_flags = extra_flags
         if greyscale:
@@ -396,7 +396,7 @@ class PdfPage:
             render_flags |= pdfium.FPDF_RENDER_FORCEHALFTONE
         if rev_byteorder:
             render_flags |= pdfium.FPDF_REVERSE_BYTE_ORDER
-        if fill_to_stroke and colour_scheme is not None:
+        if fill_to_stroke and color_scheme is not None:
             render_flags |= pdfium.FPDF_CONVERT_FILL_TO_STROKE
         
         if optimise_mode is OptimiseMode.NONE:
@@ -410,17 +410,17 @@ class PdfPage:
         
         render_args = (bitmap, self._page, -crop[0], -crop[3], src_width, src_height, RotationToConst[rotation], render_flags)
         
-        if colour_scheme is None:
+        if color_scheme is None:
             pdfium.FPDF_RenderPageBitmap(*render_args)
         else:
-            # rendering with colour scheme is only available in the async version at the moment
-            # TODO take colour scheme in consideration for alpha channel decision
+            # rendering with color scheme is only available in the async version at the moment
+            # TODO take color scheme in consideration for alpha channel decision
             
             ifsdk_pause = pdfium.IFSDK_PAUSE()
             ifsdk_pause.version = 1
             ifsdk_pause.NeedToPauseNow = get_functype(pdfium.IFSDK_PAUSE, "NeedToPauseNow")(lambda _: False)
             
-            fpdf_colorscheme = colour_scheme._convert(rev_byteorder)
+            fpdf_colorscheme = color_scheme._convert(rev_byteorder)
             status = pdfium.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_colorscheme, ifsdk_pause)
             
             assert status == pdfium.FPDF_RENDER_DONE
@@ -439,7 +439,7 @@ class PdfPage:
         Rasterise the page to bytes. Parameters match :meth:`.render_base`.
         
         Returns:
-            (bytes, str, (int, int)): Image data, colour format, and size.
+            (bytes, str, (int, int)): Image data, color format, and size.
         """
         c_array, *args = self.render_base(**kwargs)
         return bytes(c_array), *args
@@ -452,7 +452,7 @@ class PdfPage:
         Rasterise the page to a NumPy array. Parameters match :meth:`.render_base`.
         
         Returns:
-            (numpy.ndarray, str): NumPy array, and colour format.
+            (numpy.ndarray, str): NumPy array, and color format.
         """
         
         if not have_numpy:
@@ -496,7 +496,7 @@ class PdfPage:
         return pil_image
 
 
-class ColourScheme:
+class ColorScheme:
     
     def __init__(
             self,
@@ -519,7 +519,7 @@ class ColourScheme:
                 continue
             value = getattr(self, attr)
             if value is not None:
-                setattr(fpdf_colorscheme, attr+"_color", colour_tohex(value, rev_byteorder))
+                setattr(fpdf_colorscheme, attr+"_color", color_tohex(value, rev_byteorder))
         
         return fpdf_colorscheme
 

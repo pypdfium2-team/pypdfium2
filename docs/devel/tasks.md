@@ -9,7 +9,7 @@ Also see the inline `TODO` marks in source code.
 ### Main Code
 * Make the bindings file `_pypdfium.py` public.
 * Make members of `_utils.py` public (move into `misc.py`).
-* Investigate other PDFium rendering functions. Ideally, we would want to add margins, flip and colour schemes.
+* Investigate other PDFium rendering functions. Ideally, we would want to add margins, flip and color schemes.
 * Read up what `FPDFPage_Flatten()` does and if we could use it somehow.
 * Consolidate and extend the support model.
 

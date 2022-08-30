@@ -151,8 +151,8 @@ Here are some examples of using the support model API.
       scale = 1,              # 72dpi resolution
       rotation = 0,           # no additional rotation
       crop = (0, 0, 0, 0),    # no crop (left, right, bottom, top)
-      colour = (255, 255, 255, 255),  # RGBA background colour (white)
-      greyscale = False,      # render coloured
+      color = (255, 255, 255, 255),  # RGBA background color (white)
+      greyscale = False,      # render colored
       optimise_mode = OptimiseMode.NONE,  # no supbixel rendering
       draw_annots = True,     # show annotations
       draw_forms = True,      # show forms
@@ -494,7 +494,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
   ```
 
-* Finally, let's finish this guide with an example on how to render the first page of a document to a `PIL` image in `RGBA` colour format.
+* Finally, let's finish this guide with an example on how to render the first page of a document to a `PIL` image in `RGBA` color format.
   ```python
   import math
   import ctypes
@@ -519,7 +519,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   use_alpha = False  # We don't render with transparent background
   bitmap = pdfium.FPDFBitmap_Create(width, height, int(use_alpha))
   # Fill the whole bitmap with a white background
-  # The colour is given as a 32-bit integer in ARGB format (8 bits per channel)
+  # The color is given as a 32-bit integer in ARGB format (8 bits per channel)
   pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
   
   # Store common rendering arguments
