@@ -26,12 +26,12 @@ def crop_type(string):
         raise ValueError("Crop must be a list of four numbers.")
     return crop
 
-ColourSchemeOpt = dict(
+ColorSchemeOpt = dict(
     default = None,
     metavar = "C",
     nargs = 4,
     type = int,
-    help = "Option for rendering with custom colour scheme.",
+    help = "Option for rendering with custom color scheme.",
 )
 
 def attach_parser(subparsers):
@@ -79,33 +79,33 @@ def attach_parser(subparsers):
         help = "Rotate pages by 90, 180 or 270 degrees",
     )
     parser.add_argument(
-        "--background-colour",
+        "--background-color",
         default = (255, 255, 255, 255),
         metavar = "C",
         nargs = 4,
         type = int,
-        help = "Page background colour. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
+        help = "Page background color. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
     )
     parser.add_argument(
-        "--path-fill-colour",
-        **ColourSchemeOpt
+        "--path-fill-color",
+        **ColorSchemeOpt
     )
     parser.add_argument(
-        "--path-stroke-colour",
-        **ColourSchemeOpt
+        "--path-stroke-color",
+        **ColorSchemeOpt
     )
     parser.add_argument(
-        "--text-fill-colour",
-        **ColourSchemeOpt
+        "--text-fill-color",
+        **ColorSchemeOpt
     )
     parser.add_argument(
-        "--text-stroke-colour",
-        **ColourSchemeOpt
+        "--text-stroke-color",
+        **ColorSchemeOpt
     )
     parser.add_argument(
         "--fill-to-stroke",
         action = "store_true",
-        help = "Whether fill paths need to be stroked. Ignored if not rendering with custom colour scheme.",
+        help = "Whether fill paths need to be stroked. Ignored if not rendering with custom color scheme.",
     )
     parser.add_argument(
         "--force-halftone",
@@ -131,7 +131,7 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--greyscale",
         action = "store_true",
-        help = "Whether to render in greyscale mode (no colours)",
+        help = "Whether to render in greyscale mode (no colors)",
     )
     parser.add_argument(
         "--crop",
@@ -172,23 +172,23 @@ def main(args):
         else:
             page_indices = [i for i in range(len(pdf))]
         
-        colour_scheme = None
-        colour_scheme_kwargs = dict(
-            path_fill = args.path_fill_colour,
-            path_stroke = args.path_stroke_colour,
-            text_fill = args.text_fill_colour,
-            text_stroke = args.text_stroke_colour,
+        color_scheme_kws = dict(
+            path_fill_color = args.path_fill_color,
+            path_stroke_color = args.path_stroke_color,
+            text_fill_color = args.text_fill_color,
+            text_stroke_color = args.text_stroke_color,
         )
-        if any(colour_scheme_kwargs.values()):
-            colour_scheme = pdfium.ColourScheme(**colour_scheme_kwargs)
+        color_scheme = None
+        if any(color_scheme_kws.values()):
+            color_scheme = pdfium.ColorScheme(**color_scheme_kws)
         
         kwargs = dict(
             page_indices = page_indices,
             scale = args.scale,
             rotation = args.rotation,
             crop = args.crop,
-            colour = args.background_colour,
-            colour_scheme = colour_scheme,
+            color = args.background_color,
+            color_scheme = color_scheme,
             fill_to_stroke = args.fill_to_stroke,
             force_halftone = args.force_halftone,
             greyscale = args.greyscale,

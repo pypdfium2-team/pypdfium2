@@ -102,7 +102,7 @@ def test_render_page_alpha(sample_page):
         [(150, 390), (42,  96,  153, 255)],
         [(150, 570), (128, 0,   128, 255)],
     ]
-    kwargs = dict(colour=(0, 0, 0, 0))
+    kwargs = dict(color=(0, 0, 0, 0))
     image = sample_page.render_topil(**kwargs)
     image_rev = sample_page.render_topil(**kwargs, rev_byteorder=True)
     
@@ -112,7 +112,7 @@ def test_render_page_alpha(sample_page):
     for pos, exp_value in pixels:
         assert image.getpixel(pos) == exp_value
     
-    image.save(join(OutputDir, "coloured_alpha.png"))
+    image.save(join(OutputDir, "colored_alpha.png"))
     for g in (image, image_rev): g.close()
 
 
@@ -133,7 +133,7 @@ def test_render_page_greyscale(sample_page):
     # PDFium currently doesn't support LA, hence greyscale + alpha rendering results in RGBA
     image = sample_page.render_topil(
         greyscale = True,
-        colour = (0, 0, 0, 0),
+        color = (0, 0, 0, 0),
         scale = 0.5,
     )
     assert image.size == (298, 421)
@@ -143,7 +143,7 @@ def test_render_page_greyscale(sample_page):
 
 
 @pytest.mark.parametrize(
-    "colour",
+    "color",
     [
         (255, 255, 255, 255),
         (60,  70,  80,  100),
@@ -153,36 +153,36 @@ def test_render_page_greyscale(sample_page):
         (255, 255, 0,   255),
     ]
 )
-def test_render_page_bgcolour(colour, sample_page):
+def test_render_page_bgcolor(color, sample_page):
     
-    kwargs = dict(colour=colour, scale=0.5)
+    kwargs = dict(color=color, scale=0.5)
     image = sample_page.render_topil(**kwargs)
     image_rev = sample_page.render_topil(**kwargs, rev_byteorder=True)
     assert image == image_rev
     
     bg_pixel = image.getpixel( (0, 0) )
-    if colour[3] == 255:
-        colour = colour[:-1]
+    if color[3] == 255:
+        color = color[:-1]
     assert image.size == (298, 421)
-    assert bg_pixel == colour
+    assert bg_pixel == color
     
     image.close()
 
 
-def test_render_page_colourscheme():
+def test_render_page_colorscheme():
     
     pdf = pdfium.PdfDocument(TestFiles.text)
     page = pdf.get_page(0)
-    colour_scheme = pdfium.ColourScheme(
-        text_fill = (255, 255, 255, 255),
+    color_scheme = pdfium.ColorScheme(
+        text_fill_color = (255, 255, 255, 255),
     )
     image = page.render_topil(
         greyscale = True,
-        colour = (0, 0, 0, 255),
-        colour_scheme = colour_scheme,
+        color = (0, 0, 0, 255),
+        color_scheme = color_scheme,
     )
     assert image.mode == "L"
-    image.save( join(OutputDir, "render_colourscheme.png") )
+    image.save( join(OutputDir, "render_colorscheme.png") )
     
     for g in (page, pdf): g.close()
 

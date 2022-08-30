@@ -484,7 +484,7 @@ class PdfDocument:
         See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
         
         Yields:
-            (:class:`numpy.ndarray`, str): NumPy array, and colour format.
+            (:class:`numpy.ndarray`, str): NumPy array, and color format.
         """
         yield from self._render_base("numpy", **kwargs)
 

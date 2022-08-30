@@ -80,7 +80,7 @@
 - Updated PDFium from `5145` to `5159` (autorelease).
 - Subtle improvements were applied to the handling of input buffers (providing `read()` beside `readinto()` is now explicitly required).
 - Concerning file access, the autoclose logic has been moved from the loder data holder to `PdfDocument.close()`, which is somewhat more obvious.
-- The internal `colour_tohex()` utility function has been optimised by using bit-shifts and the binary `or` operator.
+- The internal `color_tohex()` utility function has been optimised by using bit-shifts and the binary `or` operator.
 - Disabled implicit source build in `setup.py`, which used to be the fallback if no pre-built binaries are available for the host platform. Now, an exception is raised instead.
 - The changelog is now better integrated with automatic releases.
 - In the release workflow, reverted an inelegant change regarding dependency installation order.
@@ -255,7 +255,7 @@
   * Restructured rendering functions to provide multiple different output types:
     `render_page_topil()` and `render_page_tobytes()` replace `render_page()`; similarly, `render_pdf_topil()` and `render_pdf_tobytes()` replace `render_pdf()`.
     These functions are derived from `render_page_base()` and `render_pdf_base()`, respectively.
-  * In `render_page_...()` and `render_pdf_...()`, we now only accept RGBA tuples for the colour parameter.
+  * In `render_page_...()` and `render_pdf_...()`, we now only accept RGBA tuples for the color parameter.
 - The Pillow dependency is now optional in the core library.
 - Removed workarounds for non-ascii filepaths on Windows. The issues with `FPDF_LoadDocument()` should be fixed since PDFium `4915`. Thanks to Lei Zhang and Thomas Sepez of PDFium team.
 - Added some boilerplate code to setup scripts to make sure imports always work when the file is invoked directly.
@@ -306,7 +306,7 @@
 ## 0.13.0 (2022-02-14)
 
 - Updated PDFium from `4874` to `4888`.
-- In `render_page()`, the bitmap is now directly initialised with the right colour format, rather than always using RGBA and converting afterwards. This is expected to improve performance when rendering without alpha channel, in particular for greyscale.
+- In `render_page()`, the bitmap is now directly initialised with the right color format, rather than always using RGBA and converting afterwards. This is expected to improve performance when rendering without alpha channel, in particular for greyscale.
 - Installed a new support model class `PdfDocument` on top of the separate helper functions, for object oriented document access. This should be easier to use and more like the API of other Python PDF libraries.
 - Fixed `setup.py` to always call `getdeps` first, before other imports that already require packages that `getdeps` should install.
 - Restructured platform-specific setup to greatly reduce code duplication.

@@ -4,9 +4,10 @@
 import pypdfium2._pypdfium as pdfium
 
 
-def get_bitmap_format(colour, greyscale, rev_byteorder):
+def get_bitmap_format(bg_color, greyscale, rev_byteorder):
     
-    if (colour[3] < 255):
+    if (bg_color[3] < 255):
+        # even if a custom color scheme is given and its values contain transparency, we don't need to care, because drawings are additive
         px_const = pdfium.FPDFBitmap_BGRA
     else:
         if greyscale:
@@ -24,30 +25,30 @@ def get_bitmap_format(colour, greyscale, rev_byteorder):
     return px_const, px_str, rev_byteorder
 
 
-def colour_tohex(colour, rev_byteorder):
+def color_tohex(color, rev_byteorder):
     """
-    Convert an RGBA colour specified by 4 integers ranging from 0 to 255 to a single 32-bit integer as required by PDFium.
+    Convert an RGBA color specified by 4 integers ranging from 0 to 255 to a single 32-bit integer as required by PDFium.
     If using regular byte order, the output format will be ARGB. If using reversed byte order, it will be ABGR.
     """
     
-    if not all(0 <= c <= 255 for c in colour):
-        raise ValueError("Colour value exceeds boundaries.")
+    if not all(0 <= c <= 255 for c in color):
+        raise ValueError("Color value exceeds boundaries.")
     
-    r, g, b, a = colour
+    r, g, b, a = color
     
-    # colour is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
+    # color is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
     if rev_byteorder:
         channels = (a, b, g, r)
     else:
         channels = (a, r, g, b)
     
-    c_colour = 0
+    c_color = 0
     shift = 24
     for c in channels:
-        c_colour |= c << shift
+        c_color |= c << shift
         shift -= 8
     
-    return c_colour
+    return c_color
 
 
 def get_functype(struct, funcname):
