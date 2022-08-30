@@ -29,20 +29,3 @@ Text Page
 Miscellaneous
 *************
 .. automodule:: pypdfium2._helpers.misc
-
-PDFium
-******
-
-This is an assortment of PDFium members referenced in this documentation.
-
-.. function:: FPDF_LoadDocument
-.. function:: FPDF_LoadMemDocument64
-.. function:: FPDF_LoadCustomDocument
-.. function:: FPDF_GetLastError
-.. class:: FPDF_DOCUMENT
-.. class:: FPDF_PAGE
-.. class:: FPDF_TEXTPAGE
-.. class:: FPDF_SCHHANDLE
-.. class:: FPDF_FONT
-.. data:: FPDF_FONT_TYPE1
-.. data:: FPDF_FONT_TRUETYPE

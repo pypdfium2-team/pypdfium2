@@ -298,7 +298,7 @@ class PdfPage:
                 For Alpha, 0 means full transparency, while 255 means no transparency.
             
             color_scheme (ColorScheme | None):
-                A custom color scheme for rendering, defining fill and stroke colors for paths and text.
+                A custom color scheme for rendering, defining fill and stroke colors for path and text objects.
             
             fill_to_stroke (bool):
                 Whether fill paths need to be stroked. This option is ignored if *color_scheme* is :data:`None`.
@@ -334,7 +334,7 @@ class PdfPage:
             
             extra_flags (int):
                 Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
-                Flags not covered by other options include ``FPDF_RENDER_LIMITEDIMAGECACHE`` and ``FPDF_NO_NATIVETEXT``, for instance.
+                Flags not covered by other options include :data:`FPDF_RENDER_LIMITEDIMAGECACHE` and :data:`FPDF_NO_NATIVETEXT`, for instance.
             
             memory_limit (int | None):
                 Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
@@ -496,14 +496,31 @@ class PdfPage:
 
 
 class ColorScheme:
+    """
+    Rendering color scheme. Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
+    (At least one parameter needs to be given.)
+    
+    Note:
+        Valid fields are dynamically extracted from the :class:`FPDF_COLORSCHEME` structure.
+    
+    Parameters:
+        path_fill_color
+        path_stroke_color
+        text_fill_color
+        text_stroke_color
+    """
     
     def __init__(self, **_kws):
         self.kwargs = {k: v for k, v in _kws.items() if v is not None}
+        fields = [key for key, _ in pdfium.FPDF_COLORSCHEME._fields_]
         assert len(self.kwargs) > 0
-        fields = [key for key, type in pdfium.FPDF_COLORSCHEME._fields_]
         assert all(k in fields for k in self.kwargs.keys())
     
     def convert(self, rev_byteorder):
+        """
+        Returns:
+            The color scheme as :class:`FPDF_COLORSCHEME` object.
+        """
         fpdf_colorscheme = pdfium.FPDF_COLORSCHEME()
         for key, value in self.kwargs.items():
             setattr(fpdf_colorscheme, key, color_tohex(value, rev_byteorder))
@@ -532,6 +549,6 @@ class PdfPageObject:
     def get_type(self):
         """
         Returns:
-            int: The type of the object (``FPDF_PAGEOBJ_...``).
+            int: The type of the object (:data:`FPDF_PAGEOBJ_...`).
         """
         return pdfium.FPDFPageObj_GetType(self._pageobj)

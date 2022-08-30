@@ -57,7 +57,7 @@ class OutlineItem:
             Zero-based index of the page the bookmark points to.
             May be :data:`None` if the bookmark has no target page (or it could not be determined).
         view_mode (int):
-            A view mode constant (``PDFDEST_VIEW_...``) defining how the coordinates of *view_pos* shall be interpreted.
+            A view mode constant (:data:`PDFDEST_VIEW_...`) defining how the coordinates of *view_pos* shall be interpreted.
         view_pos (typing.Sequence[float]):
             Target position on the page the viewport should jump to when the bookmark is clicked.
             It is a sequence of :class:`float` values in PDF canvas units.
