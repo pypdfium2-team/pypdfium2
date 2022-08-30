@@ -422,9 +422,10 @@ class PdfPage:
             pdfium.FPDF_RenderPage_Close(self.raw)
         
         if draw_forms:
-            form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(self.pdf.raw, pdfium.FPDF_FORMFILLINFO(2))
-            pdfium.FPDF_FFLDraw(form_fill, *render_args)
-            pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
+            form_info = pdfium.FPDF_FORMFILLINFO(1)
+            form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.pdf.raw, form_info)
+            pdfium.FPDF_FFLDraw(form_env, *render_args)
+            pdfium.FPDFDOC_ExitFormFillEnvironment(form_env)
         
         return buffer, cl_string, (width, height)
     
