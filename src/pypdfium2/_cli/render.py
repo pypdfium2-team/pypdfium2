@@ -172,12 +172,15 @@ def main(args):
         else:
             page_indices = [i for i in range(len(pdf))]
         
-        color_scheme = pdfium.ColorScheme(
+        color_scheme_kws = dict(
             path_fill_color = args.path_fill_color,
             path_stroke_color = args.path_stroke_color,
             text_fill_color = args.text_fill_color,
             text_stroke_color = args.text_stroke_color,
         )
+        color_scheme = None
+        if any(color_scheme_kws.values()):
+            color_scheme = pdfium.ColorScheme(**color_scheme_kws)
         
         kwargs = dict(
             page_indices = page_indices,
