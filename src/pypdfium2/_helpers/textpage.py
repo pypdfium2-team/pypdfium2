@@ -11,25 +11,15 @@ class PdfTextPage:
     """ Text extraction helper class. """
     
     def __init__(self, textpage, page):
-        self._textpage = textpage
-        self._page = page
-    
-    @property
-    def raw(self):
-        """ FPDF_TEXTPAGE: The raw PDFium text page object handle. """
-        return self._textpage
-    
-    @property
-    def page(self):
-        """ PdfPage: The page this text page belongs to. """
-        return self._page
+        self.raw = textpage
+        self.page = page
     
     def close(self):
         """
         Close the text page to release allocated memory.
         This method shall be called when finished working with the text page.
         """
-        pdfium.FPDFText_ClosePage(self._textpage)
+        pdfium.FPDFText_ClosePage(self.raw)
     
     
     def get_text(self, left=0, bottom=0, right=0, top=0):
@@ -51,7 +41,7 @@ class PdfTextPage:
         if not (0 <= left < right <= width) or not (0 <= bottom < top <= height):
             raise ValueError("Invalid page area requested.")
         
-        args = (self._textpage, left, top, right, bottom)
+        args = (self.raw, left, top, right, bottom)
         n_chars = pdfium.FPDFText_GetBoundedText(*args, None, 0)
         if n_chars <= 0:
             return ""
@@ -68,7 +58,7 @@ class PdfTextPage:
         Returns:
             int: The number of characters on the page.
         """
-        return pdfium.FPDFText_CountChars(self._textpage)
+        return pdfium.FPDFText_CountChars(self.raw)
     
     
     def count_rects(self, index=0, count=0):
@@ -86,7 +76,7 @@ class PdfTextPage:
             count = n_chars
         if not (0 <= index < index+count <= n_chars):
             raise ValueError("Character span is out of bounds.")
-        return pdfium.FPDFText_CountRects(self._textpage, index, count)
+        return pdfium.FPDFText_CountRects(self.raw, index, count)
     
     
     def get_index(self, x, y, x_tol, y_tol):
@@ -103,7 +93,7 @@ class PdfTextPage:
             int | None: The index of the character at or nearby the point (x, y).
             May be :data:`None` if there is no character or an error occurred.
         """
-        index = pdfium.FPDFText_GetCharIndexAtPos(self._textpage, x, y, x_tol, y_tol)
+        index = pdfium.FPDFText_GetCharIndexAtPos(self.raw, x, y, x_tol, y_tol)
         if index < 0:
             return None
         return index
@@ -129,11 +119,11 @@ class PdfTextPage:
         
         if loose:
             rect = pdfium.FS_RECTF()
-            ret_code = pdfium.FPDFText_GetLooseCharBox(self._textpage, index, rect)
+            ret_code = pdfium.FPDFText_GetLooseCharBox(self.raw, index, rect)
             left, bottom, right, top = rect.left, rect.bottom, rect.right, rect.top
         else:
             left, bottom, right, top = c_double(), c_double(), c_double(), c_double()
-            ret_code = pdfium.FPDFText_GetCharBox(self._textpage, index, left, right, bottom, top)
+            ret_code = pdfium.FPDFText_GetCharBox(self.raw, index, left, right, bottom, top)
             left, bottom, right, top = left.value, bottom.value, right.value, top.value
         
         if not ret_code:
@@ -152,7 +142,7 @@ class PdfTextPage:
         n_rects = self.count_rects(index, count)
         for index in range(n_rects):
             left, top, right, bottom = c_double(), c_double(), c_double(), c_double()
-            pdfium.FPDFText_GetRect(self._textpage, index, left, top, right, bottom)
+            pdfium.FPDFText_GetRect(self.raw, index, left, top, right, bottom)
             yield (left.value, bottom.value, right.value, top.value)
     
     
@@ -164,7 +154,7 @@ class PdfTextPage:
             :class:`str`: A web link string.
         """
         
-        links = pdfium.FPDFLink_LoadWebLinks(self._textpage)
+        links = pdfium.FPDFLink_LoadWebLinks(self.raw)
         n_links = pdfium.FPDFLink_CountWebLinks(links)
         
         for i in range(n_links):
@@ -205,7 +195,7 @@ class PdfTextPage:
         
         enc_text = (text + "\x00").encode("utf-16-le")
         text_pointer = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
-        search = pdfium.FPDFText_FindStart(self._textpage, text_pointer, flags, index)
+        search = pdfium.FPDFText_FindStart(self.raw, text_pointer, flags, index)
         return PdfTextSearcher(search, self)
 
 
@@ -213,26 +203,16 @@ class PdfTextSearcher:
     """ Text searcher helper class. """
     
     def __init__(self, search, textpage):
-        self._search = search
-        self._textpage = textpage
-    
-    @property
-    def raw(self):
-        """ FPDF_SCHHANDLE: The raw PDFium searcher handle. """
-        return self._search
-    
-    @property
-    def textpage(self):
-        """ PdfTextPage: The text page this searching helper belongs to. """
-        return self._textpage
+        self.raw = search
+        self.textpage = textpage
     
     def _get_occurrence(self, find_func):
-        found = find_func(self._search)
+        found = find_func(self.raw)
         if not found:
             return None
-        index = pdfium.FPDFText_GetSchResultIndex(self._search)
-        count = pdfium.FPDFText_GetSchCount(self._search)
-        return tuple( [box for box in self._textpage.get_rectboxes(index, count)] )
+        index = pdfium.FPDFText_GetSchResultIndex(self.raw)
+        count = pdfium.FPDFText_GetSchCount(self.raw)
+        return tuple( [box for box in self.textpage.get_rectboxes(index, count)] )
     
     def get_next(self):
         """
@@ -256,4 +236,4 @@ class PdfTextSearcher:
         Close the search structure to release allocated memory.
         This method shall be called when done with text searching.
         """
-        pdfium.FPDFText_FindClose(self._search)
+        pdfium.FPDFText_FindClose(self.raw)

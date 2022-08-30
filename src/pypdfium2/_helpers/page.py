@@ -45,25 +45,15 @@ class PdfPage:
     """ Page helper class. """
     
     def __init__(self, page, pdf):
-        self._page = page
-        self._pdf = pdf
-    
-    @property
-    def raw(self):
-        """ FPDF_PAGE: The raw PDFium page object handle. """
-        return self._page
-    
-    @property
-    def pdf(self):
-        """ PdfDocument: The document this page belongs to. """
-        return self._pdf
+        self.raw = page
+        self.pdf = pdf
     
     def close(self):
         """
         Close the page to release allocated memory.
         This function shall be called when finished working with the object.
         """
-        pdfium.FPDF_ClosePage(self._page)
+        pdfium.FPDF_ClosePage(self.raw)
     
     
     def get_width(self):
@@ -71,14 +61,14 @@ class PdfPage:
         Returns:
             float: Page width (horizontal size).
         """
-        return pdfium.FPDF_GetPageWidthF(self._page)
+        return pdfium.FPDF_GetPageWidthF(self.raw)
     
     def get_height(self):
         """
         Returns:
             float: Page height (vertical size).
         """
-        return pdfium.FPDF_GetPageHeightF(self._page)
+        return pdfium.FPDF_GetPageHeightF(self.raw)
     
     def get_size(self):
         """
@@ -92,16 +82,16 @@ class PdfPage:
         Returns:
             int: Clockwise page rotation in degrees.
         """
-        return RotationToDegrees[ pdfium.FPDFPage_GetRotation(self._page) ]
+        return RotationToDegrees[ pdfium.FPDFPage_GetRotation(self.raw) ]
     
     def set_rotation(self, rotation):
         """ Define the absolute, clockwise page rotation (0, 90, 180, or 270 degrees). """
-        pdfium.FPDFPage_SetRotation(self._page, RotationToConst[rotation])
+        pdfium.FPDFPage_SetRotation(self.raw, RotationToConst[rotation])
     
     
     def _get_box(self, box_func, fallback_func):
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = box_func(self._page, left, bottom, right, top)
+        ret_code = box_func(self.raw, left, bottom, right, top)
         if not ret_code:
             return fallback_func()
         return (left.value, bottom.value, right.value, top.value)
@@ -109,7 +99,7 @@ class PdfPage:
     def _set_box(self, box_func, l, b, r, t):
         if not all(isinstance(val, (int, float)) for val in (l, b, r, t)):
             raise ValueError("Box values must be int or float.")
-        box_func(self._page, l, b, r, t)
+        box_func(self.raw, l, b, r, t)
     
     def get_mediabox(self):
         """
@@ -176,7 +166,7 @@ class PdfPage:
         Returns:
             PdfTextPage: The text page that corresponds to this page.
         """
-        textpage = pdfium.FPDFText_LoadPage(self._page)
+        textpage = pdfium.FPDFText_LoadPage(self.raw)
         if not textpage:
             raise PdfiumError("Loading the text page failed")
         return PdfTextPage(textpage, self)
@@ -228,10 +218,10 @@ class PdfPage:
                 start_point - (pos.x_offset / hb_font.scale) * font_size,
                 pos_y,
             )
-            pdfium.FPDFPage_InsertObject(self._page, pdf_textobj)
+            pdfium.FPDFPage_InsertObject(self.raw, pdf_textobj)
             start_point += (pos.x_advance / hb_font.scale) * font_size
         
-        pdfium.FPDFPage_GenerateContent(self._page)
+        pdfium.FPDFPage_GenerateContent(self.raw)
     
     
     def count_objects(self):
@@ -239,7 +229,7 @@ class PdfPage:
         Returns:
             int: The number of page objects on this page.
         """
-        return pdfium.FPDFPage_CountObjects(self._page)
+        return pdfium.FPDFPage_CountObjects(self.raw)
     
     def get_objects(self):
         """
@@ -249,7 +239,7 @@ class PdfPage:
             :class:`.PdfPageObject`: Page object helper.
         """
         for i in range( self.count_objects() ):
-            raw_obj = pdfium.FPDFPage_GetObject(self._page, i)
+            raw_obj = pdfium.FPDFPage_GetObject(self.raw, i)
             yield PdfPageObject(raw_obj)
     
     
@@ -408,7 +398,7 @@ class PdfPage:
         else:
             raise ValueError("Invalid optimise_mode %s" % optimise_mode)
         
-        render_args = (bitmap, self._page, -crop[0], -crop[3], src_width, src_height, RotationToConst[rotation], render_flags)
+        render_args = (bitmap, self.raw, -crop[0], -crop[3], src_width, src_height, RotationToConst[rotation], render_flags)
         
         if color_scheme is None:
             pdfium.FPDF_RenderPageBitmap(*render_args)
@@ -423,7 +413,7 @@ class PdfPage:
             status = pdfium.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_colorscheme, ifsdk_pause)
             
             assert status == pdfium.FPDF_RENDER_DONE
-            pdfium.FPDF_RenderPage_Close(self._page)
+            pdfium.FPDF_RenderPage_Close(self.raw)
         
         if draw_forms:
             form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(self.pdf.raw, pdfium.FPDF_FORMFILLINFO(2))
@@ -531,7 +521,7 @@ class PdfPageObject:
     """ Page object helper class. """
     
     def __init__(self, pageobj):
-        self._pageobj = pageobj
+        self.raw = pageobj
     
     def get_pos(self):
         """
@@ -541,7 +531,7 @@ class PdfPageObject:
             A tuple of four :class:`float` coordinates for left, bottom, right, and top.
         """
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = pdfium.FPDFPageObj_GetBounds(self._pageobj, left, bottom, right, top)
+        ret_code = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
         if not ret_code:
             raise PdfiumError("Locating the page object failed")
         return (left.value, bottom.value, right.value, top.value)
@@ -551,4 +541,4 @@ class PdfPageObject:
         Returns:
             int: The type of the object (:data:`FPDF_PAGEOBJ_...`).
         """
-        return pdfium.FPDFPageObj_GetType(self._pageobj)
+        return pdfium.FPDFPageObj_GetType(self.raw)

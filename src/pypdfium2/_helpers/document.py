@@ -61,10 +61,6 @@ class PdfDocument:
         * Looping over a document will yield its pages from beginning to end.
         * Pages may be loaded using list index access.
         * The ``del`` keyword and list index access may be used to delete pages.
-    
-    Note:
-        :class:`.PdfDocument` does not implement a page cache. This is to ensure correct behaviour in case the order or number of pages is modified using the raw API.
-        Therefore, it is up to the caller to cache pages appropriately and avoid inefficient repated loading/closing of pages.
     """
     
     def __init__(
@@ -105,9 +101,9 @@ class PdfDocument:
                 assert False  # unhandled file access strategy (hypothetical internal error)
         
         if isinstance(self._actual_input, pdfium.FPDF_DOCUMENT):
-            self._pdf = self._actual_input
+            self.raw = self._actual_input
         else:
-            self._pdf, self._ld_data = open_pdf(self._actual_input, self._password)
+            self.raw, self._ld_data = open_pdf(self._actual_input, self._password)
     
     
     def __enter__(self):
@@ -117,7 +113,7 @@ class PdfDocument:
         self.close()
     
     def __len__(self):
-        return pdfium.FPDF_GetPageCount(self._pdf)
+        return pdfium.FPDF_GetPageCount(self.raw)
     
     def __iter__(self):
         for i in range( len(self) ):
@@ -129,11 +125,6 @@ class PdfDocument:
     def __delitem__(self, i):
         self.del_page(i)
     
-    
-    @property
-    def raw(self):
-        """ FPDF_DOCUMENT: The raw PDFium document object handle. """
-        return self._pdf
     
     @classmethod
     def new(cls):
@@ -149,7 +140,7 @@ class PdfDocument:
         Close the document to release allocated memory.
         This function shall be called when finished working with the object.
         """
-        pdfium.FPDF_CloseDocument(self._pdf)
+        pdfium.FPDF_CloseDocument(self.raw)
         if self._ld_data is not None:
             self._ld_data.close()
         if self._autoclose and is_input_buffer(self._actual_input):
@@ -163,7 +154,7 @@ class PdfDocument:
             or :data:`None` if the version could not be determined (e. g. because the document was created using :meth:`PdfDocument.new`).
         """
         version = ctypes.c_int()
-        success = pdfium.FPDF_GetFileVersion(self._pdf, version)
+        success = pdfium.FPDF_GetFileVersion(self.raw, version)
         if not success:
             return
         return int(version.value)
@@ -186,7 +177,7 @@ class PdfDocument:
         filewrite.version = 1
         filewrite.WriteBlock = get_functype(pdfium.FPDF_FILEWRITE, "WriteBlock")( _writer_class(buffer) )
         
-        saveargs = (self._pdf, filewrite, pdfium.FPDF_NO_INCREMENTAL)
+        saveargs = (self.raw, filewrite, pdfium.FPDF_NO_INCREMENTAL)
         if version is None:
             success = pdfium.FPDF_SaveAsCopy(*saveargs)
         else:
@@ -220,13 +211,13 @@ class PdfDocument:
         """
         if index is None:
             index = len(self)
-        raw_page = pdfium.FPDFPage_New(self._pdf, index, width, height)
+        raw_page = pdfium.FPDFPage_New(self.raw, index, width, height)
         return PdfPage(raw_page, self)
     
     def del_page(self, index):
         """ Remove the page at *index*. """
         self._verify_index(index)
-        pdfium.FPDFPage_Delete(self._pdf, index)
+        pdfium.FPDFPage_Delete(self.raw, index)
     
     def get_page(self, index):
         """
@@ -234,7 +225,7 @@ class PdfDocument:
             PdfPage: The page at *index*.
         """
         self._verify_index(index)
-        raw_page = pdfium.FPDF_LoadPage(self._pdf, index)
+        raw_page = pdfium.FPDF_LoadPage(self.raw, index)
         return PdfPage(raw_page, self)
     
     
@@ -257,7 +248,7 @@ class PdfDocument:
             font_data = fh.read()
         
         pdf_font = pdfium.FPDFText_LoadFont(
-            self._pdf,
+            self.raw,
             ctypes.cast(font_data, ctypes.POINTER(ctypes.c_uint8)),
             len(font_data),
             type,
@@ -275,8 +266,8 @@ class PdfDocument:
         title = t_buffer.raw.decode('utf-16-le')[:-1]
         
         is_closed = pdfium.FPDFBookmark_GetCount(bookmark) < 0
-        dest = pdfium.FPDFBookmark_GetDest(self._pdf, bookmark)
-        page_index = pdfium.FPDFDest_GetDestPageIndex(self._pdf, dest)
+        dest = pdfium.FPDFBookmark_GetDest(self.raw, bookmark)
+        page_index = pdfium.FPDFDest_GetDestPageIndex(self.raw, dest)
         if page_index == -1:
             page_index = None
         
@@ -317,7 +308,7 @@ class PdfDocument:
         if seen is None:
             seen = set()
         
-        bookmark = pdfium.FPDFBookmark_GetFirstChild(self._pdf, parent)
+        bookmark = pdfium.FPDFBookmark_GetFirstChild(self.raw, parent)
         
         while bookmark:
             
@@ -336,7 +327,7 @@ class PdfDocument:
                 seen = seen,
             )
             
-            bookmark = pdfium.FPDFBookmark_GetNextSibling(self._pdf, bookmark)
+            bookmark = pdfium.FPDFBookmark_GetNextSibling(self.raw, bookmark)
     
     
     @staticmethod
@@ -518,18 +509,13 @@ class PdfFont:
     """ PDF font data helper class. """
     
     def __init__(self, pdf_font, font_data):
-        self._pdf_font = pdf_font
+        self.raw = pdf_font
         self._font_data = font_data
-    
-    @property
-    def raw(self):
-        """ FPDF_FONT: The raw PDFium font object handle. """
-        return self._pdf_font
     
     def close(self):
         """
         Close the font to release allocated memory.
         This function shall be called when finished working with the object.
         """
-        pdfium.FPDFFont_Close(self._pdf_font)
+        pdfium.FPDFFont_Close(self.raw)
         id(self._font_data)
