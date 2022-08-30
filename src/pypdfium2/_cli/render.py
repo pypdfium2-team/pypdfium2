@@ -20,20 +20,6 @@ def rotation_type(string):
     return rotation
 
 
-def colour_type(string):
-    if string.lower() == "none":
-        return
-    else:
-        colour = ast.literal_eval(string)
-        if not isinstance(colour, (tuple, list)):
-            raise ValueError("Invalid colour type %s. Must be list or tuple." % type(colour))
-        if not len(colour) in (3, 4):
-            raise ValueError("Invalid number of colour values. Must be 3 or 4.")
-        if not all(isinstance(val, int) and 0 <= val <= 255 for val in colour):
-            raise ValueError("Colour values must be integers ranging from 0 to 255.")
-        return colour
-
-
 def crop_type(string):
     crop = ast.literal_eval(string)
     if not isinstance(crop, (tuple, list)) or len(crop) != 4 or not all(isinstance(c, (int, float)) for c in crop):
@@ -64,7 +50,7 @@ def attach_parser(subparsers):
     )
     parser.add_argument(
         "--format", "-f",
-        default = "jpg",
+        default = "png",
         help = "File extension of the image format to use",
     )
     parser.add_argument(
@@ -88,7 +74,8 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--colour",
         default = (255, 255, 255, 255),
-        type = colour_type,
+        nargs = 4,
+        type = int,
         help = "Page background colour. Defaults to white. It can be given in RGBA format as a sequence of integers ranging from 0 to 255, or it may be 'none' for transparent background."
     )
     parser.add_argument(

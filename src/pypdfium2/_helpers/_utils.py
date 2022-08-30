@@ -6,11 +6,6 @@ import pypdfium2._pypdfium as pdfium
 
 def get_bitmap_format(colour, greyscale, rev_byteorder):
     
-    if len(colour) != 4:
-        raise ValueError("Colour must be a sequence of four values (red, green, blue, alpha).")
-    if not all(0 <= c <= 255 for c in colour):
-        raise ValueError("Colour value exceeds boundaries.")
-    
     if (colour[3] < 255):
         px_const = pdfium.FPDFBitmap_BGRA
     else:
@@ -29,11 +24,16 @@ def get_bitmap_format(colour, greyscale, rev_byteorder):
     return px_const, px_str, rev_byteorder
 
 
-def colour_tohex(r, g, b, a, rev_byteorder):
+def colour_tohex(colour, rev_byteorder):
     """
     Convert an RGBA colour specified by 4 integers ranging from 0 to 255 to a single 32-bit integer as required by PDFium.
     If using regular byte order, the output format will be ARGB. If using reversed byte order, it will be ABGR.
     """
+    
+    if not all(0 <= c <= 255 for c in colour):
+        raise ValueError("Colour value exceeds boundaries.")
+    
+    r, g, b, a = colour
     
     # colour is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
     if rev_byteorder:

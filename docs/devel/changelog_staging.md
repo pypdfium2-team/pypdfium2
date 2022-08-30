@@ -15,7 +15,7 @@
     - If the target page of a bookmark cannot be identified, `PdfDocument.get_toc()` now assigns `None` rather than `-1`, to avoid accidental reverse list indexing and to enforce that callers properly handle this case.
     *Other changes*
     - Improved code style and consistency regarding interaction with PDFium/ctypes.
-    - New rendering parameters added: `draw_forms`, `rev_byteorder`, `extra_flags`, and `memory_limit`.
+    - New rendering parameters added: `colour_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `extra_flags`, and `memory_limit`.
     - New rendering functions `render_tonumpy()` added, returning a shaped NumPy array.
 - Setup code
     - When doing an automatic release, repository changes are now only pushed after successful wheel building, to avoid leaving the repository in an invalid state in case some earlier step fails.

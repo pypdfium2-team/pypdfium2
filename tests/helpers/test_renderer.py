@@ -169,6 +169,24 @@ def test_render_page_bgcolour(colour, sample_page):
     image.close()
 
 
+def test_render_page_colourscheme():
+    
+    pdf = pdfium.PdfDocument(TestFiles.text)
+    page = pdf.get_page(0)
+    colour_scheme = pdfium.ColourScheme(
+        text_fill = (255, 255, 255, 255),
+    )
+    image = page.render_topil(
+        greyscale = True,
+        colour = (0, 0, 0, 255),
+        colour_scheme = colour_scheme,
+    )
+    assert image.mode == "L"
+    image.save( join(OutputDir, "render_colourscheme.png") )
+    
+    for g in (page, pdf): g.close()
+
+
 @pytest.mark.parametrize(
     "rev_byteorder", [False, True]
 )

@@ -8,8 +8,9 @@ from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers._utils import (
-    get_bitmap_format,
+    get_functype,
     colour_tohex,
+    get_bitmap_format,
     RotationToConst,
     RotationToDegrees,
 )
@@ -257,14 +258,17 @@ class PdfPage:
             scale = 1,
             rotation = 0,
             crop = (0, 0, 0, 0),
-            colour = (255, 255, 255, 255),
             greyscale = False,
+            colour = (255, 255, 255, 255),
+            colour_scheme = None,
+            fill_to_stroke = False,
             optimise_mode = OptimiseMode.NONE,
             draw_annots = True,
             draw_forms = True,
             no_smoothtext = False,
             no_smoothimage = False,
             no_smoothpath = False,
+            force_halftone = False,
             rev_byteorder = False,
             extra_flags = 0,
             memory_limit = 2**30,
@@ -293,6 +297,12 @@ class PdfPage:
                 For RGB, 0 will include nothing of the colour in question, while 255 will fully include it.
                 For Alpha, 0 means full transparency, while 255 means no transparency.
             
+            colour_scheme (ColourScheme | None):
+                A custom colour scheme for rendering, defining fill and stroke colours for paths and text.
+            
+            fill_to_stroke (bool):
+                Whether fill paths need to be stroked. This option is ignored if *colour_scheme* is :data:`None`.
+            
             greyscale (bool):
                 Whether to render in greyscale mode (no colours).
             
@@ -314,6 +324,9 @@ class PdfPage:
             no_smoothpath (bool):
                 Disable anti-aliasing of paths.
             
+            force_halftone (bool):
+                Always use halftone for image streching.
+            
             rev_byteorder (bool):
                 By default, the output pixel format will be ``BGR(A)``.
                 This option may be used to render with reversed byte order, leading to ``RGB(A)`` output instead.
@@ -321,6 +334,7 @@ class PdfPage:
             
             extra_flags (int):
                 Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
+                Flags not covered by other options include ``FPDF_RENDER_LIMITEDIMAGECACHE`` and ``FPDF_NO_NATIVETEXT``, for instance.
             
             memory_limit (int | None):
                 Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
@@ -340,7 +354,7 @@ class PdfPage:
         """
         
         cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(colour, greyscale, rev_byteorder)
-        c_colour = colour_tohex(*colour, rev_byteorder)
+        c_colour = colour_tohex(colour, rev_byteorder)
         n_channels = len(cl_string)
         
         src_width  = math.ceil(self.get_width()  * scale)
@@ -378,8 +392,12 @@ class PdfPage:
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHIMAGE
         if no_smoothpath:
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHPATH
+        if force_halftone:
+            render_flags |= pdfium.FPDF_RENDER_FORCEHALFTONE
         if rev_byteorder:
             render_flags |= pdfium.FPDF_REVERSE_BYTE_ORDER
+        if fill_to_stroke and colour_scheme is not None:
+            render_flags |= pdfium.FPDF_CONVERT_FILL_TO_STROKE
         
         if optimise_mode is OptimiseMode.NONE:
             pass
@@ -391,7 +409,21 @@ class PdfPage:
             raise ValueError("Invalid optimise_mode %s" % optimise_mode)
         
         render_args = (bitmap, self._page, -crop[0], -crop[3], src_width, src_height, RotationToConst[rotation], render_flags)
-        pdfium.FPDF_RenderPageBitmap(*render_args)
+        
+        if colour_scheme is None:
+            pdfium.FPDF_RenderPageBitmap(*render_args)
+        else:
+            # rendering with colour scheme is only available in the async version at the moment
+            
+            ifsdk_pause = pdfium.IFSDK_PAUSE()
+            ifsdk_pause.version = 1
+            ifsdk_pause.NeedToPauseNow = get_functype(pdfium.IFSDK_PAUSE, "NeedToPauseNow")(lambda _: False)
+            
+            fpdf_colorscheme = colour_scheme._convert(rev_byteorder)
+            status = pdfium.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_colorscheme, ifsdk_pause)
+            
+            assert status == pdfium.FPDF_RENDER_DONE
+            pdfium.FPDF_RenderPage_Close(self._page)
         
         if draw_forms:
             form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(self.pdf.raw, pdfium.FPDF_FORMFILLINFO(2))
@@ -461,6 +493,34 @@ class PdfPage:
         
         pil_image = PIL.Image.frombytes(cl_dst, size, c_array, "raw", cl_src, 0, 1)
         return pil_image
+
+
+class ColourScheme:
+    
+    def __init__(
+            self,
+            path_fill = None,
+            path_stroke = None,
+            text_fill = None,
+            text_stroke = None,
+        ):
+        self.path_fill = path_fill
+        self.path_stroke = path_stroke
+        self.text_fill = text_fill
+        self.text_stroke = text_stroke
+    
+    def _convert(self, rev_byteorder):
+        
+        fpdf_colorscheme = pdfium.FPDF_COLORSCHEME()
+        
+        for attr in dir(self):
+            if attr.startswith("_"):
+                continue
+            value = getattr(self, attr)
+            if value is not None:
+                setattr(fpdf_colorscheme, attr+"_color", colour_tohex(value, rev_byteorder))
+        
+        return fpdf_colorscheme
 
 
 class PdfPageObject:
