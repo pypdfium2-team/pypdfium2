@@ -4,25 +4,39 @@
 import pypdfium2._pypdfium as pdfium
 
 
-def colour_helper(r, g, b, a, greyscale, rev_byteorder):
+def get_bitmap_format(colour, greyscale, rev_byteorder):
     
-    if not all(0 <= c <= 255 for c in (r, g, b, a)):
+    if len(colour) != 4:
+        raise ValueError("Colour must be a sequence of four values (red, green, blue, alpha).")
+    if not all(0 <= c <= 255 for c in colour):
         raise ValueError("Colour value exceeds boundaries.")
     
-    if (a < 255):
-        px_format = pdfium.FPDFBitmap_BGRA
+    if (colour[3] < 255):
+        px_const = pdfium.FPDFBitmap_BGRA
     else:
         if greyscale:
             # attempting to use FPDF_REVERSE_BYTE_ORDER with FPDFBitmap_Gray is not only unnecessary, but also causes issues, so prohibit it (pdfium bug?)
-            px_format = pdfium.FPDFBitmap_Gray
+            px_const = pdfium.FPDFBitmap_Gray
             rev_byteorder = False
         else:
-            px_format = pdfium.FPDFBitmap_BGR
-    
-    # TODO split function here, so we can use colour conversion separately
+            px_const = pdfium.FPDFBitmap_BGR
     
     if rev_byteorder:
-        # colour is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
+        px_str = BitmapFormatToStrReverse[px_const]
+    else:
+        px_str = BitmapFormatToStr[px_const]
+    
+    return px_const, px_str, rev_byteorder
+
+
+def colour_tohex(r, g, b, a, rev_byteorder):
+    """
+    Convert an RGBA colour specified by 4 integers ranging from 0 to 255 to a single 32-bit integer as required by PDFium.
+    If using regular byte order, the output format will be ARGB. If using reversed byte order, it will be ABGR.
+    """
+    
+    # colour is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
+    if rev_byteorder:
         channels = (a, b, g, r)
     else:
         channels = (a, r, g, b)
@@ -33,7 +47,7 @@ def colour_helper(r, g, b, a, greyscale, rev_byteorder):
         c_colour |= c << shift
         shift -= 8
     
-    return c_colour, px_format, rev_byteorder
+    return c_colour
 
 
 def get_functype(struct, funcname):
@@ -57,14 +71,14 @@ def _invert_dict(dictionary):
     return {v: k for k, v in dictionary.items()}
 
 
-#: Convert a PDFium pixel format constant to string, assuming regular byte order
+#: Convert a PDFium pixel format constant to string, assuming regular byte order.
 BitmapFormatToStr = {
     pdfium.FPDFBitmap_BGRA: "BGRA",
     pdfium.FPDFBitmap_BGR:  "BGR",
     pdfium.FPDFBitmap_Gray: "L",
 }
 
-#: Convert a PDFium pixel format constant to string, assuming reversed byte order
+#: Convert a PDFium pixel format constant to string, assuming reversed byte order.
 BitmapFormatToStrReverse = {
     pdfium.FPDFBitmap_BGRA: "RGBA",
     pdfium.FPDFBitmap_BGR:  "RGB",

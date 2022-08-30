@@ -8,9 +8,8 @@ from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers._utils import (
-    colour_helper,
-    BitmapFormatToStr,
-    BitmapFormatToStrReverse,
+    get_bitmap_format,
+    colour_tohex,
     RotationToConst,
     RotationToDegrees,
 )
@@ -340,12 +339,8 @@ class PdfPage:
             The ctypes array is allocated by Python (not PDFium), so we don't need to care about freeing memory.
         """
         
-        c_colour, cl_pdfium, rev_byteorder = colour_helper(*colour, greyscale, rev_byteorder)
-        
-        if rev_byteorder:
-            cl_string = BitmapFormatToStrReverse[cl_pdfium]
-        else:
-            cl_string = BitmapFormatToStr[cl_pdfium]
+        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(colour, greyscale, rev_byteorder)
+        c_colour = colour_tohex(*colour, rev_byteorder)
         n_channels = len(cl_string)
         
         src_width  = math.ceil(self.get_width()  * scale)
