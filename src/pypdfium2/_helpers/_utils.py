@@ -4,9 +4,9 @@
 import pypdfium2._pypdfium as pdfium
 
 
-def get_bitmap_format(color, greyscale, rev_byteorder):
+def get_bitmap_format(bg_color, color_scheme, greyscale, rev_byteorder):
     
-    if (color[3] < 255):
+    if (bg_color[3] < 255) or color_scheme.needs_alpha():
         px_const = pdfium.FPDFBitmap_BGRA
     else:
         if greyscale:

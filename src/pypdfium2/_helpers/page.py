@@ -353,7 +353,10 @@ class PdfPage:
             The ctypes array is allocated by Python (not PDFium), so we don't need to care about freeing memory.
         """
         
-        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder)
+        if color_scheme is None:
+            color_scheme = ColorScheme()
+        
+        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, color_scheme, greyscale, rev_byteorder)
         c_color = color_tohex(color, rev_byteorder)
         n_channels = len(cl_string)
         
@@ -396,7 +399,7 @@ class PdfPage:
             render_flags |= pdfium.FPDF_RENDER_FORCEHALFTONE
         if rev_byteorder:
             render_flags |= pdfium.FPDF_REVERSE_BYTE_ORDER
-        if fill_to_stroke and color_scheme is not None:
+        if fill_to_stroke and color_scheme.needed:
             render_flags |= pdfium.FPDF_CONVERT_FILL_TO_STROKE
         
         if optimise_mode is OptimiseMode.NONE:
@@ -410,21 +413,21 @@ class PdfPage:
         
         render_args = (bitmap, self._page, -crop[0], -crop[3], src_width, src_height, RotationToConst[rotation], render_flags)
         
-        if color_scheme is None:
-            pdfium.FPDF_RenderPageBitmap(*render_args)
-        else:
+        if color_scheme.needed:
             # rendering with color scheme is only available in the async version at the moment
-            # TODO take color scheme in consideration for alpha channel decision
             
             ifsdk_pause = pdfium.IFSDK_PAUSE()
             ifsdk_pause.version = 1
             ifsdk_pause.NeedToPauseNow = get_functype(pdfium.IFSDK_PAUSE, "NeedToPauseNow")(lambda _: False)
             
-            fpdf_colorscheme = color_scheme._convert(rev_byteorder)
+            fpdf_colorscheme = color_scheme.convert(rev_byteorder)
             status = pdfium.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_colorscheme, ifsdk_pause)
             
             assert status == pdfium.FPDF_RENDER_DONE
             pdfium.FPDF_RenderPage_Close(self._page)
+        
+        else:
+            pdfium.FPDF_RenderPageBitmap(*render_args)
         
         if draw_forms:
             form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(self.pdf.raw, pdfium.FPDF_FORMFILLINFO(2))
@@ -498,29 +501,20 @@ class PdfPage:
 
 class ColorScheme:
     
-    def __init__(
-            self,
-            path_fill = None,
-            path_stroke = None,
-            text_fill = None,
-            text_stroke = None,
-        ):
-        self.path_fill = path_fill
-        self.path_stroke = path_stroke
-        self.text_fill = text_fill
-        self.text_stroke = text_stroke
+    def __init__(self, **_kws):
+        self.kwargs = {k: v for k, v in _kws.items() if v is not None}
+        self.needed = (len(self.kwargs) > 0)
+        if self.needed:
+            fields = [key for key, type in pdfium.FPDF_COLORSCHEME._fields_]
+            assert all(k in fields for k in self.kwargs.keys())
     
-    def _convert(self, rev_byteorder):
-        
+    def needs_alpha(self):
+        return any(color[3] < 255 for color in self.kwargs.values())
+    
+    def convert(self, rev_byteorder):
         fpdf_colorscheme = pdfium.FPDF_COLORSCHEME()
-        
-        for attr in dir(self):
-            if attr.startswith("_"):
-                continue
-            value = getattr(self, attr)
-            if value is not None:
-                setattr(fpdf_colorscheme, attr+"_color", color_tohex(value, rev_byteorder))
-        
+        for key, value in self.kwargs.items():
+            setattr(fpdf_colorscheme, key, color_tohex(value, rev_byteorder))
         return fpdf_colorscheme
 
 

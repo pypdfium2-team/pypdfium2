@@ -174,7 +174,7 @@ def test_render_page_colorscheme():
     pdf = pdfium.PdfDocument(TestFiles.text)
     page = pdf.get_page(0)
     color_scheme = pdfium.ColorScheme(
-        text_fill = (255, 255, 255, 255),
+        text_fill_color = (255, 255, 255, 255),
     )
     image = page.render_topil(
         greyscale = True,
