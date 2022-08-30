@@ -184,19 +184,19 @@ def main(args):
         
         kwargs = dict(
             page_indices = page_indices,
+            n_processes = args.processes,
             scale = args.scale,
             rotation = args.rotation,
             crop = args.crop,
+            greyscale = args.greyscale,
             color = args.background_color,
             color_scheme = color_scheme,
             fill_to_stroke = args.fill_to_stroke,
-            force_halftone = args.force_halftone,
-            greyscale = args.greyscale,
             optimise_mode = args.optimise_mode,
             draw_annots = not args.no_annotations,
             draw_forms = not args.no_forms,
+            force_halftone = args.force_halftone,
             rev_byteorder = args.rev_byteorder,
-            n_processes = args.processes,
         )
         for type in args.no_antialias:
             kwargs["no_smooth%s" % type] = True

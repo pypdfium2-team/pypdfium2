@@ -292,6 +292,9 @@ class PdfPage:
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top).
                 Crop is applied after rotation.
             
+            greyscale (bool):
+                Whether to render in greyscale mode (no colors).
+            
             color (typing.Tuple[int, int, int, int]):
                 Page background color. Shall be a list of values for red, green, blue and alpha, ranging from 0 to 255.
                 For RGB, 0 will include nothing of the color in question, while 255 will fully include it.
@@ -302,9 +305,6 @@ class PdfPage:
             
             fill_to_stroke (bool):
                 Whether fill paths need to be stroked. This option is ignored if *color_scheme* is :data:`None`.
-            
-            greyscale (bool):
-                Whether to render in greyscale mode (no colors).
             
             optimise_mode (OptimiseMode):
                 How to optimise page rendering.

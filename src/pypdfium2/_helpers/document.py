@@ -460,7 +460,7 @@ class PdfDocument:
         See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
         
         Yields:
-            :class:`tuple`: Result of :meth:`.PdfPage.render_tobytes`.
+            Result of :meth:`.PdfPage.render_tobytes`.
         """
         yield from self._render_base("bytes", **kwargs)
     
@@ -472,7 +472,7 @@ class PdfDocument:
         See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
         
         Yields:
-            :class:`PIL.Image.Image`: PIL image.
+            Result of :meth:`.PdfPage.render_topil`.
         """
         yield from self._render_base("pil", **kwargs)
     
@@ -484,7 +484,7 @@ class PdfDocument:
         See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
         
         Yields:
-            (:class:`numpy.ndarray`, str): NumPy array, and color format.
+            Result of :meth:`.PdfPage.render_tonumpy`.
         """
         yield from self._render_base("numpy", **kwargs)
 
