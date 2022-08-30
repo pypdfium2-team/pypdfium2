@@ -414,6 +414,7 @@ class PdfPage:
             pdfium.FPDF_RenderPageBitmap(*render_args)
         else:
             # rendering with colour scheme is only available in the async version at the moment
+            # TODO take colour scheme in consideration for alpha channel decision
             
             ifsdk_pause = pdfium.IFSDK_PAUSE()
             ifsdk_pause.version = 1
