@@ -183,6 +183,7 @@ class PdfDocument:
         """
         
         filewrite = pdfium.FPDF_FILEWRITE()
+        filewrite.version = 1
         filewrite.WriteBlock = get_functype(pdfium.FPDF_FILEWRITE, "WriteBlock")( _writer_class(buffer) )
         
         saveargs = (self._pdf, filewrite, pdfium.FPDF_NO_INCREMENTAL)
