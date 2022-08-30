@@ -26,6 +26,13 @@ def crop_type(string):
         raise ValueError("Crop must be a list of four numbers.")
     return crop
 
+ColourSchemeOpt = dict(
+    default = None,
+    metavar = "C",
+    nargs = 4,
+    type = int,
+    help = "Option for rendering with custom colour scheme.",
+)
 
 def attach_parser(subparsers):
     parser = subparsers.add_parser(
@@ -72,11 +79,38 @@ def attach_parser(subparsers):
         help = "Rotate pages by 90, 180 or 270 degrees",
     )
     parser.add_argument(
-        "--colour",
+        "--background-colour",
         default = (255, 255, 255, 255),
+        metavar = "C",
         nargs = 4,
         type = int,
-        help = "Page background colour. Defaults to white. It can be given in RGBA format as a sequence of integers ranging from 0 to 255, or it may be 'none' for transparent background."
+        help = "Page background colour. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
+    )
+    parser.add_argument(
+        "--path-fill-colour",
+        **ColourSchemeOpt
+    )
+    parser.add_argument(
+        "--path-stroke-colour",
+        **ColourSchemeOpt
+    )
+    parser.add_argument(
+        "--text-fill-colour",
+        **ColourSchemeOpt
+    )
+    parser.add_argument(
+        "--text-stroke-colour",
+        **ColourSchemeOpt
+    )
+    parser.add_argument(
+        "--fill-to-stroke",
+        action = "store_true",
+        help = "Whether fill paths need to be stroked. Ignored if not rendering with custom colour scheme.",
+    )
+    parser.add_argument(
+        "--force-halftone",
+        action = "store_true",
+        help = "Always use halftone for image stretching",
     )
     parser.add_argument(
         "--no-annotations",
@@ -103,7 +137,7 @@ def attach_parser(subparsers):
         "--crop",
         type = crop_type,
         default = (0, 0, 0, 0),
-        help = "Amount to crop from (left, bottom, right, top)"
+        help = "Amount to crop from (left, bottom, right, top)",
     )
     parser.add_argument(
         "--no-antialias",
@@ -115,13 +149,13 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--rev-byteorder",
         action = "store_true",
-        help = "Render with reverse byte order internally, i. e. RGB(A) instead of BGR(A). The result should be completely identical."
+        help = "Render with reverse byte order internally, i. e. RGB(A) instead of BGR(A). The result should be completely identical.",
     )
     parser.add_argument(
         "--processes",
         default = os.cpu_count(),
         type = int,
-        help = "The number of processes to use for rendering (defaults to the number of CPU cores)"
+        help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
     )
 
 
@@ -138,12 +172,25 @@ def main(args):
         else:
             page_indices = [i for i in range(len(pdf))]
         
+        colour_scheme = None
+        colour_scheme_kwargs = dict(
+            path_fill = args.path_fill_colour,
+            path_stroke = args.path_stroke_colour,
+            text_fill = args.text_fill_colour,
+            text_stroke = args.text_stroke_colour,
+        )
+        if any(colour_scheme_kwargs.values()):
+            colour_scheme = pdfium.ColourScheme(**colour_scheme_kwargs)
+        
         kwargs = dict(
             page_indices = page_indices,
             scale = args.scale,
             rotation = args.rotation,
             crop = args.crop,
-            colour = args.colour,
+            colour = args.background_colour,
+            colour_scheme = colour_scheme,
+            fill_to_stroke = args.fill_to_stroke,
+            force_halftone = args.force_halftone,
             greyscale = args.greyscale,
             optimise_mode = args.optimise_mode,
             draw_annots = not args.no_annotations,
