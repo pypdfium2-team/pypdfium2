@@ -50,8 +50,8 @@ class PdfPage:
         * The :attr:`.pdf` attribute stores the :class:`.PdfDocument` this page belongs to.
     """
     
-    def __init__(self, page, pdf):
-        self.raw = page
+    def __init__(self, raw, pdf):
+        self.raw = raw
         self.pdf = pdf
     
     def close(self):
@@ -534,8 +534,8 @@ class PdfPageObject:
         * The :attr:`.page` attribute stores the :class:`.PdfPage` this page object belongs to.
     """
     
-    def __init__(self, pageobj, page):
-        self.raw = pageobj
+    def __init__(self, raw, page):
+        self.raw = raw
         self.page = page
     
     def get_pos(self):

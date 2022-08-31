@@ -16,8 +16,8 @@ class PdfTextPage:
         * The :attr:`.page` attribute stores the :class:`.PdfPage` this text page belongs to.
     """
     
-    def __init__(self, textpage, page):
-        self.raw = textpage
+    def __init__(self, raw, page):
+        self.raw = raw
         self.page = page
     
     def close(self):
@@ -214,8 +214,8 @@ class PdfTextSearcher:
         * The :attr:`.textpage` attribute stores the :class:`.PdfTextPage` this searcher belongs to.
     """
     
-    def __init__(self, search, textpage):
-        self.raw = search
+    def __init__(self, raw, textpage):
+        self.raw = raw
         self.textpage = textpage
     
     def _get_occurrence(self, find_func):
