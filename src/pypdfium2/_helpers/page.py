@@ -422,7 +422,8 @@ class PdfPage:
             pdfium.FPDF_RenderPage_Close(self.raw)
         
         if draw_forms:
-            form_info = pdfium.FPDF_FORMFILLINFO(1)
+            form_info = pdfium.FPDF_FORMFILLINFO()
+            form_info.version = 1
             form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.pdf.raw, form_info)
             pdfium.FPDF_FFLDraw(form_env, *render_args)
             pdfium.FPDFDOC_ExitFormFillEnvironment(form_env)
