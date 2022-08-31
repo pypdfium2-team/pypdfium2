@@ -12,7 +12,7 @@ class PdfTextPage:
     Text extraction helper class.
     
     Note:
-        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_TEXTPAGE` object.
+        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_TEXTPAGE`.
         * The :attr:`.page` attribute stores the :class:`.PdfPage` this text page belongs to.
     """
     
@@ -210,7 +210,7 @@ class PdfTextSearcher:
     Text searcher helper class.
     
     Note:
-        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_SCHHANDLE` object.
+        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_SCHHANDLE`.
         * The :attr:`.textpage` attribute stores the :class:`.PdfTextPage` this searcher belongs to.
     """
     

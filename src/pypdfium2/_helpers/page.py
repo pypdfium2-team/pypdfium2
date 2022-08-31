@@ -46,8 +46,8 @@ class PdfPage:
     Page helper class.
     
     Note:
-        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGE` object.
-        * The :attr:`.pdf` attribute stores the :class:`.PdfDocument` object this page belongs to.
+        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGE`.
+        * The :attr:`.pdf` attribute stores the :class:`.PdfDocument` this page belongs to.
     """
     
     def __init__(self, page, pdf):
@@ -246,7 +246,7 @@ class PdfPage:
         """
         for i in range( self.count_objects() ):
             raw_obj = pdfium.FPDFPage_GetObject(self.raw, i)
-            yield PdfPageObject(raw_obj)
+            yield PdfPageObject(raw_obj, self)
     
     
     def render_base(
@@ -530,11 +530,13 @@ class PdfPageObject:
     Page object helper class.
     
     Note:
-        The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGEOBJECT`.
+        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGEOBJECT`.
+        * The :attr:`.page` attribute stores the :class:`.PdfPage` this page object belongs to.
     """
     
-    def __init__(self, pageobj):
+    def __init__(self, pageobj, page):
         self.raw = pageobj
+        self.page = page
     
     def get_pos(self):
         """

@@ -63,7 +63,7 @@ class PdfDocument:
         * The ``del`` keyword and list index access may be used to delete pages.
     
     Note:
-        The :attr:`.raw` attribute stores the underlying :class:`FPDF_DOCUMENT` object.
+        The :attr:`.raw` attribute stores the underlying :class:`FPDF_DOCUMENT`.
     """
     
     def __init__(
@@ -513,7 +513,7 @@ class PdfFont:
     PDF font data helper class.
     
     Note:
-        The :attr:`.raw` attribute stores the underlying :class:`FPDF_FONT` object.
+        The :attr:`.raw` attribute stores the underlying :class:`FPDF_FONT`.
     """
     
     def __init__(self, pdf_font, font_data):
