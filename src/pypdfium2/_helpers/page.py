@@ -321,7 +321,7 @@ class PdfPage:
                 Disable anti-aliasing of paths.
             
             force_halftone (bool):
-                Always use halftone for image streching.
+                Always use halftone for image stretching.
             
             rev_byteorder (bool):
                 By default, the output pixel format will be ``BGR(A)``.

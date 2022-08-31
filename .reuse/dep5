@@ -19,6 +19,12 @@ Comment:
     `.about_wheel_license.md` is a description file which exists only to state that
     `LicenseRef-PdfiumThirdParty` is used.
 
+Files: autorelease/*
+Copyright: 2022 geisserml
+License: CC-BY-4.0
+Comment:
+    Directory for autorelease control files.
+
 Files: tests/resources/toc.pdf
 Copyright: 2020 Matthias Erll
 License: LicenseRef-FairUse
@@ -75,14 +81,3 @@ License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches
     For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
-
-Files: sourcebuild/patches/depot_tools/gclient_scm.patch
-Copyright: 2021 BoLaMN
-License: LicenseRef-FairUse
-Comment:
-    Obtained from: https://github.com/bblanchon/pdfium-binaries/pull/39
-
-Files: sourcebuild/patches/pdfium/nativebuild.patch
-       sourcebuild/patches/pdfium/skip_deps.patch
-Copyright: 2022 geisserml <geisserml@gmail.com>
-License: BSD-3-Clause OR Apache-2.0
