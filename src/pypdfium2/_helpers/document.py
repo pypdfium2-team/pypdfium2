@@ -145,9 +145,7 @@ class PdfDocument:
         Close the document to release allocated memory.
         This function shall be called when finished working with the object.
         """
-        if self._form_env is not None:
-            pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)
-            id(self._form_config)
+        self.exit_formenv()
         pdfium.FPDF_CloseDocument(self.raw)
         if self._ld_data is not None:
             self._ld_data.close()
@@ -157,18 +155,34 @@ class PdfDocument:
     
     def init_formenv(self):
         """
-        Initialise a form environment object for this document.
+        Initialise a form environment handle for this document.
         If already initialised, the existing one will be returned instead.
-        :meth:`.close` will free the form environment, if initialised.
         
         Returns:
             FPDF_FORMHANDLE:
         """
-        if self._form_env is None:
-            self._form_config = pdfium.FPDF_FORMFILLINFO()
-            self._form_config.version = 2
-            self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, self._form_config)
+        if self._form_env is not None:
+            return self._form_env
+        self._form_config = pdfium.FPDF_FORMFILLINFO()
+        self._form_config.version = 2
+        self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, self._form_config)
         return self._form_env
+    
+    
+    def exit_formenv(self):
+        """
+        Release allocated memory by exiting the form environment.
+        If the form environment is not initialised, nothing will be done.
+        
+        Note:
+            This method is called by :meth:`.close`.
+        """
+        if self._form_env is None:
+            return
+        pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)
+        self._form_env = None
+        id(self._form_config)
+        self._form_config = None
     
     
     def get_version(self):
