@@ -78,6 +78,7 @@ class PdfDocument:
         self._actual_input = input_data
         self._rendering_input = None
         self._ld_data = None
+        self._form_env = None
         
         self._password = password
         self._file_access = file_access
@@ -143,11 +144,29 @@ class PdfDocument:
         Close the document to release allocated memory.
         This function shall be called when finished working with the object.
         """
+        if self._form_env is not None:
+            print(self._form_env)
+            pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)  # this call segfaults
         pdfium.FPDF_CloseDocument(self.raw)
         if self._ld_data is not None:
             self._ld_data.close()
         if self._autoclose and is_input_buffer(self._actual_input):
             self._actual_input.close()
+    
+    
+    def init_formenv(self):
+        """
+        Initialise a form environment object for this document.
+        If already initialised, the existing one will be returned instead.
+        :meth:`.close` will free the form environment, if initialised.
+        
+        Returns:
+            FPDF_FORMHANDLE:
+        """
+        if self._form_env is None:
+            form_info = pdfium.FPDF_FORMFILLINFO(1)
+            self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, form_info)
+        return self._form_env
     
     
     def get_version(self):
