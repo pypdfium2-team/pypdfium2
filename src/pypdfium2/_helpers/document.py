@@ -516,8 +516,8 @@ class PdfFont:
         The :attr:`.raw` attribute stores the underlying :class:`FPDF_FONT`.
     """
     
-    def __init__(self, pdf_font, font_data):
-        self.raw = pdf_font
+    def __init__(self, raw, font_data):
+        self.raw = raw
         self._font_data = font_data
     
     def close(self):
