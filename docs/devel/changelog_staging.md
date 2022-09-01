@@ -17,6 +17,7 @@
     - Improved code style and consistency regarding interaction with PDFium/ctypes.
     - New rendering parameters added: `color_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `extra_flags`, and `memory_limit`.
     - New rendering functions `render_tonumpy()` added, returning a shaped NumPy array.
+    - Form environments are now initialised/exited on document level rather than on page rendering. *In the course of this work, a segmentation fault source was eliminated, related to a formerly undocumented requirement of PDFium regarding object lifetime. Whether the segmentation fault would actually take place was dependant on Python garbage collection behaviour. This did not appear to happen under normal circumstances, so the issue remained unnoticed for a long time. For stability and security reasons, we urge users that older versions of pypdfium2 should not be used anymore!*
 - Setup code
     - When doing an automatic release, repository changes are now only pushed after successful wheel building, to avoid leaving the repository in an invalid state in case some earlier step fails.
     - PDFium's commit log is now shown with GitHub releases.
