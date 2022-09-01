@@ -39,11 +39,6 @@ Subcommands = {
 
 def parse_args(argv=sys.argv[1:]):
     
-    if IS_SOURCEBUILD:
-        build_type = "source build"
-    else:
-        build_type = "official build"
-    
     parser = argparse.ArgumentParser(
         prog = "pypdfium2",
         description = "Command line interface to the pypdfium2 Python library",
@@ -51,7 +46,10 @@ def parse_args(argv=sys.argv[1:]):
     parser.add_argument(
         "--version", "-v",
         action = "version",
-        version = "pypdfium2 %s (libpdfium %s, %s)" % (V_PYPDFIUM2, V_LIBPDFIUM, build_type),
+        version = "pypdfium2 %s (libpdfium %s, %s)" % (
+            V_PYPDFIUM2, V_LIBPDFIUM,
+            "source build" if IS_SOURCEBUILD else "official build",
+        ),
     )
     
     subparsers = parser.add_subparsers(dest="subcommand")

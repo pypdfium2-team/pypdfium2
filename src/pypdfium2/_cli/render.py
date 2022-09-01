@@ -26,6 +26,7 @@ def crop_type(string):
         raise ValueError("Crop must be a list of four numbers.")
     return crop
 
+
 ColorSchemeOpt = dict(
     default = None,
     metavar = "C",
@@ -33,6 +34,7 @@ ColorSchemeOpt = dict(
     type = int,
     help = "Option for rendering with custom color scheme.",
 )
+
 
 def attach_parser(subparsers):
     parser = subparsers.add_parser(
