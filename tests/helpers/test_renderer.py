@@ -258,6 +258,14 @@ def test_render_page_noantialias(sample_page):
     pil_image.close()
 
 
+def test_render_pages_no_concurrency(multipage_doc):
+    for page in multipage_doc:
+        image = page.render_topil(scale=0.5, greyscale=True)
+        assert isinstance(image, PIL.Image.Image)
+        image.close()
+        page.close()
+
+
 @pytest.fixture
 def render_pdffile_topil(multipage_doc):
     
