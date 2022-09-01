@@ -258,7 +258,7 @@ class PdfDocument:
             is_cid,
         )
         
-        return PdfFont(pdf_font, font_data)
+        return PdfFont(pdf_font, self, font_data)
     
     
     def _get_bookmark(self, bookmark, level):
@@ -513,11 +513,13 @@ class PdfFont:
     PDF font data helper class.
     
     Note:
-        The :attr:`.raw` attribute stores the underlying :class:`FPDF_FONT`.
+        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_FONT`.
+        * The :attr:`.pdf` attribute holds a reference to the :class:`.PdfDocument` this font belongs to.
     """
     
-    def __init__(self, raw, font_data):
+    def __init__(self, raw, pdf, font_data):
         self.raw = raw
+        self.pdf = pdf
         self._font_data = font_data
     
     def close(self):

@@ -47,7 +47,7 @@ class PdfPage:
     
     Note:
         * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGE`.
-        * The :attr:`.pdf` attribute stores the :class:`.PdfDocument` this page belongs to.
+        * The :attr:`.pdf` attribute holds a reference to the :class:`.PdfDocument` this page belongs to.
     """
     
     def __init__(self, raw, pdf):
@@ -531,7 +531,7 @@ class PdfPageObject:
     
     Note:
         * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGEOBJECT`.
-        * The :attr:`.page` attribute stores the :class:`.PdfPage` this page object belongs to.
+        * The :attr:`.page` holds a reference to the :class:`.PdfPage` this page object belongs to.
     """
     
     def __init__(self, raw, page):
