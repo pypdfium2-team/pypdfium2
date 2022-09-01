@@ -79,7 +79,7 @@ class PdfDocument:
         self._rendering_input = None
         self._ld_data = None
         self._form_env = None
-        self._form_info = None
+        self._form_config = None
         
         self._password = password
         self._file_access = file_access
@@ -147,7 +147,7 @@ class PdfDocument:
         """
         if self._form_env is not None:
             pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)
-            id(self._form_info)
+            id(self._form_config)
         pdfium.FPDF_CloseDocument(self.raw)
         if self._ld_data is not None:
             self._ld_data.close()
@@ -165,9 +165,9 @@ class PdfDocument:
             FPDF_FORMHANDLE:
         """
         if self._form_env is None:
-            self._form_info = pdfium.FPDF_FORMFILLINFO()
-            self._form_info.version = 2
-            self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, self._form_info)
+            self._form_config = pdfium.FPDF_FORMFILLINFO()
+            self._form_config.version = 2
+            self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, self._form_config)
         return self._form_env
     
     
