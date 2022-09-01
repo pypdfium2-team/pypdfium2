@@ -79,6 +79,7 @@ class PdfDocument:
         self._rendering_input = None
         self._ld_data = None
         self._form_env = None
+        self._form_info = None
         
         self._password = password
         self._file_access = file_access
@@ -145,8 +146,8 @@ class PdfDocument:
         This function shall be called when finished working with the object.
         """
         if self._form_env is not None:
-            print(self._form_env)
-            pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)  # this call segfaults
+            pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)
+            id(self._form_info)
         pdfium.FPDF_CloseDocument(self.raw)
         if self._ld_data is not None:
             self._ld_data.close()
@@ -164,8 +165,9 @@ class PdfDocument:
             FPDF_FORMHANDLE:
         """
         if self._form_env is None:
-            form_info = pdfium.FPDF_FORMFILLINFO(1)
-            self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, form_info)
+            self._form_info = pdfium.FPDF_FORMFILLINFO()
+            self._form_info.version = 2
+            self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, self._form_info)
         return self._form_env
     
     
