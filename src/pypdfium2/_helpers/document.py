@@ -180,8 +180,8 @@ class PdfDocument:
         if self._form_env is None:
             return
         pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)
-        self._form_env = None
         id(self._form_config)
+        self._form_env = None
         self._form_config = None
     
     
