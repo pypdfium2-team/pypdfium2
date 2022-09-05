@@ -48,7 +48,7 @@ def test_entrypoint():
 # setup_base
 
 ExpectedTags = (
-    (PlatformNames.darwin_x64,    "macosx_10_11_x86_64.macosx_11_0_x86_64.macosx_12_0_x86_64"),
+    (PlatformNames.darwin_x64,    "macosx_10_13_x86_64.macosx_11_0_x86_64.macosx_12_0_x86_64"),
     (PlatformNames.darwin_arm64,  "macosx_11_0_arm64.macosx_12_0_arm64"),
     (PlatformNames.linux_x64,     "manylinux_2_17_x86_64.manylinux2014_x86_64"),
     (PlatformNames.linux_x86,     "manylinux_2_17_i686.manylinux2014_i686"),
