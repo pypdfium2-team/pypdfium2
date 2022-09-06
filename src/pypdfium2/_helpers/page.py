@@ -453,7 +453,8 @@ class PdfPage:
             raise RuntimeError("NumPy library needs to be installed for render_tonumpy().")
         
         c_array, cl_format, (width, height) = self.render_base(**kwargs)
-        np_array = numpy.ctypeslib.as_array(c_array).reshape( (height, width, len(cl_format)) )
+        np_array = numpy.ctypeslib.as_array(c_array)
+        np_array.shape = (height, width, len(cl_format))
         
         return np_array, cl_format
     
