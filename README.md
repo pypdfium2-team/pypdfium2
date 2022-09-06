@@ -579,13 +579,16 @@ To the authors' knowledge, pypdfium2 is one of the very rare Python libraries th
 ## Issues
 
 In case you found a behavioural or structural problem, or wish to request a new feature, please file a [bug report](https://github.com/pypdfium2-team/pypdfium2/issues/new/choose) on the [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues).
-
 For general questions or suggestions, the [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions) is always a good place to start.
 
-<!-- TODO bug triaging roadmap -->
-
+As pypdfium2 relies on several external components, it is possible that issues need to be addressed elsewhere. The following places may be relevant:
+* PDFium [bug tracker](https://bugs.chromium.org/p/pdfium/issues/list) and [mailing list](https://groups.google.com/g/pdfium/)
+* [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues)
+* [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues)
 
 ### Known limitations
+
+pypdfium2 also has some drawbacks, of which we would like to inform you below.
 
 #### Incompatibility with CPython 3.7.6 and 3.8.1
 
