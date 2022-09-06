@@ -373,7 +373,6 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
-<!-- TODO consider suggesting get_functype() once it is public -->
 * In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks across Python/C language boundaries.
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
@@ -400,7 +399,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Set up an interface structure for custom file access
   fileaccess = pdfium.FPDF_FILEACCESS()
   fileaccess.m_FileLen = file_len
-  # CFUNCTYPE declaration copied from the bindings file (for some reason, this is not applied automatically)
+  # CFUNCTYPE declaration copied from the bindings file (unfortunately, this is not applied automatically)
   functype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
   # Instantiate a callable object, wrapped with the CFUNCTYPE declaration
   fileaccess.m_GetBlock = functype( _reader_class(py_buffer) )
@@ -439,7 +438,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
   
   If resources need to remain valid after the time of a function call, PDFium documentation usually indicates this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segmentation fault).
-
+  
   For instance, the documentation on `FPDF_LoadCustomDocument()` states that
   > The application must keep the file resources |pFileAccess| points to valid until the returned FPDF_DOCUMENT is closed. |pFileAccess| itself does not need to outlive the FPDF_DOCUMENT.
   
@@ -554,7 +553,13 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   pdfium.FPDF_CloseDocument(pdf)
   ```
 
-<!-- TODO command-line interface -->
+### [Command-line Interface](https://pypdfium2.readthedocs.io/en/stable/shell_api.html)
+
+pypdfium2 also ships with a simple command-line interface, providing access to key features of the support model in a shell environment (e. g. rendering, text extraction, TOC inspection, document merging, ...).
+
+The primary motivation in providing a CLI is to simplify manual testing, but it may be helpful in a variety of other situations as well.
+Usage should be largely self-explanatory, assuming a minimum of familiarity with the command-line.
+
 
 ## Licensing
 
@@ -566,26 +571,58 @@ Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSE
 
 pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by including [SPDX](https://spdx.org/licenses/) headers in source files, and license information for data files in [`.reuse/dep5`](.reuse/dep5).
 
-<!-- TODO development, testing -->
+To the authors' knowledge, pypdfium2 is one of the very rare Python libraries that are capable of PDF rendering while not being covered by restrictive licenses which prohibit the use in closed-source projects (such as the `GPL`).[^10]
+
+[^10]: The only other liberal-licensed PDF rendering libraries known to the authors are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). `pdf.js` is limited to a web environment. Creating Python bindings to `PDFBox` might be possible but there is no serious solution yet (apart from amateurish wrappers around its command-line API).
+
 
 ## Issues
 
-<!-- TODO rewrite section -->
+While using pypdfium2, you might encounter bugs or missing features.
 
-Since pypdfium2 is built using external binaries and an automatic bindings creator, issues that are not related to packaging or support model code likely need to be addressed upstream. However, the [issue](https://github.com/pypdfium2-team/pypdfium2/issues) or [discussion](https://github.com/pypdfium2-team/pypdfium2/discussions) panels are always a good place to start if you have any problems, questions or suggestions.
+In the endeavour to improve the product, the maintainers wish to be informed about any problems that might arise while using pypdfium2.
+Therefore, the first place for your report should be this repository.
+Remember to include applicable details such as tracebacks, operating system and architecture, as well as the version of pypdfium2 and used dependencies.
 
-If the cause of an issue could be determined to be in PDFium, the problem needs to be reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list). For discussion and general questions, also consider joining the [PDFium mailing list](https://groups.google.com/g/pdfium/).
+In case your issue could be tracked down to a third-party dependency, we will accompany or conduct subsequent measures.
 
-Issues related to pre-compiled packages should be discussed at [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
+Here is a roadmap of relevant places:
+* pypdfium2
+  - [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues): Initial reports of specific issues.
+    They may need to be transferred to other projects. Issues related to support model code, packaging or documentation probably need to be addressed in pypdfium2 itself.
+  - [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions): General questions and suggestions.
+  - In case you do not want to publicly disclose the issue or your code, you may also contact the maintainers privately via e-mail.
+* PDFium
+  - [Bug tracker](https://bugs.chromium.org/p/pdfium/issues/list): Defects in PDFium.
+    Beware: The bridge between Python and C increases the probability of integration issues or API misuse.
+    The symptoms can often look like a PDFium bug while it is not. In some cases, this may be quite difficult to distinguish.
+  - [Mailing list](https://groups.google.com/g/pdfium/): Questions regarding PDFium usage.
+* [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
+* [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues): Bindings generator.
 
-If your issue is caused by the bindings generator, refer to the [ctypesgen bug tracker](https://github.com/ctypesgen/ctypesgen/issues).
+### Known limitations
 
+pypdfium2 also has some drawbacks, of which you will be informed below.
 
-## Known limitations
-
-### Incompatibility with CPython 3.7.6 and 3.8.1
+#### Incompatibility with CPython 3.7.6 and 3.8.1
 
 pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that broke ctypesgen-created string handling code.
+
+#### Risk of unknown object lifetime violations
+
+As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.
+
+The problem is that the Python interpreter may garbage collect objects with reference count zero at any time. Thus, it can happen that an unreferenced but still required object by chance stays around long enough before it is garbage collected, dangling in mid-air, forming a likely source of non-deterministic segmentation faults.
+If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that such mistakes remain unnoticed for a long time.
+
+Although great care has been taken while developing the support model, it cannot be fully excluded that unknown violations of object lifetime are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
+
+#### No direct access to PDF data structures
+
+It should be noted that PDFium, unlike many other PDF libraries, is currently not providing direct access to raw PDF data structures. It does not publicly expose APIs to read/write PDF dictionaries, name trees, etc. Instead, it merely offers a variety of higher-level functions to modify PDFs. While these are certainly useful to abstract away some of the format's complexity and to avoid the creation of invalid PDFs, the fact that instruments for low-level access are largely missing in the public API does considerably limit the library's potential. If PDFium's capabilities are not sufficient for your use case, or you just wish to work with the raw PDF structure on your own, you may want to consider other products such as [`pikepdf`](https://github.com/pikepdf/pikepdf) to use instead of, or in conjunction with, pypdfium2.
+
+
+<!-- TODO development section -->
 
 
 ## In Use
@@ -597,8 +634,10 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 *Your project uses pypdfium2, but is not part of the list yet? Please let us know!*
 
+We are curious to see how people are using pypdfium2. Always feel free to share knowledge or code samples on the discussions page.
 
-## Thanks to[^10]
+
+## Thanks to[^11]
 
 <!-- order: alphabetical by surname -->
 
@@ -616,7 +655,7 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 *If you have somehow contributed to this project but we forgot to mention you here, feel encouraged to help us correct this oversight.*
 
-[^10]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
+[^11]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
 
 
 ## History
