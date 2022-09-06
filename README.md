@@ -581,18 +581,24 @@ To the authors' knowledge, pypdfium2 is one of the very rare Python libraries th
 While using pypdfium2, you might encounter bugs or missing features.
 
 In the endeavour to improve the product, the maintainers wish to be informed about any problems that might arise while using pypdfium2.
-Therefore, the first place for your report should always be this repository.
+Therefore, the first place for your report should be this repository.
+Remember to include applicable details such as tracebacks, operating system and architecture, as well as the version of pypdfium2 and used dependencies.
+
 In case your issue could be tracked down to a third-party dependency, we will accompany or conduct subsequent measures.
 
 Here is a roadmap of relevant places:
 * pypdfium2
-  - [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues): Specific structural or behavioural problems
-  - [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions): General questions and suggestions
+  - [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues): Initial reports of specific issues.
+    They may need to be transferred to other projects. Issues related to support model code, packaging or documentation probably need to be addressed in pypdfium2 itself.
+  - [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions): General questions and suggestions.
+  - In case you do not want to publicly disclose the issue or your code, you may also contact the maintainers privately via e-mail.
 * PDFium
-  - [Bug tracker](https://bugs.chromium.org/p/pdfium/issues/list)
-  - [Mailing list](https://groups.google.com/g/pdfium/)
-* [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues)
-* [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues)
+  - [Bug tracker](https://bugs.chromium.org/p/pdfium/issues/list): Defects in PDFium.
+    Beware: The bridge between Python and C increases the probability of integration issues or API misuse.
+    The symptoms can often look like a PDFium bug while it is not. In some cases, this may be quite difficult to distinguish.
+  - [Mailing list](https://groups.google.com/g/pdfium/): Questions regarding PDFium usage.
+* [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
+* [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues): Bindings generator.
 
 ### Known limitations
 
@@ -615,9 +621,8 @@ Although great care has been taken while developing the support model, it cannot
 
 It should be noted that PDFium, unlike many other PDF libraries, is currently not providing direct access to raw PDF data structures. It does not publicly expose APIs to read/write PDF dictionaries, name trees, etc. Instead, it merely offers a variety of higher-level functions to modify PDFs. While these are certainly useful to abstract away some of the format's complexity and to avoid the creation of invalid PDFs, the fact that instruments for low-level access are largely missing in the public API does considerably limit the library's potential. If PDFium's capabilities are not sufficient for your use case, or you just wish to work with the raw PDF structure on your own, you may want to consider other products such as [`pikepdf`](https://github.com/pikepdf/pikepdf) to use instead of, or in conjunction with, pypdfium2.
 
-## Development
 
-<!-- TODO -->
+<!-- TODO development section -->
 
 
 ## In Use
@@ -629,7 +634,8 @@ It should be noted that PDFium, unlike many other PDF libraries, is currently no
 
 *Your project uses pypdfium2, but is not part of the list yet? Please let us know!*
 
-<!-- TODO write something about sharing of use cases, code snippets, code review, etc. -->
+We are curious to see how people are using pypdfium2. Always feel free to share knowledge or code samples on the discussions page.
+
 
 ## Thanks to[^11]
 
