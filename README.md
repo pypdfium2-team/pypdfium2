@@ -571,7 +571,9 @@ Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSE
 
 pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by including [SPDX](https://spdx.org/licenses/) headers in source files, and license information for data files in [`.reuse/dep5`](.reuse/dep5).
 
-To the authors' knowledge, pypdfium2 is one of the very rare Python libraries that are capable of PDF rendering while not being covered by restrictive copyleft licenses (such as the `GPL`) that prohibit use in closed-source projects.
+To the authors' knowledge, pypdfium2 is one of the very rare Python libraries that are capable of PDF rendering while not being covered by restrictive licenses which prohibit the use in closed-source projects (such as the `GPL`).[^10]
+
+[^10]: The only other liberal-licensed PDF rendering libraries known to the authors are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). `pdf.js` is limited to a web environment. Creating Python bindings to `PDFBox` might be possible but there is no serious solution yet (apart from amateurish wrappers around its command-line API).
 
 
 ## Issues
@@ -598,6 +600,9 @@ If the timeframe between reaching reference count zero and removal is sufficient
 
 Although great care has been taken while developing the support model, it cannot be fully excluded that unknown violations of object lifetime are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
 
+#### No direct access to PDF data structures
+
+It should be noted that PDFium, unlike many other PDF libraries, is currently not providing direct access to raw PDF data structures. It does not publicly expose APIs to read/write PDF dictionaries, name trees, etc. Instead, it merely offers a variety of higher-level functions to modify PDFs. While these are certainly useful to abstract away some of the format's complexity and to avoid the creation of invalid PDFs, the fact that instruments for low-level access are largely missing in the public API does considerably limit the library's potential. If PDFium's capabilities are not sufficient for your use case, or you just wish to work with the raw PDF structure on your own, you may want to consider other products such as [`pikepdf`](https://github.com/pikepdf/pikepdf) to use instead of, or in conjunction with, pypdfium2.
 
 ## Development
 
@@ -614,7 +619,7 @@ Although great care has been taken while developing the support model, it cannot
 *Your project uses pypdfium2, but is not part of the list yet? Please let us know!*
 
 
-## Thanks to[^10]
+## Thanks to[^11]
 
 <!-- order: alphabetical by surname -->
 
@@ -632,7 +637,7 @@ Although great care has been taken while developing the support model, it cannot
 
 *If you have somehow contributed to this project but we forgot to mention you here, feel encouraged to help us correct this oversight.*
 
-[^10]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
+[^11]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
 
 
 ## History
