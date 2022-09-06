@@ -578,17 +578,25 @@ To the authors' knowledge, pypdfium2 is one of the very rare Python libraries th
 
 ## Issues
 
-In case you found a behavioural or structural problem, or wish to request a new feature, please file a [bug report](https://github.com/pypdfium2-team/pypdfium2/issues/new/choose) on the [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues).
-For general questions or suggestions, the [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions) is always a good place to start.
+While using pypdfium2, you might encounter bugs or missing features.
 
-As pypdfium2 relies on several external components, it is possible that issues need to be addressed elsewhere. The following places may be relevant:
-* PDFium [bug tracker](https://bugs.chromium.org/p/pdfium/issues/list) and [mailing list](https://groups.google.com/g/pdfium/)
+In the endeavour to improve the product, the maintainers wish to be informed about any problems that might arise while using pypdfium2.
+Therefore, the first place for your report should always be this repository.
+In case your issue could be tracked down to a third-party dependency, we will accompany or conduct subsequent measures.
+
+Here is a roadmap of relevant places:
+* pypdfium2
+  - [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues): Specific structural or behavioural problems
+  - [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions): General questions and suggestions
+* PDFium
+  - [Bug tracker](https://bugs.chromium.org/p/pdfium/issues/list)
+  - [Mailing list](https://groups.google.com/g/pdfium/)
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues)
 * [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues)
 
 ### Known limitations
 
-pypdfium2 also has some drawbacks, of which we would like to inform you below.
+pypdfium2 also has some drawbacks, of which you will be informed below.
 
 #### Incompatibility with CPython 3.7.6 and 3.8.1
 
@@ -621,6 +629,7 @@ It should be noted that PDFium, unlike many other PDF libraries, is currently no
 
 *Your project uses pypdfium2, but is not part of the list yet? Please let us know!*
 
+<!-- TODO write something about sharing of use cases, code snippets, code review, etc. -->
 
 ## Thanks to[^11]
 
