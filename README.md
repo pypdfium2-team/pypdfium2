@@ -595,7 +595,7 @@ Here is a roadmap of relevant places:
 * PDFium
   - [Bug tracker](https://bugs.chromium.org/p/pdfium/issues/list): Defects in PDFium.
     Beware: The bridge between Python and C increases the probability of integration issues or API misuse.
-    The symptoms can often look like a PDFium bug while it is not. In some cases, this may be quite difficult to distinguish.
+    The symptoms can often make it look like a PDFium bug while it is not. In some cases, this may be quite difficult to distinguish.
   - [Mailing list](https://groups.google.com/g/pdfium/): Questions regarding PDFium usage.
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
 * [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues): Bindings generator.
