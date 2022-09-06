@@ -251,7 +251,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   There are no defaults, so you always need to provide a value for each argument.
   ```python
   # arguments: filepath (str|bytes), password (str|bytes|None)
-  pdf = pdfium.FPDF_LoadDocument(filepath, None)
+  pdf = pdfium.FPDF_LoadDocument(filepath.encode("utf-8"), None)
   ```
   This is the underlying bindings declaration,[^7] which loads the function from the binary and
   contains the information required to convert Python types to their C equivalents.
@@ -261,7 +261,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       FPDF_LoadDocument.argtypes = [FPDF_STRING, FPDF_BYTESTRING]
       FPDF_LoadDocument.restype = FPDF_DOCUMENT
   ```
-  For instance, Python `str` or `bytes` are converted to `FPDF_STRING` implicitly. If a `str` is provided, its UTF-8 encoding will be used.
+  For instance, Python `str` or `bytes` are converted to `FPDF_STRING` automatically.
+  If a `str` is provided, its UTF-8 encoding will be used. However, it is usually advisable to encode strings explicitly.
 
 [^7]: From the auto-generated bindings file, which is not part of the repository. It is built into wheels, or created on installation. If you have an editable install, the bindings file may be found at `src/_pypdfium.py`.
 

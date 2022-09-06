@@ -71,10 +71,12 @@ def open_pdf_bytes(bytedata, password=None):
 
 def open_pdf(input_data, password=None):
     
+    if isinstance(password, str):
+        password = password.encode("utf-8")
+    
     ld_data = None
     if isinstance(input_data, str):
-        # filename and password are utf-8 encoded
-        pdf = pdfium.FPDF_LoadDocument(input_data, password)
+        pdf = pdfium.FPDF_LoadDocument(input_data.encode("utf-8"), password)
     elif isinstance(input_data, bytes):
         pdf, ld_data = open_pdf_bytes(input_data, password)
     elif is_input_buffer(input_data):
