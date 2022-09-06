@@ -373,7 +373,6 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
-<!-- TODO consider suggesting get_functype() once it is public -->
 * In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks across Python/C language boundaries.
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
@@ -400,7 +399,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Set up an interface structure for custom file access
   fileaccess = pdfium.FPDF_FILEACCESS()
   fileaccess.m_FileLen = file_len
-  # CFUNCTYPE declaration copied from the bindings file (for some reason, this is not applied automatically)
+  # CFUNCTYPE declaration copied from the bindings file (unfortunately, this is not applied automatically)
   functype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
   # Instantiate a callable object, wrapped with the CFUNCTYPE declaration
   fileaccess.m_GetBlock = functype( _reader_class(py_buffer) )
@@ -439,7 +438,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
   
   If resources need to remain valid after the time of a function call, PDFium documentation usually indicates this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segmentation fault).
-
+  
   For instance, the documentation on `FPDF_LoadCustomDocument()` states that
   > The application must keep the file resources |pFileAccess| points to valid until the returned FPDF_DOCUMENT is closed. |pFileAccess| itself does not need to outlive the FPDF_DOCUMENT.
   
@@ -554,7 +553,13 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   pdfium.FPDF_CloseDocument(pdf)
   ```
 
-<!-- TODO command-line interface -->
+### [Command-line Interface](https://pypdfium2.readthedocs.io/en/stable/shell_api.html)
+
+pypdfium2 also ships with a simple command-line interface, providing access to key features of the support model in a shell environment (e. g. rendering, text extraction, TOC inspection, document merging, ...).
+
+The primary motivation in providing a CLI is to simplify manual testing, but it may be helpful in a variety of other situations as well.
+Usage should be largely self-explanatory, assuming a minimum of familiarity with the command-line.
+
 
 ## Licensing
 
@@ -566,26 +571,37 @@ Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSE
 
 pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by including [SPDX](https://spdx.org/licenses/) headers in source files, and license information for data files in [`.reuse/dep5`](.reuse/dep5).
 
-<!-- TODO development, testing -->
+To the authors' knowledge, pypdfium2 is one of the very rare Python libraries that are capable of PDF rendering while not being covered by restrictive copyleft licenses (such as the `GPL`) that prohibit use in closed-source projects.
+
 
 ## Issues
 
-<!-- TODO rewrite section -->
+In case you found a behavioural or structural problem, or wish to request a new feature, please file a [bug report](https://github.com/pypdfium2-team/pypdfium2/issues/new/choose) on the [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues).
 
-Since pypdfium2 is built using external binaries and an automatic bindings creator, issues that are not related to packaging or support model code likely need to be addressed upstream. However, the [issue](https://github.com/pypdfium2-team/pypdfium2/issues) or [discussion](https://github.com/pypdfium2-team/pypdfium2/discussions) panels are always a good place to start if you have any problems, questions or suggestions.
+For general questions or suggestions, the [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions) is always a good place to start.
 
-If the cause of an issue could be determined to be in PDFium, the problem needs to be reported at the [PDFium bug tracker](https://bugs.chromium.org/p/pdfium/issues/list). For discussion and general questions, also consider joining the [PDFium mailing list](https://groups.google.com/g/pdfium/).
-
-Issues related to pre-compiled packages should be discussed at [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues), though.
-
-If your issue is caused by the bindings generator, refer to the [ctypesgen bug tracker](https://github.com/ctypesgen/ctypesgen/issues).
+<!-- TODO bug triaging roadmap -->
 
 
-## Known limitations
+### Known limitations
 
-### Incompatibility with CPython 3.7.6 and 3.8.1
+#### Incompatibility with CPython 3.7.6 and 3.8.1
 
 pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that broke ctypesgen-created string handling code.
+
+#### Risk of unknown object lifetime violations
+
+As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.
+
+The problem is that the Python interpreter may garbage collect objects with reference count zero at any time. Thus, it can happen that an unreferenced but still required object by chance stays around long enough before it is garbage collected, dangling in mid-air, forming a likely source of non-deterministic segmentation faults.
+If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that such mistakes remain unnoticed for a long time.
+
+Although great care has been taken while developing the support model, it cannot be fully excluded that unknown violations of object lifetime are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
+
+
+## Development
+
+<!-- TODO -->
 
 
 ## In Use
