@@ -34,7 +34,7 @@ else:
     have_pil = True
 
 try:
-    import numpy
+    import numpy.ctypeslib
 except ImportError:
     have_numpy = False
 else:
@@ -453,11 +453,8 @@ class PdfPage:
             raise RuntimeError("NumPy library needs to be installed for render_tonumpy().")
         
         c_array, cl_format, (width, height) = self.render_base(**kwargs)
-        np_array = numpy.ndarray(
-            shape = (height, width, len(cl_format)),
-            dtype = numpy.ubyte,
-            buffer = c_array,
-        )
+        np_array = numpy.ctypeslib.as_array(c_array)
+        np_array.shape = (height, width, len(cl_format))
         
         return np_array, cl_format
     
