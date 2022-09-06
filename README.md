@@ -538,11 +538,6 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Render the page
   pdfium.FPDF_RenderPageBitmap(*render_args)
   
-  # Set up a form environment and render forms
-  form_config = pdfium.FPDF_FORMFILLINFO(2)
-  form_fill = pdfium.FPDFDOC_InitFormFillEnvironment(pdf, form_config)
-  pdfium.FPDF_FFLDraw(form_fill, *render_args)
-  
   # Get a pointer to the first item of the buffer
   first_item = pdfium.FPDFBitmap_GetBuffer(bitmap)
   # Re-interpret the pointer to encompass the whole buffer
@@ -556,7 +551,6 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Free resources
   pdfium.FPDFBitmap_Destroy(bitmap)
   pdfium.FPDF_ClosePage(page)
-  pdfium.FPDFDOC_ExitFormFillEnvironment(form_fill)
   pdfium.FPDF_CloseDocument(pdf)
   ```
 
