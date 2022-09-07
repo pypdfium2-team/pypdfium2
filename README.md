@@ -581,9 +581,9 @@ To the authors' knowledge, pypdfium2 is one of the very rare Python libraries th
 
 While using pypdfium2, you might encounter bugs or missing features.
 
-In the endeavour to improve the product, the maintainers wish to be informed about any problems that might arise while using pypdfium2.
+In the endeavour to improve the product, the maintainers wish to be informed about any problems related to pypdfium2 usage.
 Therefore, the first place for your report should be this repository.
-Remember to include applicable details such as tracebacks, operating system and architecture, as well as the version of pypdfium2 and used dependencies.
+Remember to include applicable details such as tracebacks, operating system and architecture, as well as the versions of pypdfium2 and used dependencies.
 
 In case your issue could be tracked down to a third-party dependency, we will accompany or conduct subsequent measures.
 
