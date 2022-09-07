@@ -13,7 +13,7 @@ class PdfTextPage:
     
     Note:
         * The :attr:`.raw` attribute stores the underlying :class:`FPDF_TEXTPAGE`.
-        * The :attr:`.page` holds a reference to the :class:`.PdfPage` this text page belongs to.
+        * The :attr:`.page` attribute holds a reference to the :class:`.PdfPage` this text page belongs to.
     """
     
     def __init__(self, raw, page):
@@ -211,7 +211,7 @@ class PdfTextSearcher:
     
     Note:
         * The :attr:`.raw` attribute stores the underlying :class:`FPDF_SCHHANDLE`.
-        * The :attr:`.textpage` holds a reference to the :class:`.PdfTextPage` this searcher belongs to.
+        * The :attr:`.textpage` attribute holds a reference to the :class:`.PdfTextPage` this searcher belongs to.
     """
     
     def __init__(self, raw, textpage):
