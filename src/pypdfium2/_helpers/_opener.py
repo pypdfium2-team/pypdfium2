@@ -10,7 +10,6 @@ from pypdfium2._helpers._utils import (
 )
 
 
-
 class BufferDataHolder:
     
     def __init__(self, reader_func, buffer):
