@@ -7,6 +7,6 @@ from pypdfium2._namespace import *
 
 logger = logging.getLogger(__name__)
 
-# FPDF_InitLibrary() would be slightly more convenient but is planned for deprecation
-FPDF_InitLibraryWithConfig( FPDF_LIBRARY_CONFIG() )
+# Note: PDFium developers plan changes to the initialisation API
+FPDF_InitLibrary()
 atexit.register(FPDF_DestroyLibrary)
