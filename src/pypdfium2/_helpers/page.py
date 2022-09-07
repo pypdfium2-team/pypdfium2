@@ -502,6 +502,9 @@ class ColorScheme:
         text_stroke_color
     """
     
+    # TODO(#129) avoid uninitialised struct fields
+    # restructure the class and set appropriate defaults, assuming white background
+    
     def __init__(self, **_kws):
         self.kwargs = {k: v for k, v in _kws.items() if v is not None}
         fields = [key for key, _ in pdfium.FPDF_COLORSCHEME._fields_]

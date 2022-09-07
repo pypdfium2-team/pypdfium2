@@ -163,6 +163,7 @@ class PdfDocument:
         """
         if self._form_env is not None:
             return self._form_env
+        # TODO(#129) avoid uninitialised struct fields, if possible
         self._form_config = pdfium.FPDF_FORMFILLINFO()
         self._form_config.version = 2
         self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, self._form_config)
