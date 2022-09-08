@@ -9,6 +9,7 @@ import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers._utils import (
     get_functype,
+    validate_colors,
     color_tohex,
     get_bitmap_format,
     RotationToConst,
@@ -349,6 +350,7 @@ class PdfPage:
             The ctypes array is allocated by Python (not PDFium), so we don't need to care about freeing memory.
         """
         
+        validate_colors(color, color_scheme)
         cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder)
         c_color = color_tohex(color, rev_byteorder)
         n_channels = len(cl_string)

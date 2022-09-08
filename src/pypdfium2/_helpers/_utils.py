@@ -4,6 +4,17 @@
 import pypdfium2._pypdfium as pdfium
 
 
+def validate_colors(bg_color, color_scheme):
+    colors = [bg_color]
+    if color_scheme is not None:
+        colors += list( color_scheme.kwargs.values() )
+    for col in colors:
+        if len(col) != 4:
+            raise ValueError("Color must consist of exactly 4 values.")
+        if not all(0 <= c <= 255 for c in col):
+            raise ValueError("Color value exceeds boundaries.")
+
+
 def get_bitmap_format(bg_color, greyscale, rev_byteorder):
     
     if (bg_color[3] < 255):
@@ -30,9 +41,6 @@ def color_tohex(color, rev_byteorder):
     Convert an RGBA color specified by 4 integers ranging from 0 to 255 to a single 32-bit integer as required by PDFium.
     If using regular byte order, the output format will be ARGB. If using reversed byte order, it will be ABGR.
     """
-    
-    if not all(0 <= c <= 255 for c in color):
-        raise ValueError("Color value exceeds boundaries.")
     
     r, g, b, a = color
     
