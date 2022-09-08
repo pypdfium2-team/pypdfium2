@@ -23,10 +23,9 @@
 
 - Setup code
     - When doing an automatic release, repository changes are now only pushed after successful wheel building, to avoid leaving the repository in an invalid state in case some earlier step fails.
+    - Autorelease now properly takes existing beta tags into account for its version changes.
     - PDFium's commit log is now shown with GitHub releases.
-    - Polished `setup.py` code to be much cleaner and easier to understand.
-    - Restructured some setup-related sources.
-    - Tweaked dependency pinning.
+    - Miscellaneous setup improvements.
 
 - Documentation
     - Rewrote the project's `README.md`. Added more support model examples and an extensive guide regarding the raw PDFium/ctypes API.
