@@ -628,10 +628,11 @@ It should be noted that PDFium, unlike many other PDF libraries, is currently no
 
 ## In Use
 
-* [doctr](https://mindee.github.io/doctr/), an OCR library powered by deep learning, uses pypdfium2 to rasterise PDFs.
-* [EDS-PDF](https://github.com/aphp/edspdf), a PDF text extraction framework, also uses pypdfium2 for rendering.
-* [Extract-URLs](https://github.com/elescamilla/Extract-URLs/) use pypdfium2 to extract URLs from PDF documents.
-* [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) compares pypdfium2's text extraction capabilities with other libraries.
+* [doctr](https://mindee.github.io/doctr/), an OCR library powered by deep learning, uses pypdfium2 to render PDFs.
+* [EDS-PDF](https://github.com/aphp/edspdf), a framework for PDF text extraction and classification, also uses pypdfium2 for rendering.
+* [Arabic-OCR](https://github.com/ssraza21/Arabic-OCR), a small web application to create digital documents from the result of arabic OCR, renders PDF pages with pypdfium2.
+* [Extract-URLs](https://github.com/elescamilla/Extract-URLs/), uses pypdfium2 to extract URLs from PDF documents.
+* [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) compares pypdfium2's text extraction capabilities with other Python PDF libraries.
 
 *Your project uses pypdfium2, but is not part of the list yet? Please let us know!*
 
