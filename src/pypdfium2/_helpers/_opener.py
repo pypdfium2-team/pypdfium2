@@ -52,10 +52,10 @@ def open_pdf_buffer(buffer, password=None):
     file_len = buffer.tell()
     buffer.seek(0)
     
-    # TODO(#129) avoid uninitialised struct field by setting m_Param
     fileaccess = pdfium.FPDF_FILEACCESS()
     fileaccess.m_FileLen = file_len
     fileaccess.m_GetBlock = get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")( _reader_class(buffer) )
+    fileaccess.m_Param = None
     
     pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, password)
     ld_data = BufferDataHolder(fileaccess.m_GetBlock, buffer)

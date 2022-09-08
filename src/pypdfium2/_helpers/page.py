@@ -489,11 +489,12 @@ class PdfPage:
 
 class ColorScheme:
     """
-    Rendering color scheme. Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
-    (At least one parameter needs to be given.)
+    Rendering color scheme.
+    Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
     
     Note:
-        Valid fields are dynamically extracted from the :class:`FPDF_COLORSCHEME` structure.
+        Valid fields are extracted dynamically from the :class:`FPDF_COLORSCHEME` structure.
+        Unassigned integer fields default to 0 (black).
     
     Parameters:
         path_fill_color
@@ -502,11 +503,10 @@ class ColorScheme:
         text_stroke_color
     """
     
-    # TODO(#129) avoid uninitialised struct fields
-    # restructure the class and set appropriate defaults, assuming white background
-    
-    def __init__(self, **_kws):
-        self.kwargs = {k: v for k, v in _kws.items() if v is not None}
+    def __init__(self, **kwargs):
+        # If required, we could add a dictionary of defaults and update it with the given arguments
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        self.kwargs = kwargs
         fields = [key for key, _ in pdfium.FPDF_COLORSCHEME._fields_]
         assert len(self.kwargs) > 0
         assert all(k in fields for k in self.kwargs.keys())
