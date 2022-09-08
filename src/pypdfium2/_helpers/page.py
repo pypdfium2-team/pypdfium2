@@ -23,23 +23,17 @@ from pypdfium2._helpers.misc import (
 try:
     import uharfbuzz as harfbuzz
 except ImportError:
-    have_harfbuzz = False
-else:
-    have_harfbuzz = True
+    harfbuzz = None
 
 try:
     import PIL.Image
 except ImportError:
-    have_pil = False
-else:
-    have_pil = True
+    PIL = None
 
 try:
     import numpy.ctypeslib
 except ImportError:
-    have_numpy = False
-else:
-    have_numpy = True
+    numpy = None
 
 
 class PdfPage:
@@ -451,7 +445,7 @@ class PdfPage:
             (numpy.ndarray, str): NumPy array, and color format.
         """
         
-        if not have_numpy:
+        if numpy is None:
             raise RuntimeError("NumPy library needs to be installed for render_tonumpy().")
         
         c_array, cl_format, (width, height) = self.render_base(**kwargs)
@@ -471,7 +465,7 @@ class PdfPage:
             PIL.Image.Image: An image of the page.
         """
         
-        if not have_pil:
+        if PIL is None:
             raise RuntimeError("Pillow library needs to be installed for render_topil().")
         
         c_array, cl_src, size = self.render_base(**kwargs)

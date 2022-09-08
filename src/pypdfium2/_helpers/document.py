@@ -28,9 +28,7 @@ from pypdfium2._helpers.misc import (
 try:
     import uharfbuzz as harfbuzz
 except ImportError:
-    have_harfbuzz = False
-else:
-    have_harfbuzz = True
+    harfbuzz = None
 
 logger = logging.getLogger(__name__)
 
@@ -535,7 +533,7 @@ class HarfbuzzFont:
     """ Harfbuzz font data helper class. """
     
     def __init__(self, font_path):
-        if not have_harfbuzz:
+        if harfbuzz is None:
             raise RuntimeError("Font helpers require uharfbuzz to be installed.")
         self.blob = harfbuzz.Blob.from_file_path(font_path)
         self.face = harfbuzz.Face(self.blob)

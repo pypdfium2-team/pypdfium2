@@ -22,9 +22,7 @@ from pypdfium2._cli import (
 try:
     import argcomplete
 except ImportError:
-    have_argcomplete = False
-else:
-    have_argcomplete = True
+    argcomplete = None
 
 
 Subcommands = {
@@ -56,7 +54,7 @@ def parse_args(argv=sys.argv[1:]):
     for cmd in Subcommands.values():
         cmd.attach_parser(subparsers)
     
-    if have_argcomplete:
+    if argcomplete is not None:
         argcomplete.autocomplete(parser)
     
     return parser.parse_args(argv)
