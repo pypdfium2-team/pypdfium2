@@ -583,7 +583,7 @@ While using pypdfium2, you might encounter bugs or missing features.
 
 In the endeavour to improve the product, the maintainers wish to be informed about any problems related to pypdfium2 usage.
 Therefore, the first place for your report should be this repository.
-Remember to include applicable details such as tracebacks, operating system and architecture, as well as the versions of pypdfium2 and used dependencies.
+Remember to include applicable details such as tracebacks, operating system and CPU architecture, as well as the versions of pypdfium2 and used dependencies.
 
 In case your issue could be tracked down to a third-party dependency, we will accompany or conduct subsequent measures.
 
