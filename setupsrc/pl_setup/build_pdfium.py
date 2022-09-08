@@ -57,7 +57,7 @@ elif sys.platform.startswith("win32"):
     DefaultConfig["pdf_use_win32_gdi"] = True
 
 
-def dl_depottools(Git, do_update):
+def dl_depottools(do_update):
     
     if not os.path.isdir(SB_Dir):
         os.makedirs(SB_Dir)
@@ -67,14 +67,14 @@ def dl_depottools(Git, do_update):
     if os.path.isdir(DepotToolsDir):
         if do_update:
             print("DepotTools: Revert and update ...")
-            run_cmd([Git, "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
-            run_cmd([Git, "pull", DepotTools_URL], cwd=DepotToolsDir)
+            run_cmd(["git", "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
+            run_cmd(["git", "pull", DepotTools_URL], cwd=DepotToolsDir)
         else:
             print("DepotTools: Using existing repository as-is.")
             is_update = False
     else:
         print("DepotTools: Download ...")
-        run_cmd([Git, "clone", "--depth", "1", DepotTools_URL, DepotToolsDir], cwd=SB_Dir)
+        run_cmd(["git", "clone", "--depth", "1", DepotTools_URL, DepotToolsDir], cwd=SB_Dir)
     
     os.environ["PATH"] += os.pathsep + DepotToolsDir
     
@@ -102,9 +102,9 @@ def dl_pdfium(GClient, do_update, revision):
     return is_sync
 
 
-def get_version_info(Git):
-    head_commit = run_cmd([Git, "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
-    refs_string = run_cmd([Git, "ls-remote", "--heads", PDFium_URL, "chromium/*"], cwd=None, capture=True)
+def get_version_info():
+    head_commit = run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
+    refs_string = run_cmd(["git", "ls-remote", "--heads", PDFium_URL, "chromium/*"], cwd=None, capture=True)
     latest = refs_string.split("\n")[-1]
     tag_commit, ref = latest.split("\t")
     tag = ref.split("/")[-1]
@@ -129,14 +129,14 @@ def update_version(head_commit, tag_commit, tag):
         set_version("V_LIBPDFIUM", new_libversion)
 
 
-def _apply_patchset(Git, patchset):
+def _apply_patchset(patchset):
     for patch, cwd in patchset:
-        run_cmd([Git, "apply", "-v", patch], cwd=cwd)
+        run_cmd(["git", "apply", "-v", patch], cwd=cwd)
 
-def patch_pdfium(Git):
-    _apply_patchset(Git, PdfiumMainPatches)
+def patch_pdfium():
+    _apply_patchset(PdfiumMainPatches)
     if sys.platform.startswith("win32"):
-        _apply_patchset(Git, PdfiumWinPatches)
+        _apply_patchset(PdfiumWinPatches)
         shutil.copy(join(PatchDir, "pdfium", "win", "resources.rc"), join(PDFiumDir, "resources.rc"))
 
 
@@ -173,7 +173,7 @@ def find_lib(srcname=None, directory=PDFiumBuildDir):
     return libpath
 
 
-def pack(Ctypesgen, src_libpath, destname=None):
+def pack(src_libpath, destname=None):
     
     if os.path.isdir(OutputDir):
         shutil.rmtree(OutputDir)
@@ -188,7 +188,7 @@ def pack(Ctypesgen, src_libpath, destname=None):
     include_dir = join(OutputDir, "include")
     shutil.copytree(join(PDFiumDir, "public"), include_dir)
     
-    call_ctypesgen(Ctypesgen, OutputDir, include_dir)
+    call_ctypesgen(OutputDir, include_dir)
     shutil.rmtree(include_dir)
 
 
@@ -225,9 +225,6 @@ def main(
         b_target = None,
     ):
     
-    Git = shutil.which("git")
-    Ctypesgen = shutil.which("ctypesgen")
-    
     if b_revision is None:
         b_revision = "main"
     if b_target is None:
@@ -239,7 +236,7 @@ def main(
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
     
-    dl_depottools(Git, b_update)
+    dl_depottools(b_update)
     
     GClient = get_tool("gclient", "bat")
     GN      = get_tool("gn", "bat")
@@ -247,9 +244,9 @@ def main(
     
     pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
     if pdfium_dl_done:
-        patch_pdfium(Git)
+        patch_pdfium()
     
-    ver_info = get_version_info(Git)
+    ver_info = get_version_info()
     update_version(*ver_info)
     
     config_dict = DefaultConfig.copy()
@@ -259,7 +256,7 @@ def main(
     configure(GN, config_str)
     build(Ninja, b_target)
     libpath = find_lib(b_srcname)
-    pack(Ctypesgen, libpath, b_destname)
+    pack(libpath, b_destname)
 
 
 def parse_args(argv):

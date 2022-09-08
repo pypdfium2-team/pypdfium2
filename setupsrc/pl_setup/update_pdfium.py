@@ -90,7 +90,7 @@ def unpack_archives(archives):
         os.remove(file)
 
 
-def generate_bindings(Ctypesgen, archives):
+def generate_bindings(archives):
     
     for platform_dir in archives.keys():
         
@@ -113,7 +113,7 @@ def generate_bindings(Ctypesgen, archives):
         
         shutil.move(join(bin_dir, items[0]), join(platform_dir, target_name))
         
-        call_ctypesgen(Ctypesgen, platform_dir, join(build_dir, "include"))
+        call_ctypesgen(platform_dir, join(build_dir, "include"))
         shutil.rmtree(build_dir)
 
 
@@ -126,18 +126,15 @@ def get_download_files(platforms):
 
 def main(platforms):
     
-    Git = shutil.which("git")
-    Ctypesgen = shutil.which("ctypesgen")
-    
     download_files = get_download_files(platforms)
     
-    latest = get_latest_version(Git)
+    latest = get_latest_version()
     handle_versions(str(latest))
     clear_data(download_files)
     
     archives = download_releases(latest, download_files)
     unpack_archives(archives)
-    generate_bindings(Ctypesgen, archives)
+    generate_bindings(archives)
 
 
 def parse_args(argv):
