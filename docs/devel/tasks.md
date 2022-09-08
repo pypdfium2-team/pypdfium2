@@ -15,7 +15,6 @@ Also see the issues panel and inline `TODO` marks in source code.
 * Consolidate and extend the support model.
 
 ### Setup Infrastructure
-* autorelease: If a beta version is set, remove it instead of incrementing v_patch, possibly also for v_minor.
 * update_pdfium: accept `auto` for `--platform` argument.
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest).
 * update_pdfium: only generate the bindings file once for all platforms.

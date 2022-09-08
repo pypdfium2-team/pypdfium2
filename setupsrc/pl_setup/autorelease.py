@@ -11,7 +11,6 @@ import argparse
 import tempfile
 from os.path import (
     join,
-    exists,
     abspath,
     dirname,
 )
@@ -32,9 +31,9 @@ from pl_setup.packaging_base import (
 )
 
 
-AutoreleaseDir = join(SourceTree, "autorelease")
-UpdateMajor = join(AutoreleaseDir, "update_major.txt")
-UpdateBeta  = join(AutoreleaseDir, "update_beta.txt")
+AutoreleaseDir  = join(SourceTree, "autorelease")
+MajorUpdateFile = join(AutoreleaseDir, "update_major.txt")
+BetaUpdateFile  = join(AutoreleaseDir, "update_beta.txt")
 
 
 def run_local(*args, **kws):
@@ -58,35 +57,43 @@ def do_versioning(Git, latest):
     # (autorelease can't work with that state because it needs information about the previous release for its version changes)
     assert not VerNamespace["IS_SOURCEBUILD"]
     assert VerNamespace["V_LIBPDFIUM"].isnumeric()
+    
+    v_beta = VerNamespace["V_BETA"]
     v_libpdfium = int(VerNamespace["V_LIBPDFIUM"])
-    # the current libpdfium version must never be larger than the determined latest
-    assert not v_libpdfium > latest
+    assert not v_libpdfium > latest  # the current libpdfium version must never be larger than the determined latest
     
     c_updates = (v_libpdfium < latest)
     py_updates = _check_py_updates(Git, VerNamespace["V_PYPDFIUM2"])
+    inc_major = os.path.exists(MajorUpdateFile)
+    inc_beta = os.path.exists(BetaUpdateFile)
     
     if not c_updates and not py_updates:
         raise RuntimeError("Neither pypdfium2 code nor pdfium binaries updated. Making a new release would be pointless.")
     
-    if exists(UpdateMajor):
+    if c_updates:
+        set_version("V_LIBPDFIUM", str(latest))
+    
+    if inc_major:
         set_version("V_MAJOR", VerNamespace["V_MAJOR"]+1)
         set_version("V_MINOR", 0)
         set_version("V_PATCH", 0)
-        set_version("V_LIBPDFIUM", str(latest))
-        os.remove(UpdateMajor)
-    elif c_updates:
-        set_version("V_MINOR", VerNamespace["V_MINOR"]+1)
-        set_version("V_PATCH", 0)
-        set_version("V_LIBPDFIUM", str(latest))
+        os.remove(MajorUpdateFile)
     else:
-        set_version("V_PATCH", VerNamespace["V_PATCH"]+1)
+        if v_beta is None:
+            if c_updates:
+                set_version("V_MINOR", VerNamespace["V_MINOR"]+1)
+                set_version("V_PATCH", 0)
+            else:
+                set_version("V_PATCH", VerNamespace["V_PATCH"]+1)
+        elif not inc_beta:
+            set_version("V_BETA", None)
     
-    if exists(UpdateBeta):
-        v_beta = VerNamespace["V_BETA"]
+    if inc_beta:
         if v_beta is None:
             v_beta = 0
-        set_version("V_BETA", v_beta+1)
-        os.remove(UpdateBeta)
+        v_beta += 1
+        set_version("V_BETA", v_beta)
+        os.remove(BetaUpdateFile)
 
 
 def get_summary():
