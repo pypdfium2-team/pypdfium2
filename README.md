@@ -123,7 +123,7 @@ Here are some examples of using the support model API.
           "[%s] " % ("-" if item.is_closed else "+") +
           "%s -> %s  # %s %s" % (
               item.title,
-              item.page_index + 1,
+              item.page_index+1 if item.page_index is not None else "?",
               item.view_mode,
               item.view_pos,
           )
