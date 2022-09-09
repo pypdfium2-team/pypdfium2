@@ -7,7 +7,9 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 Also see the issues panel and inline `TODO` marks in source code.
 
 ### Main Code
-* Consider writing bytes to a tempfile before multipage rendering, to avoid duplicating document resources in memory.
+* Research if/how we can efficiently render to ctypes arrays concurrently.
+* When rendering with multiple processes and bytes were provided as input, is the memory duplicated or shared? If it's duplicated, find a way to share it or write a tempfile instead.
+* When rendering, allow callers to provide an own buffer?
 * Move init/destroy into a separate file. Provide public init/destroy functions, given that embedders who deal with long-running applications might not want to have PDFium in memory all the time.
 * Make members of `_utils.py` public (move into `misc.py`) ?
 * Make the bindings file `_pypdfium.py` public ?
@@ -43,3 +45,4 @@ Also see the issues panel and inline `TODO` marks in source code.
 ### Miscellaneous
 * Ask Linux distributors to package PDFium.
 * Add means to plug in PDFium headers/binaries from an arbitrary location, probably using custom environment variables.
+* Keep in mind that `ctypes.pythonapi` exists. Maybe we could replace our wonky `id()` based keep-the-object-alive approach with proper incref/decref calls?
