@@ -9,8 +9,9 @@ from ..conftest import TestFiles
 def test_boxes():
     
     pdf = pdfium.PdfDocument(TestFiles.render)
-    page = pdf.get_page(0)
-    assert page.get_size() == (595, 842)
+    index = 0
+    page = pdf.get_page(index)
+    assert page.get_size() == pdf.get_page_size(index) == (595, 842)
     assert page.get_mediabox() == (0, 0, 595, 842)
     assert isinstance(page, pdfium.PdfPage)
     

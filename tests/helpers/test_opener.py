@@ -240,16 +240,21 @@ def test_doc_extras():
         assert isinstance(pdf, pdfium.PdfDocument)
         assert len(pdf) == 0
         
-        sizes = [(50, 100), (100, 150), (150, 200)]
+        sizes = [(50, 100), (100, 150), (150, 200), (200, 250)]
         for size in sizes:
             page = pdf.new_page(*size)
             page.close()
-        for size, page in zip(sizes, pdf):
+        for i, (size, page) in enumerate(zip(sizes, pdf)):
             assert isinstance(page, pdfium.PdfPage)
-            assert size == page.get_size()
+            assert size == page.get_size() == pdf.get_page_size(i)
             page.close()
         
         del pdf[0]
         page = pdf[0]
-        assert page.get_size() == (100, 150)
+        assert page.get_size() == pdf.get_page_size(0) == (100, 150)
+        page.close()
+        
+        del pdf[-len(pdf)]
+        page = pdf[-len(pdf)]
+        assert page.get_size() == pdf.get_page_size(-len(pdf)) == (150, 200)
         page.close()

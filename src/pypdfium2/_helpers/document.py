@@ -223,10 +223,30 @@ class PdfDocument:
             raise PdfiumError("Saving the document failed")
     
     
-    def _verify_index(self, index):
+    def _handle_index(self, index):
         n_pages = len(self)
+        if index < 0:
+            index += n_pages
         if not 0 <= index < n_pages:
             raise IndexError("Page index %s is out of bounds for document with %s pages." % (index, n_pages))
+        return index
+    
+    
+    def get_page_size(self, index):
+        """
+        Get the dimensions of the page at *index*. Reverse indexing is allowed.
+        This method is equivalent to :meth:`.PdfPage.get_size()` but works without needing to load a separate page object.
+        
+        Returns:
+            (float, float): Page width and height in PDF canvas units.
+        """
+        index = self._handle_index(index)
+        size = pdfium.FS_SIZEF()
+        success = pdfium.FPDF_GetPageSizeByIndexF(self.raw, index, size)
+        if not success:
+            raise PdfiumError("Getting page size by index failed.")
+        return (float(size.width), float(size.height))
+    
     
     def new_page(self, width, height, index=None):
         """
@@ -239,7 +259,8 @@ class PdfDocument:
                 Target page height (vertical size).
             index (int | None):
                 Suggested zero-based index at which the page will be inserted.
-                If *index* is less or equal to zero, the page will be inserted at the beginning.
+                If *index* is negative, the indexing direction will be reversed.
+                If *index* is zero, the page will be inserted at the beginning.
                 If *index* is :data:`None` or larger that the document's current last index, the page will be appended to the end.
         
         Returns:
@@ -247,20 +268,26 @@ class PdfDocument:
         """
         if index is None:
             index = len(self)
+        elif index < 0:
+            index += len(self)
         raw_page = pdfium.FPDFPage_New(self.raw, index, width, height)
         return PdfPage(raw_page, self)
     
+    
     def del_page(self, index):
-        """ Remove the page at *index*. """
-        self._verify_index(index)
+        """
+        Remove the page at *index*. Reverse indexing is allowed.
+        """
+        index = self._handle_index(index)
         pdfium.FPDFPage_Delete(self.raw, index)
+    
     
     def get_page(self, index):
         """
         Returns:
-            PdfPage: The page at *index*.
+            PdfPage: The page at *index*. Reverse indexing is allowed.
         """
-        self._verify_index(index)
+        index = self._handle_index(index)
         raw_page = pdfium.FPDF_LoadPage(self.raw, index)
         return PdfPage(raw_page, self)
     
@@ -432,7 +459,7 @@ class PdfDocument:
         
         Parameters:
             page_indices (typing.Sequence[int] | None):
-                A sequence of zero-based indices of the pages to render.
+                A sequence of zero-based indices of the pages to render. Reverse indexing is allowed.
                 If :data:`None`, all pages will be included.
             n_processes (int):
                 Target number of parallel processes.
@@ -455,12 +482,8 @@ class PdfDocument:
             else:
                 self._rendering_input = self._orig_input
         
-        n_pages = len(self)
-        
-        if page_indices is None or len(page_indices) == 0:
-            page_indices = [i for i in range(n_pages)]
-        if not all(0 <= i < n_pages for i in page_indices):
-            raise ValueError("A page index is out of bounds.")
+        if not page_indices:
+            page_indices = [i for i in range(len(self))]
         
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
