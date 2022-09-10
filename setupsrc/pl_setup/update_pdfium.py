@@ -21,10 +21,13 @@ from pl_setup.packaging_base import (
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
+    HostPlatform,
     set_version,
     get_latest_version,
     call_ctypesgen,
 )
+
+AutoPlatformId = "auto"
 
 
 def handle_versions(latest):
@@ -120,6 +123,8 @@ def generate_bindings(archives):
 def get_download_files(platforms):
     download_files = {}
     for pl_name in platforms:
+        if pl_name == AutoPlatformId:
+            pl_name = HostPlatform().get_name()
         download_files[ join(DataTree, pl_name) ] = ReleaseNames[pl_name]
     return download_files
 
@@ -138,15 +143,17 @@ def main(platforms):
 
 
 def parse_args(argv):
+    platform_choices = (AutoPlatformId, *BinaryPlatforms)
     parser = argparse.ArgumentParser(
-        description = "Download pre-built PDFium packages and generate bindings. Available platform identifiers: %s" % BinaryPlatforms,
+        description = "Download pre-built PDFium packages and generate bindings.",
     )
     parser.add_argument(
         "--platforms", "-p",
-        metavar = "identifier",
-        choices = BinaryPlatforms,
-        default = BinaryPlatforms,
         nargs = "+",
+        metavar = "identifier",
+        choices = platform_choices,
+        default = BinaryPlatforms,
+        help = "The platform(s) to include. Available platform identifiers are %s. `auto` represents the current host platform." % (platform_choices, ),
     )
     return parser.parse_args(argv)
 

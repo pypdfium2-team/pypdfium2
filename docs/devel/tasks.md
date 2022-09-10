@@ -17,7 +17,6 @@ Also see the issues panel and inline `TODO` marks in source code.
 * Consolidate and extend the support model.
 
 ### Setup Infrastructure
-* update_pdfium: accept `auto` for `--platform` argument.
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest).
 * update_pdfium: only generate the bindings file once for all platforms.
 * update_pdfium: don't skip missing artefacts by default, abort instead.
