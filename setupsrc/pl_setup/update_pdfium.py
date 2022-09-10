@@ -10,6 +10,7 @@ import shutil
 import tarfile
 import argparse
 import traceback
+import functools
 from urllib import request
 from os.path import join, abspath, dirname
 from concurrent.futures import ThreadPoolExecutor
@@ -48,7 +49,7 @@ def clear_data(download_files):
             shutil.rmtree(pl_dir)
 
 
-def _get_package(args):
+def _get_package(robust, args):
     
     dirpath, file_url, file_path = args
     print("'%s' -> '%s'" % (file_url, file_path))
@@ -56,13 +57,16 @@ def _get_package(args):
     try:
         request.urlretrieve(file_url, file_path)
     except Exception:
-        traceback.print_exc()
-        return
+        if robust:
+            traceback.print_exc()
+            return
+        else:
+            raise
     
     return dirpath, file_path
 
 
-def download_releases(latest_version, download_files):
+def download_releases(latest_version, download_files, robust):
     
     base_url = "%s%s/" % (ReleaseURL, latest_version)
     args_list = []
@@ -76,8 +80,9 @@ def download_releases(latest_version, download_files):
         args_list.append( (dirpath, file_url, file_path) )
     
     archives = {}
-    with ThreadPoolExecutor( len(args_list) ) as pool:
-        for output in pool.map(_get_package, args_list):
+    with ThreadPoolExecutor(max_workers=len(args_list)) as pool:
+        func = functools.partial(_get_package, robust)
+        for output in pool.map(func, args_list):
             if output is not None:
                 dirpath, file_path = output
                 archives[dirpath] = file_path
@@ -129,7 +134,7 @@ def get_download_files(platforms):
     return download_files
 
 
-def main(platforms):
+def main(platforms, robust=False):
     
     download_files = get_download_files(platforms)
     
@@ -137,7 +142,7 @@ def main(platforms):
     handle_versions(str(latest))
     clear_data(download_files)
     
-    archives = download_releases(latest, download_files)
+    archives = download_releases(latest, download_files, robust)
     unpack_archives(archives)
     generate_bindings(archives)
 
@@ -155,12 +160,20 @@ def parse_args(argv):
         default = BinaryPlatforms,
         help = "The platform(s) to include. Available platform identifiers are %s. `auto` represents the current host platform." % (platform_choices, ),
     )
+    parser.add_argument(
+        "--robust",
+        action = "store_true",
+        help = "Skip missing binaries instead of raising an exception.",
+    )
     return parser.parse_args(argv)
 
 
 def run_cli(argv=sys.argv[1:]):
     args = parse_args(argv)
-    return main(args.platforms)
+    main(
+        args.platforms,
+        robust = args.robust,
+    )
 
 
 if __name__ == "__main__":

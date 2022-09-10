@@ -19,7 +19,6 @@ Also see the issues panel and inline `TODO` marks in source code.
 ### Setup Infrastructure
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest).
 * update_pdfium: only generate the bindings file once for all platforms.
-* update_pdfium: don't skip missing artefacts by default, abort instead.
 * packaging_base: use a class for `VerNamespace` so it can be flushed more easily (?)
 * craft_packages: add means to skip platforms for which artefacts are missing.
 * setup: improve error messages if binaries/bindings are not present in the platform directory - consider downloading missing binaries implicitly on installation.
