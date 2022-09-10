@@ -22,6 +22,7 @@ from os.path import (
 
 SetupTargetVar   = "PYP_TARGET_PLATFORM"
 SdistTarget      = "sdist"
+AutoPlatformId   = "auto"
 BindingsFileName = "_pypdfium.py"
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
