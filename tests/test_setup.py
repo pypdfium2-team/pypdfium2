@@ -72,16 +72,16 @@ def test_expected_tags(all_platnames):
 
 def test_get_tag():
     for platform, tag in ExpectedTags:
-        assert setup_base._get_tag(platform) == tag
+        assert pkg_base.get_wheel_tag(platform) == tag
 
 def test_unknown_tag():
     plat_dir = "win_amd74"
-    with pytest.raises(ValueError, match=re.escape("Unknown platform directory %s" % plat_dir)):
-        setup_base._get_tag(plat_dir)
+    with pytest.raises(ValueError, match=re.escape("Unknown platform name %s" % plat_dir)):
+        pkg_base.get_wheel_tag(plat_dir)
 
 def test_get_bdist():
     for platform, _ in ExpectedTags:
-        bdist_cls = setup_base._get_bdist(platform)
+        bdist_cls = setup_base.bdist_factory(platform)
         assert issubclass(bdist_cls, bdist_wheel)
 
 

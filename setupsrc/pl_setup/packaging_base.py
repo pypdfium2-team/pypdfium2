@@ -14,11 +14,15 @@ from os.path import (
     exists,
     abspath,
     dirname,
+    basename,
     expanduser,
 )
 
 # TODO improve consistency of variable names; think about variables to move in/out
 
+SetupTargetVar   = "PYP_TARGET_PLATFORM"
+SdistTarget      = "sdist"
+BindingsFileName = "_pypdfium.py"
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
 DataTree    = join(SourceTree, "data")
@@ -27,8 +31,6 @@ ModuleDir   = join(SourceTree, "src", "pypdfium2")
 VersionFile = join(ModuleDir, "version.py")
 Changelog   = join(SourceTree, "docs", "source", "changelog.md")
 ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
-SetupTargetVar = "PYP_TARGET_PLATFORM"
-SdistTarget    = "sdist"
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
@@ -117,6 +119,63 @@ class HostPlatform:
             return None
 
 
+def _get_linux_tag(arch):
+    return "manylinux_2_17_%s.manylinux2014_%s" % (arch, arch)
+
+def _get_musllinux_tag(arch):
+    return "musllinux_1_2_%s" % (arch)
+
+
+def _get_mac_tag(arch, *versions):
+    
+    assert len(versions) > 0
+    
+    template = "macosx_%s_%s"
+    
+    tag = ""
+    sep = ""
+    for v in versions:
+        tag += sep + template % (v, arch)
+        sep = "."
+    
+    return tag
+
+
+def get_wheel_tag(pl_name):
+    # pip>=20.3 now accepts macOS wheels tagged as 10_x on 11_x. Not sure what applies to 12_x.
+    # Let's retain multi-version tagging for broader compatibility all the same.
+    if pl_name == PlatformNames.darwin_x64:
+        # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
+        return _get_mac_tag("x86_64", "10_13", "11_0", "12_0")
+    elif pl_name == PlatformNames.darwin_arm64:
+        return _get_mac_tag("arm64", "11_0", "12_0")
+    elif pl_name == PlatformNames.linux_x64:
+        return _get_linux_tag("x86_64")
+    elif pl_name == PlatformNames.linux_x86:
+        return _get_linux_tag("i686")
+    elif pl_name == PlatformNames.linux_arm64:
+        return _get_linux_tag("aarch64")
+    elif pl_name == PlatformNames.linux_arm32:
+        return _get_linux_tag("armv7l")
+    elif pl_name == PlatformNames.musllinux_x64:
+        return _get_musllinux_tag("x86_64")
+    elif pl_name == PlatformNames.musllinux_x86:
+        return _get_musllinux_tag("i686")
+    elif pl_name == PlatformNames.windows_x64:
+        return "win_amd64"
+    elif pl_name == PlatformNames.windows_arm64:
+        return "win_arm64"
+    elif pl_name == PlatformNames.windows_x86:
+        return "win32"
+    elif pl_name == PlatformNames.sourcebuild:
+        tag = sysconfig.get_platform()
+        for char in ("-", "."):
+            tag = tag.replace(char, "_")
+        return tag
+    else:
+        raise ValueError("Unknown platform name %s" % pl_name)
+
+
 def run_cmd(command, cwd, capture=False, **kwargs):
     
     print('%s ("%s")' % (command, cwd))
@@ -138,17 +197,17 @@ def get_latest_version():
 
 def call_ctypesgen(platform_dir, include_dir):
     
-    bindings_file = join(platform_dir, "_pypdfium.py")
+    bindings = join(platform_dir, BindingsFileName)
     
-    ctypesgen_cmd = ["ctypesgen", "--library", "pdfium", "--strip-build-path", platform_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings_file]
+    ctypesgen_cmd = ["ctypesgen", "--library", "pdfium", "--strip-build-path", platform_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings]
     run_cmd(ctypesgen_cmd, cwd=platform_dir)
     
-    with open(bindings_file, "r") as file_reader:
+    with open(bindings, "r") as file_reader:
         text = file_reader.read()
         text = text.replace(platform_dir, ".")
         text = text.replace(HomeDir, "~")
     
-    with open(bindings_file, "w") as file_writer:
+    with open(bindings, "w") as file_writer:
         file_writer.write(text)
 
 
@@ -158,10 +217,20 @@ def clean_artefacts():
     if exists(build_cache):
         shutil.rmtree(build_cache)
     
-    deletable_files = [join(ModuleDir, n) for n in (*Libnames, "_pypdfium.py")]
+    deletable_files = [join(ModuleDir, n) for n in (*Libnames, BindingsFileName)]
     for file in deletable_files:
         if exists(file):
             os.remove(file)
+
+
+def copy_platfiles(pl_name):
+    
+    files = [f for f in glob(join(DataTree, pl_name, '*')) if os.path.isfile(f)]
+    assert len(files) == 2
+    
+    for src_path in files:
+        dest_path = join(ModuleDir, basename(src_path))
+        shutil.copy(src_path, dest_path)
 
 
 def get_version_ns():
