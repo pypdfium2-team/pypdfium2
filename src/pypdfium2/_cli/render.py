@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import ast
+import PIL.Image
 from os.path import (
     join,
     abspath,
@@ -18,13 +18,6 @@ def rotation_type(string):
     if rotation not in (0, 90, 180, 270):
         raise ValueError("Invalid rotation value %s" % rotation)
     return rotation
-
-
-def crop_type(string):
-    crop = ast.literal_eval(string)
-    if not isinstance(crop, (tuple, list)) or len(crop) != 4 or not all(isinstance(c, (int, float)) for c in crop):
-        raise ValueError("Crop must be a list of four numbers.")
-    return crop
 
 
 ColorSchemeOpt = dict(
@@ -137,7 +130,8 @@ def attach_parser(subparsers):
     )
     parser.add_argument(
         "--crop",
-        type = crop_type,
+        nargs = 4,
+        type = float,
         default = (0, 0, 0, 0),
         help = "Amount to crop from (left, bottom, right, top)",
     )
@@ -158,6 +152,11 @@ def attach_parser(subparsers):
         default = os.cpu_count(),
         type = int,
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
+    )
+    parser.add_argument(
+        "--use-numpy",
+        action = "store_true",
+        help = "Render to numpy arrays as intermediary, then converting to PIL images (for testing only)."
     )
 
 
@@ -203,11 +202,19 @@ def main(args):
         for type in args.no_antialias:
             kwargs["no_smooth%s" % type] = True
         
-        renderer = pdf.render_topil(**kwargs)
+        if args.use_numpy:
+            renderer = pdf.render_tonumpy(**kwargs)
+        else:
+            renderer = pdf.render_topil(**kwargs)
         prefix = splitext(basename(input_path))[0] + "_"
         n_digits = len(str( max(page_indices)+1 ))
         
-        for image, index in zip(renderer, page_indices):
+        for result, index in zip(renderer, page_indices):
+            if args.use_numpy:
+                array, cl_format = result
+                image = PIL.Image.fromarray(array, mode=cl_format)
+            else:
+                image = result
             suffix = str(index+1).zfill(n_digits)
             output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
             image.save(output_path)
