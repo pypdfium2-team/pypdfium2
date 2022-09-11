@@ -490,7 +490,7 @@ class ColorScheme:
     
     Note:
         Valid fields are extracted dynamically from the :class:`FPDF_COLORSCHEME` structure.
-        Unassigned integer fields default to 0 (black).
+        Unassigned integer fields default to 0, which means transparent.
     
     Parameters:
         path_fill_color
