@@ -27,6 +27,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
     python3 -m pip install .
     ```
   
+  <!-- TODO(#136@geisserml) Update instructions when finished. -->
   * With a locally built PDFium binary
     ```bash
     python3 setupsrc/pl_setup/build_pdfium.py
@@ -53,6 +54,8 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
 
 As pypdfium2 uses external binaries, there are a few special ways of controlling setup behaviour.
 They do not represent standardised solutions, but are specific to this project.
+
+<!-- TODO(#136@geisserml) Update instructions when finished. -->
 
 * The environment variable `PYP_TARGET_PLATFORM` defines which binaries to include.
   If unset or `auto`, the host platform is detected automatically and corresponding binaries will be selected (if available).

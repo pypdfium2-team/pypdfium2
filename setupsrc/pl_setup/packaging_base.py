@@ -20,9 +20,9 @@ from os.path import (
 
 # TODO improve consistency of variable names; think about variables to move in/out
 
-SetupTargetVar   = "PYP_TARGET_PLATFORM"
-SdistTarget      = "sdist"
-AutoPlatformId   = "auto"
+SetupTargetVar   = "PYP_TARGET_PLATFORM"  # TODO(#136@geisserml) rename to BinaryTargetVar   = "PYPDFIUM_BINARY"
+SdistTarget      = "sdist"                # TODO(#136@geisserml) rename to BinaryTarget_None = "none"
+AutoPlatformId   = "auto"                 # TODO(#136@geisserml) rename to BinaryTarget_Auto = "auto"
 BindingsFileName = "_pypdfium.py"
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
@@ -39,6 +39,7 @@ ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 
 
+# TODO(#136@geisserml) Internalise into build script. Replace with something that only includes the names that may land in platform folders.
 Libnames = (
     "pdfium",
     "pdfium.dylib",
@@ -214,6 +215,8 @@ def call_ctypesgen(platform_dir, include_dir):
 
 def clean_artefacts():
     
+    # TODO(#136@geisserml) Improve robustness.
+    
     build_cache = join(SourceTree, "build")
     if exists(build_cache):
         shutil.rmtree(build_cache)
@@ -225,6 +228,8 @@ def clean_artefacts():
 
 
 def copy_platfiles(pl_name):
+    
+    # TODO(#136@geisserml) Improve robustness. Explicitly get the relevant files instead of globbing the directory.
     
     files = [f for f in glob(join(DataTree, pl_name, '*')) if os.path.isfile(f)]
     assert len(files) == 2
@@ -245,6 +250,8 @@ VerNamespace = get_version_ns()
 
 
 def set_version(variable, new_ver):
+    
+    # TODO(#136@geisserml) Change function to set multiple entries at once, to avoid inefficient repeated r/w of the version file.
     
     with open(VersionFile, "r") as fh:
         content = fh.read()

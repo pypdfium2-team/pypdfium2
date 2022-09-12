@@ -113,6 +113,8 @@ def get_version_info():
 
 def update_version(head_commit, tag_commit, tag):
     
+    # TODO(#136@geisserml) Write version status file and handle the changes in `setup.py`.
+    
     is_sourcebuild  = VerNamespace["IS_SOURCEBUILD"]
     curr_libversion = VerNamespace["V_LIBPDFIUM"]
     
@@ -160,6 +162,8 @@ def find_lib(srcname=None, directory=PDFiumBuildDir):
             return path
         else:
             print("Warning: The file of given srcname does not exist.", file=sys.stderr)
+    
+    # TODO(#136@geisserml) Internalise `Libnames`, or else think of a different strategy.
     
     libpath = None
     for lname in Libnames:
@@ -229,8 +233,10 @@ def main(
         b_revision = "main"
     if b_target is None:
         b_target = "pdfium"
-    # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
+    
+    # TODO(#136@geisserml) Rename binaries according to host system, like in `update_pdfium` (share the logic in `packaging_base`).
     if b_destname is None and sys.platform.startswith("linux"):
+        # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
         b_destname = "pdfium"
     
     if sys.platform.startswith("win32"):

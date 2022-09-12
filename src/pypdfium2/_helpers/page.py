@@ -344,6 +344,8 @@ class PdfPage:
             The ctypes array is allocated by Python (not PDFium), so we don't need to care about freeing memory.
         """
         
+        # TODO Avoid running the same code repeatedly when rendering multiple pages with the same configuration: Split up input compilation and processing, while keeping the current API intact.
+        
         validate_colors(color, color_scheme)
         cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder)
         c_color = color_tohex(color, rev_byteorder)
@@ -499,10 +501,8 @@ class ColorScheme:
         text_stroke_color
     """
     
-    def __init__(self, **kwargs):
-        # If required, we could add a dictionary of defaults and update it with the given arguments
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-        self.kwargs = kwargs
+    def __init__(self, **caller_kws):
+        self.kwargs = {k: v for k, v in caller_kws.items() if v is not None}
         fields = [key for key, _ in pdfium.FPDF_COLORSCHEME._fields_]
         assert len(self.kwargs) > 0
         assert all(k in fields for k in self.kwargs.keys())

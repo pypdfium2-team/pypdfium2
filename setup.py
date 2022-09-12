@@ -21,8 +21,10 @@ from pl_setup.packaging_base import (
     SdistTarget,
 )
 
-StatusFile = join(SourceTree, "data", ".presetup_done.txt")
 
+# TODO(#136@geisserml) Replace with separate version status files per platform.
+
+StatusFile = join(SourceTree, "data", ".presetup_done.txt")
 
 def check_presetup():
     if os.path.exists(StatusFile):

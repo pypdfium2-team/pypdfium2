@@ -32,6 +32,8 @@ from pl_setup.packaging_base import (
 
 def handle_versions(latest):
     
+    # TODO(#136@geisserml) Write version status file and handle the changes in `setup.py`.
+    
     v_libpdfium = VerNamespace["V_LIBPDFIUM"]
     is_sourcebuild = VerNamespace["IS_SOURCEBUILD"]
     
