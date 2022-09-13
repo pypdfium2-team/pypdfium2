@@ -7,14 +7,18 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 Also see the issues panel and inline `TODO` marks in source code.
 
 ### Main Code
-* Research if/how we can efficiently render to ctypes arrays concurrently.
+* Investigate if we can restructure/split rendering code:
+    * interruptable rendering (#128)
+    * caller-provided output buffer
+    * concurrent rendering to ctypes array, if possible
+    * separate input compilation and processing
+* Ask upstream to expose a rendering function that combines matrix, color scheme and interruptability.
 * When rendering with multiple processes and bytes were provided as input, is the memory duplicated or shared? If it's duplicated, find a way to share it or write a tempfile instead.
-* When rendering, allow callers to provide an own buffer?
 * Move init/destroy into a separate file. Provide public init/destroy functions, given that embedders who deal with long-running applications might not want to have PDFium in memory all the time.
 * Make members of `_utils.py` public (move into `misc.py`) ?
 * Make the bindings file `_pypdfium.py` public ?
-* Investigate other PDFium rendering functions. Ideally, we would want to add margins, flip and color schemes.
-* Consolidate and extend the support model.
+* Add support model for attachment API.
+* Consolidate and extend helper classes.
 
 ### Setup Infrastructure
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest).
@@ -45,3 +49,4 @@ Also see the issues panel and inline `TODO` marks in source code.
 * Ask Linux distributors to package PDFium.
 * Add means to plug in PDFium headers/binaries from an arbitrary location, probably using custom environment variables.
 * Keep in mind that `ctypes.pythonapi` exists. Maybe we could replace our wonky `id()` based keep-the-object-alive approach with proper incref/decref calls?
+* Find out if/when we need to use `ctypes.byref()`.

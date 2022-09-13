@@ -344,8 +344,6 @@ class PdfPage:
             The ctypes array is allocated by Python (not PDFium), so we don't need to care about freeing memory.
         """
         
-        # TODO Avoid running the same code repeatedly when rendering multiple pages with the same configuration: Split up input compilation and processing, while keeping the current API intact.
-        
         validate_colors(color, color_scheme)
         cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder)
         c_color = color_tohex(color, rev_byteorder)
