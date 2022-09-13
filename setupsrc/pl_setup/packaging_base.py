@@ -39,19 +39,6 @@ ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 
 
-# TODO(#136@geisserml) Internalise into build script. Replace with something that only includes the names that may land in platform folders.
-Libnames = (
-    "pdfium",
-    "pdfium.dylib",
-    "pdfium.dll",
-    "libpdfium.so",
-    "pdfium.so",
-    "libpdfium",
-    "libpdfium.dylib",
-    "libpdfium.dll",
-)
-
-
 class SystemNames:
     linux   = "linux"
     darwin  = "darwin"
@@ -95,8 +82,11 @@ LibnameForSystem = {
 
 BinaryPlatforms = list(ReleaseNames.keys())
 BinarySystems   = list(LibnameForSystem.keys())
+MainLibnames    = list(LibnameForSystem.values())
 
 def plat_to_system(pl_name):
+    if pl_name == PlatformNames.sourcebuild:
+        return Host.system
     result = [s for s in BinarySystems if pl_name.startswith(s)]
     assert len(result) == 1
     return result[0]
@@ -248,7 +238,7 @@ def clean_artefacts():
     if exists(build_cache):
         shutil.rmtree(build_cache)
     
-    deletable_files = [join(ModuleDir, n) for n in (*Libnames, BindingsFileName)]
+    deletable_files = [join(ModuleDir, n) for n in (*MainLibnames, BindingsFileName)]
     for file in deletable_files:
         if exists(file):
             os.remove(file)
@@ -256,12 +246,8 @@ def clean_artefacts():
 
 def copy_platfiles(pl_name):
     
-    if pl_name == PlatformNames.sourcebuild:
-        system = Host.system
-    else:
-        system = plat_to_system(pl_name)
-    
     # NOTE this will fail in case of sourcebuild with unknown host system
+    system = plat_to_system(pl_name)
     binary_name = LibnameForSystem[system]
     
     platfiles = (

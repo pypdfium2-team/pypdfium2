@@ -88,7 +88,7 @@ def test_get_bdist():
 # packaging_base
 
 def test_libnames():
-    for name in pkg_base.Libnames:
+    for name in pkg_base.MainLibnames:
         assert "pdfium" in name
 
 def test_platformnames(all_platnames):

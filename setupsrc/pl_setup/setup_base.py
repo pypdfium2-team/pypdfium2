@@ -8,8 +8,9 @@ from wheel.bdist_wheel import bdist_wheel
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
-    Libnames,
     VerNamespace,
+    LibnameForSystem,
+    plat_to_system,
     get_wheel_tag,
     clean_artefacts,
     copy_platfiles,
@@ -43,11 +44,15 @@ class BinaryDistribution (setuptools.Distribution):
 
 def mkwheel(pl_name):
     
+    # NOTE this will fail in case of sourcebuild with unknown host system
+    system = plat_to_system(pl_name)
+    libname = LibnameForSystem[system]
+    
     clean_artefacts()
     copy_platfiles(pl_name)
     
     setuptools.setup(
-        package_data = {"": Libnames},
+        package_data = {"": libname},
         cmdclass = {"bdist_wheel": bdist_factory(pl_name)},
         distclass = BinaryDistribution,
         **SetupKws,
