@@ -86,7 +86,7 @@ MainLibnames    = list(LibnameForSystem.values())
 
 def plat_to_system(pl_name):
     if pl_name == PlatformNames.sourcebuild:
-        # NOTE If doing a sourcebuild on an unknown host system, this will return None, which causes binary detection code to fail.
+        # NOTE If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name).
         return Host.system
     result = [s for s in BinarySystems if pl_name.startswith(s)]
     assert len(result) == 1
@@ -281,6 +281,8 @@ def set_versions(ver_changes):
         content = fh.read()
     
     for variable, new_ver in ver_changes.items():
+        
+        # Assuming previous and new value are of the same type
         if isinstance(new_ver, str):
             template = '%s = "%s"'
         else:
@@ -291,6 +293,8 @@ def set_versions(ver_changes):
         print("'%s' -> '%s'" % (previous, updated))
         assert content.count(previous) == 1
         content = content.replace(previous, updated)
+        
+        # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, no reliance can be placed upon the value of `V_PYPDFIUM2` after this method has been run. If you need the real value, VerNamespace needs to be re-created.
         VerNamespace[variable] = new_ver
         
     with open(VersionFile, "w") as fh:
