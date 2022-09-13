@@ -12,8 +12,8 @@ from pl_setup.packaging_base import (
     clean_artefacts,
     BinaryPlatforms,
     SourceTree,
-    SetupTargetVar,
-    SdistTarget,
+    BinaryTargetVar,
+    BinaryTarget_None,
 )
 
 
@@ -31,12 +31,12 @@ def main():
     args = parser.parse_args()
     
     clean_artefacts()
-    os.environ[SetupTargetVar] = SdistTarget
+    os.environ[BinaryTargetVar] = BinaryTarget_None
     _run_build(["--sdist"])
     clean_artefacts()
     
     for plat in BinaryPlatforms:
-        os.environ[SetupTargetVar] = plat
+        os.environ[BinaryTargetVar] = plat
         _run_build(["--wheel"])
         clean_artefacts()
 

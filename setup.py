@@ -17,8 +17,8 @@ from pl_setup.packaging_base import (
     HostPlatform,
     PlatformNames,
     SourceTree,
-    SetupTargetVar,
-    SdistTarget,
+    BinaryTargetVar,
+    BinaryTarget_None,
 )
 
 
@@ -59,7 +59,7 @@ def packaging_handler(target):
     
     from pl_setup.setup_base import mkwheel, SetupKws
     
-    if target == SdistTarget:
+    if target == BinaryTarget_None:
         setuptools.setup(**SetupKws)
     elif hasattr(PlatformNames, target):
         mkwheel( getattr(PlatformNames, target) )
@@ -71,7 +71,7 @@ def packaging_handler(target):
 
 def main():
     
-    target = os.environ.get(SetupTargetVar, None)
+    target = os.environ.get(BinaryTargetVar, None)
     
     if target in (None, "auto"):
         w_presetup = check_presetup()

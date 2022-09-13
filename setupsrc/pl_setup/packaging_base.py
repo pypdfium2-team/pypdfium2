@@ -20,9 +20,9 @@ from os.path import (
 
 # TODO improve consistency of variable names; think about variables to move in/out
 
-SetupTargetVar   = "PYP_TARGET_PLATFORM"  # TODO(#136@geisserml) rename to BinaryTargetVar   = "PYPDFIUM_BINARY"
-SdistTarget      = "sdist"                # TODO(#136@geisserml) rename to BinaryTarget_None = "none"
-AutoPlatformId   = "auto"                 # TODO(#136@geisserml) rename to BinaryTarget_Auto = "auto"
+BinaryTargetVar   = "PDFIUM_BINARY"
+BinaryTarget_None = "none"
+BinaryTarget_Auto = "auto"
 BindingsFileName = "_pypdfium.py"
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))

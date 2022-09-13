@@ -22,7 +22,7 @@ from pl_setup.packaging_base import (
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
-    AutoPlatformId,
+    BinaryTarget_Auto,
     HostPlatform,
     set_version,
     get_latest_version,
@@ -125,9 +125,9 @@ def main(platforms, robust=False):
     
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
-    if AutoPlatformId in platforms:
+    if BinaryTarget_Auto in platforms:
         platforms = platforms.copy()
-        platforms[platforms.index(AutoPlatformId)] = HostPlatform().get_name()
+        platforms[platforms.index(BinaryTarget_Auto)] = HostPlatform().get_name()
     
     latest = get_latest_version()
     handle_versions(str(latest))
@@ -139,7 +139,7 @@ def main(platforms, robust=False):
 
 
 def parse_args(argv):
-    platform_choices = (AutoPlatformId, *BinaryPlatforms)
+    platform_choices = (BinaryTarget_Auto, *BinaryPlatforms)
     parser = argparse.ArgumentParser(
         description = "Download pre-built PDFium packages and generate bindings.",
     )

@@ -31,7 +31,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
   * With a locally built PDFium binary
     ```bash
     python3 setupsrc/pl_setup/build_pdfium.py
-    PYP_TARGET_PLATFORM="sourcebuild" python3 -m pip install .
+    PDFIUM_BINARY="sourcebuild" python3 -m pip install .
     ```
     The build script provides a few options that can be listed by calling it with `--help`.
     Building PDFium may take a long time because it comes with its own toolchain and bundled dependencies, rather than using system-provided components.[^1]
@@ -55,13 +55,13 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
 As pypdfium2 uses external binaries, there are a few special ways of controlling setup behaviour.
 They do not represent standardised solutions, but are specific to this project.
 
-<!-- TODO(#136@geisserml) Update instructions when finished. -->
-
-* The environment variable `PYP_TARGET_PLATFORM` defines which binaries to include.
+* The environment variable `PDFIUM_BINARY` defines which binary to include.
   If unset or `auto`, the host platform is detected automatically and corresponding binaries will be selected (if available).
   If set to a certain platform identifier, binaries for the requested platform will be used.[^4]
   If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts.
   If set to `sdist`, no platform-dependent files will be injected, so as to create a source distribution.
+
+-<!-- TODO(#136@geisserml) Update instructions when finished. -->
 
 * The presence of the file `data/.presetup_done.txt` is used to decide if setup code should download binaries and create bindings, or if existing artefacts should be used instead, as re-creating them may not be desirable with every single run.[^5] Consequently, this file needs to be removed if you wish to update the artefacts with the next installation. We are planning to improve this process in the future.
 
