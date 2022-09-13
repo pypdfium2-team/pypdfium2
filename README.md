@@ -27,7 +27,6 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
     python3 -m pip install .
     ```
   
-  <!-- TODO(#136@geisserml) Update instructions when finished. -->
   * With a locally built PDFium binary
     ```bash
     python3 setupsrc/pl_setup/build_pdfium.py

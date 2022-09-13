@@ -14,11 +14,11 @@ from os.path import (
 sys.path.insert(0, join(dirname(abspath(__file__)), "setupsrc"))
 from pl_setup import check_deps
 from pl_setup.packaging_base import (
-    HostPlatform,
-    PlatformNames,
+    Host,
     SourceTree,
     BinaryTargetVar,
     BinaryTarget_None,
+    PlatformNames,
 )
 
 
@@ -40,19 +40,16 @@ def install_handler(w_presetup):
     from pl_setup import update_pdfium
     from pl_setup.setup_base import mkwheel
     
-    host = HostPlatform()
-    pl_name = host.get_name()
-    
-    if pl_name is None:
+    if Host.platform is None:
         # If PDFium had a proper build system, we could trigger a source build here
         raise RuntimeError(
-            "No pre-built binaries available for platform '%s' with libc implementation '%s'. " % (host.plat_info, host.libc_info) +
+            "No pre-built binaries available for platform '%s' with libc implementation '%s'. " % (Host._plat_info, Host._libc_info) +
             "You can attempt a source build, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Doing cross-compilation or using a different build system might be possible, though. Please get in touch with the project maintainers."
         )
     
     if w_presetup:
-        update_pdfium.main([pl_name])
-    mkwheel(pl_name)
+        update_pdfium.main([Host.platform])
+    mkwheel(Host.platform)
 
 
 def packaging_handler(target):

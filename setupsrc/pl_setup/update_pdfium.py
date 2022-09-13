@@ -17,13 +17,13 @@ from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
+    Host,
     DataTree,
     VerNamespace,
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
     BinaryTarget_Auto,
-    HostPlatform,
     set_version,
     get_latest_version,
     call_ctypesgen,
@@ -127,7 +127,7 @@ def main(platforms, robust=False):
         raise ValueError("Duplicate platforms not allowed.")
     if BinaryTarget_Auto in platforms:
         platforms = platforms.copy()
-        platforms[platforms.index(BinaryTarget_Auto)] = HostPlatform().get_name()
+        platforms[platforms.index(BinaryTarget_Auto)] = Host.platform
     
     latest = get_latest_version()
     handle_versions(str(latest))

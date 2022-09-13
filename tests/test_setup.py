@@ -48,18 +48,18 @@ def test_entrypoint():
 # setup_base
 
 ExpectedTags = (
-    (PlatformNames.darwin_x64,    "macosx_10_13_x86_64.macosx_11_0_x86_64.macosx_12_0_x86_64"),
-    (PlatformNames.darwin_arm64,  "macosx_11_0_arm64.macosx_12_0_arm64"),
-    (PlatformNames.linux_x64,     "manylinux_2_17_x86_64.manylinux2014_x86_64"),
-    (PlatformNames.linux_x86,     "manylinux_2_17_i686.manylinux2014_i686"),
-    (PlatformNames.linux_arm64,   "manylinux_2_17_aarch64.manylinux2014_aarch64"),
-    (PlatformNames.linux_arm32,   "manylinux_2_17_armv7l.manylinux2014_armv7l"),
-    (PlatformNames.musllinux_x64, "musllinux_1_2_x86_64"),
-    (PlatformNames.musllinux_x86, "musllinux_1_2_i686"),
-    (PlatformNames.windows_x64,   "win_amd64"),
-    (PlatformNames.windows_arm64, "win_arm64"),
-    (PlatformNames.windows_x86,   "win32"),
-    (PlatformNames.sourcebuild,   sysconfig.get_platform().replace('-','_').replace('.','_')),
+    (PlatformNames.linux_x64,      "manylinux_2_17_x86_64.manylinux2014_x86_64"),
+    (PlatformNames.linux_x86,      "manylinux_2_17_i686.manylinux2014_i686"),
+    (PlatformNames.linux_arm64,    "manylinux_2_17_aarch64.manylinux2014_aarch64"),
+    (PlatformNames.linux_arm32,    "manylinux_2_17_armv7l.manylinux2014_armv7l"),
+    (PlatformNames.linux_musl_x64, "musllinux_1_2_x86_64"),
+    (PlatformNames.linux_musl_x86, "musllinux_1_2_i686"),
+    (PlatformNames.darwin_x64,     "macosx_10_13_x86_64.macosx_11_0_x86_64.macosx_12_0_x86_64"),
+    (PlatformNames.darwin_arm64,   "macosx_11_0_arm64.macosx_12_0_arm64"),
+    (PlatformNames.windows_x64,    "win_amd64"),
+    (PlatformNames.windows_arm64,  "win_arm64"),
+    (PlatformNames.windows_x86,    "win32"),
+    (PlatformNames.sourcebuild,    sysconfig.get_platform().replace('-','_').replace('.','_')),
 )
 
 
