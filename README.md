@@ -61,7 +61,7 @@ They do not represent standardised solutions, but are specific to this project.
   If unset or `auto`, the host platform is detected automatically and corresponding binaries will be selected (if available).
   If set to a certain platform identifier, binaries for the requested platform will be used.[^4]
   If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts.
-  If set to `sdist`, no platform-dependant files will be injected, so as to create a source distribution.
+  If set to `sdist`, no platform-dependent files will be injected, so as to create a source distribution.
 
 * The presence of the file `data/.presetup_done.txt` is used to decide if setup code should download binaries and create bindings, or if existing artefacts should be used instead, as re-creating them may not be desirable with every single run.[^5] Consequently, this file needs to be removed if you wish to update the artefacts with the next installation. We are planning to improve this process in the future.
 
@@ -74,7 +74,7 @@ However, some optional support model features require additional packages:
   pypdfium2 provides convenience methods to directly return PIL image objects when dealing with raster graphics.
 * [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. Similar to `Pillow`, pypdfium2 provides helpers to get raster graphics in the form of multidimensional numpy arrays.
 * [`uharfbuzz`](https://github.com/harfbuzz/uharfbuzz) is a text shaping engine used by text insertion helpers, to support foreign writing systems.
-  If you do not care about this, you may insert text using the raw PDFium functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependant on uharfbuzz.
+  If you do not care about this, you may insert text using the raw PDFium functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependent on uharfbuzz.
 
 [^1]: Replacing PDFium's toolchain with a leaner and more elegant build system that is designed to run on any host platform constitutes a long-standing task. This would be required to be able to reliably perform a local source build when installing an `sdist` package. If you have the time and expertise to set up such a build system, please start a repository and inform us about it.
 
@@ -361,7 +361,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * size))
   # Buffer as ctypes array (referencing the original buffer, will be unavailable as soon as the bitmap is destroyed)
   c_array = buffer.contents
-  # Buffer as Python bytes (independant copy)
+  # Buffer as Python bytes (independent copy)
   data = bytes(c_array)
   ```
 

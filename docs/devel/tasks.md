@@ -23,7 +23,8 @@ Also see the issues panel and inline `TODO` marks in source code.
 * craft_packages: add means to skip platforms for which artefacts are missing.
 * setup: improve error messages if binaries/bindings are not present in the platform directory - consider downloading missing binaries implicitly on installation.
 * setup: improve binary updating procedure by tracking version of currently present binaries - also consider updating outdated binaries implicitly, or at least do something against the possible mismatch with the version file.
-* add a `MANIFEST.in` file to avoid being dependant on the presence of `setuptools-scm`.
+* autorelease: on the long term, switch to a proper configuration file (yaml or something) rather than placing empty indicator files in a directory.
+* add a `MANIFEST.in` file to avoid being dependent on the presence of `setuptools-scm`.
 * sourcebuild/win: fix dynamic values in `resources.rc`.
 
 ### Tests
