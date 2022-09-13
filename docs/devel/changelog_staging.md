@@ -30,7 +30,11 @@
     - pypdfium2 now declares a no-op setuptools extension to prevent wheel content from landing in a `purelib` folder. Some systems use this information to separate platform-dependent packages from pure-python packages (i. e. `/usr/lib64` instead of `/usr/lib`). Confer PEP 427.
     - Autorelease now properly takes existing beta tags into account for its version changes.
     - PDFium's commit log is now shown with GitHub releases.
+    - The wheel packaging script now restores in-tree artefacts from a possible editable install.
     - Platform files are now detected in a more robust way. If missing, a proper exception will be raised.
+    - Platform data directories are now annotated with a text file storing the pdfium version, to prevemt a possible mismatch between the state of `version.py` and the actual version of the used binary. The update and build scripts do not directly change the main version file anymore, but defer the changes to `setup.py`.
+    - Missing platform files are now always procured implicitly on installation. If platform files exist already but are outdated, they will be updated by default. You may opt out by creating an empty file called `.lock_autoupdate.txt` in `data/`.
+    - Significant code quality improvements.
 
 - Documentation
     - Rewrote the project's `README.md`. Added more support model examples and an extensive guide regarding the raw PDFium/ctypes API.
