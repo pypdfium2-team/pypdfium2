@@ -11,7 +11,6 @@ import subprocess
 from glob import glob
 from os.path import (
     join,
-    exists,
     abspath,
     dirname,
     basename,
@@ -235,12 +234,12 @@ def clean_artefacts():
     # TODO(#136@geisserml) Improve robustness.
     
     build_cache = join(SourceTree, "build")
-    if exists(build_cache):
+    if os.path.exists(build_cache):
         shutil.rmtree(build_cache)
     
     deletable_files = [join(ModuleDir, n) for n in (*MainLibnames, BindingsFileName)]
     for file in deletable_files:
-        if exists(file):
+        if os.path.exists(file):
             os.remove(file)
 
 
