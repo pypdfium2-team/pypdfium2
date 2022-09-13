@@ -17,7 +17,7 @@ from os.path import (
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
     run_cmd,
-    set_version,
+    set_versions,
     get_version_ns,
     get_latest_version,
     SourceTree,
@@ -69,30 +69,32 @@ def do_versioning(latest):
     if not c_updates and not py_updates:
         raise RuntimeError("Neither pypdfium2 code nor pdfium binaries updated. Making a new release would be pointless.")
     
+    ver_changes = dict()
     if c_updates:
-        set_version("V_LIBPDFIUM", str(latest))
-    
+        ver_changes["V_LIBPDFIUM"] = str(latest)
     if inc_major:
-        set_version("V_MAJOR", VerNamespace["V_MAJOR"]+1)
-        set_version("V_MINOR", 0)
-        set_version("V_PATCH", 0)
+        ver_changes["V_MAJOR"] = VerNamespace["V_MAJOR"]+1
+        ver_changes["V_MINOR"] = 0
+        ver_changes["V_PATCH"] = 0
         os.remove(MajorUpdateFile)
     else:
         if v_beta is None:
             if c_updates:
-                set_version("V_MINOR", VerNamespace["V_MINOR"]+1)
-                set_version("V_PATCH", 0)
+                ver_changes["V_MINOR"] = VerNamespace["V_MINOR"]+1
+                ver_changes["V_PATCH"] = 0
             else:
-                set_version("V_PATCH", VerNamespace["V_PATCH"]+1)
+                ver_changes["V_PATCH"] = VerNamespace["V_PATCH"]+1
         elif not inc_beta:
-            set_version("V_BETA", None)
-    
+            ver_changes["V_BETA"] = None
     if inc_beta:
         if v_beta is None:
             v_beta = 0
         v_beta += 1
-        set_version("V_BETA", v_beta)
+        ver_changes["V_BETA"] = v_beta
         os.remove(BetaUpdateFile)
+    
+    assert len(ver_changes) > 0
+    set_versions(ver_changes)
 
 
 def get_summary():

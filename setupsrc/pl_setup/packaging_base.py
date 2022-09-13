@@ -274,24 +274,23 @@ def get_version_ns():
 VerNamespace = get_version_ns()
 
 
-def set_version(variable, new_ver):
-    
-    # TODO(#136@geisserml) Change function to set multiple entries at once, to avoid inefficient repeated r/w of the version file.
+def set_versions(ver_changes):
     
     with open(VersionFile, "r") as fh:
         content = fh.read()
     
-    if isinstance(new_ver, str):
-        template = '%s = "%s"'
-    else:
-        template = '%s = %s'
-    previous = template % (variable, VerNamespace[variable])
-    updated = template % (variable, new_ver)
-    
-    print("'%s' -> '%s'" % (previous, updated))
-    assert content.count(previous) == 1
-    content = content.replace(previous, updated)
-    VerNamespace[variable] = new_ver
-    
+    for variable, new_ver in ver_changes.items():
+        if isinstance(new_ver, str):
+            template = '%s = "%s"'
+        else:
+            template = '%s = %s'
+        previous = template % (variable, VerNamespace[variable])
+        updated = template % (variable, new_ver)
+        
+        print("'%s' -> '%s'" % (previous, updated))
+        assert content.count(previous) == 1
+        content = content.replace(previous, updated)
+        VerNamespace[variable] = new_ver
+        
     with open(VersionFile, "w") as fh:
         fh.write(content)
