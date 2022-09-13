@@ -231,16 +231,19 @@ def call_ctypesgen(target_dir, include_dir):
 
 def clean_artefacts():
     
-    # TODO(#136@geisserml) Improve robustness.
+    deletables = [
+        join(SourceTree, "build"),
+        join(ModuleDir, BindingsFileName),
+    ]
+    deletables += [join(ModuleDir, fn) for fn in MainLibnames]
     
-    build_cache = join(SourceTree, "build")
-    if os.path.exists(build_cache):
-        shutil.rmtree(build_cache)
-    
-    deletable_files = [join(ModuleDir, n) for n in (*MainLibnames, BindingsFileName)]
-    for file in deletable_files:
-        if os.path.exists(file):
-            os.remove(file)
+    for item in deletables:
+        if not os.path.exists(item):
+            continue
+        if os.path.isfile(item):
+            os.remove(item)
+        elif os.path.isdir(item):
+            shutil.rmtree(item)
 
 
 def copy_platfiles(pl_name):
