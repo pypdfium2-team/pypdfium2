@@ -37,11 +37,6 @@ SetupKws = dict(
 )
 
 
-class BinaryDistribution (setuptools.Distribution):
-    def has_ext_modules(self):
-        return True
-
-
 def mkwheel(pl_name):
     
     # NOTE this will fail in case of sourcebuild with unknown host system
@@ -54,6 +49,12 @@ def mkwheel(pl_name):
     setuptools.setup(
         package_data = {"": [libname]},
         cmdclass = {"bdist_wheel": bdist_factory(pl_name)},
-        distclass = BinaryDistribution,
+        ext_modules = [
+            # declare a no-op extension module to prevent setuptools from using a purelib folder (cf. PEP 427)
+            setuptools.Extension(
+                "pdfium", [""],
+                optional = True,
+            ),
+        ],
         **SetupKws,
     )

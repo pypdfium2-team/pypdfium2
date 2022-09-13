@@ -27,6 +27,7 @@
 - Setup code
     - `$PYP_TARGET_PLATFORM` was renamed to `$PDFIUM_BINARY`, the value `sdist` was renamed to `none`.
     - When doing an automatic release, repository changes are now only pushed after successful wheel building, to avoid leaving the repository in an invalid state in case some earlier step fails.
+    - pypdfium2 now declares a no-op setuptools extension to prevent wheel content from landing in a `purelib` folder. Some systems use this information to separate platform-dependent packages from pure-python packages (i. e. `/usr/lib64` instead of `/usr/lib`). Confer PEP 427.
     - Autorelease now properly takes existing beta tags into account for its version changes.
     - PDFium's commit log is now shown with GitHub releases.
     - Platform files are now detected in a more robust way. If missing, a proper exception will be raised.
