@@ -52,7 +52,7 @@ def mkwheel(pl_name):
     copy_platfiles(pl_name)
     
     setuptools.setup(
-        package_data = {"": libname},
+        package_data = {"": [libname]},
         cmdclass = {"bdist_wheel": bdist_factory(pl_name)},
         distclass = BinaryDistribution,
         **SetupKws,

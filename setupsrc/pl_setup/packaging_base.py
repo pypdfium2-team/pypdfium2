@@ -214,16 +214,16 @@ def get_latest_version():
     return int( tag.split("/")[-1] )
 
 
-def call_ctypesgen(platform_dir, include_dir):
+def call_ctypesgen(target_dir, include_dir):
     
-    bindings = join(platform_dir, BindingsFileName)
+    bindings = join(target_dir, BindingsFileName)
     
-    ctypesgen_cmd = ["ctypesgen", "--library", "pdfium", "--strip-build-path", platform_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings]
-    run_cmd(ctypesgen_cmd, cwd=platform_dir)
+    ctypesgen_cmd = ["ctypesgen", "--library", "pdfium", "--strip-build-path", target_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings]
+    run_cmd(ctypesgen_cmd, cwd=target_dir)
     
     with open(bindings, "r") as file_reader:
         text = file_reader.read()
-        text = text.replace(platform_dir, ".")
+        text = text.replace(target_dir, ".")
         text = text.replace(HomeDir, "~")
     
     with open(bindings, "w") as file_writer:
