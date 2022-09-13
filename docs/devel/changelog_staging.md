@@ -25,10 +25,11 @@
     - Form environments are now initialised/exited on document level rather than on page rendering. *In the course of this work, a segmentation fault source was eliminated, related to a formerly undocumented requirement of PDFium regarding object lifetime. Whether the segmentation fault would actually take place was dependent on Python garbage collection behaviour. This did not appear to happen under normal circumstances, so the issue remained unnoticed for a long time.*
 
 - Setup code
+    - `$PYP_TARGET_PLATFORM` was renamed to `$PDFIUM_BINARY`, the value `sdist` was renamed to `none`.
     - When doing an automatic release, repository changes are now only pushed after successful wheel building, to avoid leaving the repository in an invalid state in case some earlier step fails.
     - Autorelease now properly takes existing beta tags into account for its version changes.
     - PDFium's commit log is now shown with GitHub releases.
-    - Miscellaneous setup improvements.
+    - Platform files are now detected in a more robust way. If missing, a proper exception will be raised.
 
 - Documentation
     - Rewrote the project's `README.md`. Added more support model examples and an extensive guide regarding the raw PDFium/ctypes API.

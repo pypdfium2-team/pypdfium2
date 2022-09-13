@@ -58,7 +58,7 @@ They do not represent standardised solutions, but are specific to this project.
   If unset or `auto`, the host platform is detected automatically and corresponding binaries will be selected (if available).
   If set to a certain platform identifier, binaries for the requested platform will be used.[^4]
   If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts.
-  If set to `sdist`, no platform-dependent files will be injected, so as to create a source distribution.
+  If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
 
 -<!-- TODO(#136@geisserml) Update instructions when finished. -->
 
