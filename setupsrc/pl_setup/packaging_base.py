@@ -86,6 +86,7 @@ MainLibnames    = list(LibnameForSystem.values())
 
 def plat_to_system(pl_name):
     if pl_name == PlatformNames.sourcebuild:
+        # NOTE If doing a sourcebuild on an unknown host system, this will return None, which causes binary detection code to fail.
         return Host.system
     result = [s for s in BinarySystems if pl_name.startswith(s)]
     assert len(result) == 1
@@ -247,21 +248,21 @@ def clean_artefacts():
             shutil.rmtree(item)
 
 
-def copy_platfiles(pl_name):
-    
-    # NOTE this will fail in case of sourcebuild with unknown host system
+def get_platfiles(pl_name):
     system = plat_to_system(pl_name)
-    binary_name = LibnameForSystem[system]
-    
     platfiles = (
         join(DataTree, pl_name, BindingsFileName),
-        join(DataTree, pl_name, binary_name)
+        join(DataTree, pl_name, LibnameForSystem[system])
     )
-    
-    for file in platfiles:
-        if not os.path.exists(file):
-            raise RuntimeError("Platform file missing: %s" % file)
-        shutil.copy(file, join(ModuleDir, basename(file)))
+    return platfiles
+
+
+def copy_platfiles(pl_name):
+    platfiles = get_platfiles(pl_name)
+    for fp in platfiles:
+        if not os.path.exists(fp):
+            raise RuntimeError("Platform file missing: %s" % fp)
+        shutil.copy(fp, ModuleDir)
 
 
 def get_version_ns():

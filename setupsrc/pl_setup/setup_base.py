@@ -3,17 +3,25 @@
 
 import sys
 import setuptools
-from os.path import abspath, dirname
+from os.path import (
+    join,
+    abspath,
+    dirname,
+)
 from wheel.bdist_wheel import bdist_wheel
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
+    DataTree,
     VerNamespace,
     LibnameForSystem,
+    VerStatusFileName,
+    PlatformNames,
     plat_to_system,
     get_wheel_tag,
     clean_artefacts,
     copy_platfiles,
+    set_versions,
 )
 
 
@@ -39,9 +47,17 @@ SetupKws = dict(
 
 def mkwheel(pl_name):
     
-    # NOTE this will fail in case of sourcebuild with unknown host system
     system = plat_to_system(pl_name)
     libname = LibnameForSystem[system]
+    
+    ver_file = join(DataTree, pl_name, VerStatusFileName)
+    with open(ver_file, "r") as fh:
+        v_libpdfium = fh.read().strip()
+    
+    ver_changes = dict()
+    ver_changes["V_LIBPDFIUM"] = str(v_libpdfium)
+    ver_changes["IS_SOURCEBUILD"] = (pl_name == PlatformNames.sourcebuild)
+    set_versions(ver_changes)
     
     clean_artefacts()
     copy_platfiles(pl_name)

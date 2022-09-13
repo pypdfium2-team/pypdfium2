@@ -2,9 +2,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Attempt to download and build PDFium from source. This may take very long.
-# Only tested on Linux with glibc. Might not work on other platforms.
-
 import os
 import sys
 import shutil
@@ -120,9 +117,9 @@ def update_version(head_commit, tag_commit, tag):
     else:
         v_libpdfium = head_commit
     
-    ver_file = join(DataTree, PlatformNames.sourcebuild, VerStatusFileName)
+    ver_file = join(OutputDir, VerStatusFileName)
     with open(ver_file, "w") as fh:
-        fh.write(v_libpdfium)
+        fh.write( str(v_libpdfium) )
 
 
 def _apply_patchset(patchset):
@@ -174,9 +171,7 @@ def find_lib(src_libname=None, directory=PDFiumBuildDir):
 
 def pack(src_libpath, destname=None):
     
-    if os.path.isdir(OutputDir):
-        shutil.rmtree(OutputDir)
-    os.makedirs(OutputDir)
+    # TODO remove existing binary/bindings, just to be safe
     
     if destname is None:
         destname = LibnameForSystem[Host.system]
@@ -184,11 +179,11 @@ def pack(src_libpath, destname=None):
     destpath = join(OutputDir, destname)
     shutil.copy(src_libpath, destpath)
     
-    include_dir = join(OutputDir, "include")
-    shutil.copytree(join(PDFiumDir, "public"), include_dir)
+    ver_info = get_version_info()
+    update_version(*ver_info)
     
+    include_dir = join(PDFiumDir, "public")
     call_ctypesgen(OutputDir, include_dir)
-    shutil.rmtree(include_dir)
 
 
 def get_tool(tool, win_append):
@@ -224,6 +219,9 @@ def main(
         b_target = None,
     ):
     
+    if not os.path.exists(OutputDir):
+        os.makedirs(OutputDir)
+    
     if b_revision is None:
         b_revision = "main"
     if b_target is None:
@@ -241,9 +239,6 @@ def main(
     pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
     if pdfium_dl_done:
         patch_pdfium()
-    
-    ver_info = get_version_info()
-    update_version(*ver_info)
     
     config_dict = DefaultConfig.copy()
     config_str = serialise_config(config_dict)

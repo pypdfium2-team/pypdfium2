@@ -2,8 +2,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Download the PDFium binaries and generate ctypes bindings
-
 import os
 import sys
 import shutil
