@@ -21,16 +21,13 @@ from pl_setup.packaging_base import (
     PlatformNames,
 )
 
+PresetupFile = join(SourceTree, "data", ".presetup_done.txt")
 
-# TODO(#136@geisserml) Replace with separate version status files per platform.
-
-StatusFile = join(SourceTree, "data", ".presetup_done.txt")
-
-def check_presetup():
-    if os.path.exists(StatusFile):
+def need_presetup():
+    if os.path.exists(PresetupFile):
         return False
     else:
-        with open(StatusFile, "w") as fh:
+        with open(PresetupFile, "w") as fh:
             fh.write("")
         return True
 
@@ -47,6 +44,7 @@ def install_handler(w_presetup):
             "You can attempt a source build, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Doing cross-compilation or using a different build system might be possible, though. Please get in touch with the project maintainers."
         )
     
+    # TODO(#136@geisserml) Use separate version status files per platform.
     if w_presetup:
         update_pdfium.main([Host.platform])
     mkwheel(Host.platform)
@@ -71,7 +69,7 @@ def main():
     target = os.environ.get(BinaryTargetVar, None)
     
     if target in (None, "auto"):
-        w_presetup = check_presetup()
+        w_presetup = need_presetup()
         if w_presetup:
             check_deps.main()
         install_handler(w_presetup)
