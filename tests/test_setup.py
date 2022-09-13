@@ -86,6 +86,7 @@ def test_get_bdist():
 
 
 # packaging_base
+# TODO update/extend
 
 def test_libnames():
     for name in pkg_base.MainLibnames:
