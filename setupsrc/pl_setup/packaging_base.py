@@ -22,7 +22,8 @@ from os.path import (
 BinaryTargetVar   = "PDFIUM_BINARY"
 BinaryTarget_None = "none"
 BinaryTarget_Auto = "auto"
-BindingsFileName = "_pypdfium.py"
+BindingsFileName  = "_pypdfium.py"
+VerStatusFileName = ".pdfium_version.txt"
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
 DataTree    = join(SourceTree, "data")

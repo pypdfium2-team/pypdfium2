@@ -16,15 +16,14 @@ from pl_setup.packaging_base import (
     Host,
     SB_Dir,
     DataTree,
-    VerNamespace,
     PDFium_URL,
     DepotTools_URL,
     MainLibnames,
     LibnameForSystem,
+    VerStatusFileName,
     PlatformNames,
     run_cmd,
     call_ctypesgen,
-    set_version,
 )
 
 
@@ -115,22 +114,15 @@ def get_version_info():
 
 def update_version(head_commit, tag_commit, tag):
     
-    # TODO(#136@geisserml) Write version status file and handle the changes in `setup.py`.
-    
-    is_sourcebuild  = VerNamespace["IS_SOURCEBUILD"]
-    curr_libversion = VerNamespace["V_LIBPDFIUM"]
-    
     print("Current head %s, latest tagged commit %s (%s)" % (head_commit, tag_commit, tag))
     if head_commit == tag_commit:
-        new_libversion = tag
+        v_libpdfium = tag
     else:
-        new_libversion = head_commit
+        v_libpdfium = head_commit
     
-    if not is_sourcebuild:
-        print("Switching from pre-built binaries to source build.")
-        set_version("IS_SOURCEBUILD", True)
-    if curr_libversion != new_libversion:
-        set_version("V_LIBPDFIUM", new_libversion)
+    ver_file = join(DataTree, PlatformNames.sourcebuild, VerStatusFileName)
+    with open(ver_file, "w") as fh:
+        fh.write(v_libpdfium)
 
 
 def _apply_patchset(patchset):

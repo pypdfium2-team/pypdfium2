@@ -19,29 +19,14 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
     Host,
     DataTree,
-    VerNamespace,
+    VerStatusFileName,
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
     BinaryTarget_Auto,
-    set_version,
     get_latest_version,
     call_ctypesgen,
 )
-
-
-def handle_versions(latest):
-    
-    # TODO(#136@geisserml) Write version status file and handle the changes in `setup.py`.
-    
-    v_libpdfium = VerNamespace["V_LIBPDFIUM"]
-    is_sourcebuild = VerNamespace["IS_SOURCEBUILD"]
-    
-    if is_sourcebuild:
-        print("Switching from sourcebuild to pre-built binaries.")
-        set_version("IS_SOURCEBUILD", False)
-    if v_libpdfium != latest:
-        set_version("V_LIBPDFIUM", latest)
 
 
 def clear_data(download_files):
@@ -93,7 +78,7 @@ def unpack_archives(archives):
         os.remove(file_path)
 
 
-def generate_bindings(archives):
+def generate_bindings(archives, latest_ver):
     
     for pl_name in archives.keys():
         
@@ -114,8 +99,11 @@ def generate_bindings(archives):
         
         items = os.listdir(bin_dir)
         assert len(items) == 1
-        
         shutil.move(join(bin_dir, items[0]), join(pl_dir, target_name))
+        
+        ver_file = join(DataTree, pl_name, VerStatusFileName)
+        with open(ver_file, "w") as fh:
+            fh.write(latest_ver)
         
         call_ctypesgen(pl_dir, join(build_dir, "include"))
         shutil.rmtree(build_dir)
@@ -129,13 +117,12 @@ def main(platforms, robust=False):
         platforms = platforms.copy()
         platforms[platforms.index(BinaryTarget_Auto)] = Host.platform
     
-    latest = get_latest_version()
-    handle_versions(str(latest))
+    latest_ver = str( get_latest_version() )
     clear_data(platforms)
     
-    archives = download_releases(latest, platforms, robust)
+    archives = download_releases(latest_ver, platforms, robust)
     unpack_archives(archives)
-    generate_bindings(archives)
+    generate_bindings(archives, latest_ver)
 
 
 def parse_args(argv):
