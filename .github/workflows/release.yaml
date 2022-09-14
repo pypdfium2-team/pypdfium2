@@ -46,9 +46,7 @@ jobs:
       # we have to reset the state of the repository since `pip install .[...]` will implicitly alter the version file,
       # but we want to do versioning in the autorelease script while still installing dependencies beforehand
       - name: Post-install cleanup
-        run: |
-          git reset --hard HEAD
-          rm -rf ./data/.presetup_done.txt
+        run: git reset --hard HEAD
       
       - name: Run autorelease script
         run: python3 setupsrc/pl_setup/autorelease.py --checkin

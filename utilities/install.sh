@@ -4,8 +4,7 @@
 
 set -v
 
-python3 -m pip install . -v --no-build-isolation
-rm -f data/.presetup_done.txt
+python3 -m pip install -v --no-build-isolation .
 pushd src/pypdfium2/
 rm -f _pypdfium.py pdfium pdfium.dll pdfium.dylib
 popd
