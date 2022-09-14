@@ -52,17 +52,15 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
 ### Setup magic
 
 As pypdfium2 uses external binaries, there are some special setup aspects to consider.
-They are not standardised, but specific to this project.
 
-* The environment variable `PDFIUM_BINARY` defines which binary to include.
-  If unset or `auto`, the host platform is detected automatically and corresponding binaries will be selected (if available).
-  If set to a certain platform identifier, binaries for the requested platform will be used.[^4]
-  If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts.
-  If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
-
-<!-- TODO(#136@geisserml) Update instructions when finished. -->
-
-* The presence of the file `data/.presetup_done.txt` is used to decide if setup code should download binaries and create bindings, or if existing artefacts should be used instead, as re-creating them may not be desirable with every single run.[^5] Consequently, this file needs to be removed if you wish to update the artefacts with the next installation. We are planning to improve this process in the future.
+* Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
+* The environment variable `PDFIUM_BINARY` controls which binary to include on setup.
+  * If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
+    Platform files are downloaded/generated automatically, if not present yet. By default, existing platform files will also be updated if a newer version is available, but this may be prevented by creating an empty file called `.lock_autoupdate.txt` in `data/`.
+  * If set to a certain platform identifier, binaries for the requested platform will be used.[^4]
+    In this case, platform files will not be downloaded/generated automatically, but need to be supplied beforehand using the `update_pdfium.py` script.
+  * If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts, assuming a prior run of `build_pdfium.py`.
+  * If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
 
 ### Runtime Dependencies
 
@@ -82,8 +80,6 @@ However, some optional support model features require additional packages:
 [^3]: Possible scenarios include using a locally modified version of a dependency, or supplying a dependency built from a certain commit (while not changing the code)
 
 [^4]: This is mainly of internal interest for packaging, so that wheels can be crafted for any platform without access to a native host.
-
-[^5]: This is especially relevant as `pip install` may run the code in `setup.py` multiple times.
 
 
 ## Usage
