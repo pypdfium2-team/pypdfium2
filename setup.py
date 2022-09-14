@@ -25,16 +25,9 @@ from pl_setup.packaging_base import (
     get_latest_version,
 )
 
-PresetupFile = join(DataTree, ".presetup_done.txt")
-LockFile     = join(DataTree, ".lock_autoupdate.txt")
+# NOTE Setuptools may run this code several times (if using PEP 517 style setup).
 
-def need_presetup():
-    if exists(PresetupFile):
-        return False
-    else:
-        with open(PresetupFile, "w") as fh:
-            fh.write("")
-        return True
+LockFile = join(DataTree, ".lock_autoupdate.txt")
 
 
 def install_handler(latest_ver):
@@ -55,21 +48,21 @@ def install_handler(latest_ver):
     
     if not all(exists(fp) for fp in get_platfiles(pl_name)):
         need_update = True  # always update if platform files are missing
-    else:
+    
+    elif not exists(LockFile):
         
+        # Automatic updates imply some duplication across different runs. The code runs quickly enough, so this is not much of a problem.
+        
+        latest_ver = get_latest_version()
         ver_file = join(DataTree, pl_name, VerStatusFileName)
         assert os.path.exists(ver_file)
         
         with open(ver_file, "r") as fh:
             curr_version = int( fh.read().strip() )
-        assert curr_version <= latest_ver
+        assert not curr_version > latest_ver
         
         if curr_version < latest_ver:
-            if exists(LockFile):
-                print("Binaries are outdated, but autoupdate is locked.", file=sys.stderr)
-            else:
-                print("Updating binaries automatically. A lock file may be created to prevent this.", file=sys.stderr)
-                need_update = True
+            need_update = True
     
     if need_update:
         update_pdfium.main([pl_name])
@@ -95,10 +88,9 @@ def main():
     target = os.environ.get(BinaryTargetVar, None)
     
     if target in (None, "auto"):
-        if need_presetup():
-            check_deps.main()
-        latest_ver = get_latest_version()
-        install_handler(latest_ver)
+        # As check_deps needs to run only once and then never again, we could prevent repeated runs using a status file. However, it runs quickly enough, so this is not really necessary.
+        check_deps.main()
+        install_handler()
     else:
         packaging_handler(target)
 

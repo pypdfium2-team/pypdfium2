@@ -161,12 +161,8 @@ def find_lib(src_libname=None, directory=PDFiumBuildDir):
     try_paths = [join(directory, n) for n in try_names]
     found_paths = [fp for fp in try_paths if os.path.isfile(fp)]
     
-    if len(found_paths) == 1:
-        return found_paths[0]
-    elif len(found_paths) < 1:
-        raise RuntimeError("Binary not found.")
-    else:
-        raise RuntimeError("Multiple binaries found (ambiguity).")
+    assert len(found_paths) == 1
+    return found_paths[0]
 
 
 def pack(src_libpath, destname=None):
