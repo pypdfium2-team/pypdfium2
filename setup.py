@@ -30,7 +30,7 @@ from pl_setup.packaging_base import (
 LockFile = join(DataTree, ".lock_autoupdate.txt")
 
 
-def install_handler(latest_ver):
+def install_handler():
     
     from pl_setup import update_pdfium
     from pl_setup.setup_base import mkwheel
