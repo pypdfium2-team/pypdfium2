@@ -631,15 +631,21 @@ It should be noted that PDFium, unlike many other PDF libraries, is currently no
 
 ## In Use
 
+We are curious to see what people are doing with pypdfium2. Always feel free to share knowledge or code samples on the discussions page.
+Here are some public projects that are known to use pypdfium2:
+
 * [doctr](https://github.com/mindee/doctr), an OCR library powered by deep learning, uses pypdfium2 to render PDFs.
 * [EDS-PDF](https://github.com/aphp/edspdf), a framework for PDF text extraction and classification, also uses pypdfium2 for rendering.
 * [Arabic-OCR](https://github.com/ssraza21/Arabic-OCR), a small web application to create digital documents from the result of arabic OCR, renders PDF pages with pypdfium2.
 * [Extract-URLs](https://github.com/elescamilla/Extract-URLs/), uses pypdfium2 to extract URLs from PDF documents.
 * [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) compares pypdfium2's text extraction capabilities with other Python PDF libraries.
+* [pdfbrain](https://github.com/innodatalabs/pdfbrain) provides alternative helper classes around the raw API exposed by pypdfium2. It predates pypdfium2's own support model and only covers PDF parsing, not manipulation.
 
 *Your project uses pypdfium2, but is not part of the list yet? Please let us know!*
 
-We are curious to see how people are using pypdfium2. Always feel free to share knowledge or code samples on the discussions page.
+There are also a few projects that *could* update to pypdfium2 but are still using its predecessor, pypdfium:
+* [kuafu](https://github.com/YinlinHu/kuafu), an unmaintained PyQt5-based PDF reader, provides a PDFium backend.
+* [microsoft/OCR-Form-Tools](https://github.com/microsoft/OCR-Form-Tools) uses pypdfium to render PDFs, but the code in question is of poor quality.
 
 
 ## Thanks to[^11]
