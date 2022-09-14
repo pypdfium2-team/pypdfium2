@@ -276,10 +276,21 @@ VerNamespace = get_version_ns()
 
 def set_versions(ver_changes):
     
+    # skip unnecessary version changes
+    skip = set()
+    for var in ver_changes.keys():
+        if ver_changes[var] == VerNamespace[var]:
+            skip.add(var)
+    if len(skip) == len(ver_changes):
+        return
+    
     with open(VersionFile, "r") as fh:
         content = fh.read()
     
     for variable, new_ver in ver_changes.items():
+        
+        if variable in skip:
+            continue
         
         # Assuming previous and new value are of the same type
         if isinstance(new_ver, str):
