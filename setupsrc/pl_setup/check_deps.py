@@ -2,62 +2,35 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import sys
 import shutil
 import importlib.util
-from os.path import abspath, dirname
-
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
-from pl_setup.packaging_base import run_cmd
 
 
-PyPackages = (
+Packages = (
     "build",
     "wheel",
     "ctypesgen",
     "setuptools",
     "setuptools-scm",
 )
-SysCommands = (
+Commands = (
     "git",
     "gcc",
+    "ctypesgen",
 )
 
 
-def _pip_install(pkg):
-    run_cmd([sys.executable, "-m", "pip", "install", pkg], cwd=None)
-
-
-def install_pydeps():
-    
-    for pkg in PyPackages:
-        if not importlib.util.find_spec( pkg.replace("-", "_") ):
-            _pip_install(pkg)
-    
-    # Uninstalling ctypesgen sometimes leaves parts behind. In this case, `find_spec()` would still consider the library installed, although the command is unavailable.
-    if not shutil.which("ctypesgen"):
-        _pip_install("ctypesgen")
-
-
-def check_sysdeps():
-    
-    missing = []
-    found = []
-    
-    for dep_name in SysCommands:
-        if shutil.which(dep_name):
-            found.append(dep_name)
-        else:
-            missing.append(dep_name)
-    
-    print("Found system dependencies: %s" % found)
-    if len(missing) > 0:
-        print("Missing system dependencies: %s" % missing)
+have_package = lambda pkg: importlib.util.find_spec( pkg.replace("-", "_") )
 
 
 def main():
-    check_sysdeps()
-    install_pydeps()
+    
+    missing_pkgs = {pkg for pkg in Packages if not have_package(pkg)}
+    missing_cmds = {cmd for cmd in Commands if not shutil.which(cmd)}
+    missing = missing_pkgs.union(missing_cmds)
+    
+    if len(missing) > 0:
+        raise RuntimeError("The following packages or commands are missing: %s" % missing)
 
 
 if __name__ == "__main__":

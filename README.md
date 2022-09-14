@@ -41,7 +41,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
   When installing from source, some additional options of the `pip` package manager may be relevant:
   * `-v`: Request more detailed logging output. Useful for debugging.
   * `-e`: Install in editable mode, so that the installation will point to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
-  * `--no-build-isolation`: Do not isolate the installation in a virtual environment and use system packages instead. In this case, dependencies specified in `pyproject.toml` (PEP 518) will not take effect and should be pre-installed by the caller.[^2] This is an indispensable option if wanting to run the installation with custom versions of setup dependencies.[^3]
+  * `--no-build-isolation`: Do not isolate the installation in a virtual environment and use system packages instead. In this case, dependencies specified in `pyproject.toml` (PEP 518) will not take effect and should be pre-installed by the caller. This is an indispensable option if wanting to run the installation with custom versions of setup dependencies.[^3]
 
 * Installing an unofficial distribution
   
@@ -74,8 +74,6 @@ However, some optional support model features require additional packages:
   If you do not care about this, you may insert text using the raw PDFium functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependent on uharfbuzz.
 
 [^1]: Replacing PDFium's toolchain with a leaner and more elegant build system that is designed to run on any host platform constitutes a long-standing task. This would be required to be able to reliably perform a local source build when installing an `sdist` package. If you have the time and expertise to set up such a build system, please start a repository and inform us about it.
-
-[^2]: pypdfium2 still has a fallback mechanism, though it might not be entirely reliable.
 
 [^3]: Possible scenarios include using a locally modified version of a dependency, or supplying a dependency built from a certain commit (while not changing the code)
 
