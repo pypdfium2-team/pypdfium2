@@ -16,7 +16,7 @@ Also see the issues panel and inline `TODO` marks in source code.
 * Move init/destroy into a separate file. Provide public init/destroy functions, given that embedders who deal with long-running applications might not want to have PDFium in memory all the time.
 * Make members of `_utils.py` public (move into `misc.py`) ?
 * Make the bindings file `_pypdfium.py` public ?
-* Add support model for attachment API.
+* Add support models for attachments and image extraction.
 * Consolidate and extend helper classes.
 
 ### Setup Infrastructure
