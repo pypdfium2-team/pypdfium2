@@ -238,11 +238,11 @@ has_transparency = pdfium.FPDFPage_HasTransparency(page.raw)
 While helper classes conveniently wrap the raw PDFium API, it may still be accessed directly and is publicly exposed in the main namespace of pypdfium2.
 As the vast majority of PDFium members is prefixed with `FPDF`, they are clearly distinguishable from support model components.
 
-For PDFium documentation, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^6]
+For PDFium documentation, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^5]
 A large variety of examples on how to interface with the raw API using [`ctypes`](https://docs.python.org/3/library/ctypes.html) is already provided with [support model source code](src/pypdfium2/_helpers).
 Nonetheless, the following guide may be helpful to get started with the raw API, especially for developers who are not familiar with `ctypes` yet.
 
-[^6]: Unfortunately, no recent HTML-rendered documentation is available for PDFium at the moment. While large parts of the old [Foxit docs](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html) still seem similar to PDFium's current API, many modifications and new functions are actually missing, which can be confusing.
+[^5]: Unfortunately, no recent HTML-rendered documentation is available for PDFium at the moment. While large parts of the old [Foxit docs](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html) still seem similar to PDFium's current API, many modifications and new functions are actually missing, which can be confusing.
 
 * In general, PDFium functions can be called just like normal Python functions.
   However, parameters may only be passed positionally, i. e. it is not possible to use keyword arguments.
@@ -251,7 +251,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # arguments: filepath (str|bytes), password (str|bytes|None)
   pdf = pdfium.FPDF_LoadDocument(filepath.encode("utf-8"), None)
   ```
-  This is the underlying bindings declaration,[^7] which loads the function from the binary and
+  This is the underlying bindings declaration,[^6] which loads the function from the binary and
   contains the information required to convert Python types to their C equivalents.
   ```python
   if _libs["pdfium"].has("FPDF_LoadDocument", "cdecl"):
@@ -262,7 +262,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   For instance, Python `str` or `bytes` are converted to `FPDF_STRING` automatically.
   If a `str` is provided, its UTF-8 encoding will be used. However, it is usually advisable to encode strings explicitly.
 
-[^7]: From the auto-generated bindings file, which is not part of the repository. It is built into wheels, or created on installation. If you have an editable install, the bindings file may be found at `src/_pypdfium.py`.
+[^6]: From the auto-generated bindings file, which is not part of the repository. It is built into wheels, or created on installation. If you have an editable install, the bindings file may be found at `src/_pypdfium.py`.
 
 * While some functions are quite easy to use, things soon get more complex.
   First of all, function parameters are not only used for input, but also for output:
@@ -370,9 +370,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   n_bytes = py_buffer.readinto(c_buffer.contents)  # returns the number of bytes read
   ```
 
-[^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
-
-* In many situations, callback functions come in handy.[^9] Thanks to `ctypes`, it is seamlessly possible to use callbacks across Python/C language boundaries.
+* In many situations, callback functions come in handy.[^7] Thanks to `ctypes`, it is seamlessly possible to use callbacks across Python/C language boundaries.
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
   ```python
@@ -433,7 +431,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   fileaccess.m_Param = id(buffer)
   ```
 
-[^9]: e. g. incremental reading/writing, progress bars, pausing of progressive tasks, ...
+[^7]: e. g. incremental reading/writing, progress bars, pausing of progressive tasks, ...
 
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
   
@@ -492,6 +490,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
           seen.add(address)
       bookmark = pdfium.FPDFBookmark_GetNextSibling(pdf, bookmark)
   ```
+  
+  [^8]: This is not only the case for objects received from different function calls - even checking if the contents attribute of a pointer is identical to itself (`ptr.contents is ptr.contents`) will always return `False` because a new object is constructed with each attribute access. Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
 * Finally, let's finish this guide with an example on how to render the first page of a document to a `PIL` image in `RGBA` color format.
   ```python
@@ -571,9 +571,9 @@ Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSE
 
 pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by including [SPDX](https://spdx.org/licenses/) headers in source files, and license information for data files in [`.reuse/dep5`](.reuse/dep5).
 
-To the authors' knowledge, pypdfium2 is one of the very rare Python libraries that are capable of PDF rendering while not being covered by restrictive licenses which prohibit the use in closed-source projects (such as the `GPL`).[^10]
+To the authors' knowledge, pypdfium2 is one of the very rare Python libraries that are capable of PDF rendering while not being covered by restrictive licenses which prohibit the use in closed-source projects (such as the `GPL`).[^9]
 
-[^10]: The only other liberal-licensed PDF rendering libraries known to the authors are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). `pdf.js` is limited to a web environment. Creating Python bindings to `PDFBox` might be possible but there is no serious solution yet (apart from amateurish wrappers around its command-line API).
+[^9]: The only other liberal-licensed PDF rendering libraries known to the authors are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). `pdf.js` is limited to a web environment. Creating Python bindings to `PDFBox` might be possible but there is no serious solution yet (apart from amateurish wrappers around its command-line API).
 
 
 ## Issues
@@ -644,7 +644,7 @@ There are also a few projects that *could* update to pypdfium2 but are still usi
 * [microsoft/OCR-Form-Tools](https://github.com/microsoft/OCR-Form-Tools) uses pypdfium to render PDFs, but the code in question is of poor quality.
 
 
-## Thanks to[^11]
+## Thanks to[^10]
 
 <!-- order: alphabetical by surname -->
 
@@ -662,7 +662,7 @@ There are also a few projects that *could* update to pypdfium2 but are still usi
 
 *If you have somehow contributed to this project but we forgot to mention you here, feel encouraged to help us correct this oversight.*
 
-[^11]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
+[^10]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
 
 
 ## History
