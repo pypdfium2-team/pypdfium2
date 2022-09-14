@@ -20,7 +20,7 @@ Also see the issues panel and inline `TODO` marks in source code.
 * Consolidate and extend helper classes.
 
 ### Setup Infrastructure
-* craft_packages: add means to skip platforms for which artefacts are missing.
+* craft_wheels: add means to skip platforms for which artefacts are missing.
 * update_pdfium: only generate the bindings file once for all platforms.
 * update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest).
 * packaging_base: use a class for `VerNamespace` so it can be flushed more easily (?)

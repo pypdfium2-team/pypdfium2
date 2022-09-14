@@ -27,6 +27,30 @@ from pl_setup.packaging_base import (
 )
 
 
+class ArtefactStash:
+    
+    # Preserve in-tree aftefacts from editable install
+    
+    def __init__(self):
+        
+        self.tmp_dir = None
+        self.plfile_names = [BindingsFileName, LibnameForSystem[Host.system]]
+        self.plfile_paths = [join(ModuleDir, fn) for fn in self.plfile_names]
+        
+        if not any(os.path.exists(fp) for fp in self.plfile_paths):
+            return
+        self.tmp_dir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
+        for fp in self.plfile_paths:
+            shutil.move(fp, self.tmp_dir.name)
+    
+    def pop(self):
+        if self.tmp_dir is None:
+            return
+        for fn in self.plfile_names:
+            shutil.move(join(self.tmp_dir.name, fn), ModuleDir)
+        self.tmp_dir.cleanup()
+
+
 def run_build(args):
     run_cmd([sys.executable, "-m", "build", "--skip-dependency-check", "--no-isolation"] + args, cwd=SourceTree, env=os.environ)
 
@@ -38,18 +62,8 @@ def main():
     )
     args = parser.parse_args()
     
-    # Push possible in-tree artefacts from editable install to stash
-    tmp_dir = None
-    platfiles = (
-        join(ModuleDir, BindingsFileName),
-        join(ModuleDir, LibnameForSystem[Host.system]),
-    )
-    if any(os.path.exists(fp) for fp in platfiles):
-        tmp_dir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
-        for fp in platfiles:
-            shutil.move(fp, tmp_dir.name)
+    stash = ArtefactStash()
     
-    clean_artefacts()
     os.environ[BinaryTargetVar] = BinaryTarget_None
     run_build(["--sdist"])
     clean_artefacts()
@@ -59,11 +73,7 @@ def main():
         run_build(["--wheel"])
         clean_artefacts()
     
-    # Pop stash
-    if tmp_dir is not None:
-        for fn in os.listdir(tmp_dir.name):
-            shutil.move(join(tmp_dir.name, fn), ModuleDir)
-        tmp_dir.cleanup()
+    stash.pop()
 
 
 if __name__ == '__main__':
