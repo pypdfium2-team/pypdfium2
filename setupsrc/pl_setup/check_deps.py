@@ -11,7 +11,6 @@ Packages = (
     "wheel",
     "ctypesgen",
     "setuptools",
-    "setuptools-scm",
 )
 Commands = (
     "git",

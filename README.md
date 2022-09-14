@@ -36,7 +36,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
     Building PDFium may take a long time because it comes with its own toolchain and bundled dependencies, rather than using system-provided components.[^1]
   
   The host system needs to provide `git` and `gcc`.
-  Setup code also depends on the Python packages `ctypesgen`, `wheel`, `setuptools` and `setuptools-scm`, which will usually get installed automatically.
+  Setup code also depends on the Python packages `ctypesgen`, `wheel`, and `setuptools`, which will usually get installed automatically.
   
   When installing from source, some additional options of the `pip` package manager may be relevant:
   * `-v`: Request more detailed logging output. Useful for debugging.

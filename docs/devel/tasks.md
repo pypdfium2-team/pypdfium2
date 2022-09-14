@@ -26,7 +26,6 @@ Also see the issues panel and inline `TODO` marks in source code.
 * packaging_base: use a class for `VerNamespace` so it can be flushed more easily (?)
 * use the logging module rather than `print()`.
 * autorelease: on the long term, switch to a proper configuration file rather than placing empty indicator files in a directory.
-* add a `MANIFEST.in` file to avoid being dependent on the presence of `setuptools-scm`.
 * sourcebuild/win: fix dynamic values in `resources.rc`.
 
 ### Tests
