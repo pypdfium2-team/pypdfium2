@@ -234,7 +234,7 @@ class PdfPage:
                 Maximum recursion depth to consider when descending into Form XObjects.
         
         Yields:
-            (PdfPageObject, int): Page object and nesting level.
+            :class:`.PdfPageObject`: The page object.
         """
         
         if form is None:
@@ -551,8 +551,9 @@ class PdfPageObject:
     
     Attributes:
         raw (FPDF_PAGEOBJECT): The underlying PDFium pageobject handle.
-        type (int): The type of the object (:data:`FPDF_PAGEOBJ_...`).
         page (PdfPage): Reference to the page this pageobject belongs to.
+        level (int): Nesting level signifying the number of parent Form XObjects. Zero if the object is not nested in a Form XObject.
+        type (int): The type of the object (:data:`FPDF_PAGEOBJ_...`).
     """
     
     def __init__(self, raw, page, level=0):
