@@ -366,8 +366,6 @@ class PdfDocument:
             :class:`.OutlineItem`: The data of an outline item ("bookmark").
         """
         
-        if level >= max_depth:
-            return []
         if seen is None:
             seen = set()
         
@@ -383,12 +381,13 @@ class PdfDocument:
                 seen.add(address)
             
             yield self._get_bookmark(bookmark, level)
-            yield from self.get_toc(
-                max_depth = max_depth,
-                parent = bookmark,
-                level = level + 1,
-                seen = seen,
-            )
+            if level < max_depth-1:
+                yield from self.get_toc(
+                    max_depth = max_depth,
+                    parent = bookmark,
+                    level = level + 1,
+                    seen = seen,
+                )
             
             bookmark = pdfium.FPDFBookmark_GetNextSibling(self.raw, bookmark)
     
