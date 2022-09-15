@@ -15,6 +15,7 @@
         - `no_antialias` has been replaced with separate boolean options `no_smoothtext`, `no_smoothimage`, and `no_smoothpath`
     - If the target page of a bookmark cannot be identified, `PdfDocument.get_toc()` now assigns `None` rather than `-1`, to avoid accidental reverse list indexing and to enforce that callers properly handle this case.
     - If a negative index is passed to `PdfDocument.new_page()`, it is now interpreted in reversed direction, rather than inserting at the beginning.
+    - `PdfPage.count_objects()` was removed. Use `PdfPage.get_objects()` or the raw PDFium API instead.
     - The `get_type()` method of `PdfPageObject` was replaced with a `type` attribute.
     
     *Other changes*
