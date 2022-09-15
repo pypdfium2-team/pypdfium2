@@ -37,6 +37,7 @@
     - Platform data directories are now annotated with a text file storing the pdfium version, to prevemt a possible mismatch between the state of `version.py` and the actual version of the used binary. The update and build scripts do not directly change the main version file anymore, but defer the changes to `setup.py`.
     - Missing platform files are now always procured implicitly on installation. If platform files exist already but are outdated, they will be updated by default. You may opt out by creating an empty file called `.lock_autoupdate.txt` in `data/`.
     - A `MANIFEST.in` file was added to avoid being dependent on `setuptools_scm`.
+    - On setup, dependency checks are now only done for system commands. The wonky implicit installation of missing Python packages was removed. If opting out of build isolation, callers should properly install setup dependencies beforehand.
     - Significant code quality improvements.
 
 - Documentation
