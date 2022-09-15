@@ -225,7 +225,7 @@ class PdfPage:
         pdfium.FPDFPage_GenerateContent(self.raw)
     
     
-    def get_objects(self, max_depth=3, form=None, level=0):
+    def get_objects(self, max_depth=2, form=None, level=0):
         """
         Iterate through the page objects on this page.
         
