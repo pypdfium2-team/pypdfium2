@@ -43,7 +43,7 @@ def install_handler():
             "You can attempt a source build, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Doing cross-compilation or using a different build system might be possible, though. Please get in touch with the project maintainers."
         )
     
-        
+    
     need_update = False
     
     if not all(exists(fp) for fp in get_platfiles(pl_name)):
