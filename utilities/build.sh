@@ -5,5 +5,4 @@
 set -v
 
 python3 ./setupsrc/pl_setup/build_pdfium.py
-export PYP_TARGET_PLATFORM="sourcebuild"
-python3 -m pip install . -v --no-build-isolation
+PDFIUM_BINARY="sourcebuild" python3 -m pip install -v --no-build-isolation .
