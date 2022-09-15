@@ -2,9 +2,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Attempt to download and build PDFium from source. This may take very long.
-# Only tested on Linux with glibc. Might not work on other platforms.
-
 import os
 import sys
 import shutil
@@ -13,16 +10,17 @@ from os.path import join, abspath, dirname
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from pl_setup.packaging_base import (
+    Host,
     SB_Dir,
-    Libnames,
     DataTree,
-    VerNamespace,
     PDFium_URL,
     DepotTools_URL,
+    MainLibnames,
+    LibnameForSystem,
+    VerStatusFileName,
     PlatformNames,
     run_cmd,
     call_ctypesgen,
-    set_version,
 )
 
 
@@ -113,22 +111,15 @@ def get_version_info():
 
 def update_version(head_commit, tag_commit, tag):
     
-    # TODO(#136@geisserml) Write version status file and handle the changes in `setup.py`.
-    
-    is_sourcebuild  = VerNamespace["IS_SOURCEBUILD"]
-    curr_libversion = VerNamespace["V_LIBPDFIUM"]
-    
     print("Current head %s, latest tagged commit %s (%s)" % (head_commit, tag_commit, tag))
     if head_commit == tag_commit:
-        new_libversion = tag
+        v_libpdfium = tag
     else:
-        new_libversion = head_commit
+        v_libpdfium = head_commit
     
-    if not is_sourcebuild:
-        print("Switching from pre-built binaries to source build.")
-        set_version("IS_SOURCEBUILD", True)
-    if curr_libversion != new_libversion:
-        set_version("V_LIBPDFIUM", new_libversion)
+    ver_file = join(OutputDir, VerStatusFileName)
+    with open(ver_file, "w") as fh:
+        fh.write( str(v_libpdfium) )
 
 
 def _apply_patchset(patchset):
@@ -154,46 +145,41 @@ def build(Ninja, target):
     run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
-def find_lib(srcname=None, directory=PDFiumBuildDir):
+def find_lib(src_libname=None, directory=PDFiumBuildDir):
     
-    if srcname is not None:
-        path = join(PDFiumBuildDir, srcname)
+    if src_libname is not None:
+        path = join(PDFiumBuildDir, src_libname)
         if os.path.isfile(path):
             return path
         else:
-            print("Warning: The file of given srcname does not exist.", file=sys.stderr)
+            print("Warning: Binary not found under given name.", file=sys.stderr)
     
-    # TODO(#136@geisserml) Internalise `Libnames`, or else think of a different strategy.
+    try_names = []
+    for name in MainLibnames + ["pdfium.so"]:
+        try_names += [name, "lib"+name]
     
-    libpath = None
-    for lname in Libnames:
-        path = join(directory, lname)
-        if os.path.isfile(path):
-            libpath = path
+    try_paths = [join(directory, n) for n in try_names]
+    found_paths = [fp for fp in try_paths if os.path.isfile(fp)]
     
-    if libpath is None:
-        raise RuntimeError("Build artifact not found.")
-    
-    return libpath
+    assert len(found_paths) == 1
+    return found_paths[0]
 
 
 def pack(src_libpath, destname=None):
     
-    if os.path.isdir(OutputDir):
-        shutil.rmtree(OutputDir)
-    os.makedirs(OutputDir)
+    # TODO remove existing binary/bindings, just to be safe
     
     if destname is None:
-        destname = os.path.basename(src_libpath)
+        destname = LibnameForSystem[Host.system]
     
     destpath = join(OutputDir, destname)
     shutil.copy(src_libpath, destpath)
     
-    include_dir = join(OutputDir, "include")
-    shutil.copytree(join(PDFiumDir, "public"), include_dir)
+    ver_info = get_version_info()
+    update_version(*ver_info)
     
+    include_dir = join(PDFiumDir, "public")
     call_ctypesgen(OutputDir, include_dir)
-    shutil.rmtree(include_dir)
 
 
 def get_tool(tool, win_append):
@@ -222,22 +208,20 @@ def serialise_config(config_dict):
 
 
 def main(
-        b_srcname = None,
-        b_destname = None,
+        b_src_libname = None,
+        b_dest_libname = None,
         b_update = False,
         b_revision = None,
         b_target = None,
     ):
     
+    if not os.path.exists(OutputDir):
+        os.makedirs(OutputDir)
+    
     if b_revision is None:
         b_revision = "main"
     if b_target is None:
         b_target = "pdfium"
-    
-    # TODO(#136@geisserml) Rename binaries according to host system, like in `update_pdfium` (share the logic in `packaging_base`).
-    if b_destname is None and sys.platform.startswith("linux"):
-        # on Linux, rename the binary to `pdfium` to ensure it also works with older versions of ctypesgen
-        b_destname = "pdfium"
     
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
@@ -252,17 +236,14 @@ def main(
     if pdfium_dl_done:
         patch_pdfium()
     
-    ver_info = get_version_info()
-    update_version(*ver_info)
-    
     config_dict = DefaultConfig.copy()
     config_str = serialise_config(config_dict)
     print("\nBuild configuration:\n%s\n" % config_str)
     
     configure(GN, config_str)
     build(Ninja, b_target)
-    libpath = find_lib(b_srcname)
-    pack(libpath, b_destname)
+    libpath = find_lib(b_src_libname)
+    pack(libpath, b_dest_libname)
 
 
 def parse_args(argv):
@@ -272,12 +253,12 @@ def parse_args(argv):
     )
     
     parser.add_argument(
-        "--srcname", "-s",
+        "--src-libname",
         help = "Name of the generated PDFium binary file. This script tries to automatically find the binary, which should usually work. If it does not, however, this option may be used to explicitly provide the file name to look for.",
     )
     parser.add_argument(
-        "--destname", "-d",
-        help = "Rename the binary to a different filename.",
+        "--dest-libname",
+        help = "Rename the binary. Must be a name recognised by packaging code.",
     )
     parser.add_argument(
         "--update", "-u",
@@ -299,11 +280,11 @@ def parse_args(argv):
 def main_cli(argv=sys.argv[1:]):
     args = parse_args(argv)
     return main(
-        b_srcname = args.srcname,
-        b_destname = args.destname,
-        b_update = args.update,
+        b_src_libname  = args.src_libname,
+        b_dest_libname = args.dest_libname,
+        b_update   = args.update,
         b_revision = args.revision,
-        b_target = args.target,
+        b_target   = args.target,
     )
     
 

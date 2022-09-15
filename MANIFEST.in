@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+# This only includes a bare minimum of files required for local installation (and PyPI upload).
+# Note: If setuptools-scm is installed, it will include all files checked into version control, and it is not currently possible to opt out (setuptools_scm/issues/190)
+
+# license files are already included setup.cfg
+recursive-include sourcebuild/patches/ *
+recursive-include src *.py
+recursive-include setupsrc *.py

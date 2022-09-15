@@ -9,48 +9,62 @@ from os.path import (
     join,
     abspath,
     dirname,
+    exists,
 )
 
 sys.path.insert(0, join(dirname(abspath(__file__)), "setupsrc"))
 from pl_setup import check_deps
 from pl_setup.packaging_base import (
-    HostPlatform,
+    Host,
+    DataTree,
+    BinaryTargetVar,
+    BinaryTarget_None,
+    VerStatusFileName,
     PlatformNames,
-    SourceTree,
-    SetupTargetVar,
-    SdistTarget,
+    get_platfiles,
+    get_latest_version,
 )
 
+# NOTE Setuptools may run this code several times (if using PEP 517 style setup).
 
-# TODO(#136@geisserml) Replace with separate version status files per platform.
-
-StatusFile = join(SourceTree, "data", ".presetup_done.txt")
-
-def check_presetup():
-    if os.path.exists(StatusFile):
-        return False
-    else:
-        with open(StatusFile, "w") as fh:
-            fh.write("")
-        return True
+LockFile = join(DataTree, ".lock_autoupdate.txt")
 
 
-def install_handler(w_presetup):
+def install_handler():
     
     from pl_setup import update_pdfium
     from pl_setup.setup_base import mkwheel
     
-    host = HostPlatform()
-    pl_name = host.get_name()
-    
+    pl_name = Host.platform
     if pl_name is None:
         # If PDFium had a proper build system, we could trigger a source build here
         raise RuntimeError(
-            "No pre-built binaries available for platform '%s' with libc implementation '%s'. " % (host.plat_info, host.libc_info) +
+            "No pre-built binaries available for platform '%s' with libc implementation '%s'. " % (Host._plat_info, Host._libc_info) +
             "You can attempt a source build, but it's unlikely to work out due to binary toolchain requirements of PDFium's build system. Doing cross-compilation or using a different build system might be possible, though. Please get in touch with the project maintainers."
         )
     
-    if w_presetup:
+    
+    need_update = False
+    
+    if not all(exists(fp) for fp in get_platfiles(pl_name)):
+        need_update = True  # always update if platform files are missing
+    
+    elif not exists(LockFile):
+        
+        # Automatic updates imply some duplication across different runs. The code runs quickly enough, so this is not much of a problem.
+        
+        latest_ver = get_latest_version()
+        ver_file = join(DataTree, pl_name, VerStatusFileName)
+        assert os.path.exists(ver_file)
+        
+        with open(ver_file, "r") as fh:
+            curr_version = int( fh.read().strip() )
+        assert not curr_version > latest_ver
+        
+        if curr_version < latest_ver:
+            need_update = True
+    
+    if need_update:
         update_pdfium.main([pl_name])
     mkwheel(pl_name)
 
@@ -59,7 +73,7 @@ def packaging_handler(target):
     
     from pl_setup.setup_base import mkwheel, SetupKws
     
-    if target == SdistTarget:
+    if target == BinaryTarget_None:
         setuptools.setup(**SetupKws)
     elif hasattr(PlatformNames, target):
         mkwheel( getattr(PlatformNames, target) )
@@ -71,13 +85,12 @@ def packaging_handler(target):
 
 def main():
     
-    target = os.environ.get(SetupTargetVar, None)
+    target = os.environ.get(BinaryTargetVar, None)
     
     if target in (None, "auto"):
-        w_presetup = check_presetup()
-        if w_presetup:
-            check_deps.main()
-        install_handler(w_presetup)
+        # As check_deps needs to run only once and then never again, we could prevent repeated runs using a status file. However, it runs quickly enough, so this is not really necessary.
+        check_deps.main()
+        install_handler()
     else:
         packaging_handler(target)
 

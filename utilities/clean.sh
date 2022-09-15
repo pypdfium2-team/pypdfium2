@@ -6,5 +6,5 @@ set -v
 
 rm -rf src/pypdfium2.egg-info/
 rm -rf dist
-rm -rf data/* data/.presetup_done.txt
+rm -rf data/*
 rm -f tests/output/*

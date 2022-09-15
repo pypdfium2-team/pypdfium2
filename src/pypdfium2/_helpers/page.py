@@ -225,23 +225,52 @@ class PdfPage:
         pdfium.FPDFPage_GenerateContent(self.raw)
     
     
-    def count_objects(self):
-        """
-        Returns:
-            int: The number of page objects on this page.
-        """
-        return pdfium.FPDFPage_CountObjects(self.raw)
-    
-    def get_objects(self):
+    def get_objects(self, max_depth=2, form=None, level=0):
         """
         Iterate through the page objects on this page.
         
+        Parameters:
+            max_depth (int):
+                Maximum recursion depth to consider when descending into Form XObjects.
+        
         Yields:
-            :class:`.PdfPageObject`: Page object helper.
+            (PdfPageObject, int): Page object and nesting level.
         """
-        for i in range( self.count_objects() ):
-            raw_obj = pdfium.FPDFPage_GetObject(self.raw, i)
-            yield PdfPageObject(raw_obj, self)
+        
+        if form is None:
+            count_objects = pdfium.FPDFPage_CountObjects
+            get_object = pdfium.FPDFPage_GetObject
+            parent = self.raw
+        else:
+            count_objects = pdfium.FPDFFormObj_CountObjects
+            get_object = pdfium.FPDFFormObj_GetObject
+            parent = form
+        
+        n_objects = count_objects(parent)
+        if n_objects == 0:
+            return
+        elif n_objects < 0:
+            raise PdfiumError("Failed to get number of page objects.")
+        
+        for i in range(n_objects):
+            
+            raw_obj = get_object(parent, i)
+            if raw_obj is None:
+                raise PdfiumError("Failed to get page object.")
+            
+            helper_obj = PdfPageObject(
+                raw = raw_obj,
+                page = self,
+                level = level,
+            )
+            yield helper_obj
+            
+            if level < max_depth-1 and helper_obj.type == pdfium.FPDF_PAGEOBJ_FORM:
+                yield from self.get_objects(
+                    max_depth = max_depth,
+                    form = raw_obj,
+                    level = level + 1,
+                )
     
     
     def render_base(
@@ -522,12 +551,15 @@ class PdfPageObject:
     
     Note:
         * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGEOBJECT`.
+        * The :attr:`.type` attribute stores the type of the object (:data:`FPDF_PAGEOBJ_...`)
         * The :attr:`.page` attribute holds a reference to the :class:`.PdfPage` this page object belongs to.
     """
     
-    def __init__(self, raw, page):
+    def __init__(self, raw, page, level=0):
         self.raw = raw
         self.page = page
+        self.level = level
+        self.type = pdfium.FPDFPageObj_GetType(self.raw)
     
     def get_pos(self):
         """
@@ -541,10 +573,3 @@ class PdfPageObject:
         if not ret_code:
             raise PdfiumError("Locating the page object failed")
         return (left.value, bottom.value, right.value, top.value)
-    
-    def get_type(self):
-        """
-        Returns:
-            int: The type of the object (:data:`FPDF_PAGEOBJ_...`).
-        """
-        return pdfium.FPDFPageObj_GetType(self.raw)

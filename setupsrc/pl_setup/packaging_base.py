@@ -11,19 +11,18 @@ import subprocess
 from glob import glob
 from os.path import (
     join,
-    exists,
     abspath,
     dirname,
-    basename,
     expanduser,
 )
 
 # TODO improve consistency of variable names; think about variables to move in/out
 
-SetupTargetVar   = "PYP_TARGET_PLATFORM"  # TODO(#136@geisserml) rename to BinaryTargetVar   = "PYPDFIUM_BINARY"
-SdistTarget      = "sdist"                # TODO(#136@geisserml) rename to BinaryTarget_None = "none"
-AutoPlatformId   = "auto"                 # TODO(#136@geisserml) rename to BinaryTarget_Auto = "auto"
-BindingsFileName = "_pypdfium.py"
+BinaryTargetVar   = "PDFIUM_BINARY"
+BinaryTarget_None = "none"
+BinaryTarget_Auto = "auto"
+BindingsFileName  = "_pypdfium.py"
+VerStatusFileName = ".pdfium_version.txt"
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
 DataTree    = join(SourceTree, "data")
@@ -39,66 +38,81 @@ ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 
 
-# TODO(#136@geisserml) Internalise into build script. Replace with something that only includes the names that may land in platform folders.
-Libnames = (
-    "pdfium",
-    "pdfium.dylib",
-    "pdfium.dll",
-    "libpdfium.so",
-    "pdfium.so",
-    "libpdfium",
-    "libpdfium.dylib",
-    "libpdfium.dll",
-)
+class SystemNames:
+    linux   = "linux"
+    darwin  = "darwin"
+    windows = "windows"
 
 
 class PlatformNames:
-    darwin_x64    = "darwin_x64"
-    darwin_arm64  = "darwin_arm64"
-    linux_x64     = "linux_x64"
-    linux_x86     = "linux_x86"
-    linux_arm64   = "linux_arm64"
-    linux_arm32   = "linux_arm32"
-    musllinux_x64 = "musllinux_x64"
-    musllinux_x86 = "musllinux_x86"
-    windows_x64   = "windows_x64"
-    windows_x86   = "windows_x86"
-    windows_arm64 = "windows_arm64"
-    sourcebuild   = "sourcebuild"
+    linux_x64      = SystemNames.linux   + "_x64"
+    linux_x86      = SystemNames.linux   + "_x86"
+    linux_arm64    = SystemNames.linux   + "_arm64"
+    linux_arm32    = SystemNames.linux   + "_arm32"
+    linux_musl_x64 = SystemNames.linux   + "_musl_x64"
+    linux_musl_x86 = SystemNames.linux   + "_musl_x86"
+    darwin_x64     = SystemNames.darwin  + "_x64"
+    darwin_arm64   = SystemNames.darwin  + "_arm64"
+    windows_x64    = SystemNames.windows + "_x64"
+    windows_x86    = SystemNames.windows + "_x86"
+    windows_arm64  = SystemNames.windows + "_arm64"
+    sourcebuild    = "sourcebuild"
 
 
 ReleaseNames = {
-    PlatformNames.darwin_x64    : "pdfium-mac-x64",
-    PlatformNames.darwin_arm64  : "pdfium-mac-arm64",
-    PlatformNames.linux_x64     : "pdfium-linux-x64",
-    PlatformNames.linux_x86     : "pdfium-linux-x86",
-    PlatformNames.linux_arm64   : "pdfium-linux-arm64",
-    PlatformNames.linux_arm32   : "pdfium-linux-arm",
-    PlatformNames.musllinux_x64 : "pdfium-linux-musl-x64",
-    PlatformNames.musllinux_x86 : "pdfium-linux-musl-x86",
-    PlatformNames.windows_x64   : "pdfium-win-x64",
-    PlatformNames.windows_x86   : "pdfium-win-x86",
-    PlatformNames.windows_arm64 : "pdfium-win-arm64",
+    PlatformNames.darwin_x64     : "pdfium-mac-x64",
+    PlatformNames.darwin_arm64   : "pdfium-mac-arm64",
+    PlatformNames.linux_x64      : "pdfium-linux-x64",
+    PlatformNames.linux_x86      : "pdfium-linux-x86",
+    PlatformNames.linux_arm64    : "pdfium-linux-arm64",
+    PlatformNames.linux_arm32    : "pdfium-linux-arm",
+    PlatformNames.linux_musl_x64 : "pdfium-linux-musl-x64",
+    PlatformNames.linux_musl_x86 : "pdfium-linux-musl-x86",
+    PlatformNames.windows_x64    : "pdfium-win-x64",
+    PlatformNames.windows_x86    : "pdfium-win-x86",
+    PlatformNames.windows_arm64  : "pdfium-win-arm64",
+}
+
+LibnameForSystem = {
+    SystemNames.linux:   "pdfium",
+    SystemNames.darwin:  "pdfium.dylib",
+    SystemNames.windows: "pdfium.dll",
 }
 
 BinaryPlatforms = list(ReleaseNames.keys())
+BinarySystems   = list(LibnameForSystem.keys())
+MainLibnames    = list(LibnameForSystem.values())
+
+def plat_to_system(pl_name):
+    if pl_name == PlatformNames.sourcebuild:
+        # NOTE If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name).
+        return Host.system
+    result = [s for s in BinarySystems if pl_name.startswith(s)]
+    assert len(result) == 1
+    return result[0]
 
 
-class HostPlatform:
+class _host_platform:
     
     def __init__(self):
+        
         # `libc_ver()` currently returns an empty string on libc implementations other than glibc - hence, we assume musl if it's not glibc
         # FIXME is there some function to actually detect musl?
-        self.plat_info = sysconfig.get_platform().lower().replace("-", "_").replace(".", "_")
-        self.libc_info, self.is_glibc = None, None
-        if self.plat_info.startswith("linux"):
-            self.libc_info = platform.libc_ver()
-            self.is_glibc = (self.libc_info[0] == "glibc")
+        self._plat_info = sysconfig.get_platform().lower().replace("-", "_").replace(".", "_")
+        self._libc_info, self._is_glibc = None, None
+        if self._plat_info.startswith("linux"):
+            self._libc_info = platform.libc_ver()
+            self._is_glibc = (self._libc_info[0] == "glibc")
+        
+        self.platform = self._get_platform()
+        self.system = None
+        if self.platform is not None:
+            self.system = plat_to_system(self.platform)
     
     def _is_plat(self, start, end):
-        return self.plat_info.startswith(start) and self.plat_info.endswith(end)
+        return self._plat_info.startswith(start) and self._plat_info.endswith(end)
     
-    def get_name(self):
+    def _get_platform(self):
         if self._is_plat("macosx", "arm64"):
             return PlatformNames.darwin_arm64
         elif self._is_plat("macosx", "x86_64"):
@@ -108,9 +122,9 @@ class HostPlatform:
         elif self._is_plat("linux", "aarch64"):
             return PlatformNames.linux_arm64
         elif self._is_plat("linux", "x86_64"):
-            return PlatformNames.linux_x64 if self.is_glibc else PlatformNames.musllinux_x64
+            return PlatformNames.linux_x64 if self._is_glibc else PlatformNames.linux_musl_x64
         elif self._is_plat("linux", "i686"):
-            return PlatformNames.linux_x86 if self.is_glibc else PlatformNames.musllinux_x86
+            return PlatformNames.linux_x86 if self._is_glibc else PlatformNames.linux_musl_x86
         elif self._is_plat("win", "arm64"):
             return PlatformNames.windows_arm64
         elif self._is_plat("win", "amd64"):
@@ -119,6 +133,9 @@ class HostPlatform:
             return PlatformNames.windows_x86
         else:
             return None
+
+
+Host = _host_platform()
 
 
 def _get_linux_tag(arch):
@@ -159,9 +176,9 @@ def get_wheel_tag(pl_name):
         return _get_linux_tag("aarch64")
     elif pl_name == PlatformNames.linux_arm32:
         return _get_linux_tag("armv7l")
-    elif pl_name == PlatformNames.musllinux_x64:
+    elif pl_name == PlatformNames.linux_musl_x64:
         return _get_musllinux_tag("x86_64")
-    elif pl_name == PlatformNames.musllinux_x86:
+    elif pl_name == PlatformNames.linux_musl_x86:
         return _get_musllinux_tag("i686")
     elif pl_name == PlatformNames.windows_x64:
         return "win_amd64"
@@ -197,16 +214,16 @@ def get_latest_version():
     return int( tag.split("/")[-1] )
 
 
-def call_ctypesgen(platform_dir, include_dir):
+def call_ctypesgen(target_dir, include_dir):
     
-    bindings = join(platform_dir, BindingsFileName)
+    bindings = join(target_dir, BindingsFileName)
     
-    ctypesgen_cmd = ["ctypesgen", "--library", "pdfium", "--strip-build-path", platform_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings]
-    run_cmd(ctypesgen_cmd, cwd=platform_dir)
+    ctypesgen_cmd = ["ctypesgen", "--library", "pdfium", "--strip-build-path", target_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings]
+    run_cmd(ctypesgen_cmd, cwd=target_dir)
     
     with open(bindings, "r") as file_reader:
         text = file_reader.read()
-        text = text.replace(platform_dir, ".")
+        text = text.replace(target_dir, ".")
         text = text.replace(HomeDir, "~")
     
     with open(bindings, "w") as file_writer:
@@ -215,28 +232,36 @@ def call_ctypesgen(platform_dir, include_dir):
 
 def clean_artefacts():
     
-    # TODO(#136@geisserml) Improve robustness.
+    deletables = [
+        join(SourceTree, "build"),
+        join(ModuleDir, BindingsFileName),
+    ]
+    deletables += [join(ModuleDir, fn) for fn in MainLibnames]
     
-    build_cache = join(SourceTree, "build")
-    if exists(build_cache):
-        shutil.rmtree(build_cache)
-    
-    deletable_files = [join(ModuleDir, n) for n in (*Libnames, BindingsFileName)]
-    for file in deletable_files:
-        if exists(file):
-            os.remove(file)
+    for item in deletables:
+        if not os.path.exists(item):
+            continue
+        if os.path.isfile(item):
+            os.remove(item)
+        elif os.path.isdir(item):
+            shutil.rmtree(item)
+
+
+def get_platfiles(pl_name):
+    system = plat_to_system(pl_name)
+    platfiles = (
+        join(DataTree, pl_name, BindingsFileName),
+        join(DataTree, pl_name, LibnameForSystem[system])
+    )
+    return platfiles
 
 
 def copy_platfiles(pl_name):
-    
-    # TODO(#136@geisserml) Improve robustness. Explicitly get the relevant files instead of globbing the directory.
-    
-    files = [f for f in glob(join(DataTree, pl_name, '*')) if os.path.isfile(f)]
-    assert len(files) == 2
-    
-    for src_path in files:
-        dest_path = join(ModuleDir, basename(src_path))
-        shutil.copy(src_path, dest_path)
+    platfiles = get_platfiles(pl_name)
+    for fp in platfiles:
+        if not os.path.exists(fp):
+            raise RuntimeError("Platform file missing: %s" % fp)
+        shutil.copy(fp, ModuleDir)
 
 
 def get_version_ns():
@@ -249,24 +274,38 @@ def get_version_ns():
 VerNamespace = get_version_ns()
 
 
-def set_version(variable, new_ver):
+def set_versions(ver_changes):
     
-    # TODO(#136@geisserml) Change function to set multiple entries at once, to avoid inefficient repeated r/w of the version file.
+    # skip unnecessary version changes
+    skip = set()
+    for var in ver_changes.keys():
+        if ver_changes[var] == VerNamespace[var]:
+            skip.add(var)
+    if len(skip) == len(ver_changes):
+        return
     
     with open(VersionFile, "r") as fh:
         content = fh.read()
     
-    if isinstance(new_ver, str):
-        template = '%s = "%s"'
-    else:
-        template = '%s = %s'
-    previous = template % (variable, VerNamespace[variable])
-    updated = template % (variable, new_ver)
-    
-    print("'%s' -> '%s'" % (previous, updated))
-    assert content.count(previous) == 1
-    content = content.replace(previous, updated)
-    VerNamespace[variable] = new_ver
-    
+    for variable, new_ver in ver_changes.items():
+        
+        if variable in skip:
+            continue
+        
+        # Assuming previous and new value are of the same type
+        if isinstance(new_ver, str):
+            template = '%s = "%s"'
+        else:
+            template = '%s = %s'
+        previous = template % (variable, VerNamespace[variable])
+        updated = template % (variable, new_ver)
+        
+        print("'%s' -> '%s'" % (previous, updated))
+        assert content.count(previous) == 1
+        content = content.replace(previous, updated)
+        
+        # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, no reliance can be placed upon the value of `V_PYPDFIUM2` after this method has been run. If you need the real value, VerNamespace needs to be re-created.
+        VerNamespace[variable] = new_ver
+        
     with open(VersionFile, "w") as fh:
         fh.write(content)

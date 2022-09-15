@@ -202,7 +202,7 @@ def test_open_invalid():
 
 def test_object_hierarchy():
     
-    pdf = pdfium.PdfDocument(TestFiles.empty)
+    pdf = pdfium.PdfDocument(TestFiles.images)
     assert isinstance(pdf, pdfium.PdfDocument)
     assert isinstance(pdf.raw, pdfium.FPDF_DOCUMENT)
     
@@ -210,6 +210,12 @@ def test_object_hierarchy():
     assert isinstance(page, pdfium.PdfPage)
     assert isinstance(page.raw, pdfium.FPDF_PAGE)
     assert page.pdf is pdf
+    
+    pageobj = next(page.get_objects())
+    assert isinstance(pageobj, pdfium.PdfPageObject)
+    assert isinstance(pageobj.raw, pdfium.FPDF_PAGEOBJECT)
+    assert isinstance(pageobj.type, int)
+    assert pageobj.page is page
     
     textpage = page.get_textpage()
     assert isinstance(textpage, pdfium.PdfTextPage)

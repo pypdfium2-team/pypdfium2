@@ -12,27 +12,26 @@ Also see the issues panel and inline `TODO` marks in source code.
     * caller-provided output buffer
     * concurrent rendering to ctypes array, if possible
     * separate input compilation and processing
-* Ask upstream to expose a rendering function that combines matrix, color scheme and interruptability.
 * When rendering with multiple processes and bytes were provided as input, is the memory duplicated or shared? If it's duplicated, find a way to share it or write a tempfile instead.
 * Move init/destroy into a separate file. Provide public init/destroy functions, given that embedders who deal with long-running applications might not want to have PDFium in memory all the time.
 * Make members of `_utils.py` public (move into `misc.py`) ?
 * Make the bindings file `_pypdfium.py` public ?
-* Add support model for attachment API.
+* Add support models for attachments and image extraction.
 * Consolidate and extend helper classes.
 
 ### Setup Infrastructure
-* update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest).
+* craft_wheels: add means to skip platforms for which artefacts are missing.
 * update_pdfium: only generate the bindings file once for all platforms.
+* update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest).
 * packaging_base: use a class for `VerNamespace` so it can be flushed more easily (?)
-* craft_packages: add means to skip platforms for which artefacts are missing.
-* setup: improve error messages if binaries/bindings are not present in the platform directory - consider downloading missing binaries implicitly on installation.
-* setup: improve binary updating procedure by tracking version of currently present binaries - also consider updating outdated binaries implicitly, or at least do something against the possible mismatch with the version file.
-* autorelease: on the long term, switch to a proper configuration file (yaml or something) rather than placing empty indicator files in a directory.
-* add a `MANIFEST.in` file to avoid being dependent on the presence of `setuptools-scm`.
+* use the logging module rather than `print()`.
+* autorelease: on the long term, switch to a proper configuration file rather than placing empty indicator files in a directory.
 * sourcebuild/win: fix dynamic values in `resources.rc`.
 
 ### Tests
-* Add test case for rendering a PDF with interactive forms.
+* Add new test cases
+    * rendering forms
+    * finding of nested objects
 * Find a better replacement for `importchecker`.
 
 ### Documentation
@@ -47,6 +46,7 @@ Also see the issues panel and inline `TODO` marks in source code.
 
 ### Miscellaneous
 * Ask Linux distributors to package PDFium.
+* Discuss rendering methods in PDFium's mailing list (we'd like a way to combine matrix, color scheme and interruptibility).
 * Add means to plug in PDFium headers/binaries from an arbitrary location, probably using custom environment variables.
 * Keep in mind that `ctypes.pythonapi` exists. Maybe we could replace our wonky `id()` based keep-the-object-alive approach with proper incref/decref calls?
 * Find out if/when we need to use `ctypes.byref()`.
