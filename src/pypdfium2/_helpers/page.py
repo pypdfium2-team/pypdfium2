@@ -40,9 +40,9 @@ class PdfPage:
     """
     Page helper class.
     
-    Note:
-        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGE`.
-        * The :attr:`.pdf` attribute holds a reference to the :class:`.PdfDocument` this page belongs to.
+    Attributes:
+        raw (FPDF_PAGE): The underlying PDFium page handle.
+        pdf (PdfDocument): Reference to the document this page belongs to.
     """
     
     def __init__(self, raw, pdf):
@@ -549,10 +549,10 @@ class PdfPageObject:
     """
     Page object helper class.
     
-    Note:
-        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_PAGEOBJECT`.
-        * The :attr:`.type` attribute stores the type of the object (:data:`FPDF_PAGEOBJ_...`)
-        * The :attr:`.page` attribute holds a reference to the :class:`.PdfPage` this page object belongs to.
+    Attributes:
+        raw (FPDF_PAGEOBJECT): The underlying PDFium pageobject handle.
+        type (int): The type of the object (:data:`FPDF_PAGEOBJ_...`).
+        page (PdfPage): Reference to the page this pageobject belongs to.
     """
     
     def __init__(self, raw, page, level=0):

@@ -60,8 +60,8 @@ class PdfDocument:
         * Pages may be loaded using list index access.
         * The ``del`` keyword and list index access may be used to delete pages.
     
-    Note:
-        The :attr:`.raw` attribute stores the underlying :class:`FPDF_DOCUMENT`.
+    Attributes:
+        raw (FPDF_DOCUMENT): The underlying PDFium document handle.
     """
     
     def __init__(
@@ -567,9 +567,9 @@ class PdfFont:
     """
     PDF font data helper class.
     
-    Note:
-        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_FONT`.
-        * The :attr:`.pdf` attribute holds a reference to the :class:`.PdfDocument` this font belongs to.
+    Attributes:
+        raw (FPDF_FONT): The underlying PDFium font handle.
+        pdf (PdfDocument): Reference to the document this font belongs to.
     """
     
     def __init__(self, raw, pdf, font_data):

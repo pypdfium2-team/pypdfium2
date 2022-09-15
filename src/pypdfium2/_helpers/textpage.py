@@ -11,9 +11,9 @@ class PdfTextPage:
     """
     Text extraction helper class.
     
-    Note:
-        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_TEXTPAGE`.
-        * The :attr:`.page` attribute holds a reference to the :class:`.PdfPage` this text page belongs to.
+    Attributes:
+        raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
+        page (PdfPage): Reference to the page this textpage belongs to.
     """
     
     def __init__(self, raw, page):
@@ -209,9 +209,9 @@ class PdfTextSearcher:
     """
     Text searcher helper class.
     
-    Note:
-        * The :attr:`.raw` attribute stores the underlying :class:`FPDF_SCHHANDLE`.
-        * The :attr:`.textpage` attribute holds a reference to the :class:`.PdfTextPage` this searcher belongs to.
+    Attributes:
+        raw (FPDF_SCHHANDLE): The underlying PDFium searcher handle.
+        textpage (PdfTextPage): Reference to the textpage this searcher belongs to.
     """
     
     def __init__(self, raw, textpage):
