@@ -52,7 +52,7 @@ def test_pageobjects():
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf.get_page(0)
     
-    images = [obj for obj in page.get_objects() if obj.get_type() == pdfium.FPDF_PAGEOBJ_IMAGE]
+    images = [obj for obj in page.get_objects() if obj.type == pdfium.FPDF_PAGEOBJ_IMAGE]
     assert len(images) == 3
     
     positions = [img.get_pos() for img in images]

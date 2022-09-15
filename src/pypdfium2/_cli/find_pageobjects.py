@@ -11,30 +11,31 @@ from pypdfium2._helpers._utils import (
 
 
 def attach_parser(subparsers):
+    obj_types = list(ObjtypeToConst.keys())
     parser = subparsers.add_parser(
         "find-pageobjects",
-        help = "Locate page objects of a certain type",
+        help = "Locate page objects of given types.",
     )
     parser.add_argument(
         "input",
         type = os.path.abspath,
-        help = "Path to the PDF document to work with",
+        help = "Path to the PDF document to work with.",
     )
     parser.add_argument(
         "--password",
-        help = "Password to unlock the PDF, if encrypted"
+        help = "Password to unlock the PDF, if encrypted."
     )
     parser.add_argument(
         "--pages",
         type = pagetext_type,
-        help = "The pages to search (defaults to all)",
+        help = "The pages to search (defaults to all).",
     )
     parser.add_argument(
         "--types",
         nargs = "+",
-        required = True,
-        choices = list(ObjtypeToConst.keys()),
-        help = "Object types to consider",
+        choices = obj_types,
+        default = obj_types,
+        help = "Object types to consider (defaults to all).",
     )
 
 
@@ -48,9 +49,8 @@ def main(args):
     for index in args.pages:
         page = doc.get_page(index)
         for obj in page.get_objects():
-            type = obj.get_type()
-            if type in args.types:
-                print(ObjtypeToName[type], obj.get_pos())
+            if obj.type in args.types:
+                print("    "*obj.level + ObjtypeToName[obj.type], obj.get_pos())
         page.close()
     
     doc.close()
