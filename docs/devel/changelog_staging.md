@@ -15,6 +15,7 @@
         - `no_antialias` has been replaced with separate boolean options `no_smoothtext`, `no_smoothimage`, and `no_smoothpath`
     - If the target page of a bookmark cannot be identified, `PdfDocument.get_toc()` now assigns `None` rather than `-1`, to avoid accidental reverse list indexing and to enforce that callers properly handle this case.
     - If a negative index is passed to `PdfDocument.new_page()`, it is now interpreted in reversed direction, rather than inserting at the beginning.
+    - The `get_type()` method of `PdfPageObject` was replaced with a `type` attribute.
     
     *Other changes*
     - Improved code style and consistency regarding interaction with PDFium/ctypes.
@@ -22,6 +23,7 @@
     - New rendering functions `render_tonumpy()` added, returning a shaped NumPy array.
     - New method `PdfDocument.get_page_size()` to retrieve page size by index without needing to load a `PdfPage` (uses `FPDF_GetPageSizeByIndexF()` under the hood).
     - All document-level methods that take a page index now accept negative values for reverse indexing.
+    - `PdfPage.get_objects()` can now recursively descend into Form XObjects.
     - Form environments are now initialised/exited on document level rather than on page rendering. *In the course of this work, a segmentation fault source was eliminated, related to a formerly undocumented requirement of PDFium regarding object lifetime. Whether the segmentation fault would actually take place was dependent on Python garbage collection behaviour. This did not appear to happen under normal circumstances, so the issue remained unnoticed for a long time.*
 
 - Setup code
