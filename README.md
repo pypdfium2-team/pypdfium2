@@ -620,7 +620,73 @@ Although great care has been taken while developing the support model, it cannot
 It should be noted that PDFium, unlike many other PDF libraries, is currently not providing direct access to raw PDF data structures. It does not publicly expose APIs to read/write PDF dictionaries, name trees, etc. Instead, it merely offers a variety of higher-level functions to modify PDFs. While these are certainly useful to abstract away some of the format's complexity and to avoid the creation of invalid PDFs, the fact that universal instruments for low-level access are largely missing in the public API does considerably limit the library's potential. If PDFium's capabilities are not sufficient for your use case, or you just wish to work with the raw PDF structure on your own, you may want to consider other products such as [`pikepdf`](https://github.com/pikepdf/pikepdf) to use instead of, or in conjunction with, pypdfium2.
 
 
-<!-- TODO development section -->
+## Development
+
+This section contains some key information relevant for project maintainers.
+
+### Release workflow
+
+The release process is fully automated using Python scripts and a CI setup for GitHub Actions.
+A new release is triggered every Monday, following the schedule of `pdfium-binaries`.
+You may also trigger the workflow manually using the GitHub Actions pannel or the [`gh`](https://cli.github.com/) command-line tool.
+
+Python release scripts are located in the folder `setupsrc/pl_setup`, along with custom setup code:
+* `update_pdfium.py` downloads binaries and generates the bindings.
+* `craft_wheels.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
+* `autorelease.py` takes care of versioning, changelog, release note generation and VCS checkin.
+
+The autorelease script has some peculiarities maintainers should know about:
+* The changelog for the next release shall be written into `docs/devel/changelog_staging.md`.
+  On release, it will be moved into the main changelog under `docs/source/changelog.md`, annotated with the PDFium version update.
+  It will also be shown on the GitHub release page.
+* pypdfium2 versioning uses the pattern `major.minor.patch`, optionally with an appended beta mark (e. g. `2.7.1`, `2.11.0`, `3.0.0b1`, ...).
+  Version changes are based on the following logic:
+  * If PDFium was updated, the minor version is incremented.
+  * If only pypdfium2 code was updated, the patch version is incremented instead.
+  * Major updates and beta marks are controlled via empty files in the `autorelease/` directory.
+    If `update_major.txt` exists, the major version is incremented.
+    If `update_beta.txt` exists, a new beta tag is set, or an existing one is incremented.
+    These files are removed automatically once the release is finished.
+  * If switching from a beta release to a non-beta release, the beta mark is removed while minor and patch versions remain unchanged.
+
+In case of necessity, you may also forego autorelease/CI and do the release manually, which will roughly work like this (though ideally it should never be needed):
+* Commit changes to the version file
+  ```bash
+  git add src/pypdfium2/version.py
+  git commit -m "increment version"
+  git push
+  ```
+* Create a new tag that matches the version file
+  ```bash
+  # subsitute $VERSION accordingly
+  git tag -a $VERSION
+  git push --tags
+  ```
+* Build the packages
+  ```bash
+  # assuming the python executable to use is called `python3`
+  python3 setupsrc/pl_setup/update_pdfium.py
+  python3 setupsrc/pl_setup/craft_wheels.py
+  ```
+* Upload to PyPI
+  ```bash
+  # make sure the packages are valid
+  twine check dist/*
+  # upload to PyPI (this will interactively ask for your username/password)
+  twine upload dist/*
+  ```
+
+If something went wrong with commit or tag, you can still revert the changes:
+```bash
+# perform an interactive rebase to change history (substitute $N_COMMITS with the number of commits to drop or modify)
+git rebase -i HEAD~$N_COMMITS
+git push --force
+# delete local tag (substitute $TAGNAME accordingly)
+git tag -d $TAGNAME
+# delete remote tag
+git push --delete origin $TAGNAME
+```
+Faulty PyPI releases can be yanked or deleted as well using the web interface.
 
 
 ## In Use
