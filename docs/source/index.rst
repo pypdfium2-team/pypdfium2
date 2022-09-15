@@ -4,10 +4,10 @@
 pypdfium2
 =========
 
-.. _PDFium: https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html
+.. _README.md: https://github.com/pypdfium2-team/pypdfium2#readme
 
 | Welcome to the documentation for the support model of pypdfium2.
-| Concerning the low-level API, please also refer to the documentation for `PDFium`_ and :mod:`ctypes`.
+| For general information, please also refer to the project's `README.md`_ file.
 
 
 .. toctree::
