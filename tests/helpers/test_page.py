@@ -3,6 +3,7 @@
 
 import pytest
 import pypdfium2 as pdfium
+from pypdfium2._helpers._utils import ObjtypeToName
 from ..conftest import TestFiles
 
 
@@ -52,7 +53,12 @@ def test_pageobjects():
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf.get_page(0)
     
-    images = [obj for obj in page.get_objects() if obj.type == pdfium.FPDF_PAGEOBJ_IMAGE]
+    images = []
+    for obj in page.get_objects():
+        assert obj.type in ObjtypeToName.keys()
+        if obj.type == pdfium.FPDF_PAGEOBJ_IMAGE:
+            assert obj.level == 0
+            images.append(obj)
     assert len(images) == 3
     
     positions = [img.get_pos() for img in images]
