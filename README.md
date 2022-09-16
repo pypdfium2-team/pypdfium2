@@ -624,6 +624,8 @@ It should be noted that PDFium, unlike many other PDF libraries, is currently no
 
 This section contains some key information relevant for project maintainers.
 
+<!-- TODO wheel tags, documentation (sphinx), testing (pytest), maintainer access, GitHub peculiarities -->
+
 ### Release workflow
 
 The release process is fully automated using Python scripts and a CI setup for GitHub Actions.
@@ -675,6 +677,7 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   # upload to PyPI (this will interactively ask for your username/password)
   twine upload dist/*
   ```
+<!-- TODO note updating the stable branch -->
 
 If something went wrong with commit or tag, you can still revert the changes:
 ```bash
