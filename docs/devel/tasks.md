@@ -9,7 +9,6 @@ Also see the issues panel and inline `TODO` marks in source code.
 ### Main Code
 * Investigate if we can restructure/split rendering code:
     * interruptable rendering (#128)
-    * caller-provided output buffer
     * concurrent rendering to ctypes array, if possible
     * separate input compilation and processing
 * When rendering with multiple processes and bytes were provided as input, is the memory duplicated or shared? If it's duplicated, find a way to share it or write a tempfile instead.

@@ -291,6 +291,7 @@ class PdfPage:
             force_halftone = False,
             rev_byteorder = False,
             extra_flags = 0,
+            allocator = None,
             memory_limit = 2**30,
         ):
         """
@@ -356,6 +357,10 @@ class PdfPage:
                 Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
                 Flags not covered by other options include :data:`FPDF_RENDER_LIMITEDIMAGECACHE` and :data:`FPDF_NO_NATIVETEXT`, for instance.
             
+            allocator (typing.Callable):
+                A custom function to provide a ctypes.c_ubyte array. It is called with the required number of bytes (i. e. the length the array shall have).
+                This may be used to directly write the pixel data to a specific place in memory (e. g. a GUI widget buffer), avoiding unnecessary data copying.
+            
             memory_limit (int | None):
                 Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
                 If the limit is exceeded, a :exc:`RuntimeError` will be raised.
@@ -397,7 +402,15 @@ class PdfPage:
                 "Consider adjusting the *memory_limit* parameter."
             )
         
-        buffer = (ctypes.c_ubyte * n_bytes)()
+        if allocator is None:
+            buffer = (ctypes.c_ubyte * n_bytes)()
+        else:
+            buffer = allocator(n_bytes)
+            if buffer._type_ is not ctypes.c_ubyte:
+                raise RuntimeError("Array must be of type ctypes.c_ubyte. Consider using ctypes.cast().")
+            if len(buffer) < n_bytes:
+                raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (len(buffer), n_bytes))
+            
         bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
         if color[3] > 0:
             pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_color)
