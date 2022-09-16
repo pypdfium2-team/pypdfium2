@@ -412,8 +412,7 @@ class PdfPage:
                 raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (len(buffer), n_bytes))
             
         bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
-        if color[3] > 0:
-            pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_color)
+        pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_color)
         
         render_flags = extra_flags
         if greyscale:
