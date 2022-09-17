@@ -20,7 +20,7 @@
     
     *Other changes*
     - Improved code style and consistency regarding interaction with PDFium/ctypes.
-    - New rendering parameters added: `color_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `extra_flags`, and `memory_limit`.
+    - New rendering parameters added: `color_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `extra_flags`, `allocator`, and `memory_limit`.
     - New rendering functions `render_tonumpy()` added, returning a shaped NumPy array.
     - New method `PdfDocument.get_page_size()` to retrieve page size by index without needing to load a `PdfPage` (uses `FPDF_GetPageSizeByIndexF()` under the hood).
     - All document-level methods that take a page index now accept negative values for reverse indexing.

@@ -295,7 +295,7 @@ class PdfPage:
             memory_limit = 2**30,
         ):
         """
-        Rasterise the page to a ctypes ubyte array.
+        Rasterise the page to a :class:`ctypes.c_ubyte` array.
         This is the base method for :meth:`.render_tobytes`, :meth:`.render_tonumpy` and :meth:`.render_topil`.
         
         Parameters:
@@ -357,25 +357,33 @@ class PdfPage:
                 Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
                 Flags not covered by other options include :data:`FPDF_RENDER_LIMITEDIMAGECACHE` and :data:`FPDF_NO_NATIVETEXT`, for instance.
             
-            allocator (typing.Callable):
-                A custom function to provide a ctypes.c_ubyte array. It is called with the required number of bytes (i. e. the length the array shall have).
-                This may be used to directly write the pixel data to a specific place in memory (e. g. a GUI widget buffer), avoiding unnecessary data copying.
+            allocator (typing.Callable | None):
+                
+                | A function to provide a custom :class:`ctypes.c_ubyte` array. It is called with the required number of bytes (i. e. the length the array shall have).
+                | If not given, a new buffer is allocated by ctypes (not PDFium), so Python takes care of all memory management.
+                
+                | If you wish to render to an existing buffer that was not alloacted by ctypes itself, note that you may get a ctypes array representation of arbitrary memory using ``(ctypes.c_ubyte*n_bytes).from_address(mem_address)``, where *n_bytes* shall be the number of bytes to encompass, and *mem_address* the memory address of the first byte.
+                | This may be used to directly write the pixel data to a specific place in memory (e. g. a GUI widget buffer), avoiding unnecessary data copying.
+                
+                Callers must ensure that ...
+                
+                * the buffer and its ctypes representation are large enough to hold the requested number of bytes
+                * the memory remains valid as long as the ctypes array is used
+                * the memory is freed once it is not needed anymore
             
             memory_limit (int | None):
                 Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
-                If the limit is exceeded, a :exc:`RuntimeError` will be raised.
+                If the limit would be exceeded, a :exc:`RuntimeError` is raised.
                 If :data:`None` or 0, this function may allocate arbitrary amounts of memory as far as Python and the OS permit.
             
         Returns:
             (ctypes.c_ubyte array, str, (int, int)):
             Ctypes array, color format, and image size.
-            The color format may be ``BGR/RGB``, ``BGRA/RGBA``, or ``L``, depending on the parameters *color*, *greyscale* and *rev_byteorder*.
+            The color format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, or ``L``, depending on the parameters *color*, *greyscale* and *rev_byteorder*.
             Image size is given in pixels as a tuple of width and height.
         
         Hint:
             To convert a DPI value to a scale factor, divide it by 72.
-        Note:
-            The ctypes array is allocated by Python (not PDFium), so we don't need to care about freeing memory.
         """
         
         validate_colors(color, color_scheme)
