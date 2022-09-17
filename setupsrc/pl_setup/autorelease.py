@@ -95,9 +95,11 @@ def do_versioning(latest):
     
     assert len(ver_changes) > 0
     set_versions(ver_changes)
+    
+    return (c_updates, py_updates)
 
 
-def get_summary():
+def get_summary(curr_ns):
     
     with open(ChangelogStaging, "r") as fh:
         content = fh.read()
@@ -106,9 +108,11 @@ def get_summary():
         devel_msg = content[pos:].strip()
         if devel_msg:
             devel_msg += "\n"
-
-    with open(ChangelogStaging, "w") as fh:
-        fh.write(header)
+    
+    # flush changelog_staging, except if doing a beta release
+    if curr_ns["V_BETA"] is not None:
+        with open(ChangelogStaging, "w") as fh:
+            fh.write(header)
     
     return devel_msg
 
@@ -156,16 +160,16 @@ def _get_log(cwd, url, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
     return log
 
 
-def make_releasenotes(summary, prev_ns, curr_ns):
+def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     
     relnotes = ""
     relnotes += "# Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
     relnotes += "## pypdfium2\n\n"
     relnotes += "### Summary\n\n"
-    
     if summary:
         relnotes += summary + "\n"
     
+    # even if python code was not updated, there will be a release commit
     relnotes += "### Log\n\n"
     relnotes += _get_log(
         SourceTree, RepositoryURL,
@@ -174,8 +178,7 @@ def make_releasenotes(summary, prev_ns, curr_ns):
     )
     relnotes += "\n"
     
-    if int(prev_ns["V_LIBPDFIUM"]) < int(curr_ns["V_LIBPDFIUM"]):
-        
+    if c_updates:
         # FIXME is there a faster way to get pdfium's commit log?
         with tempfile.TemporaryDirectory() as tempdir:
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tempdir)
@@ -208,14 +211,16 @@ def main():
     
     prev_ns = copy.deepcopy(VerNamespace)
     latest = get_latest_version()
-    do_versioning(latest)
+    c_updates, py_updates = do_versioning(latest)
     curr_ns = get_version_ns()
     
-    summary = get_summary()
-    log_changes(summary, prev_ns, curr_ns)
+    summary = get_summary(curr_ns)
+    if curr_ns["V_BETA"] is not None:
+        # update changelog, except if doing a beta release
+        log_changes(summary, prev_ns, curr_ns)
     if args.checkin:
         register_changes(curr_ns)
-    make_releasenotes(summary, prev_ns, curr_ns)
+    make_releasenotes(summary, prev_ns, curr_ns, c_updates)
 
 
 if __name__ == "__main__":
