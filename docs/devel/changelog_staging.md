@@ -23,7 +23,7 @@
     - New rendering parameters added: `color_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `extra_flags`, `allocator`, and `memory_limit`.
     - New rendering functions `render_tonumpy()` added, returning a shaped NumPy array.
     - New method `PdfDocument.get_page_size()` to retrieve page size by index without needing to load a `PdfPage` (uses `FPDF_GetPageSizeByIndexF()` under the hood).
-    - All document-level methods that take a page index now accept negative values for reverse indexing.
+    - All document-level methods that take a page index now accept negative values for reverse indexing (except the rendering methods).
     - `PdfPage.get_objects()` can now recursively descend into Form XObjects.
     - Form environments are now initialised/exited on document level rather than on page rendering. *In the course of this work, a segmentation fault source was eliminated, related to a formerly undocumented requirement of PDFium regarding object lifetime. Whether the segmentation fault would actually take place was dependent on Python garbage collection behaviour. This did not appear to happen under normal circumstances, so the issue remained unnoticed for a long time.*
 

@@ -458,7 +458,7 @@ class PdfDocument:
         
         Parameters:
             page_indices (typing.Sequence[int] | None):
-                A sequence of zero-based indices of the pages to render. Reverse indexing is allowed.
+                A sequence of zero-based indices of the pages to render. Reverse indexing or duplicate page indices are prohibited.
                 If :data:`None`, all pages will be included.
             n_processes (int):
                 Target number of parallel processes.
@@ -481,8 +481,14 @@ class PdfDocument:
             else:
                 self._rendering_input = self._orig_input
         
+        n_pages = len(self)
         if not page_indices:
-            page_indices = [i for i in range(len(self))]
+            page_indices = [i for i in range(n_pages)]
+        else:
+            if not all(0 <= i < n_pages for i in page_indices):
+                raise ValueError("Out-of-bounds page index")
+            if len(page_indices) != len(set(page_indices)):
+                raise ValueError("Duplicate page index")
         
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
