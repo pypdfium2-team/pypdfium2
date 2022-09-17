@@ -146,8 +146,10 @@ def register_changes(curr_ns):
     run_local(["git", "checkout", "main"])
 
 
-def _get_log(cwd, url, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
+def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
     log = ""
+    log += "\n<details>\n"
+    log += "  <summary>%s commit log</summary>\n\n" % name
     log += "Commits between [`%s`](%s) and [`%s`](%s) " % (
         ver_a, url+prefix_ver+ver_a,
         ver_b, url+prefix_ver+ver_b,
@@ -158,6 +160,7 @@ def _get_log(cwd, url, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
         "--pretty=format:* [`%h`]({}%H) %s".format(url+prefix_commit)],
         capture=True, cwd=cwd,
     )
+    log += "\n\n</details>\n"
     return log
 
 
@@ -169,36 +172,30 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
         os.remove(SkipCommitLogFile)
     
     relnotes = ""
-    relnotes += "# Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
-    relnotes += "## pypdfium2\n\n"
-    relnotes += "### Summary\n\n"
+    relnotes += "## Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
+    relnotes += "### Summary (pypdfium2)\n\n"
     if summary:
         relnotes += summary + "\n"
     
     if include_log:
         # even if python code was not updated, there will be a release commit
-        relnotes += "### Log\n\n"
         relnotes += _get_log(
-            SourceTree, RepositoryURL,
+            "pypdfium2", RepositoryURL, SourceTree,
             prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
             "/tree/", "/commit/", "",
         )
         relnotes += "\n"
     
     if include_log and c_updates:
+        
         # FIXME is there a faster way to get pdfium's commit log?
         with tempfile.TemporaryDirectory() as tempdir:
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tempdir)
-            pdfium_log = _get_log(
-                join(tempdir, "pdfium_history"), PDFium_URL,
+            relnotes += _get_log(
+                "PDFium", PDFium_URL, join(tempdir, "pdfium_history"),
                 prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"],
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
             )
-        
-        relnotes += "\n## PDFium\n\n"
-        relnotes += "### Log\n\n"
-        relnotes += pdfium_log
-        relnotes += "\n"
     
     with open(join(SourceTree, "RELEASE.md"), "w") as fh:
         fh.write(relnotes)
