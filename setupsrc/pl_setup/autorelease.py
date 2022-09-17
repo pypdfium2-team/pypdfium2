@@ -30,9 +30,10 @@ from pl_setup.packaging_base import (
 )
 
 
-AutoreleaseDir  = join(SourceTree, "autorelease")
-MajorUpdateFile = join(AutoreleaseDir, "update_major.txt")
-BetaUpdateFile  = join(AutoreleaseDir, "update_beta.txt")
+AutoreleaseDir    = join(SourceTree, "autorelease")
+MajorUpdateFile   = join(AutoreleaseDir, "update_major.txt")
+BetaUpdateFile    = join(AutoreleaseDir, "update_beta.txt")
+SkipCommitLogFile = join(AutoreleaseDir, "skip_commit_log.txt")
 
 
 def run_local(*args, **kws):
@@ -110,7 +111,7 @@ def get_summary(curr_ns):
             devel_msg += "\n"
     
     # flush changelog_staging, except if doing a beta release
-    if curr_ns["V_BETA"] is not None:
+    if curr_ns["V_BETA"] is None:
         with open(ChangelogStaging, "w") as fh:
             fh.write(header)
     
@@ -162,6 +163,11 @@ def _get_log(cwd, url, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
 
 def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     
+    include_log = True
+    if os.path.exists(SkipCommitLogFile):
+        include_log = False
+        os.remove(SkipCommitLogFile)
+    
     relnotes = ""
     relnotes += "# Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
     relnotes += "## pypdfium2\n\n"
@@ -169,16 +175,17 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     if summary:
         relnotes += summary + "\n"
     
-    # even if python code was not updated, there will be a release commit
-    relnotes += "### Log\n\n"
-    relnotes += _get_log(
-        SourceTree, RepositoryURL,
-        prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
-        "/tree/", "/commit/", "",
-    )
-    relnotes += "\n"
+    if include_log:
+        # even if python code was not updated, there will be a release commit
+        relnotes += "### Log\n\n"
+        relnotes += _get_log(
+            SourceTree, RepositoryURL,
+            prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
+            "/tree/", "/commit/", "",
+        )
+        relnotes += "\n"
     
-    if c_updates:
+    if include_log and c_updates:
         # FIXME is there a faster way to get pdfium's commit log?
         with tempfile.TemporaryDirectory() as tempdir:
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tempdir)
@@ -215,7 +222,7 @@ def main():
     curr_ns = get_version_ns()
     
     summary = get_summary(curr_ns)
-    if curr_ns["V_BETA"] is not None:
+    if curr_ns["V_BETA"] is None:
         # update changelog, except if doing a beta release
         log_changes(summary, prev_ns, curr_ns)
     if args.checkin:

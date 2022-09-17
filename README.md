@@ -650,6 +650,8 @@ The autorelease script has some peculiarities maintainers should know about:
     If `update_beta.txt` exists, a new beta tag is set, or an existing one is incremented.
     These files are removed automatically once the release is finished.
   * If switching from a beta release to a non-beta release, the beta mark is removed while minor and patch versions remain unchanged.
+* By default, the commit log of pypdfium2 and PDFium will be included on the GitHub release page.
+  For exhaustive changes, this might not be desired, so you can opt out of this feature on per-release basis by creating an empty `skip_commit_log.txt` file in `autorelease/`.
 
 In case of necessity, you may also forego autorelease/CI and do the release manually, which will roughly work like this (though ideally it should never be needed):
 * Commit changes to the version file
