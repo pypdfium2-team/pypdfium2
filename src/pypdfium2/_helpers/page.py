@@ -6,7 +6,6 @@ import math
 import ctypes
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers._utils import (
     get_functype,
     validate_colors,
@@ -19,21 +18,16 @@ from pypdfium2._helpers.misc import (
     OptimiseMode,
     PdfiumError,
 )
+from pypdfium2._helpers.converters import (
+    BitmapConv,
+    AnyBitmapConv,
+)
+from pypdfium2._helpers.textpage import PdfTextPage
 
 try:
     import uharfbuzz as harfbuzz
 except ImportError:
     harfbuzz = None
-
-try:
-    import PIL.Image
-except ImportError:
-    PIL = None
-
-try:
-    import numpy.ctypeslib
-except ImportError:
-    numpy = None
 
 
 class PdfPage:
@@ -473,63 +467,20 @@ class PdfPage:
         return buffer, cl_string, (width, height)
     
     
+    def render_to(self, converter, **kwargs):
+        return converter( self.render_base(**kwargs) )
+    
+    # deprecated, retained for backwards compatibility
     def render_tobytes(self, **kwargs):
-        """
-        Rasterise the page to bytes. Parameters match :meth:`.render_base`.
-        
-        Returns:
-            (bytes, str, (int, int)): Image data, color format, and size.
-        """
-        c_array, *args = self.render_base(**kwargs)
-        return bytes(c_array), *args
+        return self.render_to(AnyBitmapConv(bytes), **kwargs)
     
-    
+    # deprecated, retained for backwards compatibility
     def render_tonumpy(self, **kwargs):
-        """
-        *Requires* :mod:`numpy`.
-        
-        Rasterise the page to a NumPy array. Parameters match :meth:`.render_base`.
-        
-        Returns:
-            (numpy.ndarray, str): NumPy array, and color format.
-        """
-        
-        if numpy is None:
-            raise RuntimeError("NumPy library needs to be installed for render_tonumpy().")
-        
-        c_array, cl_format, (width, height) = self.render_base(**kwargs)
-        np_array = numpy.ctypeslib.as_array(c_array)
-        np_array.shape = (height, width, len(cl_format))
-        
-        return np_array, cl_format
+        return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
     
-    
+    # deprecated, retained for backwards compatibility
     def render_topil(self, **kwargs):
-        """
-        *Requires* :mod:`PIL`.
-        
-        Rasterise the page to a PIL image. Parameters match :meth:`.render_base`.
-        
-        Returns:
-            PIL.Image.Image: An image of the page.
-        """
-        
-        if PIL is None:
-            raise RuntimeError("Pillow library needs to be installed for render_topil().")
-        
-        c_array, cl_src, size = self.render_base(**kwargs)
-        
-        cl_mapping = {
-            "BGRA": "RGBA",
-            "BGR":  "RGB",
-        }
-        if cl_src in cl_mapping:
-            cl_dst = cl_mapping[cl_src]
-        else:
-            cl_dst = cl_src
-        
-        pil_image = PIL.Image.frombuffer(cl_dst, size, c_array, "raw", cl_src, 0, 1)
-        return pil_image
+        return self.render_to(BitmapConv.pil_image, **kwargs)
 
 
 class ColorScheme:

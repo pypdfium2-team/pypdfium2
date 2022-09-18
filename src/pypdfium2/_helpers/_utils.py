@@ -29,9 +29,9 @@ def get_bitmap_format(bg_color, greyscale, rev_byteorder):
             px_const = pdfium.FPDFBitmap_BGR
     
     if rev_byteorder:
-        px_str = BitmapFormatToStrReverse[px_const]
+        px_str = BitmapConstToReverseStr[px_const]
     else:
-        px_str = BitmapFormatToStr[px_const]
+        px_str = BitmapConstToStr[px_const]
     
     return px_const, px_str, rev_byteorder
 
@@ -79,20 +79,38 @@ def _invert_dict(dictionary):
     """
     return {v: k for k, v in dictionary.items()}
 
+def _transform_dict(main, transformer):
+    """
+    Remap each value of a *main* dictionary through a second *transformer* dictionary, if contained.
+    Otherwise, take over the existing value as-is.
+    
+    Returns:
+        Transformed variant of the *main* dictionary.
+    """
+    output = {}
+    for key, value in main.items():
+        if value in transformer.keys():
+            output[key] = transformer[value]
+        else:
+            output[key] = value
+    return output
+
 
 #: Convert a PDFium pixel format constant to string, assuming regular byte order.
-BitmapFormatToStr = {
-    pdfium.FPDFBitmap_BGRA: "BGRA",
-    pdfium.FPDFBitmap_BGR:  "BGR",
+BitmapConstToStr = {
     pdfium.FPDFBitmap_Gray: "L",
+    pdfium.FPDFBitmap_BGR:  "BGR",
+    pdfium.FPDFBitmap_BGRA: "BGRA",
+}
+
+# Convert a reverse pixel format string to its regular counterpart.
+UnreverseBitmapStr = {
+    "BGR":  "RGB",
+    "BGRA": "RGBA",
 }
 
 #: Convert a PDFium pixel format constant to string, assuming reversed byte order.
-BitmapFormatToStrReverse = {
-    pdfium.FPDFBitmap_BGRA: "RGBA",
-    pdfium.FPDFBitmap_BGR:  "RGB",
-    pdfium.FPDFBitmap_Gray: "L",
-}
+BitmapConstToReverseStr = _transform_dict(BitmapConstToStr, UnreverseBitmapStr)
 
 #: Convert a PDFium view mode constant (``PDFDEST_VIEW_...``) to string.
 ViewmodeMapping = {

@@ -18,12 +18,16 @@ from pypdfium2._helpers._opener import (
     open_pdf,
     is_input_buffer,
 )
-from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.misc import (
     OutlineItem,
     FileAccess,
     PdfiumError,
 )
+from pypdfium2._helpers.converters import (
+    BitmapConv,
+    AnyBitmapConv,
+)
+from pypdfium2._helpers.page import PdfPage
 
 try:
     import uharfbuzz as harfbuzz
@@ -431,35 +435,32 @@ class PdfDocument:
     
     
     @classmethod
-    def _process_page(cls, index, renderer_name, input_data, password, file_access, **kwargs):
+    def _process_page(cls, index, converter, input_data, password, file_access, **kwargs):
         pdf = cls(
             input_data,
             password = password,
             file_access = file_access,
         )
         page = pdf.get_page(index)
-        result = getattr(page, "render_to"+renderer_name)(**kwargs)
-        for g in (page, pdf): g.close()
-        return result, index
+        return page.render_to(converter, **kwargs), index
     
     
-    def _render_base(
+    def render_to(
             self,
-            renderer_name,
+            converter,
             page_indices = None,
             n_processes = os.cpu_count(),
             **kwargs
         ):
         """
         Concurrently render multiple pages, using a process pool executor.
-        This method serves as base for :meth:`.render_tobytes` and :meth:`render_topil`. Embedders should never call it directly.
-        
-        The order of results matches the order of given page indices.
         
         Parameters:
+            converter ():
+                TODO
             page_indices (typing.Sequence[int] | None):
                 A sequence of zero-based indices of the pages to render. Reverse indexing or duplicate page indices are prohibited.
-                If :data:`None`, all pages will be included.
+                If :data:`None`, all pages will be included. The order of results is guaranteed to match the order of given page indices.
             n_processes (int):
                 Target number of parallel processes.
             kwargs (dict):
@@ -492,7 +493,7 @@ class PdfDocument:
         
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
-            renderer_name = renderer_name,
+            converter = converter,
             input_data = self._rendering_input,
             password = self._password,
             file_access = self._file_access,
@@ -509,39 +510,17 @@ class PdfDocument:
         assert len(page_indices) == i
     
     
+    # deprecated, retained for backwards compatibility
     def render_tobytes(self, **kwargs):
-        """
-        Concurrently render pages to bytes.
-        See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
-        
-        Yields:
-            Result of :meth:`.PdfPage.render_tobytes`.
-        """
-        yield from self._render_base("bytes", **kwargs)
+        return self.render_to(AnyBitmapConv(bytes), **kwargs)
     
-    def render_topil(self, **kwargs):
-        """
-        *Requires* :mod:`PIL`.
-        
-        Concurrently render pages to PIL images.
-        See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
-        
-        Yields:
-            Result of :meth:`.PdfPage.render_topil`.
-        """
-        yield from self._render_base("pil", **kwargs)
-    
+    # deprecated, retained for backwards compatibility
     def render_tonumpy(self, **kwargs):
-        """
-        *Requires* :mod:`numpy`.
-        
-        Concurrently render pages to NumPy arrays.
-        See :meth:`.PdfDocument._render_base` and :meth:`.PdfPage.render_base` for possible keyword arguments.
-        
-        Yields:
-            Result of :meth:`.PdfPage.render_tonumpy`.
-        """
-        yield from self._render_base("numpy", **kwargs)
+        return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
+    
+    # deprecated, retained for backwards compatibility
+    def render_topil(self, **kwargs):
+        return self.render_to(BitmapConv.pil_image, **kwargs)
 
 
 class _writer_class:
