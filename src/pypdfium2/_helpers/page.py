@@ -418,7 +418,7 @@ class PdfPage:
                 raise RuntimeError("Array must be of type ctypes.c_ubyte. Consider using ctypes.cast().")
             if len(buffer) < n_bytes:
                 raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (len(buffer), n_bytes))
-            
+        
         bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_color)
         
@@ -528,7 +528,7 @@ class PdfPage:
         else:
             cl_dst = cl_src
         
-        pil_image = PIL.Image.frombytes(cl_dst, size, c_array, "raw", cl_src, 0, 1)
+        pil_image = PIL.Image.frombuffer(cl_dst, size, c_array, "raw", cl_src, 0, 1)
         return pil_image
 
 
