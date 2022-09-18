@@ -284,6 +284,7 @@ class PdfPage:
             no_smoothpath = False,
             force_halftone = False,
             rev_byteorder = False,
+            prefer_bgrx = False,
             extra_flags = 0,
             allocator = None,
             memory_limit = 2**30,
@@ -347,6 +348,9 @@ class PdfPage:
                 This option may be used to render with reversed byte order, leading to ``RGB(A)`` output instead.
                 ``L`` is unaffected.
             
+            prefer_bgrx (bool):
+                TODO
+            
             extra_flags (int):
                 Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
                 Flags not covered by other options include :data:`FPDF_RENDER_LIMITEDIMAGECACHE` and :data:`FPDF_NO_NATIVETEXT`, for instance.
@@ -381,7 +385,7 @@ class PdfPage:
         """
         
         validate_colors(color, color_scheme)
-        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder)
+        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder, prefer_bgrx)
         c_color = color_tohex(color, rev_byteorder)
         n_channels = len(cl_string)
         

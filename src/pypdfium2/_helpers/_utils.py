@@ -15,7 +15,7 @@ def validate_colors(bg_color, color_scheme):
             raise ValueError("Color value exceeds boundaries.")
 
 
-def get_bitmap_format(bg_color, greyscale, rev_byteorder):
+def get_bitmap_format(bg_color, greyscale, rev_byteorder, prefer_bgrx):
     
     if (bg_color[3] < 255):
         # even if a custom color scheme is given and its values contain transparency, we don't need to care, because drawings are additive
@@ -26,7 +26,10 @@ def get_bitmap_format(bg_color, greyscale, rev_byteorder):
             px_const = pdfium.FPDFBitmap_Gray
             rev_byteorder = False
         else:
-            px_const = pdfium.FPDFBitmap_BGR
+            if prefer_bgrx:
+                px_const = pdfium.FPDFBitmap_BGRx
+            else:
+                px_const = pdfium.FPDFBitmap_BGR
     
     if rev_byteorder:
         px_str = BitmapConstToReverseStr[px_const]
@@ -101,12 +104,14 @@ BitmapConstToStr = {
     pdfium.FPDFBitmap_Gray: "L",
     pdfium.FPDFBitmap_BGR:  "BGR",
     pdfium.FPDFBitmap_BGRA: "BGRA",
+    pdfium.FPDFBitmap_BGRx: "BGRX",
 }
 
 # Convert a reverse pixel format string to its regular counterpart.
 UnreverseBitmapStr = {
     "BGR":  "RGB",
     "BGRA": "RGBA",
+    "BGRX": "RGBX",
 }
 
 #: Convert a PDFium pixel format constant to string, assuming reversed byte order.

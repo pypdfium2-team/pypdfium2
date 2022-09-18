@@ -94,6 +94,20 @@ def test_render_page_transform(sample_page, name, crop, scale, rotation):
     pil_image.close()
 
 
+@pytest.mark.parametrize(
+    "rev_byteorder", [False, True]
+)
+def test_render_page_bgrx(rev_byteorder, sample_page):
+    pil_image = sample_page.render_topil(
+        prefer_bgrx = True,
+        rev_byteorder = rev_byteorder,
+    )
+    assert pil_image.mode == "RGBX"
+    exp_pixels = [(pos, (*value, 255)) for pos, value in ExpRenderPixels]
+    _check_pixels(pil_image, exp_pixels)
+    pil_image.close()
+
+
 def test_render_page_alpha(sample_page):
     
     pixels = [
