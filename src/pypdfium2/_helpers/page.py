@@ -381,18 +381,8 @@ class PdfPage (BitmapConvAliases):
                 Flags not covered by other options include :data:`FPDF_RENDER_LIMITEDIMAGECACHE` and :data:`FPDF_NO_NATIVETEXT`, for instance.
             
             allocator (typing.Callable | None):
-                
-                | A function to provide a custom :class:`ctypes.c_ubyte` array. It is called with the required number of bytes (i. e. the length the array shall have).
-                | If not given, a new buffer is allocated by ctypes (not PDFium), so Python takes care of all memory management.
-                
-                | If you wish to render to an existing buffer that was not alloacted by ctypes itself, note that you may get a ctypes array representation of arbitrary memory using ``(ctypes.c_ubyte*n_bytes).from_address(mem_address)``, where *n_bytes* shall be the number of bytes to encompass, and *mem_address* the memory address of the first byte.
-                | This may be used to directly write the pixel data to a specific place in memory (e. g. a GUI widget buffer), avoiding unnecessary data copying.
-                
-                Callers must ensure that ...
-                
-                * the buffer and its ctypes representation are large enough to hold the requested number of bytes
-                * the memory remains valid as long as the ctypes array is used
-                * the memory is freed once it is not needed anymore
+                A function to provide a custom ctypes buffer. It is called with the required buffer size in bytes.
+                If not given, a new :class:`ctypes.c_ubyte` array is allocated by Python (this simplify memory management, as opposed to allocation by PDFium).
             
             memory_limit (int | None):
                 Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
@@ -400,13 +390,24 @@ class PdfPage (BitmapConvAliases):
                 If :data:`None` or 0, this function may allocate arbitrary amounts of memory as far as Python and the OS permit.
             
         Returns:
-            (ctypes.c_ubyte array, str, (int, int)):
+            (ctypes array, str, (int, int)):
             Ctypes array, color format, and image size.
             The color format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, or ``L``, depending on the parameters *color*, *greyscale* and *rev_byteorder*.
             Image size is given in pixels as a tuple of width and height.
         
-        Hint:
+        Tip:
             To convert a DPI value to a scale factor, divide it by 72.
+        
+        Note:
+            Please take into account the following information regarding the *allocator* parameter:
+            
+            If you wish to render to an existing buffer that was not alloacted by ctypes itself, note that you may get a ctypes array representation of arbitrary memory using ``(ctypes.c_ubyte*n_bytes).from_address(mem_address)``, where *n_bytes* shall be the number of bytes to encompass, and *mem_address* the memory address of the first byte. This may be used to directly write the pixel data to a specific place in memory (e. g. a GUI widget buffer), avoiding unnecessary data copying.
+            
+            In this case, callers must ensure that ...
+            
+            * the buffer and its ctypes representation are large enough to hold the requested number of bytes
+            * the memory remains valid as long as the ctypes array is used
+            * the memory is freed once not needed anymore
         """
         
         validate_colors(color, color_scheme)
@@ -451,10 +452,8 @@ class PdfPage (BitmapConvAliases):
             buffer = (ctypes.c_ubyte * n_bytes)()
         else:
             buffer = allocator(n_bytes)
-            if buffer._type_ is not ctypes.c_ubyte:
-                raise RuntimeError("Array must be of type ctypes.c_ubyte. Consider using ctypes.cast().")
-            if len(buffer) < n_bytes:
-                raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (len(buffer), n_bytes))
+            if ctypes.sizeof(buffer) < n_bytes:
+                raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (ctypes.sizeof(buffer), n_bytes))
         
         bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_color)
