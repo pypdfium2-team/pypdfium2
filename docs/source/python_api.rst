@@ -17,11 +17,12 @@ Version
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
-    :private-members: _render_base
+    :show-inheritance:
 
 Page
 ****
 .. automodule:: pypdfium2._helpers.page
+    :show-inheritance:
 
 Text Page
 *********
