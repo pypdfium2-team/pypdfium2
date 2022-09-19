@@ -14,6 +14,11 @@ Version
 *******
 .. automodule:: pypdfium2.version
 
+Converters
+**********
+.. automodule:: pypdfium2._helpers.converters
+    :show-inheritance:
+
 Document
 ********
 .. automodule:: pypdfium2._helpers.document

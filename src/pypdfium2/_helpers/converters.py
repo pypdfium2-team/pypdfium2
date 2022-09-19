@@ -70,17 +70,38 @@ class BitmapConv:
 
 
 class BitmapConvAliases:
+    """
+    Base class for deprecated rendering target aliases. Retained for backwards compatibility, but may be removed in the future.
+    The :meth:`PdfPage.render_to` / :meth:`PdfDocument.render_to` APIs should be used instead.
     
-    # deprecated aliases, retained for backwards compatibility
+    Important:
+        Deprecated APIs may be removed with a minor release after a sufficient timeframe.
+        No major release might be made to mark the removal of this API.
+    """
     
     def render_to(self):
+        """
+        Method to be implemented by the inheriting class.
+        """
         raise NotImplementedError("Inheriting class must provide render_to() method.")
     
     def render_tobytes(self, **kwargs):
+        """
+        .. deprecated:: 3.0
+            Use ``render_to(BitmapConv.any(bytes), **kwargs)`` instead. See :class:`.BitmapConv.any`.
+        """
         return self.render_to(BitmapConv.any(bytes), **kwargs)
     
     def render_tonumpy(self, **kwargs):
+        """
+        .. deprecated:: 3.0
+            Use ``render_to(BitmapConv.numpy_ndarray, **kwargs)`` instead. See :class:`.BitmapConv.numpy_ndarray`.
+        """
         return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
     
     def render_topil(self, prefer_la=False, **kwargs):
+        """
+        .. deprecated:: 3.0
+            Use ``render_to(BitmapConv.pil_image, **kwargs)`` instead. See :class:`.BitmapConv.pil_image`.
+        """
         return self.render_to(BitmapConv.pil_image(prefer_la=prefer_la), **kwargs)
