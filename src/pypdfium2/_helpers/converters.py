@@ -19,10 +19,6 @@ class BitmapConvBase:
     Parent class for bitmap converters compatible with :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to`.
     The constructor captures any arguments (positionals and keywords) and adds them to the :meth:`.run` call.
     It is not necessary to implement a constructor in the inheriting class.
-    
-    Tip:
-        If you wish to implement a custom converter that does not take any parameters, note that ``render_to()`` accepts any callable.
-        It does not necessarily have to be an instance of this class.
     """
     
     def __init__(self, *args, **kwargs):
@@ -54,7 +50,7 @@ class BitmapConvBase:
             typing.Any:
                 The converted rendering result (implementation-specific).
                 If the converter is used with :meth:`.PdfDocument.render_to` (or anything else that uses :mod:`multiprocessing`),
-                the return values must be compatible with :mod:`pickle`.
+                the return value must be compatible with :mod:`pickle`.
         """
         raise NotImplementedError("Inheriting class must provide run() method.")
 
@@ -62,10 +58,9 @@ class BitmapConvBase:
 class BitmapConv:
     """
     Built-in converters to translate the result of :meth:`.PdfPage.render_base`.
-    
-    Note:
-        Technically, the converter implementations are standalone - the outer class is just to nicely enclose them in one namespace.
     """
+    
+    # Technically, the converter implementations are standalone - the outer class is just to nicely enclose them in one namespace.
     
     class any (BitmapConvBase):
         """
@@ -73,7 +68,7 @@ class BitmapConv:
         
         Example:
             ``render_to(BitmapConv.any(bytes), **kwargs)``:
-                Get the pixel data as bytes (independent copy of the ctypes array).
+                Get the pixel data as bytes. (Note, though, that this would create an independent copy of the pixel data, which should be avoided in general.)
         
         Parameters:
             converter (typing.Callable):
@@ -99,14 +94,12 @@ class BitmapConv:
         
         Returns:
             (numpy.ndarray, str): NumPy array, and color format.
-        
-        Note:
-            This converter does not return bitmap size because the array is multi-dimensional,
-            so this information is already contained in the array's shape.
         """
         
         @staticmethod
         def run(result, renderer_kws):
+            
+            # NOTE This converter does not return bitmap size because the information is contained in the array's shape already.
             
             if numpy is None:
                 raise RuntimeError("NumPy library needs to be installed for numpy_ndarray() converter.")
@@ -131,9 +124,6 @@ class BitmapConv:
         Returns:
             PIL.Image.Image: The image object.
         
-        Note:
-            This converter does not return additional parameters.
-            Information on size and color format (mode) is already contained in the image object.
         Hint:
             This uses :func:`PIL.Image.frombuffer` under the hood.
             If possible for the color format in question, the image will reference the ctypes array. Otherwise, PIL may create a copy of the data.
@@ -144,6 +134,8 @@ class BitmapConv:
         
         @staticmethod
         def run(result, renderer_kws, prefer_la=False):
+            
+            # NOTE This converter does not return additional parameters, as information on size and color format (mode) is already contained in the image object.
             
             if PIL is None:
                 raise RuntimeError("Pillow library needs to be installed for pil_image() converter.")
@@ -180,8 +172,6 @@ class BitmapConvAliases:
         """
         .. deprecated:: 3.0
             Use ``render_to(BitmapConv.any(bytes), **kwargs)`` instead. See :class:`.BitmapConv.any`.
-        Note:
-            This creates an independent copy of the pixel data, which should be avoided in general.
         """
         return self.render_to(BitmapConv.any(bytes), **kwargs)
     
