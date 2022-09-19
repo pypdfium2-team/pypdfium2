@@ -21,7 +21,7 @@ class BitmapConvBase:
     It is not necessary to implement a constructor in the inheriting class.
     
     Tip:
-        If you wish to implement a custom converter that does not take any parametrs, note that ``render_to()`` accepts any callable.
+        If you wish to implement a custom converter that does not take any parameters, note that ``render_to()`` accepts any callable.
         It does not necessarily have to be an instance of this class.
     """
     

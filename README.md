@@ -630,7 +630,7 @@ This section contains some key information relevant for project maintainers.
 
 The release process is fully automated using Python scripts and a CI setup for GitHub Actions.
 A new release is triggered every Monday, following the schedule of `pdfium-binaries`.
-You may also trigger the workflow manually using the GitHub Actions pannel or the [`gh`](https://cli.github.com/) command-line tool.
+You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
 
 Python release scripts are located in the folder `setupsrc/pl_setup`, along with custom setup code:
 * `update_pdfium.py` downloads binaries and generates the bindings.
@@ -662,7 +662,7 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   ```
 * Create a new tag that matches the version file
   ```bash
-  # subsitute $VERSION accordingly
+  # substitute $VERSION accordingly
   git tag -a $VERSION
   git push --tags
   ```
