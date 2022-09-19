@@ -68,7 +68,7 @@ class BitmapConv:
         Parameters:
             converter (typing.Callable):
                 A callable to translate a ctypes array to a different data type.
-                The callable could be a function, a class with constructor, or an instance of a class implementing ``__call__(self, ...)``.
+                It could be a function, a class with constructor, or an instance of a class implementing ``__call__(self, ...)``.
         Returns:
             (typing.Any, ...):
                 The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (color format, size).
