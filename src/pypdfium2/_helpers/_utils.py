@@ -15,28 +15,18 @@ def validate_colors(bg_color, color_scheme):
             raise ValueError("Color value exceeds boundaries.")
 
 
-def get_bitmap_format(bg_color, greyscale, rev_byteorder, prefer_bgrx):
-    
+def auto_bitmap_format(bg_color, greyscale, prefer_bgrx):
+    # even if a custom color scheme is given and its values contain transparency, we don't need to care, because drawings are additive
     if (bg_color[3] < 255):
-        # even if a custom color scheme is given and its values contain transparency, we don't need to care, because drawings are additive
-        px_const = pdfium.FPDFBitmap_BGRA
+        return pdfium.FPDFBitmap_BGRA
     else:
         if greyscale:
-            # attempting to use FPDF_REVERSE_BYTE_ORDER with FPDFBitmap_Gray is not only unnecessary, but also causes issues, so prohibit it (pdfium bug?)
-            px_const = pdfium.FPDFBitmap_Gray
-            rev_byteorder = False
+            return pdfium.FPDFBitmap_Gray
         else:
             if prefer_bgrx:
-                px_const = pdfium.FPDFBitmap_BGRx
+                return pdfium.FPDFBitmap_BGRx
             else:
-                px_const = pdfium.FPDFBitmap_BGR
-    
-    if rev_byteorder:
-        px_str = BitmapConstToReverseStr[px_const]
-    else:
-        px_str = BitmapConstToStr[px_const]
-    
-    return px_const, px_str, rev_byteorder
+                return pdfium.FPDFBitmap_BGR
 
 
 def color_tohex(color, rev_byteorder):

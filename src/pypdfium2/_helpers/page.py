@@ -10,9 +10,11 @@ from pypdfium2._helpers._utils import (
     get_functype,
     validate_colors,
     color_tohex,
-    get_bitmap_format,
+    auto_bitmap_format,
     RotationToConst,
     RotationToDegrees,
+    BitmapConstToStr,
+    BitmapConstToReverseStr,
 )
 from pypdfium2._helpers.misc import (
     OptimiseMode,
@@ -303,6 +305,7 @@ class PdfPage (BitmapConvAliases):
             force_halftone = False,
             rev_byteorder = False,
             prefer_bgrx = False,
+            forced_bitmap_format = None,
             extra_flags = 0,
             allocator = None,
             memory_limit = 2**30,
@@ -369,6 +372,9 @@ class PdfPage (BitmapConvAliases):
             prefer_bgrx (bool):
                 TODO
             
+            forced_bitmap_format (int | None):
+                TODO
+            
             extra_flags (int):
                 Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
                 Flags not covered by other options include :data:`FPDF_RENDER_LIMITEDIMAGECACHE` and :data:`FPDF_NO_NATIVETEXT`, for instance.
@@ -403,7 +409,21 @@ class PdfPage (BitmapConvAliases):
         """
         
         validate_colors(color, color_scheme)
-        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder, prefer_bgrx)
+        
+        if forced_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
+            cl_pdfium = auto_bitmap_format(color, greyscale, prefer_bgrx)
+        else:
+            cl_pdfium = forced_bitmap_format
+        
+        # attempting to use FPDF_REVERSE_BYTE_ORDER with FPDFBitmap_Gray is not only unnecessary, but also causes issues, so prohibit it (pdfium bug?)
+        if cl_pdfium == pdfium.FPDFBitmap_Gray:
+            rev_byteorder = False
+        
+        if rev_byteorder:
+            cl_string = BitmapConstToReverseStr[cl_pdfium]
+        else:
+            cl_string = BitmapConstToStr[cl_pdfium]
+        
         c_color = color_tohex(color, rev_byteorder)
         n_channels = len(cl_string)
         
