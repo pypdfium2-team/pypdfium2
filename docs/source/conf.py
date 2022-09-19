@@ -27,6 +27,7 @@ extensions = [
 
 add_module_names = False
 autodoc_preserve_defaults = True
+autodoc_inherit_docstrings = False
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,

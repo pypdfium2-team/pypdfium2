@@ -15,19 +15,45 @@ except ImportError:
 
 
 class BitmapConvBase:
+    """
+    Parent class for bitmap converters compatible with :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to`.
+    The constructor captures any arguments (positionals and keywords) and adds them to the :meth:`.run` call.
+    It is not necessary to implement a constructor in the inheriting class.
+    """
     
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
     
     @staticmethod
-    def run():
+    def run(result, renderer_kws, *args, **kwargs):  # generic header
+        """
+        The actual converter function, to be implemented by the inheriting class.
+        See below for a specification of the parameters that will be passed to the function.
+        
+        Parameters:
+            result (tuple):
+                Result of the :meth:`.PdfPage.render_base` call (ctypes ubyte array, color format, size).
+            renderer_kws (dict):
+                Dictionary of keywords that were passed to :meth:`.PdfPage.render_base` by the caller. May be empty.
+            args (tuple):
+                Further positional arguments captured by the constructor.
+                The overriding function may take custom parameters, but must not capture arbitrary arguments!
+            kwargs (dict):
+                Further keyword arguments captured by the constructor.
+                The overriding function may take custom parameters, but must not capture arbitrary keywords!
+        Returns:
+            typing.Any: The converted rendering result (implementation-specific).
+        """
         raise NotImplementedError("Inheriting class must provide run() method.")
 
 
 class BitmapConv:
     
     class any (BitmapConvBase):
+        """
+        TODO
+        """
         
         @staticmethod
         def run(result, renderer_kws, converter):
@@ -35,6 +61,19 @@ class BitmapConv:
             return converter(c_array), *info
     
     class numpy_ndarray (BitmapConvBase):
+        """
+        *Requires* :mod:`numpy`.
+        
+        Get the bitmap as shaped NumPy array referencing the original ctypes array.
+        This converter never makes a copy of the data.
+        
+        Returns:
+            (numpy.ndarray, str): NumPy array, and color format.
+        
+        Note:
+            This converter does not return bitmap size because the array is multi-dimensional,
+            so this information is already contained in the array's shape.
+        """
         
         @staticmethod
         def run(result, renderer_kws):
@@ -49,6 +88,28 @@ class BitmapConv:
             return np_array, cl_format
     
     class pil_image (BitmapConvBase):
+        """
+        *Requires* :mod:`PIL`.
+        
+        Get the bitmap as PIL image.
+        
+        Parameters:
+            prefer_la (bool):
+                If :data:`True`, automatically convert ``RGBA``/``BGRA`` to ``LA`` if rendering in greyscale mode with alpha channel
+                (PDFium does not provide ``LA`` output directly).
+        Returns:
+            PIL.Image.Image: The image object.
+        
+        Note:
+            This converter does not return additional parameters.
+            Information on size and color format (mode) is already contained in the image object.
+        Hint:
+            This uses :func:`PIL.Image.frombuffer` under the hood.
+            If possible for the color format in question, the image will reference the ctypes array. Otherwise, PIL may create a copy of the data.
+            At the time of writing, PIL can directly work with ``RGBA``, ``RGBX`` or ``L`` pixel data (see :attr:`PIL.Image._MAPMODES`).
+            Depending on the use case, you may want to consider setting the rendering parameters *rev_byteorder* and *prefer_bgrx* to :data:`True`
+            to generate natively compatible output.
+        """
         
         @staticmethod
         def run(result, renderer_kws, prefer_la=False):
@@ -72,7 +133,7 @@ class BitmapConv:
 class BitmapConvAliases:
     """
     Base class for deprecated rendering target aliases. Retained for backwards compatibility, but may be removed in the future.
-    The :meth:`PdfPage.render_to` / :meth:`PdfDocument.render_to` APIs should be used instead.
+    The :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to` APIs should be used instead.
     
     Important:
         Deprecated APIs may be removed with a minor release after a sufficient timeframe.
@@ -89,6 +150,8 @@ class BitmapConvAliases:
         """
         .. deprecated:: 3.0
             Use ``render_to(BitmapConv.any(bytes), **kwargs)`` instead. See :class:`.BitmapConv.any`.
+        Note:
+            This creates an independent copy of the pixel data, which should be avoided in general.
         """
         return self.render_to(BitmapConv.any(bytes), **kwargs)
     
