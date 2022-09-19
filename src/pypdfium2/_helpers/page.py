@@ -18,7 +18,10 @@ from pypdfium2._helpers.misc import (
     OptimiseMode,
     PdfiumError,
 )
-from pypdfium2._helpers.converters import BitmapConvAliases
+from pypdfium2._helpers.converters import (
+    BitmapConv,
+    AnyBitmapConv,
+)
 from pypdfium2._helpers.textpage import PdfTextPage
 
 try:
@@ -27,7 +30,7 @@ except ImportError:
     harfbuzz = None
 
 
-class PdfPage (BitmapConvAliases):
+class PdfPage:
     """
     Page helper class.
     
@@ -468,9 +471,20 @@ class PdfPage (BitmapConvAliases):
         return buffer, cl_string, (width, height)
     
     
-    def render_to(self, conv, **renderer_kws):
-        result = self.render_base(**renderer_kws)
-        return conv.func(result, renderer_kws, *conv.args, **conv.kwargs)
+    def render_to(self, converter, **kwargs):
+        return converter( self.render_base(**kwargs) )
+    
+    # deprecated, retained for backwards compatibility
+    def render_tobytes(self, **kwargs):
+        return self.render_to(AnyBitmapConv(bytes), **kwargs)
+    
+    # deprecated, retained for backwards compatibility
+    def render_tonumpy(self, **kwargs):
+        return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
+    
+    # deprecated, retained for backwards compatibility
+    def render_topil(self, **kwargs):
+        return self.render_to(BitmapConv.pil_image, **kwargs)
 
 
 class ColorScheme:

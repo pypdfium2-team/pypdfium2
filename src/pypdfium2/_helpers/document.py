@@ -23,7 +23,10 @@ from pypdfium2._helpers.misc import (
     FileAccess,
     PdfiumError,
 )
-from pypdfium2._helpers.converters import BitmapConvAliases
+from pypdfium2._helpers.converters import (
+    BitmapConv,
+    AnyBitmapConv,
+)
 from pypdfium2._helpers.page import PdfPage
 
 try:
@@ -34,7 +37,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class PdfDocument (BitmapConvAliases):
+class PdfDocument:
     """
     Document helper class.
     
@@ -505,6 +508,19 @@ class PdfDocument (BitmapConvAliases):
                 yield result
         
         assert len(page_indices) == i
+    
+    
+    # deprecated, retained for backwards compatibility
+    def render_tobytes(self, **kwargs):
+        return self.render_to(AnyBitmapConv(bytes), **kwargs)
+    
+    # deprecated, retained for backwards compatibility
+    def render_tonumpy(self, **kwargs):
+        return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
+    
+    # deprecated, retained for backwards compatibility
+    def render_topil(self, **kwargs):
+        return self.render_to(BitmapConv.pil_image, **kwargs)
 
 
 class _writer_class:
