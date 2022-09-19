@@ -18,10 +18,7 @@ from pypdfium2._helpers.misc import (
     OptimiseMode,
     PdfiumError,
 )
-from pypdfium2._helpers.converters import (
-    BitmapConv,
-    AnyBitmapConv,
-)
+from pypdfium2._helpers.converters import BitmapConv
 from pypdfium2._helpers.textpage import PdfTextPage
 
 try:
@@ -472,19 +469,20 @@ class PdfPage:
     
     
     def render_to(self, converter, **kwargs):
-        return converter( self.render_base(**kwargs) )
+        result = self.render_base(**kwargs)
+        return converter(result, kwargs)
     
     # deprecated, retained for backwards compatibility
     def render_tobytes(self, **kwargs):
-        return self.render_to(AnyBitmapConv(bytes), **kwargs)
+        return self.render_to(BitmapConv.any(bytes), **kwargs)
     
     # deprecated, retained for backwards compatibility
     def render_tonumpy(self, **kwargs):
-        return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
+        return self.render_to(BitmapConv.numpy_ndarray(), **kwargs)
     
     # deprecated, retained for backwards compatibility
     def render_topil(self, **kwargs):
-        return self.render_to(BitmapConv.pil_image, **kwargs)
+        return self.render_to(BitmapConv.pil_image(), **kwargs)
 
 
 class ColorScheme:

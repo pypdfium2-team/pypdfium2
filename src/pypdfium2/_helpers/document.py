@@ -23,10 +23,7 @@ from pypdfium2._helpers.misc import (
     FileAccess,
     PdfiumError,
 )
-from pypdfium2._helpers.converters import (
-    BitmapConv,
-    AnyBitmapConv,
-)
+from pypdfium2._helpers.converters import BitmapConv
 from pypdfium2._helpers.page import PdfPage
 
 try:
@@ -512,15 +509,15 @@ class PdfDocument:
     
     # deprecated, retained for backwards compatibility
     def render_tobytes(self, **kwargs):
-        return self.render_to(AnyBitmapConv(bytes), **kwargs)
+        return self.render_to(BitmapConv.any(bytes), **kwargs)
     
     # deprecated, retained for backwards compatibility
     def render_tonumpy(self, **kwargs):
-        return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
+        return self.render_to(BitmapConv.numpy_ndarray(), **kwargs)
     
     # deprecated, retained for backwards compatibility
     def render_topil(self, **kwargs):
-        return self.render_to(BitmapConv.pil_image, **kwargs)
+        return self.render_to(BitmapConv.pil_image(), **kwargs)
 
 
 class _writer_class:
