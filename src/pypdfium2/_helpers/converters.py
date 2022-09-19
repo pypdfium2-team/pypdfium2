@@ -28,12 +28,14 @@ class BitmapConvBase:
 class BitmapConv:
     
     class any (BitmapConvBase):
+        
         @staticmethod
         def run(result, renderer_kws, converter):
             c_array, *info = result
             return converter(c_array), *info
     
     class numpy_ndarray (BitmapConvBase):
+        
         @staticmethod
         def run(result, renderer_kws):
             
@@ -47,8 +49,9 @@ class BitmapConv:
             return np_array, cl_format
     
     class pil_image (BitmapConvBase):
+        
         @staticmethod
-        def run(result, renderer_kws):
+        def run(result, renderer_kws, prefer_la=False):
             
             if PIL is None:
                 raise RuntimeError("Pillow library needs to be installed for pil_image() converter.")
@@ -58,7 +61,12 @@ class BitmapConv:
             if cl_src in UnreverseBitmapStr.keys():
                 cl_dst = UnreverseBitmapStr[cl_src]
             
-            return PIL.Image.frombuffer(cl_dst, size, c_array, "raw", cl_src, 0, 1)
+            pil_image = PIL.Image.frombuffer(cl_dst, size, c_array, "raw", cl_src, 0, 1)
+            if prefer_la:
+                if renderer_kws.get("greyscale", False) and cl_dst == "RGBA":
+                    pil_image = pil_image.convert("LA")
+            
+            return pil_image
 
 
 class BitmapConvAliases:
@@ -74,5 +82,5 @@ class BitmapConvAliases:
     def render_tonumpy(self, **kwargs):
         return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
     
-    def render_topil(self, **kwargs):
-        return self.render_to(BitmapConv.pil_image, **kwargs)
+    def render_topil(self, prefer_la=False, **kwargs):
+        return self.render_to(BitmapConv.pil_image(prefer_la=prefer_la), **kwargs)
