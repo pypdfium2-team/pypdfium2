@@ -131,7 +131,7 @@ def test_render_page_alpha(sample_page):
     for g in (image, image_rev): g.close()
 
 
-def test_render_page_greyscale(sample_page):
+def test_render_page_grey(sample_page):
 
     kwargs = dict(
         greyscale = True,
@@ -144,16 +144,24 @@ def test_render_page_greyscale(sample_page):
     assert image.mode == "L"
     image.save(join(OutputDir, "greyscale.png"))
     for g in (image, image_rev): g.close()
-    
-    # PDFium currently doesn't support LA, hence greyscale + alpha rendering results in RGBA
+
+
+@pytest.mark.parametrize(
+    "prefer_la", [False, True]
+)
+def test_render_page_grey_alpha(prefer_la, sample_page):
     image = sample_page.render_topil(
         greyscale = True,
         color = (0, 0, 0, 0),
+        prefer_la = prefer_la,
         scale = 0.5,
     )
     assert image.size == (298, 421)
-    assert image.mode == "RGBA"
-    image.save(join(OutputDir, "greyscale_alpha.png"))
+    if prefer_la:
+        assert image.mode == "LA"
+    else:
+        assert image.mode == "RGBA"
+    image.save(join(OutputDir, "greyscale_alpha_%s.png" % image.mode))
     image.close()
 
 

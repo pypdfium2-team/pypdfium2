@@ -19,9 +19,10 @@
     - The `get_type()` method of `PdfPageObject` was replaced with a `type` attribute.
     
     *Other changes*
-    - Added new `render_to()` functions to `PdfPage` and `PdfDocument` that take a custom bitmap converter, to transform the ctypes array to a different object. A set of built-in converters is provided with the `BitmapConv` class. Confer the updated API documentation for details. The previous rendering functions (`render_topil()` `render_tobytes()`, ...) are still around as deprecated aliases but may be removed eventually.
     - New rendering parameters added: `color_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `extra_flags`, `allocator`, and `memory_limit`.
+    - Added new `render_to()` functions to `PdfPage` and `PdfDocument` that take a custom bitmap converter, to transform the ctypes array to a different object. A set of built-in converters is provided with the `BitmapConv` class. Confer the updated API documentation for details. The previous rendering functions (`render_topil()` `render_tobytes()`, ...) are still around as deprecated aliases but may be removed eventually.
     - New rendering target `numpy.ndarray` added.
+    - The `PIL.Image.Image` target now accepts a `prefer_la` parameter to request automatic conversion of `BGRA`/`RGBA` to `LA` if rendering in greyscale with alpha channel (PDFium does not support `LA` natively).
     - New method `PdfDocument.get_page_size()` to retrieve page size by index without needing to load a `PdfPage` (uses `FPDF_GetPageSizeByIndexF()` under the hood).
     - All document-level methods that take a page index now accept negative values for reverse indexing (except the rendering methods).
     - `PdfPage.get_objects()` can now recursively descend into Form XObjects.
