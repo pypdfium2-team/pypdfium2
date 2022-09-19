@@ -19,6 +19,10 @@ class BitmapConvBase:
     Parent class for bitmap converters compatible with :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to`.
     The constructor captures any arguments (positionals and keywords) and adds them to the :meth:`.run` call.
     It is not necessary to implement a constructor in the inheriting class.
+    
+    Tip:
+        If you wish to implement a custom converter that does not take any parametrs, note that ``render_to()`` accepts any callable.
+        It does not necessarily have to be an instance of this class.
     """
     
     def __init__(self, *args, **kwargs):
@@ -43,7 +47,10 @@ class BitmapConvBase:
                 Further keyword arguments captured by the constructor.
                 The overriding function may take custom parameters, but must not capture arbitrary keywords!
         Returns:
-            typing.Any: The converted rendering result (implementation-specific).
+            typing.Any:
+                The converted rendering result (implementation-specific).
+                If the converter is used with :meth:`.PdfDocument.render_to` (or anything else that uses :mod:`multiprocessing`),
+                the return values must be compatible with :mod:`pickle`.
         """
         raise NotImplementedError("Inheriting class must provide run() method.")
 
@@ -52,7 +59,19 @@ class BitmapConv:
     
     class any (BitmapConvBase):
         """
-        TODO
+        Simple factory for converters that merely translate the ctypes array, while passing through additional information unaffected.
+        
+        Example:
+            ``render_to(BitmapConv.any(bytes), **kwargs)``:
+                Get the pixel data as bytes (independent copy of the ctypes array).
+        
+        Parameters:
+            converter (typing.Callable):
+                A callable to translate a ctypes array to a different data type.
+                The callable could be a function, a class with constructor, or an instance of a class implementing ``__call__(self, ...)``.
+        Returns:
+            (typing.Any, ...):
+                The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (color format, size).
         """
         
         @staticmethod
@@ -132,12 +151,9 @@ class BitmapConv:
 
 class BitmapConvAliases:
     """
-    Base class for deprecated rendering target aliases. Retained for backwards compatibility, but may be removed in the future.
+    Base class for deprecated rendering target aliases.
+    Retained for backwards compatibility, but might be removed in the future.
     The :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to` APIs should be used instead.
-    
-    Important:
-        Deprecated APIs may be removed with a minor release after a sufficient timeframe.
-        No major release might be made to mark the removal of this API.
     """
     
     def render_to(self):
