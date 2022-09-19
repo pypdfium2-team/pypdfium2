@@ -19,8 +19,8 @@ from pypdfium2._helpers.misc import (
     PdfiumError,
 )
 from pypdfium2._helpers.converters import (
-    BitmapConv,
-    AnyBitmapConv,
+    BitmapConvBase,
+    BitmapConvAliases,
 )
 from pypdfium2._helpers.textpage import PdfTextPage
 
@@ -30,7 +30,7 @@ except ImportError:
     harfbuzz = None
 
 
-class PdfPage:
+class PdfPage (BitmapConvAliases):
     """
     Page helper class.
     
@@ -267,6 +267,18 @@ class PdfPage:
                 )
     
     
+    def render_to(self, conv, **renderer_kws):
+        args = (self.render_base(**renderer_kws), renderer_kws)
+        if isinstance(conv, BitmapConvBase):
+            return conv.run(*args, *conv.args, **conv.kwargs)
+        elif issubclass(conv, BitmapConvBase):
+            return conv().run(*args)
+        elif callable(conv):
+            return conv(*args)
+        else:
+            raise ValueError("Converter must be an instance or subclass of BitmapConvBase, or a callable, but %s was given." % conv)
+    
+    
     def render_base(
             self,
             scale = 1,
@@ -469,22 +481,6 @@ class PdfPage:
             pdfium.FPDF_FFLDraw(form_env, *render_args)
         
         return buffer, cl_string, (width, height)
-    
-    
-    def render_to(self, converter, **kwargs):
-        return converter( self.render_base(**kwargs) )
-    
-    # deprecated, retained for backwards compatibility
-    def render_tobytes(self, **kwargs):
-        return self.render_to(AnyBitmapConv(bytes), **kwargs)
-    
-    # deprecated, retained for backwards compatibility
-    def render_tonumpy(self, **kwargs):
-        return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
-    
-    # deprecated, retained for backwards compatibility
-    def render_topil(self, **kwargs):
-        return self.render_to(BitmapConv.pil_image, **kwargs)
 
 
 class ColorScheme:
