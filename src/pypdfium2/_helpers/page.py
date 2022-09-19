@@ -280,6 +280,7 @@ class PdfPage (BitmapConvAliases):
         if isinstance(conv, BitmapConvBase):
             return conv.run(*args, *conv.args, **conv.kwargs)
         elif issubclass(conv, BitmapConvBase):
+            # run() is supposed to be a static method, but just initialise an instance of the converter class so it also works if the implementer forgot the decorator
             return conv().run(*args)
         elif callable(conv):
             return conv(*args)

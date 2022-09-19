@@ -30,10 +30,16 @@ class BitmapConvBase:
         self.kwargs = kwargs
     
     @staticmethod
-    def run(result, renderer_kws, *args, **kwargs):  # generic header
+    def run(result, renderer_kws, *args, **kwargs):
         """
         The actual converter function, to be implemented by the inheriting class.
-        See below for a specification of the parameters that will be passed to the function.
+        The header reflects what the function may receive (two mandatory positionals, and arbitrary implementation-dependent parameters).
+        See below for a specification.
+        
+        Note:
+            :meth:`.run` should be implemented as a :func:`staticmethod`.
+        Important:
+            To make sure callers are notified of possible mistakes, the overriding function should never capture unrecognised arguments!
         
         Parameters:
             result (tuple):
@@ -41,11 +47,9 @@ class BitmapConvBase:
             renderer_kws (dict):
                 Dictionary of keywords that were passed to :meth:`.PdfPage.render_base` by the caller. May be empty.
             args (tuple):
-                Further positional arguments captured by the constructor.
-                The overriding function may take custom parameters, but must not capture arbitrary arguments!
+                Further positional arguments captured by the constructor, to be explicitly taken by the implementation (see the admonition above).
             kwargs (dict):
-                Further keyword arguments captured by the constructor.
-                The overriding function may take custom parameters, but must not capture arbitrary keywords!
+                Further keyword arguments captured by the constructor, to be explicitly taken by the implementation (see the admonition above).
         Returns:
             typing.Any:
                 The converted rendering result (implementation-specific).
@@ -56,10 +60,16 @@ class BitmapConvBase:
 
 
 class BitmapConv:
+    """
+    Built-in converters to translate the result of :meth:`.PdfPage.render_base`.
+    
+    Note:
+        Technically, the converter implementations are standalone - the outer class is just to nicely enclose them in one namespace.
+    """
     
     class any (BitmapConvBase):
         """
-        Simple factory for converters that merely translate the ctypes array, while passing through additional information unaffected.
+        Simple factory for converters that merely work with the ctypes array, while passing through additional information unaffected.
         
         Example:
             ``render_to(BitmapConv.any(bytes), **kwargs)``:
@@ -78,6 +88,7 @@ class BitmapConv:
         def run(result, renderer_kws, converter):
             c_array, *info = result
             return converter(c_array), *info
+    
     
     class numpy_ndarray (BitmapConvBase):
         """
@@ -105,6 +116,7 @@ class BitmapConv:
             np_array.shape = (height, width, len(cl_format))
             
             return np_array, cl_format
+    
     
     class pil_image (BitmapConvBase):
         """
