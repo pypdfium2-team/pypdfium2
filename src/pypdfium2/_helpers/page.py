@@ -272,6 +272,8 @@ class PdfPage (BitmapConvAliases):
         TODO
         """
         
+        # In the future, we could add means to set different defaults for specific built-in converters, if necessary.
+        
         args = (self.render_base(**renderer_kws), renderer_kws)
         if isinstance(conv, BitmapConvBase):
             return conv.run(*args, *conv.args, **conv.kwargs)

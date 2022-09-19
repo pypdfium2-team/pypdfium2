@@ -152,9 +152,11 @@ class BitmapConv:
 class BitmapConvAliases:
     """
     Base class for deprecated rendering target aliases.
-    Retained for backwards compatibility, but might be removed in the future.
+    Currently retained for backwards compatibility, but might be removed in the future.
     The :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to` APIs should be used instead.
     """
+    
+    # TODO consider implementing a parameter sieve using :mod:`inspect` that smartly divides keyword arguments between converter and renderer
     
     def render_to(self):
         """
