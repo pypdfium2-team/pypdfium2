@@ -145,21 +145,27 @@ Here are some examples of using the support model API.
 * Render a single page
   ```python
   image = page.render_to(
-      pdfium.BitmapConv.pil_image,
-      scale = 1,              # 72dpi resolution
-      rotation = 0,           # no additional rotation
-      crop = (0, 0, 0, 0),    # no crop (left, right, bottom, top)
-      color = (255, 255, 255, 255),  # RGBA background color (white)
-      greyscale = False,      # render colored
-      optimise_mode = OptimiseMode.NONE,  # no supbixel rendering
-      draw_annots = True,     # show annotations
-      draw_forms = True,      # show forms
-      no_smoothtext = False,  # anti-alias text
-      no_smoothimage = False, # anti-alias images
-      no_smoothpath = False,  # anti-alias paths
-      rev_byteorder = False,  # do not reverse byte order
-      extra_flags = 0,        # no additional PDFium flags
-      memory_limit = 2**30,   # maximum allocation (1 GiB)
+      # defaults
+      scale = 1,                          # 72dpi resolution
+      rotation = 0,                       # no additional rotation
+      crop = (0, 0, 0, 0),                # no crop (form: left, right, bottom, top)
+      greyscale = False,                  # coloured output
+      color = (255, 255, 255, 255),       # fill bitmap with white background before rendering (form: RGBA)
+      color_scheme = None,                # no custom colour scheme
+      fill_to_stroke = False,             # don't stroke fill paths (relevant for custom colour scheme only)
+      optimise_mode = OptimiseMode.NONE,  # no optimisations (e. g. subpixel rendering)
+      draw_annots = True,                 # show annotations
+      draw_forms = True,                  # show forms
+      no_smoothtext = False,              # anti-alias text
+      no_smoothimage = False,             # anti-alias images
+      no_smoothpath = False,              # anti-alias paths
+      force_halftone = False,             # don't force halftone for image stretching
+      rev_byteorder = False,              # don't reverse byte order
+      prefer_bgrx = False,                # don't prefer four channels for coloured output
+      force_bitmap_format = None,         # don't force a specific bitmap format
+      extra_flags = 0,                    # no extra flags
+      allocator = None,                   # no custom allocator
+      memory_limit = 2**30,               # maximum allocation (1 GiB)
   )
   image.show()
   image.close()
@@ -636,7 +642,8 @@ sphinx-build -b html ./docs/source ./docs/build/html/
 ```
 
 Built documentation is hosted on [`readthedocs.org`](https://readthedocs.org/projects/pypdfium2/).
-The web interface provides an administration page for maintainers. Moreover, a [`.readthedocs.yaml`](.readthedocs.yaml) file is used to configure build host and installation method (see the [instructions](https://docs.readthedocs.io/en/stable/config-file/v2.html)).
+It is primarily configured using a [`.readthedocs.yaml`](.readthedocs.yaml) file (see the [instructions](https://docs.readthedocs.io/en/stable/config-file/v2.html)).
+The web interface also provides an administration page for maintainers.
 
 ### Testing
 

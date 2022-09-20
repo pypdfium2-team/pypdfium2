@@ -149,6 +149,11 @@ def attach_parser(subparsers):
         help = "Render with reverse byte order internally, i. e. RGB(A) instead of BGR(A). The result should be completely identical.",
     )
     parser.add_argument(
+        "--prefer-bgrx",
+        action = "store_true",
+        help = "Request the use of a four-channel pixel format for coloured output, even if rendering without transparency.",
+    )
+    parser.add_argument(
         "--processes",
         default = os.cpu_count(),
         type = int,
@@ -199,6 +204,7 @@ def main(args):
             draw_forms = not args.no_forms,
             force_halftone = args.force_halftone,
             rev_byteorder = args.rev_byteorder,
+            prefer_bgrx = args.prefer_bgrx,
         )
         for type in args.no_antialias:
             kwargs["no_smooth%s" % type] = True

@@ -271,10 +271,44 @@ class PdfPage (BitmapConvAliases):
     
     def render_to(self, converter, **renderer_kws):
         """
-        TODO
+        Rasterise a page to a specific output format.
+        
+        Parameters:
+            
+            converter (BitmapConvBase | typing.Callable):
+                
+                A translator to convert the output of :meth:`.render_base`. See :class:`.BitmapConv` for a set of built-in converters.
+                It may be a class, or an instance of a class, that implements the converter interface by inheriting from :class:`.BitmapConvBase` and overriding :meth:`~.BitmapConvBase.run`. Converters may be initialised with parameters to be passed to their :meth:`~.BitmapConvBase.run` method.
+                
+                Alternatively, if your custom converter does not take any parameters, you may also just pass in a function (or callable) that consumes two positional arguments (rendering output, dictionary of rendering keywords) and returns the converted result.
+            
+            renderer_kws (dict):
+                Keyword arguments to the renderer.
+        
+        Returns:
+            typing.Any: Converter-specific result.
+        
+        Examples:
+            
+            .. code-block:: python
+                
+                # convert to a NumPy array
+                array, cl_format = render_to(BitmapConv.numpy_ndarray, ...)
+                # passing an initialised converter without arguments is equivalent
+                array, cl_format = render_to(BitmapConv.numpy_ndarray(), ...)
+                
+                # convert to a PIL image (with default settings)
+                image = render_to(BitmapConv.pil_image, ...)
+                
+                # convert to PIL image (with specific settings)
+                image = render_to(BitmapConv.pil_image(prefer_la=True), ...)
+                
+                # convert to bytes using the special "any" converter factory
+                data, cl_format, size = render_to(BitmapConv.any(bytes), ...)
         """
         
         # In the future, we could add means to set different defaults for specific built-in converters, if necessary.
+        # We could also consider implementing a parameter sieve to automatically divide keyword arguments between converter and renderer so that callers don't need to care about the separation
         
         args = (self.render_base(**renderer_kws), renderer_kws)
         if isinstance(converter, BitmapConvBase):
@@ -306,7 +340,7 @@ class PdfPage (BitmapConvAliases):
             force_halftone = False,
             rev_byteorder = False,
             prefer_bgrx = False,
-            forced_bitmap_format = None,
+            force_bitmap_format = None,
             extra_flags = 0,
             allocator = None,
             memory_limit = 2**30,
@@ -365,19 +399,20 @@ class PdfPage (BitmapConvAliases):
                 Always use halftone for image stretching.
             
             rev_byteorder (bool):
-                By default, the output pixel format will be ``BGR(A)``.
-                This option may be used to render with reversed byte order, leading to ``RGB(A)`` output instead.
+                By default, the output pixel format will be ``BGR(A/X)``.
+                This option may be used to render with reversed byte order, leading to ``RGB(A/X)`` output instead.
                 ``L`` is unaffected.
             
             prefer_bgrx (bool):
-                TODO
+                Request the use of a four-channel pixel format for coloured output, even if rendering without transparency.
+                (i. e. ``BGRX``/``RGBX`` rather than ``BGR``/``RGB``).
             
-            forced_bitmap_format (int | None):
-                TODO
+            force_bitmap_format (int | None):
+                Override the automatic pixel format selection and enforce the use of a specific format (:attr:`FPDFBitmap_*`).
+                For instance, this may be used to render in greyscale mode while using ``BGR`` as output format (default choice would be ``L``).
             
             extra_flags (int):
-                Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
-                Flags not covered by other options include :data:`FPDF_RENDER_LIMITEDIMAGECACHE` and :data:`FPDF_NO_NATIVETEXT`, for instance.
+                Additional PDFium rendering flags. Multiple flags may be combined with bitwise OR (``|`` operator).
             
             allocator (typing.Callable | None):
                 A function to provide a custom ctypes buffer. It is called with the required buffer size in bytes.
@@ -389,8 +424,7 @@ class PdfPage (BitmapConvAliases):
                 If :data:`None` or 0, this function may allocate arbitrary amounts of memory as far as Python and the OS permit.
             
         Returns:
-            (ctypes array, str, (int, int)):
-            Ctypes array, color format, and image size.
+            (ctypes array, str, (int, int)): Bitmap data, color format, and image size.
             The color format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, or ``L``, depending on the parameters *color*, *greyscale* and *rev_byteorder*.
             Image size is given in pixels as a tuple of width and height.
         
@@ -411,10 +445,10 @@ class PdfPage (BitmapConvAliases):
         
         validate_colors(color, color_scheme)
         
-        if forced_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
+        if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
             cl_pdfium = auto_bitmap_format(color, greyscale, prefer_bgrx)
         else:
-            cl_pdfium = forced_bitmap_format
+            cl_pdfium = force_bitmap_format
         
         # attempting to use FPDF_REVERSE_BYTE_ORDER with FPDFBitmap_Gray is not only unnecessary, but also causes issues, so prohibit it (pdfium bug?)
         if cl_pdfium == pdfium.FPDFBitmap_Gray:

@@ -452,16 +452,16 @@ class PdfDocument (BitmapConvAliases):
         """
         Concurrently render multiple pages, using a process pool executor.
         
+        .. seealso:: :meth:`.PdfPage.render_to` / :meth:`.PdfPage.render_base`
+        
         Parameters:
-            converter (BitmapConvBase):
-                TODO
             page_indices (typing.Sequence[int] | None):
                 A sequence of zero-based indices of the pages to render. Reverse indexing or duplicate page indices are prohibited.
                 If :data:`None`, all pages will be included. The order of results is guaranteed to match the order of given page indices.
             n_processes (int):
                 Target number of parallel processes.
             kwargs (dict):
-                Keyword arguments to be passed to :meth:`.PdfPage.render_base`.
+                Keyword arguments to the renderer.
         Yields:
             :data:`typing.Any`: Implementation-specific result object.
         """

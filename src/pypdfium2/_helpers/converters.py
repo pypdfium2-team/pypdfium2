@@ -33,9 +33,8 @@ class BitmapConvBase:
         See below for a specification.
         
         Note:
-            :meth:`.run` should be implemented as a :func:`staticmethod`.
-        Important:
-            To make sure callers are notified of possible mistakes, the overriding function should never capture unrecognised arguments!
+            * :meth:`.run` should be implemented as a :func:`staticmethod`.
+            * To make sure callers are notified of possible mistakes, the overriding function should never capture unrecognised arguments!
         
         Parameters:
             result (tuple):
@@ -47,10 +46,7 @@ class BitmapConvBase:
             kwargs (dict):
                 Further keyword arguments captured by the constructor, to be explicitly taken by the implementation (see the admonition above).
         Returns:
-            typing.Any:
-                The converted rendering result (implementation-specific).
-                If the converter is used in a :mod:`multiprocessing` context (like :meth:`.PdfDocument.render_to`),
-                the return value must be compatible with :mod:`pickle`.
+            typing.Any: The converted rendering result (implementation-specific).
         """
         raise NotImplementedError("Inheriting class must provide run() method.")
 
@@ -73,7 +69,7 @@ class BitmapConv:
         Parameters:
             converter (typing.Callable):
                 A callable to translate a ctypes array to a different data type.
-                It could be a function, a class with constructor, or an instance of a class implementing ``__call__(self, ...)``.
+                It could be a function, a class with constructor, or an instance of a class implementing ``__call__``.
         Returns:
             (typing.Any, ...):
                 The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (color format, size).
@@ -160,31 +156,27 @@ class BitmapConvAliases:
     The :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to` APIs should be preferred instead.
     """
     
-    # TODO consider implementing a parameter sieve using :mod:`inspect` that smartly divides keyword arguments between converter and renderer
-    
     def render_to(self):
-        """
-        Method to be implemented by the inheriting class.
-        """
+        """ Method to be implemented by the inheriting class. """
         raise NotImplementedError("Inheriting class must provide render_to() method.")
     
     def render_tobytes(self, **kwargs):
         """
         .. deprecated:: 3.0
-            Use ``render_to(BitmapConv.any(bytes), **kwargs)`` instead. See :class:`.BitmapConv.any`.
+            Use ``render_to(BitmapConv.any(bytes), ...)`` instead.
         """
         return self.render_to(BitmapConv.any(bytes), **kwargs)
     
     def render_tonumpy(self, **kwargs):
         """
         .. deprecated:: 3.0
-            Use ``render_to(BitmapConv.numpy_ndarray, **kwargs)`` instead. See :class:`.BitmapConv.numpy_ndarray`.
+            Use ``render_to(BitmapConv.numpy_ndarray, ...)`` instead.
         """
         return self.render_to(BitmapConv.numpy_ndarray, **kwargs)
     
     def render_topil(self, prefer_la=False, **kwargs):
         """
         .. deprecated:: 3.0
-            Use ``render_to(BitmapConv.pil_image, **kwargs)`` instead. See :class:`.BitmapConv.pil_image`.
+            Use ``render_to(BitmapConv.pil_image, ...)`` instead.
         """
         return self.render_to(BitmapConv.pil_image(prefer_la=prefer_la), **kwargs)
