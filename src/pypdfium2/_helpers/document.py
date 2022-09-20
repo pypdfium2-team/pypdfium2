@@ -458,7 +458,9 @@ class PdfDocument (BitmapConvAliases):
             file_access = file_access,
         )
         page = pdf.get_page(index)
-        return page.render_to(converter, **kwargs), index
+        result = page.render_to(converter, **kwargs)
+        for g in (page, pdf): g.close()
+        return result, index
     
     
     def render_to(
