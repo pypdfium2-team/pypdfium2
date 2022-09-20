@@ -101,7 +101,8 @@ Here are some examples of using the support model API.
 * Render multiple pages concurrently
   ```python
   page_indices = [i for i in range(n_pages)]  # all pages
-  renderer = pdf.render_topil(
+  renderer = pdf.render_to(
+      pdfium.BitmapConv.pil_image,
       page_indices = page_indices,
       scale = 300/72,  # 300dpi resolution
   )
@@ -143,21 +144,28 @@ Here are some examples of using the support model API.
 
 * Render a single page
   ```python
-  image = page.render_topil(
-      scale = 1,              # 72dpi resolution
-      rotation = 0,           # no additional rotation
-      crop = (0, 0, 0, 0),    # no crop (left, right, bottom, top)
-      color = (255, 255, 255, 255),  # RGBA background color (white)
-      greyscale = False,      # render colored
-      optimise_mode = OptimiseMode.NONE,  # no supbixel rendering
-      draw_annots = True,     # show annotations
-      draw_forms = True,      # show forms
-      no_smoothtext = False,  # anti-alias text
-      no_smoothimage = False, # anti-alias images
-      no_smoothpath = False,  # anti-alias paths
-      rev_byteorder = False,  # do not reverse byte order
-      extra_flags = 0,        # no additional PDFium flags
-      memory_limit = 2**30,   # maximum allocation (1 GiB)
+  image = page.render_to(
+      # defaults
+      scale = 1,                          # 72dpi resolution
+      rotation = 0,                       # no additional rotation
+      crop = (0, 0, 0, 0),                # no crop (form: left, right, bottom, top)
+      greyscale = False,                  # coloured output
+      color = (255, 255, 255, 255),       # fill bitmap with white background before rendering (form: RGBA)
+      color_scheme = None,                # no custom colour scheme
+      fill_to_stroke = False,             # don't stroke fill paths (relevant for custom colour scheme only)
+      optimise_mode = OptimiseMode.NONE,  # no optimisations (e. g. subpixel rendering)
+      draw_annots = True,                 # show annotations
+      draw_forms = True,                  # show forms
+      no_smoothtext = False,              # anti-alias text
+      no_smoothimage = False,             # anti-alias images
+      no_smoothpath = False,              # anti-alias paths
+      force_halftone = False,             # don't force halftone for image stretching
+      rev_byteorder = False,              # don't reverse byte order
+      prefer_bgrx = False,                # don't prefer four channels for coloured output
+      force_bitmap_format = None,         # don't force a specific bitmap format
+      extra_flags = 0,                    # no extra flags
+      allocator = None,                   # no custom allocator
+      memory_limit = 2**30,               # maximum allocation (1 GiB)
   )
   image.show()
   image.close()
@@ -624,13 +632,32 @@ It should be noted that PDFium, unlike many other PDF libraries, is currently no
 
 This section contains some key information relevant for project maintainers.
 
-<!-- TODO wheel tags, documentation (sphinx), testing (pytest), maintainer access, GitHub peculiarities -->
+<!-- TODO wheel tags, maintainer access, GitHub peculiarities -->
+
+### Documentation
+
+pypdfium2 provides API documentation using [sphinx](https://github.com/sphinx-doc/sphinx/). It may be rendered to various formats, including HTML:
+```bash
+sphinx-build -b html ./docs/source ./docs/build/html/
+```
+
+Built documentation is hosted on [`readthedocs.org`](https://readthedocs.org/projects/pypdfium2/).
+It is primarily configured using a [`.readthedocs.yaml`](.readthedocs.yaml) file (see the [instructions](https://docs.readthedocs.io/en/stable/config-file/v2.html)).
+The web interface also provides an administration page for maintainers.
+
+### Testing
+
+pypdfium2 contains a small test suite to verify the library's functionality. It is written with [pytest](https://github.com/pytest-dev/pytest/):
+```bash
+python3 -m pytest tests/
+```
+You may pass `-sv` to get more detailed output.
 
 ### Release workflow
 
 The release process is fully automated using Python scripts and a CI setup for GitHub Actions.
 A new release is triggered every Monday, following the schedule of `pdfium-binaries`.
-You may also trigger the workflow manually using the GitHub Actions pannel or the [`gh`](https://cli.github.com/) command-line tool.
+You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
 
 Python release scripts are located in the folder `setupsrc/pl_setup`, along with custom setup code:
 * `update_pdfium.py` downloads binaries and generates the bindings.
@@ -649,9 +676,7 @@ The autorelease script has some peculiarities maintainers should know about:
     If `update_major.txt` exists, the major version is incremented.
     If `update_beta.txt` exists, a new beta tag is set, or an existing one is incremented.
     These files are removed automatically once the release is finished.
-  * If switching from a beta release to a non-beta release, the beta mark is removed while minor and patch versions remain unchanged.
-* By default, the commit log of pypdfium2 and PDFium will be included on the GitHub release page.
-  For exhaustive changes, this might not be desired, so you can opt out of this feature on per-release basis by creating an empty `skip_commit_log.txt` file in `autorelease/`.
+  * If switching from a beta release to a non-beta release, only the beta mark is removed while minor and patch versions remain unchanged.
 
 In case of necessity, you may also forego autorelease/CI and do the release manually, which will roughly work like this (though ideally it should never be needed):
 * Commit changes to the version file
@@ -662,13 +687,12 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   ```
 * Create a new tag that matches the version file
   ```bash
-  # subsitute $VERSION accordingly
+  # substitute $VERSION accordingly
   git tag -a $VERSION
   git push --tags
   ```
 * Build the packages
   ```bash
-  # assuming the python executable to use is called `python3`
   python3 setupsrc/pl_setup/update_pdfium.py
   python3 setupsrc/pl_setup/craft_wheels.py
   ```
@@ -679,7 +703,12 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   # upload to PyPI (this will interactively ask for your username/password)
   twine upload dist/*
   ```
-<!-- TODO note updating the stable branch -->
+* Update the `stable` branch to trigger a documentation rebuild
+  ```bash
+  git checkout stable
+  git rebase origin/main  # alternatively: git reset --hard main
+  git checkout main
+  ```
 
 If something went wrong with commit or tag, you can still revert the changes:
 ```bash
@@ -691,7 +720,7 @@ git tag -d $TAGNAME
 # delete remote tag
 git push --delete origin $TAGNAME
 ```
-Faulty PyPI releases can be yanked or deleted as well using the web interface.
+Faulty PyPI releases may be yanked using the web interface.
 
 
 ## In Use

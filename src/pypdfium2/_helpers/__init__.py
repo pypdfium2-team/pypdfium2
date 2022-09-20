@@ -4,6 +4,7 @@
 # full support model namespace
 
 from pypdfium2._helpers.misc import *
+from pypdfium2._helpers.converters import *
 from pypdfium2._helpers.document import *
 from pypdfium2._helpers.page import *
 from pypdfium2._helpers.textpage import *

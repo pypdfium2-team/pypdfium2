@@ -23,7 +23,7 @@ def _check_general(pdf, n_pages=1):
 def _check_render(pdf):
     
     page = pdf.get_page(0)
-    pil_image = page.render_topil()
+    pil_image = page.render_to(pdfium.BitmapConv.pil_image)
     page.close()
     
     assert pil_image.mode == "RGB"

@@ -19,13 +19,15 @@
     - The `get_type()` method of `PdfPageObject` was replaced with a `type` attribute.
     
     *Other changes*
-    - Improved code style and consistency regarding interaction with PDFium/ctypes.
-    - New rendering parameters added: `color_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `extra_flags`, `allocator`, and `memory_limit`.
-    - New rendering functions `render_tonumpy()` added, returning a shaped NumPy array.
+    - New rendering parameters added: `color_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `prefer_bgrx`, `force_bitmap_format`, `extra_flags`, `allocator`, and `memory_limit`.
+    - Added new `render_to()` functions to `PdfPage` and `PdfDocument` that take a custom bitmap converter, to transform the ctypes array to a different object. A set of built-in converters is provided with the `BitmapConv` class. Confer the updated API documentation for details. The previous rendering functions (`render_topil()` `render_tobytes()`, ...) are still around as deprecated aliases but might be removed eventually.
+    - New rendering target `numpy_ndarray` added.
+    - The `pil_image` rendering target now accepts a `prefer_la` parameter to request automatic conversion of `BGRA`/`RGBA` to `LA` if rendering in greyscale mode with alpha channel.
     - New method `PdfDocument.get_page_size()` to retrieve page size by index without needing to load a `PdfPage` (uses `FPDF_GetPageSizeByIndexF()` under the hood).
     - All document-level methods that take a page index now accept negative values for reverse indexing (except the rendering methods).
     - `PdfPage.get_objects()` can now recursively descend into Form XObjects.
     - Form environments are now initialised/exited on document level rather than on page rendering. *In the course of this work, a segmentation fault source was eliminated, related to a formerly undocumented requirement of PDFium regarding object lifetime. Whether the segmentation fault would actually take place was dependent on Python garbage collection behaviour. This did not appear to happen under normal circumstances, so the issue remained unnoticed for a long time.*
+    - Improved code style and consistency regarding interaction with PDFium/ctypes.
 
 - Setup code
     - `$PYP_TARGET_PLATFORM` was renamed to `$PDFIUM_BINARY`, the value `sdist` was renamed to `none`.

@@ -15,25 +15,18 @@ def validate_colors(bg_color, color_scheme):
             raise ValueError("Color value exceeds boundaries.")
 
 
-def get_bitmap_format(bg_color, greyscale, rev_byteorder):
-    
+def auto_bitmap_format(bg_color, greyscale, prefer_bgrx):
+    # even if a custom color scheme is given and its values contain transparency, we don't need to care, because drawings are additive
     if (bg_color[3] < 255):
-        # even if a custom color scheme is given and its values contain transparency, we don't need to care, because drawings are additive
-        px_const = pdfium.FPDFBitmap_BGRA
+        return pdfium.FPDFBitmap_BGRA
     else:
         if greyscale:
-            # attempting to use FPDF_REVERSE_BYTE_ORDER with FPDFBitmap_Gray is not only unnecessary, but also causes issues, so prohibit it (pdfium bug?)
-            px_const = pdfium.FPDFBitmap_Gray
-            rev_byteorder = False
+            return pdfium.FPDFBitmap_Gray
         else:
-            px_const = pdfium.FPDFBitmap_BGR
-    
-    if rev_byteorder:
-        px_str = BitmapFormatToStrReverse[px_const]
-    else:
-        px_str = BitmapFormatToStr[px_const]
-    
-    return px_const, px_str, rev_byteorder
+            if prefer_bgrx:
+                return pdfium.FPDFBitmap_BGRx
+            else:
+                return pdfium.FPDFBitmap_BGR
 
 
 def color_tohex(color, rev_byteorder):
@@ -79,22 +72,42 @@ def _invert_dict(dictionary):
     """
     return {v: k for k, v in dictionary.items()}
 
+def _transform_dict(main, transformer):
+    """
+    Remap each value of a *main* dictionary through a second *transformer* dictionary, if contained.
+    Otherwise, take over the existing value as-is.
+    
+    Returns:
+        Transformed variant of the *main* dictionary.
+    """
+    output = {}
+    for key, value in main.items():
+        if value in transformer.keys():
+            output[key] = transformer[value]
+        else:
+            output[key] = value
+    return output
+
 
 #: Convert a PDFium pixel format constant to string, assuming regular byte order.
-BitmapFormatToStr = {
-    pdfium.FPDFBitmap_BGRA: "BGRA",
-    pdfium.FPDFBitmap_BGR:  "BGR",
+BitmapConstToStr = {
     pdfium.FPDFBitmap_Gray: "L",
+    pdfium.FPDFBitmap_BGR:  "BGR",
+    pdfium.FPDFBitmap_BGRA: "BGRA",
+    pdfium.FPDFBitmap_BGRx: "BGRX",
+}
+
+# Convert a reverse pixel format string to its regular counterpart.
+UnreverseBitmapStr = {
+    "BGR":  "RGB",
+    "BGRA": "RGBA",
+    "BGRX": "RGBX",
 }
 
 #: Convert a PDFium pixel format constant to string, assuming reversed byte order.
-BitmapFormatToStrReverse = {
-    pdfium.FPDFBitmap_BGRA: "RGBA",
-    pdfium.FPDFBitmap_BGR:  "RGB",
-    pdfium.FPDFBitmap_Gray: "L",
-}
+BitmapConstToReverseStr = _transform_dict(BitmapConstToStr, UnreverseBitmapStr)
 
-#: Convert a PDFium view mode constant (``PDFDEST_VIEW_...``) to string.
+#: Convert a PDFium view mode constant (``PDFDEST_VIEW_*``) to string.
 ViewmodeMapping = {
     pdfium.PDFDEST_VIEW_XYZ:   "XYZ",
     pdfium.PDFDEST_VIEW_FIT:   "Fit",
@@ -107,7 +120,7 @@ ViewmodeMapping = {
     pdfium.PDFDEST_VIEW_UNKNOWN_MODE: "?",
 }
 
-#: Convert a PDFium error constant (``FPDF_ERR_...``) to string.
+#: Convert a PDFium error constant (``FPDF_ERR_*``) to string.
 ErrorMapping = {
     pdfium.FPDF_ERR_SUCCESS:  "Success",
     pdfium.FPDF_ERR_UNKNOWN:  "Unknown error",
@@ -118,7 +131,7 @@ ErrorMapping = {
     pdfium.FPDF_ERR_PAGE:     "Page not found or content error",
 }
 
-#: Convert a PDFium object type constant (``FPDF_PAGEOBJ_...``) to string.
+#: Convert a PDFium object type constant (``FPDF_PAGEOBJ_*``) to string.
 ObjtypeToName = {
     pdfium.FPDF_PAGEOBJ_UNKNOWN: "unknown",
     pdfium.FPDF_PAGEOBJ_TEXT:    "text",

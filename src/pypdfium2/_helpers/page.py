@@ -6,37 +6,33 @@ import math
 import ctypes
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers._utils import (
     get_functype,
     validate_colors,
     color_tohex,
-    get_bitmap_format,
+    auto_bitmap_format,
     RotationToConst,
     RotationToDegrees,
+    BitmapConstToStr,
+    BitmapConstToReverseStr,
 )
 from pypdfium2._helpers.misc import (
     OptimiseMode,
     PdfiumError,
 )
+from pypdfium2._helpers.converters import (
+    BitmapConvBase,
+    BitmapConvAliases,
+)
+from pypdfium2._helpers.textpage import PdfTextPage
 
 try:
     import uharfbuzz as harfbuzz
 except ImportError:
     harfbuzz = None
 
-try:
-    import PIL.Image
-except ImportError:
-    PIL = None
 
-try:
-    import numpy.ctypeslib
-except ImportError:
-    numpy = None
-
-
-class PdfPage:
+class PdfPage (BitmapConvAliases):
     """
     Page helper class.
     
@@ -273,13 +269,66 @@ class PdfPage:
                 )
     
     
+    def render_to(self, converter, **renderer_kws):
+        """
+        Rasterise a page to a specific output format.
+        
+        Parameters:
+            
+            converter (BitmapConvBase | typing.Callable):
+                
+                A translator to convert the output of :meth:`.render_base`. See :class:`.BitmapConv` for a set of built-in converters.
+                It may be a class, or an instance of a class, that implements the converter interface by inheriting from :class:`.BitmapConvBase` and overriding :meth:`~.BitmapConvBase.run`. Converters may be initialised with parameters to be passed to their :meth:`~.BitmapConvBase.run` method.
+                
+                Alternatively, if your custom converter does not take any parameters, you may also just pass in a function (or callable) that consumes two positional arguments (rendering output, dictionary of rendering keywords) and returns the converted result.
+            
+            renderer_kws (dict):
+                Keyword arguments to the renderer.
+        
+        Returns:
+            typing.Any: Converter-specific result.
+        
+        Examples:
+            
+            .. code-block:: python
+                
+                # convert to a NumPy array
+                array, cl_format = render_to(BitmapConv.numpy_ndarray, ...)
+                # passing an initialised converter without arguments is equivalent
+                array, cl_format = render_to(BitmapConv.numpy_ndarray(), ...)
+                
+                # convert to a PIL image (with default settings)
+                image = render_to(BitmapConv.pil_image, ...)
+                
+                # convert to PIL image (with specific settings)
+                image = render_to(BitmapConv.pil_image(prefer_la=True), ...)
+                
+                # convert to bytes using the special "any" converter factory
+                data, cl_format, size = render_to(BitmapConv.any(bytes), ...)
+        """
+        
+        # In the future, we could add means to set different defaults for specific built-in converters, if necessary.
+        # We could also consider implementing a parameter sieve to automatically divide keyword arguments between converter and renderer so that callers don't need to care about the separation
+        
+        args = (self.render_base(**renderer_kws), renderer_kws)
+        if isinstance(converter, BitmapConvBase):
+            return converter.run(*args, *converter.args, **converter.kwargs)
+        elif issubclass(converter, BitmapConvBase):
+            # run() is supposed to be a static method, but just initialise an instance of the converter class so it also works if the implementer forgot the decorator
+            return converter().run(*args)
+        elif callable(converter):
+            return converter(*args)
+        else:
+            raise ValueError("Converter must be an instance or subclass of BitmapConvBase, or a callable, but %s was given." % converter)
+    
+    
     def render_base(
             self,
             scale = 1,
             rotation = 0,
             crop = (0, 0, 0, 0),
             greyscale = False,
-            color = (255, 255, 255, 255),
+            color = (255, 255, 255, 255),  # TODO rename to fill_color
             color_scheme = None,
             fill_to_stroke = False,
             optimise_mode = OptimiseMode.NONE,
@@ -290,13 +339,14 @@ class PdfPage:
             no_smoothpath = False,
             force_halftone = False,
             rev_byteorder = False,
+            prefer_bgrx = False,
+            force_bitmap_format = None,
             extra_flags = 0,
             allocator = None,
             memory_limit = 2**30,
         ):
         """
-        Rasterise the page to a :class:`ctypes.c_ubyte` array.
-        This is the base method for :meth:`.render_tobytes`, :meth:`.render_tonumpy` and :meth:`.render_topil`.
+        Rasterise the page to a :class:`ctypes.c_ubyte` array. This is the base method for :meth:`.render_to`.
         
         Parameters:
             
@@ -349,27 +399,24 @@ class PdfPage:
                 Always use halftone for image stretching.
             
             rev_byteorder (bool):
-                By default, the output pixel format will be ``BGR(A)``.
-                This option may be used to render with reversed byte order, leading to ``RGB(A)`` output instead.
+                By default, the output pixel format will be ``BGR(A/X)``.
+                This option may be used to render with reversed byte order, leading to ``RGB(A/X)`` output instead.
                 ``L`` is unaffected.
             
+            prefer_bgrx (bool):
+                Request the use of a four-channel pixel format for coloured output, even if rendering without transparency.
+                (i. e. ``BGRX``/``RGBX`` rather than ``BGR``/``RGB``).
+            
+            force_bitmap_format (int | None):
+                Override the automatic pixel format selection and enforce the use of a specific format (:attr:`FPDFBitmap_*`).
+                For instance, this may be used to render in greyscale mode while using ``BGR`` as output format (default choice would be ``L``).
+            
             extra_flags (int):
-                Additional PDFium rendering flags. Multiple flags may be combined with binary OR.
-                Flags not covered by other options include :data:`FPDF_RENDER_LIMITEDIMAGECACHE` and :data:`FPDF_NO_NATIVETEXT`, for instance.
+                Additional PDFium rendering flags. Multiple flags may be combined with bitwise OR (``|`` operator).
             
             allocator (typing.Callable | None):
-                
-                | A function to provide a custom :class:`ctypes.c_ubyte` array. It is called with the required number of bytes (i. e. the length the array shall have).
-                | If not given, a new buffer is allocated by ctypes (not PDFium), so Python takes care of all memory management.
-                
-                | If you wish to render to an existing buffer that was not alloacted by ctypes itself, note that you may get a ctypes array representation of arbitrary memory using ``(ctypes.c_ubyte*n_bytes).from_address(mem_address)``, where *n_bytes* shall be the number of bytes to encompass, and *mem_address* the memory address of the first byte.
-                | This may be used to directly write the pixel data to a specific place in memory (e. g. a GUI widget buffer), avoiding unnecessary data copying.
-                
-                Callers must ensure that ...
-                
-                * the buffer and its ctypes representation are large enough to hold the requested number of bytes
-                * the memory remains valid as long as the ctypes array is used
-                * the memory is freed once it is not needed anymore
+                A function to provide a custom ctypes buffer. It is called with the required buffer size in bytes.
+                If not given, a new :class:`ctypes.c_ubyte` array is allocated by Python (this simplify memory management, as opposed to allocation by PDFium).
             
             memory_limit (int | None):
                 Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
@@ -377,17 +424,41 @@ class PdfPage:
                 If :data:`None` or 0, this function may allocate arbitrary amounts of memory as far as Python and the OS permit.
             
         Returns:
-            (ctypes.c_ubyte array, str, (int, int)):
-            Ctypes array, color format, and image size.
+            (ctypes array, str, (int, int)): Bitmap data, color format, and image size.
             The color format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, or ``L``, depending on the parameters *color*, *greyscale* and *rev_byteorder*.
             Image size is given in pixels as a tuple of width and height.
         
-        Hint:
+        Tip:
             To convert a DPI value to a scale factor, divide it by 72.
+        
+        Note:
+            Please take into account the following information regarding the *allocator* parameter:
+            
+            If you wish to render to an existing buffer that was not alloacted by ctypes itself, note that you may get a ctypes array representation of arbitrary memory using ``(ctypes.c_ubyte*n_bytes).from_address(mem_address)``, where *n_bytes* shall be the number of bytes to encompass, and *mem_address* the memory address of the first byte. This may be used to directly write the pixel data to a specific place in memory (e. g. a GUI widget buffer), avoiding unnecessary data copying.
+            
+            In this case, callers must ensure that ...
+            
+            * the buffer and its ctypes representation are large enough to hold the requested number of bytes
+            * the memory remains valid as long as the ctypes array is used
+            * the memory is freed once not needed anymore
         """
         
         validate_colors(color, color_scheme)
-        cl_pdfium, cl_string, rev_byteorder = get_bitmap_format(color, greyscale, rev_byteorder)
+        
+        if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
+            cl_pdfium = auto_bitmap_format(color, greyscale, prefer_bgrx)
+        else:
+            cl_pdfium = force_bitmap_format
+        
+        # attempting to use FPDF_REVERSE_BYTE_ORDER with FPDFBitmap_Gray is not only unnecessary, but also causes issues, so prohibit it (pdfium bug?)
+        if cl_pdfium == pdfium.FPDFBitmap_Gray:
+            rev_byteorder = False
+        
+        if rev_byteorder:
+            cl_string = BitmapConstToReverseStr[cl_pdfium]
+        else:
+            cl_string = BitmapConstToStr[cl_pdfium]
+        
         c_color = color_tohex(color, rev_byteorder)
         n_channels = len(cl_string)
         
@@ -414,10 +485,8 @@ class PdfPage:
             buffer = (ctypes.c_ubyte * n_bytes)()
         else:
             buffer = allocator(n_bytes)
-            if buffer._type_ is not ctypes.c_ubyte:
-                raise RuntimeError("Array must be of type ctypes.c_ubyte. Consider using ctypes.cast().")
-            if len(buffer) < n_bytes:
-                raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (len(buffer), n_bytes))
+            if ctypes.sizeof(buffer) < n_bytes:
+                raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (ctypes.sizeof(buffer), n_bytes))
         
         bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_color)
@@ -471,65 +540,6 @@ class PdfPage:
             pdfium.FPDF_FFLDraw(form_env, *render_args)
         
         return buffer, cl_string, (width, height)
-    
-    
-    def render_tobytes(self, **kwargs):
-        """
-        Rasterise the page to bytes. Parameters match :meth:`.render_base`.
-        
-        Returns:
-            (bytes, str, (int, int)): Image data, color format, and size.
-        """
-        c_array, *args = self.render_base(**kwargs)
-        return bytes(c_array), *args
-    
-    
-    def render_tonumpy(self, **kwargs):
-        """
-        *Requires* :mod:`numpy`.
-        
-        Rasterise the page to a NumPy array. Parameters match :meth:`.render_base`.
-        
-        Returns:
-            (numpy.ndarray, str): NumPy array, and color format.
-        """
-        
-        if numpy is None:
-            raise RuntimeError("NumPy library needs to be installed for render_tonumpy().")
-        
-        c_array, cl_format, (width, height) = self.render_base(**kwargs)
-        np_array = numpy.ctypeslib.as_array(c_array)
-        np_array.shape = (height, width, len(cl_format))
-        
-        return np_array, cl_format
-    
-    
-    def render_topil(self, **kwargs):
-        """
-        *Requires* :mod:`PIL`.
-        
-        Rasterise the page to a PIL image. Parameters match :meth:`.render_base`.
-        
-        Returns:
-            PIL.Image.Image: An image of the page.
-        """
-        
-        if PIL is None:
-            raise RuntimeError("Pillow library needs to be installed for render_topil().")
-        
-        c_array, cl_src, size = self.render_base(**kwargs)
-        
-        cl_mapping = {
-            "BGRA": "RGBA",
-            "BGR":  "RGB",
-        }
-        if cl_src in cl_mapping:
-            cl_dst = cl_mapping[cl_src]
-        else:
-            cl_dst = cl_src
-        
-        pil_image = PIL.Image.frombuffer(cl_dst, size, c_array, "raw", cl_src, 0, 1)
-        return pil_image
 
 
 class ColorScheme:
@@ -573,7 +583,7 @@ class PdfPageObject:
         raw (FPDF_PAGEOBJECT): The underlying PDFium pageobject handle.
         page (PdfPage): Reference to the page this pageobject belongs to.
         level (int): Nesting level signifying the number of parent Form XObjects. Zero if the object is not nested in a Form XObject.
-        type (int): The type of the object (:data:`FPDF_PAGEOBJ_...`).
+        type (int): The type of the object (:data:`FPDF_PAGEOBJ_*`).
     """
     
     def __init__(self, raw, page, level=0):
