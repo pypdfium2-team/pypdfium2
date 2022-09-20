@@ -53,6 +53,8 @@ class OutlineItem:
             String of the bookmark.
         is_closed (bool):
             If :data:`True`, child items shall be hidden by default.
+        n_kids (int):
+            Number of child bookmarks (>= 0).
         page_index (int | None):
             Zero-based index of the page the bookmark points to.
             May be :data:`None` if the bookmark has no target page (or it could not be determined).
@@ -69,6 +71,7 @@ class OutlineItem:
             level,
             title,
             is_closed,
+            n_kids,
             page_index,
             view_mode,
             view_pos,
@@ -76,6 +79,7 @@ class OutlineItem:
         self.level = level
         self.title = title
         self.is_closed = is_closed
+        self.n_kids = n_kids
         self.page_index = page_index
         self.view_mode = view_mode
         self.view_pos = view_pos

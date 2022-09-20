@@ -329,7 +329,9 @@ class PdfDocument (BitmapConvAliases):
         pdfium.FPDFBookmark_GetTitle(bookmark, t_buffer, t_buflen)
         title = t_buffer.raw.decode('utf-16-le')[:-1]
         
-        is_closed = pdfium.FPDFBookmark_GetCount(bookmark) < 0
+        count = pdfium.FPDFBookmark_GetCount(bookmark)
+        is_closed = count < 0
+        n_kids = abs(count)
         dest = pdfium.FPDFBookmark_GetDest(self.raw, bookmark)
         page_index = pdfium.FPDFDest_GetDestPageIndex(self.raw, dest)
         if page_index == -1:
@@ -344,6 +346,7 @@ class PdfDocument (BitmapConvAliases):
             level = level,
             title = title,
             is_closed = is_closed,
+            n_kids = n_kids,
             page_index = page_index,
             view_mode = view_mode,
             view_pos = view_pos,
@@ -406,15 +409,25 @@ class PdfDocument (BitmapConvAliases):
         """
         
         for item in toc:
+            
+            if item.n_kids == 0:
+                state = "*"
+            elif item.is_closed:
+                state = "-"
+            else:
+                state = "+"
+            
+            if item.page_index is None:
+                target = "?"
+            else:
+                target = item.page_index + 1
+            
+            view_mode = ViewmodeMapping[item.view_mode]
+            view_pos = [round(c, n_digits) for c in item.view_pos]
+            
             print(
                 "    " * item.level +
-                "[%s] " % ("-" if item.is_closed else "+") +
-                "%s -> %s  # %s %s" % (
-                    item.title,
-                    item.page_index+1 if item.page_index is not None else "?",
-                    ViewmodeMapping[item.view_mode],
-                    [round(c, n_digits) for c in item.view_pos],
-                )
+                "[%s] %s -> %s  # %s %s" % (state, item.title, target, view_mode, view_pos)
             )
     
     

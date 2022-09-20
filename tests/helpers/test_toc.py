@@ -22,12 +22,13 @@ def toc_circular_doc():
     doc.close()
 
 
-def _compare_bookmark(bookmark, title, page_index, view_mode, view_pos, is_closed):
-    assert bookmark.title == title
-    assert bookmark.page_index == page_index
-    assert bookmark.view_mode == view_mode
-    assert pytest.approx(bookmark.view_pos, abs=1) == view_pos
-    assert bookmark.is_closed == is_closed
+def _compare_bookmark(bookmark, **kwargs):
+    for name, exp_value in kwargs.items():
+        value = getattr(bookmark, name)
+        if name == "view_pos":
+            assert pytest.approx(value, abs=1) == exp_value
+        else:
+            assert value == exp_value
 
 
 def test_gettoc(toc_doc):
@@ -42,6 +43,7 @@ def test_gettoc(toc_doc):
         view_mode = pdfium.PDFDEST_VIEW_XYZ,
         view_pos = (89, 758, 0),
         is_closed = True,
+        n_kids = 2,
     )
     
     # check common values
@@ -58,6 +60,7 @@ def test_gettoc(toc_doc):
         view_mode = pdfium.PDFDEST_VIEW_XYZ,
         view_pos = (89, 657, 0),
         is_closed = False,
+        n_kids = 0,
     )
 
 
@@ -70,6 +73,7 @@ def test_gettoc_circular(toc_circular_doc, caplog):
         view_mode = pdfium.PDFDEST_VIEW_UNKNOWN_MODE,
         view_pos = [],
         is_closed = False,
+        n_kids = 0,
     )
     _compare_bookmark(
         next(toc),
@@ -78,6 +82,7 @@ def test_gettoc_circular(toc_circular_doc, caplog):
         view_mode = pdfium.PDFDEST_VIEW_UNKNOWN_MODE,
         view_pos = [],
         is_closed = False,
+        n_kids = 0,
     )
     with caplog.at_level(logging.WARNING):
         for other in toc: pass
@@ -107,30 +112,30 @@ def test_toc_misc(toc_doc, toc_circular_doc):
 
 TocResult_A = """\
 [-] One -> 1  # XYZ [89.29, 757.7, 0.0]
-    [+] One-A -> 1  # XYZ [89.29, 706.86, 0.0]
+    [*] One-A -> 1  # XYZ [89.29, 706.86, 0.0]
     [-] One-B -> 1  # XYZ [89.29, 657.03, 0.0]
-        [+] One-B-I -> 1  # XYZ [89.29, 607.2, 0.0]
-        [+] One-B-II -> 1  # XYZ [89.29, 557.76, 0.0]
-[+] Two -> 1  # XYZ [89.29, 507.16, 0.0]
+        [*] One-B-I -> 1  # XYZ [89.29, 607.2, 0.0]
+        [*] One-B-II -> 1  # XYZ [89.29, 557.76, 0.0]
+[*] Two -> 1  # XYZ [89.29, 507.16, 0.0]
 [-] Three -> 2  # XYZ [89.29, 757.7, 0.0]
-    [+] Three-A -> 2  # XYZ [89.29, 706.98, 0.0]
-    [+] Three-B -> 2  # XYZ [89.29, 657.15, 0.0]
+    [*] Three-A -> 2  # XYZ [89.29, 706.98, 0.0]
+    [*] Three-B -> 2  # XYZ [89.29, 657.15, 0.0]
 """
 
 TocResult_B = """\
-[+] A Good Beginning -> ?  # ? []
-[+] A Good Ending -> ?  # ? []
+[*] A Good Beginning -> ?  # ? []
+[*] A Good Ending -> ?  # ? []
 """
 
 TocResult_C = """\
-[+] XYZ 2.1-Page1 red bold -> 1  # XYZ [100.0, 100.0, 2.1]
-[+] Fit-Page2 green Italic -> 2  # Fit []
-[+] FitB Italic&Bold b -> 3  # FitB []
-[+] FitV Page4 -> 4  # FitV [500.0]
-[+] FitH Page5 -> 5  # FitH [600.0]
-[+] FitR Page6 -> 6  # FitR [100.0, 100.0, 200.0, 200.0]
-[+] FitBH Page7 -> 7  # FitBH [100.0]
-[+] FitBV Page8 -> 8  # FitBV [100.0]
+[*] XYZ 2.1-Page1 red bold -> 1  # XYZ [100.0, 100.0, 2.1]
+[*] Fit-Page2 green Italic -> 2  # Fit []
+[*] FitB Italic&Bold b -> 3  # FitB []
+[*] FitV Page4 -> 4  # FitV [500.0]
+[*] FitH Page5 -> 5  # FitH [600.0]
+[*] FitR Page6 -> 6  # FitR [100.0, 100.0, 200.0, 200.0]
+[*] FitBH Page7 -> 7  # FitBH [100.0]
+[*] FitBV Page8 -> 8  # FitBV [100.0]
 """
 
 TocResult_D = """\
@@ -147,6 +152,6 @@ TocResult_D = """\
 [+] 2.outline -> 2  # FitH [749.48]
     [+] 2.1.outline -> 2  # FitH [699.36]
         [+] 2.1.1.outline -> 2  # FitH [628.74]
-            [+] 2.1.1.1.outline -> 2  # FitH [583.18]
-    [+] 2.2 outline -> 2  # FitH [515.22]
+            [*] 2.1.1.1.outline -> 2  # FitH [583.18]
+    [*] 2.2 outline -> 2  # FitH [515.22]
 """
