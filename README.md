@@ -101,7 +101,8 @@ Here are some examples of using the support model API.
 * Render multiple pages concurrently
   ```python
   page_indices = [i for i in range(n_pages)]  # all pages
-  renderer = pdf.render_topil(
+  renderer = pdf.render_to(
+      pdfium.BitmapConv.pil_image,
       page_indices = page_indices,
       scale = 300/72,  # 300dpi resolution
   )
@@ -143,7 +144,8 @@ Here are some examples of using the support model API.
 
 * Render a single page
   ```python
-  image = page.render_topil(
+  image = page.render_to(
+      pdfium.BitmapConv.pil_image,
       scale = 1,              # 72dpi resolution
       rotation = 0,           # no additional rotation
       crop = (0, 0, 0, 0),    # no crop (left, right, bottom, top)

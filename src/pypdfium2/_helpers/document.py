@@ -453,7 +453,7 @@ class PdfDocument (BitmapConvAliases):
         Concurrently render multiple pages, using a process pool executor.
         
         Parameters:
-            converter ():
+            converter (BitmapConvBase):
                 TODO
             page_indices (typing.Sequence[int] | None):
                 A sequence of zero-based indices of the pages to render. Reverse indexing or duplicate page indices are prohibited.

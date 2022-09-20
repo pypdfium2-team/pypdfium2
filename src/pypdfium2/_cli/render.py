@@ -10,6 +10,7 @@ from os.path import (
     splitext,
 )
 from pypdfium2 import _namespace as pdfium
+from pypdfium2._helpers._utils import UnreverseBitmapStr
 from pypdfium2._cli._parsers import pagetext_type
 
 
@@ -202,16 +203,20 @@ def main(args):
         for type in args.no_antialias:
             kwargs["no_smooth%s" % type] = True
         
+        converter = pdfium.BitmapConv.pil_image
         if args.use_numpy:
-            renderer = pdf.render_tonumpy(**kwargs)
-        else:
-            renderer = pdf.render_topil(**kwargs)
+            converter = pdfium.BitmapConv.numpy_ndarray
+        
         prefix = splitext(basename(input_path))[0] + "_"
         n_digits = len(str( max(page_indices)+1 ))
+        
+        renderer = pdf.render_to(converter, **kwargs)
         
         for result, index in zip(renderer, page_indices):
             if args.use_numpy:
                 array, cl_format = result
+                if cl_format in UnreverseBitmapStr.keys():
+                    raise RuntimeError("PIL.Image.fromarray() can't work with colour format %s. Consider using --rev-byteorder." % cl_format)
                 image = PIL.Image.fromarray(array, mode=cl_format)
             else:
                 image = result

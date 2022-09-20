@@ -35,7 +35,7 @@ class BitmapConvBase:
         Note:
             :meth:`.run` should be implemented as a :func:`staticmethod`.
         Important:
-            To make sure callers are notified of possible mistakes, the overriding function should never silently capture unrecognised arguments!
+            To make sure callers are notified of possible mistakes, the overriding function should never capture unrecognised arguments!
         
         Parameters:
             result (tuple):
@@ -127,7 +127,7 @@ class BitmapConv:
         Hint:
             This uses :func:`PIL.Image.frombuffer` under the hood.
             If possible for the color format in question, the image will reference the ctypes array. Otherwise, PIL may create a copy of the data.
-            At the time of writing, PIL can directly work with ``RGBA``, ``RGBX`` or ``L`` pixel data (see :attr:`PIL.Image._MAPMODES`).
+            At the time of writing, PIL can directly work with ``RGBA``, ``RGBX`` or ``L`` pixel data.
             Depending on the use case, you may want to consider setting the rendering parameters *rev_byteorder* and *prefer_bgrx* to :data:`True`
             to generate natively compatible output.
         """
@@ -157,7 +157,7 @@ class BitmapConvAliases:
     """
     Base class for deprecated rendering target aliases.
     Currently retained for backwards compatibility, but might be removed in the future.
-    The :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to` APIs should be used instead.
+    The :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to` APIs should be preferred instead.
     """
     
     # TODO consider implementing a parameter sieve using :mod:`inspect` that smartly divides keyword arguments between converter and renderer

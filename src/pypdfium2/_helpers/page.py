@@ -269,7 +269,7 @@ class PdfPage (BitmapConvAliases):
                 )
     
     
-    def render_to(self, conv, **renderer_kws):
+    def render_to(self, converter, **renderer_kws):
         """
         TODO
         """
@@ -277,15 +277,15 @@ class PdfPage (BitmapConvAliases):
         # In the future, we could add means to set different defaults for specific built-in converters, if necessary.
         
         args = (self.render_base(**renderer_kws), renderer_kws)
-        if isinstance(conv, BitmapConvBase):
-            return conv.run(*args, *conv.args, **conv.kwargs)
-        elif issubclass(conv, BitmapConvBase):
+        if isinstance(converter, BitmapConvBase):
+            return converter.run(*args, *converter.args, **converter.kwargs)
+        elif issubclass(converter, BitmapConvBase):
             # run() is supposed to be a static method, but just initialise an instance of the converter class so it also works if the implementer forgot the decorator
-            return conv().run(*args)
-        elif callable(conv):
-            return conv(*args)
+            return converter().run(*args)
+        elif callable(converter):
+            return converter(*args)
         else:
-            raise ValueError("Converter must be an instance or subclass of BitmapConvBase, or a callable, but %s was given." % conv)
+            raise ValueError("Converter must be an instance or subclass of BitmapConvBase, or a callable, but %s was given." % converter)
     
     
     def render_base(
@@ -294,7 +294,7 @@ class PdfPage (BitmapConvAliases):
             rotation = 0,
             crop = (0, 0, 0, 0),
             greyscale = False,
-            color = (255, 255, 255, 255),
+            color = (255, 255, 255, 255),  # TODO rename to fill_color
             color_scheme = None,
             fill_to_stroke = False,
             optimise_mode = OptimiseMode.NONE,
@@ -312,8 +312,7 @@ class PdfPage (BitmapConvAliases):
             memory_limit = 2**30,
         ):
         """
-        Rasterise the page to a :class:`ctypes.c_ubyte` array.
-        This is the base method for :meth:`.render_tobytes`, :meth:`.render_tonumpy` and :meth:`.render_topil`.
+        Rasterise the page to a :class:`ctypes.c_ubyte` array. This is the base method for :meth:`.render_to`.
         
         Parameters:
             
