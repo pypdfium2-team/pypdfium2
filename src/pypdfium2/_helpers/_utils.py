@@ -107,7 +107,7 @@ UnreverseBitmapStr = {
 #: Convert a PDFium pixel format constant to string, assuming reversed byte order.
 BitmapConstToReverseStr = _transform_dict(BitmapConstToStr, UnreverseBitmapStr)
 
-#: Convert a PDFium view mode constant (``PDFDEST_VIEW_...``) to string.
+#: Convert a PDFium view mode constant (``PDFDEST_VIEW_*``) to string.
 ViewmodeMapping = {
     pdfium.PDFDEST_VIEW_XYZ:   "XYZ",
     pdfium.PDFDEST_VIEW_FIT:   "Fit",
@@ -120,7 +120,7 @@ ViewmodeMapping = {
     pdfium.PDFDEST_VIEW_UNKNOWN_MODE: "?",
 }
 
-#: Convert a PDFium error constant (``FPDF_ERR_...``) to string.
+#: Convert a PDFium error constant (``FPDF_ERR_*``) to string.
 ErrorMapping = {
     pdfium.FPDF_ERR_SUCCESS:  "Success",
     pdfium.FPDF_ERR_UNKNOWN:  "Unknown error",
@@ -131,7 +131,7 @@ ErrorMapping = {
     pdfium.FPDF_ERR_PAGE:     "Page not found or content error",
 }
 
-#: Convert a PDFium object type constant (``FPDF_PAGEOBJ_...``) to string.
+#: Convert a PDFium object type constant (``FPDF_PAGEOBJ_*``) to string.
 ObjtypeToName = {
     pdfium.FPDF_PAGEOBJ_UNKNOWN: "unknown",
     pdfium.FPDF_PAGEOBJ_TEXT:    "text",

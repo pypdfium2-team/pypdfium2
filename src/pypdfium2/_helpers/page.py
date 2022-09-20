@@ -549,7 +549,7 @@ class PdfPageObject:
         raw (FPDF_PAGEOBJECT): The underlying PDFium pageobject handle.
         page (PdfPage): Reference to the page this pageobject belongs to.
         level (int): Nesting level signifying the number of parent Form XObjects. Zero if the object is not nested in a Form XObject.
-        type (int): The type of the object (:data:`FPDF_PAGEOBJ_...`).
+        type (int): The type of the object (:data:`FPDF_PAGEOBJ_*`).
     """
     
     def __init__(self, raw, page, level=0):
