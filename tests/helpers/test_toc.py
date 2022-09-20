@@ -59,7 +59,7 @@ def test_gettoc(toc_doc):
         page_index = 1,
         view_mode = pdfium.PDFDEST_VIEW_XYZ,
         view_pos = (89, 657, 0),
-        is_closed = False,
+        is_closed = None,
         n_kids = 0,
     )
 
@@ -72,7 +72,7 @@ def test_gettoc_circular(toc_circular_doc, caplog):
         page_index = None,
         view_mode = pdfium.PDFDEST_VIEW_UNKNOWN_MODE,
         view_pos = [],
-        is_closed = False,
+        is_closed = None,
         n_kids = 0,
     )
     _compare_bookmark(
@@ -81,7 +81,7 @@ def test_gettoc_circular(toc_circular_doc, caplog):
         page_index = None,
         view_mode = pdfium.PDFDEST_VIEW_UNKNOWN_MODE,
         view_pos = [],
-        is_closed = False,
+        is_closed = None,
         n_kids = 0,
     )
     with caplog.at_level(logging.WARNING):

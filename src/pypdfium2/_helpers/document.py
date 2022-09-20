@@ -330,7 +330,13 @@ class PdfDocument (BitmapConvAliases):
         title = t_buffer.raw.decode('utf-16-le')[:-1]
         
         count = pdfium.FPDFBookmark_GetCount(bookmark)
-        is_closed = count < 0
+        if count < 0:
+            is_closed = True
+        elif count == 0:
+            is_closed = None
+        else:
+            is_closed = False
+        
         n_kids = abs(count)
         dest = pdfium.FPDFBookmark_GetDest(self.raw, bookmark)
         page_index = pdfium.FPDFDest_GetDestPageIndex(self.raw, dest)

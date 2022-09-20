@@ -8,7 +8,7 @@
 - Support model
     
     *API-breaking changes*
-    - If the target page of a bookmark cannot be identified, `PdfDocument.get_toc()` now assigns `None` rather than `-1`, to avoid accidental reverse list indexing and to enforce that callers properly handle this case.
+    - If the target page of a bookmark cannot be identified, `OutlineItem.page_index` is now `None` rather than `-1`, to avoid accidental reverse list indexing and to enforce that callers properly handle this case. Moreover, `OutlineItem.is_closed` is now `None` rather than `False` if the bookmark has no kids.
     - `PdfPageObject.get_type()` was replaced with a `type` attribute.
     - `PdfPage.count_objects()` was removed. Use `PdfPage.get_objects()` or the raw PDFium API instead.
     - If a negative index is passed to `PdfDocument.new_page()`, it is now interpreted in reversed direction, rather than inserting at the beginning.
