@@ -28,7 +28,7 @@ clean:
 	bash ./utilities/clean.sh
 
 docs-build:
-	sphinx-build ./docs/source ./docs/build/html
+	sphinx-build -b html ./docs/source ./docs/build/html
 
 docs-open:
 	xdg-open ./docs/build/html/index.html
