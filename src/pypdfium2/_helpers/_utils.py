@@ -19,14 +19,12 @@ def auto_bitmap_format(bg_color, greyscale, prefer_bgrx):
     # even if a custom color scheme is given and its values contain transparency, we don't need to care, because drawings are additive
     if (bg_color[3] < 255):
         return pdfium.FPDFBitmap_BGRA
+    elif greyscale:
+        return pdfium.FPDFBitmap_Gray
+    elif prefer_bgrx:
+        return pdfium.FPDFBitmap_BGRx
     else:
-        if greyscale:
-            return pdfium.FPDFBitmap_Gray
-        else:
-            if prefer_bgrx:
-                return pdfium.FPDFBitmap_BGRx
-            else:
-                return pdfium.FPDFBitmap_BGR
+        return pdfium.FPDFBitmap_BGR
 
 
 def color_tohex(color, rev_byteorder):
