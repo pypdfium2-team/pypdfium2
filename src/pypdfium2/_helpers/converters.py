@@ -35,11 +35,11 @@ class BitmapConvBase:
         Note:
             :meth:`.run` should be implemented as a :func:`staticmethod`.
         Important:
-            To make sure callers are notified of possible mistakes, the overriding function should never capture unrecognised arguments!
+            To make sure callers are notified of possible mistakes, the overriding function should never silently capture unrecognised arguments!
         
         Parameters:
             result (tuple):
-                Result of the :meth:`.PdfPage.render_base` call (ctypes ubyte array, color format, size).
+                Result of the :meth:`.PdfPage.render_base` call (ctypes array, color format, size).
             renderer_kws (dict):
                 Dictionary of keywords that were passed to :meth:`.PdfPage.render_base` by the caller. May be empty.
             args (tuple):
@@ -49,7 +49,7 @@ class BitmapConvBase:
         Returns:
             typing.Any:
                 The converted rendering result (implementation-specific).
-                If the converter is used with :meth:`.PdfDocument.render_to` (or anything else that uses :mod:`multiprocessing`),
+                If the converter is used in a :mod:`multiprocessing` context (like :meth:`.PdfDocument.render_to`),
                 the return value must be compatible with :mod:`pickle`.
         """
         raise NotImplementedError("Inheriting class must provide run() method.")
@@ -57,7 +57,7 @@ class BitmapConvBase:
 
 class BitmapConv:
     """
-    Built-in converters to translate the result of :meth:`.PdfPage.render_base`.
+    Built-in converters to be applied on the rendering result.
     """
     
     # Technically, the converter implementations are standalone - the outer class is just to nicely enclose them in one namespace.
