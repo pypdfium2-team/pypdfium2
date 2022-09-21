@@ -53,8 +53,8 @@ def attach_parser(subparsers):
     )
     parser.add_argument(
         "--format", "-f",
-        default = "png",
-        help = "File extension of the image format to use",
+        default = "jpg",
+        help = "The image format to use",
     )
     parser.add_argument(
         "--pages",
@@ -159,11 +159,6 @@ def attach_parser(subparsers):
         type = int,
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
     )
-    parser.add_argument(
-        "--use-numpy",
-        action = "store_true",
-        help = "Render to numpy arrays as intermediary, then converting to PIL images (for testing only)."
-    )
 
 
 def main(args):
@@ -209,23 +204,11 @@ def main(args):
         for type in args.no_antialias:
             kwargs["no_smooth%s" % type] = True
         
-        converter = pdfium.BitmapConv.pil_image
-        if args.use_numpy:
-            converter = pdfium.BitmapConv.numpy_ndarray
-        
         prefix = splitext(basename(input_path))[0] + "_"
         n_digits = len(str( max(page_indices)+1 ))
+        renderer = pdf.render_to(pdfium.BitmapConv.pil_image, **kwargs)
         
-        renderer = pdf.render_to(converter, **kwargs)
-        
-        for result, index in zip(renderer, page_indices):
-            if args.use_numpy:
-                array, cl_format = result
-                if cl_format in UnreverseBitmapStr.keys():
-                    raise RuntimeError("PIL.Image.fromarray() can't work with colour format %s. Consider using --rev-byteorder." % cl_format)
-                image = PIL.Image.fromarray(array, mode=cl_format)
-            else:
-                image = result
+        for image, index in zip(renderer, page_indices):
             suffix = str(index+1).zfill(n_digits)
             output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
             image.save(output_path)
