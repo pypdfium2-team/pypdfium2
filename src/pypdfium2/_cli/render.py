@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import PIL.Image
 from os.path import (
     join,
     abspath,
@@ -10,23 +9,13 @@ from os.path import (
     splitext,
 )
 from pypdfium2 import _namespace as pdfium
-from pypdfium2._helpers._utils import UnreverseBitmapStr
 from pypdfium2._cli._parsers import pagetext_type
 
 
-def rotation_type(string):
-    rotation = int(string)
-    if rotation not in (0, 90, 180, 270):
-        raise ValueError("Invalid rotation value %s" % rotation)
-    return rotation
-
-
-ColorSchemeOpt = dict(
-    default = None,
+ColorOpts = dict(
     metavar = "C",
     nargs = 4,
     type = int,
-    help = "Option for rendering with custom color scheme.",
 )
 
 
@@ -71,37 +60,15 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--rotation",
         default = 0,
-        type = rotation_type,
+        type = int,
+        choices = (0, 90, 180, 270),
         help = "Rotate pages by 90, 180 or 270 degrees",
     )
     parser.add_argument(
-        "--background-color",
+        "--fill-color",
         default = (255, 255, 255, 255),
-        metavar = "C",
-        nargs = 4,
-        type = int,
-        help = "Page background color. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
-    )
-    parser.add_argument(
-        "--path-fill-color",
-        **ColorSchemeOpt
-    )
-    parser.add_argument(
-        "--path-stroke-color",
-        **ColorSchemeOpt
-    )
-    parser.add_argument(
-        "--text-fill-color",
-        **ColorSchemeOpt
-    )
-    parser.add_argument(
-        "--text-stroke-color",
-        **ColorSchemeOpt
-    )
-    parser.add_argument(
-        "--fill-to-stroke",
-        action = "store_true",
-        help = "Whether fill paths need to be stroked. Ignored if not rendering with custom color scheme.",
+        help = "Color the bitmap will be filled with before rendering. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
+        **ColorOpts,
     )
     parser.add_argument(
         "--force-halftone",
@@ -159,6 +126,32 @@ def attach_parser(subparsers):
         type = int,
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
     )
+    
+    color_scheme = parser.add_argument_group(
+        title = "Color scheme",
+        description = "Options for rendering with custom color scheme",
+    )
+    color_scheme.add_argument(
+        "--path-fill",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--path-stroke",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--text-fill",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--text-stroke",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--fill-to-stroke",
+        action = "store_true",
+        help = "Whether fill paths need to be stroked. Ignored if not rendering with custom color scheme.",
+    )
 
 
 def main(args):
@@ -174,15 +167,20 @@ def main(args):
         else:
             page_indices = [i for i in range(len(pdf))]
         
-        color_scheme_kws = dict(
-            path_fill_color = args.path_fill_color,
-            path_stroke_color = args.path_stroke_color,
-            text_fill_color = args.text_fill_color,
-            text_stroke_color = args.text_stroke_color,
+        cs_kwargs = dict(
+            path_fill = args.path_fill,
+            path_stroke = args.path_stroke,
+            text_fill = args.text_fill,
+            text_stroke = args.text_stroke,
         )
-        color_scheme = None
-        if any(color_scheme_kws.values()):
-            color_scheme = pdfium.ColorScheme(**color_scheme_kws)
+        cs = None
+        if all(cs_kwargs.values()):
+            cs = pdfium.ColorScheme(
+                fill_to_stroke = args.fill_to_stroke,
+                **cs_kwargs,
+            )
+        elif any(cs_kwargs.values()):
+            raise ValueError("If rendering with custom color scheme, all parameters need to be set explicitly.")
         
         kwargs = dict(
             page_indices = page_indices,
@@ -191,9 +189,8 @@ def main(args):
             rotation = args.rotation,
             crop = args.crop,
             greyscale = args.greyscale,
-            color = args.background_color,
-            color_scheme = color_scheme,
-            fill_to_stroke = args.fill_to_stroke,
+            fill_color = args.fill_color,
+            color_scheme = cs,
             optimise_mode = args.optimise_mode,
             draw_annots = not args.no_annotations,
             draw_forms = not args.no_forms,

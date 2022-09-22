@@ -7,7 +7,7 @@ import pypdfium2._pypdfium as pdfium
 def validate_colors(bg_color, color_scheme):
     colors = [bg_color]
     if color_scheme is not None:
-        colors += list( color_scheme.kwargs.values() )
+        colors += list( color_scheme.colors.values() )
     for col in colors:
         if len(col) != 4:
             raise ValueError("Color must consist of exactly 4 values.")

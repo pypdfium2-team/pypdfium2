@@ -160,7 +160,7 @@ Here are some examples of using the support model API.
       rotation = 0,                       # no additional rotation
       crop = (0, 0, 0, 0),                # no crop (form: left, right, bottom, top)
       greyscale = False,                  # coloured output
-      color = (255, 255, 255, 255),       # fill bitmap with white background before rendering (form: RGBA)
+      fill_color = (255, 255, 255, 255),  # fill bitmap with white background before rendering (form: RGBA)
       color_scheme = None,                # no custom colour scheme
       fill_to_stroke = False,             # don't stroke fill paths (relevant for custom colour scheme only)
       optimise_mode = OptimiseMode.NONE,  # no optimisations (e. g. subpixel rendering)

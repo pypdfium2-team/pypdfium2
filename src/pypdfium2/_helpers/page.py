@@ -328,9 +328,8 @@ class PdfPage (BitmapConvAliases):
             rotation = 0,
             crop = (0, 0, 0, 0),
             greyscale = False,
-            color = (255, 255, 255, 255),  # TODO rename to fill_color
+            fill_color = (255, 255, 255, 255),
             color_scheme = None,
-            fill_to_stroke = False,
             optimise_mode = OptimiseMode.NONE,
             draw_annots = True,
             draw_forms = True,
@@ -366,16 +365,14 @@ class PdfPage (BitmapConvAliases):
             greyscale (bool):
                 Whether to render in greyscale mode (no colors).
             
-            color (typing.Tuple[int, int, int, int]):
-                Page background color. Shall be a list of values for red, green, blue and alpha, ranging from 0 to 255.
+            fill_color (typing.Tuple[int, int, int, int]):
+                Color the bitmap will be filled with before rendering.
+                Shall be a list of values for red, green, blue and alpha, ranging from 0 to 255.
                 For RGB, 0 will include nothing of the color in question, while 255 will fully include it.
                 For Alpha, 0 means full transparency, while 255 means no transparency.
             
             color_scheme (ColorScheme | None):
                 A custom color scheme for rendering, defining fill and stroke colors for path and text objects.
-            
-            fill_to_stroke (bool):
-                Whether fill paths need to be stroked. This option is ignored if *color_scheme* is :data:`None`.
             
             optimise_mode (OptimiseMode):
                 How to optimise page rendering.
@@ -443,10 +440,10 @@ class PdfPage (BitmapConvAliases):
             * the memory is freed once not needed anymore
         """
         
-        validate_colors(color, color_scheme)
+        validate_colors(fill_color, color_scheme)
         
         if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
-            cl_pdfium = auto_bitmap_format(color, greyscale, prefer_bgrx)
+            cl_pdfium = auto_bitmap_format(fill_color, greyscale, prefer_bgrx)
         else:
             cl_pdfium = force_bitmap_format
         
@@ -459,7 +456,7 @@ class PdfPage (BitmapConvAliases):
         else:
             cl_string = BitmapConstToStr[cl_pdfium]
         
-        c_color = color_tohex(color, rev_byteorder)
+        c_fill_color = color_tohex(fill_color, rev_byteorder)
         n_channels = len(cl_string)
         
         src_width  = math.ceil(self.get_width()  * scale)
@@ -489,7 +486,7 @@ class PdfPage (BitmapConvAliases):
                 raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (ctypes.sizeof(buffer), n_bytes))
         
         bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
-        pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_color)
+        pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_fill_color)
         
         render_flags = extra_flags
         if greyscale:
@@ -506,7 +503,7 @@ class PdfPage (BitmapConvAliases):
             render_flags |= pdfium.FPDF_RENDER_FORCEHALFTONE
         if rev_byteorder:
             render_flags |= pdfium.FPDF_REVERSE_BYTE_ORDER
-        if fill_to_stroke and color_scheme is not None:
+        if color_scheme and color_scheme.fill_to_stroke:
             render_flags |= pdfium.FPDF_CONVERT_FILL_TO_STROKE
         
         if optimise_mode is OptimiseMode.NONE:
@@ -546,33 +543,33 @@ class ColorScheme:
     """
     Rendering color scheme.
     Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
-    
-    Note:
-        Valid fields are extracted dynamically from the :class:`FPDF_COLORSCHEME` structure.
-        Unassigned integer fields default to 0, which means transparent.
-    
-    Parameters:
-        path_fill_color
-        path_stroke_color
-        text_fill_color
-        text_stroke_color
     """
     
-    def __init__(self, **caller_kws):
-        self.kwargs = {k: v for k, v in caller_kws.items() if v is not None}
-        fields = [key for key, _ in pdfium.FPDF_COLORSCHEME._fields_]
-        assert len(self.kwargs) > 0
-        assert all(k in fields for k in self.kwargs.keys())
+    def __init__(
+            self,
+            path_fill,
+            path_stroke,
+            text_fill,
+            text_stroke,
+            fill_to_stroke = False,
+        ):
+        self.colors = dict(
+            path_fill_color = path_fill,
+            path_stroke_color = path_stroke,
+            text_fill_color = text_fill,
+            text_stroke_color = text_stroke,
+        )
+        self.fill_to_stroke = fill_to_stroke
     
     def convert(self, rev_byteorder):
         """
         Returns:
             The color scheme as :class:`FPDF_COLORSCHEME` object.
         """
-        fpdf_colorscheme = pdfium.FPDF_COLORSCHEME()
-        for key, value in self.kwargs.items():
-            setattr(fpdf_colorscheme, key, color_tohex(value, rev_byteorder))
-        return fpdf_colorscheme
+        fpdf_cs = pdfium.FPDF_COLORSCHEME()
+        for key, value in self.colors.items():
+            setattr(fpdf_cs, key, color_tohex(value, rev_byteorder))
+        return fpdf_cs
 
 
 class PdfPageObject:

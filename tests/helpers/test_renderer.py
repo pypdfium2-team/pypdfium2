@@ -121,7 +121,7 @@ def test_render_page_alpha(sample_page):
     ]
     kwargs = dict(
         converter = pdfium.BitmapConv.pil_image,
-        color = (0, 0, 0, 0),
+        fill_color = (0, 0, 0, 0),
     )
     image = sample_page.render_to(**kwargs)
     image_rev = sample_page.render_to(**kwargs, rev_byteorder=True)
@@ -162,7 +162,7 @@ def test_render_page_grey_alpha(prefer_la, sample_page):
     image = sample_page.render_to(
         converter,
         greyscale = True,
-        color = (0, 0, 0, 0),
+        fill_color = (0, 0, 0, 0),
         scale = 0.5,
     )
     assert image.size == (298, 421)
@@ -175,7 +175,7 @@ def test_render_page_grey_alpha(prefer_la, sample_page):
 
 
 @pytest.mark.parametrize(
-    "color",
+    "fill_color",
     [
         (255, 255, 255, 255),
         (60,  70,  80,  100),
@@ -185,11 +185,11 @@ def test_render_page_grey_alpha(prefer_la, sample_page):
         (255, 255, 0,   255),
     ]
 )
-def test_render_page_bgcolor(color, sample_page):
+def test_render_page_bgcolor(fill_color, sample_page):
     
     kwargs = dict(
         converter = pdfium.BitmapConv.pil_image,
-        color = color,
+        fill_color = fill_color,
         scale = 0.5,
     )
     image = sample_page.render_to(**kwargs)
@@ -197,10 +197,10 @@ def test_render_page_bgcolor(color, sample_page):
     assert image == image_rev
     
     bg_pixel = image.getpixel( (0, 0) )
-    if color[3] == 255:
-        color = color[:-1]
+    if fill_color[3] == 255:
+        fill_color = fill_color[:-1]
     assert image.size == (298, 421)
-    assert bg_pixel == color
+    assert bg_pixel == fill_color
     
     image.close()
 
@@ -210,12 +210,15 @@ def test_render_page_colorscheme():
     pdf = pdfium.PdfDocument(TestFiles.text)
     page = pdf.get_page(0)
     color_scheme = pdfium.ColorScheme(
-        text_fill_color = (255, 255, 255, 255),
+        path_fill   = (15,  15,  15,  255),
+        path_stroke = (255, 255, 255, 255),
+        text_fill   = (255, 255, 255, 255),
+        text_stroke = (255, 255, 255, 255),
     )
     image = page.render_to(
         pdfium.BitmapConv.pil_image,
         greyscale = True,
-        color = (0, 0, 0, 255),
+        fill_color = (0, 0, 0, 255),
         color_scheme = color_scheme,
     )
     assert image.mode == "L"
