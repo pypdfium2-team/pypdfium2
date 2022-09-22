@@ -10,6 +10,7 @@
     *API-breaking changes*
     - If the target page of a bookmark cannot be identified, `OutlineItem.page_index` is now `None` rather than `-1`, to avoid accidental reverse list indexing and to enforce that callers properly handle this case. Moreover, `OutlineItem.is_closed` is now `None` rather than `False` if the bookmark has no kids.
     - `PdfPageObject.get_type()` was replaced with a `type` attribute.
+    - `PdfTextPage.count_chars()` was replaced with a `char_count` attribute.
     - `PdfPage.count_objects()` was removed. Use `PdfPage.get_objects()` or the raw PDFium API instead.
     - If a negative index is passed to `PdfDocument.new_page()`, it is now interpreted in reversed direction, rather than inserting at the beginning.
     - PDFium is now provided with an external, python-allocated buffer for rendering. This has numerous advantages, most notably that callers don't need to free resources anymore. `PdfPage.render_base()` now directly returns a ctypes ubyte array; `BitmapDataHolder` has been removed.

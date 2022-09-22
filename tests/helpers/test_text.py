@@ -42,7 +42,7 @@ def test_gettext(textpage):
 
 @pytest.mark.parametrize("loose", [False, True])
 def test_getcharbox(textpage, loose):
-    for index in range( textpage.count_chars() ):
+    for index in range(textpage.char_count):
         box = textpage.get_charbox(index, loose=loose)
         assert all( isinstance(val, (int, float)) for val in box )
         assert box[0] <= box[2] and box[1] <= box[3]
@@ -117,9 +117,8 @@ def test_get_index(textpage):
     
     x, y = (60, textpage.page.get_height()-66)
     
-    n_chars = textpage.count_chars()
     index = textpage.get_index(x, y, 5, 5)
-    assert index < n_chars and index == 0
+    assert index < textpage.char_count and index == 0
     
     charbox = textpage.get_charbox(index)
     char = textpage.get_text(*charbox)
@@ -131,8 +130,8 @@ def test_textpage_empty():
     page = pdf.get_page(0)
     textpage = page.get_textpage()
     
+    assert textpage.char_count == 0
     assert textpage.get_text() == ""
-    assert textpage.count_chars() == 0
     assert textpage.count_rects() == 0
     assert textpage.get_index(0, 0, 0, 0) is None
     assert [r for r in textpage.get_rectboxes()] == []
