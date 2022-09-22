@@ -150,7 +150,7 @@ def attach_parser(subparsers):
     colour_scheme.add_argument(
         "--fill-to-stroke",
         action = "store_true",
-        help = "Whether fill paths need to be stroked. Ignored if not rendering with custom colour scheme.",
+        help = "Whether fill paths need to be stroked.",
     )
 
 

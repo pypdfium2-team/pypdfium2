@@ -89,7 +89,6 @@ class PdfTextPage:
             y (float): Vertical position.
             x_tol (float): Horizontal tolerance.
             y_tol (float): Vertical tolerance.
-        
         Returns:
             int | None: The index of the character at or nearby the point (x, y).
             May be :data:`None` if there is no character or an error occurred.

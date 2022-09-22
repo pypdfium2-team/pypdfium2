@@ -50,7 +50,6 @@ class PdfDocument (BitmapConvAliases):
     Raises:
         PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
         FileNotFoundError: Raised if an invalid or non-existent file path was given.
-        TypeError: Raised if an invalid file access strategy was given.
     
     Hint:
         * :func:`len` may be called to get a document's number of pages.
@@ -97,10 +96,8 @@ class PdfDocument (BitmapConvAliases):
                 buf = open(self._orig_input, "rb")
                 self._actual_input = buf.read()
                 buf.close()
-            elif not isinstance(self._file_access, FileAccess):
-                raise TypeError("Invalid file_access type. Expected `FileAccess`, but got `%s`." % type(self._file_access).__name__)
             else:
-                assert False  # unhandled file access strategy (hypothetical internal error)
+                assert False
         
         if isinstance(self._actual_input, pdfium.FPDF_DOCUMENT):
             self.raw = self._actual_input
@@ -261,7 +258,6 @@ class PdfDocument (BitmapConvAliases):
                 If *index* is negative, the indexing direction will be reversed.
                 If *index* is zero, the page will be inserted at the beginning.
                 If *index* is :data:`None` or larger that the document's current last index, the page will be appended to the end.
-        
         Returns:
             PdfPage: The newly created page.
         """
@@ -440,7 +436,7 @@ class PdfDocument (BitmapConvAliases):
         """
         Update the input sources for concurrent rendering to the document's current state
         by saving to bytes and setting the result as new input.
-        If you modified the document, you may want to call this method before :meth:`._render_base`.
+        If you modified the document, you may want to call this method before :meth:`.render_to`.
         """
         buffer = io.BytesIO()
         self.save(buffer)

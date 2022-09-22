@@ -29,9 +29,10 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--types",
         nargs = "+",
+        metavar = "T",
         choices = obj_types,
         default = obj_types,
-        help = "Object types to consider (defaults to all).",
+        help = "Object types to consider (defaults to all). Choices: %s" % obj_types,
     )
     parser.add_argument(
         "--max-depth",

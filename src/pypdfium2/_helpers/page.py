@@ -423,7 +423,7 @@ class PdfPage (BitmapConvAliases):
             
         Returns:
             (ctypes array, str, (int, int)): Bitmap data, colour format, and image size.
-            The colour format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, or ``L``, depending on the parameters *colour*, *greyscale* and *rev_byteorder*.
+            The colour format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, ``BGRX``/``RGBX``, or ``L``, depending on the parameters *colour*, *greyscale*, *rev_byteorder* and *prefer_bgrx*.
             Image size is given in pixels as a tuple of width and height.
         
         Tip:

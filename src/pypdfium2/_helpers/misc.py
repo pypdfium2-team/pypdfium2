@@ -53,9 +53,11 @@ class OutlineItem:
         title (str):
             String of the bookmark.
         is_closed (bool):
-            If :data:`True`, child items shall be hidden by default.
+            :data:`True` if child items shall be collapsed by default.
+            :data:`False` if they shall be expanded by default.
+            :data:`None` if the item has no descendants (i. e. *n_kids* == 0).
         n_kids (int):
-            Number of child bookmarks (>= 0).
+            Number of child items (>= 0).
         page_index (int | None):
             Zero-based index of the page the bookmark points to.
             May be :data:`None` if the bookmark has no target page (or it could not be determined).
@@ -155,7 +157,7 @@ BitmapTypeToStr = {
     pdfium.FPDFBitmap_BGRx: "BGRX",
 }
 
-# Convert a reverse pixel format string to its regular counterpart.
+#: Convert a reverse pixel format string to its regular counterpart.
 BitmapStrReverseToRegular = {
     "BGR":  "RGB",
     "BGRA": "RGBA",

@@ -123,7 +123,7 @@ class BitmapConv:
         Hint:
             This uses :func:`PIL.Image.frombuffer` under the hood.
             If possible for the colour format in question, the image will reference the ctypes array. Otherwise, PIL may create a copy of the data.
-            At the time of writing, PIL can directly work with ``RGBA``, ``RGBX`` or ``L`` pixel data.
+            At the time of writing, PIL can directly work with ``RGBA``, ``RGBX`` or ``L`` (among the pixel formats supported by PDFium).
             Depending on the use case, you may want to consider setting the rendering parameters *rev_byteorder* and *prefer_bgrx* to :data:`True`
             to generate natively compatible output.
         """
