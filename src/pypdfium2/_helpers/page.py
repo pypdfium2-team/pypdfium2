@@ -441,6 +441,8 @@ class PdfPage (BitmapConvAliases):
             * the memory is freed once not needed anymore
         """
         
+        # TODO add option for FPDF_RENDER_LIMITEDIMAGECACHE
+        
         validate_colours(fill_colour, colour_scheme)
         
         if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
