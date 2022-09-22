@@ -415,6 +415,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   fileaccess.m_FileLen = file_len
   # CFUNCTYPE declaration copied from the bindings file (unfortunately, this is not applied automatically)
   functype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
+  # Alternatively, the CFUNCTYPE declaration can also be extracted dynamically using a helper function of pypdfium2
+  functype = pdfium.get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")
   # Instantiate a callable object, wrapped with the CFUNCTYPE declaration
   fileaccess.m_GetBlock = functype( _reader_class(py_buffer) )
   # Finally, load the document
@@ -427,7 +429,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   Hence, we'd need to pass the memory address of the buffer object and dereference that in the callback.
   ```python
   # Declare a function decorated with the CFUNCTYPE
-  @ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
+  @pdfium.get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")
   def _reader_func(param, position, p_buf, size):
       # Dereference the memory address
       py_buffer = ctypes.cast(param, ctypes.py_object).value
