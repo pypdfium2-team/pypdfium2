@@ -16,14 +16,14 @@
     - PDFium is now provided with an external, python-allocated buffer for rendering. This has numerous advantages, most notably that callers don't need to free resources anymore. `PdfPage.render_base()` now directly returns a ctypes ubyte array; `BitmapDataHolder` has been removed.
     - Changed rendering parameters
         - `annotations` was renamed to `draw_annots`
-        - `colour` was renamed to `color` and now only takes a list of 4 values for simplicity - it may not be 3 values or `None` anymore
+        - `colour` was renamed to `fill_colour` and now only takes a list of 4 values for simplicity - it may not be 3 values or `None` anymore
         - `no_antialias` has been replaced with separate boolean options `no_smoothtext`, `no_smoothimage`, and `no_smoothpath`
     
     *Other changes*
     - `OutlineItem` now contains information on the number of sub-items (`n_kids` attribute).
     - All document-level methods that take a page index now accept negative values for reverse indexing (except the rendering methods).
     - New method `PdfDocument.get_page_size()` to retrieve page size by index without needing to load a `PdfPage` (uses `FPDF_GetPageSizeByIndexF()` under the hood).
-    - New rendering parameters added: `color_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `prefer_bgrx`, `force_bitmap_format`, `extra_flags`, `allocator`, and `memory_limit`.
+    - New rendering parameters added: `colour_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `prefer_bgrx`, `force_bitmap_format`, `extra_flags`, `allocator`, and `memory_limit`.
     - Added new `render_to()` functions to `PdfPage` and `PdfDocument` that take a custom bitmap converter, to transform the ctypes array to a different object. A set of built-in converters is provided with the `BitmapConv` class. Confer the updated API documentation for details. The previous rendering functions (`render_topil()` `render_tobytes()`, ...) are still around as deprecated aliases but might be removed eventually.
     - New rendering target `numpy_ndarray` added.
     - The `pil_image` rendering target now accepts a `prefer_la` parameter to request automatic conversion of `BGRA`/`RGBA` to `LA` if rendering in greyscale mode with alpha channel.

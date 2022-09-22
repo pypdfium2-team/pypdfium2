@@ -45,7 +45,7 @@ Also see the issues panel and inline `TODO` marks in source code.
 
 ### Miscellaneous
 * Ask Linux distributors to package PDFium.
-* Discuss rendering methods in PDFium's mailing list (we'd like a way to combine matrix, color scheme and interruptibility).
+* Discuss rendering methods in PDFium's mailing list (we'd like a way to combine matrix, colour scheme and interruptibility).
 * Add means to plug in PDFium headers/binaries from an arbitrary location, probably using custom environment variables.
 * Keep in mind that `ctypes.pythonapi` exists. Maybe we could replace our wonky `id()` based keep-the-object-alive approach with proper incref/decref calls?
 * Find out if/when we need to use `ctypes.byref()`.

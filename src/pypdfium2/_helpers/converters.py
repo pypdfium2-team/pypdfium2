@@ -38,7 +38,7 @@ class BitmapConvBase:
         
         Parameters:
             result (tuple):
-                Result of the :meth:`.PdfPage.render_base` call (ctypes array, color format, size).
+                Result of the :meth:`.PdfPage.render_base` call (ctypes array, colour format, size).
             renderer_kws (dict):
                 Dictionary of keywords that were passed to :meth:`.PdfPage.render_base` by the caller. May be empty.
             args (tuple):
@@ -72,7 +72,7 @@ class BitmapConv:
                 It could be a function, a class with constructor, or an instance of a class implementing ``__call__``.
         Returns:
             (typing.Any, ...):
-                The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (color format, size).
+                The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (colour format, size).
         """
         
         @staticmethod
@@ -89,7 +89,7 @@ class BitmapConv:
         This converter never makes a copy of the data.
         
         Returns:
-            (numpy.ndarray, str): NumPy array, and color format.
+            (numpy.ndarray, str): NumPy array, and colour format.
         """
         
         @staticmethod
@@ -122,7 +122,7 @@ class BitmapConv:
         
         Hint:
             This uses :func:`PIL.Image.frombuffer` under the hood.
-            If possible for the color format in question, the image will reference the ctypes array. Otherwise, PIL may create a copy of the data.
+            If possible for the colour format in question, the image will reference the ctypes array. Otherwise, PIL may create a copy of the data.
             At the time of writing, PIL can directly work with ``RGBA``, ``RGBX`` or ``L`` pixel data.
             Depending on the use case, you may want to consider setting the rendering parameters *rev_byteorder* and *prefer_bgrx* to :data:`True`
             to generate natively compatible output.
@@ -131,7 +131,7 @@ class BitmapConv:
         @staticmethod
         def run(result, renderer_kws, prefer_la=False):
             
-            # NOTE This converter does not return additional parameters, as information on size and color format (mode) is already contained in the image object.
+            # NOTE This converter does not return additional parameters, as information on size and colour format (mode) is already contained in the image object.
             
             if PIL is None:
                 raise RuntimeError("Pillow library needs to be installed for pil_image() converter.")

@@ -12,7 +12,7 @@ from pypdfium2 import _namespace as pdfium
 from pypdfium2._cli._parsers import pagetext_type
 
 
-ColorOpts = dict(
+ColourOpts = dict(
     metavar = "C",
     nargs = 4,
     type = int,
@@ -65,10 +65,10 @@ def attach_parser(subparsers):
         help = "Rotate pages by 90, 180 or 270 degrees",
     )
     parser.add_argument(
-        "--fill-color",
+        "--fill-colour",
         default = (255, 255, 255, 255),
-        help = "Color the bitmap will be filled with before rendering. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
-        **ColorOpts,
+        help = "Colour the bitmap will be filled with before rendering. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
+        **ColourOpts,
     )
     parser.add_argument(
         "--force-halftone",
@@ -94,7 +94,7 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--greyscale",
         action = "store_true",
-        help = "Whether to render in greyscale mode (no colors)",
+        help = "Whether to render in greyscale mode (no colours)",
     )
     parser.add_argument(
         "--crop",
@@ -127,30 +127,30 @@ def attach_parser(subparsers):
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
     )
     
-    color_scheme = parser.add_argument_group(
-        title = "Color scheme",
-        description = "Options for rendering with custom color scheme",
+    colour_scheme = parser.add_argument_group(
+        title = "Colour scheme",
+        description = "Options for rendering with custom colour scheme",
     )
-    color_scheme.add_argument(
+    colour_scheme.add_argument(
         "--path-fill",
-        **ColorOpts
+        **ColourOpts
     )
-    color_scheme.add_argument(
+    colour_scheme.add_argument(
         "--path-stroke",
-        **ColorOpts
+        **ColourOpts
     )
-    color_scheme.add_argument(
+    colour_scheme.add_argument(
         "--text-fill",
-        **ColorOpts
+        **ColourOpts
     )
-    color_scheme.add_argument(
+    colour_scheme.add_argument(
         "--text-stroke",
-        **ColorOpts
+        **ColourOpts
     )
-    color_scheme.add_argument(
+    colour_scheme.add_argument(
         "--fill-to-stroke",
         action = "store_true",
-        help = "Whether fill paths need to be stroked. Ignored if not rendering with custom color scheme.",
+        help = "Whether fill paths need to be stroked. Ignored if not rendering with custom colour scheme.",
     )
 
 
@@ -175,12 +175,12 @@ def main(args):
         )
         cs = None
         if all(cs_kwargs.values()):
-            cs = pdfium.ColorScheme(
+            cs = pdfium.ColourScheme(
                 fill_to_stroke = args.fill_to_stroke,
                 **cs_kwargs,
             )
         elif any(cs_kwargs.values()):
-            raise ValueError("If rendering with custom color scheme, all parameters need to be set explicitly.")
+            raise ValueError("If rendering with custom colour scheme, all parameters need to be set explicitly.")
         
         kwargs = dict(
             page_indices = page_indices,
@@ -189,8 +189,8 @@ def main(args):
             rotation = args.rotation,
             crop = args.crop,
             greyscale = args.greyscale,
-            fill_color = args.fill_color,
-            color_scheme = cs,
+            fill_colour = args.fill_colour,
+            colour_scheme = cs,
             optimise_mode = args.optimise_mode,
             draw_annots = not args.no_annotations,
             draw_forms = not args.no_forms,

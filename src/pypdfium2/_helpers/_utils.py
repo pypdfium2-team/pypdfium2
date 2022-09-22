@@ -4,20 +4,20 @@
 import pypdfium2._pypdfium as pdfium
 
 
-def validate_colors(bg_color, color_scheme):
-    colors = [bg_color]
-    if color_scheme is not None:
-        colors += list( color_scheme.colors.values() )
-    for col in colors:
+def validate_colours(bg_colour, colour_scheme):
+    colours = [bg_colour]
+    if colour_scheme is not None:
+        colours += list( colour_scheme.colours.values() )
+    for col in colours:
         if len(col) != 4:
-            raise ValueError("Color must consist of exactly 4 values.")
+            raise ValueError("Colour must consist of exactly 4 values.")
         if not all(0 <= c <= 255 for c in col):
-            raise ValueError("Color value exceeds boundaries.")
+            raise ValueError("Colour value exceeds boundaries.")
 
 
-def auto_bitmap_format(bg_color, greyscale, prefer_bgrx):
-    # no need to take alpha values of color_scheme into account (drawings are additive)
-    if (bg_color[3] < 255):
+def auto_bitmap_format(bg_colour, greyscale, prefer_bgrx):
+    # no need to take alpha values of colour_scheme into account (drawings are additive)
+    if (bg_colour[3] < 255):
         return pdfium.FPDFBitmap_BGRA
     elif greyscale:
         return pdfium.FPDFBitmap_Gray
@@ -27,27 +27,27 @@ def auto_bitmap_format(bg_color, greyscale, prefer_bgrx):
         return pdfium.FPDFBitmap_BGR
 
 
-def color_tohex(color, rev_byteorder):
+def colour_tohex(colour, rev_byteorder):
     """
-    Convert an RGBA color specified by 4 integers ranging from 0 to 255 to a single 32-bit integer as required by PDFium.
+    Convert an RGBA colour specified by 4 integers ranging from 0 to 255 to a single 32-bit integer as required by PDFium.
     If using regular byte order, the output format will be ARGB. If using reversed byte order, it will be ABGR.
     """
     
-    r, g, b, a = color
+    r, g, b, a = colour
     
-    # color is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
+    # colour is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
     if rev_byteorder:
         channels = (a, b, g, r)
     else:
         channels = (a, r, g, b)
     
-    c_color = 0
+    c_colour = 0
     shift = 24
     for c in channels:
-        c_color |= c << shift
+        c_colour |= c << shift
         shift -= 8
     
-    return c_color
+    return c_colour
 
 
 def get_functype(struct, funcname):

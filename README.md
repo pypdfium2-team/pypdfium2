@@ -156,26 +156,26 @@ Here are some examples of using the support model API.
   ```python
   image = page.render_to(
       # defaults
-      scale = 1,                          # 72dpi resolution
-      rotation = 0,                       # no additional rotation
-      crop = (0, 0, 0, 0),                # no crop (form: left, right, bottom, top)
-      greyscale = False,                  # coloured output
-      fill_color = (255, 255, 255, 255),  # fill bitmap with white background before rendering (form: RGBA)
-      color_scheme = None,                # no custom colour scheme
-      fill_to_stroke = False,             # don't stroke fill paths (relevant for custom colour scheme only)
-      optimise_mode = OptimiseMode.NONE,  # no optimisations (e. g. subpixel rendering)
-      draw_annots = True,                 # show annotations
-      draw_forms = True,                  # show forms
-      no_smoothtext = False,              # anti-alias text
-      no_smoothimage = False,             # anti-alias images
-      no_smoothpath = False,              # anti-alias paths
-      force_halftone = False,             # don't force halftone for image stretching
-      rev_byteorder = False,              # don't reverse byte order
-      prefer_bgrx = False,                # don't prefer four channels for coloured output
-      force_bitmap_format = None,         # don't force a specific bitmap format
-      extra_flags = 0,                    # no extra flags
-      allocator = None,                   # no custom allocator
-      memory_limit = 2**30,               # maximum allocation (1 GiB)
+      scale = 1,                           # 72dpi resolution
+      rotation = 0,                        # no additional rotation
+      crop = (0, 0, 0, 0),                 # no crop (form: left, right, bottom, top)
+      greyscale = False,                   # coloured output
+      fill_colour = (255, 255, 255, 255),  # fill bitmap with white background before rendering (form: RGBA)
+      colour_scheme = None,                # no custom colour scheme
+      fill_to_stroke = False,              # don't stroke fill paths (relevant for custom colour scheme only)
+      optimise_mode = OptimiseMode.NONE,   # no optimisations (e. g. subpixel rendering)
+      draw_annots = True,                  # show annotations
+      draw_forms = True,                   # show forms
+      no_smoothtext = False,               # anti-alias text
+      no_smoothimage = False,              # anti-alias images
+      no_smoothpath = False,               # anti-alias paths
+      force_halftone = False,              # don't force halftone for image stretching
+      rev_byteorder = False,               # don't reverse byte order
+      prefer_bgrx = False,                 # don't prefer four channels for coloured output
+      force_bitmap_format = None,          # don't force a specific bitmap format
+      extra_flags = 0,                     # no extra flags
+      allocator = None,                    # no custom allocator
+      memory_limit = 2**30,                # maximum allocation (1 GiB)
   )
   image.show()
   image.close()
@@ -510,7 +510,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
   [^ctypes_no_oor]: Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
-* Finally, let's finish this guide with an example on how to render the first page of a document to a `PIL` image in `RGBA` color format.
+* Finally, let's finish this guide with an example on how to render the first page of a document to a `PIL` image in `RGBA` colour format.
   ```python
   import math
   import ctypes
@@ -535,7 +535,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   use_alpha = False  # We don't render with transparent background
   bitmap = pdfium.FPDFBitmap_Create(width, height, int(use_alpha))
   # Fill the whole bitmap with a white background
-  # The color is given as a 32-bit integer in ARGB format (8 bits per channel)
+  # The colour is given as a 32-bit integer in ARGB format (8 bits per channel)
   pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
   
   # Store common rendering arguments
