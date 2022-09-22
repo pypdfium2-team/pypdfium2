@@ -4,8 +4,8 @@
 import pypdfium2._pypdfium as pdfium
 
 
-def validate_colours(bg_colour, colour_scheme):
-    colours = [bg_colour]
+def validate_colours(fill_colour, colour_scheme):
+    colours = [fill_colour]
     if colour_scheme is not None:
         colours += list( colour_scheme.colours.values() )
     for col in colours:
@@ -15,9 +15,9 @@ def validate_colours(bg_colour, colour_scheme):
             raise ValueError("Colour value exceeds boundaries.")
 
 
-def auto_bitmap_format(bg_colour, greyscale, prefer_bgrx):
+def auto_bitmap_format(fill_colour, greyscale, prefer_bgrx):
     # no need to take alpha values of colour_scheme into account (drawings are additive)
-    if (bg_colour[3] < 255):
+    if (fill_colour[3] < 255):
         return pdfium.FPDFBitmap_BGRA
     elif greyscale:
         return pdfium.FPDFBitmap_Gray

@@ -185,7 +185,7 @@ def test_render_page_grey_alpha(prefer_la, sample_page):
         (255, 255, 0,   255),
     ]
 )
-def test_render_page_bgcolour(fill_colour, sample_page):
+def test_render_page_fill_colour(fill_colour, sample_page):
     
     kwargs = dict(
         converter = pdfium.BitmapConv.pil_image,
