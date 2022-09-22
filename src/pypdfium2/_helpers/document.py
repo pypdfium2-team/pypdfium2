@@ -10,10 +10,6 @@ import functools
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers._utils import (
-    ViewmodeMapping,
-    get_functype,
-)
 from pypdfium2._helpers._opener import (
     open_pdf,
     is_input_buffer,
@@ -22,6 +18,8 @@ from pypdfium2._helpers.misc import (
     OutlineItem,
     FileAccess,
     PdfiumError,
+    ViewmodeToStr,
+    get_functype,
 )
 from pypdfium2._helpers.converters import BitmapConvAliases
 from pypdfium2._helpers.page import PdfPage
@@ -428,7 +426,7 @@ class PdfDocument (BitmapConvAliases):
             else:
                 target = item.page_index + 1
             
-            view_mode = ViewmodeMapping[item.view_mode]
+            view_mode = ViewmodeToStr[item.view_mode]
             view_pos = [round(c, n_digits) for c in item.view_pos]
             
             print(

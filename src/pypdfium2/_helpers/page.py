@@ -7,18 +7,18 @@ import ctypes
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers._utils import (
-    get_functype,
     validate_colours,
-    colour_tohex,
     auto_bitmap_format,
-    RotationToConst,
-    RotationToDegrees,
-    BitmapConstToStr,
-    BitmapConstToReverseStr,
 )
 from pypdfium2._helpers.misc import (
     OptimiseMode,
     PdfiumError,
+    get_functype,
+    colour_tohex,
+    RotationToConst,
+    RotationToDegrees,
+    BitmapTypeToStr,
+    BitmapTypeToStrReverse,
 )
 from pypdfium2._helpers.converters import (
     BitmapConvBase,
@@ -453,9 +453,9 @@ class PdfPage (BitmapConvAliases):
             rev_byteorder = False
         
         if rev_byteorder:
-            cl_string = BitmapConstToReverseStr[cl_pdfium]
+            cl_string = BitmapTypeToStrReverse[cl_pdfium]
         else:
-            cl_string = BitmapConstToStr[cl_pdfium]
+            cl_string = BitmapTypeToStr[cl_pdfium]
         
         c_fill_colour = colour_tohex(fill_colour, rev_byteorder)
         n_channels = len(cl_string)

@@ -3,10 +3,10 @@
 
 import ctypes
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2._helpers._utils import (
+from pypdfium2._helpers.misc import (
     get_functype,
-    ErrorMapping,
+    PdfiumError,
+    ErrorToStr,
 )
 
 
@@ -86,7 +86,7 @@ def open_pdf(input_data, password=None):
     
     if pdfium.FPDF_GetPageCount(pdf) < 1:
         err_code = pdfium.FPDF_GetLastError()
-        pdfium_msg = ErrorMapping.get(err_code, "Error code %s" % err_code)
+        pdfium_msg = ErrorToStr.get(err_code, "Error code %s" % err_code)
         raise PdfiumError("Loading the document failed (PDFium: %s)" % pdfium_msg)
     
     return pdf, ld_data

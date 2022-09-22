@@ -111,7 +111,6 @@ Here are some examples of using the support model API.
       image.close()
   ```
 
-<!-- TODO convert view mode integer to string -->
 * Read the table of contents
   ```python
   for item in pdf.get_toc():
@@ -128,14 +127,15 @@ Here are some examples of using the support model API.
       else:
           target = item.page_index + 1
       
+      view_mode = pdfium.ViewmodeToStr[item.view_mode]
       view_pos = [round(c, n_digits) for c in item.view_pos]
+      
       print(
           "    " * item.level +
-          "[%s] %s -> %s  # %s %s" % (state, item.title, target, item.view_mode, view_pos)
+          "[%s] %s -> %s  # %s %s" % (state, item.title, target, view_mode, view_pos)
       )
   ```
 
-<!-- TODO convert object type integer to string -->
 * Load a page to work with
   ```python
   page = pdf[0]  # or pdf.get_page(0)
@@ -147,7 +147,7 @@ Here are some examples of using the support model API.
   
   # Locate objects on the page
   for obj in page.get_objects():
-      print(obj.get_type(), obj.get_pos())
+      print("    "*obj.level + pdfium.ObjectTypeToStr[obj.type], obj.get_pos())
   ```
 
 * Render a single page

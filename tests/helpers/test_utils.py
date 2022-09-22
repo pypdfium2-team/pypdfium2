@@ -3,7 +3,6 @@
 
 import pytest
 import pypdfium2 as pdfium
-from pypdfium2._helpers._utils import *
 
 # TODO test auto_bitmap_format() and colour_tohex()
 
@@ -18,16 +17,16 @@ from pypdfium2._helpers._utils import *
     ]
 )
 def test_rotation_conversion(degrees, const):
-    assert RotationToConst[degrees] == const
-    assert RotationToDegrees[const] == degrees
+    assert pdfium.RotationToConst[degrees] == const
+    assert pdfium.RotationToDegrees[const] == degrees
 
 
 @pytest.mark.parametrize(
     ["prefix", "mapping"],
     [
-        ("PDFDEST_VIEW_", ViewmodeMapping),
-        ("FPDF_ERR_", ErrorMapping),
-        ("FPDF_PAGEOBJ_", ObjtypeToName),
+        ("PDFDEST_VIEW_", pdfium.ViewmodeToStr),
+        ("FPDF_ERR_",     pdfium.ErrorToStr),
+        ("FPDF_PAGEOBJ_", pdfium.ObjectTypeToStr),
     ]
 )
 def test_const_tostring(prefix, mapping):

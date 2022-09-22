@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-from pypdfium2._helpers._utils import UnreverseBitmapStr
+from pypdfium2._helpers.misc import BitmapStrReverseToRegular
 
 try:
     import PIL.Image
@@ -138,8 +138,8 @@ class BitmapConv:
             
             c_array, cl_src, size = result
             cl_dst = cl_src
-            if cl_src in UnreverseBitmapStr.keys():
-                cl_dst = UnreverseBitmapStr[cl_src]
+            if cl_src in BitmapStrReverseToRegular.keys():
+                cl_dst = BitmapStrReverseToRegular[cl_src]
             
             pil_image = PIL.Image.frombuffer(cl_dst, size, c_array, "raw", cl_src, 0, 1)
             if prefer_la:

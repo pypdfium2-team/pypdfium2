@@ -4,14 +4,10 @@
 import os.path
 from pypdfium2 import _namespace as pdfium
 from pypdfium2._cli._parsers import pagetext_type
-from pypdfium2._helpers._utils import (
-    ObjtypeToConst,
-    ObjtypeToName,
-)
 
 
 def attach_parser(subparsers):
-    obj_types = list(ObjtypeToConst.keys())
+    obj_types = list(pdfium.ObjectTypeToConst.keys())
     parser = subparsers.add_parser(
         "find-pageobjects",
         help = "Locate page objects of given types.",
@@ -37,20 +33,26 @@ def attach_parser(subparsers):
         default = obj_types,
         help = "Object types to consider (defaults to all).",
     )
+    parser.add_argument(
+        "--max-depth",
+        type = int,
+        default = 2,
+        help = "Maximum recursion depth to consider when descending into Form XObjects.",
+    )
 
 
 def main(args):
     
     doc = pdfium.PdfDocument(args.input, password=args.password)
-    args.types = [ObjtypeToConst[t] for t in args.types]
+    args.types = [pdfium.ObjectTypeToConst[t] for t in args.types]
     if args.pages is None:
         args.pages = [i for i in range(len(doc))]
     
     for index in args.pages:
         page = doc.get_page(index)
-        for obj in page.get_objects():
+        for obj in page.get_objects(max_depth=args.max_depth):
             if obj.type in args.types:
-                print("    "*obj.level + ObjtypeToName[obj.type], obj.get_pos())
+                print("    "*obj.level + pdfium.ObjectTypeToStr[obj.type], obj.get_pos())
         page.close()
     
     doc.close()
