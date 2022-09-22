@@ -426,12 +426,13 @@ class PdfDocument (BitmapConvAliases):
             else:
                 target = item.page_index + 1
             
-            view_mode = ViewmodeToStr[item.view_mode]
-            view_pos = [round(c, n_digits) for c in item.view_pos]
-            
             print(
                 "    " * item.level +
-                "[%s] %s -> %s  # %s %s" % (state, item.title, target, view_mode, view_pos)
+                "[%s] %s -> %s  # %s %s" % (
+                    state, item.title, target,
+                    ViewmodeToStr[item.view_mode],
+                    [round(c, n_digits) for c in item.view_pos],
+                )
             )
     
     

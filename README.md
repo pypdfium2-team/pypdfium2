@@ -113,8 +113,8 @@ Here are some examples of using the support model API.
 
 * Read the table of contents
   ```python
-  for item in pdf.get_toc():
-      
+  for item in toc:
+    
       if item.n_kids == 0:
           state = "*"
       elif item.is_closed:
@@ -127,12 +127,13 @@ Here are some examples of using the support model API.
       else:
           target = item.page_index + 1
       
-      view_mode = pdfium.ViewmodeToStr[item.view_mode]
-      view_pos = [round(c, n_digits) for c in item.view_pos]
-      
       print(
           "    " * item.level +
-          "[%s] %s -> %s  # %s %s" % (state, item.title, target, view_mode, view_pos)
+          "[%s] %s -> %s  # %s %s" % (
+              state, item.title, target,
+              pdfium.ViewmodeToStr[item.view_mode],
+              [round(c, n_digits) for c in item.view_pos],
+          )
       )
   ```
 
@@ -160,7 +161,6 @@ Here are some examples of using the support model API.
       greyscale = False,                   # coloured output
       fill_colour = (255, 255, 255, 255),  # fill bitmap with white background before rendering (form: RGBA)
       colour_scheme = None,                # no custom colour scheme
-      fill_to_stroke = False,              # don't stroke fill paths (relevant for custom colour scheme only)
       optimise_mode = OptimiseMode.NONE,   # no optimisations (e. g. subpixel rendering)
       draw_annots = True,                  # show annotations
       draw_forms = True,                   # show forms
