@@ -128,12 +128,10 @@ Here are some examples of using the support model API.
       else:
           target = item.page_index + 1
       
-      view_mode = ViewmodeMapping[item.view_mode]
       view_pos = [round(c, n_digits) for c in item.view_pos]
-      
       print(
           "    " * item.level +
-          "[%s] %s -> %s  # %s %s" % (state, item.title, target, view_mode, view_pos)
+          "[%s] %s -> %s  # %s %s" % (state, item.title, target, item.view_mode, view_pos)
       )
   ```
 
