@@ -52,9 +52,11 @@ class PdfTextPage:
         if n_chars <= 0:
             return ""
         
-        c_array = (ctypes.c_ushort * (n_chars+1))()
-        pdfium.FPDFText_GetBoundedText(*args, c_array, n_chars)
-        text = bytes(c_array).decode("utf-16-le", errors="ignore")[:-1]
+        n_bytes = 2 * n_chars
+        buffer = ctypes.create_string_buffer(n_bytes)
+        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+        pdfium.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
+        text = buffer.raw.decode("utf-16-le", errors="ignore")
         
         return text
     
@@ -165,10 +167,11 @@ class PdfTextPage:
         
         for i in range(n_links):
             n_chars = pdfium.FPDFLink_GetURL(links, i, None, 0)
-            buffer = (ctypes.c_ushort * n_chars)()
-            pdfium.FPDFLink_GetURL(links, i, buffer, n_chars)
-            link = bytes(buffer).decode("utf-16-le")[:-1]
-            yield link
+            n_bytes = n_chars * 2
+            buffer = ctypes.create_string_buffer(n_bytes)
+            buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+            pdfium.FPDFLink_GetURL(links, i, buffer_ptr, n_chars)
+            yield buffer.raw[:n_bytes-2].decode("utf-16-le")
         
         pdfium.FPDFLink_CloseWebLinks(links)
     

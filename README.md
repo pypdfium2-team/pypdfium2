@@ -311,43 +311,44 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```
 
 * For string output parameters, callers needs to provide a sufficiently long, pre-allocated buffer.
+  This may work differently depending on what type the function requires, which encoding is used, whether the number of bytes or characters is returned, and whether space for a null terminator is included or not. Carefully review the documentation for the function in question to fulfill its requirements.
   
   Example A: Getting the title string of a bookmark.
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
-  # First call to get the required number of bytes (not characters!)
-  # With this function, space for a null terminator is included already
+  # First call to get the required number of bytes (not characters!), including space for a null terminator
   n_bytes = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
-  # Initialisation of the string buffer
-  # Internally, this will create a C char array of length `n_bytes` (1 char is 1 byte wide)
+  # Initialise the output buffer
   buffer = ctypes.create_string_buffer(n_bytes)
   # Second call with the actual buffer
   pdfium.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
-  # Decode bytes to str and cut off the null terminator
-  # The docs for the function in question indicate which decoder to use (usually: UTF-16LE)
-  # You might want to pass `errors="ignore"` to skip possible encoding errors without raising an exception
-  title = buffer.raw.decode('utf-16-le')[:-1]
+  # Decode to string, cutting off the null terminator
+  # Encoding: UTF-16LE (2 bytes per character)
+  title = buffer.raw[:n_bytes-2].decode('utf-16-le')
   ```
-  
-  The above pattern applies to functions that require type `char`.
-  However, some functions use `unsigned short` instead, which works a bit differently.
-  Concerning functions that take a typeless pointer (`void`) for a string buffer, it is recommended to check whether the function returns the number of bytes or characters and use the corresponding approach.
-  In principle, the two patterns are exchangeable provided that you allocate enough memory (2 bytes per character for UTF-16) and types match in the end.
   
   Example B: Extracting text in given boundaries.
   ```python
-  # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set to int or float values)
-  # Store common arguments for the two function calls
+  # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set)
+  # Store common arguments for the two calls
   args = (textpage, left, top, right, bottom)
-  # Get the expected number of characters (not bytes!). Return an empty string if no characters were found.
-  n_characters = pdfium.FPDFText_GetBoundedText(*args, None, 0)
-  if n_characters <= 0:
+  # First call to get the required number of characters (not bytes!) - a possible null terminator is not included
+  n_chars = pdfium.FPDFText_GetBoundedText(*args, None, 0)
+  # If no characters were found, return an empty string
+  if n_chars <= 0:
       return ""
-  # Initialise an array of `unsigned short` slots for the characters, plus a null terminator
-  c_array = (ctypes.c_ushort * (n_characters+1))()
-  pdfium.FPDFText_GetBoundedText(*args, c_array, n_characters)
-  # Convert the c_ushort array to bytes and decode them, cutting off the null terminator
-  text = bytes(c_array).decode("utf-16-le")[:-1]
+  # Calculate the required number of bytes
+  # Encoding: UTF-16LE (2 bytes per character)
+  n_bytes = 2 * n_chars
+  # Initialise the output buffer - this function can work without null terminator, so skip it
+  buffer = ctypes.create_string_buffer(n_bytes)
+  # Re-interpret the type from char to unsigned short as required by the function
+  buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+  # Second call with the actual buffer
+  pdfium.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
+  # Decode to string
+  # (You may want to pass `errors="ignore"` to skip possible errors in the PDF's encoding)
+  text = buffer.raw.decode("utf-16-le")
   ```
 
 * Not only are there different ways of string output that need to be handled according to the requirements of the function in question.

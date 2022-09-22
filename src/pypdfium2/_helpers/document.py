@@ -324,10 +324,10 @@ class PdfDocument (BitmapConvAliases):
     
     def _get_bookmark(self, bookmark, level):
         
-        t_buflen = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
-        t_buffer = ctypes.create_string_buffer(t_buflen)
-        pdfium.FPDFBookmark_GetTitle(bookmark, t_buffer, t_buflen)
-        title = t_buffer.raw.decode('utf-16-le')[:-1]
+        n_bytes = pdfium.FPDFBookmark_GetTitle(bookmark, None, 0)
+        buffer = ctypes.create_string_buffer(n_bytes)
+        pdfium.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
+        title = buffer.raw[:n_bytes-2].decode('utf-16-le')
         
         count = pdfium.FPDFBookmark_GetCount(bookmark)
         if count < 0:
