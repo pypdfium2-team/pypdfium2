@@ -16,7 +16,7 @@ def validate_colors(bg_color, color_scheme):
 
 
 def auto_bitmap_format(bg_color, greyscale, prefer_bgrx):
-    # even if a custom color scheme is given and its values contain transparency, we don't need to care, because drawings are additive
+    # no need to take alpha values of color_scheme into account (drawings are additive)
     if (bg_color[3] < 255):
         return pdfium.FPDFBitmap_BGRA
     elif greyscale:
