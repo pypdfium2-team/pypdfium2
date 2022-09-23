@@ -34,7 +34,8 @@ class BitmapConvBase:
         
         Note:
             * :meth:`.run` should be implemented as a :func:`staticmethod`.
-            * To make sure callers are notified of possible mistakes, the overriding function should never capture unrecognised arguments!
+            * If the implementation takes additional parameters, it is expected to define them on an explicit basis.
+              Unrecognised arguments should always be refused.
         
         Parameters:
             result (tuple):
@@ -42,9 +43,9 @@ class BitmapConvBase:
             renderer_kws (dict):
                 Dictionary of keywords that were passed to :meth:`.PdfPage.render_base` by the caller. May be empty.
             args (tuple):
-                Further positional arguments captured by the constructor, to be explicitly taken by the implementation (see the admonition above).
+                Further positional arguments to the converter, as captured by the constructor (see note above).
             kwargs (dict):
-                Further keyword arguments captured by the constructor, to be explicitly taken by the implementation (see the admonition above).
+                Further keyword arguments to the converter, as captured by the constructor (see note above).
         Returns:
             typing.Any: The converted rendering result (implementation-specific).
         """
@@ -71,8 +72,7 @@ class BitmapConv:
                 A callable to translate a ctypes array to a different data type.
                 It could be a function, a class with constructor, or an instance of a class implementing ``__call__``.
         Returns:
-            (typing.Any, ...):
-                The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (colour format, size).
+            (typing.Any, ...): The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (colour format, size).
         """
         
         @staticmethod
