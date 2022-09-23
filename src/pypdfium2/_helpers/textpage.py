@@ -14,13 +14,11 @@ class PdfTextPage:
     Attributes:
         raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
         page (PdfPage): Reference to the page this textpage belongs to.
-        char_count (int): Number of characters on the page.
     """
     
     def __init__(self, raw, page):
         self.raw = raw
         self.page = page
-        self.char_count = pdfium.FPDFText_CountChars(self.raw)
     
     def close(self):
         """
@@ -63,19 +61,28 @@ class PdfTextPage:
         return text
     
     
+    def count_chars(self):
+        """
+        Returns:
+            int: The number of characters on the page.
+        """
+        return pdfium.FPDFText_CountChars(self.raw)
+    
+    
     def count_rects(self, index=0, count=0):
         """
         Parameters:
             index (int): Character index at which to start.
-            count (int): Character count to consider (defaults to :attr:`.char_count`).
+            count (int): Character count to consider (defaults to :meth:`.count_chars`).
         Returns:
             int: The number of text rectangles on the page.
         """
-        if self.char_count == 0:
+        n_chars = self.count_chars()
+        if n_chars == 0:
             return 0
         if count == 0:
-            count = self.char_count
-        if not (0 <= index < index+count <= self.char_count):
+            count = n_chars
+        if not (0 <= index < index+count <= n_chars):
             raise ValueError("Character span is out of bounds.")
         return pdfium.FPDFText_CountRects(self.raw, index, count)
     
@@ -113,8 +120,9 @@ class PdfTextPage:
             Values for left, bottom, right and top in PDF canvas units.
         """
         
-        if not 0 <= index < self.char_count:
-            raise ValueError("Character index %s is out of bounds. The maximum index is %d." % (index, self.char_count-1))
+        n_chars = self.count_chars()
+        if not 0 <= index < n_chars:
+            raise ValueError("Character index %s is out of bounds. The maximum index is %d." % (index, n_chars-1))
         
         if loose:
             rect = pdfium.FS_RECTF()
