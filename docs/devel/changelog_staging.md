@@ -23,7 +23,7 @@
     - All document-level methods that take a page index now accept negative values for reverse indexing (except the rendering methods).
     - New method `PdfDocument.get_page_size()` to retrieve page size by index without needing to load a `PdfPage` (uses `FPDF_GetPageSizeByIndexF()` under the hood).
     - New rendering parameters added: `colour_scheme`, `fill_to_stroke`, `force_halftone`, `draw_forms`, `rev_byteorder`, `prefer_bgrx`, `force_bitmap_format`, `extra_flags`, `allocator`, and `memory_limit`.
-    - Added new `render_to()` functions to `PdfPage` and `PdfDocument` that take a custom bitmap converter, to transform the ctypes array to a different object. A set of built-in converters is provided with the `BitmapConv` class. Confer the updated API documentation for details. The previous rendering functions (`render_topil()` `render_tobytes()`, ...) are still around as deprecated aliases but might be removed eventually.
+    - Added new `render_to()` functions to `PdfPage` and `PdfDocument` that take a custom bitmap converter, to transform the ctypes array to a different object. A set of built-in converters is provided with the `BitmapConv` class. Confer the updated API documentation for details. The previous rendering functions (`render_topil()` `render_tobytes()`, ...) are still around as aliases but might be deprecated eventually.
     - New rendering target `numpy_ndarray` added.
     - The `pil_image` rendering target now accepts a `prefer_la` parameter to request automatic conversion of `BGRA`/`RGBA` to `LA` if rendering in greyscale mode with alpha channel.
     - `PdfPage.get_objects()` can now recursively descend into Form XObjects.
@@ -37,11 +37,10 @@
     - PDFium's commit log is now shown with GitHub releases.
     - The wheel packaging script now restores in-tree artefacts from a possible editable install.
     - Platform files are now detected in a more robust way. If missing, a proper exception will be raised.
-    - Platform data directories are now annotated with a text file storing the pdfium version, to prevemt a possible mismatch between the state of `version.py` and the actual version of the used binary. The update and build scripts do not directly change the main version file anymore, but defer the changes to `setup.py`.
+    - Platform data directories are now annotated with a text file storing the pdfium version, to prevent a possible mismatch between the state of `version.py` and the actual version of the used binary. The update and build scripts do not directly change the main version file anymore, but defer the changes to `setup.py`.
     - Missing platform files are now always procured implicitly on installation. If platform files exist already but are outdated, they will be updated by default. You may opt out by creating an empty file called `.lock_autoupdate.txt` in `data/`.
     - A `MANIFEST.in` file was added to avoid being dependent on `setuptools_scm`.
     - On setup, dependency checks are now only done for system commands. The wonky implicit installation of missing Python packages was removed. If opting out of build isolation, callers should properly install setup dependencies beforehand.
-    - Significant code quality improvements.
 
 - Documentation
     - Rewrote the project's `README.md`. Added more support model examples and an extensive guide regarding the raw PDFium/ctypes API.
