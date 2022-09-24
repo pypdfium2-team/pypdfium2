@@ -6,7 +6,8 @@
 
 ## 3.0.0 (2022-09-24)
 
-- No PDFium update (autorelease).
+- Updated PDFium from `5254` to `5316` (autorelease).
+
 - Support model
     
     *API-breaking changes*
