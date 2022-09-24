@@ -130,8 +130,12 @@ def log_changes(summary, prev_ns, curr_ns):
         content = fh.read()
         pos = content.index("\n", content.index("# Changelog")) + 1
         part_a = content[:pos].strip() + "\n"
-        part_b = content[pos:].strip()
-        content = part_a + "\n\n" + pdfium_msg + "\n" + summary + "\n\n" + part_b + "\n"
+        part_b = content[pos:].strip() + "\n"
+        content = part_a + "\n\n" + pdfium_msg + "\n"
+        if curr_ns["V_BETA"] is None:
+            content += summary
+        content += "\n\n" + part_b
+    
     with open(Changelog, "w") as fh:
         fh.write(content)
 
@@ -212,9 +216,7 @@ def main():
     curr_ns = get_version_ns()
     
     summary = get_summary(curr_ns)
-    if curr_ns["V_BETA"] is None:
-        # update changelog, except if doing a beta release
-        log_changes(summary, prev_ns, curr_ns)
+    log_changes(summary, prev_ns, curr_ns)
     if args.checkin:
         register_changes(curr_ns)
     make_releasenotes(summary, prev_ns, curr_ns, c_updates)
