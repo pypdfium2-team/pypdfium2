@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # However, objects must be closed in correct order. It is illegal to close a subordinate object if any of its superordinate objects has been closed already.
 # If Python garbage collects multiple pypdfium2 objects in one cycle, it may finalise them in arbitrary order.
 # Therefore, we implement checks to only call PDFium close functions if all superordinate objects are still open.
-# If some exception occurred, __del__ will still be called.
+# Even if some exception occurred, __del__ will still be called.
 # However, it is not guaranteed that __del__ is called on objects that still exists when the interpreter exits. This is irrelevant for us because all associated memory is released when the Python process terminates.
 # If an exception happens in __del__ itself, it is caught and converted to an "unraisable exception" warning by Python. This will happen if an attribute accessed in __del__ is not initialised yet due to a parameter error on construction.
 # Correct functionality may be confirmed by adding context information and debug prints to close().
