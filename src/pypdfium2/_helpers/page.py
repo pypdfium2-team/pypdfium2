@@ -58,7 +58,9 @@ class PdfPage (BitmapConvAliases):
     def close(self):
         """
         Close the page to release allocated memory.
-        This function shall be called when finished working with the object.
+        If the page (or its parent document) is already closed, nothing will be done.
+        
+        This method is called by the `__del__` finaliser.
         """
         
         if self._skip_close():
