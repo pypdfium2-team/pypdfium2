@@ -37,7 +37,7 @@ class PdfTextPage:
         """
         
         if self._skip_close():
-            return
+            return  # self or superordinate object closed already
         
         pdfium.FPDFText_ClosePage(self.raw)
         self._is_closed = True
@@ -253,7 +253,7 @@ class PdfTextSearcher:
         """
         
         if self._skip_close():
-            return
+            return  # self or superordinate object closed already
         
         pdfium.FPDFText_FindClose(self.raw)
         self._is_closed = True
