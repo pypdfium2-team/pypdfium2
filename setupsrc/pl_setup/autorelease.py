@@ -33,7 +33,6 @@ from pl_setup.packaging_base import (
 AutoreleaseDir    = join(SourceTree, "autorelease")
 MajorUpdateFile   = join(AutoreleaseDir, "update_major.txt")
 BetaUpdateFile    = join(AutoreleaseDir, "update_beta.txt")
-SkipCommitLogFile = join(AutoreleaseDir, "skip_commit_log.txt")
 
 
 def run_local(*args, **kws):
@@ -166,27 +165,21 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
 
 def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     
-    include_log = True
-    if os.path.exists(SkipCommitLogFile):
-        include_log = False
-        os.remove(SkipCommitLogFile)
-    
     relnotes = ""
     relnotes += "## Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
     relnotes += "### Summary (pypdfium2)\n\n"
     if summary:
         relnotes += summary + "\n"
     
-    if include_log:
-        # even if python code was not updated, there will be a release commit
-        relnotes += _get_log(
-            "pypdfium2", RepositoryURL, SourceTree,
-            prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
-            "/tree/", "/commit/", "",
-        )
-        relnotes += "\n"
+    # even if python code was not updated, there will be a release commit
+    relnotes += _get_log(
+        "pypdfium2", RepositoryURL, SourceTree,
+        prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
+        "/tree/", "/commit/", "",
+    )
+    relnotes += "\n"
     
-    if include_log and c_updates:
+    if c_updates:
         
         # FIXME is there a faster way to get pdfium's commit log?
         with tempfile.TemporaryDirectory() as tempdir:
