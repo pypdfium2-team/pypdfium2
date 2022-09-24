@@ -83,7 +83,7 @@ class BitmapConv:
     
     class numpy_ndarray (BitmapConvBase):
         """
-        *Requires* :mod:`numpy`.
+        *Requires* :mod:`numpy`
         
         Get the bitmap as shaped NumPy array referencing the original ctypes array.
         This converter never makes a copy of the data.
@@ -109,7 +109,7 @@ class BitmapConv:
     
     class pil_image (BitmapConvBase):
         """
-        *Requires* :mod:`PIL`.
+        *Requires* :mod:`PIL`
         
         Get the bitmap as PIL image.
         

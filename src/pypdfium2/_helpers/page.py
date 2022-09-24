@@ -179,7 +179,7 @@ class PdfPage (BitmapConvAliases):
             pdf_font,
         ):
         """
-        *Requires* uharfbuzz.
+        *Requires* :mod:`uharfbuzz`
         
         Insert text into the page at a specified position, using the writing system's ligature.
         This function supports Asian scripts such as Hindi.
@@ -337,6 +337,7 @@ class PdfPage (BitmapConvAliases):
             no_smoothimage = False,
             no_smoothpath = False,
             force_halftone = False,
+            limit_image_cache = False,
             rev_byteorder = False,
             prefer_bgrx = False,
             force_bitmap_format = None,
@@ -395,6 +396,9 @@ class PdfPage (BitmapConvAliases):
             force_halftone (bool):
                 Always use halftone for image stretching.
             
+            limit_image_cache (bool):
+                Limit image cache size.
+            
             rev_byteorder (bool):
                 By default, the output pixel format will be ``BGR(A/X)``.
                 This option may be used to render with reversed byte order, leading to ``RGB(A/X)`` output instead.
@@ -440,8 +444,6 @@ class PdfPage (BitmapConvAliases):
             * the memory remains valid as long as the ctypes array is used
             * the memory is freed once not needed anymore
         """
-        
-        # TODO add option for FPDF_RENDER_LIMITEDIMAGECACHE
         
         validate_colours(fill_colour, colour_scheme)
         
@@ -504,6 +506,8 @@ class PdfPage (BitmapConvAliases):
             render_flags |= pdfium.FPDF_RENDER_NO_SMOOTHPATH
         if force_halftone:
             render_flags |= pdfium.FPDF_RENDER_FORCEHALFTONE
+        if limit_image_cache:
+            render_flags |= pdfium.FPDF_RENDER_LIMITEDIMAGECACHE
         if rev_byteorder:
             render_flags |= pdfium.FPDF_REVERSE_BYTE_ORDER
         if colour_scheme and colour_scheme.fill_to_stroke:

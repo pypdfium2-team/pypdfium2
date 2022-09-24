@@ -23,7 +23,7 @@ Main help
 
 Renderer
 ********
-*Requires* :mod:`PIL`.
+*Requires* :mod:`PIL`
 
 ``pypdfium2 render --help``
 

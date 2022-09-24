@@ -42,6 +42,7 @@ class PdfDocument (BitmapConvAliases):
             A byte buffer is defined as an object that implements the methods ``seek()``, ``tell()``, ``read()`` and ``readinto()``.
         password (str | bytes):
             A password to unlock the PDF, if encrypted.
+            If the document is not encrypted but a password was given, PDFium will ignore it.
         file_access (FileAccess):
             This parameter may be used to control how files are opened internally. It is ignored if *input_data* is not a file path.
         autoclose (bool):
@@ -295,7 +296,7 @@ class PdfDocument (BitmapConvAliases):
             font_path (str):
                 File path of the font to use.
             type (int):
-                A constant signifying the type of the given font (:data:`.FPDF_FONT_TYPE1` or :data:`.FPDF_FONT_TRUETYPE`).
+                A constant signifying the type of the given font (:data:`.FPDF_FONT_*`).
             is_cid (bool):
                 Whether the given font is a CID font or not.
         Returns:
