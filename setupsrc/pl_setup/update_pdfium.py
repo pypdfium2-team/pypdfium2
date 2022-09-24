@@ -57,9 +57,11 @@ def _get_package(latest_ver, robust, pl_name):
     return pl_name, file_path
 
 
-def download_releases(latest_ver, platforms, robust):
+def download_releases(latest_ver, platforms, robust, max_workers):
+    if not max_workers:
+        max_workers = len(platforms)
     archives = {}
-    with ThreadPoolExecutor(max_workers=len(platforms)) as pool:
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
         func = functools.partial(_get_package, latest_ver, robust)
         for pl_name, file_path in pool.map(func, platforms):
             if pl_name is None:
@@ -107,7 +109,7 @@ def generate_bindings(archives, latest_ver):
         shutil.rmtree(build_dir)
 
 
-def main(platforms, robust=False):
+def main(platforms, robust=False, max_workers=None):
     
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
@@ -118,7 +120,7 @@ def main(platforms, robust=False):
     latest_ver = str( get_latest_version() )
     clear_data(platforms)
     
-    archives = download_releases(latest_ver, platforms, robust)
+    archives = download_releases(latest_ver, platforms, robust, max_workers)
     unpack_archives(archives)
     generate_bindings(archives, latest_ver)
 
@@ -141,6 +143,11 @@ def parse_args(argv):
         action = "store_true",
         help = "Skip missing binaries instead of raising an exception.",
     )
+    parser.add_argument(
+        "--max-workers",
+        type = int,
+        help = "Maximum number of jobs to run in parallel when downloading binaries.",
+    )
     return parser.parse_args(argv)
 
 
@@ -149,6 +156,7 @@ def run_cli(argv=sys.argv[1:]):
     main(
         args.platforms,
         robust = args.robust,
+        max_workers = args.max_workers,
     )
 
 
