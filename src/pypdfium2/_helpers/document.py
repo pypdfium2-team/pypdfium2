@@ -71,6 +71,9 @@ class PdfDocument (BitmapConvAliases):
             autoclose = False,
         ):
         
+        self._is_closed = False
+        self.raw = None
+        
         self._orig_input = input_data
         self._actual_input = input_data
         self._rendering_input = None
@@ -125,6 +128,33 @@ class PdfDocument (BitmapConvAliases):
     def __delitem__(self, i):
         self.del_page(i)
     
+    def __del__(self):
+        self.close()
+    
+    
+    def _skip_close(self):
+        return self._is_closed
+    
+    def close(self):
+        """
+        Close the document to release allocated memory.
+        This function shall be called when finished working with the object.
+        """
+        
+        if self._skip_close():
+            return  # self is closed already
+        if self.raw is None:
+            return  # exception on constrution (handling this avoids unraisable exception warnings)
+        
+        self.exit_formenv()
+        pdfium.FPDF_CloseDocument(self.raw)
+        self._is_closed = True
+        
+        if self._ld_data is not None:
+            self._ld_data.close()
+        if self._autoclose and is_input_buffer(self._actual_input):
+            self._actual_input.close()
+    
     
     @classmethod
     def new(cls):
@@ -134,18 +164,6 @@ class PdfDocument (BitmapConvAliases):
         """
         new_pdf = pdfium.FPDF_CreateNewDocument()
         return cls(new_pdf)
-    
-    def close(self):
-        """
-        Close the document to release allocated memory.
-        This function shall be called when finished working with the object.
-        """
-        self.exit_formenv()
-        pdfium.FPDF_CloseDocument(self.raw)
-        if self._ld_data is not None:
-            self._ld_data.close()
-        if self._autoclose and is_input_buffer(self._actual_input):
-            self._actual_input.close()
     
     
     def init_formenv(self):
@@ -559,14 +577,30 @@ class PdfFont:
     """
     
     def __init__(self, raw, pdf, font_data):
+        self._is_closed = False
         self.raw = raw
         self.pdf = pdf
         self._font_data = font_data
+    
+    def __del__(self):
+        self.close()
+    
+    
+    def _skip_close(self):
+        if self.pdf._skip_close():
+            return True
+        return self._is_closed
     
     def close(self):
         """
         Close the font to release allocated memory.
         This function shall be called when finished working with the object.
         """
+        
+        if self._skip_close():
+            return  # self or parent closed already
+        
         pdfium.FPDFFont_Close(self.raw)
+        self._is_closed = True
+        
         id(self._font_data)

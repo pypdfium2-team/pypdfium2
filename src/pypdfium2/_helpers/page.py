@@ -42,15 +42,30 @@ class PdfPage (BitmapConvAliases):
     """
     
     def __init__(self, raw, pdf):
+        self._is_closed = False
         self.raw = raw
         self.pdf = pdf
+    
+    def __del__(self):
+        self.close()
+    
+    
+    def _skip_close(self):
+        if self.pdf._skip_close():
+            return True
+        return self._is_closed
     
     def close(self):
         """
         Close the page to release allocated memory.
         This function shall be called when finished working with the object.
         """
+        
+        if self._skip_close():
+            return
+        
         pdfium.FPDF_ClosePage(self.raw)
+        self._is_closed = True
     
     
     def get_width(self):
