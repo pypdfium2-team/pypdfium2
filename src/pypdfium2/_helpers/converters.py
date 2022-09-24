@@ -72,13 +72,13 @@ class BitmapConv:
                 A callable to translate a ctypes array to a different data type.
                 It could be a function, a class with constructor, or an instance of a class implementing ``__call__``.
         Returns:
-            (typing.Any, ...): The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (colour format, size).
+            (typing.Any, str, (int, int)): The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (colour format, size).
         """
         
         @staticmethod
         def run(result, renderer_kws, converter):
-            c_array, *info = result
-            return converter(c_array), *info
+            c_array, cl_format, size = result
+            return converter(c_array), cl_format, size
     
     
     class numpy_ndarray (BitmapConvBase):
