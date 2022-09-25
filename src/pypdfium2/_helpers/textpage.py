@@ -34,7 +34,7 @@ class PdfTextPage:
         Close the textpage to release allocated memory.
         If the textpage (or its parent page or document) is already closed, nothing will be done.
         
-        This method is called by the `__del__` finaliser.
+        This method is called by the ``__del__`` finaliser.
         """
         
         if self._skip_close():
@@ -251,7 +251,7 @@ class PdfTextSearcher:
         Close the text searcher to release allocated memory.
         If the text searcher (or its parent textpage, page or document) is already closed, nothing will be done.
         
-        This method is called by the `__del__` finaliser.
+        This method is called by the ``__del__`` finaliser.
         """
         
         if self._skip_close():

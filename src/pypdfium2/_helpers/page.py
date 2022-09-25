@@ -59,7 +59,7 @@ class PdfPage (BitmapConvAliases):
         Close the page to release allocated memory.
         If the page (or its parent document) is already closed, nothing will be done.
         
-        This method is called by the `__del__` finaliser.
+        This method is called by the ``__del__`` finaliser.
         """
         
         if self._skip_close():
