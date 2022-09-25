@@ -63,7 +63,7 @@ class PdfPage (BitmapConvAliases):
         """
         
         if self._skip_close():
-            return  # self or superordinate object closed already
+            return
         
         pdfium.FPDF_ClosePage(self.raw)
         self.raw = None

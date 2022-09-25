@@ -611,7 +611,7 @@ class PdfFont:
         """
         
         if self._skip_close():
-            return  # self or superordinate object closed already
+            return
         
         pdfium.FPDFFont_Close(self.raw)
         self.raw = None
