@@ -50,9 +50,11 @@ class PdfPage (BitmapConvAliases):
     
     
     def _skip_close(self):
+        if self.raw is None:
+            return True
         if self.pdf._skip_close():
             return True
-        return (self.raw is None)
+        return False
     
     def close(self):
         """

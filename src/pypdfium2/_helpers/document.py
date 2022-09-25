@@ -146,7 +146,9 @@ class PdfDocument (BitmapConvAliases):
     
     
     def _skip_close(self):
-        return (self.raw is None)
+        if self.raw is None:
+            return True
+        return False
     
     def close(self):
         """
@@ -157,7 +159,7 @@ class PdfDocument (BitmapConvAliases):
         """
         
         if self._skip_close():
-            return  # self is closed already, or exception on construction
+            return
         
         self.exit_formenv()
         pdfium.FPDF_CloseDocument(self.raw)
@@ -598,9 +600,11 @@ class PdfFont:
     
     
     def _skip_close(self):
+        if self.raw is None:
+            return True
         if self.pdf._skip_close():
             return True
-        return (self.raw is None)
+        return False
     
     def close(self):
         """

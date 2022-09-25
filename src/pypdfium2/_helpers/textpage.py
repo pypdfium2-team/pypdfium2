@@ -25,9 +25,11 @@ class PdfTextPage:
     
     
     def _skip_close(self):
+        if self.raw is None:
+            return True
         if self.page._skip_close():
             return True
-        return (self.raw is None)
+        return False
     
     def close(self):
         """
@@ -242,9 +244,11 @@ class PdfTextSearcher:
     
     
     def _skip_close(self):
+        if self.raw is None:
+            return True
         if self.textpage._skip_close():
             return True
-        return (self.raw is None)
+        return False
     
     def close(self):
         """
