@@ -85,7 +85,6 @@ class PdfDocument (BitmapConvAliases):
             autoclose = False,
         ):
         
-        self._is_closed = False
         self.raw = None
         
         self._orig_input = input_data
@@ -147,7 +146,7 @@ class PdfDocument (BitmapConvAliases):
     
     
     def _skip_close(self):
-        return self._is_closed
+        return (self.raw is None)
     
     def close(self):
         """
@@ -158,13 +157,11 @@ class PdfDocument (BitmapConvAliases):
         """
         
         if self._skip_close():
-            return  # self is closed already
-        if self.raw is None:
-            return  # exception on constrution (handling this avoids unraisable exception warnings)
+            return  # self is closed already, or exception on construction
         
         self.exit_formenv()
         pdfium.FPDF_CloseDocument(self.raw)
-        self._is_closed = True
+        self.raw = None
         
         if self._ld_data is not None:
             self._ld_data.close()
@@ -592,7 +589,6 @@ class PdfFont:
     """
     
     def __init__(self, raw, pdf, font_data):
-        self._is_closed = False
         self.raw = raw
         self.pdf = pdf
         self._font_data = font_data
@@ -604,7 +600,7 @@ class PdfFont:
     def _skip_close(self):
         if self.pdf._skip_close():
             return True
-        return self._is_closed
+        return (self.raw is None)
     
     def close(self):
         """
@@ -618,6 +614,6 @@ class PdfFont:
             return  # self or superordinate object closed already
         
         pdfium.FPDFFont_Close(self.raw)
-        self._is_closed = True
+        self.raw = None
         
         id(self._font_data)

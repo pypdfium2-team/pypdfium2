@@ -42,7 +42,6 @@ class PdfPage (BitmapConvAliases):
     """
     
     def __init__(self, raw, pdf):
-        self._is_closed = False
         self.raw = raw
         self.pdf = pdf
     
@@ -53,7 +52,7 @@ class PdfPage (BitmapConvAliases):
     def _skip_close(self):
         if self.pdf._skip_close():
             return True
-        return self._is_closed
+        return (self.raw is None)
     
     def close(self):
         """
@@ -67,7 +66,7 @@ class PdfPage (BitmapConvAliases):
             return  # self or superordinate object closed already
         
         pdfium.FPDF_ClosePage(self.raw)
-        self._is_closed = True
+        self.raw = None
     
     
     def get_width(self):

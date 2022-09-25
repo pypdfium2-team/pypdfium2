@@ -17,7 +17,6 @@ class PdfTextPage:
     """
     
     def __init__(self, raw, page):
-        self._is_closed = False
         self.raw = raw
         self.page = page
     
@@ -28,7 +27,7 @@ class PdfTextPage:
     def _skip_close(self):
         if self.page._skip_close():
             return True
-        return self._is_closed
+        return (self.raw is None)
     
     def close(self):
         """
@@ -42,7 +41,7 @@ class PdfTextPage:
             return  # self or superordinate object closed already
         
         pdfium.FPDFText_ClosePage(self.raw)
-        self._is_closed = True
+        self.raw = None
     
     
     def get_text(self, left=0, bottom=0, right=0, top=0):
@@ -235,7 +234,6 @@ class PdfTextSearcher:
     """
     
     def __init__(self, raw, textpage):
-        self._is_closed = False
         self.raw = raw
         self.textpage = textpage
     
@@ -246,7 +244,7 @@ class PdfTextSearcher:
     def _skip_close(self):
         if self.textpage._skip_close():
             return True
-        return self._is_closed
+        return (self.raw is None)
     
     def close(self):
         """
@@ -260,7 +258,7 @@ class PdfTextSearcher:
             return  # self or superordinate object closed already
         
         pdfium.FPDFText_FindClose(self.raw)
-        self._is_closed = True
+        self.raw = None
     
     
     def _get_occurrence(self, find_func):
