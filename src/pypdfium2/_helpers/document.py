@@ -3,6 +3,7 @@
 
 import io
 import os
+import sys
 import os.path
 import ctypes
 import logging
@@ -563,8 +564,11 @@ class PdfDocument (BitmapConvAliases):
             renderer_kws = renderer_kws,
         )
         
-        # ctx = mp.get_context("spawn")
-        with mp.Pool(n_processes) as pool:
+        ctx = mp
+        if sys.platform.startswith("linux"):
+            ctx = mp.get_context("forkserver")
+        
+        with ctx.Pool(n_processes) as pool:
             i = 0
             for result, index in pool.map(invoke_renderer, page_indices):
                 assert index == page_indices[i]
