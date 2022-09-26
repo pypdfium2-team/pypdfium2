@@ -433,17 +433,6 @@ class PdfPage (BitmapConvAliases):
         
         Tip:
             To convert a DPI value to a scale factor, divide it by 72.
-        
-        Note:
-            Please take into account the following information regarding the *allocator* parameter:
-            
-            If you wish to render to an existing buffer that was not alloacted by ctypes itself, note that you may get a ctypes array representation of arbitrary memory using ``(ctypes.c_ubyte*n_bytes).from_address(mem_address)``, where *n_bytes* shall be the number of bytes to encompass, and *mem_address* the memory address of the first byte. This may be used to directly write the pixel data to a specific place in memory (e. g. a GUI widget buffer), avoiding unnecessary data copying.
-            
-            In this case, callers must ensure that ...
-            
-            * the buffer and its ctypes representation are large enough to hold the requested number of bytes
-            * the memory remains valid as long as the ctypes array is used
-            * the memory is freed once not needed anymore
         """
         
         validate_colours(fill_colour, colour_scheme)
