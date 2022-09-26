@@ -331,7 +331,7 @@ class PdfPage (BitmapConvAliases):
         args = (self.render_base(**renderer_kws), renderer_kws)
         if isinstance(converter, BitmapConvBase):
             return converter.run(*args, *converter.args, **converter.kwargs)
-        elif issubclass(converter, BitmapConvBase):
+        elif isinstance(converter, type) and issubclass(converter, BitmapConvBase):
             # run() is supposed to be a static method, but just initialise an instance of the converter class so it also works if the implementer forgot the decorator
             return converter().run(*args)
         elif callable(converter):
