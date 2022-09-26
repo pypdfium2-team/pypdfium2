@@ -523,9 +523,12 @@ class PdfDocument (BitmapConvAliases):
             :data:`typing.Any`: Implementation-specific result object.
         
         Note:
-            If rendering with shared memory, some things work differently
+            **Warning**: The shared memory feature is experimental and possibly dangerous. Use at own risk.
+            
+            If rendering with the shared memory, some things work differently:
+            
             - *converter* may be :data:`None`. In this case, the output of :meth:`.PdfPage.render_base` is returned as-is.
-            - If a converter is given, the converted result is returned, with the only difference that the first argument will be bundled with a :class:`~multiprocessing.shared_memory.SharedMemory` handle.
+            - If a converter is given, the converted result is returned, with the only difference that the first argument will be bundled with a corresponding :class:`~multiprocessing.shared_memory.SharedMemory` handle.
         """
         
         if self._rendering_input is None:

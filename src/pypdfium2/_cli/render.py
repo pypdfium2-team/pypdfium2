@@ -129,7 +129,7 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--shared-memory",
         action = "store_true",
-        help = "Whether to use shared memory (avoids serialisation / data copying)"
+        help = "Whether to use shared memory (avoids serialisation / data copying). Warning: This feature is experimental and possibly dangerous!"
     )
     
     colour_scheme = parser.add_argument_group(

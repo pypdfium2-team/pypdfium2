@@ -417,6 +417,9 @@ class PdfPage (BitmapConvAliases):
                 If not given, a new :class:`ctypes.c_ubyte` array is allocated by Python (this simplify memory management, as opposed to allocation by PDFium).
             
             use_shared_memory (bool):
+                
+                **Warning**: This feature is experimental and possibly dangerous. Use at own risk.
+                
                 Whether to allocate a shared memory block that can be used by different processes.
                 If :data:`True`, this function will not return a ctypes array, but the unique name of the memory block, which may be used to get a corresponding :class:`~multiprocessing.shared_memory.SharedMemory` handle.
                 Shared memory may be used to avoid serialisation and data copying if rendering with multiple processes.
