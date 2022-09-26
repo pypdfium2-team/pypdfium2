@@ -4,3 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- `render_to()` was fixed to actually allow callables. The code passage in question was unreachable due to an unguarded `issubclass()` check before.
