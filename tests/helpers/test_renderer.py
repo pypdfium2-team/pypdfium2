@@ -6,6 +6,9 @@ import math
 import ctypes
 import logging
 from os.path import join
+from multiprocessing.shared_memory import (
+    SharedMemory
+)
 import numpy
 import PIL.Image
 import pytest
@@ -312,6 +315,22 @@ def test_render_page_noantialias(sample_page):
     )
     assert isinstance(pil_image, PIL.Image.Image)
     pil_image.close()
+
+
+def test_render_page_sharedmem(sample_page):
+    mem_name, cl_format, size = sample_page.render_base(
+        use_shared_memory = True,
+    )
+    
+    assert isinstance(mem_name, str)
+    assert cl_format == "BGR"
+    assert size == (595, 842)
+    
+    shared_mem = SharedMemory(name=mem_name, create=False)
+    assert len(shared_mem.buf) >= size[0] * size[1] * len(cl_format)
+    
+    shared_mem.unlink()
+    shared_mem.close()
 
 
 def test_render_pages_no_concurrency(multipage_doc):

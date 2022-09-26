@@ -5,6 +5,9 @@
 import math
 import ctypes
 from ctypes import c_float
+from multiprocessing.shared_memory import (
+    SharedMemory
+)
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers._utils import (
     validate_colours,
@@ -344,6 +347,7 @@ class PdfPage (BitmapConvAliases):
             force_bitmap_format = None,
             extra_flags = 0,
             allocator = None,
+            use_shared_memory = False,
             memory_limit = 2**30,
         ):
         """
@@ -421,13 +425,19 @@ class PdfPage (BitmapConvAliases):
                 A function to provide a custom ctypes buffer. It is called with the required buffer size in bytes.
                 If not given, a new :class:`ctypes.c_ubyte` array is allocated by Python (this simplify memory management, as opposed to allocation by PDFium).
             
+            use_shared_memory (bool):
+                Whether to allocate a shared memory block that can be used by different processes.
+                If :data:`True`, this function will not return a ctypes array, but the unique name of the memory block, which may be used to get a corresponding :class:`multiprocessing.shared_memory.SharedMemory` handle.
+                Shared memory may be used to avoid serialisation and data copying if rendering with multiple processes.
+                This parameter is ignored if a custom allocator was provided.
+            
             memory_limit (int | None):
                 Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
                 If the limit would be exceeded, a :exc:`RuntimeError` is raised.
                 If :data:`None` or 0, this function may allocate arbitrary amounts of memory as far as Python and the OS permit.
             
         Returns:
-            (ctypes array, str, (int, int)): Bitmap data, colour format, and image size.
+            (ctypes array | str, str, (int, int)): Bitmap data, colour format, and image size.
             The colour format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, ``BGRX``/``RGBX``, or ``L``, depending on the parameters *colour*, *greyscale*, *rev_byteorder* and *prefer_bgrx*.
             Image size is given in pixels as a tuple of width and height.
         
@@ -473,8 +483,13 @@ class PdfPage (BitmapConvAliases):
                 "Consider adjusting the *memory_limit* parameter."
             )
         
+        shared_mem = None
         if allocator is None:
-            buffer = (ctypes.c_ubyte * n_bytes)()
+            if use_shared_memory:
+                shared_mem = SharedMemory(name=None, create=True, size=n_bytes)
+                buffer = (ctypes.c_ubyte * n_bytes).from_buffer(shared_mem.buf)
+            else:
+                buffer = (ctypes.c_ubyte * n_bytes)()
         else:
             buffer = allocator(n_bytes)
             if ctypes.sizeof(buffer) < n_bytes:
@@ -533,7 +548,13 @@ class PdfPage (BitmapConvAliases):
             form_env = self.pdf.init_formenv()
             pdfium.FPDF_FFLDraw(form_env, *render_args)
         
-        return buffer, cl_string, (width, height)
+        result = buffer
+        if use_shared_memory:
+            del buffer  # can't close otherwise - FIXME wonky?
+            result = shared_mem.name
+            shared_mem.close()  # this does not destroy the memory block, it only detaches this instance
+        
+        return result, cl_string, (width, height)
 
 
 class ColourScheme:
