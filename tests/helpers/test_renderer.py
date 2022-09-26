@@ -317,18 +317,33 @@ def test_render_page_noantialias(sample_page):
     pil_image.close()
 
 
+def _resolve_shared_mem(mem_name):
+    assert isinstance(mem_name, str)
+    return SharedMemory(name=mem_name, create=False)
+
+
 def test_render_page_sharedmem(sample_page):
-    mem_name, cl_format, size = sample_page.render_base(
+    shared_mem, cl_format, size = sample_page.render_to(
+        converter = pdfium.BitmapConv.any(_resolve_shared_mem),
         use_shared_memory = True,
+        rev_byteorder = True,
     )
     
-    assert isinstance(mem_name, str)
-    assert cl_format == "BGR"
+    assert cl_format == "RGB"
     assert size == (595, 842)
     
-    shared_mem = SharedMemory(name=mem_name, create=False)
-    assert len(shared_mem.buf) >= size[0] * size[1] * len(cl_format)
+    # PIL doesn't take memoryview directly, so get a ctypes array representation
+    n_bytes = size[0] * size[1] * len(cl_format)
+    buffer = (ctypes.c_ubyte * n_bytes).from_buffer(shared_mem.buf)
     
+    assert len(shared_mem.buf) >= n_bytes
+    assert len(buffer) == n_bytes
+    
+    pil_image = PIL.Image.frombuffer(cl_format, size, buffer, "raw", cl_format, 0, 1)
+    pil_image.save( join(OutputDir, "render_page_sharedmem.png") )
+    pil_image.close()
+    
+    del buffer  # can't close otherwise - FIXME wonky?
     shared_mem.unlink()
     shared_mem.close()
 
