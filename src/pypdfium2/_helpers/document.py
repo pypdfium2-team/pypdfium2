@@ -483,12 +483,14 @@ class PdfDocument (BitmapConvAliases):
     def _convert_sharedmem(converter, render_output, renderer_kws):
         # this runs in the main process
         
-        mem_name, *info = render_output
+        mem_name, cl_format, size = render_output
         shared_mem = SharedMemory(name=mem_name, create=False)
         
-        # converter expects ctypes array, so give it one
-        c_array = (ctypes.c_ubyte * len(shared_mem.buf)).from_buffer(shared_mem.buf)
-        conv_result = apply_converter(converter, (c_array, *info), renderer_kws)
+        # converter expects a ctypes array, so give it one
+        # might also be able to use len(shared_mem.buf), but we're not sure if this is the requested or the actual size, and decoders might not tolerate excessive memory, so better be safe than sorry
+        n_bytes = size[0] * size[1] * len(cl_format)
+        c_array = (ctypes.c_ubyte * n_bytes).from_buffer(shared_mem.buf)
+        conv_result = apply_converter(converter, (c_array, cl_format, size), renderer_kws)
         del c_array  # can't close shared memory object otherwise - FIXME wonky?
         
         # pass through the shared memory object to the caller so as to close and unlink it when finished
