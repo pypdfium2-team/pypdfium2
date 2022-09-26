@@ -202,7 +202,7 @@ class PdfTextPage:
         if match_whole_word:
             flags |= pdfium.FPDF_MATCHWHOLEWORD
         
-        # assuming the ctypes.cast() keeps the casted object alive
+        # assuming the pointer returned by ctypes.cast() keeps the casted object alive
         enc_text = (text + "\x00").encode("utf-16-le")
         enc_text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
         search = pdfium.FPDFText_FindStart(self.raw, enc_text_ptr, flags, index)
