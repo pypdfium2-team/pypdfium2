@@ -570,6 +570,7 @@ class PdfDocument (BitmapConvAliases):
         # TODO add parameter to let caller configure the strategy (None for default/auto)
         ctx = mp
         if use_shared_memory and sys.platform.startswith("linux"):
+            # see https://stackoverflow.com/questions/62748654/python-3-8-shared-memory-resource-tracker-producing-unexpected-warnings-at-appli
             ctx = mp.get_context("forkserver")
         
         with ctx.Pool(n_processes) as pool:
