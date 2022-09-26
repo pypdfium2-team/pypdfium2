@@ -544,7 +544,7 @@ class PdfPage (BitmapConvAliases):
         
         result = buffer
         if use_shared_memory:
-            del buffer  # can't close otherwise - FIXME wonky?
+            del buffer  # can't close shared memory object otherwise - FIXME wonky?
             result = shared_mem.name
             shared_mem.close()  # this does not destroy the memory block, it only detaches this instance
         

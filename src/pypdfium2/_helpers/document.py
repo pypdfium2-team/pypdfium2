@@ -459,6 +459,8 @@ class PdfDocument (BitmapConvAliases):
     
     @classmethod
     def _process_page(cls, index, converter, input_data, password, file_access, use_shared_memory, renderer_kws):
+        # this runs in the worker process
+        
         pdf = cls(
             input_data,
             password = password,
@@ -479,6 +481,7 @@ class PdfDocument (BitmapConvAliases):
     
     @staticmethod
     def _convert_sharedmem(converter, render_output, renderer_kws):
+        # this runs in the main process
         
         mem_name, *info = render_output
         shared_mem = SharedMemory(name=mem_name, create=False)
@@ -486,7 +489,7 @@ class PdfDocument (BitmapConvAliases):
         # converter expects ctypes array, so give it one
         c_array = (ctypes.c_ubyte * len(shared_mem.buf)).from_buffer(shared_mem.buf)
         conv_result = apply_converter(converter, (c_array, *info), renderer_kws)
-        del c_array  # can't close otherwise - FIXME wonky?
+        del c_array  # can't close shared memory object otherwise - FIXME wonky?
         
         # pass through the shared memory object to the caller so as to close and unlink it when finished
         if isinstance(conv_result, (tuple, list)):

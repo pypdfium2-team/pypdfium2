@@ -343,7 +343,7 @@ def test_render_page_sharedmem(sample_page):
     pil_image.save( join(OutputDir, "render_page_sharedmem.png") )
     pil_image.close()
     
-    del buffer  # can't close otherwise - FIXME wonky?
+    del buffer  # can't close shared memory object otherwise - FIXME wonky?
     shared_mem.unlink()
     shared_mem.close()
 
