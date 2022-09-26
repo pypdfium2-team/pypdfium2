@@ -126,6 +126,11 @@ def attach_parser(subparsers):
         type = int,
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
     )
+    parser.add_argument(
+        "--shared-memory",
+        action = "store_true",
+        help = "Whether to use shared memory (avoids serialisation / data copying)"
+    )
     
     colour_scheme = parser.add_argument_group(
         title = "Colour scheme",
@@ -197,6 +202,7 @@ def main(args):
             force_halftone = args.force_halftone,
             rev_byteorder = args.rev_byteorder,
             prefer_bgrx = args.prefer_bgrx,
+            use_shared_memory = args.shared_memory,
         )
         for type in args.no_antialias:
             kwargs["no_smooth%s" % type] = True
@@ -205,10 +211,21 @@ def main(args):
         n_digits = len(str( max(page_indices)+1 ))
         renderer = pdf.render_to(pdfium.BitmapConv.pil_image, **kwargs)
         
-        for image, index in zip(renderer, page_indices):
+        for result, index in zip(renderer, page_indices):
+            
+            shared_mem = None
+            if args.shared_memory:
+                image, shared_mem = result
+            else:
+                image = result
+            
             suffix = str(index+1).zfill(n_digits)
             output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
             image.save(output_path)
             image.close()
+            
+            if shared_mem:
+                shared_mem.unlink()
+                shared_mem.close()
         
         pdf.close()

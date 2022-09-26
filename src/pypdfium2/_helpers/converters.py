@@ -14,6 +14,19 @@ except ImportError:
     numpy = None
 
 
+def apply_converter(converter, result, renderer_kws):
+    args = (result, renderer_kws)
+    if isinstance(converter, BitmapConvBase):
+        return converter.run(*args, *converter.args, **converter.kwargs)
+    elif isinstance(converter, type) and issubclass(converter, BitmapConvBase):
+        # run() is supposed to be a static method, but just initialise an instance of the converter class so it also works if the implementer forgot the decorator
+        return converter().run(*args)
+    elif callable(converter):
+        return converter(*args)
+    else:
+        raise ValueError("Converter must be an instance or subclass of BitmapConvBase, or a callable, but %s was given." % converter)
+
+
 class BitmapConvBase:
     """
     Parent class for bitmap converters compatible with :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to`.
@@ -24,6 +37,7 @@ class BitmapConvBase:
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
+    
     
     @staticmethod
     def run(result, renderer_kws, *args, **kwargs):

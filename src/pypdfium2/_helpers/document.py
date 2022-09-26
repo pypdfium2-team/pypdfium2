@@ -7,7 +7,10 @@ import os.path
 import ctypes
 import logging
 import functools
-from concurrent.futures import ProcessPoolExecutor
+import multiprocessing as mp
+from multiprocessing.shared_memory import (
+    SharedMemory,
+)
 
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers._opener import (
@@ -21,7 +24,10 @@ from pypdfium2._helpers.misc import (
     ViewmodeToStr,
     get_functype,
 )
-from pypdfium2._helpers.converters import BitmapConvAliases
+from pypdfium2._helpers.converters import (
+    apply_converter,
+    BitmapConvAliases,
+)
 from pypdfium2._helpers.page import PdfPage
 
 try:
@@ -451,16 +457,43 @@ class PdfDocument (BitmapConvAliases):
     
     
     @classmethod
-    def _process_page(cls, index, converter, input_data, password, file_access, **kwargs):
+    def _process_page(cls, index, converter, input_data, password, file_access, use_shared_memory, renderer_kws):
         pdf = cls(
             input_data,
             password = password,
             file_access = file_access,
         )
         page = pdf.get_page(index)
-        result = page.render_to(converter, **kwargs)
-        for g in (page, pdf): g.close()
-        return result, index
+        
+        if use_shared_memory:
+            output = page.render_base(**renderer_kws)
+        else:
+            output = page.render_to(converter, **renderer_kws)
+        
+        for g in (page, pdf):
+            g.close()
+        
+        return output, index
+    
+    
+    @staticmethod
+    def _convert_sharedmem(converter, render_output, renderer_kws):
+        
+        mem_name, *info = render_output
+        shared_mem = SharedMemory(name=mem_name, create=False)
+        
+        # converter expects ctypes array, so give it one
+        c_array = (ctypes.c_ubyte * len(shared_mem.buf)).from_buffer(shared_mem.buf)
+        conv_result = apply_converter(converter, (c_array, *info), renderer_kws)
+        del c_array  # can't close otherwise - FIXME wonky?
+        
+        # pass through the shared memory object to the caller so as to close and unlink it when finished
+        if isinstance(conv_result, (tuple, list)):
+            bitmap, *conv_info = conv_result
+            return ((bitmap, shared_mem), *conv_info)
+        else:
+            bitmap = conv_result
+            return (bitmap, shared_mem)
     
     
     def render_to(
@@ -468,6 +501,7 @@ class PdfDocument (BitmapConvAliases):
             converter,
             page_indices = None,
             n_processes = os.cpu_count(),
+            use_shared_memory = False,
             **kwargs
         ):
         """
@@ -483,8 +517,14 @@ class PdfDocument (BitmapConvAliases):
                 Target number of parallel processes.
             kwargs (dict):
                 Keyword arguments to the renderer.
+        
         Yields:
             :data:`typing.Any`: Implementation-specific result object.
+        
+        Note:
+            If rendering with shared memory, some things work differently
+            - *converter* may be :data:`None`. In this case, the output of :meth:`.PdfPage.render_base` is returned as-is.
+            - If a converter is given, the converted result is returned, with the only difference that the first argument will be bundled with a :class:`~multiprocessing.shared_memory.SharedMemory` handle.
         """
         
         if self._rendering_input is None:
@@ -509,21 +549,30 @@ class PdfDocument (BitmapConvAliases):
             if len(page_indices) != len(set(page_indices)):
                 raise ValueError("Duplicate page index")
         
+        renderer_kws = dict(
+            use_shared_memory = use_shared_memory,
+            **kwargs
+        )
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
             converter = converter,
             input_data = self._rendering_input,
             password = self._password,
             file_access = self._file_access,
-            **kwargs
+            use_shared_memory = use_shared_memory,
+            renderer_kws = renderer_kws,
         )
         
-        i = 0
-        with ProcessPoolExecutor(n_processes) as pool:
+        # ctx = mp.get_context("spawn")
+        with mp.Pool(n_processes) as pool:
+            i = 0
             for result, index in pool.map(invoke_renderer, page_indices):
                 assert index == page_indices[i]
                 i += 1
-                yield result
+                if use_shared_memory and converter:
+                    yield PdfDocument._convert_sharedmem(converter, result, renderer_kws)
+                else:
+                    yield result
         
         assert len(page_indices) == i
 

@@ -24,7 +24,7 @@ from pypdfium2._helpers.misc import (
     BitmapTypeToStrReverse,
 )
 from pypdfium2._helpers.converters import (
-    BitmapConvBase,
+    apply_converter,
     BitmapConvAliases,
 )
 from pypdfium2._helpers.textpage import PdfTextPage
@@ -312,18 +312,9 @@ class PdfPage (BitmapConvAliases):
         """
         
         # In the future, we could add means to set different defaults for specific built-in converters, if necessary.
-        # We could also consider implementing a parameter sieve to automatically divide keyword arguments between converter and renderer so that callers don't need to care about the separation
+        # We could also consider implementing a parameter sieve using :mod:`inspect` to automatically divide keyword arguments between converter and renderer so that callers don't need to care about the separation
         
-        args = (self.render_base(**renderer_kws), renderer_kws)
-        if isinstance(converter, BitmapConvBase):
-            return converter.run(*args, *converter.args, **converter.kwargs)
-        elif isinstance(converter, type) and issubclass(converter, BitmapConvBase):
-            # run() is supposed to be a static method, but just initialise an instance of the converter class so it also works if the implementer forgot the decorator
-            return converter().run(*args)
-        elif callable(converter):
-            return converter(*args)
-        else:
-            raise ValueError("Converter must be an instance or subclass of BitmapConvBase, or a callable, but %s was given." % converter)
+        return apply_converter(converter, self.render_base(**renderer_kws), renderer_kws)
     
     
     def render_base(
@@ -427,7 +418,7 @@ class PdfPage (BitmapConvAliases):
             
             use_shared_memory (bool):
                 Whether to allocate a shared memory block that can be used by different processes.
-                If :data:`True`, this function will not return a ctypes array, but the unique name of the memory block, which may be used to get a corresponding :class:`multiprocessing.shared_memory.SharedMemory` handle.
+                If :data:`True`, this function will not return a ctypes array, but the unique name of the memory block, which may be used to get a corresponding :class:`~multiprocessing.shared_memory.SharedMemory` handle.
                 Shared memory may be used to avoid serialisation and data copying if rendering with multiple processes.
                 This parameter is ignored if a custom allocator was provided.
             
