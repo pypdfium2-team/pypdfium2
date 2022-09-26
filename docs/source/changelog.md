@@ -4,6 +4,12 @@
 # Changelog
 
 
+## 3.1.0 (2022-09-26)
+
+- Updated PDFium from `5316` to `5323` (autorelease).
+- `render_to()` was fixed to actually allow callables. The code passage in question was unreachable due to an unguarded `issubclass()` check before.
+
+
 ## 3.0.0 (2022-09-24)
 
 - Updated PDFium from `5254` to `5316` (autorelease).
