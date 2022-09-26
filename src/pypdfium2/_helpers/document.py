@@ -567,6 +567,7 @@ class PdfDocument (BitmapConvAliases):
             renderer_kws = renderer_kws,
         )
         
+        # TODO add parameter to let caller configure the strategy (None for default/auto)
         ctx = mp
         if use_shared_memory and sys.platform.startswith("linux"):
             ctx = mp.get_context("forkserver")
