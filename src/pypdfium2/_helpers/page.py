@@ -45,30 +45,12 @@ class PdfPage (BitmapConvAliases):
         self.raw = raw
         self.pdf = pdf
     
-    def __del__(self):
-        self.close()
-    
-    
-    def _skip_close(self):
-        if self.raw is None:
-            return True
-        if self.pdf._skip_close():
-            return True
-        return False
-    
     def close(self):
         """
         Close the page to release allocated memory.
-        If the page (or its parent document) is already closed, nothing will be done.
-        
-        This method is called by the ``__del__`` finaliser.
+        This function shall be called when finished working with the object.
         """
-        
-        if self._skip_close():
-            return
-        
         pdfium.FPDF_ClosePage(self.raw)
-        self.raw = None
     
     
     def get_width(self):
