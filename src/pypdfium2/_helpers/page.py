@@ -51,6 +51,7 @@ class PdfPage (BitmapConvAliases):
         This function shall be called when finished working with the object.
         """
         pdfium.FPDF_ClosePage(self.raw)
+        self.raw = None
     
     
     def get_width(self):

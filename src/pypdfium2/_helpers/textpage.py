@@ -26,6 +26,7 @@ class PdfTextPage:
         This method shall be called when finished working with the text page.
         """
         pdfium.FPDFText_ClosePage(self.raw)
+        self.raw = None
     
     
     def get_text(self, left=0, bottom=0, right=0, top=0):
@@ -221,6 +222,14 @@ class PdfTextSearcher:
         self.raw = raw
         self.textpage = textpage
     
+    def close(self):
+        """
+        Close the search structure to release allocated memory.
+        This method shall be called when done with text searching.
+        """
+        pdfium.FPDFText_FindClose(self.raw)
+        self.raw = None
+    
     def _get_occurrence(self, find_func):
         found = find_func(self.raw)
         if not found:
@@ -245,10 +254,3 @@ class PdfTextSearcher:
             or :data:`None` if the first occurrence was passed.
         """
         return self._get_occurrence(pdfium.FPDFText_FindPrev)
-    
-    def close(self):
-        """
-        Close the search structure to release allocated memory.
-        This method shall be called when done with text searching.
-        """
-        pdfium.FPDFText_FindClose(self.raw)

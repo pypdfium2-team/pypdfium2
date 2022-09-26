@@ -140,8 +140,12 @@ class PdfDocument (BitmapConvAliases):
         Close the document to release allocated memory.
         This function shall be called when finished working with the object.
         """
+        
         self.exit_formenv()
+        
         pdfium.FPDF_CloseDocument(self.raw)
+        self.raw = None
+        
         if self._ld_data is not None:
             self._ld_data.close()
         if self._autoclose and is_input_buffer(self._actual_input):
@@ -569,4 +573,5 @@ class PdfFont:
         This function shall be called when finished working with the object.
         """
         pdfium.FPDFFont_Close(self.raw)
+        self.raw = None
         id(self._font_data)
