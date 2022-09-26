@@ -7,7 +7,7 @@ Python API
 .. Warning::
     * PDFium is not thread-safe. If you need to parallelise time-consuming PDFium tasks, use processes instead of threads.
     * Not calling the ``close()`` methods as required may lead to memory leaks.
-    * Calling ``close()`` makes the object in question inoperable, it should not be accessed anymore.
+    * Calling ``close()`` makes the object in question inoperable, so it should not be accessed anymore.
 
 Version
 *******
