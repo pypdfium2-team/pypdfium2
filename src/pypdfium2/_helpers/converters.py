@@ -72,7 +72,7 @@ class BitmapConv:
                 A callable to translate a ctypes array to a different data type.
                 It could be a function, a class with constructor, or an instance of a class implementing ``__call__``.
         Returns:
-            (typing.Any, str, (int, int)): The converted rendering result (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (colour format, size).
+            (typing.Any, str, (int, int)): The converted bitmap (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (colour format, size).
         """
         
         @staticmethod
