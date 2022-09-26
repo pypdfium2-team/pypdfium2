@@ -568,7 +568,7 @@ class PdfDocument (BitmapConvAliases):
         )
         
         ctx = mp
-        if sys.platform.startswith("linux"):
+        if use_shared_memory and sys.platform.startswith("linux"):
             ctx = mp.get_context("forkserver")
         
         with ctx.Pool(n_processes) as pool:
