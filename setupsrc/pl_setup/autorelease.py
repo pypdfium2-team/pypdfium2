@@ -93,8 +93,8 @@ def do_versioning(latest):
         ver_changes["V_BETA"] = v_beta
         os.remove(BetaUpdateFile)
     
-    assert len(ver_changes) > 0
-    set_versions(ver_changes)
+    did_change = set_versions(ver_changes)
+    assert did_change
     
     return (c_updates, py_updates)
 

@@ -276,36 +276,37 @@ VerNamespace = get_version_ns()
 
 def set_versions(ver_changes):
     
-    # skip unnecessary version changes
-    skip = set()
-    for var in ver_changes.keys():
-        if ver_changes[var] == VerNamespace[var]:
-            skip.add(var)
+    if len(ver_changes) == 0:
+        return False
+    
+    skip = {var for var, value in ver_changes.items() if value == VerNamespace[var]}
     if len(skip) == len(ver_changes):
-        return
+        return False
     
     with open(VersionFile, "r") as fh:
         content = fh.read()
     
-    for variable, new_ver in ver_changes.items():
+    for var, new_val in ver_changes.items():
         
-        if variable in skip:
+        if var in skip:
             continue
         
         # Assuming previous and new value are of the same type
-        if isinstance(new_ver, str):
+        if isinstance(new_val, str):
             template = '%s = "%s"'
         else:
             template = '%s = %s'
-        previous = template % (variable, VerNamespace[variable])
-        updated = template % (variable, new_ver)
+        previous = template % (var, VerNamespace[var])
+        updated = template % (var, new_val)
         
         print("'%s' -> '%s'" % (previous, updated))
         assert content.count(previous) == 1
         content = content.replace(previous, updated)
         
         # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, no reliance can be placed upon the value of `V_PYPDFIUM2` after this method has been run. If you need the real value, VerNamespace needs to be re-created.
-        VerNamespace[variable] = new_ver
-        
+        VerNamespace[var] = new_val
+    
     with open(VersionFile, "w") as fh:
         fh.write(content)
+    
+    return True
