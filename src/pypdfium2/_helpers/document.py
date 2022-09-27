@@ -8,6 +8,9 @@ import os.path
 import ctypes
 import logging
 import functools
+from concurrent.futures import (
+    ProcessPoolExecutor,
+)
 import multiprocessing as mp
 from multiprocessing.shared_memory import (
     SharedMemory,
@@ -573,14 +576,14 @@ class PdfDocument (BitmapConvAliases):
         )
         
         # TODO add parameter to let caller configure the strategy (None for default/auto)
-        ctx = mp
+        ctx = None
         if use_shared_memory and sys.platform.startswith("linux"):
             # see https://stackoverflow.com/questions/62748654/python-3-8-shared-memory-resource-tracker-producing-unexpected-warnings-at-appli
             ctx = mp.get_context("forkserver")
         
-        with ctx.Pool(n_processes) as pool:
+        with ProcessPoolExecutor(n_processes, mp_context=ctx) as pool:
             i = 0
-            for result, index in pool.imap(invoke_renderer, page_indices):
+            for result, index in pool.map(invoke_renderer, page_indices):
                 assert index == page_indices[i]
                 i += 1
                 if use_shared_memory and converter:
