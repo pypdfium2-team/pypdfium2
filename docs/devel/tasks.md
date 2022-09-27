@@ -7,10 +7,8 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 Also see the issues panel and inline `TODO` marks in source code.
 
 ### Main Code
-* Investigate if we can restructure/split rendering code:
-    * interruptible rendering (#128)
-    * concurrent rendering to ctypes array, if possible
-    * separate input compilation and processing
+* Raise an exception if objects were not closed in correct order. On `__del__`, issue a warning if an object is not closed yet.
+* Investigate if we can implement interruptible rendering.
 * When rendering with multiple processes and bytes were provided as input, is the memory duplicated or shared? If it's duplicated, find a way to share it or write a tempfile instead.
 * Move init/destroy into a separate file. Provide public init/destroy functions, given that embedders who deal with long-running applications might not want to have PDFium in memory all the time.
 * Make the bindings file `_pypdfium.py` public ?
