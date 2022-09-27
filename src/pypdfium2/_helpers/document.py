@@ -580,7 +580,7 @@ class PdfDocument (BitmapConvAliases):
         
         with ctx.Pool(n_processes) as pool:
             i = 0
-            for result, index in pool.map(invoke_renderer, page_indices):
+            for result, index in pool.imap(invoke_renderer, page_indices):
                 assert index == page_indices[i]
                 i += 1
                 if use_shared_memory and converter:
