@@ -230,6 +230,13 @@ def test_render_page_colourscheme():
     for g in (page, pdf): g.close()
 
 
+def test_render_page_custom_allocator(sample_page):
+    allocator = lambda n_bytes: (ctypes.c_ubyte * n_bytes)()
+    out_array, cl_format, size = sample_page.render_base(allocator=allocator)
+    assert len(out_array) == len(cl_format) * size[0] * size[1]
+    assert out_array._type_ is ctypes.c_ubyte
+
+
 @pytest.mark.parametrize(
     "rev_byteorder", [False, True]
 )

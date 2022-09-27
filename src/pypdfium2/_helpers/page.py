@@ -337,6 +337,7 @@ class PdfPage (BitmapConvAliases):
             prefer_bgrx = False,
             force_bitmap_format = None,
             extra_flags = 0,
+            allocator = None,
             use_shared_memory = False,
             memory_limit = 2**30,
         ):
@@ -411,6 +412,10 @@ class PdfPage (BitmapConvAliases):
             extra_flags (int):
                 Additional PDFium rendering flags. Multiple flags may be combined with bitwise OR (``|`` operator).
             
+            allocator (typing.Callable | None):
+                A function to provide a custom ctypes buffer. It is called with the required buffer size in bytes.
+                If not given, a new :class:`ctypes.c_ubyte` array is allocated by Python (this simplify memory management, as opposed to allocation by PDFium).
+            
             use_shared_memory (bool):
                 
                 **Warning**: This feature is experimental and possibly dangerous. Use at own risk.
@@ -418,6 +423,7 @@ class PdfPage (BitmapConvAliases):
                 Whether to allocate a shared memory block that can be used by different processes.
                 If :data:`True`, this function will not return a ctypes array, but the unique name of the memory block, which may be used to get a corresponding :class:`~multiprocessing.shared_memory.SharedMemory` handle.
                 Shared memory may be used to avoid serialisation and data copying if rendering with multiple processes.
+                This parameter is ignored if a custom allocator was provided.
             
             memory_limit (int | None):
                 Maximum number of bytes that may be allocated (defaults to 1 GiB rsp. 2^30 bytes).
@@ -472,11 +478,16 @@ class PdfPage (BitmapConvAliases):
             )
         
         shared_mem = None
-        if use_shared_memory:
-            shared_mem = SharedMemory(name=None, create=True, size=n_bytes)
-            buffer = (ctypes.c_ubyte * n_bytes).from_buffer(shared_mem.buf)
+        if allocator is None:
+            if use_shared_memory:
+                shared_mem = SharedMemory(name=None, create=True, size=n_bytes)
+                buffer = (ctypes.c_ubyte * n_bytes).from_buffer(shared_mem.buf)
+            else:
+                buffer = (ctypes.c_ubyte * n_bytes)()
         else:
-            buffer = (ctypes.c_ubyte * n_bytes)()
+            buffer = allocator(n_bytes)
+            if ctypes.sizeof(buffer) < n_bytes:
+                raise RuntimeError("Not enough bytes allocated (buffer length: %s, required bytes: %s)." % (ctypes.sizeof(buffer), n_bytes))
         
         bitmap = pdfium.FPDFBitmap_CreateEx(width, height, cl_pdfium, buffer, stride)
         pdfium.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, c_fill_colour)
