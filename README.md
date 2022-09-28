@@ -629,7 +629,7 @@ pypdfium2 cannot be used with releases 3.7.6 and 3.8.1 of the CPython interprete
 
 As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.
 
-The problem is that the Python interpreter may garbage collect objects with reference count zero at any time. Thus, it can happen that an unreferenced but still required object by chance long enough before it is garbage collected. Such dangling objects are likely to cause non-deterministic segmentation faults.
+The problem is that the Python interpreter may garbage collect objects with reference count zero at any time. Thus, it can happen that an unreferenced but still required object by chance stays around long enough before it is garbage collected. Such dangling objects are likely to cause non-deterministic segmentation faults.
 If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that mistakes regarding object lifetime remain unnoticed for a long time.
 
 Although great care has been taken while developing the support model, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
@@ -750,7 +750,7 @@ Here are some public projects that are known to use pypdfium2:
 
 There are also a few projects that *could* update to pypdfium2 but are still using its predecessor, pypdfium:
 * [kuafu](https://github.com/YinlinHu/kuafu), an unmaintained PyQt5-based PDF reader, provides a PDFium backend.
-* [microsoft/OCR-Form-Tools](https://github.com/microsoft/OCR-Form-Tools) uses pypdfium to render PDFs, but the code in question is of poor quality.
+* [microsoft/OCR-Form-Tools](https://github.com/microsoft/OCR-Form-Tools) uses pypdfium to render PDFs.
 
 
 ## Thanks to[^thanks_to]
