@@ -94,29 +94,37 @@ def dl_pdfium(GClient, do_update, revision):
         print("PDFium: Download ...")
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PDFium_URL], cwd=SB_Dir)
     
+    # TODO consider --with_branch_heads so we can improve get_pdfium_version()
+    # while the heads take up additional disk space, this shouldn't be a problem for a shallow clone
     if is_sync:
         run_cmd([GClient, "sync", "--revision", "origin/%s" % revision, "--no-history", "--shallow"], cwd=SB_Dir)
     
     return is_sync
 
 
-def get_version_info():
+def get_pdfium_version():
+    
+    # FIXME awkward mix of local/remote git - this will fail to identify the tag if local and remote state do not match
+    
     head_commit = run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
     refs_string = run_cmd(["git", "ls-remote", "--heads", PDFium_URL, "chromium/*"], cwd=None, capture=True)
+    
     latest = refs_string.split("\n")[-1]
     tag_commit, ref = latest.split("\t")
+    tag_commit = tag_commit[:7]
     tag = ref.split("/")[-1]
-    return head_commit, tag_commit[:7], tag
-
-
-def update_version(head_commit, tag_commit, tag):
     
     print("Current head %s, latest tagged commit %s (%s)" % (head_commit, tag_commit, tag))
+    
     if head_commit == tag_commit:
         v_libpdfium = tag
     else:
         v_libpdfium = head_commit
     
+    return v_libpdfium
+
+
+def update_version(v_libpdfium):
     ver_file = join(OutputDir, VerStatusFileName)
     with open(ver_file, "w") as fh:
         fh.write( str(v_libpdfium) )
@@ -126,11 +134,28 @@ def _apply_patchset(patchset):
     for patch, cwd in patchset:
         run_cmd(["git", "apply", "-v", patch], cwd=cwd)
 
-def patch_pdfium():
+
+def _create_resources_rc(v_libpdfium):
+    
+    input_path = join(PatchDir, "win", "resources.rc")
+    output_path = join(PDFiumDir, "resources.rc")
+    
+    with open(input_path, "r") as fh:
+        content = fh.read()
+    
+    vars = ("$VERSION_CSV", "$VERSION")
+    for var in vars:
+        content = content.replace(var, v_libpdfium)
+    
+    with open(output_path, "w") as fh:
+        fh.write(content)
+
+
+def patch_pdfium(v_libpdfium):
     _apply_patchset(PdfiumMainPatches)
     if sys.platform.startswith("win32"):
         _apply_patchset(PdfiumWinPatches)
-        shutil.copy(join(PatchDir, "pdfium", "win", "resources.rc"), join(PDFiumDir, "resources.rc"))
+        _create_resources_rc(v_libpdfium)
 
 
 def configure(GN, config):
@@ -165,7 +190,7 @@ def find_lib(src_libname=None, directory=PDFiumBuildDir):
     return found_paths[0]
 
 
-def pack(src_libpath, destname=None):
+def pack(src_libpath, v_libpdfium, destname=None):
     
     # TODO remove existing binary/bindings, just to be safe
     
@@ -175,8 +200,7 @@ def pack(src_libpath, destname=None):
     destpath = join(OutputDir, destname)
     shutil.copy(src_libpath, destpath)
     
-    ver_info = get_version_info()
-    update_version(*ver_info)
+    update_version(v_libpdfium)
     
     include_dir = join(PDFiumDir, "public")
     call_ctypesgen(OutputDir, include_dir)
@@ -233,8 +257,9 @@ def main(
     Ninja   = get_tool("ninja", "exe")
     
     pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
+    v_libpdfium = get_pdfium_version()
     if pdfium_dl_done:
-        patch_pdfium()
+        patch_pdfium(v_libpdfium)
     
     config_dict = DefaultConfig.copy()
     config_str = serialise_config(config_dict)
@@ -243,7 +268,7 @@ def main(
     configure(GN, config_str)
     build(Ninja, b_target)
     libpath = find_lib(b_src_libname)
-    pack(libpath, b_dest_libname)
+    pack(libpath, v_libpdfium, b_dest_libname)
 
 
 def parse_args(argv):

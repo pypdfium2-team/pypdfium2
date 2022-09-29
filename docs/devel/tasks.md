@@ -23,7 +23,6 @@ Also see the issues panel and inline `TODO` marks in source code.
 * packaging_base: use a class for `VerNamespace` so it can be flushed more easily (?)
 * use the logging module rather than `print()`.
 * autorelease: on the long term, consider switching to a proper configuration file rather than placing empty indicator files in a directory.
-* sourcebuild/win: fix dynamic values in `resources.rc`.
 
 ### Tests
 * Unify rendering tests with `RenderTestCase` class and a single, parametrized function
