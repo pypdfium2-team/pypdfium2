@@ -45,6 +45,8 @@ class SystemNames:
 
 
 class PlatformNames:
+    # - Attribute names and values are expected to match
+    # - Platform names are expected to start with the corresponding system name
     linux_x64      = SystemNames.linux   + "_x64"
     linux_x86      = SystemNames.linux   + "_x86"
     linux_arm64    = SystemNames.linux   + "_arm64"
