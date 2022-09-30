@@ -291,7 +291,8 @@ def set_versions(ver_changes):
         if var in skip:
             continue
         
-        # Assuming previous and new value are of the same type
+        # this does not work universally - only one notation per type is supported, and switches between str and non-str types don't work
+        # FIXME see if we can restructure this code for improved flexibility
         if isinstance(new_val, str):
             template = '%s = "%s"'
         else:
@@ -303,7 +304,7 @@ def set_versions(ver_changes):
         assert content.count(previous) == 1
         content = content.replace(previous, updated)
         
-        # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, no reliance can be placed upon the value of `V_PYPDFIUM2` after this method has been run. If you need the real value, VerNamespace needs to be re-created.
+        # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, no reliance can be placed upon the values of dynamic variables (V_PYPDFIUM2 !) after this method has been run. If you need the real value, VerNamespace needs to be re-created.
         VerNamespace[var] = new_val
     
     with open(VersionFile, "w") as fh:
