@@ -37,6 +37,8 @@ class ArtefactStash:
         self.plfile_names = [BindingsFileName, LibnameForSystem[Host.system]]
         self.plfile_paths = [join(ModuleDir, fn) for fn in self.plfile_names]
         
+        # FIXME it's bad code style to assume that all platform files exist if a single one exists - while this holds true in general, we should only attempt to move files that actually exist
+        
         if not any(os.path.exists(fp) for fp in self.plfile_paths):
             return
         self.tmp_dir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
