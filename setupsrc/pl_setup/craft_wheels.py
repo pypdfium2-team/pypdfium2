@@ -34,13 +34,23 @@ class ArtefactStash:
     def __init__(self):
         
         self.tmp_dir = None
-        self.plfile_names = [BindingsFileName, LibnameForSystem[Host.system]]
-        self.plfile_paths = [join(ModuleDir, fn) for fn in self.plfile_names]
+        self.plfile_names = []
+        self.plfile_paths = []
         
-        # FIXME it's bad code style to assume that all platform files exist if a single one exists - while this holds true in general, we should only attempt to move files that actually exist
+        patterns = (BindingsFileName, LibnameForSystem[Host.system])
+        for fn in patterns:
+            fp = join(ModuleDir, fn)
+            if not os.path.exists(fp):
+                continue
+            self.plfile_names.append(fn)
+            self.plfile_paths.append(fp)
+        assert len(self.plfile_names) == len(self.plfile_paths)
         
-        if not any(os.path.exists(fp) for fp in self.plfile_paths):
+        if len(self.plfile_paths) == 0:
             return
+        elif len(self.plfile_paths) != 2:
+            print("Warning: Expected exactly 2 platform files, but found %s." % len(self.plfile_paths), file=sys.stderr)
+        
         self.tmp_dir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
         for fp in self.plfile_paths:
             shutil.move(fp, self.tmp_dir.name)
