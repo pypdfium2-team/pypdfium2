@@ -30,9 +30,9 @@ from pl_setup.packaging_base import (
 )
 
 
-AutoreleaseDir    = join(SourceTree, "autorelease")
-MajorUpdateFile   = join(AutoreleaseDir, "update_major.txt")
-BetaUpdateFile    = join(AutoreleaseDir, "update_beta.txt")
+AutoreleaseDir  = join(SourceTree, "autorelease")
+MajorUpdateFile = join(AutoreleaseDir, "update_major.txt")
+BetaUpdateFile  = join(AutoreleaseDir, "update_beta.txt")
 
 
 def run_local(*args, **kws):
@@ -70,28 +70,38 @@ def do_versioning(latest):
         raise RuntimeError("Neither pypdfium2 code nor pdfium binaries updated. Making a new release would be pointless.")
     
     ver_changes = dict()
+    
     if c_updates:
+        # denote pdfium update (independent change)
         ver_changes["V_LIBPDFIUM"] = str(latest)
+    
     if inc_major:
-        ver_changes["V_MAJOR"] = VerNamespace["V_MAJOR"]+1
+        # major update
+        ver_changes["V_MAJOR"] = VerNamespace["V_MAJOR"] + 1
         ver_changes["V_MINOR"] = 0
         ver_changes["V_PATCH"] = 0
         os.remove(MajorUpdateFile)
-    else:
-        if v_beta is None:
-            if c_updates:
-                ver_changes["V_MINOR"] = VerNamespace["V_MINOR"]+1
-                ver_changes["V_PATCH"] = 0
-            else:
-                ver_changes["V_PATCH"] = VerNamespace["V_PATCH"]+1
-        elif not inc_beta:
-            ver_changes["V_BETA"] = None
+    elif v_beta is None:
+        # if we're not doing a major update and the previous version was not a beta, update minor and/or patch
+        # however, we still want to run this if adding a new beta tag
+        if c_updates:
+            # pdfium update -> increment minor version and reset patch version
+            ver_changes["V_MINOR"] = VerNamespace["V_MINOR"] + 1
+            ver_changes["V_PATCH"] = 0
+        else:
+            # no pdfium update -> increment patch version
+            ver_changes["V_PATCH"] = VerNamespace["V_PATCH"] + 1
+    
     if inc_beta:
+        # if the new version shall be a beta, set or increment the tag (independent change)
         if v_beta is None:
             v_beta = 0
         v_beta += 1
         ver_changes["V_BETA"] = v_beta
         os.remove(BetaUpdateFile)
+    elif v_beta is not None:
+        # if the previous version was a beta but the new one shall not be, remove the tag (independent change)
+        ver_changes["V_BETA"] = None
     
     did_change = set_versions(ver_changes)
     assert did_change
