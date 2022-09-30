@@ -5,6 +5,7 @@ import sys
 import setuptools
 from os.path import (
     join,
+    exists,
     abspath,
     dirname,
 )
@@ -50,7 +51,14 @@ def mkwheel(pl_name):
     system = plat_to_system(pl_name)
     libname = LibnameForSystem[system]
     
-    ver_file = join(DataTree, pl_name, VerStatusFileName)
+    pl_dir = join(DataTree, pl_name)
+    if not exists(pl_dir):
+        raise RuntimeError("Missing platform directory %s - you might have forgotten to run update_pdfium.py" % pl_name)
+    
+    ver_file = join(pl_dir, VerStatusFileName)
+    if not exists(ver_file):
+        raise RuntimeError("Missing PDFium version file for %s" % pl_name)
+    
     with open(ver_file, "r") as fh:
         v_libpdfium = fh.read().strip()
     
