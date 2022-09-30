@@ -25,7 +25,7 @@ from pl_setup.packaging_base import (
     get_latest_version,
 )
 
-# NOTE Setuptools may run this code several times (if using PEP 517 style setup).
+# NOTE Setuptools may, unfortunately, run this code several times (if using PEP 517 style setup).
 
 LockFile = join(DataTree, ".lock_autoupdate.txt")
 
@@ -45,22 +45,25 @@ def install_handler():
     
     
     need_update = False
+    pl_dir = join(DataTree, pl_name)
+    ver_file = join(pl_dir, VerStatusFileName)
     
-    if not all(exists(fp) for fp in get_platfiles(pl_name)):
-        need_update = True  # always update if platform files are missing
+    if not os.path.exists(pl_dir):
+        need_update = True  # platform directory doesn't exist yet
+    if not os.path.exists(ver_file) or not all(exists(fp) for fp in get_platfiles(pl_name)):
+        print("Warning: Specific platform files are missing -> implicit update", file=sys.stderr)
+        need_update = True
     
     elif not exists(LockFile):
         
         # Automatic updates imply some duplication across different runs. The code runs quickly enough, so this is not much of a problem.
         
         latest_ver = get_latest_version()
-        ver_file = join(DataTree, pl_name, VerStatusFileName)
-        assert os.path.exists(ver_file)
-        
         with open(ver_file, "r") as fh:
             curr_version = int( fh.read().strip() )
-        assert not curr_version > latest_ver
         
+        if curr_version > latest_ver:
+            raise RuntimeError("Current version must not be greater than latest")
         if curr_version < latest_ver:
             need_update = True
     
@@ -88,7 +91,7 @@ def main():
     target = os.environ.get(BinaryTargetVar, None)
     
     if target in (None, "auto"):
-        # As check_deps needs to run only once and then never again, we could prevent repeated runs using a status file. However, it runs quickly enough, so this is not really necessary.
+        # As check_deps should only need to be run once, we could prevent repeated runs using a status file. However, it runs quickly enough, so this isn't necessary.
         check_deps.main()
         install_handler()
     else:
