@@ -19,7 +19,7 @@ def test_pageobj_placement():
     matrix_a = pdfium.PdfMatrix()
     matrix_a.scale(0.5, 0.5)
     matrix_a.translate(0, height/2)
-    pageobj_a.set_matrix(matrix_a)
+    pageobj_a.set_matrix(matrix_a)  # same effect as transform()
     dest_page.insert_object(pageobj_a)
     
     pageobj_b = xobject.as_pageobject()
@@ -28,7 +28,7 @@ def test_pageobj_placement():
     matrix_b.translate(width/2, height/2)
     matrix_b.mirror(x=True, y=False)
     matrix_b.translate(width/2, 0)  # compensate
-    pageobj_b.set_matrix(matrix_b)
+    pageobj_b.set_matrix(matrix_b)  # same effect as transform()
     dest_page.insert_object(pageobj_b)
     
     pageobj_c = xobject.as_pageobject()
@@ -36,8 +36,17 @@ def test_pageobj_placement():
     matrix_c.scale(0.5, 0.5)
     matrix_c.mirror(x=False, y=True)
     matrix_c.translate(0, height/2)  # compensate
-    pageobj_c.set_matrix(matrix_c)
+    pageobj_c.transform(matrix_c)  # same effect as set_matrix()
     dest_page.insert_object(pageobj_c)
+    
+    pageobj_d = xobject.as_pageobject()
+    matrix_d = pdfium.PdfMatrix()
+    matrix_d.scale(0.5, 0.5)
+    matrix_d.translate(width/2, 0)
+    matrix_d.mirror(x=True, y=True)
+    matrix_d.translate(width/2, height/2)
+    pageobj_d.transform(matrix_d) # same effect as set_matrix()
+    dest_page.insert_object(pageobj_d)
     
     dest_page.generate_content()
     
