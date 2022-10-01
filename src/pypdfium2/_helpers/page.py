@@ -177,6 +177,9 @@ class PdfPage (BitmapConvAliases):
         """
         Insert a page object into the page.
         
+        Position and form are defined by the object's matrix.
+        If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.
+        
         Note:
             You may want to call :meth:`.generate_content` once you finished adding new content to the page.
         
@@ -189,7 +192,7 @@ class PdfPage (BitmapConvAliases):
     def generate_content(self):
         """
         Generate added page content.
-        This function must be called to apply changes before saving the document or reloading the page.
+        This function shall be called to apply changes before saving the document or reloading the page.
         """
         success = pdfium.FPDFPage_GenerateContent(self.raw)
         if not success:

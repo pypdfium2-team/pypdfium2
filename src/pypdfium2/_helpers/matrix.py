@@ -6,6 +6,10 @@ import pypdfium2._pypdfium as pdfium
 
 
 class PdfMatrix:
+    """
+    PDF transformation matrix helper class.
+    See the PDF 1.7 specification, Section 8.3.3 ("Common Transformations").
+    """
     
     def __init__(self, a=1, b=0, c=0, d=1, e=0, f=0):
         self.a = a
@@ -59,8 +63,8 @@ class PdfMatrix:
     def translate(self, x, y):
         """
         Parameters:
-            x (float): Horizontal shift (negative: left, positive: right).
-            y (float): Vertical shift (negative: left, positive: right).
+            x (float): Horizontal shift (<0: left, >0: right).
+            y (float): Vertical shift.
         """
         self.e += x
         self.f += y
@@ -68,15 +72,16 @@ class PdfMatrix:
     def scale(self, x, y):
         """
         Parameters:
-            x (float): A factor to compress or stretch the X axis.
-            y (float): A factor to compress or stretch the Y axis.
+            x (float): A factor to scale the X axis (<1: compress, >1: stretch).
+            y (float): A factor to scale the Y axis.
         """
+        # alternatively: a*=x, b*=y, c*=x, d*=y
         self.multiply( PdfMatrix(x, 0, 0, y) )
     
     def rotate(self, angle):
         """
         Parameters:
-            angle (float): Clockwise angle in degrees to rotate the matrix
+            angle (float): Clockwise angle in degrees to rotate the matrix.
         """
         angle = (angle/180) * math.pi
         c, s = math.cos(angle), math.sin(angle)
@@ -95,8 +100,8 @@ class PdfMatrix:
     def skew(self, x_angle, y_angle):
         """
         Parameters:
-            x_angle (float): Angle in degrees to skew the X axis.
-            y_angle (float): Angle in degrees to skew the Y axis.
+            x_angle (float): Inner angle in degrees to skew the X axis.
+            y_angle (float): Inner angle in degrees to skew the Y axis.
         """
         tan_a = math.tan((x_angle/180) * math.pi)
         tan_b = math.tan((y_angle/180) * math.pi)
