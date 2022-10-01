@@ -4,6 +4,7 @@
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.misc import PdfiumError
+from pypdfium2._helpers.matrix import PdfMatrix
 
 
 class PdfPageObject:
@@ -49,19 +50,41 @@ class PdfPageObject:
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         ret_code = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
         if not ret_code:
-            raise PdfiumError("Locating the page object failed")
+            raise PdfiumError("Failed to locate pageobject")
         return (left.value, bottom.value, right.value, top.value)
     
     
     def get_matrix(self):
-        pass  # TODO
+        """
+        Returns:
+            PdfMatrix: The current matrix of the pageobject.
+        """
+        fs_matrix = pdfium.FS_MATRIX()
+        success = pdfium.FPDFPageObj_GetMatrix(self.raw, fs_matrix)
+        if not success:
+            raise PdfiumError("Failed to get matrix of pageobject")
+        return PdfMatrix.from_pdfium(fs_matrix)
     
     
     def set_matrix(self, matrix):
-        pass  # TODO
+        """
+        Parameters:
+            matrix (PdfMatrix): The new matrix of the page object.
+        """
+        if not isinstance(matrix, PdfMatrix):
+            raise ValueError("*matrix* must be a PdfMatrix object")
+        success = pdfium.FPDFPageObj_SetMatrix(self.raw, matrix.to_pdfium())
+        if not success:
+            raise PdfiumError("Failed to set matrix of pageobject")
     
     
     def transform(self, matrix):
-        pass  # TODO
+        """
+        Parameters:
+            matrix (PdfMatrix): A matrix to be applied on top of existing transformations.
+        """
+        if not isinstance(matrix, PdfMatrix):
+            raise ValueError("*matrix* must be a PdfMatrix object")
+        pdfium.FPDFPageObj_Transform(self.raw, *matrix.get())
     
     
