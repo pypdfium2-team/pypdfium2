@@ -7,23 +7,6 @@ from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 
 
-class PdfXObject:
-    
-    def __init__(self, raw, pdf):
-        self.raw = raw
-        self.pdf = pdf
-    
-    def as_pageobject(self):
-        raw_pageobj = pdfium.FPDF_NewFormObjectFromXObject(self.raw)
-        return PdfPageObject(
-            raw = raw_pageobj,
-            pdf = self.pdf,
-        )
-    
-    def close(self):
-        pdfium.FPDF_CloseXObject(self.raw)
-
-
 class PdfPageObject:
     """
     Page object helper class.
@@ -32,11 +15,9 @@ class PdfPageObject:
         raw (FPDF_PAGEOBJECT):
             The underlying PDFium pageobject handle.
         page (PdfPage):
-            Reference to the page this pageobject belongs to.
-            If the object does not belong to a page yet, this parameter may be :data:`None`.
+            Reference to the page this pageobject belongs to. May be :data:`None` if the object does not belong to a page yet.
         pdf (PdfDocument):
             Reference to the document this pageobject belongs to.
-            This parameter only needs to be given if *page* is :data:`None`.
         level (int):
             Nesting level signifying the number of parent Form XObjects. Zero if the object is not nested in a Form XObject.
         type (int):
