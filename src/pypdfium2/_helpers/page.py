@@ -20,6 +20,9 @@ from pypdfium2._helpers.misc import (
     BitmapTypeToStr,
     BitmapTypeToStrReverse,
 )
+from pypdfium2._helpers.pageobject import (
+    PdfPageObject,
+)
 from pypdfium2._helpers.converters import (
     BitmapConvBase,
     BitmapConvAliases,
@@ -170,6 +173,29 @@ class PdfPage (BitmapConvAliases):
         return PdfTextPage(textpage, self)
     
     
+    def insert_object(self, pageobj):
+        """
+        Insert a page object into the page.
+        
+        Note:
+            You may want to call :meth:`.generate_content` once you finished adding new content to the page.
+        
+        Parameters:
+            pageobj (PdfPageObject): The page object to insert.
+        """
+        pdfium.FPDFPage_InsertObject(pageobj.raw)
+    
+    
+    def generate_content(self):
+        """
+        Generate added page content.
+        This function must be called to apply changes before saving the document or reloading the page.
+        """
+        success = pdfium.FPDFPage_GenerateContent(self.raw)
+        if not success:
+            raise PdfiumError("Generating page content failed.")
+    
+    
     def insert_text(
             self,
             text,
@@ -184,6 +210,9 @@ class PdfPage (BitmapConvAliases):
         
         Insert text into the page at a specified position, using the writing system's ligature.
         This function supports Asian scripts such as Hindi.
+        
+        Note:
+            You may want to call :meth:`.generate_content` once you finished adding new content to the page.
         
         Parameters:
             text (str):
@@ -218,8 +247,6 @@ class PdfPage (BitmapConvAliases):
             )
             pdfium.FPDFPage_InsertObject(self.raw, pdf_textobj)
             start_point += (pos.x_advance / hb_font.scale) * font_size
-        
-        pdfium.FPDFPage_GenerateContent(self.raw)
     
     
     def get_objects(self, max_depth=2, form=None, level=0):
@@ -567,34 +594,3 @@ class ColourScheme:
         for key, value in self.colours.items():
             setattr(fpdf_cs, key, colour_tohex(value, rev_byteorder))
         return fpdf_cs
-
-
-class PdfPageObject:
-    """
-    Page object helper class.
-    
-    Attributes:
-        raw (FPDF_PAGEOBJECT): The underlying PDFium pageobject handle.
-        page (PdfPage): Reference to the page this pageobject belongs to.
-        level (int): Nesting level signifying the number of parent Form XObjects. Zero if the object is not nested in a Form XObject.
-        type (int): The type of the object (:data:`FPDF_PAGEOBJ_*`).
-    """
-    
-    def __init__(self, raw, page, level=0):
-        self.raw = raw
-        self.page = page
-        self.level = level
-        self.type = pdfium.FPDFPageObj_GetType(self.raw)
-    
-    def get_pos(self):
-        """
-        Get the position of the object on the page.
-        
-        Returns:
-            A tuple of four :class:`float` coordinates for left, bottom, right, and top.
-        """
-        left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
-        if not ret_code:
-            raise PdfiumError("Locating the page object failed")
-        return (left.value, bottom.value, right.value, top.value)
