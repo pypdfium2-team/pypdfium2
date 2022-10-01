@@ -59,8 +59,8 @@ class PdfMatrix:
     def translate(self, x, y):
         """
         Parameters:
-            x (int|float): Horizontal shift (negative: left, positive: right).
-            y (int|float): Vertical shift (negative: left, positive: right).
+            x (float): Horizontal shift (negative: left, positive: right).
+            y (float): Vertical shift (negative: left, positive: right).
         """
         self.e += x
         self.f += y
@@ -68,15 +68,15 @@ class PdfMatrix:
     def scale(self, x, y):
         """
         Parameters:
-            x (int|float): A factor to compress or stretch the X axis.
-            y (int|float): A factor to compress or stretch the Y axis.
+            x (float): A factor to compress or stretch the X axis.
+            y (float): A factor to compress or stretch the Y axis.
         """
         self.multiply( PdfMatrix(x, 0, 0, y) )
     
     def rotate(self, angle):
         """
         Parameters:
-            angle (int|float): Clockwise angle in degrees to rotate the matrix
+            angle (float): Clockwise angle in degrees to rotate the matrix
         """
         angle = (angle/180) * math.pi
         c, s = math.cos(angle), math.sin(angle)
@@ -95,8 +95,8 @@ class PdfMatrix:
     def skew(self, x_angle, y_angle):
         """
         Parameters:
-            x_angle (int|float): Angle in degrees to skew the X axis.
-            y_angle (int|float): Angle in degrees to skew the Y axis.
+            x_angle (float): Angle in degrees to skew the X axis.
+            y_angle (float): Angle in degrees to skew the Y axis.
         """
         tan_a = math.tan((x_angle/180) * math.pi)
         tan_b = math.tan((y_angle/180) * math.pi)
