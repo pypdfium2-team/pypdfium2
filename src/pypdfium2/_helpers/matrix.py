@@ -87,14 +87,14 @@ class PdfMatrix:
         c, s = math.cos(angle), math.sin(angle)
         self.multiply( PdfMatrix(c, -s, s, c) )
     
-    def mirror(self, x, y):
+    def mirror(self, vertical, horizontal):
         """
         Parameters:
-            x (bool): Whether to flip the X axis.
-            y (bool): Whether to flip the Y axis.
+            vertical (bool): Whether to mirror at the Y axis.
+            horizontal (bool): Whether to mirror at the X axis.
         """
-        s_x = (-1 if x else 1)
-        s_y = (-1 if y else 1)
+        s_x = (-1 if vertical else 1)
+        s_y = (-1 if horizontal else 1)
         self.scale(s_x, s_y)
     
     def skew(self, x_angle, y_angle):
