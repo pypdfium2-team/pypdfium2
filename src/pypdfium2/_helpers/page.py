@@ -183,7 +183,7 @@ class PdfPage (BitmapConvAliases):
         Parameters:
             pageobj (PdfPageObject): The page object to insert.
         """
-        pdfium.FPDFPage_InsertObject(pageobj.raw)
+        pdfium.FPDFPage_InsertObject(self.raw, pageobj.raw)
     
     
     def generate_content(self):
