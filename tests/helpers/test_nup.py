@@ -13,15 +13,16 @@ def test_pageobj_placement():
     
     dest_pdf = pdfium.PdfDocument.new()
     dest_page = dest_pdf.new_page(width, height)
+    xobject = src_pdf.page_as_xobject(0, dest_pdf)
     
-    pageobj_a = src_pdf.page_as_form(0, dest_pdf)
+    pageobj_a = xobject.as_pageobject()
     matrix_a = pdfium.PdfMatrix()
     matrix_a.scale(0.5, 0.5)
     matrix_a.translate(0, height/2)
     pageobj_a.set_matrix(matrix_a)
     dest_page.insert_object(pageobj_a)
     
-    pageobj_b = src_pdf.page_as_form(0, dest_pdf)
+    pageobj_b = xobject.as_pageobject()
     matrix_b = pdfium.PdfMatrix()
     matrix_b.scale(0.5, 0.5)
     matrix_b.translate(width/2, height/2)
@@ -30,7 +31,7 @@ def test_pageobj_placement():
     pageobj_b.set_matrix(matrix_b)
     dest_page.insert_object(pageobj_b)
     
-    pageobj_c = src_pdf.page_as_form(0, dest_pdf)
+    pageobj_c = xobject.as_pageobject()
     matrix_c = pdfium.PdfMatrix()
     matrix_c.scale(0.5, 0.5)
     matrix_c.mirror(x=False, y=True)
@@ -39,9 +40,8 @@ def test_pageobj_placement():
     dest_page.insert_object(pageobj_c)
     
     dest_page.generate_content()
-    dest_page.close()
     
     with open(join(OutputDir, "pageobj_placement.pdf"), "wb") as buf:
         dest_pdf.save(buf)
     
-    for g in (dest_pdf, src_pdf): g.close()
+    for g in (dest_page, xobject, dest_pdf, src_pdf): g.close()

@@ -7,6 +7,23 @@ from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 
 
+class PdfXObject:
+    
+    def __init__(self, raw, pdf):
+        self.raw = raw
+        self.pdf = pdf
+    
+    def as_pageobject(self):
+        raw_pageobj = pdfium.FPDF_NewFormObjectFromXObject(self.raw)
+        return PdfPageObject(
+            raw = raw_pageobj,
+            pdf = self.pdf,
+        )
+    
+    def close(self):
+        pdfium.FPDF_CloseXObject(self.raw)
+
+
 class PdfPageObject:
     """
     Page object helper class.

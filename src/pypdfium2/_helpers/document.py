@@ -22,7 +22,7 @@ from pypdfium2._helpers.misc import (
     get_functype,
 )
 from pypdfium2._helpers.pageobject import (
-    PdfPageObject,
+    PdfXObject,
 )
 from pypdfium2._helpers.converters import BitmapConvAliases
 from pypdfium2._helpers.page import PdfPage
@@ -252,7 +252,7 @@ class PdfDocument (BitmapConvAliases):
         return (float(size.width), float(size.height))
     
     
-    def page_as_form(self, index, dest_pdf):
+    def page_as_xobject(self, index, dest_pdf):
         """
         Capture a page as Form XObject and attach it to a document's resources.
         
@@ -265,17 +265,12 @@ class PdfDocument (BitmapConvAliases):
         
         index = self._handle_index(index)
         
-        raw_xobj = pdfium.FPDF_NewXObjectFromPage(dest_pdf.raw, self.raw, index)
-        if raw_xobj is None:
+        raw_xobject = pdfium.FPDF_NewXObjectFromPage(dest_pdf.raw, self.raw, index)
+        if raw_xobject is None:
             raise PdfiumError("Failed to capture page %s as FPDF_XOBJECT" % index)
         
-        raw_pageobj = pdfium.FPDF_NewFormObjectFromXObject(raw_xobj)
-        pdfium.FPDF_CloseXObject(raw_xobj)
-        if raw_pageobj is None:
-            raise PdfiumError("Failed to convert FPDF_XOBJECT to FPDF_PAGEOBJECT.")
-        
-        return PdfPageObject(
-            raw = raw_pageobj,
+        return PdfXObject(
+            raw = raw_xobject,
             pdf = dest_pdf,
         )
     
