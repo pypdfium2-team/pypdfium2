@@ -51,12 +51,8 @@ class PdfMatrix:
         """
         Multiply this matrix by another :class:`.PdfMatrix`, to concatenate transformations.
         """
-        new_matrix = dict(
-            a = self.a*matrix.a + self.b*matrix.c,
-            b = self.a*matrix.b + self.b*matrix.d,
-            c = self.c*matrix.a + self.d*matrix.c,
-            d = self.c*matrix.b + self.d*matrix.d,
-        )
+        # new_matrix = dict(...)
+        # TODO
         for char, value in new_matrix.items():
             setattr(self, char, value)
     
