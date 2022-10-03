@@ -179,7 +179,7 @@ Here are some examples of using the support model API.
   image.close()
   ```
 
-* Work with text
+* Extract and search text
   ```python
   # Load a text page helper
   textpage = page.get_textpage()
@@ -212,7 +212,7 @@ Here are some examples of using the support model API.
   page = pdf.new_page(width, height)
   ```
 
-* Add text content
+* Insert text content
   ```python
   NotoSans = "./tests/resources/NotoSans-Regular.ttf"
   hb_font = pdfium.HarfbuzzFont(NotoSans)
@@ -229,6 +229,7 @@ Here are some examples of using the support model API.
       hb_font = hb_font,
       pdf_font = pdf_font,
   )
+  page.generate_content()
   ```
 
 * Save the document (and close objects)
@@ -469,9 +470,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       
       def close(self):
           # Make sure both objects remain available until this function is called
-          # In theory, a heavily optimising interpreter might be able to detect that
-          # `self.function` is an unused reference and clean it up, so add a no-op id()
-          # call to enforce that the resource stays in memory
+          # No-op id() call to denote that the object needs to stay in memory up to this point
           id(self.function)
           self.buffer.close()
   
