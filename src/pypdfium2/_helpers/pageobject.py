@@ -47,10 +47,12 @@ class PdfPageObject:
         Returns:
             A tuple of four :class:`float` coordinates for left, bottom, right, and top.
         """
+        if self.page is None:
+            raise RuntimeError("Must not call get_pos() on a loose pageobject.")
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         ret_code = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
         if not ret_code:
-            raise PdfiumError("Failed to locate pageobject")
+            raise PdfiumError("Failed to locate pageobject.")
         return (left.value, bottom.value, right.value, top.value)
     
     
@@ -62,7 +64,7 @@ class PdfPageObject:
         fs_matrix = pdfium.FS_MATRIX()
         success = pdfium.FPDFPageObj_GetMatrix(self.raw, fs_matrix)
         if not success:
-            raise PdfiumError("Failed to get matrix of pageobject")
+            raise PdfiumError("Failed to get matrix of pageobject.")
         return PdfMatrix.from_pdfium(fs_matrix)
     
     
@@ -72,10 +74,10 @@ class PdfPageObject:
             matrix (PdfMatrix): The new matrix the page object shall have.
         """
         if not isinstance(matrix, PdfMatrix):
-            raise ValueError("*matrix* must be a PdfMatrix object")
+            raise ValueError("*matrix* must be a PdfMatrix object.")
         success = pdfium.FPDFPageObj_SetMatrix(self.raw, matrix.to_pdfium())
         if not success:
-            raise PdfiumError("Failed to set matrix of pageobject")
+            raise PdfiumError("Failed to set matrix of pageobject.")
     
     
     def transform(self, matrix):
@@ -84,7 +86,7 @@ class PdfPageObject:
             matrix (PdfMatrix): A matrix to be applied on top of existing transformations.
         """
         if not isinstance(matrix, PdfMatrix):
-            raise ValueError("*matrix* must be a PdfMatrix object")
+            raise ValueError("*matrix* must be a PdfMatrix object.")
         pdfium.FPDFPageObj_Transform(self.raw, *matrix.get())
     
     
