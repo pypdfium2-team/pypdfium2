@@ -32,6 +32,7 @@ def test_pageobj_placement():
     dest_page.insert_object(pageobj_a)
     assert pageobj_a.pdf is dest_pdf
     assert pageobj_a.page is dest_page
+    # pos_a = pageobj_a.get_pos()  # xfail (crbug.com/pdfium/1905)
     
     pageobj_b = xobject.as_pageobject()
     matrix_b = pdfium.PdfMatrix(-0.5, 0, 0, 0.5, width, height/2)
