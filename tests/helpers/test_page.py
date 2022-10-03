@@ -51,14 +51,17 @@ def test_rotation():
 def test_pageobjects():
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf.get_page(0)
+    assert page.pdf is pdf
     
-    images = []
-    for obj in page.get_objects():
-        assert obj.type in pdfium.ObjectTypeToStr.keys()
-        if obj.type == pdfium.FPDF_PAGEOBJ_IMAGE:
-            assert obj.level == 0
-            images.append(obj)
+    images = [obj for obj in page.get_objects() if obj.type == pdfium.FPDF_PAGEOBJ_IMAGE]
     assert len(images) == 3
+    
+    obj = images[0]
+    assert obj.level == 0
+    assert isinstance(obj, pdfium.PdfPageObject)
+    assert isinstance(obj.raw, pdfium.FPDF_PAGEOBJECT)
+    assert obj.page is page
+    assert obj.pdf is pdf
     
     positions = [img.get_pos() for img in images]
     exp_positions = [

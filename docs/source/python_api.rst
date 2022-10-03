@@ -23,6 +23,14 @@ Page
 .. automodule:: pypdfium2._helpers.page
     :show-inheritance:
 
+Page Object
+***********
+.. automodule:: pypdfium2._helpers.pageobject
+
+Matrix
+******
+.. automodule:: pypdfium2._helpers.matrix
+
 Converters
 **********
 .. automodule:: pypdfium2._helpers.converters

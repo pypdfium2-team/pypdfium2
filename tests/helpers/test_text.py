@@ -202,6 +202,7 @@ def test_insert_text():
         hb_font = hb_font,
         pdf_font = pdf_font,
     )
+    page.generate_content()
     
     textpage = page.get_textpage()
     # extraction of message_a xfails - it looks like no PDF software can reconstruct this text correctly

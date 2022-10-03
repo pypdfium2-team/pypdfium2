@@ -21,6 +21,9 @@ from pypdfium2._helpers.misc import (
     ViewmodeToStr,
     get_functype,
 )
+from pypdfium2._helpers.pageobject import (
+    PdfPageObject,
+)
 from pypdfium2._helpers.converters import BitmapConvAliases
 from pypdfium2._helpers.page import PdfPage
 
@@ -247,6 +250,29 @@ class PdfDocument (BitmapConvAliases):
         if not success:
             raise PdfiumError("Getting page size by index failed.")
         return (float(size.width), float(size.height))
+    
+    
+    def page_as_xobject(self, index, dest_pdf):
+        """
+        Capture a page as XObject and attach it to a document's resources.
+        
+        Parameters:
+            index (int): Zero-based index of the page. Reverse indexing is allowed.
+            dest_pdf (PdfDocument): Target document to which the XObject shall be added.
+        Returns:
+            PdfXObject: The page as XObject.
+        """
+        
+        index = self._handle_index(index)
+        
+        raw_xobject = pdfium.FPDF_NewXObjectFromPage(dest_pdf.raw, self.raw, index)
+        if raw_xobject is None:
+            raise PdfiumError("Failed to capture page %s as FPDF_XOBJECT" % index)
+        
+        return PdfXObject(
+            raw = raw_xobject,
+            pdf = dest_pdf,
+        )
     
     
     def new_page(self, width, height, index=None):
@@ -551,6 +577,38 @@ class HarfbuzzFont:
         self.face = harfbuzz.Face(self.blob)
         self.font = harfbuzz.Font(self.face)
         self.scale = self.font.scale[0]
+
+
+class PdfXObject:
+    """
+    XObject helper class.
+    
+    Attributes:
+        raw (FPDF_XOBJECT): The underlying PDFium XObject handle.
+        pdf (PdfDocument): Reference to the document this XObject belongs to.
+    """
+    
+    def __init__(self, raw, pdf):
+        self.raw = raw
+        self.pdf = pdf
+    
+    def as_pageobject(self):
+        """
+        Returns:
+            PdfPageObject: A new pageobject referencing the XObject.
+        """
+        raw_pageobj = pdfium.FPDF_NewFormObjectFromXObject(self.raw)
+        return PdfPageObject(
+            raw = raw_pageobj,
+            pdf = self.pdf,
+        )
+    
+    def close(self):
+        """
+        Close the XObject to release allocated memory.
+        This function shall be called when finished working with the object.
+        """
+        pdfium.FPDF_CloseXObject(self.raw)
 
 
 class PdfFont:

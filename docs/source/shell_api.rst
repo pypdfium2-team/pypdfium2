@@ -14,7 +14,7 @@ Version
 .. program-output:: pypdfium2 --version
 
 
-Main help
+Main Help
 *********
 ``pypdfium2 --help``
 
