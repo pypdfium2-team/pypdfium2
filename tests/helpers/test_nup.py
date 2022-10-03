@@ -16,33 +16,22 @@ def test_pageobj_placement():
     xobject = src_pdf.page_as_xobject(0, dest_pdf)
     
     pageobj_a = xobject.as_pageobject()
-    matrix_a = pdfium.PdfMatrix()
-    matrix_a.scale(0.5, 0.5)
-    matrix_a.translate(0, height/2)
+    matrix_a = pdfium.PdfMatrix(0.5, 0, 0, 0.5, 0, height/2)
     pageobj_a.set_matrix(matrix_a)  # same effect as transform()
     dest_page.insert_object(pageobj_a)
     
     pageobj_b = xobject.as_pageobject()
-    matrix_b = pdfium.PdfMatrix()
-    matrix_b.scale(0.5, 0.5)
-    matrix_b.mirror(vertical=True, horizontal=False)  # mirror at y axis
-    matrix_b.translate(width, height/2)
+    matrix_b = pdfium.PdfMatrix(-0.5, 0, 0, 0.5, width, height/2)
     pageobj_b.set_matrix(matrix_b)  # same effect as transform()
     dest_page.insert_object(pageobj_b)
     
     pageobj_c = xobject.as_pageobject()
-    matrix_c = pdfium.PdfMatrix()
-    matrix_c.scale(0.5, 0.5)
-    matrix_c.mirror(vertical=False, horizontal=True)  # mirror at x axis
-    matrix_c.translate(0, height/2)  # compensate
+    matrix_c = pdfium.PdfMatrix(0.5, 0, 0, -0.5, 0, height/2)
     pageobj_c.transform(matrix_c)  # same effect as set_matrix()
     dest_page.insert_object(pageobj_c)
     
     pageobj_d = xobject.as_pageobject()
-    matrix_d = pdfium.PdfMatrix()
-    matrix_d.scale(0.5, 0.5)
-    matrix_d.mirror(vertical=True, horizontal=True)  # mirror at y and x axis
-    matrix_d.translate(width, height/2)
+    matrix_d = pdfium.PdfMatrix(-0.5, 0, 0, -0.5, width, height/2)
     pageobj_d.transform(matrix_d) # same effect as set_matrix()
     dest_page.insert_object(pageobj_d)
     
