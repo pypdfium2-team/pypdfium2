@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import math
 import pypdfium2._pypdfium as pdfium
 
 
@@ -26,9 +25,9 @@ class PdfMatrix:
     
     def get(self):
         """
-        Get the matrix as list of the form [a, b, c, d, e, f].
+        Get the matrix as tuple of the form [a, b, c, d, e, f].
         """
-        return [self.a, self.b, self.c, self.d, self.e, self.f]
+        return (self.a, self.b, self.c, self.d, self.e, self.f)
     
     @classmethod
     def from_pdfium(cls, fs_matrix):

@@ -186,7 +186,17 @@ class PdfPage (BitmapConvAliases):
         Parameters:
             pageobj (PdfPageObject): The page object to insert.
         """
+        
+        if pageobj.page is not None:
+            raise ValueError("The pageobject you attempted to insert already belongs to a page.")
+        if (pageobj.pdf is not None) and (pageobj.pdf is not self.pdf):
+            raise ValueError("The pageobject you attempted to insert belongs to a different PDF.")
+        
         pdfium.FPDFPage_InsertObject(self.raw, pageobj.raw)
+        
+        pageobj.page = self
+        if pageobj.pdf is None:
+            pageobj.pdf = self.pdf
     
     
     def generate_content(self):
@@ -288,6 +298,7 @@ class PdfPage (BitmapConvAliases):
             helper_obj = PdfPageObject(
                 raw = raw_obj,
                 page = self,
+                pdf = self.pdf,
                 level = level,
             )
             yield helper_obj

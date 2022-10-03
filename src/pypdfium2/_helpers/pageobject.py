@@ -17,7 +17,7 @@ class PdfPageObject:
         page (PdfPage):
             Reference to the page this pageobject belongs to. May be :data:`None` if the object does not belong to a page yet.
         pdf (PdfDocument):
-            Reference to the document this pageobject belongs to.
+            Reference to the document this pageobject belongs to. May be :data:`None` if the object does not belong to a document yet.
         level (int):
             Nesting level signifying the number of parent Form XObjects. Zero if the object is not nested in a Form XObject.
         type (int):
@@ -26,16 +26,17 @@ class PdfPageObject:
     
     def __init__(self, raw, page=None, pdf=None, level=0):
         
-        if all(o is not None for o in (page, pdf)):
-            raise ValueError("*page* and *pdf* are mutually exclusive.")
-        if all(o is None for o in (page, pdf)):
-            raise ValueError("Either *page* or *pdf* needs to be given.")
-        
         self.raw = raw
         self.page = page
-        self.pdf = (page.pdf if pdf is None else pdf)
+        self.pdf = pdf
         self.level = level
         self.type = pdfium.FPDFPageObj_GetType(self.raw)
+        
+        if page is not None:
+            if self.pdf is None:
+                self.pdf = page.pdf
+            elif self.pdf is not page.pdf:
+                raise ValueError("*page* must belong to *pdf* when constructing a pageobject.")
     
     
     def get_pos(self):
