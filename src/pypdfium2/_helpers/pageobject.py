@@ -18,6 +18,7 @@ class PdfPageObject:
             Reference to the page this pageobject belongs to. May be :data:`None` if the object does not belong to a page yet.
         pdf (PdfDocument):
             Reference to the document this pageobject belongs to. May be :data:`None` if the object does not belong to a document yet.
+            This attribute is always set if :attr:`.page` is set.
         level (int):
             Nesting level signifying the number of parent Form XObjects. Zero if the object is not nested in a Form XObject.
         type (int):
@@ -68,7 +69,7 @@ class PdfPageObject:
     def set_matrix(self, matrix):
         """
         Parameters:
-            matrix (PdfMatrix): The new matrix of the page object.
+            matrix (PdfMatrix): The new matrix the page object shall have.
         """
         if not isinstance(matrix, PdfMatrix):
             raise ValueError("*matrix* must be a PdfMatrix object")

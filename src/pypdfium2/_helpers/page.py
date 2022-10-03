@@ -180,6 +180,8 @@ class PdfPage (BitmapConvAliases):
         Position and form are defined by the object's matrix.
         If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.
         
+        The page object must not belong to a page yet. If it belongs to a PDF, this page must be part of that PDF.
+        
         Note:
             You may want to call :meth:`.generate_content` once you finished adding new content to the page.
         

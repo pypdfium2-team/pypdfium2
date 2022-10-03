@@ -25,7 +25,7 @@ class PdfMatrix:
     
     def get(self):
         """
-        Get the matrix as tuple of the form [a, b, c, d, e, f].
+        Get the matrix as tuple of the form (a, b, c, d, e, f).
         """
         return (self.a, self.b, self.c, self.d, self.e, self.f)
     
