@@ -197,8 +197,7 @@ class PdfPage (BitmapConvAliases):
         pdfium.FPDFPage_InsertObject(self.raw, pageobj.raw)
         
         pageobj.page = self
-        if pageobj.pdf is None:
-            pageobj.pdf = self.pdf
+        pageobj.pdf = self.pdf
     
     
     def generate_content(self):
