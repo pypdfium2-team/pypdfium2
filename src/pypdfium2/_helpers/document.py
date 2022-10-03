@@ -567,18 +567,6 @@ class _writer_class:
         return 1
 
 
-class HarfbuzzFont:
-    """ Harfbuzz font data helper class. """
-    
-    def __init__(self, font_path):
-        if harfbuzz is None:
-            raise RuntimeError("Font helpers require uharfbuzz to be installed.")
-        self.blob = harfbuzz.Blob.from_file_path(font_path)
-        self.face = harfbuzz.Face(self.blob)
-        self.font = harfbuzz.Font(self.face)
-        self.scale = self.font.scale[0]
-
-
 class PdfXObject:
     """
     XObject helper class.
@@ -609,6 +597,18 @@ class PdfXObject:
         This function shall be called when finished working with the object.
         """
         pdfium.FPDF_CloseXObject(self.raw)
+
+
+class HarfbuzzFont:
+    """ Harfbuzz font data helper class. """
+    
+    def __init__(self, font_path):
+        if harfbuzz is None:
+            raise RuntimeError("Font helpers require uharfbuzz to be installed.")
+        self.blob = harfbuzz.Blob.from_file_path(font_path)
+        self.face = harfbuzz.Face(self.blob)
+        self.font = harfbuzz.Font(self.face)
+        self.scale = self.font.scale[0]
 
 
 class PdfFont:

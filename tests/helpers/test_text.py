@@ -52,7 +52,7 @@ def test_getrectboxes(textpage):
     rects = textpage.get_rectboxes()
     
     first_rect = next(rects)
-    assert pytest.approx(first_rect, abs=1) == [58, 767, 258, 782]
+    assert pytest.approx(first_rect, abs=1) == (58, 767, 258, 782)
     first_text = textpage.get_text(*first_rect)
     assert first_text == "Lorem ipsum dolor sit amet,"
     
