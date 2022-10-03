@@ -49,11 +49,18 @@ class PdfPageObject:
         """
         if self.page is None:
             raise RuntimeError("Must not call get_pos() on a loose pageobject.")
+        
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         ret_code = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
+        
         if not ret_code:
             raise PdfiumError("Failed to locate pageobject.")
-        return (left.value, bottom.value, right.value, top.value)
+        
+        pos = (left.value, bottom.value, right.value, top.value)
+        if pos[0] >= pos[2] or pos[1] >= pos[3]:
+            raise RuntimeError("Object boundaries are invalid: %s" % (pos, ))
+        
+        return pos
     
     
     def get_matrix(self):
