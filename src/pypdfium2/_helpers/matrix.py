@@ -11,6 +11,7 @@ class PdfMatrix:
     See the PDF 1.7 specification, Section 8.3.3 ("Common Transformations").
     
     Note:
+        * The PDF format uses row vectors.
         * Transformations operate from the origin of the coordinate system.
         * While :class:`.PdfMatrix` objects themselves are mutable, passing them to methods like :meth:`.PdfPageObject.set_matrix` will merely capture a snapshot using :meth:`.to_pdfium`, so changes applied to the matrix afterwards will not affect the PDF object in question.
     
@@ -22,6 +23,8 @@ class PdfMatrix:
         e (float): Matrix value [2][0] (X translation).
         f (float): Matrix value [2][1] (Y translation).
     """
+    
+    # The effect of applying the matrix on a vector (x, y) is (ax+cy+e, bx+dy+f)
     
     def __init__(self, a=1, b=0, c=0, d=1, e=0, f=0):
         self.set(a, b, c, d, e, f)
@@ -122,6 +125,7 @@ class PdfMatrix:
         """
         angle = (angle/180) * math.pi  # arc measure
         c, s = math.cos(angle), math.sin(angle)
+        # The PDF format uses row vectors, so b = -s leads to clockwise rotation indeed
         self.multiply( PdfMatrix(c, -s, s, c) )
     
     def mirror(self, vertical, horizontal):

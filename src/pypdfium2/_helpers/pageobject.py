@@ -66,7 +66,7 @@ class PdfPageObject:
     def get_matrix(self):
         """
         Returns:
-            PdfMatrix: The current matrix of the pageobject.
+            PdfMatrix: The pageobject's current transform matrix.
         """
         fs_matrix = pdfium.FS_MATRIX()
         success = pdfium.FPDFPageObj_GetMatrix(self.raw, fs_matrix)
@@ -77,8 +77,7 @@ class PdfPageObject:
     
     def set_matrix(self, matrix):
         """
-        Parameters:
-            matrix (PdfMatrix): The new matrix the page object shall have.
+        Define *matrix* as the pageobject's transform matrix.
         """
         if not isinstance(matrix, PdfMatrix):
             raise ValueError("*matrix* must be a PdfMatrix object.")
@@ -89,11 +88,8 @@ class PdfPageObject:
     
     def transform(self, matrix):
         """
-        Parameters:
-            matrix (PdfMatrix): A matrix to be applied on top of existing transformations.
+        Apply *matrix* on top of the pageobject's current transform matrix.
         """
         if not isinstance(matrix, PdfMatrix):
             raise ValueError("*matrix* must be a PdfMatrix object.")
         pdfium.FPDFPageObj_Transform(self.raw, *matrix.get())
-    
-    
