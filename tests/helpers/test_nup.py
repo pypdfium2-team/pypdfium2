@@ -19,9 +19,6 @@ def test_pageobj_placement():
     
     src_width, src_height = src_pdf.get_page_size(0)
     assert (round(src_width), round(src_height)) == (595, 842)
-    scaled_matrix = pdfium.PdfMatrix()
-    scaled_matrix.scale(0.5, 0.5)
-    assert repr(scaled_matrix) == "PdfMatrix(0.5, 0.0, 0.0, 0.5, 0.0, 0.0)"
     w, h = src_width/2, src_height/2  # object size
     
     dest_page_1 = dest_pdf.new_page(src_width, src_height)
@@ -33,7 +30,8 @@ def test_pageobj_placement():
     assert po.pdf is dest_pdf
     assert po.page is None
     assert po.type == pdfium.FPDF_PAGEOBJ_FORM
-    matrix = scaled_matrix.copy()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
     matrix.translate(0, h)  # position
     assert matrix == pdfium.PdfMatrix(0.5, 0, 0, 0.5, 0, h)
     po.set_matrix(matrix)
@@ -44,7 +42,8 @@ def test_pageobj_placement():
     # pos_a = po.get_pos()  # xfail (crbug.com/pdfium/1905)
     
     po = xobject.as_pageobject()
-    matrix = scaled_matrix.copy()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
     matrix.mirror(vertical=True, horizontal=False)
     matrix.translate(w, 0)  # compensate
     matrix.translate(w, h)  # position
@@ -54,7 +53,8 @@ def test_pageobj_placement():
     
     po = xobject.as_pageobject()
     assert po.get_matrix() == pdfium.PdfMatrix()
-    matrix = scaled_matrix.copy()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
     matrix.mirror(vertical=False, horizontal=True)
     matrix.translate(0, h)  # compensate
     matrix.translate(w, 0)  # position
@@ -64,7 +64,8 @@ def test_pageobj_placement():
     dest_page_1.insert_object(po)
     
     po = xobject.as_pageobject()
-    matrix = scaled_matrix.copy()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
     matrix.mirror(vertical=True, horizontal=True)
     matrix.translate(w, h)  # compensate
     assert matrix == pdfium.PdfMatrix(-0.5, 0, 0, -0.5, w, h)
@@ -77,7 +78,8 @@ def test_pageobj_placement():
     dest_page_2 = dest_pdf.new_page(square_len, square_len)
     
     po = xobject.as_pageobject()
-    matrix = scaled_matrix.copy()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
     matrix.rotate(360)
     matrix.translate(0, w)  # position
     assert pytest.approx(matrix.get(), abs=0.1) == (0.5, 0, 0, 0.5, 0, w)
@@ -85,7 +87,8 @@ def test_pageobj_placement():
     dest_page_2.insert_object(po)
     
     po = xobject.as_pageobject()
-    matrix = scaled_matrix.copy()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
     matrix.rotate(90)
     matrix.translate(0, w)  # compensate
     matrix.translate(w, h)  # position
@@ -94,7 +97,8 @@ def test_pageobj_placement():
     dest_page_2.insert_object(po)
     
     po = xobject.as_pageobject()
-    matrix = scaled_matrix.copy()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
     matrix.rotate(180)
     matrix.translate(w, h)  # compensate
     matrix.translate(h, 0)  # position
@@ -103,7 +107,8 @@ def test_pageobj_placement():
     dest_page_2.insert_object(po)
     
     po = xobject.as_pageobject()
-    matrix = scaled_matrix.copy()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
     matrix.rotate(270)
     matrix.translate(h, 0)  # compensate
     assert pytest.approx(matrix.get(), abs=0.1) == (0, 0.5, -0.5, 0, h, 0)
@@ -112,11 +117,25 @@ def test_pageobj_placement():
     
     dest_page_2.generate_content()
     dest_page_2.close()
+    dest_page_3 = dest_pdf.new_page(src_width, src_height)
+    
+    po = xobject.as_pageobject()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(0.5, 0.5)
+    matrix.translate(-w/2, -h/2)
+    matrix.rotate(90)
+    matrix.translate(h/2, w/2)
+    po.set_matrix(matrix)
+    dest_page_3.insert_object(po)
+    
+    dest_page_3.generate_content()
+    dest_page_3.close()
     
     # TODO
+    # * test copy and repr
     # * test skew
-    # * assert that transform() actually transforms and is not just doing the same as set_matrix()
-    # * assert that the transformation operates from the origin of the coordinate system (e. g. translate before rotate/mirror)
+    # * assert that PdfPageObject.transform() actually transforms and is not just doing the same as set_matrix()
+    # * assert that the transformation operates from the origin of the coordinate system
     
     with open(join(OutputDir, "pageobj_placement.pdf"), "wb") as buf:
         dest_pdf.save(buf)
