@@ -102,6 +102,7 @@ class PdfMatrix:
             x (float): Horizontal shift (<0: left, >0: right).
             y (float): Vertical shift.
         """
+        # same as self.multiply( PdfMatrix(1, 0, 0, 1, x, y) )
         self.e += x
         self.f += y
     
@@ -111,7 +112,7 @@ class PdfMatrix:
             x (float): A factor to scale the X axis (<1: compress, >1: stretch).
             y (float): A factor to scale the Y axis.
         """
-        # alternatively: a*=x, b*=y, c*=x, d*=y
+        # same as a*=x, b*=y, c*=x, d*=y, e*=x, f*=y
         self.multiply( PdfMatrix(x, 0, 0, y) )
     
     def rotate(self, angle):
