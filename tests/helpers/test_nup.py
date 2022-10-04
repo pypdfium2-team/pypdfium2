@@ -82,7 +82,7 @@ def test_pageobj_placement():
     matrix.scale(0.5, 0.5)
     matrix.rotate(360)
     matrix.translate(0, w)  # position
-    assert pytest.approx(matrix.get(), abs=0.1) == (0.5, 0, 0, 0.5, 0, w)
+    assert pytest.approx(matrix.get()) == (0.5, 0, 0, 0.5, 0, w)
     po.set_matrix(matrix)
     dest_page_2.insert_object(po)
     
@@ -92,7 +92,7 @@ def test_pageobj_placement():
     matrix.rotate(90)
     matrix.translate(0, w)  # compensate
     matrix.translate(w, h)  # position
-    assert pytest.approx(matrix.get(), abs=0.1) == (0, -0.5, 0.5, 0, w, w+h)
+    assert pytest.approx(matrix.get()) == (0, -0.5, 0.5, 0, w, w+h)
     po.set_matrix(matrix)
     dest_page_2.insert_object(po)
     
@@ -102,7 +102,7 @@ def test_pageobj_placement():
     matrix.rotate(180)
     matrix.translate(w, h)  # compensate
     matrix.translate(h, 0)  # position
-    assert pytest.approx(matrix.get(), abs=0.1) == (-0.5, 0, 0, -0.5, w+h, h)
+    assert pytest.approx(matrix.get()) == (-0.5, 0, 0, -0.5, w+h, h)
     po.set_matrix(matrix)
     dest_page_2.insert_object(po)
     
@@ -111,7 +111,7 @@ def test_pageobj_placement():
     matrix.scale(0.5, 0.5)
     matrix.rotate(270)
     matrix.translate(h, 0)  # compensate
-    assert pytest.approx(matrix.get(), abs=0.1) == (0, 0.5, -0.5, 0, h, 0)
+    assert pytest.approx(matrix.get()) == (0, 0.5, -0.5, 0, h, 0)
     po.set_matrix(matrix)
     dest_page_2.insert_object(po)
     
