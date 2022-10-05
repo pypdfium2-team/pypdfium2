@@ -477,6 +477,11 @@ class PdfPage (BitmapConvAliases):
             To convert a DPI value to a scale factor, divide it by 72.
         """
         
+        # In theory, we would like to switch to matrix-based rendering because it provides more transformation features, but there are some obstacles:
+        # * PDFium does not provide a function to draw forms with a custom transform matrix, nor a function that would combine matrix and colour scheme.
+        # * A missing piece on our side is calculating the bounding box of the transformed page, which we need to create a fitting bitmap.
+        # Perhaps it would be easier to keep rendering code as-is and instead just add a helper for FPDFPage_TransFormWithClip() that may be used before rendering?
+        
         validate_colours(fill_colour, colour_scheme)
         
         if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
