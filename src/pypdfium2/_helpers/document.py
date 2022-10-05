@@ -504,6 +504,9 @@ class PdfDocument (BitmapConvAliases):
         
         .. seealso:: :meth:`.PdfPage.render_to` / :meth:`.PdfPage.render_base`
         
+        Note:
+            If rendering only a single page, the call is simply forwarded to :meth:`PdfPage.render_to` as a shortcut.
+        
         Parameters:
             page_indices (typing.Sequence[int] | None):
                 A sequence of zero-based indices of the pages to render. Reverse indexing or duplicate page indices are prohibited.
@@ -512,9 +515,27 @@ class PdfDocument (BitmapConvAliases):
                 Target number of parallel processes.
             kwargs (dict):
                 Keyword arguments to the renderer.
+        
         Yields:
             :data:`typing.Any`: Implementation-specific result object.
         """
+        
+        n_pages = len(self)
+        if not page_indices:
+            page_indices = [i for i in range(n_pages)]
+        else:
+            if not all(0 <= i < n_pages for i in page_indices):
+                raise ValueError("Out-of-bounds page index")
+            if len(page_indices) != len(set(page_indices)):
+                raise ValueError("Duplicate page index")
+        
+        # shortcut: if we're rendering just a single page, don't waste time setting up a process pool
+        if len(page_indices) == 1:
+            page = self.get_page(page_indices[0])
+            result = page.render_to(converter, **kwargs)
+            page.close()
+            yield result
+            return
         
         if self._rendering_input is None:
             if isinstance(self._orig_input, pdfium.FPDF_DOCUMENT):
@@ -528,15 +549,6 @@ class PdfDocument (BitmapConvAliases):
                 self._orig_input.seek(cursor)
             else:
                 self._rendering_input = self._orig_input
-        
-        n_pages = len(self)
-        if not page_indices:
-            page_indices = [i for i in range(n_pages)]
-        else:
-            if not all(0 <= i < n_pages for i in page_indices):
-                raise ValueError("Out-of-bounds page index")
-            if len(page_indices) != len(set(page_indices)):
-                raise ValueError("Duplicate page index")
         
         invoke_renderer = functools.partial(
             PdfDocument._process_page,

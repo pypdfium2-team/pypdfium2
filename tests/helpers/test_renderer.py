@@ -399,7 +399,9 @@ def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes, render_pdf
 def test_render_pdf_new(caplog):
     
     pdf = pdfium.PdfDocument.new()
-    page = pdf.new_page(50, 100)
+    # two pages to actually reach the process pool and not just the single-page shortcut
+    page_1 = pdf.new_page(50, 100)
+    page_2 = pdf.new_page(50, 100)
     
     with caplog.at_level(logging.WARNING):
         renderer = pdf.render_to(pdfium.BitmapConv.pil_image)
@@ -412,12 +414,12 @@ def test_render_pdf_new(caplog):
     assert image.mode == "RGB"
     assert image.size == (50, 100)
     
-    for g in (image, page, pdf): g.close()
+    for g in (image, page_1, page_2, pdf): g.close()
 
 
 def test_render_pdfbuffer(caplog):
     
-    buffer = open(TestFiles.render, "rb")
+    buffer = open(TestFiles.multipage, "rb")
     pdf = pdfium.PdfDocument(buffer)
     assert pdf._orig_input is buffer
     assert pdf._actual_input is buffer
@@ -428,8 +430,8 @@ def test_render_pdfbuffer(caplog):
             pdfium.BitmapConv.pil_image,
             scale = 0.5,
         )
-        for image in renderer:
-            assert isinstance(image, PIL.Image.Image)
+        image = next(renderer)
+        assert isinstance(image, PIL.Image.Image)
     
     assert isinstance(pdf._rendering_input, bytes)
     warning = "Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly."
@@ -440,7 +442,7 @@ def test_render_pdfbuffer(caplog):
 
 def test_render_pdfbytes():
     
-    with open(TestFiles.render, "rb") as fh:
+    with open(TestFiles.multipage, "rb") as fh:
         data = fh.read()
     
     pdf = pdfium.PdfDocument(data)
@@ -451,8 +453,8 @@ def test_render_pdfbytes():
         pdfium.BitmapConv.pil_image,
         scale = 0.5,
     )
-    for image in renderer:
-        assert isinstance(image, PIL.Image.Image)
+    image = next(renderer)
+    assert isinstance(image, PIL.Image.Image)
     assert isinstance(pdf._rendering_input, bytes)
     
     pdf.close()
@@ -460,9 +462,9 @@ def test_render_pdfbytes():
 
 def test_render_pdffile_asbuffer():
     
-    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BUFFER)
+    pdf = pdfium.PdfDocument(TestFiles.multipage, file_access=pdfium.FileAccess.BUFFER)
     
-    assert pdf._orig_input == TestFiles.render
+    assert pdf._orig_input == TestFiles.multipage
     assert isinstance(pdf._actual_input, io.BufferedReader)
     assert pdf._rendering_input is None
     assert pdf._file_access is pdfium.FileAccess.BUFFER
@@ -471,11 +473,11 @@ def test_render_pdffile_asbuffer():
         pdfium.BitmapConv.pil_image,
         scale = 0.5,
     )
-    for image in renderer:
-        assert isinstance(image, PIL.Image.Image)
+    image = next(renderer)
+    assert isinstance(image, PIL.Image.Image)
     
     # Not sure how to test that the requested file access strategy is actually used when constructing the new PdfDocument objects
-    assert pdf._rendering_input == TestFiles.render
+    assert pdf._rendering_input == TestFiles.multipage
     
     pdf.close()
     assert pdf._actual_input.closed is True
@@ -483,9 +485,9 @@ def test_render_pdffile_asbuffer():
 
 def test_render_pdffile_asbytes():
     
-    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BYTES)
+    pdf = pdfium.PdfDocument(TestFiles.multipage, file_access=pdfium.FileAccess.BYTES)
     
-    assert pdf._orig_input == TestFiles.render
+    assert pdf._orig_input == TestFiles.multipage
     assert isinstance(pdf._actual_input, bytes)
     assert pdf._rendering_input is None
     assert pdf._file_access is pdfium.FileAccess.BYTES
@@ -494,8 +496,8 @@ def test_render_pdffile_asbytes():
         pdfium.BitmapConv.pil_image,
         scale = 0.5,
     )
-    for image in renderer:
-        assert isinstance(image, PIL.Image.Image)
-    assert pdf._rendering_input == TestFiles.render
+    image = next(renderer)
+    assert isinstance(image, PIL.Image.Image)
+    assert pdf._rendering_input == TestFiles.multipage
     
     pdf.close()
