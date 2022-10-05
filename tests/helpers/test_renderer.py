@@ -23,7 +23,7 @@ def sample_page():
     pdf = pdfium.PdfDocument(TestFiles.render)
     page = pdf.get_page(0)
     yield page
-    for g in (page, pdf): g.close()
+    # for g in (page, pdf): g.close()
 
 
 @pytest.fixture
@@ -224,7 +224,7 @@ def test_render_page_colourscheme():
     assert image.mode == "L"
     image.save( join(OutputDir, "render_colourscheme.png") )
     
-    for g in (page, pdf): g.close()
+    # for g in (page, pdf): g.close()
 
 
 def test_render_page_custom_allocator(sample_page):
@@ -323,7 +323,7 @@ def test_render_pages_no_concurrency(multipage_doc):
         )
         assert isinstance(image, PIL.Image.Image)
         image.close()
-        page.close()
+        # page.close()
 
 
 @pytest.fixture
@@ -413,8 +413,9 @@ def test_render_pdf_new(caplog):
     assert isinstance(image, PIL.Image.Image)
     assert image.mode == "RGB"
     assert image.size == (50, 100)
+    image.close()
     
-    for g in (image, page_1, page_2, pdf): g.close()
+    # for g in (page_1, page_2, pdf): g.close()
 
 
 def test_render_pdfbuffer(caplog):
@@ -437,7 +438,7 @@ def test_render_pdfbuffer(caplog):
     warning = "Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly."
     assert warning in caplog.text
     
-    for g in (pdf, buffer): g.close()
+    # for g in (pdf, buffer): g.close()
 
 
 def test_render_pdfbytes():

@@ -24,7 +24,7 @@ def _check_render(pdf):
     
     page = pdf.get_page(0)
     pil_image = page.render_to(pdfium.BitmapConv.pil_image)
-    page.close()
+    # page.close()
     
     assert pil_image.mode == "RGB"
     assert pil_image.size == (595, 842)
@@ -184,7 +184,7 @@ def test_open_new():
     pdfium.FPDF_ImportPages(dest_pdf.raw, src_pdf.raw, b"1, 3", 0)
     assert len(dest_pdf) == 2
     
-    for g in (dest_pdf, src_pdf): g.close()
+    # for g in (dest_pdf, src_pdf): g.close()
 
 
 def test_open_invalid():
@@ -223,7 +223,7 @@ def test_object_hierarchy():
     assert isinstance(searcher.raw, pdfium.FPDF_SCHHANDLE)
     assert searcher.textpage is textpage
     
-    for g in (searcher, textpage, page, pdf): g.close()
+    # for g in (searcher, textpage, page, pdf): g.close()
 
 
 def test_doc_extras():
@@ -233,7 +233,7 @@ def test_doc_extras():
         assert len(pdf) == 1
         page = pdf[0]
         assert isinstance(page, pdfium.PdfPage)
-        page.close()
+        # page.close()
     assert isinstance(pdf._actual_input, io.BufferedReader)
     assert pdf._actual_input.closed is True
     
@@ -245,18 +245,18 @@ def test_doc_extras():
         sizes = [(50, 100), (100, 150), (150, 200), (200, 250)]
         for size in sizes:
             page = pdf.new_page(*size)
-            page.close()
+            # page.close()
         for i, (size, page) in enumerate(zip(sizes, pdf)):
             assert isinstance(page, pdfium.PdfPage)
             assert size == page.get_size() == pdf.get_page_size(i)
-            page.close()
+            # page.close()
         
         del pdf[0]
         page = pdf[0]
         assert page.get_size() == pdf.get_page_size(0) == (100, 150)
-        page.close()
+        # page.close()
         
         del pdf[-len(pdf)]
         page = pdf[-len(pdf)]
         assert page.get_size() == pdf.get_page_size(-len(pdf)) == (150, 200)
-        page.close()
+        # page.close()

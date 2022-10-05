@@ -13,7 +13,7 @@ from ..conftest import TestFiles, ResourceDir, OutputDir
 def doc():
     doc = pdfium.PdfDocument(TestFiles.text)
     yield doc
-    doc.close()
+    # doc.close()
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ def textpage(doc):
     textpage = page.get_textpage()
     assert isinstance(textpage, pdfium.PdfTextPage)
     yield textpage
-    for g in (textpage, page): g.close()
+    # for g in (textpage, page): g.close()
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def linkpage(doc):
     page = doc.get_page(1)
     linkpage = page.get_textpage()
     yield linkpage
-    for g in (linkpage, page): g.close()
+    # for g in (linkpage, page): g.close()
 
 
 def test_gettext(textpage):
@@ -110,7 +110,7 @@ def test_search_text(textpage):
             assert box[0] <= box[2]
             assert box[1] <= box[3]
     
-    searcher.close()
+    # searcher.close()
 
 
 def test_get_index(textpage):
@@ -139,14 +139,14 @@ def test_textpage_empty():
     
     searcher = textpage.search("a")
     assert searcher.get_next() is None
-    searcher.close()
+    # searcher.close()
     
     with pytest.raises(ValueError, match=re.escape("Character index 0 is out of bounds. The maximum index is -1.")):
         textpage.get_charbox(0)
     with pytest.raises(ValueError, match=re.escape("Text length must be >0.")):
         textpage.search("")
     
-    for g in (textpage, page, pdf): g.close()
+    # for g in (textpage, page, pdf): g.close()
 
 
 def test_get_links(linkpage):
@@ -212,4 +212,4 @@ def test_insert_text():
     with open(join(OutputDir, "text_insertion.pdf"), "wb") as buffer:
         pdf.save(buffer, version=17)
     
-    for g in (textpage, page, pdf_font, pdf): g.close()
+    # for g in (textpage, page, pdf_font, pdf): g.close()
