@@ -5,6 +5,7 @@ import io
 import re
 import shutil
 import tempfile
+import weakref
 import pytest
 import PIL.Image
 from os.path import join, abspath
@@ -207,6 +208,7 @@ def test_object_hierarchy():
     assert isinstance(page.raw, pdfium.FPDF_PAGE)
     assert page.pdf is pdf
     
+    # pageobjects don't need a finalizer
     pageobj = next(page.get_objects())
     assert isinstance(pageobj, pdfium.PdfPageObject)
     assert isinstance(pageobj.raw, pdfium.FPDF_PAGEOBJECT)
@@ -223,7 +225,12 @@ def test_object_hierarchy():
     assert isinstance(searcher.raw, pdfium.FPDF_SCHHANDLE)
     assert searcher.textpage is textpage
     
-    # for g in (searcher, textpage, page, pdf): g.close()
+    for obj in (searcher, textpage, page, pdf):
+        assert callable(obj._static_close)
+        assert isinstance(obj._finalizer, weakref.finalize)
+        assert obj._finalizer.alive
+        obj.close()
+        assert not obj._finalizer.alive
 
 
 def test_doc_extras():
