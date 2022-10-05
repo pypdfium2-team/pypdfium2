@@ -113,7 +113,6 @@ class PdfDocument (BitmapConvAliases):
         self._finalizer = weakref.finalize(
             self, self._static_close,
             self.raw, self._ld_data, self._autoclose, self._actual_input,
-            is_finalizer = True,
         )
     
     
@@ -148,11 +147,9 @@ class PdfDocument (BitmapConvAliases):
     
     
     @staticmethod
-    def _static_close(raw, ld_data, autoclose, actual_input, is_finalizer=False):
+    def _static_close(raw, ld_data, autoclose, actual_input):
         
-        if is_finalizer:
-            logger.warning("Closing document via finalizer")
-        
+        logger.warning("Closing document")
         pdfium.FPDF_CloseDocument(raw)
         
         if ld_data is not None:
@@ -162,13 +159,8 @@ class PdfDocument (BitmapConvAliases):
     
     
     @staticmethod
-    def _static_exit_formenv(form_env, form_config, is_finalizer=False):
-        
-        # FIXME if this happens, is it guaranteed to be before the document is closed ?
-        
-        if is_finalizer:
-            logger.warning("Closing formenv via finalizer")
-        
+    def _static_exit_formenv(form_env, form_config):
+        logger.warning("Exiting form env")
         pdfium.FPDFDOC_ExitFormFillEnvironment(form_env)
         id(form_config)
     
@@ -180,8 +172,7 @@ class PdfDocument (BitmapConvAliases):
         if self.raw is None:
             return
         self.exit_formenv()
-        self._static_close(self.raw, self._ld_data, self._autoclose, self._actual_input)
-        self._finalizer.detach()
+        self._finalizer()
         self.raw = None
     
     
@@ -201,7 +192,6 @@ class PdfDocument (BitmapConvAliases):
         self._form_finalizer = weakref.finalize(
             self, self._static_exit_formenv,
             self._form_env, self._form_config,
-            is_finalizer = True,
         )
         return self._form_env
     
@@ -212,8 +202,7 @@ class PdfDocument (BitmapConvAliases):
         """
         if self._form_env is None:
             return
-        self._static_exit_formenv(self._form_env, self._form_config)
-        self._form_finalizer.detach()
+        self._form_finalizer()
         self._form_env = None
         self._form_config = None
     
@@ -626,7 +615,8 @@ class PdfXObject:
         self.raw = raw
         self.pdf = pdf
         self._finalizer = weakref.finalize(
-            self._static_close, self.raw
+            self, self._static_close,
+            self.raw,
         )
     
     def as_pageobject(self):
@@ -650,8 +640,7 @@ class PdfXObject:
         """
         if self.raw is None:
             return
-        self._static_close(self.raw)
-        self._finalizer.detach()
+        self._finalizer()
         self.raw = None
 
 
@@ -696,6 +685,5 @@ class PdfFont:
         """
         if self.raw is None:
             return
-        self._static_close(self.raw, self._font_data)
-        self._finalizer.detach()
+        self._finalizer()
         self.raw = None
