@@ -81,6 +81,7 @@ class PdfDocument (BitmapConvAliases):
         self._ld_data = None
         self._form_env = None
         self._form_config = None
+        self._form_finalizer = None
         
         self._password = password
         self._file_access = file_access
@@ -150,10 +151,8 @@ class PdfDocument (BitmapConvAliases):
     def _static_close(raw, ld_data, autoclose, actual_input, is_finalizer=False):
         
         if is_finalizer:
-            logger.critical("Closing document via finalizer")
+            logger.warning("Closing document via finalizer")
         
-        if raw is None:
-            return
         pdfium.FPDF_CloseDocument(raw)
         
         if ld_data is not None:
@@ -161,10 +160,26 @@ class PdfDocument (BitmapConvAliases):
         if autoclose and is_input_buffer(actual_input):
             actual_input.close()
     
+    
+    @staticmethod
+    def _static_exit_formenv(form_env, form_config, is_finalizer=False):
+        
+        # FIXME if this happens, is it guaranteed to be before the document is closed ?
+        
+        if is_finalizer:
+            logger.warning("Closing formenv via finalizer")
+        
+        pdfium.FPDFDOC_ExitFormFillEnvironment(form_env)
+        id(form_config)
+    
+    
     def close(self):
         """
         TODO
         """
+        if self.raw is None:
+            return
+        self.exit_formenv()
         self._static_close(self.raw, self._ld_data, self._autoclose, self._actual_input)
         self._finalizer.detach()
         self.raw = None
@@ -183,6 +198,11 @@ class PdfDocument (BitmapConvAliases):
         self._form_config = pdfium.FPDF_FORMFILLINFO()
         self._form_config.version = 2
         self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, self._form_config)
+        self._form_finalizer = weakref.finalize(
+            self, self._static_exit_formenv,
+            self._form_env, self._form_config,
+            is_finalizer = True,
+        )
         return self._form_env
     
     
@@ -190,11 +210,10 @@ class PdfDocument (BitmapConvAliases):
         """
         TODO
         """
-        # TODO auto-exit formenv via weakref
         if self._form_env is None:
             return
-        pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)
-        id(self._form_config)
+        self._static_exit_formenv(self._form_env, self._form_config)
+        self._form_finalizer.detach()
         self._form_env = None
         self._form_config = None
     
