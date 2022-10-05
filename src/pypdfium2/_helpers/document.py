@@ -160,7 +160,7 @@ class PdfDocument (BitmapConvAliases):
     
     @staticmethod
     def _static_exit_formenv(form_env, form_config):
-        logger.warning("Exiting form env")
+        logger.warning("Closing form env")
         pdfium.FPDFDOC_ExitFormFillEnvironment(form_env)
         id(form_config)
     
@@ -632,6 +632,7 @@ class PdfXObject:
     
     @staticmethod
     def _static_close(raw):
+        logger.warning("Closing XObject")
         pdfium.FPDF_CloseXObject(raw)
     
     def close(self):
@@ -676,6 +677,7 @@ class PdfFont:
     
     @staticmethod
     def _static_close(raw, font_data):
+        logger.warning("Closing font")
         pdfium.FPDFFont_Close(raw)
         id(font_data)
     

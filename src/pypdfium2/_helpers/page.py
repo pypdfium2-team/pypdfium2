@@ -5,6 +5,7 @@
 import math
 import ctypes
 import weakref
+import logging
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers._utils import (
@@ -35,6 +36,8 @@ try:
 except ImportError:
     harfbuzz = None
 
+logger = logging.getLogger(__name__)
+
 
 class PdfPage (BitmapConvAliases):
     """
@@ -55,6 +58,7 @@ class PdfPage (BitmapConvAliases):
     
     @staticmethod
     def _static_close(raw):
+        logger.warning("Closing page")
         pdfium.FPDF_ClosePage(raw)
     
     def close(self):

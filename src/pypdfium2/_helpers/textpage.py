@@ -3,9 +3,12 @@
 
 import ctypes
 import weakref
+import logging
 from ctypes import c_double
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.misc import PdfiumError
+
+logger = logging.getLogger(__name__)
 
 
 class PdfTextPage:
@@ -27,6 +30,7 @@ class PdfTextPage:
     
     @staticmethod
     def _static_close(raw):
+        logger.warning("Closing text page")
         pdfium.FPDFText_ClosePage(raw)
     
     def close(self):
@@ -238,6 +242,7 @@ class PdfTextSearcher:
     
     @staticmethod
     def _static_close(raw):
+        logger.warning("Closing text searcher")
         pdfium.FPDFText_FindClose(raw)
     
     def close(self):
