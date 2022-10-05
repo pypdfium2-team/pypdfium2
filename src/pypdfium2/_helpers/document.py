@@ -4,6 +4,7 @@
 import io
 import os
 import os.path
+import weakref
 import ctypes
 import logging
 import functools
@@ -107,6 +108,12 @@ class PdfDocument (BitmapConvAliases):
             self.raw = self._actual_input
         else:
             self.raw, self._ld_data = open_pdf(self._actual_input, self._password)
+        
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw, self._ld_data, self._autoclose, self._actual_input,
+            is_finalizer = True,
+        )
     
     
     def __enter__(self):
@@ -138,21 +145,29 @@ class PdfDocument (BitmapConvAliases):
         new_pdf = pdfium.FPDF_CreateNewDocument()
         return cls(new_pdf)
     
+    
+    @staticmethod
+    def _static_close(raw, ld_data, autoclose, actual_input, is_finalizer=False):
+        
+        if is_finalizer:
+            logger.critical("Closing document via finalizer")
+        
+        if raw is None:
+            return
+        pdfium.FPDF_CloseDocument(raw)
+        
+        if ld_data is not None:
+            ld_data.close()
+        if autoclose and is_input_buffer(actual_input):
+            actual_input.close()
+    
     def close(self):
         """
-        Close the document to release allocated memory.
-        This function shall be called when finished working with the object.
+        TODO
         """
-        
-        self.exit_formenv()
-        
-        pdfium.FPDF_CloseDocument(self.raw)
+        self._static_close(self.raw, self._ld_data, self._autoclose, self._actual_input)
+        self._finalizer.detach()
         self.raw = None
-        
-        if self._ld_data is not None:
-            self._ld_data.close()
-        if self._autoclose and is_input_buffer(self._actual_input):
-            self._actual_input.close()
     
     
     def init_formenv(self):
@@ -173,12 +188,9 @@ class PdfDocument (BitmapConvAliases):
     
     def exit_formenv(self):
         """
-        Release allocated memory by exiting the form environment.
-        If the form environment is not initialised, nothing will be done.
-        
-        Note:
-            This method is called by :meth:`.close`.
+        TODO
         """
+        # TODO auto-exit formenv via weakref
         if self._form_env is None:
             return
         pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)

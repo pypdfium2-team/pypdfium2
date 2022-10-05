@@ -40,7 +40,7 @@ def open_filepath_native():
     assert pdf._file_access is pdfium.FileAccess.NATIVE
     _check_general(pdf)
     yield _check_render(pdf)
-    pdf.close()
+    # pdf.close()
 
 
 @pytest.fixture
@@ -55,7 +55,7 @@ def open_bytes():
     _check_general(pdf)
     yield _check_render(pdf)
     
-    pdf.close()
+    # pdf.close()
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def open_buffer():
     _check_general(pdf)
     yield _check_render(pdf)
     
-    pdf.close()
+    # pdf.close()
     assert buffer.closed is False
     buffer.close()
 
@@ -113,7 +113,7 @@ def test_open_filepath_bytes():
     assert isinstance(pdf._actual_input, bytes)
     _check_general(pdf)
     
-    pdf.close()
+    # pdf.close()
 
 
 def test_open_encrypted():
@@ -134,7 +134,7 @@ def test_open_encrypted():
     for input_data, password in test_cases:
         pdf = pdfium.PdfDocument(input_data, password)
         _check_general(pdf)
-        pdf.close()
+        # pdf.close()
         if input_data is buffer:
             buffer.seek(0)
     
@@ -142,7 +142,7 @@ def test_open_encrypted():
     
     with pytest.raises(pdfium.PdfiumError, match=re.escape("Loading the document failed (PDFium: Incorrect password error)")):
         pdf = pdfium.PdfDocument(TestFiles.encrypted, "wrong_password")
-        pdf.close()
+        # pdf.close()
 
 
 @pytest.mark.parametrize(
@@ -152,7 +152,7 @@ def test_open_encrypted():
 def test_open_nonencrypted_with_password(file_access):
     pdf = pdfium.PdfDocument(TestFiles.render, password="irrelevant", file_access=file_access)
     _check_general(pdf)
-    pdf.close()
+    # pdf.close()
 
 
 def test_open_nonascii():
@@ -163,7 +163,7 @@ def test_open_nonascii():
     
     pdf = pdfium.PdfDocument(nonascii_file)
     _check_general(pdf)
-    pdf.close()
+    # pdf.close()
     
     tempdir.cleanup()
 

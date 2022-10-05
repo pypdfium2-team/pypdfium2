@@ -30,7 +30,7 @@ def sample_page():
 def multipage_doc():
     pdf = pdfium.PdfDocument(TestFiles.multipage)
     yield pdf
-    pdf.close()
+    # pdf.close()
 
 
 def _check_pixels(pil_image, pixels):
@@ -457,7 +457,7 @@ def test_render_pdfbytes():
     assert isinstance(image, PIL.Image.Image)
     assert isinstance(pdf._rendering_input, bytes)
     
-    pdf.close()
+    # pdf.close()
 
 
 def test_render_pdffile_asbuffer():
@@ -500,4 +500,4 @@ def test_render_pdffile_asbytes():
     assert isinstance(image, PIL.Image.Image)
     assert pdf._rendering_input == TestFiles.multipage
     
-    pdf.close()
+    # pdf.close()

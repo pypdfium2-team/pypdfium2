@@ -36,7 +36,7 @@ def test_save_withversion():
     
     buffer = io.BytesIO()
     pdf.save(buffer, version=17)
-    pdf.close()
+    # pdf.close()
     
     buffer.seek(0)
     data = buffer.read()
