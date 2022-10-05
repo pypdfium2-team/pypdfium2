@@ -4,6 +4,7 @@
 
 import math
 import ctypes
+import weakref
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers._utils import (
@@ -47,13 +48,22 @@ class PdfPage (BitmapConvAliases):
     def __init__(self, raw, pdf):
         self.raw = raw
         self.pdf = pdf
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw,
+        )
+    
+    @staticmethod
+    def _static_close(raw):
+        pdfium.FPDF_ClosePage(raw)
     
     def close(self):
         """
-        Close the page to release allocated memory.
-        This function shall be called when finished working with the object.
+        TODO
         """
-        pdfium.FPDF_ClosePage(self.raw)
+        if self.raw is None:
+            return
+        self._finalizer()
         self.raw = None
     
     

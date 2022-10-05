@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import ctypes
+import weakref
 from ctypes import c_double
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.misc import PdfiumError
@@ -19,13 +20,22 @@ class PdfTextPage:
     def __init__(self, raw, page):
         self.raw = raw
         self.page = page
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw,
+        )
+    
+    @staticmethod
+    def _static_close(raw):
+        pdfium.FPDFText_ClosePage(raw)
     
     def close(self):
         """
-        Close the text page to release allocated memory.
-        This method shall be called when finished working with the text page.
+        TODO
         """
-        pdfium.FPDFText_ClosePage(self.raw)
+        if self.raw is None:
+            return
+        self._finalizer()
         self.raw = None
     
     
@@ -221,13 +231,22 @@ class PdfTextSearcher:
     def __init__(self, raw, textpage):
         self.raw = raw
         self.textpage = textpage
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw,
+        )
+    
+    @staticmethod
+    def _static_close(raw):
+        pdfium.FPDFText_FindClose(raw)
     
     def close(self):
         """
-        Close the search structure to release allocated memory.
-        This method shall be called when done with text searching.
+        TODO
         """
-        pdfium.FPDFText_FindClose(self.raw)
+        if self.raw is None:
+            return
+        self._finalizer()
         self.raw = None
     
     def _get_occurrence(self, find_func):
