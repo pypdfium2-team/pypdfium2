@@ -508,7 +508,7 @@ class PdfDocument (BitmapConvAliases):
         )
         page = pdf.get_page(index)
         result = page.render_to(converter, **kwargs)
-        for g in (page, pdf): g.close()
+        # for g in (page, pdf): g.close()
         return result, index
     
     
@@ -553,7 +553,7 @@ class PdfDocument (BitmapConvAliases):
         if len(page_indices) == 1:
             page = self.get_page(page_indices[0])
             result = page.render_to(converter, **kwargs)
-            page.close()
+            # page.close()
             yield result
             return
         

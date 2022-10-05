@@ -40,9 +40,9 @@ def main(args):
         textpage = page.get_textpage()
         text = textpage.get_text()
         
-        for g in (textpage, page): g.close()
+        # for g in (textpage, page): g.close()
         
         print(sep + "# Page %s\n" % (index+1) + text)
         sep = "\n"
     
-    doc.close()
+    # doc.close()

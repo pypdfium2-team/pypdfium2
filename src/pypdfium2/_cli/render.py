@@ -211,4 +211,4 @@ def main(args):
             image.save(output_path)
             image.close()
         
-        pdf.close()
+        # pdf.close()
