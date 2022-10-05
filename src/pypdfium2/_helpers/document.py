@@ -625,6 +625,9 @@ class PdfXObject:
     def __init__(self, raw, pdf):
         self.raw = raw
         self.pdf = pdf
+        self._finalizer = weakref.finalize(
+            self._static_close, self.raw
+        )
     
     def as_pageobject(self):
         """
@@ -637,12 +640,19 @@ class PdfXObject:
             pdf = self.pdf,
         )
     
+    @staticmethod
+    def _static_close(raw):
+        pdfium.FPDF_CloseXObject(raw)
+    
     def close(self):
         """
-        Close the XObject to release allocated memory.
-        This function shall be called when finished working with the object.
+        TODO
         """
-        pdfium.FPDF_CloseXObject(self.raw)
+        if self.raw is None:
+            return
+        self._static_close(self.raw)
+        self._finalizer.detach()
+        self.raw = None
 
 
 class HarfbuzzFont:
@@ -670,12 +680,22 @@ class PdfFont:
         self.raw = raw
         self.pdf = pdf
         self._font_data = font_data
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw, self._font_data,
+        )
+    
+    @staticmethod
+    def _static_close(raw, font_data):
+        pdfium.FPDFFont_Close(raw)
+        id(font_data)
     
     def close(self):
         """
-        Close the font to release allocated memory.
-        This function shall be called when finished working with the object.
+        TODO
         """
-        pdfium.FPDFFont_Close(self.raw)
+        if self.raw is None:
+            return
+        self._static_close(self.raw, self._font_data)
+        self._finalizer.detach()
         self.raw = None
-        id(self._font_data)
