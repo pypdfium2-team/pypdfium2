@@ -54,14 +54,19 @@ class PdfPage (BitmapConvAliases):
         # if the form env of the parent document is initialised, we could call FORM_OnAfterLoadPage() here
         self._finalizer = weakref.finalize(
             self, self._static_close,
-            self.raw, self.pdf
+            self.raw, self.pdf,
         )
+    
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.pdf._tree_closed()
     
     @staticmethod
     def _static_close(raw, parent):
         logger.debug("Closing page")
-        if parent.raw is None:
-            logger.warning("Parent document %s closed before page" % parent)
+        if parent._tree_closed():
+            logger.critical("Document closed before page (this is illegal). Document: %s" % parent)
         pdfium.FPDF_ClosePage(raw)
     
     def close(self):
@@ -70,6 +75,7 @@ class PdfPage (BitmapConvAliases):
         Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
+            logger.warning("Duplicate close call suppressed on page %s" % self)
             return
         # if the form env of the parent document is initialised, we could call FORM_OnBeforeClosePage() here
         self._finalizer()

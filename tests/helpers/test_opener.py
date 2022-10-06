@@ -4,8 +4,9 @@
 import io
 import re
 import shutil
-import tempfile
+import logging
 import weakref
+import tempfile
 import pytest
 import PIL.Image
 from os.path import join, abspath
@@ -197,7 +198,7 @@ def test_open_invalid():
         pdf = pdfium.PdfDocument("invalid/path", file_access=pdfium.FileAccess.BUFFER)
 
 
-def test_object_hierarchy():
+def test_object_hierarchy(caplog):
     
     pdf = pdfium.PdfDocument(TestFiles.images)
     assert isinstance(pdf, pdfium.PdfDocument)
@@ -240,6 +241,11 @@ def test_object_hierarchy():
         assert obj._finalizer.alive
         obj.close()
         assert not obj._finalizer.alive
+    
+    for obj in (searcher, textpage, page, pdf):
+        with caplog.at_level(logging.WARNING):
+            obj.close()
+        assert "Duplicate close call suppressed on" in caplog.text
 
 
 def test_doc_extras():

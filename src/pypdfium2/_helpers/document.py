@@ -174,10 +174,15 @@ class PdfDocument (BitmapConvAliases):
             This method calls :meth:`.exit_formenv`.
         """
         if self.raw is None:
+            logger.warning("Duplicate close call suppressed on document %s" % self)
             return
         self.exit_formenv()
         self._finalizer()
         self.raw = None
+    
+    
+    def _tree_closed(self):
+        return (self.raw is None)
     
     
     def init_formenv(self):
@@ -626,8 +631,31 @@ class PdfXObject:
         self.pdf = pdf
         self._finalizer = weakref.finalize(
             self, self._static_close,
-            self.raw,
+            self.raw, self.pdf,
         )
+    
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.pdf._tree_closed()
+    
+    @staticmethod
+    def _static_close(raw, parent):
+        logger.debug("Closing XObject")
+        if parent._tree_closed():
+            logger.critical("Document closed before XObject (this is illegal). Document: %s" % parent)
+        pdfium.FPDF_CloseXObject(raw)
+    
+    def close(self):
+        """
+        Free memory by applying the finalizer for the underlying PDFium XObject.
+        Please refer to the generic note on ``close()`` methods for details.
+        """
+        if self.raw is None:
+            logger.warning("Duplicate close call suppressed on XObject %s" % self)
+            return
+        self._finalizer()
+        self.raw = None
     
     def as_pageobject(self):
         """
@@ -639,21 +667,6 @@ class PdfXObject:
             raw = raw_pageobj,
             pdf = self.pdf,
         )
-    
-    @staticmethod
-    def _static_close(raw):
-        logger.debug("Closing XObject")
-        pdfium.FPDF_CloseXObject(raw)
-    
-    def close(self):
-        """
-        Free memory by applying the finalizer for the underlying PDFium XObject.
-        Please refer to the generic note on ``close()`` methods for details.
-        """
-        if self.raw is None:
-            return
-        self._finalizer()
-        self.raw = None
 
 
 class HarfbuzzFont:
@@ -683,12 +696,19 @@ class PdfFont:
         self._font_data = font_data
         self._finalizer = weakref.finalize(
             self, self._static_close,
-            self.raw, self._font_data,
+            self.raw, self.pdf, self._font_data,
         )
     
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.pdf._tree_closed()
+    
     @staticmethod
-    def _static_close(raw, font_data):
+    def _static_close(raw, parent, font_data):
         logger.debug("Closing font")
+        if parent._tree_closed():
+            logger.critical("Document closed before font (this is illegal). Document: %s" % parent)
         pdfium.FPDFFont_Close(raw)
         id(font_data)
     
@@ -698,6 +718,7 @@ class PdfFont:
         Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
+            logger.warning("Duplicate close call suppressed on font %s" % self)
             return
         self._finalizer()
         self.raw = None

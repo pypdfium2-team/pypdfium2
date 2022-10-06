@@ -25,12 +25,19 @@ class PdfTextPage:
         self.page = page
         self._finalizer = weakref.finalize(
             self, self._static_close,
-            self.raw,
+            self.raw, self.page,
         )
     
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.page._tree_closed()
+    
     @staticmethod
-    def _static_close(raw):
+    def _static_close(raw, parent):
         logger.debug("Closing text page")
+        if parent._tree_closed():
+            logger.critical("Some parent closed before text page (this is illegal). Direct parent: %s" % parent)
         pdfium.FPDFText_ClosePage(raw)
     
     def close(self):
@@ -39,6 +46,7 @@ class PdfTextPage:
         Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
+            logger.warning("Duplicate close call suppressed on text page %s" % self)
             return
         self._finalizer()
         self.raw = None
@@ -238,12 +246,19 @@ class PdfTextSearcher:
         self.textpage = textpage
         self._finalizer = weakref.finalize(
             self, self._static_close,
-            self.raw,
+            self.raw, self.textpage,
         )
     
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.textpage._tree_closed()
+    
     @staticmethod
-    def _static_close(raw):
+    def _static_close(raw, parent):
         logger.debug("Closing text searcher")
+        if parent._tree_closed():
+            logger.critical("Some parent closed before text searcher (this is illegal). Direct parent: %s" % parent)
         pdfium.FPDFText_FindClose(raw)
     
     def close(self):
@@ -252,6 +267,7 @@ class PdfTextSearcher:
         Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
+            logger.warning("Duplicate close call suppressed on text searcher %s" % self)
             return
         self._finalizer()
         self.raw = None
