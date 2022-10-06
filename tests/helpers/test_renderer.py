@@ -92,7 +92,7 @@ def test_render_page_transform(sample_page, name, crop, scale, rotation):
             pixels.append( ((x, y), value) )
     
     _check_pixels(pil_image, pixels)
-    pil_image.close()
+    # pil_image.close()
 
 
 @pytest.mark.parametrize(
@@ -107,7 +107,7 @@ def test_render_page_bgrx(rev_byteorder, sample_page):
     assert pil_image.mode == "RGBX"
     exp_pixels = [(pos, (*value, 255)) for pos, value in ExpRenderPixels]
     _check_pixels(pil_image, exp_pixels)
-    pil_image.close()
+    # pil_image.close()
 
 
 def test_render_page_alpha(sample_page):
@@ -133,7 +133,7 @@ def test_render_page_alpha(sample_page):
         assert image.getpixel(pos) == exp_value
     
     image.save(join(OutputDir, "coloured_alpha.png"))
-    for g in (image, image_rev): g.close()
+    # for g in (image, image_rev): g.close()
 
 
 def test_render_page_grey(sample_page):
@@ -149,7 +149,7 @@ def test_render_page_grey(sample_page):
     assert image.size == (298, 421)
     assert image.mode == "L"
     image.save(join(OutputDir, "greyscale.png"))
-    for g in (image, image_rev): g.close()
+    # for g in (image, image_rev): g.close()
 
 
 @pytest.mark.parametrize(
@@ -171,7 +171,7 @@ def test_render_page_grey_alpha(prefer_la, sample_page):
     else:
         assert image.mode == "RGBA"
     image.save(join(OutputDir, "greyscale_alpha_%s.png" % image.mode))
-    image.close()
+    # image.close()
 
 
 @pytest.mark.parametrize(
@@ -202,7 +202,7 @@ def test_render_page_fill_colour(fill_colour, sample_page):
     assert image.size == (298, 421)
     assert bg_pixel == fill_colour
     
-    image.close()
+    # image.close()
 
 
 def test_render_page_colourscheme():
@@ -279,7 +279,7 @@ def test_render_page_tobytes(rev_byteorder, sample_page):
     assert pil_image.mode == "RGB"
     assert pil_image.size == (298, 421)
     assert isinstance(pil_image, PIL.Image.Image)
-    pil_image.close()
+    # pil_image.close()
 
 
 def test_render_page_optimisation(sample_page):
@@ -299,7 +299,7 @@ def test_render_page_optimisation(sample_page):
             scale = 0.5,
         )
         assert isinstance(pil_image, PIL.Image.Image)
-        pil_image.close()
+        # pil_image.close()
 
 
 def test_render_page_noantialias(sample_page):
@@ -311,7 +311,7 @@ def test_render_page_noantialias(sample_page):
         scale = 0.5,
     )
     assert isinstance(pil_image, PIL.Image.Image)
-    pil_image.close()
+    # pil_image.close()
 
 
 def test_render_pages_no_concurrency(multipage_doc):
@@ -322,7 +322,7 @@ def test_render_pages_no_concurrency(multipage_doc):
             greyscale = True,
         )
         assert isinstance(image, PIL.Image.Image)
-        image.close()
+        # image.close()
         # page.close()
 
 
@@ -342,7 +342,7 @@ def render_pdffile_topil(multipage_doc):
     
     assert len(imgs) == 3
     yield imgs
-    for g in imgs: g.close()
+    # for g in imgs: g.close()
 
 
 @pytest.fixture
@@ -363,7 +363,7 @@ def render_pdffile_tobytes(multipage_doc):
     
     assert len(imgs) == 3
     yield imgs
-    for g in imgs: g.close()
+    # for g in imgs: g.close()
 
 
 @pytest.fixture
@@ -388,7 +388,7 @@ def render_pdffile_tonumpy(multipage_doc):
     
     assert len(imgs) == 3
     yield imgs
-    for g in imgs: g.close()
+    # for g in imgs: g.close()
 
 
 def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes, render_pdffile_tonumpy):
@@ -413,7 +413,7 @@ def test_render_pdf_new(caplog):
     assert isinstance(image, PIL.Image.Image)
     assert image.mode == "RGB"
     assert image.size == (50, 100)
-    image.close()
+    # image.close()
     
     # for g in (page_1, page_2, pdf): g.close()
 
