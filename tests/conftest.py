@@ -29,6 +29,7 @@ class TestFiles:
     text          = join(ResourceDir, "text.pdf")
     empty         = join(ResourceDir, "empty.pdf")
     images        = join(ResourceDir, "images.pdf")
+    form          = join(ResourceDir, "form_listbox.pdf")
 
 
 ExpRenderPixels = (

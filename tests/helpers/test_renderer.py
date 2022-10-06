@@ -5,6 +5,7 @@ import io
 import math
 import ctypes
 import logging
+import weakref
 from os.path import join
 import numpy
 import PIL.Image
@@ -502,3 +503,37 @@ def test_render_pdffile_asbytes():
     assert pdf._rendering_input == TestFiles.multipage
     
     # pdf.close()
+
+
+@pytest.mark.parametrize(
+    ("draw_forms", "exp_colour"),
+    [
+        (False, (255, 255, 255)),
+        (True, (0, 51, 113)),
+    ]
+)
+def test_render_form(draw_forms, exp_colour):
+    
+    pdf = pdfium.PdfDocument(TestFiles.form)
+    page = pdf.get_page(0)
+    image = page.render_to(
+        pdfium.BitmapConv.pil_image,
+        draw_forms = draw_forms,
+    )
+    
+    assert image.getpixel( (190, 190) ) == exp_colour
+    assert image.getpixel( (190, 430) ) == exp_colour
+    assert image.getpixel( (190, 480) ) == exp_colour
+    
+    if draw_forms:
+        assert isinstance(pdf._form_env, pdfium.FPDF_FORMHANDLE)
+        assert isinstance(pdf._form_config, pdfium.FPDF_FORMFILLINFO)
+        assert isinstance(pdf._form_finalizer, weakref.finalize)
+        assert pdf._form_finalizer.alive
+        pdf.exit_formenv()
+        assert not pdf._form_finalizer.alive
+    else:
+        assert pdf._form_finalizer is None
+    
+    assert pdf._form_env is None
+    assert pdf._form_config is None
