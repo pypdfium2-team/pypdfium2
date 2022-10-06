@@ -150,14 +150,14 @@ class PdfTextPage:
         
         if loose:
             rect = pdfium.FS_RECTF()
-            ret_code = pdfium.FPDFText_GetLooseCharBox(self.raw, index, rect)
+            success = pdfium.FPDFText_GetLooseCharBox(self.raw, index, rect)
             left, bottom, right, top = rect.left, rect.bottom, rect.right, rect.top
         else:
             left, bottom, right, top = c_double(), c_double(), c_double(), c_double()
-            ret_code = pdfium.FPDFText_GetCharBox(self.raw, index, left, right, bottom, top)
+            success = pdfium.FPDFText_GetCharBox(self.raw, index, left, right, bottom, top)
             left, bottom, right, top = left.value, bottom.value, right.value, top.value
         
-        if not ret_code:
+        if not success:
             raise PdfiumError("Retrieving the char box failed")
         
         return left, bottom, right, top

@@ -55,9 +55,9 @@ class PdfPageObject:
             raise RuntimeError("Must not call get_pos() on a loose pageobject.")
         
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
+        success = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
         
-        if not ret_code:
+        if not success:
             raise PdfiumError("Failed to locate pageobject.")
         
         pos = (left.value, bottom.value, right.value, top.value)

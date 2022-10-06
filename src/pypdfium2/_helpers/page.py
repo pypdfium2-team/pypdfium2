@@ -117,8 +117,8 @@ class PdfPage (BitmapConvAliases):
     
     def _get_box(self, box_func, fallback_func):
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = box_func(self.raw, left, bottom, right, top)
-        if not ret_code:
+        success = box_func(self.raw, left, bottom, right, top)
+        if not success:
             return fallback_func()
         return (left.value, bottom.value, right.value, top.value)
     
