@@ -596,10 +596,11 @@ class PdfPage (BitmapConvAliases):
             assert status == pdfium.FPDF_RENDER_DONE
             pdfium.FPDF_RenderPage_Close(self.raw)
         
-        # TODO call FPDF_GetFormType() to check if we need to initialise the form env at all
         if draw_forms:
-            form_env = self.pdf.init_formenv()
-            pdfium.FPDF_FFLDraw(form_env, *render_args)
+            form_type = pdfium.FPDF_GetFormType(self.pdf.raw)  # consider moving to document ?
+            if form_type != pdfium.FORMTYPE_NONE:
+                form_env = self.pdf.init_formenv()
+                pdfium.FPDF_FFLDraw(form_env, *render_args)
         
         return buffer, cl_string, (width, height)
 

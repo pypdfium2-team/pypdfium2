@@ -9,3 +9,4 @@
 - Added a helper class for transform matrices.
 - Added support models to capture pages as XObjects, to get page objects for XObjects, to transform them with matrices, and to insert page objects into a page. This may be used to implement a custom N-up compositor, for instance.
 - The document level renderer now uses a shortcut if processing just a single page.
+- When rendering, pypdfium2 now checks if the document has forms before initialising/exiting a form environment.
