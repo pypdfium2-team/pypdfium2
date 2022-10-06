@@ -30,7 +30,7 @@ class PdfTextPage:
     
     @staticmethod
     def _static_close(raw):
-        logger.warning("Closing text page")
+        logger.debug("Closing text page")
         pdfium.FPDFText_ClosePage(raw)
     
     def close(self):
@@ -242,7 +242,7 @@ class PdfTextSearcher:
     
     @staticmethod
     def _static_close(raw):
-        logger.warning("Closing text searcher")
+        logger.debug("Closing text searcher")
         pdfium.FPDFText_FindClose(raw)
     
     def close(self):

@@ -59,7 +59,7 @@ class PdfPage (BitmapConvAliases):
     
     @staticmethod
     def _static_close(raw):
-        logger.warning("Closing page")
+        logger.debug("Closing page")
         pdfium.FPDF_ClosePage(raw)
     
     def close(self):
