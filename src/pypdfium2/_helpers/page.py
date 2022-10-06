@@ -64,7 +64,8 @@ class PdfPage (BitmapConvAliases):
     
     def close(self):
         """
-        TODO
+        Free memory by applying the finalizer for the underlying PDFium page.
+        Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
             return

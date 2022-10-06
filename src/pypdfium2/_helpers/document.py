@@ -167,7 +167,11 @@ class PdfDocument (BitmapConvAliases):
     
     def close(self):
         """
-        TODO
+        Free memory by applying the finalizer for the underlying PDFium document.
+        Please refer to the generic note on ``close()`` methods for details.
+        
+        Note:
+            This method calls :meth:`.exit_formenv`.
         """
         if self.raw is None:
             return
@@ -198,7 +202,13 @@ class PdfDocument (BitmapConvAliases):
     
     def exit_formenv(self):
         """
-        TODO
+        Free memory by applying the finalizer for the underlying PDFium form environment, if it was initialised.
+        If :meth:`.init_formenv` was not called, nothing will be done.
+        
+        This behaves like the ``close()`` methods. Please refer to the generic note for details.
+        
+        Note:
+            This method is called by :meth:`.close`.
         """
         if self._form_env is None:
             return
@@ -637,7 +647,8 @@ class PdfXObject:
     
     def close(self):
         """
-        TODO
+        Free memory by applying the finalizer for the underlying PDFium XObject.
+        Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
             return
@@ -683,7 +694,8 @@ class PdfFont:
     
     def close(self):
         """
-        TODO
+        Free memory by applying the finalizer for the underlying PDFium font.
+        Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
             return

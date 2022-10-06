@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class PdfTextPage:
     """
-    Text extraction helper class.
+    Text page helper class.
     
     Attributes:
         raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
@@ -35,7 +35,8 @@ class PdfTextPage:
     
     def close(self):
         """
-        TODO
+        Free memory by applying the finalizer for the underlying PDFium text page.
+        Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
             return
@@ -247,7 +248,8 @@ class PdfTextSearcher:
     
     def close(self):
         """
-        TODO
+        Free memory by applying the finalizer for the underlying PDFium text searcher.
+        Please refer to the generic note on ``close()`` methods for details.
         """
         if self.raw is None:
             return

@@ -13,6 +13,7 @@ class PdfMatrix:
     Note:
         * The PDF format uses row vectors.
         * Transformations operate from the origin of the coordinate system.
+        * :class:`.PdfMatrix` is a standalone support model and does not wrap a PDFium class. All calculation is implemented in Python.
         * While :class:`.PdfMatrix` objects themselves are mutable, passing them to methods like :meth:`.PdfPageObject.set_matrix` will merely capture a snapshot using :meth:`.to_pdfium`, so changes applied to the matrix afterwards will not affect the PDF object in question.
     
     Attributes:

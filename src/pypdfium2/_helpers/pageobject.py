@@ -11,6 +11,10 @@ class PdfPageObject:
     """
     Page object helper class.
     
+    Note:
+        Page objects are automatically freed by PDFium with the page they belong to.
+        If a page object ends up without associated page, you should call ``FPDFPageObj_Destroy(pageobj.raw)``.
+    
     Attributes:
         raw (FPDF_PAGEOBJECT):
             The underlying PDFium pageobject handle.

@@ -4,9 +4,18 @@
 Python API
 ==========
 
-.. Warning::
+.. warning::
     * PDFium is not thread-safe. If you need to parallelise time-consuming PDFium tasks, use processes instead of threads.
-    * Calling ``close()`` makes the object in question inoperable, so it should not be accessed anymore.
+
+.. note::
+    Calling an object's ``close()`` method ...
+    
+    * will free memory by applying its finalizer (which calls a PDFium function on the underlying ``raw`` object).
+    * makes the object in question inoperable by setting its ``raw`` attribute to :data:`None`.
+    
+    Since version 3.3, objects are closed automatically on garbage collection via :class:`weakref.finalize`,
+    so it is not necessary to call ``close()`` manually anymore.
+
 
 Version
 *******
