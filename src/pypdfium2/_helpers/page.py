@@ -100,9 +100,6 @@ class PdfPage (BitmapConvAliases):
         """
         Returns:
             (float, float): Page width and height.
-        Note:
-            * This uses :meth:`.get_width` and :meth:`.get_height`.
-            * If you need just page size and do not intend to work with the page object any further, consider using :meth:`.PdfDocument.get_page_size` instead.
         """
         return (self.get_width(), self.get_height())
     

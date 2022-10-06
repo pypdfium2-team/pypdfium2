@@ -275,10 +275,6 @@ class PdfDocument (BitmapConvAliases):
         """
         Get the dimensions of the page at *index*. Reverse indexing is allowed.
         
-        Note:
-            * This method works without needing to load a separate page object.
-            * :meth:`.PdfPage.get_size` calls a different PDFium function but should provide the same result.
-        
         Returns:
             (float, float): Page width and height in PDF canvas units.
         """
