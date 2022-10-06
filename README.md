@@ -108,7 +108,6 @@ Here are some examples of using the support model API.
   )
   for i, image in zip(page_indices, renderer):
       image.save("out_%s.jpg" % str(i).zfill(n_pages))
-      image.close()
   ```
 
 * Read the table of contents
@@ -176,7 +175,6 @@ Here are some examples of using the support model API.
       memory_limit = 2**30,                # maximum allocation (1 GiB)
   )
   image.show()
-  image.close()
   ```
 
 * Extract and search text
@@ -198,7 +196,8 @@ Here are some examples of using the support model API.
   first_occurrence = searcher.get_next()
   ```
 
-* Release allocated memory by closing finished objects
+* Finished objects may be closed explicitly to release memory allocated by PDFium.
+  Otherwise, they will be finalised automatically on garbage collection.
   ```python
   # Attention: objects must be closed in correct order!
   for garbage in (searcher, textpage, page, pdf):
@@ -232,12 +231,10 @@ Here are some examples of using the support model API.
   page.generate_content()
   ```
 
-* Save the document (and close objects)
+* Save the document
   ```python
   with open("output.pdf", "wb") as buffer:
       pdf.save(buffer, version=17)  # use PDF 1.7 standard
-  for garbage in (page, pdf_font, pdf):
-      garbage.close()
   ```
 
 PDFium provides a large amount of functions, many of which are not covered by support models yet.
