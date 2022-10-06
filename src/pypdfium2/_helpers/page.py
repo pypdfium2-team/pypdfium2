@@ -119,6 +119,7 @@ class PdfPage (BitmapConvAliases):
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         success = box_func(self.raw, left, bottom, right, top)
         if not success:
+            # TODO avoid repeated initialisation of c_float objects for fallback
             return fallback_func()
         return (left.value, bottom.value, right.value, top.value)
     
@@ -276,6 +277,7 @@ class PdfPage (BitmapConvAliases):
         for info, pos in zip(hb_buffer.glyph_infos, hb_buffer.glyph_positions):
             pdf_textobj = pdfium.FPDFPageObj_CreateTextObj(self.pdf.raw, pdf_font.raw, font_size)
             pdfium.FPDFText_SetCharcodes(pdf_textobj, ctypes.c_uint32(info.codepoint), 1)
+            # TODO consider using PdfMatrix support model
             pdfium.FPDFPageObj_Transform(
                 pdf_textobj,
                 1, 0, 0, 1,
