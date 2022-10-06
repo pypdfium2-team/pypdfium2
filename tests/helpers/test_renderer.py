@@ -515,6 +515,9 @@ def test_render_pdffile_asbytes():
 def test_render_form(draw_forms, exp_colour):
     
     pdf = pdfium.PdfDocument(TestFiles.form)
+    assert pdf._form_env is None
+    assert pdf._form_config is None
+    
     page = pdf.get_page(0)
     image = page.render_to(
         pdfium.BitmapConv.pil_image,
