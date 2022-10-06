@@ -7,6 +7,7 @@ from os.path import join, dirname, abspath, isdir, isfile
 
 lib_logger = logging.getLogger("pypdfium2")
 lib_logger.addHandler(logging.StreamHandler())
+lib_logger.setLevel(logging.DEBUG)
 
 TestDir     = dirname(abspath(__file__))
 SourceTree  = dirname(TestDir)
