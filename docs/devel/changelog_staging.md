@@ -6,6 +6,7 @@
 # Changelog for next release
 - Disruption: `PdfPage.insert_text()` does not generate page content automatically anymore. The new `PdfPage.generate_content()` method now needs to be called to apply changes, to avoid generating content repeatedly.
 - pypdfium2 finally implements automatic object finalisation. Calling the `close()` methods is not mandatory anymore.
+  The context manager APO of `PdfDocument` is retained for backwards compatibility but was disabled because it increases the risk of finalising objects in wrong order.
 - Added a helper class for transform matrices.
 - Added support models to capture pages as XObjects, to get page objects for XObjects, to transform them with matrices, and to insert page objects into a page. This may be used to implement a custom N-up compositor, for instance.
 - The document level renderer now uses a shortcut if processing just a single page.

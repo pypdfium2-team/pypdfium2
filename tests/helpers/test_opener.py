@@ -244,6 +244,8 @@ def test_object_hierarchy():
 
 def test_doc_extras():
     
+    # context managers are a no-op since 3.3 - they're merely retained for backwards compatibility
+    
     with pdfium.PdfDocument(TestFiles.empty, file_access=pdfium.FileAccess.BUFFER) as pdf:
         assert isinstance(pdf, pdfium.PdfDocument)
         assert len(pdf) == 1
@@ -251,7 +253,6 @@ def test_doc_extras():
         assert isinstance(page, pdfium.PdfPage)
         # page.close()
     assert isinstance(pdf._actual_input, io.BufferedReader)
-    assert pdf._actual_input.closed is True
     
     with pdfium.PdfDocument.new() as pdf:
         

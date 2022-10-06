@@ -3,5 +3,6 @@
 
 # Planned Changes
 
-<!-- The following API breaking changes are being considered for the next major release: -->
-Currently, no API breaking changes are planned.
+<!-- Currently, no API breaking changes are planned. -->
+The following API breaking changes are being considered for the next major release:
+- The content manager API of `PdfDocument` will be removed. It will not be possible to use documents in a `with`-block anymore.

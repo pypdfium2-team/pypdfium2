@@ -58,7 +58,6 @@ class PdfDocument (BitmapConvAliases):
     
     Hint:
         * :func:`len` may be called to get a document's number of pages.
-        * :class:`PdfDocument` implements the context manager API, hence documents can be used in a ``with`` block, where :meth:`.close` will be called automatically on exit.
         * Looping over a document will yield its pages from beginning to end.
         * Pages may be loaded using list index access.
         * The ``del`` keyword and list index access may be used to delete pages.
@@ -120,7 +119,8 @@ class PdfDocument (BitmapConvAliases):
         return self
     
     def __exit__(self, *_):
-        self.close()
+        # We do not invoke close at this place anymore because that would increase the risk of callers closing parent objects before child objects. (Consider a `with`-block where pages are not closed explicitly: garbage collection of pages commonly happens later than context manager exit, so page would be closed after document, which is illegal.)
+        pass
     
     def __len__(self):
         return pdfium.FPDF_GetPageCount(self.raw)
