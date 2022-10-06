@@ -51,6 +51,7 @@ class PdfPage (BitmapConvAliases):
     def __init__(self, raw, pdf):
         self.raw = raw
         self.pdf = pdf
+        # if the form env of the parent document is initialised, we could call FORM_OnAfterLoadPage() here
         self._finalizer = weakref.finalize(
             self, self._static_close,
             self.raw,
@@ -67,6 +68,7 @@ class PdfPage (BitmapConvAliases):
         """
         if self.raw is None:
             return
+        # if the form env of the parent document is initialised, we could call FORM_OnBeforeClosePage() here
         self._finalizer()
         self.raw = None
     
@@ -502,6 +504,7 @@ class PdfPage (BitmapConvAliases):
         validate_colours(fill_colour, colour_scheme)
         
         if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
+            # FIXME do we need to take FPDFPage_HasTransparency() into account ?
             cl_pdfium = auto_bitmap_format(fill_colour, greyscale, prefer_bgrx)
         else:
             cl_pdfium = force_bitmap_format
@@ -593,6 +596,7 @@ class PdfPage (BitmapConvAliases):
             assert status == pdfium.FPDF_RENDER_DONE
             pdfium.FPDF_RenderPage_Close(self.raw)
         
+        # FIXME is there a function to check if the PDF actually has forms, to avoid initialising the form env unnecessarily ?
         if draw_forms:
             form_env = self.pdf.init_formenv()
             pdfium.FPDF_FFLDraw(form_env, *render_args)
