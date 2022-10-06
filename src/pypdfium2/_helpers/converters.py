@@ -17,8 +17,7 @@ except ImportError:
 class BitmapConvBase:
     """
     Parent class for bitmap converters compatible with :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to`.
-    The constructor captures any arguments (positionals and keywords) and adds them to the :meth:`.run` call.
-    It is not necessary to implement a constructor in the inheriting class.
+    The constructor captures any arguments and adds them to the :meth:`.run` call.
     """
     
     def __init__(self, *args, **kwargs):
@@ -29,23 +28,16 @@ class BitmapConvBase:
     def run(result, renderer_kws, *args, **kwargs):
         """
         The actual converter function, to be implemented by the inheriting class.
-        The header reflects what the function may receive (two mandatory positionals, and arbitrary implementation-dependent parameters).
-        See below for a specification.
-        
-        Note:
-            * :meth:`.run` should be implemented as a :func:`staticmethod`.
-            * If the implementation takes additional parameters, it is expected to define them on an explicit basis.
-              Unrecognised arguments should always be refused.
         
         Parameters:
             result (tuple):
-                Result of the :meth:`.PdfPage.render_base` call (ctypes array, colour format, size).
+                Result of the :meth:`~.PdfPage.render_base` call (ctypes array, colour format, size).
             renderer_kws (dict):
-                Dictionary of keywords that were passed to :meth:`.PdfPage.render_base` by the caller. May be empty.
+                Dictionary of rendering keywords that were passed in by the caller.
             args (tuple):
-                Further positional arguments to the converter, as captured by the constructor (see note above).
+                Further positional arguments to the converter, as captured by the constructor.
             kwargs (dict):
-                Further keyword arguments to the converter, as captured by the constructor (see note above).
+                Further keyword arguments to the converter, as captured by the constructor.
         Returns:
             typing.Any: The converted rendering result (implementation-specific).
         """
@@ -65,14 +57,13 @@ class BitmapConv:
         
         Example:
             ``render_to(BitmapConv.any(bytes), **kwargs)``:
-                Get the pixel data as bytes. (Note, though, that this would create an independent copy of the pixel data, which should be avoided in general.)
+                Get an independent copy of the pixel data as bytes.
         
         Parameters:
             converter (typing.Callable):
-                A callable to translate a ctypes array to a different data type.
-                It could be a function, a class with constructor, or an instance of a class implementing ``__call__``.
+                A function to translate a ctypes array to a different data type.
         Returns:
-            (typing.Any, str, (int, int)): The converted bitmap (implementation-specific), and additional information returned by :meth:`.PdfPage.render_base` (colour format, size).
+            (typing.Any, str, (int, int)): The converted bitmap (implementation-specific), and additional information returned by :meth:`~.PdfPage.render_base` (colour format, size).
         """
         
         @staticmethod
@@ -123,9 +114,8 @@ class BitmapConv:
         Hint:
             This uses :func:`PIL.Image.frombuffer` under the hood.
             If possible for the colour format in question, the image will reference the ctypes array. Otherwise, PIL may create a copy of the data.
-            At the time of writing, PIL can directly work with ``RGBA``, ``RGBX`` or ``L`` (among the pixel formats supported by PDFium).
-            Depending on the use case, you may want to consider setting the rendering parameters *rev_byteorder* and *prefer_bgrx* to :data:`True`
-            to generate natively compatible output.
+            Among the pixel formats supported by PDFium, PIL can directly work with ``RGBA``, ``RGBX`` or ``L``.
+            You may want to consider setting the rendering parameters *rev_byteorder* and *prefer_bgrx* to :data:`True` to generate natively compatible output.
         """
         
         @staticmethod

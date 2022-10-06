@@ -340,17 +340,11 @@ class PdfPage (BitmapConvAliases):
         Rasterise a page to a specific output format.
         
         Parameters:
-            
             converter (BitmapConvBase | typing.Callable):
-                
-                A translator to convert the output of :meth:`.render_base`. See :class:`.BitmapConv` for a set of built-in converters.
-                It may be a class, or an instance of a class, that implements the converter interface by inheriting from :class:`.BitmapConvBase` and overriding :meth:`~.BitmapConvBase.run`. Converters may be initialised with parameters to be passed to their :meth:`~.BitmapConvBase.run` method.
-                
-                Alternatively, if your custom converter does not take any parameters, you may also just pass in a function (or callable) that consumes two positional arguments (rendering output, dictionary of rendering keywords) and returns the converted result.
-            
+                A translator to convert the output of :meth:`.render_base`.
+                See :class:`.BitmapConv` for a set of built-in converters.
             renderer_kws (dict):
                 Keyword arguments to the renderer.
-        
         Returns:
             typing.Any: Converter-specific result.
         
@@ -417,8 +411,8 @@ class PdfPage (BitmapConvAliases):
         Parameters:
             
             scale (float):
-                A factor scaling the number of pixels that represent the length of 1 PDF canvas unit (equivalent to 1/72 of an inch by default). [1]_
-                This defines the resolution of the image. To convert a DPI value to a scale factor, divide it by the size of 1 canvas unit in inches (usually 72).
+                A factor scaling the number of pixels that represent the length of 1 PDF canvas unit (usually 1/72 in). [1]_
+                This defines the resolution of the image. To convert a DPI value to a scale factor, multiply it by the size of 1 canvas unit in inches.
                 
                 .. [1] Since PDF 1.6, pages may define a so-called user unit. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. pypdfium2 currently does not take this into account.
                 

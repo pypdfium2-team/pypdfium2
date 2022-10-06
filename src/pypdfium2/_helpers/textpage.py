@@ -113,10 +113,10 @@ class PdfTextPage:
     
     def get_index(self, x, y, x_tol, y_tol):
         """
-        Get the character index for a given position. All coordinates and lengths are to be given in PDF canvas units.
+        Get the character index for a given position.
         
         Parameters:
-            x (float): Horizontal position.
+            x (float): Horizontal position (in PDF canvas units).
             y (float): Vertical position.
             x_tol (float): Horizontal tolerance.
             y_tol (float): Vertical tolerance.
