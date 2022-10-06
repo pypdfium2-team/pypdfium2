@@ -244,8 +244,9 @@ def test_object_hierarchy(caplog):
     
     for obj in (searcher, textpage, page, pdf):
         with caplog.at_level(logging.WARNING):
+            caplog.clear()
             obj.close()
-        assert "Duplicate close call suppressed on" in caplog.text
+        assert "Duplicate close call suppressed on " in caplog.text
 
 
 def test_doc_extras():
