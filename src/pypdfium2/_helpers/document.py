@@ -170,8 +170,7 @@ class PdfDocument (BitmapConvAliases):
         Free memory by applying the finalizer for the underlying PDFium document.
         Please refer to the generic note on ``close()`` methods for details.
         
-        Note:
-            This method calls :meth:`.exit_formenv`.
+        This method calls :meth:`.exit_formenv`.
         """
         if self.raw is None:
             logger.warning("Duplicate close call suppressed on document %s" % self)
@@ -211,9 +210,6 @@ class PdfDocument (BitmapConvAliases):
         If :meth:`.init_formenv` was not called, nothing will be done.
         
         This behaves like the ``close()`` methods. Please refer to the generic note for details.
-        
-        Note:
-            This method is called by :meth:`.close`.
         """
         if self._form_env is None:
             return
@@ -533,10 +529,7 @@ class PdfDocument (BitmapConvAliases):
         """
         Concurrently render multiple pages, using a process pool executor.
         
-        .. seealso:: :meth:`.PdfPage.render_to` / :meth:`.PdfPage.render_base`
-        
-        Note:
-            If rendering only a single page, the call is simply forwarded to :meth:`.PdfPage.render_to` as a shortcut.
+        If rendering only a single page, the call is simply forwarded to :meth:`.PdfPage.render_to` as a shortcut.
         
         Parameters:
             page_indices (typing.Sequence[int] | None):
@@ -545,7 +538,7 @@ class PdfDocument (BitmapConvAliases):
             n_processes (int):
                 Target number of parallel processes.
             kwargs (dict):
-                Keyword arguments to the renderer.
+                Keyword arguments to the renderer. See :meth:`.PdfPage.render_to` / :meth:`.PdfPage.render_base`.
         
         Yields:
             :data:`typing.Any`: Implementation-specific result object.

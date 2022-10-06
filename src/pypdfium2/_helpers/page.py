@@ -205,10 +205,9 @@ class PdfPage (BitmapConvAliases):
         Position and form are defined by the object's matrix.
         If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.
         
-        The page object must not belong to a page yet. If it belongs to a PDF, this page must be part of that PDF.
+        The page object must not belong to a page yet. If it belongs to a PDF, this page must be part of the PDF.
         
-        Note:
-            You may want to call :meth:`.generate_content` once you finished adding new content to the page.
+        You may want to call :meth:`.generate_content` once you finished adding new content to the page.
         
         Parameters:
             pageobj (PdfPageObject): The page object to insert.
@@ -250,8 +249,7 @@ class PdfPage (BitmapConvAliases):
         Insert text into the page at a specified position, using the writing system's ligature.
         This function supports Asian scripts such as Hindi.
         
-        Note:
-            You may want to call :meth:`.generate_content` once you finished adding new content to the page.
+        You may want to call :meth:`.generate_content` once you finished adding new content to the page.
         
         Parameters:
             text (str):
@@ -419,8 +417,8 @@ class PdfPage (BitmapConvAliases):
         Parameters:
             
             scale (float):
-                This parameter defines the resolution of the image.
-                Technically speaking, it is a factor scaling the number of pixels that represent the length of 1 PDF canvas unit (equivalent to 1/72 of an inch by default). [1]_
+                A factor scaling the number of pixels that represent the length of 1 PDF canvas unit (equivalent to 1/72 of an inch by default). [1]_
+                This defines the resolution of the image. To convert a DPI value to a scale factor, divide it by the size of 1 canvas unit in inches (usually 72).
                 
                 .. [1] Since PDF 1.6, pages may define a so-called user unit. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. pypdfium2 currently does not take this into account.
                 
@@ -497,9 +495,6 @@ class PdfPage (BitmapConvAliases):
             (ctypes array, str, (int, int)): Bitmap data, colour format, and image size.
             The colour format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, ``BGRX``/``RGBX``, or ``L``, depending on the parameters *colour*, *greyscale*, *rev_byteorder* and *prefer_bgrx*.
             Image size is given in pixels as a tuple of width and height.
-        
-        Tip:
-            To convert a DPI value to a scale factor, divide it by 72.
         """
         
         # In theory, we would like to switch to matrix-based rendering because it provides more transformation features, but there are some obstacles:
