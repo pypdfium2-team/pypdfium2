@@ -596,7 +596,7 @@ class PdfPage (BitmapConvAliases):
             assert status == pdfium.FPDF_RENDER_DONE
             pdfium.FPDF_RenderPage_Close(self.raw)
         
-        # FIXME is there a function to check if the PDF actually has forms, to avoid initialising the form env unnecessarily ?
+        # TODO call FPDF_GetFormType() to check if we need to initialise the form env at all
         if draw_forms:
             form_env = self.pdf.init_formenv()
             pdfium.FPDF_FFLDraw(form_env, *render_args)
