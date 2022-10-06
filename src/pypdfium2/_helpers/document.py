@@ -540,7 +540,7 @@ class PdfDocument (BitmapConvAliases):
         .. seealso:: :meth:`.PdfPage.render_to` / :meth:`.PdfPage.render_base`
         
         Note:
-            If rendering only a single page, the call is simply forwarded to :meth:`PdfPage.render_to` as a shortcut.
+            If rendering only a single page, the call is simply forwarded to :meth:`.PdfPage.render_to` as a shortcut.
         
         Parameters:
             page_indices (typing.Sequence[int] | None):
