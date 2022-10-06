@@ -15,6 +15,8 @@ Python API
     
     Since version 3.3, objects are closed automatically on garbage collection via :class:`weakref.finalize`,
     so it is not necessary to call ``close()`` manually anymore.
+    
+    .. see also https://groups.google.com/g/pdfium/c/7qLFskabmnk/m/xQEnXiG5BgAJ
 
 
 Version
