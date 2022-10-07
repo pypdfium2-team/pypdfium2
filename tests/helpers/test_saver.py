@@ -26,7 +26,7 @@ def test_save():
         new_pdf.save(buffer)
     assert isfile(output_file)
     
-    for g in (page, new_pdf, src_pdf): g.close()
+    # for g in (page, new_pdf, src_pdf): g.close()
 
 
 def test_save_withversion():
@@ -36,7 +36,7 @@ def test_save_withversion():
     
     buffer = io.BytesIO()
     pdf.save(buffer, version=17)
-    pdf.close()
+    # pdf.close()
     
     buffer.seek(0)
     data = buffer.read()
@@ -47,7 +47,6 @@ def test_save_withversion():
     assert data[:len(exp_start)] == exp_start
     assert data[-len(exp_end):] == exp_end
     
-    reopened_pdf = pdfium.PdfDocument(buffer)
+    reopened_pdf = pdfium.PdfDocument(buffer, autoclose=True)
     assert len(reopened_pdf) == 2
-    for g in (reopened_pdf, buffer): g.close()
-    
+    # reopened_pdf.close()

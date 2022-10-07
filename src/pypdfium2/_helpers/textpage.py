@@ -2,36 +2,100 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import ctypes
+import weakref
+import logging
 from ctypes import c_double
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers.misc import PdfiumError
 
+logger = logging.getLogger(__name__)
+
 
 class PdfTextPage:
     """
-    Text extraction helper class.
+    Text page helper class.
     
     Attributes:
         raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
         page (PdfPage): Reference to the page this textpage belongs to.
+        n_chars (int): Number of characters on the page, by the time of initialisation.
     """
     
     def __init__(self, raw, page):
         self.raw = raw
         self.page = page
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw, self.page,
+        )
+        self.n_chars = pdfium.FPDFText_CountChars(self.raw)
+    
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.page._tree_closed()
+    
+    @staticmethod
+    def _static_close(raw, parent):
+        logger.debug("Closing text page")
+        if parent._tree_closed():
+            logger.critical("Some parent closed before text page (this is illegal). Direct parent: %s" % parent)
+        pdfium.FPDFText_ClosePage(raw)
     
     def close(self):
         """
-        Close the text page to release allocated memory.
-        This method shall be called when finished working with the text page.
+        Free memory by applying the finalizer for the underlying PDFium text page.
+        Please refer to the generic note on ``close()`` methods for details.
         """
-        pdfium.FPDFText_ClosePage(self.raw)
+        if self.raw is None:
+            logger.warning("Duplicate close call suppressed on text page %s" % self)
+            return
+        self._finalizer()
         self.raw = None
     
     
-    def get_text(self, left=0, bottom=0, right=0, top=0):
+    def count_chars(self):  # TODO major release: remove
         """
-        Extract text from given boundaries. If *right* and/or *top* are 0, they default to page width or height, respectively.
+        Deprecated alias for :attr:`.n_chars`
+        """
+        return self.n_chars
+    
+    
+    @staticmethod
+    def _check_span(n_chars, index, count):
+        if not (0 <= index < index+count <= n_chars):
+            raise ValueError("Character span is out of bounds.")
+    
+    
+    def get_text_range(self, index=0, count=0):
+        """
+        Extract text from a given range.
+        
+        Parameters:
+            index (int): Index of the first character to include.
+            count (int): Number of characters to be extracted. If 0, it defaults to the number of characters on the page minus *index*.
+        
+        Returns:
+            str: The text in the range in question, or an empty string if no text was found.
+        """
+        
+        if self.n_chars == 0:
+            return ""
+        if count == 0:
+            count = self.n_chars - index
+        self._check_span(self.n_chars, index, count)
+        
+        n_bytes = count*2
+        buffer = ctypes.create_string_buffer(n_bytes+2)
+        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+        pdfium.FPDFText_GetText(self.raw, index, count, buffer_ptr)
+        return buffer.raw[:n_bytes].decode("utf-16-le", errors="ignore")
+    
+    
+    def get_text(self, left=None, bottom=None, right=None, top=None):  # TODO major release: rename to get_text_bounded
+        """
+        Extract text from given boundaries in PDF coordinates.
+        If a parameter is :data:`None`, it defaults to the corresponding CropBox value.
         
         See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
         
@@ -39,13 +103,20 @@ class PdfTextPage:
             str: The text on the page area in question, or an empty string if no text was found.
         """
         
-        width, height = self.page.get_size()
-        if right == 0:
-            right = width
-        if top == 0:
-            top = height
+        if self.n_chars == 0:
+            return ""
         
-        if not (0 <= left < right <= width) or not (0 <= bottom < top <= height):
+        cropbox = self.page.get_cropbox()
+        if left is None:
+            left = cropbox[0]
+        if bottom is None:
+            bottom = cropbox[1]
+        if right is None:
+            right = cropbox[2]
+        if top is None:
+            top = cropbox[3]
+        
+        if not (cropbox[0] <= left < right <= cropbox[2]) or not (cropbox[1] <= bottom < top <= cropbox[3]):
             raise ValueError("Invalid page area requested.")
         
         args = (self.raw, left, top, right, bottom)
@@ -57,17 +128,7 @@ class PdfTextPage:
         buffer = ctypes.create_string_buffer(n_bytes)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
-        text = buffer.raw.decode("utf-16-le", errors="ignore")
-        
-        return text
-    
-    
-    def count_chars(self):
-        """
-        Returns:
-            int: The number of characters on the page.
-        """
-        return pdfium.FPDFText_CountChars(self.raw)
+        return buffer.raw.decode("utf-16-le", errors="ignore")
     
     
     def count_rects(self, index=0, count=0):
@@ -78,22 +139,22 @@ class PdfTextPage:
         Returns:
             int: The number of text rectangles on the page.
         """
-        n_chars = self.count_chars()
-        if n_chars == 0:
+        
+        if self.n_chars == 0:
             return 0
         if count == 0:
-            count = n_chars
-        if not (0 <= index < index+count <= n_chars):
-            raise ValueError("Character span is out of bounds.")
+            count = self.n_chars
+        self._check_span(self.n_chars, index, count)
+        
         return pdfium.FPDFText_CountRects(self.raw, index, count)
     
     
     def get_index(self, x, y, x_tol, y_tol):
         """
-        Get the character index for a given position. All coordinates and lengths are to be given in PDF canvas units.
+        Get the character index for a given position.
         
         Parameters:
-            x (float): Horizontal position.
+            x (float): Horizontal position (in PDF canvas units).
             y (float): Vertical position.
             x_tol (float): Horizontal tolerance.
             y_tol (float): Vertical tolerance.
@@ -121,20 +182,19 @@ class PdfTextPage:
             Values for left, bottom, right and top in PDF canvas units.
         """
         
-        n_chars = self.count_chars()
-        if not 0 <= index < n_chars:
-            raise ValueError("Character index %s is out of bounds. The maximum index is %d." % (index, n_chars-1))
+        if not 0 <= index < self.n_chars:
+            raise ValueError("Character index %s is out of bounds. The maximum index is %d." % (index, self.n_chars-1))
         
         if loose:
             rect = pdfium.FS_RECTF()
-            ret_code = pdfium.FPDFText_GetLooseCharBox(self.raw, index, rect)
+            success = pdfium.FPDFText_GetLooseCharBox(self.raw, index, rect)
             left, bottom, right, top = rect.left, rect.bottom, rect.right, rect.top
         else:
             left, bottom, right, top = c_double(), c_double(), c_double(), c_double()
-            ret_code = pdfium.FPDFText_GetCharBox(self.raw, index, left, right, bottom, top)
+            success = pdfium.FPDFText_GetCharBox(self.raw, index, left, right, bottom, top)
             left, bottom, right, top = left.value, bottom.value, right.value, top.value
         
-        if not ret_code:
+        if not success:
             raise PdfiumError("Retrieving the char box failed")
         
         return left, bottom, right, top
@@ -221,13 +281,32 @@ class PdfTextSearcher:
     def __init__(self, raw, textpage):
         self.raw = raw
         self.textpage = textpage
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw, self.textpage,
+        )
+    
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.textpage._tree_closed()
+    
+    @staticmethod
+    def _static_close(raw, parent):
+        logger.debug("Closing text searcher")
+        if parent._tree_closed():
+            logger.critical("Some parent closed before text searcher (this is illegal). Direct parent: %s" % parent)
+        pdfium.FPDFText_FindClose(raw)
     
     def close(self):
         """
-        Close the search structure to release allocated memory.
-        This method shall be called when done with text searching.
+        Free memory by applying the finalizer for the underlying PDFium text searcher.
+        Please refer to the generic note on ``close()`` methods for details.
         """
-        pdfium.FPDFText_FindClose(self.raw)
+        if self.raw is None:
+            logger.warning("Duplicate close call suppressed on text searcher %s" % self)
+            return
+        self._finalizer()
         self.raw = None
     
     def _get_occurrence(self, find_func):

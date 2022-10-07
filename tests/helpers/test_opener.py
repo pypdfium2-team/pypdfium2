@@ -4,6 +4,8 @@
 import io
 import re
 import shutil
+import logging
+import weakref
 import tempfile
 import pytest
 import PIL.Image
@@ -24,7 +26,7 @@ def _check_render(pdf):
     
     page = pdf.get_page(0)
     pil_image = page.render_to(pdfium.BitmapConv.pil_image)
-    page.close()
+    # page.close()
     
     assert pil_image.mode == "RGB"
     assert pil_image.size == (595, 842)
@@ -40,7 +42,7 @@ def open_filepath_native():
     assert pdf._file_access is pdfium.FileAccess.NATIVE
     _check_general(pdf)
     yield _check_render(pdf)
-    pdf.close()
+    # pdf.close()
 
 
 @pytest.fixture
@@ -55,7 +57,7 @@ def open_bytes():
     _check_general(pdf)
     yield _check_render(pdf)
     
-    pdf.close()
+    # pdf.close()
 
 
 @pytest.fixture
@@ -67,7 +69,7 @@ def open_buffer():
     _check_general(pdf)
     yield _check_render(pdf)
     
-    pdf.close()
+    # pdf.close()
     assert buffer.closed is False
     buffer.close()
 
@@ -113,7 +115,7 @@ def test_open_filepath_bytes():
     assert isinstance(pdf._actual_input, bytes)
     _check_general(pdf)
     
-    pdf.close()
+    # pdf.close()
 
 
 def test_open_encrypted():
@@ -134,7 +136,7 @@ def test_open_encrypted():
     for input_data, password in test_cases:
         pdf = pdfium.PdfDocument(input_data, password)
         _check_general(pdf)
-        pdf.close()
+        # pdf.close()
         if input_data is buffer:
             buffer.seek(0)
     
@@ -142,7 +144,7 @@ def test_open_encrypted():
     
     with pytest.raises(pdfium.PdfiumError, match=re.escape("Loading the document failed (PDFium: Incorrect password error)")):
         pdf = pdfium.PdfDocument(TestFiles.encrypted, "wrong_password")
-        pdf.close()
+        # pdf.close()
 
 
 @pytest.mark.parametrize(
@@ -152,7 +154,7 @@ def test_open_encrypted():
 def test_open_nonencrypted_with_password(file_access):
     pdf = pdfium.PdfDocument(TestFiles.render, password="irrelevant", file_access=file_access)
     _check_general(pdf)
-    pdf.close()
+    # pdf.close()
 
 
 def test_open_nonascii():
@@ -163,7 +165,7 @@ def test_open_nonascii():
     
     pdf = pdfium.PdfDocument(nonascii_file)
     _check_general(pdf)
-    pdf.close()
+    # pdf.close()
     
     tempdir.cleanup()
 
@@ -184,7 +186,7 @@ def test_open_new():
     pdfium.FPDF_ImportPages(dest_pdf.raw, src_pdf.raw, b"1, 3", 0)
     assert len(dest_pdf) == 2
     
-    for g in (dest_pdf, src_pdf): g.close()
+    # for g in (dest_pdf, src_pdf): g.close()
 
 
 def test_open_invalid():
@@ -196,17 +198,27 @@ def test_open_invalid():
         pdf = pdfium.PdfDocument("invalid/path", file_access=pdfium.FileAccess.BUFFER)
 
 
-def test_object_hierarchy():
+def test_object_hierarchy(caplog):
     
     pdf = pdfium.PdfDocument(TestFiles.images)
     assert isinstance(pdf, pdfium.PdfDocument)
     assert isinstance(pdf.raw, pdfium.FPDF_DOCUMENT)
+    
+    assert callable(pdf._static_exit_formenv)
+    pdf.init_formenv()
+    assert isinstance(pdf._form_finalizer, weakref.finalize)
+    assert pdf._form_finalizer.alive
+    assert isinstance(pdf._form_config, pdfium.FPDF_FORMFILLINFO)
+    assert isinstance(pdf._form_env, pdfium.FPDF_FORMHANDLE)
+    pdf.exit_formenv()
+    assert not pdf._form_finalizer.alive
     
     page = pdf.get_page(0)
     assert isinstance(page, pdfium.PdfPage)
     assert isinstance(page.raw, pdfium.FPDF_PAGE)
     assert page.pdf is pdf
     
+    # pageobjects don't need a finalizer
     pageobj = next(page.get_objects())
     assert isinstance(pageobj, pdfium.PdfPageObject)
     assert isinstance(pageobj.raw, pdfium.FPDF_PAGEOBJECT)
@@ -223,19 +235,31 @@ def test_object_hierarchy():
     assert isinstance(searcher.raw, pdfium.FPDF_SCHHANDLE)
     assert searcher.textpage is textpage
     
-    for g in (searcher, textpage, page, pdf): g.close()
+    for obj in (searcher, textpage, page, pdf):
+        assert callable(obj._static_close)
+        assert isinstance(obj._finalizer, weakref.finalize)
+        assert obj._finalizer.alive
+        obj.close()
+        assert not obj._finalizer.alive
+    
+    for obj in (searcher, textpage, page, pdf):
+        with caplog.at_level(logging.WARNING):
+            caplog.clear()
+            obj.close()
+        assert "Duplicate close call suppressed on " in caplog.text
 
 
 def test_doc_extras():
+    
+    # context managers are a no-op since 3.3 - they're merely retained for backwards compatibility
     
     with pdfium.PdfDocument(TestFiles.empty, file_access=pdfium.FileAccess.BUFFER) as pdf:
         assert isinstance(pdf, pdfium.PdfDocument)
         assert len(pdf) == 1
         page = pdf[0]
         assert isinstance(page, pdfium.PdfPage)
-        page.close()
+        # page.close()
     assert isinstance(pdf._actual_input, io.BufferedReader)
-    assert pdf._actual_input.closed is True
     
     with pdfium.PdfDocument.new() as pdf:
         
@@ -245,18 +269,18 @@ def test_doc_extras():
         sizes = [(50, 100), (100, 150), (150, 200), (200, 250)]
         for size in sizes:
             page = pdf.new_page(*size)
-            page.close()
+            # page.close()
         for i, (size, page) in enumerate(zip(sizes, pdf)):
             assert isinstance(page, pdfium.PdfPage)
             assert size == page.get_size() == pdf.get_page_size(i)
-            page.close()
+            # page.close()
         
         del pdf[0]
         page = pdf[0]
         assert page.get_size() == pdf.get_page_size(0) == (100, 150)
-        page.close()
+        # page.close()
         
         del pdf[-len(pdf)]
         page = pdf[-len(pdf)]
         assert page.get_size() == pdf.get_page_size(-len(pdf)) == (150, 200)
-        page.close()
+        # page.close()

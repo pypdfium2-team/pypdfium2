@@ -4,6 +4,8 @@
 
 import math
 import ctypes
+import weakref
+import logging
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
 from pypdfium2._helpers._utils import (
@@ -34,6 +36,8 @@ try:
 except ImportError:
     harfbuzz = None
 
+logger = logging.getLogger(__name__)
+
 
 class PdfPage (BitmapConvAliases):
     """
@@ -47,13 +51,34 @@ class PdfPage (BitmapConvAliases):
     def __init__(self, raw, pdf):
         self.raw = raw
         self.pdf = pdf
+        # if the form env of the parent document is initialised, we could call FORM_OnAfterLoadPage() here
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw, self.pdf,
+        )
+    
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.pdf._tree_closed()
+    
+    @staticmethod
+    def _static_close(raw, parent):
+        logger.debug("Closing page")
+        if parent._tree_closed():
+            logger.critical("Document closed before page (this is illegal). Document: %s" % parent)
+        pdfium.FPDF_ClosePage(raw)
     
     def close(self):
         """
-        Close the page to release allocated memory.
-        This function shall be called when finished working with the object.
+        Free memory by applying the finalizer for the underlying PDFium page.
+        Please refer to the generic note on ``close()`` methods for details.
         """
-        pdfium.FPDF_ClosePage(self.raw)
+        if self.raw is None:
+            logger.warning("Duplicate close call suppressed on page %s" % self)
+            return
+        # if the form env of the parent document is initialised, we could call FORM_OnBeforeClosePage() here
+        self._finalizer()
         self.raw = None
     
     
@@ -75,9 +100,6 @@ class PdfPage (BitmapConvAliases):
         """
         Returns:
             (float, float): Page width and height.
-        Note:
-            * This uses :meth:`.get_width` and :meth:`.get_height`.
-            * If you need just page size and do not intend to work with the page object any further, consider using :meth:`.PdfDocument.get_page_size` instead.
         """
         return (self.get_width(), self.get_height())
     
@@ -95,8 +117,9 @@ class PdfPage (BitmapConvAliases):
     
     def _get_box(self, box_func, fallback_func):
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = box_func(self.raw, left, bottom, right, top)
-        if not ret_code:
+        success = box_func(self.raw, left, bottom, right, top)
+        if not success:
+            # TODO avoid repeated initialisation of c_float objects for fallback
             return fallback_func()
         return (left.value, bottom.value, right.value, top.value)
     
@@ -183,10 +206,9 @@ class PdfPage (BitmapConvAliases):
         Position and form are defined by the object's matrix.
         If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.
         
-        The page object must not belong to a page yet. If it belongs to a PDF, this page must be part of that PDF.
+        The page object must not belong to a page yet. If it belongs to a PDF, this page must be part of the PDF.
         
-        Note:
-            You may want to call :meth:`.generate_content` once you finished adding new content to the page.
+        You may want to call :meth:`.generate_content` once you finished adding new content to the page.
         
         Parameters:
             pageobj (PdfPageObject): The page object to insert.
@@ -228,8 +250,7 @@ class PdfPage (BitmapConvAliases):
         Insert text into the page at a specified position, using the writing system's ligature.
         This function supports Asian scripts such as Hindi.
         
-        Note:
-            You may want to call :meth:`.generate_content` once you finished adding new content to the page.
+        You may want to call :meth:`.generate_content` once you finished adding new content to the page.
         
         Parameters:
             text (str):
@@ -256,6 +277,7 @@ class PdfPage (BitmapConvAliases):
         for info, pos in zip(hb_buffer.glyph_infos, hb_buffer.glyph_positions):
             pdf_textobj = pdfium.FPDFPageObj_CreateTextObj(self.pdf.raw, pdf_font.raw, font_size)
             pdfium.FPDFText_SetCharcodes(pdf_textobj, ctypes.c_uint32(info.codepoint), 1)
+            # TODO consider using PdfMatrix support model
             pdfium.FPDFPageObj_Transform(
                 pdf_textobj,
                 1, 0, 0, 1,
@@ -320,17 +342,11 @@ class PdfPage (BitmapConvAliases):
         Rasterise a page to a specific output format.
         
         Parameters:
-            
             converter (BitmapConvBase | typing.Callable):
-                
-                A translator to convert the output of :meth:`.render_base`. See :class:`.BitmapConv` for a set of built-in converters.
-                It may be a class, or an instance of a class, that implements the converter interface by inheriting from :class:`.BitmapConvBase` and overriding :meth:`~.BitmapConvBase.run`. Converters may be initialised with parameters to be passed to their :meth:`~.BitmapConvBase.run` method.
-                
-                Alternatively, if your custom converter does not take any parameters, you may also just pass in a function (or callable) that consumes two positional arguments (rendering output, dictionary of rendering keywords) and returns the converted result.
-            
+                A translator to convert the output of :meth:`.render_base`.
+                See :class:`.BitmapConv` for a set of built-in converters.
             renderer_kws (dict):
                 Keyword arguments to the renderer.
-        
         Returns:
             typing.Any: Converter-specific result.
         
@@ -397,8 +413,8 @@ class PdfPage (BitmapConvAliases):
         Parameters:
             
             scale (float):
-                This parameter defines the resolution of the image.
-                Technically speaking, it is a factor scaling the number of pixels that represent the length of 1 PDF canvas unit (equivalent to 1/72 of an inch by default). [1]_
+                A factor scaling the number of pixels that represent the length of 1 PDF canvas unit (usually 1/72 in). [1]_
+                This defines the resolution of the image. To convert a DPI value to a scale factor, multiply it by the size of 1 canvas unit in inches.
                 
                 .. [1] Since PDF 1.6, pages may define a so-called user unit. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. pypdfium2 currently does not take this into account.
                 
@@ -475,9 +491,6 @@ class PdfPage (BitmapConvAliases):
             (ctypes array, str, (int, int)): Bitmap data, colour format, and image size.
             The colour format may be ``BGR``/``RGB``, ``BGRA``/``RGBA``, ``BGRX``/``RGBX``, or ``L``, depending on the parameters *colour*, *greyscale*, *rev_byteorder* and *prefer_bgrx*.
             Image size is given in pixels as a tuple of width and height.
-        
-        Tip:
-            To convert a DPI value to a scale factor, divide it by 72.
         """
         
         # In theory, we would like to switch to matrix-based rendering because it provides more transformation features, but there are some obstacles:
@@ -488,6 +501,7 @@ class PdfPage (BitmapConvAliases):
         validate_colours(fill_colour, colour_scheme)
         
         if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
+            # FIXME do we need to take FPDFPage_HasTransparency() into account ?
             cl_pdfium = auto_bitmap_format(fill_colour, greyscale, prefer_bgrx)
         else:
             cl_pdfium = force_bitmap_format
@@ -580,8 +594,10 @@ class PdfPage (BitmapConvAliases):
             pdfium.FPDF_RenderPage_Close(self.raw)
         
         if draw_forms:
-            form_env = self.pdf.init_formenv()
-            pdfium.FPDF_FFLDraw(form_env, *render_args)
+            form_type = pdfium.FPDF_GetFormType(self.pdf.raw)  # consider moving to document ?
+            if form_type != pdfium.FORMTYPE_NONE:
+                form_env = self.pdf.init_formenv()
+                pdfium.FPDF_FFLDraw(form_env, *render_args)
         
         return buffer, cl_string, (width, height)
 

@@ -73,7 +73,7 @@ def test_pageobj_placement():
     dest_page_1.insert_object(po)
     
     dest_page_1.generate_content()
-    dest_page_1.close()
+    # dest_page_1.close()
     square_len = w + h
     dest_page_2 = dest_pdf.new_page(square_len, square_len)
     
@@ -116,7 +116,7 @@ def test_pageobj_placement():
     dest_page_2.insert_object(po)
     
     dest_page_2.generate_content()
-    dest_page_2.close()
+    # dest_page_2.close()
     dest_page_3 = dest_pdf.new_page(src_width, src_height)
     
     po = xobject.as_pageobject()
@@ -129,7 +129,7 @@ def test_pageobj_placement():
     dest_page_3.insert_object(po)
     
     dest_page_3.generate_content()
-    dest_page_3.close()
+    # dest_page_3.close()
     
     # TODO
     # * test copy and repr
@@ -140,4 +140,4 @@ def test_pageobj_placement():
     with open(join(OutputDir, "pageobj_placement.pdf"), "wb") as buf:
         dest_pdf.save(buf)
     
-    for g in (xobject, dest_pdf, src_pdf): g.close()
+    # for g in (xobject, dest_pdf, src_pdf): g.close()

@@ -36,6 +36,7 @@ Comment:
 Files: tests/resources/toc_circular.pdf
        tests/resources/toc_viewmodes.pdf
        tests/resources/toc_maxdepth.pdf
+       tests/resources/form_listbox.pdf
 Copyright: 2022 PDFium Developers
 License: BSD-3-Clause OR Apache-2.0
 Comment:
@@ -43,6 +44,7 @@ Comment:
     https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf
     https://pdfium.googlesource.com/pdfium_tests/+/refs/heads/main/fx/other/8.2_outline.pdf
     https://pdfium.googlesource.com/pdfium_tests/+/refs/heads/main/fx/FRC_8.2.2_part1/FRC_51_8.2.2_T_8.4__Count_edit_count_100.pdf
+    https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/listbox_form.pdf
 
 Files: tests/resources/box_fallback.in
        tests/resources/box_fallback.pdf

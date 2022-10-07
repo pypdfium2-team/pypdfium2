@@ -28,7 +28,6 @@ Also see the issues panel and inline `TODO` marks in source code.
 * Unify rendering tests with `RenderTestCase` class and a single, parametrized function
 * Overhaul outdated tests and improve coverage
 * Add new test cases
-    * rendering forms
     * finding of nested objects
 * Find a better replacement for `importchecker`.
 

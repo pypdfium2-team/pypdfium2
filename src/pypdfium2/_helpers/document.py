@@ -4,6 +4,7 @@
 import io
 import os
 import os.path
+import weakref
 import ctypes
 import logging
 import functools
@@ -57,7 +58,6 @@ class PdfDocument (BitmapConvAliases):
     
     Hint:
         * :func:`len` may be called to get a document's number of pages.
-        * :class:`PdfDocument` implements the context manager API, hence documents can be used in a ``with`` block, where :meth:`.close` will be called automatically on exit.
         * Looping over a document will yield its pages from beginning to end.
         * Pages may be loaded using list index access.
         * The ``del`` keyword and list index access may be used to delete pages.
@@ -80,6 +80,7 @@ class PdfDocument (BitmapConvAliases):
         self._ld_data = None
         self._form_env = None
         self._form_config = None
+        self._form_finalizer = None
         
         self._password = password
         self._file_access = file_access
@@ -107,13 +108,19 @@ class PdfDocument (BitmapConvAliases):
             self.raw = self._actual_input
         else:
             self.raw, self._ld_data = open_pdf(self._actual_input, self._password)
+        
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw, self._ld_data, self._autoclose, self._actual_input,
+        )
     
     
     def __enter__(self):
         return self
     
     def __exit__(self, *_):
-        self.close()
+        # We do not invoke close at this place anymore because that would increase the risk of callers closing parent objects before child objects. (Consider a `with`-block where pages are not closed explicitly: garbage collection of pages commonly happens later than context manager exit, so page would be closed after document, which is illegal.)
+        pass
     
     def __len__(self):
         return pdfium.FPDF_GetPageCount(self.raw)
@@ -138,21 +145,43 @@ class PdfDocument (BitmapConvAliases):
         new_pdf = pdfium.FPDF_CreateNewDocument()
         return cls(new_pdf)
     
+    
+    @staticmethod
+    def _static_close(raw, ld_data, autoclose, actual_input):
+        
+        logger.debug("Closing document")
+        pdfium.FPDF_CloseDocument(raw)
+        
+        if ld_data is not None:
+            ld_data.close()
+        if autoclose and is_input_buffer(actual_input):
+            actual_input.close()
+    
+    
+    @staticmethod
+    def _static_exit_formenv(form_env, form_config):
+        logger.debug("Closing form env")
+        pdfium.FPDFDOC_ExitFormFillEnvironment(form_env)
+        id(form_config)
+    
+    
     def close(self):
         """
-        Close the document to release allocated memory.
-        This function shall be called when finished working with the object.
+        Free memory by applying the finalizer for the underlying PDFium document.
+        Please refer to the generic note on ``close()`` methods for details.
+        
+        This method calls :meth:`.exit_formenv`.
         """
-        
+        if self.raw is None:
+            logger.warning("Duplicate close call suppressed on document %s" % self)
+            return
         self.exit_formenv()
-        
-        pdfium.FPDF_CloseDocument(self.raw)
+        self._finalizer()
         self.raw = None
-        
-        if self._ld_data is not None:
-            self._ld_data.close()
-        if self._autoclose and is_input_buffer(self._actual_input):
-            self._actual_input.close()
+    
+    
+    def _tree_closed(self):
+        return (self.raw is None)
     
     
     def init_formenv(self):
@@ -168,21 +197,23 @@ class PdfDocument (BitmapConvAliases):
         self._form_config = pdfium.FPDF_FORMFILLINFO()
         self._form_config.version = 2
         self._form_env = pdfium.FPDFDOC_InitFormFillEnvironment(self.raw, self._form_config)
+        self._form_finalizer = weakref.finalize(
+            self, self._static_exit_formenv,
+            self._form_env, self._form_config,
+        )
         return self._form_env
     
     
     def exit_formenv(self):
         """
-        Release allocated memory by exiting the form environment.
-        If the form environment is not initialised, nothing will be done.
+        Free memory by applying the finalizer for the underlying PDFium form environment, if it was initialised.
+        If :meth:`.init_formenv` was not called, nothing will be done.
         
-        Note:
-            This method is called by :meth:`.close`.
+        This behaves like the ``close()`` methods. Please refer to the generic note for details.
         """
         if self._form_env is None:
             return
-        pdfium.FPDFDOC_ExitFormFillEnvironment(self._form_env)
-        id(self._form_config)
+        self._form_finalizer()
         self._form_env = None
         self._form_config = None
     
@@ -239,10 +270,6 @@ class PdfDocument (BitmapConvAliases):
     def get_page_size(self, index):
         """
         Get the dimensions of the page at *index*. Reverse indexing is allowed.
-        
-        Note:
-            * This method works without needing to load a separate page object.
-            * :meth:`.PdfPage.get_size` calls a different PDFium function but should provide the same result.
         
         Returns:
             (float, float): Page width and height in PDF canvas units.
@@ -488,7 +515,7 @@ class PdfDocument (BitmapConvAliases):
         )
         page = pdf.get_page(index)
         result = page.render_to(converter, **kwargs)
-        for g in (page, pdf): g.close()
+        # for g in (page, pdf): g.close()
         return result, index
     
     
@@ -502,10 +529,7 @@ class PdfDocument (BitmapConvAliases):
         """
         Concurrently render multiple pages, using a process pool executor.
         
-        .. seealso:: :meth:`.PdfPage.render_to` / :meth:`.PdfPage.render_base`
-        
-        Note:
-            If rendering only a single page, the call is simply forwarded to :meth:`PdfPage.render_to` as a shortcut.
+        If rendering only a single page, the call is simply forwarded to :meth:`.PdfPage.render_to` as a shortcut.
         
         Parameters:
             page_indices (typing.Sequence[int] | None):
@@ -514,7 +538,7 @@ class PdfDocument (BitmapConvAliases):
             n_processes (int):
                 Target number of parallel processes.
             kwargs (dict):
-                Keyword arguments to the renderer.
+                Keyword arguments to the renderer. See :meth:`.PdfPage.render_to` / :meth:`.PdfPage.render_base`.
         
         Yields:
             :data:`typing.Any`: Implementation-specific result object.
@@ -533,7 +557,7 @@ class PdfDocument (BitmapConvAliases):
         if len(page_indices) == 1:
             page = self.get_page(page_indices[0])
             result = page.render_to(converter, **kwargs)
-            page.close()
+            # page.close()
             yield result
             return
         
@@ -594,6 +618,33 @@ class PdfXObject:
     def __init__(self, raw, pdf):
         self.raw = raw
         self.pdf = pdf
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw, self.pdf,
+        )
+    
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.pdf._tree_closed()
+    
+    @staticmethod
+    def _static_close(raw, parent):
+        logger.debug("Closing XObject")
+        if parent._tree_closed():
+            logger.critical("Document closed before XObject (this is illegal). Document: %s" % parent)
+        pdfium.FPDF_CloseXObject(raw)
+    
+    def close(self):
+        """
+        Free memory by applying the finalizer for the underlying PDFium XObject.
+        Please refer to the generic note on ``close()`` methods for details.
+        """
+        if self.raw is None:
+            logger.warning("Duplicate close call suppressed on XObject %s" % self)
+            return
+        self._finalizer()
+        self.raw = None
     
     def as_pageobject(self):
         """
@@ -605,13 +656,6 @@ class PdfXObject:
             raw = raw_pageobj,
             pdf = self.pdf,
         )
-    
-    def close(self):
-        """
-        Close the XObject to release allocated memory.
-        This function shall be called when finished working with the object.
-        """
-        pdfium.FPDF_CloseXObject(self.raw)
 
 
 class HarfbuzzFont:
@@ -639,12 +683,31 @@ class PdfFont:
         self.raw = raw
         self.pdf = pdf
         self._font_data = font_data
+        self._finalizer = weakref.finalize(
+            self, self._static_close,
+            self.raw, self.pdf, self._font_data,
+        )
+    
+    def _tree_closed(self):
+        if self.raw is None:
+            return True
+        return self.pdf._tree_closed()
+    
+    @staticmethod
+    def _static_close(raw, parent, font_data):
+        logger.debug("Closing font")
+        if parent._tree_closed():
+            logger.critical("Document closed before font (this is illegal). Document: %s" % parent)
+        pdfium.FPDFFont_Close(raw)
+        id(font_data)
     
     def close(self):
         """
-        Close the font to release allocated memory.
-        This function shall be called when finished working with the object.
+        Free memory by applying the finalizer for the underlying PDFium font.
+        Please refer to the generic note on ``close()`` methods for details.
         """
-        pdfium.FPDFFont_Close(self.raw)
+        if self.raw is None:
+            logger.warning("Duplicate close call suppressed on font %s" % self)
+            return
+        self._finalizer()
         self.raw = None
-        id(self._font_data)

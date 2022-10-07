@@ -11,6 +11,10 @@ class PdfPageObject:
     """
     Page object helper class.
     
+    Note:
+        Page objects are automatically freed by PDFium with the page they belong to.
+        If a page object ends up without associated page, you should call ``FPDFPageObj_Destroy(pageobj.raw)``.
+    
     Attributes:
         raw (FPDF_PAGEOBJECT):
             The underlying PDFium pageobject handle.
@@ -51,9 +55,9 @@ class PdfPageObject:
             raise RuntimeError("Must not call get_pos() on a loose pageobject.")
         
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        ret_code = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
+        success = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
         
-        if not ret_code:
+        if not success:
             raise PdfiumError("Failed to locate pageobject.")
         
         pos = (left.value, bottom.value, right.value, top.value)

@@ -28,4 +28,4 @@ def attach_parser(subparsers):
 def main(args):
     pdf = pdfium.PdfDocument(args.input, password=args.password)
     pdf.print_toc( pdf.get_toc() )
-    pdf.close()
+    # pdf.close()

@@ -5,6 +5,7 @@ import io
 import math
 import ctypes
 import logging
+import weakref
 from os.path import join
 import numpy
 import PIL.Image
@@ -23,14 +24,14 @@ def sample_page():
     pdf = pdfium.PdfDocument(TestFiles.render)
     page = pdf.get_page(0)
     yield page
-    for g in (page, pdf): g.close()
+    # for g in (page, pdf): g.close()
 
 
 @pytest.fixture
 def multipage_doc():
     pdf = pdfium.PdfDocument(TestFiles.multipage)
     yield pdf
-    pdf.close()
+    # pdf.close()
 
 
 def _check_pixels(pil_image, pixels):
@@ -92,7 +93,7 @@ def test_render_page_transform(sample_page, name, crop, scale, rotation):
             pixels.append( ((x, y), value) )
     
     _check_pixels(pil_image, pixels)
-    pil_image.close()
+    # pil_image.close()
 
 
 @pytest.mark.parametrize(
@@ -107,7 +108,7 @@ def test_render_page_bgrx(rev_byteorder, sample_page):
     assert pil_image.mode == "RGBX"
     exp_pixels = [(pos, (*value, 255)) for pos, value in ExpRenderPixels]
     _check_pixels(pil_image, exp_pixels)
-    pil_image.close()
+    # pil_image.close()
 
 
 def test_render_page_alpha(sample_page):
@@ -133,7 +134,7 @@ def test_render_page_alpha(sample_page):
         assert image.getpixel(pos) == exp_value
     
     image.save(join(OutputDir, "coloured_alpha.png"))
-    for g in (image, image_rev): g.close()
+    # for g in (image, image_rev): g.close()
 
 
 def test_render_page_grey(sample_page):
@@ -149,7 +150,7 @@ def test_render_page_grey(sample_page):
     assert image.size == (298, 421)
     assert image.mode == "L"
     image.save(join(OutputDir, "greyscale.png"))
-    for g in (image, image_rev): g.close()
+    # for g in (image, image_rev): g.close()
 
 
 @pytest.mark.parametrize(
@@ -171,7 +172,7 @@ def test_render_page_grey_alpha(prefer_la, sample_page):
     else:
         assert image.mode == "RGBA"
     image.save(join(OutputDir, "greyscale_alpha_%s.png" % image.mode))
-    image.close()
+    # image.close()
 
 
 @pytest.mark.parametrize(
@@ -202,7 +203,7 @@ def test_render_page_fill_colour(fill_colour, sample_page):
     assert image.size == (298, 421)
     assert bg_pixel == fill_colour
     
-    image.close()
+    # image.close()
 
 
 def test_render_page_colourscheme():
@@ -224,7 +225,7 @@ def test_render_page_colourscheme():
     assert image.mode == "L"
     image.save( join(OutputDir, "render_colourscheme.png") )
     
-    for g in (page, pdf): g.close()
+    # for g in (page, pdf): g.close()
 
 
 def test_render_page_custom_allocator(sample_page):
@@ -279,7 +280,7 @@ def test_render_page_tobytes(rev_byteorder, sample_page):
     assert pil_image.mode == "RGB"
     assert pil_image.size == (298, 421)
     assert isinstance(pil_image, PIL.Image.Image)
-    pil_image.close()
+    # pil_image.close()
 
 
 def test_render_page_optimisation(sample_page):
@@ -299,7 +300,7 @@ def test_render_page_optimisation(sample_page):
             scale = 0.5,
         )
         assert isinstance(pil_image, PIL.Image.Image)
-        pil_image.close()
+        # pil_image.close()
 
 
 def test_render_page_noantialias(sample_page):
@@ -311,7 +312,7 @@ def test_render_page_noantialias(sample_page):
         scale = 0.5,
     )
     assert isinstance(pil_image, PIL.Image.Image)
-    pil_image.close()
+    # pil_image.close()
 
 
 def test_render_pages_no_concurrency(multipage_doc):
@@ -322,8 +323,8 @@ def test_render_pages_no_concurrency(multipage_doc):
             greyscale = True,
         )
         assert isinstance(image, PIL.Image.Image)
-        image.close()
-        page.close()
+        # image.close()
+        # page.close()
 
 
 @pytest.fixture
@@ -342,7 +343,7 @@ def render_pdffile_topil(multipage_doc):
     
     assert len(imgs) == 3
     yield imgs
-    for g in imgs: g.close()
+    # for g in imgs: g.close()
 
 
 @pytest.fixture
@@ -363,7 +364,7 @@ def render_pdffile_tobytes(multipage_doc):
     
     assert len(imgs) == 3
     yield imgs
-    for g in imgs: g.close()
+    # for g in imgs: g.close()
 
 
 @pytest.fixture
@@ -388,7 +389,7 @@ def render_pdffile_tonumpy(multipage_doc):
     
     assert len(imgs) == 3
     yield imgs
-    for g in imgs: g.close()
+    # for g in imgs: g.close()
 
 
 def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes, render_pdffile_tonumpy):
@@ -413,8 +414,9 @@ def test_render_pdf_new(caplog):
     assert isinstance(image, PIL.Image.Image)
     assert image.mode == "RGB"
     assert image.size == (50, 100)
+    # image.close()
     
-    for g in (image, page_1, page_2, pdf): g.close()
+    # for g in (page_1, page_2, pdf): g.close()
 
 
 def test_render_pdfbuffer(caplog):
@@ -437,7 +439,7 @@ def test_render_pdfbuffer(caplog):
     warning = "Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly."
     assert warning in caplog.text
     
-    for g in (pdf, buffer): g.close()
+    # for g in (pdf, buffer): g.close()
 
 
 def test_render_pdfbytes():
@@ -457,7 +459,7 @@ def test_render_pdfbytes():
     assert isinstance(image, PIL.Image.Image)
     assert isinstance(pdf._rendering_input, bytes)
     
-    pdf.close()
+    # pdf.close()
 
 
 def test_render_pdffile_asbuffer():
@@ -500,4 +502,41 @@ def test_render_pdffile_asbytes():
     assert isinstance(image, PIL.Image.Image)
     assert pdf._rendering_input == TestFiles.multipage
     
-    pdf.close()
+    # pdf.close()
+
+
+@pytest.mark.parametrize(
+    ("draw_forms", "exp_colour"),
+    [
+        (False, (255, 255, 255)),
+        (True, (0, 51, 113)),
+    ]
+)
+def test_render_form(draw_forms, exp_colour):
+    
+    pdf = pdfium.PdfDocument(TestFiles.form)
+    assert pdf._form_env is None
+    assert pdf._form_config is None
+    
+    page = pdf.get_page(0)
+    image = page.render_to(
+        pdfium.BitmapConv.pil_image,
+        draw_forms = draw_forms,
+    )
+    
+    assert image.getpixel( (190, 190) ) == exp_colour
+    assert image.getpixel( (190, 430) ) == exp_colour
+    assert image.getpixel( (190, 480) ) == exp_colour
+    
+    if draw_forms:
+        assert isinstance(pdf._form_env, pdfium.FPDF_FORMHANDLE)
+        assert isinstance(pdf._form_config, pdfium.FPDF_FORMFILLINFO)
+        assert isinstance(pdf._form_finalizer, weakref.finalize)
+        assert pdf._form_finalizer.alive
+        pdf.exit_formenv()
+        assert not pdf._form_finalizer.alive
+    else:
+        assert pdf._form_finalizer is None
+    
+    assert pdf._form_env is None
+    assert pdf._form_config is None
