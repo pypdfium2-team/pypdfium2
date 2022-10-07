@@ -92,9 +92,10 @@ class PdfTextPage:
         return buffer.raw[:n_bytes].decode("utf-16-le", errors="ignore")
     
     
-    def get_text(self, left=0, bottom=0, right=0, top=0):  # TODO major release: rename to get_text_bounded
+    def get_text(self, left=None, bottom=None, right=None, top=None):  # TODO major release: rename to get_text_bounded
         """
-        Extract text from given boundaries. If *right* and/or *top* are 0, they default to page width or height, respectively.
+        Extract text from given boundaries in PDF coordinates.
+        If a parameter is :data:`None`, it defaults to the corresponding CropBox value.
         
         See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
         
@@ -105,13 +106,17 @@ class PdfTextPage:
         if self.n_chars == 0:
             return ""
         
-        width, height = self.page.get_size()
-        if right == 0:
-            right = width
-        if top == 0:
-            top = height
+        cropbox = self.page.get_cropbox()
+        if left is None:
+            left = cropbox[0]
+        if bottom is None:
+            bottom = cropbox[1]
+        if right is None:
+            right = cropbox[2]
+        if top is None:
+            top = cropbox[3]
         
-        if not (0 <= left < right <= width) or not (0 <= bottom < top <= height):
+        if not (cropbox[0] <= left < right <= cropbox[2]) or not (cropbox[1] <= bottom < top <= cropbox[3]):
             raise ValueError("Invalid page area requested.")
         
         args = (self.raw, left, top, right, bottom)

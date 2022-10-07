@@ -5,6 +5,7 @@
 
 # Changelog for next release
 - Disruption: `PdfPage.insert_text()` does not generate page content automatically anymore. The new `PdfPage.generate_content()` method now needs to be called to apply changes, to avoid generating content repeatedly.
+- Disruption: In `PdfTextPage.get_text()`, the boundary values are now only set to defaults if they're `None`, not 0. This change was necessary because the underlying PDFium function requires PDF box values rather than normalised values.
 - pypdfium2 finally implements automatic object finalisation. Calling the `close()` methods is not mandatory anymore. The context manager API of `PdfDocument` is retained for backwards compatibility, but exiting the context manager does not close the document anymore, since this would increase the risk of closing objects in wrong order.
 - A new text extraction method `get_text_range()` was added.
 - Text pages now have an `n_chars` attribute. `count_chars()` is still available as deprecated alias.
