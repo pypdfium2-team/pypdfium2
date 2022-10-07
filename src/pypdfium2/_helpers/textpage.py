@@ -18,6 +18,7 @@ class PdfTextPage:
     Attributes:
         raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
         page (PdfPage): Reference to the page this textpage belongs to.
+        n_chars (int): Number of characters on the page, by the time of initialisation.
     """
     
     def __init__(self, raw, page):
@@ -27,6 +28,7 @@ class PdfTextPage:
             self, self._static_close,
             self.raw, self.page,
         )
+        self.n_chars = pdfium.FPDFText_CountChars(self.raw)
     
     def _tree_closed(self):
         if self.raw is None:
@@ -52,12 +54,11 @@ class PdfTextPage:
         self.raw = None
     
     
-    def count_chars(self):  # TODO major release: replace with n_chars attribute
+    def count_chars(self):  # TODO major release: remove
         """
-        Returns:
-            int: The number of characters on the page.
+        Deprecated alias for :attr:`.n_chars`
         """
-        return pdfium.FPDFText_CountChars(self.raw)
+        return self.n_chars
     
     
     @staticmethod
@@ -78,12 +79,11 @@ class PdfTextPage:
             str: The text in the range in question, or an empty string if no text was found.
         """
         
-        page_chars = self.count_chars()
-        if page_chars == 0:
+        if self.n_chars == 0:
             return ""
         if count == 0:
-            count = page_chars - index
-        self._check_span(page_chars, index, count)
+            count = self.n_chars - index
+        self._check_span(self.n_chars, index, count)
         
         n_bytes = count*2
         buffer = ctypes.create_string_buffer(n_bytes+2)
@@ -102,8 +102,7 @@ class PdfTextPage:
             str: The text on the page area in question, or an empty string if no text was found.
         """
         
-        page_chars = self.count_chars()
-        if page_chars == 0:
+        if self.n_chars == 0:
             return ""
         
         width, height = self.page.get_size()
@@ -136,12 +135,11 @@ class PdfTextPage:
             int: The number of text rectangles on the page.
         """
         
-        n_chars = self.count_chars()
-        if n_chars == 0:
+        if self.n_chars == 0:
             return 0
         if count == 0:
-            count = n_chars
-        self._check_span(n_chars, index, count)
+            count = self.n_chars
+        self._check_span(self.n_chars, index, count)
         
         return pdfium.FPDFText_CountRects(self.raw, index, count)
     
@@ -179,9 +177,8 @@ class PdfTextPage:
             Values for left, bottom, right and top in PDF canvas units.
         """
         
-        n_chars = self.count_chars()
-        if not 0 <= index < n_chars:
-            raise ValueError("Character index %s is out of bounds. The maximum index is %d." % (index, n_chars-1))
+        if not 0 <= index < self.n_chars:
+            raise ValueError("Character index %s is out of bounds. The maximum index is %d." % (index, self.n_chars-1))
         
         if loose:
             rect = pdfium.FS_RECTF()
