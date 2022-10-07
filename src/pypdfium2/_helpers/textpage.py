@@ -106,6 +106,7 @@ class PdfTextPage:
         if self.n_chars == 0:
             return ""
         
+        mediabox = self.page.get_mediabox()
         cropbox = self.page.get_cropbox()
         if left is None:
             left = cropbox[0]
@@ -116,7 +117,7 @@ class PdfTextPage:
         if top is None:
             top = cropbox[3]
         
-        if not (cropbox[0] <= left < right <= cropbox[2]) or not (cropbox[1] <= bottom < top <= cropbox[3]):
+        if not (mediabox[0] <= left < right <= mediabox[2]) or not (mediabox[1] <= bottom < top <= mediabox[3]):
             raise ValueError("Invalid page area requested.")
         
         args = (self.raw, left, top, right, bottom)
