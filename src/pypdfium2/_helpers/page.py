@@ -64,7 +64,7 @@ class PdfPage (BitmapConvAliases):
     
     @staticmethod
     def _static_close(raw, parent):
-        logger.debug("Closing page")
+        # logger.debug("Closing page")
         if parent._tree_closed():
             logger.critical("Document closed before page (this is illegal). Document: %s" % parent)
         pdfium.FPDF_ClosePage(raw)

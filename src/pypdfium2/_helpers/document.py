@@ -149,7 +149,7 @@ class PdfDocument (BitmapConvAliases):
     @staticmethod
     def _static_close(raw, ld_data, autoclose, actual_input):
         
-        logger.debug("Closing document")
+        # logger.debug("Closing document")
         pdfium.FPDF_CloseDocument(raw)
         
         if ld_data is not None:
@@ -630,7 +630,7 @@ class PdfXObject:
     
     @staticmethod
     def _static_close(raw, parent):
-        logger.debug("Closing XObject")
+        # logger.debug("Closing XObject")
         if parent._tree_closed():
             logger.critical("Document closed before XObject (this is illegal). Document: %s" % parent)
         pdfium.FPDF_CloseXObject(raw)
@@ -695,7 +695,7 @@ class PdfFont:
     
     @staticmethod
     def _static_close(raw, parent, font_data):
-        logger.debug("Closing font")
+        # logger.debug("Closing font")
         if parent._tree_closed():
             logger.critical("Document closed before font (this is illegal). Document: %s" % parent)
         pdfium.FPDFFont_Close(raw)

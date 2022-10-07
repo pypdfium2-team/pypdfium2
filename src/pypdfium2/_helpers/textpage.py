@@ -37,7 +37,7 @@ class PdfTextPage:
     
     @staticmethod
     def _static_close(raw, parent):
-        logger.debug("Closing text page")
+        # logger.debug("Closing text page")
         if parent._tree_closed():
             logger.critical("Some parent closed before text page (this is illegal). Direct parent: %s" % parent)
         pdfium.FPDFText_ClosePage(raw)
@@ -293,7 +293,7 @@ class PdfTextSearcher:
     
     @staticmethod
     def _static_close(raw, parent):
-        logger.debug("Closing text searcher")
+        # logger.debug("Closing text searcher")
         if parent._tree_closed():
             logger.critical("Some parent closed before text searcher (this is illegal). Direct parent: %s" % parent)
         pdfium.FPDFText_FindClose(raw)
