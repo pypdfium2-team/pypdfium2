@@ -6,6 +6,10 @@ from pypdfium2 import _namespace as pdfium
 from pypdfium2._cli._parsers import pagetext_type
 
 
+STRATEGY_RANGE = "range"
+STRATEGY_BOUNDED = "bounded"
+
+
 def attach_parser(subparsers):
     parser = subparsers.add_parser(
         "extract-text",
@@ -25,6 +29,13 @@ def attach_parser(subparsers):
         help = "Page numbers to include (defaults to all)",
         type = pagetext_type,
     )
+    parser.add_argument(
+        "--strategy",
+        type = str,
+        choices = (STRATEGY_RANGE, STRATEGY_BOUNDED),
+        default = STRATEGY_RANGE,
+        help = "PDFium text extraction strategy.",
+    )
 
 
 def main(args):
@@ -38,7 +49,13 @@ def main(args):
         
         page = doc.get_page(index)
         textpage = page.get_textpage()
-        text = textpage.get_text()
+        
+        if args.strategy == STRATEGY_RANGE:
+            text = textpage.get_text_range()
+        elif args.strategy == STRATEGY_BOUNDED:
+            text = textpage.get_text()
+        else:
+            assert False
         
         # for g in (textpage, page): g.close()
         

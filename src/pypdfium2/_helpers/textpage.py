@@ -52,7 +52,47 @@ class PdfTextPage:
         self.raw = None
     
     
-    def get_text(self, left=0, bottom=0, right=0, top=0):
+    def count_chars(self):  # TODO major release: replace with n_chars attribute
+        """
+        Returns:
+            int: The number of characters on the page.
+        """
+        return pdfium.FPDFText_CountChars(self.raw)
+    
+    
+    @staticmethod
+    def _check_span(n_chars, index, count):
+        if not (0 <= index < index+count <= n_chars):
+            raise ValueError("Character span is out of bounds.")
+    
+    
+    def get_text_range(self, index=0, count=0):
+        """
+        Extract text from a given range.
+        
+        Parameters:
+            index (int): Index of the first character to include.
+            count (int): Number of characters to be extracted. If 0, it defaults to the number of characters on the page minus *index*.
+        
+        Returns:
+            str: The text in the range in question, or an empty string if no text was found.
+        """
+        
+        page_chars = self.count_chars()
+        if page_chars == 0:
+            return ""
+        if count == 0:
+            count = page_chars - index
+        self._check_span(page_chars, index, count)
+        
+        n_bytes = count*2
+        buffer = ctypes.create_string_buffer(n_bytes+2)
+        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+        pdfium.FPDFText_GetText(self.raw, index, count, buffer_ptr)
+        return buffer.raw[:n_bytes].decode("utf-16-le", errors="ignore")
+    
+    
+    def get_text(self, left=0, bottom=0, right=0, top=0):  # TODO major release: rename to get_text_bounded
         """
         Extract text from given boundaries. If *right* and/or *top* are 0, they default to page width or height, respectively.
         
@@ -61,6 +101,10 @@ class PdfTextPage:
         Returns:
             str: The text on the page area in question, or an empty string if no text was found.
         """
+        
+        page_chars = self.count_chars()
+        if page_chars == 0:
+            return ""
         
         width, height = self.page.get_size()
         if right == 0:
@@ -80,17 +124,7 @@ class PdfTextPage:
         buffer = ctypes.create_string_buffer(n_bytes)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
-        text = buffer.raw.decode("utf-16-le", errors="ignore")
-        
-        return text
-    
-    
-    def count_chars(self):
-        """
-        Returns:
-            int: The number of characters on the page.
-        """
-        return pdfium.FPDFText_CountChars(self.raw)
+        return buffer.raw.decode("utf-16-le", errors="ignore")
     
     
     def count_rects(self, index=0, count=0):
@@ -101,13 +135,14 @@ class PdfTextPage:
         Returns:
             int: The number of text rectangles on the page.
         """
+        
         n_chars = self.count_chars()
         if n_chars == 0:
             return 0
         if count == 0:
             count = n_chars
-        if not (0 <= index < index+count <= n_chars):
-            raise ValueError("Character span is out of bounds.")
+        self._check_span(n_chars, index, count)
+        
         return pdfium.FPDFText_CountRects(self.raw, index, count)
     
     
