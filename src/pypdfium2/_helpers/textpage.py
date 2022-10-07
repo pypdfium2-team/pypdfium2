@@ -67,13 +67,14 @@ class PdfTextPage:
             raise ValueError("Character span is out of bounds.")
     
     
-    def get_text_range(self, index=0, count=0):
+    def get_text_range(self, index=0, count=0, errors="ignore"):
         """
         Extract text from a given range.
         
         Parameters:
             index (int): Index of the first character to include.
             count (int): Number of characters to be extracted. If 0, it defaults to the number of characters on the page minus *index*.
+            errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
         
         Returns:
             str: The text in the range in question, or an empty string if no text was found.
@@ -89,16 +90,18 @@ class PdfTextPage:
         buffer = ctypes.create_string_buffer(n_bytes+2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium.FPDFText_GetText(self.raw, index, count, buffer_ptr)
-        return buffer.raw[:n_bytes].decode("utf-16-le", errors="ignore")
+        return buffer.raw[:n_bytes].decode("utf-16-le", errors=errors)
     
     
-    def get_text(self, left=None, bottom=None, right=None, top=None):  # TODO major release: rename to get_text_bounded
+    def get_text(self, left=None, bottom=None, right=None, top=None, errors="ignore"):  # TODO major release: rename to get_text_bounded
         """
         Extract text from given boundaries in PDF coordinates.
         If a parameter is :data:`None`, it defaults to the corresponding CropBox value.
         
         See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
         
+        Parameters:
+            errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
         Returns:
             str: The text on the page area in question, or an empty string if no text was found.
         """
@@ -129,7 +132,7 @@ class PdfTextPage:
         buffer = ctypes.create_string_buffer(n_bytes)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
-        return buffer.raw.decode("utf-16-le", errors="ignore")
+        return buffer.raw.decode("utf-16-le", errors=errors)
     
     
     def count_rects(self, index=0, count=0):
