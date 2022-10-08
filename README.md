@@ -349,8 +349,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * Not only are there different ways of string output that need to be handled according to the requirements of the function in question.
   String input, too, can work differently depending on encoding, null termination, and type.
-  If a function takes a UTF-8 encoded `FPDF_STRING` or `FPDF_BYTESTRING` (e. g. `FPDF_LoadDocument()`), you may simply pass the Python string, and bindings code will handle the rest.
-  However, some functions have special needs. For instance, `FPDFText_FindStart()` demands a UTF-16LE encoded string with null terminator, given as a pointer to an `unsigned short` array:
+  While functions that take a `UTF-8` encoded `FPDF_STRING` or `FPDF_BYTESTRING` are easy to call, other functions may have more peculiar needs. For instance, `FPDFText_FindStart()` demands a UTF-16LE encoded string with null terminator, given as a pointer to an `unsigned short` array:
   ```python
   # (Assuming `text` is a str and `textpage` an FPDF_TEXTPAGE)
   # Add the null terminator and encode as UTF-16LE
@@ -419,33 +418,6 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   fileaccess.m_GetBlock = functype( _reader_class(py_buffer) )
   # Finally, load the document
   pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, None)
-  ```
-  
-  While callable objects are quite convenient for tasks like this, they are a peculiarity of Python.
-  That's why file access structure and callback are actually designed to hold a pointer to the caller's buffer.
-  Using this approach is more complicated as we can't just set and get a Python object because things get passed through C.
-  Hence, we'd need to pass the memory address of the buffer object and dereference that in the callback.
-  ```python
-  # Declare a function decorated with the CFUNCTYPE
-  @pdfium.get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")
-  def _reader_func(param, position, p_buf, size):
-      # Dereference the memory address
-      py_buffer = ctypes.cast(param, ctypes.py_object).value
-      # The rest works as usual
-      c_buffer = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
-      py_buffer.seek(position)
-      py_buffer.readinto(c_buffer.contents)
-      return 1
-  
-  # When setting up the file access structure, do the following things differently:
-  # A) Just reference the function instead of creating a callable object
-  fileaccess.m_GetBlock = _reader_func
-  # B) Set the m_Param field to the memory address of the buffer, to be dereferenced later
-  # This value will be passed to the callback as first argument
-  # (Note: It's an implementation detail of CPython that the return value of id(obj)
-  # corresponds to the object's memory address, so this is kind of wonky. In practice,
-  # a callable object should be used instead.)
-  fileaccess.m_Param = id(buffer)
   ```
 
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.

@@ -160,7 +160,7 @@ class PdfDocument (BitmapConvAliases):
     
     @staticmethod
     def _static_exit_formenv(form_env, form_config):
-        logger.debug("Closing form env")
+        # logger.debug("Closing form env")
         pdfium.FPDFDOC_ExitFormFillEnvironment(form_env)
         id(form_config)
     

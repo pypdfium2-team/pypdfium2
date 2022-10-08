@@ -25,6 +25,10 @@ extensions = [
     "myst_parser",
 ]
 
+suppress_warnings = [
+    "ref.myst",
+]
+
 add_module_names = False
 autodoc_preserve_defaults = True
 autodoc_inherit_docstrings = False

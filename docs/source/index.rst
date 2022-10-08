@@ -4,16 +4,13 @@
 pypdfium2
 =========
 
-.. _README.md: https://github.com/pypdfium2-team/pypdfium2#readme
-
-| Welcome to the documentation for the support model of pypdfium2.
-| For general information, please also refer to the project's `README.md`_ file.
-
+Welcome to the documentation for the support model of pypdfium2.
 
 .. toctree::
    :maxdepth: 2
    :caption: Usage
    
+   readme
    python_api
    shell_api
 
