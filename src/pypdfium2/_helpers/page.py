@@ -67,6 +67,7 @@ class PdfPage (BitmapConvAliases):
         # logger.debug("Closing page")
         if parent._tree_closed():
             logger.critical("Document closed before page (this is illegal). Document: %s" % parent)
+        # if the form env of the parent document is initialised, we could call FORM_OnBeforeClosePage() here
         pdfium.FPDF_ClosePage(raw)
     
     def close(self):
@@ -77,7 +78,6 @@ class PdfPage (BitmapConvAliases):
         if self.raw is None:
             logger.warning("Duplicate close call suppressed on page %s" % self)
             return
-        # if the form env of the parent document is initialised, we could call FORM_OnBeforeClosePage() here
         self._finalizer()
         self.raw = None
     
