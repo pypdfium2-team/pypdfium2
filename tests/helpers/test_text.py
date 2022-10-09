@@ -34,7 +34,7 @@ def linkpage(doc):
 
 
 def test_gettext(textpage):
-    text_a = textpage.get_text()
+    text_a = textpage.get_text_bounded()
     text_b = textpage.get_text_range()
     assert text_a == text_b
     assert len(text_a) == 438
@@ -62,7 +62,7 @@ def test_getrectboxes(textpage):
     
     first_rect = next(rects)
     assert pytest.approx(first_rect, abs=1) == (58, 767, 258, 782)
-    first_text = textpage.get_text(*first_rect)
+    first_text = textpage.get_text_bounded(*first_rect)
     assert first_text == "Lorem ipsum dolor sit amet,"
     assert textpage.get_text_range(0, len(first_text)) == first_text
     
@@ -70,7 +70,7 @@ def test_getrectboxes(textpage):
     for rect in rects:
         assert len(rect) == 4
         assert 56 < rect[0] < 59
-        text = textpage.get_text(*rect)
+        text = textpage.get_text_bounded(*rect)
         assert isinstance(text, str)
         assert len(text) <= 66
         i += 1
@@ -95,7 +95,7 @@ def test_gettext_area_oob(textpage):
     ]
     for area in areas:
         with pytest.raises(ValueError, match=re.escape("Invalid page area requested.")):
-            textpage.get_text(*area)
+            textpage.get_text_bounded(*area)
 
 
 def test_search_text(textpage):
@@ -132,7 +132,7 @@ def test_get_index(textpage):
     assert index < textpage.n_chars and index == 0
     
     charbox = textpage.get_charbox(index)
-    char = textpage.get_text(*charbox)
+    char = textpage.get_text_bounded(*charbox)
     assert char == "L"
 
 
@@ -141,7 +141,7 @@ def test_textpage_empty():
     page = pdf.get_page(0)
     textpage = page.get_textpage()
     
-    assert textpage.get_text() == ""
+    assert textpage.get_text_bounded() == ""
     assert textpage.get_text_range() == ""
     assert textpage.n_chars == textpage.count_chars() == 0
     assert textpage.count_rects() == 0
@@ -216,9 +216,9 @@ def test_insert_text():
     page.generate_content()
     
     textpage = page.get_textpage()
-    assert textpage.get_text(left=posx_b, bottom=posy_b, top=posy_b+fs_b) == message_b
+    assert textpage.get_text_bounded(left=posx_b, bottom=posy_b, top=posy_b+fs_b) == message_b
     # extraction of message_a xfails - it looks like no PDF software can reconstruct this text correctly
-    # assert textpage.get_text(left=posx_a, bottom=posy_a, top=posy_a+fs_a) == "मၝघोषणाᆸपुჹ\u10cbऔर सहमत ီ\r\nँჸकᇆ"
+    # assert textpage.get_text_bounded(left=posx_a, bottom=posy_a, top=posy_a+fs_a) == "मၝघोषणाᆸपुჹ\u10cbऔर सहमत ီ\r\nँჸकᇆ"
     
     with open(join(OutputDir, "text_insertion.pdf"), "wb") as buffer:
         pdf.save(buffer, version=17)

@@ -54,9 +54,9 @@ class PdfTextPage:
         self.raw = None
     
     
-    def count_chars(self):  # TODO major release: remove
+    def count_chars(self):
         """
-        Deprecated alias for :attr:`.n_chars`
+        Deprecated alias for :attr:`.n_chars`. Will be removed with the next major release.
         """
         return self.n_chars
     
@@ -71,11 +71,12 @@ class PdfTextPage:
         """
         Extract text from a given range.
         
+        See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
+        
         Parameters:
             index (int): Index of the first character to include.
             count (int): Number of characters to be extracted. If 0, it defaults to the number of characters on the page minus *index*.
             errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
-        
         Returns:
             str: The text in the range in question, or an empty string if no text was found.
         """
@@ -93,12 +94,10 @@ class PdfTextPage:
         return buffer.raw[:n_bytes].decode("utf-16-le", errors=errors)
     
     
-    def get_text(self, left=None, bottom=None, right=None, top=None, errors="ignore"):  # TODO major release: rename to get_text_bounded
+    def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
         """
         Extract text from given boundaries in PDF coordinates.
         If a parameter is :data:`None`, it defaults to the corresponding CropBox value.
-        
-        See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
         
         Parameters:
             errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
@@ -133,6 +132,13 @@ class PdfTextPage:
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
         return buffer.raw.decode("utf-16-le", errors=errors)
+    
+    
+    def get_text(self, *args, **kwargs):
+        """
+        Deprecated alias for :meth:`.get_text_bounded`. Will be removed with the next major release.
+        """
+        return self.get_text_bounded(*args, **kwargs)
     
     
     def count_rects(self, index=0, count=0):

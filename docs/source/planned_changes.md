@@ -7,8 +7,8 @@
 
 The following API breaking changes are being considered for the next major release:
 - The textpage API will change
-  * `count_chars()` will be removed in favour of the `n_chars` attribute.
-  * `get_text()` will be renamed to `get_text_bounded()`.
+  * The `count_chars()` alias will be removed in favour of the `n_chars` attribute.
+  * The `get_text()` alias will be removed in favour of `get_text_bounded()`.
 - The `PdfDocument` class will be cleaned up:
   * The context manager API will be removed. It will not be possible to use documents in a `with`-block anymore.
   * The `update_rendering_input()` method will be removed.

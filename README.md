@@ -183,9 +183,9 @@ Here are some examples of using the support model API.
   textpage = page.get_textpage()
   
   # Extract text from the whole page
-  text_all = textpage.get_text()
+  text_all = textpage.get_text_range()
   # Extract text from a specific rectangular area
-  text_part = textpage.get_text(left=50, bottom=100, right=width-50, top=height-100)
+  text_part = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
   
   # Extract URLs from the page
   links = [l for l in textpage.get_links()]

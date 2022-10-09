@@ -50,10 +50,11 @@ def main(args):
         page = doc.get_page(index)
         textpage = page.get_textpage()
         
+        # TODO let caller pass in possible range/boundary parameters
         if args.strategy == STRATEGY_RANGE:
             text = textpage.get_text_range()
         elif args.strategy == STRATEGY_BOUNDED:
-            text = textpage.get_text()
+            text = textpage.get_text_bounded()
         else:
             assert False
         
