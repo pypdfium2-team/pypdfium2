@@ -58,9 +58,5 @@ def main(args):
         else:
             assert False
         
-        # for g in (textpage, page): g.close()
-        
         print(sep + "# Page %s\n" % (index+1) + text)
         sep = "\n"
-    
-    # doc.close()

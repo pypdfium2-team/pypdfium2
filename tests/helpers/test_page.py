@@ -28,15 +28,12 @@ def test_boxes():
         getattr(page, "set_%sbox" % meth_name)(*exp_box)
         box = getattr(page, "get_%sbox" % meth_name)()
         assert pytest.approx(box) == exp_box
-    
-    # for g in (page, pdf): g.close()
 
 
 def test_mediabox_fallback():
     pdf = pdfium.PdfDocument(TestFiles.box_fallback)
     page = pdf.get_page(0)
     assert page.get_mediabox() == (0, 0, 612, 792)
-    # for g in (page, pdf): g.close()
 
 
 def test_rotation():
@@ -45,7 +42,6 @@ def test_rotation():
     for r in (90, 180, 270, 0):
         page.set_rotation(r)
         assert page.get_rotation() == r
-    # for g in (page, pdf): g.close()
 
 
 def test_pageobjects():
@@ -72,5 +68,3 @@ def test_pageobjects():
     assert len(positions) == len(exp_positions)
     for pos, exp_pos in zip(positions, exp_positions):
         assert pytest.approx(pos, abs=1) == exp_pos
-    
-    # for g in (page, pdf): g.close()
