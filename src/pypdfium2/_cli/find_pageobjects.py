@@ -54,6 +54,3 @@ def main(args):
         for obj in page.get_objects(max_depth=args.max_depth):
             if obj.type in args.types:
                 print("    "*obj.level + pdfium.ObjectTypeToStr[obj.type], obj.get_pos())
-        # page.close()
-    
-    # doc.close()

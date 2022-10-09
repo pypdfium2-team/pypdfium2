@@ -91,5 +91,3 @@ def main(args):
     dest_pdf = pdfium.PdfDocument(raw_dest)
     with open(args.output, "wb") as buffer:
         dest_pdf.save(buffer)
-    
-    # for g in (dest_pdf, src_pdf): g.close()

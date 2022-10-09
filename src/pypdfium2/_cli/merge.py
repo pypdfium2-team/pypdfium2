@@ -17,7 +17,6 @@ def _merge_files(input_paths, passwords):
             raise RuntimeError("Importing pages failed.")
         
         index += len(src_pdf)
-        # src_pdf.close()
     
     return dest_pdf
 
@@ -52,5 +51,3 @@ def main(args):
     merged_pdf = _merge_files(args.inputs, args.passwords)
     with open(args.output, "wb") as buffer:
         merged_pdf.save(buffer)
-    
-    # merged_pdf.close()

@@ -209,6 +209,3 @@ def main(args):
             suffix = str(index+1).zfill(n_digits)
             output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
             image.save(output_path)
-            # image.close()
-        
-        # pdf.close()

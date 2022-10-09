@@ -13,13 +13,11 @@ from ..conftest import TestFiles
 def toc_doc():
     doc = pdfium.PdfDocument(TestFiles.toc)
     yield doc
-    # doc.close()
 
 @pytest.fixture
 def toc_circular_doc():
     doc = pdfium.PdfDocument(TestFiles.toc_circular)
     yield doc
-    # doc.close()
 
 
 def _compare_bookmark(bookmark, **kwargs):
@@ -103,11 +101,9 @@ def test_toc_misc(toc_doc, toc_circular_doc):
     
     viewmodes_doc = pdfium.PdfDocument(TestFiles.toc_viewmodes)
     _test_printtoc(viewmodes_doc, TocResult_C)
-    # viewmodes_doc.close()
     
     maxdepth_doc = pdfium.PdfDocument(TestFiles.toc_maxdepth)
     _test_printtoc(maxdepth_doc, TocResult_D, max_depth=10)
-    # maxdepth_doc.close()
 
 
 TocResult_A = """\
