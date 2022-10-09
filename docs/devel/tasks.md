@@ -7,14 +7,15 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 Also see the issues panel and inline `TODO` marks in source code.
 
 ### Main Code
-* Raise an exception if objects were not closed in correct order. On `__del__`, issue a warning if an object is not closed yet.
+* Check if we should use `FPDFPage_HasTransparency()` on rendering.
+* Add support models for attachments and image extraction.
+* Consolidate and extend helper classes.
+* Ensure we correctly handle PDFium return codes indicating failure.
+* Review on a case-by-case basis where we should raise an error and where pass.
 * Investigate if we can implement interruptible rendering.
 * When rendering with multiple processes and bytes were provided as input, is the memory duplicated or shared? If it's duplicated, find a way to share it or write a tempfile instead.
 * Move init/destroy into a separate file. Provide public init/destroy functions, given that embedders who deal with long-running applications might not want to have PDFium in memory all the time.
 * Make the bindings file `_pypdfium.py` public ?
-* Add support models for attachments and image extraction.
-* Ensure we correctly handle PDFium return codes indicating failure.
-* Consolidate and extend helper classes.
 
 ### Setup Infrastructure
 * craft_wheels: add means to skip platforms for which artefacts are missing.

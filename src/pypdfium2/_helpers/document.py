@@ -119,7 +119,8 @@ class PdfDocument (BitmapConvAliases):
         return self
     
     def __exit__(self, *_):
-        # We do not invoke close at this place anymore because that would increase the risk of callers closing parent objects before child objects. (Consider a `with`-block where pages are not closed explicitly: garbage collection of pages commonly happens later than context manager exit, so page would be closed after document, which is illegal.)
+        # We do not invoke close at this place anymore because that would increase the risk of callers closing parent objects before child objects.
+        # (Consider a `with`-block where pages are not closed explicitly: garbage collection of pages commonly happens later than context manager exit, so page would be closed after document, which is illegal.)
         pass
     
     def __len__(self):

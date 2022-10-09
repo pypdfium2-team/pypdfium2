@@ -277,7 +277,6 @@ class PdfPage (BitmapConvAliases):
         for info, pos in zip(hb_buffer.glyph_infos, hb_buffer.glyph_positions):
             pdf_textobj = pdfium.FPDFPageObj_CreateTextObj(self.pdf.raw, pdf_font.raw, font_size)
             pdfium.FPDFText_SetCharcodes(pdf_textobj, ctypes.c_uint32(info.codepoint), 1)
-            # TODO consider using PdfMatrix support model
             pdfium.FPDFPageObj_Transform(
                 pdf_textobj,
                 1, 0, 0, 1,
@@ -369,14 +368,10 @@ class PdfPage (BitmapConvAliases):
                 data, cl_format, size = render_to(BitmapConv.any(bytes), ...)
         """
         
-        # In the future, we could add means to set different defaults for specific built-in converters, if necessary.
-        # We could also consider implementing a parameter sieve to automatically divide keyword arguments between converter and renderer so that callers don't need to care about the separation
-        
         args = (self.render_base(**renderer_kws), renderer_kws)
         if isinstance(converter, BitmapConvBase):
             return converter.run(*args, *converter.args, **converter.kwargs)
         elif isinstance(converter, type) and issubclass(converter, BitmapConvBase):
-            # run() is supposed to be a static method, but just initialise an instance of the converter class so it also works if the implementer forgot the decorator
             return converter().run(*args)
         elif callable(converter):
             return converter(*args)
@@ -493,20 +488,13 @@ class PdfPage (BitmapConvAliases):
             Image size is given in pixels as a tuple of width and height.
         """
         
-        # In theory, we would like to switch to matrix-based rendering because it provides more transformation features, but there are some obstacles:
-        # * PDFium does not provide a function to draw forms with a custom transform matrix, nor a function that would combine matrix and colour scheme.
-        # * A missing piece on our side is calculating the bounding box of the transformed page, which we need to create a fitting bitmap.
-        # Perhaps it would be easier to keep rendering code as-is and instead just add a helper for FPDFPage_TransFormWithClip() that may be used before rendering?
-        
         validate_colours(fill_colour, colour_scheme)
         
         if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
-            # FIXME do we need to take FPDFPage_HasTransparency() into account ?
             cl_pdfium = auto_bitmap_format(fill_colour, greyscale, prefer_bgrx)
         else:
             cl_pdfium = force_bitmap_format
         
-        # attempting to use FPDF_REVERSE_BYTE_ORDER with FPDFBitmap_Gray is not only unnecessary, but also causes issues, so prohibit it (pdfium bug?)
         if cl_pdfium == pdfium.FPDFBitmap_Gray:
             rev_byteorder = False
         
@@ -581,7 +569,6 @@ class PdfPage (BitmapConvAliases):
         if colour_scheme is None:
             pdfium.FPDF_RenderPageBitmap(*render_args)
         else:
-            # rendering with colour scheme is only available as async variant at the moment
             
             ifsdk_pause = pdfium.IFSDK_PAUSE()
             ifsdk_pause.version = 1

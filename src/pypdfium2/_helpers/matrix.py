@@ -124,9 +124,9 @@ class PdfMatrix:
         Parameters:
             angle (float): Clockwise angle in degrees to rotate the matrix.
         """
+        # row vectors -> b = -s leads to clockwise rotation indeed
         angle = (angle/180) * math.pi  # arc measure
         c, s = math.cos(angle), math.sin(angle)
-        # The PDF format uses row vectors, so b = -s leads to clockwise rotation indeed
         self.multiply( PdfMatrix(c, -s, s, c) )
     
     def mirror(self, vertical, horizontal):

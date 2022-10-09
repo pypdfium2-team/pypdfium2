@@ -15,3 +15,4 @@ The following API breaking changes are being considered for the next major relea
     Callers are expected to save and re-open the document on their if they wish that changes take effect with the multi-page renderer.
   * The multipage renderer will not implicitly read byte buffers into memory anymore.
     Callers are expected to take an explicit decision by providing a different input in the first place.
+- `PdfDocument.add_font()` might be changed to take bytes rather than a file path.

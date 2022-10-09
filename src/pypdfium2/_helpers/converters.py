@@ -49,8 +49,6 @@ class BitmapConv:
     Built-in converters to be applied on the rendering result.
     """
     
-    # Technically, the converter implementations are standalone - the outer class is just to nicely enclose them in one namespace.
-    
     class any (BitmapConvBase):
         """
         Simple factory for converters that merely work with the ctypes array, while passing through additional information unaffected.
@@ -86,8 +84,6 @@ class BitmapConv:
         @staticmethod
         def run(result, renderer_kws):
             
-            # NOTE This converter does not return bitmap size because the information is contained in the array's shape already.
-            
             if numpy is None:
                 raise RuntimeError("NumPy library needs to be installed for numpy_ndarray() converter.")
             
@@ -120,8 +116,6 @@ class BitmapConv:
         
         @staticmethod
         def run(result, renderer_kws, prefer_la=False):
-            
-            # NOTE This converter does not return additional parameters, as information on size and colour format (mode) is already contained in the image object.
             
             if PIL is None:
                 raise RuntimeError("Pillow library needs to be installed for pil_image() converter.")

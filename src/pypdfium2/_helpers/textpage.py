@@ -87,7 +87,7 @@ class PdfTextPage:
             count = self.n_chars - index
         self._check_span(self.n_chars, index, count)
         
-        n_bytes = count*2
+        n_bytes = count * 2
         buffer = ctypes.create_string_buffer(n_bytes+2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium.FPDFText_GetText(self.raw, index, count, buffer_ptr)
