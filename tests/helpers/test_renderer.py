@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
+import re
 import math
 import ctypes
 import logging
@@ -377,44 +378,32 @@ def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes, render_pdf
         assert a == b == c
 
 
-def test_render_pdf_new(caplog):
+def test_render_pdf_new():
     
-    pdf = pdfium.PdfDocument.new()
     # two pages to actually reach the process pool and not just the single-page shortcut
+    pdf = pdfium.PdfDocument.new()
     page_1 = pdf.new_page(50, 100)
     page_2 = pdf.new_page(50, 100)
+    renderer = pdf.render_to(
+        pdfium.BitmapConv.pil_image,
+    )
     
-    with caplog.at_level(logging.WARNING):
-        renderer = pdf.render_to(pdfium.BitmapConv.pil_image)
+    with pytest.raises(ValueError, match="Cannot render in parallel without input sources."):
         image = next(renderer)
-    
-    warning = "Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data."
-    assert warning in caplog.text
-    
-    assert isinstance(image, PIL.Image.Image)
-    assert image.mode == "RGB"
-    assert image.size == (50, 100)
-    
 
-def test_render_pdfbuffer(caplog):
+
+def test_render_pdfbuffer():
     
     buffer = open(TestFiles.multipage, "rb")
     pdf = pdfium.PdfDocument(buffer)
     assert pdf._orig_input is buffer
     assert pdf._actual_input is buffer
-    assert pdf._rendering_input is None
     
-    with caplog.at_level(logging.WARNING):
-        renderer = pdf.render_to(
-            pdfium.BitmapConv.pil_image,
-            scale = 0.5,
-        )
-        image = next(renderer)
-        assert isinstance(image, PIL.Image.Image)
-    
-    assert isinstance(pdf._rendering_input, bytes)
-    warning = "Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly."
-    assert warning in caplog.text
+    renderer = pdf.render_to(
+        pdfium.BitmapConv.pil_image,
+    )
+    with pytest.raises(ValueError, match=re.escape("Cannot render in parallel with buffer input.")):
+        next(renderer)
 
 
 def test_render_pdfbytes():
@@ -425,14 +414,12 @@ def test_render_pdfbytes():
     pdf = pdfium.PdfDocument(data)
     assert pdf._orig_input is data
     assert pdf._actual_input is data
-    assert pdf._rendering_input is None
     renderer = pdf.render_to(
         pdfium.BitmapConv.pil_image,
         scale = 0.5,
     )
     image = next(renderer)
     assert isinstance(image, PIL.Image.Image)
-    assert isinstance(pdf._rendering_input, bytes)
 
 
 def test_render_pdffile_asbuffer():
@@ -441,7 +428,6 @@ def test_render_pdffile_asbuffer():
     
     assert pdf._orig_input == TestFiles.multipage
     assert isinstance(pdf._actual_input, io.BufferedReader)
-    assert pdf._rendering_input is None
     assert pdf._file_access is pdfium.FileAccess.BUFFER
     
     renderer = pdf.render_to(
@@ -450,8 +436,6 @@ def test_render_pdffile_asbuffer():
     )
     image = next(renderer)
     assert isinstance(image, PIL.Image.Image)
-    
-    assert pdf._rendering_input == TestFiles.multipage
     
     pdf.close()
     assert pdf._actual_input.closed is True
@@ -463,7 +447,6 @@ def test_render_pdffile_asbytes():
     
     assert pdf._orig_input == TestFiles.multipage
     assert isinstance(pdf._actual_input, bytes)
-    assert pdf._rendering_input is None
     assert pdf._file_access is pdfium.FileAccess.BYTES
     
     renderer = pdf.render_to(
@@ -472,7 +455,6 @@ def test_render_pdffile_asbytes():
     )
     image = next(renderer)
     assert isinstance(image, PIL.Image.Image)
-    assert pdf._rendering_input == TestFiles.multipage
 
 
 @pytest.mark.parametrize(

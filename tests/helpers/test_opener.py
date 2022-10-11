@@ -166,7 +166,6 @@ def test_open_new():
     assert isinstance(dest_pdf, pdfium.PdfDocument)
     assert isinstance(dest_pdf.raw, pdfium.FPDF_DOCUMENT)
     assert dest_pdf.raw is dest_pdf._orig_input is dest_pdf._actual_input
-    assert dest_pdf._rendering_input is None
     assert dest_pdf._ld_data is None
     
     assert dest_pdf.get_version() is None
