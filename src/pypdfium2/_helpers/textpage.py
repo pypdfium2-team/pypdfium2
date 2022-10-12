@@ -18,7 +18,7 @@ class PdfTextPage:
     Attributes:
         raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
         page (PdfPage): Reference to the page this textpage belongs to.
-        n_chars (int): Number of characters on the page, by the time of initialisation.
+        n_chars (int): Number of characters on the page, at the time of initialisation.
     """
     
     def __init__(self, raw, page):

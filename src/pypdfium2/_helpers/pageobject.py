@@ -24,9 +24,10 @@ class PdfPageObject:
             Reference to the document this pageobject belongs to. May be :data:`None` if the object does not belong to a document yet.
             This attribute is always set if :attr:`.page` is set.
         level (int):
-            Nesting level signifying the number of parent Form XObjects. Zero if the object is not nested in a Form XObject.
+            Nesting level signifying the number of parent Form XObjects, at the time of initialisation.
+            Zero if the object is not nested in a Form XObject.
         type (int):
-            The type of the object (:data:`FPDF_PAGEOBJ_*`).
+            The type of the object (:data:`FPDF_PAGEOBJ_*`), at the time of initialisation.
     """
     
     def __init__(self, raw, page=None, pdf=None, level=0):
