@@ -50,7 +50,7 @@ def install_handler():
     
     if not os.path.exists(pl_dir):
         need_update = True  # platform directory doesn't exist yet
-    if not os.path.exists(ver_file) or not all(exists(fp) for fp in get_platfiles(pl_name)):
+    elif not os.path.exists(ver_file) or not all(exists(fp) for fp in get_platfiles(pl_name)):
         print("Warning: Specific platform files are missing -> implicit update", file=sys.stderr)
         need_update = True
     
