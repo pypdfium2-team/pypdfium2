@@ -10,24 +10,14 @@ from pypdfium2._helpers.misc import (
 )
 
 
-class BufferDataHolder:
+class _data_holder:
     
-    def __init__(self, reader_func, buffer):
-        self.reader_func = reader_func
-        self.buffer = buffer
-    
-    def close(self):
-        id(self.reader_func)
-        id(self.buffer)
-
-
-class ByteDataHolder:
-    
-    def __init__(self, bytedata):
-        self.bytedata = bytedata
+    def __init__(self, *args):
+        self._args = args
     
     def close(self):
-        id(self.bytedata)
+        for arg in self._args:
+            id(arg)
 
 
 class _reader_class:
@@ -46,7 +36,7 @@ def is_input_buffer(maybe_buffer):
     return all( callable(getattr(maybe_buffer, a, None)) for a in ("seek", "tell", "read", "readinto") )
 
 
-def open_pdf_buffer(buffer, password=None):
+def get_fileaccess(buffer):
     
     buffer.seek(0, 2)
     file_len = buffer.tell()
@@ -57,16 +47,9 @@ def open_pdf_buffer(buffer, password=None):
     fileaccess.m_GetBlock = get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")( _reader_class(buffer) )
     fileaccess.m_Param = None
     
-    pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, password)
-    ld_data = BufferDataHolder(fileaccess.m_GetBlock, buffer)
+    ld_data = _data_holder(fileaccess.m_GetBlock, buffer)
     
-    return pdf, ld_data
-
-
-def open_pdf_bytes(bytedata, password=None):
-    pdf = pdfium.FPDF_LoadMemDocument64(bytedata, len(bytedata), password)
-    ld_data = ByteDataHolder(bytedata)
-    return pdf, ld_data
+    return fileaccess, ld_data
 
 
 def open_pdf(input_data, password=None):
@@ -78,9 +61,11 @@ def open_pdf(input_data, password=None):
     if isinstance(input_data, str):
         pdf = pdfium.FPDF_LoadDocument(input_data.encode("utf-8"), password)
     elif isinstance(input_data, bytes):
-        pdf, ld_data = open_pdf_bytes(input_data, password)
+        pdf = pdfium.FPDF_LoadMemDocument64(input_data, len(input_data), password)
+        ld_data = _data_holder(input_data)
     elif is_input_buffer(input_data):
-        pdf, ld_data = open_pdf_buffer(input_data, password)
+        fileaccess, ld_data = get_fileaccess(input_data)
+        pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, password)
     else:
         raise TypeError("Invalid input type '%s'" % type(input_data).__name__)
     
