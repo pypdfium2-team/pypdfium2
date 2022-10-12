@@ -38,8 +38,7 @@ jobs:
       - name: Install/update dependencies
         run: |
           python3 -m pip install -U pip
-          python3 -m pip install -U setuptools build wheel
-          python3 -m pip install git+https://github.com/ctypesgen/ctypesgen.git@master
+          python3 -m pip install -U setuptools build wheel ctypesgen
           python3 -m pip install -U .[utilities,test,inserttext,converters]
       
       # we have to reset the state of the repository since `pip install .[...]` will implicitly alter the version file,

@@ -6,6 +6,6 @@ build-backend = "setuptools.build_meta"
 requires = [
     "setuptools",
     "build",
-    "wheel",  # @ git+https://github.com/pypa/wheel.git@9d4264d2f23ea44dd85639a27fa6b284261921cd  # or @main
-    "ctypesgen",  # @ git+https://github.com/ctypesgen/ctypesgen.git@master
+    "wheel",
+    "ctypesgen",
 ]
