@@ -26,12 +26,10 @@ Version
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
-    :show-inheritance:
 
 Page
 ****
 .. automodule:: pypdfium2._helpers.page
-    :show-inheritance:
 
 Page Object
 ***********
@@ -48,7 +46,6 @@ Matrix
 Converters
 **********
 .. automodule:: pypdfium2._helpers.converters
-    :show-inheritance:
 
 Miscellaneous
 *************

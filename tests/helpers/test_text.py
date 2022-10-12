@@ -77,24 +77,6 @@ def test_getrectboxes(textpage):
     assert textpage.get_text_range(textpage.n_chars-len(text), 0)
 
 
-def test_gettext_area_oob(textpage):
-    areas = [
-        (-1, 0, 0, 0),   # left too low
-        (0, -1, 0, 0),   # bottom too low
-        (0, 0, -1, 0),   # right too low
-        (0, 0, 0, -1),   # top too low
-        (600, 0, 0, 0),  # left too high
-        (0, 900, 0, 0),  # bottom too high
-        (0, 0, 600, 0),  # right too high
-        (0, 0, 0, 900),  # top too high
-        (100, 0, 50, 0), # left higher than right
-        (0, 100, 0, 50), # bottom higher than top
-    ]
-    for area in areas:
-        with pytest.raises(ValueError, match=re.escape("Invalid page area requested.")):
-            textpage.get_text_bounded(*area)
-
-
 def test_search_text(textpage):
     searcher = textpage.search("labor")
     

@@ -17,7 +17,7 @@ except ImportError:
 class BitmapConvBase:
     """
     Parent class for bitmap converters compatible with :meth:`.PdfPage.render_to` / :meth:`.PdfDocument.render_to`.
-    The constructor captures any arguments and adds them to the :meth:`.run` call.
+    The initialiser captures any arguments and adds them to the :meth:`.run` call.
     """
     
     def __init__(self, *args, **kwargs):
@@ -35,9 +35,9 @@ class BitmapConvBase:
             renderer_kws (dict):
                 Dictionary of rendering keywords that were passed in by the caller.
             args (tuple):
-                Further positional arguments to the converter, as captured by the constructor.
+                Further positional arguments to the converter, as captured by the initialiser.
             kwargs (dict):
-                Further keyword arguments to the converter, as captured by the constructor.
+                Further keyword arguments to the converter, as captured by the initialiser.
         Returns:
             typing.Any: The converted rendering result (implementation-specific).
         """

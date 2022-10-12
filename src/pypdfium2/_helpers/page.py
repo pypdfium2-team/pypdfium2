@@ -1,5 +1,4 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
-# SPDX-FileCopyrightText: 2022 Anurag Bansal <anurag.bansal.585@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import math
@@ -263,6 +262,9 @@ class PdfPage (BitmapConvAliases):
                 PDF font data.
         """
         
+        # User-contributed code
+        # SPDX-FileCopyrightText: 2022 Anurag Bansal <anurag.bansal.585@gmail.com>
+        
         hb_buffer = harfbuzz.Buffer()
         hb_buffer.add_str(text)
         hb_buffer.guess_segment_properties()
@@ -316,15 +318,16 @@ class PdfPage (BitmapConvAliases):
             if raw_obj is None:
                 raise PdfiumError("Failed to get page object.")
             
-            helper_obj = PdfPageObject(
+            type = pdfium.FPDFPageObj_GetType(raw_obj)
+            yield PdfPageObject(
                 raw = raw_obj,
+                type = type,
                 page = self,
                 pdf = self.pdf,
                 level = level,
             )
-            yield helper_obj
             
-            if level < max_depth-1 and helper_obj.type == pdfium.FPDF_PAGEOBJ_FORM:
+            if level < max_depth-1 and type == pdfium.FPDF_PAGEOBJ_FORM:
                 yield from self.get_objects(
                     max_depth = max_depth,
                     form = raw_obj,
@@ -338,10 +341,10 @@ class PdfPage (BitmapConvAliases):
         
         Parameters:
             converter (BitmapConvBase | typing.Callable):
-                A translator to convert the output of :meth:`.render_base`.
-                See :class:`.BitmapConv` for a set of built-in converters.
+                A translator to convert the output of :meth:`.render_base`. See :class:`.BitmapConv` for a set of built-in converters.
             renderer_kws (dict):
                 Keyword arguments to the renderer.
+        
         Returns:
             typing.Any: Converter-specific result.
         
