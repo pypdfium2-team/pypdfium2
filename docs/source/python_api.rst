@@ -37,6 +37,10 @@ Page Object
 ***********
 .. automodule:: pypdfium2._helpers.pageobject
 
+Text Page
+*********
+.. automodule:: pypdfium2._helpers.textpage
+
 Matrix
 ******
 .. automodule:: pypdfium2._helpers.matrix
@@ -45,10 +49,6 @@ Converters
 **********
 .. automodule:: pypdfium2._helpers.converters
     :show-inheritance:
-
-Text Page
-*********
-.. automodule:: pypdfium2._helpers.textpage
 
 Miscellaneous
 *************
