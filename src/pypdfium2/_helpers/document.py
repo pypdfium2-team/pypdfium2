@@ -14,7 +14,6 @@ from pypdfium2._helpers.misc import (
     OutlineItem,
     FileAccess,
     PdfiumError,
-    DataHolder,
     ErrorToStr,
     ViewmodeToStr,
     get_functype,
@@ -75,7 +74,7 @@ class PdfDocument (BitmapConvAliases):
         
         self._orig_input = input_data
         self._actual_input = input_data
-        self._ld_data = None
+        self._data_holder = []
         
         self._password = password
         self._file_access = file_access
@@ -106,11 +105,12 @@ class PdfDocument (BitmapConvAliases):
         if isinstance(self._actual_input, pdfium.FPDF_DOCUMENT):
             self.raw = self._actual_input
         else:
-            self.raw, self._ld_data = _open_pdf(self._actual_input, self._password)
+            self.raw, ld_data = _open_pdf(self._actual_input, self._password)
+            self._data_holder += ld_data
         
         self._finalizer = weakref.finalize(
             self, self._static_close,
-            self.raw, self._ld_data, self._autoclose, self._actual_input,
+            self.raw, self._data_holder, self._autoclose, self._actual_input,
         )
     
     
@@ -147,13 +147,13 @@ class PdfDocument (BitmapConvAliases):
     
     
     @staticmethod
-    def _static_close(raw, ld_data, autoclose, actual_input):
+    def _static_close(raw, data_holder, autoclose, actual_input):
         
         # logger.debug("Closing document")
         pdfium.FPDF_CloseDocument(raw)
         
-        if ld_data is not None:
-            ld_data.close()
+        for data in data_holder:
+            id(data)
         if autoclose and is_input_buffer(actual_input):
             actual_input.close()
     
@@ -575,12 +575,12 @@ def _open_pdf(input_data, password=None):
     if isinstance(password, str):
         password = password.encode("utf-8")
     
-    ld_data = None
+    ld_data = ()
     if isinstance(input_data, str):
         pdf = pdfium.FPDF_LoadDocument(input_data.encode("utf-8"), password)
     elif isinstance(input_data, bytes):
         pdf = pdfium.FPDF_LoadMemDocument64(input_data, len(input_data), password)
-        ld_data = DataHolder(input_data)
+        ld_data = (input_data, )
     elif is_input_buffer(input_data):
         fileaccess, ld_data = get_fileaccess(input_data)
         pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, password)

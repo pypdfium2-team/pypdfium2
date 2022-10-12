@@ -125,22 +125,6 @@ def get_functype(struct, funcname):
     return {k: v for k, v in struct._fields_}[funcname]
 
 
-class DataHolder:
-    """
-    Utility class to keep arbitrary objects alive up to a certain point.
-    """
-    
-    def __init__(self, *args):
-        self._args = args
-    
-    def close(self):
-        """
-        Call this method to denote the point up to which resources need to remain available.
-        """
-        for arg in self._args:
-            id(arg)
-
-
 class _reader_class:
     
     def __init__(self, buffer):
@@ -166,7 +150,7 @@ def get_fileaccess(buffer):
     Acquire an :class:`FPDF_FILEACCESS` interface for a byte buffer.
     
     Returns:
-        (FPDF_FILEACCESS, DataHolder): PDFium file access interface, and accompanying data holder.
+        (FPDF_FILEACCESS, tuple): PDFium file access interface, and accompanying data that needs to be held in memory.
     """
     
     buffer.seek(0, 2)
@@ -178,7 +162,7 @@ def get_fileaccess(buffer):
     fileaccess.m_GetBlock = get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")( _reader_class(buffer) )
     fileaccess.m_Param = None
     
-    ld_data = DataHolder(fileaccess.m_GetBlock, buffer)
+    ld_data = (fileaccess.m_GetBlock, buffer)
     
     return fileaccess, ld_data
 
