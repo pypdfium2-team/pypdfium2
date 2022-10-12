@@ -5,7 +5,6 @@ import io
 import re
 import math
 import ctypes
-import logging
 import weakref
 from os.path import join
 import numpy
