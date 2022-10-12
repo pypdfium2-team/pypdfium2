@@ -266,6 +266,22 @@ def copy_platfiles(pl_name):
         shutil.copy(fp, ModuleDir)
 
 
+def get_changelog_staging(flush=False):
+    
+    with open(ChangelogStaging, "r") as fh:
+        content = fh.read()
+        pos = content.index("\n", content.index("# Changelog")) + 1
+        header = content[:pos].strip() + "\n"
+        devel_msg = content[pos:].strip()
+        if devel_msg:
+            devel_msg += "\n"
+    
+    if flush:
+        with open(ChangelogStaging, "w") as fh:
+            fh.write(header)
+    
+    return devel_msg
+
 def get_version_ns():
     ver_ns = {}
     with open(VersionFile, "r") as fh:

@@ -4,7 +4,7 @@
 Changelog
 =========
 
-.. ifconfig:: branch_name == 'main'
+.. ifconfig:: include_changelog_staging
     
     Next
     ----

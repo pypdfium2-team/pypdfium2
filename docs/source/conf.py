@@ -14,23 +14,17 @@ from os.path import (
 
 sys.path.insert(0, join(dirname(dirname(dirname(abspath(__file__)))), "setupsrc"))
 from pl_setup.packaging_base import (
-    SourceTree,
-    run_cmd,
+    get_changelog_staging,
 )
 
+def _have_changelog():
+    log = get_changelog_staging()
+    if log:
+        return True
+    else:
+        return False
 
-def get_branch():
-    branch = run_cmd(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=SourceTree, capture=True)
-    if branch == "HEAD":
-        # attempt to resolve detached head state (may happen in RTD build)
-        output = run_cmd(["git", "branch"], cwd=SourceTree, capture=True)
-        line = [l[2:] for l in output.split("\n") if l.startswith("* ")][0]
-        branch = line.replace("(HEAD detached at origin/", "").replace(")", "").strip()
-    print(branch, file=sys.stderr)
-    return branch
-
-
-branch_name = get_branch()
+include_changelog_staging = _have_changelog()
 
 project = "pypdfium2"
 author = "pypdfium2-team"
@@ -73,4 +67,4 @@ intersphinx_mapping = {
 
 
 def setup(app):
-    app.add_config_value("branch_name", "", "env")
+    app.add_config_value("include_changelog_staging", False, "env")

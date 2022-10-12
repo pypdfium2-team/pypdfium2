@@ -20,6 +20,7 @@ from pl_setup.packaging_base import (
     set_versions,
     get_version_ns,
     get_latest_version,
+    get_changelog_staging,
     SourceTree,
     PDFium_URL,
     RepositoryURL,
@@ -107,24 +108,6 @@ def do_versioning(latest):
     assert did_change
     
     return (c_updates, py_updates)
-
-
-def get_summary(curr_ns):
-    
-    with open(ChangelogStaging, "r") as fh:
-        content = fh.read()
-        pos = content.index("\n", content.index("# Changelog")) + 1
-        header = content[:pos].strip() + "\n"
-        devel_msg = content[pos:].strip()
-        if devel_msg:
-            devel_msg += "\n"
-    
-    # flush changelog_staging, except if doing a beta release
-    if curr_ns["V_BETA"] is None:
-        with open(ChangelogStaging, "w") as fh:
-            fh.write(header)
-    
-    return devel_msg
 
 
 def log_changes(summary, prev_ns, curr_ns):
@@ -225,7 +208,9 @@ def main():
     c_updates, py_updates = do_versioning(latest)
     curr_ns = get_version_ns()
     
-    summary = get_summary(curr_ns)
+    summary = get_changelog_staging(
+        flush = (curr_ns["V_BETA"] is None),
+    )
     log_changes(summary, prev_ns, curr_ns)
     if args.checkin:
         register_changes(curr_ns)
