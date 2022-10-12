@@ -35,44 +35,6 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-def _open_pdf(input_data, password=None):
-    
-    if isinstance(password, str):
-        password = password.encode("utf-8")
-    
-    ld_data = None
-    if isinstance(input_data, str):
-        pdf = pdfium.FPDF_LoadDocument(input_data.encode("utf-8"), password)
-    elif isinstance(input_data, bytes):
-        pdf = pdfium.FPDF_LoadMemDocument64(input_data, len(input_data), password)
-        ld_data = DataHolder(input_data)
-    elif is_input_buffer(input_data):
-        fileaccess, ld_data = get_fileaccess(input_data)
-        pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, password)
-    else:
-        raise TypeError("Invalid input type '%s'" % type(input_data).__name__)
-    
-    if pdfium.FPDF_GetPageCount(pdf) < 1:
-        err_code = pdfium.FPDF_GetLastError()
-        pdfium_msg = ErrorToStr.get(err_code, "Error code %s" % err_code)
-        raise PdfiumError("Loading the document failed (PDFium: %s)" % pdfium_msg)
-    
-    return pdf, ld_data
-
-
-class _writer_class:
-    
-    def __init__(self, buffer):
-        self.buffer = buffer
-        if not callable( getattr(self.buffer, "write", None) ):
-            raise ValueError("Output buffer must implement the write() method.")
-    
-    def __call__(self, _, data, size):
-        block = ctypes.cast(data, ctypes.POINTER(ctypes.c_ubyte * size))
-        self.buffer.write(block.contents)
-        return 1
-
-
 class PdfDocument (BitmapConvAliases):
     """
     Document helper class.
@@ -606,6 +568,44 @@ class PdfDocument (BitmapConvAliases):
                 yield result
         
         assert len(page_indices) == i
+
+
+def _open_pdf(input_data, password=None):
+    
+    if isinstance(password, str):
+        password = password.encode("utf-8")
+    
+    ld_data = None
+    if isinstance(input_data, str):
+        pdf = pdfium.FPDF_LoadDocument(input_data.encode("utf-8"), password)
+    elif isinstance(input_data, bytes):
+        pdf = pdfium.FPDF_LoadMemDocument64(input_data, len(input_data), password)
+        ld_data = DataHolder(input_data)
+    elif is_input_buffer(input_data):
+        fileaccess, ld_data = get_fileaccess(input_data)
+        pdf = pdfium.FPDF_LoadCustomDocument(fileaccess, password)
+    else:
+        raise TypeError("Invalid input type '%s'" % type(input_data).__name__)
+    
+    if pdfium.FPDF_GetPageCount(pdf) < 1:
+        err_code = pdfium.FPDF_GetLastError()
+        pdfium_msg = ErrorToStr.get(err_code, "Error code %s" % err_code)
+        raise PdfiumError("Loading the document failed (PDFium: %s)" % pdfium_msg)
+    
+    return pdf, ld_data
+
+
+class _writer_class:
+    
+    def __init__(self, buffer):
+        self.buffer = buffer
+        if not callable( getattr(self.buffer, "write", None) ):
+            raise ValueError("Output buffer must implement the write() method.")
+    
+    def __call__(self, _, data, size):
+        block = ctypes.cast(data, ctypes.POINTER(ctypes.c_ubyte * size))
+        self.buffer.write(block.contents)
+        return 1
 
 
 class PdfXObject:

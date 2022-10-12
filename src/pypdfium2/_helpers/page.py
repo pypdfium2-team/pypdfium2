@@ -8,10 +8,6 @@ import weakref
 import logging
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers._utils import (
-    validate_colours,
-    auto_bitmap_format,
-)
 from pypdfium2._helpers.misc import (
     OptimiseMode,
     PdfiumError,
@@ -488,10 +484,12 @@ class PdfPage (BitmapConvAliases):
             Image size is given in pixels as a tuple of width and height.
         """
         
-        validate_colours(fill_colour, colour_scheme)
+        _validate_colours(fill_colour)
+        if colour_scheme is not None:
+            _validate_colours(*colour_scheme.colours.values())
         
         if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
-            cl_pdfium = auto_bitmap_format(fill_colour, greyscale, prefer_bgrx)
+            cl_pdfium = _auto_bitmap_format(fill_colour, greyscale, prefer_bgrx)
         else:
             cl_pdfium = force_bitmap_format
         
@@ -587,6 +585,26 @@ class PdfPage (BitmapConvAliases):
                 pdfium.FPDF_FFLDraw(form_env, *render_args)
         
         return buffer, cl_string, (width, height)
+
+
+def _validate_colours(*colours):
+    for col in colours:
+        if len(col) != 4:
+            raise ValueError("Colour must consist of exactly 4 values.")
+        if not all(0 <= c <= 255 for c in col):
+            raise ValueError("Colour value exceeds boundaries.")
+
+
+def _auto_bitmap_format(fill_colour, greyscale, prefer_bgrx):
+    # no need to take alpha values of colour_scheme into account (drawings are additive)
+    if (fill_colour[3] < 255):
+        return pdfium.FPDFBitmap_BGRA
+    elif greyscale:
+        return pdfium.FPDFBitmap_Gray
+    elif prefer_bgrx:
+        return pdfium.FPDFBitmap_BGRx
+    else:
+        return pdfium.FPDFBitmap_BGR
 
 
 class ColourScheme:
