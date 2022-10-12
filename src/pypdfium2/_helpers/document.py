@@ -119,6 +119,10 @@ class PdfDocument (BitmapConvAliases):
         self._file_access = file_access
         self._autoclose = autoclose
         
+        self._form_env = None
+        self._form_config = None
+        self._form_finalizer = None
+        
         if isinstance(self._orig_input, str):
             
             self._orig_input = os.path.abspath( os.path.expanduser(self._orig_input) )
@@ -141,10 +145,6 @@ class PdfDocument (BitmapConvAliases):
             self.raw = self._actual_input
         else:
             self.raw, self._ld_data = _open_pdf(self._actual_input, self._password)
-        
-        self._form_env = None
-        self._form_config = None
-        self._form_finalizer = None
         
         self._finalizer = weakref.finalize(
             self, self._static_close,
