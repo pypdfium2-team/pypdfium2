@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import enum
+import ctypes
 import pypdfium2._pypdfium as pdfium
 
 
@@ -10,7 +11,7 @@ class PdfiumError (RuntimeError):
     pass
 
 
-class FileAccess (enum.Enum):
+class FileAccess (enum.Enum):  # FIXME ambiguous name?
     """
     Different ways how files can be loaded.
     
@@ -88,7 +89,6 @@ class OutlineItem:
         self.view_pos = view_pos
 
 
-
 def colour_tohex(colour, rev_byteorder):
     """
     Convert an RGBA colour specified by 4 integers ranging from 0 to 255 to a single 32-bit integer as required by PDFium.
@@ -123,6 +123,64 @@ def get_functype(struct, funcname):
         This is a convenience function to retrieve the declaration.
     """
     return {k: v for k, v in struct._fields_}[funcname]
+
+
+class DataHolder:
+    """
+    Utility class to keep arbitrary objects alive up to a certain point.
+    """
+    
+    def __init__(self, *args):
+        self._args = args
+    
+    def close(self):
+        """
+        Call this method to denote the point up to which resources need to remain available.
+        """
+        for arg in self._args:
+            id(arg)
+
+
+class _reader_class:
+    
+    def __init__(self, buffer):
+        self._buffer = buffer
+    
+    def __call__(self, _, position, p_buf, size):
+        c_buf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
+        self._buffer.seek(position)
+        self._buffer.readinto(c_buf.contents)
+        return 1
+
+
+def is_input_buffer(maybe_buffer):
+    """
+    Returns:
+        bool: True if the given object implements the methods ``seek()``, ``tell()``, ``read()``, and ``readinto()``. False otherwise.
+    """
+    return all( callable(getattr(maybe_buffer, a, None)) for a in ("seek", "tell", "read", "readinto") )
+
+
+def get_fileaccess(buffer):
+    """
+    Acquire an :class:`FPDF_FILEACCESS` interface for a byte buffer.
+    
+    Returns:
+        (FPDF_FILEACCESS, DataHolder): PDFium file access interface, and accompanying data holder.
+    """
+    
+    buffer.seek(0, 2)
+    file_len = buffer.tell()
+    buffer.seek(0)
+    
+    fileaccess = pdfium.FPDF_FILEACCESS()
+    fileaccess.m_FileLen = file_len
+    fileaccess.m_GetBlock = get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")( _reader_class(buffer) )
+    fileaccess.m_Param = None
+    
+    ld_data = DataHolder(fileaccess.m_GetBlock, buffer)
+    
+    return fileaccess, ld_data
 
 
 def _invert_dict(dictionary):

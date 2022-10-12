@@ -11,17 +11,15 @@ import functools
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers._opener import (
-    open_pdf,
-    is_input_buffer,
-)
 from pypdfium2._helpers.misc import (
     OutlineItem,
     FileAccess,
     PdfiumError,
     ViewmodeToStr,
     get_functype,
+    is_input_buffer,
 )
+from pypdfium2._helpers._opener import open_pdf
 from pypdfium2._helpers.pageobject import (
     PdfPageObject,
 )
@@ -43,7 +41,7 @@ class PdfDocument (BitmapConvAliases):
     Parameters:
         input_data (str | bytes | typing.BinaryIO | FPDF_DOCUMENT):
             The input PDF given as file path, bytes, byte buffer, or raw PDFium document handle.
-            A byte buffer is defined as an object that implements the methods ``seek()``, ``tell()``, ``read()`` and ``readinto()``.
+            :func:`.is_input_buffer` defines which objects are recognised as byte buffers.
         password (str | bytes):
             A password to unlock the PDF, if encrypted.
             If the document is not encrypted but a password was given, PDFium will ignore it.
