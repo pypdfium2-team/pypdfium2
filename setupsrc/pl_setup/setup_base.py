@@ -32,13 +32,17 @@ def bdist_factory(pl_name):
         
         def finalize_options(self, *args, **kws):
             bdist_wheel.finalize_options(self, *args, **kws)
-            self.plat_name_supplied = True
             self.root_is_pure = False
         
         def get_tag(self, *args, **kws):
             return "py3", "none", get_wheel_tag(pl_name)
     
     return pypdfium_bdist
+
+
+class BinaryDistribution (setuptools.Distribution):
+    def has_ext_modules(self):
+        return True
 
 
 SetupKws = dict(
@@ -73,12 +77,6 @@ def mkwheel(pl_name):
     setuptools.setup(
         package_data = {"": [libname]},
         cmdclass = {"bdist_wheel": bdist_factory(pl_name)},
-        ext_modules = [
-            # declare a no-op extension module to prevent setuptools from using a purelib folder (cf. PEP 427)
-            setuptools.Extension(
-                "pdfium", [""],
-                optional = True,
-            ),
-        ],
+        distclass = BinaryDistribution,
         **SetupKws,
     )
