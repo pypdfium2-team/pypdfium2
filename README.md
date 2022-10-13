@@ -208,7 +208,7 @@ Here are some examples of using the support model API.
   ```python
   pdf = pdfium.PdfDocument.new()
   width, height = (595, 842)
-  page = pdf.new_page(width, height)
+  page_a = pdf.new_page(width, height)
   ```
 
 * Insert text content
@@ -220,7 +220,7 @@ Here are some examples of using the support model API.
       type = pdfium.FPDF_FONT_TRUETYPE,
       is_cid = True,
   )
-  page.insert_text(
+  page_a.insert_text(
       text = "मैं घोषणा, पुष्टि और सहमत हूँ कि:",
       pos_x = 50,
       pos_y = height - 75,
@@ -228,7 +228,18 @@ Here are some examples of using the support model API.
       hb_font = hb_font,
       pdf_font = pdf_font,
   )
-  page.generate_content()
+  page_a.generate_content()
+  ```
+
+* Add a JPEG image on a second page
+  ```python
+  # Direct JPEG inclusion (only a small overhead for the PDF container)
+  image = pdfium.PdfImageObject.new(pdf)
+  buffer = open("./tests/resources/mona_lisa.jpg", "rb")
+  width, height = image.load_jpeg(buffer, autoclose=True)
+  page_b = pdf.new_page(width, height)
+  page_b.insert_object(image)
+  page_b.generate_content()
   ```
 
 * Save the document
