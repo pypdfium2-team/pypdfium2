@@ -3,7 +3,11 @@
 
 from ctypes import c_float
 import pypdfium2._pypdfium as pdfium
-from pypdfium2._helpers.misc import PdfiumError
+from pypdfium2._helpers.misc import (
+    PdfiumError,
+    get_fileaccess,
+    is_input_buffer,
+)
 from pypdfium2._helpers.matrix import PdfMatrix
 
 
@@ -11,13 +15,18 @@ class PdfPageObject:
     """
     Page object helper class.
     
+    When constructing a :class:`.PdfPageObject`, a more specific subclass may be returned instead,
+    depending on :attr:`.type` (e. g. :class:`.PdfImageObject`).
+    
     Note:
         Page objects are automatically freed by PDFium with the page they belong to.
-        If a page object ends up without associated page, you should call ``FPDFPageObj_Destroy(pageobj.raw)``.
+        If a page object ends up without associated page, you may want to call ``FPDFPageObj_Destroy(pageobj.raw)``.
     
     Attributes:
         raw (FPDF_PAGEOBJECT):
             The underlying PDFium pageobject handle.
+        type (int):
+            The type of the object (:data:`FPDF_PAGEOBJ_*`), at the time of initialisation.
         page (PdfPage):
             Reference to the page this pageobject belongs to. May be :data:`None` if the object does not belong to a page yet.
         pdf (PdfDocument):
@@ -26,17 +35,26 @@ class PdfPageObject:
         level (int):
             Nesting level signifying the number of parent Form XObjects, at the time of initialisation.
             Zero if the object is not nested in a Form XObject.
-        type (int):
-            The type of the object (:data:`FPDF_PAGEOBJ_*`), at the time of initialisation.
     """
     
-    def __init__(self, raw, page=None, pdf=None, level=0):
+    
+    def __new__(cls, raw, type, *args, **kwargs):
+        # Allow to create a more specific helper depending on the type
+        if type == pdfium.FPDF_PAGEOBJ_IMAGE:
+            instance = super().__new__(PdfImageObject)
+        else:
+            instance = super().__new__(PdfPageObject)
+        instance.__init__(raw, type, *args, **kwargs)
+        return instance
+    
+    
+    def __init__(self, raw, type, page=None, pdf=None, level=0):
         
         self.raw = raw
+        self.type = type
         self.page = page
         self.pdf = pdf
         self.level = level
-        self.type = pdfium.FPDFPageObj_GetType(self.raw)
         
         if page is not None:
             if self.pdf is None:
@@ -57,15 +75,10 @@ class PdfPageObject:
         
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         success = pdfium.FPDFPageObj_GetBounds(self.raw, left, bottom, right, top)
-        
         if not success:
             raise PdfiumError("Failed to locate pageobject.")
         
-        pos = (left.value, bottom.value, right.value, top.value)
-        if pos[0] >= pos[2] or pos[1] >= pos[3]:
-            raise RuntimeError("Object boundaries are invalid: %s" % (pos, ))
-        
-        return pos
+        return (left.value, bottom.value, right.value, top.value)
     
     
     def get_matrix(self):
@@ -98,3 +111,114 @@ class PdfPageObject:
         if not isinstance(matrix, PdfMatrix):
             raise ValueError("*matrix* must be a PdfMatrix object.")
         pdfium.FPDFPageObj_Transform(self.raw, *matrix.get())
+
+
+class PdfImageObject (PdfPageObject):
+    """
+    Image object helper class (specific kind of page object).
+    """
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    @classmethod
+    def new(cls, pdf):
+        """
+        Parameters:
+            pdf (PdfDocument): The document to which the new image object shall be added.
+        Returns:
+            PdfImageObject: Handle to a new, empty image.
+        """
+        return cls(
+            pdfium.FPDFPageObj_NewImageObj(pdf.raw),
+            pdfium.FPDF_PAGEOBJ_IMAGE,
+            page = None,
+            pdf = pdf,
+        )
+    
+    
+    def load_jpeg(self, buffer, pages=None, inline=False, autoclose=True):
+        """
+        Load a JPEG into the image object.
+        
+        For a new image, 1 pixel will correspond to a length of 1 canvas unit, which is 1/72in by default, leading to a resolution of 72dpi.
+        :meth:`~PdfPageObject.transform` may be used to scale and position the image.
+        
+        If replacing an image, the existing transform matrix will be used.
+        If aspect ratios do not match, the new image will be squashed into the old image's boundaries.
+        The matrix may be corrected manually to prevent distortion.
+        
+        Parameters:
+            buffer (typing.BinaryIO):
+                A readable byte buffer to access the JPEG data.
+            pages (typing.Sequence[PdfPage] | None):
+                A list of pages that might contain the image.
+                May be :data:`None` or empty if the image is known not to be part of any page yet.
+                If the image exists multiple times, all occurrences found on the given pages will be replaced.
+            inline (bool):
+                Whether to load the image content into memory.
+                If :data:`True`, the buffer may be closed after this function call.
+                Otherwise, the buffer needs to remain open until the PDF is closed.
+            autoclose (bool):
+                Whether the buffer should be automatically closed once it is not needed anymore.
+        
+        Returns:
+            (int, int): Image width and height in pixels.
+        """
+        
+        if not is_input_buffer(buffer):
+            raise ValueError("This is not a compatible buffer: %s" % buffer)
+        
+        fileaccess, ld_data = get_fileaccess(buffer)
+        
+        if inline:
+            loader = pdfium.FPDFImageObj_LoadJpegFileInline
+        else:
+            loader = pdfium.FPDFImageObj_LoadJpegFile
+        
+        c_pages = None
+        page_count = 0
+        if pages:
+            page_count = len(pages)
+            c_pages = (pdfium.FPDF_PAGE * page_count)(*[p.raw for p in pages])
+        
+        success = loader(c_pages, page_count, self.raw, fileaccess)
+        if not success:
+            raise PdfiumError("Loading JPEG into image object failed.")
+        
+        if inline:
+            id(ld_data)
+            if autoclose:
+                buffer.close()
+        else:
+            self.pdf._data_holder += ld_data
+            if autoclose:
+                self.pdf._data_closer.append(buffer)
+        
+        metadata = self.get_info()
+        matrix = self.get_matrix()
+        if matrix == PdfMatrix():
+            # if the image's matrix is the identity matrix, it will appear as a tiny square of 1x1 canvas units
+            # hence, we scale to the image's width and height in pixels to achieve a sane default size
+            matrix.scale(metadata.width, metadata.height)
+            self.set_matrix(matrix)
+        
+        return (metadata.width, metadata.height)
+    
+    
+    def get_info(self):
+        """
+        Returns:
+            FPDF_IMAGEOBJ_METADATA:
+            A structure containing information about the image object, including dimensions, DPI, bits per pixel, and colour space.
+            If the image does not belong to a page yet, some values will be unset (0).
+        """
+        
+        raw_page = (self.page.raw if self.page else None)
+        
+        metadata = pdfium.FPDF_IMAGEOBJ_METADATA()
+        success = pdfium.FPDFImageObj_GetImageMetadata(self.raw, raw_page, metadata)
+        if not success:
+            raise PdfiumError("Failed to retrieve image metadata.")
+        
+        return metadata

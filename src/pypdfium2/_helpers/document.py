@@ -75,6 +75,7 @@ class PdfDocument (BitmapConvAliases):
         self._orig_input = input_data
         self._actual_input = input_data
         self._data_holder = []
+        self._data_closer = []
         
         self._password = password
         self._file_access = file_access
@@ -94,7 +95,7 @@ class PdfDocument (BitmapConvAliases):
                 pass
             elif self._file_access is FileAccess.BUFFER:
                 self._actual_input = open(self._orig_input, "rb")
-                self._autoclose = True
+                self._data_closer.append(self._actual_input)
             elif self._file_access is FileAccess.BYTES:
                 buf = open(self._orig_input, "rb")
                 self._actual_input = buf.read()
@@ -108,9 +109,12 @@ class PdfDocument (BitmapConvAliases):
             self.raw, ld_data = _open_pdf(self._actual_input, self._password)
             self._data_holder += ld_data
         
+        if self._autoclose and is_input_buffer(self._actual_input):
+            self._data_closer.append(self._actual_input)
+        
         self._finalizer = weakref.finalize(
             self, self._static_close,
-            self.raw, self._data_holder, self._autoclose, self._actual_input,
+            self.raw, self._data_holder, self._data_closer,
         )
     
     
@@ -147,15 +151,15 @@ class PdfDocument (BitmapConvAliases):
     
     
     @staticmethod
-    def _static_close(raw, data_holder, autoclose, actual_input):
+    def _static_close(raw, data_holder, data_closer):
         
         # logger.debug("Closing document")
         pdfium.FPDF_CloseDocument(raw)
         
         for data in data_holder:
             id(data)
-        if autoclose and is_input_buffer(actual_input):
-            actual_input.close()
+        for data in data_closer:
+            data.close()
     
     
     @staticmethod
@@ -178,6 +182,8 @@ class PdfDocument (BitmapConvAliases):
         self.exit_formenv()
         self._finalizer()
         self.raw = None
+        self._data_holder = []
+        self._data_closer = []
     
     
     def _tree_closed(self):
@@ -279,7 +285,7 @@ class PdfDocument (BitmapConvAliases):
         success = pdfium.FPDF_GetPageSizeByIndexF(self.raw, index, size)
         if not success:
             raise PdfiumError("Getting page size by index failed.")
-        return (float(size.width), float(size.height))
+        return (size.width, size.height)
     
     
     def page_as_xobject(self, index, dest_pdf):
@@ -656,6 +662,7 @@ class PdfXObject:
         raw_pageobj = pdfium.FPDF_NewFormObjectFromXObject(self.raw)
         return PdfPageObject(
             raw = raw_pageobj,
+            type = pdfium.FPDF_PAGEOBJ_FORM,
             pdf = self.pdf,
         )
 

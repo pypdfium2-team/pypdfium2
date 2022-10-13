@@ -9,57 +9,46 @@ pypdfium2 can also be used from the command-line.
 
 Version
 *******
-``pypdfium2 --version``
-
-.. program-output:: pypdfium2 --version
+.. command-output:: pypdfium2 --version
 
 
 Main Help
 *********
-``pypdfium2 --help``
-
-.. program-output:: pypdfium2 --help
+.. command-output:: pypdfium2 --help
 
 
 Renderer
 ********
 *Requires* :mod:`PIL`
 
-``pypdfium2 render --help``
-
-.. program-output:: pypdfium2 render --help
+.. command-output:: pypdfium2 render --help
 
 
 Table of Contents Reader
 ************************
-``pypdfium2 toc --help``
-
-.. program-output:: pypdfium2 toc --help
+.. command-output:: pypdfium2 toc --help
 
 
 Merger
 ******
-``pypdfium2 merge --help``
-
-.. program-output:: pypdfium2 merge --help
+.. command-output:: pypdfium2 merge --help
 
 
 Page Tiler
 **********
-``pypdfium2 tile --help``
-
-.. program-output:: pypdfium2 tile --help
+.. command-output:: pypdfium2 tile --help
 
 
 Text Extractor
 **************
-``pypdfium2 extract-text --help``
-
-.. program-output:: pypdfium2 extract-text --help
+.. command-output:: pypdfium2 extract-text --help
 
 
 Page Object Finder
 ******************
-``pypdfium2 find-pageobjects --help``
+.. command-output:: pypdfium2 find-pageobjects --help
 
-.. program-output:: pypdfium2 find-pageobjects --help
+
+JPEG Converter
+**************
+.. command-output:: pypdfium2 jpegtopdf --help

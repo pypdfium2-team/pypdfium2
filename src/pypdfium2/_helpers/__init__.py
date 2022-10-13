@@ -6,4 +6,5 @@ from pypdfium2._helpers.matrix import *
 from pypdfium2._helpers.converters import *
 from pypdfium2._helpers.document import *
 from pypdfium2._helpers.page import *
+from pypdfium2._helpers.pageobject import *
 from pypdfium2._helpers.textpage import *

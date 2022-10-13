@@ -17,6 +17,7 @@ from pypdfium2._cli import (
     tile,
     extract_text,
     find_pageobjects,
+    jpegtopdf,
 )
 
 try:
@@ -32,6 +33,7 @@ Subcommands = {
     "tile": tile,
     "extract-text": extract_text,
     "find-pageobjects": find_pageobjects,
+    "jpegtopdf": jpegtopdf,
 }
 
 

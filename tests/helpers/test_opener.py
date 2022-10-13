@@ -39,6 +39,7 @@ def _check_render(pdf):
 def open_filepath_native():
     pdf = pdfium.PdfDocument(TestFiles.render)
     assert pdf._data_holder == []
+    assert pdf._data_closer == []
     assert pdf._file_access is pdfium.FileAccess.NATIVE
     _check_general(pdf)
     yield _check_render(pdf)
@@ -53,6 +54,7 @@ def open_bytes():
     assert isinstance(bytedata, bytes)
     pdf = pdfium.PdfDocument(bytedata)
     assert pdf._data_holder == [bytedata]
+    assert pdf._data_closer == []
     
     _check_general(pdf)
     yield _check_render(pdf)
@@ -65,6 +67,7 @@ def open_buffer():
     pdf = pdfium.PdfDocument(buffer)
     assert len(pdf._data_holder) == 2
     assert buffer in pdf._data_holder
+    assert pdf._data_closer == []
     
     _check_general(pdf)
     yield _check_render(pdf)
@@ -88,6 +91,7 @@ def test_open_buffer_autoclose():
     buffer = open(TestFiles.render, "rb")
     pdf = pdfium.PdfDocument(buffer, autoclose=True)
     assert len(pdf._data_holder) == 2
+    assert pdf._data_closer == [buffer]
     _check_general(pdf)
     
     pdf.close()
@@ -98,10 +102,11 @@ def test_open_filepath_buffer():
     
     pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BUFFER)
     assert len(pdf._data_holder) == 2
+    assert pdf._data_closer == [pdf._actual_input]
     
     assert pdf._orig_input == TestFiles.render
     assert isinstance(pdf._actual_input, io.BufferedReader)
-    assert pdf._autoclose is True
+    assert pdf._autoclose is False
     _check_general(pdf)
     
     pdf.close()
@@ -114,6 +119,7 @@ def test_open_filepath_bytes():
     assert pdf._orig_input == TestFiles.render
     assert isinstance(pdf._actual_input, bytes)
     assert pdf._data_holder == [pdf._actual_input]
+    assert pdf._data_closer == []
     
     _check_general(pdf)
 
@@ -174,6 +180,7 @@ def test_open_new():
     assert isinstance(dest_pdf.raw, pdfium.FPDF_DOCUMENT)
     assert dest_pdf.raw is dest_pdf._orig_input is dest_pdf._actual_input
     assert dest_pdf._data_holder == []
+    assert dest_pdf._data_closer == []
     
     assert dest_pdf.get_version() is None
     

@@ -57,6 +57,7 @@ autodoc_inherit_docstrings = False
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
+    "show-inheritance": True,
     "member-order": "bysource",
 }
 intersphinx_mapping = {

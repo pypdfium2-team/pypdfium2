@@ -9,5 +9,6 @@ The following API breaking changes are being considered for the next major relea
 - The textpage API will change
   * The `count_chars()` alias will be removed in favour of the `n_chars` attribute.
   * The `get_text()` alias will be removed in favour of `get_text_bounded()`.
+- `PdfPage.insert_text()` will be renamed to `insert_text_shaped()`.
 - The `PdfDocument` context manager API will be removed. It will not be possible to use documents in a `with`-block anymore.
 - `PdfDocument.add_font()` might be changed to take bytes rather than a file path.

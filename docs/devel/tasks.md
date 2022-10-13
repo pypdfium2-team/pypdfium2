@@ -7,8 +7,12 @@ These are various tasks for the maintainer to keep in mind, in no specific order
 Also see the issues panel and inline `TODO` marks in source code.
 
 ### Main Code
+* Make bitmap converters independent of rendering so as to use them on bitmaps in other places as well.
+* Allow to plug in arbitrary static render functions into `render_to()` methods. Then we can add a secondary function for matrix rendering.
+* Rename `insert_text()` to `insert_text_shaped()` (keeping the other as alias) so we can add a simple text insertion function later.
 * Check if we should use `FPDFPage_HasTransparency()` on rendering.
-* Add support models for attachments and image extraction.
+* Add new support models for attachments, document metadata, and image extraction.
+* Add helper methods for page labels and trailer ID.
 * Consolidate and extend helper classes.
 * Ensure we correctly handle PDFium return codes indicating failure.
 * Review on a case-by-case basis where we should raise an error and where pass.
