@@ -31,7 +31,7 @@ def attach_parser(subparsers):
 def main(args):
     
     # Very rudimentary JPEG to PDF conversion, mostly for testing
-    # The implementation could certainly be more sophisticated (e. g. configurable DPI, margins, crop, positioning, ...)
+    # The implementation could certainly be more sophisticated (e. g. configurable DPI, default DPI based on image metadata via Pillow, margins, crop, positioning, ...)
     
     pdf = pdfium.PdfDocument.new()
     
