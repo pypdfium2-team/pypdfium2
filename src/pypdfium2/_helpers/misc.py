@@ -179,22 +179,14 @@ def _invert_dict(dictionary):
     """
     return {v: k for k, v in dictionary.items()}
 
-def _transform_dict(main, transformer):
-    """
-    Remap each value of a *main* dictionary through a second *transformer* dictionary, if contained.
-    Otherwise, take over the existing value as-is.
-    
-    Returns:
-        Transformed variant of the *main* dictionary.
-    """
-    output = {}
-    for key, value in main.items():
-        if value in transformer.keys():
-            output[key] = transformer[value]
-        else:
-            output[key] = value
-    return output
 
+#: Get the number of channels for a PDFium pixel format constant.
+BitmapTypeToNChannels = {
+    pdfium.FPDFBitmap_Gray: 1,
+    pdfium.FPDFBitmap_BGR:  3,
+    pdfium.FPDFBitmap_BGRA: 4,
+    pdfium.FPDFBitmap_BGRx: 4,
+}
 
 #: Convert a PDFium pixel format constant to string, assuming regular byte order.
 BitmapTypeToStr = {
@@ -212,7 +204,12 @@ BitmapStrReverseToRegular = {
 }
 
 #: Convert a PDFium pixel format constant to string, assuming reversed byte order.
-BitmapTypeToStrReverse = _transform_dict(BitmapTypeToStr, BitmapStrReverseToRegular)
+BitmapTypeToStrReverse = {
+    pdfium.FPDFBitmap_Gray: "L",
+    pdfium.FPDFBitmap_BGR:  "RGB",
+    pdfium.FPDFBitmap_BGRA: "RGBA",
+    pdfium.FPDFBitmap_BGRx: "RGBX",
+}
 
 #: Convert a PDFium view mode constant (:attr:`PDFDEST_VIEW_*`) to string.
 ViewmodeToStr = {
