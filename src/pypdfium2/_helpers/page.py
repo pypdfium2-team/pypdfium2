@@ -487,10 +487,6 @@ class PdfPage (BitmapConvAliases):
             Image size is given in pixels as a tuple of width and height.
         """
         
-        _validate_colours(fill_colour)
-        if colour_scheme is not None:
-            _validate_colours(*colour_scheme.colours.values())
-        
         if force_bitmap_format in (None, pdfium.FPDFBitmap_Unknown):
             cl_pdfium = _auto_bitmap_format(fill_colour, greyscale, prefer_bgrx)
         else:
@@ -588,14 +584,6 @@ class PdfPage (BitmapConvAliases):
                 pdfium.FPDF_FFLDraw(form_env, *render_args)
         
         return buffer, cl_string, (width, height)
-
-
-def _validate_colours(*colours):
-    for col in colours:
-        if len(col) != 4:
-            raise ValueError("Colour must consist of exactly 4 values.")
-        if not all(0 <= c <= 255 for c in col):
-            raise ValueError("Colour value exceeds boundaries.")
 
 
 def _auto_bitmap_format(fill_colour, greyscale, prefer_bgrx):

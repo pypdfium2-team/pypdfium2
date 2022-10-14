@@ -95,6 +95,11 @@ def colour_tohex(colour, rev_byteorder):
     If using regular byte order, the output format will be ARGB. If using reversed byte order, it will be ABGR.
     """
     
+    if len(colour) != 4:
+        raise ValueError("Colour must consist of exactly 4 values.")
+    if not all(0 <= c <= 255 for c in colour):
+        raise ValueError("Colour value exceeds boundaries.")
+    
     r, g, b, a = colour
     
     # colour is interpreted differently with FPDF_REVERSE_BYTE_ORDER (perhaps inadvertently?)
