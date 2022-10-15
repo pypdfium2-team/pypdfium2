@@ -181,7 +181,7 @@ def test_open_new():
     assert dest_pdf.raw is dest_pdf._orig_input is dest_pdf._actual_input
     assert dest_pdf._data_holder == []
     assert dest_pdf._data_closer == []
-    
+    assert dest_pdf._rendering_input is None
     assert dest_pdf.get_version() is None
     
     src_pdf = pdfium.PdfDocument(TestFiles.multipage)

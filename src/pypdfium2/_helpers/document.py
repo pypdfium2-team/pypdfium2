@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import io
 import os
 import os.path
 import weakref
@@ -76,6 +77,7 @@ class PdfDocument (BitmapConvAliases):
         self._actual_input = input_data
         self._data_holder = []
         self._data_closer = []
+        self._rendering_input = None
         
         self._password = password
         self._file_access = file_access
@@ -499,6 +501,19 @@ class PdfDocument (BitmapConvAliases):
             )
     
     
+    def update_rendering_input(self):
+        """
+        Update the input sources for concurrent rendering to the document's current state
+        by saving to bytes and setting the result as new input.
+        If you modified the document, you may want to call this method before :meth:`.render_to`.
+        """
+        buffer = io.BytesIO()
+        self.save(buffer)
+        buffer.seek(0)
+        self._rendering_input = buffer.read()
+        buffer.close()
+    
+    
     @classmethod
     def _process_page(cls, index, converter, input_data, password, file_access, **kwargs):
         pdf = cls(
@@ -519,7 +534,7 @@ class PdfDocument (BitmapConvAliases):
             **kwargs
         ):
         """
-        Render multiple pages in parallel, using a process pool executor.
+        Concurrently render multiple pages, using a process pool executor.
         
         If rendering only a single page, the call is simply forwarded to :meth:`.PdfPage.render_to` as a shortcut.
         
@@ -552,15 +567,23 @@ class PdfDocument (BitmapConvAliases):
             yield result
             return
         
-        if isinstance(self._orig_input, pdfium.FPDF_DOCUMENT):
-            raise ValueError("Cannot render in parallel without input sources.")
-        elif is_input_buffer(self._orig_input):
-            raise ValueError("Cannot render in parallel with buffer input.")
+        if self._rendering_input is None:
+            if isinstance(self._orig_input, pdfium.FPDF_DOCUMENT):
+                logger.warning("Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data.")
+                self.update_rendering_input()
+            elif is_input_buffer(self._orig_input):
+                logger.warning("Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly.")
+                cursor = self._orig_input.tell()
+                self._orig_input.seek(0)
+                self._rendering_input = self._orig_input.read()
+                self._orig_input.seek(cursor)
+            else:
+                self._rendering_input = self._orig_input
         
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
             converter = converter,
-            input_data = self._orig_input,
+            input_data = self._rendering_input,
             password = self._password,
             file_access = self._file_access,
             **kwargs
