@@ -101,9 +101,15 @@ def test_new_jpeg():
     image_a = pdfium.PdfImageObject.new(pdf)
     buffer = open(TestFiles.mona_lisa, "rb")
     width, height = image_a.load_jpeg(buffer, autoclose=True)
-    assert image_a.get_matrix() == pdfium.PdfMatrix(width, 0, 0, height, 0, 0)
+    
     assert len(pdf._data_holder) == 2
     assert pdf._data_closer == [buffer]
+    
+    assert image_a.get_matrix() == pdfium.PdfMatrix()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(width, height)
+    image_a.set_matrix(matrix)
+    assert image_a.get_matrix() == pdfium.PdfMatrix(width, 0, 0, height, 0, 0)
     page.insert_object(image_a)
     
     metadata = image_a.get_info()
@@ -123,10 +129,12 @@ def test_new_jpeg():
     image_b = pdfium.PdfImageObject.new(pdf)
     with open(TestFiles.mona_lisa, "rb") as buffer:
         image_b.load_jpeg(buffer, inline=True, autoclose=False)
-    image_b.get_matrix() == pdfium.PdfMatrix(width, 0, 0, height, 0, 0)
-    matrix_b = pdfium.PdfMatrix()
-    matrix_b.translate(width, 0)
-    image_b.transform(matrix_b)
+    
+    assert image_b.get_matrix() == pdfium.PdfMatrix()
+    matrix = pdfium.PdfMatrix()
+    matrix.scale(width, height)
+    matrix.translate(width, 0)
+    image_b.set_matrix(matrix)
     image_b.get_matrix() == pdfium.PdfMatrix(width, 0, 0, height, width, 0)
     page.insert_object(image_b)
     

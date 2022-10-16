@@ -141,20 +141,21 @@ class PdfImageObject (PdfPageObject):
         """
         Load a JPEG into the image object.
         
-        For a new image, 1 pixel will correspond to a length of 1 canvas unit, which is 1/72in by default, leading to a resolution of 72dpi.
-        :meth:`~PdfPageObject.transform` may be used to scale and position the image.
+        Position and size of the image are defined by its matrix.
+        If the image is new, it will appear as a tiny square of 1x1 units on the bottom left corner of the page.
+        Use :class:`.PdfMatrix` and :meth:`.set_matrix` to adjust the position.
         
-        If replacing an image, the existing transform matrix will be used.
+        If replacing an image, the existing matrix will be preserved.
         If aspect ratios do not match, the new image will be squashed into the old image's boundaries.
-        The matrix may be corrected manually to prevent distortion.
+        Modify the matrix manually if you wish to prevent this.
         
         Parameters:
             buffer (typing.BinaryIO):
                 A readable byte buffer to access the JPEG data.
             pages (typing.Sequence[PdfPage] | None):
-                A list of pages that might contain the image.
-                May be :data:`None` or empty if the image is known not to be part of any page yet.
-                If the image exists multiple times, all occurrences found on the given pages will be replaced.
+                If replacing an image, pass in a list of loaded pages that might contain the it, to update their cache.
+                (The same image may be shown multiple times in different transforms across a PDF.)
+                If the image object handle is new, this parameter may be :data:`None` or an empty list.
             inline (bool):
                 Whether to load the image content into memory.
                 If :data:`True`, the buffer may be closed after this function call.
@@ -196,13 +197,6 @@ class PdfImageObject (PdfPageObject):
                 self.pdf._data_closer.append(buffer)
         
         metadata = self.get_info()
-        matrix = self.get_matrix()
-        if matrix == PdfMatrix():
-            # if the image's matrix is the identity matrix, it will appear as a tiny square of 1x1 canvas units
-            # hence, we scale to the image's width and height in pixels to achieve a sane default size
-            matrix.scale(metadata.width, metadata.height)
-            self.set_matrix(matrix)
-        
         return (metadata.width, metadata.height)
     
     
