@@ -3,7 +3,9 @@
 
 # Configuration file for the Sphinx documentation builder.
 # See https://www.sphinx-doc.org/en/master/usage/configuration.html
+# and https://docs.readthedocs.io/en/stable/environment-variables.html
 
+import os
 import sys
 import time
 from os.path import (
@@ -14,17 +16,27 @@ from os.path import (
 
 sys.path.insert(0, join(dirname(dirname(dirname(abspath(__file__)))), "setupsrc"))
 from pl_setup.packaging_base import (
-    get_changelog_staging,
+    run_cmd,
+    SourceTree,
 )
 
-def _have_changelog():
-    log = get_changelog_staging()
-    if log:
-        return True
-    else:
-        return False
 
-include_changelog_staging = _have_changelog()
+def _get_build_type():
+    
+    # RTD uses git checkout --force origin/... which results in a detached HEAD state, so we cannot easily get the branch name
+    # Thus query for an RTD-specific environment variable instead
+    rtd_version_name = os.environ.get("READTHEDOCS_VERSION_NAME", None)
+    if rtd_version_name:
+        return rtd_version_name
+    
+    branch = run_cmd(["git", "branch", "--show-current"], cwd=SourceTree, capture=True)
+    if branch == "stable":
+        return "stable"
+    else:
+        return "latest"
+
+
+build_type = _get_build_type()
 
 project = "pypdfium2"
 author = "pypdfium2-team"
@@ -68,4 +80,4 @@ intersphinx_mapping = {
 
 
 def setup(app):
-    app.add_config_value("include_changelog_staging", False, "env")
+    app.add_config_value("build_type", "latest", "env")
