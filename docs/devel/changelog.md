@@ -4,6 +4,13 @@
 # Changelog
 
 
+## 3.4.0 (2022-10-17)
+
+- Updated PDFium from `5351` to `5364` (autorelease).
+- Added a new support model `PdfImageObject` (which inherits from `PdfPageObject`). This can be used to insert a JPEG image into a page, get metadata, etc.
+- Docs: The changelog page now selectively includes an entry for the next release that may be shown on `latest` builds.
+
+
 ## 3.3.0 (2022-10-10)
 
 - Updated PDFium from `5337` to `5351` (autorelease).
