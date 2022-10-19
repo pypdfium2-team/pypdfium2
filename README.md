@@ -233,13 +233,19 @@ Here are some examples of using the support model API.
 
 * Add a JPEG image on a second page
   ```python
-  # Direct JPEG inclusion (only a small overhead for the PDF container)
+  pdf = pdfium.PdfDocument.new()
+
   image = pdfium.PdfImageObject.new(pdf)
   buffer = open("./tests/resources/mona_lisa.jpg", "rb")
   width, height = image.load_jpeg(buffer, autoclose=True)
-  page_b = pdf.new_page(width, height)
-  page_b.insert_object(image)
-  page_b.generate_content()
+
+  matrix = pdfium.PdfMatrix()
+  matrix.scale(width, height)
+  image.set_matrix(matrix)
+
+  page = pdf.new_page(width, height)
+  page.insert_object(image)
+  page.generate_content()
   ```
 
 * Save the document
