@@ -44,7 +44,6 @@ class PdfPageObject:
             instance = super().__new__(PdfImageObject)
         else:
             instance = super().__new__(PdfPageObject)
-        instance.__init__(raw, type, *args, **kwargs)
         return instance
     
     
