@@ -107,12 +107,12 @@ Here are some examples of using the support model API.
       scale = 300/72,  # 300dpi resolution
   )
   for i, image in zip(page_indices, renderer):
-      image.save("out_%s.jpg" % str(i).zfill(n_pages))
+      image.save("out_%0*d.jpg" % (n_digits, i))
   ```
 
 * Read the table of contents
   ```python
-  for item in toc:
+  for item in pdf.get_toc():
     
       if item.n_kids == 0:
           state = "*"
@@ -153,7 +153,7 @@ Here are some examples of using the support model API.
 * Render a single page
   ```python
   image = page.render_to(
-      # defaults
+      pdfium.BitmapConv.pil_image,
       scale = 1,                           # 72dpi resolution
       rotation = 0,                        # no additional rotation
       crop = (0, 0, 0, 0),                 # no crop (form: left, right, bottom, top)

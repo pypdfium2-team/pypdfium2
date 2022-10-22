@@ -4,3 +4,5 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Fixed an issue with the `__new__` method of `PdfPageObject` that caused `__init__` to run twice.
+- Fixed faulty examples in the Readme.
