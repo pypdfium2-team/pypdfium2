@@ -101,6 +101,8 @@ class PdfPage:
             raise ValueError("Box values must be int or float.")
         box_func(self.raw, l, b, r, t)
     
+    # TODO implement get_bbox()
+    
     def get_mediabox(self):
         """
         Returns:
