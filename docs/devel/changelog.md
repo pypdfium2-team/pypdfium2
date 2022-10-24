@@ -4,6 +4,13 @@
 # Changelog
 
 
+## 3.5.0 (2022-10-24)
+
+- Updated PDFium from `5364` to `5378` (autorelease).
+- Fixed an issue with the `__new__` method of `PdfPageObject` that caused `__init__` to run twice.
+- Fixed faulty examples in the Readme.
+
+
 ## 3.4.0 (2022-10-17)
 
 - Updated PDFium from `5351` to `5364` (autorelease).
