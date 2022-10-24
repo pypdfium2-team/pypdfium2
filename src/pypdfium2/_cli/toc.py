@@ -4,11 +4,7 @@
 from pypdfium2 import _namespace as pdfium
 
 
-def attach_parser(subparsers):
-    parser = subparsers.add_parser(
-        "toc",
-        help = "Show a PDF document's table of contents",
-    )
+def attach(parser):
     parser.add_argument(
         "input",
         help = "PDF document of which to print the outline",
@@ -27,4 +23,7 @@ def attach_parser(subparsers):
 
 def main(args):
     pdf = pdfium.PdfDocument(args.input, password=args.password)
-    pdf.print_toc( pdf.get_toc() )
+    toc = pdf.get_toc(
+        max_depth = args.max_depth,
+    )
+    pdf.print_toc(toc)

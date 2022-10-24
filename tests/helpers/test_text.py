@@ -3,10 +3,8 @@
 
 import re
 import pytest
-from os.path import join
-from importlib.util import find_spec
 import pypdfium2 as pdfium
-from ..conftest import TestFiles, ResourceDir, OutputDir
+from ..conftest import TestFiles
 
 
 @pytest.fixture
@@ -120,7 +118,7 @@ def test_textpage_empty():
     
     assert textpage.get_text_bounded() == ""
     assert textpage.get_text_range() == ""
-    assert textpage.n_chars == textpage.count_chars() == 0
+    assert textpage.n_chars == 0
     assert textpage.count_rects() == 0
     assert textpage.get_index(0, 0, 0, 0) is None
     assert [r for r in textpage.get_rectboxes()] == []
@@ -130,67 +128,5 @@ def test_textpage_empty():
     
     with pytest.raises(ValueError, match=re.escape("Character index 0 is out of bounds. The maximum index is -1.")):
         textpage.get_charbox(0)
-    with pytest.raises(ValueError, match=re.escape("Text length must be >0.")):
+    with pytest.raises(ValueError, match=re.escape("Text length must be greater than 0.")):
         textpage.search("")
-
-
-def test_get_links(linkpage):
-    exp_links = (
-        "https://www.wikipedia.org/",
-        "https://www.openstreetmap.org/",
-        "https://www.opensuse.org/",
-        "https://kde.org/",
-    )
-    for i, link in enumerate(linkpage.get_links()):
-        assert link == exp_links[i]
-
-
-@pytest.mark.skipif(not find_spec("uharfbuzz"), reason="uharfbuzz is not installed")
-def test_insert_text():
-    
-    pdf = pdfium.PdfDocument.new()
-    width, height = 500, 300
-    page = pdf.new_page(width, height)
-    assert page.get_size() == (width, height)
-    
-    NotoSans = join(ResourceDir, "NotoSans-Regular.ttf")
-    hb_font = pdfium.HarfbuzzFont(NotoSans)
-    pdf_font = pdf.add_font(
-        NotoSans,
-        type = pdfium.FPDF_FONT_TRUETYPE,
-        is_cid = True,
-    )
-    
-    message_a = "मैं घोषणा, पुष्टि और सहमत हूँ कि:"
-    posx_a = 50
-    posy_a = height - 75
-    fs_a = 25
-    
-    message_b = "Latin letters test."
-    posx_b = 50
-    posy_b = height - 150
-    fs_b = 30
-    
-    page.insert_text(
-        text = message_a,
-        pos_x = posx_a,
-        pos_y = posy_a,
-        font_size = fs_a,
-        hb_font = hb_font,
-        pdf_font = pdf_font,
-    )
-    page.insert_text(
-        text = message_b,
-        pos_x = posx_b,
-        pos_y = posy_b,
-        font_size = fs_b,
-        hb_font = hb_font,
-        pdf_font = pdf_font,
-    )
-    page.generate_content()
-    
-    textpage = page.get_textpage()
-    assert textpage.get_text_bounded(left=posx_b, bottom=posy_b, top=posy_b+fs_b) == message_b
-    
-    with open(join(OutputDir, "text_insertion.pdf"), "wb") as buffer:
-        pdf.save(buffer, version=17)

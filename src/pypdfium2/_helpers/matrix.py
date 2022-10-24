@@ -24,7 +24,8 @@ class PdfMatrix:
         f (float): Matrix value [2][1] (Y translation).
     """
     
-    # The effect of applying the matrix on a vector (x, y) is (ax+cy+e, bx+dy+f)
+    # See pdfium/core/fxcrt/fx_coordinates.{h,cpp} (unfortunately, PDFium's matrix implementation is non-public)
+    # Effect of applying the matrix on a point: (x, y) -> (ax+cy+e, bx+dy+f)
     
     def __init__(self, a=1, b=0, c=0, d=1, e=0, f=0):
         self.set(a, b, c, d, e, f)
@@ -36,6 +37,7 @@ class PdfMatrix:
     
     def __repr__(self):
         return "PdfMatrix%s" % (self.get(), )
+    
     
     def get(self):
         """
@@ -61,6 +63,7 @@ class PdfMatrix:
         """
         return PdfMatrix(*self.get())
     
+    
     @classmethod
     def from_pdfium(cls, fs_matrix):
         """
@@ -81,6 +84,7 @@ class PdfMatrix:
         """
         return pdfium.FS_MATRIX(*self.get())
     
+    
     def multiply(self, other):
         """
         Multiply this matrix by another :class:`.PdfMatrix`, to concatenate transformations.
@@ -88,7 +92,7 @@ class PdfMatrix:
         # M1 x M2 (self x other)
         # (a1, b1, 0)   (a2, b2, 0)   (a1a2+b1c2,    a1b2+b1d2,    0)
         # (c1, d1, 0) x (c2, d2, 0) = (c1a2+d1c2,    c1b2+d1d2,    0)
-        # (e1, f1, 1)   (e2, f2, 0)   (e1a2+f1c2+e2, e1b2+f1d2+f2, 1)
+        # (e1, f1, 1)   (e2, f2, 1)   (e1a2+f1c2+e2, e1b2+f1d2+f2, 1)
         new_matrix = (
             self.a*other.a + self.b*other.c,            # a
             self.a*other.b + self.b*other.d,            # b
@@ -124,7 +128,7 @@ class PdfMatrix:
             angle (float): Clockwise angle in degrees to rotate the matrix.
         """
         # row vectors -> b = -s leads to clockwise rotation indeed
-        angle = (angle/180) * math.pi  # arc measure
+        angle = (angle/180) * math.pi  # convert to radian
         c, s = math.cos(angle), math.sin(angle)
         self.multiply( PdfMatrix(c, -s, s, c) )
     

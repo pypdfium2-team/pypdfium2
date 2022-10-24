@@ -2,14 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-from os.path import (
-    join,
-    abspath,
-    basename,
-    splitext,
-)
+from pathlib import Path
 from pypdfium2 import _namespace as pdfium
-from pypdfium2._cli._parsers import pagetext_type
+from pypdfium2._cli._parsers import parse_pagetext
 
 
 ColourOpts = dict(
@@ -19,14 +14,11 @@ ColourOpts = dict(
 )
 
 
-def attach_parser(subparsers):
-    parser = subparsers.add_parser(
-        "render",
-        help = "Rasterise pages of a PDF file",
-    )
+def attach(parser):
     parser.add_argument(
         "inputs",
         nargs = "+",
+        type = Path,
         help = "PDF documents to render",
     )
     parser.add_argument(
@@ -36,7 +28,7 @@ def attach_parser(subparsers):
     )
     parser.add_argument(
         "--output", "-o",
-        type = abspath,
+        type = Path,
         required = True,
         help = "Output directory where to place the serially numbered images",
     )
@@ -48,7 +40,7 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--pages",
         default = None,
-        type = pagetext_type,
+        type = parse_pagetext,
         help = "Numbers of the pages to render (defaults to all)",
     )
     parser.add_argument(
@@ -88,7 +80,7 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--optimise-mode",
         default = pdfium.OptimiseMode.NONE,
-        type = lambda string: pdfium.OptimiseMode[string.upper()],
+        type = lambda s: pdfium.OptimiseMode[s.upper()],
         help = "Select a rendering optimisation mode (none, lcd_display, printing)",
     )
     parser.add_argument(
@@ -201,11 +193,9 @@ def main(args):
         for type in args.no_antialias:
             kwargs["no_smooth%s" % type] = True
         
-        prefix = splitext(basename(input_path))[0] + "_"
         n_digits = len(str( max(page_indices)+1 ))
-        renderer = pdf.render_to(pdfium.BitmapConv.pil_image, **kwargs)
+        renderer = pdf.render(pdfium.PdfBitmap.to_pil, **kwargs)
         
         for image, index in zip(renderer, page_indices):
-            suffix = str(index+1).zfill(n_digits)
-            output_path = "%s.%s" % (join(args.output, prefix+suffix), args.format)
+            output_path = args.output / (input_path.stem + "_%0*d.%s" % (n_digits, index+1, args.format))
             image.save(output_path)

@@ -30,24 +30,18 @@ jobs:
           repository: ${{ github.repository }}
           fetch-depth: 0
       
-      - name: Configure git
-        run: |
-          git config user.email "geisserml@gmail.com"
-          git config user.name "geisserml"
-      
       - name: Install/update dependencies
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -U setuptools build wheel ctypesgen
-          python3 -m pip install -U .[utilities,test,inserttext,converters]
-      
-      # we have to reset the state of the repository since `pip install .[...]` will implicitly alter the version file,
-      # but we want to do versioning in the autorelease script while still installing dependencies beforehand
-      - name: Post-install cleanup
-        run: git reset --hard HEAD
+          python3 -m pip install -U .[utilities,test,converters]
+          git reset --hard HEAD
       
       - name: Run autorelease script
-        run: python3 setupsrc/pl_setup/autorelease.py --checkin
+        run: |
+          git config user.email "geisserml@gmail.com"
+          git config user.name "geisserml"
+          python3 setupsrc/pl_setup/autorelease.py --checkin
       
       - name: Run packaging script
         run: make packaging
@@ -63,9 +57,7 @@ jobs:
       
       - name: Get latest tag
         id: get_tag
-        run: |
-          RELEASE_TAG=$(git describe --abbrev=0)
-          echo "::set-output name=release_tag::$RELEASE_TAG"
+        run: echo "release_tag=$(git describe --abbrev=0)" >> $GITHUB_OUTPUT
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1

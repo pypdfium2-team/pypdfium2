@@ -4,7 +4,6 @@
 import io
 import re
 import shutil
-import logging
 import weakref
 import tempfile
 import pytest
@@ -25,7 +24,7 @@ def _check_general(pdf, n_pages=1):
 def _check_render(pdf):
     
     page = pdf.get_page(0)
-    pil_image = page.render_to(pdfium.BitmapConv.pil_image)
+    pil_image = page.render().to_pil()
     
     assert pil_image.mode == "RGB"
     assert pil_image.size == (595, 842)
@@ -94,7 +93,7 @@ def test_open_buffer_autoclose():
     assert pdf._data_closer == [buffer]
     _check_general(pdf)
     
-    pdf.close()
+    pdf._finalizer()
     assert buffer.closed is True
 
 
@@ -109,7 +108,7 @@ def test_open_filepath_buffer():
     assert pdf._autoclose is False
     _check_general(pdf)
     
-    pdf.close()
+    pdf._finalizer()
     assert pdf._actual_input.closed is True
 
 
@@ -181,11 +180,11 @@ def test_open_new():
     assert dest_pdf.raw is dest_pdf._orig_input is dest_pdf._actual_input
     assert dest_pdf._data_holder == []
     assert dest_pdf._data_closer == []
-    assert dest_pdf._rendering_input is None
+    
     assert dest_pdf.get_version() is None
     
     src_pdf = pdfium.PdfDocument(TestFiles.multipage)
-    pdfium.FPDF_ImportPages(dest_pdf.raw, src_pdf.raw, b"1, 3", 0)
+    dest_pdf.import_pages(src_pdf, [0, 2])
     assert len(dest_pdf) == 2
 
 
@@ -198,19 +197,18 @@ def test_open_invalid():
         pdf = pdfium.PdfDocument("invalid/path", file_access=pdfium.FileAccess.BUFFER)
 
 
-def test_object_hierarchy(caplog):
+def test_object_hierarchy():
     
     pdf = pdfium.PdfDocument(TestFiles.images)
     assert isinstance(pdf, pdfium.PdfDocument)
     assert isinstance(pdf.raw, pdfium.FPDF_DOCUMENT)
     
-    assert callable(pdf._static_exit_formenv)
     pdf.init_formenv()
     assert isinstance(pdf._form_finalizer, weakref.finalize)
     assert pdf._form_finalizer.alive
     assert isinstance(pdf._form_config, pdfium.FPDF_FORMFILLINFO)
     assert isinstance(pdf._form_env, pdfium.FPDF_FORMHANDLE)
-    pdf.exit_formenv()
+    pdf._form_finalizer()
     assert not pdf._form_finalizer.alive
     
     page = pdf.get_page(0)
@@ -218,7 +216,7 @@ def test_object_hierarchy(caplog):
     assert isinstance(page.raw, pdfium.FPDF_PAGE)
     assert page.pdf is pdf
     
-    # pageobjects don't need a finalizer
+    # TODO test smart finalization of loose pageobjects
     pageobj = next(page.get_objects())
     assert isinstance(pageobj, pdfium.PdfPageObject)
     assert isinstance(pageobj.raw, pdfium.FPDF_PAGEOBJECT)
@@ -239,43 +237,28 @@ def test_object_hierarchy(caplog):
         assert callable(obj._static_close)
         assert isinstance(obj._finalizer, weakref.finalize)
         assert obj._finalizer.alive
-        obj.close()
+        obj._finalizer()
         assert not obj._finalizer.alive
-    
-    for obj in (searcher, textpage, page, pdf):
-        with caplog.at_level(logging.WARNING):
-            caplog.clear()
-            obj.close()
-        assert "Duplicate close call suppressed on " in caplog.text
 
 
 def test_doc_extras():
-    
-    # context managers are a no-op since 3.3 - they're merely retained for backwards compatibility
-    
-    with pdfium.PdfDocument(TestFiles.empty, file_access=pdfium.FileAccess.BUFFER) as pdf:
-        assert isinstance(pdf, pdfium.PdfDocument)
-        assert len(pdf) == 1
-        page = pdf[0]
-        assert isinstance(page, pdfium.PdfPage)
+        
+    pdf = pdfium.PdfDocument(TestFiles.empty, file_access=pdfium.FileAccess.BUFFER)
+    assert len(pdf) == 1
+    page = pdf[0]
+    assert isinstance(page, pdfium.PdfPage)
     assert isinstance(pdf._actual_input, io.BufferedReader)
     
-    with pdfium.PdfDocument.new() as pdf:
-        
-        assert isinstance(pdf, pdfium.PdfDocument)
-        assert len(pdf) == 0
-        
-        sizes = [(50, 100), (100, 150), (150, 200), (200, 250)]
-        for size in sizes:
-            page = pdf.new_page(*size)
-        for i, (size, page) in enumerate(zip(sizes, pdf)):
-            assert isinstance(page, pdfium.PdfPage)
-            assert size == page.get_size() == pdf.get_page_size(i)
-        
-        del pdf[0]
-        page = pdf[0]
-        assert page.get_size() == pdf.get_page_size(0) == (100, 150)
-        
-        del pdf[-len(pdf)]
-        page = pdf[-len(pdf)]
-        assert page.get_size() == pdf.get_page_size(-len(pdf)) == (150, 200)
+    pdf = pdfium.PdfDocument.new()
+    assert len(pdf) == 0
+    
+    sizes = [(50, 100), (100, 150), (150, 200), (200, 250)]
+    for size in sizes:
+        page = pdf.new_page(*size)
+    for i, (size, page) in enumerate(zip(sizes, pdf)):
+        assert isinstance(page, pdfium.PdfPage)
+        assert size == page.get_size() == pdf.get_page_size(i)
+    
+    del pdf[0]
+    page = pdf[0]
+    assert page.get_size() == pdf.get_page_size(0) == (100, 150)

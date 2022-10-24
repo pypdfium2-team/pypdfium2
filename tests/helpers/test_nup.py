@@ -39,7 +39,9 @@ def test_pageobj_placement():
     dest_page_1.insert_object(po)
     assert po.pdf is dest_pdf
     assert po.page is dest_page_1
-    # pos_a = po.get_pos()  # xfail (crbug.com/pdfium/1905)
+    pos_a = po.get_pos()
+    # xfail with pdfium < 5370, https://crbug.com/pdfium/1905
+    assert pytest.approx(pos_a, abs=0.5) == (19, 440, 279, 823)
     
     po = xobject.as_pageobject()
     matrix = pdfium.PdfMatrix()

@@ -11,34 +11,15 @@ class PdfiumError (RuntimeError):
     pass
 
 
-class FileAccess (enum.Enum):  # FIXME ambiguous name?
-    """
-    Different ways how files can be loaded.
-    
-    .. list-table:: Overview of file access modes
-        :header-rows: 1
-        :widths: auto
-        
-        * - Mode
-          - PDFium loader
-          - Comment
-        * - :attr:`.NATIVE`
-          - :func:`.FPDF_LoadDocument`
-          - File access managed by PDFium in C/C++.
-        * - :attr:`.BUFFER`
-          - :func:`.FPDF_LoadCustomDocument`
-          - Data read incrementally from Python file buffer.
-        * - :attr:`.BYTES`
-          - :func:`.FPDF_LoadMemDocument64`
-          - Data loaded into memory and passed to PDFium at once.
-    """
-    NATIVE = 0
-    BUFFER = 1
-    BYTES  = 2
+class FileAccess (enum.Enum):  # FIXME ambiguity with FPDF_FILEACCESS ?
+    """ File access modes. """
+    NATIVE = 0  #: :func:`.FPDF_LoadDocument`       - Let PDFium manage file access in C/C++
+    BUFFER = 1  #: :func:`.FPDF_LoadCustomDocument` - Pass data to PDFium incrementally from Python file buffer
+    BYTES  = 2  #: :func:`.FPDF_LoadMemDocument64`  - Load data into memory and pass it to PDFium at once
 
 
 class OptimiseMode (enum.Enum):
-    """ Modes defining how page rendering shall be optimised. """
+    """ Page rendering optimisation modes. """
     NONE = 0         #: No optimisation.
     LCD_DISPLAY = 1  #: Optimise for LCD displays (via subpixel rendering).
     PRINTING = 2     #: Optimise for printing.
@@ -54,11 +35,10 @@ class OutlineItem:
         title (str):
             String of the bookmark.
         is_closed (bool):
-            :data:`True` if child items shall be collapsed by default.
-            :data:`False` if they shall be expanded by default.
-            :data:`None` if the item has no descendants (i. e. *n_kids* == 0).
+            :data:`True` if child items shall be collapsed, :data:`False` if they shall be expanded.
+            :data:`None` if the item has no descendants (i. e. ``n_kids == 0``).
         n_kids (int):
-            Number of child items (>= 0).
+            Absolute number of child items, according to the PDF.
         page_index (int | None):
             Zero-based index of the page the bookmark points to.
             May be :data:`None` if the bookmark has no target page (or it could not be determined).
@@ -130,27 +110,19 @@ def get_functype(struct, funcname):
     return {k: v for k, v in struct._fields_}[funcname]
 
 
-class _reader_class:
+class _buffer_reader:
     
     def __init__(self, buffer):
-        self._buffer = buffer
+        self.buffer = buffer
     
     def __call__(self, _, position, p_buf, size):
         c_buf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
-        self._buffer.seek(position)
-        self._buffer.readinto(c_buf.contents)
+        self.buffer.seek(position)
+        self.buffer.readinto(c_buf.contents)
         return 1
 
 
-def is_input_buffer(maybe_buffer):
-    """
-    Returns:
-        bool: True if the given object implements the methods ``seek()``, ``tell()``, ``read()``, and ``readinto()``. False otherwise.
-    """
-    return all( callable(getattr(maybe_buffer, a, None)) for a in ("seek", "tell", "read", "readinto") )
-
-
-def get_fileaccess(buffer):
+def get_bufaccess(buffer):
     """
     Acquire an :class:`FPDF_FILEACCESS` interface for a byte buffer.
     
@@ -162,14 +134,22 @@ def get_fileaccess(buffer):
     file_len = buffer.tell()
     buffer.seek(0)
     
-    fileaccess = pdfium.FPDF_FILEACCESS()
-    fileaccess.m_FileLen = file_len
-    fileaccess.m_GetBlock = get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")( _reader_class(buffer) )
-    fileaccess.m_Param = None
+    access = pdfium.FPDF_FILEACCESS()
+    access.m_FileLen = file_len
+    access.m_GetBlock = get_functype(pdfium.FPDF_FILEACCESS, "m_GetBlock")( _buffer_reader(buffer) )
+    access.m_Param = None
     
-    ld_data = (fileaccess.m_GetBlock, buffer)
+    to_hold = (access.m_GetBlock, buffer)
     
-    return fileaccess, ld_data
+    return access, to_hold
+
+
+def is_input_buffer(maybe_buffer):
+    """
+    Returns:
+        bool: True if the given object implements the methods ``seek()``, ``tell()``, ``read()``, and ``readinto()``. False otherwise.
+    """
+    return all( callable(getattr(maybe_buffer, a, None)) for a in ("seek", "tell", "read", "readinto") )
 
 
 def _invert_dict(dictionary):
@@ -194,13 +174,6 @@ BitmapTypeToStr = {
     pdfium.FPDFBitmap_BGR:  "BGR",
     pdfium.FPDFBitmap_BGRA: "BGRA",
     pdfium.FPDFBitmap_BGRx: "BGRX",
-}
-
-#: Convert a reverse pixel format string to its regular counterpart.
-BitmapStrReverseToRegular = {
-    "BGR":  "RGB",
-    "BGRA": "RGBA",
-    "BGRX": "RGBX",
 }
 
 #: Convert a PDFium pixel format constant to string, assuming reversed byte order.

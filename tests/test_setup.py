@@ -99,7 +99,7 @@ def test_platformnames(all_platnames):
 
 def test_paths():
     assert pkg_base.HomeDir == str( Path.home() )
-    assert pkg_base.SourceTree == SourceTree
+    assert pkg_base.SourceTree == str(SourceTree)
     assert pkg_base.DataTree == str( Path(SourceTree) / "data" )
     assert pkg_base.SB_Dir == str( Path(SourceTree) / "sourcebuild" )
     assert pkg_base.ModuleDir == str( Path(SourceTree) / "src" / "pypdfium2" )

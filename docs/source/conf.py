@@ -8,13 +8,9 @@
 import os
 import sys
 import time
-from os.path import (
-    join,
-    dirname,
-    abspath,
-)
+from pathlib import Path
 
-sys.path.insert(0, join(dirname(dirname(dirname(abspath(__file__)))), "setupsrc"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "setupsrc"))
 from pl_setup.packaging_base import (
     run_cmd,
     SourceTree,
@@ -69,7 +65,6 @@ autodoc_inherit_docstrings = False
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
-    "show-inheritance": True,
     "member-order": "bysource",
 }
 intersphinx_mapping = {
@@ -78,6 +73,11 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
 
+# rst_prolog = """
+# .. |br| raw:: html
+#
+#    <br/>
+# """
 
 def setup(app):
     app.add_config_value("build_type", "latest", "env")

@@ -220,6 +220,8 @@ def call_ctypesgen(target_dir, include_dir):
     
     bindings = join(target_dir, BindingsFileName)
     
+    # TODO refine command (ctypesgen provides a lot of interesting options)
+    # on the long term, consider using one bindings file per header (might improve performance)
     ctypesgen_cmd = ["ctypesgen", "--library", "pdfium", "--strip-build-path", target_dir, "-L", "."] + sorted(glob( join(include_dir, "*.h") )) + ["-o", bindings]
     run_cmd(ctypesgen_cmd, cwd=target_dir)
     

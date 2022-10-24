@@ -26,7 +26,7 @@ jobs:
       - name: Install/update packages
         run: |
           python3 -m pip install -U pip setuptools wheel
-          python3 -m pip install -U --pre pypdfium2[test,converters,inserttext]
+          python3 -m pip install -U --pre pypdfium2[test,converters]
       
       - name: Check out pypdfium2 repository
         uses: actions/checkout@v3

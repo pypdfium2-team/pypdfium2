@@ -76,13 +76,13 @@ However, some optional support model features require additional packages:
 * [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module name `PIL`) is a highly pouplar imaging library for Python.
   pypdfium2 provides convenience methods to directly return PIL image objects when dealing with raster graphics.
 * [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. Similar to `Pillow`, pypdfium2 provides helpers to get raster graphics in the form of multidimensional numpy arrays.
-* [`uharfbuzz`](https://github.com/harfbuzz/uharfbuzz) is a text shaping engine used by text insertion helpers, to support foreign writing systems.
-  If you do not care about this, you may insert text using the raw PDFium functions `FPDFPageObj_NewTextObj()` (or `FPDFPageObj_CreateTextObj()`) and `FPDFText_SetText()` without being dependent on uharfbuzz.
 
 
 ## Usage
 
 ### [Support model](https://pypdfium2.readthedocs.io/en/stable/python_api.html)
+
+<!-- TODO demonstrate more APIs (e. g. XObject placement, transform matrices, image extraction, ...) -->
 
 Here are some examples of using the support model API.
 
@@ -101,8 +101,8 @@ Here are some examples of using the support model API.
 * Render multiple pages concurrently
   ```python
   page_indices = [i for i in range(n_pages)]  # all pages
-  renderer = pdf.render_to(
-      pdfium.BitmapConv.pil_image,
+  renderer = pdf.render(
+      pdfium.PdfBitmap.to_pil,
       page_indices = page_indices,
       scale = 300/72,  # 300dpi resolution
   )
@@ -152,8 +152,8 @@ Here are some examples of using the support model API.
 
 * Render a single page
   ```python
-  image = page.render_to(
-      pdfium.BitmapConv.pil_image,
+  bitmap = page.render(
+      # defaults
       scale = 1,                           # 72dpi resolution
       rotation = 0,                        # no additional rotation
       crop = (0, 0, 0, 0),                 # no crop (form: left, right, bottom, top)
@@ -171,10 +171,9 @@ Here are some examples of using the support model API.
       prefer_bgrx = False,                 # don't prefer four channels for coloured output
       force_bitmap_format = None,          # don't force a specific bitmap format
       extra_flags = 0,                     # no extra flags
-      allocator = None,                    # no custom allocator
-      memory_limit = 2**30,                # maximum allocation (1 GiB)
   )
-  image.show()
+  pil_image = bitmap.to_pil()
+  pil_image.show()
   ```
 
 * Extract and search text
@@ -187,21 +186,10 @@ Here are some examples of using the support model API.
   # Extract text from a specific rectangular area
   text_part = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
   
-  # Extract URLs from the page
-  links = [l for l in textpage.get_links()]
-  
   # Locate text on the page
   searcher = textpage.search("something", match_case=False, match_whole_word=False)
   # This will be a list of bounding boxes of the form (left, right, bottom, top)
   first_occurrence = searcher.get_next()
-  ```
-
-* Finished objects may be closed explicitly to release memory allocated by PDFium.
-  Otherwise, they will be finalised automatically on garbage collection.
-  ```python
-  # Attention: objects must be closed in correct order!
-  for garbage in (searcher, textpage, page, pdf):
-      garbage.close()
   ```
 
 * Create a new PDF with an empty A4 sized page
@@ -211,38 +199,19 @@ Here are some examples of using the support model API.
   page_a = pdf.new_page(width, height)
   ```
 
-* Insert text content
-  ```python
-  NotoSans = "./tests/resources/NotoSans-Regular.ttf"
-  hb_font = pdfium.HarfbuzzFont(NotoSans)
-  pdf_font = pdf.add_font(
-      NotoSans,
-      type = pdfium.FPDF_FONT_TRUETYPE,
-      is_cid = True,
-  )
-  page_a.insert_text(
-      text = "मैं घोषणा, पुष्टि और सहमत हूँ कि:",
-      pos_x = 50,
-      pos_y = height - 75,
-      font_size = 25,
-      hb_font = hb_font,
-      pdf_font = pdf_font,
-  )
-  page_a.generate_content()
-  ```
-
-* Add a JPEG image on a second page
+* Include a JPEG image in a PDF
   ```python
   pdf = pdfium.PdfDocument.new()
-
+  
   image = pdfium.PdfImageObject.new(pdf)
   buffer = open("./tests/resources/mona_lisa.jpg", "rb")
-  width, height = image.load_jpeg(buffer, autoclose=True)
-
+  image.load_jpeg(buffer, autoclose=True)
+  width, height = image.get_size()
+  
   matrix = pdfium.PdfMatrix()
   matrix.scale(width, height)
   image.set_matrix(matrix)
-
+  
   page = pdf.new_page(width, height)
   page.insert_object(image)
   page.generate_content()
@@ -272,6 +241,8 @@ A large variety of examples on how to interface with the raw API using [`ctypes`
 Nonetheless, the following guide may be helpful to get started with the raw API, especially for developers who are not familiar with `ctypes` yet.
 
 [^pdfium_docs]: Unfortunately, no recent HTML-rendered documentation is available for PDFium at the moment. While large parts of the old [Foxit docs](https://developers.foxit.com/resources/pdf-sdk/c_api_reference_pdfium/group___f_p_d_f_i_u_m.html) still seem similar to PDFium's current API, many modifications and new functions are actually missing, which can be confusing.
+
+<!-- TODO write something about weakref.finalize(); add example on creating a C page array -->
 
 * In general, PDFium functions can be called just like normal Python functions.
   However, parameters may only be passed positionally, i. e. it is not possible to use keyword arguments.
@@ -742,7 +713,6 @@ There are also a few projects that *could* update to pypdfium2 but are still usi
 
 <!-- order: alphabetical by surname -->
 
-* [Anurag Bansal](https://github.com/banagg): Support model for text insertion (`PdfPage.insert_text()`).
 * [Benoît Blanchon](https://github.com/bblanchon): Author of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](sourcebuild/patches/).
 * [Anderson Bravalheri](https://github.com/abravalheri): Help with PEP 517/518 compliance. Hint to use an environment variable rather than separate setup files.
 * [Bastian Germann](https://github.com/bgermann): Help with inclusion of licenses for third-party components of PDFium.

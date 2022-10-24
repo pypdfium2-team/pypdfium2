@@ -24,8 +24,8 @@ Renderer
 .. command-output:: pypdfium2 render --help
 
 
-Table of Contents Reader
-************************
+TOC Reader
+**********
 .. command-output:: pypdfium2 toc --help
 
 
@@ -44,9 +44,14 @@ Text Extractor
 .. command-output:: pypdfium2 extract-text --help
 
 
-Page Object Finder
-******************
-.. command-output:: pypdfium2 find-pageobjects --help
+Image Extractor
+***************
+.. command-output:: pypdfium2 extract-images --help
+
+
+Object Finder
+*************
+.. command-output:: pypdfium2 find-objects --help
 
 
 JPEG Converter

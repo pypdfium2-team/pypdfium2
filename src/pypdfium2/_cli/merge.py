@@ -4,28 +4,7 @@
 from pypdfium2 import _namespace as pdfium
 
 
-def _merge_files(input_paths, passwords):
-    
-    dest_pdf = pdfium.PdfDocument.new()
-    index = 0
-    
-    for in_path, pwd in zip(input_paths, passwords):
-        
-        src_pdf = pdfium.PdfDocument(in_path, password=pwd)
-        success = pdfium.FPDF_ImportPagesByIndex(dest_pdf.raw, src_pdf.raw, None, 0, index)
-        if not success:
-            raise RuntimeError("Importing pages failed.")
-        
-        index += len(src_pdf)
-    
-    return dest_pdf
-
-
-def attach_parser(subparsers):
-    parser = subparsers.add_parser(
-        "merge",
-        help = "Concatenate PDF files",
-    )
+def attach(parser):
     parser.add_argument(
         "inputs",
         nargs = "+",
@@ -34,7 +13,7 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--passwords",
         nargs = "*",
-        help = "A sequence of passwords to unlock encrypted PDFs. The value is ignored for non-encrypted documents, where any placeholder may be used.",
+        help = "A sequence of passwords to unlock encrypted PDFs. Any placeholder may be used for non-encrypted documents.",
     )
     parser.add_argument(
         "--output", "-o",
@@ -48,6 +27,12 @@ def main(args):
     if not args.passwords:
         args.passwords = [None for _ in args.inputs]
     
-    merged_pdf = _merge_files(args.inputs, args.passwords)
+    dest_pdf = pdfium.PdfDocument.new()
+    index = 0
+    for in_path, password in zip(args.inputs, args.passwords):
+        src_pdf = pdfium.PdfDocument(in_path, password=password)
+        dest_pdf.import_pages(src_pdf)
+        index += len(src_pdf)
+    
     with open(args.output, "wb") as buffer:
-        merged_pdf.save(buffer)
+        dest_pdf.save(buffer)

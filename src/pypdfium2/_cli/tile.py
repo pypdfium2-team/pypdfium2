@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os.path
 from enum import Enum
+from pathlib import Path
 from pypdfium2 import _namespace as pdfium
 
 
@@ -26,11 +26,7 @@ def units_to_pt(value, unit: Units):
         raise ValueError("Invalid unit type %s" % unit)
 
 
-def attach_parser(subparsers):
-    parser = subparsers.add_parser(
-        "tile",
-        help = "Perform page tiling (N-up compositing)",
-    )
+def attach(parser):
     parser.add_argument(
         "input",
         help = "PDF file on which to perform N-up compositing",
@@ -42,7 +38,7 @@ def attach_parser(subparsers):
     parser.add_argument(
         "--output", "-o",
         required = True,
-        type = os.path.abspath,
+        type = Path,
         help = "Target path for the new document",
     )
     parser.add_argument(

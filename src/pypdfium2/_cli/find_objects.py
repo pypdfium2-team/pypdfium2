@@ -1,20 +1,18 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os.path
+from pathlib import Path
 from pypdfium2 import _namespace as pdfium
-from pypdfium2._cli._parsers import pagetext_type
+from pypdfium2._cli._parsers import parse_pagetext
 
 
-def attach_parser(subparsers):
-    obj_types = list(pdfium.ObjectTypeToConst.keys())
-    parser = subparsers.add_parser(
-        "find-pageobjects",
-        help = "Locate page objects of given types.",
-    )
+def attach(parser):
+    
+    obj_types = list( pdfium.ObjectTypeToConst.keys() )
+    
     parser.add_argument(
         "input",
-        type = os.path.abspath,
+        type = Path,
         help = "Path to the PDF document to work with.",
     )
     parser.add_argument(
@@ -23,7 +21,7 @@ def attach_parser(subparsers):
     )
     parser.add_argument(
         "--pages",
-        type = pagetext_type,
+        type = parse_pagetext,
         help = "The pages to search (defaults to all).",
     )
     parser.add_argument(
@@ -44,13 +42,19 @@ def attach_parser(subparsers):
 
 def main(args):
     
-    doc = pdfium.PdfDocument(args.input, password=args.password)
+    pdf = pdfium.PdfDocument(args.input, password=args.password)
     args.types = [pdfium.ObjectTypeToConst[t] for t in args.types]
     if args.pages is None:
-        args.pages = [i for i in range(len(doc))]
+        args.pages = [i for i in range(len(pdf))]
     
-    for index in args.pages:
-        page = doc.get_page(index)
-        for obj in page.get_objects(max_depth=args.max_depth):
-            if obj.type in args.types:
-                print("    "*obj.level + pdfium.ObjectTypeToStr[obj.type], obj.get_pos())
+    # TODO add option to show image metadata; print count of found objects at end
+    
+    for i in args.pages:
+        
+        page = pdf.get_page(i)
+        obj_searcher = page.get_objects(max_depth=args.max_depth)
+        
+        for obj in obj_searcher:
+            if obj.type not in args.types:
+                continue
+            print("    "*obj.level + pdfium.ObjectTypeToStr[obj.type], obj.get_pos())
