@@ -95,7 +95,6 @@ class PdfPage:
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         success = box_func(self.raw, left, bottom, right, top)
         if not success:
-            # TODO avoid repeated initialisation of c_float objects for fallback
             return fallback_func()
         return (left.value, bottom.value, right.value, top.value)
     
