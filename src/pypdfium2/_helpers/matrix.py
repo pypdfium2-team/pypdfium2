@@ -119,8 +119,13 @@ class PdfMatrix:
             x (float): A factor to scale the X axis (<1: compress, >1: stretch).
             y (float): A factor to scale the Y axis.
         """
-        # same as a*=x, b*=y, c*=x, d*=y, e*=x, f*=y
-        self.multiply( PdfMatrix(x, 0, 0, y) )
+        # same as self.multiply( PdfMatrix(x, 0, 0, y) )
+        self.a *= x
+        self.b *= y
+        self.c *= x
+        self.d *= y
+        self.e *= x
+        self.f *= y
     
     def rotate(self, angle):
         """
