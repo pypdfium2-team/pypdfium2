@@ -20,7 +20,7 @@ class PdfObject:
     """
     Page object helper class.
     
-    When constructing a :class:`.PdfObject`, a more specific subclass may be returned instead,
+    When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead,
     depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
     
     Attributes:
@@ -42,7 +42,6 @@ class PdfObject:
     def __new__(cls, raw, *args, **kwargs):
         
         type = pdfium.FPDFPageObj_GetType(raw)
-        
         if type == pdfium.FPDF_PAGEOBJ_IMAGE:
             instance = super().__new__(PdfImage)
         else:
