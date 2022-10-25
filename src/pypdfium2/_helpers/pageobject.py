@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+# TODO rename file to pageobjects.py or objects.py
 
 import ctypes
 import weakref
@@ -15,6 +16,7 @@ from pypdfium2._helpers.bitmap import PdfBitmap
 c_float = ctypes.c_float
 
 
+# TODO rename to PdfObject
 class PdfPageObject:
     """
     Page object helper class.
@@ -136,6 +138,7 @@ class PdfPageObject:
         pdfium.FPDFPageObj_Transform(self.raw, *matrix.get())
 
 
+# TODO rename to PdfImage
 class PdfImageObject (PdfPageObject):
     """
     Image object helper class (specific kind of page object).
