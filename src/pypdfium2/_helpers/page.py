@@ -88,6 +88,9 @@ class PdfPage:
         pdfium.FPDFPage_SetRotation(self.raw, RotationToConst[rotation])
     
     
+    # pdfium's box getters currently do not inherit from parent nodes in the page tree (https://crbug.com/pdfium/1786)
+    # the higher level page size and bounding box functions do, though
+    
     def _get_box(self, box_func, fallback_func):
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         success = box_func(self.raw, left, bottom, right, top)
