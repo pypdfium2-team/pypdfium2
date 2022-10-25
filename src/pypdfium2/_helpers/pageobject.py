@@ -42,7 +42,7 @@ class PdfPageObject:
     
     def __new__(cls, raw, *args, **kwargs):
         
-        # Allow to create a more specific helper depending on the type
+        # Construct a more specific helper depending on the object's type
         type = pdfium.FPDFPageObj_GetType(raw)
         
         if type == pdfium.FPDF_PAGEOBJ_IMAGE:
@@ -186,9 +186,6 @@ class PdfImageObject (PdfPageObject):
                 Otherwise, the buffer needs to remain open until the PDF is closed.
             autoclose (bool):
                 Whether the buffer should be automatically closed once it is not needed anymore.
-        
-        Returns:
-            (int, int): Image width and height in pixels.
         """
         
         if not is_input_buffer(buffer):
@@ -243,9 +240,8 @@ class PdfImageObject (PdfPageObject):
     
     def get_size(self):
         """
-        
+        TODO
         """
-        
         metadata = self.get_metadata()
         return (metadata.width, metadata.height)
     
