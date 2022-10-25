@@ -101,8 +101,6 @@ class PdfPage:
             raise ValueError("Box values must be int or float.")
         box_func(self.raw, l, b, r, t)
     
-    # TODO implement get_bbox()
-    
     def get_mediabox(self):
         """
         Returns:
@@ -126,7 +124,9 @@ class PdfPage:
         return self._get_box(pdfium.FPDFPage_GetCropBox, self.get_mediabox)
     
     def set_cropbox(self, l, b, r, t):
-        """ Set the page's CropBox. """
+        """
+        Set the page's CropBox.
+        """
         self._set_box(pdfium.FPDFPage_SetCropBox, l, b, r, t)
     
     def get_bleedbox(self):
@@ -137,7 +137,9 @@ class PdfPage:
         return self._get_box(pdfium.FPDFPage_GetBleedBox, self.get_cropbox)
     
     def set_bleedbox(self, l, b, r, t):
-        """ Set the page's BleedBox. """
+        """
+        Set the page's BleedBox.
+        """
         self._set_box(pdfium.FPDFPage_SetBleedBox, l, b, r, t)
     
     def get_trimbox(self):
@@ -148,7 +150,9 @@ class PdfPage:
         return self._get_box(pdfium.FPDFPage_GetTrimBox, self.get_cropbox)
     
     def set_trimbox(self, l, b, r, t):
-        """ Set the page's TrimBox. """
+        """
+        Set the page's TrimBox.
+        """
         self._set_box(pdfium.FPDFPage_SetTrimBox, l, b, r, t)
     
     def get_artbox(self):
@@ -159,8 +163,22 @@ class PdfPage:
         return self._get_box(pdfium.FPDFPage_GetArtBox, self.get_cropbox)
     
     def set_artbox(self, l, b, r, t):
-        """ Set the page's ArtBox. """
+        """
+        Set the page's ArtBox.
+        """
         self._set_box(pdfium.FPDFPage_SetArtBox, l, b, r, t)
+    
+    
+    def get_bbox(self):
+        """
+        TODO docs
+        """
+        # TODO test integration
+        rect = pdfium.FS_RECTF()
+        success = pdfium.FPDF_GetPageBoundingBox(self.raw, rect)
+        if not success:
+            raise PdfiumError("Failed to get page bounding box.")
+        return (rect.left, rect.bottom, rect.right, rect.top)
     
     
     def get_textpage(self):
