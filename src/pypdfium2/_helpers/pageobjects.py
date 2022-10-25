@@ -16,13 +16,12 @@ from pypdfium2._helpers.bitmap import PdfBitmap
 c_float = ctypes.c_float
 
 
-# TODO rename to PdfObject
-class PdfPageObject:
+class PdfObject:
     """
     Page object helper class.
     
-    When constructing a :class:`.PdfPageObject`, a more specific subclass may be returned instead,
-    depending on :attr:`.type` (e. g. :class:`.PdfImageObject`).
+    When constructing a :class:`.PdfObject`, a more specific subclass may be returned instead,
+    depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
     
     Attributes:
         raw (FPDF_PAGEOBJECT):
@@ -42,13 +41,12 @@ class PdfPageObject:
     
     def __new__(cls, raw, *args, **kwargs):
         
-        # Construct a more specific helper depending on the object's type
         type = pdfium.FPDFPageObj_GetType(raw)
         
         if type == pdfium.FPDF_PAGEOBJ_IMAGE:
-            instance = super().__new__(PdfImageObject)
+            instance = super().__new__(PdfImage)
         else:
-            instance = super().__new__(PdfPageObject)
+            instance = super().__new__(PdfObject)
         
         instance.type = type
         return instance
@@ -138,8 +136,7 @@ class PdfPageObject:
         pdfium.FPDFPageObj_Transform(self.raw, *matrix.get())
 
 
-# TODO rename to PdfImage
-class PdfImageObject (PdfPageObject):
+class PdfImage (PdfObject):
     """
     Image object helper class (specific kind of page object).
     """
@@ -152,7 +149,7 @@ class PdfImageObject (PdfPageObject):
         Parameters:
             pdf (PdfDocument): The document to which the new image object shall be added.
         Returns:
-            PdfImageObject: Handle to a new, empty image.
+            PdfImage: Handle to a new, empty image.
         """
         return cls(
             pdfium.FPDFPageObj_NewImageObj(pdf.raw),

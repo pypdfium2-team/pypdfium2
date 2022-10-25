@@ -203,7 +203,7 @@ Here are some examples of using the support model API.
   ```python
   pdf = pdfium.PdfDocument.new()
   
-  image = pdfium.PdfImageObject.new(pdf)
+  image = pdfium.PdfImage.new(pdf)
   buffer = open("./tests/resources/mona_lisa.jpg", "rb")
   image.load_jpeg(buffer, autoclose=True)
   width, height = image.get_size()

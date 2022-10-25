@@ -37,7 +37,7 @@ def main(args):
         # Simple check if the input files are JPEGs - a better implementation could use mimetypes or python-magic instead
         assert path.suffix.lower() in (".jpg", ".jpeg")
         
-        image = pdfium.PdfImageObject.new(pdf)
+        image = pdfium.PdfImage.new(pdf)
         buffer = open(path, "rb")
         image.load_jpeg(buffer, inline=args.inline, autoclose=True)
         width, height = image.get_size()

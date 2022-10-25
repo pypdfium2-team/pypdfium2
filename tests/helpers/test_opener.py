@@ -218,7 +218,7 @@ def test_object_hierarchy():
     
     # TODO test smart finalization of loose pageobjects
     pageobj = next(page.get_objects())
-    assert isinstance(pageobj, pdfium.PdfPageObject)
+    assert isinstance(pageobj, pdfium.PdfObject)
     assert isinstance(pageobj.raw, pdfium.FPDF_PAGEOBJECT)
     assert isinstance(pageobj.type, int)
     assert pageobj.page is page

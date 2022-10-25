@@ -24,7 +24,7 @@ Page
 
 Page Object
 ***********
-.. automodule:: pypdfium2._helpers.pageobject
+.. automodule:: pypdfium2._helpers.pageobjects
    :show-inheritance:
 
 Text Page

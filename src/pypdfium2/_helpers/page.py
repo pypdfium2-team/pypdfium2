@@ -16,7 +16,7 @@ from pypdfium2._helpers.misc import (
 )
 from pypdfium2._helpers.bitmap import PdfBitmap
 from pypdfium2._helpers.textpage import PdfTextPage
-from pypdfium2._helpers.pageobject import PdfPageObject
+from pypdfium2._helpers.pageobjects import PdfObject
 
 c_float = ctypes.c_float
 
@@ -204,7 +204,7 @@ class PdfPage:
         If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.
         
         Parameters:
-            pageobj (PdfPageObject): The page object to insert.
+            pageobj (PdfObject): The page object to insert.
         """
         
         if pageobj.page:
@@ -223,7 +223,7 @@ class PdfPage:
         Remove a page object from the page. The page object must not be used afterwards.
         
         Parameters:
-            pageobj (PdfPageObject): The page object to remove.
+            pageobj (PdfObject): The page object to remove.
         """
         
         # TODO testing
@@ -256,7 +256,7 @@ class PdfPage:
                 Maximum recursion depth to consider when descending into Form XObjects.
         
         Yields:
-            :class:`.PdfPageObject`: The page object.
+            :class:`.PdfObject`: The page object.
         """
         
         if form is None:
@@ -281,7 +281,7 @@ class PdfPage:
                 raise PdfiumError("Failed to get page object.")
             
             type = pdfium.FPDFPageObj_GetType(raw_obj)
-            yield PdfPageObject(
+            yield PdfObject(
                 raw = raw_obj,
                 page = self,
                 pdf = self.pdf,

@@ -25,7 +25,7 @@ def test_pageobj_placement():
     
     po = xobject.as_pageobject()
     assert po.get_matrix() == pdfium.PdfMatrix()
-    assert isinstance(po, pdfium.PdfPageObject)
+    assert isinstance(po, pdfium.PdfObject)
     assert isinstance(po.raw, pdfium.FPDF_PAGEOBJECT)
     assert po.pdf is dest_pdf
     assert po.page is None
@@ -133,7 +133,7 @@ def test_pageobj_placement():
     # TODO
     # * test copy and repr
     # * test skew
-    # * assert that PdfPageObject.transform() actually transforms and is not just doing the same as set_matrix()
+    # * assert that PdfObject.transform() actually transforms and is not just doing the same as set_matrix()
     # * assert that the transformation operates from the origin of the coordinate system
     
     with open(join(OutputDir, "pageobj_placement.pdf"), "wb") as buf:

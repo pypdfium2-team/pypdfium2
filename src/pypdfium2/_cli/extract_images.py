@@ -58,7 +58,7 @@ def main(args):
     for i in args.pages:
         page = pdf.get_page(i)
         obj_searcher = page.get_objects(max_depth=args.max_depth)
-        image_objs += [obj for obj in obj_searcher if isinstance(obj, pdfium.PdfImageObject)]
+        image_objs += [obj for obj in obj_searcher if isinstance(obj, pdfium.PdfImage)]
     
     n_digits = len(str(len(image_objs)))
     for i, obj in enumerate(image_objs):

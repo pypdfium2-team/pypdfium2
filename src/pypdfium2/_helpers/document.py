@@ -21,7 +21,7 @@ from pypdfium2._helpers.misc import (
     is_input_buffer,
 )
 from pypdfium2._helpers.page import PdfPage
-from pypdfium2._helpers.pageobject import PdfPageObject
+from pypdfium2._helpers.pageobjects import PdfObject
 
 logger = logging.getLogger(__name__)
 
@@ -612,12 +612,12 @@ class PdfXObject:
     def as_pageobject(self):
         """
         Returns:
-            PdfPageObject: An independent page object representation of the XObject.
+            PdfObject: An independent page object representation of the XObject.
             If multiple page objects are created from one XObject, they share resources.
             Page objects created from an XObject remain valid after the XObject is finalized.
         """
         raw_pageobj = pdfium.FPDF_NewFormObjectFromXObject(self.raw)
-        return PdfPageObject(
+        return PdfObject(
             raw = raw_pageobj,
             pdf = self.pdf,
         )

@@ -20,8 +20,8 @@ def test_image_objects():
     assert len(images) == 3
     
     obj = images[0]
-    assert isinstance(obj, pdfium.PdfPageObject)
-    assert type(obj) is pdfium.PdfImageObject
+    assert isinstance(obj, pdfium.PdfObject)
+    assert type(obj) is pdfium.PdfImage
     assert obj.type == pdfium.FPDF_PAGEOBJ_IMAGE
     assert isinstance(obj.raw, pdfium.FPDF_PAGEOBJECT)
     assert obj.level == 0
@@ -46,7 +46,7 @@ def test_misc_objects():
     assert page.pdf is pdf
     
     for obj in page.get_objects():
-        assert type(obj) is pdfium.PdfPageObject
+        assert type(obj) is pdfium.PdfObject
         assert isinstance(obj.raw, pdfium.FPDF_PAGEOBJECT)
         assert obj.type in (pdfium.FPDF_PAGEOBJ_TEXT, pdfium.FPDF_PAGEOBJ_PATH)
         assert obj.level == 0
@@ -61,7 +61,7 @@ def test_new_jpeg():
     pdf = pdfium.PdfDocument.new()
     page = pdf.new_page(240, 120)
     
-    image_a = pdfium.PdfImageObject.new(pdf)
+    image_a = pdfium.PdfImage.new(pdf)
     buffer = open(TestFiles.mona_lisa, "rb")
     image_a.load_jpeg(buffer, autoclose=True)
     width, height = image_a.get_size()
@@ -92,7 +92,7 @@ def test_new_jpeg():
     assert metadata.horizontal_dpi == 72
     assert metadata.vertical_dpi == 72
     
-    image_b = pdfium.PdfImageObject.new(pdf)
+    image_b = pdfium.PdfImage.new(pdf)
     with open(TestFiles.mona_lisa, "rb") as buffer:
         image_b.load_jpeg(buffer, inline=True, autoclose=False)
     
@@ -121,7 +121,7 @@ def test_replace_image():
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf.get_page(0)
     
-    images = [img for img in page.get_objects() if isinstance(img, pdfium.PdfImageObject)]
+    images = [img for img in page.get_objects() if isinstance(img, pdfium.PdfImage)]
     matrices = [img.get_matrix() for img in images]
     assert len(images) == 3
     image_1 = images[0]
@@ -156,7 +156,7 @@ def test_extract_image(render):
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf.get_page(0)
     
-    all_images = [img for img in page.get_objects() if isinstance(img, pdfium.PdfImageObject)]
+    all_images = [img for img in page.get_objects() if isinstance(img, pdfium.PdfImage)]
     image = all_images[0]
     
     metadata = image.get_metadata()
@@ -202,7 +202,7 @@ def test_remove_image():
     page_1 = pdf.get_page(0)
     
     # TODO order images by position
-    images = [img for img in page_1.get_objects() if isinstance(img, pdfium.PdfImageObject)]
+    images = [img for img in page_1.get_objects() if isinstance(img, pdfium.PdfImage)]
     assert len(images) == 3
     
     # drop an image
