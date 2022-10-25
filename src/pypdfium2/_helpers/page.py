@@ -401,8 +401,6 @@ def _parse_renderopts(
         extra_flags = 0,
     ):
     
-    # TODO consider unifying prefer_bgrx / force_bitmap_format into a single option
-    
     if force_bitmap_format is None:
         cl_format = _auto_bitmap_format(fill_colour, greyscale, prefer_bgrx)
     else:
