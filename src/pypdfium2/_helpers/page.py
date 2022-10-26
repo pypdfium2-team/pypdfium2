@@ -35,7 +35,6 @@ class PdfPage:
     def __init__(self, raw, pdf):
         self.raw = raw
         self.pdf = pdf
-        # if the form env of the parent document is initialised, we could call FORM_OnAfterLoadPage() here
         self._finalizer = weakref.finalize(
             self, self._static_close,
             self.raw, self.pdf,
@@ -51,7 +50,6 @@ class PdfPage:
         # logger.debug("Closing page")
         if parent._tree_closed():
             logger.critical("Document closed before page (this is illegal). Document: %s" % parent)
-        # if the form env of the parent document is initialised, we could call FORM_OnBeforeClosePage() here
         pdfium.FPDF_ClosePage(raw)
     
     
@@ -355,6 +353,7 @@ class PdfPage:
             pdfium.FPDF_RenderPage_Close(self.raw)
         
         if draw_forms and (self.pdf.get_formtype() != pdfium.FORMTYPE_NONE):
+            # FIXME what about FORM_OnAfterLoadPage() / FORM_OnBeforeClosePage()
             exit_formenv = (self.pdf._form_env is None)
             formenv = self.pdf.init_formenv()
             pdfium.FPDF_FFLDraw(formenv, *render_args)
