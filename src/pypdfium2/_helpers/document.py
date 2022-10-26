@@ -6,6 +6,7 @@ import weakref
 import ctypes
 import logging
 import functools
+import threading
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 
@@ -463,8 +464,7 @@ class PdfDocument:
             file_access = file_access,
         )
         page = pdf.get_page(index)
-        result = renderer(page, converter, **kwargs)
-        return result, index
+        return renderer(page, converter, **kwargs)
     
     
     def render(
@@ -510,12 +510,6 @@ class PdfDocument:
             if len(page_indices) != len(set(page_indices)):
                 raise ValueError("Duplicate page index")
         
-        # shortcut: if we're rendering just a single page, don't waste time setting up a process pool
-        if len(page_indices) == 1:
-            page = self.get_page(page_indices[0])
-            yield renderer(page, converter, **kwargs)
-            return
-        
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
             input_data = self._orig_input,
@@ -526,14 +520,8 @@ class PdfDocument:
             **kwargs
         )
         
-        i = 0
         with ProcessPoolExecutor(n_processes) as pool:
-            for result, index in pool.map(invoke_renderer, page_indices):
-                assert index == page_indices[i]
-                i += 1
-                yield result
-        
-        assert len(page_indices) == i
+            yield from pool.map(invoke_renderer, page_indices)
 
 
 def _open_pdf(input_data, password, autoclose):
