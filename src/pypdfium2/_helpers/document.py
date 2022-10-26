@@ -473,7 +473,7 @@ class PdfDocument:
     def _handle_requests(requests, results):
         while True:
             request = requests.get()
-            if request == "STOP":
+            if request is None:  # stop
                 break
             results.put(request)
     
@@ -546,7 +546,7 @@ class PdfDocument:
         with ProcessPoolExecutor(n_processes) as pool:
             yield from pool.map(invoke_renderer, page_indices)
         
-        requests.put("STOP")
+        requests.put(None)  # stop
         request_handler.join()
 
 
