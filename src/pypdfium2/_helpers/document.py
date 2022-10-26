@@ -8,6 +8,7 @@ import logging
 import functools
 import threading
 from pathlib import Path
+import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2._pypdfium as pdfium
@@ -22,6 +23,7 @@ from pypdfium2._helpers.misc import (
     is_input_buffer,
 )
 from pypdfium2._helpers.page import PdfPage
+from pypdfium2._helpers.bitmap import PdfBitmap
 from pypdfium2._helpers.pageobjects import PdfObject
 
 logger = logging.getLogger(__name__)
@@ -467,6 +469,15 @@ class PdfDocument:
         return renderer(page, converter, **kwargs)
     
     
+    @staticmethod
+    def _handle_requests(requests, results):
+        while True:
+            request = requests.get()
+            if request == "STOP":
+                break
+            results.put(request)
+    
+    
     def render(
             self,
             converter,
@@ -510,6 +521,11 @@ class PdfDocument:
             if len(page_indices) != len(set(page_indices)):
                 raise ValueError("Duplicate page index")
         
+        manager = mp.Manager()
+        requests = manager.Queue()
+        results = manager.Queue()
+        bitmap_maker = _shared_bitmap_maker(requests, results)
+        
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
             input_data = self._orig_input,
@@ -517,11 +533,35 @@ class PdfDocument:
             file_access = self._file_access,
             converter = converter,
             renderer = renderer,
+            bitmap_maker = bitmap_maker,
             **kwargs
         )
         
+        request_handler = threading.Thread(
+            target = self._handle_requests,
+            args = (requests, results),
+        )
+        request_handler.start()
+        
         with ProcessPoolExecutor(n_processes) as pool:
             yield from pool.map(invoke_renderer, page_indices)
+        
+        requests.put("STOP")
+        request_handler.join()
+
+
+class _shared_bitmap_maker:
+    
+    def __init__(self, requests, results):
+        self.requests = requests
+        self.results = results
+    
+    def __call__(self, width, height, format, rev_byteorder):
+        request = (width, height, format, rev_byteorder)
+        self.requests.put(request)
+        answer = self.results.get()
+        assert answer == request
+        return PdfBitmap.new_native(width, height, format, rev_byteorder)
 
 
 def _open_pdf(input_data, password, autoclose):
