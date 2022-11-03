@@ -52,6 +52,10 @@ jobs:
       - name: Run packaging script
         run: make packaging
       
+      - name: Get latest tag
+        id: get_tag
+        run: echo "release_tag=$(git describe --abbrev=0)" >> $GITHUB_OUTPUT
+      
       - name: Push autorelease changes
         run: |
           git checkout main
@@ -60,12 +64,6 @@ jobs:
           git checkout stable
           git push
           git checkout main
-      
-      - name: Get latest tag
-        id: get_tag
-        run: |
-          RELEASE_TAG=$(git describe --abbrev=0)
-          echo "::set-output name=release_tag::$RELEASE_TAG"
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
