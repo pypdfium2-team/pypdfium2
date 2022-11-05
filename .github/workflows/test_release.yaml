@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# TODO Implement wheel testing on autorelease, then remove this workflow.
+
 name: Test Release
 on: workflow_dispatch
 
