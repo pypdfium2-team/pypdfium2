@@ -17,9 +17,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: ['ubuntu-22.04', 'ubuntu-20.04', 'macos-12', 'macos-11', 'macos-10.15', 'windows-2022', 'windows-2019']
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        py: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        py: ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11']
+        exclude:
+          - os: ubuntu-latest
+            py: '3.6'
     
     runs-on: ${{ matrix.os }}
     
