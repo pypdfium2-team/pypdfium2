@@ -26,7 +26,6 @@ jobs:
           # Python 3.11 test temporarily disabled on macOS because sysconfig.get_platform() returns garbage
           - os: macos-latest
             py: '3.11'
-          
     
     runs-on: ${{ matrix.os }}
     
