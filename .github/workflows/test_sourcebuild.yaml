@@ -37,7 +37,7 @@ jobs:
       - name: Install deps
         run: |
           python3 -m pip install -U pip
-          python3 -m pip install -U .[setup,test]
+          python3 -m pip install -U .[setup,converters,test]
       
       - name: Build PDFium
         run: python3 ./setupsrc/pl_setup/build_pdfium.py
