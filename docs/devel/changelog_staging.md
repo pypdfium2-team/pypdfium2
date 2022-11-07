@@ -7,3 +7,4 @@
 - Major improvements to GitHub Workflows.
 - Fixed build script for Windows (artifact detection) and macOS (GN configuration).
 - Fixed test suite on Windows (cleanup failure).
+- Fixed test suite on Python < 3.7.

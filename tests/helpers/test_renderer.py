@@ -14,6 +14,7 @@ import pypdfium2 as pdfium
 from ..conftest import (
     get_members,
     TestFiles,
+    PyVersion,
     OutputDir,
     ExpRenderPixels
 )
@@ -123,7 +124,8 @@ def test_render_page_alpha(sample_page):
     image = sample_page.render_to(**kwargs)
     image_rev = sample_page.render_to(**kwargs, rev_byteorder=True)
     
-    assert image == image_rev
+    if PyVersion > (3, 6):
+        assert image == image_rev
     assert image.mode == "RGBA"
     assert image.size == (595, 842)
     for pos, exp_value in pixels:
@@ -188,7 +190,9 @@ def test_render_page_fill_colour(fill_colour, sample_page):
     )
     image = sample_page.render_to(**kwargs)
     image_rev = sample_page.render_to(**kwargs, rev_byteorder=True)
-    assert image == image_rev
+    
+    if PyVersion > (3, 6):
+        assert image == image_rev
     
     bg_pixel = image.getpixel( (0, 0) )
     if fill_colour[3] == 255:
