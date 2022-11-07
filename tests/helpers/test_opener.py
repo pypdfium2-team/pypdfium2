@@ -1,12 +1,14 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import io
 import re
 import shutil
 import logging
 import weakref
 import tempfile
+import traceback
 import pytest
 import PIL.Image
 from os.path import join, abspath
@@ -169,7 +171,11 @@ def test_open_nonascii():
     pdf = pdfium.PdfDocument(nonascii_file)
     _check_general(pdf)
     
-    tempdir.cleanup()
+    try:
+        os.remove(nonascii_file)
+        tempdir.cleanup()
+    except Exception:
+        traceback.print_exc()
 
 
 def test_open_new():
