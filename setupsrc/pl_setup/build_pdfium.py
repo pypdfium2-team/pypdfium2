@@ -50,8 +50,6 @@ DefaultConfig = {
 
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
-elif sys.platform.startswith("win32"):
-    DefaultConfig["pdf_use_win32_gdi"] = True
 
 
 def dl_depottools(do_update):

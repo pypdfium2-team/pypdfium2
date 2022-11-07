@@ -5,6 +5,6 @@
 
 # Changelog for next release
 - Major improvements to GitHub Workflows.
-- Fixed build script for Windows (artifact detection) and macOS (GN configuration).
+- Fixed build script for macOS (GN configuration). (Fixing artifact detection on Windows is still work in progress.)
 - Fixed test suite on Windows (cleanup failure).
 - Fixed test suite on Python < 3.7.
