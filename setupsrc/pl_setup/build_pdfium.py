@@ -30,8 +30,8 @@ PDFiumBuildDir = join(PDFiumDir, "out", "Default")
 OutputDir      = join(DataTree, PlatformNames.sourcebuild)
 
 PdfiumMainPatches = [
-    (join(PatchDir, "public_headers.patch"), PDFiumDir),
     (join(PatchDir, "shared_library.patch"), PDFiumDir),
+    (join(PatchDir, "public_headers.patch"), PDFiumDir),
 ]
 PdfiumWinPatches = [
     (join(PatchDir, "win", "pdfium.patch"), PDFiumDir),
