@@ -15,7 +15,6 @@ from pl_setup.packaging_base import (
     DataTree,
     PDFium_URL,
     DepotTools_URL,
-    MainLibnames,
     LibnameForSystem,
     VerStatusFileName,
     PlatformNames,
@@ -179,15 +178,19 @@ def find_lib(src_libname=None, directory=PDFiumBuildDir):
         else:
             print("Warning: Binary not found under given name.", file=sys.stderr)
     
-    try_names = []
-    for name in MainLibnames + ["pdfium.so"]:
-        try_names += [name, "lib"+name]
+    if sys.platform.startswith("linux"):
+        libname = "libpdfium.so"
+    elif sys.platform.startswith("darwin"):
+        libname = "libpdfium.dylib"
+    elif sys.platform.startswith("win32"):
+        libname = "pdfium.dll"
+    else:
+        raise RuntimeError("Not sure how pdfium artifact is called on platform '%s'" % (sys.platform, ))
     
-    try_paths = [join(directory, n) for n in try_names]
-    found_paths = [fp for fp in try_paths if os.path.isfile(fp)]
+    libpath = join(directory, libname)
+    assert os.path.exists(libpath)
     
-    assert len(found_paths) == 1
-    return found_paths[0]
+    return libpath
 
 
 def pack(src_libpath, v_libpdfium, destname=None):
