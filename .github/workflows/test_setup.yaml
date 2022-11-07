@@ -5,6 +5,10 @@ name: Test Setup
 on:
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   
   test_setup:

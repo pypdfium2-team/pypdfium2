@@ -6,6 +6,10 @@ name: Test Sourcebuild
 on:
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   
   test_sourcebuild:

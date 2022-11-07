@@ -134,12 +134,11 @@ def log_changes(summary, prev_ns, curr_ns):
 
 
 def register_changes(curr_ns):
+    run_local(["git", "checkout", "-B", "autorelease_tmp", "main"])
     run_local(["git", "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
     run_local(["git", "commit", "-m", "[autorelease] update changelog and version file"])
+    # NOTE the actually pushed tag will be a different one, but it's nevertheless convenient to have this here because of the changelog
     run_local(["git", "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
-    run_local(["git", "checkout", "stable"])
-    run_local(["git", "reset", "--hard", "main"])
-    run_local(["git", "checkout", "main"])
 
 
 def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
@@ -197,9 +196,9 @@ def main():
         description = "Automatic update script for pypdfium2, to be run in the CI release workflow."
     )
     parser.add_argument(
-        "--checkin",
+        "--register",
         action = "store_true",
-        help = "Allow running modifying git commands (commit, tag, reset)."
+        help = "Save changes in autorelease_tmp branch."
     )
     args = parser.parse_args()
     
@@ -212,7 +211,7 @@ def main():
         flush = (curr_ns["V_BETA"] is None),
     )
     log_changes(summary, prev_ns, curr_ns)
-    if args.checkin:
+    if args.register:
         register_changes(curr_ns)
     make_releasenotes(summary, prev_ns, curr_ns, c_updates)
 

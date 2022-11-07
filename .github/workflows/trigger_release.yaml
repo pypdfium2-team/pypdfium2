@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Trigger Release
+on:
+  
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+  # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
+  # schedule:
+  #   - cron: '0 10 * * 1'
+  
+  workflow_dispatch:
+    inputs:
+      test:
+        default: false
+        type: boolean
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    uses: ./.github/workflows/build_packages.yaml
+    with:
+      test: ${{ inputs.test }}
+      publish: true
