@@ -35,6 +35,9 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       
+      - name: Print platform info (debugging)
+        run: python3 -c "import platform; print(platform.machine())"
+      
       - name: Check out pypdfium2 repository
         uses: actions/checkout@v3
         with:
