@@ -23,9 +23,6 @@ jobs:
           # It seems that python 3.6 is not available on ubuntu-latest anymore
           - os: ubuntu-latest
             py: '3.6'
-          # Python 3.11 test temporarily disabled on macOS because sysconfig.get_platform() returns garbage
-          - os: macos-latest
-            py: '3.11'
     
     runs-on: ${{ matrix.os }}
     
