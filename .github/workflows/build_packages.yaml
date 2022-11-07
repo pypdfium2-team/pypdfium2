@@ -3,24 +3,6 @@
 
 name: Build Packages
 on:
-  
-  # FIXME share inputs between workflow_call and workflow_dispatch
-  
-  workflow_call:
-    inputs:
-      test:
-        default: true
-        type: boolean
-      publish:
-        default: false
-        type: boolean
-      py_version:
-        default: '3.10'
-        type: string
-      runner:
-        default: 'ubuntu-latest'
-        type: string
-  
   workflow_dispatch:
     inputs:
       test:

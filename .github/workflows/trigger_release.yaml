@@ -3,7 +3,6 @@
 
 name: Trigger Release
 on:
-  
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
   # schedule:
@@ -20,8 +19,21 @@ defaults:
     shell: bash
 
 jobs:
+  
+  # once there is a way to share inputs between workflow_dispatch and workflow_call, we can switch to github reusable workflows
+  
   release:
-    uses: ./.github/workflows/build_packages.yaml
-    with:
-      test: ${{ inputs.test }}
-      publish: true
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger Release
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build_packages.yaml
+          inputs: |
+            {
+              "test": "${{ inputs.test }}",
+              "publish": "true",
+              "py_version": "3.10",
+              "runner": "ubuntu-latest"
+            }
