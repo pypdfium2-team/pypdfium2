@@ -101,10 +101,11 @@ class _host_platform:
         # `libc_ver()` currently returns an empty string on libc implementations other than glibc - hence, we assume musl if it's not glibc
         # FIXME is there some function to actually detect musl?
         self._plat_info = sysconfig.get_platform().lower().replace("-", "_").replace(".", "_")
-        self._libc_info, self._is_glibc = None, None
+        self._libc_info = None
+        self._is_glibc = True
         if self._plat_info.startswith("linux"):
             self._libc_info = platform.libc_ver()
-            self._is_glibc = (self._libc_info[0] == "glibc")
+            self._is_glibc = self._libc_info[0].startswith("glibc")
         
         self.platform = self._get_platform()
         self.system = None
