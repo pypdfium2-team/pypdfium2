@@ -16,6 +16,10 @@ on:
       test:
         default: false
         type: boolean
+      publish:
+        # typically always true, exposed only for testing purposes
+        default: true
+        type: boolean
 
 defaults:
   run:
@@ -24,6 +28,7 @@ defaults:
 jobs:
   
   # Once there is a way to share inputs between workflow_dispatch and workflow_call, we can switch to github reusable workflows
+  # Alternatively, if it were possible to configure the inputs of scheduled workflow runs, we could remove this file entirely
   
   release:
     runs-on: ubuntu-latest
@@ -37,7 +42,7 @@ jobs:
             {
               "pre_test": "${{ inputs.pre_test }}",
               "test": "${{ inputs.test }}",
-              "publish": "true",
+              "publish": "${{ inputs.publish }}",
               "py_version": "3.10",
               "runner": "ubuntu-latest"
             }
