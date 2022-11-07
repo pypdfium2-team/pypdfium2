@@ -202,7 +202,7 @@ jobs:
           git push --tags
           git checkout stable
           git reset --hard main
-          git push
+          git push --force
           git checkout main
       
       - name: Publish to GitHub
