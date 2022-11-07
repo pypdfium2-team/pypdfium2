@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Test Release
+on:
+  workflow_dispatch:
+    inputs:
+      index_url:
+        default: 'https://pypi.org/simple'
+        type: string
+
+jobs:
+
+  test-release:
+  
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        py: ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11']
+        exclude:
+          # It seems that python 3.6 is not available on ubuntu-latest anymore
+          - os: ubuntu-latest
+            py: '3.6'
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.py }}
+      
+      - name: Update dependencies
+        run: python3 -m pip install -U pip setuptools wheel
+      
+      - name: Install pypdfium2
+        run: python3 -m pip install -U --pre pypdfium2[test,converters] --index-url ${{ inputs.index_url }}
+      
+      - name: Get pypdfium2 version
+        id: version
+        run: python3 -c "import pypdfium2; print('version=%s' % pypdfium2.V_PYPDFIUM2)" >> $GITHUB_OUTPUT
+      
+      - name: Check out pypdfium2 repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ steps.version.outputs.version }}
+      
+      - name: Run tests
+        run: python3 -m pytest tests/
