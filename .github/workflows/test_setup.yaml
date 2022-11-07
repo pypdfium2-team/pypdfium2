@@ -4,6 +4,7 @@
 name: Test Setup
 on:
   workflow_dispatch:
+  workflow_call:
 
 defaults:
   run:
@@ -39,7 +40,7 @@ jobs:
           python3 -m pip install -U pip
           python3 -m pip install -U .[setup,converters,test,docs]
       
-      # TODO Should we run the test suite after each way of installing?
+      # FIXME Should we run the test suite after each way of installing?
       
       - name: Setup (default, no isolation)
         run: python3 -m pip install --no-build-isolation .

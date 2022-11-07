@@ -5,6 +5,9 @@ name: Build Packages
 on:
   workflow_dispatch:
     inputs:
+      pre_test:
+        default: false
+        type: boolean
       test:
         default: true
         type: boolean
@@ -26,7 +29,17 @@ defaults:
 
 jobs:
   
+  test_setup:
+    if: ${{ inputs.pre_test }}
+    uses: ./.github/workflows/test_setup.yaml
+  
+  test_sourcebuild:
+    if: ${{ inputs.pre_test }}
+    uses: ./.github/workflows/test_sourcebuild.yaml
+  
   build:
+    needs: [test_setup, test_sourcebuild]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
     outputs:
       new_version: ${{ steps.get_version.outputs.new_version }}
@@ -213,11 +226,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.build.outputs.new_version }}
       
-      # - name: Publish to TestPyPI
-      #   run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
+      - name: Publish to TestPyPI
+        run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
       
-      # - name: Publish to PyPI
-      #   run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
+      - name: Publish to PyPI
+        run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
   
   
   cleanup:

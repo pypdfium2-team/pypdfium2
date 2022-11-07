@@ -5,11 +5,14 @@ name: Trigger Release
 on:
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
-  # schedule:
-  #   - cron: '0 10 * * 1'
+  schedule:
+    - cron: '0 10 * * 1'
   
   workflow_dispatch:
     inputs:
+      pre_test:
+        default: false
+        type: boolean
       test:
         default: false
         type: boolean
@@ -20,7 +23,7 @@ defaults:
 
 jobs:
   
-  # once there is a way to share inputs between workflow_dispatch and workflow_call, we can switch to github reusable workflows
+  # Once there is a way to share inputs between workflow_dispatch and workflow_call, we can switch to github reusable workflows
   
   release:
     runs-on: ubuntu-latest
@@ -32,6 +35,7 @@ jobs:
           workflow: build_packages.yaml
           inputs: |
             {
+              "pre_test": "${{ inputs.pre_test }}",
               "test": "${{ inputs.test }}",
               "publish": "true",
               "py_version": "3.10",

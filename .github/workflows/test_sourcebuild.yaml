@@ -5,6 +5,7 @@ name: Test Sourcebuild
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 defaults:
   run:
