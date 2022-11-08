@@ -40,11 +40,9 @@ Also see the issues panel and inline `TODO` marks in source code.
 * Add/rewrite remaining Readme sections.
 
 ### GitHub Workflows
-* release: restructure so that it can be run without the publishing part.
-* test_release: make it possible to run this workflow on wheels that are not published yet (will probably need upload-artifact and download-artifact actions).
-* test_release: add `pypy` interpreter.
-* Add a new workflow to test the build script.
-* Set up CodeQL (see `Code security and analysis -> Code scanning` in the settings).
+* build_packages: consider splitting up autorelease in two stages to avoid a temporary branch, then transfer changes as patch.
+* Add a testing workflow (Test suite, code coverage, ...)
+* Consider testing pypy interpreter as well
 
 ### Miscellaneous
 * Ask Linux distributors to package PDFium.
