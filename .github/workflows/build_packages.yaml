@@ -38,8 +38,6 @@ jobs:
     uses: ./.github/workflows/test_sourcebuild.yaml
   
   build:
-    needs: [test_setup, test_sourcebuild]
-    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
     outputs:
       new_version: ${{ steps.get_version.outputs.new_version }}
@@ -173,7 +171,7 @@ jobs:
   
   
   publish:
-    needs: [build, test]
+    needs: [test_setup, test_sourcebuild, build, test]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
     
