@@ -67,6 +67,8 @@ jobs:
       - name: Run test suite
         run: python3 -m pytest tests/
       
+      # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
+      # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
       - name: Run autorelease script
         run: |
           git config user.email "geisserml@gmail.com"
@@ -115,6 +117,7 @@ jobs:
           name: whl_windows64
           path: dist/*win_amd64.whl
       
+      # tag deliberately not pushed (see above)
       - name: Push autorelease_tmp branch
         run: git push -u origin autorelease_tmp
   
