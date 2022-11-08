@@ -46,9 +46,6 @@ jobs:
     
     steps:
       
-      - name: Print inputs (debugging)
-        run: echo "test ${{ inputs.test }}, publish ${{ inputs.publish }}, py_version ${{ inputs.py_version }}, runner ${{ inputs.runner }}"
-      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

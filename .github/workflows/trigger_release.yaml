@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
     inputs:
       pre_test:
-        default: false
+        default: true
         type: boolean
       test:
-        default: false
+        default: true
         type: boolean
       publish:
         # typically always true, exposed only for testing purposes
