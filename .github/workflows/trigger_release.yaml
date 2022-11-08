@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Trigger Release
+on:
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+  # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
+  schedule:
+    - cron: '0 10 * * 1'
+  
+  workflow_dispatch:
+    inputs:
+      pre_test:
+        default: true
+        type: boolean
+      test:
+        default: true
+        type: boolean
+      publish:
+        # typically always true, exposed only for testing purposes
+        default: true
+        type: boolean
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  
+  # Once there is a way to share inputs between workflow_dispatch and workflow_call, we can switch to github reusable workflows
+  # Alternatively, if it were possible to configure the inputs of scheduled workflow runs, we could remove this file entirely
+  
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger Release
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build_packages.yaml
+          inputs: |
+            {
+              "pre_test": "${{ inputs.pre_test }}",
+              "test": "${{ inputs.test }}",
+              "publish": "${{ inputs.publish }}",
+              "py_version": "3.10",
+              "runner": "ubuntu-latest"
+            }

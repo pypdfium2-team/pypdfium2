@@ -9,6 +9,8 @@ lib_logger = logging.getLogger("pypdfium2")
 lib_logger.addHandler(logging.StreamHandler())
 lib_logger.setLevel(logging.DEBUG)
 
+PyVersion = (sys.version_info.major, sys.version_info.minor)
+
 TestDir     = dirname(abspath(__file__))
 SourceTree  = dirname(TestDir)
 ResourceDir = join(TestDir, "resources")

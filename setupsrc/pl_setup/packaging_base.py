@@ -98,40 +98,52 @@ class _host_platform:
     
     def __init__(self):
         
+        # Get information about the host platform (system and machine name)
+        # For the machine name, the platform module just passes through information provided by the OS (The uname command on Unix, or an equivalent implementation on other systems like Windows), so we can determine the relevant names from Python's source code, system specs or information available online (e. g. https://en.wikipedia.org/wiki/Uname)
+        # There is also sysconfig.get_platform() which we used before, but its behaviour did not fully match our needs (it can return "universal2" on macOS)
+        self._system_name = platform.system().lower()
+        self._machine_name = platform.machine().lower()
+        
+        # https://github.com/python/cpython/issues/87414
         # `libc_ver()` currently returns an empty string on libc implementations other than glibc - hence, we assume musl if it's not glibc
-        # FIXME is there some function to actually detect musl?
-        self._plat_info = sysconfig.get_platform().lower().replace("-", "_").replace(".", "_")
-        self._libc_info, self._is_glibc = None, None
-        if self._plat_info.startswith("linux"):
+        # TODO find some function to actually detect musl
+        self._libc_info = None
+        self._is_glibc = None
+        if self._system_name == "linux":
             self._libc_info = platform.libc_ver()
-            self._is_glibc = (self._libc_info[0] == "glibc")
+            self._is_glibc = self._libc_info[0].startswith("glibc")
         
         self.platform = self._get_platform()
         self.system = None
         if self.platform is not None:
             self.system = plat_to_system(self.platform)
     
-    def _is_plat(self, start, end):
-        return self._plat_info.startswith(start) and self._plat_info.endswith(end)
+    def _is_plat(self, system, machine):
+        return self._system_name.startswith(system) and self._machine_name.startswith(machine)
     
     def _get_platform(self):
-        if self._is_plat("macosx", "arm64"):
-            return PlatformNames.darwin_arm64
-        elif self._is_plat("macosx", "x86_64"):
+        
+        if self._system_name == "linux":
+            assert self._is_glibc is not None
+        
+        # some machine names are merely "qualified guesses", mistakes can't be fully excluded for platforms we don't have access to
+        if self._is_plat("darwin", "x86_64"):
             return PlatformNames.darwin_x64
-        elif self._is_plat("linux", "armv7l"):
-            return PlatformNames.linux_arm32
-        elif self._is_plat("linux", "aarch64"):
-            return PlatformNames.linux_arm64
+        elif self._is_plat("darwin", "arm64"):
+            return PlatformNames.darwin_arm64
         elif self._is_plat("linux", "x86_64"):
             return PlatformNames.linux_x64 if self._is_glibc else PlatformNames.linux_musl_x64
         elif self._is_plat("linux", "i686"):
             return PlatformNames.linux_x86 if self._is_glibc else PlatformNames.linux_musl_x86
-        elif self._is_plat("win", "arm64"):
-            return PlatformNames.windows_arm64
-        elif self._is_plat("win", "amd64"):
+        elif self._is_plat("linux", "armv7l"):
+            return PlatformNames.linux_arm32
+        elif self._is_plat("linux", "aarch64"):
+            return PlatformNames.linux_arm64
+        elif self._is_plat("windows", "amd64"):
             return PlatformNames.windows_x64
-        elif self._is_plat("win32", ""):
+        elif self._is_plat("windows", "arm64"):
+            return PlatformNames.windows_arm64
+        elif self._is_plat("windows", "x86"):
             return PlatformNames.windows_x86
         else:
             return None

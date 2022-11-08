@@ -1,13 +1,13 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Build & Publish Docs (GH Pages)
+name: Update Docs (GH Pages)
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - 'main'
+      - main
 
 # Set permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -19,6 +19,10 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   

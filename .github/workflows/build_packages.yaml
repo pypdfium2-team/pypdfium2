@@ -1,0 +1,247 @@
+# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Build Packages
+on:
+  workflow_dispatch:
+    inputs:
+      pre_test:
+        default: false
+        type: boolean
+      test:
+        default: true
+        type: boolean
+      publish:
+        default: false
+        type: boolean
+      py_version:
+        default: '3.10'
+        type: string
+      runner:
+        default: 'ubuntu-latest'
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+# Some considerations: https://github.com/orgs/community/discussions/38443
+
+jobs:
+  
+  test_setup:
+    if: ${{ inputs.pre_test }}
+    uses: ./.github/workflows/test_setup.yaml
+  
+  test_sourcebuild:
+    if: ${{ inputs.pre_test }}
+    uses: ./.github/workflows/test_sourcebuild.yaml
+  
+  build:
+    runs-on: ${{ inputs.runner }}
+    outputs:
+      new_version: ${{ steps.get_version.outputs.new_version }}
+    
+    steps:
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.py_version }}
+      
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+      
+      - name: Install dependencies & pypdfium2
+        run: |
+          python3 -m pip install -U pip setuptools
+          python3 -m pip install -U .[setup,utilities,test,converters]
+      
+      - name: Run test suite
+        run: python3 -m pytest tests/
+      
+      # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
+      # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
+      - name: Run autorelease script
+        run: |
+          git config user.email "geisserml@gmail.com"
+          git config user.name "geisserml"
+          git reset --hard HEAD
+          python3 setupsrc/pl_setup/autorelease.py --register
+          git checkout autorelease_tmp
+      
+      - name: Get new version
+        id: get_version
+        run: echo "new_version=$(git describe --abbrev=0)" >> $GITHUB_OUTPUT
+      
+      - name: Run packaging script
+        run: make packaging
+      
+      - name: Upload release notes
+        uses: actions/upload-artifact@v3
+        with:
+          name: release_notes
+          path: RELEASE.md
+      
+      - name: Upload packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: dist/*
+      
+      - name: Upload testing artifact (Linux)
+        if: ${{ inputs.test }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: whl_linux64
+          path: dist/*manylinux_*_x86_64*.whl
+      
+      - name: Upload testing artifact (macOS)
+        if: ${{ inputs.test }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: whl_macos64
+          path: dist/*macosx_*_x86_64*.whl
+      
+      - name: Upload testing artifact (Windows)
+        if: ${{ inputs.test }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: whl_windows64
+          path: dist/*win_amd64.whl
+      
+      # tag deliberately not pushed (see above)
+      - name: Push autorelease_tmp branch
+        run: git push -u origin autorelease_tmp
+  
+  
+  test:
+    if: ${{ inputs.test }}
+    needs: build
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        py: ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11']
+        include:
+          - os: ubuntu-latest
+            wheel: whl_linux64
+          - os: macos-latest
+            wheel: whl_macos64
+          - os: windows-latest
+            wheel: whl_windows64
+        exclude:
+          - os: ubuntu-latest
+            py: '3.6'
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.py }}
+      
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          ref: autorelease_tmp
+      
+      - name: Download aftifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.wheel }}
+          path: dist/
+      
+      - name: Install dependencies
+        run: |
+          python3 -m pip install -U pip setuptools
+          python3 -m pip install -U pytest pillow numpy wheel
+      
+      - name: Install pypdfium2 from artifact
+        run: python3 -m pip install dist/*.whl
+      
+      - name: Run Test Suite
+        run: python3 -m pytest tests/
+  
+  
+  publish:
+    needs: [test_setup, test_sourcebuild, build, test]
+    if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
+    runs-on: ${{ inputs.runner }}
+    
+    steps:
+      
+      - name: Check out repository (deep)
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.py_version }}
+      
+      - name: Install twine
+        run: python3 -m pip install -U twine
+      
+      - name: Download packages
+        uses: actions/download-artifact@v3
+        with:
+          name: packages
+          path: dist/
+      
+      - name: Download release notes
+        uses: actions/download-artifact@v3
+        with:
+          name: release_notes
+      
+      - name: Apply and push repository changes
+        run: |
+          git config user.email "geisserml@gmail.com"
+          git config user.name "geisserml"
+          git checkout main
+          git merge origin/autorelease_tmp
+          git tag -a ${{ needs.build.outputs.new_version }} -m "Autorelease"
+          git push
+          git push --tags
+          git checkout stable
+          git reset --hard main
+          git push --force
+          git checkout main
+      
+      - name: Publish to GitHub
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'dist/*'
+          bodyFile: 'RELEASE.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.build.outputs.new_version }}
+      
+      - name: Publish to TestPyPI
+        run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
+      
+      - name: Publish to PyPI
+        run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
+  
+  
+  cleanup:
+    needs: [build, test, publish]
+    if: always()
+    runs-on: ${{ inputs.runner }}
+    
+    steps:
+      
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+    
+      - name: Remove temporary branch
+        run: git push origin --delete autorelease_tmp
