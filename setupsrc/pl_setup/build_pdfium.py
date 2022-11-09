@@ -2,6 +2,8 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# NOTE Works on Linux and macOS. On Windows, applying patches fails for some reason.
+
 import os
 import sys
 import shutil
@@ -183,6 +185,7 @@ def find_lib(src_libname=None, directory=PDFiumBuildDir):
     elif sys.platform.startswith("win32"):
         libname = "pdfium.dll"
     else:
+        # TODO implement fallback artifact detection
         raise RuntimeError("Not sure how pdfium artifact is called on platform '%s'" % (sys.platform, ))
     
     libpath = join(directory, libname)
