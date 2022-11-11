@@ -91,7 +91,7 @@ def dl_pdfium(GClient, do_update, revision):
             print("PDFium: Using existing repository as-is.")
     else:
         print("PDFium: Download ...")
-        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--custom-var", "checkout_skia=true", "--unmanaged", PDFium_URL], cwd=SB_Dir)
+        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PDFium_URL], cwd=SB_Dir)
     
     if is_sync:
         run_cmd([GClient, "sync", "--revision", "origin/%s" % revision, "--no-history", "--with_branch_heads"], cwd=SB_Dir)
