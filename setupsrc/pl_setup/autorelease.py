@@ -73,7 +73,7 @@ def do_versioning(latest):
     ver_changes = dict()
     
     if c_updates:
-        # denote pdfium update (independent change)
+        # denote pdfium update
         ver_changes["V_LIBPDFIUM"] = str(latest)
     
     if inc_major:
@@ -84,7 +84,7 @@ def do_versioning(latest):
         os.remove(MajorUpdateFile)
     elif v_beta is None:
         # if we're not doing a major update and the previous version was not a beta, update minor and/or patch
-        # however, we still want to run this if adding a new beta tag
+        # (note that we still want to run this if adding a new beta tag, though)
         if c_updates:
             # pdfium update -> increment minor version and reset patch version
             ver_changes["V_MINOR"] = VerNamespace["V_MINOR"] + 1
@@ -94,14 +94,14 @@ def do_versioning(latest):
             ver_changes["V_PATCH"] = VerNamespace["V_PATCH"] + 1
     
     if inc_beta:
-        # if the new version shall be a beta, set or increment the tag (independent change)
+        # if the new version shall be a beta, set or increment the tag
         if v_beta is None:
             v_beta = 0
         v_beta += 1
         ver_changes["V_BETA"] = v_beta
         os.remove(BetaUpdateFile)
     elif v_beta is not None:
-        # if the previous version was a beta but the new one shall not be, remove the tag (independent change)
+        # if the previous version was a beta but the new one shall not be, remove the tag
         ver_changes["V_BETA"] = None
     
     did_change = set_versions(ver_changes)
