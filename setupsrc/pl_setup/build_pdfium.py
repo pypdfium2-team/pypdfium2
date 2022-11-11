@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE Works on Linux and macOS. On Windows, applying patches fails for some reason.
+# NOTE Works on Linux and macOS. On Windows, calling rc.exe fails for some reason.
 
 import os
 import sys
@@ -91,12 +91,10 @@ def dl_pdfium(GClient, do_update, revision):
             print("PDFium: Using existing repository as-is.")
     else:
         print("PDFium: Download ...")
-        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PDFium_URL], cwd=SB_Dir)
+        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--custom-var", "checkout_skia=true", "--unmanaged", PDFium_URL], cwd=SB_Dir)
     
-    # TODO consider --with_branch_heads so we can improve get_pdfium_version()
-    # while the heads take up additional disk space, this shouldn't be a problem for a shallow clone
     if is_sync:
-        run_cmd([GClient, "sync", "--revision", "origin/%s" % revision, "--no-history", "--shallow"], cwd=SB_Dir)
+        run_cmd([GClient, "sync", "--revision", "origin/%s" % revision, "--no-history", "--with_branch_heads"], cwd=SB_Dir)
     
     return is_sync
 
@@ -129,11 +127,6 @@ def update_version(v_libpdfium):
         fh.write( str(v_libpdfium) )
 
 
-def _apply_patchset(patchset):
-    for patch, cwd in patchset:
-        run_cmd(["git", "apply", "-v", patch], cwd=cwd)
-
-
 def _create_resources_rc(v_libpdfium):
     
     input_path = join(PatchDir, "win", "resources.rc")
@@ -142,12 +135,16 @@ def _create_resources_rc(v_libpdfium):
     with open(input_path, "r") as fh:
         content = fh.read()
     
-    vars = ("$VERSION_CSV", "$VERSION")
-    for var in vars:
-        content = content.replace(var, v_libpdfium)
+    content = content.replace("$VERSION", v_libpdfium)
+    content = content.replace("$VERSION_CSV", v_libpdfium.replace(".", ","))
     
     with open(output_path, "w") as fh:
         fh.write(content)
+
+
+def _apply_patchset(patchset):
+    for patch, cwd in patchset:
+        run_cmd(["git", "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd)
 
 
 def patch_pdfium(v_libpdfium):
@@ -253,6 +250,8 @@ def main(
     
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
+        # WindowsSDK_DIR = "/c/Program Files (x86)/Windows Kits/10/bin/10.0.19041.0/x64"
+        # os.environ["PATH"] += os.pathsep + WindowsSDK_DIR
     
     dl_depottools(b_update)
     
