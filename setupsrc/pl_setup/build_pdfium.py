@@ -250,8 +250,7 @@ def main(
     
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
-        # WindowsSDK_DIR = "/c/Program Files (x86)/Windows Kits/10/bin/10.0.19041.0/x64"
-        # os.environ["PATH"] += os.pathsep + WindowsSDK_DIR
+        os.environ["PATH"] += os.pathsep + R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
     
     dl_depottools(b_update)
     
