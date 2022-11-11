@@ -135,6 +135,10 @@ def _create_resources_rc(v_libpdfium):
     with open(input_path, "r") as fh:
         content = fh.read()
     
+    # FIXME RC does not seem to tolerate a commit hash as version
+    if not v_libpdfium.isnumeric():
+        v_libpdfium = "1.0"
+    
     content = content.replace("$VERSION", v_libpdfium)
     content = content.replace("$VERSION_CSV", v_libpdfium.replace(".", ","))
     
@@ -250,7 +254,9 @@ def main(
     
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
-        os.environ["PATH"] += os.pathsep + R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
+        WindowsSDK_DIR = R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
+        assert os.path.isdir(WindowsSDK_DIR)
+        os.environ["PATH"] += os.pathsep + WindowsSDK_DIR
     
     dl_depottools(b_update)
     
