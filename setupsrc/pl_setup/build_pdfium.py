@@ -135,6 +135,10 @@ def _create_resources_rc(v_libpdfium):
     with open(input_path, "r") as fh:
         content = fh.read()
     
+    # FIXME RC does not seem to tolerate commit hash as version
+    if not v_libpdfium.isnumeric():
+        v_libpdfium = "1.0"
+    
     content = content.replace("$VERSION_CSV", v_libpdfium.replace(".", ","))
     content = content.replace("$VERSION", v_libpdfium)
     
