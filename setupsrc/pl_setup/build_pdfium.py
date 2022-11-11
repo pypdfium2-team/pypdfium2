@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE Works on Linux and macOS. On Windows, calling rc.exe fails for some reason.
+# NOTE Works on Linux/macOS/Windows (that is, at least on GitHub Actions)
 
 import os
 import sys
@@ -135,7 +135,7 @@ def _create_resources_rc(v_libpdfium):
     with open(input_path, "r") as fh:
         content = fh.read()
     
-    # FIXME RC does not seem to tolerate commit hash as version
+    # NOTE RC does not seem to tolerate commit hash, so set a dummy version instead
     if not v_libpdfium.isnumeric():
         v_libpdfium = "1.0"
     
