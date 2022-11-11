@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE Works on Linux and macOS. On Windows, calling rc.exe fails for some reason.
+# NOTE Works on Linux/macOS/Windows (that is, at least on GitHub Actions)
 
 import os
 import sys
@@ -135,8 +135,12 @@ def _create_resources_rc(v_libpdfium):
     with open(input_path, "r") as fh:
         content = fh.read()
     
-    content = content.replace("$VERSION", v_libpdfium)
+    # NOTE RC does not seem to tolerate commit hash, so set a dummy version instead
+    if not v_libpdfium.isnumeric():
+        v_libpdfium = "1.0"
+    
     content = content.replace("$VERSION_CSV", v_libpdfium.replace(".", ","))
+    content = content.replace("$VERSION", v_libpdfium)
     
     with open(output_path, "w") as fh:
         fh.write(content)
@@ -250,8 +254,9 @@ def main(
     
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
-        # WindowsSDK_DIR = "/c/Program Files (x86)/Windows Kits/10/bin/10.0.19041.0/x64"
-        # os.environ["PATH"] += os.pathsep + WindowsSDK_DIR
+        WindowsSDK_DIR = R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
+        assert os.path.isdir(WindowsSDK_DIR)
+        os.environ["PATH"] += os.pathsep + WindowsSDK_DIR
     
     dl_depottools(b_update)
     
