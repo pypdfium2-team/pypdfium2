@@ -209,13 +209,13 @@ def get_wheel_tag(pl_name):
         raise ValueError("Unknown platform name %s" % pl_name)
 
 
-def run_cmd(command, cwd, capture=False, **kwargs):
+def run_cmd(command, cwd, capture=False, check=True, **kwargs):
     
     print('%s ("%s")' % (command, cwd))
     if capture:
         kwargs.update( dict(stdout=subprocess.PIPE, stderr=subprocess.STDOUT) )
     
-    comp_process = subprocess.run(command, cwd=cwd, **kwargs)
+    comp_process = subprocess.run(command, cwd=cwd, check=check, **kwargs)
     if capture:
         return comp_process.stdout.decode("utf-8").strip()
     else:
