@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'macos-latest']  # 'windows-latest' (known failure, needs fixing)
+        os: ['windows-latest']  # debugging
     
     runs-on: ${{ matrix.os }}
     
