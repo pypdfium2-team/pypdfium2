@@ -7,19 +7,7 @@ on:
   # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
   schedule:
     - cron: '0 10 * * 1'
-  
   workflow_dispatch:
-    inputs:
-      pre_test:
-        default: true
-        type: boolean
-      test:
-        default: true
-        type: boolean
-      publish:
-        # typically always true, exposed only for testing purposes
-        default: true
-        type: boolean
 
 defaults:
   run:
@@ -40,9 +28,9 @@ jobs:
           workflow: build_packages.yaml
           inputs: |
             {
-              "pre_test": "${{ inputs.pre_test }}",
-              "test": "${{ inputs.test }}",
-              "publish": "${{ inputs.publish }}",
+              "pre_test": "true",
+              "test": "true",
+              "publish": "true",
               "py_version": "3.10",
               "runner": "ubuntu-latest"
             }

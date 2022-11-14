@@ -153,7 +153,7 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     log += run_cmd(["git", "log",
         "%s..%s" % (prefix_tag+ver_a, prefix_tag+ver_b),
         "--pretty=format:* [`%h`]({}%H) %s".format(url+prefix_commit)],
-        capture=True, cwd=cwd,
+        capture=True, check=False, cwd=cwd,
     )
     log += "\n\n</details>\n"
     return log
