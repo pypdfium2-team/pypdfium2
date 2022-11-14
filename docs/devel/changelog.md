@@ -4,6 +4,17 @@
 # Changelog
 
 
+## 3.8.0 (2022-11-14)
+
+- Updated PDFium from `5406` to `5418` (autorelease).
+- Major improvements to GitHub Workflows.
+- Fixed setup on macOS with Python 3.11. (Wheel users were not impacted.)
+- Fixed build script on macOS (GN configuration).
+- Fixed build script on Windows (patches and RC).
+- Fixed test suite on Windows (cleanup failure).
+- Fixed test suite on Python < 3.7.
+
+
 ## 3.7.0 (2022-11-07)
 
 - Updated PDFium from `5392` to `5406` (autorelease).
