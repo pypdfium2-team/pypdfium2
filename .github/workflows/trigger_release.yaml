@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# Separate trigger workflow because we can't configure inputs for scheduled workflow runs (and don't want publish enabled by default in the main workflow)
+# TODO change to GH reusable workflow with exxplicit inputs
+
 name: Trigger Release
 on:
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
@@ -14,9 +17,6 @@ defaults:
     shell: bash
 
 jobs:
-  
-  # Once there is a way to share inputs between workflow_dispatch and workflow_call, we can switch to github reusable workflows
-  # Alternatively, if it were possible to configure the inputs of scheduled workflow runs, we could remove this file entirely
   
   release:
     runs-on: ubuntu-latest
