@@ -252,6 +252,7 @@ def main(
     if b_target is None:
         b_target = "pdfium"
     
+    # TODO make windows sdk dir configurable
     if sys.platform.startswith("win32"):
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
         WindowsSDK_DIR = R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
