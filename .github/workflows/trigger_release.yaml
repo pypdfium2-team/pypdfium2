@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # Separate trigger workflow because we can't configure inputs for scheduled workflow runs (and don't want publish enabled by default in the main workflow)
-# TODO change to GH reusable workflow with exxplicit inputs
 
 name: Trigger Release
 on:
