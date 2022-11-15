@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import os.path
 import sys
 import shutil
 import tarfile
@@ -70,11 +71,29 @@ def download_releases(latest_ver, platforms, robust, max_workers):
     return archives
 
 
+# Tar extraction helpers to prevent CVE-2007-4559 (path traversal attack) - Thanks to @Kasimir123 and @TrellixVulnTeam
+# To the author's knowledge, Python's standard library does not provide a function to extract tars safely
+# (It has been reported that shutil.unpack_archive() is affected by the vulnerability as well.)
+
+def _is_within_dir(directory, target):
+    abs_directory = abspath(directory)
+    abs_target = abspath(target)
+    prefix = os.path.commonprefix([abs_directory, abs_target])
+    return prefix == abs_directory
+
+def safe_extract(tar, path=".", **kwargs):
+    for member in tar.getmembers():
+        member_path = join(path, member.name)
+        if not _is_within_dir(path, member_path):
+            raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
+    tar.extractall(path, **kwargs)
+
+
 def unpack_archives(archives):
     for pl_name, file_path in archives.items():
-        extraction_path = join(DataTree, pl_name, "build_tar")
+        dest_path = join(DataTree, pl_name, "build_tar")
         with tarfile.open(file_path) as archive:
-            archive.extractall(extraction_path)
+            safe_extract(archive, dest_path)
         os.remove(file_path)
 
 
