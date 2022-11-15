@@ -3,15 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import os.path
 import sys
 import shutil
 import tarfile
 import argparse
 import traceback
 import functools
-from urllib import request
+import os.path
 from os.path import join, abspath, dirname
+from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
