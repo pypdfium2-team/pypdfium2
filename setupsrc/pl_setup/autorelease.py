@@ -153,7 +153,7 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     log += run_cmd(["git", "log",
         "%s..%s" % (prefix_tag+ver_a, prefix_tag+ver_b),
         "--pretty=format:* [`%h`]({}%H) %s".format(url+prefix_commit)],
-        capture=True, check=False, cwd=cwd,
+        capture=True, check=True, cwd=cwd,
     )
     log += "\n\n</details>\n"
     return log
@@ -167,13 +167,14 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     if summary:
         relnotes += summary + "\n"
     
-    # even if python code was not updated, there will be a release commit
-    relnotes += _get_log(
-        "pypdfium2", RepositoryURL, SourceTree,
-        prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
-        "/tree/", "/commit/", "",
-    )
-    relnotes += "\n"
+    # FIXME fails in workflow
+    # # even if python code was not updated, there will be a release commit
+    # relnotes += _get_log(
+    #     "pypdfium2", RepositoryURL, SourceTree,
+    #     prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
+    #     "/tree/", "/commit/", "",
+    # )
+    # relnotes += "\n"
     
     if c_updates:
         
