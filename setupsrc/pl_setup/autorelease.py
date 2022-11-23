@@ -167,14 +167,13 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     if summary:
         relnotes += summary + "\n"
     
-    # FIXME fails in workflow
-    # # even if python code was not updated, there will be a release commit
-    # relnotes += _get_log(
-    #     "pypdfium2", RepositoryURL, SourceTree,
-    #     prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
-    #     "/tree/", "/commit/", "",
-    # )
-    # relnotes += "\n"
+    # even if python code was not updated, there will be a release commit
+    relnotes += _get_log(
+        "pypdfium2", RepositoryURL, SourceTree,
+        prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
+        "/tree/", "/commit/", "",
+    )
+    relnotes += "\n"
     
     if c_updates:
         
