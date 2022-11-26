@@ -7,5 +7,5 @@ requires = [
     "setuptools",
     "build",
     "wheel!=0.38.0,!=0.38.1",
-    "ctypesgen",
+    "ctypesgen@git+https://github.com/mara004/ctypesgen@pypdfium2",
 ]
