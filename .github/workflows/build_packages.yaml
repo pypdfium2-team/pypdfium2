@@ -29,6 +29,8 @@ defaults:
 
 jobs:
   
+  # TODO sync sourcebuild patches with pdfium-binaries on before release
+  
   test_setup:
     if: ${{ inputs.pre_test }}
     uses: ./.github/workflows/test_setup.yaml
@@ -227,8 +229,6 @@ jobs:
       
       - name: Publish to TestPyPI
         run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
-      
-      # TODO call test_release with testpypi as index url before actually publishing
       
       - name: Publish to PyPI
         run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
