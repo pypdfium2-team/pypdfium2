@@ -1,62 +1,43 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os.path
-from pypdfium2 import _namespace as pdfium
-from pypdfium2._cli._parsers import pagetext_type
+from enum import Enum
+from pypdfium2._cli._parsers import add_input, get_input
 
 
-STRATEGY_RANGE = "range"
-STRATEGY_BOUNDED = "bounded"
+class ExtractionStrategy (Enum):
+    RANGE = 0
+    BOUNDED = 1
 
 
-def attach_parser(subparsers):
-    parser = subparsers.add_parser(
-        "extract-text",
-        help = "Extract text from a PDF page in given boundaries",
-    )
-    parser.add_argument(
-        "input",
-        type = os.path.abspath,
-        help = "Path to the PDF document to work with",
-    )
-    parser.add_argument(
-        "--password",
-        help = "Password to unlock the PDF, if encrypted",
-    )
-    parser.add_argument(
-        "--pages",
-        help = "Page numbers to include (defaults to all)",
-        type = pagetext_type,
-    )
+def attach(parser):
+    add_input(parser, pages=True)
     parser.add_argument(
         "--strategy",
-        type = str,
-        choices = (STRATEGY_RANGE, STRATEGY_BOUNDED),
-        default = STRATEGY_RANGE,
-        help = "PDFium text extraction strategy.",
+        type = lambda s: ExtractionStrategy[s.upper()],
+        default = ExtractionStrategy.RANGE,
+        help = "PDFium text extraction strategy (range, bounded).",
+        # TODO think out a strategy for choices (see https://github.com/python/cpython/issues/69247)
     )
 
 
 def main(args):
     
-    doc = pdfium.PdfDocument(args.input, password=args.password)
-    if args.pages is None:
-        args.pages = [i for i in range(len(doc))]
+    pdf = get_input(args)
     
     sep = ""
-    for index in args.pages:
+    for i in args.pages:
         
-        page = doc.get_page(index)
+        page = pdf.get_page(i)
         textpage = page.get_textpage()
         
         # TODO let caller pass in possible range/boundary parameters
-        if args.strategy == STRATEGY_RANGE:
+        if args.strategy == ExtractionStrategy.RANGE:
             text = textpage.get_text_range()
-        elif args.strategy == STRATEGY_BOUNDED:
+        elif args.strategy == ExtractionStrategy.BOUNDED:
             text = textpage.get_text_bounded()
         else:
             assert False
         
-        print(sep + "# Page %s\n" % (index+1) + text)
+        print(sep + "# Page %s\n" % (i+1) + text)
         sep = "\n"

@@ -1,38 +1,46 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import sys
 import logging
-from os.path import join, dirname, abspath, isdir, isfile
+from pathlib import Path
+import pypdfium2 as pdfium
+from pypdfium2._helpers._internal import autoclose
 
 lib_logger = logging.getLogger("pypdfium2")
 lib_logger.addHandler(logging.StreamHandler())
 lib_logger.setLevel(logging.DEBUG)
 
+pdfium.PdfUnspHandler().setup()
+
+autoclose.DEBUG_AUTOCLOSE = bool(int( os.environ.get("DEBUG_AUTOCLOSE", "0") ))
+
 PyVersion = (sys.version_info.major, sys.version_info.minor)
 
-TestDir     = dirname(abspath(__file__))
-SourceTree  = dirname(TestDir)
-ResourceDir = join(TestDir, "resources")
-OutputDir   = join(TestDir, "output")
+TestDir     = Path(__file__).absolute().parent
+SourceTree  = TestDir.parent
+ResourceDir = TestDir / "resources"
+OutputDir   = TestDir / "output"
 
-sys.path.insert(0, join(SourceTree, "setupsrc"))
+sys.path.insert(0, str(SourceTree / "setupsrc"))
 
 
 class TestFiles:
-    render        = join(ResourceDir, "render.pdf")
-    encrypted     = join(ResourceDir, "encrypted.pdf")
-    multipage     = join(ResourceDir, "multipage.pdf")
-    toc           = join(ResourceDir, "toc.pdf")
-    toc_viewmodes = join(ResourceDir, "toc_viewmodes.pdf")
-    toc_maxdepth  = join(ResourceDir, "toc_maxdepth.pdf")
-    toc_circular  = join(ResourceDir, "toc_circular.pdf")
-    box_fallback  = join(ResourceDir, "box_fallback.pdf")
-    text          = join(ResourceDir, "text.pdf")
-    empty         = join(ResourceDir, "empty.pdf")
-    images        = join(ResourceDir, "images.pdf")
-    form          = join(ResourceDir, "form_listbox.pdf")
-    mona_lisa     = join(ResourceDir, "mona_lisa.jpg")
+    render        = ResourceDir / "render.pdf"
+    encrypted     = ResourceDir / "encrypted.pdf"
+    multipage     = ResourceDir / "multipage.pdf"
+    toc           = ResourceDir / "toc.pdf"
+    toc_viewmodes = ResourceDir / "toc_viewmodes.pdf"
+    toc_maxdepth  = ResourceDir / "toc_maxdepth.pdf"
+    toc_circular  = ResourceDir / "toc_circular.pdf"
+    box_fallback  = ResourceDir / "box_fallback.pdf"
+    text          = ResourceDir / "text.pdf"
+    empty         = ResourceDir / "empty.pdf"
+    images        = ResourceDir / "images.pdf"
+    form          = ResourceDir / "form_listbox.pdf"
+    attachments   = ResourceDir / "attachments.pdf"
+    mona_lisa     = ResourceDir / "mona_lisa.jpg"
 
 
 ExpRenderPixels = (
@@ -65,6 +73,6 @@ def get_members(cls):
 
 def test_testpaths():
     for dirpath in (TestDir, SourceTree, ResourceDir, OutputDir):
-        assert isdir(dirpath)
+        assert dirpath.is_dir()
     for filepath in iterate_testfiles(False):
-        assert isfile(filepath)
+        assert filepath.is_file()

@@ -3,29 +3,27 @@
 
 import re
 import pytest
-from os.path import join
-from importlib.util import find_spec
 import pypdfium2 as pdfium
-from ..conftest import TestFiles, ResourceDir, OutputDir
+from ..conftest import TestFiles
 
 
 @pytest.fixture
-def doc():
-    doc = pdfium.PdfDocument(TestFiles.text)
-    yield doc
+def text_pdf():
+    pdf = pdfium.PdfDocument(TestFiles.text)
+    yield pdf
 
 
 @pytest.fixture
-def textpage(doc):
-    page = doc.get_page(0)
+def textpage(text_pdf):
+    page = text_pdf.get_page(0)
     textpage = page.get_textpage()
     assert isinstance(textpage, pdfium.PdfTextPage)
     yield textpage
 
 
 @pytest.fixture
-def linkpage(doc):
-    page = doc.get_page(1)
+def linkpage(text_pdf):
+    page = text_pdf.get_page(1)
     linkpage = page.get_textpage()
     yield linkpage
 
@@ -40,7 +38,7 @@ def test_gettext(textpage):
     assert text_a.startswith(exp_start)
     assert text_a.endswith(exp_end)
     text_start = textpage.get_text_range(0, len(exp_start))
-    text_end_a = textpage.get_text_range(len(text_a)-len(exp_end), 0)
+    text_end_a = textpage.get_text_range(len(text_a)-len(exp_end))  # count=-1
     text_end_b = textpage.get_text_range(len(text_a)-len(exp_end), len(exp_end))
     assert text_start == exp_start
     assert text_end_a == text_end_b == exp_end
@@ -48,33 +46,43 @@ def test_gettext(textpage):
 
 @pytest.mark.parametrize("loose", [False, True])
 def test_getcharbox(textpage, loose):
-    for index in range(textpage.n_chars):
+    for index in range(textpage.count_chars()):
         box = textpage.get_charbox(index, loose=loose)
         assert all( isinstance(val, (int, float)) for val in box )
         assert box[0] <= box[2] and box[1] <= box[3]
 
 
 def test_getrectboxes(textpage):
-    rects = textpage.get_rectboxes()
+    n_rects = textpage.count_rects()
+    rects = [textpage.get_rect(i) for i in range(n_rects)]
+    assert len(rects) == 10
     
-    first_rect = next(rects)
+    first_rect = rects[0]
     assert pytest.approx(first_rect, abs=1) == (58, 767, 258, 782)
     first_text = textpage.get_text_bounded(*first_rect)
     assert first_text == "Lorem ipsum dolor sit amet,"
     assert textpage.get_text_range(0, len(first_text)) == first_text
     
-    i = 0
     for rect in rects:
         assert len(rect) == 4
         assert 56 < rect[0] < 59
         text = textpage.get_text_bounded(*rect)
         assert isinstance(text, str)
         assert len(text) <= 66
-        i += 1
     
-    assert i == 9
     assert text == "officia deserunt mollit anim id est laborum."
-    assert textpage.get_text_range(textpage.n_chars-len(text), 0)
+    assert textpage.get_text_range(textpage.count_chars()-len(text))  # count=-1
+
+
+def _get_rects(textpage, search_result):
+    # TODO add helper?
+    if search_result is None:
+        return
+    c_index, c_count = search_result
+    r_index = textpage.count_rects(0, c_index)
+    r_count = textpage.count_rects(c_index, c_count)
+    rects = [textpage.get_rect(i) for i in range(r_index, r_index+r_count)]
+    return rects
 
 
 def test_search_text(textpage):
@@ -87,18 +95,15 @@ def test_search_text(textpage):
     occ_2b = searcher.get_prev()
     occ_1b = searcher.get_prev()
     
-    assert pytest.approx(occ_1a[0], abs=1) == (292, 678, 329, 690)
-    assert pytest.approx(occ_2a[0], abs=1) == (324, 641, 360, 653)
-    assert pytest.approx(occ_3a[0], abs=1) == (305, 549, 341, 561)
+    assert occ_1a == (89, 5)
+    assert occ_2a == (181, 5)
+    assert occ_3a == (430, 5)
     assert occ_4x is None
     assert occ_1a == occ_1b and occ_2a == occ_2b
     
-    for occ in (occ_1a, occ_2a, occ_3a):
-        for box in occ:
-            assert all(isinstance(val, (int, float)) for val in box)
-            assert len(box) == 4
-            assert box[0] <= box[2]
-            assert box[1] <= box[3]
+    _get_rects(textpage, occ_1a) == [ (292, 678, 329, 690) ]
+    _get_rects(textpage, occ_2a) == [ (324, 641, 360, 653) ]
+    _get_rects(textpage, occ_3a) == [ (305, 549, 341, 561) ]
 
 
 def test_get_index(textpage):
@@ -106,7 +111,7 @@ def test_get_index(textpage):
     x, y = (60, textpage.page.get_height()-66)
     
     index = textpage.get_index(x, y, 5, 5)
-    assert index < textpage.n_chars and index == 0
+    assert index < textpage.count_chars() and index == 0
     
     charbox = textpage.get_charbox(index)
     char = textpage.get_text_bounded(*charbox)
@@ -120,77 +125,14 @@ def test_textpage_empty():
     
     assert textpage.get_text_bounded() == ""
     assert textpage.get_text_range() == ""
-    assert textpage.n_chars == textpage.count_chars() == 0
+    assert textpage.count_chars() == 0
     assert textpage.count_rects() == 0
     assert textpage.get_index(0, 0, 0, 0) is None
-    assert [r for r in textpage.get_rectboxes()] == []
     
     searcher = textpage.search("a")
     assert searcher.get_next() is None
     
-    with pytest.raises(ValueError, match=re.escape("Character index 0 is out of bounds. The maximum index is -1.")):
+    with pytest.raises(pdfium.PdfiumError, match=re.escape("Failed to get charbox.")):
         textpage.get_charbox(0)
-    with pytest.raises(ValueError, match=re.escape("Text length must be >0.")):
+    with pytest.raises(ValueError, match=re.escape("Text length must be greater than 0.")):
         textpage.search("")
-
-
-def test_get_links(linkpage):
-    exp_links = (
-        "https://www.wikipedia.org/",
-        "https://www.openstreetmap.org/",
-        "https://www.opensuse.org/",
-        "https://kde.org/",
-    )
-    for i, link in enumerate(linkpage.get_links()):
-        assert link == exp_links[i]
-
-
-@pytest.mark.skipif(not find_spec("uharfbuzz"), reason="uharfbuzz is not installed")
-def test_insert_text():
-    
-    pdf = pdfium.PdfDocument.new()
-    width, height = 500, 300
-    page = pdf.new_page(width, height)
-    assert page.get_size() == (width, height)
-    
-    NotoSans = join(ResourceDir, "NotoSans-Regular.ttf")
-    hb_font = pdfium.HarfbuzzFont(NotoSans)
-    pdf_font = pdf.add_font(
-        NotoSans,
-        type = pdfium.FPDF_FONT_TRUETYPE,
-        is_cid = True,
-    )
-    
-    message_a = "मैं घोषणा, पुष्टि और सहमत हूँ कि:"
-    posx_a = 50
-    posy_a = height - 75
-    fs_a = 25
-    
-    message_b = "Latin letters test."
-    posx_b = 50
-    posy_b = height - 150
-    fs_b = 30
-    
-    page.insert_text(
-        text = message_a,
-        pos_x = posx_a,
-        pos_y = posy_a,
-        font_size = fs_a,
-        hb_font = hb_font,
-        pdf_font = pdf_font,
-    )
-    page.insert_text(
-        text = message_b,
-        pos_x = posx_b,
-        pos_y = posy_b,
-        font_size = fs_b,
-        hb_font = hb_font,
-        pdf_font = pdf_font,
-    )
-    page.generate_content()
-    
-    textpage = page.get_textpage()
-    assert textpage.get_text_bounded(left=posx_b, bottom=posy_b, top=posy_b+fs_b) == message_b
-    
-    with open(join(OutputDir, "text_insertion.pdf"), "wb") as buffer:
-        pdf.save(buffer, version=17)

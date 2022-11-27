@@ -2,22 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
+import re
 import math
-import ctypes
-import weakref
-import logging
-from os.path import join
 import numpy
 import PIL.Image
 import pytest
 import pypdfium2 as pdfium
+import pypdfium2.raw as pdfium_c
 from ..conftest import (
-    get_members,
     TestFiles,
     PyVersion,
     OutputDir,
     ExpRenderPixels
 )
+
+# TODO assert that bitmap and info are consistent
 
 
 @pytest.fixture
@@ -55,13 +54,12 @@ def _check_pixels(pil_image, pixels):
     ]
 )
 def test_render_page_transform(sample_page, name, crop, scale, rotation):
-    pil_image = sample_page.render_to(
-        pdfium.BitmapConv.pil_image,
+    pil_image = sample_page.render(
         crop = crop,
         scale = scale,
         rotation = rotation,
-    )
-    pil_image.save( join(OutputDir, "%s.png" % name) )
+    ).to_pil()
+    pil_image.save(OutputDir / ("%s.png" % name))
     assert pil_image.mode == "RGB"
     
     c_left, c_bottom, c_right, c_top = [math.ceil(c*scale) for c in crop]
@@ -98,11 +96,10 @@ def test_render_page_transform(sample_page, name, crop, scale, rotation):
     "rev_byteorder", [False, True]
 )
 def test_render_page_bgrx(rev_byteorder, sample_page):
-    pil_image = sample_page.render_to(
-        pdfium.BitmapConv.pil_image,
+    pil_image = sample_page.render(
         prefer_bgrx = True,
         rev_byteorder = rev_byteorder,
-    )
+    ).to_pil()
     assert pil_image.mode == "RGBX"
     exp_pixels = [(pos, (*value, 255)) for pos, value in ExpRenderPixels]
     _check_pixels(pil_image, exp_pixels)
@@ -118,11 +115,10 @@ def test_render_page_alpha(sample_page):
         [(150, 570), (128, 0,   128, 255)],
     ]
     kwargs = dict(
-        converter = pdfium.BitmapConv.pil_image,
-        fill_colour = (0, 0, 0, 0),
+        fill_color = (0, 0, 0, 0),
     )
-    image = sample_page.render_to(**kwargs)
-    image_rev = sample_page.render_to(**kwargs, rev_byteorder=True)
+    image = sample_page.render(**kwargs).to_pil()
+    image_rev = sample_page.render(**kwargs, rev_byteorder=True).to_pil()
     
     if PyVersion > (3, 6):
         assert image == image_rev
@@ -131,47 +127,24 @@ def test_render_page_alpha(sample_page):
     for pos, exp_value in pixels:
         assert image.getpixel(pos) == exp_value
     
-    image.save(join(OutputDir, "coloured_alpha.png"))
+    image.save(OutputDir / "colored_alpha.png")
 
 
 def test_render_page_grey(sample_page):
-
     kwargs = dict(
-        converter = pdfium.BitmapConv.pil_image,
-        greyscale = True,
+        grayscale = True,
         scale = 0.5,
     )
-    image = sample_page.render_to(**kwargs)
-    image_rev = sample_page.render_to(**kwargs, rev_byteorder=True)
+    image = sample_page.render(**kwargs).to_pil()
+    image_rev = sample_page.render(**kwargs, rev_byteorder=True).to_pil()
     assert image == image_rev
     assert image.size == (298, 421)
     assert image.mode == "L"
-    image.save(join(OutputDir, "greyscale.png"))
+    image.save(OutputDir / "grayscale.png")
 
 
 @pytest.mark.parametrize(
-    "prefer_la", [False, True]
-)
-def test_render_page_grey_alpha(prefer_la, sample_page):
-    converter = pdfium.BitmapConv.pil_image(
-        prefer_la = prefer_la,
-    )
-    image = sample_page.render_to(
-        converter,
-        greyscale = True,
-        fill_colour = (0, 0, 0, 0),
-        scale = 0.5,
-    )
-    assert image.size == (298, 421)
-    if prefer_la:
-        assert image.mode == "LA"
-    else:
-        assert image.mode == "RGBA"
-    image.save(join(OutputDir, "greyscale_alpha_%s.png" % image.mode))
-
-
-@pytest.mark.parametrize(
-    "fill_colour",
+    "fill_color",
     [
         (255, 255, 255, 255),
         (60,  70,  80,  100),
@@ -181,51 +154,40 @@ def test_render_page_grey_alpha(prefer_la, sample_page):
         (255, 255, 0,   255),
     ]
 )
-def test_render_page_fill_colour(fill_colour, sample_page):
-    
+def test_render_page_fill_color(fill_color, sample_page):
     kwargs = dict(
-        converter = pdfium.BitmapConv.pil_image,
-        fill_colour = fill_colour,
+        fill_color = fill_color,
         scale = 0.5,
     )
-    image = sample_page.render_to(**kwargs)
-    image_rev = sample_page.render_to(**kwargs, rev_byteorder=True)
+    image = sample_page.render(**kwargs).to_pil()
+    image_rev = sample_page.render(**kwargs, rev_byteorder=True).to_pil()
     
     if PyVersion > (3, 6):
         assert image == image_rev
     
     bg_pixel = image.getpixel( (0, 0) )
-    if fill_colour[3] == 255:
-        fill_colour = fill_colour[:-1]
+    if fill_color[3] == 255:
+        fill_color = fill_color[:-1]
     assert image.size == (298, 421)
-    assert bg_pixel == fill_colour
+    assert bg_pixel == fill_color
 
 
-def test_render_page_colourscheme():
-    
+def test_render_page_colorscheme():
     pdf = pdfium.PdfDocument(TestFiles.text)
     page = pdf.get_page(0)
-    colour_scheme = pdfium.ColourScheme(
+    color_scheme = pdfium.PdfColorScheme(
         path_fill   = (15,  15,  15,  255),
         path_stroke = (255, 255, 255, 255),
         text_fill   = (255, 255, 255, 255),
         text_stroke = (255, 255, 255, 255),
     )
-    image = page.render_to(
-        pdfium.BitmapConv.pil_image,
-        greyscale = True,
-        fill_colour = (0, 0, 0, 255),
-        colour_scheme = colour_scheme,
-    )
+    image = page.render(
+        grayscale = True,
+        fill_color = (0, 0, 0, 255),
+        color_scheme = color_scheme,
+    ).to_pil()
     assert image.mode == "L"
-    image.save( join(OutputDir, "render_colourscheme.png") )
-
-
-def test_render_page_custom_allocator(sample_page):
-    allocator = lambda n_bytes: (ctypes.c_ubyte * n_bytes)()
-    out_array, cl_format, size = sample_page.render_base(allocator=allocator)
-    assert len(out_array) == len(cl_format) * size[0] * size[1]
-    assert out_array._type_ is ctypes.c_ubyte
+    image.save(OutputDir / "render_colorscheme.png")
 
 
 @pytest.mark.parametrize(
@@ -233,15 +195,16 @@ def test_render_page_custom_allocator(sample_page):
 )
 def test_render_page_tonumpy(rev_byteorder, sample_page):
     
-    array, cl_format = sample_page.render_to(
-        pdfium.BitmapConv.numpy_ndarray,
+    bitmap = sample_page.render(
         rev_byteorder = rev_byteorder,
     )
+    info, array = bitmap.get_info(), bitmap.to_numpy()
     assert isinstance(array, numpy.ndarray)
+    assert isinstance(info, pdfium.PdfBitmapInfo)
     if rev_byteorder:
-        assert cl_format == "RGB"
+        assert info.mode == "RGB"
     else:
-        assert cl_format == "BGR"
+        assert info.mode == "BGR"
     
     for (x, y), value in ExpRenderPixels:
         if rev_byteorder:
@@ -251,75 +214,45 @@ def test_render_page_tonumpy(rev_byteorder, sample_page):
 
 
 @pytest.mark.parametrize(
-    "rev_byteorder", [False, True]
+    "mode",
+    [
+        None,
+        pdfium.RenderOptimizeMode.LCD_DISPLAY,
+        pdfium.RenderOptimizeMode.PRINTING,
+    ]
 )
-def test_render_page_tobytes(rev_byteorder, sample_page):
-    
-    bytedata, cl_format, size = sample_page.render_to(
-        pdfium.BitmapConv.any(bytes),
+def test_render_page_optimization(sample_page, mode):
+    pil_image = sample_page.render(
+        optimize_mode = mode,
         scale = 0.5,
-        rev_byteorder = rev_byteorder,
-    )
-    
-    assert isinstance(bytedata, bytes)
-    assert size == (298, 421)
-    assert len(bytedata) == size[0] * size[1] * len(cl_format)
-    if rev_byteorder:
-        assert cl_format == "RGB"
-    else:
-        assert cl_format == "BGR"
-    
-    pil_image = PIL.Image.frombytes("RGB", size, bytedata, "raw", cl_format)
-    assert pil_image.mode == "RGB"
-    assert pil_image.size == (298, 421)
+    ).to_pil()
     assert isinstance(pil_image, PIL.Image.Image)
 
 
-def test_render_page_optimisation(sample_page):
-    
-    modes = get_members(pdfium.OptimiseMode)
-    assert len(modes) == 3
-    assert set(modes) == set([
-        pdfium.OptimiseMode.NONE,
-        pdfium.OptimiseMode.LCD_DISPLAY,
-        pdfium.OptimiseMode.PRINTING,
-    ])
-    
-    for mode in modes:
-        pil_image = sample_page.render_to(
-            pdfium.BitmapConv.pil_image,
-            optimise_mode = mode,
-            scale = 0.5,
-        )
-        assert isinstance(pil_image, PIL.Image.Image)
-
-
 def test_render_page_noantialias(sample_page):
-    pil_image = sample_page.render_to(
-        pdfium.BitmapConv.pil_image,
+    pil_image = sample_page.render(
         no_smoothtext  = True,
         no_smoothimage = True,
         no_smoothpath  = True,
         scale = 0.5,
-    )
+    ).to_pil()
     assert isinstance(pil_image, PIL.Image.Image)
 
 
 def test_render_pages_no_concurrency(multipage_doc):
     for page in multipage_doc:
-        image = page.render_to(
-            pdfium.BitmapConv.pil_image,
+        image = page.render(
             scale = 0.5,
-            greyscale = True,
-        )
+            grayscale = True,
+        ).to_pil()
         assert isinstance(image, PIL.Image.Image)
 
 
 @pytest.fixture
 def render_pdffile_topil(multipage_doc):
     
-    renderer = multipage_doc.render_to(
-        pdfium.BitmapConv.pil_image,
+    renderer = multipage_doc.render(
+        pdfium.PdfBitmap.to_pil,
         scale = 0.5,
     )
     imgs = []
@@ -334,183 +267,193 @@ def render_pdffile_topil(multipage_doc):
 
 
 @pytest.fixture
-def render_pdffile_tobytes(multipage_doc):
-    
-    renderer = multipage_doc.render_to(
-        pdfium.BitmapConv.any(bytes),
-        scale = 0.5,
-    )
-    imgs = []
-    
-    for imgdata, cl_format, size in renderer:
-        assert cl_format == "BGR"
-        assert isinstance(imgdata, bytes)
-        assert len(imgdata) == size[0] * size[1] * len(cl_format)
-        pil_image = PIL.Image.frombytes("RGB", size, imgdata, "raw", "BGR")
-        imgs.append(pil_image)
-    
-    assert len(imgs) == 3
-    yield imgs
-
-
-@pytest.fixture
 def render_pdffile_tonumpy(multipage_doc):
     
-    renderer = multipage_doc.render_to(
-        pdfium.BitmapConv.numpy_ndarray,
+    renderer = multipage_doc.render(
+        pdfium.PdfBitmap.to_numpy,
         scale = 0.5,
         rev_byteorder = True,
+        pass_info = True,
     )
     imgs = []
     
-    for array, cl_format in renderer:
-        assert cl_format == "RGB"
+    for array, info in renderer:
+        assert info.mode == "RGB"
         assert isinstance(array, numpy.ndarray)
-        pil_image = PIL.Image.fromarray(array, mode=cl_format)
+        pil_image = PIL.Image.fromarray(array, mode=info.mode)
         imgs.append(pil_image)
     
     # for i, img in enumerate(imgs):
-    #     img.save(join(OutputDir, "numpy_%s.png" % i))
+    #     img.save(OutputDir / ("numpy_%s.png" % i))
     
     assert len(imgs) == 3
     yield imgs
 
 
-def test_render_pdffile(render_pdffile_topil, render_pdffile_tobytes, render_pdffile_tonumpy):
-    for a, b, c in zip(render_pdffile_topil, render_pdffile_tobytes, render_pdffile_tonumpy):
-        assert a == b == c
+def test_render_pdffile(render_pdffile_topil, render_pdffile_tonumpy):
+    for a, b in zip(render_pdffile_topil, render_pdffile_tonumpy):
+        assert a == b
 
 
-def test_render_pdf_new(caplog):
+def test_render_pdf_new():
     
-    pdf = pdfium.PdfDocument.new()
     # two pages to actually reach the process pool and not just the single-page shortcut
+    pdf = pdfium.PdfDocument.new()
     page_1 = pdf.new_page(50, 100)
     page_2 = pdf.new_page(50, 100)
+    renderer = pdf.render(pdfium.PdfBitmap.to_pil)
     
-    with caplog.at_level(logging.WARNING):
-        renderer = pdf.render_to(pdfium.BitmapConv.pil_image)
-        image = next(renderer)
-    
-    warning = "Cannot perform concurrent processing without input sources - saving the document implicitly to get picklable data."
-    assert warning in caplog.text
-    
-    assert isinstance(image, PIL.Image.Image)
-    assert image.mode == "RGB"
-    assert image.size == (50, 100)
-    
+    with pytest.raises(ValueError, match="Can only render in parallel with file path input and native access mode."):
+        next(renderer)
 
-def test_render_pdfbuffer(caplog):
+
+def test_render_pdfbuffer():
     
     buffer = open(TestFiles.multipage, "rb")
     pdf = pdfium.PdfDocument(buffer)
     assert pdf._orig_input is buffer
     assert pdf._actual_input is buffer
-    assert pdf._rendering_input is None
     
-    with caplog.at_level(logging.WARNING):
-        renderer = pdf.render_to(
-            pdfium.BitmapConv.pil_image,
-            scale = 0.5,
-        )
-        image = next(renderer)
-        assert isinstance(image, PIL.Image.Image)
-    
-    assert isinstance(pdf._rendering_input, bytes)
-    warning = "Cannot perform concurrent rendering with buffer input - reading the whole buffer into memory implicitly."
-    assert warning in caplog.text
+    renderer = pdf.render(pdfium.PdfBitmap.to_pil)
+    with pytest.raises(ValueError, match=re.escape("Can only render in parallel with file path input and native access mode.")):
+        next(renderer)
 
 
-def test_render_pdfbytes():
+# BUG(#164): disabled test cases
+
+# def test_render_pdfbytes():
     
-    with open(TestFiles.multipage, "rb") as fh:
-        data = fh.read()
+#     with open(TestFiles.multipage, "rb") as fh:
+#         data = fh.read()
     
-    pdf = pdfium.PdfDocument(data)
-    assert pdf._orig_input is data
-    assert pdf._actual_input is data
-    assert pdf._rendering_input is None
-    renderer = pdf.render_to(
-        pdfium.BitmapConv.pil_image,
-        scale = 0.5,
-    )
-    image = next(renderer)
-    assert isinstance(image, PIL.Image.Image)
-    assert isinstance(pdf._rendering_input, bytes)
+#     pdf = pdfium.PdfDocument(data)
+#     assert pdf._orig_input is data
+#     assert pdf._actual_input is data
+#     renderer = pdf.render(
+#         pdfium.PdfBitmap.to_pil,
+#         scale = 0.5,
+#     )
+#     image = next(renderer)
+#     assert isinstance(image, PIL.Image.Image)
 
 
-def test_render_pdffile_asbuffer():
+# def test_render_pdffile_asbuffer():
     
-    pdf = pdfium.PdfDocument(TestFiles.multipage, file_access=pdfium.FileAccess.BUFFER)
+#     pdf = pdfium.PdfDocument(TestFiles.multipage, file_access=pdfium.FileAccessMode.BUFFER)
     
-    assert pdf._orig_input == TestFiles.multipage
-    assert isinstance(pdf._actual_input, io.BufferedReader)
-    assert pdf._rendering_input is None
-    assert pdf._file_access is pdfium.FileAccess.BUFFER
+#     assert pdf._orig_input == str(TestFiles.multipage)
+#     assert isinstance(pdf._actual_input, io.BufferedReader)
+#     assert pdf._file_access is pdfium.FileAccessMode.BUFFER
     
-    renderer = pdf.render_to(
-        pdfium.BitmapConv.pil_image,
-        scale = 0.5,
-    )
-    image = next(renderer)
-    assert isinstance(image, PIL.Image.Image)
+#     renderer = pdf.render(
+#         pdfium.PdfBitmap.to_pil,
+#         scale = 0.5,
+#     )
+#     image = next(renderer)
+#     assert isinstance(image, PIL.Image.Image)
     
-    assert pdf._rendering_input == TestFiles.multipage
-    
-    pdf.close()
-    assert pdf._actual_input.closed is True
+#     pdf._finalizer()
+#     assert pdf._actual_input.closed is True
 
 
-def test_render_pdffile_asbytes():
+# def test_render_pdffile_asbytes():
     
-    pdf = pdfium.PdfDocument(TestFiles.multipage, file_access=pdfium.FileAccess.BYTES)
+#     pdf = pdfium.PdfDocument(TestFiles.multipage, file_access=pdfium.FileAccessMode.BYTES)
     
-    assert pdf._orig_input == TestFiles.multipage
-    assert isinstance(pdf._actual_input, bytes)
-    assert pdf._rendering_input is None
-    assert pdf._file_access is pdfium.FileAccess.BYTES
+#     assert pdf._orig_input == str(TestFiles.multipage)
+#     assert isinstance(pdf._actual_input, bytes)
+#     assert pdf._file_access is pdfium.FileAccessMode.BYTES
     
-    renderer = pdf.render_to(
-        pdfium.BitmapConv.pil_image,
-        scale = 0.5,
-    )
-    image = next(renderer)
-    assert isinstance(image, PIL.Image.Image)
-    assert pdf._rendering_input == TestFiles.multipage
+#     renderer = pdf.render(
+#         pdfium.PdfBitmap.to_pil,
+#         scale = 0.5,
+#     )
+#     image = next(renderer)
+#     assert isinstance(image, PIL.Image.Image)
 
 
 @pytest.mark.parametrize(
-    ("draw_forms", "exp_colour"),
+    ("draw_forms", "exp_color"),
     [
         (False, (255, 255, 255)),
         (True, (0, 51, 113)),
     ]
 )
-def test_render_form(draw_forms, exp_colour):
+def test_render_form(draw_forms, exp_color):
     
     pdf = pdfium.PdfDocument(TestFiles.form)
-    assert pdf._form_env is None
-    assert pdf._form_config is None
+    assert pdf._formenv is None
     
     page = pdf.get_page(0)
-    image = page.render_to(
-        pdfium.BitmapConv.pil_image,
+    image = page.render(
         draw_forms = draw_forms,
-    )
+    ).to_pil()
     
-    assert image.getpixel( (190, 190) ) == exp_colour
-    assert image.getpixel( (190, 430) ) == exp_colour
-    assert image.getpixel( (190, 480) ) == exp_colour
+    assert image.getpixel( (190, 190) ) == exp_color
+    assert image.getpixel( (190, 430) ) == exp_color
+    assert image.getpixel( (190, 480) ) == exp_color
     
     if draw_forms:
-        assert isinstance(pdf._form_env, pdfium.FPDF_FORMHANDLE)
-        assert isinstance(pdf._form_config, pdfium.FPDF_FORMFILLINFO)
-        assert isinstance(pdf._form_finalizer, weakref.finalize)
-        assert pdf._form_finalizer.alive
-        pdf.exit_formenv()
-        assert not pdf._form_finalizer.alive
+        assert isinstance(pdf._formenv, pdfium.PdfFormEnv)
     else:
-        assert pdf._form_finalizer is None
+        assert pdf._formenv is None
+
+
+def test_numpy_nocopy(sample_page):
+    bitmap = sample_page.render(scale=0.1)
+    array = bitmap.to_numpy()
+    assert (bitmap.width, bitmap.height) == (60, 85)
+    val_a, val_b = 255, 123
+    assert array[0][0][0] == val_a
+    bitmap.buffer[0] = val_b
+    assert array[0][0][0] == val_b
+    array[0][0][0] = val_a
+    assert bitmap.buffer[0] == val_a
+
+
+@pytest.mark.parametrize(
+    ("bitmap_format", "rev_byteorder", "is_referenced"),
+    [
+        (pdfium_c.FPDFBitmap_BGR,  False, False),
+        (pdfium_c.FPDFBitmap_BGR,  True,  False),
+        (pdfium_c.FPDFBitmap_BGRA, False, False),
+        (pdfium_c.FPDFBitmap_BGRA, True,  True),
+        (pdfium_c.FPDFBitmap_BGRx, False, False),
+        (pdfium_c.FPDFBitmap_BGRx, True,  True),
+        (pdfium_c.FPDFBitmap_Gray, False, True),
+    ]
+)
+def test_pil_nocopy_where_possible(bitmap_format, rev_byteorder, is_referenced, sample_page):
     
-    assert pdf._form_env is None
-    assert pdf._form_config is None
+    bitmap = sample_page.render(
+        scale = 0.1,
+        rev_byteorder = rev_byteorder,
+        force_bitmap_format = bitmap_format,
+    )
+    pil_image = bitmap.to_pil()
+    assert pil_image.size == (60, 85)
+    
+    val_a, val_b = 255, 123
+    if bitmap.n_channels == 4:
+        pixel_a = (val_a, 255, 255, 255)
+        pixel_b = (val_b, 255, 255, 255)
+    elif bitmap.n_channels == 3:
+        pixel_a = (val_a, 255, 255)
+        pixel_b = (val_b, 255, 255)
+    elif bitmap.n_channels == 1:
+        pixel_a = val_a
+        pixel_b = val_b
+    else:
+        assert False
+    
+    assert pil_image.getpixel((0, 0)) == pixel_a
+    bitmap.buffer[0] = val_b
+    if is_referenced:
+        # editing the buffer modifies the PIL image
+        assert pil_image.getpixel((0, 0)) == pixel_b
+        # but it looks like editing the PIL image does not modify the buffer?
+        # pil_image.putpixel((0, 0), pixel_a)
+        # assert pil_image.getpixel((0, 0)) == pixel_a
+        # assert bitmap.buffer[0] == val_a  # fails
+    else:
+        assert pil_image.getpixel((0, 0)) == pixel_a

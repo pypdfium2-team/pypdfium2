@@ -16,5 +16,6 @@ if V_BETA is not None:
 #: PDFium library version string (git tag or commit hash).
 V_LIBPDFIUM = "5431"
 
-#: Whether the included PDFium binary was built from source locally (:data:`True`) or downloaded from pdfium-binaries (:data:`False`).
+# TODO consider renaming or changing this variable
+#: Whether the included PDFium binary was downloaded from pdfium-binaries (False) or supplied locally (True).
 IS_SOURCEBUILD = False

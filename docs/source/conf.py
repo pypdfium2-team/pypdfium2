@@ -8,13 +8,10 @@
 import os
 import sys
 import time
-from os.path import (
-    join,
-    dirname,
-    abspath,
-)
+import collections
+from pathlib import Path
 
-sys.path.insert(0, join(dirname(dirname(dirname(abspath(__file__)))), "setupsrc"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "setupsrc"))
 from pl_setup.packaging_base import (
     run_cmd,
     SourceTree,
@@ -30,10 +27,10 @@ def _get_build_type():
         return rtd_version_name
     
     branch = run_cmd(["git", "branch", "--show-current"], cwd=SourceTree, capture=True)
-    if branch == "stable":
-        return "stable"
-    else:
+    if branch == "main":
         return "latest"
+    else:
+        return branch
 
 
 build_type = _get_build_type()
@@ -54,8 +51,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.ifconfig",
-    "sphinxcontrib.programoutput",
     "myst_parser",
+    "sphinxcontrib.programoutput",
 ]
 
 suppress_warnings = [
@@ -65,11 +62,12 @@ suppress_warnings = [
 
 add_module_names = False
 autodoc_preserve_defaults = True
-autodoc_inherit_docstrings = False
+autodoc_inherit_docstrings = True
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
     "show-inheritance": True,
+    # "inherited-members": True,
     "member-order": "bysource",
 }
 intersphinx_mapping = {
@@ -78,6 +76,22 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
 
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-rst_prolog
+# .. |br| raw:: html
+
+#    <br/>
+rst_prolog = """
+.. |build_type| replace:: %(build_type)s
+""" % dict(
+    build_type = build_type,
+)
+
+
+def remove_namedtuple_aliases(app, what, name, obj, skip, options):
+    if type(obj) is collections._tuplegetter:
+        return True
+    return skip
 
 def setup(app):
+    app.connect('autodoc-skip-member', remove_namedtuple_aliases)
     app.add_config_value("build_type", "latest", "env")

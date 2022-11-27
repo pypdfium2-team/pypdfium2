@@ -2,9 +2,6 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
-install:
-	bash ./utilities/install.sh
-
 test:
 	python3 -m pytest ./tests/
 
@@ -19,10 +16,6 @@ setup-all:
 
 packaging:
 	bash ./utilities/packaging.sh
-
-.PHONY: build
-build:
-	bash ./utilities/build.sh
 
 clean:
 	bash ./utilities/clean.sh

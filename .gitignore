@@ -12,8 +12,12 @@ docs/build/
 sourcebuild/
 !sourcebuild/patches
 
-src/pypdfium2/_pypdfium.py
+src/pypdfium2/raw.py
 src/pypdfium2/pdfium
+
+*.so
+*.dll
+*.dylib
 
 **/__pycache__
 **/.mypy_cache
@@ -24,10 +28,5 @@ src/pypdfium2/pdfium
 *.egg-info
 *.eggs
 *.kate-swp
-*.kdev4
 *.python-version
-*.presetup_done.txt
-
-*.so
-*.dll
-*.dylib
+*.coverage

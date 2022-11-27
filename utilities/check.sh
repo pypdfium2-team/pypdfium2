@@ -4,6 +4,6 @@
 
 set -v
 
-find . -path ./sourcebuild -prune -o -name '*.py' -print |xargs -n 1 importchecker
+autoflake src/ tests/ --recursive --remove-all-unused-imports --ignore-pass-statements --exclude "src/pypdfium2/_namespace.py,src/pypdfium2/__init__.py,src/pypdfium2/_helpers/__init__.py"
 codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sourcebuild,./dist,./.git,__pycache__,.mypy_cache,.hypothesis" -L "tabe,splitted"
-reuse lint 
+reuse lint

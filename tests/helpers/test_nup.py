@@ -3,7 +3,7 @@
 
 import pytest
 import pypdfium2 as pdfium
-from os.path import join
+import pypdfium2.raw as pdfium_c
 from ..conftest import TestFiles, OutputDir
 
 
@@ -14,7 +14,7 @@ def test_pageobj_placement():
     dest_pdf = pdfium.PdfDocument.new()
     xobject = src_pdf.page_as_xobject(0, dest_pdf)
     assert isinstance(xobject, pdfium.PdfXObject)
-    assert isinstance(xobject.raw, pdfium.FPDF_XOBJECT)
+    assert isinstance(xobject.raw, pdfium_c.FPDF_XOBJECT)
     assert xobject.pdf is dest_pdf
     
     src_width, src_height = src_pdf.get_page_size(0)
@@ -25,11 +25,11 @@ def test_pageobj_placement():
     
     po = xobject.as_pageobject()
     assert po.get_matrix() == pdfium.PdfMatrix()
-    assert isinstance(po, pdfium.PdfPageObject)
-    assert isinstance(po.raw, pdfium.FPDF_PAGEOBJECT)
+    assert isinstance(po, pdfium.PdfObject)
+    assert isinstance(po.raw, pdfium_c.FPDF_PAGEOBJECT)
     assert po.pdf is dest_pdf
     assert po.page is None
-    assert po.type == pdfium.FPDF_PAGEOBJ_FORM
+    assert po.type == pdfium_c.FPDF_PAGEOBJ_FORM
     matrix = pdfium.PdfMatrix()
     matrix.scale(0.5, 0.5)
     matrix.translate(0, h)  # position
@@ -39,7 +39,9 @@ def test_pageobj_placement():
     dest_page_1.insert_object(po)
     assert po.pdf is dest_pdf
     assert po.page is dest_page_1
-    # pos_a = po.get_pos()  # xfail (crbug.com/pdfium/1905)
+    pos_a = po.get_pos()
+    # xfail with pdfium < 5370, https://crbug.com/pdfium/1905
+    assert pytest.approx(pos_a, abs=0.5) == (19, 440, 279, 823)
     
     po = xobject.as_pageobject()
     matrix = pdfium.PdfMatrix()
@@ -131,8 +133,7 @@ def test_pageobj_placement():
     # TODO
     # * test copy and repr
     # * test skew
-    # * assert that PdfPageObject.transform() actually transforms and is not just doing the same as set_matrix()
+    # * assert that PdfObject.transform() actually transforms and is not just doing the same as set_matrix()
     # * assert that the transformation operates from the origin of the coordinate system
     
-    with open(join(OutputDir, "pageobj_placement.pdf"), "wb") as buf:
-        dest_pdf.save(buf)
+    dest_pdf.save(OutputDir / "pageobj_placement.pdf")

@@ -5,14 +5,13 @@ import os
 import io
 import re
 import shutil
-import logging
-import weakref
 import tempfile
 import traceback
-import pytest
 import PIL.Image
 from os.path import join, abspath
 import pypdfium2 as pdfium
+import pypdfium2.raw as pdfium_c
+import pytest
 from ..conftest import TestFiles, ExpRenderPixels
 
 
@@ -27,7 +26,7 @@ def _check_general(pdf, n_pages=1):
 def _check_render(pdf):
     
     page = pdf.get_page(0)
-    pil_image = page.render_to(pdfium.BitmapConv.pil_image)
+    pil_image = page.render().to_pil()
     
     assert pil_image.mode == "RGB"
     assert pil_image.size == (595, 842)
@@ -42,7 +41,7 @@ def open_filepath_native():
     pdf = pdfium.PdfDocument(TestFiles.render)
     assert pdf._data_holder == []
     assert pdf._data_closer == []
-    assert pdf._file_access is pdfium.FileAccess.NATIVE
+    assert pdf._file_access is pdfium.FileAccessMode.NATIVE
     _check_general(pdf)
     yield _check_render(pdf)
 
@@ -96,29 +95,29 @@ def test_open_buffer_autoclose():
     assert pdf._data_closer == [buffer]
     _check_general(pdf)
     
-    pdf.close()
+    pdf._finalizer()
     assert buffer.closed is True
 
 
 def test_open_filepath_buffer():
     
-    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BUFFER)
+    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccessMode.BUFFER)
     assert len(pdf._data_holder) == 2
     assert pdf._data_closer == [pdf._actual_input]
     
-    assert pdf._orig_input == TestFiles.render
+    assert pdf._orig_input == str(TestFiles.render)
     assert isinstance(pdf._actual_input, io.BufferedReader)
-    assert pdf._autoclose is False
+    assert pdf._autoclose is True
     _check_general(pdf)
     
-    pdf.close()
+    pdf._finalizer()
     assert pdf._actual_input.closed is True
 
 
 def test_open_filepath_bytes():
     
-    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccess.BYTES)
-    assert pdf._orig_input == TestFiles.render
+    pdf = pdfium.PdfDocument(TestFiles.render, file_access=pdfium.FileAccessMode.BYTES)
+    assert pdf._orig_input == str(TestFiles.render)
     assert isinstance(pdf._actual_input, bytes)
     assert pdf._data_holder == [pdf._actual_input]
     assert pdf._data_closer == []
@@ -149,13 +148,13 @@ def test_open_encrypted():
     
     buffer.close()
     
-    with pytest.raises(pdfium.PdfiumError, match=re.escape("Loading the document failed (PDFium: Incorrect password error)")):
+    with pytest.raises(pdfium.PdfiumError, match=re.escape("Failed to load document (PDFium: Incorrect password error).")):
         pdf = pdfium.PdfDocument(TestFiles.encrypted, "wrong_password")
 
 
 @pytest.mark.parametrize(
     "file_access",
-    [pdfium.FileAccess.NATIVE, pdfium.FileAccess.BYTES, pdfium.FileAccess.BUFFER]
+    [pdfium.FileAccessMode.NATIVE, pdfium.FileAccessMode.BYTES, pdfium.FileAccessMode.BUFFER]
 )
 def test_open_nonencrypted_with_password(file_access):
     pdf = pdfium.PdfDocument(TestFiles.render, password="irrelevant", file_access=file_access)
@@ -171,6 +170,7 @@ def test_open_nonascii():
     pdf = pdfium.PdfDocument(nonascii_file)
     _check_general(pdf)
     
+    # FIXME cleanup permission error on Windows
     try:
         os.remove(nonascii_file)
         tempdir.cleanup()
@@ -183,105 +183,112 @@ def test_open_new():
     dest_pdf = pdfium.PdfDocument.new()
     
     assert isinstance(dest_pdf, pdfium.PdfDocument)
-    assert isinstance(dest_pdf.raw, pdfium.FPDF_DOCUMENT)
+    assert isinstance(dest_pdf.raw, pdfium_c.FPDF_DOCUMENT)
     assert dest_pdf.raw is dest_pdf._orig_input is dest_pdf._actual_input
     assert dest_pdf._data_holder == []
     assert dest_pdf._data_closer == []
-    assert dest_pdf._rendering_input is None
+    
     assert dest_pdf.get_version() is None
     
     src_pdf = pdfium.PdfDocument(TestFiles.multipage)
-    pdfium.FPDF_ImportPages(dest_pdf.raw, src_pdf.raw, b"1, 3", 0)
+    dest_pdf.import_pages(src_pdf, [0, 2])
     assert len(dest_pdf) == 2
 
 
 def test_open_invalid():
     with pytest.raises(TypeError, match=re.escape("Invalid input type 'int'")):
         pdf = pdfium.PdfDocument(123)
-    with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
+    with pytest.raises(FileNotFoundError, match=re.escape(abspath("invalid/path"))):
         pdf = pdfium.PdfDocument("invalid/path")
-    with pytest.raises(FileNotFoundError, match=re.escape("File does not exist: '%s'" % abspath("invalid/path"))):
-        pdf = pdfium.PdfDocument("invalid/path", file_access=pdfium.FileAccess.BUFFER)
+    with pytest.raises(FileNotFoundError, match=re.escape(abspath("invalid/path"))):
+        pdf = pdfium.PdfDocument("invalid/path", file_access=pdfium.FileAccessMode.BUFFER)
 
 
-def test_object_hierarchy(caplog):
+def test_object_hierarchy():
     
     pdf = pdfium.PdfDocument(TestFiles.images)
     assert isinstance(pdf, pdfium.PdfDocument)
-    assert isinstance(pdf.raw, pdfium.FPDF_DOCUMENT)
+    assert isinstance(pdf.raw, pdfium_c.FPDF_DOCUMENT)
     
-    assert callable(pdf._static_exit_formenv)
-    pdf.init_formenv()
-    assert isinstance(pdf._form_finalizer, weakref.finalize)
-    assert pdf._form_finalizer.alive
-    assert isinstance(pdf._form_config, pdfium.FPDF_FORMFILLINFO)
-    assert isinstance(pdf._form_env, pdfium.FPDF_FORMHANDLE)
-    pdf.exit_formenv()
-    assert not pdf._form_finalizer.alive
+    formenv = pdf.init_formenv()
+    assert formenv is pdf._formenv
+    assert formenv is pdf.init_formenv()
+    assert formenv._finalizer.alive
+    assert isinstance(formenv, pdfium.PdfFormEnv)
+    assert isinstance(formenv.raw, pdfium_c.FPDF_FORMHANDLE)
+    assert isinstance(formenv.config, pdfium_c.FPDF_FORMFILLINFO)
+    formenv.close()
+    assert not formenv._finalizer.alive
+    assert pdf._formenv is None
     
     page = pdf.get_page(0)
     assert isinstance(page, pdfium.PdfPage)
-    assert isinstance(page.raw, pdfium.FPDF_PAGE)
+    assert isinstance(page.raw, pdfium_c.FPDF_PAGE)
     assert page.pdf is pdf
     
-    # pageobjects don't need a finalizer
     pageobj = next(page.get_objects())
-    assert isinstance(pageobj, pdfium.PdfPageObject)
-    assert isinstance(pageobj.raw, pdfium.FPDF_PAGEOBJECT)
+    assert isinstance(pageobj, pdfium.PdfObject)
+    assert isinstance(pageobj.raw, pdfium_c.FPDF_PAGEOBJECT)
     assert isinstance(pageobj.type, int)
     assert pageobj.page is page
     
     textpage = page.get_textpage()
     assert isinstance(textpage, pdfium.PdfTextPage)
-    assert isinstance(textpage.raw, pdfium.FPDF_TEXTPAGE)
+    assert isinstance(textpage.raw, pdfium_c.FPDF_TEXTPAGE)
     assert textpage.page is page
     
     searcher = textpage.search("abcd")
     assert isinstance(searcher, pdfium.PdfTextSearcher)
-    assert isinstance(searcher.raw, pdfium.FPDF_SCHHANDLE)
+    assert isinstance(searcher.raw, pdfium_c.FPDF_SCHHANDLE)
     assert searcher.textpage is textpage
     
     for obj in (searcher, textpage, page, pdf):
-        assert callable(obj._static_close)
-        assert isinstance(obj._finalizer, weakref.finalize)
         assert obj._finalizer.alive
         obj.close()
         assert not obj._finalizer.alive
-    
-    for obj in (searcher, textpage, page, pdf):
-        with caplog.at_level(logging.WARNING):
-            caplog.clear()
-            obj.close()
-        assert "Duplicate close call suppressed on " in caplog.text
+
+
+def _compare_metadata(pdf, metadata, exp_metadata):
+    all_keys = ("Title", "Author", "Subject", "Keywords", "Creator", "Producer", "CreationDate", "ModDate")
+    assert len(metadata) == len(all_keys)
+    assert all(k in metadata for k in all_keys)
+    for k in all_keys:
+        assert metadata[k] == pdf.get_metadata_value(k)
+        if k in exp_metadata:
+            assert metadata[k] == exp_metadata[k]
+        else:
+            assert metadata[k] == ""
+
+
+def test_metadata():
+    pdf = pdfium.PdfDocument(TestFiles.empty)
+    metadata = pdf.get_metadata_dict()
+    exp_metadata = {
+        "Producer": "LibreOffice 6.4",
+        "Creator": "Writer",
+        "CreationDate": "D:20220520145414+02'00'",
+    }
+    _compare_metadata(pdf, metadata, exp_metadata)
 
 
 def test_doc_extras():
-    
-    # context managers are a no-op since 3.3 - they're merely retained for backwards compatibility
-    
-    with pdfium.PdfDocument(TestFiles.empty, file_access=pdfium.FileAccess.BUFFER) as pdf:
-        assert isinstance(pdf, pdfium.PdfDocument)
-        assert len(pdf) == 1
-        page = pdf[0]
-        assert isinstance(page, pdfium.PdfPage)
+        
+    pdf = pdfium.PdfDocument(TestFiles.empty, file_access=pdfium.FileAccessMode.BUFFER)
+    assert len(pdf) == 1
+    page = pdf[0]
+    assert isinstance(page, pdfium.PdfPage)
     assert isinstance(pdf._actual_input, io.BufferedReader)
     
-    with pdfium.PdfDocument.new() as pdf:
-        
-        assert isinstance(pdf, pdfium.PdfDocument)
-        assert len(pdf) == 0
-        
-        sizes = [(50, 100), (100, 150), (150, 200), (200, 250)]
-        for size in sizes:
-            page = pdf.new_page(*size)
-        for i, (size, page) in enumerate(zip(sizes, pdf)):
-            assert isinstance(page, pdfium.PdfPage)
-            assert size == page.get_size() == pdf.get_page_size(i)
-        
-        del pdf[0]
-        page = pdf[0]
-        assert page.get_size() == pdf.get_page_size(0) == (100, 150)
-        
-        del pdf[-len(pdf)]
-        page = pdf[-len(pdf)]
-        assert page.get_size() == pdf.get_page_size(-len(pdf)) == (150, 200)
+    pdf = pdfium.PdfDocument.new()
+    assert len(pdf) == 0
+    
+    sizes = [(50, 100), (100, 150), (150, 200), (200, 250)]
+    for size in sizes:
+        page = pdf.new_page(*size)
+    for i, (size, page) in enumerate(zip(sizes, pdf)):
+        assert isinstance(page, pdfium.PdfPage)
+        assert size == page.get_size() == pdf.get_page_size(i)
+    
+    del pdf[0]
+    page = pdf[0]
+    assert page.get_size() == pdf.get_page_size(0) == (100, 150)

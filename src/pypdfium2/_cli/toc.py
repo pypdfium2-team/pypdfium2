@@ -1,22 +1,11 @@
 # SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-from pypdfium2 import _namespace as pdfium
+from pypdfium2._cli._parsers import add_input, get_input
 
 
-def attach_parser(subparsers):
-    parser = subparsers.add_parser(
-        "toc",
-        help = "Show a PDF document's table of contents",
-    )
-    parser.add_argument(
-        "input",
-        help = "PDF document of which to print the outline",
-    )
-    parser.add_argument(
-        "--password",
-        help = "Password to unlock the PDF, if encrypted"
-    )
+def attach(parser):
+    add_input(parser, pages=False)
     parser.add_argument(
         "--max-depth",
         type = int,
@@ -26,5 +15,8 @@ def attach_parser(subparsers):
 
 
 def main(args):
-    pdf = pdfium.PdfDocument(args.input, password=args.password)
-    pdf.print_toc( pdf.get_toc() )
+    pdf = get_input(args)
+    toc = pdf.get_toc(
+        max_depth = args.max_depth,
+    )
+    pdf.print_toc(toc)

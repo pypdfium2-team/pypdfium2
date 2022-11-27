@@ -6,6 +6,7 @@ import pytest
 import logging
 import contextlib
 import pypdfium2 as pdfium
+import pypdfium2.raw as pdfium_c
 from ..conftest import TestFiles
 
 
@@ -38,7 +39,7 @@ def test_gettoc(toc_doc):
         next(toc),
         title = "One",
         page_index = 0,
-        view_mode = pdfium.PDFDEST_VIEW_XYZ,
+        view_mode = pdfium_c.PDFDEST_VIEW_XYZ,
         view_pos = (89, 758, 0),
         is_closed = True,
         n_kids = 2,
@@ -46,8 +47,8 @@ def test_gettoc(toc_doc):
     
     # check common values
     for bookmark in toc:
-        assert isinstance(bookmark, pdfium.OutlineItem)
-        assert bookmark.view_mode is pdfium.PDFDEST_VIEW_XYZ
+        assert isinstance(bookmark, pdfium.PdfOutlineItem)
+        assert bookmark.view_mode is pdfium_c.PDFDEST_VIEW_XYZ
         assert round(bookmark.view_pos[0]) == 89
     
     # check last bookmark
@@ -55,7 +56,7 @@ def test_gettoc(toc_doc):
         bookmark,
         title = "Three-B",
         page_index = 1,
-        view_mode = pdfium.PDFDEST_VIEW_XYZ,
+        view_mode = pdfium_c.PDFDEST_VIEW_XYZ,
         view_pos = (89, 657, 0),
         is_closed = None,
         n_kids = 0,
@@ -68,7 +69,7 @@ def test_gettoc_circular(toc_circular_doc, caplog):
         next(toc),
         title = "A Good Beginning",
         page_index = None,
-        view_mode = pdfium.PDFDEST_VIEW_UNKNOWN_MODE,
+        view_mode = pdfium_c.PDFDEST_VIEW_UNKNOWN_MODE,
         view_pos = [],
         is_closed = None,
         n_kids = 0,
@@ -77,7 +78,7 @@ def test_gettoc_circular(toc_circular_doc, caplog):
         next(toc),
         title = "A Good Ending",
         page_index = None,
-        view_mode = pdfium.PDFDEST_VIEW_UNKNOWN_MODE,
+        view_mode = pdfium_c.PDFDEST_VIEW_UNKNOWN_MODE,
         view_pos = [],
         is_closed = None,
         n_kids = 0,

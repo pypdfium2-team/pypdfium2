@@ -4,7 +4,7 @@
 pypdfium2
 =========
 
-Welcome to the documentation for the support model of pypdfium2.
+Welcome to the documentation for the support model of pypdfium2 (|build_type| build).
 
 .. toctree::
    :maxdepth: 2
