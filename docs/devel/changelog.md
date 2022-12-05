@@ -4,6 +4,11 @@
 # Changelog
 
 
+## 3.11.0 (2022-12-05)
+
+- Updated PDFium from `5445` to `5459` (autorelease).
+
+
 ## 3.10.0 (2022-11-28)
 
 - Updated PDFium from `5431` to `5445` (autorelease).
