@@ -433,7 +433,7 @@ class PdfPage (AutoCloseable):
             pdfium_c.FPDF_RenderPage_Close(self.raw)
         
         if draw_forms and (self.pdf.get_formtype() != pdfium_c.FORMTYPE_NONE):
-            # FORM_OnAfterLoadPage() and FORM_OnBeforeClosePage() might need to be called as well, but we're not sure how to integrate this properly
+            # FORM_OnAfterLoadPage() and FORM_OnBeforeClosePage() might need to be called as well, but not sure how to integrate them properly
             formenv = self.pdf.init_formenv()
             pdfium_c.FPDF_FFLDraw(formenv.raw, *render_args)
         

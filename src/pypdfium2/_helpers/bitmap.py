@@ -131,13 +131,14 @@ class PdfBitmap (AutoCloseable):
         )
     
     
-    # TODO support setting stride if external buffer is provided
     @classmethod
     def new_native(cls, width, height, format, rev_byteorder=False, buffer=None):
         """
         Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by Python/ctypes.
         Bitmaps created by this function are always packed (no unused bytes at line end).
         """
+        
+        # TODO support setting stride if external buffer is provided
         
         stride = width * consts.BitmapTypeToNChannels[format]
         total_bytes = stride * height
@@ -298,7 +299,7 @@ def _pil_convert_for_pdfium(pil_image):
         pil_image = PIL.Image.merge("RGBA", (b, g, r, a))
     elif pil_image.mode == "RGBX":
         # no one needs the unused channel, so drop it to reduce memory consumption
-        r, g, b, x = pil_image.split()
+        r, g, b, _ = pil_image.split()
         pil_image = PIL.Image.merge("RGB", (b, g, r))
     
     return pil_image

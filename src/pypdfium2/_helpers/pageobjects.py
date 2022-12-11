@@ -331,7 +331,7 @@ class PdfImage (PdfObject):
         
         Note that this function is quite limited because PDFium's public API does not expose all required information.
         Only DCTDecode (JPEG) and JPXDecode (JPEG 2000) images can be extracted directly.
-        For images with complex filters, the bitmap data is used. Otherwise, ``get_data(decode_simple=True)`` is used, which avoids lossy conversion for images whose bit depth or colour format is not supported by PDFium's bitmap implementation.
+        For images with complex filters, the bitmap data is used. Otherwise, ``get_data(decode_simple=True)`` is used.
         
         Parameters:
             dest (str | io.BytesIO):

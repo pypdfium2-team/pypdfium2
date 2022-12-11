@@ -27,14 +27,13 @@ class PdfAttachment:
             Reference to the document this attachment belongs to. Must remain valid as long as the attachment is used.
     """
     
-    # TODO consider using AutoCloseable machienery to guarantee `pdf` remains alive as long as the attachment object exists
-    
     # Problems with PDFium's attachment API:
     # - https://crbug.com/pdfium/1939
     # - https://crbug.com/pdfium/893
     
     
     def __init__(self, raw, pdf):
+        # assuming an (unused) reference is enough to keep the parent pdf alive
         self.raw = raw
         self.pdf = pdf
     
