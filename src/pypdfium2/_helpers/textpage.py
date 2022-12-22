@@ -18,7 +18,7 @@ class PdfTextPage:
     Attributes:
         raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
         page (PdfPage): Reference to the page this textpage belongs to.
-        n_chars (int): Number of characters on the page, at the time of initialisation.
+        n_chars (int): Initial value of :meth:`.count_chars` (deprecated).
     """
     
     def __init__(self, raw, page):
@@ -56,7 +56,8 @@ class PdfTextPage:
     
     def count_chars(self):
         """
-        Deprecated alias for :attr:`.n_chars`. Will be removed with the next major release.
+        Returns:
+            int: Number of characters on the page.
         """
         return self.n_chars
     
