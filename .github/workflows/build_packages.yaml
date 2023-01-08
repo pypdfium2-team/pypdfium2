@@ -234,6 +234,12 @@ jobs:
         run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
   
   
+  # GH Pages rebuild is not triggered automatically by bot commits for some reason, hence do it explicitly
+  update_gh_pages:
+    needs: publish
+    uses: ./.github/workflows/gh_pages.yaml
+  
+  
   cleanup:
     needs: [build, test, publish]
     if: always()

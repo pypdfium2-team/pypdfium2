@@ -5,6 +5,7 @@ name: Update Docs (GH Pages)
 
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     branches:
       - main
