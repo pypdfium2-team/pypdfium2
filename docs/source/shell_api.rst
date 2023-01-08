@@ -1,4 +1,4 @@
-.. SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+.. SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 .. SPDX-License-Identifier: CC-BY-4.0
 
 Shell API
@@ -19,19 +19,17 @@ Main Help
 
 Renderer
 ********
-*Requires* :mod:`PIL`
-
 .. command-output:: pypdfium2 render --help
 
 
-Table of Contents Reader
-************************
+TOC Reader
+**********
 .. command-output:: pypdfium2 toc --help
 
 
-Merger
-******
-.. command-output:: pypdfium2 merge --help
+Arranger
+********
+.. command-output:: pypdfium2 arrange --help
 
 
 Page Tiler
@@ -44,11 +42,16 @@ Text Extractor
 .. command-output:: pypdfium2 extract-text --help
 
 
-Page Object Finder
-******************
-.. command-output:: pypdfium2 find-pageobjects --help
+Image Extractor
+***************
+.. command-output:: pypdfium2 extract-images --help
 
 
-JPEG Converter
-**************
-.. command-output:: pypdfium2 jpegtopdf --help
+Page Object Analyzer
+********************
+.. command-output:: pypdfium2 pageobjects --help
+
+
+Image Converter
+***************
+.. command-output:: pypdfium2 imgtopdf --help

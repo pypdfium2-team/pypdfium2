@@ -20,10 +20,16 @@ Comment:
     `LicenseRef-PdfiumThirdParty` is used.
 
 Files: autorelease/*
-Copyright: 2022 geisserml
+Copyright: 2023 geisserml
 License: CC-BY-4.0
 Comment:
     Directory for autorelease control files.
+
+Files: tests/expectations/*
+Copyright: 2023 geisserml
+License: CC-BY-4.0
+Comment:
+    Test expectations.
 
 Files: tests/resources/toc.pdf
 Copyright: 2020 Matthias Erll
@@ -36,7 +42,8 @@ Comment:
 Files: tests/resources/toc_circular.pdf
        tests/resources/toc_viewmodes.pdf
        tests/resources/toc_maxdepth.pdf
-       tests/resources/form_listbox.pdf
+       tests/resources/forms.pdf
+       tests/resources/attachments.pdf
        tests/resources/mona_lisa.jpg
 Copyright: 2022 PDFium Developers
 License: BSD-3-Clause OR Apache-2.0
@@ -46,16 +53,17 @@ Comment:
     https://pdfium.googlesource.com/pdfium_tests/+/refs/heads/main/fx/other/8.2_outline.pdf
     https://pdfium.googlesource.com/pdfium_tests/+/refs/heads/main/fx/FRC_8.2.2_part1/FRC_51_8.2.2_T_8.4__Count_edit_count_100.pdf
     https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/listbox_form.pdf
+    https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/embedded_attachments.pdf
     https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/mona_lisa.jpg
 
 Files: tests/resources/box_fallback.in
        tests/resources/box_fallback.pdf
 Copyright: 2022 PDFium Developers
-           2022 geisserml <geisserml@gmail.com>
+           2023 geisserml <geisserml@gmail.com>
 License: BSD-3-Clause OR Apache-2.0
 
 Files: tests/resources/images.pdf
-Copyright: 2022 geisserml <geisserml@gmail.com>
+Copyright: 2023 geisserml <geisserml@gmail.com>
            2022 Johannes Schauer Marin Rodrigues <josch@mister-muffin.de>
 License: LicenseRef-FairUse
 Comments:
@@ -66,7 +74,7 @@ Files: tests/resources/render.pdf
        tests/resources/encrypted.pdf
        tests/resources/text.pdf
        tests/resources/empty.pdf
-Copyright: 2022 geisserml <geisserml@gmail.com>
+Copyright: 2023 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
 
 Files: tests/resources/NotoSans-Regular.ttf
@@ -80,8 +88,15 @@ Files: sourcebuild/patches/public_headers.patch
        sourcebuild/patches/win/build.patch
        sourcebuild/patches/win/pdfium.patch
        sourcebuild/patches/win/resources.rc
-Copyright: 2022 Benoît Blanchon
+Copyright: 2023 Benoît Blanchon
 License: LicenseRef-FairUse
 Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches
     For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
+
+
+Files: sourcebuild/patches/syslibs_sourcebuild.patch
+Copyright: 2023 geisserml <geisserml@gmail.com>
+License: CC-BY-4.0
+Comment:
+    pypdfium2 specific sourcebuild patches

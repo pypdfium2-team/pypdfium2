@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Test Release
@@ -45,4 +45,4 @@ jobs:
           ref: ${{ steps.version.outputs.version }}
       
       - name: Run tests
-        run: python3 -m pytest tests/
+        run: make test

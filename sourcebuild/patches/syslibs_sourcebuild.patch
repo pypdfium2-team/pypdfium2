@@ -1,0 +1,13 @@
+diff --git a/config/linux/pkg-config.py b/config/linux/pkg-config.py
+index 2e38c7ffb..7f4349c5d 100755
+--- a/config/linux/pkg-config.py
++++ b/config/linux/pkg-config.py
+@@ -60,7 +60,7 @@ def SetConfigPath(options):
+ 
+   libdir = sysroot + '/usr/' + options.system_libdir + '/pkgconfig'
+   libdir += ':' + sysroot + '/usr/share/pkgconfig'
+-  os.environ['PKG_CONFIG_LIBDIR'] = libdir
++  # os.environ['PKG_CONFIG_LIBDIR'] = libdir
+   return libdir
+ 
+ 

@@ -1,19 +1,26 @@
-# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
 build/
 dist/
 tests/output/
+tests_old/output/
 data/
 !data/.gitkeep
 
 docs/build/
 !docs/build/.gitkeep
+
+# FIXME changes to patches are still ignored?
 sourcebuild/
 !sourcebuild/patches
 
-src/pypdfium2/_pypdfium.py
+src/pypdfium2/raw.py
 src/pypdfium2/pdfium
+
+*.so
+*.dll
+*.dylib
 
 **/__pycache__
 **/.mypy_cache
@@ -24,10 +31,5 @@ src/pypdfium2/pdfium
 *.egg-info
 *.eggs
 *.kate-swp
-*.kdev4
 *.python-version
-*.presetup_done.txt
-
-*.so
-*.dll
-*.dylib
+*.coverage

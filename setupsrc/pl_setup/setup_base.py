@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import sys
@@ -68,7 +68,10 @@ def mkwheel(pl_name):
     
     ver_changes = dict()
     ver_changes["V_LIBPDFIUM"] = str(v_libpdfium)
-    ver_changes["IS_SOURCEBUILD"] = (pl_name == PlatformNames.sourcebuild)
+    if pl_name == PlatformNames.sourcebuild:
+        ver_changes["V_BUILDNAME"] = "source"
+    else:
+        ver_changes["V_BUILDNAME"] = "pdfium-binaries"
     set_versions(ver_changes)
     
     clean_artefacts()
