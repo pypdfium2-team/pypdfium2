@@ -12,6 +12,10 @@ on:
     paths:
       - docs/**
       - src/**
+  workflow_run:
+    # well, actually it should only run if ${{ inputs.publish }} is set...
+    workflows: ['Build Packages']
+    types: [completed]
 
 # Set permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
