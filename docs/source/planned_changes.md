@@ -6,4 +6,4 @@
 <!-- Currently, no API breaking changes are planned. -->
 
 There will be a lot of API breaking changes with the next major release.
-Please see the updated documentation of the `devel-testsuite` branch for details.
+Please see the updated documentation of the `devel-new` branch for details.
