@@ -211,11 +211,11 @@ def pack(src_libpath, v_libpdfium, destname=None):
     call_ctypesgen(OutputDir, include_dir)
 
 
-def get_tool(tool, win_append):
-    exe = join(DepotToolsDir, tool)
+def get_tool(name):
+    bin = join(DepotToolsDir, name)
     if sys.platform.startswith("win32"):
-        exe += "." + win_append
-    return exe
+        bin += ".bat"
+    return bin
 
 
 def serialise_config(config_dict):
@@ -261,9 +261,9 @@ def main(
     
     dl_depottools(b_update)
     
-    GClient = get_tool("gclient", "bat")
-    GN      = get_tool("gn", "bat")
-    Ninja   = get_tool("ninja", "exe")
+    GClient = get_tool("gclient")
+    GN      = get_tool("gn")
+    Ninja   = get_tool("ninja")
     
     pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
     v_libpdfium = get_pdfium_version()
