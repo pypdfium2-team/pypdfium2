@@ -145,6 +145,7 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     log = ""
     log += "\n<details>\n"
     log += "  <summary>%s commit log</summary>\n\n" % name
+    # TODO turn 'between' into a GH compare link
     log += "Commits between [`%s`](%s) and [`%s`](%s) " % (
         ver_a, url+prefix_ver+ver_a,
         ver_b, url+prefix_ver+ver_b,
