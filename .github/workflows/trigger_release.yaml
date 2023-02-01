@@ -27,7 +27,7 @@ jobs:
           workflow: build_packages.yaml
           inputs: |
             {
-              "pre_test": "true",
+              "pre_test": "false",
               "test": "true",
               "publish": "true",
               "py_version": "3.10",
