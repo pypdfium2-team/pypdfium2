@@ -17,11 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        py: ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11']
-        exclude:
-          # It seems that python 3.6 is not available on ubuntu-latest anymore
-          - os: ubuntu-latest
-            py: '3.6'
+        py: ['3.7', '3.8', '3.9', '3.10', '3.11']
     
     runs-on: ${{ matrix.os }}
     
