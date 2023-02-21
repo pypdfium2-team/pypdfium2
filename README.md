@@ -156,7 +156,7 @@ Here are some examples of using the support model API.
       pdfium.BitmapConv.pil_image,
       scale = 1,                           # 72dpi resolution
       rotation = 0,                        # no additional rotation
-      crop = (0, 0, 0, 0),                 # no crop (form: left, right, bottom, top)
+      crop = (0, 0, 0, 0),                 # no crop (form: left, bottom, right, top)
       greyscale = False,                   # coloured output
       fill_colour = (255, 255, 255, 255),  # fill bitmap with white background before rendering (form: RGBA)
       colour_scheme = None,                # no custom colour scheme
