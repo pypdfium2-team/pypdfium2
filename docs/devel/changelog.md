@@ -4,6 +4,11 @@
 # Changelog
 
 
+## 4.0.0b1 (2023-02-22)
+
+- No PDFium update (autorelease).
+
+
 ## History
 
 pypdfium2 is on PyPI since Dec 3, 2021. New versions have been released on a regular basis ever since.
