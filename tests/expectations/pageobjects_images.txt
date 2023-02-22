@@ -1,0 +1,36 @@
+# Page 1
+text
+    Position: (58.692, 759.975, 127.024, 779.335)
+image
+    Position: (132.7, 459.189, 349.5, 549.689)
+    Filters: ['CCITTFaxDecode']
+    width: 115
+    height: 48
+    horizontal_dpi: 38.19187927246094
+    vertical_dpi: 38.18785858154297
+    bits_per_pixel: 1
+    colorspace: DeviceGray
+    marked_content_id: 1
+image
+    Position: (47.65, 652.239, 162.6, 700.239)
+    Filters: ['CCITTFaxDecode']
+    width: 115
+    height: 48
+    horizontal_dpi: 72.03131103515625
+    vertical_dpi: 72.0
+    bits_per_pixel: 1
+    colorspace: DeviceGray
+    marked_content_id: 2
+image
+    Position: (203.55, 204.089, 577.2, 360.039)
+    Filters: ['CCITTFaxDecode']
+    width: 115
+    height: 48
+    horizontal_dpi: 22.159772872924805
+    vertical_dpi: 22.16094970703125
+    bits_per_pixel: 1
+    colorspace: DeviceGray
+    marked_content_id: 3
+-> Count: 4
+
+-> Total count: 4

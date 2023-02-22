@@ -1,5 +1,7 @@
-# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+# NOTE only runs from main branch for now
 
 name: Build Packages
 on:
@@ -63,7 +65,7 @@ jobs:
           python3 -m pip install -U .[setup,utilities,test,converters]
       
       - name: Run test suite
-        run: python3 -m pytest tests/
+        run: make test
       
       # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
       # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
@@ -167,7 +169,7 @@ jobs:
         run: python3 -m pip install dist/*.whl
       
       - name: Run Test Suite
-        run: python3 -m pytest tests/
+        run: make test
   
   
   publish:

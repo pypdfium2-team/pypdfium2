@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
@@ -38,14 +38,12 @@ def install_handler():
     pl_name = Host.platform
     if pl_name is None:
         # If PDFium had a proper build system, we could trigger a source build here
-        libc_msg = ""
-        if Host._libc_info is not None:
-            libc_msg = " (libc info %s)" % (Host._libc_info, )
         raise RuntimeError(
-            "No pre-built binaries available for system '%s' on machine '%s'" % (Host._system_name, Host._machine_name) + libc_msg + ". " +
+            "No pre-built binaries available for system %s (libc info %s) on machine %s. " % (Host._system_name, Host._libc_info, Host._machine_name) +
             "You may place custom binaries & bindings in data/sourcebuild and install with `%s=sourcebuild`." % (BinaryTargetVar, )
         )
     
+    # TODO Linux/macOS: check that minimum version requirements are fulfilled
     
     need_update = False
     pl_dir = join(DataTree, pl_name)

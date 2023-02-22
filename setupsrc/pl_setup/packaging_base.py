@@ -1,9 +1,10 @@
-# SPDX-FileCopyrightText: 2022 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # No external dependencies shall be imported in this file
 
 import os
+import sys
 import shutil
 import platform
 import sysconfig
@@ -21,7 +22,7 @@ from os.path import (
 BinaryTargetVar   = "PDFIUM_BINARY"
 BinaryTarget_None = "none"
 BinaryTarget_Auto = "auto"
-BindingsFileName  = "_pypdfium.py"
+BindingsFileName  = "raw.py"
 VerStatusFileName = ".pdfium_version.txt"
 HomeDir     = expanduser("~")
 SourceTree  = dirname(dirname(dirname(abspath(__file__))))
@@ -75,6 +76,7 @@ ReleaseNames = {
     PlatformNames.windows_arm64  : "pdfium-win-arm64",
 }
 
+# target names for pypdfium2/ctypesgen
 LibnameForSystem = {
     SystemNames.linux:   "pdfium",
     SystemNames.darwin:  "pdfium.dylib",
@@ -152,48 +154,26 @@ class _host_platform:
 Host = _host_platform()
 
 
-def _get_linux_tag(arch):
-    return "manylinux_2_17_%s.manylinux2014_%s" % (arch, arch)
-
-def _get_musllinux_tag(arch):
-    return "musllinux_1_2_%s" % (arch)
-
-
-def _get_mac_tag(arch, *versions):
-    
-    assert len(versions) > 0
-    
-    template = "macosx_%s_%s"
-    
-    tag = ""
-    sep = ""
-    for v in versions:
-        tag += sep + template % (v, arch)
-        sep = "."
-    
-    return tag
-
-
 def get_wheel_tag(pl_name):
-    # pip>=20.3 now accepts macOS wheels tagged as 10_x on 11_x. Not sure what applies to 12_x.
-    # Let's retain multi-version tagging for broader compatibility all the same.
     if pl_name == PlatformNames.darwin_x64:
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
-        return _get_mac_tag("x86_64", "10_13", "11_0", "12_0")
+        return "macosx_10_13_x86_64"
     elif pl_name == PlatformNames.darwin_arm64:
-        return _get_mac_tag("arm64", "11_0", "12_0")
+        # macOS 11 is the first version available on arm64 (M1)
+        return "macosx_11_0_arm64"
+    # As of Jan 2023, pdfium requires glibc >= 2.26 (see https://crrev.com/1084974 and https://groups.google.com/a/chromium.org/g/chromium-dev/c/SdCs9k3celo/m/bnnBzU1FCgAJ)
     elif pl_name == PlatformNames.linux_x64:
-        return _get_linux_tag("x86_64")
+        return "manylinux_2_26_x86_64"
     elif pl_name == PlatformNames.linux_x86:
-        return _get_linux_tag("i686")
+        return "manylinux_2_26_i686"
     elif pl_name == PlatformNames.linux_arm64:
-        return _get_linux_tag("aarch64")
+        return "manylinux_2_26_aarch64"
     elif pl_name == PlatformNames.linux_arm32:
-        return _get_linux_tag("armv7l")
+        return "manylinux_2_26_armv7l"
     elif pl_name == PlatformNames.linux_musl_x64:
-        return _get_musllinux_tag("x86_64")
+        return "musllinux_1_2_x86_64"
     elif pl_name == PlatformNames.linux_musl_x86:
-        return _get_musllinux_tag("i686")
+        return "musllinux_1_2_i686"
     elif pl_name == PlatformNames.windows_x64:
         return "win_amd64"
     elif pl_name == PlatformNames.windows_arm64:
@@ -211,7 +191,7 @@ def get_wheel_tag(pl_name):
 
 def run_cmd(command, cwd, capture=False, check=True, **kwargs):
     
-    print('%s ("%s")' % (command, cwd))
+    print('%s ("%s")' % (command, cwd), file=sys.stderr)
     if capture:
         kwargs.update( dict(stdout=subprocess.PIPE, stderr=subprocess.STDOUT) )
     
@@ -236,7 +216,7 @@ def call_ctypesgen(target_dir, include_dir):
     ctypesgen_cmd = ["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", "--strip-build-path=%s" % include_dir, *headers, "-o", bindings]
     run_cmd(ctypesgen_cmd, cwd=target_dir)
     
-    # --strip-build-path fails for the preamble: https://github.com/ctypesgen/ctypesgen/issues/160
+    # --strip-build-path fails for the header: https://github.com/ctypesgen/ctypesgen/issues/160
     with open(bindings, "r") as file_reader:
         text = file_reader.read()
         text = text.replace(include_dir, ".")
