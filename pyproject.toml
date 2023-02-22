@@ -1,11 +1,91 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
     "setuptools",
     "build",
-    "wheel!=0.38.0,!=0.38.1",
-    "ctypesgen@git+https://github.com/mara004/ctypesgen@pypdfium2",
+    "wheel !=0.38.0, !=0.38.1",
+    "ctypesgen @ git+https://github.com/mara004/ctypesgen@pypdfium2",
 ]
+
+[project]
+name = "pypdfium2"
+description = "Python bindings to PDFium"
+readme = "README.md"
+requires-python = ">= 3.6"
+dynamic = ["version"]
+keywords = ["pdf", "pdfium"]
+authors = [
+    {name = "pypdfium2-team"},
+    {name = "geisserml", email = "geisserml@gmail.com"},
+]
+license = {text = "Apache-2.0 or BSD-3-Clause"}
+classifiers = [
+    # TODO review/improve classifiers
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+homepage = "https://github.com/pypdfium2-team/pypdfium2"  # FIXME not shown by pip
+documentation = "https://pypdfium2.readthedocs.io/"
+changelog = "https://pypdfium2.readthedocs.io/en/stable/changelog.html"
+
+[project.scripts]
+pypdfium2 = "pypdfium2.__main__:cli_main"
+
+[project.optional-dependencies]
+converters = [
+    "pillow",
+    "numpy",
+]
+setup = [
+    "ctypesgen @ git+https://github.com/mara004/ctypesgen@pypdfium2",  # FIXME BUG(177)
+    "wheel",  # !=0.38.0,!=0.38.1
+    "build",
+]
+docs = [
+    "sphinx >= 4.4.0",
+    "sphinx-rtd-theme >= 1.0",
+    "sphinxcontrib-programoutput",
+    "myst-parser",
+    "docutils >= 0.17",
+]
+test = [
+    "pytest",
+    "wheel",  # !=0.38.0,!=0.38.1
+]
+utilities = [
+    "autoflake",
+    "codespell",
+    "reuse",
+    "check-wheel-contents",
+    "twine",
+]
+autocomplete = [
+    "argcomplete",
+]
+
+[tool.setuptools]
+license-files = [
+    # As we do not distribute all project files, only a subset of licenses is needed
+    "LICENSES/Apache-2.0.txt",
+    "LICENSES/BSD-3-Clause.txt",
+    "LICENSES/CC-BY-4.0.txt",
+    "LICENSES/LicenseRef-PdfiumThirdParty.txt",
+    ".reuse/dep5",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

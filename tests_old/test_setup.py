@@ -4,8 +4,6 @@
 import re
 import pytest
 import sysconfig
-import configparser
-from os.path import join
 from pathlib import Path
 from wheel.bdist_wheel import bdist_wheel
 from pl_setup import (
@@ -27,22 +25,23 @@ def all_platnames():
 
 # module
 
-def test_entrypoint():
+# NOTE migrated to pyproject.toml
+# def test_entrypoint():
     
-    setup_cfg = configparser.ConfigParser()
-    setup_cfg.read( join(SourceTree, "setup.cfg") )
-    console_scripts = setup_cfg["options.entry_points"]["console_scripts"]
+#     setup_cfg = configparser.ConfigParser()
+#     setup_cfg.read( join(SourceTree, "setup.cfg") )
+#     console_scripts = setup_cfg["options.entry_points"]["console_scripts"]
     
-    entry_point = console_scripts.split("=")[-1].strip().split(":")
-    module_path = entry_point[0]
-    method_name = entry_point[1]
+#     entry_point = console_scripts.split("=")[-1].strip().split(":")
+#     module_path = entry_point[0]
+#     method_name = entry_point[1]
     
-    namespace = {}
-    exec("from %s import %s" % (module_path, method_name), namespace)
-    assert method_name in namespace
+#     namespace = {}
+#     exec("from %s import %s" % (module_path, method_name), namespace)
+#     assert method_name in namespace
     
-    function = namespace[method_name]
-    assert callable(function)
+#     function = namespace[method_name]
+#     assert callable(function)
 
 
 # setup_base
