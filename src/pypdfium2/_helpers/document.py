@@ -55,7 +55,7 @@ class PdfDocument (AutoCloseable):
             Form env, if the document has forms and ``may_init_forms=True``.
         formtype (int):
             PDFium form type that applies to the document (:attr:`FORMTYPE_*`).
-            ``FORMTYPE_NONE`` if the document has no forms or ``may_init_forms=False``.
+            :attr:`FORMTYPE_NONE` if the document has no forms or ``may_init_forms=False``.
     """
     
     def __init__(
