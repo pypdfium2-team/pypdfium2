@@ -28,11 +28,18 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       
-      - name: Update dependencies
-        run: python3 -m pip install -U pip setuptools
+      - name: Check out pypdfium2 repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+      
+      - name: Install/update deps
+        run: |
+          python3 -m pip install -U pip setuptools
+          python3 -m pip install -U -r req/converters.txt -r req/test.txt
       
       - name: Install pypdfium2
-        run: python3 -m pip install -U --pre pypdfium2[test,converters] --index-url ${{ inputs.index_url }}
+        run: python3 -m pip install -U --pre pypdfium2 --index-url ${{ inputs.index_url }}
       
       - name: Get pypdfium2 version
         id: version
