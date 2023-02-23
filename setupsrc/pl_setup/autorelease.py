@@ -62,7 +62,7 @@ def do_versioning(latest):
     
     v_beta = VerNamespace["V_BETA"]
     v_libpdfium = int(VerNamespace["V_LIBPDFIUM"])
-    assert not v_libpdfium > latest  # the current libpdfium version must never be larger than the determined latest
+    assert not v_libpdfium > latest  # the current libpdfium version must never be higher than the determined latest
     
     c_updates = (v_libpdfium < latest)
     py_updates = _check_py_updates(VerNamespace["V_PYPDFIUM2"])
