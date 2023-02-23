@@ -94,9 +94,12 @@ Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches
     For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
 
-
 Files: sourcebuild/patches/syslibs_sourcebuild.patch
 Copyright: 2023 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
 Comment:
     pypdfium2 specific sourcebuild patches
+
+Files: req/*.txt
+Copyright: 2023 geisserml <geisserml@gmail.com>
+License: CC-BY-4.0

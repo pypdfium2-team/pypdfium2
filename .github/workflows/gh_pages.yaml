@@ -43,8 +43,10 @@ jobs:
           python-version: '3.10'
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install library
-        run: python3 -m pip install -U .[docs]
+      - name: Install deps & pypdfium2
+        run: |
+          python3 -m pip install -r req/docs.txt
+          python3 -m pip install -e .
       - name: Build documentation
         run: make docs-build
       - name: Remove unnecessary files

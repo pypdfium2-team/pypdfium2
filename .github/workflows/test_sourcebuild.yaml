@@ -35,9 +35,7 @@ jobs:
           repository: ${{ github.repository }}
       
       - name: Install deps
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U .[setup,converters,test]
+        run: python3 -m pip install -U -r req/default.txt
       
       - name: Build PDFium
         run: python3 ./setupsrc/pl_setup/build_pdfium.py

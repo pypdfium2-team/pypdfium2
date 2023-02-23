@@ -59,10 +59,11 @@ jobs:
           repository: ${{ github.repository }}
           fetch-depth: 0
       
-      - name: Install dependencies & pypdfium2
-        run: |
-          python3 -m pip install -U pip setuptools
-          python3 -m pip install -U .[setup,utilities,test,converters]
+      - name: Install/update dependencies
+        run: python3 -m pip install -U -r req/default.txt -r req/utilities.txt
+      
+      - name: Install pypdfium2
+        run: python3 -m pip install --no-build-isolation -e .
       
       - name: Run test suite
         run: make test

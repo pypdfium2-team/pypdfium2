@@ -45,37 +45,10 @@ changelog = "https://pypdfium2.readthedocs.io/en/stable/changelog.html"
 [project.scripts]
 pypdfium2 = "pypdfium2.__main__:cli_main"
 
-[project.optional-dependencies]
-converters = [
-    "pillow",
-    "numpy",
-]
-setup = [
-    "ctypesgen @ git+https://github.com/mara004/ctypesgen@pypdfium2",  # FIXME BUG(177)
-    "wheel",  # !=0.38.0,!=0.38.1
-    "build",
-]
-docs = [
-    "sphinx >= 4.4.0",
-    "sphinx-rtd-theme >= 1.0",
-    "sphinxcontrib-programoutput",
-    "myst-parser",
-    "docutils >= 0.17",
-]
-test = [
-    "pytest",
-    "wheel",  # !=0.38.0,!=0.38.1
-]
-utilities = [
-    "autoflake",
-    "codespell",
-    "reuse",
-    "check-wheel-contents",
-    "twine",
-]
-autocomplete = [
-    "argcomplete",
-]
+# NOTE using requirements files instead - rationale:
+# - installation is independent of pypdfium2 (allows to install setup deps beforehand and then use --no-build-isolation)
+# - initial motivation: work around BUG(177 - PyPI upload refused due to custom dependency)
+# [project.optional-dependencies]
 
 [tool.setuptools]
 license-files = [
