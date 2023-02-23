@@ -8,3 +8,4 @@ rm -rf src/pypdfium2.egg-info/
 rm -rf dist
 rm -rf data/*
 rm -f tests/output/*
+rm -f src/pypdfium2.egg-info/SOURCES.txt

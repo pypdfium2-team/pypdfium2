@@ -22,9 +22,9 @@ def _get_build_type():
     
     # RTD uses git checkout --force origin/... which results in a detached HEAD state, so we cannot easily get the branch name
     # Thus query for an RTD-specific environment variable instead
-    rtd_version_name = os.environ.get("READTHEDOCS_VERSION_NAME", None)
-    if rtd_version_name:
-        return rtd_version_name
+    rtd_vn = os.environ.get("READTHEDOCS_VERSION_NAME", None)
+    if rtd_vn:
+        return rtd_vn
     
     branch = run_cmd(["git", "branch", "--show-current"], cwd=SourceTree, capture=True)
     if branch == "main":
@@ -91,6 +91,7 @@ def remove_namedtuple_aliases(app, what, name, obj, skip, options):
     if type(obj) is collections._tuplegetter:
         return True
     return skip
+
 
 def setup(app):
     app.connect('autodoc-skip-member', remove_namedtuple_aliases)

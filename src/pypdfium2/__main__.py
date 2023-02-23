@@ -51,7 +51,7 @@ def get_parser():
         module = CmdToModule[name]
         module.attach(subparser)
     
-    if argcomplete is not None:
+    if argcomplete:
         argcomplete.autocomplete(main_parser)
     
     return main_parser
