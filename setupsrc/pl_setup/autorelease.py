@@ -101,6 +101,7 @@ def do_versioning(latest):
             v_beta = 0
         v_beta += 1
         ver_changes["V_BETA"] = v_beta
+        # TODO don't automatically remove? might be safer and more convenient.
         os.remove(BetaUpdateFile)
     elif v_beta is not None:
         # if the previous version was a beta but the new one shall not be, remove the tag
