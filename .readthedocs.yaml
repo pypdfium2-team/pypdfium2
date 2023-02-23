@@ -19,8 +19,7 @@ build:
 
 python:
   install:
+    - requirements: req/docs.txt
     - method: pip
       path: .
-      extra_requirements:
-        - docs
   system_packages: true
