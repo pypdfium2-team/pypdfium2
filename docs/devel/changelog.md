@@ -4,6 +4,11 @@
 # Changelog
 
 
+## 4.0.0b2 (2023-02-23)
+
+- No PDFium update (autorelease).
+
+
 ## 4.0.0b1 (2023-02-22)
 
 - Attempted first beta release for v4. PyPI upload failed due to bug #177.
