@@ -144,7 +144,7 @@ class PdfTextPage (AutoCloseable):
             index (int):
                 Index of the character to work with, in the page's character array.
             loose (bool):
-                If True, the entire glyph bounds will be covered, without taking the actual glyph shape into account.
+                TODO
         Returns:
             Float values for left, bottom, right and top in PDF canvas units.
         """
@@ -176,7 +176,7 @@ class PdfTextPage (AutoCloseable):
         return (l.value, b.value, r.value, t.value)
     
     
-    def search(self, text, index=0, match_case=False, match_whole_word=False):
+    def search(self, text, index=0, match_case=False, match_whole_word=False, consecutive=False):
         """
         Locate text on the page.
         
@@ -189,6 +189,8 @@ class PdfTextPage (AutoCloseable):
                 If True, the search will be case-specific (upper and lower letters treated as different characters).
             match_whole_word (bool):
                 If True, substring occurrences will be ignored (e. g. `cat` would not match `category`).
+            consecutive (bool):
+                TODO
         Returns:
             PdfTextSearcher: A helper object to search text.
         """
@@ -201,6 +203,8 @@ class PdfTextPage (AutoCloseable):
             flags |= pdfium_c.FPDF_MATCHCASE
         if match_whole_word:
             flags |= pdfium_c.FPDF_MATCHWHOLEWORD
+        if consecutive:
+            flags |= pdfium_c.FPDF_CONSECUTIVE
         
         enc_text = (text + "\x00").encode("utf-16-le")
         enc_text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
