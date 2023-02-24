@@ -12,7 +12,7 @@ import urllib.request
 from os.path import join, abspath, dirname
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
-from pl_setup.packaging_base import (
+from pypdfium2_setup.packaging_base import (
     Host,
     SB_Dir,
     DataTree,

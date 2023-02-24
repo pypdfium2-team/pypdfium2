@@ -12,7 +12,7 @@ from os.path import (
 from wheel.bdist_wheel import bdist_wheel
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
-from pl_setup.packaging_base import (
+from pypdfium2_setup.packaging_base import (
     DataTree,
     VerNamespace,
     LibnameForSystem,

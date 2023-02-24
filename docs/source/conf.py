@@ -12,7 +12,7 @@ import collections
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "setupsrc"))
-from pl_setup.packaging_base import (
+from pypdfium2_setup.packaging_base import (
     run_cmd,
     SourceTree,
 )

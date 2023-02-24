@@ -16,10 +16,10 @@ docs-open:
 	xdg-open ./docs/build/html/index.html
 
 update-all:
-	python3 ./setupsrc/pl_setup/update_pdfium.py
+	python3 ./setupsrc/pypdfium2_setup/update_pdfium.py
 
 setup-all:
-	python3 ./setupsrc/pl_setup/craft_packages.py
+	python3 ./setupsrc/pypdfium2_setup/craft_packages.py
 
 check:
 	bash ./utilities/check.sh

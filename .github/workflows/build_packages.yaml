@@ -75,7 +75,7 @@ jobs:
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
           git reset --hard HEAD
-          python3 setupsrc/pl_setup/autorelease.py --register
+          python3 setupsrc/pypdfium2_setup/autorelease.py --register
           git checkout autorelease_tmp
       
       - name: Get new version

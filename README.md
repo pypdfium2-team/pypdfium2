@@ -31,7 +31,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
   
   * With a locally built PDFium binary
     ```bash
-    python3 setupsrc/pl_setup/build_pdfium.py
+    python3 setupsrc/pypdfium2_setup/build_pdfium.py
     PDFIUM_BINARY="sourcebuild" python3 -m pip install .
     ```
     The build script provides a few options that can be listed by calling it with `--help`.
@@ -634,7 +634,7 @@ The release process is fully automated using Python scripts and a CI setup for G
 A new release is triggered every Monday, following the schedule of `pdfium-binaries`.
 You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
 
-Python release scripts are located in the folder `setupsrc/pl_setup`, along with custom setup code:
+Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
 * `update_pdfium.py` downloads binaries and generates the bindings.
 * `craft_packages.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
 * `autorelease.py` takes care of versioning, changelog, release note generation and VCS checkin.
@@ -668,8 +668,8 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   ```
 * Build the packages
   ```bash
-  python3 setupsrc/pl_setup/update_pdfium.py
-  python3 setupsrc/pl_setup/craft_packages.py
+  python3 setupsrc/pypdfium2_setup/update_pdfium.py
+  python3 setupsrc/pypdfium2_setup/craft_packages.py
   ```
 * Upload to PyPI
   ```bash

@@ -6,11 +6,11 @@ import pytest
 import sysconfig
 from pathlib import Path
 from wheel.bdist_wheel import bdist_wheel
-from pl_setup import (
+from pypdfium2_setup import (
     setup_base,
     packaging_base as pkg_base,
 )
-from pl_setup.packaging_base import (
+from pypdfium2_setup.packaging_base import (
     PlatformNames,
     BinaryPlatforms,
     ReleaseNames,

@@ -38,7 +38,7 @@ jobs:
         run: python3 -m pip install -U -r req/default.txt
       
       - name: Build PDFium
-        run: python3 ./setupsrc/pl_setup/build_pdfium.py
+        run: python3 ./setupsrc/pypdfium2_setup/build_pdfium.py
       
       - name: Install
         run: PDFIUM_BINARY="sourcebuild" python3 -m pip install .

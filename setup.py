@@ -13,8 +13,8 @@ from os.path import (
 )
 
 sys.path.insert(0, join(dirname(abspath(__file__)), "setupsrc"))
-from pl_setup import check_deps
-from pl_setup.packaging_base import (
+from pypdfium2_setup import check_deps
+from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
     BinaryTargetVar,
@@ -32,8 +32,8 @@ LockFile = join(DataTree, ".lock_autoupdate.txt")
 
 def install_handler():
     
-    from pl_setup import update_pdfium
-    from pl_setup.setup_base import mkwheel
+    from pypdfium2_setup import update_pdfium
+    from pypdfium2_setup.setup_base import mkwheel
     
     pl_name = Host.platform
     if pl_name is None:
@@ -75,7 +75,7 @@ def install_handler():
 
 def packaging_handler(target):
     
-    from pl_setup.setup_base import mkwheel, SetupKws
+    from pypdfium2_setup.setup_base import mkwheel, SetupKws
     
     if target == BinaryTarget_None:
         setuptools.setup(**SetupKws)

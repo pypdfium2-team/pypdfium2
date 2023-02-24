@@ -15,7 +15,7 @@ from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
-from pl_setup.packaging_base import (
+from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
     VerStatusFileName,
