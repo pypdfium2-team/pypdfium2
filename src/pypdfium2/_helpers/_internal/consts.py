@@ -7,7 +7,7 @@ import pypdfium2.raw as pdfium_c
 class _fallback_dict (dict):
     
     def get(self, key, default_prefix="Unhandled constant"):
-        return dict.get(self, key, "%s %s" % (default_prefix, key))
+        return dict.get(self, key, f"{default_prefix} {key}")
 
 
 #: Convert a rotation value in degrees to a PDFium constant.

@@ -25,7 +25,7 @@ def units_to_pt(value, unit: Units):
     elif unit is Units.MM:
         return (value*72) / 25.4
     else:
-        raise ValueError("Invalid unit type %s" % unit)
+        raise ValueError(f"Invalid unit type {unit}")
 
 
 def attach(parser):

@@ -39,5 +39,5 @@ def main(args):
         else:
             assert False
         
-        print(sep + "# Page %s\n" % (i+1) + text)
+        print(sep + f"# Page {i+1}\n" + text)
         sep = "\n"

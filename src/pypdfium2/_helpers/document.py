@@ -198,7 +198,7 @@ class PdfDocument (AutoCloseable):
         elif utils.is_buffer(dest, "w"):
             self._save_to(dest, *args, **kwargs)
         else:
-            raise ValueError("Cannot save to '%s'" % (dest, ))
+            raise ValueError(f"Cannot save to '{dest}'")
     
     
     def get_identifier(self, type=pdfium_c.FILEIDTYPE_PERMANENT):
@@ -281,7 +281,7 @@ class PdfDocument (AutoCloseable):
         """
         raw_attachment = pdfium_c.FPDFDoc_GetAttachment(self, index)
         if not raw_attachment:
-            raise PdfiumError("Failed to get attachment at index %s." % (index, ))
+            raise PdfiumError(f"Failed to get attachment at index {index}.")
         return PdfAttachment(raw_attachment, self)
     
     
@@ -299,7 +299,7 @@ class PdfDocument (AutoCloseable):
         enc_name_ptr = ctypes.cast(enc_name, pdfium_c.FPDF_WIDESTRING)
         raw_attachment = pdfium_c.FPDFDoc_AddAttachment(self, enc_name_ptr)
         if not raw_attachment:
-            raise PdfiumError("Failed to create new attachment '%s'." % (name, ))
+            raise PdfiumError(f"Failed to create new attachment '{name}'.")
         return PdfAttachment(raw_attachment, self)
     
     
@@ -314,7 +314,7 @@ class PdfDocument (AutoCloseable):
         """
         success = pdfium_c.FPDFDoc_DeleteAttachment(self, index)
         if not success:
-            raise PdfiumError("Failed to delete attachment at index %s." % (index, ))
+            raise PdfiumError(f"Failed to delete attachment at index {index}.")
     
     
     def get_page(self, index):
@@ -436,7 +436,7 @@ class PdfDocument (AutoCloseable):
         
         raw_xobject = pdfium_c.FPDF_NewXObjectFromPage(dest_pdf, self, index)
         if raw_xobject is None:
-            raise PdfiumError("Failed to capture page %s as FPDF_XOBJECT." % index)
+            raise PdfiumError(f"Failed to capture page {index} as FPDF_XOBJECT.")
         
         return PdfXObject(
             raw = raw_xobject,
@@ -686,11 +686,11 @@ def _open_pdf(input_data, password, autoclose):
             to_close = (input_data, )
         pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
     else:
-        raise TypeError("Invalid input type '%s'" % type(input_data).__name__)
+        raise TypeError(f"Invalid input type '{type(input_data).__name__}'")
     
     if pdfium_c.FPDF_GetPageCount(pdf) < 1:
         err_code = pdfium_c.FPDF_GetLastError()
-        raise PdfiumError("Failed to load document (PDFium: %s)." % consts.ErrorToStr.get(err_code))
+        raise PdfiumError(f"Failed to load document (PDFium: {consts.ErrorToStr.get(err_code)}).")
     
     return pdf, to_hold, to_close
 

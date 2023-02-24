@@ -30,7 +30,7 @@ SubCommands = {
     "attachments":    "list/extract/edit embedded files",
 }
 
-CmdToModule = {n: importlib.import_module("pypdfium2._cli.%s" % n.replace("-", "_")) for n in SubCommands}
+CmdToModule = {n: importlib.import_module(f"pypdfium2._cli.{n.replace('-', '_')}") for n in SubCommands}
 
 
 def get_parser():
@@ -42,7 +42,7 @@ def get_parser():
     main_parser.add_argument(
         "--version", "-v",
         action = "version",
-        version = "pypdfium2 %s (libpdfium %s, %s build)" % (V_PYPDFIUM2, V_LIBPDFIUM, V_BUILDNAME),
+        version = f"pypdfium2 {V_PYPDFIUM2} (libpdfium {V_LIBPDFIUM}, {V_BUILDNAME} build)",
     )
     subparsers = main_parser.add_subparsers(dest="subcommand")
     

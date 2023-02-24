@@ -8,12 +8,12 @@ V_MINOR = 0
 V_PATCH = 0
 V_BETA = 2
 
-#: pypdfium2 version string.
-V_PYPDFIUM2 = "%s.%s.%s" % (V_MAJOR, V_MINOR, V_PATCH)
+#: pypdfium2 version string
+V_PYPDFIUM2 = f"{V_MAJOR}.{V_MINOR}.{V_PATCH}"
 if V_BETA is not None:
-    V_PYPDFIUM2 += "b%s" % V_BETA
+    V_PYPDFIUM2 += f"b{V_BETA}"
 
-#: PDFium library version string (git tag or commit hash).
+#: PDFium library version string (git tag or commit hash)
 V_LIBPDFIUM = "5579"
 
 #: String describing the included PDFium binary's origin (pdfium-binaries, sourcebuild)

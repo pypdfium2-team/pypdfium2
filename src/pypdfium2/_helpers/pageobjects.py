@@ -209,7 +209,7 @@ class PdfImage (PdfObject):
         elif utils.is_buffer(source, "r"):
             buffer = source
         else:
-            raise ValueError("Cannot load JPEG from %s - not a file path or byte buffer." % (source, ))
+            raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte buffer.")
         
         bufaccess, ld_data = utils.get_bufreader(buffer)
         
@@ -271,7 +271,7 @@ class PdfImage (PdfObject):
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)
         
         if raw_bitmap is None:
-            raise PdfiumError("Failed to get bitmap of image %s." % self)
+            raise PdfiumError(f"Failed to get bitmap of image {self}.")
         
         return PdfBitmap.from_raw(raw_bitmap)
     
@@ -324,6 +324,7 @@ class PdfImage (PdfObject):
     
     
     def extract(self, dest, *args, **kwargs):
+        # TODO rewrite/simplify docstring
         """
         Extract the image into an independently usable file or byte buffer.
         Where possible within PDFium's limited public API, it will be attempted to transfer the image data directly,
@@ -335,7 +336,7 @@ class PdfImage (PdfObject):
         
         Parameters:
             dest (str | io.BytesIO):
-                File path or byte buffer to which the image shall be written.
+                File prefix or byte buffer to which the image shall be written.
             fb_format (str):
                 The image format to use in case it is necessary to (re-)encode the data.
             fb_render (bool):
@@ -348,12 +349,12 @@ class PdfImage (PdfObject):
         format = next(extraction_gen)
         
         if isinstance(dest, (str, Path)):
-            with open("%s.%s" % (dest, format), "wb") as buf:
+            with open(f"{dest}.{format}", "wb") as buf:
                 extraction_gen.send(buf)
         elif utils.is_buffer(dest, "w"):
             extraction_gen.send(dest)
         else:
-            raise ValueError("Cannot extract to '%s'" % (dest, ))
+            raise ValueError(f"Cannot extract to '{dest}'")
 
 
 ImageInfo = namedtuple("ImageInfo", "format mode metadata all_filters complex_filters")
@@ -436,9 +437,7 @@ def _extract_direct(image_obj):
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "raw"
         else:
-            raise ImageNotExtractableError(
-                "Unhandled color space %s - don't know how to treat data" % consts.ColorspaceToStr.get(metadata.colorspace)
-            )
+            raise ImageNotExtractableError(f"Unhandled color space {consts.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data")
     
     elif len(complex_filters) == 1:
         f = complex_filters[0]
@@ -449,14 +448,14 @@ def _extract_direct(image_obj):
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "jp2"
         else:
-            raise ImageNotExtractableError("Unhandled complex filter %s" % f)
+            raise ImageNotExtractableError(f"Unhandled complex filter {f}")
         
         # Other complex filters:
         # CCITTFaxDecode: In theory, could be extracted directly (with a TIFF header builder like pikepdf/models/_transcoding.py:generate_ccitt_header), but PDFium doesn't tell us which CCITT group encoding it is.
         # JBIG2Decode: In PDF, JBIG2 header info is stripped, and global segments may be stored in a separate stream. In that form, the data would probably not be of much use, except perhaps for direct re-insertion into another PDF. We're not sure if it would be possible to re-combine this into a single JBIG2 file, or if any application could use this at all. PDFium doesn't provide us with the global segments, anyway.
     
     else:
-        raise ImageNotExtractableError("Cannot handle multiple complex filters %s" % (complex_filters, ))
+        raise ImageNotExtractableError(f"Cannot handle multiple complex filters {complex_filters}")
     
     info = ImageInfo(out_format, mode, metadata, all_filters, complex_filters)
     return out_data, info

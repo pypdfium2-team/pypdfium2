@@ -506,7 +506,7 @@ def _parse_renderopts(
         elif optimize_mode == "print":
             flags |= pdfium_c.FPDF_PRINTING
         else:
-            raise ValueError("Invalid optimize_mode %s" % optimize_mode)
+            raise ValueError(f"Invalid optimize_mode {optimize_mode}")
     
     # TODO consider using a namedtuple or something
     return cl_format, rev_byteorder, fill_color, flags

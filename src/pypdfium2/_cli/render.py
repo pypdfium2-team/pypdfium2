@@ -165,7 +165,7 @@ def main(args):
         prefer_bgrx = args.prefer_bgrx,
     )
     for type in args.no_antialias:
-        kwargs["no_smooth%s" % type] = True
+        kwargs[f"no_smooth{type}"] = True
     
     n_digits = len(str( max(args.pages)+1 ))
     renderer = pdf.render(pdfium.PdfBitmap.to_pil, **kwargs)

@@ -65,15 +65,15 @@ class AutoCloseable (AutoCastable):
     def _close_template(raw, uuid, parent, close_func, *args, **kwargs):
         # NOTE deliberately not using logging so that it also works during the shutdown phase
         if DEBUG_AUTOCLOSE:
-            print("Closing %s with UUID %s" % (raw, uuid), file=sys.stderr)
+            print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
         if (parent is not None) and parent._tree_closed():
-            print("Parent closed before child - this is illegal (%s, %s)." % (parent, raw), file=sys.stderr)
+            print(f"Parent closed before child - this is illegal ({parent}, {raw}).", file=sys.stderr)
         close_func(raw, *args, **kwargs)
     
     
     def close(self):
         if (self.raw is None):
-            logger.warning("Duplicate close call suppressed on %s." % (self, ))
+            logger.warning(f"Duplicate close call suppressed on {self}.")
             return
         if self._finalizer is not None:
             self._finalizer()

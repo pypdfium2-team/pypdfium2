@@ -19,55 +19,56 @@ def attach(parser):
 def main(args):
     
     pdf = get_input(args)
-    print("Page Count: %s" % len(pdf))
-    print("PDF Version: %s" % str(pdf.get_version() / 10))
+    print(f"Page Count: {len(pdf)}")
+    print(f"PDF Version: {pdf.get_version() / 10}")
     
     id_permanent = pdf.get_identifier(pdfium_c.FILEIDTYPE_PERMANENT)
     id_changing  = pdf.get_identifier(pdfium_c.FILEIDTYPE_CHANGING)
-    print("ID (permanent): %s" % id_permanent)
-    print("ID (changing):  %s" % id_changing)
-    print("ID match? - %s" % (id_permanent == id_changing))
-    print("Tagged? - %s" % pdf.is_tagged())
+    print(f"ID (permanent): {id_permanent}")
+    print(f"ID (changing):  {id_changing}")
+    print(f"ID match? - {id_permanent == id_changing}")
+    print(f"Tagged? - {pdf.is_tagged()}")
     
     pagemode = pdf.get_pagemode()
     if pagemode != pdfium_c.PAGEMODE_USENONE:
-        print("Page Mode: %s" % consts.PageModeToStr.get(pagemode))
+        print(f"Page Mode: {consts.PageModeToStr.get(pagemode)}")
     
     if pdf._has_forms:
-        print("Forms: %s" % consts.FormTypeToStr.get(pdf.formtype))
+        print(f"Forms: {consts.FormTypeToStr.get(pdf.formtype)}")
     
     metadata = pdf.get_metadata_dict(skip_empty=True)
-    pad = " " * 4
     if len(metadata) > 0:
         print("Metadata:")
         for key, value in metadata.items():
-            print(pad + "%s: %s" % (key, value))
+            print(f"    {key}: {value}")
     
     for i in args.pages:
         
-        print()
+        print(f"\n# Page {i+1}")
         page = pdf[i]
-        size = round_list(page.get_size(), args.n_digits)
         
-        print("# Page %s" % (i+1, ))
-        print("Size: %s" % (size, ))
-        print("Rotation: %s" % (page.get_rotation(), ))
+        size = round_list(page.get_size(), args.n_digits)
+        print(f"Size: {size}")
+        print(f"Rotation: {page.get_rotation()}")
         
         bbox = round_list(page.get_bbox(), args.n_digits)
-        print("Bounding Box: %s" % (bbox, ))
+        print(f"Bounding Box: {bbox}")
         
         mediabox = round_list(page.get_mediabox(), args.n_digits)
-        cropbox  = round_list(page.get_cropbox(),  args.n_digits)
-        bleedbox = round_list(page.get_bleedbox(), args.n_digits)
-        trimbox  = round_list(page.get_trimbox(),  args.n_digits)
-        artbox   = round_list(page.get_artbox(),   args.n_digits)
+        print(f"MediaBox: {mediabox}")
         
-        print("MediaBox: %s" % (mediabox, ))
+        cropbox = round_list(page.get_cropbox(), args.n_digits)
         if cropbox != mediabox:
-            print("CropBox: %s" % (cropbox, ))
+            print(f"CropBox: {cropbox}")
+        
+        bleedbox = round_list(page.get_bleedbox(), args.n_digits)
         if bleedbox != cropbox:
-            print("BleedBox: %s" % (bleedbox, ))
+            print(f"BleedBox: {bleedbox}")
+        
+        trimbox = round_list(page.get_trimbox(), args.n_digits)
         if trimbox != cropbox:
-            print("TrimBox: %s" % (trimbox, ))
+            print(f"TrimBox: {trimbox}")
+        
+        artbox = round_list(page.get_artbox(), args.n_digits)
         if artbox != cropbox:
-            print("ArtBox: %s" % (artbox, ))
+            print(f"ArtBox: {artbox}")

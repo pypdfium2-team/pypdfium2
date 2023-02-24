@@ -32,7 +32,7 @@ def attach(parser):
         nargs = "+",
         metavar = "T",
         choices = obj_types,
-        help = "Object types to include. Choices: %s" % (obj_types, ),
+        help = f"Object types to include. Choices: {obj_types}",
     )
     parser.add_argument(
         "--max-depth",
@@ -56,7 +56,7 @@ def print_img_metadata(metadata, pad=""):
             value = consts.ColorspaceToStr.get(value)
         elif attr == "marked_content_id" and value == -1:
             continue
-        print(pad + "%s: %s\n" % (attr, value), end="")
+        print(pad + f"{attr}: {value}\n", end="")
 
 
 def main(args):
@@ -78,7 +78,7 @@ def main(args):
             filter = args.filter,
             max_depth = args.max_depth,
         )
-        preamble = "# Page %s\n" % (i+1)
+        preamble = f"# Page {i+1}\n"
         count = 0
         
         for obj in obj_searcher:
@@ -89,10 +89,10 @@ def main(args):
             
             if show_pos:
                 pos = round_list(obj.get_pos(), args.n_digits)
-                print("%sPosition: %s" % (pad_1, pos))
+                print(pad_1 + f"Position: {pos}")
             
             if show_imageinfo and isinstance(obj, pdfium.PdfImage):
-                print("%sFilters: %s" % (pad_1, obj.get_filters()))
+                print(pad_1 + f"Filters: {obj.get_filters()}")
                 metadata = obj.get_metadata()
                 print_img_metadata(metadata, pad=pad_1)
             
@@ -100,8 +100,8 @@ def main(args):
             preamble = ""
         
         if count > 0:
-            print("-> Count: %s\n" % count)
+            print(f"-> Count: {count}\n")
             total_count += count
     
     if total_count > 0:
-        print("-> Total count: %s" % total_count)
+        print(f"-> Total count: {total_count}")

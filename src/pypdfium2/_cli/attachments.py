@@ -56,7 +56,7 @@ def main(args):
     if args.action == ACTION_LIST:
         for i in range(n_attachments):
             attachment = pdf.get_attachment(i)
-            print("[%s]" % (i+1, ), attachment.get_name())
+            print(f"[{i+1}]", attachment.get_name())
     
     elif args.action == ACTION_EXTRACT:
         

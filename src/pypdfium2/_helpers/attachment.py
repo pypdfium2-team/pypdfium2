@@ -13,7 +13,7 @@ def _encode_key(key):
     if isinstance(key, str):
         return (key + "\x00").encode("utf-8")
     else:
-        raise TypeError("Key must be str, but %s was given." % type(key).__name__)
+        raise TypeError(f"Key must be str, but {type(key).__name__} was given.")
 
 
 class PdfAttachment (AutoCastable):
@@ -62,7 +62,7 @@ class PdfAttachment (AutoCastable):
         pdfium_c.FPDFAttachment_GetFile(self, None, 0, n_bytes)
         n_bytes = n_bytes.value
         if n_bytes == 0:
-            raise PdfiumError("Failed to extract attachment (buffer length %s)." % (n_bytes, ))
+            raise PdfiumError(f"Failed to extract attachment (buffer length {n_bytes}).")
         
         buffer = ctypes.create_string_buffer(n_bytes)
         out_buflen = ctypes.c_ulong()
@@ -71,7 +71,7 @@ class PdfAttachment (AutoCastable):
         if not success:
             raise PdfiumError("Failed to extract attachment (error status).")
         if n_bytes < out_buflen:
-            raise PdfiumError("Failed to extract attachment (expected %s bytes, but got %s)." % (n_bytes, out_buflen))
+            raise PdfiumError(f"Failed to extract attachment (expected {n_bytes} bytes, but got {out_buflen}).")
         
         return buffer
     
@@ -120,7 +120,7 @@ class PdfAttachment (AutoCastable):
         enc_key = _encode_key(key)
         n_bytes = pdfium_c.FPDFAttachment_GetStringValue(self, enc_key, None, 0)
         if n_bytes <= 0:
-            raise PdfiumError("Failed to get value of key '%s'." % (key, ))
+            raise PdfiumError(f"Failed to get value of key '{key}'.")
         
         buffer = ctypes.create_string_buffer(n_bytes)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
@@ -140,4 +140,4 @@ class PdfAttachment (AutoCastable):
         enc_value_ptr = ctypes.cast(enc_value, pdfium_c.FPDF_WIDESTRING)
         success = pdfium_c.FPDFAttachment_SetStringValue(self, _encode_key(key), enc_value_ptr)
         if not success:
-            raise PdfiumError("Failed to set attachment param '%s' to '%s'." % (key, value))
+            raise PdfiumError(f"Failed to set attachment param '{key}' to '{value}'.")

@@ -42,7 +42,7 @@ class PdfMatrix:
     
     
     def __repr__(self):
-        return "PdfMatrix%s" % (self.get(), )
+        return f"PdfMatrix{self.get()}"
     
     
     def __eq__(self, matrix):
