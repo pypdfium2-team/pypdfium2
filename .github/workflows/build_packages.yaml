@@ -97,27 +97,6 @@ jobs:
           name: packages
           path: dist/*
       
-      - name: Upload testing artifact (Linux)
-        if: ${{ inputs.test }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: whl_linux64
-          path: dist/*manylinux_*_x86_64*.whl
-      
-      - name: Upload testing artifact (macOS)
-        if: ${{ inputs.test }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: whl_macos64
-          path: dist/*macosx_*_x86_64*.whl
-      
-      - name: Upload testing artifact (Windows)
-        if: ${{ inputs.test }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: whl_windows64
-          path: dist/*win_amd64.whl
-      
       # tag deliberately not pushed (see above)
       - name: Push autorelease_tmp branch
         run: git push -u origin autorelease_tmp
@@ -134,11 +113,11 @@ jobs:
         py: ['3.7', '3.8', '3.9', '3.10', '3.11']
         include:
           - os: ubuntu-latest
-            wheel: whl_linux64
+            wheel: dist/*manylinux_*_x86_64*.whl
           - os: macos-latest
-            wheel: whl_macos64
+            wheel: dist/*macosx_*_x86_64*.whl
           - os: windows-latest
-            wheel: whl_windows64
+            wheel: dist/*win_amd64.whl
     
     runs-on: ${{ matrix.os }}
     
@@ -155,10 +134,10 @@ jobs:
           repository: ${{ github.repository }}
           ref: autorelease_tmp
       
-      - name: Download aftifact
+      - name: Download packages
         uses: actions/download-artifact@v3
         with:
-          name: ${{ matrix.wheel }}
+          name: packages
           path: dist/
       
       - name: Install dependencies
@@ -167,7 +146,7 @@ jobs:
           python3 -m pip install -U pytest pillow numpy wheel
       
       - name: Install pypdfium2 from artifact
-        run: python3 -m pip install dist/*.whl
+        run: python3 -m pip install ${{ matrix.wheel }}
       
       - name: Run Test Suite
         run: make test
