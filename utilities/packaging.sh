@@ -8,7 +8,7 @@ bash utilities/clean.sh
 bash utilities/check.sh
 
 python3 setupsrc/pl_setup/update_pdfium.py
-python3 setupsrc/pl_setup/craft_wheels.py
+python3 setupsrc/pl_setup/craft_packages.py
 
 twine check dist/*
 # ignore W002: erroneous detection of __init__.py files as duplicates

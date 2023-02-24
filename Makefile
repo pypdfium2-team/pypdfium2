@@ -19,7 +19,7 @@ update-all:
 	python3 ./setupsrc/pl_setup/update_pdfium.py
 
 setup-all:
-	python3 ./setupsrc/pl_setup/craft_wheels.py
+	python3 ./setupsrc/pl_setup/craft_packages.py
 
 check:
 	bash ./utilities/check.sh

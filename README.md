@@ -636,7 +636,7 @@ You may also trigger the workflow manually using the GitHub Actions panel or the
 
 Python release scripts are located in the folder `setupsrc/pl_setup`, along with custom setup code:
 * `update_pdfium.py` downloads binaries and generates the bindings.
-* `craft_wheels.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
+* `craft_packages.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
 * `autorelease.py` takes care of versioning, changelog, release note generation and VCS checkin.
 
 The autorelease script has some peculiarities maintainers should know about:
@@ -669,7 +669,7 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
 * Build the packages
   ```bash
   python3 setupsrc/pl_setup/update_pdfium.py
-  python3 setupsrc/pl_setup/craft_wheels.py
+  python3 setupsrc/pl_setup/craft_packages.py
   ```
 * Upload to PyPI
   ```bash
