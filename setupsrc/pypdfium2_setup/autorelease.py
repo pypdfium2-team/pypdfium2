@@ -147,16 +147,15 @@ def register_changes(curr_ns):
 def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
     log = ""
     log += "\n<details>\n"
-    log += "  <summary>%s commit log</summary>\n\n" % name
+    log += "  <summary>%s commit log</summary>\n\n" % (name, )
     # TODO turn 'between' into a GH compare link
     log += "Commits between [`%s`](%s) and [`%s`](%s) " % (
         ver_a, url+prefix_ver+ver_a,
         ver_b, url+prefix_ver+ver_b,
     )
     log += "(latest commit first):\n\n"
-    log += run_cmd(["git", "log",
-        "%s..%s" % (prefix_tag+ver_a, prefix_tag+ver_b),
-        "--pretty=format:* [`%h`]({}%H) %s".format(url+prefix_commit)],
+    log += run_cmd(
+        ["git", "log", "%s..%s" % (prefix_tag+ver_a, prefix_tag+ver_b), "--pretty", f"format:* [`%h`]({url+prefix_commit}%H) %s"],
         capture=True, check=True, cwd=cwd,
     )
     log += "\n\n</details>\n"
@@ -166,7 +165,7 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
 def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     
     relnotes = ""
-    relnotes += "## Changes (Release %s)\n\n" % curr_ns["V_PYPDFIUM2"]
+    relnotes += "## Changes (Release %s)\n\n" % (curr_ns["V_PYPDFIUM2"], )
     relnotes += "### Summary (pypdfium2)\n\n"
     if summary:
         relnotes += summary + "\n"

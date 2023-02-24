@@ -57,11 +57,11 @@ def mkwheel(pl_name):
     
     pl_dir = join(DataTree, pl_name)
     if not exists(pl_dir):
-        raise RuntimeError("Missing platform directory %s - you might have forgotten to run update_pdfium.py" % pl_name)
+        raise RuntimeError(f"Missing platform directory {pl_name} - you might have forgotten to run update_pdfium.py")
     
     ver_file = join(pl_dir, VerStatusFileName)
     if not exists(ver_file):
-        raise RuntimeError("Missing PDFium version file for %s" % pl_name)
+        raise RuntimeError(f"Missing PDFium version file for {pl_name}")
     
     with open(ver_file, "r") as fh:
         v_libpdfium = fh.read().strip()

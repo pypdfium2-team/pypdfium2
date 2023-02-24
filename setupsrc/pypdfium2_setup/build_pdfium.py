@@ -112,7 +112,7 @@ def dl_pdfium(GClient, do_update, revision):
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PDFium_URL], cwd=SB_Dir)
     
     if is_sync:
-        run_cmd([GClient, "sync", "--revision", "origin/%s" % revision, "--no-history", "--with_branch_heads"], cwd=SB_Dir)
+        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--with_branch_heads"], cwd=SB_Dir)
     
     return is_sync
 
@@ -143,7 +143,7 @@ def get_pdfium_version():
     tag_commit = tag_commit[:7]
     tag = ref.split("/")[-1]
     
-    print("Current head %s, latest tagged commit %s (%s)" % (head_commit, tag_commit, tag), file=sys.stderr)
+    print(f"Current head {head_commit}, latest tagged commit {tag_commit} ({tag})", file=sys.stderr)
     
     if head_commit == tag_commit:
         v_libpdfium = tag
@@ -219,7 +219,7 @@ def find_lib(src_libname=None, directory=PDFiumBuildDir):
         libname = "pdfium.dll"
     else:
         # TODO implement fallback artifact detection
-        raise RuntimeError("Not sure how pdfium artifact is called on platform '%s'" % (sys.platform, ))
+        raise RuntimeError(f"Not sure how pdfium artifact is called on platform '{sys.platform}'")
     
     libpath = join(directory, libname)
     assert os.path.exists(libpath)
@@ -256,13 +256,13 @@ def serialise_config(config_dict):
     sep = ""
     
     for key, value in config_dict.items():
-        config_str += sep + "%s = " % key
+        config_str += sep + f"{key} = "
         if isinstance(value, bool):
             config_str += str(value).lower()
         elif isinstance(value, str):
-            config_str += '"%s"' % value
+            config_str += f'"{value}"'
         else:
-            raise TypeError("Not sure how to serialise type %s" % type(value))
+            raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
         sep = "\n"
     
     return config_str
@@ -316,7 +316,7 @@ def main(
     if b_use_syslibs:
         config_dict.update(SyslibsConfig)
     config_str = serialise_config(config_dict)
-    print("\nBuild configuration:\n%s\n" % config_str)
+    print(f"\nBuild configuration:\n{config_str}\n")
     
     configure(GN, config_str)
     build(Ninja, b_target)

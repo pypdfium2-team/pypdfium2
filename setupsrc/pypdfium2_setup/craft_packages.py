@@ -49,7 +49,7 @@ class ArtefactStash:
         if len(self.plfile_paths) == 0:
             return
         elif len(self.plfile_paths) != 2:
-            print("Warning: Expected exactly 2 platform files, but found %s." % len(self.plfile_paths), file=sys.stderr)
+            print(f"Warning: Expected exactly 2 platform files, but found {len(self.plfile_paths)}.", file=sys.stderr)
         
         self.tmp_dir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
         for fp in self.plfile_paths:

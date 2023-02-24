@@ -186,12 +186,12 @@ def get_wheel_tag(pl_name):
             tag = tag.replace(char, "_")
         return tag
     else:
-        raise ValueError("Unknown platform name %s" % pl_name)
+        raise ValueError(f"Unknown platform name {pl_name}")
 
 
 def run_cmd(command, cwd, capture=False, check=True, **kwargs):
     
-    print('%s ("%s")' % (command, cwd), file=sys.stderr)
+    print(f"{command} (cwd='{cwd}')", file=sys.stderr)
     if capture:
         kwargs.update( dict(stdout=subprocess.PIPE, stderr=subprocess.STDOUT) )
     
@@ -203,7 +203,7 @@ def run_cmd(command, cwd, capture=False, check=True, **kwargs):
 
 
 def get_latest_version():
-    git_ls = run_cmd(["git", "ls-remote", "%s.git" % ReleaseRepo], cwd=None, capture=True)
+    git_ls = run_cmd(["git", "ls-remote", f"{ReleaseRepo}.git"], cwd=None, capture=True)
     tag = git_ls.split("\t")[-1]
     return int( tag.split("/")[-1] )
 
@@ -213,9 +213,9 @@ def call_ctypesgen(target_dir, include_dir):
     bindings = join(target_dir, BindingsFileName)
     headers = sorted(glob( join(include_dir, "*.h") ))
     
-    run_cmd(["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", "--strip-build-path=%s" % include_dir, *headers, "-o", bindings], cwd=target_dir)
+    # https://github.com/ctypesgen/ctypesgen/issues/160
+    run_cmd(["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", f"--strip-build-path={include_dir}", *headers, "-o", bindings], cwd=target_dir)
     
-    # --strip-build-path fails for the header: https://github.com/ctypesgen/ctypesgen/issues/160
     with open(bindings, "r") as file_reader:
         text = file_reader.read()
         text = text.replace(include_dir, ".")
@@ -255,7 +255,7 @@ def copy_platfiles(pl_name):
     platfiles = get_platfiles(pl_name)
     for fp in platfiles:
         if not os.path.exists(fp):
-            raise RuntimeError("Platform file missing: %s" % fp)
+            raise RuntimeError(f"Platform file missing: {fp}")
         shutil.copy(fp, ModuleDir)
 
 
@@ -311,7 +311,7 @@ def set_versions(ver_changes):
         previous = template % (var, VerNamespace[var])
         updated = template % (var, new_val)
         
-        print("'%s' -> '%s'" % (previous, updated))
+        print(f"'{previous}' -> '{updated}'")
         assert content.count(previous) == 1
         content = content.replace(previous, updated)
         

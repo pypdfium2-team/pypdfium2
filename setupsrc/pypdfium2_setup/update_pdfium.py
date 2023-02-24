@@ -41,10 +41,10 @@ def _get_package(latest_ver, robust, pl_name):
     if not os.path.exists(pl_dir):
         os.makedirs(pl_dir)
     
-    file_name = "%s.%s" % (ReleaseNames[pl_name], "tgz")
-    file_url = "%s%s/%s" % (ReleaseURL, latest_ver, file_name)
+    file_name = f"{ReleaseNames[pl_name]}.tgz"
+    file_url = f"{ReleaseURL}{latest_ver}/{file_name}"
     file_path = join(pl_dir, file_name)
-    print("'%s' -> '%s'" % (file_url, file_path))
+    print(f"'{file_url}' -> '{file_path}'")
     
     try:
         request.urlretrieve(file_url, file_path)
@@ -114,7 +114,7 @@ def generate_bindings(archives, latest_ver):
         elif "linux" in dirname:
             target_name = "pdfium"
         else:
-            raise ValueError("Unknown platform directory name '%s'" % dirname)
+            raise ValueError(f"Unknown platform directory name '{dirname}'")
         
         items = os.listdir(bin_dir)
         assert len(items) == 1
@@ -155,7 +155,7 @@ def parse_args(argv):
         metavar = "identifier",
         choices = platform_choices,
         default = BinaryPlatforms,
-        help = "The platform(s) to include. Available platform identifiers are %s. `auto` represents the current host platform." % (platform_choices, ),
+        help = f"The platform(s) to include. `auto` represents the current host platform. Choices: {platform_choices}.",
     )
     parser.add_argument(
         "--robust",

@@ -14,7 +14,7 @@ Commands = (
 def main():
     missing = {cmd for cmd in Commands if not shutil.which(cmd)}
     if len(missing) > 0:
-        raise RuntimeError("The following packages or commands are missing: %s" % missing)
+        raise RuntimeError(f"The following packages or commands are missing: {missing}")
 
 
 if __name__ == "__main__":
