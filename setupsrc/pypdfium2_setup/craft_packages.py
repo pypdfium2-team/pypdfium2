@@ -6,13 +6,9 @@ import sys
 import shutil
 import argparse
 import tempfile
-from os.path import (
-    join,
-    dirname,
-    abspath,
-)
+from pathlib import Path
 
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     clean_artefacts,
@@ -33,34 +29,26 @@ class ArtefactStash:
     
     def __init__(self):
         
-        self.tmp_dir = None
-        self.plfile_names = []
-        self.plfile_paths = []
+        self.tmpdir = None
+        file_names = [BindingsFileName, LibnameForSystem[Host.system]]
+        self.files = [fp for fp in [ModuleDir / fn for fn in file_names] if fp.exists()]
         
-        patterns = (BindingsFileName, LibnameForSystem[Host.system])
-        for fn in patterns:
-            fp = join(ModuleDir, fn)
-            if not os.path.exists(fp):
-                continue
-            self.plfile_names.append(fn)
-            self.plfile_paths.append(fp)
-        assert len(self.plfile_names) == len(self.plfile_paths)
-        
-        if len(self.plfile_paths) == 0:
+        if len(self.files) == 0:
             return
-        elif len(self.plfile_paths) != 2:
-            print(f"Warning: Expected exactly 2 platform files, but found {len(self.plfile_paths)}.", file=sys.stderr)
+        elif len(self.files) != 2:
+            print(f"Warning: Expected exactly 2 platform files, but found {len(self.files)}.", file=sys.stderr)
         
-        self.tmp_dir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
-        for fp in self.plfile_paths:
-            shutil.move(fp, self.tmp_dir.name)
+        self.tmpdir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
+        self.tmpdir_path = Path(self.tmpdir.name)
+        for fp in self.files:
+            shutil.move(fp, self.tmpdir_path)
     
     def pop(self):
-        if self.tmp_dir is None:
+        if self.tmpdir is None:
             return
-        for fn in self.plfile_names:
-            shutil.move(join(self.tmp_dir.name, fn), ModuleDir)
-        self.tmp_dir.cleanup()
+        for fp in self.files:
+            shutil.move(self.tmpdir_path / fp.name, ModuleDir)
+        self.tmpdir.cleanup()
 
 
 def run_build(args):

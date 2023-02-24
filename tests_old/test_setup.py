@@ -97,12 +97,13 @@ def test_platformnames(all_platnames):
         assert name == getattr(PlatformNames, name)
 
 def test_paths():
-    assert pkg_base.HomeDir == str( Path.home() )
-    assert pkg_base.SourceTree == str(SourceTree)
-    assert pkg_base.DataTree == str( Path(SourceTree) / "data" )
-    assert pkg_base.SB_Dir == str( Path(SourceTree) / "sourcebuild" )
-    assert pkg_base.ModuleDir == str( Path(SourceTree) / "src" / "pypdfium2" )
-    assert pkg_base.VersionFile == str( Path(pkg_base.ModuleDir) / "version.py" )
+    # FIXME not much point doing this?
+    assert pkg_base.HomeDir == Path.home()
+    assert pkg_base.SourceTree == SourceTree
+    assert pkg_base.DataTree == SourceTree / "data"
+    assert pkg_base.SB_Dir == SourceTree / "sourcebuild"
+    assert pkg_base.ModuleDir == SourceTree / "src" / "pypdfium2"
+    assert pkg_base.VersionFile == Path(pkg_base.ModuleDir) / "version.py"
 
 
 # update_pdfium

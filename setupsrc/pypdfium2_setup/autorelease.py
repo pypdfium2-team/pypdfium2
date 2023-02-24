@@ -2,21 +2,14 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE only runs from main branch for now
-
-import os
 import sys
 import time
 import copy
 import argparse
 import tempfile
-from os.path import (
-    join,
-    abspath,
-    dirname,
-)
+from pathlib import Path
 
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     set_versions,
@@ -33,9 +26,9 @@ from pypdfium2_setup.packaging_base import (
 )
 
 
-AutoreleaseDir  = join(SourceTree, "autorelease")
-MajorUpdateFile = join(AutoreleaseDir, "update_major.txt")
-BetaUpdateFile  = join(AutoreleaseDir, "update_beta.txt")
+AutoreleaseDir  = SourceTree / "autorelease"
+MajorUpdateFile = AutoreleaseDir / "update_major.txt"
+BetaUpdateFile  = AutoreleaseDir / "update_beta.txt"
 
 
 def run_local(*args, **kws):
@@ -66,8 +59,8 @@ def do_versioning(latest):
     
     c_updates = (v_libpdfium < latest)
     py_updates = _check_py_updates(VerNamespace["V_PYPDFIUM2"])
-    inc_major = os.path.exists(MajorUpdateFile)
-    inc_beta = os.path.exists(BetaUpdateFile)
+    inc_major = MajorUpdateFile.exists()
+    inc_beta = BetaUpdateFile.exists()
     
     if not c_updates and not py_updates:
         raise RuntimeError("Neither pypdfium2 code nor pdfium binaries updated. Making a new release would be pointless.")
@@ -83,7 +76,7 @@ def do_versioning(latest):
         ver_changes["V_MAJOR"] = VerNamespace["V_MAJOR"] + 1
         ver_changes["V_MINOR"] = 0
         ver_changes["V_PATCH"] = 0
-        os.remove(MajorUpdateFile)
+        MajorUpdateFile.unlink()
     elif v_beta is None:
         # if we're not doing a major update and the previous version was not a beta, update minor and/or patch
         # (note that we still want to run this if adding a new beta tag, though)
@@ -101,8 +94,7 @@ def do_versioning(latest):
             v_beta = 0
         v_beta += 1
         ver_changes["V_BETA"] = v_beta
-        # TODO don't automatically remove? might be safer and more convenient.
-        os.remove(BetaUpdateFile)
+        BetaUpdateFile.unlink()
     elif v_beta is not None:
         # if the previous version was a beta but the new one shall not be, remove the tag
         ver_changes["V_BETA"] = None
@@ -122,22 +114,19 @@ def log_changes(summary, prev_ns, curr_ns):
         pdfium_msg += "No PDFium update"
     pdfium_msg += " (autorelease)."
     
-    with open(Changelog, "r") as fh:
-        content = fh.read()
-        pos = content.index("\n", content.index("# Changelog")) + 1
-        part_a = content[:pos].strip() + "\n"
-        part_b = content[pos:].strip() + "\n"
-        content = part_a + "\n\n" + pdfium_msg + "\n"
-        if curr_ns["V_BETA"] is None:
-            content += summary
-        content += "\n\n" + part_b
-    
-    with open(Changelog, "w") as fh:
-        fh.write(content)
+    content = Changelog.read_text()
+    pos = content.index("\n", content.index("# Changelog")) + 1
+    part_a = content[:pos].strip() + "\n"
+    part_b = content[pos:].strip() + "\n"
+    content = part_a + "\n\n" + pdfium_msg + "\n"
+    if curr_ns["V_BETA"] is None:
+        content += summary
+    content += "\n\n" + part_b
+    Changelog.write_text(content)
 
 
 def register_changes(curr_ns):
-    run_local(["git", "checkout", "-B", "autorelease_tmp", "main"])
+    run_local(["git", "checkout", "-B", "autorelease_tmp"])  #, "origin/main"
     run_local(["git", "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
     run_local(["git", "commit", "-m", "[autorelease] update changelog and version file"])
     # NOTE the actually pushed tag will be a different one, but it's nevertheless convenient to have this here because of the changelog
@@ -184,13 +173,12 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
         with tempfile.TemporaryDirectory() as tempdir:
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tempdir)
             relnotes += _get_log(
-                "PDFium", PDFium_URL, join(tempdir, "pdfium_history"),
+                "PDFium", PDFium_URL, tempdir/"pdfium_history",
                 prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"],
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
             )
     
-    with open(join(SourceTree, "RELEASE.md"), "w") as fh:
-        fh.write(relnotes)
+    (SourceTree / "RELEASE.md").write_text(relnotes)
 
 
 def main():

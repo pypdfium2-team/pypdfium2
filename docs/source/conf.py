@@ -11,7 +11,7 @@ import time
 import collections
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "setupsrc"))
+sys.path.insert(0, str(Path(__file__).parents[2] / "setupsrc"))
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     SourceTree,

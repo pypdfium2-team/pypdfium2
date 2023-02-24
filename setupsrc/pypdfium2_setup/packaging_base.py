@@ -3,19 +3,12 @@
 
 # No external dependencies shall be imported in this file
 
-import os
 import sys
 import shutil
 import platform
 import sysconfig
 import subprocess
-from glob import glob
-from os.path import (
-    join,
-    abspath,
-    dirname,
-    expanduser,
-)
+from pathlib import Path
 
 # TODO improve consistency of variable names; think about variables to move in/out
 
@@ -24,14 +17,14 @@ BinaryTarget_None = "none"
 BinaryTarget_Auto = "auto"
 BindingsFileName  = "raw.py"
 VerStatusFileName = ".pdfium_version.txt"
-HomeDir     = expanduser("~")
-SourceTree  = dirname(dirname(dirname(abspath(__file__))))
-DataTree    = join(SourceTree, "data")
-SB_Dir      = join(SourceTree, "sourcebuild")
-ModuleDir   = join(SourceTree, "src", "pypdfium2")
-VersionFile = join(ModuleDir, "version.py")
-Changelog   = join(SourceTree, "docs", "devel", "changelog.md")
-ChangelogStaging = join(SourceTree, "docs", "devel", "changelog_staging.md")
+HomeDir     = Path.home()
+SourceTree  = Path(__file__).parents[2]
+DataTree    = SourceTree / "data"
+SB_Dir      = SourceTree / "sourcebuild"
+ModuleDir   = SourceTree / "src" / "pypdfium2"
+VersionFile = ModuleDir / "version.py"
+Changelog   = SourceTree / "docs" / "devel" / "changelog.md"
+ChangelogStaging = SourceTree / "docs" / "devel" / "changelog_staging.md"
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
 DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
@@ -189,9 +182,12 @@ def get_wheel_tag(pl_name):
         raise ValueError(f"Unknown platform name {pl_name}")
 
 
-def run_cmd(command, cwd, capture=False, check=True, **kwargs):
+def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
     
-    print(f"{command} (cwd='{cwd}')", file=sys.stderr)
+    if str_cast:
+        command = [str(c) for c in command]
+    
+    print(f"{command} (cwd={cwd!r})", file=sys.stderr)
     if capture:
         kwargs.update( dict(stdout=subprocess.PIPE, stderr=subprocess.STDOUT) )
     
@@ -210,43 +206,37 @@ def get_latest_version():
 
 def call_ctypesgen(target_dir, include_dir):
     
-    bindings = join(target_dir, BindingsFileName)
-    headers = sorted(glob( join(include_dir, "*.h") ))
+    bindings = target_dir / BindingsFileName
     
     # https://github.com/ctypesgen/ctypesgen/issues/160
-    run_cmd(["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", f"--strip-build-path={include_dir}", *headers, "-o", bindings], cwd=target_dir)
+    run_cmd(["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", f"--strip-build-path={include_dir}", *sorted(include_dir.glob("*.h")), "-o", bindings], cwd=target_dir)
     
-    with open(bindings, "r") as file_reader:
-        text = file_reader.read()
-        text = text.replace(include_dir, ".")
-        text = text.replace(HomeDir, "~")
-    
-    with open(bindings, "w") as file_writer:
-        file_writer.write(text)
+    text = bindings.read_text()
+    text = text.replace(str(include_dir), ".")
+    text = text.replace(str(HomeDir), "~")
+    bindings.write_text(text)
 
 
 def clean_artefacts():
     
     deletables = [
-        join(SourceTree, "build"),
-        join(ModuleDir, BindingsFileName),
+        SourceTree / "build",
+        ModuleDir / BindingsFileName,
     ]
-    deletables += [join(ModuleDir, fn) for fn in MainLibnames]
+    deletables += [ModuleDir / fn for fn in MainLibnames]
     
-    for item in deletables:
-        if not os.path.exists(item):
-            continue
-        if os.path.isfile(item):
-            os.remove(item)
-        elif os.path.isdir(item):
-            shutil.rmtree(item)
+    for fp in deletables:
+        if fp.is_file():
+            fp.unlink()
+        elif fp.is_dir():
+            shutil.rmtree(fp)
 
 
 def get_platfiles(pl_name):
     system = plat_to_system(pl_name)
     platfiles = (
-        join(DataTree, pl_name, BindingsFileName),
-        join(DataTree, pl_name, LibnameForSystem[system])
+        DataTree / pl_name / BindingsFileName,
+        DataTree / pl_name / LibnameForSystem[system],
     )
     return platfiles
 
@@ -254,31 +244,28 @@ def get_platfiles(pl_name):
 def copy_platfiles(pl_name):
     platfiles = get_platfiles(pl_name)
     for fp in platfiles:
-        if not os.path.exists(fp):
+        if not fp.exists():
             raise RuntimeError(f"Platform file missing: {fp}")
         shutil.copy(fp, ModuleDir)
 
 
 def get_changelog_staging(flush=False):
     
-    with open(ChangelogStaging, "r") as fh:
-        content = fh.read()
-        pos = content.index("\n", content.index("# Changelog")) + 1
-        header = content[:pos].strip() + "\n"
-        devel_msg = content[pos:].strip()
-        if devel_msg:
-            devel_msg += "\n"
+    content = ChangelogStaging.read_text()
+    pos = content.index("\n", content.index("# Changelog")) + 1
+    header = content[:pos].strip() + "\n"
+    devel_msg = content[pos:].strip()
+    if devel_msg:
+        devel_msg += "\n"
     
     if flush:
-        with open(ChangelogStaging, "w") as fh:
-            fh.write(header)
+        ChangelogStaging.write_text(header)
     
     return devel_msg
 
 def get_version_ns():
     ver_ns = {}
-    with open(VersionFile, "r") as fh:
-        exec(fh.read(), ver_ns)
+    exec(VersionFile.read_text(), ver_ns)
     ver_ns = {k: v for k, v in ver_ns.items() if not k.startswith("_")}
     return ver_ns
 
@@ -289,13 +276,11 @@ def set_versions(ver_changes):
     
     if len(ver_changes) == 0:
         return False
-    
     skip = {var for var, value in ver_changes.items() if value == VerNamespace[var]}
     if len(skip) == len(ver_changes):
         return False
     
-    with open(VersionFile, "r") as fh:
-        content = fh.read()
+    content = VersionFile.read_text()
     
     for var, new_val in ver_changes.items():
         
@@ -318,7 +303,6 @@ def set_versions(ver_changes):
         # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, no reliance can be placed upon the values of dynamic variables (V_PYPDFIUM2 !) after this method has been run. If you need the real value, VerNamespace needs to be re-created.
         VerNamespace[var] = new_val
     
-    with open(VersionFile, "w") as fh:
-        fh.write(content)
+    VersionFile.write_text(content)
     
     return True
