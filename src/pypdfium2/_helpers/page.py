@@ -315,7 +315,10 @@ class PdfPage (AutoCloseable):
         return rc
     
     
-    # TODO add helpers for matrix-based and interruptible rendering
+    # TODO
+    # - add helpers for matrix-based and interruptible rendering
+    # - add lower-level renderer that takes a caller-provided bitmap
+    # e. g. render(), render_ex(), render_matrix(), render_matrix_ex()
     
     
     def render(
