@@ -29,7 +29,7 @@ defaults:
 
 jobs:
   
-  # TODO sync sourcebuild patches with pdfium-binaries on before release
+  # TODO sync sourcebuild patches with pdfium-binaries on before release?
   
   test_setup:
     if: ${{ inputs.pre_test }}
@@ -63,11 +63,13 @@ jobs:
       - name: Install pypdfium2
         run: python3 -m pip install --no-build-isolation -e .
       
+      # TODO test after autorelease run
       - name: Run test suite
         run: make test
       
       # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
       # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
+      # -> TODO avoid tmp tag
       - name: Run autorelease script
         run: |
           git config user.email "geisserml@gmail.com"
