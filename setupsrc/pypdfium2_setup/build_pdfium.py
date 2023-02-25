@@ -237,7 +237,7 @@ def pack(src_libpath, v_libpdfium, destname=None):
 def get_tool(name):
     bin = DepotToolsDir / name
     if sys.platform.startswith("win32"):
-        bin += ".bat"
+        bin = bin.with_suffix(".bat")
     return bin
 
 
