@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
-from os.path import join, isfile
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 from .conftest import TestFiles, OutputDir
@@ -22,9 +21,9 @@ def test_save():
     page = new_pdf.get_page(0)
     assert page.get_size() == (595, 842)
     
-    output_file = join(OutputDir, "tiling.pdf")
+    output_file = OutputDir / "tiling.pdf"
     new_pdf.save(output_file)
-    assert isfile(output_file)
+    assert output_file.exists()
     
 
 def test_save_withversion():

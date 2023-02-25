@@ -9,7 +9,7 @@ import pypdfium2.__main__ as pdfium_cli
 
 pdfium_cli.setup_logging()
 
-TestDir         = Path(__file__).resolve().parent
+TestDir         = Path(__file__).parent
 SourceTree      = TestDir.parent
 ResourceDir     = TestDir / "resources"
 OutputDir       = TestDir / "output"

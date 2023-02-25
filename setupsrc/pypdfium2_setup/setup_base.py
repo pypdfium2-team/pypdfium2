@@ -3,15 +3,10 @@
 
 import sys
 import setuptools
-from os.path import (
-    join,
-    exists,
-    abspath,
-    dirname,
-)
+from pathlib import Path
 from wheel.bdist_wheel import bdist_wheel
 
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import (
     DataTree,
     VerNamespace,
@@ -55,19 +50,16 @@ def mkwheel(pl_name):
     system = plat_to_system(pl_name)
     libname = LibnameForSystem[system]
     
-    pl_dir = join(DataTree, pl_name)
-    if not exists(pl_dir):
+    pl_dir = DataTree / pl_name
+    if not pl_dir.exists():
         raise RuntimeError(f"Missing platform directory {pl_name} - you might have forgotten to run update_pdfium.py")
     
-    ver_file = join(pl_dir, VerStatusFileName)
-    if not exists(ver_file):
+    ver_file = pl_dir / VerStatusFileName
+    if not ver_file.exists():
         raise RuntimeError(f"Missing PDFium version file for {pl_name}")
     
-    with open(ver_file, "r") as fh:
-        v_libpdfium = fh.read().strip()
-    
     ver_changes = dict()
-    ver_changes["V_LIBPDFIUM"] = str(v_libpdfium)
+    ver_changes["V_LIBPDFIUM"] = ver_file.read_text().strip()
     if pl_name == PlatformNames.sourcebuild:
         ver_changes["V_BUILDNAME"] = "source"
     else:

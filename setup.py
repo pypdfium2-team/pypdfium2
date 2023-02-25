@@ -5,14 +5,9 @@
 import os
 import sys
 import setuptools
-from os.path import (
-    join,
-    abspath,
-    dirname,
-    exists,
-)
+from pathlib import Path
 
-sys.path.insert(0, join(dirname(abspath(__file__)), "setupsrc"))
+sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup import check_deps
 from pypdfium2_setup.packaging_base import (
     Host,
@@ -27,7 +22,7 @@ from pypdfium2_setup.packaging_base import (
 
 # NOTE Setuptools may, unfortunately, run this code several times (if using PEP 517 style setup).
 
-LockFile = join(DataTree, ".lock_autoupdate.txt")
+LockFile = DataTree / ".lock_autoupdate.txt"
 
 
 def install_handler():
@@ -38,30 +33,26 @@ def install_handler():
     pl_name = Host.platform
     if pl_name is None:
         # If PDFium had a proper build system, we could trigger a source build here
-        raise RuntimeError(
-            "No pre-built binaries available for system %s (libc info %s) on machine %s. " % (Host._system_name, Host._libc_info, Host._machine_name) +
-            "You may place custom binaries & bindings in data/sourcebuild and install with `%s=sourcebuild`." % (BinaryTargetVar, )
-        )
+        raise RuntimeError(f"No pre-built binaries available for system {Host._system_name} (libc info {Host._libc_info}) on machine {Host._machine_name}. You may place custom binaries & bindings in data/sourcebuild and install with `{BinaryTargetVar}=sourcebuild`.")
     
     # TODO Linux/macOS: check that minimum version requirements are fulfilled
     
     need_update = False
-    pl_dir = join(DataTree, pl_name)
-    ver_file = join(pl_dir, VerStatusFileName)
+    pl_dir = DataTree / pl_name
+    ver_file = pl_dir / VerStatusFileName
     
-    if not os.path.exists(pl_dir):
+    if not pl_dir.exists():
         need_update = True  # platform directory doesn't exist yet
-    elif not os.path.exists(ver_file) or not all(exists(fp) for fp in get_platfiles(pl_name)):
+    elif not ver_file.exists() or not all(fp.exists() for fp in get_platfiles(pl_name)):
         print("Warning: Specific platform files are missing -> implicit update", file=sys.stderr)
         need_update = True
     
-    elif not exists(LockFile):
+    elif not LockFile.exists():
         
         # Automatic updates imply some duplication across different runs. The code runs quickly enough, so this is not much of a problem.
         
         latest_ver = get_latest_version()
-        with open(ver_file, "r") as fh:
-            curr_version = int( fh.read().strip() )
+        curr_version = int( ver_file.read_text().strip() )
         
         if curr_version > latest_ver:
             raise RuntimeError("Current version must not be greater than latest")
@@ -82,7 +73,7 @@ def packaging_handler(target):
     elif hasattr(PlatformNames, target):
         mkwheel( getattr(PlatformNames, target) )
     else:
-        raise ValueError("Invalid deployment target '%s'" % target)
+        raise ValueError(f"Invalid deployment target '{target}'")
     
     return False
 

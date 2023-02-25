@@ -2,19 +2,17 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
 import sys
 import shutil
 import tarfile
 import argparse
 import traceback
 import functools
-import os.path
-from os.path import join, abspath, dirname
+from pathlib import Path
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
@@ -30,24 +28,23 @@ from pypdfium2_setup.packaging_base import (
 
 def clear_data(download_files):
     for pl_name in download_files:
-        pl_dir = join(DataTree, pl_name)
-        if os.path.isdir(pl_dir):
+        pl_dir = DataTree / pl_name
+        if pl_dir.exists():
             shutil.rmtree(pl_dir)
 
 
 def _get_package(latest_ver, robust, pl_name):
     
-    pl_dir = join(DataTree, pl_name)
-    if not os.path.exists(pl_dir):
-        os.makedirs(pl_dir)
+    pl_dir = DataTree / pl_name
+    pl_dir.mkdir(parents=True, exist_ok=True)
     
-    file_name = f"{ReleaseNames[pl_name]}.tgz"
-    file_url = f"{ReleaseURL}{latest_ver}/{file_name}"
-    file_path = join(pl_dir, file_name)
-    print(f"'{file_url}' -> '{file_path}'")
+    fn = f"{ReleaseNames[pl_name]}.tgz"
+    fu = f"{ReleaseURL}{latest_ver}/{fn}"
+    fp = pl_dir / fn
+    print(f"'{fu}' -> '{fp}'")
     
     try:
-        request.urlretrieve(file_url, file_path)
+        request.urlretrieve(fu, fp)
     except Exception:
         if robust:
             traceback.print_exc()
@@ -55,7 +52,7 @@ def _get_package(latest_ver, robust, pl_name):
         else:
             raise
     
-    return pl_name, file_path
+    return pl_name, fp
 
 
 def download_releases(latest_ver, platforms, robust, max_workers):
@@ -71,44 +68,39 @@ def download_releases(latest_ver, platforms, robust, max_workers):
     return archives
 
 
-# Tar extraction helpers to prevent CVE-2007-4559 (path traversal attack) - Thanks to @Kasimir123 and @TrellixVulnTeam
-# To the author's knowledge, Python's standard library does not provide a function to extract tars safely
-# (It has been reported that shutil.unpack_archive() is affected by the vulnerability as well.)
 
-def _is_within_dir(directory, target):
-    abs_directory = abspath(directory)
-    abs_target = abspath(target)
-    prefix = os.path.commonprefix([abs_directory, abs_target])
-    return prefix == abs_directory
-
-def safe_extract(tar, path=".", **kwargs):
+def safe_extract(tar, dest_dir, **kwargs):
+    # NOTE CVE-2007-4559 workaround (cannot use shutil.unpack_archive())
+    dest_dir = dest_dir.resolve()
     for member in tar.getmembers():
-        member_path = join(path, member.name)
-        if not _is_within_dir(path, member_path):
+        # if str(dest_dir) != os.path.commonprefix( [dest_dir, (dest_dir/member.name).resolve()] ):
+        # ^ initial @Kasimir123/@TrellixVulnTeam logic, simplified into a one-liner; code below should have same effect
+        # if not (dest_dir/member.name).resolve().is_relative_to(dest_dir):  # python >= 3.9
+        if not str( (dest_dir/member.name).resolve() ).startswith( str(dest_dir) ):
             raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
-    tar.extractall(path, **kwargs)
+    tar.extractall(dest_dir, **kwargs)
 
 
 def unpack_archives(archives):
-    for pl_name, file_path in archives.items():
-        dest_path = join(DataTree, pl_name, "build_tar")
-        with tarfile.open(file_path) as archive:
-            safe_extract(archive, dest_path)
-        os.remove(file_path)
+    for pl_name, fp in archives.items():
+        dest_dir = DataTree / pl_name / "build_tar"
+        with tarfile.open(fp) as archive:
+            safe_extract(archive, dest_dir)
+        fp.unlink()
 
 
 def generate_bindings(archives, latest_ver):
     
     for pl_name in archives.keys():
         
-        pl_dir = join(DataTree, pl_name)
-        build_dir = join(pl_dir, "build_tar")
-        bin_dir = join(build_dir, "lib")
-        dirname = os.path.basename(pl_dir)
+        pl_dir = DataTree / pl_name
+        build_dir = pl_dir / "build_tar"
+        bin_dir = build_dir / "lib"
+        dirname = pl_dir.name
         
         if dirname.startswith("windows"):
             target_name = "pdfium.dll"
-            bin_dir = join(build_dir, "bin")
+            bin_dir = build_dir / "bin"
         elif dirname.startswith("darwin"):
             target_name = "pdfium.dylib"
         elif "linux" in dirname:
@@ -116,15 +108,14 @@ def generate_bindings(archives, latest_ver):
         else:
             raise ValueError(f"Unknown platform directory name '{dirname}'")
         
-        items = os.listdir(bin_dir)
+        items = list(bin_dir.iterdir())
         assert len(items) == 1
-        shutil.move(join(bin_dir, items[0]), join(pl_dir, target_name))
+        shutil.move(bin_dir / items[0], pl_dir / target_name)
         
-        ver_file = join(DataTree, pl_name, VerStatusFileName)
-        with open(ver_file, "w") as fh:
-            fh.write(latest_ver)
+        ver_file = DataTree / pl_name / VerStatusFileName
+        ver_file.write_text(latest_ver)
         
-        call_ctypesgen(pl_dir, join(build_dir, "include"))
+        call_ctypesgen(pl_dir, build_dir/"include")
         shutil.rmtree(build_dir)
 
 

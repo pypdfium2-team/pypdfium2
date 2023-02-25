@@ -1,14 +1,12 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
-import io
 import re
 import shutil
 import tempfile
 import traceback
+from pathlib import Path
 import PIL.Image
-from os.path import join, abspath
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pytest
@@ -48,9 +46,7 @@ def open_filepath_native():
 @pytest.fixture
 def open_bytes():
     
-    with open(TestFiles.render, "rb") as buffer:
-        bytedata = buffer.read()
-    
+    bytedata = TestFiles.render.read_bytes()
     assert isinstance(bytedata, bytes)
     pdf = pdfium.PdfDocument(bytedata)
     assert pdf._data_holder == [bytedata]
@@ -128,7 +124,7 @@ def test_open_encrypted():
 def test_open_nonascii():
     
     tempdir = tempfile.TemporaryDirectory(prefix="pypdfium2_")
-    nonascii_file = join(tempdir.name, "tên file chứakýtự éèáàçß 发短信.pdf")
+    nonascii_file = Path(tempdir.name) / "tên file chứakýtự éèáàçß 发短信.pdf"
     shutil.copy(TestFiles.render, nonascii_file)
     
     pdf = pdfium.PdfDocument(nonascii_file)
@@ -136,7 +132,7 @@ def test_open_nonascii():
     
     # FIXME cleanup permission error on Windows
     try:
-        os.remove(nonascii_file)
+        nonascii_file.unlink()
         tempdir.cleanup()
     except Exception:
         traceback.print_exc()

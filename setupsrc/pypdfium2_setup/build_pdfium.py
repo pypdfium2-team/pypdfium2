@@ -9,9 +9,9 @@ import sys
 import shutil
 import argparse
 import urllib.request
-from os.path import join, abspath, dirname
+from pathlib import Path, WindowsPath
 
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import (
     Host,
     SB_Dir,
@@ -26,22 +26,22 @@ from pypdfium2_setup.packaging_base import (
 )
 
 
-PatchDir       = join(SB_Dir, "patches")
-DepotToolsDir  = join(SB_Dir, "depot_tools")
-PDFiumDir      = join(SB_Dir, "pdfium")
-PDFiumBuildDir = join(PDFiumDir, "out", "Default")
-OutputDir      = join(DataTree, PlatformNames.sourcebuild)
+PatchDir       = SB_Dir / "patches"
+DepotToolsDir  = SB_Dir / "depot_tools"
+PDFiumDir      = SB_Dir / "pdfium"
+PDFiumBuildDir = PDFiumDir / "out" / "Default"
+OutputDir      = DataTree / PlatformNames.sourcebuild
 
 PatchesMain = [
-    (join(PatchDir, "shared_library.patch"), PDFiumDir),
-    (join(PatchDir, "public_headers.patch"), PDFiumDir),
+    (PatchDir/"shared_library.patch", PDFiumDir),
+    (PatchDir/"public_headers.patch", PDFiumDir),
 ]
 PatchesWindows = [
-    (join(PatchDir, "win", "pdfium.patch"), PDFiumDir),
-    (join(PatchDir, "win", "build.patch"), join(PDFiumDir, "build")),
+    (PatchDir/"win"/"pdfium.patch", PDFiumDir),
+    (PatchDir/"win"/"build.patch", PDFiumDir/"build"),
 ]
 PatchesSyslibs = [
-    (join(PatchDir, "syslibs_sourcebuild.patch"), join(PDFiumDir, "build"))
+    (PatchDir/"syslibs_sourcebuild.patch", PDFiumDir/"build")
 ]
 
 DefaultConfig = {
@@ -74,12 +74,10 @@ elif sys.platform.startswith("darwin"):
 
 def dl_depottools(do_update):
     
-    if not os.path.isdir(SB_Dir):
-        os.makedirs(SB_Dir)
+    SB_Dir.mkdir(parents=True, exist_ok=True)
     
     is_update = True
-    
-    if os.path.isdir(DepotToolsDir):
+    if DepotToolsDir.exists():
         if do_update:
             print("DepotTools: Revert and update ...")
             run_cmd(["git", "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
@@ -91,7 +89,7 @@ def dl_depottools(do_update):
         print("DepotTools: Download ...")
         run_cmd(["git", "clone", "--depth", "1", DepotTools_URL, DepotToolsDir], cwd=SB_Dir)
     
-    os.environ["PATH"] += os.pathsep + DepotToolsDir
+    os.environ["PATH"] += os.pathsep + str(DepotToolsDir)
     
     return is_update
 
@@ -100,7 +98,7 @@ def dl_pdfium(GClient, do_update, revision):
     
     is_sync = True
     
-    if os.path.isdir(PDFiumDir):
+    if PDFiumDir.exists():
         if do_update:
             print("PDFium: Revert / Sync  ...")
             run_cmd([GClient, "revert"], cwd=SB_Dir)
@@ -121,13 +119,12 @@ def _dl_unbundler():
 
     # Workaround: download missing tools for unbundle/replace_gn_files.py (syslibs build)
 
-    tool_dir = join(PDFiumDir,"tools","generate_shim_headers")
-    tool_file = join(tool_dir, "generate_shim_headers.py")
+    tool_dir = PDFiumDir / "tools" / "generate_shim_headers"
+    tool_file = tool_dir / "generate_shim_headers.py"
     tool_url = "https://raw.githubusercontent.com/chromium/chromium/main/tools/generate_shim_headers/generate_shim_headers.py"
 
-    if not os.path.isdir(tool_dir):
-        os.makedirs(tool_dir)
-    if not os.path.exists(tool_file):
+    tool_dir.mkdir(parents=True, exist_ok=True)
+    if not tool_file.exists():
         urllib.request.urlretrieve(tool_url, tool_file)
 
 
@@ -154,18 +151,15 @@ def get_pdfium_version():
 
 
 def update_version(v_libpdfium):
-    ver_file = join(OutputDir, VerStatusFileName)
-    with open(ver_file, "w") as fh:
-        fh.write( str(v_libpdfium) )
+    ver_file = OutputDir / VerStatusFileName
+    ver_file.write_text( str(v_libpdfium) )
 
 
 def _create_resources_rc(v_libpdfium):
     
-    input_path = join(PatchDir, "win", "resources.rc")
-    output_path = join(PDFiumDir, "resources.rc")
-    
-    with open(input_path, "r") as fh:
-        content = fh.read()
+    input_path = PatchDir / "win" / "resources.rc"
+    output_path = PDFiumDir / "resources.rc"
+    content = input_path.read_text()
     
     # NOTE RC does not seem to tolerate commit hash, so set a dummy version instead
     if not v_libpdfium.isnumeric():
@@ -173,14 +167,12 @@ def _create_resources_rc(v_libpdfium):
     
     content = content.replace("$VERSION_CSV", v_libpdfium.replace(".", ","))
     content = content.replace("$VERSION", v_libpdfium)
-    
-    with open(output_path, "w") as fh:
-        fh.write(content)
+    output_path.write_text(content)
 
 
-def _apply_patchset(patchset):
+def _apply_patchset(patchset, check=True):
     for patch, cwd in patchset:
-        run_cmd(["git", "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd)
+        run_cmd(["git", "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=check)
 
 
 def patch_pdfium(v_libpdfium):
@@ -191,10 +183,8 @@ def patch_pdfium(v_libpdfium):
 
 
 def configure(GN, config):
-    if not os.path.exists(PDFiumBuildDir):
-        os.makedirs(PDFiumBuildDir)
-    with open(join(PDFiumBuildDir, "args.gn"), "w") as args_handle:
-        args_handle.write(config)
+    PDFiumBuildDir.mkdir(parents=True, exist_ok=True)
+    (PDFiumBuildDir / "args.gn").write_text(config)
     run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
 
 
@@ -205,8 +195,8 @@ def build(Ninja, target):
 def find_lib(src_libname=None, directory=PDFiumBuildDir):
     
     if src_libname is not None:
-        path = join(PDFiumBuildDir, src_libname)
-        if os.path.isfile(path):
+        path = directory / src_libname
+        if path.exists():
             return path
         else:
             print("Warning: Binary not found under given name.", file=sys.stderr)
@@ -221,8 +211,8 @@ def find_lib(src_libname=None, directory=PDFiumBuildDir):
         # TODO implement fallback artifact detection
         raise RuntimeError(f"Not sure how pdfium artifact is called on platform '{sys.platform}'")
     
-    libpath = join(directory, libname)
-    assert os.path.exists(libpath)
+    libpath = directory / libname
+    assert libpath.exists()
     
     return libpath
 
@@ -234,17 +224,18 @@ def pack(src_libpath, v_libpdfium, destname=None):
     if destname is None:
         destname = LibnameForSystem[Host.system]
     
-    destpath = join(OutputDir, destname)
+    OutputDir.mkdir(parents=True, exist_ok=True)
+    destpath = OutputDir / destname
     shutil.copy(src_libpath, destpath)
     
     update_version(v_libpdfium)
     
-    include_dir = join(PDFiumDir, "public")
+    include_dir = PDFiumDir / "public"
     call_ctypesgen(OutputDir, include_dir)
 
 
 def get_tool(name):
-    bin = join(DepotToolsDir, name)
+    bin = DepotToolsDir / name
     if sys.platform.startswith("win32"):
         bin += ".bat"
     return bin
@@ -278,20 +269,19 @@ def main(
         b_win_sdk_dir = None,
     ):
     
-    if not os.path.exists(OutputDir):
-        os.makedirs(OutputDir)
+    # NOTE defaults handled internally to avoid duplication with parse_args()
     
     if b_revision is None:
         b_revision = "main"
     if b_target is None:
         b_target = "pdfium"
-    if b_win_sdk_dir is None:
-        b_win_sdk_dir = R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
     
     if sys.platform.startswith("win32"):
+        if b_win_sdk_dir is None:
+            b_win_sdk_dir = WindowsPath(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64")
+        assert b_win_sdk_dir.exists()
+        os.environ["PATH"] += os.pathsep + str(b_win_sdk_dir)
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
-        assert os.path.isdir(b_win_sdk_dir)
-        os.environ["PATH"] += os.pathsep + b_win_sdk_dir
     
     dl_depottools(b_update)
     
@@ -304,10 +294,9 @@ def main(
     
     if pdfium_dl_done:
         patch_pdfium(v_libpdfium)
-        if b_use_syslibs:
-            # FIXME needs reset if doing normal sourcebuild afterwards
-            _apply_patchset(PatchesSyslibs)
-            _dl_unbundler()
+    if b_use_syslibs:  # FIXME needs reset
+        _apply_patchset(PatchesSyslibs, check=False)
+        _dl_unbundler()
 
     if b_use_syslibs:
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
@@ -358,6 +347,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--win-sdk-dir",
+        type = WindowsPath,
         help = "Path to the Windows SDK (Windows only)",
     )
     

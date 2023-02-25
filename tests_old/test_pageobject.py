@@ -2,10 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
-from os.path import (
-    join,
-    exists,
-)
 import pytest
 import PIL.Image
 import pypdfium2 as pdfium
@@ -111,7 +107,7 @@ def test_new_image_from_jpeg():
     page.gen_content()
     out_path = OutputDir / "image_jpeg.pdf"
     pdf.save(out_path)
-    assert exists(out_path)
+    assert out_path.exists()
     
     page._finalizer()
     pdf._finalizer()
@@ -178,7 +174,7 @@ def test_replace_image_with_jpeg():
     page.gen_content()
     output_path = OutputDir / "replace_images.pdf"
     pdf.save(output_path)
-    assert exists(output_path)
+    assert output_path.exists()
 
 
 @pytest.mark.parametrize(
@@ -211,7 +207,7 @@ def test_image_get_bitmap(render):
         assert bitmap.height == 90
         assert bitmap.stride == 864
         assert bitmap.rev_byteorder is False
-        output_path = join(OutputDir, "extract_rendered.png")
+        output_path = OutputDir / "extract_rendered.png"
     else:
         assert bitmap.format == pdfium_c.FPDFBitmap_Gray
         assert bitmap.n_channels == 1
@@ -219,12 +215,12 @@ def test_image_get_bitmap(render):
         assert bitmap.height == 48
         assert bitmap.stride == 116
         assert bitmap.rev_byteorder is False
-        output_path = join(OutputDir, "extract.png")
+        output_path = OutputDir / "extract.png"
     
     pil_image = bitmap.to_pil()
     assert isinstance(pil_image, PIL.Image.Image)
     pil_image.save(output_path)
-    assert exists(output_path)
+    assert output_path.exists()
 
 
 def test_remove_image():
@@ -247,4 +243,4 @@ def test_remove_image():
     
     output_path = OutputDir / "test_remove_objects.pdf"
     pdf.save(output_path)
-    assert exists(output_path)
+    assert output_path.exists()
