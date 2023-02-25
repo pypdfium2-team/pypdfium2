@@ -63,10 +63,6 @@ jobs:
       - name: Install pypdfium2
         run: python3 -m pip install --no-build-isolation -e .
       
-      # TODO test after autorelease run
-      - name: Run test suite
-        run: make test
-      
       # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
       # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
       # -> TODO avoid tmp tag
@@ -81,6 +77,9 @@ jobs:
       - name: Get new version
         id: get_version
         run: echo "new_version=$(git describe --abbrev=0)" >> $GITHUB_OUTPUT
+      
+      - name: Run test suite
+        run: make test
       
       - name: Run packaging script
         run: make packaging
