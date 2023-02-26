@@ -33,13 +33,13 @@ def clear_data(download_files):
             shutil.rmtree(pl_dir)
 
 
-def _get_package(latest_ver, robust, pl_name):
+def _get_package(version, robust, pl_name):
     
     pl_dir = DataTree / pl_name
     pl_dir.mkdir(parents=True, exist_ok=True)
     
     fn = f"{ReleaseNames[pl_name]}.tgz"
-    fu = f"{ReleaseURL}{latest_ver}/{fn}"
+    fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
     print(f"'{fu}' -> '{fp}'")
     
@@ -55,12 +55,12 @@ def _get_package(latest_ver, robust, pl_name):
     return pl_name, fp
 
 
-def download_releases(latest_ver, platforms, robust, max_workers):
+def download_releases(version, platforms, robust, max_workers):
     if not max_workers:
         max_workers = len(platforms)
     archives = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        func = functools.partial(_get_package, latest_ver, robust)
+        func = functools.partial(_get_package, version, robust)
         for pl_name, file_path in pool.map(func, platforms):
             if pl_name is None:
                 continue
@@ -94,7 +94,7 @@ def unpack_archives(archives):
         fp.unlink()
 
 
-def generate_bindings(archives, latest_ver):
+def generate_bindings(archives, version):
     
     for pl_name in archives.keys():
         
@@ -118,13 +118,13 @@ def generate_bindings(archives, latest_ver):
         shutil.move(bin_dir / items[0], pl_dir / target_name)
         
         ver_file = DataTree / pl_name / VerStatusFileName
-        ver_file.write_text(latest_ver)
+        ver_file.write_text(str(version))
         
         call_ctypesgen(pl_dir, build_dir/"include")
         shutil.rmtree(build_dir)
 
 
-def main(platforms, robust=False, max_workers=None):
+def main(platforms, version, robust=False, max_workers=None):
     
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
@@ -132,12 +132,10 @@ def main(platforms, robust=False, max_workers=None):
         platforms = platforms.copy()
         platforms[platforms.index(BinaryTarget_Auto)] = Host.platform
     
-    latest_ver = str( get_latest_version() )
     clear_data(platforms)
-    
-    archives = download_releases(latest_ver, platforms, robust, max_workers)
+    archives = download_releases(version, platforms, robust, max_workers)
     unpack_archives(archives)
-    generate_bindings(archives, latest_ver)
+    generate_bindings(archives, version)
 
 
 def parse_args(argv):
@@ -152,6 +150,12 @@ def parse_args(argv):
         choices = platform_choices,
         default = BinaryPlatforms,
         help = f"The platform(s) to include. `auto` represents the current host platform. Choices: {platform_choices}.",
+    )
+    parser.add_argument(
+        "--version", "-v",
+        type = int,
+        default = get_latest_version(),
+        help = "The pdfium-binaries release to use (defaults to latest). Must be a valid tag integer."
     )
     parser.add_argument(
         "--robust",
@@ -170,6 +174,7 @@ def run_cli(argv=sys.argv[1:]):
     args = parse_args(argv)
     main(
         args.platforms,
+        version = args.version,
         robust = args.robust,
         max_workers = args.max_workers,
     )

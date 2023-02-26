@@ -41,7 +41,7 @@ jobs:
         run: python3 ./setupsrc/pypdfium2_setup/build_pdfium.py
       
       - name: Install
-        run: PDFIUM_BINARY="sourcebuild" python3 -m pip install .
+        run: PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
       
       - name: Run Test Suite
         run: make test

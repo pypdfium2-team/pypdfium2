@@ -60,7 +60,7 @@ def get_parser():
 def setup_logging():
     
     # FIXME can we make some sort of public API to set this without a strange import?
-    bases.DEBUG_AUTOCLOSE = bool(int( os.environ.get("DEBUG_AUTOCLOSE", "0") ))
+    bases.DEBUG_AUTOCLOSE = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
     
     lib_logger = logging.getLogger("pypdfium2")
     lib_logger.addHandler(logging.StreamHandler())

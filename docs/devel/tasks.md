@@ -16,7 +16,7 @@ Also see the issues panel and inline `TODO`/`FIXME` marks in source code.
 * Migrate everything to pathlib
 * craft_packages: add means to skip platforms for which artefacts are missing.
 * update_pdfium: only generate the bindings file once for all platforms.
-* update_pdfium: add option to download a custom pdfium-binaries release (i. e. not the latest).
+* update_pdfium/setup: add option to use V8 binaries.
 * packaging_base: consider using a class for `VerNamespace`.
 * Use the logging module rather than `print()`.
 

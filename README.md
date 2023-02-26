@@ -32,7 +32,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
   * With a locally built PDFium binary
     ```bash
     python3 setupsrc/pypdfium2_setup/build_pdfium.py
-    PDFIUM_BINARY="sourcebuild" python3 -m pip install .
+    PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
     ```
     The build script provides a few options that can be listed by calling it with `--help`.
     Building PDFium may take a long time because it comes with its own toolchain and bundled dependencies, rather than using system-provided components.[^pdfium_buildsystem]
@@ -60,9 +60,10 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
 As pypdfium2 uses external binaries, there are some special setup aspects to consider.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
-* The environment variable `PDFIUM_BINARY` controls which binary to include on setup.
+* The environment variable `PDFIUM_PLATFORM` controls which binary to include on setup.
   * If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
-    Platform files are downloaded/generated automatically, if not present yet. By default, existing platform files will also be updated if a newer version is available, but this may be prevented by creating an empty file called `.lock_autoupdate.txt` in `data/`.
+    By default, the latest pdfium-binaries release is used, otherwise `PDFIUM_VERSION` may be specified to select a specific one.
+    (If matching platform files already exist in the `data/` cache, they will be reused as-is.)
   * If set to a certain platform identifier, binaries for the requested platform will be used.[^platform_ids]
     In this case, platform files will not be downloaded/generated automatically, but need to be supplied beforehand using the `update_pdfium.py` script.
   * If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts, assuming a prior run of `build_pdfium.py`.

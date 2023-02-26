@@ -14,7 +14,7 @@ lib_logger.setLevel(logging.DEBUG)
 
 pdfium.PdfUnspHandler().setup()
 
-bases.DEBUG_AUTOCLOSE = bool(int( os.environ.get("DEBUG_AUTOCLOSE", "0") ))
+bases.DEBUG_AUTOCLOSE = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
 
 PyVersion = (sys.version_info.major, sys.version_info.minor)
 

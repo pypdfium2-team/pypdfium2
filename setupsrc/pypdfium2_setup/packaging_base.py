@@ -12,7 +12,8 @@ from pathlib import Path
 
 # TODO improve consistency of variable names; think about variables to move in/out
 
-BinaryTargetVar   = "PDFIUM_BINARY"
+VersionTargetVar  = "PDFIUM_VERSION"
+BinaryTargetVar   = "PDFIUM_PLATFORM"
 BinaryTarget_None = "none"
 BinaryTarget_Auto = "auto"
 BindingsFileName  = "raw.py"
