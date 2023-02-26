@@ -12,6 +12,7 @@ on:
     paths:
       - docs/**
       - src/**
+      - README.md
   workflow_run:
     # well, actually it should only run if ${{ inputs.publish }} is set...
     workflows: ['Build Packages']
