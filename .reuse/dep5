@@ -103,3 +103,9 @@ Comment:
 Files: req/*.txt
 Copyright: 2023 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
+
+Files: RELEASE.md
+Copyright: 2023 geisserml <geisserml@gmail.com>
+License: CC-BY-4.0
+Comment:
+    Temporary autorelease file
