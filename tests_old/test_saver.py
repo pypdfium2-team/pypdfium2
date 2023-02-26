@@ -18,7 +18,7 @@ def test_save():
     
     new_pdf = pdfium.PdfDocument(new_pdf_raw)
     assert len(new_pdf) == 1
-    page = new_pdf.get_page(0)
+    page = new_pdf[0]
     assert page.get_size() == (595, 842)
     
     output_file = OutputDir / "tiling.pdf"

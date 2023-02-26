@@ -20,7 +20,7 @@ from .conftest import (
 @pytest.fixture
 def sample_page():
     pdf = pdfium.PdfDocument(TestFiles.render)
-    page = pdf.get_page(0)
+    page = pdf[0]
     yield page
 
 
@@ -172,7 +172,7 @@ def test_render_page_fill_color(fill_color, sample_page):
 
 def test_render_page_colorscheme():
     pdf = pdfium.PdfDocument(TestFiles.text)
-    page = pdf.get_page(0)
+    page = pdf[0]
     color_scheme = pdfium.PdfColorScheme(
         path_fill   = (15,  15,  15,  255),
         path_stroke = (255, 255, 255, 255),
@@ -323,7 +323,7 @@ def test_render_form(with_forms, exp_color):
     else:
         assert pdf.formenv is None
     
-    page = pdf.get_page(0)
+    page = pdf[0]
     image = page.render(
         may_draw_forms = with_forms,
     ).to_pil()

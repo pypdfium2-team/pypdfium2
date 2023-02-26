@@ -140,7 +140,7 @@ Here are some examples of using the support model API.
 
 * Load a page to work with
   ```python
-  page = pdf[0]  # or pdf.get_page(0)
+  page = pdf[0]
   
   # Get page dimensions in PDF canvas units (1pt->1/72in by default)
   width, height = page.get_size()

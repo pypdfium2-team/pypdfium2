@@ -11,7 +11,7 @@ def test_get_text_bounded_defaults_with_rotation():
     # Make sure defaults use native PDF coordinates instead of normalized page size
     
     pdf = pdfium.PdfDocument(TestResources.text)
-    page = pdf.get_page(0)
+    page = pdf[0]
     page.set_rotation(90)
     textpage = page.get_textpage()
     

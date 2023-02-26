@@ -23,7 +23,7 @@ def _check_general(pdf, n_pages=1):
 
 def _check_render(pdf):
     
-    page = pdf.get_page(0)
+    page = pdf[0]
     pil_image = page.render().to_pil()
     
     assert pil_image.mode == "RGB"
@@ -167,7 +167,7 @@ def test_object_hierarchy():
     assert isinstance(pdf, pdfium.PdfDocument)
     assert isinstance(pdf.raw, pdfium_c.FPDF_DOCUMENT)
     
-    page = pdf.get_page(0)
+    page = pdf[0]
     assert isinstance(page, pdfium.PdfPage)
     assert isinstance(page.raw, pdfium_c.FPDF_PAGE)
     assert page.pdf is pdf

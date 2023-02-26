@@ -11,7 +11,7 @@ from .conftest import TestFiles, OutputDir
 
 def test_image_objects():
     pdf = pdfium.PdfDocument(TestFiles.images)
-    page = pdf.get_page(0)
+    page = pdf[0]
     assert page.pdf is pdf
     
     images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
@@ -40,7 +40,7 @@ def test_image_objects():
 def test_misc_objects():
     
     pdf = pdfium.PdfDocument(TestFiles.render)
-    page = pdf.get_page(0)
+    page = pdf[0]
     assert page.pdf is pdf
     
     for obj in page.get_objects():
@@ -149,7 +149,7 @@ def test_new_image_from_bitmap():
 def test_replace_image_with_jpeg():
     
     pdf = pdfium.PdfDocument(TestFiles.images)
-    page = pdf.get_page(0)
+    page = pdf[0]
     
     images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
     matrices = [img.get_matrix() for img in images]
@@ -183,7 +183,7 @@ def test_replace_image_with_jpeg():
 def test_image_get_bitmap(render):
     
     pdf = pdfium.PdfDocument(TestFiles.images)
-    page = pdf.get_page(0)
+    page = pdf[0]
     
     all_images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
     image = all_images[0]
@@ -226,7 +226,7 @@ def test_image_get_bitmap(render):
 def test_remove_image():
     
     pdf = pdfium.PdfDocument(TestFiles.images)
-    page_1 = pdf.get_page(0)
+    page_1 = pdf[0]
     
     # TODO order images by position
     images = list( page_1.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )

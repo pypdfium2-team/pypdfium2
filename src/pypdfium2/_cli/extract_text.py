@@ -28,7 +28,7 @@ def main(args):
     sep = ""
     for i in args.pages:
         
-        page = pdf.get_page(i)
+        page = pdf[i]
         textpage = page.get_textpage()
         
         # TODO let caller pass in possible range/boundary parameters

@@ -51,7 +51,7 @@ def main(args):
     
     images = []
     for i in args.pages:
-        page = pdf.get_page(i)
+        page = pdf[i]
         obj_searcher = page.get_objects(
             filter = (pdfium_c.FPDF_PAGEOBJ_IMAGE, ),
             max_depth = args.max_depth,

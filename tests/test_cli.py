@@ -108,7 +108,7 @@ def test_tile(tmp_path):
     
     pdf = pdfium.PdfDocument(out)
     assert len(pdf) == 1
-    page = pdf.get_page(0)
+    page = pdf[0]
     pageobjs = list( page.get_objects(max_depth=1) )
     assert len(pageobjs) == 3
     assert all(o.type == pdfium_c.FPDF_PAGEOBJ_FORM for o in pageobjs)

@@ -130,7 +130,7 @@ class PdfDocument (AutoCloseable):
     
     def __iter__(self):
         for i in range( len(self) ):
-            yield self.get_page(i)
+            yield self[i]
     
     def __getitem__(self, i):
         return self.get_page(i)
@@ -317,6 +317,7 @@ class PdfDocument (AutoCloseable):
             raise PdfiumError(f"Failed to delete attachment at index {index}.")
     
     
+    # TODO deprecate in favour of index access?
     def get_page(self, index):
         """
         Returns:
@@ -531,7 +532,7 @@ class PdfDocument (AutoCloseable):
             input_data,
             password = password,
         )
-        page = pdf.get_page(index)
+        page = pdf[index]
         
         bitmap = renderer(page, **kwargs)
         info = bitmap.get_info()

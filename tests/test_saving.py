@@ -86,6 +86,6 @@ def test_save_deletion():
     saved_pdf = pdfium.PdfDocument(buffer, autoclose=True)
     assert len(saved_pdf) == 2
     
-    page = saved_pdf.get_page(0)
+    page = saved_pdf[0]
     textpage = page.get_textpage()
     assert textpage.get_text_bounded() == "Page\r\n2"

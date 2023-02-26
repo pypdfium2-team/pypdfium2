@@ -15,7 +15,7 @@ def text_pdf():
 
 @pytest.fixture
 def textpage(text_pdf):
-    page = text_pdf.get_page(0)
+    page = text_pdf[0]
     textpage = page.get_textpage()
     assert isinstance(textpage, pdfium.PdfTextPage)
     yield textpage
@@ -23,7 +23,7 @@ def textpage(text_pdf):
 
 @pytest.fixture
 def linkpage(text_pdf):
-    page = text_pdf.get_page(1)
+    page = text_pdf[1]
     linkpage = page.get_textpage()
     yield linkpage
 
@@ -120,7 +120,7 @@ def test_get_index(textpage):
 
 def test_textpage_empty():
     pdf = pdfium.PdfDocument(TestFiles.empty)
-    page = pdf.get_page(0)
+    page = pdf[0]
     textpage = page.get_textpage()
     
     assert textpage.get_text_bounded() == ""

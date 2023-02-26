@@ -24,7 +24,7 @@ def _check_pdf(pdf):
     assert isinstance(pdf.get_identifier(), bytes)
     
     for i in range(n_pages):
-        page = pdf.get_page(i)
+        page = pdf[i]
         assert page.get_size() == pdf.get_page_size(i)
         page.close()
 
@@ -151,7 +151,7 @@ def test_misc():
     assert pdf.get_identifier(pdfium_c.FILEIDTYPE_PERMANENT) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
     assert pdf.get_identifier(pdfium_c.FILEIDTYPE_CHANGING) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
     assert pdf.get_pagemode() == pdfium_c.PAGEMODE_USENONE
-    page = pdf.get_page(0)
+    page = pdf[0]
     assert pdf.get_page_size(0) == page.get_size()
     assert pdf.get_page_label(0) == ""
 

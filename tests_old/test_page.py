@@ -11,7 +11,7 @@ def test_boxes():
     
     pdf = pdfium.PdfDocument(TestFiles.render)
     index = 0
-    page = pdf.get_page(index)
+    page = pdf[index]
     assert page.get_size() == pdf.get_page_size(index) == (595, 842)
     assert page.get_mediabox() == (0, 0, 595, 842)
     assert isinstance(page, pdfium.PdfPage)
@@ -33,7 +33,7 @@ def test_boxes():
 
 def test_mediabox_fallback():
     pdf = pdfium.PdfDocument(TestFiles.box_fallback)
-    page = pdf.get_page(0)
+    page = pdf[0]
     assert page.get_mediabox() == (0, 0, 612, 792)
 
 
