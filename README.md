@@ -528,7 +528,7 @@ pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by in
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
 
-As of early 2023, a single developer is author and rightsholder of the code base (apart from a few minor, insignificant [code contributions](https://github.com/pypdfium2-team/pypdfium2/graphs/contributors)).
+As of early 2023, a single developer is author and rightsholder of the code base (apart from a few minor [code contributions](https://github.com/pypdfium2-team/pypdfium2/graphs/contributors)).
 
 [^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the authors are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). `pdf.js` is limited to a web environment. Creating Python bindings to `PDFBox` might be possible but there is no serious solution yet (apart from amateurish wrappers around its command-line API).
 
@@ -711,6 +711,8 @@ Faulty PyPI releases may be yanked using the web interface.
 * [kobaltcore](https://github.com/kobaltcore): Bug fix for `PdfDocument.save()`.
 * [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium with ctypes in `redstork` and `pdfbrain`.
 * [Peter Saalbrink](https://github.com/petersaalbrink): Code style improvements to the multipage renderer.
+
+... and further [code contributors](https://github.com/pypdfium2-team/pypdfium2/graphs/contributors) (GitHub stats).
 
 *If you have somehow contributed to this project but we forgot to mention you here, please let us know.*
 
