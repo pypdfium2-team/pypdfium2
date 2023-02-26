@@ -70,11 +70,16 @@ def download_releases(latest_ver, platforms, robust, max_workers):
 
 
 def safe_extract(tar, dest_dir, **kwargs):
-    # NOTE CVE-2007-4559 workaround (cannot use shutil.unpack_archive())
+    
+    # Workaround against CVE-2007-4559 (path traversal attack) (thanks @Kasimir123 / @TrellixVulnTeam)
+    # Actually, we would just like to use shutil.unpack_archive() or similar, but to the author's knowledge, the stdlib still does not provide any (simple) means to extract tars safely (as of Feb 2023).
+    # It is not understandable why they don't just add an option `prevent_traversal` or something to shutil.unpack_archive().
+    
     dest_dir = dest_dir.resolve()
     for member in tar.getmembers():
         # if str(dest_dir) != os.path.commonprefix( [dest_dir, (dest_dir/member.name).resolve()] ):
         # ^ initial @Kasimir123/@TrellixVulnTeam logic, simplified into a one-liner; code below should have same effect
+        # (yes, this also works against absolute paths)
         # if not (dest_dir/member.name).resolve().is_relative_to(dest_dir):  # python >= 3.9
         if not str( (dest_dir/member.name).resolve() ).startswith( str(dest_dir) ):
             raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
