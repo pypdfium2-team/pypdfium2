@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import (
     run_cmd,
-    clean_artefacts,
+    clean_platfiles,
     Host,
     ModuleDir,
     BindingsFileName,
@@ -66,12 +66,12 @@ def main():
     
     os.environ[BinaryTargetVar] = BinaryTarget_None
     run_build(["--sdist"])
-    clean_artefacts()
+    clean_platfiles()
     
     for plat in BinaryPlatforms:
         os.environ[BinaryTargetVar] = plat
         run_build(["--wheel"])
-        clean_artefacts()
+        clean_platfiles()
     
     stash.pop()
 

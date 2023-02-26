@@ -219,7 +219,7 @@ def call_ctypesgen(target_dir, include_dir):
     bindings.write_text(text)
 
 
-def clean_artefacts():
+def clean_platfiles():
     
     deletables = [
         SourceTree / "build",
@@ -243,8 +243,27 @@ def get_platfiles(pl_name):
     return platfiles
 
 
-def copy_platfiles(pl_name):
+def emplace_platfiles(pl_name):
+    
+    pl_dir = DataTree / pl_name
+    if not pl_dir.exists():
+        raise RuntimeError(f"Missing platform directory {pl_name} - you might have forgotten to run update_pdfium.py")
+    
+    ver_file = pl_dir / VerStatusFileName
+    if not ver_file.exists():
+        raise RuntimeError(f"Missing PDFium version file for {pl_name}")
+    
+    ver_changes = dict()
+    ver_changes["V_LIBPDFIUM"] = ver_file.read_text().strip()
+    if pl_name == PlatformNames.sourcebuild:
+        ver_changes["V_BUILDNAME"] = "source"
+    else:
+        ver_changes["V_BUILDNAME"] = "pdfium-binaries"
+    set_versions(ver_changes)
+    
+    clean_platfiles()
     platfiles = get_platfiles(pl_name)
+    
     for fp in platfiles:
         if not fp.exists():
             raise RuntimeError(f"Platform file missing: {fp}")

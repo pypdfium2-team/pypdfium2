@@ -15,8 +15,8 @@ from pypdfium2_setup.packaging_base import (
     PlatformNames,
     plat_to_system,
     get_wheel_tag,
-    clean_artefacts,
-    copy_platfiles,
+    clean_platfiles,
+    emplace_platfiles,
     set_versions,
 )
 
@@ -47,27 +47,10 @@ SetupKws = dict(
 
 def mkwheel(pl_name):
     
+    emplace_platfiles(pl_name)
+    
     system = plat_to_system(pl_name)
     libname = LibnameForSystem[system]
-    
-    pl_dir = DataTree / pl_name
-    if not pl_dir.exists():
-        raise RuntimeError(f"Missing platform directory {pl_name} - you might have forgotten to run update_pdfium.py")
-    
-    ver_file = pl_dir / VerStatusFileName
-    if not ver_file.exists():
-        raise RuntimeError(f"Missing PDFium version file for {pl_name}")
-    
-    ver_changes = dict()
-    ver_changes["V_LIBPDFIUM"] = ver_file.read_text().strip()
-    if pl_name == PlatformNames.sourcebuild:
-        ver_changes["V_BUILDNAME"] = "source"
-    else:
-        ver_changes["V_BUILDNAME"] = "pdfium-binaries"
-    set_versions(ver_changes)
-    
-    clean_artefacts()
-    copy_platfiles(pl_name)
     
     setuptools.setup(
         package_data = {"": [libname]},

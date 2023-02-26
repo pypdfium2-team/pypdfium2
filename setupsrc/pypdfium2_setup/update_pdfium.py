@@ -23,6 +23,7 @@ from pypdfium2_setup.packaging_base import (
     BinaryTarget_Auto,
     get_latest_version,
     call_ctypesgen,
+    emplace_platfiles,
 )
 
 
@@ -128,18 +129,26 @@ def generate_bindings(archives, version):
         shutil.rmtree(build_dir)
 
 
-def main(platforms, version, robust=False, max_workers=None, use_v8=False):
+def main(platforms, version, robust=False, max_workers=None, use_v8=False, emplace=False):
+    
+    # FIXME questionable code style?
+    
+    if not platforms:
+        platforms = [Host.platform] if emplace else BinaryPlatforms
     
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     if BinaryTarget_Auto in platforms:
         platforms = platforms.copy()
         platforms[platforms.index(BinaryTarget_Auto)] = Host.platform
-    
+
     clear_data(platforms)
     archives = download_releases(version, platforms, robust, max_workers, use_v8)
     unpack_archives(archives)
     generate_bindings(archives, version)
+    
+    if emplace:
+        emplace_platfiles(Host.platform)
 
 
 def parse_args(argv):
@@ -152,7 +161,6 @@ def parse_args(argv):
         nargs = "+",
         metavar = "identifier",
         choices = platform_choices,
-        default = BinaryPlatforms,
         help = f"The platform(s) to include. `auto` represents the current host platform. Choices: {platform_choices}.",
     )
     parser.add_argument(
@@ -175,6 +183,11 @@ def parse_args(argv):
         "--use-v8",
         action = "store_true",
         help = "Use PDFium V8 binaries for JavaScript and XFA support."
+    )
+    parser.add_argument(
+        "--emplace",
+        action = "store_true",
+        help = "Move binaries for the host platform into the source tree.",
     )
     return parser.parse_args(argv)
 
