@@ -42,7 +42,6 @@ def install_handler():
     
     pl_dir = DataTree / pl_name
     ver_file = pl_dir / VerStatusFileName
-    v8_file = pl_dir / V8StatusFile
     
     curr_ver = None
     if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
@@ -54,13 +53,12 @@ def install_handler():
     else:
         req_ver = int(req_ver)
     
-    had_v8 = v8_file.exists()
+    had_v8 = (pl_dir / V8StatusFile).exists()
     use_v8 = bool(int( os.environ.get("PDFIUM_USE_V8", 0) ))
     
     if curr_ver != req_ver or had_v8 != use_v8:
         print(f"Switching pdfium binary from {curr_ver} (v8 {had_v8}) to {req_ver} (v8 {use_v8})", file=sys.stderr)
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
-        v8_file.touch() if use_v8 else v8_file.unlink(missing_ok=True)  # cleanup not actually necessary
     mkwheel(pl_name)
 
 

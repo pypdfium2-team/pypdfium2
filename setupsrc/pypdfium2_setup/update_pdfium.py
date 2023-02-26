@@ -17,6 +17,7 @@ from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
     VerStatusFileName,
+    V8StatusFile,
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
@@ -57,19 +58,24 @@ def _get_package(pl_name, version, robust, use_v8):
         else:
             raise
     
+    if use_v8:
+        (pl_dir / V8StatusFile).touch(exist_ok=True)
+    
     return pl_name, fp
 
 
 def download_releases(version, platforms, robust, max_workers, use_v8):
+    
     if not max_workers:
         max_workers = len(platforms)
+    
     archives = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         func = functools.partial(_get_package, version=version, robust=robust, use_v8=use_v8)
         for pl_name, file_path in pool.map(func, platforms):
-            if pl_name is None:
-                continue
-            archives[pl_name] = file_path
+            if pl_name is not None:
+                archives[pl_name] = file_path
+    
     return archives
 
 
