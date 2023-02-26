@@ -60,7 +60,7 @@ def main():
     parser = argparse.ArgumentParser(
         description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`. (This script does not take any arguments.)",
     )
-    args = parser.parse_args()
+    parser.parse_args()
     
     stash = ArtefactStash()
     

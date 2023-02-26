@@ -355,16 +355,7 @@ def parse_args(argv):
 
 
 def main_cli(argv=sys.argv[1:]):
-    args = parse_args(argv)
-    return main(
-        b_src_libname = args.src_libname,
-        b_dest_libname = args.dest_libname,
-        b_update = args.update,
-        b_revision = args.revision,
-        b_target = args.target,
-        b_use_syslibs = args.use_syslibs,
-        b_win_sdk_dir = args.win_sdk_dir,
-    )
+    return main( **{"b_"+k : v for k, v in vars( parse_args(argv) ).items()} )
     
 
 if __name__ == "__main__":

@@ -113,7 +113,6 @@ def test_releasenames(all_platnames):
     for key, value in ReleaseNames.items():
         assert key in BinaryPlatforms
         assert hasattr(PlatformNames, key)
-        prefix, system, cpu = value.replace("linux-musl", "musllinux").split("-", maxsplit=3)
-        assert prefix == "pdfium"
+        system, cpu = value.replace("linux-musl", "musllinux").split("-", maxsplit=3)
         assert system in ("linux", "musllinux", "mac", "win")
         assert cpu in ("x64", "x86", "arm64", "arm")

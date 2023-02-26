@@ -18,6 +18,7 @@ BinaryTarget_None = "none"
 BinaryTarget_Auto = "auto"
 BindingsFileName  = "raw.py"
 VerStatusFileName = ".pdfium_version.txt"
+V8StatusFile      = ".pdfium_is_v8.txt"
 HomeDir     = Path.home()
 SourceTree  = Path(__file__).parents[2]
 DataTree    = SourceTree / "data"
@@ -57,17 +58,17 @@ class PlatformNames:
 
 
 ReleaseNames = {
-    PlatformNames.darwin_x64     : "pdfium-mac-x64",
-    PlatformNames.darwin_arm64   : "pdfium-mac-arm64",
-    PlatformNames.linux_x64      : "pdfium-linux-x64",
-    PlatformNames.linux_x86      : "pdfium-linux-x86",
-    PlatformNames.linux_arm64    : "pdfium-linux-arm64",
-    PlatformNames.linux_arm32    : "pdfium-linux-arm",
-    PlatformNames.linux_musl_x64 : "pdfium-linux-musl-x64",
-    PlatformNames.linux_musl_x86 : "pdfium-linux-musl-x86",
-    PlatformNames.windows_x64    : "pdfium-win-x64",
-    PlatformNames.windows_x86    : "pdfium-win-x86",
-    PlatformNames.windows_arm64  : "pdfium-win-arm64",
+    PlatformNames.darwin_x64     : "mac-x64",
+    PlatformNames.darwin_arm64   : "mac-arm64",
+    PlatformNames.linux_x64      : "linux-x64",
+    PlatformNames.linux_x86      : "linux-x86",
+    PlatformNames.linux_arm64    : "linux-arm64",
+    PlatformNames.linux_arm32    : "linux-arm",
+    PlatformNames.linux_musl_x64 : "linux-musl-x64",
+    PlatformNames.linux_musl_x86 : "linux-musl-x86",
+    PlatformNames.windows_x64    : "win-x64",
+    PlatformNames.windows_x86    : "win-x86",
+    PlatformNames.windows_arm64  : "win-arm64",
 }
 
 # target names for pypdfium2/ctypesgen

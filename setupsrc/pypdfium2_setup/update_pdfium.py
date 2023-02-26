@@ -33,12 +33,16 @@ def clear_data(download_files):
             shutil.rmtree(pl_dir)
 
 
-def _get_package(version, robust, pl_name):
+def _get_package(pl_name, version, robust, use_v8):
     
     pl_dir = DataTree / pl_name
     pl_dir.mkdir(parents=True, exist_ok=True)
     
-    fn = f"{ReleaseNames[pl_name]}.tgz"
+    prefix = "pdfium-"
+    if use_v8:
+        prefix += "v8-"
+    
+    fn = prefix + f"{ReleaseNames[pl_name]}.tgz"
     fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
     print(f"'{fu}' -> '{fp}'")
@@ -55,12 +59,12 @@ def _get_package(version, robust, pl_name):
     return pl_name, fp
 
 
-def download_releases(version, platforms, robust, max_workers):
+def download_releases(version, platforms, robust, max_workers, use_v8):
     if not max_workers:
         max_workers = len(platforms)
     archives = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        func = functools.partial(_get_package, version, robust)
+        func = functools.partial(_get_package, version=version, robust=robust, use_v8=use_v8)
         for pl_name, file_path in pool.map(func, platforms):
             if pl_name is None:
                 continue
@@ -124,7 +128,7 @@ def generate_bindings(archives, version):
         shutil.rmtree(build_dir)
 
 
-def main(platforms, version, robust=False, max_workers=None):
+def main(platforms, version, robust=False, max_workers=None, use_v8=False):
     
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
@@ -133,7 +137,7 @@ def main(platforms, version, robust=False, max_workers=None):
         platforms[platforms.index(BinaryTarget_Auto)] = Host.platform
     
     clear_data(platforms)
-    archives = download_releases(version, platforms, robust, max_workers)
+    archives = download_releases(version, platforms, robust, max_workers, use_v8)
     unpack_archives(archives)
     generate_bindings(archives, version)
 
@@ -167,18 +171,17 @@ def parse_args(argv):
         type = int,
         help = "Maximum number of jobs to run in parallel when downloading binaries.",
     )
+    parser.add_argument(
+        "--use-v8",
+        action = "store_true",
+        help = "Use PDFium V8 binaries for JavaScript and XFA support."
+    )
     return parser.parse_args(argv)
 
 
-def run_cli(argv=sys.argv[1:]):
-    args = parse_args(argv)
-    main(
-        args.platforms,
-        version = args.version,
-        robust = args.robust,
-        max_workers = args.max_workers,
-    )
+def cli_main(argv=sys.argv[1:]):
+    main( **vars( parse_args(argv) ) )
 
 
 if __name__ == "__main__":
-    run_cli()
+    cli_main()
