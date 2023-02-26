@@ -631,7 +631,7 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 ### Release workflow
 
 The release process is fully automated using Python scripts and a CI setup for GitHub Actions.
-A new release is triggered every Monday, following the schedule of `pdfium-binaries`.
+A new release is triggered every Tuesday, one day after `pdfium-binaries`.
 You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
 
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
@@ -728,7 +728,7 @@ Inspired by *wowpng*, the first known proof of concept Python binding to PDFium 
 *pypdfium-reboot* then added a script to automate binary deployment and bindings generation to simplify regular updates. However, it was still not platform specific.
 
 pypdfium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels and consolidate the setup scripts. Further additions include ...
-* A CI workflow to automatically release new wheels every Monday
+* A CI workflow to automatically release new wheels every Tuesday
 * Support models that conveniently wrap the raw PDFium/ctypes API
 * Test code
 * A script to build PDFium from source
