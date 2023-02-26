@@ -19,6 +19,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        use_syslibs: [false]
+        include:
+          - os: ubuntu-latest
+            use_syslibs: [true]
     
     runs-on: ${{ matrix.os }}
     
@@ -38,10 +42,11 @@ jobs:
         run: python3 -m pip install -U -r req/default.txt
       
       - name: Build PDFium (default)
+        if: ${{ !matrix.use_syslibs }}
         run: python3 ./setupsrc/pypdfium2_setup/build_pdfium.py
       
       - name: Build PDFium (with syslibs)
-        if: ${{ matrix.os }} == 'ubuntu-latest'
+        if: ${{ matrix.use_syslibs }}
         run: |
           sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev
           python3 ./setupsrc/pypdfium2_setup/build_pdfium.py --use-syslibs
