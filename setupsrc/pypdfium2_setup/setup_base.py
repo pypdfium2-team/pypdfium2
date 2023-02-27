@@ -8,16 +8,11 @@ from wheel.bdist_wheel import bdist_wheel
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import (
-    DataTree,
     VerNamespace,
     LibnameForSystem,
-    VerStatusFileName,
-    PlatformNames,
     plat_to_system,
     get_wheel_tag,
-    clean_platfiles,
     emplace_platfiles,
-    set_versions,
 )
 
 
