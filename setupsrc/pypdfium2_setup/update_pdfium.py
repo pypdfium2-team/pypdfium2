@@ -8,6 +8,7 @@ import tarfile
 import argparse
 import traceback
 import functools
+import os.path
 from pathlib import Path
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
@@ -88,11 +89,8 @@ def safe_extract(tar, dest_dir, **kwargs):
     
     dest_dir = dest_dir.resolve()
     for member in tar.getmembers():
-        # if str(dest_dir) != os.path.commonprefix( [dest_dir, (dest_dir/member.name).resolve()] ):
-        # ^ initial @Kasimir123/@TrellixVulnTeam logic, simplified into a one-liner; code below should have same effect
-        # (yes, this also works against absolute paths)
         # if not (dest_dir/member.name).resolve().is_relative_to(dest_dir):  # python >= 3.9
-        if not str( (dest_dir/member.name).resolve() ).startswith( str(dest_dir) ):
+        if str(dest_dir) != os.path.commonprefix( [dest_dir, (dest_dir/member.name).resolve()] ):
             raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
     tar.extractall(dest_dir, **kwargs)
 
