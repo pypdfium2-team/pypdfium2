@@ -28,10 +28,6 @@ def install_handler():
     
     # TODO Linux/macOS: check that minimum OS version requirements are fulfilled
     
-    # FIXME not really necessary?
-    from pypdfium2_setup import check_deps
-    check_deps.main()
-    
     from pypdfium2_setup import update_pdfium
     from pypdfium2_setup.setup_base import mkwheel
     
