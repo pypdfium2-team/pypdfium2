@@ -97,7 +97,7 @@ class _host_platform:
         
         # Get information about the host platform (system and machine name)
         # For the machine name, the platform module just passes through information provided by the OS (The uname command on Unix, or an equivalent implementation on other systems like Windows), so we can determine the relevant names from Python's source code, system specs or information available online (e. g. https://en.wikipedia.org/wiki/Uname)
-        # There is also sysconfig.get_platform() which we used before, but its behaviour did not fully match our needs (it can return "universal2" on macOS)
+        # There is also sysconfig.get_platform() which we used before, but its behaviour did not fully match our needs (esp. on macOS)
         self._system_name = platform.system().lower()
         self._machine_name = platform.machine().lower()
         
@@ -154,9 +154,10 @@ def get_wheel_tag(pl_name):
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
         return "macosx_10_13_x86_64"
     elif pl_name == PlatformNames.darwin_arm64:
-        # macOS 11 is the first version available on arm64 (M1)
+        # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
     # As of Jan 2023, pdfium requires glibc >= 2.26 (see https://crrev.com/1084974 and https://groups.google.com/a/chromium.org/g/chromium-dev/c/SdCs9k3celo/m/bnnBzU1FCgAJ)
+    # TODO lower requirements for older PDFium binaries?
     elif pl_name == PlatformNames.linux_x64:
         return "manylinux_2_26_x86_64"
     elif pl_name == PlatformNames.linux_x86:
