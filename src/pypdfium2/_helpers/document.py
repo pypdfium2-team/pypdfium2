@@ -64,7 +64,7 @@ class PdfDocument (AutoCloseable):
             input,
             password = None,
             autoclose = False,
-            may_init_forms = True,
+            may_init_forms = False,
         ):
         
         if isinstance(input, str):
@@ -90,6 +90,7 @@ class PdfDocument (AutoCloseable):
         
         AutoCloseable.__init__(self, self._close_impl, self._data_holder, self._data_closer)
         
+        # TODO make formtype a lazy property (it doesn't actually need a form env to retrieve)
         self.formenv = None
         self.formtype = pdfium_c.FORMTYPE_NONE
         self._has_forms = False

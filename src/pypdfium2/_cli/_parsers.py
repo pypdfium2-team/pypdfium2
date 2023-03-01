@@ -64,8 +64,8 @@ def add_n_digits(parser):
     )
 
 
-def get_input(args):
-    pdf = pdfium.PdfDocument(args.input, password=args.password)
+def get_input(args, **kwargs):
+    pdf = pdfium.PdfDocument(args.input, password=args.password, **kwargs)
     if "pages" in args and not args.pages:
         args.pages = [i for i in range(len(pdf))]
     return pdf

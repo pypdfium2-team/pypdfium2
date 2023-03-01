@@ -317,6 +317,9 @@ def test_render_pdfbuffer():
 )
 def test_render_form(with_forms, exp_color):
     
+    if with_forms and pdfium.V_PDFIUM_IS_V8:
+        pytest.skip("pypdfium2's helpers do not support forms with V8 enabled binaries yet.")
+    
     pdf = pdfium.PdfDocument(TestFiles.form, may_init_forms=with_forms)
     if with_forms:
         assert isinstance(pdf.formenv, pdfium.PdfFormEnv)
