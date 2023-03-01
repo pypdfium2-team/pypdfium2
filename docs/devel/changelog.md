@@ -1,6 +1,9 @@
 <!-- SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
+<!-- MyST Syntax -->
+
+
 # Changelog
 
 
@@ -23,7 +26,7 @@
 
 ## 4.0.0b1 (2023-02-22)
 
-- Attempted first beta release for v4. PyPI upload failed due to bug #177.
+- Attempted first beta release for v4. PyPI upload failed due to {issue}`177`.
 
 
 ## History

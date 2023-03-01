@@ -1,5 +1,6 @@
 sphinx >= 4.4.0
 sphinx-rtd-theme >= 1.0
 sphinxcontrib-programoutput
+sphinx-issues
 myst-parser
 docutils >= 0.17

@@ -53,7 +53,10 @@ extensions = [
     "sphinx.ext.ifconfig",
     "myst_parser",
     "sphinxcontrib.programoutput",
+    "sphinx_issues",
 ]
+
+issues_github_path = "pypdfium2-team/pypdfium2"
 
 suppress_warnings = [
     "ref.myst",
