@@ -18,7 +18,7 @@
 
 ## 4.0.0b2 (2023-02-23)
 
-- No PDFium update (autorelease).
+- First working beta release for v4.
 
 
 ## 4.0.0b1 (2023-02-22)
