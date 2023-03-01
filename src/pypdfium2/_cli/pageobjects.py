@@ -25,7 +25,7 @@ def attach(parser):
     add_input(parser, pages=True)
     add_n_digits(parser)
     
-    # TODO think out better strategy for choices
+    # TODO think out strategy for choices (see https://github.com/python/cpython/issues/69247)
     obj_types = list( consts.ObjectTypeToConst.keys() )
     parser.add_argument(
         "--filter",
