@@ -18,7 +18,7 @@ BinaryTarget_None = "none"
 BinaryTarget_Auto = "auto"
 BindingsFileName  = "raw.py"
 VerStatusFileName = ".pdfium_version.txt"
-V8StatusFile      = ".pdfium_is_v8.txt"
+V8StatusFileName  = ".pdfium_is_v8.txt"
 HomeDir     = Path.home()
 SourceTree  = Path(__file__).parents[2]
 DataTree    = SourceTree / "data"
@@ -255,10 +255,8 @@ def emplace_platfiles(pl_name):
     
     ver_changes = dict()
     ver_changes["V_LIBPDFIUM"] = ver_file.read_text().strip()
-    if pl_name == PlatformNames.sourcebuild:
-        ver_changes["V_BUILDNAME"] = "source"
-    else:
-        ver_changes["V_BUILDNAME"] = "pdfium-binaries"
+    ver_changes["V_BUILDNAME"] = "source" if pl_name == PlatformNames.sourcebuild else "pdfium-binaries"
+    ver_changes["V_PDFIUM_IS_V8"] = (pl_dir / V8StatusFileName).exists()
     set_versions(ver_changes)
     
     clean_platfiles()

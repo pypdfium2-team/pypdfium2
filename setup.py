@@ -12,7 +12,7 @@ from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
     VersionTargetVar,
-    V8StatusFile,
+    V8StatusFileName,
     BinaryTargetVar,
     BinaryTarget_None,
     VerStatusFileName,
@@ -53,7 +53,7 @@ def install_handler():
     else:
         req_ver = int(req_ver)
     
-    had_v8 = (pl_dir / V8StatusFile).exists()
+    had_v8 = (pl_dir / V8StatusFileName).exists()
     use_v8 = bool(int( os.environ.get("PDFIUM_USE_V8", 0) ))
     
     if curr_ver != req_ver or had_v8 != use_v8:

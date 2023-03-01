@@ -18,7 +18,7 @@ from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
     VerStatusFileName,
-    V8StatusFile,
+    V8StatusFileName,
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
@@ -60,7 +60,7 @@ def _get_package(pl_name, version, robust, use_v8):
             raise
     
     if use_v8:
-        (pl_dir / V8StatusFile).touch(exist_ok=True)
+        (pl_dir / V8StatusFileName).touch(exist_ok=True)
     
     return pl_name, fp
 

@@ -12,6 +12,7 @@ from collections import namedtuple
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2.raw as pdfium_c
+from pypdfium2.version import V_PDFIUM_IS_V8
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.pageobjects import PdfObject
@@ -90,16 +91,10 @@ class PdfDocument (AutoCloseable):
         AutoCloseable.__init__(self, self._close_impl, self._data_holder, self._data_closer)
         
         self.formenv = None
+        self.formtype = pdfium_c.FORMTYPE_NONE
+        self._has_forms = False
         if may_init_forms:
-            self.formtype = pdfium_c.FPDF_GetFormType(self)
-            self._has_forms = self.formtype != pdfium_c.FORMTYPE_NONE  # TODO maybe make public?
-            if self._has_forms:
-                formconfig = pdfium_c.FPDF_FORMFILLINFO(version=2)
-                raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, formconfig)
-                self.formenv = PdfFormEnv(raw, formconfig, self)
-        else:
-            self.formtype = pdfium_c.FORMTYPE_NONE
-            self._has_forms = False
+            self._init_forms()
     
     
     @property
@@ -137,6 +132,18 @@ class PdfDocument (AutoCloseable):
     
     def __delitem__(self, i):
         self.del_page(i)
+    
+    
+    def _init_forms(self):
+        self.formtype = pdfium_c.FPDF_GetFormType(self)
+        self._has_forms = self.formtype != pdfium_c.FORMTYPE_NONE  # TODO make public?
+        if self._has_forms:
+            if V_PDFIUM_IS_V8:
+                # BUG(182): would need a caller-provided form config ...
+                raise RuntimeError("pypdfium2's helpers do not support forms with V8 enabled binaries yet.")
+            formconfig = pdfium_c.FPDF_FORMFILLINFO(version=2)
+            raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, formconfig)
+            self.formenv = PdfFormEnv(raw, formconfig, self)
     
     
     @classmethod

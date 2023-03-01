@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["V_PYPDFIUM2", "V_LIBPDFIUM", "V_BUILDNAME"]
+__all__ = ["V_PYPDFIUM2", "V_LIBPDFIUM", "V_BUILDNAME", "V_PDFIUM_IS_V8"]
 
 V_MAJOR = 4
 V_MINOR = 0
@@ -19,4 +19,5 @@ V_LIBPDFIUM = "5619"
 #: String describing the included PDFium binary's origin (pdfium-binaries, sourcebuild)
 V_BUILDNAME = "pdfium-binaries"
 
-# TODO add info whether it's a V8 build or not
+#: Whether the included PDFium binary was built with V8 support or not
+V_PDFIUM_IS_V8 = False
