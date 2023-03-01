@@ -8,9 +8,9 @@
 [pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is an ABI-level Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
 
 The project is built using [ctypesgen](https://github.com/ctypesgen/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
-Its custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms and Python versions is supported with wheel packages.
+Its custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms is supported with wheel packages.
 
-pypdfium2 includes helper classes to simplify common use cases, while the raw PDFium/ctypes API remains accessible as well.
+pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ctypes API remains accessible as well.
 
 
 ## Installation
@@ -37,7 +37,7 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
     The build script provides a few options that can be listed by calling it with `--help`.
     Building PDFium may take a long time because it comes with its own toolchain and bundled dependencies, rather than using system-provided components.[^pdfium_buildsystem]
     
-  The host system needs to provide `git` and `gcc`.
+  The host system needs to provide `git` and a C pre-processor (`gcc` or `clang`).
   Setup code also depends on the Python packages `ctypesgen`, `wheel`, and `setuptools`, which will usually get installed automatically.
   
   When installing from source, some additional options of the `pip` package manager may be relevant:
@@ -60,9 +60,10 @@ pypdfium2 includes helper classes to simplify common use cases, while the raw PD
 As pypdfium2 uses external binaries, there are some special setup aspects to consider.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
-* The environment variable `PDFIUM_PLATFORM` controls which binary to include on setup.
+* The environment variable `$PDFIUM_PLATFORM` controls which binary to include on setup.
   * If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
-    By default, the latest pdfium-binaries release is used, otherwise `PDFIUM_VERSION` may be specified to select a specific one.
+    By default, the latest pdfium-binaries release is used, otherwise `$PDFIUM_VERSION` may be specified to request a specific one.
+    Moreover, `$PDFIUM_USE_V8=1` may be set to use the V8 (JavaScript) enabled binaries.
     (If matching platform files already exist in the `data/` cache, they will be reused as-is.)
   * If set to a certain platform identifier, binaries for the requested platform will be used.[^platform_ids]
     In this case, platform files will not be downloaded/generated automatically, but need to be supplied beforehand using the `update_pdfium.py` script.
@@ -609,9 +610,12 @@ This provides us with full control over the build environment and the used comma
 
 pypdfium2 contains a small test suite to verify the library's functionality. It is written with [pytest](https://github.com/pytest-dev/pytest/):
 ```bash
-python3 -m pytest tests/
+python3 -m pytest tests/ tests_old/
 ```
-You may pass `-sv` to get more detailed output.
+
+Note that ...
+* you can pass `-sv` to get more detailed output.
+* `$DEBUG_AUTOCLOSE=1` may be set to get debugging information on automatic object finalization.
 
 To get code coverage statistics, you can run
 ```bash
