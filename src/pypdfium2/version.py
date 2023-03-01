@@ -16,7 +16,7 @@ if V_BETA is not None:
 #: PDFium library version string (git tag or commit hash)
 V_LIBPDFIUM = "5619"
 
-#: String describing the included PDFium binary's origin (pdfium-binaries, sourcebuild)
+#: String describing the included PDFium binary's origin (pdfium-binaries, source)
 V_BUILDNAME = "pdfium-binaries"
 
 #: Whether the included PDFium binary was built with V8 support or not
