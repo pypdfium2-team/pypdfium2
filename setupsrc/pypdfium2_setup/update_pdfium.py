@@ -90,7 +90,7 @@ def safe_extract(tar, dest_dir, **kwargs):
     dest_dir = dest_dir.resolve()
     for member in tar.getmembers():
         # if not (dest_dir/member.name).resolve().is_relative_to(dest_dir):  # python >= 3.9
-        if str(dest_dir) != os.path.commonprefix( [dest_dir, (dest_dir/member.name).resolve()] ):
+        if str(dest_dir) != os.path.commonpath( [dest_dir, (dest_dir/member.name).resolve()] ):
             raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
     tar.extractall(dest_dir, **kwargs)
 
