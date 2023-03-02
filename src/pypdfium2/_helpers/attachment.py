@@ -55,7 +55,7 @@ class PdfAttachment (AutoCastable):
     def get_data(self):
         """
         Returns:
-            ctypes.Array: The attachment's file data (as :class:`ctypes.c_char` array).
+            ctypes.Array: The attachment's file data (as :class:`~ctypes.c_char` array).
         """
                 
         n_bytes = ctypes.c_ulong()
@@ -84,7 +84,7 @@ class PdfAttachment (AutoCastable):
         
         Parameters:
             data (bytes | ctypes.Array):
-                New file data for the attachment. May be any data type that can be implicitly converted to :class:`ctypes.c_void_p`.
+                New file data for the attachment. May be any data type that can be implicitly converted to :class:`~ctypes.c_void_p`.
         """
         success = pdfium_c.FPDFAttachment_SetFile(self, self.pdf, data, len(data))
         if not success:

@@ -41,7 +41,7 @@ class PdfBitmap (AutoCloseable):
     Attributes:
         raw (FPDF_BITMAP):
             The underlying PDFium bitmap handle.
-        buffer (ctypes.c_ubyte):
+        buffer (~ctypes.c_ubyte):
             A ctypes array representation of the pixel data (each item is an unsigned byte, i. e. a number ranging from 0 to 255).
     """
     
@@ -103,7 +103,7 @@ class PdfBitmap (AutoCloseable):
                 PDFium bitmap handle.
             rev_byteorder (bool):
                 Whether the bitmap uses reverse byte order.
-            ex_buffer (ctypes.c_ubyte | None):
+            ex_buffer (~ctypes.c_ubyte | None):
                 If the bitmap was created from a buffer allocated by Python/ctypes, pass in the ctypes array to keep it referenced.
         """
         

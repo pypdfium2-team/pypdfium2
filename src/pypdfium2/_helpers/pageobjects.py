@@ -283,7 +283,7 @@ class PdfImage (PdfObject):
                 If True, apply simple filters, resulting in semi-decoded data (see :attr:`.SIMPLE_FILTERS`).
                 Otherwise, the raw data will be returned.
         Returns:
-            ctypes.Array: The data of the image stream (as :class:`ctypes.c_ubyte` array).
+            ctypes.Array: The data of the image stream (as :class:`~ctypes.c_ubyte` array).
         """
         
         if decode_simple:
