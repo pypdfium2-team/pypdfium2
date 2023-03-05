@@ -15,8 +15,9 @@
 - The raw API is now isolated in a separate namespace (`pypdfium2.raw`).
   Moreover, the raw API bindings do not implicitly encode strings anymore (pypdfium2 is now built with a patched version of ctypesgen by default).
 - Helper objects now automatically resolve to the underlying raw object if used as ctypes function parameter.
-- Improved command-line interface.
-- Improved documentation.
+- Overhauled the code base to use `pathlib` and f-strings.
+- Updated wheel tags.
+- Improved command-line interface, setup code, and documentation.
 
 
 ## 4.0.0b2 (2023-02-23)
