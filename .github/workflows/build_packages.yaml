@@ -204,6 +204,7 @@ jobs:
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.build.outputs.new_version }}
+          prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
       
       - name: Publish to TestPyPI
         run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
