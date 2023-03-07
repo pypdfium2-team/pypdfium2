@@ -7,9 +7,8 @@ import sys
 import logging
 import argparse
 import importlib
-import pypdfium2._helpers as pdfium
-from pypdfium2._helpers._internal import bases
 from pypdfium2.version import *
+import pypdfium2._helpers as pdfium
 
 try:
     import argcomplete
@@ -59,8 +58,8 @@ def get_parser():
 
 def setup_logging():
     
-    # FIXME can we make some sort of public API to set this without a strange import?
-    bases.DEBUG_AUTOCLOSE = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    pdfium.internal.set_autoclose_debug(debug_autoclose)
     
     lib_logger = logging.getLogger("pypdfium2")
     lib_logger.addHandler(logging.StreamHandler())

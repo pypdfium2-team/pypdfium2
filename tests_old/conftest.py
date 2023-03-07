@@ -6,7 +6,6 @@ import sys
 import logging
 from pathlib import Path
 import pypdfium2 as pdfium
-from pypdfium2._helpers._internal import bases
 
 lib_logger = logging.getLogger("pypdfium2")
 lib_logger.addHandler(logging.StreamHandler())
@@ -14,7 +13,8 @@ lib_logger.setLevel(logging.DEBUG)
 
 pdfium.PdfUnspHandler().setup()
 
-bases.DEBUG_AUTOCLOSE = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+pdfium.internal.set_autoclose_debug(debug_autoclose)
 
 PyVersion = (sys.version_info.major, sys.version_info.minor)
 

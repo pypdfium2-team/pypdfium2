@@ -99,3 +99,22 @@ Miscellaneous
 *************
 .. automodule:: pypdfium2._helpers.misc
 .. automodule:: pypdfium2._helpers.unsupported
+
+
+Internal
+********
+
+.. warning::
+   The following helpers are considered internal, so their API may change any time.
+
+Base classes
+------------
+.. automodule:: pypdfium2._helpers._internal.bases
+
+Constants
+---------
+.. automodule:: pypdfium2._helpers._internal.consts
+
+Utilities
+---------
+.. automodule:: pypdfium2._helpers._internal.utils

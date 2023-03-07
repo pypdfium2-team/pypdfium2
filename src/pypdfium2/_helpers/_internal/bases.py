@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["AutoCastable", "AutoCloseable"]
+__all__ = ["AutoCastable", "AutoCloseable", "set_autoclose_debug"]
 
 import sys
 import weakref
@@ -13,12 +13,22 @@ logger = logging.getLogger(__name__)
 DEBUG_AUTOCLOSE = False
 
 
+def set_autoclose_debug(value=True):
+    """
+    Set autoclose debugging to define whether a message should be printed each time an object is finalized (opt-in).
+    True to enable (method default), False to disable.
+    """
+    global DEBUG_AUTOCLOSE
+    DEBUG_AUTOCLOSE = value
+
+
 class AutoCastable:
     
-    # Automatically return the underlying raw object of wrapper classes if used as ctypes function parameter
-    
     @property
-    def _as_parameter_(self):  # ctypes hook
+    def _as_parameter_(self):
+        """
+        Ctypes hook to automatically return the underlying raw object of a wrapper class if used as C function parameter.
+        """
         return self.raw
 
 
@@ -63,7 +73,7 @@ class AutoCloseable (AutoCastable):
     
     @staticmethod
     def _close_template(raw, uuid, parent, close_func, *args, **kwargs):
-        # NOTE deliberately not using logging so that it also works during the shutdown phase
+        # FIXME should we add context info (explicit/automatic) ?
         if DEBUG_AUTOCLOSE:
             print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
         if (parent is not None) and parent._tree_closed():
