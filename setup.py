@@ -68,8 +68,6 @@ def packaging_handler(target):
         mkwheel( getattr(PlatformNames, target) )
     else:
         raise ValueError(f"Invalid deployment target '{target}'")
-    
-    return False
 
 
 def main():
