@@ -115,8 +115,6 @@ class PdfObject (AutoCloseable):
         Parameters:
             matrix (PdfMatrix): Set this matrix as the pageobject's transform matrix.
         """
-        if not isinstance(matrix, PdfMatrix):
-            raise ValueError("*matrix* must be a PdfMatrix object.")
         success = pdfium_c.FPDFPageObj_SetMatrix(self, matrix)
         if not success:
             raise PdfiumError("Failed to set matrix of pageobject.")
@@ -127,8 +125,6 @@ class PdfObject (AutoCloseable):
         Parameters:
             matrix (PdfMatrix): Multiply the page object's current transform matrix by this matrix.
         """
-        if not isinstance(matrix, PdfMatrix):
-            raise ValueError("*matrix* must be a PdfMatrix object.")
         pdfium_c.FPDFPageObj_Transform(self, *matrix.get())
 
 
