@@ -146,7 +146,7 @@ def test_open_invalid():
 
 def test_misc():
     pdf = pdfium.PdfDocument(TestResources.empty)
-    assert pdf.formtype == pdfium_c.FORMTYPE_NONE
+    assert pdf.get_formtype() == pdfium_c.FORMTYPE_NONE
     assert pdf.get_version() == 15
     assert pdf.get_identifier(pdfium_c.FILEIDTYPE_PERMANENT) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
     assert pdf.get_identifier(pdfium_c.FILEIDTYPE_CHANGING) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"

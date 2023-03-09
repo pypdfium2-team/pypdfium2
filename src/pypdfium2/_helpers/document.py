@@ -36,8 +36,6 @@ class PdfDocument (AutoCloseable):
             If a password is given but the PDF is not encrypted, it will be ignored (as of PDFium 5418).
         autoclose (bool):
             Whether byte buffer input should be automatically closed on finalization.
-        may_init_forms (bool):
-            Whether a form env may be initialized, if the document has forms.
     
     Raises:
         PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
@@ -53,10 +51,7 @@ class PdfDocument (AutoCloseable):
         raw (FPDF_DOCUMENT):
             The underlying PDFium document handle.
         formenv (PdfFormEnv | None):
-            Form env, if the document has forms and ``may_init_forms=True``.
-        formtype (int):
-            PDFium form type that applies to the document (:attr:`FORMTYPE_*`).
-            :attr:`FORMTYPE_NONE` if the document has no forms or ``may_init_forms=False``.
+            Form env, if the document has forms and :meth:`.init_forms` was called.
     """
     
     def __init__(
@@ -64,7 +59,6 @@ class PdfDocument (AutoCloseable):
             input,
             password = None,
             autoclose = False,
-            may_init_forms = False,
         ):
         
         if isinstance(input, str):
@@ -80,6 +74,7 @@ class PdfDocument (AutoCloseable):
         
         self._data_holder = []
         self._data_closer = []
+        self.formenv = None
         
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
@@ -89,13 +84,6 @@ class PdfDocument (AutoCloseable):
             self._data_closer += to_close
         
         AutoCloseable.__init__(self, self._close_impl, self._data_holder, self._data_closer)
-        
-        # TODO make formtype a lazy property (it doesn't actually need a form env to retrieve)
-        self.formenv = None
-        self.formtype = pdfium_c.FORMTYPE_NONE
-        self._has_forms = False
-        if may_init_forms:
-            self._init_forms()
     
     
     @property
@@ -135,18 +123,6 @@ class PdfDocument (AutoCloseable):
         self.del_page(i)
     
     
-    def _init_forms(self):
-        self.formtype = pdfium_c.FPDF_GetFormType(self)
-        self._has_forms = self.formtype != pdfium_c.FORMTYPE_NONE  # TODO make public?
-        if self._has_forms:
-            if V_PDFIUM_IS_V8:
-                # BUG(182): would need a caller-provided form config ...
-                raise RuntimeError("pypdfium2's helpers do not support forms with V8 enabled binaries yet.")
-            formconfig = pdfium_c.FPDF_FORMFILLINFO(version=2)
-            raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, formconfig)
-            self.formenv = PdfFormEnv(raw, formconfig, self)
-    
-    
     @classmethod
     def new(cls):
         """
@@ -155,6 +131,40 @@ class PdfDocument (AutoCloseable):
         """
         new_pdf = pdfium_c.FPDF_CreateNewDocument()
         return cls(new_pdf)
+    
+    
+    def init_forms(self, config=None):
+        """
+        Initialize a form env, if the document has forms. If already initialized, nothing will be done.
+        See the :attr:`formenv` attribute.
+    
+        Note:
+            If form rendering is desired, this method should be called directly after constructing the document,
+            before getting any page handles (due to PDFium's API).
+        
+        Parameters:
+            config (FPDF_FORMFILLINFO):
+                Caller-provided form config interface to use. Optional for default builds.
+                Must be given if using V8 enabled PDFium (:data:`.V_PDFIUM_IS_V8`), with all required fields implemented.
+        """
+        if (self.get_formtype() == pdfium_c.FORMTYPE_NONE) or self.formenv:
+            return
+        if not config:
+            if V_PDFIUM_IS_V8:
+                raise RuntimeError("A caller-provided form config is required with V8 enabled PDFium.")
+            config = pdfium_c.FPDF_FORMFILLINFO(version=2)
+        raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
+        self.formenv = PdfFormEnv(raw, config, self)
+    
+    
+    # TODO(#186) use functools.cached_property
+    def get_formtype(self):
+        """
+        Returns:
+            int: PDFium form type that applies to the document (:attr:`FORMTYPE_*`).
+            :attr:`FORMTYPE_NONE` if the document has no forms.
+        """
+        return pdfium_c.FPDF_GetFormType(self)
     
     
     def get_pagemode(self):

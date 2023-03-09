@@ -131,7 +131,8 @@ def attach(parser):
 
 def main(args):
     
-    pdf = get_input(args, may_init_forms=True)
+    pdf = get_input(args)
+    pdf.init_forms()
     
     cs_kwargs = dict(
         path_fill = args.path_fill,

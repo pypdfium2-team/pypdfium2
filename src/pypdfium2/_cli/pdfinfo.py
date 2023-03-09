@@ -33,8 +33,7 @@ def main(args):
     if pagemode != pdfium_c.PAGEMODE_USENONE:
         print(f"Page Mode: {consts.PageModeToStr.get(pagemode)}")
     
-    # FIXME use support model once implemented properly
-    formtype = pdfium_c.FPDF_GetFormType(pdf)
+    formtype = pdf.get_formtype()
     if formtype != pdfium_c.FORMTYPE_NONE:
         print(f"Forms: {consts.FormTypeToStr.get(formtype)}")
     
