@@ -14,10 +14,6 @@ DEBUG_AUTOCLOSE = False
 
 
 def set_autoclose_debug(value=True):
-    """
-    Set autoclose debugging to define whether a message should be printed each time an object is finalized (opt-in).
-    True to enable (method default), False to disable.
-    """
     global DEBUG_AUTOCLOSE
     DEBUG_AUTOCLOSE = value
 
@@ -26,9 +22,6 @@ class AutoCastable:
     
     @property
     def _as_parameter_(self):
-        """
-        Ctypes hook to automatically return the underlying raw object of a wrapper class if used as C function parameter.
-        """
         return self.raw
 
 
