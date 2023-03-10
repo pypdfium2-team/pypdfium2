@@ -17,10 +17,11 @@ PDFium is not thread-compatible. If you need to parallelize tasks, use processes
 API layers
 ----------
 
-pypdfium2 offers two API layers:
+pypdfium2 provides multiple API layers:
 
 * The raw PDFium API, to be used with :mod:`ctypes` (namespace ``pypdfium2.raw``).
 * The support model API, which is a nice set of Python helper classes around the raw API (namespace ``pypdfium2``).
+* Additionally, there is the internal API, which contains various utilities that are not fit for the main support model (namespace ``pypdfium2.internal``).
 
 All wrapper objects provide a ``raw`` attribute to access the underlying ctypes object.
 In addition, helpers automatically resolve to raw if used as C function parameter. [#ctypes_param_hook]_
@@ -106,15 +107,8 @@ Internal
 
 .. warning::
    The following helpers are considered internal, so their API may change any time.
+   They are isolated in an own namespace (``pypdfium2.internal``).
 
-Base classes
-------------
-.. automodule:: pypdfium2._helpers._internal.bases
-
-Constants
----------
 .. automodule:: pypdfium2._helpers._internal.consts
-
-Utilities
----------
+.. automodule:: pypdfium2._helpers._internal.bases
 .. automodule:: pypdfium2._helpers._internal.utils
