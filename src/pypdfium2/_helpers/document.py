@@ -342,7 +342,7 @@ class PdfDocument (AutoCloseable):
             PdfPage: The page at *index* (zero-based).
         Note:
             This calls ``FORM_OnAfterLoadPage()`` if the document has an active form env.
-            The form env must no be closed before the page is closed!
+            The form env must not be closed before the page is closed!
         """
         
         raw_page = pdfium_c.FPDF_LoadPage(self, index)
