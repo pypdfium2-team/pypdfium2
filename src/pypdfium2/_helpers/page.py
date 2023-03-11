@@ -83,11 +83,11 @@ class PdfPage (AutoCloseable):
         pdfium_c.FPDFPage_SetRotation(self, consts.RotationToConst[rotation])
     
     
-    def _get_box(self, box_func, fallback_func):
+    def _get_box(self, box_func, fallback_func, fallback_ok):
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
         success = box_func(self, left, bottom, right, top)
         if not success:
-            return fallback_func()
+            return (fallback_func() if fallback_ok else None)
         return (left.value, bottom.value, right.value, top.value)
     
     def _set_box(self, box_func, l, b, r, t):
@@ -95,7 +95,7 @@ class PdfPage (AutoCloseable):
             raise ValueError("Box values must be int or float.")
         box_func(self, l, b, r, t)
     
-    def get_mediabox(self):
+    def get_mediabox(self, fallback_ok=True):
         """
         Returns:
             (float, float, float, float):
@@ -106,7 +106,7 @@ class PdfPage (AutoCloseable):
             do not inherit from parent nodes in the page tree (as of PDFium 5418).
         """
         # https://crbug.com/pdfium/1786
-        return self._get_box(pdfium_c.FPDFPage_GetMediaBox, lambda: (0, 0, 612, 792))
+        return self._get_box(pdfium_c.FPDFPage_GetMediaBox, lambda: (0, 0, 612, 792), fallback_ok)
     
     def set_mediabox(self, l, b, r, t):
         """
@@ -114,12 +114,12 @@ class PdfPage (AutoCloseable):
         """
         self._set_box(pdfium_c.FPDFPage_SetMediaBox, l, b, r, t)
     
-    def get_cropbox(self):
+    def get_cropbox(self, fallback_ok=True):
         """
         Returns:
             The page's CropBox (If not defined, falls back to MediaBox).
         """
-        return self._get_box(pdfium_c.FPDFPage_GetCropBox, self.get_mediabox)
+        return self._get_box(pdfium_c.FPDFPage_GetCropBox, self.get_mediabox, fallback_ok)
     
     def set_cropbox(self, l, b, r, t):
         """
@@ -127,12 +127,12 @@ class PdfPage (AutoCloseable):
         """
         self._set_box(pdfium_c.FPDFPage_SetCropBox, l, b, r, t)
     
-    def get_bleedbox(self):
+    def get_bleedbox(self, fallback_ok=True):
         """
         Returns:
             The page's BleedBox (If not defined, falls back to CropBox).
         """
-        return self._get_box(pdfium_c.FPDFPage_GetBleedBox, self.get_cropbox)
+        return self._get_box(pdfium_c.FPDFPage_GetBleedBox, self.get_cropbox, fallback_ok)
     
     def set_bleedbox(self, l, b, r, t):
         """
@@ -140,12 +140,12 @@ class PdfPage (AutoCloseable):
         """
         self._set_box(pdfium_c.FPDFPage_SetBleedBox, l, b, r, t)
     
-    def get_trimbox(self):
+    def get_trimbox(self, fallback_ok=True):
         """
         Returns:
             The page's TrimBox (If not defined, falls back to CropBox).
         """
-        return self._get_box(pdfium_c.FPDFPage_GetTrimBox, self.get_cropbox)
+        return self._get_box(pdfium_c.FPDFPage_GetTrimBox, self.get_cropbox, fallback_ok)
     
     def set_trimbox(self, l, b, r, t):
         """
@@ -153,12 +153,12 @@ class PdfPage (AutoCloseable):
         """
         self._set_box(pdfium_c.FPDFPage_SetTrimBox, l, b, r, t)
     
-    def get_artbox(self):
+    def get_artbox(self, fallback_ok=True):
         """
         Returns:
             The page's ArtBox (If not defined, falls back to CropBox).
         """
-        return self._get_box(pdfium_c.FPDFPage_GetArtBox, self.get_cropbox)
+        return self._get_box(pdfium_c.FPDFPage_GetArtBox, self.get_cropbox, fallback_ok)
     
     def set_artbox(self, l, b, r, t):
         """

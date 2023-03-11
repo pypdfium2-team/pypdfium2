@@ -29,6 +29,8 @@ def parse_numtext(numtext):
 
 
 def round_list(lst, n_digits):
+    if not lst:
+        return lst
     result = [round(v, n_digits) for v in lst]
     if isinstance(lst, tuple):
         result = tuple(result)

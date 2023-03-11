@@ -16,6 +16,12 @@ def attach(parser):
     add_n_digits(parser)
 
 
+def _print_box(page, box_name, n_digits):
+    box = getattr(page, f"get_{box_name.lower()}box")(fallback_ok=False)
+    if box:
+        print(f"{box_name.capitalize()}Box: {round_list(box, n_digits)}")
+
+
 def main(args):
     
     pdf = get_input(args)
@@ -46,30 +52,11 @@ def main(args):
     for i in args.pages:
         
         print(f"\n# Page {i+1}")
+        
         page = pdf[i]
-        
-        size = round_list(page.get_size(), args.n_digits)
-        print(f"Size: {size}")
+        print(f"Size: {round_list(page.get_size(), args.n_digits)}")
         print(f"Rotation: {page.get_rotation()}")
+        print(f"Bounding Box: {round_list(page.get_bbox(), args.n_digits)}")
         
-        bbox = round_list(page.get_bbox(), args.n_digits)
-        print(f"Bounding Box: {bbox}")
-        
-        mediabox = round_list(page.get_mediabox(), args.n_digits)
-        print(f"MediaBox: {mediabox}")
-        
-        cropbox = round_list(page.get_cropbox(), args.n_digits)
-        if cropbox != mediabox:
-            print(f"CropBox: {cropbox}")
-        
-        bleedbox = round_list(page.get_bleedbox(), args.n_digits)
-        if bleedbox != cropbox:
-            print(f"BleedBox: {bleedbox}")
-        
-        trimbox = round_list(page.get_trimbox(), args.n_digits)
-        if trimbox != cropbox:
-            print(f"TrimBox: {trimbox}")
-        
-        artbox = round_list(page.get_artbox(), args.n_digits)
-        if artbox != cropbox:
-            print(f"ArtBox: {artbox}")
+        for box_name in ("media", "crop", "bleed", "trim", "art"):
+            _print_box(page, box_name, args.n_digits)
