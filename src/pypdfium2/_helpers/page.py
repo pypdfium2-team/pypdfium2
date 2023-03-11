@@ -95,6 +95,8 @@ class PdfPage (AutoCloseable):
             raise ValueError("Box values must be int or float.")
         box_func(self, l, b, r, t)
     
+    # NOTE in case further arguments are needed (besides fallback_ok), then use *args, **kwargs in callers
+    
     def get_mediabox(self, fallback_ok=True):
         """
         Returns:
