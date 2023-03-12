@@ -16,12 +16,6 @@ def attach(parser):
     add_n_digits(parser)
 
 
-def _print_box(page, box_name, n_digits):
-    box = getattr(page, f"get_{box_name.lower()}box")(fallback_ok=False)
-    if box:
-        print(f"{box_name.capitalize()}Box: {round_list(box, n_digits)}")
-
-
 def main(args):
     
     pdf = get_input(args)
@@ -59,4 +53,6 @@ def main(args):
         print(f"Bounding Box: {round_list(page.get_bbox(), args.n_digits)}")
         
         for box_name in ("media", "crop", "bleed", "trim", "art"):
-            _print_box(page, box_name, args.n_digits)
+            box = getattr(page, f"get_{box_name.lower()}box")(fallback_ok=False)
+            if box:
+                print(f"{box_name.capitalize()}Box: {round_list(box, args.n_digits)}")
