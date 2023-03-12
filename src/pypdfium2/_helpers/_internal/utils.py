@@ -63,8 +63,7 @@ class _buffer_writer:
 
 def get_bufreader(buffer):
     
-    buffer.seek(0, 2)
-    file_len = buffer.tell()
+    file_len = buffer.seek(0, 2)
     buffer.seek(0)
     
     reader = pdfium_c.FPDF_FILEACCESS()
