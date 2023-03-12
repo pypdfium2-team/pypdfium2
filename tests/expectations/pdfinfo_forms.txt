@@ -4,7 +4,7 @@ ID (permanent): b''
 ID (changing):  b''
 ID match? - True
 Tagged? - False
-Forms: AcroForm
+Form Type: AcroForm
 
 # Page 1
 Size: (300.0, 600.0)

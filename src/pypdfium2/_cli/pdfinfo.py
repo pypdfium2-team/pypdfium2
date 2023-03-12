@@ -35,7 +35,7 @@ def main(args):
     
     formtype = pdf.get_formtype()
     if formtype != pdfium_c.FORMTYPE_NONE:
-        print(f"Forms: {consts.FormTypeToStr.get(formtype)}")
+        print(f"Form Type: {consts.FormTypeToStr.get(formtype)}")
     
     metadata = pdf.get_metadata_dict(skip_empty=True)
     if len(metadata) > 0:
