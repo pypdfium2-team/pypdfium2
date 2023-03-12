@@ -319,11 +319,7 @@ def test_render_form(with_forms, exp_color):
     
     pdf = pdfium.PdfDocument(TestFiles.form)
     if with_forms:
-        try:
-            pdf.init_forms()
-        except RuntimeError:
-            assert pdfium.V_PDFIUM_IS_V8
-            pytest.skip()
+        pdf.init_forms() if not pdfium.V_PDFIUM_IS_V8 else pytest.skip()
     
     if with_forms:
         assert isinstance(pdf.formenv, pdfium.PdfFormEnv)
