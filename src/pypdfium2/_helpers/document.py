@@ -275,12 +275,9 @@ class PdfDocument (AutoCloseable):
         Returns:
             dict: PDF metadata.
         """
-        metadata = {}
-        for key in self.METADATA_KEYS:
-            value = self.get_metadata_value(key)
-            if skip_empty and not value:
-                continue
-            metadata[key] = value
+        metadata = {k: self.get_metadata_value(k) for k in self.METADATA_KEYS}
+        if skip_empty:
+            metadata = {k: v for k, v in metadata.items() if v}
         return metadata
     
     
