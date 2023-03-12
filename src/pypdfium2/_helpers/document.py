@@ -157,7 +157,6 @@ class PdfDocument (AutoCloseable):
         self.formenv = PdfFormEnv(raw, config, self)
     
     
-    # TODO(#186) use functools.cached_property
     def get_formtype(self):
         """
         Returns:
