@@ -23,6 +23,7 @@
 ## 4.1.0 (2023-03-07)
 
 - Updated PDFium from `5619` to `5633` (autorelease).
+- The `PdfDocument` parameter `may_init_forms` is now False by default.
 
 
 ## 4.0.0 (2023-02-28)
