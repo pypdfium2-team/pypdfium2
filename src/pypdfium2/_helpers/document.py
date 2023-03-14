@@ -547,7 +547,7 @@ class PdfDocument (AutoCloseable):
             password = password,
         )
         if need_formenv:
-            # TODO pass in a copy of the form config
+            # TODO handle custom form config - as ctypes objects can't be pickled, we can't directly pass in a form config (which recursively consists of ctypes objects), so we'll need some different mechanism, likely a callback to create the form config.
             pdf.init_forms()
         page = pdf[index]
         
