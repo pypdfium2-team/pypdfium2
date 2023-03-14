@@ -540,12 +540,15 @@ class PdfDocument (AutoCloseable):
     
     
     @classmethod
-    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, **kwargs):
+    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, **kwargs):
         
         pdf = cls(
             input_data,
             password = password,
         )
+        if need_formenv:
+            # TODO pass in a copy of the form config
+            pdf.init_forms()
         page = pdf[index]
         
         bitmap = renderer(page, **kwargs)
@@ -613,6 +616,7 @@ class PdfDocument (AutoCloseable):
             renderer = renderer,
             converter = converter,
             pass_info = pass_info,
+            need_formenv = bool(self.formenv),
             **kwargs
         )
         
