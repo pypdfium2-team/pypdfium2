@@ -6,8 +6,8 @@
 
 version: 2
 
-formats:
-  - pdf
+# formats:
+#   - pdf  # FIXME broken?
 
 sphinx:
    configuration: docs/source/conf.py
