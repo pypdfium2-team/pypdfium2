@@ -7,6 +7,19 @@
 # Changelog
 
 
+## 4.2.0 (2023-03-14)
+
+- Updated PDFium from `5633` to `5648` (autorelease).
+- API-breaking changes around forms code, necessary to fix conceptual issues. Closes {issue}`182`.
+  * `may_init_forms` parameter replaced with `init_forms()`, so that a custom form config can be provided.
+    This is particularly required for V8 enabled PDFium.
+  * `formtype` attribute replaced with `get_formtype()`.
+    Previously, `formtype` would only be set correctly if `may_init_forms=True`,
+    which caused confusion for documents that have forms but no initialized form env.
+- `PdfPage.get_*box()` functions now provide an option to disable fallbacks. Closes {issue}`187`.
+- Some formerly hidden utilities are now exposed in the new namespace `pypdfium2.internal`.
+
+
 ## 4.1.0 (2023-03-07)
 
 - Updated PDFium from `5619` to `5633` (autorelease).
