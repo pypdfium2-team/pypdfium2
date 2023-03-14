@@ -75,6 +75,7 @@ class PdfDocument (AutoCloseable):
         self._data_holder = []
         self._data_closer = []
         self.formenv = None
+        self._form_config_maker = None
         
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
@@ -133,7 +134,12 @@ class PdfDocument (AutoCloseable):
         return cls(new_pdf)
     
     
-    def init_forms(self, config=None):
+    @staticmethod
+    def _default_form_config_maker():
+        return pdfium_c.FPDF_FORMFILLINFO(version=2)
+    
+    
+    def init_forms(self, config_maker=None):
         """
         Initialize a form env, if the document has forms. If already initialized, nothing will be done.
         See the :attr:`formenv` attribute.
@@ -143,16 +149,22 @@ class PdfDocument (AutoCloseable):
             before getting any page handles (due to PDFium's API).
         
         Parameters:
-            config (FPDF_FORMFILLINFO):
-                Caller-provided form config interface to use. Optional for default builds.
-                Must be given if using V8 enabled PDFium (:data:`.V_PDFIUM_IS_V8`), with all required fields implemented.
+            config_maker (typing.Callable | None):
+                Callback returning a custom form config interface. Optional for default builds.
+                Must be given if using V8 enabled PDFium (:data:`.V_PDFIUM_IS_V8`), and the returned config must implement all required fields.
         """
+        
         if (self.get_formtype() == pdfium_c.FORMTYPE_NONE) or self.formenv:
             return
-        if not config:
+        
+        if not config_maker:
             if V_PDFIUM_IS_V8:
-                raise RuntimeError("A caller-provided form config is required with V8 enabled PDFium.")
-            config = pdfium_c.FPDF_FORMFILLINFO(version=2)
+                raise RuntimeError("A caller-provided form config maker is required with V8 enabled PDFium.")
+            else:
+                config_maker = PdfDocument._default_form_config_maker
+        
+        self._form_config_maker = config_maker
+        config = config_maker()
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         self.formenv = PdfFormEnv(raw, config, self)
     
@@ -540,15 +552,14 @@ class PdfDocument (AutoCloseable):
     
     
     @classmethod
-    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, **kwargs):
+    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, form_config_maker, **kwargs):
         
         pdf = cls(
             input_data,
             password = password,
         )
         if need_formenv:
-            # TODO handle custom form config - as ctypes objects can't be pickled, we can't directly pass in a form config (which recursively consists of ctypes objects), so we'll need some different mechanism, likely a callback to create the form config.
-            pdf.init_forms()
+            pdf.init_forms(config_maker=form_config_maker)
         page = pdf[index]
         
         bitmap = renderer(page, **kwargs)
@@ -617,6 +628,7 @@ class PdfDocument (AutoCloseable):
             converter = converter,
             pass_info = pass_info,
             need_formenv = bool(self.formenv),
+            form_config_maker = self._form_config_maker,
             **kwargs
         )
         
