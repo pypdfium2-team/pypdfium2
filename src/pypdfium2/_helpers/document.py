@@ -152,7 +152,8 @@ class PdfDocument (AutoCloseable):
         if not config:
             if V_PDFIUM_IS_V8:
                 raise RuntimeError("A caller-provided form config is required with V8 enabled PDFium.")
-            config = pdfium_c.FPDF_FORMFILLINFO(version=2)
+            else:
+                config = pdfium_c.FPDF_FORMFILLINFO(version=2)
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         self.formenv = PdfFormEnv(raw, config, self)
     
@@ -540,15 +541,17 @@ class PdfDocument (AutoCloseable):
     
     
     @classmethod
-    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, **kwargs):
+    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, mk_formconfig, **kwargs):
         
         pdf = cls(
             input_data,
             password = password,
         )
         if need_formenv:
-            # TODO handle custom form config - as ctypes objects can't be pickled, we can't directly pass in a form config (which recursively consists of ctypes objects), so we'll need some different mechanism, likely a callback to create the form config.
-            pdf.init_forms()
+            if mk_formconfig:
+                pdf.init_forms(config=mk_formconfig())
+            else:
+                pdf.init_forms()
         page = pdf[index]
         
         bitmap = renderer(page, **kwargs)
@@ -571,6 +574,7 @@ class PdfDocument (AutoCloseable):
             page_indices = None,
             n_processes = os.cpu_count(),
             pass_info = False,
+            mk_formconfig = None,
             **kwargs
         ):
         """
@@ -590,6 +594,8 @@ class PdfDocument (AutoCloseable):
                 The number of parallel process to use.
             renderer (typing.Callable):
                 The page rendering function to use. This may be used to plug in custom renderers other than :meth:`.PdfPage.render`.
+            mk_formconfig (typing.Callable[FPDF_FORMFILLINFO] | None):
+                Optional callback returning a custom form config to use when initializing a form env in worker jobs.
             kwargs (dict):
                 Keyword arguments to the renderer.
         
@@ -617,6 +623,7 @@ class PdfDocument (AutoCloseable):
             converter = converter,
             pass_info = pass_info,
             need_formenv = bool(self.formenv),
+            mk_formconfig = mk_formconfig,
             **kwargs
         )
         
