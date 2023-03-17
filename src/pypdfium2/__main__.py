@@ -17,16 +17,16 @@ except ImportError:
 
 
 SubCommands = {
-    "render":         "rasterize pages",
-    "toc":            "print table of contents",
     "arrange":        "rearrange/merge documents",
-    "tile":           "tile pages (N-up)",
-    "pdfinfo":        "print info on document and pages",
-    "pageobjects":    "print info on page objects",
-    "extract-text":   "extract text",
-    "extract-images": "extract images",
-    "imgtopdf":       "convert images to PDF",
     "attachments":    "list/extract/edit embedded files",
+    "extract-images": "extract images",
+    "extract-text":   "extract text",
+    "imgtopdf":       "convert images to PDF",
+    "pageobjects":    "print info on page objects",
+    "pdfinfo":        "print info on document and pages",
+    "render":         "rasterize pages",
+    "tile":           "tile pages (N-up)",
+    "toc":            "print table of contents",
 }
 
 CmdToModule = {n: importlib.import_module(f"pypdfium2._cli.{n.replace('-', '_')}") for n in SubCommands}

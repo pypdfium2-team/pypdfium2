@@ -17,44 +17,9 @@ Main Help
 .. command-output:: pypdfium2 --help
 
 
-Renderer
-********
-.. command-output:: pypdfium2 render --help
-
-
-TOC Reader
-**********
-.. command-output:: pypdfium2 toc --help
-
-
 Arranger
 ********
 .. command-output:: pypdfium2 arrange --help
-
-
-Page Tiler
-**********
-.. command-output:: pypdfium2 tile --help
-
-
-Text Extractor
-**************
-.. command-output:: pypdfium2 extract-text --help
-
-
-Image Extractor
-***************
-.. command-output:: pypdfium2 extract-images --help
-
-
-Page Object Analyzer
-********************
-.. command-output:: pypdfium2 pageobjects --help
-
-
-Image Converter
-***************
-.. command-output:: pypdfium2 imgtopdf --help
 
 
 Attachments
@@ -64,3 +29,43 @@ Attachments
 .. command-output:: pypdfium2 attachments file.pdf list --help
 .. command-output:: pypdfium2 attachments file.pdf extract --help
 .. command-output:: pypdfium2 attachments file.pdf edit --help
+
+
+Image Extractor
+***************
+.. command-output:: pypdfium2 extract-images --help
+
+
+Text Extractor
+**************
+.. command-output:: pypdfium2 extract-text --help
+
+
+Image Converter
+***************
+.. command-output:: pypdfium2 imgtopdf --help
+
+
+Page Objects Info
+*****************
+.. command-output:: pypdfium2 pageobjects --help
+
+
+Document Info
+*************
+.. command-output:: pypdfium2 pdfinfo --help
+
+
+Renderer
+********
+.. command-output:: pypdfium2 render --help
+
+
+Page Tiler
+**********
+.. command-output:: pypdfium2 tile --help
+
+
+TOC Reader
+**********
+.. command-output:: pypdfium2 toc --help
