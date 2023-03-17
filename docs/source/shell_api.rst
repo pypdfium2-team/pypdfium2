@@ -55,3 +55,12 @@ Page Object Analyzer
 Image Converter
 ***************
 .. command-output:: pypdfium2 imgtopdf --help
+
+
+Attachments
+***********
+.. command-output:: pypdfium2 attachments --help
+.. FIXME restructure attachments CLI so we can get help without having to specify a placeholder file
+.. command-output:: pypdfium2 attachments file.pdf list --help
+.. command-output:: pypdfium2 attachments file.pdf extract --help
+.. command-output:: pypdfium2 attachments file.pdf edit --help
