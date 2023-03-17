@@ -22,6 +22,8 @@ class PdfUnspHandler:
     
     def __init__(self):
         self.handlers = {}
+        self._config = None
+    
     
     def __call__(self, _, type):
         for handler in self.handlers.values():
