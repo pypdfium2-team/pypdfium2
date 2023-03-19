@@ -9,7 +9,7 @@
 
 ## 4.2.0 (2023-03-14)
 
-- Updated PDFium from `5633` to `5648` (autorelease).
+- Updated PDFium from `5633` to `5648`.
 - API-breaking changes around forms code, necessary to fix conceptual issues. Closes {issue}`182`.
   * `may_init_forms` parameter replaced with `init_forms()`, so that a custom form config can be provided.
     This is particularly required for V8 enabled PDFium.
@@ -22,13 +22,13 @@
 
 ## 4.1.0 (2023-03-07)
 
-- Updated PDFium from `5619` to `5633` (autorelease).
+- Updated PDFium from `5619` to `5633`.
 - The `PdfDocument` parameter `may_init_forms` is now False by default.
 
 
 ## 4.0.0 (2023-02-28)
 
-- Updated PDFium from `5579` to `5619` (autorelease).
+- Updated PDFium from `5579` to `5619`.
 - Full support model rewrite. Many existing features changed and new helpers added. Numerous bugs fixed on the way.
   Read the updated documentation to migrate your code.
 - The raw API is now isolated in a separate namespace (`pypdfium2.raw`).
@@ -46,7 +46,7 @@
 
 ## 4.0.0b1 (2023-02-22)
 
-- Attempted first beta release for v4. PyPI upload failed due to {issue}`177`.
+- Attempted beta release for v4. PyPI upload failed due to {issue}`177`.
 
 
 ## History

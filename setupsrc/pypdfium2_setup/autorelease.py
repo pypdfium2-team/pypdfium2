@@ -109,10 +109,9 @@ def log_changes(summary, prev_ns, curr_ns):
     
     pdfium_msg = "## %s (%s)\n\n- " % (curr_ns["V_PYPDFIUM2"], time.strftime("%Y-%m-%d"))
     if prev_ns["V_LIBPDFIUM"] != curr_ns["V_LIBPDFIUM"]:
-        pdfium_msg += "Updated PDFium from `%s` to `%s`" % (prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"])
+        pdfium_msg += "Updated PDFium from `%s` to `%s`." % (prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"])
     else:
-        pdfium_msg += "No PDFium update"
-    pdfium_msg += " (autorelease)."
+        pdfium_msg += "No PDFium update."
     
     content = Changelog.read_text()
     pos = content.index("\n", content.index("# Changelog")) + 1
