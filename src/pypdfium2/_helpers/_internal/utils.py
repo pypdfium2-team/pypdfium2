@@ -30,11 +30,12 @@ def set_callback(struct, fname, callback):
 
 
 def is_buffer(buf, spec="r"):
-    methods = ()
+    methods = []
+    assert set(spec).issubset(set("rw"))
     if "r" in spec:
-        methods += ("seek", "tell", "read", "readinto")
+        methods += ["seek", "tell", "read", "readinto"]
     if "w" in spec:
-        methods += ("write", )
+        methods += ["write"]
     return all(callable(getattr(buf, a, None)) for a in methods)
 
 
