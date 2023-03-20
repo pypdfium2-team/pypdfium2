@@ -90,19 +90,14 @@ class PdfPage (AutoCloseable):
             return (fallback_func() if fallback_ok else None)
         return (left.value, bottom.value, right.value, top.value)
     
-    def _set_box(self, box_func, l, b, r, t):
-        if not all(isinstance(val, (int, float)) for val in (l, b, r, t)):
-            raise ValueError("Box values must be int or float.")
-        box_func(self, l, b, r, t)
-    
     # NOTE in case further arguments are needed (besides fallback_ok), then use *args, **kwargs in callers
     
     def get_mediabox(self, fallback_ok=True):
         """
         Returns:
-            (float, float, float, float):
+            (float, float, float, float) | None:
             The page MediaBox in PDF canvas units, consisting of four coordinates (usually x0, y0, x1, y1).
-            Falls back to ANSI A (0, 0, 612, 792) in case MediaBox is not defined.
+            If MediaBox is not defined, returns ANSI A (0, 0, 612, 792) if ``fallback_ok=True``, None otherwise.
         Note:
             Due to quirks in PDFium's public API, all ``get_*box()`` functions except :meth:`.get_bbox`
             do not inherit from parent nodes in the page tree (as of PDFium 5418).
@@ -114,7 +109,7 @@ class PdfPage (AutoCloseable):
         """
         Set the page's MediaBox by passing four :class:`float` coordinates (usually x0, y0, x1, y1).
         """
-        self._set_box(pdfium_c.FPDFPage_SetMediaBox, l, b, r, t)
+        pdfium_c.FPDFPage_SetMediaBox(self, l, b, r, t)
     
     def get_cropbox(self, fallback_ok=True):
         """
@@ -127,7 +122,7 @@ class PdfPage (AutoCloseable):
         """
         Set the page's CropBox.
         """
-        self._set_box(pdfium_c.FPDFPage_SetCropBox, l, b, r, t)
+        pdfium_c.FPDFPage_SetCropBox(self, l, b, r, t)
     
     def get_bleedbox(self, fallback_ok=True):
         """
@@ -140,7 +135,7 @@ class PdfPage (AutoCloseable):
         """
         Set the page's BleedBox.
         """
-        self._set_box(pdfium_c.FPDFPage_SetBleedBox, l, b, r, t)
+        pdfium_c.FPDFPage_SetBleedBox(self, l, b, r, t)
     
     def get_trimbox(self, fallback_ok=True):
         """
@@ -153,7 +148,7 @@ class PdfPage (AutoCloseable):
         """
         Set the page's TrimBox.
         """
-        self._set_box(pdfium_c.FPDFPage_SetTrimBox, l, b, r, t)
+        pdfium_c.FPDFPage_SetTrimBox(self, l, b, r, t)
     
     def get_artbox(self, fallback_ok=True):
         """
@@ -166,7 +161,7 @@ class PdfPage (AutoCloseable):
         """
         Set the page's ArtBox.
         """
-        self._set_box(pdfium_c.FPDFPage_SetArtBox, l, b, r, t)
+        pdfium_c.FPDFPage_SetArtBox(self, l, b, r, t)
     
     
     def get_bbox(self):

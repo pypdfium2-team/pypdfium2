@@ -26,12 +26,12 @@ def color_tohex(color, rev_byteorder):
 
 
 def set_callback(struct, fname, callback):
-    setattr(struct, fname, type(getattr(struct, fname))(callback))
+    setattr(struct, fname, type( getattr(struct, fname) )(callback))
 
 
 def is_buffer(buf, spec="r"):
     methods = []
-    assert set(spec).issubset(set("rw"))
+    assert set(spec).issubset( set("rw") )
     if "r" in spec:
         methods += ["seek", "tell", "read", "readinto"]
     if "w" in spec:
