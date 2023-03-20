@@ -47,8 +47,7 @@ def get_parser():
     
     for name, help in SubCommands.items():
         subparser = subparsers.add_parser(name, description=help, help=help)
-        module = CmdToModule[name]
-        module.attach(subparser)
+        CmdToModule[name].attach(subparser)
     
     if argcomplete:
         argcomplete.autocomplete(main_parser)
@@ -72,12 +71,12 @@ def api_main(raw_args=sys.argv[1:]):
     
     parser = get_parser()
     args = parser.parse_args(raw_args)
+    
     if not args.subcommand:
         parser.print_help()
         return
     
-    module = CmdToModule[args.subcommand]
-    module.main(args)
+    CmdToModule[args.subcommand].main(args)
 
 
 def cli_main():
