@@ -7,6 +7,12 @@
 # Changelog
 
 
+## 4.3.0 (2023-03-21)
+
+- Updated PDFium from `5648` to `5664`.
+- Fixed forms rendering in the multi-page renderer by initializing a formenv in worker jobs if the triggering document has one.
+
+
 ## 4.2.0 (2023-03-14)
 
 - Updated PDFium from `5633` to `5648`.
