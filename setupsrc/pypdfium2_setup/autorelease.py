@@ -5,17 +5,21 @@
 import sys
 import time
 import copy
+import shutil
 import argparse
 import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
+from pypdfium2_setup import update_pdfium
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     set_versions,
     get_version_ns,
     get_latest_version,
     get_changelog_staging,
+    Host,
+    DataTree,
     SourceTree,
     PDFium_URL,
     RepositoryURL,
@@ -23,22 +27,30 @@ from pypdfium2_setup.packaging_base import (
     ChangelogStaging,
     VersionFile,
     VerNamespace,
+    BindingsFileName,
 )
 
 
 AutoreleaseDir  = SourceTree / "autorelease"
 MajorUpdateFile = AutoreleaseDir / "update_major.txt"
 BetaUpdateFile  = AutoreleaseDir / "update_beta.txt"
+RefBindingsFile = SourceTree / "bindings" / BindingsFileName
 
 
 def run_local(*args, **kws):
     return run_cmd(*args, **kws, cwd=SourceTree)
 
 
-# Prerequisite: Bindings have been newly generated for the current host platform (somewhat wonky assumption).
-# This can be improved when pypdfium2 is changed to generate only a single bindings file for all platforms (see TASKS.md).
 def update_refbindings():
-    pass  # TODO
+    
+    # re-generate host bindings
+    host_bindings = DataTree / Host.platform / BindingsFileName
+    host_bindings.unlink(missing_ok=True)
+    update_pdfium.main([Host.platform])
+    assert host_bindings.exists()
+    
+    # update reference bindings
+    shutil.copyfile(host_bindings, RefBindingsFile)  # yes this overwrites
 
 
 def _check_py_updates(v_pypdfium2):
