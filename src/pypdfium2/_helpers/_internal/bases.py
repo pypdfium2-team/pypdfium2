@@ -69,6 +69,7 @@ class AutoCloseable (AutoCastable):
         # FIXME should we add context info (explicit/automatic) ?
         if DEBUG_AUTOCLOSE:
             print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
+        # TODO add needs_parent safety check (if True, `parent` must be given)
         if (parent is not None) and parent._tree_closed():
             print(f"Parent closed before child - this is illegal ({parent}, {raw}).", file=sys.stderr)
         close_func(raw, *args, **kwargs)
