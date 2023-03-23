@@ -2,4 +2,4 @@ pip
 setuptools
 build
 wheel  # !=0.38.0,!=0.38.1
-ctypesgen @ git+https://github.com/mara004/ctypesgen@pypdfium2
+ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2
