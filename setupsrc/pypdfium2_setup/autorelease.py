@@ -5,17 +5,21 @@
 import sys
 import time
 import copy
+import shutil
 import argparse
 import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
+from pypdfium2_setup import update_pdfium
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     set_versions,
     get_version_ns,
     get_latest_version,
     get_changelog_staging,
+    Host,
+    DataTree,
     SourceTree,
     PDFium_URL,
     RepositoryURL,
@@ -23,16 +27,33 @@ from pypdfium2_setup.packaging_base import (
     ChangelogStaging,
     VersionFile,
     VerNamespace,
+    BindingsFileName,
 )
 
 
 AutoreleaseDir  = SourceTree / "autorelease"
 MajorUpdateFile = AutoreleaseDir / "update_major.txt"
 BetaUpdateFile  = AutoreleaseDir / "update_beta.txt"
+RefBindingsFile = SourceTree / "bindings" / BindingsFileName
+
+# these files/dirs do not necessarily need to have been changed, `git add` silently skips that
+PlacesToRegister = [AutoreleaseDir, VersionFile, Changelog, ChangelogStaging, RefBindingsFile]
 
 
 def run_local(*args, **kws):
     return run_cmd(*args, **kws, cwd=SourceTree)
+
+
+def update_refbindings():
+    
+    # re-generate host bindings
+    host_bindings = DataTree / Host.platform / BindingsFileName
+    host_bindings.unlink(missing_ok=True)
+    update_pdfium.main([Host.platform])
+    assert host_bindings.exists()
+    
+    # update reference bindings
+    shutil.copyfile(host_bindings, RefBindingsFile)  # yes this overwrites
 
 
 def _check_py_updates(v_pypdfium2):
@@ -125,8 +146,8 @@ def log_changes(summary, prev_ns, curr_ns):
 
 
 def register_changes(curr_ns):
-    run_local(["git", "checkout", "-B", "autorelease_tmp"])  #, "origin/main"
-    run_local(["git", "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
+    run_local(["git", "checkout", "-B", "autorelease_tmp"])
+    run_local(["git", "add", *PlacesToRegister])
     run_local(["git", "commit", "-m", "[autorelease] update changelog and version file"])
     # NOTE the actually pushed tag will be a different one, but it's nevertheless convenient to have this here because of the changelog
     run_local(["git", "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
@@ -193,6 +214,8 @@ def main():
     )
     args = parser.parse_args()
     
+    update_refbindings()
+    
     prev_ns = copy.deepcopy(VerNamespace)
     latest = get_latest_version()
     c_updates, py_updates = do_versioning(latest)
@@ -202,8 +225,10 @@ def main():
         flush = (curr_ns["V_BETA"] is None),
     )
     log_changes(summary, prev_ns, curr_ns)
+    
     if args.register:
         register_changes(curr_ns)
+    
     make_releasenotes(summary, prev_ns, curr_ns, c_updates)
 
 

@@ -133,9 +133,12 @@ def generate_bindings(archives, version):
         shutil.rmtree(build_dir)
 
 
-def main(platforms, version, robust=False, max_workers=None, use_v8=False, emplace=False):
+def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, emplace=False):
     
     # FIXME questionable code style?
+    
+    if not version:
+        version = get_latest_version()
     
     if not platforms:
         platforms = [Host.platform] if emplace else BinaryPlatforms
@@ -170,7 +173,6 @@ def parse_args(argv):
     parser.add_argument(
         "--version", "-v",
         type = int,
-        default = get_latest_version(),
         help = "The pdfium-binaries release to use (defaults to latest). Must be a valid tag integer."
     )
     parser.add_argument(
