@@ -36,6 +36,9 @@ MajorUpdateFile = AutoreleaseDir / "update_major.txt"
 BetaUpdateFile  = AutoreleaseDir / "update_beta.txt"
 RefBindingsFile = SourceTree / "bindings" / BindingsFileName
 
+# these files/dirs do not necessarily need to have been changed, `git add` silently skips that
+PlacesToRegister = [AutoreleaseDir, VersionFile, Changelog, ChangelogStaging, RefBindingsFile]
+
 
 def run_local(*args, **kws):
     return run_cmd(*args, **kws, cwd=SourceTree)
@@ -143,8 +146,8 @@ def log_changes(summary, prev_ns, curr_ns):
 
 
 def register_changes(curr_ns):
-    run_local(["git", "checkout", "-B", "autorelease_tmp"])  #, "origin/main"
-    run_local(["git", "add", AutoreleaseDir, VersionFile, Changelog, ChangelogStaging])
+    run_local(["git", "checkout", "-B", "autorelease_tmp"])
+    run_local(["git", "add", *PlacesToRegister])
     run_local(["git", "commit", "-m", "[autorelease] update changelog and version file"])
     # NOTE the actually pushed tag will be a different one, but it's nevertheless convenient to have this here because of the changelog
     run_local(["git", "tag", "-a", curr_ns["V_PYPDFIUM2"], "-m", "Autorelease"])
