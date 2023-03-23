@@ -5,7 +5,7 @@
 
 [#192]: https://github.com/pypdfium2-team/pypdfium2/issues/192 "Issue #192"
 
-This directory contains a reference bindings file ([raw.py](./raw.py)) for pypdfium2.
+This directory contains a reference bindings file for pypdfium2 ([raw.py](./raw.py)).
 It is updated automatically on release.
 
 This helps track changes to the bindings. See [#192] for an extended rationale.
