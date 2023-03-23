@@ -379,6 +379,7 @@ class PdfDocument (AutoCloseable):
         """
         Remove the page at *index* (zero-based).
         """
+        # FIXME what if the caller still has a handle to the page?
         pdfium_c.FPDFPage_Delete(self, index)
     
     
