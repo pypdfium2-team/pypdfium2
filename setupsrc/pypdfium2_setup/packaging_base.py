@@ -20,19 +20,19 @@ VersionTarget_Latest = "latest"
 BindingsFileName     = "raw.py"
 VerStatusFileName    = ".pdfium_version.txt"
 V8StatusFileName     = ".pdfium_is_v8.txt"
-HomeDir     = Path.home()
-SourceTree  = Path(__file__).parents[2]
-DataTree    = SourceTree / "data"
-SB_Dir      = SourceTree / "sourcebuild"
-ModuleDir   = SourceTree / "src" / "pypdfium2"
-VersionFile = ModuleDir / "version.py"
-Changelog   = SourceTree / "docs" / "devel" / "changelog.md"
-ChangelogStaging = SourceTree / "docs" / "devel" / "changelog_staging.md"
-RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
-PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
-DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
-ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
-ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
+HomeDir              = Path.home()
+SourceTree           = Path(__file__).parents[2]
+DataTree             = SourceTree / "data"
+SB_Dir               = SourceTree / "sourcebuild"
+ModuleDir            = SourceTree / "src" / "pypdfium2"
+VersionFile          = ModuleDir / "version.py"
+Changelog            = SourceTree / "docs" / "devel" / "changelog.md"
+ChangelogStaging     = SourceTree / "docs" / "devel" / "changelog_staging.md"
+RepositoryURL        = "https://github.com/pypdfium2-team/pypdfium2"
+PDFium_URL           = "https://pdfium.googlesource.com/pdfium"
+DepotTools_URL       = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+ReleaseRepo          = "https://github.com/bblanchon/pdfium-binaries"
+ReleaseURL           = ReleaseRepo + "/releases/download/chromium%2F"
 
 
 class SystemNames:
