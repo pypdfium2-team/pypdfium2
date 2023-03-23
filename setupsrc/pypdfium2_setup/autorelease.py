@@ -35,6 +35,12 @@ def run_local(*args, **kws):
     return run_cmd(*args, **kws, cwd=SourceTree)
 
 
+# Prerequisite: Bindings have been newly generated for the current host platform (somewhat wonky assumption).
+# This can be improved when pypdfium2 is changed to generate only a single bindings file for all platforms (see TASKS.md).
+def update_refbindings():
+    pass  # TODO
+
+
 def _check_py_updates(v_pypdfium2):
     # see if pypdfium2 code was updated by checking if the latest commit is tagged
     tag = run_local(["git", "tag", "--list", "--contains", "HEAD"], capture=True)
@@ -193,6 +199,8 @@ def main():
     )
     args = parser.parse_args()
     
+    update_refbindings()
+    
     prev_ns = copy.deepcopy(VerNamespace)
     latest = get_latest_version()
     c_updates, py_updates = do_versioning(latest)
@@ -202,8 +210,10 @@ def main():
         flush = (curr_ns["V_BETA"] is None),
     )
     log_changes(summary, prev_ns, curr_ns)
+    
     if args.register:
         register_changes(curr_ns)
+    
     make_releasenotes(summary, prev_ns, curr_ns, c_updates)
 
 
