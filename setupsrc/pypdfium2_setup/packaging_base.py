@@ -12,13 +12,14 @@ from pathlib import Path
 
 # TODO improve consistency of variable names; think about variables to move in/out
 
-VersionTargetVar  = "PDFIUM_VERSION"
-BinaryTargetVar   = "PDFIUM_PLATFORM"
-BinaryTarget_None = "none"
-BinaryTarget_Auto = "auto"
-BindingsFileName  = "raw.py"
-VerStatusFileName = ".pdfium_version.txt"
-V8StatusFileName  = ".pdfium_is_v8.txt"
+BinaryTargetVar      = "PDFIUM_PLATFORM"
+BinaryTarget_None    = "none"
+BinaryTarget_Auto    = "auto"
+VersionTargetVar     = "PDFIUM_VERSION"
+VersionTarget_Latest = "latest"
+BindingsFileName     = "raw.py"
+VerStatusFileName    = ".pdfium_version.txt"
+V8StatusFileName     = ".pdfium_is_v8.txt"
 HomeDir     = Path.home()
 SourceTree  = Path(__file__).parents[2]
 DataTree    = SourceTree / "data"

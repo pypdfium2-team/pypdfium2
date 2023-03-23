@@ -2,6 +2,8 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# NOTE setuptools may, unfortunately, run this code several times (if using PEP 517 style setup).
+
 import os
 import sys
 import setuptools
@@ -11,17 +13,17 @@ sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
-    VersionTargetVar,
-    V8StatusFileName,
     BinaryTargetVar,
+    BinaryTarget_Auto,
     BinaryTarget_None,
+    VersionTargetVar,
+    VersionTarget_Latest,
     VerStatusFileName,
+    V8StatusFileName,
     PlatformNames,
     get_platfiles,
     get_latest_version,
 )
-
-# NOTE setuptools may, unfortunately, run this code several times (if using PEP 517 style setup).
 
 
 def install_handler():
@@ -39,22 +41,22 @@ def install_handler():
     pl_dir = DataTree / pl_name
     ver_file = pl_dir / VerStatusFileName
     
-    curr_ver = None
+    prev_ver = None
     if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
-        curr_ver = int( ver_file.read_text().strip() )
+        prev_ver = int( ver_file.read_text().strip() )
     
-    req_ver = os.environ.get(VersionTargetVar, None)
-    if req_ver in (None, "", "latest"):
-        req_ver = get_latest_version()
+    new_ver = os.environ.get(VersionTargetVar, None)
+    if not new_ver or (new_ver.lower() == VersionTarget_Latest):
+        new_ver = get_latest_version()
     else:
-        req_ver = int(req_ver)
+        new_ver = int(new_ver)
     
     had_v8 = (pl_dir / V8StatusFileName).exists()
     use_v8 = bool(int( os.environ.get("PDFIUM_USE_V8", 0) ))
     
-    if curr_ver != req_ver or had_v8 != use_v8:
-        print(f"Switching pdfium binary from {curr_ver} (v8 {had_v8}) to {req_ver} (v8 {use_v8})", file=sys.stderr)
-        update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
+    if (prev_ver != new_ver) or (had_v8 != use_v8):
+        print(f"Switching pdfium binary from {prev_ver} (v8 {had_v8}) to {new_ver} (v8 {use_v8})", file=sys.stderr)
+        update_pdfium.main([pl_name], version=new_ver, use_v8=use_v8)
     mkwheel(pl_name)
 
 
@@ -72,7 +74,7 @@ def packaging_handler(target):
 
 def main():
     target = os.environ.get(BinaryTargetVar, None)
-    if target in (None, "auto"):
+    if not target or (target.lower() == BinaryTarget_Auto):
         install_handler()
     else:
         packaging_handler(target)
