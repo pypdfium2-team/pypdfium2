@@ -105,6 +105,7 @@ class _host_platform:
         # https://github.com/python/cpython/issues/87414
         # `libc_ver()` currently returns an empty string on libc implementations other than glibc - hence, we assume musl if it's not glibc
         # TODO find some function to actually detect musl
+        # See this for possible solutions: https://stackoverflow.com/questions/72272168/how-to-determine-which-libc-implementation-the-host-system-uses
         self._libc_info = None
         self._is_glibc = None
         if self._system_name == "linux":
