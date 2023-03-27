@@ -206,7 +206,8 @@ class PdfBitmap (AutoCloseable):
         Each row contains as many pixels as the bitmap is wide.
         The length of each pixel corresponds to the number of channels.
         
-        The resulting array is supposed to share memory with the original bitmap buffer, so changes to the buffer should be reflected in the array, and vice versa.
+        The resulting array is supposed to share memory with the original bitmap buffer,
+        so changes to the buffer should be reflected in the array, and vice versa.
         
         Returns:
             numpy.ndarray: NumPy array (representation of the bitmap buffer).
@@ -230,7 +231,10 @@ class PdfBitmap (AutoCloseable):
         """
         Convert the bitmap to a :mod:`PIL` image, using :func:`PIL.Image.frombuffer`.
         
-        For ``RGBA``, ``RGBX`` and ``L`` buffers, PIL is supposed to share memory with the original bitmap buffer, so changes to the buffer should be reflected in the image. Otherwise, PIL will make a copy of the data.
+        For ``RGBA``, ``RGBX`` and ``L`` buffers, PIL is supposed to share memory with
+        the original bitmap buffer, so changes to the buffer should be reflected in the image
+        (however, changes to the image may not be reflected in the buffer due to PIL's behaviour).
+        Otherwise, PIL will make a copy of the data.
         
         Returns:
             PIL.Image.Image: PIL image (representation or copy of the bitmap buffer).
@@ -257,7 +261,8 @@ class PdfBitmap (AutoCloseable):
     def from_pil(cls, pil_image):
         """
         Convert a :mod:`PIL` image to a PDFium bitmap.
-        Due to the restricted number of color formats and bit depths supported by PDFium's bitmap implementation, this may be a lossy operation.
+        Due to the restricted number of color formats and bit depths supported by PDFium's
+        bitmap implementation, this may be a lossy operation.
         
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
