@@ -172,9 +172,8 @@ class PdfImage (PdfObject):
         
         # https://crbug.com/pdfium/1928
         
-        raw_page = (self.page if self.page else None)
         metadata = pdfium_c.FPDF_IMAGEOBJ_METADATA()
-        success = pdfium_c.FPDFImageObj_GetImageMetadata(self, raw_page, metadata)
+        success = pdfium_c.FPDFImageObj_GetImageMetadata(self, self.page, metadata)
         if not success:
             raise PdfiumError("Failed to get image metadata.")
         
@@ -261,8 +260,7 @@ class PdfImage (PdfObject):
         if render:
             if self.pdf is None:
                 raise RuntimeError("Cannot get rendered bitmap of loose page object.")
-            raw_page = (self.page if self.page else None)
-            raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, raw_page, self)
+            raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
         else:
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)
         
