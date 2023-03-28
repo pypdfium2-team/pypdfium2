@@ -1,7 +1,7 @@
 r"""Wrapper for fpdf_annot.h
 
 Generated with:
-~/.local/bin/ctypesgen --library pdfium --runtime-libdir . ./fpdf_annot.h ./fpdf_attachment.h ./fpdf_catalog.h ./fpdf_dataavail.h ./fpdf_doc.h ./fpdf_edit.h ./fpdf_ext.h ./fpdf_flatten.h ./fpdf_formfill.h ./fpdf_fwlevent.h ./fpdf_javascript.h ./fpdf_ppo.h ./fpdf_progressive.h ./fpdf_save.h ./fpdf_searchex.h ./fpdf_signature.h ./fpdf_structtree.h ./fpdf_sysfontinfo.h ./fpdf_text.h ./fpdf_thumbnail.h ./fpdf_transformpage.h ./fpdfview.h -o ~/projects/pypdfium2/data/linux_x64/raw.py
+/opt/hostedtoolcache/Python/3.10.10/x64/bin/ctypesgen --library pdfium --runtime-libdir . ./fpdf_annot.h ./fpdf_attachment.h ./fpdf_catalog.h ./fpdf_dataavail.h ./fpdf_doc.h ./fpdf_edit.h ./fpdf_ext.h ./fpdf_flatten.h ./fpdf_formfill.h ./fpdf_fwlevent.h ./fpdf_javascript.h ./fpdf_ppo.h ./fpdf_progressive.h ./fpdf_save.h ./fpdf_searchex.h ./fpdf_signature.h ./fpdf_structtree.h ./fpdf_sysfontinfo.h ./fpdf_text.h ./fpdf_thumbnail.h ./fpdf_transformpage.h ./fpdfview.h -o ~/work/pypdfium2/pypdfium2/data/linux_x64/raw.py
 
 Do not modify this file.
 """
@@ -2339,19 +2339,19 @@ if _libs["pdfium"].has("FPDF_GetPageLabel", "cdecl"):
     FPDF_GetPageLabel.argtypes = [FPDF_DOCUMENT, c_int, POINTER(None), c_ulong]
     FPDF_GetPageLabel.restype = c_ulong
 
-__uint8_t = c_ubyte  # /usr/include/bits/types.h: 38
+__uint8_t = c_ubyte  # /usr/include/x86_64-linux-gnu/bits/types.h: 38
 
-__uint16_t = c_ushort  # /usr/include/bits/types.h: 40
+__uint16_t = c_ushort  # /usr/include/x86_64-linux-gnu/bits/types.h: 40
 
-__uint32_t = c_uint  # /usr/include/bits/types.h: 42
+__uint32_t = c_uint  # /usr/include/x86_64-linux-gnu/bits/types.h: 42
 
-__time_t = c_long  # /usr/include/bits/types.h: 160
+__time_t = c_long  # /usr/include/x86_64-linux-gnu/bits/types.h: 160
 
-uint8_t = __uint8_t  # /usr/include/bits/stdint-uintn.h: 24
+uint8_t = __uint8_t  # /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h: 24
 
-uint16_t = __uint16_t  # /usr/include/bits/stdint-uintn.h: 25
+uint16_t = __uint16_t  # /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h: 25
 
-uint32_t = __uint32_t  # /usr/include/bits/stdint-uintn.h: 26
+uint32_t = __uint32_t  # /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h: 26
 
 # fpdf_edit.h: 93
 class struct_FPDF_IMAGEOBJ_METADATA(Structure):
@@ -2996,9 +2996,9 @@ if _libs["pdfium"].has("FPDFFormObj_GetObject", "cdecl"):
     FPDFFormObj_GetObject.argtypes = [FPDF_PAGEOBJECT, c_ulong]
     FPDFFormObj_GetObject.restype = FPDF_PAGEOBJECT
 
-time_t = __time_t  # /usr/include/bits/types/time_t.h: 10
+time_t = __time_t  # /usr/include/x86_64-linux-gnu/bits/types/time_t.h: 10
 
-# /usr/include/bits/types/struct_tm.h: 7
+# /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h: 7
 class struct_tm(Structure):
     pass
 
