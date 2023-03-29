@@ -1,20 +1,12 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
 import sys
-import logging
 from pathlib import Path
-import pypdfium2 as pdfium
+# import pypdfium2.__main__ as pdfium_cli
 
-lib_logger = logging.getLogger("pypdfium2")
-lib_logger.addHandler(logging.StreamHandler())
-lib_logger.setLevel(logging.DEBUG)
-
-pdfium.PdfUnspHandler().setup()
-
-debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
-pdfium.internal.set_autoclose_debug(debug_autoclose)
+# if tests/ and tests_old/ are run together as usual, this would initialize logging twice
+# pdfium_cli.setup_logging()
 
 PyVersion = (sys.version_info.major, sys.version_info.minor)
 

@@ -12,7 +12,11 @@ from collections import namedtuple
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2.raw as pdfium_c
-from pypdfium2.version import V_PDFIUM_IS_V8
+from pypdfium2.version import (
+    V_LIBPDFIUM,
+    V_BUILDNAME,
+    V_PDFIUM_IS_V8,
+)
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.pageobjects import PdfObject
@@ -143,18 +147,19 @@ class PdfDocument (AutoCloseable):
             before getting any page handles (due to PDFium's API).
         
         Parameters:
-            config (FPDF_FORMFILLINFO):
-                Caller-provided form config interface to use. Optional for default builds.
-                Must be given if using V8 enabled PDFium (:data:`.V_PDFIUM_IS_V8`), with all required fields implemented.
+            config (FPDF_FORMFILLINFO | None):
+                Custom form config interface to use (optional).
         """
         if (self.get_formtype() == pdfium_c.FORMTYPE_NONE) or self.formenv:
             return
         if not config:
-            if V_PDFIUM_IS_V8:
-                raise RuntimeError("A caller-provided form config is required with V8 enabled PDFium.")
-            else:
-                config = pdfium_c.FPDF_FORMFILLINFO(version=2)
+            if V_PDFIUM_IS_V8 and V_BUILDNAME == "pdfium-binaries" and int(V_LIBPDFIUM) <= 5677:
+                # https://github.com/bblanchon/pdfium-binaries/issues/105
+                raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
+            config = pdfium_c.FPDF_FORMFILLINFO(version=2)
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
+        if not raw:
+            raise PdfiumError(f"Initializing form env failed for document {self}.")
         self.formenv = PdfFormEnv(raw, config, self)
     
     
