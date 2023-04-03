@@ -40,6 +40,7 @@ class AutoCloseable (AutoCastable):
         if obj is None:
             obj = self
         
+        # FIXME `self.parent` will provide the value of the property at the current time - however, we want to use the value from finalization time, not init time
         self._fin_args = (obj, AutoCloseable._close_template, self.raw, self._uuid, self.parent, close_func, *args)
         self._fin_kwargs = kwargs
         
