@@ -33,16 +33,11 @@ class AutoCloseable (AutoCastable):
         # proactively prevent accidental double initialization
         assert not hasattr(self, "_finalizer")
         
-        self._uuid = None
-        if DEBUG_AUTOCLOSE:
-            self._uuid = uuid.uuid4()
-        
-        if obj is None:
-            obj = self
-        
-        # FIXME `self.parent` will provide the value of the property at the current time - however, we want to use the value from finalization time, not init time
-        self._fin_args = (obj, AutoCloseable._close_template, self.raw, self._uuid, self.parent, close_func, *args)
-        self._fin_kwargs = kwargs
+        self._close_func = close_func
+        self._obj = self if obj is None else obj
+        self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
+        self._ex_args = args
+        self._ex_kwargs = kwargs
         
         self._finalizer = None
         if needs_free:
@@ -51,7 +46,8 @@ class AutoCloseable (AutoCastable):
     
     def _attach_finalizer(self):
         assert self._finalizer is None
-        self._finalizer = weakref.finalize(*self._fin_args, **self._fin_kwargs)
+        # FIXME if `parent` may change after finalizer installation, we've got a problem...
+        self._finalizer = weakref.finalize(self._obj, AutoCloseable._close_template, self._close_func, self.raw, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
@@ -66,7 +62,7 @@ class AutoCloseable (AutoCastable):
     
     
     @staticmethod
-    def _close_template(raw, uuid, parent, close_func, *args, **kwargs):
+    def _close_template(close_func, raw, uuid, parent, *args, **kwargs):
         # FIXME should we add context info (explicit/automatic) ?
         if DEBUG_AUTOCLOSE:
             print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
