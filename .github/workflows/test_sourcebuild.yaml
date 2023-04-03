@@ -48,7 +48,7 @@ jobs:
       - name: Build PDFium (with syslibs)
         if: ${{ matrix.use_syslibs }}
         run: |
-          sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev
+          sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
           python3 ./setupsrc/pypdfium2_setup/build_pdfium.py --use-syslibs
       
       - name: Install & test

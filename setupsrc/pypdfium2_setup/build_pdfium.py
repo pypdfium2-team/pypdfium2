@@ -61,6 +61,7 @@ SyslibsConfig = {
     "use_system_libopenjpeg2": True,
     "use_system_libpng": True,
     "use_system_zlib": True,
+    "use_system_libtiff": True,
     "sysroot": "/",
 }
 
