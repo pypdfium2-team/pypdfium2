@@ -208,7 +208,6 @@ class PdfPage (AutoCloseable):
         if pageobj.pdf and (pageobj.pdf is not self.pdf):
             raise ValueError("The pageobject you attempted to insert belongs to a different PDF.")
         
-        # If PDFium's API allowed inserting a page object into multiple pages, our support model would need to be changed accordingly
         pdfium_c.FPDFPage_InsertObject(self, pageobj)
         pageobj._detach_finalizer()
         pageobj.page = self
@@ -218,7 +217,8 @@ class PdfPage (AutoCloseable):
     def remove_obj(self, pageobj):
         """
         Remove a page object from the page.
-        The page object must not be used afterwards, except for its ``close()`` method.
+        As of PDFium 5692, detached page objects may be only re-inserted into existing pages of the same document.
+        If the page object is not re-inserted into a page, its ``close()`` method may be called.
         
         Parameters:
             pageobj (PdfObject): The page object to remove.
