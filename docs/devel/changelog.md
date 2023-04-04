@@ -7,6 +7,14 @@
 # Changelog
 
 
+## 4.5.0 (2023-04-04)
+
+- Updated PDFium from `5677` to `5692`.
+[pdfium-binaries#105]: https://github.com/bblanchon/pdfium-binaries/issues/105
+- In pdfium-binaries, form initialization for V8/XFA enabled builds has been fixed (see [pdfium-binaries#105]).
+  pypdfium2's support model has been updated accordingly.
+
+
 ## 4.4.0 (2023-03-28)
 
 - Updated PDFium from `5664` to `5677`.
