@@ -45,8 +45,8 @@ class AutoCloseable (AutoCastable):
     
     
     def _attach_finalizer(self):
+        # this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
         assert self._finalizer is None
-        # FIXME if `parent` may change after finalizer installation, we've got a problem...
         self._finalizer = weakref.finalize(self._obj, AutoCloseable._close_template, self._close_func, self.raw, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
     
     def _detach_finalizer(self):
