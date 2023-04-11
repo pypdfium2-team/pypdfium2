@@ -175,7 +175,7 @@ Here are some examples of using the support model API.
   
   # Locate text on the page
   searcher = textpage.search("something", match_case=False, match_whole_word=False)
-  # This will be a list of bounding boxes of the form (left, bottom, right, top)
+  # This returns the next occurrence as (char_index, char_count), or None if not found
   first_occurrence = searcher.get_next()
   ```
 
