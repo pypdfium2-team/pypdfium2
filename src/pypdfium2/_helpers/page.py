@@ -228,8 +228,8 @@ class PdfPage (AutoCloseable):
             raise ValueError("The page object you attempted to remove is not part of this page.")
         
         pdfium_c.FPDFPage_RemoveObject(self, pageobj)
-        pageobj._attach_finalizer()
         pageobj.page = None
+        pageobj._attach_finalizer()
     
     
     def gen_content(self):
