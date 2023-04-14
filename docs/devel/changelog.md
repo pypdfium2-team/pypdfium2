@@ -15,8 +15,9 @@
 ## 4.5.0 (2023-04-04)
 
 - Updated PDFium from `5677` to `5692`.
-- In pdfium-binaries, form initialization for V8/XFA enabled builds has been fixed (see [pdfium-binaries#105](https://github.com/bblanchon/pdfium-binaries/issues/105)).
-  pypdfium2's support model has been updated accordingly.
+- In pdfium-binaries, forms init for V8/XFA enabled builds was fixed by correctly setting up XFA on library init
+  (see [pdfium-binaries#105](https://github.com/bblanchon/pdfium-binaries/issues/105)).
+  Updated pypdfium2's support model accordingly.
 
 
 ## 4.4.0 (2023-03-28)
@@ -36,8 +37,8 @@
 - API-breaking changes around forms code, necessary to fix conceptual issues. Closes {issue}`182`.
   * `may_init_forms` parameter replaced with `init_forms()`, so that a custom form config can be provided.
   * `formtype` attribute replaced with `get_formtype()`.
-    Previously, `formtype` would only be set correctly if `may_init_forms=True`,
-    which caused confusion for documents that have forms but no initialized form env.
+    Previously, `formtype` would only be set correctly on formenv init, which caused confusion
+    for documents that have forms but no formenv was initialized.
 - `PdfPage.get_*box()` functions now provide an option to disable fallbacks. Closes {issue}`187`.
 - Some formerly hidden utilities are now exposed in the new namespace `pypdfium2.internal`.
 
@@ -63,7 +64,7 @@
 
 ## 4.0.0b2 (2023-02-23)
 
-- First working beta release for v4.
+- First successful beta release for v4.
 
 
 ## 4.0.0b1 (2023-02-22)
