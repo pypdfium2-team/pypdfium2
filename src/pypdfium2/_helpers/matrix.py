@@ -45,10 +45,10 @@ class PdfMatrix:
         return f"PdfMatrix{self.get()}"
     
     
-    def __eq__(self, matrix):
-        if type(self) is not type(matrix):
+    def __eq__(self, other):
+        if type(self) is not type(other):
             return False
-        return (self.get() == matrix.get())
+        return (self.get() == other.get())
     
     
     @property
