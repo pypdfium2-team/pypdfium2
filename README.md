@@ -116,19 +116,8 @@ Here are some examples of using the support model API.
 * Read the table of contents
   ```python
   for item in pdf.get_toc():
-    
-      if item.n_kids == 0:
-          state = "*"
-      elif item.is_closed:
-          state = "-"
-      else:
-          state = "+"
-      
-      if item.page_index is None:
-          target = "?"
-      else:
-          target = item.page_index + 1
-      
+      state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
+      target = "?" if item.page_index is None else item.page_index+1
       print(
           "    " * item.level +
           "[%s] %s -> %s  # %s %s" % (
