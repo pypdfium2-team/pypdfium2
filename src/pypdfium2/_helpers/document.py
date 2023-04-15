@@ -163,6 +163,7 @@ class PdfDocument (AutoCloseable):
         self.formenv = PdfFormEnv(raw, config, self)
     
     
+    # ?TODO(v5) consider cached property
     def get_formtype(self):
         """
         Returns:
@@ -172,6 +173,7 @@ class PdfDocument (AutoCloseable):
         return pdfium_c.FPDF_GetFormType(self)
     
     
+    # ?TODO(v5) consider cached property
     def get_pagemode(self):
         """
         Returns:
@@ -180,6 +182,7 @@ class PdfDocument (AutoCloseable):
         return pdfium_c.FPDFDoc_GetPageMode(self)
     
     
+    # ?TODO(v5) consider cached property
     def is_tagged(self):
         """
         Returns:
@@ -466,6 +469,7 @@ class PdfDocument (AutoCloseable):
         )
     
     
+    # TODO(v5) consider switching to a wrapper around the raw bookmark with on-demand cached properties
     def _get_bookmark(self, bookmark, level):
         
         n_bytes = pdfium_c.FPDFBookmark_GetTitle(bookmark, None, 0)
@@ -474,7 +478,6 @@ class PdfDocument (AutoCloseable):
         title = buffer.raw[:n_bytes-2].decode('utf-16-le')
         
         # TODO(v5) just expose count as-is rather than using two variables and doing extra work
-        # it's also more obvious if the number's sign just corresponds to the state (- closed, + open), rather than the current inversion with is_closed
         count = pdfium_c.FPDFBookmark_GetCount(bookmark)
         is_closed = True if count < 0 else None if count == 0 else False
         n_kids = abs(count)
@@ -500,6 +503,7 @@ class PdfDocument (AutoCloseable):
         )
     
     
+    # TODO(v5) change outline API (see above)
     def get_toc(
             self,
             max_depth = 15,
@@ -724,6 +728,7 @@ def _open_pdf(input_data, password, autoclose):
     return pdf, to_hold, to_close
 
 
+# TODO(v5) change outline API (see above)
 PdfOutlineItem = namedtuple("PdfOutlineItem", "level title is_closed n_kids page_index view_mode view_pos")
 """
 Bookmark information.

@@ -73,7 +73,6 @@ class AutoCloseable (AutoCastable):
     
     
     def close(self):
-        # TODO? issue a warning if needs_free=False ?
         if (self.raw is None):
             logger.warning(f"Duplicate close call suppressed on {self}.")
             return
