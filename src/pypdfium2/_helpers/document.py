@@ -473,15 +473,12 @@ class PdfDocument (AutoCloseable):
         pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
         title = buffer.raw[:n_bytes-2].decode('utf-16-le')
         
+        # TODO(v5) just expose count as-is rather than using two variables and doing extra work
+        # it's also more obvious if the number's sign just corresponds to the state (- closed, + open), rather than the current inversion with is_closed
         count = pdfium_c.FPDFBookmark_GetCount(bookmark)
-        if count < 0:
-            is_closed = True
-        elif count == 0:
-            is_closed = None
-        else:
-            is_closed = False
-        
+        is_closed = True if count < 0 else None if count == 0 else False
         n_kids = abs(count)
+        
         dest = pdfium_c.FPDFBookmark_GetDest(self, bookmark)
         page_index = pdfium_c.FPDFDest_GetDestPageIndex(self, dest)
         if page_index == -1:
