@@ -4,3 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Fixed `PdfPage.remove_obj()` wrongly retaining the page as parent in the finalizer hierarchy.
