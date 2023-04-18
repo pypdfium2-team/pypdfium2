@@ -7,6 +7,12 @@
 # Changelog
 
 
+## 4.7.0 (2023-04-18)
+
+- Updated PDFium from `5705` to `5715`.
+- Fixed `PdfPage.remove_obj()` wrongly retaining the page as parent in the finalizer hierarchy.
+
+
 ## 4.6.0 (2023-04-11)
 
 - Updated PDFium from `5692` to `5705`.
