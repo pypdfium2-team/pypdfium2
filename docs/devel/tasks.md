@@ -9,7 +9,6 @@ Also see the issues panel and inline `TODO`/`FIXME` marks in source code.
 ### Main Code
 * Add a matrix-based rendering method, and perhaps a support method around it for common transformations (crop, margins, rotate, mirror, ...).
 * Add helpers for interruptible rendering.
-* Consider adding a page object index property backed by a view of released pages on document level (`list[None | weakref.ReferenceType[PdfPage]]`) that is updated on page order changes, despite a certain risk that the page view might not match the actual state if changes are not tracked properly. (To implement this safely, PDFium would need to provide a page indexing function natively)
 
 ### Setup Infrastructure
 * craft_packages: add means to skip platforms for which artefacts are missing.
