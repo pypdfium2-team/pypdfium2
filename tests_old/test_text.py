@@ -77,10 +77,11 @@ def test_getrectboxes(textpage):
 def _get_rects(textpage, search_result):
     # TODO add helper?
     if search_result is None:
-        return
+        return []
     c_index, c_count = search_result
-    r_index = textpage.count_rects(0, c_index)
+    r_index = textpage.count_rects(0, c_index) - 1
     r_count = textpage.count_rects(c_index, c_count)
+    textpage.count_rects()
     rects = [textpage.get_rect(i) for i in range(r_index, r_index+r_count)]
     return rects
 
@@ -101,9 +102,16 @@ def test_search_text(textpage):
     assert occ_4x is None
     assert occ_1a == occ_1b and occ_2a == occ_2b
     
-    _get_rects(textpage, occ_1a) == [ (292, 678, 329, 690) ]
-    _get_rects(textpage, occ_2a) == [ (324, 641, 360, 653) ]
-    _get_rects(textpage, occ_3a) == [ (305, 549, 341, 561) ]
+    occs = (occ_1a, occ_2a, occ_3a)
+    exp_rectlists = [
+        [ (57, 675, 511, 690) ],
+        [ (58, 638, 537, 653) ],
+        [ (58, 549, 367, 561) ],
+    ]
+    
+    for occ, exp_rects in zip(occs, exp_rectlists):
+        rects = _get_rects(textpage, occ)
+        assert [pytest.approx(r, abs=0.5) for r in rects] == exp_rects
 
 
 def test_get_index(textpage):

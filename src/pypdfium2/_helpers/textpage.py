@@ -167,12 +167,16 @@ class PdfTextPage (AutoCloseable):
     def get_rect(self, index):
         """
         Get the bounding box of a text rectangle at the given index.
+        Note that :meth:`.count_rects` must be called once with default parameters
+        before subsequent :meth:`.get_rect` calls for this function to work (due to PDFium's API).
         
         Returns:
             Float values for left, bottom, right and top in PDF canvas units.
         """
         l, b, r, t = c_double(), c_double(), c_double(), c_double()
-        pdfium_c.FPDFText_GetRect(self, index, l, t, r, b)  # yes, ltrb!
+        success = pdfium_c.FPDFText_GetRect(self, index, l, t, r, b)  # yes, ltrb!
+        if not success:
+            raise PdfiumError("Failed to get rectangle. (Make sure count_rects() was called with default params once before subsequent get_rect() calls.)")
         return (l.value, b.value, r.value, t.value)
     
     
