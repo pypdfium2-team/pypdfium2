@@ -40,9 +40,6 @@ PatchesWindows = [
     (PatchDir/"win"/"pdfium.patch", PDFiumDir),
     (PatchDir/"win"/"build.patch", PDFiumDir/"build"),
 ]
-PatchesSyslibs = [
-    (PatchDir/"syslibs_sourcebuild.patch", PDFiumDir/"build")
-]
 
 DefaultConfig = {
     "is_debug": False,
@@ -62,7 +59,7 @@ SyslibsConfig = {
     "use_system_libpng": True,
     "use_system_zlib": True,
     "use_system_libtiff": True,
-    "sysroot": "/",
+    "use_sysroot": False,
 }
 
 
@@ -295,8 +292,7 @@ def main(
     
     if pdfium_dl_done:
         patch_pdfium(v_libpdfium)
-    if b_use_syslibs:  # FIXME needs reset
-        _apply_patchset(PatchesSyslibs, check=False)
+    if b_use_syslibs:
         _dl_unbundler()
 
     if b_use_syslibs:
