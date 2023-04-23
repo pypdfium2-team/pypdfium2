@@ -158,12 +158,7 @@ class PdfBitmap (AutoCloseable):
         
         Using this method is discouraged. Prefer :meth:`.new_native` instead.
         """
-        
-        if force_packed:
-            stride = width * consts.BitmapTypeToNChannels[format]
-        else:
-            stride = 0
-        
+        stride = width * consts.BitmapTypeToNChannels[format] if force_packed else 0
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, None, stride)
         return cls.from_raw(raw, rev_byteorder)
     

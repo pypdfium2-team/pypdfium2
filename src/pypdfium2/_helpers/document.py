@@ -163,7 +163,7 @@ class PdfDocument (AutoCloseable):
         self.formenv = PdfFormEnv(raw, config, self)
     
     
-    # ?TODO(v5) consider cached property
+    # TODO?(v5) consider cached property
     def get_formtype(self):
         """
         Returns:
@@ -173,7 +173,7 @@ class PdfDocument (AutoCloseable):
         return pdfium_c.FPDF_GetFormType(self)
     
     
-    # ?TODO(v5) consider cached property
+    # TODO?(v5) consider cached property
     def get_pagemode(self):
         """
         Returns:
@@ -182,7 +182,7 @@ class PdfDocument (AutoCloseable):
         return pdfium_c.FPDFDoc_GetPageMode(self)
     
     
-    # ?TODO(v5) consider cached property
+    # TODO?(v5) consider cached property
     def is_tagged(self):
         """
         Returns:
@@ -469,7 +469,8 @@ class PdfDocument (AutoCloseable):
         )
     
     
-    # TODO(v5) consider switching to a wrapper around the raw bookmark with on-demand cached properties
+    # TODO(v5) consider switching to a wrapper class around the raw bookmark
+    # (either with getter methods, or possibly cached properties)
     def _get_bookmark(self, bookmark, level):
         
         n_bytes = pdfium_c.FPDFBookmark_GetTitle(bookmark, None, 0)
@@ -555,12 +556,9 @@ class PdfDocument (AutoCloseable):
             password = password,
         )
         if need_formenv:
-            if mk_formconfig:
-                pdf.init_forms(config=mk_formconfig())
-            else:
-                pdf.init_forms()
-        page = pdf[index]
+            pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
         
+        page = pdf[index]
         bitmap = renderer(page, **kwargs)
         info = bitmap.get_info()
         result = converter(bitmap)
@@ -568,10 +566,7 @@ class PdfDocument (AutoCloseable):
         for g in (bitmap, page, pdf):
             g.close()
         
-        if pass_info:
-            return result, info
-        else:
-            return result
+        return (result, info) if pass_info else result
     
     
     def render(

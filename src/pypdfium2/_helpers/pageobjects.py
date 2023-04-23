@@ -90,12 +90,12 @@ class PdfObject (AutoCloseable):
         if self.page is None:
             raise RuntimeError("Must not call get_pos() on a loose pageobject.")
         
-        left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        success = pdfium_c.FPDFPageObj_GetBounds(self, left, bottom, right, top)
+        l, b, r, t = c_float(), c_float(), c_float(), c_float()
+        success = pdfium_c.FPDFPageObj_GetBounds(self, l, b, r, t)
         if not success:
             raise PdfiumError("Failed to locate pageobject.")
         
-        return (left.value, bottom.value, right.value, top.value)
+        return (l.value, b.value, r.value, t.value)
     
     
     def get_matrix(self):
@@ -207,11 +207,7 @@ class PdfImage (PdfObject):
             raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte buffer.")
         
         bufaccess, ld_data = utils.get_bufreader(buffer)
-        
-        if inline:
-            loader = pdfium_c.FPDFImageObj_LoadJpegFileInline
-        else:
-            loader = pdfium_c.FPDFImageObj_LoadJpegFile
+        loader = pdfium_c.FPDFImageObj_LoadJpegFileInline if inline else pdfium_c.FPDFImageObj_LoadJpegFile
         
         c_pages, page_count = utils.pages_c_array(pages)
         success = loader(c_pages, page_count, self, bufaccess)

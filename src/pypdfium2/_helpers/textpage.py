@@ -50,7 +50,7 @@ class PdfTextPage (AutoCloseable):
         if count == -1:
             count = self.count_chars() - index
         
-        # FIXME does not take possible unicode surrogation into account
+        # FIXME not sure if we may calculate buffer size like that - what about unicode surrogation, for one thing?
         n_bytes = count * 2
         buffer = ctypes.create_string_buffer(n_bytes+2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
