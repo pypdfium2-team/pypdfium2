@@ -128,7 +128,7 @@ ErrorToStr = _fallback_dict({
 UnsupportedInfoToStr = _fallback_dict({
     pdfium_c.FPDF_UNSP_DOC_XFAFORM:               "XFA form",
     pdfium_c.FPDF_UNSP_DOC_PORTABLECOLLECTION:    "Portable collection",
-    pdfium_c.FPDF_UNSP_DOC_ATTACHMENT:            "Attachment",
+    pdfium_c.FPDF_UNSP_DOC_ATTACHMENT:            "Attachment (incomplete support)",  # https://crbug.com/pdfium/1945
     pdfium_c.FPDF_UNSP_DOC_SECURITY:              "Security",
     pdfium_c.FPDF_UNSP_DOC_SHAREDREVIEW:          "Shared review",
     pdfium_c.FPDF_UNSP_DOC_SHAREDFORM_ACROBAT:    "Shared form (acrobat)",

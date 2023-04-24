@@ -56,7 +56,4 @@ class PdfUnspHandler:
     
     @staticmethod
     def _default(type):
-        # https://crbug.com/pdfium/1945
-        if type in (pdfium_c.FPDF_UNSP_DOC_ATTACHMENT, ):
-            return
         lib_logger.warning(f"Unsupported PDF feature: {consts.UnsupportedInfoToStr.get(type)}")
