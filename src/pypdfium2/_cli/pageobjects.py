@@ -91,6 +91,7 @@ def main(args):
                 pos = round_list(obj.get_pos(), args.n_digits)
                 print(pad_1 + f"Position: {pos}")
             
+            # TODO? also call get_size() for coverage
             if show_imageinfo and isinstance(obj, pdfium.PdfImage):
                 print(pad_1 + f"Filters: {obj.get_filters()}")
                 metadata = obj.get_metadata()

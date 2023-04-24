@@ -159,7 +159,7 @@ def get_wheel_tag(pl_name):
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
     # As of Jan 2023, pdfium requires glibc >= 2.26 (see https://crrev.com/1084974 and https://groups.google.com/a/chromium.org/g/chromium-dev/c/SdCs9k3celo/m/bnnBzU1FCgAJ)
-    # TODO lower requirements for older PDFium binaries?
+    # TODO? lower requirements for older PDFium binaries
     elif pl_name == PlatformNames.linux_x64:
         return "manylinux_2_26_x86_64"
     elif pl_name == PlatformNames.linux_x86:

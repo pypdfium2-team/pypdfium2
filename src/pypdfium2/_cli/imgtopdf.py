@@ -56,12 +56,9 @@ def main(args):
             image_obj.set_bitmap(bitmap)
             bitmap.close()
         
-        metadata = image_obj.get_metadata()
-        width, height = metadata.width, metadata.height
-        
-        image_obj.set_matrix( pdfium.PdfMatrix().scale(width, height) )
-        
-        page = pdf.new_page(width, height)
+        w, h = image_obj.get_size()
+        image_obj.set_matrix( pdfium.PdfMatrix().scale(w, h) )
+        page = pdf.new_page(w, h)
         page.insert_obj(image_obj)
         page.gen_content()
         

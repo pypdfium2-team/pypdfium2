@@ -181,12 +181,12 @@ Here are some examples of using the support model API.
   
   image = pdfium.PdfImage.new(pdf)
   image.load_jpeg("./tests/resources/mona_lisa.jpg")
-  metadata = image.get_metadata()
+  width, height = image.get_size()
   
-  matrix = pdfium.PdfMatrix().scale(metadata.width, metadata.height)
+  matrix = pdfium.PdfMatrix().scale(width, height)
   image.set_matrix(matrix)
   
-  page = pdf.new_page(metadata.width, metadata.height)
+  page = pdf.new_page(width, height)
   page.insert_obj(image)
   page.gen_content()
   ```

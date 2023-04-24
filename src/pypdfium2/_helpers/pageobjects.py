@@ -4,6 +4,7 @@
 __all__ = ["PdfObject", "PdfImage"]
 
 import ctypes
+from ctypes import c_uint, c_float
 from pathlib import Path
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
@@ -17,8 +18,6 @@ try:
     import PIL.Image
 except ImportError:
     PIL = None
-
-c_float = ctypes.c_float
 
 
 class PdfObject (AutoCloseable):
@@ -159,25 +158,37 @@ class PdfImage (PdfObject):
     
     def get_metadata(self):
         """
-        Retrieve image metadata, including dimensions, DPI, bits per pixel, and color space.
+        Retrieve image metadata including DPI, bits per pixel, color space, and size.
         If the image does not belong to a page yet, bits per pixel and color space will be unset (0).
         
         Note:
             * The DPI values signify the resolution of the image on the PDF page, not the DPI metadata embedded in the image file.
-            * Due to issues in PDFium, this function can be inefficient.
+            * Due to issues in PDFium, this function can be slow. If you only need image size, prefer the faster :meth:`.get_size` instead.
         
         Returns:
             FPDF_IMAGEOBJ_METADATA: Image metadata structure
         """
-        
         # https://crbug.com/pdfium/1928
-        
         metadata = pdfium_c.FPDF_IMAGEOBJ_METADATA()
         success = pdfium_c.FPDFImageObj_GetImageMetadata(self, self.page, metadata)
         if not success:
             raise PdfiumError("Failed to get image metadata.")
-        
         return metadata
+    
+    
+    def get_size(self):
+        """
+        .. versionadded:: 4.8/5731
+        
+        Returns:
+            (int, int): Image dimensions as a tuple of (width, height).
+        """
+        # https://pdfium-review.googlesource.com/c/pdfium/+/106290
+        w, h = c_uint(), c_uint()
+        success = pdfium_c.FPDFImageObj_GetImagePixelSize(self, w, h)
+        if not success:
+            raise PdfiumError("Failed to get image size.")
+        return w.value, h.value
     
     
     def load_jpeg(self, source, pages=None, inline=False, autoclose=True):

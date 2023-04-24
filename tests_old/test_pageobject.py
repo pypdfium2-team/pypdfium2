@@ -62,8 +62,7 @@ def test_new_image_from_jpeg():
     image_a = pdfium.PdfImage.new(pdf)
     buffer = open(TestFiles.mona_lisa, "rb")
     image_a.load_jpeg(buffer, autoclose=True)
-    metadata = image_a.get_metadata()
-    width, height = metadata.width, metadata.height
+    width, height = image_a.get_size()
     page.insert_obj(image_a)
     
     assert len(pdf._data_holder) == 2
@@ -90,8 +89,8 @@ def test_new_image_from_jpeg():
     assert isinstance(metadata, pdfium_c.FPDF_IMAGEOBJ_METADATA)
     assert metadata.bits_per_pixel == 24  # 3 channels, 8 bits each
     assert metadata.colorspace == pdfium_c.FPDF_COLORSPACE_DEVICERGB
-    assert metadata.height == 120
-    assert metadata.width == 120
+    assert metadata.height == height == 120
+    assert metadata.width == width == 120
     assert metadata.horizontal_dpi == 72
     assert metadata.vertical_dpi == 72
     
@@ -157,8 +156,7 @@ def test_replace_image_with_jpeg():
     image_1 = images[0]
     
     image_1.load_jpeg(TestFiles.mona_lisa, pages=[page])
-    metadata = image_1.get_metadata()
-    width, height = metadata.width, metadata.height
+    width, height = image_1.get_size()
     assert matrices == [img.get_matrix() for img in images]
     
     # preserve the aspect ratio
