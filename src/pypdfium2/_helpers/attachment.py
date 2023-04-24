@@ -66,9 +66,9 @@ class PdfAttachment (AutoCastable):
         
         buffer = ctypes.create_string_buffer(n_bytes)
         out_buflen = ctypes.c_ulong()
-        success = pdfium_c.FPDFAttachment_GetFile(self, buffer, n_bytes, out_buflen)
+        ok = pdfium_c.FPDFAttachment_GetFile(self, buffer, n_bytes, out_buflen)
         out_buflen = out_buflen.value
-        if not success:
+        if not ok:
             raise PdfiumError("Failed to extract attachment (error status).")
         if n_bytes < out_buflen:
             raise PdfiumError(f"Failed to extract attachment (expected {n_bytes} bytes, but got {out_buflen}).")
@@ -86,8 +86,8 @@ class PdfAttachment (AutoCastable):
             data (bytes | ctypes.Array):
                 New file data for the attachment. May be any data type that can be implicitly converted to :class:`~ctypes.c_void_p`.
         """
-        success = pdfium_c.FPDFAttachment_SetFile(self, self.pdf, data, len(data))
-        if not success:
+        ok = pdfium_c.FPDFAttachment_SetFile(self, self.pdf, data, len(data))
+        if not ok:
             raise PdfiumError("Failed to set attachment data.")
     
     
@@ -138,6 +138,6 @@ class PdfAttachment (AutoCastable):
         """
         enc_value = (value + "\x00").encode("utf-16-le")
         enc_value_ptr = ctypes.cast(enc_value, pdfium_c.FPDF_WIDESTRING)
-        success = pdfium_c.FPDFAttachment_SetStringValue(self, _encode_key(key), enc_value_ptr)
-        if not success:
+        ok = pdfium_c.FPDFAttachment_SetStringValue(self, _encode_key(key), enc_value_ptr)
+        if not ok:
             raise PdfiumError(f"Failed to set attachment param '{key}' to '{value}'.")

@@ -197,11 +197,11 @@ class PdfDocument (AutoCloseable):
         saveargs = (self, c_writer, flags)
         
         if version is None:
-            success = pdfium_c.FPDF_SaveAsCopy(*saveargs)
+            ok = pdfium_c.FPDF_SaveAsCopy(*saveargs)
         else:
-            success = pdfium_c.FPDF_SaveWithVersion(*saveargs, version)
+            ok = pdfium_c.FPDF_SaveWithVersion(*saveargs, version)
         
-        if not success:
+        if not ok:
             raise PdfiumError("Failed to save document.")
     
     
@@ -251,8 +251,8 @@ class PdfDocument (AutoCloseable):
             or None if the document is new or its version could not be determined.
         """
         version = ctypes.c_int()
-        success = pdfium_c.FPDF_GetFileVersion(self, version)
-        if not success:
+        ok = pdfium_c.FPDF_GetFileVersion(self, version)
+        if not ok:
             return None
         return version.value
     
@@ -335,8 +335,8 @@ class PdfDocument (AutoCloseable):
         Handles to the attachment in question received from :meth:`.get_attachment`
         must not be accessed anymore after this method has been called.
         """
-        success = pdfium_c.FPDFDoc_DeleteAttachment(self, index)
-        if not success:
+        ok = pdfium_c.FPDFDoc_DeleteAttachment(self, index)
+        if not ok:
             raise PdfiumError(f"Failed to delete attachment at index {index}.")
     
     
@@ -409,16 +409,16 @@ class PdfDocument (AutoCloseable):
             index = len(self)
         
         if isinstance(pages, str):
-            success = pdfium_c.FPDF_ImportPages(self, pdf, pages.encode("ascii"), index)
+            ok = pdfium_c.FPDF_ImportPages(self, pdf, pages.encode("ascii"), index)
         else:
             page_count = 0
             c_pages = None
             if pages:
                 page_count = len(pages)
                 c_pages = (ctypes.c_int * page_count)(*pages)
-            success = pdfium_c.FPDF_ImportPagesByIndex(self, pdf, c_pages, page_count, index)
+            ok = pdfium_c.FPDF_ImportPagesByIndex(self, pdf, c_pages, page_count, index)
         
-        if not success:
+        if not ok:
             raise PdfiumError("Failed to import pages.")
     
     
@@ -428,8 +428,8 @@ class PdfDocument (AutoCloseable):
             (float, float): Width and height in PDF canvas units of the page at *index* (zero-based).
         """
         size = pdfium_c.FS_SIZEF()
-        success = pdfium_c.FPDF_GetPageSizeByIndexF(self, index, size)
-        if not success:
+        ok = pdfium_c.FPDF_GetPageSizeByIndexF(self, index, size)
+        if not ok:
             raise PdfiumError("Failed to get page size by index.")
         return (size.width, size.height)
     

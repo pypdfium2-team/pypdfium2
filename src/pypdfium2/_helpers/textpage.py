@@ -151,14 +151,14 @@ class PdfTextPage (AutoCloseable):
         
         if loose:
             rect = pdfium_c.FS_RECTF()
-            success = pdfium_c.FPDFText_GetLooseCharBox(self, index, rect)
+            ok = pdfium_c.FPDFText_GetLooseCharBox(self, index, rect)
             l, b, r, t = rect.left, rect.bottom, rect.right, rect.top
         else:
             l, b, r, t = c_double(), c_double(), c_double(), c_double()
-            success = pdfium_c.FPDFText_GetCharBox(self, index, l, r, b, t)  # yes, lrbt!
+            ok = pdfium_c.FPDFText_GetCharBox(self, index, l, r, b, t)  # yes, lrbt!
             l, b, r, t = l.value, b.value, r.value, t.value
         
-        if not success:
+        if not ok:
             raise PdfiumError("Failed to get charbox.")
         
         return l, b, r, t
@@ -174,8 +174,8 @@ class PdfTextPage (AutoCloseable):
             Float values for left, bottom, right and top in PDF canvas units.
         """
         l, b, r, t = c_double(), c_double(), c_double(), c_double()
-        success = pdfium_c.FPDFText_GetRect(self, index, l, t, r, b)  # yes, ltrb!
-        if not success:
+        ok = pdfium_c.FPDFText_GetRect(self, index, l, t, r, b)  # yes, ltrb!
+        if not ok:
             raise PdfiumError("Failed to get rectangle. (Make sure count_rects() was called with default params once before subsequent get_rect() calls.)")
         return (l.value, b.value, r.value, t.value)
     
@@ -236,8 +236,8 @@ class PdfTextSearcher (AutoCloseable):
     
     
     def _get_occurrence(self, find_func):
-        success = find_func(self)
-        if not success:
+        ok = find_func(self)
+        if not ok:
             return None
         index = pdfium_c.FPDFText_GetSchResultIndex(self)
         count = pdfium_c.FPDFText_GetSchCount(self)

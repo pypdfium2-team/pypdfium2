@@ -242,8 +242,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Initialise an integer object (defaults to 0)
   c_version = ctypes.c_int()
   # Let the function assign a value to the c_int object, and capture its return code (True for success, False for failure)
-  success = pdfium.FPDF_GetFileVersion(pdf, c_version)
-  if success:
+  ok = pdfium.FPDF_GetFileVersion(pdf, c_version)
+  if ok:
       # If successful, get the Python int by accessing the `value` attribute of the c_int object
       version = c_version.value
   else:

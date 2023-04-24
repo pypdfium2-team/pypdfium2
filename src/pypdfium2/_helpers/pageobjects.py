@@ -90,8 +90,8 @@ class PdfObject (AutoCloseable):
             raise RuntimeError("Must not call get_pos() on a loose pageobject.")
         
         l, b, r, t = c_float(), c_float(), c_float(), c_float()
-        success = pdfium_c.FPDFPageObj_GetBounds(self, l, b, r, t)
-        if not success:
+        ok = pdfium_c.FPDFPageObj_GetBounds(self, l, b, r, t)
+        if not ok:
             raise PdfiumError("Failed to locate pageobject.")
         
         return (l.value, b.value, r.value, t.value)
@@ -103,8 +103,8 @@ class PdfObject (AutoCloseable):
             PdfMatrix: The pageobject's current transform matrix.
         """
         fs_matrix = pdfium_c.FS_MATRIX()
-        success = pdfium_c.FPDFPageObj_GetMatrix(self, fs_matrix)
-        if not success:
+        ok = pdfium_c.FPDFPageObj_GetMatrix(self, fs_matrix)
+        if not ok:
             raise PdfiumError("Failed to get matrix of pageobject.")
         return PdfMatrix.from_raw(fs_matrix)
     
@@ -114,8 +114,8 @@ class PdfObject (AutoCloseable):
         Parameters:
             matrix (PdfMatrix): Set this matrix as the pageobject's transform matrix.
         """
-        success = pdfium_c.FPDFPageObj_SetMatrix(self, matrix)
-        if not success:
+        ok = pdfium_c.FPDFPageObj_SetMatrix(self, matrix)
+        if not ok:
             raise PdfiumError("Failed to set matrix of pageobject.")
     
     
@@ -170,8 +170,8 @@ class PdfImage (PdfObject):
         """
         # https://crbug.com/pdfium/1928
         metadata = pdfium_c.FPDF_IMAGEOBJ_METADATA()
-        success = pdfium_c.FPDFImageObj_GetImageMetadata(self, self.page, metadata)
-        if not success:
+        ok = pdfium_c.FPDFImageObj_GetImageMetadata(self, self.page, metadata)
+        if not ok:
             raise PdfiumError("Failed to get image metadata.")
         return metadata
     
@@ -185,8 +185,8 @@ class PdfImage (PdfObject):
         """
         # https://pdfium-review.googlesource.com/c/pdfium/+/106290
         w, h = c_uint(), c_uint()
-        success = pdfium_c.FPDFImageObj_GetImagePixelSize(self, w, h)
-        if not success:
+        ok = pdfium_c.FPDFImageObj_GetImagePixelSize(self, w, h)
+        if not ok:
             raise PdfiumError("Failed to get image size.")
         return w.value, h.value
     
@@ -221,8 +221,8 @@ class PdfImage (PdfObject):
         loader = pdfium_c.FPDFImageObj_LoadJpegFileInline if inline else pdfium_c.FPDFImageObj_LoadJpegFile
         
         c_pages, page_count = utils.pages_c_array(pages)
-        success = loader(c_pages, page_count, self, bufaccess)
-        if not success:
+        ok = loader(c_pages, page_count, self, bufaccess)
+        if not ok:
             raise PdfiumError("Failed to load JPEG into image object.")
         
         if inline:
@@ -248,8 +248,8 @@ class PdfImage (PdfObject):
                 A list of loaded pages that might contain the image object. See :meth:`.load_jpeg`.
         """
         c_pages, page_count = utils.pages_c_array(pages)
-        success = pdfium_c.FPDFImageObj_SetBitmap(c_pages, page_count, self, bitmap)
-        if not success:
+        ok = pdfium_c.FPDFImageObj_SetBitmap(c_pages, page_count, self, bitmap)
+        if not ok:
             raise PdfiumError("Failed to set image to bitmap.")
     
     

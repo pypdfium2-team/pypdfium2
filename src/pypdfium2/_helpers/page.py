@@ -85,8 +85,8 @@ class PdfPage (AutoCloseable):
     
     def _get_box(self, box_func, fallback_func, fallback_ok):
         left, bottom, right, top = c_float(), c_float(), c_float(), c_float()
-        success = box_func(self, left, bottom, right, top)
-        if not success:
+        ok = box_func(self, left, bottom, right, top)
+        if not ok:
             return (fallback_func() if fallback_ok else None)
         return (left.value, bottom.value, right.value, top.value)
     
@@ -170,8 +170,8 @@ class PdfPage (AutoCloseable):
             The bounding box of the page (the intersection between its media box and crop box).
         """
         rect = pdfium_c.FS_RECTF()
-        success = pdfium_c.FPDF_GetPageBoundingBox(self, rect)
-        if not success:
+        ok = pdfium_c.FPDF_GetPageBoundingBox(self, rect)
+        if not ok:
             raise PdfiumError("Failed to get page bounding box.")
         return (rect.left, rect.bottom, rect.right, rect.top)
     
@@ -238,8 +238,8 @@ class PdfPage (AutoCloseable):
         
         If page content was changed, this function should be called once before saving the document or re-loading the page.
         """
-        success = pdfium_c.FPDFPage_GenerateContent(self)
-        if not success:
+        ok = pdfium_c.FPDFPage_GenerateContent(self)
+        if not ok:
             raise PdfiumError("Failed to generate page content.")
     
     
