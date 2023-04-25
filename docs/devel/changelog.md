@@ -7,6 +7,15 @@
 # Changelog
 
 
+## 4.8.0 (2023-04-25)
+
+- Updated PDFium from `5715` to `5731`.
+- `PdfTextPage.get_rect()`: Added missing return code check and updated docs regarding dependence on `count_rects()`.
+  Fixed related test code that was broken but disabled by accident (missing asserts). Thanks to Guy Rosin for reporting {issue}`207`.
+- Added `PdfImage.get_size()` wrapping the new pdfium function `FPDFImageObj_GetImagePixelSize()`, which is faster than getting image size through the metadata.
+- `build_pdfium.py --use-syslibs`: Changed `sysroot="/"` (invalid) to `use_sysroot=false` (valid). This allows us to remove a botched patch.
+
+
 ## 4.7.0 (2023-04-18)
 
 - Updated PDFium from `5705` to `5715`.

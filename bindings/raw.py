@@ -2648,349 +2648,355 @@ if _libs["pdfium"].has("FPDFImageObj_GetImageMetadata", "cdecl"):
     FPDFImageObj_GetImageMetadata.argtypes = [FPDF_PAGEOBJECT, FPDF_PAGE, POINTER(FPDF_IMAGEOBJ_METADATA)]
     FPDFImageObj_GetImageMetadata.restype = FPDF_BOOL
 
-# fpdf_edit.h: 740
+# fpdf_edit.h: 743
+if _libs["pdfium"].has("FPDFImageObj_GetImagePixelSize", "cdecl"):
+    FPDFImageObj_GetImagePixelSize = _libs["pdfium"].get("FPDFImageObj_GetImagePixelSize", "cdecl")
+    FPDFImageObj_GetImagePixelSize.argtypes = [FPDF_PAGEOBJECT, POINTER(c_uint), POINTER(c_uint)]
+    FPDFImageObj_GetImagePixelSize.restype = FPDF_BOOL
+
+# fpdf_edit.h: 753
 if _libs["pdfium"].has("FPDFPageObj_CreateNewPath", "cdecl"):
     FPDFPageObj_CreateNewPath = _libs["pdfium"].get("FPDFPageObj_CreateNewPath", "cdecl")
     FPDFPageObj_CreateNewPath.argtypes = [c_float, c_float]
     FPDFPageObj_CreateNewPath.restype = FPDF_PAGEOBJECT
 
-# fpdf_edit.h: 751
+# fpdf_edit.h: 764
 if _libs["pdfium"].has("FPDFPageObj_CreateNewRect", "cdecl"):
     FPDFPageObj_CreateNewRect = _libs["pdfium"].get("FPDFPageObj_CreateNewRect", "cdecl")
     FPDFPageObj_CreateNewRect.argtypes = [c_float, c_float, c_float, c_float]
     FPDFPageObj_CreateNewRect.restype = FPDF_PAGEOBJECT
 
-# fpdf_edit.h: 766
+# fpdf_edit.h: 779
 if _libs["pdfium"].has("FPDFPageObj_GetBounds", "cdecl"):
     FPDFPageObj_GetBounds = _libs["pdfium"].get("FPDFPageObj_GetBounds", "cdecl")
     FPDFPageObj_GetBounds.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
     FPDFPageObj_GetBounds.restype = FPDF_BOOL
 
-# fpdf_edit.h: 788
+# fpdf_edit.h: 801
 if _libs["pdfium"].has("FPDFPageObj_GetRotatedBounds", "cdecl"):
     FPDFPageObj_GetRotatedBounds = _libs["pdfium"].get("FPDFPageObj_GetRotatedBounds", "cdecl")
     FPDFPageObj_GetRotatedBounds.argtypes = [FPDF_PAGEOBJECT, POINTER(FS_QUADPOINTSF)]
     FPDFPageObj_GetRotatedBounds.restype = FPDF_BOOL
 
-# fpdf_edit.h: 800
+# fpdf_edit.h: 813
 if _libs["pdfium"].has("FPDFPageObj_SetBlendMode", "cdecl"):
     FPDFPageObj_SetBlendMode = _libs["pdfium"].get("FPDFPageObj_SetBlendMode", "cdecl")
     FPDFPageObj_SetBlendMode.argtypes = [FPDF_PAGEOBJECT, FPDF_BYTESTRING]
     FPDFPageObj_SetBlendMode.restype = None
 
-# fpdf_edit.h: 813
+# fpdf_edit.h: 826
 if _libs["pdfium"].has("FPDFPageObj_SetStrokeColor", "cdecl"):
     FPDFPageObj_SetStrokeColor = _libs["pdfium"].get("FPDFPageObj_SetStrokeColor", "cdecl")
     FPDFPageObj_SetStrokeColor.argtypes = [FPDF_PAGEOBJECT, c_uint, c_uint, c_uint, c_uint]
     FPDFPageObj_SetStrokeColor.restype = FPDF_BOOL
 
-# fpdf_edit.h: 829
+# fpdf_edit.h: 842
 if _libs["pdfium"].has("FPDFPageObj_GetStrokeColor", "cdecl"):
     FPDFPageObj_GetStrokeColor = _libs["pdfium"].get("FPDFPageObj_GetStrokeColor", "cdecl")
     FPDFPageObj_GetStrokeColor.argtypes = [FPDF_PAGEOBJECT, POINTER(c_uint), POINTER(c_uint), POINTER(c_uint), POINTER(c_uint)]
     FPDFPageObj_GetStrokeColor.restype = FPDF_BOOL
 
-# fpdf_edit.h: 842
+# fpdf_edit.h: 855
 if _libs["pdfium"].has("FPDFPageObj_SetStrokeWidth", "cdecl"):
     FPDFPageObj_SetStrokeWidth = _libs["pdfium"].get("FPDFPageObj_SetStrokeWidth", "cdecl")
     FPDFPageObj_SetStrokeWidth.argtypes = [FPDF_PAGEOBJECT, c_float]
     FPDFPageObj_SetStrokeWidth.restype = FPDF_BOOL
 
-# fpdf_edit.h: 851
+# fpdf_edit.h: 864
 if _libs["pdfium"].has("FPDFPageObj_GetStrokeWidth", "cdecl"):
     FPDFPageObj_GetStrokeWidth = _libs["pdfium"].get("FPDFPageObj_GetStrokeWidth", "cdecl")
     FPDFPageObj_GetStrokeWidth.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float)]
     FPDFPageObj_GetStrokeWidth.restype = FPDF_BOOL
 
-# fpdf_edit.h: 861
+# fpdf_edit.h: 874
 if _libs["pdfium"].has("FPDFPageObj_GetLineJoin", "cdecl"):
     FPDFPageObj_GetLineJoin = _libs["pdfium"].get("FPDFPageObj_GetLineJoin", "cdecl")
     FPDFPageObj_GetLineJoin.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_GetLineJoin.restype = c_int
 
-# fpdf_edit.h: 871
+# fpdf_edit.h: 884
 if _libs["pdfium"].has("FPDFPageObj_SetLineJoin", "cdecl"):
     FPDFPageObj_SetLineJoin = _libs["pdfium"].get("FPDFPageObj_SetLineJoin", "cdecl")
     FPDFPageObj_SetLineJoin.argtypes = [FPDF_PAGEOBJECT, c_int]
     FPDFPageObj_SetLineJoin.restype = FPDF_BOOL
 
-# fpdf_edit.h: 881
+# fpdf_edit.h: 894
 if _libs["pdfium"].has("FPDFPageObj_GetLineCap", "cdecl"):
     FPDFPageObj_GetLineCap = _libs["pdfium"].get("FPDFPageObj_GetLineCap", "cdecl")
     FPDFPageObj_GetLineCap.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_GetLineCap.restype = c_int
 
-# fpdf_edit.h: 891
+# fpdf_edit.h: 904
 if _libs["pdfium"].has("FPDFPageObj_SetLineCap", "cdecl"):
     FPDFPageObj_SetLineCap = _libs["pdfium"].get("FPDFPageObj_SetLineCap", "cdecl")
     FPDFPageObj_SetLineCap.argtypes = [FPDF_PAGEOBJECT, c_int]
     FPDFPageObj_SetLineCap.restype = FPDF_BOOL
 
-# fpdf_edit.h: 903
+# fpdf_edit.h: 916
 if _libs["pdfium"].has("FPDFPageObj_SetFillColor", "cdecl"):
     FPDFPageObj_SetFillColor = _libs["pdfium"].get("FPDFPageObj_SetFillColor", "cdecl")
     FPDFPageObj_SetFillColor.argtypes = [FPDF_PAGEOBJECT, c_uint, c_uint, c_uint, c_uint]
     FPDFPageObj_SetFillColor.restype = FPDF_BOOL
 
-# fpdf_edit.h: 919
+# fpdf_edit.h: 932
 if _libs["pdfium"].has("FPDFPageObj_GetFillColor", "cdecl"):
     FPDFPageObj_GetFillColor = _libs["pdfium"].get("FPDFPageObj_GetFillColor", "cdecl")
     FPDFPageObj_GetFillColor.argtypes = [FPDF_PAGEOBJECT, POINTER(c_uint), POINTER(c_uint), POINTER(c_uint), POINTER(c_uint)]
     FPDFPageObj_GetFillColor.restype = FPDF_BOOL
 
-# fpdf_edit.h: 933
+# fpdf_edit.h: 946
 if _libs["pdfium"].has("FPDFPageObj_GetDashPhase", "cdecl"):
     FPDFPageObj_GetDashPhase = _libs["pdfium"].get("FPDFPageObj_GetDashPhase", "cdecl")
     FPDFPageObj_GetDashPhase.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float)]
     FPDFPageObj_GetDashPhase.restype = FPDF_BOOL
 
-# fpdf_edit.h: 943
+# fpdf_edit.h: 956
 if _libs["pdfium"].has("FPDFPageObj_SetDashPhase", "cdecl"):
     FPDFPageObj_SetDashPhase = _libs["pdfium"].get("FPDFPageObj_SetDashPhase", "cdecl")
     FPDFPageObj_SetDashPhase.argtypes = [FPDF_PAGEOBJECT, c_float]
     FPDFPageObj_SetDashPhase.restype = FPDF_BOOL
 
-# fpdf_edit.h: 952
+# fpdf_edit.h: 965
 if _libs["pdfium"].has("FPDFPageObj_GetDashCount", "cdecl"):
     FPDFPageObj_GetDashCount = _libs["pdfium"].get("FPDFPageObj_GetDashCount", "cdecl")
     FPDFPageObj_GetDashCount.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_GetDashCount.restype = c_int
 
-# fpdf_edit.h: 963
+# fpdf_edit.h: 976
 if _libs["pdfium"].has("FPDFPageObj_GetDashArray", "cdecl"):
     FPDFPageObj_GetDashArray = _libs["pdfium"].get("FPDFPageObj_GetDashArray", "cdecl")
     FPDFPageObj_GetDashArray.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float), c_size_t]
     FPDFPageObj_GetDashArray.restype = FPDF_BOOL
 
-# fpdf_edit.h: 977
+# fpdf_edit.h: 990
 if _libs["pdfium"].has("FPDFPageObj_SetDashArray", "cdecl"):
     FPDFPageObj_SetDashArray = _libs["pdfium"].get("FPDFPageObj_SetDashArray", "cdecl")
     FPDFPageObj_SetDashArray.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float), c_size_t, c_float]
     FPDFPageObj_SetDashArray.restype = FPDF_BOOL
 
-# fpdf_edit.h: 990
+# fpdf_edit.h: 1003
 if _libs["pdfium"].has("FPDFPath_CountSegments", "cdecl"):
     FPDFPath_CountSegments = _libs["pdfium"].get("FPDFPath_CountSegments", "cdecl")
     FPDFPath_CountSegments.argtypes = [FPDF_PAGEOBJECT]
     FPDFPath_CountSegments.restype = c_int
 
-# fpdf_edit.h: 999
+# fpdf_edit.h: 1012
 if _libs["pdfium"].has("FPDFPath_GetPathSegment", "cdecl"):
     FPDFPath_GetPathSegment = _libs["pdfium"].get("FPDFPath_GetPathSegment", "cdecl")
     FPDFPath_GetPathSegment.argtypes = [FPDF_PAGEOBJECT, c_int]
     FPDFPath_GetPathSegment.restype = FPDF_PATHSEGMENT
 
-# fpdf_edit.h: 1009
+# fpdf_edit.h: 1022
 if _libs["pdfium"].has("FPDFPathSegment_GetPoint", "cdecl"):
     FPDFPathSegment_GetPoint = _libs["pdfium"].get("FPDFPathSegment_GetPoint", "cdecl")
     FPDFPathSegment_GetPoint.argtypes = [FPDF_PATHSEGMENT, POINTER(c_float), POINTER(c_float)]
     FPDFPathSegment_GetPoint.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1017
+# fpdf_edit.h: 1030
 if _libs["pdfium"].has("FPDFPathSegment_GetType", "cdecl"):
     FPDFPathSegment_GetType = _libs["pdfium"].get("FPDFPathSegment_GetType", "cdecl")
     FPDFPathSegment_GetType.argtypes = [FPDF_PATHSEGMENT]
     FPDFPathSegment_GetType.restype = c_int
 
-# fpdf_edit.h: 1025
+# fpdf_edit.h: 1038
 if _libs["pdfium"].has("FPDFPathSegment_GetClose", "cdecl"):
     FPDFPathSegment_GetClose = _libs["pdfium"].get("FPDFPathSegment_GetClose", "cdecl")
     FPDFPathSegment_GetClose.argtypes = [FPDF_PATHSEGMENT]
     FPDFPathSegment_GetClose.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1037
+# fpdf_edit.h: 1050
 if _libs["pdfium"].has("FPDFPath_MoveTo", "cdecl"):
     FPDFPath_MoveTo = _libs["pdfium"].get("FPDFPath_MoveTo", "cdecl")
     FPDFPath_MoveTo.argtypes = [FPDF_PAGEOBJECT, c_float, c_float]
     FPDFPath_MoveTo.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1050
+# fpdf_edit.h: 1063
 if _libs["pdfium"].has("FPDFPath_LineTo", "cdecl"):
     FPDFPath_LineTo = _libs["pdfium"].get("FPDFPath_LineTo", "cdecl")
     FPDFPath_LineTo.argtypes = [FPDF_PAGEOBJECT, c_float, c_float]
     FPDFPath_LineTo.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1065
+# fpdf_edit.h: 1078
 if _libs["pdfium"].has("FPDFPath_BezierTo", "cdecl"):
     FPDFPath_BezierTo = _libs["pdfium"].get("FPDFPath_BezierTo", "cdecl")
     FPDFPath_BezierTo.argtypes = [FPDF_PAGEOBJECT, c_float, c_float, c_float, c_float, c_float, c_float]
     FPDFPath_BezierTo.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1081
+# fpdf_edit.h: 1094
 if _libs["pdfium"].has("FPDFPath_Close", "cdecl"):
     FPDFPath_Close = _libs["pdfium"].get("FPDFPath_Close", "cdecl")
     FPDFPath_Close.argtypes = [FPDF_PAGEOBJECT]
     FPDFPath_Close.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1090
+# fpdf_edit.h: 1103
 if _libs["pdfium"].has("FPDFPath_SetDrawMode", "cdecl"):
     FPDFPath_SetDrawMode = _libs["pdfium"].get("FPDFPath_SetDrawMode", "cdecl")
     FPDFPath_SetDrawMode.argtypes = [FPDF_PAGEOBJECT, c_int, FPDF_BOOL]
     FPDFPath_SetDrawMode.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1101
+# fpdf_edit.h: 1114
 if _libs["pdfium"].has("FPDFPath_GetDrawMode", "cdecl"):
     FPDFPath_GetDrawMode = _libs["pdfium"].get("FPDFPath_GetDrawMode", "cdecl")
     FPDFPath_GetDrawMode.argtypes = [FPDF_PAGEOBJECT, POINTER(c_int), POINTER(FPDF_BOOL)]
     FPDFPath_GetDrawMode.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1113
+# fpdf_edit.h: 1126
 if _libs["pdfium"].has("FPDFPageObj_NewTextObj", "cdecl"):
     FPDFPageObj_NewTextObj = _libs["pdfium"].get("FPDFPageObj_NewTextObj", "cdecl")
     FPDFPageObj_NewTextObj.argtypes = [FPDF_DOCUMENT, FPDF_BYTESTRING, c_float]
     FPDFPageObj_NewTextObj.restype = FPDF_PAGEOBJECT
 
-# fpdf_edit.h: 1124
+# fpdf_edit.h: 1137
 if _libs["pdfium"].has("FPDFText_SetText", "cdecl"):
     FPDFText_SetText = _libs["pdfium"].get("FPDFText_SetText", "cdecl")
     FPDFText_SetText.argtypes = [FPDF_PAGEOBJECT, FPDF_WIDESTRING]
     FPDFText_SetText.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1136
+# fpdf_edit.h: 1149
 if _libs["pdfium"].has("FPDFText_SetCharcodes", "cdecl"):
     FPDFText_SetCharcodes = _libs["pdfium"].get("FPDFText_SetCharcodes", "cdecl")
     FPDFText_SetCharcodes.argtypes = [FPDF_PAGEOBJECT, POINTER(uint32_t), c_size_t]
     FPDFText_SetCharcodes.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1153
+# fpdf_edit.h: 1166
 if _libs["pdfium"].has("FPDFText_LoadFont", "cdecl"):
     FPDFText_LoadFont = _libs["pdfium"].get("FPDFText_LoadFont", "cdecl")
     FPDFText_LoadFont.argtypes = [FPDF_DOCUMENT, POINTER(uint8_t), uint32_t, c_int, FPDF_BOOL]
     FPDFText_LoadFont.restype = FPDF_FONT
 
-# fpdf_edit.h: 1171
+# fpdf_edit.h: 1184
 if _libs["pdfium"].has("FPDFText_LoadStandardFont", "cdecl"):
     FPDFText_LoadStandardFont = _libs["pdfium"].get("FPDFText_LoadStandardFont", "cdecl")
     FPDFText_LoadStandardFont.argtypes = [FPDF_DOCUMENT, FPDF_BYTESTRING]
     FPDFText_LoadStandardFont.restype = FPDF_FONT
 
-# fpdf_edit.h: 1181
+# fpdf_edit.h: 1194
 if _libs["pdfium"].has("FPDFTextObj_GetFontSize", "cdecl"):
     FPDFTextObj_GetFontSize = _libs["pdfium"].get("FPDFTextObj_GetFontSize", "cdecl")
     FPDFTextObj_GetFontSize.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float)]
     FPDFTextObj_GetFontSize.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1186
+# fpdf_edit.h: 1199
 if _libs["pdfium"].has("FPDFFont_Close", "cdecl"):
     FPDFFont_Close = _libs["pdfium"].get("FPDFFont_Close", "cdecl")
     FPDFFont_Close.argtypes = [FPDF_FONT]
     FPDFFont_Close.restype = None
 
-# fpdf_edit.h: 1196
+# fpdf_edit.h: 1209
 if _libs["pdfium"].has("FPDFPageObj_CreateTextObj", "cdecl"):
     FPDFPageObj_CreateTextObj = _libs["pdfium"].get("FPDFPageObj_CreateTextObj", "cdecl")
     FPDFPageObj_CreateTextObj.argtypes = [FPDF_DOCUMENT, FPDF_FONT, c_float]
     FPDFPageObj_CreateTextObj.restype = FPDF_PAGEOBJECT
 
-# fpdf_edit.h: 1207
+# fpdf_edit.h: 1220
 if _libs["pdfium"].has("FPDFTextObj_GetTextRenderMode", "cdecl"):
     FPDFTextObj_GetTextRenderMode = _libs["pdfium"].get("FPDFTextObj_GetTextRenderMode", "cdecl")
     FPDFTextObj_GetTextRenderMode.argtypes = [FPDF_PAGEOBJECT]
     FPDFTextObj_GetTextRenderMode.restype = FPDF_TEXT_RENDERMODE
 
-# fpdf_edit.h: 1218
+# fpdf_edit.h: 1231
 if _libs["pdfium"].has("FPDFTextObj_SetTextRenderMode", "cdecl"):
     FPDFTextObj_SetTextRenderMode = _libs["pdfium"].get("FPDFTextObj_SetTextRenderMode", "cdecl")
     FPDFTextObj_SetTextRenderMode.argtypes = [FPDF_PAGEOBJECT, FPDF_TEXT_RENDERMODE]
     FPDFTextObj_SetTextRenderMode.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1235
+# fpdf_edit.h: 1248
 if _libs["pdfium"].has("FPDFTextObj_GetText", "cdecl"):
     FPDFTextObj_GetText = _libs["pdfium"].get("FPDFTextObj_GetText", "cdecl")
     FPDFTextObj_GetText.argtypes = [FPDF_PAGEOBJECT, FPDF_TEXTPAGE, POINTER(FPDF_WCHAR), c_ulong]
     FPDFTextObj_GetText.restype = c_ulong
 
-# fpdf_edit.h: 1254
+# fpdf_edit.h: 1267
 if _libs["pdfium"].has("FPDFTextObj_GetRenderedBitmap", "cdecl"):
     FPDFTextObj_GetRenderedBitmap = _libs["pdfium"].get("FPDFTextObj_GetRenderedBitmap", "cdecl")
     FPDFTextObj_GetRenderedBitmap.argtypes = [FPDF_DOCUMENT, FPDF_PAGE, FPDF_PAGEOBJECT, c_float]
     FPDFTextObj_GetRenderedBitmap.restype = FPDF_BITMAP
 
-# fpdf_edit.h: 1265
+# fpdf_edit.h: 1278
 if _libs["pdfium"].has("FPDFTextObj_GetFont", "cdecl"):
     FPDFTextObj_GetFont = _libs["pdfium"].get("FPDFTextObj_GetFont", "cdecl")
     FPDFTextObj_GetFont.argtypes = [FPDF_PAGEOBJECT]
     FPDFTextObj_GetFont.restype = FPDF_FONT
 
-# fpdf_edit.h: 1281
+# fpdf_edit.h: 1294
 if _libs["pdfium"].has("FPDFFont_GetFontName", "cdecl"):
     FPDFFont_GetFontName = _libs["pdfium"].get("FPDFFont_GetFontName", "cdecl")
     FPDFFont_GetFontName.argtypes = [FPDF_FONT, POINTER(c_char), c_ulong]
     FPDFFont_GetFontName.restype = c_ulong
 
-# fpdf_edit.h: 1302
+# fpdf_edit.h: 1315
 if _libs["pdfium"].has("FPDFFont_GetFontData", "cdecl"):
     FPDFFont_GetFontData = _libs["pdfium"].get("FPDFFont_GetFontData", "cdecl")
     FPDFFont_GetFontData.argtypes = [FPDF_FONT, POINTER(uint8_t), c_size_t, POINTER(c_size_t)]
     FPDFFont_GetFontData.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1313
+# fpdf_edit.h: 1326
 if _libs["pdfium"].has("FPDFFont_GetIsEmbedded", "cdecl"):
     FPDFFont_GetIsEmbedded = _libs["pdfium"].get("FPDFFont_GetIsEmbedded", "cdecl")
     FPDFFont_GetIsEmbedded.argtypes = [FPDF_FONT]
     FPDFFont_GetIsEmbedded.restype = c_int
 
-# fpdf_edit.h: 1322
+# fpdf_edit.h: 1335
 if _libs["pdfium"].has("FPDFFont_GetFlags", "cdecl"):
     FPDFFont_GetFlags = _libs["pdfium"].get("FPDFFont_GetFlags", "cdecl")
     FPDFFont_GetFlags.argtypes = [FPDF_FONT]
     FPDFFont_GetFlags.restype = c_int
 
-# fpdf_edit.h: 1331
+# fpdf_edit.h: 1344
 if _libs["pdfium"].has("FPDFFont_GetWeight", "cdecl"):
     FPDFFont_GetWeight = _libs["pdfium"].get("FPDFFont_GetWeight", "cdecl")
     FPDFFont_GetWeight.argtypes = [FPDF_FONT]
     FPDFFont_GetWeight.restype = c_int
 
-# fpdf_edit.h: 1343
+# fpdf_edit.h: 1356
 if _libs["pdfium"].has("FPDFFont_GetItalicAngle", "cdecl"):
     FPDFFont_GetItalicAngle = _libs["pdfium"].get("FPDFFont_GetItalicAngle", "cdecl")
     FPDFFont_GetItalicAngle.argtypes = [FPDF_FONT, POINTER(c_int)]
     FPDFFont_GetItalicAngle.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1357
+# fpdf_edit.h: 1370
 if _libs["pdfium"].has("FPDFFont_GetAscent", "cdecl"):
     FPDFFont_GetAscent = _libs["pdfium"].get("FPDFFont_GetAscent", "cdecl")
     FPDFFont_GetAscent.argtypes = [FPDF_FONT, c_float, POINTER(c_float)]
     FPDFFont_GetAscent.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1372
+# fpdf_edit.h: 1385
 if _libs["pdfium"].has("FPDFFont_GetDescent", "cdecl"):
     FPDFFont_GetDescent = _libs["pdfium"].get("FPDFFont_GetDescent", "cdecl")
     FPDFFont_GetDescent.argtypes = [FPDF_FONT, c_float, POINTER(c_float)]
     FPDFFont_GetDescent.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1388
+# fpdf_edit.h: 1401
 if _libs["pdfium"].has("FPDFFont_GetGlyphWidth", "cdecl"):
     FPDFFont_GetGlyphWidth = _libs["pdfium"].get("FPDFFont_GetGlyphWidth", "cdecl")
     FPDFFont_GetGlyphWidth.argtypes = [FPDF_FONT, uint32_t, c_float, POINTER(c_float)]
     FPDFFont_GetGlyphWidth.restype = FPDF_BOOL
 
-# fpdf_edit.h: 1401
+# fpdf_edit.h: 1414
 if _libs["pdfium"].has("FPDFFont_GetGlyphPath", "cdecl"):
     FPDFFont_GetGlyphPath = _libs["pdfium"].get("FPDFFont_GetGlyphPath", "cdecl")
     FPDFFont_GetGlyphPath.argtypes = [FPDF_FONT, uint32_t, c_float]
     FPDFFont_GetGlyphPath.restype = FPDF_GLYPHPATH
 
-# fpdf_edit.h: 1412
+# fpdf_edit.h: 1425
 if _libs["pdfium"].has("FPDFGlyphPath_CountGlyphSegments", "cdecl"):
     FPDFGlyphPath_CountGlyphSegments = _libs["pdfium"].get("FPDFGlyphPath_CountGlyphSegments", "cdecl")
     FPDFGlyphPath_CountGlyphSegments.argtypes = [FPDF_GLYPHPATH]
     FPDFGlyphPath_CountGlyphSegments.restype = c_int
 
-# fpdf_edit.h: 1422
+# fpdf_edit.h: 1435
 if _libs["pdfium"].has("FPDFGlyphPath_GetGlyphPathSegment", "cdecl"):
     FPDFGlyphPath_GetGlyphPathSegment = _libs["pdfium"].get("FPDFGlyphPath_GetGlyphPathSegment", "cdecl")
     FPDFGlyphPath_GetGlyphPathSegment.argtypes = [FPDF_GLYPHPATH, c_int]
     FPDFGlyphPath_GetGlyphPathSegment.restype = FPDF_PATHSEGMENT
 
-# fpdf_edit.h: 1430
+# fpdf_edit.h: 1443
 if _libs["pdfium"].has("FPDFFormObj_CountObjects", "cdecl"):
     FPDFFormObj_CountObjects = _libs["pdfium"].get("FPDFFormObj_CountObjects", "cdecl")
     FPDFFormObj_CountObjects.argtypes = [FPDF_PAGEOBJECT]
     FPDFFormObj_CountObjects.restype = c_int
 
-# fpdf_edit.h: 1439
+# fpdf_edit.h: 1452
 if _libs["pdfium"].has("FPDFFormObj_GetObject", "cdecl"):
     FPDFFormObj_GetObject = _libs["pdfium"].get("FPDFFormObj_GetObject", "cdecl")
     FPDFFormObj_GetObject.argtypes = [FPDF_PAGEOBJECT, c_ulong]
