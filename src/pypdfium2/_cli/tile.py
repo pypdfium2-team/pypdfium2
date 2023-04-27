@@ -15,7 +15,7 @@ class Units (Enum):
     IN = 3
 
 
-def units_to_pt(value, unit: Units):
+def units_to_pt(value, unit):
     if unit is Units.PT:
         return value
     elif unit is Units.IN:
@@ -74,14 +74,10 @@ def main(args):
     # Rudimentary page tiling, powered by pdfium
     # A more sophisticated implementation could place XObjects rather than using PDFium's helper function, support merging and arranging on the fly, etc.
     
-    width = units_to_pt(args.width, args.unit)
-    height = units_to_pt(args.height, args.unit)
+    w = units_to_pt(args.width, args.unit)
+    h = units_to_pt(args.height, args.unit)
     
     src_pdf = get_input(args)
-    raw_dest = pdfium_c.FPDF_ImportNPagesToOne(
-        src_pdf,
-        width, height,
-        args.cols, args.rows,
-    )
+    raw_dest = pdfium_c.FPDF_ImportNPagesToOne(src_pdf, w, h, args.cols, args.rows)
     dest_pdf = pdfium.PdfDocument(raw_dest)
     dest_pdf.save(args.output)
