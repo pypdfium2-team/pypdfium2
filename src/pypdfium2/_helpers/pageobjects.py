@@ -379,6 +379,7 @@ def _extract_smart(image_obj, fb_format=None, fb_render=False):
     try:
         data, info = _extract_direct(image_obj)
     except ImageNotExtractableError:
+        # TODO? log reason why the image cannot be extracted directly
         pil_image = image_obj.get_bitmap(render=fb_render).to_pil()
     else:
         pil_image = None
@@ -408,18 +409,12 @@ def _extract_direct(image_obj):
     metadata = image_obj.get_metadata()
     mode = _get_pil_mode(metadata.colorspace, metadata.bits_per_pixel)
     
-    out_data = None
-    out_format = None
-    
-    # Not sure if FlateDecode or LZWDecode data could be wrapped directly in an image file structure like PNG or TIFF
-    
     if len(complex_filters) == 0:
         if mode:
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "raw"
         else:
             raise ImageNotExtractableError(f"Unhandled color space {consts.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data.")
-    
     elif len(complex_filters) == 1:
         f = complex_filters[0]
         if f == "DCTDecode":
@@ -430,11 +425,6 @@ def _extract_direct(image_obj):
             out_format = "jp2"
         else:
             raise ImageNotExtractableError(f"Unhandled complex filter {f}.")
-        
-        # Other complex filters:
-        # CCITTFaxDecode: In theory, could be extracted directly (with a TIFF header builder like pikepdf/models/_transcoding.py:generate_ccitt_header), but PDFium doesn't tell us which CCITT group encoding it is.
-        # JBIG2Decode: In PDF, JBIG2 header info is stripped, and global segments may be stored in a separate stream. In that form, the data would probably not be of much use, except perhaps for direct re-insertion into another PDF. We're not sure if it would be possible to re-combine this into a single JBIG2 file, or if any application could use this at all. PDFium doesn't provide us with the global segments, anyway.
-    
     else:
         raise ImageNotExtractableError(f"Cannot handle multiple complex filters {complex_filters}.")
     
