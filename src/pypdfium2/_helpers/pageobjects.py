@@ -73,10 +73,8 @@ class PdfObject (AutoCloseable):
     
     @property
     def parent(self):  # AutoCloseable hook
-        if self.page is None:
-            return self.pdf  # may be none
-        else:
-            return self.page
+        # May be None (loose pageobject)
+        return self.pdf if self.page is None else self.page
     
     
     def get_pos(self):
@@ -134,6 +132,7 @@ class PdfImage (PdfObject):
     Image object helper class (specific kind of page object).
     """
     
+    # cf. https://crbug.com/pdfium/1203
     #: Filters applied by :func:`FPDFImageObj_GetImageDataDecoded`. Hereafter referred to as "simple filters", while non-simple filters will be called "complex filters".
     SIMPLE_FILTERS = ("ASCIIHexDecode", "ASCII85Decode", "RunLengthDecode", "FlateDecode", "LZWDecode")
     
@@ -286,17 +285,10 @@ class PdfImage (PdfObject):
         Returns:
             ctypes.Array: The data of the image stream (as :class:`~ctypes.c_ubyte` array).
         """
-        
-        if decode_simple:
-            # apply simple filters (see https://crbug.com/pdfium/1203 for description)
-            func = pdfium_c.FPDFImageObj_GetImageDataDecoded
-        else:
-            func = pdfium_c.FPDFImageObj_GetImageDataRaw
-        
+        func = pdfium_c.FPDFImageObj_GetImageDataDecoded if decode_simple else pdfium_c.FPDFImageObj_GetImageDataRaw
         n_bytes = func(self, None, 0)
         buffer = (ctypes.c_ubyte * n_bytes)()
         func(self, buffer, n_bytes)
-        
         return buffer
     
     
@@ -382,15 +374,14 @@ def _get_pil_mode(colorspace, bpp):
 
 def _extract_smart(image_obj, fb_format=None, fb_render=False):
     
-    pil_image = None
-    data = None
-    info = None
+    # FIXME somewhat hard to read...
     
     try:
         data, info = _extract_direct(image_obj)
     except ImageNotExtractableError:
         pil_image = image_obj.get_bitmap(render=fb_render).to_pil()
     else:
+        pil_image = None
         format = info.format
         if format == "raw":
             metadata = info.metadata
@@ -402,23 +393,12 @@ def _extract_smart(image_obj, fb_format=None, fb_render=False):
             )
     
     if pil_image:
-        if fb_format:
-            format = fb_format
-        elif pil_image.mode == "CMYK":
-            format = "tiff"
-        else:
-            format = "png"
+        format = fb_format if fb_format else "tiff" if pil_image.mode == "CMYK" else "png"
     
-    # provide format, receive buffer
     buffer = yield format
+    pil_image.save(buffer, format=format) if pil_image else buffer.write(data)
     
-    if pil_image:
-        pil_image.save(buffer, format=format)
-    else:
-        buffer.write(data)
-    
-    # breakpoint preventing StopIteration on send()
-    yield None
+    yield  # breakpoint preventing StopIteration on .send()
 
 
 def _extract_direct(image_obj):
@@ -438,7 +418,7 @@ def _extract_direct(image_obj):
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "raw"
         else:
-            raise ImageNotExtractableError(f"Unhandled color space {consts.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data")
+            raise ImageNotExtractableError(f"Unhandled color space {consts.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data.")
     
     elif len(complex_filters) == 1:
         f = complex_filters[0]
@@ -449,14 +429,14 @@ def _extract_direct(image_obj):
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "jp2"
         else:
-            raise ImageNotExtractableError(f"Unhandled complex filter {f}")
+            raise ImageNotExtractableError(f"Unhandled complex filter {f}.")
         
         # Other complex filters:
         # CCITTFaxDecode: In theory, could be extracted directly (with a TIFF header builder like pikepdf/models/_transcoding.py:generate_ccitt_header), but PDFium doesn't tell us which CCITT group encoding it is.
         # JBIG2Decode: In PDF, JBIG2 header info is stripped, and global segments may be stored in a separate stream. In that form, the data would probably not be of much use, except perhaps for direct re-insertion into another PDF. We're not sure if it would be possible to re-combine this into a single JBIG2 file, or if any application could use this at all. PDFium doesn't provide us with the global segments, anyway.
     
     else:
-        raise ImageNotExtractableError(f"Cannot handle multiple complex filters {complex_filters}")
+        raise ImageNotExtractableError(f"Cannot handle multiple complex filters {complex_filters}.")
     
     info = ImageInfo(out_format, mode, metadata, all_filters, complex_filters)
     return out_data, info
