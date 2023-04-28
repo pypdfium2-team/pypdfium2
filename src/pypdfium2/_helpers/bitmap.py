@@ -45,30 +45,12 @@ class PdfBitmap (AutoCloseable):
             A ctypes array representation of the pixel data (each item is an unsigned byte, i. e. a number ranging from 0 to 255).
     """
     
-    def __init__(
-            self,
-            raw,
-            buffer,
-            width,
-            height,
-            stride,
-            format,
-            rev_byteorder,
-            needs_free,
-        ):
-        self.raw = raw
-        self.buffer = buffer
-        self.width = width
-        self.height = height
-        self.stride = stride
-        self.format = format
-        self.rev_byteorder = rev_byteorder
+    def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
+        self.raw, self.buffer = raw, buffer
+        self.width, self.height, self.stride = width, height, stride
+        self.format, self.rev_byteorder = format, rev_byteorder
         self.n_channels = consts.BitmapTypeToNChannels[self.format]
-        if self.rev_byteorder:
-            self.mode = consts.BitmapTypeToStrReverse[self.format]
-        else:
-            self.mode = consts.BitmapTypeToStr[self.format]
-        
+        self.mode = (consts.BitmapTypeToStrReverse if self.rev_byteorder else consts.BitmapTypeToStr)[self.format]
         AutoCloseable.__init__(self, pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
     
     

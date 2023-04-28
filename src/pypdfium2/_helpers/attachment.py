@@ -36,8 +36,7 @@ class PdfAttachment (AutoCastable):
     
     
     def __init__(self, raw, pdf):
-        self.raw = raw
-        self.pdf = pdf
+        self.raw, self.pdf = raw, pdf
     
     
     def get_name(self):
