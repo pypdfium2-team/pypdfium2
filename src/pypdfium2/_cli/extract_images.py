@@ -48,26 +48,29 @@ def main(args):
         args.format = "png"
     
     pdf = get_input(args)
+    n_pdigits = len(str( max(args.pages)+1 ))
     
-    images = []
     for i in args.pages:
+        
         page = pdf[i]
-        obj_searcher = page.get_objects(
+        images = page.get_objects(
             filter = (pdfium_c.FPDF_PAGEOBJ_IMAGE, ),
             max_depth = args.max_depth,
         )
-        images += list(obj_searcher)
-    
-    n_digits = len(str(len(images)))
-    
-    for i, image in enumerate(images):
-        prefix = args.output_dir / ("%s_%0*d" % (args.input.stem, n_digits, i+1))
         
-        try:
-            if args.use_bitmap:
-                pil_image = image.get_bitmap(render=args.render).to_pil()
-                pil_image.save(f"{prefix}.{args.format}")
-            else:
-                image.extract(prefix, fb_format=args.format, fb_render=args.render)
-        except pdfium.PdfiumError:
-            traceback.print_exc()
+        # not perfectly memory efficient, but we need image count for digit formatting
+        images = list(images)
+        n_idigits = len(str( len(images) ))
+        
+        for j, image in enumerate(images):
+            stem = "%s_%0*d_%0*d" % (args.input.stem, n_pdigits, i+1, n_idigits, j+1)
+            prefix = args.output_dir / stem
+            try:
+                if args.use_bitmap:
+                    pil_image = image.get_bitmap(render=args.render).to_pil()
+                    pil_image.save( prefix.with_suffix("."+args.format) )
+                else:
+                    image.extract(prefix, fb_format=args.format, fb_render=args.render)
+            except pdfium.PdfiumError:
+                traceback.print_exc()
+            image.close()

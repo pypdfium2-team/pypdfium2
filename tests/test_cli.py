@@ -69,7 +69,7 @@ def test_images(tmp_path):
     run_cli(["imgtopdf", TestResources.mona_lisa, "-o", img_pdf])
     run_cli(["extract-images", img_pdf, "-o", output_dir])
     
-    output_name = "img_pdf_1.jpg"
+    output_name = "img_pdf_1_1.jpg"
     assert _get_files(output_dir) == [output_name]
     assert filecmp.cmp(TestResources.mona_lisa, output_dir/output_name)
 
