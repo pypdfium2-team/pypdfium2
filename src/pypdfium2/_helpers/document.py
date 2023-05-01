@@ -605,6 +605,8 @@ class PdfDocument (AutoCloseable):
             :data:`typing.Any`: Parameter-dependent result.
         """
         
+        # TODO(v5) remove mk_formconfig parameter (bloat)
+        
         if not isinstance(self._input, (Path, str)):
             raise ValueError("Can only render in parallel with file path input.")
         
@@ -701,10 +703,10 @@ def _open_pdf(input_data, password, autoclose):
     to_close = ()
     
     if password is not None:
-        password = (password + "\x00").encode("utf-8")
+        password = (password+"\x00").encode("utf-8")
     
     if isinstance(input_data, Path):
-        pdf = pdfium_c.FPDF_LoadDocument((str(input_data) + "\x00").encode("utf-8"), password)
+        pdf = pdfium_c.FPDF_LoadDocument((str(input_data)+"\x00").encode("utf-8"), password)
     elif isinstance(input_data, (bytes, ctypes.Array)):
         pdf = pdfium_c.FPDF_LoadMemDocument64(input_data, len(input_data), password)
         to_hold = (input_data, )
