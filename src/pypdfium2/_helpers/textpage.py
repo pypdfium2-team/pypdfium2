@@ -50,7 +50,8 @@ class PdfTextPage (AutoCloseable):
         if count == -1:
             count = self.count_chars() - index
         
-        # FIXME not sure if we may calculate buffer size like that - what about unicode surrogation, for one thing?
+        # NOTE apparently, pdfium treats a surrogate pair like two separate chars, so this allocates enough memory and we end up with the right result
+        # (which however is no good API design - pdfium should properly handle surrogation and the API should tell the exact amount of memory needed)
         n_bytes = count * 2
         buffer = ctypes.create_string_buffer(n_bytes+2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
@@ -111,10 +112,10 @@ class PdfTextPage (AutoCloseable):
         Returns:
             int: The number of text rectangles in the given character range.
         """
-        result = pdfium_c.FPDFText_CountRects(self, index, count)
-        if result == -1:
+        n_rects = pdfium_c.FPDFText_CountRects(self, index, count)
+        if n_rects == -1:
             raise PdfiumError("Failed to count rectangles.")
-        return result
+        return n_rects
     
     
     def get_index(self, x, y, x_tol, y_tol):
@@ -194,7 +195,8 @@ class PdfTextPage (AutoCloseable):
             match_whole_word (bool):
                 If True, substring occurrences will be ignored (e. g. `cat` would not match `category`).
             consecutive (bool):
-                TODO
+                If False (the default), :meth:`.search` will skip past the current match to look for the next match.
+                If True, parts of the previous match may be caught again (e. g. searching for `aa` in `aaaa` would match 3 rather than 2 times).
         Returns:
             PdfTextSearcher: A helper object to search text.
         """
@@ -239,6 +241,7 @@ class PdfTextSearcher (AutoCloseable):
         ok = find_func(self)
         if not ok:
             return None
+        # FIXME what's the point of `count`? isn't it always equal to the length of the search text?
         index = pdfium_c.FPDFText_GetSchResultIndex(self)
         count = pdfium_c.FPDFText_GetSchCount(self)
         return index, count
