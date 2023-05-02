@@ -58,12 +58,7 @@ class PdfDocument (AutoCloseable):
             Form env, if the document has forms and :meth:`.init_forms` was called.
     """
     
-    def __init__(
-            self,
-            input,
-            password = None,
-            autoclose = False,
-        ):
+    def __init__(self, input, password=None, autoclose=False):
         
         if isinstance(input, str):
             input = Path(input)
@@ -458,15 +453,10 @@ class PdfDocument (AutoCloseable):
         Returns:
             PdfXObject: The page as XObject.
         """
-        
         raw_xobject = pdfium_c.FPDF_NewXObjectFromPage(dest_pdf, self, index)
         if raw_xobject is None:
             raise PdfiumError(f"Failed to capture page at index {index} as FPDF_XOBJECT.")
-        
-        return PdfXObject(
-            raw = raw_xobject,
-            pdf = dest_pdf,
-        )
+        return PdfXObject(raw=raw_xobject, pdf=dest_pdf)
     
     
     # TODO(v5) consider switching to a wrapper class around the raw bookmark
@@ -551,10 +541,7 @@ class PdfDocument (AutoCloseable):
     @classmethod
     def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, mk_formconfig, **kwargs):
         
-        pdf = cls(
-            input_data,
-            password = password,
-        )
+        pdf = cls(input_data, password=password)
         if need_formenv:
             pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
         
@@ -649,9 +636,7 @@ class PdfFormEnv (AutoCloseable):
     """
     
     def __init__(self, raw, config, pdf):
-        self.raw = raw
-        self.config = config
-        self.pdf = pdf
+        self.raw, self.config, self.pdf = raw, config, pdf
         AutoCloseable.__init__(self, self._close_impl, self.config, self.pdf)
     
     @property
@@ -675,8 +660,7 @@ class PdfXObject (AutoCloseable):
     """
     
     def __init__(self, raw, pdf):
-        self.raw = raw
-        self.pdf = pdf
+        self.raw, self.pdf = raw, pdf
         AutoCloseable.__init__(self, pdfium_c.FPDF_CloseXObject)
     
     @property
@@ -699,9 +683,7 @@ class PdfXObject (AutoCloseable):
 
 def _open_pdf(input_data, password, autoclose):
     
-    to_hold = ()
-    to_close = ()
-    
+    to_hold, to_close = (), ()
     if password is not None:
         password = (password+"\x00").encode("utf-8")
     

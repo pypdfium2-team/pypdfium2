@@ -46,9 +46,8 @@ class PdfBitmap (AutoCloseable):
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
-        self.raw, self.buffer = raw, buffer
-        self.width, self.height, self.stride = width, height, stride
-        self.format, self.rev_byteorder = format, rev_byteorder
+        self.raw, self.buffer, self.width, self.height = raw, buffer, width, height
+        self.stride, self.format, self.rev_byteorder = stride, format, rev_byteorder
         self.n_channels = consts.BitmapTypeToNChannels[self.format]
         self.mode = (consts.BitmapTypeToStrReverse if self.rev_byteorder else consts.BitmapTypeToStr)[self.format]
         AutoCloseable.__init__(self, pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
@@ -65,13 +64,8 @@ class PdfBitmap (AutoCloseable):
             PdfBitmapInfo: A namedtuple describing the bitmap.
         """
         return PdfBitmapInfo(
-            width = self.width,
-            height = self.height,
-            stride = self.stride,
-            format = self.format,
-            rev_byteorder = self.rev_byteorder,
-            n_channels = self.n_channels,
-            mode = self.mode,
+            width=self.width, height=self.height, stride=self.stride, format=self.format,
+            rev_byteorder=self.rev_byteorder, n_channels=self.n_channels, mode=self.mode,
         )
     
     
@@ -105,14 +99,8 @@ class PdfBitmap (AutoCloseable):
             buffer = ex_buffer
         
         return cls(
-            raw = raw,
-            buffer = buffer,
-            width = width,
-            height = height,
-            stride = stride,
-            format = format,
-            rev_byteorder = rev_byteorder,
-            needs_free = needs_free,
+            raw=raw, buffer=buffer, width=width, height=height, stride=stride,
+            format=format, rev_byteorder=rev_byteorder, needs_free=needs_free,
         )
     
     

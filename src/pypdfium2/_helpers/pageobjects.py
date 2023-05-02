@@ -57,10 +57,7 @@ class PdfObject (AutoCloseable):
     
     def __init__(self, raw, page=None, pdf=None, level=0):
         
-        self.raw = raw
-        self.page = page
-        self.pdf = pdf
-        self.level = level
+        self.raw, self.page, self.pdf, self.level = raw, page, pdf, level
         
         if page is not None:
             if self.pdf is None:
@@ -148,11 +145,8 @@ class PdfImage (PdfObject):
             This means that new images will appear as a tiny square of 1x1 units on the bottom left corner of the page.
             Use :class:`.PdfMatrix` and :meth:`.set_matrix` to adjust size and position.
         """
-        return cls(
-            pdfium_c.FPDFPageObj_NewImageObj(pdf),
-            page = None,
-            pdf = pdf,
-        )
+        raw_img = pdfium_c.FPDFPageObj_NewImageObj(pdf)
+        return cls(raw_img, page=None, pdf=pdf)
     
     
     def get_metadata(self):

@@ -28,8 +28,7 @@ class PdfPage (AutoCloseable):
     """
     
     def __init__(self, raw, pdf):
-        self.raw = raw
-        self.pdf = pdf
+        self.raw, self.pdf = raw, pdf
         AutoCloseable.__init__(self, self._close_impl, self.pdf)
     
     
@@ -520,18 +519,10 @@ class PdfColorScheme:
     Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
     """
     
-    def __init__(
-            self,
-            path_fill,
-            path_stroke,
-            text_fill,
-            text_stroke,
-        ):
+    def __init__(self, path_fill, path_stroke, text_fill, text_stroke):
         self.colors = dict(
-            path_fill_color = path_fill,
-            path_stroke_color = path_stroke,
-            text_fill_color = text_fill,
-            text_stroke_color = text_stroke,
+            path_fill_color=path_fill, path_stroke_color=path_stroke,
+            text_fill_color=text_fill, text_stroke_color=text_stroke,
         )
     
     def convert(self, rev_byteorder):
