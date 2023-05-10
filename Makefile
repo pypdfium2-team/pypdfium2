@@ -29,3 +29,7 @@ clean:
 
 packaging:
 	bash ./utilities/packaging.sh
+
+rebuild-bindings:
+	python3 setupsrc/pypdfium2_setup/update_pdfium.py -p auto --emplace
+	cp src/pypdfium2/raw.py bindings/raw.py
