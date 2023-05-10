@@ -9,27 +9,19 @@ Source: https://github.com/pypdfium2-team/pypdfium2
 # Copyright: $YEAR $NAME <$CONTACT>
 # License: ...
 
-Files: pdfium
-       pdfium.dll
-       pdfium.dylib
-       docs/devel/.about_wheel_license.md
-Copyright: 2022 PDFium developers
-License: (Apache-2.0 OR BSD-3-Clause) AND LicenseRef-PdfiumThirdParty
-Comment:
-    `.about_wheel_license.md` is a description file which exists only to state that
-    `LicenseRef-PdfiumThirdParty` is used.
-
-Files: autorelease/*
-Copyright: 2023 geisserml
+Files:
+    req/*.txt
+    bindings/raw.py
+    autorelease/*
+    RELEASE.md
+    tests/expectations/*
+    tests/resources/render.pdf
+    tests/resources/multipage.pdf
+    tests/resources/encrypted.pdf
+    tests/resources/text.pdf
+    tests/resources/empty.pdf
+Copyright: 2023 geisserml <geisserml@gmail.com>
 License: CC-BY-4.0
-Comment:
-    Directory for autorelease control files.
-
-Files: tests/expectations/*
-Copyright: 2023 geisserml
-License: CC-BY-4.0
-Comment:
-    Test expectations.
 
 Files: tests/resources/toc.pdf
 Copyright: 2020 Matthias Erll
@@ -69,20 +61,6 @@ License: LicenseRef-FairUse
 Comments:
     Contains `mono.png` from the img2pdf test suite.
 
-Files: tests/resources/render.pdf
-       tests/resources/multipage.pdf
-       tests/resources/encrypted.pdf
-       tests/resources/text.pdf
-       tests/resources/empty.pdf
-Copyright: 2023 geisserml <geisserml@gmail.com>
-License: CC-BY-4.0
-
-Files: tests/resources/NotoSans-Regular.ttf
-Copyright: 2022 Google Inc.
-License: OFL-1.1
-Comment:
-    Obtained from: https://fonts.google.com/noto/specimen/Noto+Sans
-
 Files: sourcebuild/patches/public_headers.patch
        sourcebuild/patches/shared_library.patch
        sourcebuild/patches/win/build.patch
@@ -94,18 +72,18 @@ Comment:
     Obtained from: https://github.com/bblanchon/pdfium-binaries/tree/master/patches
     For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
 
-Files: sourcebuild/patches/syslibs_sourcebuild.patch
-Copyright: 2023 geisserml <geisserml@gmail.com>
-License: CC-BY-4.0
+Files: pdfium
+       pdfium.dll
+       pdfium.dylib
+       docs/devel/.about_wheel_license.md
+Copyright: 2022 PDFium developers
+License: (Apache-2.0 OR BSD-3-Clause) AND LicenseRef-PdfiumThirdParty
 Comment:
-    pypdfium2 specific sourcebuild patches
+    `.about_wheel_license.md` is a description file which exists only to state that
+    `LicenseRef-PdfiumThirdParty` is used.
 
-Files: req/*.txt
-Copyright: 2023 geisserml <geisserml@gmail.com>
-License: CC-BY-4.0
-
-Files: RELEASE.md
-Copyright: 2023 geisserml <geisserml@gmail.com>
-License: CC-BY-4.0
-Comment:
-    Temporary autorelease file
+# Files: tests/resources/NotoSans-Regular.ttf
+# Copyright: 2022 Google Inc.
+# License: OFL-1.1
+# Comment:
+#     Obtained from: https://fonts.google.com/noto/specimen/Noto+Sans
