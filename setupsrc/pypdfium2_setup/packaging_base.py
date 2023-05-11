@@ -40,7 +40,7 @@ try:
     import ctypesgen
 except ImportError:
     # ctypesgen not importable, might be installed on a different python version
-    # in that case, we don't if it's our fork, so assume mainline ctypesgen for compatibility
+    # in that case, we don't know if it's our fork, so assume mainline ctypesgen for compatibility
     CTYPESGEN_IS_FORK = False
 else:
     CTYPESGEN_IS_FORK = getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
@@ -96,7 +96,7 @@ MainLibnames    = list(LibnameForSystem.values())
 
 def plat_to_system(pl_name):
     if pl_name == PlatformNames.sourcebuild:
-        # NOTE If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name).
+        # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this upstream with fallback value?
         return Host.system
     result = [s for s in BinarySystems if pl_name.startswith(s)]
     assert len(result) == 1
