@@ -550,7 +550,10 @@ class PdfDocument (AutoCloseable):
         info = bitmap.get_info()
         result = converter(bitmap)
         
-        for g in (bitmap, page, pdf):
+        # NOTE We MUST NOT call bitmap.close() before the converted object is serialized to the main process, otherwise we would free the buffer of a foreign bitmap prematurely if the converted object references the buffer rather than owning a copy. Confirmed by POC.
+        # This is not an issue when freeing the bitmap on garbage collection, provided the converted object keeps the buffer alive.
+        
+        for g in (page, pdf):
             g.close()
         
         return (result, info) if pass_info else result

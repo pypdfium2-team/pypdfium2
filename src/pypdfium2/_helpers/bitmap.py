@@ -38,6 +38,10 @@ class PdfBitmap (AutoCloseable):
     Note:
         All attributes of :class:`.PdfBitmapInfo` are available in this class as well.
     
+    Warning:
+        ``bitmap.close()``, which frees the buffer of foreign bitmaps, is not validated for safety.
+        A bitmap must not be closed when other objects still depend on its buffer!
+    
     Attributes:
         raw (FPDF_BITMAP):
             The underlying PDFium bitmap handle.
@@ -161,7 +165,10 @@ class PdfBitmap (AutoCloseable):
         pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
     
     
-    # Assumption: If the result is a view of the buffer, it holds a reference to said buffer (directly or indirectly), so that a possible finalizer is not called prematurely. This seems to hold true for numpy and PIL.
+    # Requirement: If the result is a view of the buffer (not a copy), it keeps the buffer's memory valid by retaining a reference to the buffer object.
+    # As of May 2023, this seems to hold true for numpy and PIL.
+    # TODO? Consider attaching a buffer keep-alive finalizer to the converted object
+    
     
     def to_numpy(self):
         """
