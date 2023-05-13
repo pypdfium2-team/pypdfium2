@@ -459,7 +459,7 @@ class PdfDocument (AutoCloseable):
         return PdfXObject(raw=raw_xobject, pdf=dest_pdf)
     
     
-    # TODO(v5) consider switching to a wrapper class around the raw bookmark
+    # TODO(apibreak) consider switching to a wrapper class around the raw bookmark
     # (either with getter methods, or possibly cached properties)
     def _get_bookmark(self, bookmark, level):
         
@@ -468,7 +468,7 @@ class PdfDocument (AutoCloseable):
         pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
         title = buffer.raw[:n_bytes-2].decode('utf-16-le')
         
-        # TODO(v5) just expose count as-is rather than using two variables and doing extra work
+        # TODO(apibreak) just expose count as-is rather than using two variables and doing extra work
         count = pdfium_c.FPDFBookmark_GetCount(bookmark)
         is_closed = True if count < 0 else None if count == 0 else False
         n_kids = abs(count)
@@ -494,7 +494,7 @@ class PdfDocument (AutoCloseable):
         )
     
     
-    # TODO(v5) change outline API (see above)
+    # TODO(apibreak) change outline API (see above)
     def get_toc(
             self,
             max_depth = 15,
@@ -595,7 +595,7 @@ class PdfDocument (AutoCloseable):
             :data:`typing.Any`: Parameter-dependent result.
         """
         
-        # TODO(v5) remove mk_formconfig parameter (bloat)
+        # TODO(apibreak) remove mk_formconfig parameter (bloat)
         
         if not isinstance(self._input, (Path, str)):
             raise ValueError("Can only render in parallel with file path input.")
@@ -710,7 +710,7 @@ def _open_pdf(input_data, password, autoclose):
     return pdf, to_hold, to_close
 
 
-# TODO(v5) change outline API (see above)
+# TODO(apibreak) change outline API (see above)
 PdfOutlineItem = namedtuple("PdfOutlineItem", "level title is_closed n_kids page_index view_mode view_pos")
 """
 Bookmark information.

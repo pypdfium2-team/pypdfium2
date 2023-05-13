@@ -6,10 +6,10 @@
 <!-- Currently, no API breaking changes are planned. -->
 
 ```{note}
-You may search for `TODO(v5)` to find the code spots in question.
+You may search for `TODO(apibreak)` to find the code spots in question.
 ```
 
-The following API breaking changes are in consideration for the next major release:
+The following API breaking changes are in consideration for a future release:
 
 - The `PdfDocument.get_toc()` / `PdfOutlineItem` API will be changed.
   * The parameters `is_closed` (bool) and `n_kids` (abs int) will be replaced by `count` (int),
