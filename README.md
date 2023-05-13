@@ -7,7 +7,7 @@
 
 [pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is an ABI-level Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
 
-The project is built using [ctypesgen](https://github.com/ctypesgen/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
+This bindings project is built using [ctypesgen](https://github.com/ctypesgen/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
 Its custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms is supported with wheel packages.
 
 pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ctypes API remains accessible as well.
@@ -572,11 +572,13 @@ If the timeframe between reaching reference count zero and removal is sufficient
 
 Although great care has been taken while developing the support model, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
 
-#### No direct access to raw PDF data structure
+#### Missing raw PDF access, drawbacks of ctypes bindings, uncertain future of pdfium's C API
 
-<!-- https://crbug.com/pdfium/1694 -->
+As of this writing, PDFium's public interface does not provide access to the raw PDF data structure (see [issue 1694](https://crbug.com/pdfium/1694)). It does not expose APIs to read/write PDF dictionaries, streams, name/number trees, etc. Instead, it merely offers a predefined set of abstracted functions. This considerably limits the library's potential, compared to other products such as `pikepdf`.
 
-PDFium does not currently provide direct access to the raw PDF data structure. It does not publicly expose APIs to read/write PDF dictionaries, name trees, etc. Instead, it merely offers a variety of higher-level functions to modify PDFs. While these are certainly useful to abstract some of the format's complexity and avoid the creation of invalid PDFs, the lack of public instruments for raw access considerably limits the library's potential. If PDFium's capabilities are not sufficient for your use case, or you just wish to work with the raw PDF structure on your own, you may want to consider other products such as [`pikepdf`](https://github.com/pikepdf/pikepdf) to use instead of, or in conjunction with, pypdfium2.
+PDFium's non-public backend would provide these capabilities, but it is not exported into the ABI and written in C++ (not pure C), so it cannot be accessed with `ctypes`, sadly. However, with a different bindings tool (e.g. `pybind11`, `swig`, `cython`) and own binary building, it would well be possible to expose lower-level APIs and create a much more powerful and comprehensive library. This is out of scope for this project and its developers, but we would be glad to see someone else develop such a new library (e.g. as `pypdfium3`) which could eventually supersede `pypdfium2` for most (perhaps all) use cases. Other bindings tools that allow for partial impelentation in C/C++ have further advantages compared to `ctypes`, such as improved performance and better object lifetime management.
+
+Another concern is that PDFium might eventually change direction and deprecate/remove the current `public/` C APIs, limiting PDFium to C++ only, as done by Foxit.
 
 
 ## Development
@@ -721,6 +723,12 @@ Faulty PyPI releases may be yanked using the web interface.
 
 
 ## History
+
+### PDFium
+
+The PDFium code base was originally developped as part of the commercial Foxit SDK, before being acquired and open-sourced by Google, which maintains PDFium independently ever since, while Foxit continue to develop their SDK closed-source.
+
+### pypdfium2
 
 pypdfium2 is the successor of *pypdfium* and *pypdfium-reboot*.
 
