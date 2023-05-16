@@ -7,6 +7,12 @@
 # Changelog
 
 
+## 4.11.0 (2023-05-16)
+
+- Updated PDFium from `5758` to `5772`.
+- In `PdfDocument.render()`, fixed a bad `bitmap.close()` call that would lead to a downstream use after free when using the combination of foreign bitmap and no-copy conversion. Using foreign bitmaps was not the default and expressly not recommended.
+
+
 ## 4.10.0 (2023-05-09)
 
 - Updated PDFium from `5744` to `5758`.
