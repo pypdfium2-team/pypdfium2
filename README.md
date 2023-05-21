@@ -572,13 +572,11 @@ If the timeframe between reaching reference count zero and removal is sufficient
 
 Although great care has been taken while developing the support model, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
 
-#### Missing raw PDF access, drawbacks of ctypes bindings, uncertain future of pdfium's C API
+#### Missing raw PDF access
 
 As of this writing, PDFium's public interface does not provide access to the raw PDF data structure (see [issue 1694](https://crbug.com/pdfium/1694)). It does not expose APIs to read/write PDF dictionaries, streams, name/number trees, etc. Instead, it merely offers a predefined set of abstracted functions. This considerably limits the library's potential, compared to other products such as `pikepdf`.
 
-PDFium's non-public backend would provide these capabilities, but it is not exported into the ABI and written in C++ (not pure C), so it cannot be accessed with `ctypes`, sadly. However, with a different bindings tool (e.g. `pybind11`, `swig`, `cython`) and own binary building, it would well be possible to expose lower-level APIs and create a much more powerful and comprehensive library. This is out of scope for this project and its developers, but we would be glad to see someone else develop such a new library (e.g. as `pypdfium3`) which could eventually supersede `pypdfium2` for most (perhaps all) use cases. Other bindings tools that allow for partial impelentation in C/C++ have further advantages compared to `ctypes`, such as improved performance and better object lifetime management.
-
-Another concern is that PDFium might eventually change direction and deprecate/remove the current `public/` C APIs, limiting PDFium to C++ only, as done by Foxit.
+Theoretically, PDFium's non-public backend would provide these capabilities, but it is not exported into the ABI and written in C++ (not pure C), so we cannot access it with `ctypes`. This means it's out of scope for this project.
 
 
 ## Development
