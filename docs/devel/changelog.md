@@ -7,6 +7,11 @@
 # Changelog
 
 
+## 4.12.0 (2023-05-23)
+
+- Updated PDFium from `5772` to `5786`.
+
+
 ## 4.11.0 (2023-05-16)
 
 - Updated PDFium from `5758` to `5772`.
