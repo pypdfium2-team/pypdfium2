@@ -5,7 +5,7 @@
 
 [![Downloads](https://pepy.tech/badge/pypdfium2/month)](https://pepy.tech/project/pypdfium2)
 
-[pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is an ABI-level Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
+[pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is an [ABI-level](#drawbacks-of-abi-level-bindings) Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
 
 This bindings project is built using [ctypesgen](https://github.com/ctypesgen/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
 Its custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms is supported with wheel packages.
@@ -577,6 +577,11 @@ Although great care has been taken while developing the support model, it cannot
 As of this writing, PDFium's public interface does not provide access to the raw PDF data structure (see [issue 1694](https://crbug.com/pdfium/1694)). It does not expose APIs to read/write PDF dictionaries, streams, name/number trees, etc. Instead, it merely offers a predefined set of abstracted functions. This considerably limits the library's potential, compared to other products such as `pikepdf`.
 
 Theoretically, PDFium's non-public backend would provide these capabilities, but it is not exported into the ABI and written in C++ (not pure C), so we cannot access it with `ctypes`. This means it's out of scope for this project.
+
+#### Drawbacks of ABI level bindings
+
+While ABI FFI bindings tend to be more convenient, they do have technical drawbacks compared to API bindings.
+See [here](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api-1) for further information.
 
 
 ## Development
