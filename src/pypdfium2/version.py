@@ -19,5 +19,6 @@ V_LIBPDFIUM = "5786"
 #: String describing the included PDFium binary's origin (pdfium-binaries, source)
 V_BUILDNAME = "pdfium-binaries"
 
+# TODO? change to V_BUILDTYPE: str ?
 #: Whether the included PDFium binary was built with V8 support or not
 V_PDFIUM_IS_V8 = False
