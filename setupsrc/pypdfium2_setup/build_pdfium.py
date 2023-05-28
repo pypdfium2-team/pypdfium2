@@ -12,6 +12,7 @@ import urllib.request
 from pathlib import Path, WindowsPath
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
+# TODO? consider glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     Host,
     SB_Dir,
@@ -139,11 +140,7 @@ def get_pdfium_version():
     tag = ref.split("/")[-1]
     
     print(f"Current head {head_commit}, latest tagged commit {tag_commit} ({tag})", file=sys.stderr)
-    
-    if head_commit == tag_commit:
-        v_libpdfium = tag
-    else:
-        v_libpdfium = head_commit
+    v_libpdfium = tag if head_commit == tag_commit else head_commit
     
     return v_libpdfium
 

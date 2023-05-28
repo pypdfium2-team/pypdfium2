@@ -96,7 +96,7 @@ MainLibnames    = list(LibnameForSystem.values())
 
 def plat_to_system(pl_name):
     if pl_name == PlatformNames.sourcebuild:
-        # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this upstream with fallback value?
+        # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downsteam with fallback value?
         return Host.system
     result = [s for s in BinarySystems if pl_name.startswith(s)]
     assert len(result) == 1
@@ -171,6 +171,7 @@ def get_wheel_tag(pl_name):
         return "macosx_11_0_arm64"
     # As of May 2023, pdfium may potentially require glibc >= 2.26, but the actual requirement is still lower in practice
     # (see https://crrev.com/1084974 and https://groups.google.com/a/chromium.org/g/chromium-dev/c/SdCs9k3celo/m/bnnBzU1FCgAJ)
+    # TODO? consider calling objdump to dynamically determine glibc requirement
     elif pl_name == PlatformNames.linux_x64:
         return "manylinux_2_26_x86_64"
     elif pl_name == PlatformNames.linux_x86:

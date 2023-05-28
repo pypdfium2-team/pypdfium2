@@ -14,6 +14,7 @@ from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
+# TODO? consider glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
@@ -80,7 +81,6 @@ def download_releases(version, platforms, robust, max_workers, use_v8):
     return archives
 
 
-
 def safe_extract(tar, dest_dir, **kwargs):
     
     # Workaround against CVE-2007-4559 (path traversal attack) (thanks @Kasimir123 / @TrellixVulnTeam)
@@ -124,7 +124,7 @@ def generate_bindings(archives, version):
         
         items = list(bin_dir.iterdir())
         assert len(items) == 1
-        shutil.move(bin_dir / items[0], pl_dir / target_name)
+        shutil.move(bin_dir/items[0], pl_dir/target_name)
         
         ver_file = DataTree / pl_name / VerStatusFileName
         ver_file.write_text(str(version))

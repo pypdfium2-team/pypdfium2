@@ -12,6 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup import update_pdfium
+# TODO? consider glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     set_versions,
@@ -37,7 +38,7 @@ BetaUpdateFile  = AutoreleaseDir / "update_beta.txt"
 RefBindingsFile = SourceTree / "bindings" / BindingsFileName
 
 # these files/dirs do not necessarily need to have been changed, `git add` silently skips that
-PlacesToRegister = [AutoreleaseDir, VersionFile, Changelog, ChangelogStaging, RefBindingsFile]
+PlacesToRegister = (AutoreleaseDir, VersionFile, Changelog, ChangelogStaging, RefBindingsFile)
 
 
 def run_local(*args, **kws):
