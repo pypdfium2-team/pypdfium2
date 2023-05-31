@@ -6,7 +6,6 @@ __all__ = ["PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem"]
 import os
 import ctypes
 import logging
-import weakref
 import functools
 from pathlib import Path
 from collections import namedtuple
@@ -114,7 +113,7 @@ class PdfDocument (AutoCloseable):
     def close(self):
         if self.formenv:
             self.formenv.close()
-        AutoCloseable.close(self)
+        super().close()
     
     
     def __len__(self):
@@ -165,6 +164,7 @@ class PdfDocument (AutoCloseable):
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
         self.formenv = PdfFormEnv(raw, config, self)
+        self._add_kid(self.formenv)  # correct order guaranteed by close() override anyway
     
     
     # TODO?(v5) consider cached property
@@ -358,7 +358,7 @@ class PdfDocument (AutoCloseable):
         if not raw_page:
             raise PdfiumError("Failed to load page.")
         page = PdfPage(raw_page, self)
-        self._kids.append( weakref.ref(page) )
+        self._add_kid(page)
         
         if self.formenv:
             pdfium_c.FORM_OnAfterLoadPage(page, self.formenv)
@@ -385,7 +385,9 @@ class PdfDocument (AutoCloseable):
         if index is None:
             index = len(self)
         raw_page = pdfium_c.FPDFPage_New(self, index, width, height)
-        return PdfPage(raw_page, self)
+        page = PdfPage(raw_page, self)
+        self._add_kid(page)
+        return page
     
     
     def del_page(self, index):
@@ -466,7 +468,9 @@ class PdfDocument (AutoCloseable):
         raw_xobject = pdfium_c.FPDF_NewXObjectFromPage(dest_pdf, self, index)
         if raw_xobject is None:
             raise PdfiumError(f"Failed to capture page at index {index} as FPDF_XOBJECT.")
-        return PdfXObject(raw=raw_xobject, pdf=dest_pdf)
+        xobject = PdfXObject(raw=raw_xobject, pdf=dest_pdf)
+        self._add_kid(xobject)
+        return xobject
     
     
     # TODO(apibreak) consider switching to a wrapper class around the raw bookmark

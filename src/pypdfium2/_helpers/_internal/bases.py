@@ -25,6 +25,16 @@ class AutoCastable:
         return self.raw
 
 
+# TODO? add context info (explicit/automatic)
+def _close_template(close_func, raw, uuid, parent, *args, **kwargs):
+        
+    if DEBUG_AUTOCLOSE:
+        print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
+    
+    assert (parent is None) or not parent._tree_closed()
+    close_func(raw, *args, **kwargs)
+
+
 class AutoCloseable (AutoCastable):
     # auto-closeable objects should always be auto-castable
     
@@ -48,7 +58,7 @@ class AutoCloseable (AutoCastable):
     def _attach_finalizer(self):
         # this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
         assert self._finalizer is None
-        self._finalizer = weakref.finalize(self._obj, AutoCloseable._close_template, self._close_func, self.raw, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
+        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
@@ -61,27 +71,23 @@ class AutoCloseable (AutoCastable):
             return True
         return False
     
-    
-    # TODO? add context info (explicit/automatic)
-    @staticmethod
-    def _close_template(close_func, raw, uuid, parent, *args, **kwargs):
-        if DEBUG_AUTOCLOSE:
-            print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
-        assert (parent is None) or not parent._tree_closed()  # expected to be guaranteed via kids logic
-        close_func(raw, *args, **kwargs)
+    def _add_kid(self, k):
+        self._kids.append( weakref.ref(k) )
     
     
     def close(self):
-        if (self.raw is None):
-            logger.warning(f"Duplicate close call suppressed on {self}.")
-            return
         
-        open_kids = [k for k in [k_ref() for k_ref in self._kids] if k.raw is not None]
-        if open_kids:
-            logger.warning(f"Parent closed before kids. This is against the API contract, and especially discouraged for pypdfium2 <= TODO.\n Parent: {self}; Kids: {open_kids}")
-            for k in open_kids:
+        if not self.raw or not self._finalizer:
+            return False
+        
+        for k_ref in self._kids:
+            k = k_ref()
+            if k and k.raw:
                 k.close()
         
-        if self._finalizer is not None:
-            self._finalizer()
-            self.raw = None
+        self._finalizer()
+        self.raw = None
+        self._finalizer = None
+        self._kids.clear()
+        
+        return True
