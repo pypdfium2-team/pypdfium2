@@ -240,3 +240,10 @@ def test_import_pages(sequence):
 
 def test_formenv():
     pass
+
+
+def test_invalid_close_order():
+    pdf = pdfium.PdfDocument(TestResources.multipage)
+    pages = list(pdf)
+    assert len(pages) == 3
+    pdf.close()

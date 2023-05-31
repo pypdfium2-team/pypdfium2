@@ -6,6 +6,7 @@ __all__ = ["PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem"]
 import os
 import ctypes
 import logging
+import weakref
 import functools
 from pathlib import Path
 from collections import namedtuple
@@ -83,6 +84,14 @@ class PdfDocument (AutoCloseable):
             self._data_closer += to_close
         
         AutoCloseable.__init__(self, self._close_impl, self._data_holder, self._data_closer)
+    
+    
+    def __repr__(self):
+        if isinstance(self._input, bytes):
+            input_r = f"<bytes object at {hex(id(self._input))}>"
+        else:
+            input_r = repr(self._input)
+        return f"<PdfDocument at {hex(id(self))} from {input_r}>"
     
     
     @property
@@ -349,6 +358,7 @@ class PdfDocument (AutoCloseable):
         if not raw_page:
             raise PdfiumError("Failed to load page.")
         page = PdfPage(raw_page, self)
+        self._kids.append( weakref.ref(page) )
         
         if self.formenv:
             pdfium_c.FORM_OnAfterLoadPage(page, self.formenv)
