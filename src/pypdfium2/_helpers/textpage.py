@@ -214,8 +214,10 @@ class PdfTextPage (AutoCloseable):
         
         enc_text = (text + "\x00").encode("utf-16-le")
         enc_text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
-        search = pdfium_c.FPDFText_FindStart(self, enc_text_ptr, flags, index)
-        return PdfTextSearcher(search, self)
+        raw_searcher = pdfium_c.FPDFText_FindStart(self, enc_text_ptr, flags, index)
+        searcher = PdfTextSearcher(raw_searcher, self)
+        self._add_kid(searcher)
+        return searcher
 
 
 class PdfTextSearcher (AutoCloseable):

@@ -685,7 +685,7 @@ class PdfXObject (AutoCloseable):
             Page objects created from an XObject remain valid after the XObject is closed.
         """
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
-        return PdfObject(
+        return PdfObject(  # not a child object (see above)
             raw = raw_pageobj,
             pdf = self.pdf,
         )
