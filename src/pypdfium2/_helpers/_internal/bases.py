@@ -34,11 +34,10 @@ def _close_template(close_func, raw, uuid, parent, *args, **kwargs):
 
 
 class AutoCloseable (AutoCastable):
-    # auto-closeable objects should always be auto-castable
     
     def __init__(self, close_func, *args, obj=None, needs_free=True, **kwargs):
         
-        # proactively prevent accidental double initialization
+        # NOTE proactively prevent accidental double initialization
         assert not hasattr(self, "_finalizer")
         
         self._close_func = close_func
@@ -54,7 +53,7 @@ class AutoCloseable (AutoCastable):
     
     
     def _attach_finalizer(self):
-        # this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
+        # NOTE this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
         assert self._finalizer is None
         self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
     
