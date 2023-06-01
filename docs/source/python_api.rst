@@ -52,17 +52,15 @@ PDFium objects commonly need to be closed by the caller to release allocated mem
 Where necessary, pypdfium2's helper classes implement automatic closing on garbage collection using :class:`weakref.finalize`. Additionally, they provide ``close()`` methods that can be used to release memory explicitly.
 
 It may be advantageous to close objects explicitly instead of relying on Python garbage collection behaviour, to release allocated memory and acquired file handles immediately. [#ac_obj_opaqueness]_
-In this case, note that objects must be closed in reverse order to loading (i. e. parent objects must never be closed before child objects).
-If the order of closing is violated, pypdfium2 issues a warning, but still makes an unsafe attempt to close the child object.
 
-In particular, when closing parent objects explicitly, this means that any spawned child objects ought to be closed explicitly as well, since child closing on garbage collection threatens to happen later than explicit parent closing.
-For example, if you have a document and derived pages, you may either do both ``page.close()`` and ``pdf.close()``, or ``page.close()`` alone, or omit close calls entirely, but you **must not** call ``pdf.close()`` without prior ``page.close()``.
-
-``close()`` methods should be called only once. Excessive close calls are skipped with a warning.
 Closed objects must not be accessed anymore.
-Moreover, closing an object sets the underlying ``raw`` attribute to None, which should ideally turn illegal function calls after ``close()`` into a no-op.
+Closing an object sets the underlying ``raw`` attribute to None, which should safely prevent illegal function calls on closed raw handles, though.
+Attempts to re-close an already closed object are silently ignored.
 
-It is important to note that raw objects must never be isolated from their wrappers. Continuing to use a raw object after its wrapper has been closed or garbage collected is bound to result in a use after free scenario.
+Closing a parent object will automatically close any open children (e.g. pages derived from a pdf).
+This is a fairly recent change. With older versions, you should be cautious to close all children explicitly before closing a parent object.
+
+It is important to note that raw objects must never be isolated from their wrappers. Continuing to use a raw object after it was closed (explicitly or on garbage collection of the wrapper) is bound to result in a use after free scenario.
 Due to limitations in :mod:`weakref`, finalizers can only be attached to wrapper objects, although they would logically belong to the raw objects.
 
 .. [#ac_obj_ownership] Only objects owned by the caller of PDFium need to be closed. For instance, page objects that belong to a page are automatically freed by PDFium, while the caller is responsible for loose page objects.
