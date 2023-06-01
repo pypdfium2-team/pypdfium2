@@ -100,7 +100,6 @@ class PdfDocument (AutoCloseable):
     
     @staticmethod
     def _close_impl(raw, data_holder, data_closer):
-        # can't close formenv here, would cause circular reference
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
             id(data)
@@ -108,12 +107,6 @@ class PdfDocument (AutoCloseable):
             data.close()
         data_holder.clear()
         data_closer.clear()
-    
-    
-    def close(self):
-        if self.formenv:
-            self.formenv.close()
-        super().close()
     
     
     def __len__(self):
@@ -164,7 +157,7 @@ class PdfDocument (AutoCloseable):
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
         self.formenv = PdfFormEnv(raw, config, self)
-        self._add_kid(self.formenv)  # correct order guaranteed by close() override anyway
+        self._add_kid(self.formenv)  # guarantees correct order of closing
     
     
     # TODO?(v5) consider cached property

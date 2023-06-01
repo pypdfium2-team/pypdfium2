@@ -243,7 +243,19 @@ def test_formenv():
 
 
 def test_invalid_close_order():
+    
     pdf = pdfium.PdfDocument(TestResources.multipage)
     pages = list(pdf)
     assert len(pages) == 3
     pdf.close()
+    
+    # confirm that closing the pdf automatically closes pages as well
+    for p in pages:
+        assert p.raw is None
+
+
+def test_post_close():
+    pdf = pdfium.PdfDocument(TestResources.empty)
+    pdf.close()
+    with pytest.raises(ctypes.ArgumentError):
+        pdf.get_version()

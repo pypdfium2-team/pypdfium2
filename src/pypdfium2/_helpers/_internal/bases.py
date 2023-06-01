@@ -27,10 +27,8 @@ class AutoCastable:
 
 # TODO? add context info (explicit/automatic)
 def _close_template(close_func, raw, uuid, parent, *args, **kwargs):
-        
     if DEBUG_AUTOCLOSE:
         print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
-    
     assert (parent is None) or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
 
