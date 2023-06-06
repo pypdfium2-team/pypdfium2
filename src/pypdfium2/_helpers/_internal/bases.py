@@ -25,12 +25,19 @@ class AutoCastable:
         return self.raw
 
 
+# TODO? add context info (explicit/automatic)
+def _close_template(close_func, raw, uuid, parent, *args, **kwargs):
+    if DEBUG_AUTOCLOSE:
+        print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
+    assert (parent is None) or not parent._tree_closed()
+    close_func(raw, *args, **kwargs)
+
+
 class AutoCloseable (AutoCastable):
-    # auto-closeable objects should always be auto-castable
     
     def __init__(self, close_func, *args, obj=None, needs_free=True, **kwargs):
         
-        # proactively prevent accidental double initialization
+        # NOTE proactively prevent accidental double initialization
         assert not hasattr(self, "_finalizer")
         
         self._close_func = close_func
@@ -40,14 +47,15 @@ class AutoCloseable (AutoCastable):
         self._ex_kwargs = kwargs
         
         self._finalizer = None
+        self._kids = []
         if needs_free:
             self._attach_finalizer()
     
     
     def _attach_finalizer(self):
-        # this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
+        # NOTE this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
         assert self._finalizer is None
-        self._finalizer = weakref.finalize(self._obj, AutoCloseable._close_template, self._close_func, self.raw, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
+        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
@@ -60,22 +68,23 @@ class AutoCloseable (AutoCastable):
             return True
         return False
     
-    
-    @staticmethod
-    def _close_template(close_func, raw, uuid, parent, *args, **kwargs):
-        # FIXME should we add context info (explicit/automatic) ?
-        if DEBUG_AUTOCLOSE:
-            print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
-        # TODO add needs_parent safety check (if True, `parent` must be given)
-        if (parent is not None) and parent._tree_closed():
-            print(f"Parent closed before child - this is illegal ({parent}, {raw}).", file=sys.stderr)
-        close_func(raw, *args, **kwargs)
+    def _add_kid(self, k):
+        self._kids.append( weakref.ref(k) )
     
     
     def close(self):
-        if (self.raw is None):
-            logger.warning(f"Duplicate close call suppressed on {self}.")
-            return
-        if self._finalizer is not None:
-            self._finalizer()
-            self.raw = None
+        
+        if not self.raw or not self._finalizer:
+            return False
+        
+        for k_ref in self._kids:
+            k = k_ref()
+            if k and k.raw:
+                k.close()
+        
+        self._finalizer()
+        self.raw = None
+        self._finalizer = None
+        self._kids.clear()
+        
+        return True

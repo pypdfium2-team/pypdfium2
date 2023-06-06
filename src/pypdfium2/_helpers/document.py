@@ -85,6 +85,14 @@ class PdfDocument (AutoCloseable):
         AutoCloseable.__init__(self, self._close_impl, self._data_holder, self._data_closer)
     
     
+    def __repr__(self):
+        if isinstance(self._input, bytes):
+            input_r = f"<bytes object at {hex(id(self._input))}>"
+        else:
+            input_r = repr(self._input)
+        return f"<PdfDocument at {hex(id(self))} from {input_r}>"
+    
+    
     @property
     def parent(self):  # AutoCloseable hook
         return None
@@ -92,7 +100,6 @@ class PdfDocument (AutoCloseable):
     
     @staticmethod
     def _close_impl(raw, data_holder, data_closer):
-        # can't close formenv here, would cause circular reference
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
             id(data)
@@ -100,12 +107,6 @@ class PdfDocument (AutoCloseable):
             data.close()
         data_holder.clear()
         data_closer.clear()
-    
-    
-    def close(self):
-        if self.formenv:
-            self.formenv.close()
-        AutoCloseable.close(self)
     
     
     def __len__(self):
@@ -156,6 +157,7 @@ class PdfDocument (AutoCloseable):
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
         self.formenv = PdfFormEnv(raw, config, self)
+        self._add_kid(self.formenv)  # guarantees correct order of closing
     
     
     # TODO?(v5) consider cached property
@@ -349,6 +351,7 @@ class PdfDocument (AutoCloseable):
         if not raw_page:
             raise PdfiumError("Failed to load page.")
         page = PdfPage(raw_page, self)
+        self._add_kid(page)
         
         if self.formenv:
             pdfium_c.FORM_OnAfterLoadPage(page, self.formenv)
@@ -375,7 +378,9 @@ class PdfDocument (AutoCloseable):
         if index is None:
             index = len(self)
         raw_page = pdfium_c.FPDFPage_New(self, index, width, height)
-        return PdfPage(raw_page, self)
+        page = PdfPage(raw_page, self)
+        self._add_kid(page)
+        return page
     
     
     def del_page(self, index):
@@ -456,7 +461,9 @@ class PdfDocument (AutoCloseable):
         raw_xobject = pdfium_c.FPDF_NewXObjectFromPage(dest_pdf, self, index)
         if raw_xobject is None:
             raise PdfiumError(f"Failed to capture page at index {index} as FPDF_XOBJECT.")
-        return PdfXObject(raw=raw_xobject, pdf=dest_pdf)
+        xobject = PdfXObject(raw=raw_xobject, pdf=dest_pdf)
+        self._add_kid(xobject)
+        return xobject
     
     
     # TODO(apibreak) consider switching to a wrapper class around the raw bookmark
@@ -678,7 +685,7 @@ class PdfXObject (AutoCloseable):
             Page objects created from an XObject remain valid after the XObject is closed.
         """
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
-        return PdfObject(
+        return PdfObject(  # not a child object (see above)
             raw = raw_pageobj,
             pdf = self.pdf,
         )

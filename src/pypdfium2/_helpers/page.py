@@ -183,10 +183,12 @@ class PdfPage (AutoCloseable):
         Returns:
             PdfTextPage: A new text page handle for this page.
         """
-        textpage = pdfium_c.FPDFText_LoadPage(self)
-        if not textpage:
+        raw_textpage = pdfium_c.FPDFText_LoadPage(self)
+        if not raw_textpage:
             raise PdfiumError("Failed to load text page.")
-        return PdfTextPage(textpage, self)
+        textpage = PdfTextPage(raw_textpage, self)
+        self._add_kid(textpage)
+        return textpage
     
     
     def insert_obj(self, pageobj):
@@ -285,6 +287,7 @@ class PdfPage (AutoCloseable):
                 pdf = self.pdf,
                 level = level,
             )
+            self._add_kid(helper_obj)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
             

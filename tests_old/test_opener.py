@@ -189,9 +189,9 @@ def test_object_hierarchy():
     assert searcher.textpage is textpage
     
     for obj in (searcher, textpage, page, pdf):
-        assert obj._finalizer.alive
+        assert obj._finalizer and obj._finalizer.alive
         obj.close()
-        assert not obj._finalizer.alive
+        assert not obj._finalizer
 
 
 def _compare_metadata(pdf, metadata, exp_metadata):
