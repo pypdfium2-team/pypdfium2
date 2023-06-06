@@ -743,11 +743,6 @@ FS_QUADPOINTSF = struct__FS_QUADPOINTSF
 FPDF_ANNOTATION_SUBTYPE = c_int
 FPDF_ANNOT_APPEARANCEMODE = c_int
 FPDF_OBJECT_TYPE = c_int
-
-if _libs["pdfium"].has("FPDF_InitLibrary", "cdecl"):
-    FPDF_InitLibrary = _libs["pdfium"].get("FPDF_InitLibrary", "cdecl")
-    FPDF_InitLibrary.argtypes = []
-    FPDF_InitLibrary.restype = None
 enum_anon_3 = c_int
 FPDF_RENDERERTYPE_AGG = 0
 FPDF_RENDERERTYPE_SKIA = 1
@@ -777,6 +772,11 @@ if _libs["pdfium"].has("FPDF_InitLibraryWithConfig", "cdecl"):
     FPDF_InitLibraryWithConfig = _libs["pdfium"].get("FPDF_InitLibraryWithConfig", "cdecl")
     FPDF_InitLibraryWithConfig.argtypes = [POINTER(FPDF_LIBRARY_CONFIG)]
     FPDF_InitLibraryWithConfig.restype = None
+
+if _libs["pdfium"].has("FPDF_InitLibrary", "cdecl"):
+    FPDF_InitLibrary = _libs["pdfium"].get("FPDF_InitLibrary", "cdecl")
+    FPDF_InitLibrary.argtypes = []
+    FPDF_InitLibrary.restype = None
 
 if _libs["pdfium"].has("FPDF_DestroyLibrary", "cdecl"):
     FPDF_DestroyLibrary = _libs["pdfium"].get("FPDF_DestroyLibrary", "cdecl")
