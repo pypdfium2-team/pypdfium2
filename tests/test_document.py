@@ -242,7 +242,7 @@ def test_formenv():
     pass
 
 
-def test_invalid_close_order():
+def test_closing_parent_closes_kids():
     
     pdf = pdfium.PdfDocument(TestResources.multipage)
     pages = list(pdf)
