@@ -6,7 +6,7 @@
 from enum import Enum
 import pypdfium2._helpers as pdfium
 import pypdfium2.raw as pdfium_c
-from pypdfium2._helpers._internal import consts
+import pypdfium2.internal as pdfium_i
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,
@@ -26,7 +26,7 @@ def attach(parser):
     add_n_digits(parser)
     
     # TODO think out strategy for choices (see https://github.com/python/cpython/issues/69247)
-    obj_types = list( consts.ObjectTypeToConst.keys() )
+    obj_types = list( pdfium_i.ObjectTypeToConst.keys() )
     parser.add_argument(
         "--filter",
         nargs = "+",
@@ -53,7 +53,7 @@ def print_img_metadata(metadata, pad=""):
     for attr in pdfium_c.FPDF_IMAGEOBJ_METADATA.__slots__:
         value = getattr(metadata, attr)
         if attr == "colorspace":
-            value = consts.ColorspaceToStr.get(value)
+            value = pdfium_i.ColorspaceToStr.get(value)
         elif attr == "marked_content_id" and value == -1:
             continue
         print(pad + f"{attr}: {value}\n", end="")
@@ -65,7 +65,7 @@ def main(args):
     
     # if no filter is given, leave it at None (make a difference in case of unhandled object types)
     if args.filter:
-        args.filter = [consts.ObjectTypeToConst[t] for t in args.filter]
+        args.filter = [pdfium_i.ObjectTypeToConst[t] for t in args.filter]
     
     show_pos = (InfoParams.pos in args.info)
     show_imageinfo = (InfoParams.imageinfo in args.info)
@@ -85,7 +85,7 @@ def main(args):
             
             pad_0 = "    " * obj.level
             pad_1 = pad_0 + "    "
-            print(preamble + pad_0 + consts.ObjectTypeToStr.get(obj.type))
+            print(preamble + pad_0 + pdfium_i.ObjectTypeToStr.get(obj.type))
             
             if show_pos:
                 pos = round_list(obj.get_pos(), args.n_digits)

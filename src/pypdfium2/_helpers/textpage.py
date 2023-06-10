@@ -1,20 +1,20 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["PdfTextPage", "PdfTextSearcher"]
+__all__ = ("PdfTextPage", "PdfTextSearcher")
 
 import ctypes
 import logging
 import pypdfium2.raw as pdfium_c
 from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2._helpers._internal.bases import AutoCloseable
+import pypdfium2.internal as pdfium_i
 
 c_double = ctypes.c_double
 
 logger = logging.getLogger(__name__)
 
 
-class PdfTextPage (AutoCloseable):
+class PdfTextPage (pdfium_i.AutoCloseable):
     """
     Text page helper class.
     
@@ -26,7 +26,7 @@ class PdfTextPage (AutoCloseable):
     def __init__(self, raw, page):
         self.raw = raw
         self.page = page
-        AutoCloseable.__init__(self, pdfium_c.FPDFText_ClosePage)
+        super().__init__(pdfium_c.FPDFText_ClosePage)
     
     @property
     def parent(self):  # AutoCloseable hook
@@ -220,7 +220,7 @@ class PdfTextPage (AutoCloseable):
         return searcher
 
 
-class PdfTextSearcher (AutoCloseable):
+class PdfTextSearcher (pdfium_i.AutoCloseable):
     """
     Text searcher helper class.
     
@@ -232,7 +232,7 @@ class PdfTextSearcher (AutoCloseable):
     def __init__(self, raw, textpage):
         self.raw = raw
         self.textpage = textpage
-        AutoCloseable.__init__(self, pdfium_c.FPDFText_FindClose)
+        super().__init__(pdfium_c.FPDFText_FindClose)
     
     @property
     def parent(self):  # AutoCloseable hook
@@ -248,7 +248,6 @@ class PdfTextSearcher (AutoCloseable):
         count = pdfium_c.FPDFText_GetSchCount(self)
         return index, count
     
-    
     def get_next(self):
         """
         Returns:
@@ -256,7 +255,6 @@ class PdfTextSearcher (AutoCloseable):
             or None if the last occurrence was passed.
         """
         return self._get_occurrence(pdfium_c.FPDFText_FindNext)
-    
     
     def get_prev(self):
         """

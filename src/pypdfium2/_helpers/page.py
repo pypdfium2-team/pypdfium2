@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["PdfPage", "PdfColorScheme"]
+__all__ = ("PdfPage", "PdfColorScheme")
 
 import math
 import ctypes
@@ -11,14 +11,13 @@ from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.bitmap import PdfBitmap
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers.pageobjects import PdfObject
-from pypdfium2._helpers._internal import consts, utils
-from pypdfium2._helpers._internal.bases import AutoCloseable
+import pypdfium2.internal as pdfium_i
 
 c_float = ctypes.c_float
 logger = logging.getLogger(__name__)
 
 
-class PdfPage (AutoCloseable):
+class PdfPage (pdfium_i.AutoCloseable):
     """
     Page helper class.
     
@@ -29,7 +28,7 @@ class PdfPage (AutoCloseable):
     
     def __init__(self, raw, pdf):
         self.raw, self.pdf = raw, pdf
-        AutoCloseable.__init__(self, self._close_impl, self.pdf)
+        super().__init__(self._close_impl, self.pdf)
     
     
     @staticmethod
@@ -73,13 +72,13 @@ class PdfPage (AutoCloseable):
         Returns:
             int: Clockwise page rotation in degrees.
         """
-        return consts.RotationToDegrees[ pdfium_c.FPDFPage_GetRotation(self) ]
+        return pdfium_i.RotationToDegrees[ pdfium_c.FPDFPage_GetRotation(self) ]
     
     def set_rotation(self, rotation):
         """
         Define the absolute, clockwise page rotation (0, 90, 180, or 270 degrees).
         """
-        pdfium_c.FPDFPage_SetRotation(self, consts.RotationToConst[rotation])
+        pdfium_c.FPDFPage_SetRotation(self, pdfium_i.RotationToConst[rotation])
     
     
     def _get_box(self, box_func, fallback_func, fallback_ok):
@@ -430,14 +429,14 @@ class PdfPage (AutoCloseable):
         )
         bitmap.fill_rect(0, 0, width, height, fill_color)
         
-        render_args = (bitmap, self, -crop[0], -crop[3], src_width, src_height, consts.RotationToConst[rotation], flags)
+        render_args = (bitmap, self, -crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation], flags)
         
         if color_scheme is None:
             pdfium_c.FPDF_RenderPageBitmap(*render_args)
         else:
             
             pause = pdfium_c.IFSDK_PAUSE(version=1)
-            utils.set_callback(pause, "NeedToPauseNow", lambda _: False)
+            pdfium_i.set_callback(pause, "NeedToPauseNow", lambda _: False)
             
             fpdf_cs = color_scheme.convert(rev_byteorder)
             status = pdfium_c.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_cs, pause)
@@ -535,5 +534,5 @@ class PdfColorScheme:
         """
         fpdf_cs = pdfium_c.FPDF_COLORSCHEME()
         for key, value in self.colors.items():
-            setattr(fpdf_cs, key, utils.color_tohex(value, rev_byteorder))
+            setattr(fpdf_cs, key, pdfium_i.color_tohex(value, rev_byteorder))
         return fpdf_cs

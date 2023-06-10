@@ -1,18 +1,17 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["PdfObject", "PdfImage"]
+__all__ = ("PdfObject", "PdfImage")
 
 import ctypes
 from ctypes import c_uint, c_float
 from pathlib import Path
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
+import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
-from pypdfium2._helpers._internal import consts, utils
-from pypdfium2._helpers._internal.bases import AutoCloseable
 
 try:
     import PIL.Image
@@ -20,7 +19,7 @@ except ImportError:
     PIL = None
 
 
-class PdfObject (AutoCloseable):
+class PdfObject (pdfium_i.AutoCloseable):
     """
     Page object helper class.
     
@@ -65,7 +64,7 @@ class PdfObject (AutoCloseable):
             elif self.pdf is not page.pdf:
                 raise ValueError("*page* must belong to *pdf* when constructing a pageobject.")
         
-        AutoCloseable.__init__(self, pdfium_c.FPDFPageObj_Destroy, needs_free=(page is None))
+        super().__init__(pdfium_c.FPDFPageObj_Destroy, needs_free=(page is None))
     
     
     @property
@@ -205,15 +204,15 @@ class PdfImage (PdfObject):
         if isinstance(source, (str, Path)):
             buffer = open(source, "rb")
             autoclose = True
-        elif utils.is_buffer(source, "r"):
+        elif pdfium_i.is_buffer(source, "r"):
             buffer = source
         else:
             raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte buffer.")
         
-        bufaccess, ld_data = utils.get_bufreader(buffer)
+        bufaccess, ld_data = pdfium_i.get_bufreader(buffer)
         loader = pdfium_c.FPDFImageObj_LoadJpegFileInline if inline else pdfium_c.FPDFImageObj_LoadJpegFile
         
-        c_pages, page_count = utils.pages_c_array(pages)
+        c_pages, page_count = pdfium_i.pages_c_array(pages)
         ok = loader(c_pages, page_count, self, bufaccess)
         if not ok:
             raise PdfiumError("Failed to load JPEG into image object.")
@@ -240,7 +239,7 @@ class PdfImage (PdfObject):
             pages (list[PdfPage] | None):
                 A list of loaded pages that might contain the image object. See :meth:`.load_jpeg`.
         """
-        c_pages, page_count = utils.pages_c_array(pages)
+        c_pages, page_count = pdfium_i.pages_c_array(pages)
         ok = pdfium_c.FPDFImageObj_SetBitmap(c_pages, page_count, self, bitmap)
         if not ok:
             raise PdfiumError("Failed to set image to bitmap.")
@@ -340,7 +339,7 @@ class PdfImage (PdfObject):
         if isinstance(dest, Path):
             with open(dest.with_suffix("."+format), "wb") as buf:
                 extraction_gen.send(buf)
-        elif utils.is_buffer(dest, "w"):
+        elif pdfium_i.is_buffer(dest, "w"):
             extraction_gen.send(dest)
         else:
             raise ValueError(f"Cannot extract to '{dest}'")
@@ -410,7 +409,7 @@ def _extract_direct(image_obj):
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "raw"
         else:
-            raise ImageNotExtractableError(f"Unhandled color space {consts.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data.")
+            raise ImageNotExtractableError(f"Unhandled color space {pdfium_i.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data.")
     elif len(complex_filters) == 1:
         f = complex_filters[0]
         if f == "DCTDecode":
