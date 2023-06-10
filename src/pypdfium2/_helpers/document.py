@@ -147,17 +147,16 @@ class PdfDocument (AutoCloseable):
                 Custom form config interface to use (optional).
         """
         
+        # safety check for older binaries (could be removed at some point)
+        # https://github.com/bblanchon/pdfium-binaries/issues/105
+        if V_PDFIUM_IS_V8 and V_BUILDNAME == "pdfium-binaries" and int(V_LIBPDFIUM) <= 5677:
+            raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
+        
         formtype = self.get_formtype()
         if formtype == pdfium_c.FORMTYPE_NONE or self.formenv:
             return
         
         if not config:
-            
-            # safety check for older binaries (could be removed at some point)
-            # https://github.com/bblanchon/pdfium-binaries/issues/105
-            if V_PDFIUM_IS_V8 and V_BUILDNAME == "pdfium-binaries" and int(V_LIBPDFIUM) <= 5677:
-                raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
-            
             if V_PDFIUM_IS_V8:
                 js_platform = pdfium_c.IPDF_JSPLATFORM(version=3)
                 config = pdfium_c.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, jsPlatform=js_platform)
