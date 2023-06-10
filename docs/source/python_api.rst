@@ -113,6 +113,6 @@ Internal
    The following helpers are considered internal, so their API may change any time.
    They are isolated in an own namespace (``pypdfium2.internal``).
 
-.. automodule:: pypdfium2._helpers._internal.consts
-.. automodule:: pypdfium2._helpers._internal.bases
-.. automodule:: pypdfium2._helpers._internal.utils
+.. automodule:: pypdfium2.internal.consts
+.. automodule:: pypdfium2.internal.bases
+.. automodule:: pypdfium2.internal.utils

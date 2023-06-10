@@ -1,15 +1,14 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["PdfBitmap", "PdfBitmapInfo"]
+__all__ = ("PdfBitmap", "PdfBitmapInfo")
 
 import ctypes
 import logging
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
 from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2._helpers._internal import consts, utils
-from pypdfium2._helpers._internal.bases import AutoCloseable
+import pypdfium2.internal as pdfium_i
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ except ImportError:
     numpy = None
 
 
-class PdfBitmap (AutoCloseable):
+class PdfBitmap (pdfium_i.AutoCloseable):
     """
     Bitmap helper class.
     
@@ -52,9 +51,9 @@ class PdfBitmap (AutoCloseable):
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
         self.raw, self.buffer, self.width, self.height = raw, buffer, width, height
         self.stride, self.format, self.rev_byteorder = stride, format, rev_byteorder
-        self.n_channels = consts.BitmapTypeToNChannels[self.format]
-        self.mode = (consts.BitmapTypeToStrReverse if self.rev_byteorder else consts.BitmapTypeToStr)[self.format]
-        AutoCloseable.__init__(self, pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
+        self.n_channels = pdfium_i.BitmapTypeToNChannels[self.format]
+        self.mode = (pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else pdfium_i.BitmapTypeToStr)[self.format]
+        super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
     
     
     @property
@@ -116,7 +115,7 @@ class PdfBitmap (AutoCloseable):
         Bitmaps created by this function are always packed (no unused bytes at line end).
         """
         
-        stride = width * consts.BitmapTypeToNChannels[format]
+        stride = width * pdfium_i.BitmapTypeToNChannels[format]
         if buffer is None:
             buffer = (ctypes.c_ubyte * (stride * height))()
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
@@ -132,7 +131,7 @@ class PdfBitmap (AutoCloseable):
         
         Using this method is discouraged. Prefer :meth:`.new_native` instead.
         """
-        stride = width * consts.BitmapTypeToNChannels[format] if force_packed else 0
+        stride = width * pdfium_i.BitmapTypeToNChannels[format] if force_packed else 0
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, None, stride)
         return cls.from_raw(raw, rev_byteorder)
     
@@ -161,7 +160,7 @@ class PdfBitmap (AutoCloseable):
             color (tuple[int, int, int, int]):
                 RGBA fill color (a tuple of 4 integers ranging from 0 to 255).
         """
-        c_color = utils.color_tohex(color, self.rev_byteorder)
+        c_color = pdfium_i.color_tohex(color, self.rev_byteorder)
         pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
     
     
@@ -215,7 +214,7 @@ class PdfBitmap (AutoCloseable):
         # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.frombuffer
         # https://pillow.readthedocs.io/en/stable/handbook/writing-your-own-image-plugin.html#the-raw-decoder
         
-        dest_mode = consts.BitmapTypeToStrReverse[self.format]
+        dest_mode = pdfium_i.BitmapTypeToStrReverse[self.format]
         image = PIL.Image.frombuffer(
             dest_mode,                  # target color format
             (self.width, self.height),  # size
@@ -240,13 +239,14 @@ class PdfBitmap (AutoCloseable):
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
         """
         
-        if pil_image.mode in consts.BitmapStrToConst:
+        if pil_image.mode in pdfium_i.BitmapStrToConst:
             # PIL always seems to represent BGR(A/X) input as RGB(A/X), so this code passage is probably only hit for L
-            format = consts.BitmapStrToConst[pil_image.mode]
+            format = pdfium_i.BitmapStrToConst[pil_image.mode]
         else:
             pil_image = _pil_convert_for_pdfium(pil_image)
-            format = consts.BitmapStrReverseToConst[pil_image.mode]
+            format = pdfium_i.BitmapStrReverseToConst[pil_image.mode]
         
+        # FIXME can we avoid copying here?
         py_buffer = pil_image.tobytes()
         c_buffer = (ctypes.c_ubyte * len(py_buffer)).from_buffer_copy(py_buffer)
         width, height = pil_image.size

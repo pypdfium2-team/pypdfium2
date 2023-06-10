@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["PdfAttachment"]
+__all__ = ("PdfAttachment", )
 
 import ctypes
 import pypdfium2.raw as pdfium_c
 from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2._helpers._internal.bases import AutoCastable
+import pypdfium2.internal as pdfium_i
 
 
 def _encode_key(key):
@@ -16,7 +16,7 @@ def _encode_key(key):
         raise TypeError(f"Key must be str, but {type(key).__name__} was given.")
 
 
-class PdfAttachment (AutoCastable):
+class PdfAttachment (pdfium_i.AutoCastable):
     """
     Attachment helper class.
     See PDF 1.7, Section 7.11 "File Specifications".

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem"]
+__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem")
 
 import os
 import ctypes
@@ -21,13 +21,12 @@ from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.pageobjects import PdfObject
 from pypdfium2._helpers.attachment import PdfAttachment
-from pypdfium2._helpers._internal import consts, utils
-from pypdfium2._helpers._internal.bases import AutoCloseable
+import pypdfium2.internal as pdfium_i
 
 logger = logging.getLogger(__name__)
 
 
-class PdfDocument (AutoCloseable):
+class PdfDocument (pdfium_i.AutoCloseable):
     """
     Document helper class.
     
@@ -82,7 +81,7 @@ class PdfDocument (AutoCloseable):
             self._data_holder += to_hold
             self._data_closer += to_close
         
-        AutoCloseable.__init__(self, self._close_impl, self._data_holder, self._data_closer)
+        super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
     
     
     def __repr__(self):
@@ -207,7 +206,7 @@ class PdfDocument (AutoCloseable):
     
     def _save_to(self, buffer, version=None, flags=pdfium_c.FPDF_NO_INCREMENTAL):
         
-        c_writer = utils.get_bufwriter(buffer)
+        c_writer = pdfium_i.get_bufwriter(buffer)
         saveargs = (self, c_writer, flags)
         
         if version is None:
@@ -235,7 +234,7 @@ class PdfDocument (AutoCloseable):
         if isinstance(dest, (str, Path)):
             with open(dest, "wb") as buf:
                 self._save_to(buf, *args, **kwargs)
-        elif utils.is_buffer(dest, "w"):
+        elif pdfium_i.is_buffer(dest, "w"):
             self._save_to(dest, *args, **kwargs)
         else:
             raise ValueError(f"Cannot save to '{dest}'")
@@ -649,7 +648,7 @@ class PdfDocument (AutoCloseable):
             yield from pool.map(invoke_renderer, page_indices)
 
 
-class PdfFormEnv (AutoCloseable):
+class PdfFormEnv (pdfium_i.AutoCloseable):
     """
     Form environment helper class.
     
@@ -664,7 +663,7 @@ class PdfFormEnv (AutoCloseable):
     
     def __init__(self, raw, config, pdf):
         self.raw, self.config, self.pdf = raw, config, pdf
-        AutoCloseable.__init__(self, self._close_impl, self.config, self.pdf)
+        super().__init__(PdfFormEnv._close_impl, self.config, self.pdf)
     
     @property
     def parent(self):  # AutoCloseable hook
@@ -677,7 +676,7 @@ class PdfFormEnv (AutoCloseable):
         pdf.formenv = None
 
 
-class PdfXObject (AutoCloseable):
+class PdfXObject (pdfium_i.AutoCloseable):
     """
     XObject helper class.
     
@@ -688,7 +687,7 @@ class PdfXObject (AutoCloseable):
     
     def __init__(self, raw, pdf):
         self.raw, self.pdf = raw, pdf
-        AutoCloseable.__init__(self, pdfium_c.FPDF_CloseXObject)
+        super().__init__(pdfium_c.FPDF_CloseXObject)
     
     @property
     def parent(self):  # AutoCloseable hook
@@ -719,8 +718,8 @@ def _open_pdf(input_data, password, autoclose):
     elif isinstance(input_data, (bytes, ctypes.Array)):
         pdf = pdfium_c.FPDF_LoadMemDocument64(input_data, len(input_data), password)
         to_hold = (input_data, )
-    elif utils.is_buffer(input_data, "r"):
-        bufaccess, to_hold = utils.get_bufreader(input_data)
+    elif pdfium_i.is_buffer(input_data, "r"):
+        bufaccess, to_hold = pdfium_i.get_bufreader(input_data)
         if autoclose:
             to_close = (input_data, )
         pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
@@ -729,7 +728,7 @@ def _open_pdf(input_data, password, autoclose):
     
     if pdfium_c.FPDF_GetPageCount(pdf) < 1:
         err_code = pdfium_c.FPDF_GetLastError()
-        raise PdfiumError(f"Failed to load document (PDFium: {consts.ErrorToStr.get(err_code)}).")
+        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
     
     return pdf, to_hold, to_close
 

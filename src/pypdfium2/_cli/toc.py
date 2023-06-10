@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-from pypdfium2._helpers._internal import consts
+import pypdfium2.internal as pdfium_i
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,
@@ -35,7 +35,7 @@ def main(args):
             "    " * item.level +
             "[%s] %s -> %s  # %s %s" % (
                 state, item.title, target,
-                consts.ViewmodeToStr.get(item.view_mode),
+                pdfium_i.ViewmodeToStr.get(item.view_mode),
                 round_list(item.view_pos, args.n_digits),
             )
         )

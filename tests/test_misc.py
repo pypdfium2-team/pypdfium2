@@ -3,7 +3,7 @@
 
 import pytest
 import pypdfium2.raw as pdfium_c
-from pypdfium2._helpers._internal import utils, consts
+import pypdfium2.internal as pdfium_i
 
 
 @pytest.mark.parametrize(
@@ -15,7 +15,7 @@ from pypdfium2._helpers._internal import utils, consts
 )
 def test_color_tohex(color_in, rev_byteorder, exp_color):
     
-    assert utils.color_tohex(color_in, rev_byteorder) == exp_color
+    assert pdfium_i.color_tohex(color_in, rev_byteorder) == exp_color
     
     # PDFium's utility macros just encode/decode the given color positionally, regardless of byte order
     r, g, b, a = color_in
@@ -44,19 +44,19 @@ PageObjNsp = _filter("FPDF_PAGEOBJ_")
 @pytest.mark.parametrize(
     ["mapping", "use_keys", "items"],
     [
-        (consts.BitmapTypeToNChannels,   True,  BitmapNsp),
-        (consts.BitmapTypeToStr,         True,  BitmapNsp),
-        (consts.BitmapTypeToStrReverse,  True,  BitmapNsp),
-        (consts.BitmapStrToConst,        False, BitmapNsp),
-        (consts.BitmapStrReverseToConst, False, BitmapNsp),
-        (consts.FormTypeToStr,           True,  _filter("FORMTYPE_", [pdfium_c.FORMTYPE_COUNT])),
-        (consts.ColorspaceToStr,         True,  _filter("FPDF_COLORSPACE_")),
-        (consts.ViewmodeToStr,           True,  _filter("PDFDEST_VIEW_")),
-        (consts.ObjectTypeToStr,         True,  PageObjNsp),
-        (consts.ObjectTypeToConst,       False, PageObjNsp),
-        (consts.PageModeToStr,           True,  _filter("PAGEMODE_")),
-        (consts.ErrorToStr,              True,  _filter("FPDF_ERR_")),
-        (consts.UnsupportedInfoToStr,    True,  _filter("FPDF_UNSP_")),
+        (pdfium_i.BitmapTypeToNChannels,   True,  BitmapNsp),
+        (pdfium_i.BitmapTypeToStr,         True,  BitmapNsp),
+        (pdfium_i.BitmapTypeToStrReverse,  True,  BitmapNsp),
+        (pdfium_i.BitmapStrToConst,        False, BitmapNsp),
+        (pdfium_i.BitmapStrReverseToConst, False, BitmapNsp),
+        (pdfium_i.FormTypeToStr,           True,  _filter("FORMTYPE_", [pdfium_c.FORMTYPE_COUNT])),
+        (pdfium_i.ColorspaceToStr,         True,  _filter("FPDF_COLORSPACE_")),
+        (pdfium_i.ViewmodeToStr,           True,  _filter("PDFDEST_VIEW_")),
+        (pdfium_i.ObjectTypeToStr,         True,  PageObjNsp),
+        (pdfium_i.ObjectTypeToConst,       False, PageObjNsp),
+        (pdfium_i.PageModeToStr,           True,  _filter("PAGEMODE_")),
+        (pdfium_i.ErrorToStr,              True,  _filter("FPDF_ERR_")),
+        (pdfium_i.UnsupportedInfoToStr,    True,  _filter("FPDF_UNSP_")),
     ]
 )
 def test_const_converters(mapping, use_keys, items):
@@ -78,5 +78,5 @@ def test_const_converters(mapping, use_keys, items):
     ]
 )
 def test_const_converters_rotation(degrees, const):
-    assert consts.RotationToConst[degrees] == const
-    assert consts.RotationToDegrees[const] == degrees
+    assert pdfium_i.RotationToConst[degrees] == const
+    assert pdfium_i.RotationToDegrees[const] == degrees

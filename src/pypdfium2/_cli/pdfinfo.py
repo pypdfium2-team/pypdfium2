@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2.raw as pdfium_c
-from pypdfium2._helpers._internal import consts
+import pypdfium2.internal as pdfium_i
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,
@@ -31,11 +31,11 @@ def main(args):
     
     pagemode = pdf.get_pagemode()
     if pagemode != pdfium_c.PAGEMODE_USENONE:
-        print(f"Page Mode: {consts.PageModeToStr.get(pagemode)}")
+        print(f"Page Mode: {pdfium_i.PageModeToStr.get(pagemode)}")
     
     formtype = pdf.get_formtype()
     if formtype != pdfium_c.FORMTYPE_NONE:
-        print(f"Form Type: {consts.FormTypeToStr.get(formtype)}")
+        print(f"Form Type: {pdfium_i.FormTypeToStr.get(formtype)}")
     
     metadata = pdf.get_metadata_dict(skip_empty=True)
     if len(metadata) > 0:

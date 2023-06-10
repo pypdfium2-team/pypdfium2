@@ -9,6 +9,7 @@ import argparse
 import importlib
 from pypdfium2.version import *
 import pypdfium2._helpers as pdfium
+import pypdfium2.internal as pdfium_i
 
 try:
     import argcomplete
@@ -58,7 +59,7 @@ def get_parser():
 def setup_logging():
     
     debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
-    pdfium.internal.set_autoclose_debug(debug_autoclose)
+    pdfium_i.set_autoclose_debug(debug_autoclose)
     
     lib_logger = logging.getLogger("pypdfium2")
     lib_logger.addHandler(logging.StreamHandler())

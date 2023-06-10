@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ["PdfUnspHandler"]
+__all__ = ("PdfUnspHandler", )
 
 import atexit
 import logging
 import pypdfium2.raw as pdfium_c
-from pypdfium2._helpers._internal import consts, utils
+import pypdfium2.internal as pdfium_i
 
 lib_logger = logging.getLogger("pypdfium2")
 
@@ -40,7 +40,7 @@ class PdfUnspHandler:
         """
         
         self._config = pdfium_c.UNSUPPORT_INFO(version=1)
-        utils.set_callback(self._config, "FSDK_UnSupport_Handler", self)
+        pdfium_i.set_callback(self._config, "FSDK_UnSupport_Handler", self)
         pdfium_c.FSDK_SetUnSpObjProcessHandler(self._config)
         
         atexit.register(self._keep)
@@ -56,4 +56,4 @@ class PdfUnspHandler:
     
     @staticmethod
     def _default(type):
-        lib_logger.warning(f"Unsupported PDF feature: {consts.UnsupportedInfoToStr.get(type)}")
+        lib_logger.warning(f"Unsupported PDF feature: {pdfium_i.UnsupportedInfoToStr.get(type)}")

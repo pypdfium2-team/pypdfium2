@@ -5,7 +5,7 @@ import atexit
 import logging
 from pypdfium2.version import *
 from pypdfium2._helpers import *
-from pypdfium2 import raw
+from pypdfium2 import raw, internal
 
 logger = logging.getLogger(__name__)  # FIXME perhaps unnecessary?
 
