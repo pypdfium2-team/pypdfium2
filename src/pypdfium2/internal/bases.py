@@ -4,6 +4,7 @@
 __all__ = ("AutoCastable", "AutoCloseable", "set_autoclose_debug")
 
 import sys
+import ctypes
 import weakref
 import logging
 import uuid
@@ -25,10 +26,9 @@ class AutoCastable:
         return self.raw
 
 
-# TODO? add context info (explicit/automatic)
-def _close_template(close_func, raw, uuid, parent, *args, **kwargs):
+def _close_template(close_func, raw, obj_repr, is_auto, uuid, parent, *args, **kwargs):
     if DEBUG_AUTOCLOSE:
-        print(f"Closing {raw} with UUID {uuid}", file=sys.stderr)
+        print(("Automatically" if is_auto.value else "Explicitly") + f" closing raw of {uuid}:{obj_repr}", file=sys.stderr)
     assert (parent is None) or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
 
@@ -45,6 +45,7 @@ class AutoCloseable (AutoCastable):
         self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
         self._ex_args = args
         self._ex_kwargs = kwargs
+        self._will_autoclose = ctypes.c_bool(True)  # mutable bool
         
         self._finalizer = None
         self._kids = []
@@ -55,7 +56,7 @@ class AutoCloseable (AutoCastable):
     def _attach_finalizer(self):
         # NOTE this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
         assert self._finalizer is None
-        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
+        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, repr(self), self._will_autoclose, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
@@ -82,7 +83,9 @@ class AutoCloseable (AutoCastable):
             if k and k.raw:
                 k.close()
         
+        self._will_autoclose.value = False
         self._finalizer()
+        self._will_autoclose = None
         self.raw = None
         self._finalizer = None
         self._kids.clear()
