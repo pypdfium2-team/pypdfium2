@@ -81,7 +81,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             self._data_holder += to_hold
             self._data_closer += to_close
         
-        super().__init__(self._close_impl, self._data_holder, self._data_closer)
+        super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
     
     
     def __repr__(self):
@@ -663,7 +663,7 @@ class PdfFormEnv (pdfium_i.AutoCloseable):
     
     def __init__(self, raw, config, pdf):
         self.raw, self.config, self.pdf = raw, config, pdf
-        super().__init__(self._close_impl, self.config, self.pdf)
+        super().__init__(PdfFormEnv._close_impl, self.config, self.pdf)
     
     @property
     def parent(self):  # AutoCloseable hook

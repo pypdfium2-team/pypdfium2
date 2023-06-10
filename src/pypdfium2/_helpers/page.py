@@ -28,7 +28,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def __init__(self, raw, pdf):
         self.raw, self.pdf = raw, pdf
-        super().__init__(self._close_impl, self.pdf)
+        super().__init__(PdfPage._close_impl, self.pdf)
     
     
     @staticmethod
