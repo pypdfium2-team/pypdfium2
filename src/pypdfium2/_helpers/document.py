@@ -373,7 +373,7 @@ class PdfDocument (AutoCloseable):
         
         if self.formenv:
             pdfium_c.FORM_OnAfterLoadPage(page, self.formenv)
-        # TODO attach page to formenv and add safety check on form env closing
+            self.formenv._add_kid(page)
         
         return page
     
