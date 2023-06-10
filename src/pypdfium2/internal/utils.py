@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE standalone, must not inter-depend on helpers
-
 import ctypes
 import pypdfium2.raw as pdfium_c
 
