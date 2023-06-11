@@ -69,9 +69,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._input = input
         self._password = password
         self._autoclose = autoclose
-        
         self._data_holder = []
         self._data_closer = []
+        
+        # question: can we make attributes like formenv effectively immutable for the caller?
         self.formenv = None
         
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
@@ -370,12 +371,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
         raw_page = pdfium_c.FPDF_LoadPage(self, index)
         if not raw_page:
             raise PdfiumError("Failed to load page.")
-        page = PdfPage(raw_page, self)
-        self._add_kid(page)
+        page = PdfPage(raw_page, self, self.formenv)
         
         if self.formenv:
             pdfium_c.FORM_OnAfterLoadPage(page, self.formenv)
             self.formenv._add_kid(page)
+        else:
+            self._add_kid(page)
         
         return page
     
@@ -398,7 +400,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if index is None:
             index = len(self)
         raw_page = pdfium_c.FPDFPage_New(self, index, width, height)
-        page = PdfPage(raw_page, self)
+        page = PdfPage(raw_page, self, None)
+        # FIXME should we make the formenv distinction for new pages, too?
         self._add_kid(page)
         return page
     

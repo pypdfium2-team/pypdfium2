@@ -26,20 +26,21 @@ class PdfPage (pdfium_i.AutoCloseable):
         pdf (PdfDocument): Reference to the document this page belongs to.
     """
     
-    def __init__(self, raw, pdf):
-        self.raw, self.pdf = raw, pdf
-        super().__init__(PdfPage._close_impl, self.pdf)
+    def __init__(self, raw, pdf, formenv):
+        self.raw, self.pdf, self.formenv = raw, pdf, formenv
+        super().__init__(PdfPage._close_impl, self.formenv)
     
     
     @staticmethod
-    def _close_impl(raw, pdf):
-        if pdf.formenv:
-            pdfium_c.FORM_OnBeforeClosePage(raw, pdf.formenv)
+    def _close_impl(raw, formenv):
+        if formenv:
+            pdfium_c.FORM_OnBeforeClosePage(raw, formenv)
         pdfium_c.FPDF_ClosePage(raw)
     
     
     @property
     def parent(self):  # AutoCloseable hook
+        # Might want to have this point to the direct parent, i. e. (self.pdf if formenv is None else self.formenv), but this might confuse callers expecting that parent be always pdf for pages.
         return self.pdf
     
     
@@ -443,8 +444,8 @@ class PdfPage (pdfium_i.AutoCloseable):
             assert status == pdfium_c.FPDF_RENDER_DONE
             pdfium_c.FPDF_RenderPage_Close(self)
         
-        if may_draw_forms and self.pdf.formenv:
-            pdfium_c.FPDF_FFLDraw(self.pdf.formenv, *render_args)
+        if may_draw_forms and self.formenv:
+            pdfium_c.FPDF_FFLDraw(self.formenv, *render_args)
         
         return bitmap
 
