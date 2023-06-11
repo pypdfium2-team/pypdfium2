@@ -3,6 +3,7 @@
 
 __all__ = ("AutoCastable", "AutoCloseable", "set_autoclose_debug")
 
+import os
 import sys
 import ctypes
 import weakref
@@ -12,6 +13,11 @@ import uuid
 logger = logging.getLogger(__name__)
 
 DEBUG_AUTOCLOSE = False
+
+STATE_INVALID = -1
+STATE_AUTO = 0
+STATE_EXPLICIT = 1
+STATE_BYPARENT = 2
 
 
 def set_autoclose_debug(value=True):
@@ -26,9 +32,18 @@ class AutoCastable:
         return self.raw
 
 
-def _close_template(close_func, raw, obj_repr, is_auto, uuid, parent, *args, **kwargs):
+def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
+    
     if DEBUG_AUTOCLOSE:
-        print(("Automatically" if is_auto.value else "Explicitly") + f" closing raw of {uuid}:{obj_repr}", file=sys.stderr)
+        
+        state = state.value
+        desc = "auto" if state == STATE_AUTO else "explicit" if state == STATE_EXPLICIT else "by parent" if state == STATE_BYPARENT else None
+        if desc is None:
+            raise  # unreachable
+        
+        # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
+        os.write(sys.stderr.fileno(), f"Close ({desc}) {obj_repr}\n".encode())
+    
     assert (parent is None) or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
 
@@ -42,10 +57,10 @@ class AutoCloseable (AutoCastable):
         
         self._close_func = close_func
         self._obj = self if obj is None else obj
-        self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
+        self._uuid = uuid.uuid4()
         self._ex_args = args
         self._ex_kwargs = kwargs
-        self._will_autoclose = ctypes.c_bool(True)  # mutable bool
+        self._autoclose_state = ctypes.c_int8(STATE_AUTO)  # mutable int
         
         self._finalizer = None
         self._kids = []
@@ -53,10 +68,14 @@ class AutoCloseable (AutoCastable):
             self._attach_finalizer()
     
     
+    def __repr__(self):
+        return f"<{str(self._uuid)[:8]}:{type(self).__name__}>"
+    
+    
     def _attach_finalizer(self):
         # NOTE this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
         assert self._finalizer is None
-        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, repr(self), self._will_autoclose, self._uuid, self.parent, *self._ex_args, **self._ex_kwargs)
+        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, repr(self), self._autoclose_state, self.parent, *self._ex_args, **self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
@@ -73,7 +92,7 @@ class AutoCloseable (AutoCastable):
         self._kids.append( weakref.ref(k) )
     
     
-    def close(self):
+    def close(self, _by_parent=False):
         
         if not self.raw or not self._finalizer:
             return False
@@ -81,11 +100,11 @@ class AutoCloseable (AutoCastable):
         for k_ref in self._kids:
             k = k_ref()
             if k and k.raw:
-                k.close()
+                k.close(_by_parent=True)
         
-        self._will_autoclose.value = False
+        self._autoclose_state.value = STATE_BYPARENT if _by_parent else STATE_EXPLICIT
         self._finalizer()
-        self._will_autoclose = None
+        self._autoclose_state.value = STATE_INVALID
         self.raw = None
         self._finalizer = None
         self._kids.clear()

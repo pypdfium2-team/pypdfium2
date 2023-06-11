@@ -85,11 +85,15 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     def __repr__(self):
-        if isinstance(self._input, bytes):
+        if isinstance(self._input, Path):
+            input_r = repr( str(self._input) )
+        elif isinstance(self._input, bytes):
             input_r = f"<bytes object at {hex(id(self._input))}>"
+        elif isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
+            input_r = f"<FPDF_DOCUMENT at {hex(id(self._input))}>"
         else:
             input_r = repr(self._input)
-        return f"<PdfDocument at {hex(id(self))} from {input_r}>"
+        return f"{super().__repr__()[:-1]} from {input_r}>"
     
     
     @property
