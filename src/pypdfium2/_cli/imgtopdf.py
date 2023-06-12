@@ -65,8 +65,5 @@ def main(args):
         image_obj.close()  # no-op
         page.close()
     
-    if args.output.exists():
-        raise FileExistsError(args.output)
-    
     pdf.save(args.output)
     pdf.close()
