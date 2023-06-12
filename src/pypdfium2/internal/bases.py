@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "set_autoclose_debug")
+__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE")
 
 import os
 import sys
@@ -12,17 +12,13 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-DEBUG_AUTOCLOSE = False
+
+DEBUG_AUTOCLOSE = ctypes.c_bool(False)  # mutable bool
 
 STATE_INVALID = -1
 STATE_AUTO = 0
 STATE_EXPLICIT = 1
 STATE_BYPARENT = 2
-
-
-def set_autoclose_debug(value=True):
-    global DEBUG_AUTOCLOSE
-    DEBUG_AUTOCLOSE = value
 
 
 class AutoCastable:

@@ -58,8 +58,7 @@ def get_parser():
 
 def setup_logging():
     
-    debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
-    pdfium_i.set_autoclose_debug(debug_autoclose)
+    pdfium_i.DEBUG_AUTOCLOSE.value = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
     
     lib_logger = logging.getLogger("pypdfium2")
     lib_logger.addHandler(logging.StreamHandler())
