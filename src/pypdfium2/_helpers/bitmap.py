@@ -5,6 +5,7 @@ __all__ = ("PdfBitmap", "PdfBitmapInfo")
 
 import ctypes
 import logging
+import weakref
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
 from pypdfium2._helpers.misc import PdfiumError
@@ -235,6 +236,9 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Due to the restricted number of color formats and bit depths supported by PDFium's
         bitmap implementation, this may be a lossy operation.
         
+        Note that this uses the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying.
+        Therefore, modifying the buffer of a bitmap created with this method (e.g. using :meth:`.fill_rect`) is against Python's API contract.
+        
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
         """
@@ -246,9 +250,10 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             pil_image = _pil_convert_for_pdfium(pil_image)
             format = pdfium_i.BitmapStrReverseToConst[pil_image.mode]
         
-        # FIXME can we avoid copying here?
+        # see above and https://stackoverflow.com/a/21490290/15547292
         py_buffer = pil_image.tobytes()
-        c_buffer = (ctypes.c_ubyte * len(py_buffer)).from_buffer_copy(py_buffer)
+        c_buffer = ctypes.cast(py_buffer, ctypes.POINTER(ctypes.c_ubyte * len(py_buffer))).contents
+        weakref.finalize(c_buffer, lambda: id(py_buffer))  # hack to keep the underlying bytes object alive
         width, height = pil_image.size
         
         return cls.new_native(width, height, format, rev_byteorder=False, buffer=c_buffer)
