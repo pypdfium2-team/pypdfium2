@@ -65,7 +65,7 @@ class AutoCloseable (AutoCastable):
     
     
     def __repr__(self):
-        return f"<{str(self._uuid)[:8]}:{type(self).__name__}>"
+        return f"<{type(self).__name__} uuid:{str(self._uuid)[:8]}>"
     
     
     def _attach_finalizer(self):
