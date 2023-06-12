@@ -65,7 +65,7 @@ def test_new_image_from_jpeg():
     width, height = image_a.get_size()
     page.insert_obj(image_a)
     
-    assert len(pdf._data_holder) == 2
+    assert len(pdf._data_holder) == 1
     assert pdf._data_closer == [buffer]
     
     assert image_a.get_matrix() == pdfium.PdfMatrix()

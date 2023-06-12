@@ -72,7 +72,7 @@ def get_bufreader(buffer):
     set_callback(reader, "m_GetBlock", _buffer_reader(buffer))
     reader.m_Param = None
     
-    to_hold = (reader.m_GetBlock, buffer)
+    to_hold = (reader.m_GetBlock, )
     
     return reader, to_hold
 

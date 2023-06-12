@@ -61,8 +61,7 @@ def open_buffer():
     
     buffer = open(TestFiles.render, "rb")
     pdf = pdfium.PdfDocument(buffer)
-    assert len(pdf._data_holder) == 2
-    assert buffer in pdf._data_holder
+    assert len(pdf._data_holder) == 1
     assert pdf._data_closer == []
     
     _check_general(pdf)
@@ -86,7 +85,7 @@ def test_open_buffer_autoclose():
     
     buffer = open(TestFiles.render, "rb")
     pdf = pdfium.PdfDocument(buffer, autoclose=True)
-    assert len(pdf._data_holder) == 2
+    assert len(pdf._data_holder) == 1
     assert pdf._data_closer == [buffer]
     _check_general(pdf)
     

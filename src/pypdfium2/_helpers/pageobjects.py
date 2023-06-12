@@ -209,7 +209,7 @@ class PdfImage (PdfObject):
         else:
             raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte buffer.")
         
-        bufaccess, ld_data = pdfium_i.get_bufreader(buffer)
+        bufaccess, to_hold = pdfium_i.get_bufreader(buffer)
         loader = pdfium_c.FPDFImageObj_LoadJpegFileInline if inline else pdfium_c.FPDFImageObj_LoadJpegFile
         
         c_pages, page_count = pdfium_i.pages_c_array(pages)
@@ -218,12 +218,12 @@ class PdfImage (PdfObject):
             raise PdfiumError("Failed to load JPEG into image object.")
         
         if inline:
-            for data in ld_data:
+            for data in to_hold:
                 id(data)
             if autoclose:
                 buffer.close()
         else:
-            self.pdf._data_holder += ld_data
+            self.pdf._data_holder += to_hold
             if autoclose:
                 self.pdf._data_closer.append(buffer)
     

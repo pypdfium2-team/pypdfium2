@@ -60,13 +60,9 @@ def test_open_bytes(file):
 def test_open_buffer(file, autoclose):
     input = file.open("rb")
     pdf = pdfium.PdfDocument(input, autoclose=autoclose)
-    assert input in pdf._data_holder
-    assert len(pdf._data_holder) == 2
+    assert len(pdf._data_holder) == 1
     _check_pdf(pdf)
-    if autoclose:
-        assert pdf._data_closer == [input]
-    else:
-        assert pdf._data_closer == []
+    assert pdf._data_closer == [input] if autoclose else pdf._data_closer == []
     pdf.close()
     assert input.closed == autoclose
 
