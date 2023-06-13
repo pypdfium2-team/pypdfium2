@@ -165,9 +165,18 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
     
     
-    # Requirement: If the result is a view of the buffer (not a copy), it keeps the buffer's memory valid by retaining a reference to the buffer object.
-    # As of May 2023, this seems to hold true for numpy and PIL.
-    # TODO? Consider attaching a buffer keep-alive finalizer to the converted object
+    # Requirement: If the result is a view of the buffer (not a copy), it keeps the buffer's memory valid.
+    # 
+    # Note that memory management differs between native and foreign bitmap buffers:
+    # - With native bitmaps, the memory is allocated by python on creation of the buffer object (transparent).
+    # - With foreign bitmaps, the buffer object is merely a view of memory allocated by pdfium and will be freed by finalizer (opaque).
+    # Therefore, it is expressly necessary that the receiver keep the buffer object itself alive, or check for a possible finalizer and take it over if present.
+    # 
+    # As of May 2023, this seems to hold true for NumPy and PIL.
+    # New converters should be carefully tested to work correctly with both bitmap types.
+    # 
+    # We could consider attaching a buffer keep-alive finalizer to any converted objects referencing the buffer,
+    # but then we were to rely on third parties to actually create a reference at all times, otherwise we would unnecessarily delay releasing unreferenced memory.
     
     
     def to_numpy(self):
@@ -236,8 +245,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Due to the restricted number of color formats and bit depths supported by PDFium's
         bitmap implementation, this may be a lossy operation.
         
-        Note that this uses the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying.
-        Therefore, modifying the buffer of a bitmap created with this method (e.g. using :meth:`.fill_rect`) is against Python's API contract.
+        Note that this re-uses the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying.
+        Thus, modifying the buffer would be against Python's API contract.
         
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
@@ -253,7 +262,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         # see above and https://stackoverflow.com/a/21490290/15547292
         py_buffer = pil_image.tobytes()
         c_buffer = ctypes.cast(py_buffer, ctypes.POINTER(ctypes.c_ubyte * len(py_buffer))).contents
-        weakref.finalize(c_buffer, lambda: id(py_buffer))  # hack to keep the underlying bytes object alive
+        weakref.finalize(c_buffer, lambda: id(py_buffer))
         width, height = pil_image.size
         
         return cls.new_native(width, height, format, rev_byteorder=False, buffer=c_buffer)
