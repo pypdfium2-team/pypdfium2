@@ -7,6 +7,7 @@ from enum import Enum
 import pypdfium2._helpers as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
+# TODO? consider dotted access
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,

@@ -7,11 +7,11 @@ import math
 import ctypes
 import logging
 import pypdfium2.raw as pdfium_c
+import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.bitmap import PdfBitmap
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers.pageobjects import PdfObject
-import pypdfium2.internal as pdfium_i
 
 c_float = ctypes.c_float
 logger = logging.getLogger(__name__)

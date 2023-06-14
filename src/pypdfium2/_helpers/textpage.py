@@ -6,8 +6,8 @@ __all__ = ("PdfTextPage", "PdfTextSearcher")
 import ctypes
 import logging
 import pypdfium2.raw as pdfium_c
-from pypdfium2._helpers.misc import PdfiumError
 import pypdfium2.internal as pdfium_i
+from pypdfium2._helpers.misc import PdfiumError
 
 c_double = ctypes.c_double
 

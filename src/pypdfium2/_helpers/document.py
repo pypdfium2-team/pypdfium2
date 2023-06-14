@@ -12,6 +12,7 @@ from collections import namedtuple
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2.raw as pdfium_c
+import pypdfium2.internal as pdfium_i
 from pypdfium2.version import (
     V_LIBPDFIUM,
     V_BUILDNAME,
@@ -21,7 +22,6 @@ from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.pageobjects import PdfObject
 from pypdfium2._helpers.attachment import PdfAttachment
-import pypdfium2.internal as pdfium_i
 
 logger = logging.getLogger(__name__)
 
@@ -401,7 +401,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             index = len(self)
         raw_page = pdfium_c.FPDFPage_New(self, index, width, height)
         page = PdfPage(raw_page, self, None)
-        # FIXME should we make the formenv distinction for new pages, too?
+        # not doing formenv calls for new pages as we don't see the point
         self._add_kid(page)
         return page
     

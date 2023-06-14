@@ -5,8 +5,8 @@ __all__ = ("PdfAttachment", )
 
 import ctypes
 import pypdfium2.raw as pdfium_c
-from pypdfium2._helpers.misc import PdfiumError
 import pypdfium2.internal as pdfium_i
+from pypdfium2._helpers.misc import PdfiumError
 
 
 def _encode_key(key):

@@ -8,8 +8,8 @@ import logging
 import weakref
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
-from pypdfium2._helpers.misc import PdfiumError
 import pypdfium2.internal as pdfium_i
+from pypdfium2._helpers.misc import PdfiumError
 
 logger = logging.getLogger(__name__)
 

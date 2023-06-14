@@ -7,9 +7,9 @@ import sys
 import logging
 import argparse
 import importlib
-from pypdfium2.version import *
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium  # yes this is legal in __main__
 import pypdfium2.internal as pdfium_i
+from pypdfium2.version import *
 
 try:
     import argcomplete

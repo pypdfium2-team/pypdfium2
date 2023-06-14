@@ -4,6 +4,7 @@
 import os
 from pathlib import Path
 import pypdfium2._helpers as pdfium
+# TODO? consider dotted access
 from pypdfium2._cli._parsers import add_input, get_input
 
 
