@@ -265,15 +265,15 @@ class PdfPage (pdfium_i.AutoCloseable):
         # TODO? close skipped objects explicitly ?
         
         if form:
-            count_objects = pdfium_c.FPDFFormObj_CountObjects
+            count_func = pdfium_c.FPDFFormObj_CountObjects
             get_object = pdfium_c.FPDFFormObj_GetObject
             parent = form
         else:
-            count_objects = pdfium_c.FPDFPage_CountObjects
+            count_func = pdfium_c.FPDFPage_CountObjects
             get_object = pdfium_c.FPDFPage_GetObject
             parent = self
         
-        n_objects = count_objects(parent)
+        n_objects = count_func(parent)
         if n_objects < 0:
             raise PdfiumError("Failed to get number of page objects.")
         
@@ -283,12 +283,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             if raw_obj is None:
                 raise PdfiumError("Failed to get page object.")
             
-            helper_obj = PdfObject(
-                raw = raw_obj,
-                page = self,
-                pdf = self.pdf,
-                level = level,
-            )
+            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, level=level)
             self._add_kid(helper_obj)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
@@ -424,12 +419,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         if (color_scheme is not None) and fill_to_stroke:
             flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
-        bitmap = bitmap_maker(
-            width = width,
-            height = height,
-            format = cl_format,
-            rev_byteorder = rev_byteorder,
-        )
+        bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(0, 0, width, height, fill_color)
         
         render_args = (bitmap, self, -crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation], flags)
