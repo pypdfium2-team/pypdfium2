@@ -151,11 +151,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 Custom form config interface to use (optional).
         """
         
-        # safety check for older binaries (could be removed at some point)
-        # https://github.com/bblanchon/pdfium-binaries/issues/105
-        if V_PDFIUM_IS_V8 and V_BUILDNAME == "pdfium-binaries" and int(V_LIBPDFIUM) <= 5677:
-            raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
-        
         formtype = self.get_formtype()
         if formtype == pdfium_c.FORMTYPE_NONE or self.formenv:
             return
@@ -166,6 +161,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 config = pdfium_c.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, jsPlatform=js_platform)
             else:
                 config = pdfium_c.FPDF_FORMFILLINFO(version=2)
+        
+        # safety check for older binaries to prevent a segfault (could be removed at some point)
+        # https://github.com/bblanchon/pdfium-binaries/issues/105
+        if V_PDFIUM_IS_V8 and int(V_LIBPDFIUM) <= 5677 and V_BUILDNAME == "pdfium-binaries":
+            raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
         
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
