@@ -228,7 +228,9 @@ class PdfPage (pdfium_i.AutoCloseable):
         if pageobj.page is not self:
             raise ValueError("The page object you attempted to remove is not part of this page.")
         
-        pdfium_c.FPDFPage_RemoveObject(self, pageobj)
+        ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
+        if not ok:
+            raise PdfiumError("Failed to remove pageobject.")
         pageobj.page = None
         pageobj._attach_finalizer()
     
