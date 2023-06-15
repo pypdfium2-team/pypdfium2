@@ -251,12 +251,13 @@ class PdfBitmap (pdfium_i.AutoCloseable):
                 The image.
             recopy (bool):
                 If False (the default), reuse the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying. This is recommended if you do not modify the bitmap.
-                If True (otherwise), copy memory into a new, mutable object. This is recommended if you modify the bitmap, e.g. using :meth:`.fill_rect`, otherwise you would be breaking Python's API contract at own risk.
+                If True (otherwise), copy memory into a new, mutable object. This is recommended if you modify the bitmap, e.g. using :meth:`.fill_rect`.
                 Note that the resulting bitmap is always independent of the PIL image, regardless of this option.
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
         
-        .. versionadded:: 4.16 *recopy* parameter
+        .. versionchanged:: 4.15 reference bytes object instead of copying
+        .. versionadded:: 4.16 opt-in re-copying for mutability within Python API contract
         """
         
         if pil_image.mode in pdfium_i.BitmapStrToConst:
