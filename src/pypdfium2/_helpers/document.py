@@ -209,21 +209,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return bool( pdfium_c.FPDFCatalog_IsTagged(self) )
     
     
-    def _save_to(self, buffer, version=None, flags=pdfium_c.FPDF_NO_INCREMENTAL):
-        
-        c_writer = pdfium_i.get_bufwriter(buffer)
-        saveargs = (self, c_writer, flags)
-        
-        if version is None:
-            ok = pdfium_c.FPDF_SaveAsCopy(*saveargs)
-        else:
-            ok = pdfium_c.FPDF_SaveWithVersion(*saveargs, version)
-        
-        if not ok:
-            raise PdfiumError("Failed to save document.")
-    
-    
-    def save(self, dest, *args, **kwargs):
+    def save(self, dest, version=None, flags=pdfium_c.FPDF_NO_INCREMENTAL):
         """
         Save the document at its current state.
         
@@ -236,11 +222,19 @@ class PdfDocument (pdfium_i.AutoCloseable):
             flags (int):
                 PDFium saving flags (defaults to :attr:`FPDF_NO_INCREMENTAL`).
         """
+        
+        def save_impl(buffer):
+            c_writer = pdfium_i.get_bufwriter(buffer)
+            saveargs = (self, c_writer, flags)
+            ok = pdfium_c.FPDF_SaveAsCopy(*saveargs) if version is None else pdfium_c.FPDF_SaveWithVersion(*saveargs, version)
+            if not ok:
+                raise PdfiumError("Failed to save document.")
+        
         if isinstance(dest, (str, Path)):
             with open(dest, "wb") as buf:
-                self._save_to(buf, *args, **kwargs)
+                save_impl(buf)
         elif pdfium_i.is_buffer(dest, "w"):
-            self._save_to(dest, *args, **kwargs)
+            save_impl(dest)
         else:
             raise ValueError(f"Cannot save to '{dest}'")
     
