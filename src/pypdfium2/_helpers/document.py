@@ -223,23 +223,21 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 PDFium saving flags (defaults to :attr:`FPDF_NO_INCREMENTAL`).
         """
         
-        internal_buf = isinstance(dest, (str, Path))
-        if internal_buf:
-            buf = open(dest, "wb")
+        if isinstance(dest, (str, Path)):
+            buffer, need_close = open(dest, "wb"), True
         elif pdfium_i.is_buffer(dest, "w"):
-            buf = dest
+            buffer, need_close = dest, False
         else:
             raise ValueError(f"Cannot save to '{dest}'")
         
         try:
-            c_writer = pdfium_i.get_bufwriter(buf)
-            saveargs = (self, c_writer, flags)
+            saveargs = (self, pdfium_i.get_bufwriter(buffer), flags)
             ok = pdfium_c.FPDF_SaveAsCopy(*saveargs) if version is None else pdfium_c.FPDF_SaveWithVersion(*saveargs, version)
             if not ok:
                 raise PdfiumError("Failed to save document.")
         finally:
-            if internal_buf:
-                buf.close()
+            if need_close:
+                buffer.close()
     
     
     def get_identifier(self, type=pdfium_c.FILEIDTYPE_PERMANENT):
