@@ -580,7 +580,7 @@ Theoretically, PDFium's non-public backend would provide these capabilities, but
 
 #### Drawbacks of ABI level bindings
 
-While ABI FFI bindings tend to be more convenient, they do have technical drawbacks compared to API bindings [(overview)](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api-1).
+While ABI FFI bindings tend to be more convenient, they do have technical drawbacks compared to API bindings [(overview)](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api).
 With special platforms and/or code, sometimes unforseen problems can occur [(case study)](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1173170438).
 
 
