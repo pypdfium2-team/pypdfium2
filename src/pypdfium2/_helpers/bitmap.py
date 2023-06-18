@@ -165,18 +165,17 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
     
     
-    # Requirement: If the result is a view of the buffer (not a copy), it keeps the buffer's memory valid.
+    # Requirement: If the result is a view of the buffer (not a copy), it keeps the referenced memory valid.
     # 
     # Note that memory management differs between native and foreign bitmap buffers:
     # - With native bitmaps, the memory is allocated by python on creation of the buffer object (transparent).
     # - With foreign bitmaps, the buffer object is merely a view of memory allocated by pdfium and will be freed by finalizer (opaque).
-    # Therefore, it is expressly necessary that the receiver keep the buffer object itself alive, or check for a possible finalizer and take it over if present.
     # 
-    # As of May 2023, this seems to hold true for NumPy and PIL.
-    # New converters should be carefully tested to work correctly with both bitmap types.
+    # It is necessary that receivers correctly handle both cases, e.g. by keeping the buffer object itself alive.
+    # As of May 2023, this seems to hold true for NumPy and PIL. New converters should be carefully tested.
     # 
     # We could consider attaching a buffer keep-alive finalizer to any converted objects referencing the buffer,
-    # but then we were to rely on third parties to actually create a reference at all times, otherwise we would unnecessarily delay releasing unreferenced memory.
+    # but then we'd have to rely on third parties to actually create a reference at all times, otherwise we would unnecessarily delay releasing memory.
     
     
     def to_numpy(self):
@@ -250,8 +249,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             pil_image (PIL.Image.Image):
                 The image.
             recopy (bool):
-                If False (the default), reuse the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying. This is recommended if you do not modify the bitmap.
-                If True (otherwise), copy memory into a new, mutable object. This is recommended if you modify the bitmap, e.g. using :meth:`.fill_rect`.
+                If False (the default), reuse the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying. This is recommended if you do not modify the bitmap, though the buffer does not actually enforce immutability.
+                If True (otherwise), copy memory into a new buffer that is mutable by design. This is recommended if you modify the bitmap, e.g. using :meth:`.fill_rect`.
                 Note that the resulting bitmap is always independent of the PIL image, regardless of this option.
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
