@@ -212,12 +212,13 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Convert the bitmap to a :mod:`PIL` image, using :func:`PIL.Image.frombuffer`.
         
         For ``RGBA``, ``RGBX`` and ``L`` buffers, PIL is supposed to share memory with
-        the original bitmap buffer, so changes to the buffer should be reflected in the image
-        (however, changes to the image may not be reflected in the buffer due to PIL's behaviour).
+        the original bitmap buffer, so changes to the buffer should be reflected in the image, and vice versa.
         Otherwise, PIL will make a copy of the data.
         
         Returns:
             PIL.Image.Image: PIL image (representation or copy of the bitmap buffer).
+        
+        .. versionchanged:: 4.16 Set ``image.readonly = False`` so that changes to the image are also reflected in the buffer.
         """
         
         # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.frombuffer
@@ -233,6 +234,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             self.stride,                # bytes per line
             1,                          # orientation (top->bottom)
         )
+        image.readonly = False
         
         return image
     

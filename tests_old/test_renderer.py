@@ -386,11 +386,14 @@ def test_pil_nocopy_where_possible(bitmap_format, rev_byteorder, is_referenced, 
     assert pil_image.getpixel((0, 0)) == pixel_a
     bitmap.buffer[0] = val_b
     if is_referenced:
-        # editing the buffer modifies the PIL image
+        
+        # changes to the buffer are reflected in the image
         assert pil_image.getpixel((0, 0)) == pixel_b
-        # but it looks like editing the PIL image does not modify the buffer?
-        # pil_image.putpixel((0, 0), pixel_a)
-        # assert pil_image.getpixel((0, 0)) == pixel_a
-        # assert bitmap.buffer[0] == val_a  # fails
+        
+        # changes to the image are reflected in the buffer, since we set `.readonly = False` on after image init
+        pil_image.putpixel((0, 0), pixel_a)
+        assert pil_image.getpixel((0, 0)) == pixel_a
+        assert bitmap.buffer[0] == val_a
+        
     else:
         assert pil_image.getpixel((0, 0)) == pixel_a
