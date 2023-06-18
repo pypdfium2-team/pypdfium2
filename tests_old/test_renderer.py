@@ -3,6 +3,7 @@
 
 import math
 import numpy
+import warnings
 import PIL.Image
 import pytest
 import pypdfium2 as pdfium
@@ -385,6 +386,7 @@ def test_pil_nocopy_where_possible(bitmap_format, rev_byteorder, is_referenced, 
     
     assert pil_image.getpixel((0, 0)) == pixel_a
     bitmap.buffer[0] = val_b
+    
     if is_referenced:
         
         # changes to the buffer are reflected in the image
@@ -396,4 +398,7 @@ def test_pil_nocopy_where_possible(bitmap_format, rev_byteorder, is_referenced, 
         assert bitmap.buffer[0] == val_a
         
     else:
-        assert pil_image.getpixel((0, 0)) == pixel_a
+        if pil_image.getpixel((0, 0)) == pixel_b:
+            warnings.warn(f"PIL now references {bitmap.mode} mode bitmaps.")
+        else:
+            assert pil_image.getpixel((0, 0)) == pixel_a
