@@ -283,6 +283,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
 
 def _pil_convert_for_pdfium(pil_image):
     
+    # FIXME? convoluted / hard to understand; improve control flow
+    
     if pil_image.mode == "1":
         pil_image = pil_image.convert("L")
     elif pil_image.mode.startswith("RGB"):
@@ -300,9 +302,9 @@ def _pil_convert_for_pdfium(pil_image):
         r, g, b, a = pil_image.split()
         pil_image = PIL.Image.merge("RGBA", (b, g, r, a))
     elif pil_image.mode == "RGBX":
-        # no one needs the unused channel, so drop it to reduce memory consumption
-        r, g, b, _ = pil_image.split()
-        pil_image = PIL.Image.merge("RGB", (b, g, r))
+        # technically the x channel may be unnecessary, but preserve what the caller passes in
+        r, g, b, x = pil_image.split()
+        pil_image = PIL.Image.merge("RGBX", (b, g, r, x))
     
     return pil_image
 
