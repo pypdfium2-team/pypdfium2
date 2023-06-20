@@ -4,7 +4,7 @@
 __all__ = ("V_PYPDFIUM2", "V_LIBPDFIUM", "V_BUILDNAME", "V_PDFIUM_IS_V8")
 
 V_MAJOR = 4
-V_MINOR = 15
+V_MINOR = 16
 V_PATCH = 0
 V_BETA = None
 
@@ -14,7 +14,7 @@ if V_BETA is not None:
     V_PYPDFIUM2 += f"b{V_BETA}"
 
 #: PDFium library version string (git tag or commit hash)
-V_LIBPDFIUM = "5827"
+V_LIBPDFIUM = "5841"
 
 #: String describing the included PDFium binary's origin (pdfium-binaries, source)
 V_BUILDNAME = "pdfium-binaries"

@@ -1,7 +1,7 @@
 r"""Wrapper for fpdf_annot.h
 
 Generated with:
-/opt/hostedtoolcache/Python/3.10.11/x64/bin/ctypesgen --library pdfium --runtime-libdir . ./fpdf_annot.h ./fpdf_attachment.h ./fpdf_catalog.h ./fpdf_dataavail.h ./fpdf_doc.h ./fpdf_edit.h ./fpdf_ext.h ./fpdf_flatten.h ./fpdf_formfill.h ./fpdf_fwlevent.h ./fpdf_javascript.h ./fpdf_ppo.h ./fpdf_progressive.h ./fpdf_save.h ./fpdf_searchex.h ./fpdf_signature.h ./fpdf_structtree.h ./fpdf_sysfontinfo.h ./fpdf_text.h ./fpdf_thumbnail.h ./fpdf_transformpage.h ./fpdfview.h -o ~/work/pypdfium2/pypdfium2/data/linux_x64/raw.py --no-srcinfo
+/opt/hostedtoolcache/Python/3.10.12/x64/bin/ctypesgen --library pdfium --runtime-libdir . ./fpdf_annot.h ./fpdf_attachment.h ./fpdf_catalog.h ./fpdf_dataavail.h ./fpdf_doc.h ./fpdf_edit.h ./fpdf_ext.h ./fpdf_flatten.h ./fpdf_formfill.h ./fpdf_fwlevent.h ./fpdf_javascript.h ./fpdf_ppo.h ./fpdf_progressive.h ./fpdf_save.h ./fpdf_searchex.h ./fpdf_signature.h ./fpdf_structtree.h ./fpdf_sysfontinfo.h ./fpdf_text.h ./fpdf_thumbnail.h ./fpdf_transformpage.h ./fpdfview.h -o ~/work/pypdfium2/pypdfium2/data/linux_x64/raw.py --no-srcinfo
 
 Do not modify this file.
 """
