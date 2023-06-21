@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE")
+__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "_LIBRARY_DESTROYED")
 
 import os
 import sys
@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 DEBUG_AUTOCLOSE = ctypes.c_bool(False)  # mutable bool
+_LIBRARY_DESTROYED = ctypes.c_bool(False)
 
 STATE_INVALID = -1
 STATE_AUTO = 0
@@ -31,14 +32,16 @@ class AutoCastable:
 def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
     
     if DEBUG_AUTOCLOSE:
-        
         state = state.value
         desc = "auto" if state == STATE_AUTO else "explicit" if state == STATE_EXPLICIT else "by parent" if state == STATE_BYPARENT else None
         if desc is None:
-            raise  # unreachable
-        
+            raise
         # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
         os.write(sys.stderr.fileno(), f"Close ({desc}) {obj_repr}\n".encode())
+    
+    if _LIBRARY_DESTROYED:
+        os.write(sys.stderr.fileno(), f"-> Cannot close object, library is destroyed. This may cause a memory leak!\n".encode())
+        return
     
     assert (parent is None) or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
