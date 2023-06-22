@@ -265,15 +265,15 @@ class PdfPage (pdfium_i.AutoCloseable):
         # TODO? close skipped objects explicitly ?
         
         if form:
-            count_func = pdfium_c.FPDFFormObj_CountObjects
+            count_objects = pdfium_c.FPDFFormObj_CountObjects
             get_object = pdfium_c.FPDFFormObj_GetObject
             parent = form
         else:
-            count_func = pdfium_c.FPDFPage_CountObjects
+            count_objects = pdfium_c.FPDFPage_CountObjects
             get_object = pdfium_c.FPDFPage_GetObject
             parent = self
         
-        n_objects = count_func(parent)
+        n_objects = count_objects(parent)
         if n_objects < 0:
             raise PdfiumError("Failed to get number of page objects.")
         
