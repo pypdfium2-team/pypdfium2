@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "_LIBRARY_DESTROYED")
+__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE")
 
 import os
 import sys
@@ -12,9 +12,9 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-
-DEBUG_AUTOCLOSE = ctypes.c_bool(False)  # mutable bool
-_LIBRARY_DESTROYED = ctypes.c_bool(False)
+# mutable bools
+DEBUG_AUTOCLOSE = ctypes.c_bool(False)
+LIBRARY_AVAILABLE = ctypes.c_bool(False)  # set to true on library init
 
 STATE_INVALID = -1
 STATE_AUTO = 0
@@ -39,7 +39,7 @@ def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
         # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
         os.write(sys.stderr.fileno(), f"Close ({desc}) {obj_repr}\n".encode())
     
-    if _LIBRARY_DESTROYED:
+    if not LIBRARY_AVAILABLE:
         os.write(sys.stderr.fileno(), f"-> Cannot close object, library is destroyed. This may cause a memory leak!\n".encode())
         return
     

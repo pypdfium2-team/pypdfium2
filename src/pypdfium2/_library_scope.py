@@ -7,18 +7,26 @@ import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 
 
-def destroy_lib():
+def init_lib():
+    # NOTE PDFium developers plan changes to the initialisation API (see https://crbug.com/pdfium/1446)
+    assert not pdfium_i.LIBRARY_AVAILABLE
     if pdfium_i.DEBUG_AUTOCLOSE:
+        print("Initialize PDFium (auto)", file=sys.stderr)
+    pdfium_c.FPDF_InitLibrary()
+    pdfium_i.LIBRARY_AVAILABLE.value = True
+
+
+def destroy_lib():
+    assert pdfium_i.LIBRARY_AVAILABLE
+    if pdfium_i.DEBUG_AUTOCLOSE:
+        # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
         os.write(sys.stderr.fileno(), b"Destroy PDFium (auto)\n")
-    if pdfium_i._LIBRARY_DESTROYED:
-        os.write(sys.stderr.fileno(), b"-> Library is destroyed already, return.\n")
-        return
     pdfium_c.FPDF_DestroyLibrary()
-    pdfium_i._LIBRARY_DESTROYED.value = True
+    pdfium_i.LIBRARY_AVAILABLE.value = False
+
 
 # Load pdfium
-# Note: PDFium developers plan changes to the initialisation API (see https://crbug.com/pdfium/1446)
-pdfium_c.FPDF_InitLibrary()
+init_lib()
 
 # Register an exit handler that will free pdfium
 # Trust in Python to call exit handlers only after all objects have been finalized
