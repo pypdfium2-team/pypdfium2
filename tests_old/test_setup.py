@@ -47,10 +47,10 @@ def all_platnames():
 # setup_base
 
 ExpectedTags = (
-    (PlatformNames.linux_x64,      "manylinux_2_26_x86_64"),
-    (PlatformNames.linux_x86,      "manylinux_2_26_i686"),
-    (PlatformNames.linux_arm64,    "manylinux_2_26_aarch64"),
-    (PlatformNames.linux_arm32,    "manylinux_2_26_armv7l"),
+    (PlatformNames.linux_x64,      "manylinux_2_17_x86_64"),
+    (PlatformNames.linux_x86,      "manylinux_2_17_i686"),
+    (PlatformNames.linux_arm64,    "manylinux_2_17_aarch64"),
+    (PlatformNames.linux_arm32,    "manylinux_2_17_armv7l"),
     (PlatformNames.linux_musl_x64, "musllinux_1_2_x86_64"),
     (PlatformNames.linux_musl_x86, "musllinux_1_2_i686"),
     (PlatformNames.darwin_x64,     "macosx_10_13_x86_64"),
