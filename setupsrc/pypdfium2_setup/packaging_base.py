@@ -179,9 +179,9 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatformNames.linux_arm32:
         return "manylinux_2_17_armv7l"
     elif pl_name == PlatformNames.linux_musl_x64:
-        return "musllinux_1_2_x86_64"
+        return "musllinux_1_1_x86_64"
     elif pl_name == PlatformNames.linux_musl_x86:
-        return "musllinux_1_2_i686"
+        return "musllinux_1_1_i686"
     elif pl_name == PlatformNames.windows_x64:
         return "win_amd64"
     elif pl_name == PlatformNames.windows_arm64:
