@@ -31,8 +31,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
     Document helper class.
     
     Parameters:
-        input_data (str | pathlib.Path | bytes | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
-            The input PDF given as file path, bytes, ctypes array, byte buffer, or raw PDFium document handle.
+        input (str | pathlib.Path | bytes | bytearray | memoryview | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
+            The input PDF given as file path, bytes, bytearray, memoryview, ctypes array, byte buffer, or raw PDFium document handle.
             A byte buffer is defined as an object that implements ``seek() tell() read() readinto()``.
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
@@ -59,13 +59,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def __init__(self, input, password=None, autoclose=False):
         
-        if isinstance(input, str):
-            input = Path(input)
-        if isinstance(input, Path):
-            input = input.expanduser().resolve()
-            if not input.is_file():
-                raise FileNotFoundError(input)
-        
+        input = _preprocess_input(input)
         self._input = input
         self._password = password
         self._autoclose = autoclose
@@ -88,8 +82,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def __repr__(self):
         if isinstance(self._input, Path):
             input_r = repr( str(self._input) )
-        elif isinstance(self._input, bytes):
-            input_r = f"<bytes object at {hex(id(self._input))}>"
+        elif isinstance(self._input, (bytes, bytearray, memoryview)):
+            input_r = f"<{type(self._input).__name__} at {hex(id(self._input))}>"
         elif isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             input_r = f"<FPDF_DOCUMENT at {hex(id(self._input))}>"
         else:
@@ -564,9 +558,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     @classmethod
-    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, mk_formconfig, **kwargs):
+    def _process_page(cls, index, input, password, renderer, converter, pass_info, need_formenv, mk_formconfig, **kwargs):
         
-        pdf = cls(input_data, password=password)
+        pdf = cls(input, password=password)
         if need_formenv:
             pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
         
@@ -636,7 +630,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         invoke_renderer = functools.partial(
             PdfDocument._process_page,
-            input_data = self._input,
+            input = self._input,
             password = self._password,
             renderer = renderer,
             converter = converter,
@@ -709,24 +703,41 @@ class PdfXObject (pdfium_i.AutoCloseable):
         )
 
 
-def _open_pdf(input_data, password, autoclose):
+def _preprocess_input(input):
+    if isinstance(input, str):
+        input = Path(input)
+    if isinstance(input, Path):
+        input = input.expanduser().resolve()
+        if not input.is_file():
+            raise FileNotFoundError(input)
+    else:
+        # foreign functions do not accept memoryview directly, so try the underlying object instead
+        if isinstance(input, memoryview):
+            input = input.obj
+        # nor do they accept bytearrays, so get a ctypes representation and use that instead
+        if isinstance(input, bytearray):
+            input = (ctypes.c_ubyte * len(input)).from_buffer(input)
+    return input
+
+
+def _open_pdf(input, password, autoclose):
     
     to_hold, to_close = (), ()
     if password is not None:
         password = (password+"\x00").encode("utf-8")
     
-    if isinstance(input_data, Path):
-        pdf = pdfium_c.FPDF_LoadDocument((str(input_data)+"\x00").encode("utf-8"), password)
-    elif isinstance(input_data, (bytes, ctypes.Array)):
-        pdf = pdfium_c.FPDF_LoadMemDocument64(input_data, len(input_data), password)
-        to_hold = (input_data, )
-    elif pdfium_i.is_buffer(input_data, "r"):
-        bufaccess, to_hold = pdfium_i.get_bufreader(input_data)
+    if isinstance(input, Path):
+        pdf = pdfium_c.FPDF_LoadDocument((str(input)+"\x00").encode("utf-8"), password)
+    elif isinstance(input, (bytes, ctypes.Array)):
+        pdf = pdfium_c.FPDF_LoadMemDocument64(input, len(input), password)
+        to_hold = (input, )
+    elif pdfium_i.is_buffer(input, "r"):
+        bufaccess, to_hold = pdfium_i.get_bufreader(input)
         if autoclose:
-            to_close = (input_data, )
+            to_close = (input, )
         pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
     else:
-        raise TypeError(f"Invalid input type '{type(input_data).__name__}'")
+        raise TypeError(f"Invalid input type '{type(input).__name__}'")
     
     if pdfium_c.FPDF_GetPageCount(pdf) < 1:
         err_code = pdfium_c.FPDF_GetLastError()
