@@ -591,7 +591,6 @@ FPDF_PAGERANGE = POINTER(struct_fpdf_pagerange_t__)
 class struct_fpdf_pathsegment_t(Structure):
     pass
 FPDF_PATHSEGMENT = POINTER(struct_fpdf_pathsegment_t)
-FPDF_RECORDER = POINTER(None)
 
 class struct_fpdf_schhandle_t__(Structure):
     pass
@@ -600,6 +599,7 @@ FPDF_SCHHANDLE = POINTER(struct_fpdf_schhandle_t__)
 class struct_fpdf_signature_t__(Structure):
     pass
 FPDF_SIGNATURE = POINTER(struct_fpdf_signature_t__)
+FPDF_SKIA_CANVAS = POINTER(None)
 
 class struct_fpdf_structelement_t__(Structure):
     pass
