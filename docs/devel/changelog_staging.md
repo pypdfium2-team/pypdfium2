@@ -4,4 +4,5 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- Added support for new input types `bytearray`, `memoryview`, and `mmap`. See the docs for `PdfDocument(input)`.
+- `PdfDocument.get_toc()` API changed. Bookmarks are now provided as wrapper objects with getter methods, rather than as namedtuples.
+- Removed `mk_formconfig` parameter of `PdfDocument.render()`.

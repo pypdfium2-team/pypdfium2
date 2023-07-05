@@ -286,7 +286,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
   # Decode to string, cutting off the null terminator
   # Encoding: UTF-16LE (2 bytes per character)
-  title = buffer.raw[:n_bytes-2].decode('utf-16-le')
+  title = buffer.raw[:n_bytes-2].decode("utf-16-le")
   ```
   
   Example B: Extracting text in given boundaries.

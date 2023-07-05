@@ -1,14 +1,13 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem")
+__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
 import os
 import ctypes
 import logging
 import functools
 from pathlib import Path
-from collections import namedtuple
 from concurrent.futures import ProcessPoolExecutor
 
 import pypdfium2.raw as pdfium_c
@@ -56,7 +55,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         raw (FPDF_DOCUMENT):
             The underlying PDFium document handle.
         formenv (PdfFormEnv | None):
-            Form env, if the document has forms and :meth:`.init_forms` was called.
+            Form env, if :meth:`.init_forms` was called and the document has forms.
     """
     
     def __init__(self, input, password=None, autoclose=False):
@@ -478,42 +477,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return xobject
     
     
-    # TODO(apibreak) consider switching to a wrapper class around the raw bookmark
-    # (either with getter methods, or possibly cached properties)
-    def _get_bookmark(self, bookmark, level):
-        
-        n_bytes = pdfium_c.FPDFBookmark_GetTitle(bookmark, None, 0)
-        buffer = ctypes.create_string_buffer(n_bytes)
-        pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
-        title = buffer.raw[:n_bytes-2].decode('utf-16-le')
-        
-        # TODO(apibreak) just expose count as-is rather than using two variables and doing extra work
-        count = pdfium_c.FPDFBookmark_GetCount(bookmark)
-        is_closed = True if count < 0 else None if count == 0 else False
-        n_kids = abs(count)
-        
-        dest = pdfium_c.FPDFBookmark_GetDest(self, bookmark)
-        page_index = pdfium_c.FPDFDest_GetDestPageIndex(self, dest)
-        if page_index == -1:
-            page_index = None
-        
-        n_params = ctypes.c_ulong()
-        view_pos = (pdfium_c.FS_FLOAT * 4)()
-        view_mode = pdfium_c.FPDFDest_GetView(dest, n_params, view_pos)
-        view_pos = list(view_pos)[:n_params.value]
-        
-        return PdfOutlineItem(
-            level = level,
-            title = title,
-            is_closed = is_closed,
-            n_kids = n_kids,
-            page_index = page_index,
-            view_mode = view_mode,
-            view_pos = view_pos,
-        )
-    
-    
-    # TODO(apibreak) change outline API (see above)
     def get_toc(
             self,
             max_depth = 15,
@@ -522,7 +485,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             seen = None,
         ):
         """
-        Iterate through the bookmarks in the document's table of contents.
+        Iterate through the bookmarks in the document's table of contents (TOC).
         
         Parameters:
             max_depth (int):
@@ -531,38 +494,35 @@ class PdfDocument (pdfium_i.AutoCloseable):
             :class:`.PdfOutlineItem`: Bookmark information.
         """
         
+        # TODO? warn if max_depth reached?
+        
         if seen is None:
             seen = set()
         
-        bookmark = pdfium_c.FPDFBookmark_GetFirstChild(self, parent)
+        bookmark_ptr = pdfium_c.FPDFBookmark_GetFirstChild(self, parent)
         
-        while bookmark:
+        while bookmark_ptr:
             
-            address = ctypes.addressof(bookmark.contents)
+            address = ctypes.addressof(bookmark_ptr.contents)
             if address in seen:
                 logger.warning("A circular bookmark reference was detected whilst parsing the table of contents.")
                 break
             else:
                 seen.add(address)
             
-            yield self._get_bookmark(bookmark, level)
+            yield PdfBookmark(bookmark_ptr, self, level)
             if level < max_depth-1:
-                yield from self.get_toc(
-                    max_depth = max_depth,
-                    parent = bookmark,
-                    level = level + 1,
-                    seen = seen,
-                )
+                yield from self.get_toc(max_depth=max_depth, parent=bookmark_ptr, level=level+1, seen=seen)
             
-            bookmark = pdfium_c.FPDFBookmark_GetNextSibling(self, bookmark)
+            bookmark_ptr = pdfium_c.FPDFBookmark_GetNextSibling(self, bookmark_ptr)
     
     
     @classmethod
-    def _process_page(cls, index, input, password, renderer, converter, pass_info, need_formenv, mk_formconfig, **kwargs):
+    def _render_page_worker(cls, index, input, password, renderer, converter, pass_info, need_formenv, **kwargs):
         
         pdf = cls(input, password=password)
         if need_formenv:
-            pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
+            pdf.init_forms()
         
         page = pdf[index]
         bitmap = renderer(page, **kwargs)
@@ -585,7 +545,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
             page_indices = None,
             n_processes = os.cpu_count(),
             pass_info = False,
-            mk_formconfig = None,
             **kwargs
         ):
         """
@@ -605,16 +564,12 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 The number of parallel process to use.
             renderer (typing.Callable):
                 The page rendering function to use. This may be used to plug in custom renderers other than :meth:`.PdfPage.render`.
-            mk_formconfig (typing.Callable[FPDF_FORMFILLINFO] | None):
-                Optional callback returning a custom form config to use when initializing a form env in worker jobs.
             kwargs (dict):
                 Keyword arguments to the renderer.
         
         Yields:
             :data:`typing.Any`: Parameter-dependent result.
         """
-        
-        # TODO(apibreak) remove mk_formconfig parameter (bloat)
         
         if not isinstance(self._input, (Path, str)):
             raise ValueError("Can only render in parallel with file path input.")
@@ -629,19 +584,62 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 raise ValueError("Duplicate page indices are prohibited.")
         
         invoke_renderer = functools.partial(
-            PdfDocument._process_page,
+            PdfDocument._render_page_worker,
             input = self._input,
             password = self._password,
             renderer = renderer,
             converter = converter,
             pass_info = pass_info,
             need_formenv = bool(self.formenv),
-            mk_formconfig = mk_formconfig,
             **kwargs
         )
         
         with ProcessPoolExecutor(n_processes) as pool:
             yield from pool.map(invoke_renderer, page_indices)
+
+
+def _preprocess_input(input):
+    if isinstance(input, str):
+        input = Path(input)
+    if isinstance(input, Path):
+        input = input.expanduser().resolve()
+        if not input.is_file():
+            raise FileNotFoundError(input)
+    else:
+        if isinstance(input, memoryview):
+            if input.readonly:
+                input = input.obj
+            else:
+                return (ctypes.c_ubyte * len(input)).from_buffer(input)
+        if isinstance(input, bytearray):
+            return (ctypes.c_ubyte * len(input)).from_buffer(input)
+    return input
+
+
+def _open_pdf(input, password, autoclose):
+    
+    to_hold, to_close = (), ()
+    if password is not None:
+        password = (password+"\x00").encode("utf-8")
+    
+    if isinstance(input, Path):
+        pdf = pdfium_c.FPDF_LoadDocument((str(input)+"\x00").encode("utf-8"), password)
+    elif isinstance(input, (bytes, ctypes.Array)):
+        pdf = pdfium_c.FPDF_LoadMemDocument64(input, len(input), password)
+        to_hold = (input, )
+    elif pdfium_i.is_buffer(input, "r"):
+        bufaccess, to_hold = pdfium_i.get_bufreader(input)
+        if autoclose:
+            to_close = (input, )
+        pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
+    else:
+        raise TypeError(f"Invalid input type '{type(input).__name__}'")
+    
+    if pdfium_c.FPDF_GetPageCount(pdf) < 1:
+        err_code = pdfium_c.FPDF_GetLastError()
+        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
+    
+    return pdf, to_hold, to_close
 
 
 class PdfFormEnv (pdfium_i.AutoCloseable):
@@ -703,72 +701,89 @@ class PdfXObject (pdfium_i.AutoCloseable):
         )
 
 
-def _preprocess_input(input):
-    if isinstance(input, str):
-        input = Path(input)
-    if isinstance(input, Path):
-        input = input.expanduser().resolve()
-        if not input.is_file():
-            raise FileNotFoundError(input)
-    else:
-        if isinstance(input, memoryview):
-            if input.readonly:
-                input = input.obj
-            else:
-                return (ctypes.c_ubyte * len(input)).from_buffer(input)
-        if isinstance(input, bytearray):
-            return (ctypes.c_ubyte * len(input)).from_buffer(input)
-    return input
-
-
-def _open_pdf(input, password, autoclose):
+class PdfBookmark (pdfium_i.AutoCastable):
+    """
+    Bookmark helper class.
     
-    to_hold, to_close = (), ()
-    if password is not None:
-        password = (password+"\x00").encode("utf-8")
+    Attributes:
+        raw (FPDF_BOOKMARK):
+            The underlying PDFium bookmark handle.
+        pdf (PdfDocument):
+            Reference to the document this bookmark belongs to.
+        level (int):
+            The bookmarks's nesting level in the TOC tree. Corresponds to the number of parent bookmarks.
+    """
     
-    if isinstance(input, Path):
-        pdf = pdfium_c.FPDF_LoadDocument((str(input)+"\x00").encode("utf-8"), password)
-    elif isinstance(input, (bytes, ctypes.Array)):
-        pdf = pdfium_c.FPDF_LoadMemDocument64(input, len(input), password)
-        to_hold = (input, )
-    elif pdfium_i.is_buffer(input, "r"):
-        bufaccess, to_hold = pdfium_i.get_bufreader(input)
-        if autoclose:
-            to_close = (input, )
-        pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
-    else:
-        raise TypeError(f"Invalid input type '{type(input).__name__}'")
+    def __init__(self, raw, pdf, level):
+        self.raw, self.pdf, self.level = raw, pdf, level
     
-    if pdfium_c.FPDF_GetPageCount(pdf) < 1:
-        err_code = pdfium_c.FPDF_GetLastError()
-        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
+    @property
+    def parent(self):  # no hook, just for consistency
+        return self.pdf
     
-    return pdf, to_hold, to_close
+    def get_title(self):
+        """
+        Returns:
+            str: The bookmark's title string.
+        """
+        n_bytes = pdfium_c.FPDFBookmark_GetTitle(self, None, 0)
+        buffer = ctypes.create_string_buffer(n_bytes)
+        pdfium_c.FPDFBookmark_GetTitle(self, buffer, n_bytes)
+        return buffer.raw[:n_bytes-2].decode("utf-16-le")
+    
+    def get_count(self):
+        """
+        Returns:
+            int: Signed number of child bookmarks (fully recursive). Zero if the bookmark has no descendants.
+            The initial state shall be closed (collapsed) if negative, open (expanded) if positive.
+        """
+        return pdfium_c.FPDFBookmark_GetCount(self)
+    
+    def get_dest(self):
+        """
+        Returns:
+            PdfDest | None: The bookmark's destination (page index, viewport), or None on failure.
+        """
+        raw_dest = pdfium_c.FPDFBookmark_GetDest(self.pdf, self)
+        if not raw_dest:
+            return None
+        return PdfDest(raw_dest, pdf=self.pdf)
 
 
-# TODO(apibreak) change outline API (see above)
-PdfOutlineItem = namedtuple("PdfOutlineItem", "level title is_closed n_kids page_index view_mode view_pos")
-"""
-Bookmark information.
-
-Parameters:
-    level (int):
-        Number of parent items.
-    title (str):
-        Title string of the bookmark.
-    is_closed (bool):
-        True if child items shall be collapsed, False if they shall be expanded.
-        None if the item has no descendants (i. e. ``n_kids == 0``).
-    n_kids (int):
-        Absolute number of child items, according to the PDF.
-    page_index (int | None):
-        Zero-based index of the page the bookmark points to.
-        May be None if the bookmark has no target page (or it could not be determined).
-    view_mode (int):
-        A view mode constant (:data:`PDFDEST_VIEW_*`) defining how the coordinates of *view_pos* shall be interpreted.
-    view_pos (list[float]):
-        Target position on the page the viewport should jump to when the bookmark is clicked.
-        It is a sequence of :class:`float` values in PDF canvas units.
-        Depending on *view_mode*, it may contain between 0 and 4 coordinates.
-"""
+class PdfDest (pdfium_i.AutoCastable):
+    """
+    Destination helper class.
+    
+    Attributes:
+        raw (FPDF_DEST): The underlying PDFium destination handle.
+        pdf (PdfDocument): Reference to the document this dest belongs to.
+    """
+    
+    def __init__(self, raw, pdf):
+        self.raw, self.pdf = raw, pdf
+    
+    @property
+    def parent(self):  # no hook, just for consistency
+        return self.pdf
+    
+    def get_index(self):
+        """
+        Returns:
+            int | None: Zero-based index of the page the dest points to, or None on failure.
+        """
+        val = pdfium_c.FPDFDest_GetDestPageIndex(self.pdf, self)
+        return val if val >= 0 else None
+    
+    def get_view(self):
+        """
+        Returns:
+            (int, list[float]): A tuple of (view_mode, view_pos).
+            *view_mode* is a constant (one-of :data:`PDFDEST_VIEW_*`) defining how *view_pos* shall be interpreted.
+            *view_pos* is the target position on the page the dest points to.
+            It may contain between 0 to 4 float coordinates, depending on the view mode.
+        """
+        n_params = ctypes.c_ulong()
+        pos = (pdfium_c.FS_FLOAT * 4)()
+        mode = pdfium_c.FPDFDest_GetView(self, n_params, pos)
+        pos = list(pos)[:n_params.value]
+        return (mode, pos)
