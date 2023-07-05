@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 # TODO? consider dotted access
 from pypdfium2._cli._parsers import (
@@ -25,18 +26,18 @@ def attach(parser):
 def main(args):
     
     pdf = get_input(args)
-    toc = pdf.get_toc(
-        max_depth = args.max_depth,
-    )
+    toc = pdf.get_toc(max_depth=args.max_depth)
     
-    for item in toc:
-        state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
-        target = "?" if item.page_index is None else item.page_index+1
+    for bm in toc:
+        count, dest = bm.get_count(), bm.get_dest()
+        index, (view_mode, view_pos) = (dest.get_index(), dest.get_view()) if dest else (None, (pdfium_c.PDFDEST_VIEW_UNKNOWN_MODE, []))
         print(
-            "    " * item.level +
+            "    " * bm.level +
             "[%s] %s -> %s  # %s %s" % (
-                state, item.title, target,
-                pdfium_i.ViewmodeToStr.get(item.view_mode),
-                round_list(item.view_pos, args.n_digits),
+                "*" if count == 0 else f"{count}" if count < 0 else f"+{count}",
+                bm.get_title(),
+                index+1 if index is not None else "?",
+                pdfium_i.ViewmodeToStr.get(view_mode),
+                round_list(view_pos, args.n_digits),
             )
         )
