@@ -174,7 +174,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 logger.warning(f"Failed to load XFA for document {self}.")
     
     
-    # TODO?(v5) consider cached property
     def get_formtype(self):
         """
         Returns:
@@ -184,7 +183,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return pdfium_c.FPDF_GetFormType(self)
     
     
-    # TODO?(v5) consider cached property
     def get_pagemode(self):
         """
         Returns:
@@ -193,7 +191,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return pdfium_c.FPDFDoc_GetPageMode(self)
     
     
-    # TODO?(v5) consider cached property
     def is_tagged(self):
         """
         Returns:
