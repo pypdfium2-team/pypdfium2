@@ -8,8 +8,10 @@ on:
   # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   # https://crontab.guru/
-  schedule:
-    - cron: '0 4 * * 2'
+  
+  # temporarily blocked to consider a major release with further API breaking changes
+  # schedule:
+  #   - cron: '0 4 * * 2'
   workflow_dispatch:
 
 defaults:
