@@ -8,10 +8,20 @@ import pypdfium2.raw as pdfium_c
 from .conftest import TestResources
 
 
-def _compare_bookmark(bookmark, view_pos, **kwargs):
-    for name, exp_value in kwargs.items():
-        assert exp_value == getattr(bookmark, name)
-    assert pytest.approx(bookmark.view_pos, abs=1) == view_pos
+def _compare_bookmark(bookmark, exp_title, exp_count, exp_index=None, exp_view=None):
+    
+    assert exp_title == bookmark.get_title()
+    assert exp_count == bookmark.get_count()
+    
+    dest = bookmark.get_dest()
+    if dest is None:
+        assert all(exp is None for exp in (exp_index, exp_view))
+    else:
+        assert dest.get_index() == exp_index
+        exp_mode, exp_pos = exp_view
+        mode, pos = dest.get_view()
+        assert exp_mode == mode
+        assert pytest.approx(pos, abs=1) == exp_pos
 
 
 def test_gettoc():
@@ -22,29 +32,26 @@ def test_gettoc():
     # check first bookmark
     _compare_bookmark(
         next(toc),
-        title = "One",
-        page_index = 0,
-        view_mode = pdfium_c.PDFDEST_VIEW_XYZ,
-        view_pos = (89, 758, 0),
-        is_closed = True,
-        n_kids = 2,
+        exp_title = "One",
+        exp_count = -2,
+        exp_index = 0,
+        exp_view = (pdfium_c.PDFDEST_VIEW_XYZ, (89, 758, 0)),
     )
     
     # check common values
     for bookmark in toc:
-        assert isinstance(bookmark, pdfium.PdfOutlineItem)
-        assert bookmark.view_mode is pdfium_c.PDFDEST_VIEW_XYZ
-        assert round(bookmark.view_pos[0]) == 89
+        dest = bookmark.get_dest()
+        view_mode, view_pos = dest.get_view()
+        assert view_mode == pdfium_c.PDFDEST_VIEW_XYZ
+        assert round(view_pos[0]) == 89
     
     # check last bookmark
     _compare_bookmark(
         bookmark,
-        title = "Three-B",
-        page_index = 1,
-        view_mode = pdfium_c.PDFDEST_VIEW_XYZ,
-        view_pos = (89, 657, 0),
-        is_closed = None,
-        n_kids = 0,
+        exp_title = "Three-B",
+        exp_count = 0,
+        exp_index = 1,
+        exp_view = (pdfium_c.PDFDEST_VIEW_XYZ, (89, 657, 0)),
     )
 
 
@@ -55,21 +62,13 @@ def test_gettoc_circular(caplog):
     
     _compare_bookmark(
         next(toc),
-        title = "A Good Beginning",
-        page_index = None,
-        view_mode = pdfium_c.PDFDEST_VIEW_UNKNOWN_MODE,
-        view_pos = [],
-        is_closed = None,
-        n_kids = 0,
+        exp_title = "A Good Beginning",
+        exp_count = 0,
     )
     _compare_bookmark(
         next(toc),
-        title = "A Good Ending",
-        page_index = None,
-        view_mode = pdfium_c.PDFDEST_VIEW_UNKNOWN_MODE,
-        view_pos = [],
-        is_closed = None,
-        n_kids = 0,
+        exp_title = "A Good Ending",
+        exp_count = 0,
     )
     with caplog.at_level(logging.WARNING):
         for other in toc: pass
