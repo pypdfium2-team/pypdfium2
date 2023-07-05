@@ -31,24 +31,34 @@ def set_callback(struct, fname, callback):
 
 
 def is_buffer(buf, spec="r"):
-    methods = []
-    assert set(spec).issubset( set("rw") )
+    assert set(spec).issubset( set("rw") ) and len(spec) > 0
+    ok = True
     if "r" in spec:
-        methods += ["seek", "tell", "read", "readinto"]
+        ok = all(hasattr(buf, a) for a in ("seek", "tell")) and (hasattr(buf, "readinto") or hasattr(buf, "read"))
     if "w" in spec:
-        methods += ["write"]
-    return all(callable(getattr(buf, a, None)) for a in methods)
+        ok = ok and hasattr(buf, "write")
+    return ok
 
 
 class _buffer_reader:
     
     def __init__(self, buffer):
         self.buffer = buffer
+        self._fill = self._readinto if hasattr(self.buffer, "readinto") else self._memmove
+    
+    def _readinto(self, cbuf):
+        self.buffer.readinto(cbuf)
+    
+    def _memmove(self, cbuf):
+        size = len(cbuf)
+        data = self.buffer.read(size)
+        ctypes.memmove(cbuf, data, size)
+        id(data)
     
     def __call__(self, _, position, p_buf, size):
-        c_buf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
+        cbuf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size)).contents
         self.buffer.seek(position)
-        self.buffer.readinto(c_buf.contents)
+        self._fill(cbuf)
         return 1
 
 
@@ -65,7 +75,8 @@ class _buffer_writer:
 
 def get_bufreader(buffer):
     
-    file_len = buffer.seek(0, os.SEEK_END)
+    buffer.seek(0, os.SEEK_END)
+    file_len = buffer.tell()
     buffer.seek(0)
     
     reader = pdfium_c.FPDF_FILEACCESS()

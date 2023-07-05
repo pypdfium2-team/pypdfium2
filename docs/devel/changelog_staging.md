@@ -4,3 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Added support for new input types `bytearray`, `memoryview`, and `mmap`. See the docs for `PdfDocument(input)`.

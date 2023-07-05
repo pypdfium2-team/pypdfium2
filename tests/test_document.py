@@ -3,6 +3,7 @@
 
 import re
 import os
+import mmap
 import ctypes
 import pathlib
 import pytest
@@ -108,6 +109,17 @@ def test_open_memoryview_readonly(input):
     _check_pdf(pdf)
     assert isinstance(pdf._input, bytes)
     assert pdf._data_holder == [pdf._input]
+    assert pdf._data_closer == []
+
+
+@parametrize_opener_files
+def test_open_mmap(input):
+    fh = input.open("r+b")
+    input = mmap.mmap(fh.fileno(), 0)
+    assert isinstance(input, mmap.mmap)
+    pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
+    assert len(pdf._data_holder) == 1
     assert pdf._data_closer == []
 
 

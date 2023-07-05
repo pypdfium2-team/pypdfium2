@@ -31,9 +31,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
     Document helper class.
     
     Parameters:
-        input (str | pathlib.Path | typing.BinaryIO | bytes | bytearray | memoryview | ctypes.Array | FPDF_DOCUMENT):
+        input (str | pathlib.Path | typing.BinaryIO | mmap.mmap | ctypes.Array | bytes | bytearray | memoryview | FPDF_DOCUMENT):
             The input PDF given as file path, byte buffer, bytes-like object, or raw PDFium document handle (see the type definition above).
-            In this context, "byte buffer" refers to an object implementing ``seek() tell() read() readinto()``.
+            In this context, "byte buffer" refers to an object implementing ``seek() tell() (readinto() | read())``.
+            Buffers that do not provide ``readinto()`` (e.g. mmap) fall back to less performant ``read()`` and memmove.
             Read-only memoryviews are supported only if the underlying object is of another supported bytes-like type.
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
@@ -67,9 +68,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._data_holder = []
         self._data_closer = []
         
-        # question: can we make attributes like formenv effectively immutable for the caller?
         self.formenv = None
-        
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
         else:
