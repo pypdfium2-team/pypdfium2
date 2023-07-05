@@ -19,9 +19,13 @@ def attach(parser):
     add_input(parser, pages=True)
     parser.add_argument(
         "--output", "-o",
-        type = str,
+        type = Path,
         required = True,
-        help = "Output directory or prefix for the serially numbered images",
+        help = "Output directory where the serially numbered images shall be placed",
+    )
+    parser.add_argument(
+        "--prefix",
+        help = "Custom prefix for the images. Defaults to the input filename's stem.",
     )
     parser.add_argument(
         "--format", "-f",
@@ -135,6 +139,9 @@ def main(args):
     pdf = get_input(args)
     pdf.init_forms()
     
+    if not args.prefix:
+        args.prefix = f"{args.input.stem}_"
+    
     cs_kwargs = dict(
         path_fill = args.path_fill,
         path_stroke = args.path_stroke,
@@ -173,8 +180,5 @@ def main(args):
     renderer = pdf.render(pdfium.PdfBitmap.to_pil, **kwargs)
     
     for image, index in zip(renderer, args.pages):
-        prefix = args.output
-        if Path(prefix).is_dir() and not prefix.endswith(os.path.sep):
-            prefix += os.path.sep
-        out = Path(prefix + args.input.stem + "_%0*d.%s" % (n_digits, index+1, args.format))
+        out = args.output / (args.prefix + "%0*d.%s" % (n_digits, index+1, args.format))
         image.save(out)
