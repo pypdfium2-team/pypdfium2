@@ -373,6 +373,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
   ```python
+  import os
+  
   # Factory class to create callable objects holding a reference to a Python buffer
   class _reader_class:
     
@@ -388,7 +390,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
   # (Assuming py_buffer is a Python file buffer, e. g. io.BufferedReader)
   # Get the length of the buffer
-  py_buffer.seek(0, 2)
+  py_buffer.seek(0, os.SEEK_END)
   file_len = py_buffer.tell()
   py_buffer.seek(0)
   

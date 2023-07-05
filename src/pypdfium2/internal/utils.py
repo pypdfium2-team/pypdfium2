@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import ctypes
 import pypdfium2.raw as pdfium_c
 
@@ -64,7 +65,7 @@ class _buffer_writer:
 
 def get_bufreader(buffer):
     
-    file_len = buffer.seek(0, 2)
+    file_len = buffer.seek(0, os.SEEK_END)
     buffer.seek(0)
     
     reader = pdfium_c.FPDF_FILEACCESS()

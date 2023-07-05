@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import re
+import os
 import ctypes
 import pathlib
 import pytest
@@ -59,6 +60,23 @@ def test_open_bytes(input):
 
 
 @parametrize_opener_files
+def test_open_ctypes_array(input):
+    buffer = input.open("rb")
+    buffer.seek(0, os.SEEK_END)
+    length = buffer.tell()
+    buffer.seek(0)
+    
+    input = (ctypes.c_ubyte * length)()
+    buffer.readinto(input)
+    assert isinstance(input, ctypes.Array)
+    
+    pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
+    assert pdf._data_holder == [input]
+    assert pdf._data_closer == []
+
+
+@parametrize_opener_files
 def test_open_bytearray(input):
     input = bytearray(input.read_bytes())
     assert isinstance(input, bytearray)
@@ -91,21 +109,6 @@ def test_open_memoryview_readonly(input):
     assert isinstance(pdf._input, bytes)
     assert pdf._data_holder == [pdf._input]
     assert pdf._data_closer == []
-
-
-@parametrize_opener_files
-def test_open_ctypes_array(input):
-    
-    buffer = input.open("rb")
-    buffer.seek(0, 2)
-    length = buffer.tell()
-    buffer.seek(0)
-    
-    array = (ctypes.c_ubyte * length)()
-    buffer.readinto(array)
-    
-    pdf = pdfium.PdfDocument(array)
-    _check_pdf(pdf)
 
 
 @parametrize_opener_files
