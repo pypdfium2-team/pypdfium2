@@ -63,8 +63,7 @@ def test_open_bytes(input):
 @parametrize_opener_files
 def test_open_ctypes_array(input):
     buffer = input.open("rb")
-    buffer.seek(0, os.SEEK_END)
-    length = buffer.tell()
+    length = buffer.seek(0, os.SEEK_END)
     buffer.seek(0)
     
     input = (ctypes.c_ubyte * length)()
