@@ -30,8 +30,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
     Document helper class.
     
     Parameters:
-        input (str | pathlib.Path | typing.BinaryIO | mmap.mmap | ctypes.Array | bytes | bytearray | memoryview | FPDF_DOCUMENT):
-            The input PDF given as file path, byte buffer, bytes-like object, or raw PDFium document handle (see the type definition above).
+        input (str | pathlib.Path | typing.BinaryIO | mmap.mmap | ctypes.Array | bytes | bytearray | memoryview | FPDF_DOCUMENT | typing.Callable):
+            The input PDF given as file path, byte buffer, bytes-like object, raw PDFium document handle, or callable returning another supported object (see the type definition above).
             In this context, "byte buffer" refers to an object implementing ``seek() tell() (readinto() | read())``.
             Buffers that do not provide ``readinto()`` (e.g. mmap) fall back to less performant ``read()`` and memmove.
             Read-only memoryviews are supported only if the underlying object is of another supported bytes-like type.
@@ -60,12 +60,18 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def __init__(self, input, password=None, autoclose=False):
         
-        input = _preprocess_input(input)
-        self._input = input
+        self._orig_input = input
         self._password = password
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
+        
+        new_input = self._orig_input
+        if callable(self._orig_input):
+            new_input = self._orig_input()
+            if hasattr(self._orig_input, "to_close"):
+                self._data_closer += self._orig_input.to_close
+        self._input = _preprocess_input(new_input)
         
         self.formenv = None
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
@@ -79,12 +85,15 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     def __repr__(self):
-        if isinstance(self._input, Path):
-            input_r = repr( str(self._input) )
-        elif isinstance(self._input, (bytes, bytearray, memoryview)):
-            input_r = f"<{type(self._input).__name__} at {hex(id(self._input))}>"
-        elif isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
-            input_r = f"<FPDF_DOCUMENT at {hex(id(self._input))}>"
+        orig_in = self._orig_input
+        if isinstance(orig_in, Path):
+            input_r = repr( str(orig_in) )
+        elif isinstance(orig_in, (bytes, bytearray, memoryview)):
+            input_r = f"<{type(orig_in).__name__} at {hex(id(orig_in))}>"
+        elif isinstance(orig_in, pdfium_c.FPDF_DOCUMENT):
+            input_r = f"<FPDF_DOCUMENT at {hex(id(orig_in))}>"
+        elif callable(orig_in):
+            input_r = f"<callable at {hex(id(orig_in))}: {type(self._input).__name__}>"
         else:
             input_r = repr(self._input)
         return f"{super().__repr__()[:-1]} from {input_r}>"
@@ -101,6 +110,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         for data in data_holder:
             id(data)
         for data in data_closer:
+            # TODO autoclose debug prints?
             data.close()
         data_holder.clear()
         data_closer.clear()
@@ -517,6 +527,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
     @classmethod
     def _render_page_worker(cls, index, input, password, renderer, converter, pass_info, need_formenv, **kwargs):
         
+        logger.info(f"Rendering page {index+1} ...")
+        
         pdf = cls(input, password=password)
         if need_formenv:
             pdf.init_forms()
@@ -582,7 +594,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         invoke_renderer = functools.partial(
             PdfDocument._render_page_worker,
-            input = self._input,
+            input = self._orig_input,
             password = self._password,
             renderer = renderer,
             converter = converter,

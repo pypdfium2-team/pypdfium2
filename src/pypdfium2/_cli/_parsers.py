@@ -4,9 +4,12 @@
 import os
 import mmap
 import ctypes
+import logging
 from enum import Enum
 from pathlib import Path
 import pypdfium2._helpers as pdfium
+
+logger = logging.getLogger(__name__)
 
 
 class InputMode (Enum):
@@ -34,6 +37,12 @@ def add_input(parser, pages=True):
         help = "The file access strategy to use."
     )
     parser.add_argument(
+        "--input-callable",
+        dest = "input_direct",
+        action = "store_false",
+        # TODO help
+    )
+    parser.add_argument(
         "--password",
         help = "A password to unlock the PDF, if encrypted",
     )
@@ -46,46 +55,59 @@ def add_input(parser, pages=True):
         )
 
 
-def get_input(args, autoclose=True, **kwargs):
+class input_maker:
     
     # to batch test all input types:
     # inmodes='strpath path buffer mmap ctypes bytes bytearray memview memview_w'
     # for INMODE in $inmodes; do echo "$INMODE"; pypdfium2 toc --input-mode $INMODE "tests/resources/toc.pdf"; printf "\n"; done
     
-    input = args.input.expanduser().resolve()
-    inmode = InputMode[args.input_mode.upper()]
-    to_close = []
+    def __init__(self, input, inmode):
+        self.input, self.inmode = input, inmode
+        self.to_close = []
     
-    if inmode is InputMode.STRPATH:
-        input = str(input)
-    elif inmode is InputMode.PATH:
-        assert isinstance(input, Path)
-    elif inmode is InputMode.BUFFER:
-        input = input.open("rb")
-    elif inmode is InputMode.MMAP:
-        fh = input.open("r+b")
-        input = mmap.mmap(fh.fileno(), 0)
-        to_close.append(fh)
-    elif inmode is InputMode.CTYPES:
-        buffer = input.open("rb")
-        length = buffer.seek(0, os.SEEK_END)
-        buffer.seek(0)
-        input = (ctypes.c_ubyte * length)()
-        buffer.readinto(input)
-    elif inmode is InputMode.BYTES:
-        input = input.read_bytes()
-    elif inmode is InputMode.BYTEARRAY:
-        input = bytearray(input.read_bytes())
-    elif inmode is InputMode.MEMVIEW:
-        input = memoryview( input.read_bytes() )
-    elif inmode is InputMode.MEMVIEW_W:
-        input = memoryview(bytearray( input.read_bytes() ))
-    else:
-        assert False
+    def __call__(self):
+        input, inmode = self.input, self.inmode
+        if inmode is InputMode.STRPATH:
+            input = str(input)
+        elif inmode is InputMode.PATH:
+            assert isinstance(input, Path)
+        elif inmode is InputMode.BUFFER:
+            input = input.open("rb")
+        elif inmode is InputMode.MMAP:
+            fh = input.open("r+b")
+            input = mmap.mmap(fh.fileno(), 0)
+            self.to_close.append(fh)
+        elif inmode is InputMode.CTYPES:
+            buffer = input.open("rb")
+            length = buffer.seek(0, os.SEEK_END)
+            buffer.seek(0)
+            input = (ctypes.c_ubyte * length)()
+            buffer.readinto(input)
+        elif inmode is InputMode.BYTES:
+            input = input.read_bytes()
+        elif inmode is InputMode.BYTEARRAY:
+            input = bytearray(input.read_bytes())
+        elif inmode is InputMode.MEMVIEW:
+            input = memoryview( input.read_bytes() )
+        elif inmode is InputMode.MEMVIEW_W:
+            input = memoryview(bytearray( input.read_bytes() ))
+        else:
+            assert False
+        return input
+
+
+def get_input(args, **kwargs):
     
-    pdf = pdfium.PdfDocument(input, password=args.password, autoclose=autoclose, **kwargs)
-    pdf._data_closer += to_close
-    
+    callable = input_maker(
+        input = args.input.expanduser().resolve(),
+        inmode = InputMode[args.input_mode.upper()],
+    )
+    input = callable() if args.input_direct else callable
+    pdf = pdfium.PdfDocument(input, password=args.password, autoclose=True, **kwargs)
+    logger.debug(f"CLI: created pdf {pdf!r}")
+    if args.input_direct:
+        pdf._data_closer += callable.to_close
+
     if "pages" in args and not args.pages:
         args.pages = [i for i in range(len(pdf))]
     

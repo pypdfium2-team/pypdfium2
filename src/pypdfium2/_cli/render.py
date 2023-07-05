@@ -2,10 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import logging
 from pathlib import Path
 import pypdfium2._helpers as pdfium
 # TODO? consider dotted access
 from pypdfium2._cli._parsers import add_input, get_input
+
+logger = logging.getLogger(__name__)
 
 
 ColorOpts = dict(
@@ -106,6 +109,11 @@ def attach(parser):
         type = int,
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
     )
+    parser.add_argument(
+        "--linear",
+        action = "store_true",
+        # TODO help
+    )
     
     color_scheme = parser.add_argument_group(
         title = "Color scheme",
@@ -134,6 +142,13 @@ def attach(parser):
     )
 
 
+def render_linear(pdf, page_indices, **kwargs):
+    logger.info("Linear rendering ...")
+    for i in page_indices:
+        logger.info(f"Rendering page {i+1} ...")
+        yield pdf[i].render(**kwargs).to_pil()
+
+
 def main(args):
     
     pdf = get_input(args)
@@ -159,7 +174,6 @@ def main(args):
     
     kwargs = dict(
         page_indices = args.pages,
-        n_processes = args.processes,
         scale = args.scale,
         rotation = args.rotation,
         crop = args.crop,
@@ -177,7 +191,11 @@ def main(args):
         kwargs[f"no_smooth{type}"] = True
     
     n_digits = len(str( max(args.pages)+1 ))
-    renderer = pdf.render(pdfium.PdfBitmap.to_pil, **kwargs)
+    if args.linear:
+        renderer = render_linear(pdf, **kwargs)
+    else:
+        kwargs["n_processes"] = args.processes
+        renderer = pdf.render(pdfium.PdfBitmap.to_pil, **kwargs)
     
     for image, index in zip(renderer, args.pages):
         out = args.output / (args.prefix + "%0*d.%s" % (n_digits, index+1, args.format))
