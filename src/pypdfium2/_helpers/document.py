@@ -31,9 +31,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
     Document helper class.
     
     Parameters:
-        input (str | pathlib.Path | bytes | bytearray | memoryview | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
-            The input PDF given as file path, bytes, bytearray, memoryview, ctypes array, byte buffer, or raw PDFium document handle.
-            A byte buffer is defined as an object that implements ``seek() tell() read() readinto()``.
+        input (str | pathlib.Path | typing.BinaryIO | bytes | bytearray | memoryview | ctypes.Array | FPDF_DOCUMENT):
+            The input PDF given as file path, byte buffer, bytes-like object, or raw PDFium document handle (see the type definition above).
+            In this context, "byte buffer" refers to an object implementing ``seek() tell() read() readinto()``.
+            Read-only memoryviews are supported only if the underlying object is of another supported bytes-like type.
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
             If a password is given but the PDF is not encrypted, it will be ignored (as of PDFium 5418).
@@ -711,12 +712,13 @@ def _preprocess_input(input):
         if not input.is_file():
             raise FileNotFoundError(input)
     else:
-        # foreign functions do not accept memoryview directly, so try the underlying object instead
         if isinstance(input, memoryview):
-            input = input.obj
-        # nor do they accept bytearrays, so get a ctypes representation and use that instead
+            if input.readonly:
+                input = input.obj
+            else:
+                return (ctypes.c_ubyte * len(input)).from_buffer(input)
         if isinstance(input, bytearray):
-            input = (ctypes.c_ubyte * len(input)).from_buffer(input)
+            return (ctypes.c_ubyte * len(input)).from_buffer(input)
     return input
 
 
