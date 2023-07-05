@@ -111,6 +111,7 @@ def test_open_memoryview_readonly(input):
     assert pdf._data_closer == []
 
 
+# TODO test autoclose recognition
 @parametrize_opener_files
 def test_open_mmap(input):
     fh = input.open("r+b")
