@@ -113,20 +113,6 @@ Here are some examples of using the support model API.
       image.save("out_%0*d.jpg" % (n_digits, i))
   ```
 
-* Read the table of contents
-  ```python
-  for item in pdf.get_toc():
-      state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
-      target = "?" if item.page_index is None else item.page_index+1
-      print(
-          "    " * item.level +
-          "[%s] %s -> %s  # %s %s" % (
-              state, item.title, target, item.view_mode,
-              [round(c, n_digits) for c in item.view_pos],
-          )
-      )
-  ```
-
 * Load a page to work with
   ```python
   page = pdf[0]
