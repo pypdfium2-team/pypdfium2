@@ -616,10 +616,7 @@ def _preprocess_input(input):
             raise FileNotFoundError(input)
     else:
         if isinstance(input, memoryview):
-            if input.readonly:
-                input = input.obj
-            else:
-                return (ctypes.c_ubyte * len(input)).from_buffer(input)
+            input = input.obj  # try the underlying object and hope for the best
         if isinstance(input, bytearray):
             return (ctypes.c_ubyte * len(input)).from_buffer(input)
     return input
