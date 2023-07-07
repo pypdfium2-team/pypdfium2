@@ -112,7 +112,7 @@ def attach(parser):
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
     )
     parser.add_argument(
-        "--linear",
+        "--parallel",
         action = "store_true",
         # TODO help
     )
@@ -150,7 +150,6 @@ def attach(parser):
 
 
 def render_linear(pdf, page_indices, **kwargs):
-    logger.info("Linear rendering ...")
     for i in page_indices:
         logger.info(f"Rendering page {i+1} ...")
         yield pdf[i].render(**kwargs).to_pil()
@@ -197,11 +196,13 @@ def main(args):
         kwargs[f"no_smooth{type}"] = True
     
     n_digits = len(str( max(args.pages)+1 ))
-    if args.linear:
-        renderer = render_linear(pdf, **kwargs)
-    else:
+    if args.parallel:
+        logger.info("Parallel rendering ...")
         kwargs["n_processes"] = args.processes
         renderer = pdf.render(pdfium.PdfBitmap.to_pil, **kwargs)
+    else:
+        logger.info("Linear rendering ...")
+        renderer = render_linear(pdf, **kwargs)
     
     for image, index in zip(renderer, args.pages):
         out = args.output / (args.prefix + "%0*d.%s" % (n_digits, index+1, args.format))
