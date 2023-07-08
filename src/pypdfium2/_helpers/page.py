@@ -514,7 +514,7 @@ class PdfColorScheme:
     Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
     """
     
-    def __init__(self, path_fill, path_stroke, text_fill, text_stroke):
+    def __init__(self, path_fill=None, path_stroke=None, text_fill=None, text_stroke=None):
         self.colors = dict(
             path_fill_color=path_fill, path_stroke_color=path_stroke,
             text_fill_color=text_fill, text_stroke_color=text_stroke,
@@ -527,5 +527,6 @@ class PdfColorScheme:
         """
         fpdf_cs = pdfium_c.FPDF_COLORSCHEME()
         for key, value in self.colors.items():
-            setattr(fpdf_cs, key, pdfium_i.color_tohex(value, rev_byteorder))
+            if value is not None:
+                setattr(fpdf_cs, key, pdfium_i.color_tohex(value, rev_byteorder))
         return fpdf_cs
