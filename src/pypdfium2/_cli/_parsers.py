@@ -7,6 +7,7 @@ import ctypes
 import logging
 from enum import Enum
 from pathlib import Path
+from multiprocessing.shared_memory import SharedMemory
 import pypdfium2._helpers as pdfium
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ class InputMode (Enum):
     BYTEARRAY = "bytearray"
     MEMVIEW   = "memview"
     MEMVIEW_W = "memview_w"
+    SHMEM     = "shmem"
 
 
 def add_input(parser, pages=True):
@@ -58,12 +60,11 @@ def add_input(parser, pages=True):
 class input_maker:
     
     # to batch test all input types:
-    # inmodes='strpath path buffer mmap ctypes bytes bytearray memview memview_w'
+    # inmodes='strpath path buffer mmap ctypes bytes bytearray memview memview_w shmem'
     # for INMODE in $inmodes; do echo "$INMODE"; pypdfium2 toc --input-mode $INMODE "tests/resources/toc.pdf"; printf "\n"; done
     
     def __init__(self, input, inmode):
         self.input, self.inmode = input, inmode
-        self.to_close = []
     
     def __call__(self):
         input, inmode = self.input, self.inmode
@@ -76,12 +77,11 @@ class input_maker:
         elif inmode is InputMode.MMAP:
             fh = input.open("r+b")
             input = mmap.mmap(fh.fileno(), 0)
-            self.to_close.append(fh)
         elif inmode is InputMode.CTYPES:
             buffer = input.open("rb")
-            length = buffer.seek(0, os.SEEK_END)
+            size = buffer.seek(0, os.SEEK_END)
             buffer.seek(0)
-            input = (ctypes.c_ubyte * length)()
+            input = (ctypes.c_ubyte * size)()
             buffer.readinto(input)
         elif inmode is InputMode.BYTES:
             input = input.read_bytes()
@@ -91,6 +91,14 @@ class input_maker:
             input = memoryview( input.read_bytes() )
         elif inmode is InputMode.MEMVIEW_W:
             input = memoryview(bytearray( input.read_bytes() ))
+        elif inmode is InputMode.SHMEM:
+            # FIXME shm object never destoryed before shutdown
+            # the problem is, we want to destory it when closing the root document, but not when closing a spawned sub-document
+            buffer = input.open("rb")
+            size = buffer.seek(0, os.SEEK_END)
+            buffer.seek(0)
+            input = SharedMemory(create=True, size=size)
+            buffer.readinto(input.buf.obj)  # mmap
         else:
             assert False
         return input
@@ -105,8 +113,6 @@ def get_input(args, **kwargs):
     input = callable() if args.input_direct else callable
     pdf = pdfium.PdfDocument(input, password=args.password, autoclose=True, **kwargs)
     logger.debug(f"CLI: created pdf {pdf!r}")
-    if args.input_direct:
-        pdf._data_closer += callable.to_close
 
     if "pages" in args and not args.pages:
         args.pages = [i for i in range(len(pdf))]
