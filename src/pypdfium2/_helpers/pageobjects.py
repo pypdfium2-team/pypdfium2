@@ -225,7 +225,7 @@ class PdfImage (PdfObject):
         else:
             self.pdf._data_holder += to_hold
             if autoclose:
-                self.pdf._data_closer.append(buffer)
+                self.pdf._data_closer.insert(0, buffer.close)
     
     
     def set_bitmap(self, bitmap, pages=None):

@@ -92,8 +92,6 @@ class input_maker:
         elif inmode is InputMode.MEMVIEW_W:
             input = memoryview(bytearray( input.read_bytes() ))
         elif inmode is InputMode.SHMEM:
-            # FIXME shm object never destoryed before shutdown
-            # the problem is, we want to destory it when closing the root document, but not when closing a spawned sub-document
             buffer = input.open("rb")
             size = buffer.seek(0, os.SEEK_END)
             buffer.seek(0)
@@ -106,12 +104,15 @@ class input_maker:
 
 def get_input(args, **kwargs):
     
+    args.input_mode = InputMode[args.input_mode.upper()]
     callable = input_maker(
         input = args.input.expanduser().resolve(),
-        inmode = InputMode[args.input_mode.upper()],
+        inmode = args.input_mode,
     )
     input = callable() if args.input_direct else callable
     pdf = pdfium.PdfDocument(input, password=args.password, autoclose=True, **kwargs)
+    if args.input_mode is InputMode.SHMEM:
+        pdf._data_closer.insert(0, input.unlink)
     logger.debug(f"CLI: created pdf {pdf!r}")
 
     if "pages" in args and not args.pages:

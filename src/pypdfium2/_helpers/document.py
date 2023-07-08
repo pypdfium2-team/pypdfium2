@@ -31,16 +31,21 @@ class PdfDocument (pdfium_i.AutoCloseable):
     Document helper class.
     
     Parameters:
+        
         input (str | pathlib.Path | typing.BinaryIO | mmap.mmap | ctypes.Array | bytes | bytearray | memoryview | ~multiprocessing.shared_memory.SharedMemory | FPDF_DOCUMENT | typing.Callable):
             The input PDF given as file path, byte buffer, bytes-like object, raw PDFium document handle, or wrapper around another supported object.
+            Native support is available for :class:`~pathlib.Path`, byte buffers, :class:`ctypes.Array` and :class:`bytes`.
+            The other input types are resolved to these, as far as possible.
             In this context, "byte buffer" refers to an object implementing ``seek() tell() (readinto() | read())``.
-            Buffers that do not provide ``readinto()`` (e.g. mmap) fall back to less performant ``read()`` and :func:`~ctypes.memmove`.
-            Callables, memoryviews and shared memory are supported only if the resolved object is of another supported bytes-like type.
+            Buffers that do not provide ``readinto()`` (e.g. mmap) fall back to less ideal ``read()`` and :func:`~ctypes.memmove`.
+        
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
             If a password is given but the PDF is not encrypted, it will be ignored (as of PDFium 5418).
+        
         autoclose (bool):
             Whether byte buffer input should be automatically closed on finalization.
+            If True and the input is shared memory, it will be closed but not destroyed.
     
     Raises:
         PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
@@ -108,14 +113,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     @staticmethod
     def _close_impl(raw, data_holder, data_closer):
-        print(data_holder, data_closer)
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
             id(data)
         data_holder.clear()
-        for data in data_closer:
+        for to_call in data_closer:
             # TODO autoclose debug prints?
-            data.close()
+            to_call()
         data_closer.clear()
     
     
@@ -620,12 +624,12 @@ def _preprocess_input(input):
             raise FileNotFoundError(input)
     else:
         if isinstance(input, SharedMemory):
-            to_close.append(input)
+            to_close.append(input.close)
             input = input.buf  # try the underlying object and hope for the best
         if isinstance(input, memoryview):
             input = input.obj  # try the underlying object and hope for the best
         if isinstance(input, bytearray):
-            return (ctypes.c_ubyte * len(input)).from_buffer(input)
+            input = (ctypes.c_ubyte * len(input)).from_buffer(input)
     return input, to_close
 
 
@@ -642,7 +646,7 @@ def _open_pdf(input, password):
         to_hold = (input, )
     elif pdfium_i.is_buffer(input, "r"):
         bufaccess, to_hold = pdfium_i.get_bufreader(input)
-        to_close = (input, )
+        to_close = (input.close, )
         pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
     else:
         raise TypeError(f"Invalid input type '{type(input).__name__}'")
