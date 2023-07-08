@@ -536,7 +536,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         page = pdf[index]
         bitmap = renderer(page, **kwargs)
         info = bitmap.get_info()
-        result = converter(bitmap)
+        result = converter(bitmap, index=index)
         
         # NOTE We MUST NOT call bitmap.close() before the converted object is serialized to the main process, otherwise we would free the buffer of a foreign bitmap prematurely if the converted object references the buffer rather than owning a copy. Confirmed by POC.
         # This is not an issue when freeing the bitmap on garbage collection, provided the converted object keeps the buffer alive.

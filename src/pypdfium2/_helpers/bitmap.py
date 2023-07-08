@@ -178,7 +178,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     # but then we'd have to rely on third parties to actually create a reference at all times, otherwise we would unnecessarily delay releasing memory.
     
     
-    def to_numpy(self):
+    def to_numpy(self, **kwargs):
         """
         Convert the bitmap to a :mod:`numpy` array.
         
@@ -207,7 +207,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         return array
     
     
-    def to_pil(self):
+    def to_pil(self, **kwargs):
         """
         Convert the bitmap to a :mod:`PIL` image, using :func:`PIL.Image.frombuffer`.
         

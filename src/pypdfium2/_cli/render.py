@@ -149,10 +149,23 @@ def attach(parser):
     )
 
 
-def render_linear(pdf, page_indices, **kwargs):
+class SavingPILConverter:
+    
+    def __init__(self, output_dir, prefix, n_digits, format):
+        self.output_dir, self.prefix, self.n_digits, self.format = output_dir, prefix, n_digits, format
+    
+    def __call__(self, bitmap, index, **kwargs):
+        pil_image = pdfium.PdfBitmap.to_pil(bitmap)
+        out = self.output_dir / (self.prefix + "%0*d.%s" % (self.n_digits, index+1, self.format))
+        pil_image.save(out)
+        # return out
+
+
+def render_linear(pdf, page_indices, converter, **kwargs):
     for i in page_indices:
         logger.info(f"Rendering page {i+1} ...")
-        yield pdf[i].render(**kwargs).to_pil()
+        bitmap = pdf[i].render(**kwargs)
+        yield converter(bitmap, index=i)
 
 
 def main(args):
@@ -172,8 +185,6 @@ def main(args):
     
     cs = None
     if len(cs_kwargs) > 0:
-        if len(cs_kwargs) < len(CsFields):
-            logger.warning("All color scheme params should be set explicitly. Unset elements may be missing/transparent.")
         cs = pdfium.PdfColorScheme(**cs_kwargs)
     
     kwargs = dict(
@@ -196,14 +207,15 @@ def main(args):
         kwargs[f"no_smooth{type}"] = True
     
     n_digits = len(str( max(args.pages)+1 ))
+    converter = SavingPILConverter(args.output, args.prefix, n_digits, args.format)
+    
     if args.parallel:
         logger.info("Parallel rendering ...")
         kwargs["n_processes"] = args.processes
-        renderer = pdf.render(pdfium.PdfBitmap.to_pil, **kwargs)
+        renderer = pdf.render(converter, **kwargs)
     else:
         logger.info("Linear rendering ...")
-        renderer = render_linear(pdf, **kwargs)
+        renderer = render_linear(pdf, converter=converter, **kwargs)
     
-    for image, index in zip(renderer, args.pages):
-        out = args.output / (args.prefix + "%0*d.%s" % (n_digits, index+1, args.format))
-        image.save(out)
+    for page in renderer:
+        pass  # produce without storing anything
