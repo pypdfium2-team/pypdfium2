@@ -83,6 +83,7 @@ class input_maker:
             buffer.seek(0)
             input = (ctypes.c_ubyte * size)()
             buffer.readinto(input)
+            buffer.close()
         elif inmode is InputMode.BYTES:
             input = input.read_bytes()
         elif inmode is InputMode.BYTEARRAY:
@@ -97,7 +98,8 @@ class input_maker:
             buffer.seek(0)
             input = SharedMemory(create=True, size=size)
             self._result = input
-            buffer.readinto(input.buf.obj)  # mmap
+            buffer.readinto(input.buf)  # memoryview of mmap
+            buffer.close()
         else:
             assert False
         return input
