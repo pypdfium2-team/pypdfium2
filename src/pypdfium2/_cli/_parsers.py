@@ -112,6 +112,7 @@ def get_input(args, **kwargs):
     input = callable() if args.input_direct else callable
     pdf = pdfium.PdfDocument(input, password=args.password, autoclose=True, **kwargs)
     if args.input_mode is InputMode.SHMEM:
+        # FIXME this is not --input-callable agnostic ...
         pdf._data_closer.insert(0, input.unlink)
     logger.debug(f"CLI: created pdf {pdf!r}")
 

@@ -72,10 +72,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._data_holder = []
         self._data_closer = []
         
-        input = self._orig_input
-        if callable(self._orig_input):
-            input = self._orig_input()
-        self._input, to_close = _preprocess_input(input)
+        self._input, to_close = _preprocess_input(self._orig_input)
         if autoclose:
             self._data_closer += to_close
         
@@ -616,6 +613,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
 
 def _preprocess_input(input):
     to_close = []
+    if callable(input):
+        input = input()
     if isinstance(input, str):
         input = Path(input)
     if isinstance(input, Path):
