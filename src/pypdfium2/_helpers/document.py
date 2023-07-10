@@ -88,6 +88,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
     
     
+    # TODO improve to show all input stages
     def __repr__(self):
         orig_in = self._orig_input
         if isinstance(orig_in, Path):
