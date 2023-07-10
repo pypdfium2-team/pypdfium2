@@ -106,14 +106,25 @@ def attach(parser):
         help = "Request the use of a four-channel pixel format for colored output, even if rendering without transparency.",
     )
     parser.add_argument(
+        "--parallel",
+        action = "store_true",
+        # TODO help
+    )
+    parser.add_argument(
         "--processes",
         default = os.cpu_count(),
         type = int,
         help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
     )
     parser.add_argument(
-        "--parallel",
-        action = "store_true",
+        "--mp-strategy",
+        default = "spawn",
+        help = "The multiprocessing start method to use."
+    )
+    parser.add_argument(
+        "--mp-backend",
+        choices = ("mp", "ft"),
+        default = "mp",
         # TODO help
     )
     
@@ -212,6 +223,8 @@ def main(args):
     if args.parallel:
         logger.info("Parallel rendering ...")
         kwargs["n_processes"] = args.processes
+        kwargs["mp_strategy"] = args.mp_strategy
+        kwargs["mp_backend"] = args.mp_backend
         renderer = pdf.render(converter, **kwargs)
     else:
         logger.info("Linear rendering ...")

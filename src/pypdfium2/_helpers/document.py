@@ -10,6 +10,7 @@ import logging
 import functools
 from pathlib import Path
 import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor
 from multiprocessing.shared_memory import SharedMemory
 
 import pypdfium2.raw as pdfium_c
@@ -561,10 +562,12 @@ class PdfDocument (pdfium_i.AutoCloseable):
             page_indices = None,
             n_processes = os.cpu_count(),
             pass_info = False,
+            mp_strategy = "spawn",
+            mp_backend = "mp",
             **kwargs
         ):
         """
-        Render multiple pages in parallel, using a process pool executor.
+        Render multiple pages in parallel, using a process pool.
         
         Hint:
             If your code shall be frozen into an executable, :func:`multiprocessing.freeze_support`
@@ -580,6 +583,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 The number of parallel process to use.
             renderer (typing.Callable):
                 The page rendering function to use. This may be used to plug in custom renderers other than :meth:`.PdfPage.render`.
+            mp_strategy (str):
+                The multiprocessing start method to use. ``spawn`` is recommended, or ``forkserver`` if available.
+                ``fork`` is discouraged since it has issues with buffer input (commonly a deadlock after processing all jobs).
             kwargs (dict):
                 Keyword arguments to the renderer.
         
@@ -607,9 +613,15 @@ class PdfDocument (pdfium_i.AutoCloseable):
             **kwargs
         )
         
-        ctx = mp.get_context("spawn")
-        with ctx.Pool(n_processes) as pool:
-            yield from pool.imap(invoke_renderer, page_indices)
+        ctx = mp.get_context(mp_strategy)
+        if mp_backend == "mp":
+            with ctx.Pool(n_processes) as pool:
+                yield from pool.imap(invoke_renderer, page_indices)
+        elif mp_backend == "ft":
+            with ProcessPoolExecutor(n_processes, mp_context=ctx) as pool:
+                yield from pool.map(invoke_renderer, page_indices)
+        else:
+            assert False
 
 
 def _preprocess_input(input):
