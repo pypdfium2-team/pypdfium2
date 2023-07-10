@@ -4,11 +4,12 @@
 __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
 import os
+import sys
 import ctypes
 import logging
 import functools
 from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor
+import multiprocessing as mp
 from multiprocessing.shared_memory import SharedMemory
 
 import pypdfium2.raw as pdfium_c
@@ -532,9 +533,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
     @classmethod
     def _render_page_worker(cls, index, input, password, renderer, converter, pass_info, need_formenv, **kwargs):
         
-        logger.info(f"Rendering page {index+1} ...")
+        # FIXME logging doesn't work with spawn/forkserver
+        print(f"Rendering page {index+1} ...", file=sys.stderr)
         
-        pdf = cls(input, password=password)
+        pdf = cls(input, password=password, autoclose=True)
         if need_formenv:
             pdf.init_forms()
         
@@ -585,9 +587,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
             :data:`typing.Any`: Parameter-dependent result.
         """
         
-        if not isinstance(self._input, (Path, str)):
-            raise ValueError("Can only render in parallel with file path input.")
-        
         n_pages = len(self)
         if not page_indices:
             page_indices = [i for i in range(n_pages)]
@@ -608,8 +607,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
             **kwargs
         )
         
-        with ProcessPoolExecutor(n_processes) as pool:
-            yield from pool.map(invoke_renderer, page_indices)
+        ctx = mp.get_context("spawn")
+        with ctx.Pool(n_processes) as pool:
+            yield from pool.imap(invoke_renderer, page_indices)
 
 
 def _preprocess_input(input):
@@ -624,10 +624,13 @@ def _preprocess_input(input):
             raise FileNotFoundError(input)
     else:
         if isinstance(input, SharedMemory):
+            # currently the handling is shm -> memoryview -> mmap
             to_close.append(input.close)
-            input = input.buf  # try the underlying object and hope for the best
+            input = input.buf
+            # FIXME want to switch to a ctypes array view to avoid unnecessary callbacks, but we ran into "cannot close exported pointers exist" exceptions...
+            # input = (ctypes.c_ubyte * len(input)).from_buffer(input)
         if isinstance(input, memoryview):
-            input = input.obj  # try the underlying object and hope for the best
+            input = input.obj
         if isinstance(input, bytearray):
             input = (ctypes.c_ubyte * len(input)).from_buffer(input)
     return input, to_close
