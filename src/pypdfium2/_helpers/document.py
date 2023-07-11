@@ -66,13 +66,15 @@ class PdfDocument (pdfium_i.AutoCloseable):
             Form env, if :meth:`.init_forms` was called and the document has forms.
     """
     
-    def __init__(self, input, password=None, autoclose=False):
+    def __init__(self, input, password=None, autoclose=False, to_close=None):
         
         self._orig_input = input
         self._password = password
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
+        if to_close:
+            self._data_closer.extend(to_close)
         
         self._input, to_close = _preprocess_input(self._orig_input)
         if autoclose:

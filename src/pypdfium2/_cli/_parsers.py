@@ -64,7 +64,7 @@ class input_maker:
     # for INMODE in $inmodes; do echo "$INMODE"; pypdfium2 toc --input-mode $INMODE "tests/resources/toc.pdf"; printf "\n"; done
     
     def __init__(self, orig_input, inmode):
-        self._orig_input, self._inmode = orig_input, inmode
+        self._orig_input, self._inmode, self._to_close = orig_input, inmode, []
     
     def __call__(self):
         input, inmode = self._orig_input, self._inmode
@@ -97,7 +97,7 @@ class input_maker:
             size = buffer.seek(0, os.SEEK_END)
             buffer.seek(0)
             input = SharedMemory(create=True, size=size)
-            self._result = input
+            self._to_close.append(_destroy_shmem(input))
             buffer.readinto(input.buf)  # memoryview of mmap
             buffer.close()
         else:
@@ -105,10 +105,13 @@ class input_maker:
         return input
 
 
-def _destroy_shmem(shmem):
+class _destroy_shmem:
     # safety check to ensure we don't have a wrong object also implementing unlink (e.g. Path)
-    assert isinstance(shmem, SharedMemory)
-    shmem.unlink()
+    def __init__(self, shmem):
+        self._shmem = shmem
+        assert isinstance(self._shmem, SharedMemory)
+    def __call__(self):
+        self._shmem.unlink()
 
 
 def get_input(args, **kwargs):
@@ -119,9 +122,7 @@ def get_input(args, **kwargs):
         inmode = args.input_mode,
     )
     input = callable() if args.input_direct else callable
-    pdf = pdfium.PdfDocument(input, password=args.password, autoclose=True, **kwargs)
-    if args.input_mode is InputMode.SHMEM:
-        pdf._data_closer.insert(0, lambda: _destroy_shmem(callable._result))
+    pdf = pdfium.PdfDocument(input, password=args.password, autoclose=True, to_close=callable._to_close, **kwargs)
     logger.debug(f"CLI: created pdf {pdf!r}")
 
     if "pages" in args and not args.pages:
