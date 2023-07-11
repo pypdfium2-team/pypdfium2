@@ -384,13 +384,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   fileaccess = pdfium_c.FPDF_FILEACCESS()
   fileaccess.m_FileLen = file_len
   
-  # Option A) Assign callback via lower-level helper (recommended)
-  # This automates extracting the CFUNCTYPE from the bindings and wrapping the callable
-  pdfium_i.set_callback(fileaccess, "m_GetBlock", _reader_class(py_buffer))
-  
-  # Option B) Alternatively, you could copy-paste the CFUNCTYPE (discouraged)
-  functype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(None), ctypes.c_ulong, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_ulong)
-  fileaccess.m_GetBlock = functype( _reader_class(py_buffer) )
+  # Assign the callback, wrapped in its CFUNCTYPE
+  fileaccess.m_GetBlock = type(fileaccess.m_GetBlock)( _reader_class(py_buffer) )
   
   # Finally, load the document
   pdf = pdfium_c.FPDF_LoadCustomDocument(fileaccess, None)
