@@ -74,7 +74,7 @@ def attach(parser):
     parser.add_argument(
         "--optimize-mode",
         choices = ("lcd", "print"),
-        help = "Select a rendering optimisation mode (lcd, print)",
+        help = "The rendering optimisation mode. None if not given.",
     )
     parser.add_argument(
         "--grayscale",
@@ -105,27 +105,33 @@ def attach(parser):
         action = "store_true",
         help = "Request the use of a four-channel pixel format for colored output, even if rendering without transparency.",
     )
-    parser.add_argument(
+    
+    parallel = parser.add_argument_group(
+        title = "Parallelization",
+        description = "Options for rendering with multiple processes",
+    )
+    parallel.add_argument(
         "--parallel",
         action = "store_true",
-        # TODO help
+        help = "Whether to render in parallel. If not given, any other options from this group are silently ignored.",
     )
-    parser.add_argument(
+    parallel.add_argument(
         "--processes",
         default = os.cpu_count(),
         type = int,
-        help = "The number of processes to use for rendering (defaults to the number of CPU cores)",
+        help = "The number of parallel rendering processes (defaults to the number of CPU cores)",
     )
-    parser.add_argument(
+    parallel.add_argument(
         "--mp-strategy",
+        choices = ("spawn", "forkserver", "fork"),
         default = "spawn",
-        help = "The multiprocessing start method to use."
+        help = "The process start method to use. ('fork' is discouraged due to stability issues.)",
     )
-    parser.add_argument(
+    parallel.add_argument(
         "--mp-backend",
         choices = ("mp", "ft"),
         default = "mp",
-        # TODO help
+        help = "The backend to use (mp = multiprocessing, ft = concurrent.futures).",
     )
     
     color_scheme = parser.add_argument_group(

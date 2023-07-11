@@ -580,12 +580,14 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 A sequence of zero-based indices of the pages to render. Duplicate page indices are prohibited.
                 If None, all pages will be included. The order of results is supposed to match the order of given page indices.
             n_processes (int):
-                The number of parallel process to use.
+                The number of parallel process.
             renderer (typing.Callable):
-                The page rendering function to use. This may be used to plug in custom renderers other than :meth:`.PdfPage.render`.
+                The page rendering function. This may be used to plug in custom renderers other than :meth:`.PdfPage.render`.
             mp_strategy (str):
-                The multiprocessing start method to use. ``spawn`` is recommended, or ``forkserver`` if available.
+                The process start method. ``spawn`` is recommended, or ``forkserver`` if available.
                 ``fork`` is discouraged since it has issues with buffer input (commonly a deadlock after processing all jobs).
+            mp_backend (str):
+                The process backend ("mp" for :mod:`multiprocessing`, "ft" for :mod:`concurrent.futures`)
             kwargs (dict):
                 Keyword arguments to the renderer.
         
