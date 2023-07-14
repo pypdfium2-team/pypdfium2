@@ -661,8 +661,7 @@ def _preprocess_input(input):
 def _open_pdf(input, password):
     
     to_hold, to_close = (), ()
-    if password is not None:
-        password = (password+"\x00").encode("utf-8")
+    password = (password+"\x00").encode("utf-8") if password else None
     
     if isinstance(input, Path):
         pdf = pdfium_c.FPDF_LoadDocument((str(input)+"\x00").encode("utf-8"), password)
