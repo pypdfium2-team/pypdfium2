@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from pathlib import Path
-# TODO? consider dotted access
+# CONSIDER dotted access
 from pypdfium2._cli._parsers import (
     add_input, get_input,
     parse_numtext,

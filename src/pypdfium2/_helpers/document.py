@@ -35,11 +35,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
     Parameters:
         
         input (str | pathlib.Path | typing.BinaryIO | mmap.mmap | ctypes.Array | bytes | bytearray | memoryview | ~multiprocessing.shared_memory.SharedMemory | FPDF_DOCUMENT | typing.Callable):
-            The input PDF given as file path, byte buffer, bytes-like object, raw PDFium document handle, or wrapper around another supported object.
-            Native support is available for :class:`~pathlib.Path`, byte buffers, :class:`ctypes.Array` and :class:`bytes`.
+            The input PDF given as file path, byte buffer, bytes-like object, raw PDFium document handle, or wrapper around another supported object (see the type definition above).
+            Native support is available for :class:`~pathlib.Path`, byte buffers, :class:`bytes` and :class:`ctypes.Array`.
             The other input types are resolved to these, as far as possible.
-            In this context, "byte buffer" refers to an object implementing ``seek() tell() (readinto() | read())``.
-            Buffers that do not provide ``readinto()`` (e.g. mmap) fall back to less ideal ``read()`` and :func:`~ctypes.memmove`.
+            In this context, "byte buffer" refers to an object implementing ``seek() tell() (readinto() | read())`` in a :class:`~io.BufferedIOBase` like fashion.
+            Buffers that do not provide ``readinto()`` fall back to ``read()`` and :func:`~ctypes.memmove`.
         
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
@@ -48,7 +48,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
         autoclose (bool):
             Whether byte buffer input should be automatically closed on finalization.
             If True and the input is shared memory, it will be closed but not destroyed.
-    
+        
+        to_close (typing.Sequence | None):
+            A list of callbacks to be run on after document closing. Takes effect regardless of the *autoclose* option.
+        
     Raises:
         PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
         FileNotFoundError: Raised if an invalid or non-existent file path was given.
@@ -67,6 +70,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
     """
     
     def __init__(self, input, password=None, autoclose=False, to_close=None):
+        
+        # CONSIDER adding a public method to inject into data_holder/data_closer
         
         self._orig_input = input
         self._password = password
@@ -116,12 +121,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
     @staticmethod
     def _close_impl(raw, data_holder, data_closer):
         pdfium_c.FPDF_CloseDocument(raw)
+        
         for data in data_holder:
             id(data)
         data_holder.clear()
+        
         for to_call in data_closer:
-            # TODO autoclose debug prints?
-            to_call()
+            to_call()  # TODO autoclose debug prints?
         data_closer.clear()
     
     
@@ -362,7 +368,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             raise PdfiumError(f"Failed to delete attachment at index {index}.")
     
     
-    # TODO deprecate in favour of index access?
+    # CONSIDER deprecating in favour of index access?
     def get_page(self, index):
         """
         Returns:
@@ -405,7 +411,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             index = len(self)
         raw_page = pdfium_c.FPDFPage_New(self, index, width, height)
         page = PdfPage(raw_page, self, None)
-        # not doing formenv calls for new pages as we don't see the point
+        # not doing formenv calls for new pages as it does not seem necessary
         self._add_kid(page)
         return page
     
@@ -510,7 +516,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             :class:`.PdfOutlineItem`: Bookmark information.
         """
         
-        # TODO? warn if max_depth reached?
+        # CONSIDER warn if max_depth reached?
         
         if seen is None:
             seen = set()

@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path
 import pypdfium2.raw as pdfium_c
 import pypdfium2._helpers as pdfium
-# TODO? consider dotted access
+# CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input
 
 

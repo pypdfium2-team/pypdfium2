@@ -7,7 +7,7 @@ from enum import Enum
 import pypdfium2._helpers as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
-# TODO? consider dotted access
+# CONSIDER dotted access
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,
@@ -92,7 +92,7 @@ def main(args):
                 pos = round_list(obj.get_pos(), args.n_digits)
                 print(pad_1 + f"Position: {pos}")
             
-            # TODO? also call get_size() for coverage
+            # CONSIDER also call get_size() for coverage
             if show_imageinfo and isinstance(obj, pdfium.PdfImage):
                 print(pad_1 + f"Filters: {obj.get_filters()}")
                 metadata = obj.get_metadata()

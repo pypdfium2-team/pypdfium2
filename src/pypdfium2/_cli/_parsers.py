@@ -42,7 +42,7 @@ def add_input(parser, pages=True):
         "--input-callable",
         dest = "input_direct",
         action = "store_false",
-        # TODO help
+        help = "If given, pass in a callable returning the object, instead of the object directly. This is useful to handle buffer input when multiprocessing is involved."
     )
     parser.add_argument(
         "--password",

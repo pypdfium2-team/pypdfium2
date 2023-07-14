@@ -374,7 +374,7 @@ def _extract_smart(image_obj, fb_format=None, fb_render=False):
     try:
         data, info = _extract_direct(image_obj)
     except ImageNotExtractableError:
-        # TODO? log reason why the image cannot be extracted directly
+        # CONSIDER log reason why the image cannot be extracted directly
         pil_image = image_obj.get_bitmap(render=fb_render).to_pil()
     else:
         pil_image = None

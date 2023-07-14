@@ -28,7 +28,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
             Reference to the document this attachment belongs to. Must remain valid as long as the attachment is used.
     """
     
-    # TODO consider using AutoCloseable machienery to guarantee `pdf` remains alive as long as the attachment object exists
+    # CONSIDER using AutoCloseable machienery to guarantee `pdf` remains alive as long as the attachment object exists
     
     # Problems with PDFium's attachment API:
     # - https://crbug.com/pdfium/1939

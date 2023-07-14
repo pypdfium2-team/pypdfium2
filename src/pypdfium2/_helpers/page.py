@@ -262,7 +262,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             :class:`.PdfObject`: A page object.
         """
         
-        # TODO? close skipped objects explicitly ?
+        # CONSIDER close skipped objects explicitly ?
         
         if form:
             count_objects = pdfium_c.FPDFFormObj_CountObjects
@@ -504,7 +504,7 @@ def _parse_renderopts(
         else:
             raise ValueError(f"Invalid optimize_mode {optimize_mode}")
     
-    # TODO consider using a namedtuple or something
+    # CONSIDER using a namedtuple or something
     return cl_format, rev_byteorder, fill_color, flags
 
 

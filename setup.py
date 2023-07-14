@@ -10,7 +10,7 @@ import setuptools
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
-# TODO? consider glob import or dotted access
+# CONSIDER glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     Host,
     DataTree,
@@ -29,7 +29,7 @@ from pypdfium2_setup.packaging_base import (
 
 def install_handler():
     
-    # TODO? Linux/macOS: check that minimum OS version requirements are fulfilled
+    # CONSIDER Linux/macOS: check that minimum OS version requirements are fulfilled
     
     from pypdfium2_setup import update_pdfium
     from pypdfium2_setup.setup_base import mkwheel
