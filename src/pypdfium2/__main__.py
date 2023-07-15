@@ -2,14 +2,11 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
 import sys
-import logging
 import argparse
 import importlib
-import pypdfium2 as pdfium  # yes this is legal in __main__
-import pypdfium2.internal as pdfium_i
 from pypdfium2.version import *
+from pypdfium2._cli._parsers import setup_logging
 
 try:
     import argcomplete
@@ -54,17 +51,6 @@ def get_parser():
         argcomplete.autocomplete(main_parser)
     
     return main_parser
-
-
-def setup_logging():
-    
-    pdfium_i.DEBUG_AUTOCLOSE.value = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
-    
-    lib_logger = logging.getLogger("pypdfium2")
-    lib_logger.addHandler(logging.StreamHandler())
-    lib_logger.setLevel(logging.DEBUG)
-    
-    pdfium.PdfUnspHandler().setup()
 
 
 def api_main(raw_args=sys.argv[1:]):

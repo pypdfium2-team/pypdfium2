@@ -542,8 +542,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     @classmethod
     def _render_page_worker(cls, index, input, password, renderer, converter, pass_info, need_formenv, **kwargs):
         
-        # FIXME logging doesn't work with spawn/forkserver
-        print(f"Rendering page {index+1} ...", file=sys.stderr)
+        logger.info(f"Rendering page {index+1} ...")
         
         pdf = cls(input, password=password, autoclose=True)
         if need_formenv:
@@ -572,6 +571,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             pass_info = False,
             mp_strategy = "spawn",
             mp_backend = "mp",
+            pool_kwargs = dict(),
             **kwargs
         ):
         """
@@ -625,10 +625,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         ctx = mp.get_context(mp_strategy)
         if mp_backend == "mp":
-            with ctx.Pool(n_processes) as pool:
+            with ctx.Pool(n_processes, **pool_kwargs) as pool:
                 yield from pool.imap(invoke_renderer, page_indices)
         elif mp_backend == "ft":
-            with ProcessPoolExecutor(n_processes, mp_context=ctx) as pool:
+            with ProcessPoolExecutor(n_processes, mp_context=ctx, **pool_kwargs) as pool:
                 yield from pool.map(invoke_renderer, page_indices)
         else:
             assert False

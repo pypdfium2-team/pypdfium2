@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import sys
 import logging
 from pathlib import Path
 import pypdfium2._helpers as pdfium
 # CONSIDER dotted access
-from pypdfium2._cli._parsers import add_input, get_input
+from pypdfium2._cli._parsers import add_input, get_input, setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -111,9 +112,9 @@ def attach(parser):
         description = "Options for rendering with multiple processes",
     )
     parallel.add_argument(
-        "--parallel",
+        "--linear",
         action = "store_true",
-        help = "Whether to render in parallel. If not given, any other options from this group are silently ignored.",
+        help = "Render linear in the main process without parallelization. Options of this group will be silently ignored.",
     )
     parallel.add_argument(
         "--processes",
@@ -139,9 +140,9 @@ def attach(parser):
         description = "Options for rendering with custom color scheme",
     )
     color_scheme.add_argument(
-        "--default-dark",
+        "--dark-theme",
         action = "store_true",
-        help = "Whether to use a dark scheme as default. If given, the parameters below selectively override defaults."
+        help = "Use a dark theme as base color scheme. Explicit config overrides selectively."
     )
     color_scheme.add_argument(
         "--path-fill",
@@ -193,16 +194,13 @@ def main(args):
     if not args.prefix:
         args.prefix = f"{args.input.stem}_"
     if not args.fill_color:
-        args.fill_color = (0, 0, 0, 255) if args.default_dark else (255, 255, 255, 255)
+        args.fill_color = (0, 0, 0, 255) if args.dark_theme else (255, 255, 255, 255)
     
     cs_kwargs = dict()
-    if args.default_dark:
+    if args.dark_theme:
         cs_kwargs.update(**DefaultDarkTheme)
     cs_kwargs.update(**{f: getattr(args, f) for f in CsFields if getattr(args, f)})
-    
-    cs = None
-    if len(cs_kwargs) > 0:
-        cs = pdfium.PdfColorScheme(**cs_kwargs)
+    cs = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
     
     kwargs = dict(
         page_indices = args.pages,
@@ -226,15 +224,20 @@ def main(args):
     n_digits = len(str( max(args.pages)+1 ))
     converter = SavingPILConverter(args.output, args.prefix, n_digits, args.format)
     
-    if args.parallel:
-        logger.info("Parallel rendering ...")
-        kwargs["n_processes"] = args.processes
-        kwargs["mp_strategy"] = args.mp_strategy
-        kwargs["mp_backend"] = args.mp_backend
-        renderer = pdf.render(converter, **kwargs)
-    else:
+    if args.linear:
         logger.info("Linear rendering ...")
         renderer = render_linear(pdf, converter=converter, **kwargs)
+    else:
+        logger.info("Parallel rendering ...")
+        kwargs.update(
+            n_processes = args.processes,
+            mp_strategy = args.mp_strategy,
+            mp_backend = args.mp_backend,
+            pool_kwargs = dict(),
+        )
+        if args.mp_strategy in ("spawn", "forkserver"):
+            # it looks like setup_logging() is not run automatically with these mp strategies, so set it as initializer
+            kwargs["pool_kwargs"]["initializer"] = setup_logging
+        renderer = pdf.render(converter, **kwargs)
     
-    for page in renderer:
-        pass  # produce without storing anything
+    for _ in renderer: pass  # produce without storing anything

@@ -9,8 +9,20 @@ from enum import Enum
 from pathlib import Path
 from multiprocessing.shared_memory import SharedMemory
 import pypdfium2._helpers as pdfium
+import pypdfium2.internal as pdfium_i
 
 logger = logging.getLogger(__name__)
+
+
+def setup_logging():
+    
+    pdfium_i.DEBUG_AUTOCLOSE.value = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    
+    lib_logger = logging.getLogger("pypdfium2")
+    lib_logger.addHandler(logging.StreamHandler())
+    lib_logger.setLevel(logging.DEBUG)
+    
+    pdfium.PdfUnspHandler().setup()
 
 
 class InputMode (Enum):

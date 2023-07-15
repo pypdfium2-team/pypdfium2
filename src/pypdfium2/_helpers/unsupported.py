@@ -8,6 +8,7 @@ import logging
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 
+# CONSIDER use local logger instead of main library logger (we don't do this elsewhere)
 lib_logger = logging.getLogger("pypdfium2")
 
 
