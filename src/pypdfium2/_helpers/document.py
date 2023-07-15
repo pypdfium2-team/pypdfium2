@@ -596,6 +596,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 ``fork`` is discouraged since it has issues with buffer input (commonly a deadlock after processing all jobs).
             mp_backend (str):
                 The process backend ("mp" for :mod:`multiprocessing`, "ft" for :mod:`concurrent.futures`)
+            pool_kwargs (dict):
+                Additional keyword arguments for the process pool.
             kwargs (dict):
                 Keyword arguments to the renderer.
         

@@ -58,9 +58,16 @@ def attach(parser):
         **ColorOpts,
     )
     parser.add_argument(
-        "--force-halftone",
-        action = "store_true",
-        help = "Always use halftone for image stretching",
+        "--optimize-mode",
+        choices = ("lcd", "print"),
+        help = "The rendering optimisation mode. None if not given.",
+    )
+    parser.add_argument(
+        "--crop",
+        nargs = 4,
+        type = float,
+        default = (0, 0, 0, 0),
+        help = "Amount to crop from (left, bottom, right, top)",
     )
     parser.add_argument(
         "--no-annotations",
@@ -73,23 +80,6 @@ def attach(parser):
         help = "Prevent rendering of PDF forms",
     )
     parser.add_argument(
-        "--optimize-mode",
-        choices = ("lcd", "print"),
-        help = "The rendering optimisation mode. None if not given.",
-    )
-    parser.add_argument(
-        "--grayscale",
-        action = "store_true",
-        help = "Whether to render in grayscale mode (no colors)",
-    )
-    parser.add_argument(
-        "--crop",
-        nargs = 4,
-        type = float,
-        default = (0, 0, 0, 0),
-        help = "Amount to crop from (left, bottom, right, top)",
-    )
-    parser.add_argument(
         "--no-antialias",
         nargs = "+",
         default = (),
@@ -97,14 +87,29 @@ def attach(parser):
         help = "Item types that shall not be smoothed",
     )
     parser.add_argument(
+        "--force-halftone",
+        action = "store_true",
+        help = "Always use halftone for image stretching",
+    )
+    
+    pixel_format = parser.add_argument_group(
+        title = "Pixel format",
+        description = "Options to configure the used pixel format. Notes: 1) By default, an alpha channel will be used only if --fill-color has transparency. 2) The combination of --rev-byteorder and --prefer-bgrx may be used to achieve a pixel format natively supported by PIL, to avoid data copying.",
+    )
+    pixel_format.add_argument(
+        "--grayscale",
+        action = "store_true",
+        help = "Whether to render in grayscale mode (no colors)",
+    )
+    pixel_format.add_argument(
         "--rev-byteorder",
         action = "store_true",
-        help = "Render with reverse byte order internally, i. e. RGB(A) instead of BGR(A). The result should be completely identical.",
+        help = "Render with reverse byte order internally, i. e. RGB(A/X) instead of BGR(A/X). The result should be identical.",
     )
-    parser.add_argument(
+    pixel_format.add_argument(
         "--prefer-bgrx",
         action = "store_true",
-        help = "Request the use of a four-channel pixel format for colored output, even if rendering without transparency.",
+        help = "Use a four-channel pixel format for colored output, even if rendering without transparency.",
     )
     
     parallel = parser.add_argument_group(
@@ -137,12 +142,13 @@ def attach(parser):
     
     color_scheme = parser.add_argument_group(
         title = "Color scheme",
-        description = "Options for rendering with custom color scheme",
+        description = "Options for rendering with custom color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues, in worst case different objects melt into one indistinguishable single-color shape. So it depends on the PDF if using this is elligible.",
+        # TODO File a pdfium bug about this. More sophisticated approaches that come to mind are lightness inversion of vector elements for dark theme (e.g. black-white, dark_green->light_green) and maybe threshold-based color mappings (global or per object type). A client could go further with region-specific color schemes (i.e. draw different scheme sub-rectangles/polygons on top).
     )
     color_scheme.add_argument(
         "--dark-theme",
         action = "store_true",
-        help = "Use a dark theme as base color scheme. Explicit config overrides selectively."
+        help = "Use a dark theme as base color scheme. Explicit color params override selectively."
     )
     color_scheme.add_argument(
         "--path-fill",
