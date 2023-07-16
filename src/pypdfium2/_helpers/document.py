@@ -82,16 +82,16 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         self._input, to_close = _preprocess_input(self._orig_input)
         if autoclose:
-            self._data_closer += to_close
+            self._data_closer.extend(to_close)
         
         self.formenv = None
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
         else:
             self.raw, to_hold, to_close = _open_pdf(self._input, self._password)
-            self._data_holder += to_hold
+            self._data_holder.extend(to_hold)
             if autoclose:
-                self._data_closer += to_close
+                self._data_closer.extend(to_close)
         
         super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
     

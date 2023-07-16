@@ -223,7 +223,7 @@ class PdfImage (PdfObject):
             if autoclose:
                 buffer.close()
         else:
-            self.pdf._data_holder += to_hold
+            self.pdf._data_holder.extend(to_hold)
             if autoclose:
                 self.pdf._data_closer.insert(0, buffer.close)
     
