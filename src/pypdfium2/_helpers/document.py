@@ -4,7 +4,6 @@
 __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
 import os
-import sys
 import ctypes
 import logging
 import functools

@@ -564,7 +564,7 @@ Theoretically, PDFium's non-public backend would provide these capabilities, but
 #### Drawbacks of ABI level bindings
 
 While ABI FFI bindings tend to be more convenient, they do have technical drawbacks compared to API bindings [(overview)](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api).
-With special platforms and/or code, sometimes unforseen problems can occur [(case study)](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1173170438).
+With special platforms and/or code, sometimes unforeseen problems can occur [(case study)](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1173170438).
 
 
 ## Development
@@ -712,7 +712,7 @@ Faulty PyPI releases may be yanked using the web interface.
 
 ### PDFium
 
-The PDFium code base was originally developped as part of the commercial Foxit SDK, before being acquired and open-sourced by Google, which maintains PDFium independently ever since, while Foxit continue to develop their SDK closed-source.
+The PDFium code base was originally developed as part of the commercial Foxit SDK, before being acquired and open-sourced by Google, which maintains PDFium independently ever since, while Foxit continue to develop their SDK closed-source.
 
 ### pypdfium2
 

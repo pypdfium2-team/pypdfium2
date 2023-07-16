@@ -416,7 +416,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise ValueError("Crop exceeds page dimensions")
         
         cl_format, rev_byteorder, fill_color, flags = _parse_renderopts(**kwargs)
-        if (color_scheme is not None) and fill_to_stroke:
+        if color_scheme and fill_to_stroke:
             flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
