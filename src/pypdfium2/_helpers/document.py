@@ -84,6 +84,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if autoclose:
             self._data_closer.extend(to_close)
         
+        # TODO(apibreak) formenv: consider cached property (i.e. automatic init_forms() on property access)
         self.formenv = None
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
