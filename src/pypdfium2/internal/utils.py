@@ -42,6 +42,8 @@ def is_buffer(buf, spec="r"):
 
 class _buffer_reader:
     
+    # NOTE the memmove code passage is not covered if we handle mmap as ctypes array
+    
     def __init__(self, buffer):
         self.buffer = buffer
         self._fill = self._readinto if hasattr(self.buffer, "readinto") else self._memmove

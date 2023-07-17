@@ -4,6 +4,7 @@
 __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
 import os
+import mmap
 import ctypes
 import logging
 import functools
@@ -72,6 +73,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         # CONSIDER adding a public method to inject into data_holder/data_closer
         
+        # NOTE due to mmap + weakref.finalize idiosyncrasies, we cannot hold a reference to the actual input on class level, otherwise we run into "cannot close; exported pointers exist" trouble
+        
         self._orig_input = input
         self._password = password
         self._autoclose = autoclose
@@ -80,15 +83,15 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if to_close:
             self._data_closer.extend(to_close)
         
-        self._input, to_close = _preprocess_input(self._orig_input)
+        input, to_close = _preprocess_input(self._orig_input)
         if autoclose:
             self._data_closer.extend(to_close)
         
         self.formenv = None
-        if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
-            self.raw = self._input
+        if isinstance(input, pdfium_c.FPDF_DOCUMENT):
+            self.raw = input
         else:
-            self.raw, to_hold, to_close = _open_pdf(self._input, self._password)
+            self.raw, to_hold, to_close = _open_pdf(input, self._password)
             self._data_holder.extend(to_hold)
             if autoclose:
                 self._data_closer.extend(to_close)
@@ -105,10 +108,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
             input_r = f"<{type(orig_in).__name__} at {hex(id(orig_in))}>"
         elif isinstance(orig_in, pdfium_c.FPDF_DOCUMENT):
             input_r = f"<FPDF_DOCUMENT at {hex(id(orig_in))}>"
-        elif callable(orig_in):
-            input_r = f"<callable at {hex(id(orig_in))}: {type(self._input).__name__}>"
         else:
-            input_r = repr(self._input)
+            input_r = repr(orig_in)
         return f"{super().__repr__()[:-1]} from {input_r}>"
     
     
@@ -121,12 +122,15 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def _close_impl(raw, data_holder, data_closer):
         pdfium_c.FPDF_CloseDocument(raw)
         
+        # due to mmap idiosyncracies, we must explicitly del the data variable which stores the last value of the iteration (or use indexing), otherwise we run into "cannot close; exported pointers exist" trouble
+        data = None
         for data in data_holder:
             id(data)
+        del data
         data_holder.clear()
         
-        for to_call in data_closer:
-            to_call()  # TODO autoclose debug prints?
+        for callback in data_closer:
+            callback()  # TODO autoclose debug prints?
         data_closer.clear()
     
     
@@ -647,13 +651,14 @@ def _preprocess_input(input):
             raise FileNotFoundError(input)
     else:
         if isinstance(input, SharedMemory):
-            # currently the handling is shm -> memoryview -> mmap
+            # currently the resolution path is shm -> memoryview -> mmap
             to_close.append(input.close)
             input = input.buf
-            # FIXME want to switch to a ctypes array view to avoid unnecessary callbacks, but we ran into "cannot close exported pointers exist" exceptions...
-            # input = (ctypes.c_ubyte * len(input)).from_buffer(input)
         if isinstance(input, memoryview):
             input = input.obj
+        if isinstance(input, mmap.mmap):
+            to_close.append(input.close)
+            input = (ctypes.c_ubyte * input.size()).from_buffer(input)
         if isinstance(input, bytearray):
             input = (ctypes.c_ubyte * len(input)).from_buffer(input)
     return input, to_close
