@@ -46,19 +46,16 @@ class _buffer_reader:
         self.buffer = buffer
         self._fill = self._readinto if hasattr(self.buffer, "readinto") else self._memmove
     
-    def _readinto(self, cbuf):
+    def _readinto(self, cbuf, _):
         self.buffer.readinto(cbuf)
     
-    def _memmove(self, cbuf):
-        size = len(cbuf)
-        data = self.buffer.read(size)
-        ctypes.memmove(cbuf, data, size)
-        id(data)
+    def _memmove(self, cbuf, size):
+        ctypes.memmove(cbuf, self.buffer.read(size), size)
     
     def __call__(self, _, position, p_buf, size):
         cbuf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size)).contents
         self.buffer.seek(position)
-        self._fill(cbuf)
+        self._fill(cbuf, size)
         return 1
 
 
