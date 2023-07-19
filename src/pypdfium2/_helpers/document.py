@@ -4,13 +4,18 @@
 __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
 import os
+import sys
 import ctypes
 import logging
 import functools
 from pathlib import Path
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor
-from multiprocessing.shared_memory import SharedMemory
+try:
+    from multiprocessing.shared_memory import SharedMemory
+except ImportError:
+    SharedMemory = None
+    assert sys.version_info < (3, 8)
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -33,7 +38,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     Parameters:
         
-        input (str | pathlib.Path | typing.BinaryIO | mmap.mmap | ctypes.Array | bytes | bytearray | memoryview | ~multiprocessing.shared_memory.SharedMemory | FPDF_DOCUMENT | typing.Callable):
+        input (pathlib.Path | str | typing.BinaryIO | ~mmap.mmap | ctypes.Array | bytes | bytearray | memoryview | ~multiprocessing.shared_memory.SharedMemory | FPDF_DOCUMENT | typing.Callable):
             The input PDF given as file path, byte buffer, bytes-like object, raw PDFium document handle, or wrapper around another supported object (see the type definition above).
             Native support is available for :class:`~pathlib.Path`, byte buffers, :class:`bytes` and :class:`ctypes.Array`.
             The other input types are resolved to these, as far as possible.
@@ -647,14 +652,13 @@ def _preprocess_input(input):
         if not input.is_file():
             raise FileNotFoundError(input)
     else:
-        if isinstance(input, SharedMemory):
-            # currently the handling is shm -> memoryview -> mmap
+        if SharedMemory and isinstance(input, SharedMemory):
+            # currently the resolution path is shm -> memoryview -> mmap
             to_close.append(input.close)
             input = input.buf
-            # FIXME want to switch to a ctypes array view to avoid unnecessary callbacks, but we ran into "cannot close exported pointers exist" exceptions...
-            # input = (ctypes.c_ubyte * len(input)).from_buffer(input)
         if isinstance(input, memoryview):
             input = input.obj
+        # NOTE in theory it might be good to handle mmap as bytes-like object, at least for SharedMemory to avoid callbacks and data copying - however, we currently don't do this due to complications with views held on an mmap - see PR(237)
         if isinstance(input, bytearray):
             input = (ctypes.c_ubyte * len(input)).from_buffer(input)
     return input, to_close

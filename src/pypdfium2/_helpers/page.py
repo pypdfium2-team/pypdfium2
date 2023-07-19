@@ -40,7 +40,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     @property
     def parent(self):  # AutoCloseable hook
-        # Might want to have this point to the direct parent, i. e. (self.pdf if formenv is None else self.formenv), but this might confuse callers expecting that parent be always pdf for pages.
+        # Might want to have this point to the direct parent, i. e. (self.pdf if formenv is None else self.formenv), but this might confuse callers expecting that parent always be pdf for pages.
         return self.pdf
     
     
