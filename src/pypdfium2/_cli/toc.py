@@ -30,14 +30,19 @@ def main(args):
     
     for bm in toc:
         count, dest = bm.get_count(), bm.get_dest()
-        index, (view_mode, view_pos) = (dest.get_index(), dest.get_view()) if dest else (None, (pdfium_c.PDFDEST_VIEW_UNKNOWN_MODE, []))
-        print(
-            "    " * bm.level +
-            "[%s] %s -> %s  # %s %s" % (
-                "*" if count == 0 else f"{count}" if count < 0 else f"+{count}",
-                bm.get_title(),
+        out = "    " * bm.level
+        out += "[%s] %s -> " % (
+            "*" if count == 0 else f"{count}" if count < 0 else f"+{count}",
+            bm.get_title(),
+        )
+        # distinguish between "no dest" and "dest with invalid values" while keeping result machine readable
+        if dest:
+            index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
+            out += "%s  # %s %s" % (
                 index+1 if index is not None else "?",
                 pdfium_i.ViewmodeToStr.get(view_mode),
                 round_list(view_pos, args.n_digits),
             )
-        )
+        else:
+            out += "_"
+        print(out)
