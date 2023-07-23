@@ -23,7 +23,7 @@ from pypdfium2_setup.packaging_base import (
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
-    BinaryTarget_Auto,
+    PlatformTarget_Auto,
     get_latest_version,
     call_ctypesgen,
     emplace_platfiles,
@@ -133,9 +133,9 @@ def generate_bindings(archives, version):
         shutil.rmtree(build_dir)
 
 
+# FIXME the code below is to some degree duplication of the higher-level setup.py::get_pdfium() logic and hence a bit questionable
+
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, emplace=False):
-    
-    # FIXME questionable code style?
     
     if not version:
         version = get_latest_version()
@@ -145,9 +145,9 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, 
     
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
-    if BinaryTarget_Auto in platforms:
+    if PlatformTarget_Auto in platforms:
         platforms = platforms.copy()
-        platforms[platforms.index(BinaryTarget_Auto)] = Host.platform
+        platforms[platforms.index(PlatformTarget_Auto)] = Host.platform
 
     clear_data(platforms)
     archives = download_releases(version, platforms, robust, max_workers, use_v8)
@@ -159,7 +159,7 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, 
 
 
 def parse_args(argv):
-    platform_choices = (BinaryTarget_Auto, *BinaryPlatforms)
+    platform_choices = (PlatformTarget_Auto, *BinaryPlatforms)
     parser = argparse.ArgumentParser(
         description = "Download pre-built PDFium packages and generate bindings.",
     )

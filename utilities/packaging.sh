@@ -7,7 +7,8 @@ set -v
 bash utilities/clean.sh
 bash utilities/check.sh
 
-python3 setupsrc/pypdfium2_setup/update_pdfium.py
+# calling update_pdfium is not actually necessary, but could be done to outsource binary download & bindings generation, rather than doing it within `build` calls
+# python3 setupsrc/pypdfium2_setup/update_pdfium.py
 python3 setupsrc/pypdfium2_setup/craft_packages.py
 
 twine check dist/*
