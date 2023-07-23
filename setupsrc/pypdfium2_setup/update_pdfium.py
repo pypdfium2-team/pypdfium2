@@ -16,17 +16,14 @@ from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, str(Path(__file__).parents[1]))
 # CONSIDER glob import or dotted access
 from pypdfium2_setup.packaging_base import (
-    Host,
     DataTree,
     VerStatusFileName,
     V8StatusFileName,
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
-    PlatformTarget_Auto,
     get_latest_version,
     call_ctypesgen,
-    emplace_platfiles,
 )
 
 
@@ -66,7 +63,7 @@ def _get_package(pl_name, version, robust, use_v8):
     return pl_name, fp
 
 
-def download_releases(version, platforms, robust, max_workers, use_v8):
+def download_releases(platforms, version, use_v8, max_workers, robust):
     
     if not max_workers:
         max_workers = len(platforms)
@@ -133,57 +130,34 @@ def generate_bindings(archives, version):
         shutil.rmtree(build_dir)
 
 
-# FIXME the code below is to some degree duplication of the higher-level setup.py::get_pdfium() logic and hence a bit questionable
-
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, emplace=False):
+def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     if not version:
         version = get_latest_version()
-    
     if not platforms:
-        platforms = [Host.platform] if emplace else BinaryPlatforms
-    
+        platforms = BinaryPlatforms
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
-    if PlatformTarget_Auto in platforms:
-        platforms = platforms.copy()
-        platforms[platforms.index(PlatformTarget_Auto)] = Host.platform
 
     clear_data(platforms)
-    archives = download_releases(version, platforms, robust, max_workers, use_v8)
+    archives = download_releases(platforms, version, use_v8, max_workers, robust)
     unpack_archives(archives)
     generate_bindings(archives, version)
-    
-    if emplace:
-        emplace_platfiles(Host.platform)
 
+
+# low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py
 
 def parse_args(argv):
-    platform_choices = (PlatformTarget_Auto, *BinaryPlatforms)
     parser = argparse.ArgumentParser(
         description = "Download pre-built PDFium packages and generate bindings.",
     )
     parser.add_argument(
+        # FIXME with metavar, choices are not visible in help by default - without it, the long choices list is repeated 4 times due to 2 flags and nargs="+"
         "--platforms", "-p",
         nargs = "+",
-        metavar = "identifier",
-        choices = platform_choices,
-        help = f"The platform(s) to include. `auto` represents the current host platform. Choices: {platform_choices}.",
-    )
-    parser.add_argument(
-        "--version", "-v",
-        type = int,
-        help = "The pdfium-binaries release to use (defaults to latest). Must be a valid tag integer."
-    )
-    parser.add_argument(
-        "--robust",
-        action = "store_true",
-        help = "Skip missing binaries instead of raising an exception.",
-    )
-    parser.add_argument(
-        "--max-workers",
-        type = int,
-        help = "Maximum number of jobs to run in parallel when downloading binaries.",
+        metavar = "ID",
+        choices = BinaryPlatforms,
+        help = f"The platform(s) to include. Choices: {BinaryPlatforms}",
     )
     parser.add_argument(
         "--use-v8",
@@ -191,9 +165,19 @@ def parse_args(argv):
         help = "Use PDFium V8 binaries for JavaScript and XFA support."
     )
     parser.add_argument(
-        "--emplace",
+        "--version", "-v",
+        type = int,
+        help = "The pdfium-binaries release to use (defaults to latest). Must be a valid tag integer."
+    )
+    parser.add_argument(
+        "--max-workers",
+        type = int,
+        help = "Maximum number of jobs to run in parallel when downloading binaries.",
+    )
+    parser.add_argument(
+        "--robust",
         action = "store_true",
-        help = "Move binaries for the host platform into the source tree.",
+        help = "Skip missing binaries instead of raising an exception.",
     )
     return parser.parse_args(argv)
 

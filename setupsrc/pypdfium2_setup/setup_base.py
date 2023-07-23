@@ -44,7 +44,6 @@ SetupKws = dict(
 def mkwheel(pl_name):
     
     emplace_platfiles(pl_name)
-    
     system = plat_to_system(pl_name)
     libname = LibnameForSystem[system]
     

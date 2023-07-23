@@ -34,9 +34,10 @@ class ArtefactStash:
     def __init__(self):
         
         self.tmpdir = None
+        
+        # FIXME some degree of duplication with base::get_platfiles()
         file_names = [BindingsFileName, LibnameForSystem[Host.system]]
         self.files = [fp for fp in [ModuleDir / fn for fn in file_names] if fp.exists()]
-        
         if len(self.files) == 0:
             return
         elif len(self.files) != 2:
