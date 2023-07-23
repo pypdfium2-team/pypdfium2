@@ -84,6 +84,8 @@ def main():
     parser.add_argument(
         "binary_spec",
         type = str.strip,
+        default = "",
+        nargs = "?",
     )
     args = parser.parse_args()
     
