@@ -228,13 +228,13 @@ def call_ctypesgen(target_dir, include_dir):
     # see https://github.com/ctypesgen/ctypesgen/issues/160
     
     bindings = target_dir / BindingsFileName
-    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", f"--strip-build-path={include_dir}", *sorted(include_dir.glob("*.h")), "-o", bindings]
+    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", f"--strip-build-path={include_dir}", *[h.name for h in sorted(include_dir.glob("*.h"))], "-o", bindings]
     
     if CTYPESGEN_IS_FORK:
         # extra arguments for our pypdfium2-specific fork of ctypesgen, not available in mainline ctypesgen (yet)
         args += ["--no-srcinfo"]
     
-    run_cmd(args, cwd=target_dir)
+    run_cmd(args, cwd=include_dir)
     
     text = bindings.read_text()
     text = text.replace(str(include_dir), ".")
