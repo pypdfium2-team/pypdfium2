@@ -26,11 +26,8 @@ def main():
     if binary_spec == PlatformTarget_None:
         setuptools.setup(**SetupKws)
         return
-    elif binary_spec == PlatformNames.sourcebuild:
-        pl_name = binary_spec
-    else:
-        pl_name = get_pdfium(binary_spec)
     
+    pl_name = get_pdfium(binary_spec)
     mkwheel(pl_name)
 
 
