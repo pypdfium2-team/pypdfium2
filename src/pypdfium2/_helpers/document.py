@@ -447,7 +447,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             index = len(self)
         
         if isinstance(pages, str):
-            ok = pdfium_c.FPDF_ImportPages(self, pdf, pages.encode("ascii"), index)
+            ok = pdfium_c.FPDF_ImportPages(self, pdf, (pages+"\x00").encode("ascii"), index)
         else:
             page_count = 0
             c_pages = None
