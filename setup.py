@@ -11,7 +11,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.emplace import get_pdfium
-from pypdfium2_setup.packaging_base import BinarySpec_EnvVar, PlatformTarget_None
+from pypdfium2_setup.packaging_base import (
+    BinarySpec_EnvVar,
+    PlatformTarget_None,
+    PlatformNames,
+)
 
 
 def main():
@@ -22,8 +26,11 @@ def main():
     if binary_spec == PlatformTarget_None:
         setuptools.setup(**SetupKws)
         return
+    elif binary_spec == PlatformNames.sourcebuild:
+        pl_name = binary_spec
+    else:
+        pl_name = get_pdfium(binary_spec)
     
-    pl_name = get_pdfium(binary_spec)
     mkwheel(pl_name)
 
 

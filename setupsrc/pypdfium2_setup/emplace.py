@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
 import sys
 import argparse
 from pathlib import Path
@@ -50,6 +49,7 @@ def get_pdfium(binary_spec):
             raise RuntimeError(f"No pre-built binaries available for system {Host._system_name} (libc info {Host._libc_info}) on machine {Host._machine_name}. You may place custom binaries & bindings in data/sourcebuild and install with `{BinarySpec_EnvVar}=sourcebuild`.")
     elif hasattr(PlatformNames, binary_spec):
         pl_name = getattr(PlatformNames, binary_spec)
+        assert pl_name != PlatformNames.sourcebuild
     else:
         raise ValueError(f"Invalid binary spec '{binary_spec}'")
     
@@ -89,8 +89,11 @@ def main():
         print("Removing existing in-tree platform files, if any.", file=sys.stderr)
         clean_platfiles()
         return
+    elif args.binary_spec == PlatformNames.sourcebuild:
+        pl_name = args.binary_spec
+    else:
+        pl_name = get_pdfium(args.binary_spec)
     
-    pl_name = get_pdfium(args.binary_spec)
     emplace_platfiles(pl_name)
 
 
