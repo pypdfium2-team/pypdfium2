@@ -14,7 +14,6 @@ from pypdfium2_setup.emplace import get_pdfium
 from pypdfium2_setup.packaging_base import (
     BinarySpec_EnvVar,
     PlatformTarget_None,
-    PlatformNames,
 )
 
 

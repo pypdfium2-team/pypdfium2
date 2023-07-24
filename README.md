@@ -35,7 +35,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     PDFIUM_BINARY="sourcebuild" python3 -m pip install .
     ```
     Building PDFium may take a long time because it comes with its own toolchain and bundled dependencies, rather than using system-provided components.[^pdfium_buildsystem]
-    
+  
   The host system needs to provide `git` and a C pre-processor (`gcc` or `clang`).
   Setup code also depends on the Python packages `ctypesgen`, `wheel`, and `setuptools`, which will usually get installed automatically.
   
@@ -66,6 +66,7 @@ As pypdfium2 uses external binaries, there are some special setup aspects to con
     + If set to a certain platform identifier, binaries for the requested platform will be used.[^platform_ids]
     + If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts, assuming a prior run of `build_pdfium.py`.
     + If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
+    `sourcebuild` and `none` are exclusive, they cannot be followed by additional specifiers.
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
   - Version: If given, use the specified pdfium-binaries release. Otherwise, use the latest one.
 

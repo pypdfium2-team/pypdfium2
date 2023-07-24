@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import sys
 import argparse
 from pathlib import Path
@@ -80,12 +81,15 @@ def get_pdfium(binary_spec):
 
 def main():
     
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description = "Manage in-tree artifacts from an editable install.",
+    )
     parser.add_argument(
         "binary_spec",
         type = str.strip,
-        default = "",
+        default = os.environ.get(BinarySpec_EnvVar, ""),
         nargs = "?",
+        help = f"The binary specifier. Same format as of ${BinarySpec_EnvVar} on setup.",
     )
     args = parser.parse_args()
     

@@ -12,16 +12,9 @@ import subprocess
 from pathlib import Path
 
 
-BinarySpec_EnvVar      = "PDFIUM_BINARY"
-BinarySpec_VersionSep  = ":"
-BinarySpec_V8Indicator = "-v8"
-PlatformTarget_None    = "none"  # sdist
-PlatformTarget_Auto    = "auto"
-VersionTarget_Latest   = "latest"
-
-BindingsFileName  = "raw.py"  # NOTE if you rename this, also rename or delete the instance in the `bindings/` dir
 VerStatusFileName = ".pdfium_version.txt"
 V8StatusFileName  = ".pdfium_is_v8.txt"
+BindingsFileName  = "raw.py"  # NOTE if you rename this, also rename or delete the instance in the `bindings/` dir
 
 HomeDir           = Path.home()
 SourceTree        = Path(__file__).parents[2]
@@ -31,6 +24,17 @@ ModuleDir         = SourceTree / "src" / "pypdfium2"
 VersionFile       = ModuleDir / "version.py"
 Changelog         = SourceTree / "docs" / "devel" / "changelog.md"
 ChangelogStaging  = SourceTree / "docs" / "devel" / "changelog_staging.md"
+AutoreleaseDir    = SourceTree / "autorelease"
+MajorUpdateFile   = AutoreleaseDir / "update_major.txt"
+BetaUpdateFile    = AutoreleaseDir / "update_beta.txt"
+RefBindingsFile   = SourceTree / "bindings" / BindingsFileName
+
+BinarySpec_EnvVar      = "PDFIUM_BINARY"
+BinarySpec_VersionSep  = ":"
+BinarySpec_V8Indicator = "-v8"
+PlatformTarget_None    = "none"  # sdist
+PlatformTarget_Auto    = "auto"  # host
+VersionTarget_Latest   = "latest"
 
 RepositoryURL     = "https://github.com/pypdfium2-team/pypdfium2"
 PDFium_URL        = "https://pdfium.googlesource.com/pdfium"
