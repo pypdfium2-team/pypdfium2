@@ -83,14 +83,16 @@ def safe_extract(archive_path, dest_dir):
     if sys.version_info >= (3, 11, 4):  # PEP 706
         shutil.unpack_archive(archive_path, dest_dir, format="tar", filter="data")
     else:  # workaround
+        
+        if sys.version_info >= (3, 9):
+            _is_relative_to = lambda path, dir: path.is_relative_to(dir)
+        else:
+            _is_relative_to = lambda path, dir: os.path.commonpath([dir, path]) == str(dir)
+        
         dest_dir = dest_dir.resolve()
         with tarfile.open(archive_path) as tar:
             for member in tar.getmembers():
-                if sys.version_info >= (3, 9):
-                    ok = (dest_dir/member.name).resolve().is_relative_to(dest_dir)
-                else:
-                    ok = str(dest_dir) == os.path.commonpath( [dest_dir, (dest_dir/member.name).resolve()] )
-                if not ok:
+                if not _is_relative_to((dest_dir/member.name).resolve(), dest_dir):
                     raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
             tar.extractall(dest_dir)
 
