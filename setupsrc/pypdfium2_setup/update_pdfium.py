@@ -78,26 +78,28 @@ def download_releases(platforms, version, use_v8, max_workers, robust):
     return archives
 
 
-def safe_extract(tar, dest_dir, **kwargs):
-    
-    # Workaround against CVE-2007-4559 (path traversal attack) (thanks @Kasimir123 / @TrellixVulnTeam)
-    # Actually, we would just like to use shutil.unpack_archive() or similar, but to the author's knowledge, the stdlib still does not provide any (simple) means to extract tars safely (as of Feb 2023).
-    # It is not understandable why they don't just add an option `prevent_traversal` or something to shutil.unpack_archive().
-    
-    dest_dir = dest_dir.resolve()
-    for member in tar.getmembers():
-        # if not (dest_dir/member.name).resolve().is_relative_to(dest_dir):  # python >= 3.9
-        if str(dest_dir) != os.path.commonpath( [dest_dir, (dest_dir/member.name).resolve()] ):
-            raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
-    tar.extractall(dest_dir, **kwargs)
+# CVE-2007-4559
+def safe_extract(archive_path, dest_dir):
+    if sys.version_info >= (3, 11, 4):  # PEP 706
+        shutil.unpack_archive(archive_path, dest_dir, format="tar", filter="data")
+    else:  # workaround
+        dest_dir = dest_dir.resolve()
+        with tarfile.open(archive_path) as tar:
+            for member in tar.getmembers():
+                if sys.version_info >= (3, 9):
+                    ok = (dest_dir/member.name).resolve().is_relative_to(dest_dir)
+                else:
+                    ok = str(dest_dir) == os.path.commonpath( [dest_dir, (dest_dir/member.name).resolve()] )
+                if not ok:
+                    raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
+            tar.extractall(dest_dir)
 
 
 def unpack_archives(archives):
-    for pl_name, fp in archives.items():
+    for pl_name, archive_path in archives.items():
         dest_dir = DataTree / pl_name / "build_tar"
-        with tarfile.open(fp) as archive:
-            safe_extract(archive, dest_dir)
-        fp.unlink()
+        safe_extract(archive_path, dest_dir)
+        archive_path.unlink()
 
 
 def generate_bindings(archives, version):
