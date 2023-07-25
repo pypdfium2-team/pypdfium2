@@ -10,75 +10,24 @@ import setuptools
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
-# CONSIDER glob import or dotted access
+from pypdfium2_setup.emplace import get_pdfium
 from pypdfium2_setup.packaging_base import (
-    Host,
-    DataTree,
-    BinaryTargetVar,
-    BinaryTarget_Auto,
-    BinaryTarget_None,
-    VersionTargetVar,
-    VersionTarget_Latest,
-    VerStatusFileName,
-    V8StatusFileName,
-    PlatformNames,
-    get_platfiles,
-    get_latest_version,
+    BinarySpec_EnvVar,
+    PlatformTarget_None,
 )
 
 
-def install_handler():
-    
-    # CONSIDER Linux/macOS: check that minimum OS version requirements are fulfilled
-    
-    from pypdfium2_setup import update_pdfium
-    from pypdfium2_setup.setup_base import mkwheel
-    
-    pl_name = Host.platform
-    if pl_name is None:
-        # If PDFium had a proper build system, we could trigger a source build here
-        raise RuntimeError(f"No pre-built binaries available for system {Host._system_name} (libc info {Host._libc_info}) on machine {Host._machine_name}. You may place custom binaries & bindings in data/sourcebuild and install with `{BinaryTargetVar}=sourcebuild`.")
-    
-    pl_dir = DataTree / pl_name
-    ver_file = pl_dir / VerStatusFileName
-    
-    prev_ver = None
-    if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
-        prev_ver = int( ver_file.read_text().strip() )
-    
-    new_ver = os.environ.get(VersionTargetVar, None)
-    if not new_ver or (new_ver.lower() == VersionTarget_Latest):
-        new_ver = get_latest_version()
-    else:
-        new_ver = int(new_ver)
-    
-    had_v8 = (pl_dir / V8StatusFileName).exists()
-    use_v8 = bool(int( os.environ.get("PDFIUM_USE_V8", 0) ))
-    
-    if (prev_ver != new_ver) or (had_v8 != use_v8):
-        print(f"Switching pdfium binary from {prev_ver} (v8 {had_v8}) to {new_ver} (v8 {use_v8})", file=sys.stderr)
-        update_pdfium.main([pl_name], version=new_ver, use_v8=use_v8)
-    mkwheel(pl_name)
-
-
-def packaging_handler(target):
+def main():
     
     from pypdfium2_setup.setup_base import mkwheel, SetupKws
     
-    if target == BinaryTarget_None:
+    binary_spec = os.environ.get(BinarySpec_EnvVar, "").strip()
+    if binary_spec == PlatformTarget_None:
         setuptools.setup(**SetupKws)
-    elif hasattr(PlatformNames, target):
-        mkwheel( getattr(PlatformNames, target) )
-    else:
-        raise ValueError(f"Invalid deployment target '{target}'")
-
-
-def main():
-    target = os.environ.get(BinaryTargetVar, None)
-    if not target or (target.lower() == BinaryTarget_Auto):
-        install_handler()
-    else:
-        packaging_handler(target)
+        return
+    
+    pl_name = get_pdfium(binary_spec)
+    mkwheel(pl_name)
 
 
 if __name__ == "__main__":

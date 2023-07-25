@@ -13,14 +13,17 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     clean_platfiles,
+    get_latest_version,
     Host,
     ModuleDir,
     BindingsFileName,
     LibnameForSystem,
     BinaryPlatforms,
     SourceTree,
-    BinaryTargetVar,
-    BinaryTarget_None,
+    BinarySpec_EnvVar,
+    BinarySpec_V8Indicator,
+    BinarySpec_VersionSep,
+    PlatformTarget_None,
 )
 
 
@@ -31,9 +34,10 @@ class ArtefactStash:
     def __init__(self):
         
         self.tmpdir = None
+        
+        # FIXME some degree of duplication with base::get_platfiles()
         file_names = [BindingsFileName, LibnameForSystem[Host.system]]
         self.files = [fp for fp in [ModuleDir / fn for fn in file_names] if fp.exists()]
-        
         if len(self.files) == 0:
             return
         elif len(self.files) != 2:
@@ -59,18 +63,30 @@ def run_build(args):
 def main():
     
     parser = argparse.ArgumentParser(
-        description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`. (This script does not take any arguments.)",
+        description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`.",
     )
-    parser.parse_args()
+    parser.add_argument(
+        "--use-v8",
+        action = "store_true",
+    )
+    parser.add_argument(
+        "--version",
+        type = int,
+        default = None,
+    )
+    args = parser.parse_args()
+    if not args.version:
+        args.version = get_latest_version()
     
     stash = ArtefactStash()
     
-    os.environ[BinaryTargetVar] = BinaryTarget_None
+    os.environ[BinarySpec_EnvVar] = PlatformTarget_None
     run_build(["--sdist"])
     clean_platfiles()
     
+    suffix = (BinarySpec_V8Indicator if args.use_v8 else "") + BinarySpec_VersionSep + str(args.version)
     for plat in BinaryPlatforms:
-        os.environ[BinaryTargetVar] = plat
+        os.environ[BinarySpec_EnvVar] = plat + suffix
         run_build(["--wheel"])
         clean_platfiles()
     

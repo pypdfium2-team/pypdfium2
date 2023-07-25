@@ -29,13 +29,12 @@ from pypdfium2_setup.packaging_base import (
     VersionFile,
     VerNamespace,
     BindingsFileName,
+    AutoreleaseDir,
+    MajorUpdateFile,
+    BetaUpdateFile,
+    RefBindingsFile,
 )
 
-
-AutoreleaseDir  = SourceTree / "autorelease"
-MajorUpdateFile = AutoreleaseDir / "update_major.txt"
-BetaUpdateFile  = AutoreleaseDir / "update_beta.txt"
-RefBindingsFile = SourceTree / "bindings" / BindingsFileName
 
 # these files/dirs do not necessarily need to have been changed, `git add` silently skips that
 PlacesToRegister = (AutoreleaseDir, VersionFile, Changelog, ChangelogStaging, RefBindingsFile)
@@ -191,6 +190,7 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     if c_updates:
         
         # FIXME is there a faster way to get pdfium's commit log?
+        # CONSIDER specifically show changes to public/ ?
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tmpdir)

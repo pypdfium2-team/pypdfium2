@@ -32,10 +32,10 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   * With a locally built PDFium binary
     ```bash
     python3 setupsrc/pypdfium2_setup/build_pdfium.py  # call with --help to list options
-    PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
+    PDFIUM_BINARY="sourcebuild" python3 -m pip install .
     ```
     Building PDFium may take a long time because it comes with its own toolchain and bundled dependencies, rather than using system-provided components.[^pdfium_buildsystem]
-    
+  
   The host system needs to provide `git` and a C pre-processor (`gcc` or `clang`).
   Setup code also depends on the Python packages `ctypesgen`, `wheel`, and `setuptools`, which will usually get installed automatically.
   
@@ -59,15 +59,16 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 As pypdfium2 uses external binaries, there are some special setup aspects to consider.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
-* The environment variable `$PDFIUM_PLATFORM` controls which binary to include on setup.
-  * If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
-    By default, the latest pdfium-binaries release is used, otherwise `$PDFIUM_VERSION` may be set to request a specific one.
-    Moreover, `$PDFIUM_USE_V8=1` may be set to use the V8 (JavaScript) enabled binaries.
-    (If matching platform files already exist in the `data/` cache, they will be reused as-is.)
-  * If set to a certain platform identifier, binaries for the requested platform will be used.[^platform_ids]
-    In this case, platform files will not be downloaded/generated automatically, but need to be supplied beforehand using the `update_pdfium.py` script.
-  * If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts, assuming a prior run of `build_pdfium.py`.
-  * If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
+* The environment variable `$PDFIUM_BINARY` controls which binary to include on setup.
+  The format specification is `[$platform][-v8][:$version]`.
+  - Platform:
+    + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
+    + If set to a certain platform identifier, binaries for the requested platform will be used.[^platform_ids]
+    + If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts, assuming a prior run of `build_pdfium.py`.
+    + If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
+    `sourcebuild` and `none` are exclusive, they cannot be followed by additional specifiers.
+  - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
+  - Version: If given, use the specified pdfium-binaries release. Otherwise, use the latest one.
 
 [^platform_ids]: This is mainly of internal interest for packaging, so that wheels can be crafted for any platform without access to a native host.
 
