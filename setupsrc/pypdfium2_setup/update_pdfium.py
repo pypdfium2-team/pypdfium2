@@ -4,16 +4,15 @@
 
 import sys
 import shutil
-import tarfile
 import argparse
 import traceback
 import functools
-import os.path
 from pathlib import Path
 from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
+from pypdfium2_setup._compat import safe_unpack_tar
 # CONSIDER glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     DataTree,
@@ -78,29 +77,10 @@ def download_releases(platforms, version, use_v8, max_workers, robust):
     return archives
 
 
-# CVE-2007-4559
-def safe_extract(archive_path, dest_dir):
-    if sys.version_info >= (3, 11, 4):  # PEP 706
-        shutil.unpack_archive(archive_path, dest_dir, format="tar", filter="data")
-    else:  # workaround
-        
-        if sys.version_info >= (3, 9):
-            _is_relative_to = lambda path, dir: path.is_relative_to(dir)
-        else:
-            _is_relative_to = lambda path, dir: os.path.commonpath([dir, path]) == str(dir)
-        
-        dest_dir = dest_dir.resolve()
-        with tarfile.open(archive_path) as tar:
-            for member in tar.getmembers():
-                if not _is_relative_to((dest_dir/member.name).resolve(), dest_dir):
-                    raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
-            tar.extractall(dest_dir)
-
-
 def unpack_archives(archives):
     for pl_name, archive_path in archives.items():
         dest_dir = DataTree / pl_name / "build_tar"
-        safe_extract(archive_path, dest_dir)
+        safe_unpack_tar(archive_path, dest_dir)
         archive_path.unlink()
 
 
