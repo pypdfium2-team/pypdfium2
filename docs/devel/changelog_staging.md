@@ -4,8 +4,26 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- Some API breaking changes, without a major increment due to the comparatively low overall impact.
-  - `PdfDocument.get_toc()` API changed. Bookmarks are now provided as wrapper objects with getter methods, rather than as namedtuples.
-  - Removed `mk_formconfig` parameter of `PdfDocument.render()`.
-- Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for `PdfDocument(input)`.
-- CLI/renderer: added option to configure prefix of output images
+
+*API breaking changes*
+- (Planned) Rendering: The parallel, document-level method `PdfDocument.render()` has been removed from the public API.
+  Please use `PdfPage.render()` instead, and consider caller-side, process based parallelization.
+  Parallel rendering to files is still available through the CLI (an API entrypoint is provided, see below).
+- `PdfDocument.get_toc()`: Replaced bookmark namedtuples with method-oriented wrapper classes `PdfBookmark` and `PdfDest`.
+- Setup: renamed `$PDFIUM_PLATFORM` to `$PDFIUM_BINARY`.
+
+*Improvements and new features*
+- (Planned) PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
+  `pypdfium2.raw` is now a wrapper around the actual bindings file `_raw_unsafe.py`.
+  In this course, filtering has been installed to free the namespace of unwanted members.
+- `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
+- Embedders may now call into the command-line API using the entrypoint function `pypdfium2.main()`.
+- CLI: Implemented configurable input type for testing.
+- CLI/renderer:
+  * Added options to configure parallelization and output prefix.
+  * Fixed parallel rendering with byte buffers on Linux by avoiding the process start method `fork`.
+- Improved setup code.
+
+*Rationales*
+- `PdfDocument.render()` got removed because ... TODO
+- The TOC/Bookmark API was changed because ... TODO
