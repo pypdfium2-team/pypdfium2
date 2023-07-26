@@ -71,9 +71,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
             Form env, if :meth:`.init_forms` was called and the document has forms.
     """
     
-    def __init__(self, input, password=None, autoclose=False, to_close=None):
+    def __init__(self, input, password=None, autoclose=False):
         
-        # TODO remove to_close (have caller insert into data_closer instead)
         # CONSIDER adding a public method to inject into data_holder/data_closer
         
         self._orig_input = input
@@ -81,14 +80,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
-        if to_close:
-            self._data_closer.extend(to_close)
         
         self._input, to_close = _preprocess_input(self._orig_input)
         if autoclose:
             self._data_closer.extend(to_close)
         
-        # TODO(apibreak) formenv: consider cached property (i.e. automatic init_forms() on property access)
         self.formenv = None
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input

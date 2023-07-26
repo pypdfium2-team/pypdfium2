@@ -109,21 +109,12 @@ class input_maker:
             size = buffer.seek(0, os.SEEK_END)
             buffer.seek(0)
             input = SharedMemory(create=True, size=size)
-            self._to_close.append(_destroy_shmem(input))
+            self._to_close.append(lambda: input.unlink())
             buffer.readinto(input.buf)  # memoryview of mmap
             buffer.close()
         else:
             assert False
         return input
-
-
-class _destroy_shmem:
-    # safety check to ensure we don't have a wrong object also implementing unlink (e.g. Path)
-    def __init__(self, shmem):
-        self._shmem = shmem
-        assert isinstance(self._shmem, SharedMemory)
-    def __call__(self):
-        self._shmem.unlink()
 
 
 def get_input(args, **kwargs):
@@ -134,7 +125,9 @@ def get_input(args, **kwargs):
         inmode = args.input_mode,
     )
     input = callable() if args.input_direct else callable
-    pdf = pdfium.PdfDocument(input, password=args.password, autoclose=True, to_close=callable._to_close, **kwargs)
+    pdf = pdfium.PdfDocument(input, password=args.password, autoclose=True, **kwargs)
+    for f in reversed(callable._to_close):
+        pdf._data_closer.insert(0, f)
     logger.debug(f"CLI: created pdf {pdf!r}")
 
     if "pages" in args and not args.pages:
