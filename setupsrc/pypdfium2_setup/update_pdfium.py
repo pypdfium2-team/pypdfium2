@@ -146,12 +146,12 @@ def parse_args(argv):
     parser.add_argument(
         "--use-v8",
         action = "store_true",
-        help = "Use PDFium V8 binaries for JavaScript and XFA support."
+        help = "Use V8 binaries (JavaScript/XFA support)."
     )
     parser.add_argument(
         "--version", "-v",
         type = int,
-        help = "The pdfium-binaries release to use (defaults to latest). Must be a valid tag integer."
+        help = "The binaries release to use (defaults to latest). Must be a valid tag integer."
     )
     parser.add_argument(
         "--max-workers",

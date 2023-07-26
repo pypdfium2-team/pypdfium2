@@ -44,6 +44,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             The other input types are resolved to these, as far as possible.
             In this context, "byte buffer" refers to an object implementing ``seek() tell() (readinto() | read())`` in a :class:`~io.BufferedIOBase` like fashion.
             Buffers that do not provide ``readinto()`` fall back to ``read()`` and :func:`~ctypes.memmove`.
+            Memory maps are currently treated as buffer. Convert to a ctypes array if handling as bytes-like object is desired instead.
         
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
@@ -52,9 +53,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         autoclose (bool):
             Whether byte buffer input should be automatically closed on finalization.
             If True and the input is shared memory, it will be closed but not destroyed.
-        
-        to_close (typing.Sequence | None):
-            A list of callbacks to be run on after document closing. Takes effect regardless of the *autoclose* option.
         
     Raises:
         PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
@@ -75,6 +73,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def __init__(self, input, password=None, autoclose=False, to_close=None):
         
+        # TODO remove to_close (have caller insert into data_closer instead)
         # CONSIDER adding a public method to inject into data_holder/data_closer
         
         self._orig_input = input

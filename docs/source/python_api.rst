@@ -70,6 +70,10 @@ Version
 *******
 .. automodule:: pypdfium2.version
 
+CLI Entrypoint
+**************
+.. autofunction:: pypdfium2.main
+
 Document
 ********
 .. automodule:: pypdfium2._helpers.document

@@ -53,10 +53,25 @@ def get_parser():
     return main_parser
 
 
-def api_main(raw_args=sys.argv[1:]):
+def main(argv):
+    """
+    API entrypoint to pypdfium2's command-line interface.
+    See :doc:`./shell_api` or ``pypdfium2 --help``.
+    
+    Parameters:
+        argv (list[str]):
+            The command-line arguments.
+    
+    Example:
+        
+        .. code-block:: python
+            
+            # rendering
+            main(["render", "my_file.pdf", "-o=out/", "--prefix=result_", "--scale=4", "--rev-byteorder", "--prefer-bgrx"])
+    """
     
     parser = get_parser()
-    args = parser.parse_args(raw_args)
+    args = parser.parse_args(argv)
     
     if not args.subcommand:
         parser.print_help()
@@ -67,7 +82,7 @@ def api_main(raw_args=sys.argv[1:]):
 
 def cli_main():
     setup_logging()
-    api_main()
+    main(sys.argv[1:])
 
 
 if __name__ == "__main__":
