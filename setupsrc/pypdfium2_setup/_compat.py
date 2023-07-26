@@ -16,17 +16,17 @@ if sys.version_info >= (3, 11, 4):  # PEP 706
 else:  # workaround
     
     if sys.version_info >= (3, 9):
-        _is_relative_to = lambda path, dir: path.is_relative_to(dir)
+        _is_within_dir = lambda path, dir: path.is_relative_to(dir)
     else:
         import os.path
-        _is_relative_to = lambda path, dir: os.path.commonpath([dir, path]) == str(dir)
+        _is_within_dir = lambda path, dir: os.path.commonpath([dir, path]) == str(dir)
     
     import tarfile
     
     def safe_unpack_tar(archive_path, dest_dir):
         dest_dir = dest_dir.resolve()
         with tarfile.open(archive_path) as tar:
-            for member in tar.getmembers():
-                if not _is_relative_to((dest_dir/member.name).resolve(), dest_dir):
-                    raise RuntimeError("Attempted path traversal in tar archive (probably malicious).")
+            for m in tar.getmembers():
+                if not (m.isfile() or m.isdir()) or not _is_within_dir((dest_dir/m.name).resolve(), dest_dir):
+                    raise RuntimeError("Path traversal, symlink or special member in tar archive (probably malicious).")
             tar.extractall(dest_dir)
