@@ -4,14 +4,14 @@
 Python API
 ==========
 
+.. important::
+   Documentation reflects the version of pypdfium2 it was built with.
+   Version information on additions and changes may or may not be present,
+   meaning this document can not be used to deduce the overall behavior of an older release.
+
 
 Preface
 *******
-
-Thread incompatibility
-----------------------
-
-PDFium is not thread-compatible. If you need to parallelize tasks, use processes instead of threads.
 
 
 API layers
@@ -41,7 +41,7 @@ and the consequences of usage mistakes are generally less serious.
 Memory management
 -----------------
 
-.. Information on PDFium's behaviour: https://groups.google.com/g/pdfium/c/7qLFskabmnk/m/xQEnXiG5BgAJ
+.. Information on PDFium's behavior: https://groups.google.com/g/pdfium/c/7qLFskabmnk/m/xQEnXiG5BgAJ
 .. Limitations of weakref: https://stackoverflow.com/q/52648418/15547292/#comment131514594_58243606
 
 .. note::
@@ -51,7 +51,7 @@ Memory management
 PDFium objects commonly need to be closed by the caller to release allocated memory. [#ac_obj_ownership]_
 Where necessary, pypdfium2's helper classes implement automatic closing on garbage collection using :class:`weakref.finalize`. Additionally, they provide ``close()`` methods that can be used to release memory explicitly.
 
-It may be advantageous to close objects explicitly instead of relying on Python garbage collection behaviour, to release allocated memory and acquired file handles immediately. [#ac_obj_opaqueness]_
+It may be advantageous to close objects explicitly instead of relying on Python garbage collection behavior, to release allocated memory and acquired file handles immediately. [#ac_obj_opaqueness]_
 
 Closed objects must not be accessed anymore.
 Closing an object sets the underlying ``raw`` attribute to None, which should ideally prevent illegal calls on closed raw handles, though.
@@ -64,6 +64,15 @@ Due to the design of :mod:`weakref`, finalizers can only be attached to wrapper 
 .. [#ac_obj_ownership] Only objects owned by the caller of PDFium need to be closed. For instance, page objects that belong to a page are automatically freed by PDFium, while the caller is responsible for loose page objects.
 
 .. [#ac_obj_opaqueness] Python does not know how many resources an opaque C object might bind.
+
+
+Thread incompatibility
+----------------------
+
+PDFium is not thread-compatible, meaning that one must not use multiple pdfium functions simultaneously from different threads.
+
+Since version 5, pypdfium2 wraps pdfium functions with a mutex to ensure only a single pdfium call can run at a time.
+This makes pypdfium2 safe for use in a threaded context, but threading pdfium calls themselves does not provide any performance advantage.
 
 
 Version
