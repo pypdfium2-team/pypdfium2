@@ -8,7 +8,6 @@ from pathlib import Path
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-import pypdfium2.__main__ as pdfium_cli
 from .conftest import TestResources, TestExpectations
 
 
@@ -17,13 +16,13 @@ def run_cli(argv, exp_stdout=None, normalize_lfs=False):
     argv = [str(a) for a in argv]
     
     if exp_stdout is None:
-        pdfium_cli.api_main(argv)
+        pdfium.main(argv)
         
     else:
         
         stdout_buf = io.StringIO()
         with contextlib.redirect_stdout(stdout_buf):
-            pdfium_cli.api_main(argv)
+            pdfium.main(argv)
         
         if isinstance(exp_stdout, Path):
             exp_stdout = exp_stdout.read_text()
