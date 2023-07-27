@@ -55,4 +55,4 @@ jobs:
         run: PDFIUM_BINARY="sourcebuild" python3 -m pip install .
       
       - name: Run test suite
-        run: make test
+        run: ./run test

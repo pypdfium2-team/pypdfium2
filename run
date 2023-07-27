@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: CC-BY-4.0
+
+# FIXME add support for running multiple commands at once
+# FIXME auto-completion
+
+args="${@:2}"
+
+function check() {
+    autoflake src/ setupsrc/ tests/ tests_old/ setup.py docs/source/conf.py --recursive --remove-all-unused-imports --ignore-pass-statements --ignore-init-module-imports
+    codespell --skip="./docs/build,./tests/resources,./tests/output,./tests_old/output,./data,./sourcebuild,./dist,./.git,__pycache__,.mypy_cache,.hypothesis" -L "tabe,splitted,fith,flate"
+    reuse lint
+}
+
+function clean() {
+    rm -rf src/pypdfium2.egg-info/ dist data/*
+    rm -f tests/output/* src/pypdfium2.egg-info/SOURCES.txt
+}
+
+function packaging() {
+    clean
+    check
+
+    # calling update_pdfium is not actually necessary, but could be done to outsource binary download & bindings generation, rather than doing it within `build` calls
+    # python3 setupsrc/pypdfium2_setup/update_pdfium.py
+    python3 setupsrc/pypdfium2_setup/craft_packages.py
+
+    twine check dist/*
+    # ignore W002: erroneous detection of __init__.py files as duplicates
+    check-wheel-contents dist/*.whl --ignore W002
+}
+
+set -x
+
+case $1 in
+
+test)
+    python3 -m pytest tests/ tests_old/ $args;;
+
+coverage)
+    python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/_raw_unsafe.py,setupsrc/*" -m pytest tests/ tests_old/
+    python3 -m coverage report;;
+
+docs-build)
+    python3 -m sphinx -b html docs/source docs/build/html;;
+
+docs-open)
+    xdg-open docs/build/html/index.html &>/dev/null;;
+
+check)
+    check;;
+
+clean)
+    clean;;
+
+packaging)
+    packaging;;
+
+build)
+    python3 setupsrc/pypdfium2_setup/build_pdfium.py $args;;
+
+emplace)
+    python3 setupsrc/pypdfium2_setup/emplace.py $args;;
+
+esac

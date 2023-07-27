@@ -595,7 +595,7 @@ This provides us with full control over the build environment and the used comma
 
 pypdfium2 contains a small test suite to verify the library's functionality. It is written with [pytest](https://github.com/pytest-dev/pytest/):
 ```bash
-python3 -m pytest tests/ tests_old/
+./run test
 ```
 
 Note that ...
@@ -604,7 +604,7 @@ Note that ...
 
 To get code coverage statistics, you can run
 ```bash
-make coverage
+./run coverage
 ```
 
 Sometimes, it can also be helpful to test code on many PDFs.[^testing_corpora]
