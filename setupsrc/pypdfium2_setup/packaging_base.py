@@ -14,7 +14,7 @@ from pathlib import Path
 
 VerStatusFileName = ".pdfium_version.txt"
 V8StatusFileName  = ".pdfium_is_v8.txt"
-BindingsFileName  = "raw.py"  # NOTE if you rename this, also rename or delete the instance in the `bindings/` dir
+BindingsFileName  = "_raw_unsafe.py"  # NOTE if you rename this, also rename or delete the instance in the `bindings/` dir
 
 HomeDir           = Path.home()
 SourceTree        = Path(__file__).parents[2]

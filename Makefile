@@ -6,7 +6,7 @@ test:
 	python3 -m pytest tests/ tests_old/
 
 coverage:
-	python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/raw.py,setupsrc/*" -m pytest tests/ tests_old/
+	python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/_raw_unsafe.py,setupsrc/*" -m pytest tests/ tests_old/
 	python3 -m coverage report
 
 docs-build:
@@ -32,4 +32,4 @@ packaging:
 
 rebuild-bindings:
 	python3 setupsrc/pypdfium2_setup/update_pdfium.py -p auto --emplace
-	cp src/pypdfium2/raw.py bindings/raw.py
+	cp src/pypdfium2/_raw_unsafe.py bindings/_raw_unsafe.py
