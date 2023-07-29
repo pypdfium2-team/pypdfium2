@@ -544,6 +544,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         logger.info(f"Rendering page {index+1} ...")
         
+        # FIXME theoretically, it should be possible to instantiate the pdf only once per process
+        # https://stackoverflow.com/a/28508998/15547292 suggests to implement this by exploiting global variables, as mp does not provide a native way of passing intitializer result into workers.
         pdf = cls(input, password=password, autoclose=True)
         if need_formenv:
             pdf.init_forms()
@@ -555,6 +557,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         # NOTE We MUST NOT call bitmap.close() before the converted object is serialized to the main process, otherwise we would free the buffer of a foreign bitmap prematurely if the converted object references the buffer rather than owning a copy. Confirmed by POC.
         # This is not an issue when freeing the bitmap on garbage collection, provided the converted object keeps the buffer alive.
+        # I think we could also wrap the return in a try/finally clause for explicit closing.
+        # Anyway, all this is not relevant anymore since we save in the converter.
         
         for g in (page, pdf):
             g.close()

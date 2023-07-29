@@ -5,14 +5,13 @@ Python API
 ==========
 
 .. important::
-   Documentation reflects the version of pypdfium2 it was built with.
-   Version information on additions and changes may or may not be present,
-   meaning this document can not be used to deduce the overall behavior of an older release.
+   API documentation reflects the version of pypdfium2 it was built with.
+   Version information on changes and additions may or may not be present,
+   meaning this document cannot generally be used to deduce compatibility with an older release.
 
 
 Preface
 *******
-
 
 API layers
 ----------
@@ -21,7 +20,7 @@ pypdfium2 provides multiple API layers:
 
 * The raw PDFium API, to be used with :mod:`ctypes` (namespace ``pypdfium2.raw``).
 * The support model API, which is a nice set of Python helper classes around the raw API (namespace ``pypdfium2``).
-* Additionally, there is the internal API, which contains various utilities that are not fit for the main support model (namespace ``pypdfium2.internal``).
+* The internal API, which contains various lower-level, semi-private utilities that aid with using the raw API. (``pypdfium2.internal``).
 
 All wrapper objects provide a ``raw`` attribute to access the underlying ctypes object.
 In addition, helpers automatically resolve to raw if used as C function parameter. [#ctypes_param_hook]_
@@ -31,9 +30,10 @@ The raw API is quite stable and provides a high level of backwards compatibility
 well-tested and relied on by popular projects), but it can be difficult to use, and special care needs
 to be taken about memory management.
 
-The support model API is still in development. Backwards incompatible changes may be applied occasionally,
-though they are usually limited to major releases. On the other hand, it is considerably easier to use,
-and the consequences of usage mistakes are generally less serious.
+The support model wraps raw pdfium functions in pythonic APIs that do not require knowledge of ctypes.
+They conveniently handle memory management, string transfer, error checks, and more.
+On the other hand, helpers only cover a small portion of raw pdfium and are less mature.
+Existing APIs may still receive backwards incompatible changes, though we strive to contain them within major releases.
 
 .. [#ctypes_param_hook] Implemented via ctypes hook `_as_parameter_ <https://docs.python.org/3/library/ctypes.html#calling-functions-with-your-own-custom-data-types>`_
 
@@ -46,7 +46,7 @@ Memory management
 
 .. note::
    This section covers the support model, which does a lot of protective handling around raw pdfium close functions.
-   It is not applicable to the raw API alone!
+   It is not applicable to the raw API itself!
 
 PDFium objects commonly need to be closed by the caller to release allocated memory. [#ac_obj_ownership]_
 Where necessary, pypdfium2's helper classes implement automatic closing on garbage collection using :class:`weakref.finalize`. Additionally, they provide ``close()`` methods that can be used to release memory explicitly.
@@ -72,7 +72,7 @@ Thread incompatibility
 PDFium is not thread-compatible, meaning that one must not use multiple pdfium functions simultaneously from different threads.
 
 Since version 5, pypdfium2 wraps pdfium functions with a mutex to ensure only a single pdfium call can run at a time.
-This makes pypdfium2 safe for use in a threaded context, but threading pdfium calls themselves does not provide any performance advantage.
+This makes it safe for use in a threaded context, but threading pdfium calls themselves does not provide any performance advantage.
 
 
 Version

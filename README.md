@@ -343,7 +343,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   bookmark = pdfium_c.FPDFBookmark_GetFirstChild(pdf, None)
   while bookmark:
       # bookmark is a pointer, so we need to use its `contents` attribute to get the object the pointer refers to
-      # (otherwise we'd only get the memory address of the pointer itself, which would result in random behaviour)
+      # (otherwise we'd only get the memory address of the pointer itself, which would result in random behavior)
       address = ctypes.addressof(bookmark.contents)
       if address in seen:
           break  # circular reference detected

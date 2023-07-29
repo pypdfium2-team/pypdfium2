@@ -117,7 +117,7 @@ class _host_platform:
         
         # Get information about the host platform (system and machine name)
         # For the machine name, the platform module just passes through information provided by the OS (The uname command on Unix, or an equivalent implementation on other systems like Windows), so we can determine the relevant names from Python's source code, system specs or information available online (e. g. https://en.wikipedia.org/wiki/Uname)
-        # There is also sysconfig.get_platform() which we used before, but its behaviour did not fully match our needs (esp. on macOS)
+        # There is also sysconfig.get_platform() which we used before, but its behavior did not fully match our needs (esp. on macOS)
         self._system_name = platform.system().lower()
         self._machine_name = platform.machine().lower()
         

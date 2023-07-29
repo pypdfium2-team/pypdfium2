@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
-# FIXME add support for running multiple commands at once
+# FIXME can we support running multiple commands at once ?
 # FIXME auto-completion
 
 args="${@:2}"

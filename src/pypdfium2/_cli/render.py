@@ -116,6 +116,7 @@ def attach(parser):
         description = "Options for rendering with multiple processes",
     )
     parallel.add_argument(
+        # TODO turn into --strategy option with choices (parallel, linear, smart), where smart does linear rendering if below a certain page limit (for very short documents, it's better to render directly instead of setting up a process pool)
         "--linear",
         action = "store_true",
         help = "Render linear in the main process without parallelization. Options of this group will be silently ignored.",
@@ -129,7 +130,7 @@ def attach(parser):
     parallel.add_argument(
         "--mp-strategy",
         choices = ("spawn", "forkserver", "fork"),
-        default = "spawn",
+        default = "spawn",  # could use forkserver on linux
         help = "The process start method to use. ('fork' is discouraged due to stability issues.)",
     )
     parallel.add_argument(

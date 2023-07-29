@@ -13,7 +13,7 @@
 - Setup: renamed `$PDFIUM_PLATFORM` to `$PDFIUM_BINARY`.
 
 *Improvements and new features*
-- (Planned) PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
+- PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
   `pypdfium2.raw` is now a wrapper around the actual bindings file `_raw_unsafe.py`.
   In this course, filtering has been installed to free the namespace of unwanted members.
 - `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
@@ -22,6 +22,7 @@
 - CLI/renderer:
   * Added options to configure parallelization and output prefix.
   * Fixed parallel rendering with byte buffers on Linux by avoiding the process start method `fork`.
+- sourcebuild: fixed build with system libraries.
 - Improved setup code.
 
 *Rationales*
