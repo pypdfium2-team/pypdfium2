@@ -41,11 +41,7 @@ def main(args):
         args.passwords.append(None)
     
     dest_pdf = pdfium.PdfDocument.new()
-    index = 0
-    
     for in_path, pages, password in zip(args.inputs, args.pages, args.passwords):
         src_pdf = pdfium.PdfDocument(in_path, password=password)
         dest_pdf.import_pages(src_pdf, pages=pages)
-        index += len(src_pdf)
-    
     dest_pdf.save(args.output)
