@@ -100,6 +100,7 @@ def attach(parser):
         action = "store_true",
         help = "Whether to render in grayscale mode (no colors)",
     )
+    # TODO consider making --rev-byteorder and --prefer-bgrx default?
     pixel_format.add_argument(
         "--rev-byteorder",
         action = "store_true",
