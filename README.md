@@ -700,7 +700,6 @@ Faulty PyPI releases may be yanked using the web interface.
 * [Adam Huganir](https://github.com/adam-huganir): Help with maintenance and development decisions since the beginning of the project.
 * [kobaltcore](https://github.com/kobaltcore): Bug fix for `PdfDocument.save()`.
 * [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium with ctypes in `redstork` and `pdfbrain`.
-* [Peter Saalbrink](https://github.com/petersaalbrink): Code style improvements to the multipage renderer.
 
 ... and further [code contributors](https://github.com/pypdfium2-team/pypdfium2/graphs/contributors) (GitHub stats).
 

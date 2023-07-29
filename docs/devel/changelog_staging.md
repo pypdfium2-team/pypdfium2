@@ -6,7 +6,7 @@
 # Changelog for next release
 
 *API breaking changes*
-- (Planned) Rendering: The parallel, document-level method `PdfDocument.render()` has been removed from the public API.
+- Rendering: The parallel, document-level method `PdfDocument.render()` has been removed from the public API.
   Please use `PdfPage.render()` instead, and consider caller-side, process based parallelization.
   Parallel rendering to files is still available through the CLI (an API entrypoint is provided, see below).
 - `PdfDocument.get_toc()`: Replaced bookmark namedtuples with method-oriented wrapper classes `PdfBookmark` and `PdfDest`.
@@ -19,7 +19,9 @@
 - `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
 - Embedders may now call into the command-line API using the entrypoint function `pypdfium2.main()`.
 - CLI: Implemented configurable input type for testing.
-- CLI/renderer:
+- Major CLI renderer improvements:
+  * Moved saving from main process into jobs. This avoids unnecessary data transfer and prevents images from queuing up in memory.
+  * Avoid full state data transfer and object re-initialization for each job. Instead, use a pool initializer and exploit global variables.
   * Added options to configure parallelization and output prefix.
   * Fixed parallel rendering with byte buffers on Linux by avoiding the process start method `fork`.
 - sourcebuild: fixed build with system libraries.

@@ -4,9 +4,12 @@
 import os
 import logging
 from pathlib import Path
+import multiprocessing as mp
+import concurrent.futures as ft
 import pypdfium2._helpers as pdfium
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input, setup_logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,7 @@ DefaultDarkTheme = dict(
 
 def attach(parser):
     add_input(parser, pages=True)
+    # TODO add option to set bitmap maker
     parser.add_argument(
         "--output", "-o",
         type = Path,
@@ -174,29 +178,95 @@ def attach(parser):
     )
 
 
-class SavingPILConverter:
+class PILSaver:
+    
+    # TODO? outsource filepath assembly
     
     def __init__(self, output_dir, prefix, n_digits, format):
         self.output_dir, self.prefix, self.n_digits, self.format = output_dir, prefix, n_digits, format
     
-    def __call__(self, bitmap, index, **kwargs):
+    def __call__(self, bitmap, index):
         pil_image = pdfium.PdfBitmap.to_pil(bitmap)
         out = self.output_dir / (self.prefix + "%0*d.%s" % (self.n_digits, index+1, self.format))
         pil_image.save(out)
-        # return out
+        # TODO consider freeing the bitmap earlier if the image is a copy
+        bitmap.close()
 
 
-def render_linear(pdf, page_indices, converter, **kwargs):
+def render_linear(saver, pdf, page_indices, **kwargs):
     for i in page_indices:
         logger.info(f"Rendering page {i+1} ...")
         bitmap = pdf[i].render(**kwargs)
-        yield converter(bitmap, index=i)
+        saver(bitmap, index=i)
+
+
+def _render_parallel_init(caller_init, input, password, renderer, saver, may_init_forms, renderer_kwargs):
+    
+    if caller_init:
+        caller_init()
+    
+    logger.info(f"Initializing data for process {os.getpid()}")
+    
+    pdf = pdfium.PdfDocument(input, password=password, autoclose=True)
+    if may_init_forms:
+        pdf.init_forms()
+    
+    global ProcObjs
+    ProcObjs = (pdf, renderer, renderer_kwargs, saver)
+
+
+def _render_parallel_job(index):
+    logger.info(f"Rendering page {index+1} ...")
+    global ProcObjs
+    pdf, renderer, renderer_kwargs, saver = ProcObjs
+    page = pdf[index]
+    bitmap = renderer(page, **renderer_kwargs)
+    saver(bitmap, index=index)
+    # if we don't close pages explicitly here, we get occasional deadlocks, apparently related to our PdfiumMutex ...
+    page.close()
+
+
+def render_parallel(
+        saver,
+        input,
+        password = None,
+        may_init_forms = False,
+        renderer = pdfium.PdfPage.render,
+        page_indices = None,
+        n_processes = os.cpu_count(),
+        mp_strategy = "spawn",
+        mp_backend = "mp",
+        caller_init = None,
+        **kwargs
+    ):
+    
+    pool_kwargs = dict(
+        initializer = _render_parallel_init,
+        initargs = (caller_init, input, password, renderer, saver, may_init_forms, kwargs),
+    )
+    
+    ctx = mp.get_context(mp_strategy)
+    if mp_backend == "mp":
+        with ctx.Pool(n_processes, **pool_kwargs) as pool:
+            for _ in pool.imap(_render_parallel_job, page_indices): pass
+    elif mp_backend == "ft":
+        with ft.ProcessPoolExecutor(n_processes, mp_context=ctx, **pool_kwargs) as pool:
+            for _ in pool.map(_render_parallel_job, page_indices): pass
+    else:
+        assert False
 
 
 def main(args):
     
     pdf = get_input(args)
     pdf.init_forms()
+    
+    # TODO move to parsers?
+    n_pages = len(pdf)
+    if not all(0 <= i < n_pages for i in args.pages):
+        raise ValueError("Out-of-bounds page indices are prohibited.")
+    if len(args.pages) != len(set(args.pages)):
+        raise ValueError("Duplicate page indices are prohibited.")
     
     if not args.prefix:
         args.prefix = f"{args.input.stem}_"
@@ -229,22 +299,22 @@ def main(args):
         kwargs[f"no_smooth{type}"] = True
     
     n_digits = len(str( max(args.pages)+1 ))
-    converter = SavingPILConverter(args.output, args.prefix, n_digits, args.format)
+    saver = PILSaver(args.output, args.prefix, n_digits, args.format)
     
     if args.linear:
         logger.info("Linear rendering ...")
-        renderer = render_linear(pdf, converter=converter, **kwargs)
+        render_linear(saver, pdf, **kwargs)
     else:
         logger.info("Parallel rendering ...")
         kwargs.update(
             n_processes = args.processes,
             mp_strategy = args.mp_strategy,
             mp_backend = args.mp_backend,
-            pool_kwargs = dict(),
-        )
-        if args.mp_strategy in ("spawn", "forkserver"):
+            may_init_forms = kwargs["may_draw_forms"],
             # it looks like setup_logging() is not run automatically with these mp strategies, so set it as initializer
-            kwargs["pool_kwargs"]["initializer"] = setup_logging
-        renderer = pdf.render(converter, **kwargs)
-    
-    for _ in renderer: pass  # produce without storing anything
+            caller_init = (setup_logging if args.mp_strategy in ("spawn", "forkserver") else None)
+        )
+        # FIXME externalize input to caller side
+        render_parallel(saver, pdf._orig_input, args.password, **kwargs)
+        # for shared memory, we must keep the pdf alive up to this point, since it manages input lifetime
+        id(pdf)

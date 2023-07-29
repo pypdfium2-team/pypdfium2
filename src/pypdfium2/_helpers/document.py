@@ -3,14 +3,10 @@
 
 __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
-import os
 import sys
 import ctypes
 import logging
-import functools
 from pathlib import Path
-import multiprocessing as mp
-from concurrent.futures import ProcessPoolExecutor
 try:
     from multiprocessing.shared_memory import SharedMemory
 except ImportError:
@@ -44,7 +40,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             The other input types are resolved to these, as far as possible.
             In this context, "byte buffer" refers to an object implementing ``seek() tell() (readinto() | read())`` in a :class:`~io.BufferedIOBase` like fashion.
             Buffers that do not provide ``readinto()`` fall back to ``read()`` and :func:`~ctypes.memmove`.
-            Memory maps are currently treated as buffer. Convert to a ctypes array if handling as bytes-like object is desired instead.
+            Memory maps are currently treated as buffer (including SharedMemory, which is supported through the underlying mmap). Convert to a ctypes array on the caller side if handling as bytes-like object is desired instead.
         
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
@@ -76,7 +72,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         # CONSIDER adding a public method to inject into data_holder/data_closer
         
         self._orig_input = input
-        self._password = password
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
@@ -89,7 +84,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
         else:
-            self.raw, to_hold, to_close = _open_pdf(self._input, self._password)
+            self.raw, to_hold, to_close = _open_pdf(self._input, password)
             self._data_holder.extend(to_hold)
             if autoclose:
                 self._data_closer.extend(to_close)
@@ -537,107 +532,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 yield from self.get_toc(max_depth=max_depth, parent=bookmark_ptr, level=level+1, seen=seen)
             
             bookmark_ptr = pdfium_c.FPDFBookmark_GetNextSibling(self, bookmark_ptr)
-    
-    
-    @classmethod
-    def _render_page_worker(cls, index, input, password, renderer, converter, pass_info, need_formenv, **kwargs):
-        
-        logger.info(f"Rendering page {index+1} ...")
-        
-        # FIXME theoretically, it should be possible to instantiate the pdf only once per process
-        # https://stackoverflow.com/a/28508998/15547292 suggests to implement this by exploiting global variables, as mp does not provide a native way of passing intitializer result into workers.
-        pdf = cls(input, password=password, autoclose=True)
-        if need_formenv:
-            pdf.init_forms()
-        
-        page = pdf[index]
-        bitmap = renderer(page, **kwargs)
-        info = bitmap.get_info()
-        result = converter(bitmap, index=index)
-        
-        # NOTE We MUST NOT call bitmap.close() before the converted object is serialized to the main process, otherwise we would free the buffer of a foreign bitmap prematurely if the converted object references the buffer rather than owning a copy. Confirmed by POC.
-        # This is not an issue when freeing the bitmap on garbage collection, provided the converted object keeps the buffer alive.
-        # I think we could also wrap the return in a try/finally clause for explicit closing.
-        # Anyway, all this is not relevant anymore since we save in the converter.
-        
-        for g in (page, pdf):
-            g.close()
-        
-        return (result, info) if pass_info else result
-    
-    
-    def render(
-            self,
-            converter,
-            renderer = PdfPage.render,
-            page_indices = None,
-            n_processes = os.cpu_count(),
-            pass_info = False,
-            mp_strategy = "spawn",
-            mp_backend = "mp",
-            pool_kwargs = dict(),
-            **kwargs
-        ):
-        """
-        Render multiple pages in parallel, using a process pool.
-        
-        Hint:
-            If your code shall be frozen into an executable, :func:`multiprocessing.freeze_support`
-            needs to be called at the start of the ``if __name__ == "__main__":`` block if using this method.
-        
-        Parameters:
-            converter (typing.Callable):
-                A function to convert the rendering output. See :class:`.PdfBitmap` for built-in converters.
-            page_indices (list[int] | None):
-                A sequence of zero-based indices of the pages to render. Duplicate page indices are prohibited.
-                If None, all pages will be included. The order of results is supposed to match the order of given page indices.
-            n_processes (int):
-                The number of parallel process.
-            renderer (typing.Callable):
-                The page rendering function. This may be used to plug in custom renderers other than :meth:`.PdfPage.render`.
-            mp_strategy (str):
-                The process start method. ``spawn`` is recommended, or ``forkserver`` if available.
-                ``fork`` is discouraged since it has issues with buffer input (commonly a deadlock after processing all jobs).
-            mp_backend (str):
-                The process backend ("mp" for :mod:`multiprocessing`, "ft" for :mod:`concurrent.futures`)
-            pool_kwargs (dict):
-                Additional keyword arguments for the process pool.
-            kwargs (dict):
-                Keyword arguments to the renderer.
-        
-        Yields:
-            :data:`typing.Any`: Parameter-dependent result.
-        """
-        
-        n_pages = len(self)
-        if not page_indices:
-            page_indices = [i for i in range(n_pages)]
-        else:
-            if not all(0 <= i < n_pages for i in page_indices):
-                raise ValueError("Out-of-bounds page indices are prohibited.")
-            if len(page_indices) != len(set(page_indices)):
-                raise ValueError("Duplicate page indices are prohibited.")
-        
-        invoke_renderer = functools.partial(
-            PdfDocument._render_page_worker,
-            input = self._orig_input,
-            password = self._password,
-            renderer = renderer,
-            converter = converter,
-            pass_info = pass_info,
-            need_formenv = bool(self.formenv),
-            **kwargs
-        )
-        
-        ctx = mp.get_context(mp_strategy)
-        if mp_backend == "mp":
-            with ctx.Pool(n_processes, **pool_kwargs) as pool:
-                yield from pool.imap(invoke_renderer, page_indices)
-        elif mp_backend == "ft":
-            with ProcessPoolExecutor(n_processes, mp_context=ctx, **pool_kwargs) as pool:
-                yield from pool.map(invoke_renderer, page_indices)
-        else:
-            assert False
 
 
 def _preprocess_input(input):
