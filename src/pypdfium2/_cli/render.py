@@ -10,7 +10,18 @@ import pypdfium2._helpers as pdfium
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input, setup_logging
 
+
 logger = logging.getLogger(__name__)
+
+
+CsFields = ("path_fill", "path_stroke", "text_fill", "text_stroke")
+ColorOpts = dict(metavar="C", nargs=4, type=int)
+DefaultDarkTheme = dict(
+    path_fill   = (255, 255, 255, 255),
+    path_stroke = (255, 255, 255, 255),
+    text_fill   = (255, 255, 255, 255),
+    text_stroke = (255, 255, 255, 255),
+)
 
 
 def attach(parser):
@@ -47,8 +58,7 @@ def attach(parser):
     parser.add_argument(
         "--fill-color",
         help = "Color the bitmap will be filled with before rendering. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
-        default = (255, 255, 255, 255),
-        metavar="C", nargs=4, type=int,
+        **ColorOpts,
     )
     parser.add_argument(
         "--optimize-mode",
@@ -133,6 +143,38 @@ def attach(parser):
         choices = ("mp", "ft"),
         default = "mp",
         help = "The backend to use (mp = multiprocessing, ft = concurrent.futures).",
+    )
+    
+    color_scheme = parser.add_argument_group(
+        title = "Color scheme",
+        description = "Options for rendering with custom color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues, in worst case different objects melt into one indistinguishable single-color shape. So it depends on the PDF if using this is elligible.",
+        # TODO File a pdfium bug about this. More sophisticated approaches that come to mind are lightness inversion of vector elements for dark theme (e.g. black-white, dark_green->light_green) and maybe threshold-based color mappings (global or per object type). A client could go further with region-specific color schemes (i.e. draw different scheme sub-rectangles/polygons on top).
+    )
+    color_scheme.add_argument(
+        "--dark-theme",
+        action = "store_true",
+        help = "Use a dark theme as base color scheme. Explicit color params override selectively."
+    )
+    color_scheme.add_argument(
+        "--path-fill",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--path-stroke",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--text-fill",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--text-stroke",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--fill-to-stroke",
+        action = "store_true",
+        help = "Whether fill paths need to be stroked.",
     )
 
 
@@ -227,6 +269,14 @@ def main(args):
     
     if not args.prefix:
         args.prefix = f"{args.input.stem}_"
+    if not args.fill_color:
+        args.fill_color = (0, 0, 0, 255) if args.dark_theme else (255, 255, 255, 255)
+    
+    cs_kwargs = dict()
+    if args.dark_theme:
+        cs_kwargs.update(**DefaultDarkTheme)
+    cs_kwargs.update(**{f: getattr(args, f) for f in CsFields if getattr(args, f)})
+    cs = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
     
     kwargs = dict(
         page_indices = args.pages,
@@ -235,6 +285,8 @@ def main(args):
         crop = args.crop,
         grayscale = args.grayscale,
         fill_color = args.fill_color,
+        color_scheme = cs,
+        fill_to_stroke = args.fill_to_stroke,
         optimize_mode = args.optimize_mode,
         draw_annots = not args.no_annotations,
         may_draw_forms = not args.no_forms,
