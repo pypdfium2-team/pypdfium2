@@ -1,19 +1,27 @@
 <!-- SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-<!-- List character: dash (-) -->
+<!-- Main list character: dash (-) -->
 
 # Changelog for next release
 
 *API breaking changes*
-- Rendering: The parallel, document-level method `PdfDocument.render()` has been removed from the public API.
-  Please use `PdfPage.render()` instead, and consider caller-side, process based parallelization.
-  Parallel rendering to files is still available through the CLI (an API entrypoint is provided, see below).
-- `PdfDocument.get_toc()`: Replaced bookmark namedtuples with method-oriented wrapper classes `PdfBookmark` and `PdfDest`.
+- Rendering:
+  * `PdfDocument.render()`, the parallel multi-page renderer, has been removed from the public API.
+    Please use `PdfPage.render()` instead, and consider caller-side, process based parallelization.
+    Parallel rendering to files is still available through the CLI (an API entrypoint is provided).
+    See below for more info.
+  * `PdfBitmap.get_info()` and `PdfBitmapInfo` have been removed since they only existed on behalf of data transfer in `PdfDocument.render()`.
+  * `PdfColorScheme` and the parameters `color_scheme` and `fill_to_stroke` have been removed.
+    pdfium's color scheme renderer is problematic: It takes colors for certain object types and forces them on all instances in question, flattening different colors into one, which is an undesired loss of visual information. This way, different objects can melt into indistinguishable, single-color shapes.
+    In the CLI, we hope to eventually re-implement dark theme rendering using selective lightness inversion.
+- `PdfDocument.get_toc()`: Replaced bookmark namedtuples with method-oriented wrapper classes `PdfBookmark` and `PdfDest`,
+  so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects.
+  Also provide signed count as-is rather than needlessly splitting it in two variables (unsigned int `n_kids` and bool `is_closed`).
 - Setup: renamed `$PDFIUM_PLATFORM` to `$PDFIUM_BINARY`.
 
 *Improvements and new features*
-- PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
+- (Planned) PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
   `pypdfium2.raw` is now a wrapper around the actual bindings file `_raw_unsafe.py`.
   In this course, filtering has been installed to free the namespace of unwanted members.
 - `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
@@ -27,6 +35,5 @@
 - sourcebuild: fixed build with system libraries.
 - Improved setup code.
 
-*Rationales*
-- `PdfDocument.render()` got removed because ... TODO
-- The TOC/Bookmark API was changed because ... TODO
+*Rationale for the removal of PdfDocument.render()*
+TODO

@@ -173,13 +173,12 @@ def test_render_page_tonumpy(rev_byteorder, sample_page):
     bitmap = sample_page.render(
         rev_byteorder = rev_byteorder,
     )
-    info, array = bitmap.get_info(), bitmap.to_numpy()
+    array = bitmap.to_numpy()
     assert isinstance(array, numpy.ndarray)
-    assert isinstance(info, pdfium.PdfBitmapInfo)
     if rev_byteorder:
-        assert info.mode == "RGB"
+        assert bitmap.mode == "RGB"
     else:
-        assert info.mode == "BGR"
+        assert bitmap.mode == "BGR"
     
     for (x, y), value in ExpRenderPixels:
         if rev_byteorder:
