@@ -186,11 +186,10 @@ class PILSaver:
         self.output_dir, self.prefix, self.n_digits, self.format = output_dir, prefix, n_digits, format
     
     def __call__(self, bitmap, index):
+        # TODO consider closing bitmap explicitly (a bit complicated since pil_image can be either reference or copy depending on pixel format) - also, this is only relevant for foreign bitmaps
         pil_image = pdfium.PdfBitmap.to_pil(bitmap)
         out = self.output_dir / (self.prefix + "%0*d.%s" % (self.n_digits, index+1, self.format))
         pil_image.save(out)
-        # TODO consider freeing the bitmap earlier if the image is a copy
-        bitmap.close()
 
 
 def render_linear(saver, pdf, page_indices, **kwargs):
@@ -222,8 +221,7 @@ def _render_parallel_job(index):
     page = pdf[index]
     bitmap = renderer(page, **renderer_kwargs)
     saver(bitmap, index=index)
-    # if we don't close pages explicitly here, we get occasional deadlocks, apparently related to our PdfiumMutex ...
-    page.close()
+    # TODO consider closing page explicitly
 
 
 def render_parallel(
@@ -314,7 +312,7 @@ def main(args):
             # it looks like setup_logging() is not run automatically with these mp strategies, so set it as initializer
             caller_init = (setup_logging if args.mp_strategy in ("spawn", "forkserver") else None)
         )
-        # FIXME externalize input to caller side
+        # TODO consider externalizing input to caller side
         render_parallel(saver, pdf._orig_input, args.password, **kwargs)
         # for shared memory, we must keep the pdf alive up to this point, since it manages input lifetime
         id(pdf)
