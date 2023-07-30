@@ -201,6 +201,7 @@ def render_parallel(
         initargs = (caller_init, input, password, renderer, saver, may_init_forms, kwargs),
     )
     
+    # TODO add options to use unordered and non-iterative maps for testing
     ctx = mp.get_context(mp_strategy)
     if mp_backend == "mp":
         with ctx.Pool(n_processes, **pool_kwargs) as pool:

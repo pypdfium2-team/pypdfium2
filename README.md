@@ -102,18 +102,6 @@ Here are some examples of using the support model API.
   n_pages = len(pdf)  # get the number of pages in the document
   ```
 
-* Render multiple pages concurrently
-  ```python
-  page_indices = [i for i in range(n_pages)]  # all pages
-  renderer = pdf.render(
-      pdfium.PdfBitmap.to_pil,
-      page_indices = page_indices,
-      scale = 300/72,  # 300dpi resolution
-  )
-  for i, image in zip(page_indices, renderer):
-      image.save("out_%0*d.jpg" % (n_digits, i))
-  ```
-
 * Load a page to work with
   ```python
   page = pdf[0]
