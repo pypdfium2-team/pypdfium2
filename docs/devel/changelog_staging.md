@@ -12,9 +12,6 @@
     Parallel rendering to files is still available through the CLI (an API entrypoint is provided).
     See below for more info.
   * `PdfBitmap.get_info()` and `PdfBitmapInfo` have been removed since they only existed on behalf of data transfer in `PdfDocument.render()`.
-  * `PdfColorScheme` and the parameters `color_scheme` and `fill_to_stroke` have been removed.
-    pdfium's color scheme renderer is problematic: It takes colors for certain object types and forces them on all instances in question, flattening different colors into one, which is an undesired loss of visual information. This way, different objects can melt into indistinguishable, single-color shapes.
-    In the CLI, we hope to eventually re-implement dark theme rendering using selective lightness inversion.
 - `PdfDocument.get_toc()`: Replaced bookmark namedtuples with method-oriented wrapper classes `PdfBookmark` and `PdfDest`,
   so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects.
   Also provide signed count as-is rather than needlessly splitting it in two variables (unsigned int `n_kids` and bool `is_closed`).

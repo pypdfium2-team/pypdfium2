@@ -10,17 +10,17 @@ import pypdfium2._helpers as pdfium
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input, setup_logging
 
-
 logger = logging.getLogger(__name__)
 
 
 CsFields = ("path_fill", "path_stroke", "text_fill", "text_stroke")
 ColorOpts = dict(metavar="C", nargs=4, type=int)
-DefaultDarkTheme = dict(
-    path_fill   = (255, 255, 255, 255),
-    path_stroke = (255, 255, 255, 255),
-    text_fill   = (255, 255, 255, 255),
-    text_stroke = (255, 255, 255, 255),
+SampleTheme = dict(
+    # choose some random colors so we can distinguish the different drawings (TODO improve)
+    path_fill   = (170, 100, 0,   255),  # dark orange
+    path_stroke = (0,   150, 255, 255),  # sky blue
+    text_fill   = (255, 255, 255, 255),  # white
+    text_stroke = (150, 255, 0,   255),  # green
 )
 
 
@@ -147,13 +147,13 @@ def attach(parser):
     
     color_scheme = parser.add_argument_group(
         title = "Color scheme",
-        description = "Options for rendering with custom color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues, in worst case different objects melt into one indistinguishable single-color shape. So it depends on the PDF if using this is elligible.",
-        # TODO File a pdfium bug about this. More sophisticated approaches that come to mind are lightness inversion of vector elements for dark theme (e.g. black-white, dark_green->light_green) and maybe threshold-based color mappings (global or per object type). A client could go further with region-specific color schemes (i.e. draw different scheme sub-rectangles/polygons on top).
+        description = "Options for rendering with custom color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues.",
+        # TODO Consider implementing alternative dark theme via post-processing with selective lightness inversion
     )
     color_scheme.add_argument(
-        "--dark-theme",
+        "--sample-theme",
         action = "store_true",
-        help = "Use a dark theme as base color scheme. Explicit color params override selectively."
+        help = "Use a sample theme as base color scheme. Explicit color params override selectively."
     )
     color_scheme.add_argument(
         "--path-fill",
@@ -270,11 +270,11 @@ def main(args):
     if not args.prefix:
         args.prefix = f"{args.input.stem}_"
     if not args.fill_color:
-        args.fill_color = (0, 0, 0, 255) if args.dark_theme else (255, 255, 255, 255)
+        args.fill_color = (0, 0, 0, 255) if args.sample_theme else (255, 255, 255, 255)
     
     cs_kwargs = dict()
-    if args.dark_theme:
-        cs_kwargs.update(**DefaultDarkTheme)
+    if args.sample_theme:
+        cs_kwargs.update(**SampleTheme)
     cs_kwargs.update(**{f: getattr(args, f) for f in CsFields if getattr(args, f)})
     cs = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
     

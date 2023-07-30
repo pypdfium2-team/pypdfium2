@@ -348,7 +348,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             color_scheme (PdfColorScheme | None):
                 An optional, custom rendering color scheme.
             fill_to_stroke (bool):
-                If True and rendering with custom color scheme, fill paths will be stroked.
+                If True and rendering with custom color scheme, convert path fill to stroke (i.e. only draw borders in the path_stroke color instead of filling with the path_fill color).
             fill_color (tuple[int, int, int, int]):
                 Color the bitmap will be filled with before rendering (RGBA values from 0 to 255).
             grayscale (bool):
