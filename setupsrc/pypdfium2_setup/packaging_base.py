@@ -274,7 +274,7 @@ def emplace_platfiles(pl_name):
     
     pl_dir = DataTree / pl_name
     if not pl_dir.exists():
-        raise RuntimeError(f"Missing platform directory {pl_name} - you might have forgotten to run update_pdfium.py")
+        raise RuntimeError(f"Missing platform directory {pl_name}")
     
     ver_file = pl_dir / VerStatusFileName
     if not ver_file.exists():

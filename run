@@ -63,4 +63,7 @@ build)
 emplace)
     python3 setupsrc/pypdfium2_setup/emplace.py $args;;
 
+*)
+    echo Unknown command: $1;;
+
 esac

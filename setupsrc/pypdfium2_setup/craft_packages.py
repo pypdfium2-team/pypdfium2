@@ -27,7 +27,7 @@ from pypdfium2_setup.packaging_base import (
 )
 
 
-class ArtefactStash:
+class ArtifactStash:
     
     # Preserve in-tree aftefacts from editable install
     
@@ -43,7 +43,7 @@ class ArtefactStash:
         elif len(self.files) != 2:
             print(f"Warning: Expected exactly 2 platform files, but found {len(self.files)}.", file=sys.stderr)
         
-        self.tmpdir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
+        self.tmpdir = tempfile.TemporaryDirectory(prefix="pypdfium2_artifact_stash_")
         self.tmpdir_path = Path(self.tmpdir.name)
         for fp in self.files:
             shutil.move(fp, self.tmpdir_path)
@@ -78,7 +78,7 @@ def main():
     if not args.version:
         args.version = get_latest_version()
     
-    stash = ArtefactStash()
+    stash = ArtifactStash()
     
     os.environ[BinarySpec_EnvVar] = PlatformTarget_None
     run_build(["--sdist"])
