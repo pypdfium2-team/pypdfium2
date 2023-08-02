@@ -1,25 +1,22 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# This file's original objectives:
+# Objectives:
 # - Wrap pdfium functions with a mutex so they can safely be used in a threaded context.
-#   This is temporarily disabled due to occasional deadlocks on garbage collection, pending further investigation.
 # - Try to mask the garbage exposed by ctypesgen, to achieve a cleaner namespace, as far as possible.
-#   However, this has some drawbacks:
-#   * May negatively impact import performance, and normally python devs say "practicality beats purity".
-#   * Confuses IDE highlighting and completion. Perhaps this could be fixed by editing the original namespace in place rather than wrapping it (e.g. using ctypesgen's --insert-file option), but then we'd loose access to the original namespace ...
+#   However, this has some drawbacks: it confuses IDE namespace analyzers, and may negatively impact import performance.
 
-# import threading
-# import functools
+import threading
+import functools
 
-# PdfiumMutex = threading.Lock()
+PdfiumMutex = threading.RLock()
 
-# def _make_threadsafe(f):
-#     @functools.wraps(f)
-#     def pdfium_function_threadsafe(*args, **kwargs):
-#         with PdfiumMutex:
-#             return f(*args, **kwargs)
-#     return pdfium_function_threadsafe
+def _make_threadsafe(f):
+    @functools.wraps(f)
+    def pdfium_function_threadsafe(*args, **kwargs):
+        with PdfiumMutex:
+            return f(*args, **kwargs)
+    return pdfium_function_threadsafe
 
 
 def _get_members():
@@ -46,11 +43,10 @@ def _get_members():
         member = getattr(pypdfium2._raw_unsafe, name)
         if isinstance(member, ModuleType) or hasattr(ctypes, name):
             continue
-        # if isinstance(member, ctypes._CFuncPtr):
-        #     member = _make_threadsafe(member)
+        if isinstance(member, ctypes._CFuncPtr):
+            member = _make_threadsafe(member)
         globals()[name] = member
 
 
 _get_members()
-del _get_members
-# del threading, functools, _make_threadsafe
+del threading, functools, _make_threadsafe, _get_members
