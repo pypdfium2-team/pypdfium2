@@ -3,15 +3,34 @@
 
 import os
 import logging
+import functools
 from pathlib import Path
 import multiprocessing as mp
 import concurrent.futures as ft
+import pypdfium2.raw as pdfium_c
+import pypdfium2.internal as pdfium_i
 import pypdfium2._helpers as pdfium
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input, setup_logging
 
 logger = logging.getLogger(__name__)
 
+
+def _bitmap_wrapper_foreign_simple(width, height, format, *args, **kwargs):
+    if format == pdfium_c.FPDFBitmap_BGRx:
+        use_alpha = False
+    elif format == pdfium_c.FPDFBitmap_BGRA:
+        use_alpha = True
+    else:
+        raise RuntimeError(f"Cannot create foreign_simple bitmap with bitmap type {pdfium_i.BitmapTypeToStr[format]}.")
+    return pdfium.PdfBitmap.new_foreign_simple(width, height, use_alpha, *args, **kwargs)
+
+BitmapMakers = dict(
+    native = pdfium.PdfBitmap.new_native,
+    foreign = pdfium.PdfBitmap.new_foreign,
+    foreign_packed = functools.partial(pdfium.PdfBitmap.new_foreign, force_packed=True),
+    foreign_simple = _bitmap_wrapper_foreign_simple,
+)
 
 CsFields = ("path_fill", "path_stroke", "text_fill", "text_stroke")
 ColorOpts = dict(metavar="C", nargs=4, type=int)
@@ -26,7 +45,6 @@ SampleTheme = dict(
 
 def attach(parser):
     add_input(parser, pages=True)
-    # TODO add option to set bitmap maker
     parser.add_argument(
         "--output", "-o",
         type = Path,
@@ -87,6 +105,7 @@ def attach(parser):
         nargs = "+",
         default = (),
         choices = ("text", "image", "path"),
+        type = str.lower,
         help = "Item types that shall not be smoothed",
     )
     parser.add_argument(
@@ -95,22 +114,29 @@ def attach(parser):
         help = "Always use halftone for image stretching",
     )
     
-    pixel_format = parser.add_argument_group(
-        title = "Pixel format",
-        description = "Options to configure the used pixel format. Notes: 1) By default, an alpha channel will be used only if --fill-color has transparency. 2) The combination of --rev-byteorder and --prefer-bgrx may be used to achieve a pixel format natively supported by PIL, to avoid data copying.",
+    bitmap = parser.add_argument_group(
+        title = "Bitmap options",
+        description = "Bitmap config, including pixel format. Notes: 1) By default, an alpha channel will be used only if --fill-color has transparency. 2) The combination of --rev-byteorder and --prefer-bgrx may be used to achieve a pixel format natively supported by PIL, to avoid data copying.",
     )
-    pixel_format.add_argument(
+    bitmap.add_argument(
+        "--bitmap-maker",
+        choices = BitmapMakers.keys(),
+        default = "native",
+        help = "The bitmap maker to use.",
+        type = str.lower,
+    )
+    bitmap.add_argument(
         "--grayscale",
         action = "store_true",
         help = "Whether to render in grayscale mode (no colors)",
     )
     # TODO consider making --rev-byteorder and --prefer-bgrx default?
-    pixel_format.add_argument(
+    bitmap.add_argument(
         "--rev-byteorder",
         action = "store_true",
         help = "Render with reverse byte order internally, i. e. RGB(A/X) instead of BGR(A/X). The result should be identical.",
     )
-    pixel_format.add_argument(
+    bitmap.add_argument(
         "--prefer-bgrx",
         action = "store_true",
         help = "Use a four-channel pixel format for colored output, even if rendering without transparency.",
@@ -135,13 +161,16 @@ def attach(parser):
     parallel.add_argument(
         "--mp-strategy",
         choices = ("spawn", "forkserver", "fork"),
-        default = "spawn",  # could use forkserver on linux
+        # TODO consider smarter default, e.g. use python default, but if on Linux and using buffer input, then use spawn or forkserver
+        default = "spawn",
+        type = str.lower,
         help = "The process start method to use. ('fork' is discouraged due to stability issues.)",
     )
     parallel.add_argument(
         "--mp-backend",
         choices = ("mp", "ft"),
         default = "mp",
+        type = str.lower,
         help = "The backend to use (mp = multiprocessing, ft = concurrent.futures).",
     )
     
@@ -293,6 +322,7 @@ def main(args):
         force_halftone = args.force_halftone,
         rev_byteorder = args.rev_byteorder,
         prefer_bgrx = args.prefer_bgrx,
+        bitmap_maker = BitmapMakers[args.bitmap_maker],
     )
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True
