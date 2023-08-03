@@ -22,6 +22,7 @@ src/pypdfium2/pdfium
 *.dll
 *.dylib
 
+.idea/*
 **/__pycache__
 **/.mypy_cache
 **/.pytest_cache

@@ -427,7 +427,7 @@ class PdfPage (pdfium_i.AutoCloseable):
 
 
 def _auto_bitmap_format(fill_color, grayscale, prefer_bgrx):
-    if (fill_color[3] < 255):
+    if fill_color[3] < 255:
         return pdfium_c.FPDFBitmap_BGRA
     elif grayscale:
         return pdfium_c.FPDFBitmap_Gray

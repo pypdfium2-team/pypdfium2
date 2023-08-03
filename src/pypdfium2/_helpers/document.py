@@ -508,7 +508,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             max_depth (int):
                 Maximum recursion depth to consider.
         Yields:
-            :class:`.PdfOutlineItem`: Bookmark information.
+            :class:`.PdfBookmark`
         """
         
         # CONSIDER warn if max_depth reached?
@@ -650,7 +650,7 @@ class PdfBookmark (pdfium_i.AutoCastable):
         pdf (PdfDocument):
             Reference to the document this bookmark belongs to.
         level (int):
-            The bookmarks's nesting level in the TOC tree. Corresponds to the number of parent bookmarks.
+            The bookmark's nesting level in the TOC tree. Corresponds to the number of parent bookmarks.
     """
     
     def __init__(self, raw, pdf, level):
