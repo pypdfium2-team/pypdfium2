@@ -159,7 +159,7 @@ def attach(parser):
         help = "The number of parallel rendering processes (defaults to the number of CPU cores)",
     )
     parallel.add_argument(
-        "--mp-strategy",
+        "--parallel-strategy",
         choices = ("spawn", "forkserver", "fork"),
         # TODO consider smarter default, e.g. use python default, but if on Linux and using buffer input, then use spawn or forkserver
         default = "spawn",
@@ -167,11 +167,16 @@ def attach(parser):
         help = "The process start method to use. ('fork' is discouraged due to stability issues.)",
     )
     parallel.add_argument(
-        "--mp-backend",
+        "--parallel-lib",
         choices = ("mp", "ft"),
         default = "mp",
         type = str.lower,
-        help = "The backend to use (mp = multiprocessing, ft = concurrent.futures).",
+        help = "The parallelization module to use (mp = multiprocessing, ft = concurrent.futures).",
+    )
+    parallel.add_argument(
+        "--parallel-map",
+        type = str.lower,
+        help = "The map function to use (backend specific, the default is an iterative map)."
     )
     
     color_scheme = parser.add_argument_group(
@@ -245,12 +250,12 @@ def _render_parallel_init(caller_init, input, password, saver, may_init_forms, k
 
 
 def _render_parallel_job(index):
-    # TODO consider closing page explicitly
     logger.info(f"Rendering page {index+1} ...")
     global ProcObjs
     pdf, kwargs, saver = ProcObjs
     page = pdf[index]
     bitmap = page.render(**kwargs)
+    page.close()
     saver(bitmap, index=index)
 
 
@@ -261,27 +266,30 @@ def render_parallel(
         may_init_forms = False,
         page_indices = None,
         n_processes = os.cpu_count(),
-        mp_strategy = "spawn",
-        mp_backend = "mp",
+        parallel_strategy = "spawn",
+        parallel_lib = "mp",
+        parallel_map = None,
         caller_init = None,
         **kwargs
     ):
+    
+    ctx = mp.get_context(parallel_strategy)
+    pool_backends = dict(
+        mp = (ctx.Pool, "imap"),
+        ft = (functools.partial(ft.ProcessPoolExecutor, mp_context=ctx), "map"),
+    )    
+    pool_ctor, map_attr = pool_backends[parallel_lib]
+    if parallel_map:
+        map_attr = parallel_map
     
     pool_kwargs = dict(
         initializer = _render_parallel_init,
         initargs = (caller_init, input, password, saver, may_init_forms, kwargs),
     )
     
-    # TODO add options to use unordered and non-iterative maps for testing
-    ctx = mp.get_context(mp_strategy)
-    if mp_backend == "mp":
-        with ctx.Pool(n_processes, **pool_kwargs) as pool:
-            for _ in pool.imap(_render_parallel_job, page_indices): pass
-    elif mp_backend == "ft":
-        with ft.ProcessPoolExecutor(n_processes, mp_context=ctx, **pool_kwargs) as pool:
-            for _ in pool.map(_render_parallel_job, page_indices): pass
-    else:
-        assert False
+    with pool_ctor(n_processes, **pool_kwargs) as pool:
+        map_func = getattr(pool, map_attr)
+        for _ in map_func(_render_parallel_job, page_indices): pass
 
 
 def main(args):
@@ -339,11 +347,12 @@ def main(args):
         logger.info("Parallel rendering ...")
         kwargs.update(
             n_processes = args.processes,
-            mp_strategy = args.mp_strategy,
-            mp_backend = args.mp_backend,
+            parallel_strategy = args.parallel_strategy,
+            parallel_lib = args.parallel_lib,
+            parallel_map = args.parallel_map,
             may_init_forms = may_draw_forms,
             # it looks like setup_logging() is not run automatically with these mp strategies, so set it as initializer
-            caller_init = (setup_logging if args.mp_strategy in ("spawn", "forkserver") else None)
+            caller_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
         )
         # TODO consider externalizing input to caller side
         render_parallel(saver, pdf._orig_input, args.password, **kwargs)
