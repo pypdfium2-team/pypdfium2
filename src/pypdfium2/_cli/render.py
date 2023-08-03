@@ -224,11 +224,12 @@ class PILSaver:
 def render_linear(saver, pdf, page_indices, **kwargs):
     for i in page_indices:
         logger.info(f"Rendering page {i+1} ...")
-        bitmap = pdf[i].render(**kwargs)
+        page = pdf[i]
+        bitmap = page.render(**kwargs)
         saver(bitmap, index=i)
 
 
-def _render_parallel_init(caller_init, input, password, renderer, saver, may_init_forms, renderer_kwargs):
+def _render_parallel_init(caller_init, input, password, saver, may_init_forms, kwargs):
     
     if caller_init:
         caller_init()
@@ -240,17 +241,17 @@ def _render_parallel_init(caller_init, input, password, renderer, saver, may_ini
         pdf.init_forms()
     
     global ProcObjs
-    ProcObjs = (pdf, renderer, renderer_kwargs, saver)
+    ProcObjs = (pdf, kwargs, saver)
 
 
 def _render_parallel_job(index):
+    # TODO consider closing page explicitly
     logger.info(f"Rendering page {index+1} ...")
     global ProcObjs
-    pdf, renderer, renderer_kwargs, saver = ProcObjs
+    pdf, kwargs, saver = ProcObjs
     page = pdf[index]
-    bitmap = renderer(page, **renderer_kwargs)
+    bitmap = page.render(**kwargs)
     saver(bitmap, index=index)
-    # TODO consider closing page explicitly
 
 
 def render_parallel(
@@ -258,7 +259,6 @@ def render_parallel(
         input,
         password = None,
         may_init_forms = False,
-        renderer = pdfium.PdfPage.render,
         page_indices = None,
         n_processes = os.cpu_count(),
         mp_strategy = "spawn",
@@ -269,7 +269,7 @@ def render_parallel(
     
     pool_kwargs = dict(
         initializer = _render_parallel_init,
-        initargs = (caller_init, input, password, renderer, saver, may_init_forms, kwargs),
+        initargs = (caller_init, input, password, saver, may_init_forms, kwargs),
     )
     
     # TODO add options to use unordered and non-iterative maps for testing
@@ -287,7 +287,6 @@ def render_parallel(
 def main(args):
     
     pdf = get_input(args)
-    pdf.init_forms()
     
     # TODO move to parsers?
     n_pages = len(pdf)
@@ -307,6 +306,7 @@ def main(args):
     cs_kwargs.update(**{f: getattr(args, f) for f in CsFields if getattr(args, f)})
     cs = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
     
+    may_draw_forms = not args.no_forms
     kwargs = dict(
         page_indices = args.pages,
         scale = args.scale,
@@ -318,7 +318,7 @@ def main(args):
         fill_to_stroke = args.fill_to_stroke,
         optimize_mode = args.optimize_mode,
         draw_annots = not args.no_annotations,
-        may_draw_forms = not args.no_forms,
+        may_draw_forms = may_draw_forms,
         force_halftone = args.force_halftone,
         rev_byteorder = args.rev_byteorder,
         prefer_bgrx = args.prefer_bgrx,
@@ -332,6 +332,8 @@ def main(args):
     
     if args.linear:
         logger.info("Linear rendering ...")
+        if may_draw_forms:
+            pdf.init_forms()
         render_linear(saver, pdf, **kwargs)
     else:
         logger.info("Parallel rendering ...")
@@ -339,7 +341,7 @@ def main(args):
             n_processes = args.processes,
             mp_strategy = args.mp_strategy,
             mp_backend = args.mp_backend,
-            may_init_forms = kwargs["may_draw_forms"],
+            may_init_forms = may_draw_forms,
             # it looks like setup_logging() is not run automatically with these mp strategies, so set it as initializer
             caller_init = (setup_logging if args.mp_strategy in ("spawn", "forkserver") else None)
         )
