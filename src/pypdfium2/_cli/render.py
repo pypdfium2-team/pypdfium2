@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import math
 import ctypes
 import logging
 import colorsys
@@ -135,7 +136,7 @@ def attach(parser):
         action = "store_true",
         help = "Whether to render in grayscale mode (no colors)",
     )
-    # TODO consider making --rev-byteorder and --prefer-bgrx default?
+    # TODO consider making --rev-byteorder and --prefer-bgrx default for PIL
     bitmap.add_argument(
         "--rev-byteorder",
         action = "store_true",
@@ -152,10 +153,12 @@ def attach(parser):
         description = "Options for rendering with multiple processes",
     )
     parallel.add_argument(
-        # TODO turn into --strategy option with choices (parallel, linear, smart), where smart does linear rendering if below a certain page limit (for very short documents, it's better to render directly instead of setting up a process pool)
         "--linear",
-        action = "store_true",
-        help = "Render linear in the main process without parallelization. Options of this group will be silently ignored.",
+        nargs = "?",
+        type = int,
+        default = 4,
+        const = math.inf,
+        help = "TODO"
     )
     parallel.add_argument(
         "--processes",
@@ -268,6 +271,8 @@ class PILReceiver (SavingReceiver):
     
     def postprocess(self, page, in_image, crop, rot, invert_lightness, exclude_images):
         
+        out_image = in_image
+        
         if invert_lightness:
             
             pil_filter = PIL.ImageFilter.Color3DLUT.generate(self.POSTPROC_LUT_SIZE, self._invert_px_lightness)
@@ -366,7 +371,7 @@ def main(args):
         exclude_images = args.exclude_images,
     )
     
-    if args.linear:
+    if n_pages <= args.linear:
         
         logger.info("Linear rendering ...")
         if may_draw_forms:
