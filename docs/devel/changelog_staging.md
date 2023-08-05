@@ -7,10 +7,7 @@
 
 *API breaking changes*
 - Rendering:
-  * `PdfDocument.render()`, the parallel multi-page renderer, has been removed from the public API.
-    Please use `PdfPage.render()` instead, and consider caller-side, process based parallelization.
-    Parallel rendering to files is still available through the CLI (an API entrypoint is provided).
-    See below for more info.
+  * <!-- TODO PdfDocument.render() -->
   * `PdfBitmap.get_info()` and `PdfBitmapInfo` have been removed since they only existed on behalf of data transfer in `PdfDocument.render()`.
 - `PdfDocument.get_toc()`: Replaced bookmark namedtuples with method-oriented wrapper classes `PdfBookmark` and `PdfDest`,
   so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects.
@@ -31,6 +28,3 @@
   * Fixed parallel rendering with byte buffers on Linux by avoiding the process start method `fork`.
 - sourcebuild: fixed build with system libraries.
 - Improved setup code.
-
-*Rationale for the removal of PdfDocument.render()*
-TODO

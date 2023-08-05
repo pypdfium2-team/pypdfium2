@@ -73,6 +73,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         return self.pdf if self.page is None else self.page
     
     
+    # TODO(apibreak) rename to get_bounds() (pos implies just a single position, like the bottom left corner)
     def get_pos(self):
         """
         Get the position of the object on the page.
@@ -86,9 +87,19 @@ class PdfObject (pdfium_i.AutoCloseable):
         l, b, r, t = c_float(), c_float(), c_float(), c_float()
         ok = pdfium_c.FPDFPageObj_GetBounds(self, l, b, r, t)
         if not ok:
-            raise PdfiumError("Failed to locate pageobject.")
+            raise PdfiumError("Failed to get bounds.")
         
         return (l.value, b.value, r.value, t.value)
+    
+    
+    def get_quad_bounds(self):
+        if self.type not in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
+            raise RuntimeError("Object quad points only supported for image and text")
+        q = pdfium_c.FS_QUADPOINTSF()
+        ok = pdfium_c.FPDFPageObj_GetRotatedBounds(self, q)
+        if not ok:
+            raise PdfiumError("Failed to get quad points.")
+        return ((q.x1, q.y1), (q.x2, q.y2), (q.x3, q.y3), (q.x4, q.y4))
     
     
     def get_matrix(self):
@@ -99,7 +110,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         fs_matrix = pdfium_c.FS_MATRIX()
         ok = pdfium_c.FPDFPageObj_GetMatrix(self, fs_matrix)
         if not ok:
-            raise PdfiumError("Failed to get matrix of pageobject.")
+            raise PdfiumError("Failed to get matrix.")
         return PdfMatrix.from_raw(fs_matrix)
     
     
@@ -110,7 +121,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         """
         ok = pdfium_c.FPDFPageObj_SetMatrix(self, matrix)
         if not ok:
-            raise PdfiumError("Failed to set matrix of pageobject.")
+            raise PdfiumError("Failed to set matrix.")
     
     
     def transform(self, matrix):
@@ -125,7 +136,7 @@ class PdfObject (pdfium_i.AutoCloseable):
 
 class PdfImage (PdfObject):
     """
-    Image object helper class (specific kind of page object).
+    Image object helper class (specific kind of pageobject).
     """
     
     # cf. https://crbug.com/pdfium/1203

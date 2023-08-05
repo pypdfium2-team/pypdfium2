@@ -2,7 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import ctypes
 import logging
+import colorsys
+import PIL.Image
+import PIL.ImageFilter
+import PIL.ImageDraw
 import functools
 from pathlib import Path
 import multiprocessing as mp
@@ -180,9 +185,8 @@ def attach(parser):
     )
     
     color_scheme = parser.add_argument_group(
-        title = "Color scheme",
-        description = "Options for rendering with custom color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues.",
-        # TODO Consider implementing alternative dark theme via post-processing with selective lightness inversion
+        title = "PDFium forced color scheme",
+        description = "Options for rendering with forced color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues. Consider using lightness inversion post-processing instead.",
     )
     color_scheme.add_argument(
         "--sample-theme",
@@ -210,34 +214,83 @@ def attach(parser):
         action = "store_true",
         help = "Whether fill paths need to be stroked.",
     )
+    
+    postproc = parser.add_argument_group(
+        title = "Post processing"
+    )
+    postproc.add_argument(
+        "--invert-lightness",
+        action = "store_true",
+    )
+    postproc.add_argument(
+        "--exclude-images",
+        action = "store_true",
+    )
 
 
-class PILSaver:
+class SavingReceiver:
     
-    # TODO? outsource filepath assembly
+    def __init__(self, path_parts):
+        self._path_parts = path_parts
     
-    def __init__(self, output_dir, prefix, n_digits, format):
-        self.output_dir, self.prefix, self.n_digits, self.format = output_dir, prefix, n_digits, format
+    def get_path(self, i):
+        output_dir, prefix, n_digits, format = self._path_parts
+        return output_dir / (prefix + "%0*d.%s" % (n_digits, i+1, format))
+
+
+class PILReceiver (SavingReceiver):
     
-    def __call__(self, bitmap, index):
-        # TODO consider closing bitmap explicitly (a bit complicated since pil_image can be either reference or copy depending on pixel format) - also, this is only relevant for foreign bitmaps
+    def __call__(self, page, bitmap, index, *args, **kwargs):
         pil_image = pdfium.PdfBitmap.to_pil(bitmap)
-        out = self.output_dir / (self.prefix + "%0*d.%s" % (self.n_digits, index+1, self.format))
-        pil_image.save(out)
-
-
-def render_linear(saver, pdf, page_indices, **kwargs):
-    for i in page_indices:
-        logger.info(f"Rendering page {i+1} ...")
-        page = pdf[i]
-        bitmap = page.render(**kwargs)
-        saver(bitmap, index=i)
-
-
-def _render_parallel_init(caller_init, input, password, saver, may_init_forms, kwargs):
+        pil_image = self.postprocess(page, pil_image, *args, **kwargs)
+        out_path = self.get_path(index)
+        pil_image.save(out_path)
+        logger.info(f"Wrote page {index+1} as {out_path.name}")
     
-    if caller_init:
-        caller_init()
+    # FIXME code style ...
+    
+    POSTPROC_LUT_SIZE = 17
+    
+    @staticmethod
+    def _invert_px_lightness(r, g, b):
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
+        l = 1 - l
+        return colorsys.hls_to_rgb(h, l, s)
+    
+    @staticmethod
+    def _convert_point(page, crop, size, rot, point):
+        size_x, size_y = size
+        page_x, page_y = point
+        device_x, device_y = ctypes.c_int(), ctypes.c_int()
+        ok = pdfium_c.FPDF_PageToDevice(page, -crop[0], -crop[3], size_x, size_y, rot, page_x, page_y, device_x, device_y)
+        assert ok
+        return (device_x.value, device_y.value)
+    
+    def postprocess(self, page, in_image, crop, rot, invert_lightness, exclude_images):
+        
+        if invert_lightness:
+            
+            pil_filter = PIL.ImageFilter.Color3DLUT.generate(self.POSTPROC_LUT_SIZE, self._invert_px_lightness)
+            out_image = in_image.filter(pil_filter)
+            
+            if exclude_images:
+                images = list(page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE]))
+                if len(images) > 0:
+                    mask = PIL.Image.new("1", in_image.size)
+                    draw = PIL.ImageDraw.Draw(mask)
+                    for obj in images:
+                        quad_bounds = obj.get_quad_bounds()
+                        quad_bounds = [self._convert_point(page, crop, in_image.size, pdfium_i.RotationToConst[rot], p) for p in quad_bounds]
+                        draw.polygon(quad_bounds, fill=1, outline=1)
+                    out_image.paste(in_image, mask=mask)
+        
+        return out_image
+
+
+def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, receiver, receiver_kwargs):
+    
+    if extra_init:
+        extra_init()
     
     logger.info(f"Initializing data for process {os.getpid()}")
     
@@ -246,53 +299,22 @@ def _render_parallel_init(caller_init, input, password, saver, may_init_forms, k
         pdf.init_forms()
     
     global ProcObjs
-    ProcObjs = (pdf, kwargs, saver)
+    ProcObjs = (pdf, kwargs, receiver, receiver_kwargs)
 
 
-def _render_parallel_job(index):
-    logger.info(f"Rendering page {index+1} ...")
+def _render_parallel_job(i):
+    logger.info(f"Started page {i+1} ...")
     global ProcObjs
-    pdf, kwargs, saver = ProcObjs
-    page = pdf[index]
+    pdf, kwargs, receiver, receiver_kwargs = ProcObjs
+    page = pdf[i]
     bitmap = page.render(**kwargs)
+    receiver(page, bitmap, i, **receiver_kwargs)
     page.close()
-    saver(bitmap, index=index)
-
-
-def render_parallel(
-        saver,
-        input,
-        password = None,
-        may_init_forms = False,
-        page_indices = None,
-        n_processes = os.cpu_count(),
-        parallel_strategy = "spawn",
-        parallel_lib = "mp",
-        parallel_map = None,
-        caller_init = None,
-        **kwargs
-    ):
-    
-    ctx = mp.get_context(parallel_strategy)
-    pool_backends = dict(
-        mp = (ctx.Pool, "imap"),
-        ft = (functools.partial(ft.ProcessPoolExecutor, mp_context=ctx), "map"),
-    )    
-    pool_ctor, map_attr = pool_backends[parallel_lib]
-    if parallel_map:
-        map_attr = parallel_map
-    
-    pool_kwargs = dict(
-        initializer = _render_parallel_init,
-        initargs = (caller_init, input, password, saver, may_init_forms, kwargs),
-    )
-    
-    with pool_ctor(n_processes, **pool_kwargs) as pool:
-        map_func = getattr(pool, map_attr)
-        for _ in map_func(_render_parallel_job, page_indices): pass
 
 
 def main(args):
+    
+    # TODO turn into a python-usable API yielding output paths as they arrive
     
     pdf = get_input(args)
     
@@ -316,7 +338,6 @@ def main(args):
     
     may_draw_forms = not args.no_forms
     kwargs = dict(
-        page_indices = args.pages,
         scale = args.scale,
         rotation = args.rotation,
         crop = args.crop,
@@ -335,26 +356,52 @@ def main(args):
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True
     
-    n_digits = len(str( max(args.pages)+1 ))
-    saver = PILSaver(args.output, args.prefix, n_digits, args.format)
+    n_digits = len(str(n_pages))
+    path_parts = (args.output, args.prefix, n_digits, args.format)
+    receiver = PILReceiver(path_parts)
+    receiver_kwargs = dict(
+        crop = kwargs["crop"],
+        rot = kwargs["rotation"],
+        invert_lightness = args.invert_lightness,
+        exclude_images = args.exclude_images,
+    )
     
     if args.linear:
+        
         logger.info("Linear rendering ...")
         if may_draw_forms:
             pdf.init_forms()
-        render_linear(saver, pdf, **kwargs)
+        
+        for i in args.pages:
+            logger.info(f"Started page {i+1} ...")
+            page = pdf[i]
+            bitmap = page.render(**kwargs)
+            receiver(page, bitmap, i, **receiver_kwargs)
+        
     else:
+        
         logger.info("Parallel rendering ...")
-        kwargs.update(
-            n_processes = args.processes,
-            parallel_strategy = args.parallel_strategy,
-            parallel_lib = args.parallel_lib,
-            parallel_map = args.parallel_map,
-            may_init_forms = may_draw_forms,
-            # it looks like setup_logging() is not run automatically with these mp strategies, so set it as initializer
-            caller_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
+        
+        ctx = mp.get_context(args.parallel_strategy)
+        pool_backends = dict(
+            mp = (ctx.Pool, "imap"),
+            ft = (functools.partial(ft.ProcessPoolExecutor, mp_context=ctx), "map"),
         )
-        # TODO consider externalizing input to caller side
-        render_parallel(saver, pdf._orig_input, args.password, **kwargs)
-        # for shared memory, we must keep the pdf alive up to this point, since it manages input lifetime
-        id(pdf)
+        pool_ctor, map_attr = pool_backends[args.parallel_lib]
+        if args.parallel_map:
+            map_attr = args.parallel_map
+        
+        extra_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
+        pool_kwargs = dict(
+            initializer = _render_parallel_init,
+            initargs = (extra_init, pdf._orig_input, args.password, may_draw_forms, kwargs, receiver, receiver_kwargs),
+        )
+        
+        with pool_ctor(args.processes, **pool_kwargs) as pool:
+            map_func = getattr(pool, map_attr)
+            for _ in map_func(_render_parallel_job, args.pages):
+                pass
+        
+        # For shared memory, we must keep the pdf alive up to this point, since it manages input lifetime
+        # TODO consider outsourcing input to caller side
+        pdf.close()

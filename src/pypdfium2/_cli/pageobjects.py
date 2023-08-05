@@ -89,8 +89,11 @@ def main(args):
             print(preamble + pad_0 + pdfium_i.ObjectTypeToStr.get(obj.type))
             
             if show_pos:
-                pos = round_list(obj.get_pos(), args.n_digits)
-                print(pad_1 + f"Position: {pos}")
+                bounds = round_list(obj.get_pos(), args.n_digits)
+                print(pad_1 + f"Bounds: {bounds}")
+                if obj.type in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
+                    quad_bounds = obj.get_quad_bounds()
+                    print(pad_1 + f"Quad Bounds: {[round_list(p, args.n_digits) for p in quad_bounds]}")
             
             # CONSIDER also call get_size() for coverage
             if show_imageinfo and isinstance(obj, pdfium.PdfImage):
