@@ -73,16 +73,18 @@ class PdfObject (pdfium_i.AutoCloseable):
         return self.pdf if self.page is None else self.page
     
     
-    # TODO(apibreak) rename to get_bounds() (pos implies just a single position, like the bottom left corner)
-    def get_pos(self):
+    def get_bounds(self):
         """
-        Get the position of the object on the page.
+        Get the object's bounding box on the page.
         
         Returns:
-            A tuple of four :class:`float` coordinates for left, bottom, right, and top.
+            tuple[float*4]: A rectangle of four coordinates for left, bottom, right, and top.
+        
+        Hint:
+            Consider using :meth:`.get_quad_points` for tighter boundaries.
         """
         if self.page is None:
-            raise RuntimeError("Must not call get_pos() on a loose pageobject.")
+            raise RuntimeError("Must not call get_bounds() on a loose pageobject.")
         
         l, b, r, t = c_float(), c_float(), c_float(), c_float()
         ok = pdfium_c.FPDFPageObj_GetBounds(self, l, b, r, t)
@@ -92,13 +94,26 @@ class PdfObject (pdfium_i.AutoCloseable):
         return (l.value, b.value, r.value, t.value)
     
     
-    def get_quad_bounds(self):
+    def get_quad_points(self):
+        """
+        Get the object's quadriliteral points, i.e. the corner positions.
+        For transformed objects, this provides tighter bounds than a rectangle (e.g. shear, or rotation by a non-multiple of 90°).
+        
+        Note:
+            This function only supports image and text objects.
+        
+        Returns:
+            tuple[tuple[float*2] * 4]: Four corner points of the form (x, y).
+        """
+        
         if self.type not in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
-            raise RuntimeError("Object quad points only supported for image and text")
+            raise RuntimeError("Object quad points only supported for image and text (as of pdfium 5921).")
+        
         q = pdfium_c.FS_QUADPOINTSF()
         ok = pdfium_c.FPDFPageObj_GetRotatedBounds(self, q)
         if not ok:
             raise PdfiumError("Failed to get quad points.")
+        
         return ((q.x1, q.y1), (q.x2, q.y2), (q.x3, q.y3), (q.x4, q.y4))
     
     
@@ -166,7 +181,7 @@ class PdfImage (PdfObject):
         
         Note:
             * The DPI values signify the resolution of the image on the PDF page, not the DPI metadata embedded in the image file.
-            * Due to issues in PDFium, this function can be slow. If you only need image size, prefer the faster :meth:`.get_size` instead.
+            * Due to issues in PDFium, this function can be slow. If you only need image size, prefer the faster :meth:`.get_px_size` instead.
         
         Returns:
             FPDF_IMAGEOBJ_METADATA: Image metadata structure
@@ -179,10 +194,8 @@ class PdfImage (PdfObject):
         return metadata
     
     
-    def get_size(self):
+    def get_px_size(self):
         """
-        .. versionadded:: 4.8/5731
-        
         Returns:
             (int, int): Image dimensions as a tuple of (width, height).
         """
@@ -366,10 +379,7 @@ class ImageNotExtractableError (Exception):
 def _get_pil_mode(colorspace, bpp):
     # In theory, indexed (palettized) and ICC-based color spaces could be handled as well, but PDFium currently does not provide access to the palette or the ICC profile
     if colorspace == pdfium_c.FPDF_COLORSPACE_DEVICEGRAY:
-        if bpp == 1:
-            return "1"
-        else:
-            return "L"
+        return ("1" if bpp == 1 else "L")
     elif colorspace == pdfium_c.FPDF_COLORSPACE_DEVICERGB:
         return "RGB"
     elif colorspace == pdfium_c.FPDF_COLORSPACE_DEVICECMYK:

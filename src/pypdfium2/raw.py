@@ -29,6 +29,7 @@ def _get_members():
     
     _compile_wildcards = lambda *patterns: [re.compile(fnmatch.translate(p)) for p in patterns]
     
+    # TODO __eq__ filter: discard on capture
     NAME_FILTERS = (
         (str.startswith, ["_", "struct_", "enum_"]),
         (str.endswith, ["_t__"]),

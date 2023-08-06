@@ -26,7 +26,7 @@ def test_image_objects():
     assert obj.page is page
     assert obj.pdf is pdf
     
-    positions = [img.get_pos() for img in images]
+    positions = [img.get_bounds() for img in images]
     exp_positions = [
         (133, 459, 350, 550),
         (48, 652, 163, 700),
@@ -50,7 +50,7 @@ def test_misc_objects():
         assert obj.level == 0
         assert obj.page is page
         assert obj.pdf is pdf
-        pos = obj.get_pos()
+        pos = obj.get_bounds()
         assert len(pos) == 4
 
 
@@ -62,7 +62,7 @@ def test_new_image_from_jpeg():
     image_a = pdfium.PdfImage.new(pdf)
     buffer = open(TestFiles.mona_lisa, "rb")
     image_a.load_jpeg(buffer, autoclose=True)
-    width, height = image_a.get_size()
+    width, height = image_a.get_px_size()
     page.insert_obj(image_a)
     
     assert len(pdf._data_holder) == 1
@@ -156,7 +156,7 @@ def test_replace_image_with_jpeg():
     image_1 = images[0]
     
     image_1.load_jpeg(TestFiles.mona_lisa, pages=[page])
-    width, height = image_1.get_size()
+    width, height = image_1.get_px_size()
     assert matrices == [img.get_matrix() for img in images]
     
     # preserve the aspect ratio

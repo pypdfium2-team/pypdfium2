@@ -32,7 +32,7 @@ def test_xobject_placement():
     dest_page_1.insert_obj(po)
     assert po.pdf is dest_pdf
     assert po.page is dest_page_1
-    pos_a = po.get_pos()
+    pos_a = po.get_bounds()
     # xfail with pdfium < 5370, https://crbug.com/pdfium/1905
     assert pytest.approx(pos_a, abs=0.5) == (19, 440, 279, 823)
     

@@ -284,7 +284,7 @@ class PILReceiver (SavingReceiver):
                     mask = PIL.Image.new("1", in_image.size)
                     draw = PIL.ImageDraw.Draw(mask)
                     for obj in images:
-                        quad_bounds = obj.get_quad_bounds()
+                        quad_bounds = obj.get_quad_points()
                         quad_bounds = [self._convert_point(page, crop, in_image.size, pdfium_i.RotationToConst[rot], p) for p in quad_bounds]
                         draw.polygon(quad_bounds, fill=1, outline=1)
                     out_image.paste(in_image, mask=mask)

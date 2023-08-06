@@ -113,7 +113,7 @@ Here are some examples of using the support model API.
   
   # Locate objects on the page
   for obj in page.get_objects():
-      print(obj.level, obj.type, obj.get_pos())
+      print(obj.level, obj.type, obj.get_bounds())
   ```
 
 * Render a single page
@@ -156,7 +156,7 @@ Here are some examples of using the support model API.
   
   image = pdfium.PdfImage.new(pdf)
   image.load_jpeg("./tests/resources/mona_lisa.jpg")
-  width, height = image.get_size()
+  width, height = image.get_px_size()
   
   matrix = pdfium.PdfMatrix().scale(width, height)
   image.set_matrix(matrix)

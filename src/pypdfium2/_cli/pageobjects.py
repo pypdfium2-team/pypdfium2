@@ -16,9 +16,9 @@ from pypdfium2._cli._parsers import (
 )
 
 
-class InfoParams (Enum):
-    pos = 0
-    imageinfo = 1
+PARAM_POS = "pos"
+PARAM_IMGINFO = "imginfo"
+INFO_PARAMS = (PARAM_POS, PARAM_IMGINFO)
 
 
 def attach(parser):
@@ -44,13 +44,15 @@ def attach(parser):
     parser.add_argument(
         "--info",
         nargs = "*",
-        type = lambda s: InfoParams[s.lower()],
-        default = (InfoParams.pos, InfoParams.imageinfo),
-        help = "Object details to show (pos, imageinfo).",
+        type = str.lower,
+        choices = INFO_PARAMS,
+        default = INFO_PARAMS,
+        help = "Object details to show.",
     )
 
 
 def print_img_metadata(metadata, pad=""):
+    # TODO improve procedure
     for attr in pdfium_c.FPDF_IMAGEOBJ_METADATA.__slots__:
         value = getattr(metadata, attr)
         if attr == "colorspace":
@@ -68,17 +70,14 @@ def main(args):
     if args.filter:
         args.filter = [pdfium_i.ObjectTypeToConst[t] for t in args.filter]
     
-    show_pos = (InfoParams.pos in args.info)
-    show_imageinfo = (InfoParams.imageinfo in args.info)
+    show_pos = (PARAM_POS in args.info)
+    show_imageinfo = (PARAM_IMGINFO in args.info)
     total_count = 0
     
     for i in args.pages:
         
         page = pdf[i]
-        obj_searcher = page.get_objects(
-            filter = args.filter,
-            max_depth = args.max_depth,
-        )
+        obj_searcher = page.get_objects(args.filter, max_depth=args.max_depth)
         preamble = f"# Page {i+1}\n"
         count = 0
         
@@ -89,13 +88,13 @@ def main(args):
             print(preamble + pad_0 + pdfium_i.ObjectTypeToStr.get(obj.type))
             
             if show_pos:
-                bounds = round_list(obj.get_pos(), args.n_digits)
-                print(pad_1 + f"Bounds: {bounds}")
+                bounds = round_list(obj.get_bounds(), args.n_digits)
+                print(pad_1 + f"Bounding Box: {bounds}")
                 if obj.type in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
-                    quad_bounds = obj.get_quad_bounds()
-                    print(pad_1 + f"Quad Bounds: {[round_list(p, args.n_digits) for p in quad_bounds]}")
+                    quad_bounds = obj.get_quad_points()
+                    print(pad_1 + f"Quad Points: {[round_list(p, args.n_digits) for p in quad_bounds]}")
             
-            # CONSIDER also call get_size() for coverage
+            # CONSIDER also call get_px_size() for coverage
             if show_imageinfo and isinstance(obj, pdfium.PdfImage):
                 print(pad_1 + f"Filters: {obj.get_filters()}")
                 metadata = obj.get_metadata()
