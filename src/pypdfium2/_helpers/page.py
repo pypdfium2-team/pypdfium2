@@ -348,7 +348,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             color_scheme (PdfColorScheme | None):
                 An optional, custom rendering color scheme.
             fill_to_stroke (bool):
-                If True and rendering with custom color scheme, convert path fill to stroke (i.e. only draw borders in the path_stroke color instead of filling with the path_fill color).
+                If True and rendering with custom color scheme, only draw borders around fill areas using the `area_stroke` color, instead of filling with the `area_fill` color.
             fill_color (tuple[int, int, int, int]):
                 Color the bitmap will be filled with before rendering (RGBA values from 0 to 255).
             grayscale (bool):
@@ -403,15 +403,17 @@ class PdfPage (pdfium_i.AutoCloseable):
         if color_scheme and fill_to_stroke:
             flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
+        p2d_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(0, 0, width, height, fill_color)
+        bitmap.p2d_args = p2d_args
         
-        render_args = (bitmap, self, -crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation], flags)
+        render_args = (bitmap, self, *p2d_args, flags)
         
         if color_scheme is None:
             pdfium_c.FPDF_RenderPageBitmap(*render_args)
-        else:
             
+        else:
             pause = pdfium_c.IFSDK_PAUSE(version=1)
             pdfium_i.set_callback(pause, "NeedToPauseNow", lambda _: False)
             
@@ -498,9 +500,9 @@ class PdfColorScheme:
     Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
     """
     
-    def __init__(self, path_fill=None, path_stroke=None, text_fill=None, text_stroke=None):
+    def __init__(self, area_fill=None, area_stroke=None, text_fill=None, text_stroke=None):
         self.colors = dict(
-            path_fill_color=path_fill, path_stroke_color=path_stroke,
+            path_fill_color=area_fill, path_stroke_color=area_stroke,
             text_fill_color=text_fill, text_stroke_color=text_stroke,
         )
     

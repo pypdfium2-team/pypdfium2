@@ -57,13 +57,21 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             Number of channels per pixel.
         mode (str):
             The bitmap format as string (see `PIL Modes`_).
+        p2d_args (tuple | None)
+            If the bitmap was rendered from a page, this slot stores coordinate arguments for :func:`FPDF_DeviceToPage`.
+            None otherwise.
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
-        self.raw, self.buffer, self.width, self.height = raw, buffer, width, height
-        self.stride, self.format, self.rev_byteorder = stride, format, rev_byteorder
+        self.raw = raw
+        self.buffer = buffer
+        self.width, self.height = width, height
+        self.stride = stride
+        self.format = format
+        self.rev_byteorder = rev_byteorder
         self.n_channels = pdfium_i.BitmapTypeToNChannels[self.format]
         self.mode = (pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else pdfium_i.BitmapTypeToStr)[self.format]
+        self.p2d_args = None
         super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
     
     

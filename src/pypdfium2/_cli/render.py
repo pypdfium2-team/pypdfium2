@@ -6,16 +6,18 @@ import math
 import ctypes
 import logging
 import colorsys
-import PIL.Image
-import PIL.ImageFilter
-import PIL.ImageDraw
 import functools
 from pathlib import Path
 import multiprocessing as mp
 import concurrent.futures as ft
-import pypdfium2.raw as pdfium_c
-import pypdfium2.internal as pdfium_i
+
+import PIL.Image
+import PIL.ImageFilter
+import PIL.ImageDraw
+
 import pypdfium2._helpers as pdfium
+import pypdfium2.internal as pdfium_i
+import pypdfium2.raw as pdfium_c
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input, setup_logging
 
@@ -38,18 +40,19 @@ BitmapMakers = dict(
     foreign_simple = _bitmap_wrapper_foreign_simple,
 )
 
-CsFields = ("path_fill", "path_stroke", "text_fill", "text_stroke")
+CsFields = ("area_fill", "area_stroke", "text_fill", "text_stroke")
 ColorOpts = dict(metavar="C", nargs=4, type=int)
 SampleTheme = dict(
     # choose some random colors so we can distinguish the different drawings (TODO improve)
-    path_fill   = (170, 100, 0,   255),  # dark orange
-    path_stroke = (0,   150, 255, 255),  # sky blue
+    area_fill   = (170, 100, 0,   255),  # dark orange
+    area_stroke = (0,   150, 255, 255),  # sky blue
     text_fill   = (255, 255, 255, 255),  # white
     text_stroke = (150, 255, 0,   255),  # green
 )
 
 
 def attach(parser):
+    # TODO implement numpy/opencv receiver
     add_input(parser, pages=True)
     parser.add_argument(
         "--output", "-o",
@@ -158,13 +161,13 @@ def attach(parser):
         type = int,
         default = 4,
         const = math.inf,
-        help = "TODO"
+        help = "Render non-parallel if the pdf is shorter than the specified value (defaults to 4). If this flag is given without a value, then render linear regardless of document length.",
     )
     parallel.add_argument(
         "--processes",
         default = os.cpu_count(),
         type = int,
-        help = "The number of parallel rendering processes (defaults to the number of CPU cores)",
+        help = "The maximum number of parallel rendering processes. Defaults to the number of CPU cores.",
     )
     parallel.add_argument(
         "--parallel-strategy",
@@ -189,19 +192,19 @@ def attach(parser):
     
     color_scheme = parser.add_argument_group(
         title = "PDFium forced color scheme",
-        description = "Options for rendering with forced color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues. Consider using lightness inversion post-processing instead.",
+        description = "Options for rendering with forced color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues. For a dark theme, consider using lightness inversion post-processing instead.",
     )
     color_scheme.add_argument(
         "--sample-theme",
         action = "store_true",
-        help = "Use a sample theme as base color scheme. Explicit color params override selectively."
+        help = "Use a dark background sample theme as base. Explicit color params override selectively."
     )
     color_scheme.add_argument(
-        "--path-fill",
+        "--area-fill",
         **ColorOpts
     )
     color_scheme.add_argument(
-        "--path-stroke",
+        "--area-stroke",
         **ColorOpts
     )
     color_scheme.add_argument(
@@ -215,19 +218,24 @@ def attach(parser):
     color_scheme.add_argument(
         "--fill-to-stroke",
         action = "store_true",
-        help = "Whether fill paths need to be stroked.",
+        help = "Only draw borders around fill areas using the `area_stroke` color, instead of filling with the `area_fill` color.",
     )
     
     postproc = parser.add_argument_group(
-        title = "Post processing"
+        title = "Post processing",
+        description = "Options to post-process rendered images. Note that this may have a strongly negative impact on performance.",
     )
     postproc.add_argument(
         "--invert-lightness",
         action = "store_true",
+        help = "Invert lightness using the HLS color space (light<->dark, e.g. white<->black, dark_blue<->light_blue). The intent is to achieve a dark theme for documents with light background, while providing better visual results than a forced color scheme or classical color inversion.",
     )
+    # NOTE it may be possible to implement a smart heuristical image exclusion mode
+    # e.g. if there's a single image filling a large part of the page, then we might have a scanned paper that needs to be inverted, while pictures in a device-generated pdf should be excluded
     postproc.add_argument(
         "--exclude-images",
         action = "store_true",
+        help = "Whether to exclude PDF images from post-processing.",
     )
 
 
@@ -245,12 +253,13 @@ class PILReceiver (SavingReceiver):
     
     def __call__(self, page, bitmap, index, *args, **kwargs):
         pil_image = pdfium.PdfBitmap.to_pil(bitmap)
-        pil_image = self.postprocess(page, pil_image, *args, **kwargs)
+        pil_image = self.postprocess(page, pil_image, p2d_args=bitmap.p2d_args, *args, **kwargs)
         out_path = self.get_path(index)
         pil_image.save(out_path)
         logger.info(f"Wrote page {index+1} as {out_path.name}")
     
-    # FIXME code style ...
+    
+    # TODO externalize/restructure ...
     
     POSTPROC_LUT_SIZE = 17
     
@@ -261,31 +270,34 @@ class PILReceiver (SavingReceiver):
         return colorsys.hls_to_rgb(h, l, s)
     
     @staticmethod
-    def _convert_point(page, crop, size, rot, point):
-        size_x, size_y = size
+    def _convert_point(page, p2d_args, point):
         page_x, page_y = point
         device_x, device_y = ctypes.c_int(), ctypes.c_int()
-        ok = pdfium_c.FPDF_PageToDevice(page, -crop[0], -crop[3], size_x, size_y, rot, page_x, page_y, device_x, device_y)
+        ok = pdfium_c.FPDF_PageToDevice(page, *p2d_args, page_x, page_y, device_x, device_y)
         assert ok
         return (device_x.value, device_y.value)
     
-    def postprocess(self, page, in_image, crop, rot, invert_lightness, exclude_images):
+    
+    @classmethod
+    def postprocess(cls, page, in_image, p2d_args, invert_lightness, exclude_images):
         
         out_image = in_image
         
         if invert_lightness:
             
-            pil_filter = PIL.ImageFilter.Color3DLUT.generate(self.POSTPROC_LUT_SIZE, self._invert_px_lightness)
+            pil_filter = PIL.ImageFilter.Color3DLUT.generate(cls.POSTPROC_LUT_SIZE, cls._invert_px_lightness)
             out_image = in_image.filter(pil_filter)
             
             if exclude_images:
+                
+                # FIXME apparently inaccurate, looks like we are often 1px off target ...
+                
                 images = list(page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE]))
                 if len(images) > 0:
                     mask = PIL.Image.new("1", in_image.size)
                     draw = PIL.ImageDraw.Draw(mask)
                     for obj in images:
-                        quad_bounds = obj.get_quad_points()
-                        quad_bounds = [self._convert_point(page, crop, in_image.size, pdfium_i.RotationToConst[rot], p) for p in quad_bounds]
+                        quad_bounds = [cls._convert_point(page, p2d_args, p) for p in obj.get_quad_points()]
                         draw.polygon(quad_bounds, fill=1, outline=1)
                     out_image.paste(in_image, mask=mask)
         
@@ -324,8 +336,8 @@ def main(args):
     pdf = get_input(args)
     
     # TODO move to parsers?
-    n_pages = len(pdf)
-    if not all(0 <= i < n_pages for i in args.pages):
+    pdf_len = len(pdf)
+    if not all(0 <= i < pdf_len for i in args.pages):
         raise ValueError("Out-of-bounds page indices are prohibited.")
     if len(args.pages) != len(set(args.pages)):
         raise ValueError("Duplicate page indices are prohibited.")
@@ -361,17 +373,15 @@ def main(args):
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True
     
-    n_digits = len(str(n_pages))
+    n_digits = len(str(pdf_len))
     path_parts = (args.output, args.prefix, n_digits, args.format)
     receiver = PILReceiver(path_parts)
     receiver_kwargs = dict(
-        crop = kwargs["crop"],
-        rot = kwargs["rotation"],
         invert_lightness = args.invert_lightness,
         exclude_images = args.exclude_images,
     )
     
-    if n_pages <= args.linear:
+    if len(args.pages) <= args.linear:
         
         logger.info("Linear rendering ...")
         if may_draw_forms:
@@ -402,7 +412,8 @@ def main(args):
             initargs = (extra_init, pdf._orig_input, args.password, may_draw_forms, kwargs, receiver, receiver_kwargs),
         )
         
-        with pool_ctor(args.processes, **pool_kwargs) as pool:
+        n_procs = min(args.processes, len(args.pages))
+        with pool_ctor(n_procs, **pool_kwargs) as pool:
             map_func = getattr(pool, map_attr)
             for _ in map_func(_render_parallel_job, args.pages):
                 pass
