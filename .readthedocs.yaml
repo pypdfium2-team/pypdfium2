@@ -22,4 +22,3 @@ python:
     - requirements: req/docs.txt
     - method: pip
       path: .
-  system_packages: true
