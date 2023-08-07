@@ -263,6 +263,7 @@ class PdfImage (PdfObject):
             pages (list[PdfPage] | None):
                 A list of loaded pages that might contain the image object. See :meth:`.load_jpeg`.
         """
+        # FIXME the docs don't point out if the bitmap buffer needs to be kept alive - assume no
         c_pages, page_count = pdfium_i.pages_c_array(pages)
         ok = pdfium_c.FPDFImageObj_SetBitmap(c_pages, page_count, self, bitmap)
         if not ok:

@@ -29,7 +29,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     Warning:
         ``bitmap.close()``, which frees the buffer of foreign bitmaps, is not validated for safety.
-        A bitmap must not be closed when other objects still depend on its buffer!
+        A bitmap must not be closed while other objects still depend on its buffer!
     
     Hint:
         This class provides built-in converters (e. g. :meth:`.to_pil`, :meth:`.to_numpy`) that may be used to create a different representation of the bitmap.
@@ -40,8 +40,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     Attributes:
         raw (FPDF_BITMAP):
             The underlying PDFium bitmap handle.
-        buffer (~ctypes.c_ubyte):
-            A ctypes array representation of the pixel data (each item is an unsigned byte, i. e. a number ranging from 0 to 255).
+        buffer (~ctypes.c_ubyte | bytes):
+            A buffer containing the pixel data. May be either mutable or immutable, depening on how the bitmap was created.
         width (int):
             Width of the bitmap (horizontal size).
         height (int):
@@ -72,7 +72,10 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         self.n_channels = pdfium_i.BitmapTypeToNChannels[self.format]
         self.mode = (pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else pdfium_i.BitmapTypeToStr)[self.format]
         self.p2d_args = None
-        super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
+        if needs_free:
+            super().__init__(pdfium_c.FPDFBitmap_Destroy, obj=self.buffer)
+        else:
+            super().__init__(lambda raw: id(self.buffer), is_holder=True)
     
     
     @property
@@ -253,9 +256,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         return image
     
     
-    # FIXME might want to rename *recopy* to *mutable* ?
     @classmethod
-    def from_pil(cls, pil_image, recopy=False):
+    def from_pil(cls, pil_image):
         """
         Convert a :mod:`PIL` image to a PDFium bitmap.
         Due to the restricted number of color formats and bit depths supported by PDFium's
@@ -264,34 +266,22 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Parameters:
             pil_image (PIL.Image.Image):
                 The image.
-            recopy (bool):
-                If False (the default), reuse the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying. This is recommended if you do not modify the bitmap, though the buffer does not actually enforce immutability.
-                If True (otherwise), copy memory into a new buffer that is mutable by design. This is recommended if you modify the bitmap, e.g. using :meth:`.fill_rect`.
-                Note that the resulting bitmap is always independent of the PIL image, regardless of this option.
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
-        
-        .. versionchanged:: 4.15 reference bytes object instead of copying
-        .. versionadded:: 4.16 opt-in re-copying for mutability within Python API contract
         """
         
         if pil_image.mode in pdfium_i.BitmapStrToConst:
-            # PIL always seems to represent BGR(A/X) input as RGB(A/X), so this code passage is probably only hit for L
+            # PIL apparently always represents BGR(A/X) as RGB(A/X), so this code passage is only hit for L
             format = pdfium_i.BitmapStrToConst[pil_image.mode]
         else:
             pil_image = _pil_convert_for_pdfium(pil_image)
             format = pdfium_i.BitmapStrReverseToConst[pil_image.mode]
         
+        # FIXME PIL does not seem to expose the actual image buffer directly?
         py_buffer = pil_image.tobytes()
-        if recopy:
-            c_buffer = (ctypes.c_ubyte * len(py_buffer)).from_buffer_copy(py_buffer)
-        else:
-            # see docs above and https://stackoverflow.com/a/21490290/15547292
-            c_buffer = ctypes.cast(py_buffer, ctypes.POINTER(ctypes.c_ubyte * len(py_buffer))).contents
-            weakref.finalize(c_buffer, lambda: id(py_buffer))
-        
         w, h = pil_image.size
-        return cls.new_native(w, h, format, rev_byteorder=False, buffer=c_buffer)
+        
+        return cls.new_native(w, h, format, rev_byteorder=False, buffer=py_buffer)
     
     
     # TODO implement from_numpy()

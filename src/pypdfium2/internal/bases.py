@@ -29,7 +29,7 @@ class AutoCastable:
         return self.raw
 
 
-def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
+def _close_template(close_func, raw, parent, obj_repr, state, is_holder, *args, **kwargs):
     
     if DEBUG_AUTOCLOSE:
         state = state.value
@@ -37,7 +37,7 @@ def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
         if desc is None:
             raise
         # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
-        os.write(sys.stderr.fileno(), f"Close ({desc}) {obj_repr}\n".encode())
+        os.write(sys.stderr.fileno(), f"{'Hold' if is_holder else 'Close'} ({desc}) {obj_repr}\n".encode())
     
     if not LIBRARY_AVAILABLE:
         os.write(sys.stderr.fileno(), f"-> Cannot close object, library is destroyed. This may cause a memory leak!\n".encode())
@@ -49,7 +49,7 @@ def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
 
 class AutoCloseable (AutoCastable):
     
-    def __init__(self, close_func, *args, obj=None, needs_free=True, **kwargs):
+    def __init__(self, close_func, *args, obj=None, needs_free=True, is_holder=False, **kwargs):
         
         # NOTE proactively prevent accidental double initialization
         assert not hasattr(self, "_finalizer")
@@ -59,6 +59,7 @@ class AutoCloseable (AutoCastable):
         self._uuid = uuid.uuid4()
         self._ex_args = args
         self._ex_kwargs = kwargs
+        self._is_holder = is_holder
         self._autoclose_state = ctypes.c_int8(STATE_AUTO)  # mutable int
         
         self._finalizer = None
@@ -74,7 +75,7 @@ class AutoCloseable (AutoCastable):
     def _attach_finalizer(self):
         # NOTE this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
         assert self._finalizer is None
-        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, repr(self), self._autoclose_state, self.parent, *self._ex_args, **self._ex_kwargs)
+        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, self.parent, repr(self), self._autoclose_state, self._is_holder, *self._ex_args, **self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
