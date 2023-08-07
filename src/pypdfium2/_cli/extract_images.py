@@ -17,7 +17,7 @@ def attach(parser):
         "--output-dir", "-o",
         required = True,
         type = Path,
-        help = "Output directory to take the extracted images",
+        help = "Output directory to take the extracted images.",
     )
     parser.add_argument(
         "--max-depth",

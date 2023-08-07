@@ -3,10 +3,10 @@
 
 # TODO test-confirm filter and info params
 
-from enum import Enum
+from collections import OrderedDict
 import pypdfium2._helpers as pdfium
-import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
+import pypdfium2.raw as pdfium_c
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import (
     add_input,
@@ -51,15 +51,21 @@ def attach(parser):
     )
 
 
-def print_img_metadata(metadata, pad=""):
-    # TODO improve procedure
-    for attr in pdfium_c.FPDF_IMAGEOBJ_METADATA.__slots__:
-        value = getattr(metadata, attr)
-        if attr == "colorspace":
-            value = pdfium_i.ColorspaceToStr.get(value)
-        elif attr == "marked_content_id" and value == -1:
-            continue
-        print(pad + f"{attr}: {value}\n", end="")
+def print_img_metadata(m, n_digits, pad=""):
+    
+    members = OrderedDict(
+        width = m.width,
+        height = m.height,
+        horizontal_dpi = round(m.horizontal_dpi, n_digits),
+        vertical_dpi = round(m.vertical_dpi, n_digits),
+        bits_per_pixel = m.bits_per_pixel,
+        colorspace = pdfium_i.ColorspaceToStr.get(m.colorspace),
+    )
+    if m.marked_content_id != -1:
+        members["marked_content_id"] = m.marked_content_id
+    
+    for key, value in members.items():
+        print(pad + f"{key}: {value}")
 
 
 def main(args):
@@ -94,11 +100,11 @@ def main(args):
                     quad_bounds = obj.get_quad_points()
                     print(pad_1 + f"Quad Points: {[round_list(p, args.n_digits) for p in quad_bounds]}")
             
-            # CONSIDER also call get_px_size() for coverage
             if show_imageinfo and isinstance(obj, pdfium.PdfImage):
                 print(pad_1 + f"Filters: {obj.get_filters()}")
                 metadata = obj.get_metadata()
-                print_img_metadata(metadata, pad=pad_1)
+                assert (metadata.width, metadata.height) == obj.get_px_size()
+                print_img_metadata(metadata, args.n_digits, pad=pad_1)
             
             count += 1
             preamble = ""

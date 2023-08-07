@@ -27,7 +27,7 @@ def attach(parser):
     parser.add_argument(
         "--output", "-o",
         required = True,
-        help = "Target path for the output document",
+        help = "Target path for the output document.",
     )
 
 

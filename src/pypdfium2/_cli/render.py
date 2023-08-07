@@ -58,7 +58,7 @@ def attach(parser):
         "--output", "-o",
         type = Path,
         required = True,
-        help = "Output directory where the serially numbered images shall be placed",
+        help = "Output directory where the serially numbered images shall be placed.",
     )
     parser.add_argument(
         "--prefix",
@@ -67,7 +67,7 @@ def attach(parser):
     parser.add_argument(
         "--format", "-f",
         default = "jpg",
-        help = "The image format to use",
+        help = "The image format to use.",
     )
     parser.add_argument(
         "--scale",
@@ -80,7 +80,7 @@ def attach(parser):
         default = 0,
         type = int,
         choices = (0, 90, 180, 270),
-        help = "Rotate pages by 90, 180 or 270 degrees",
+        help = "Rotate pages by 90, 180 or 270 degrees.",
     )
     parser.add_argument(
         "--fill-color",
@@ -97,17 +97,17 @@ def attach(parser):
         nargs = 4,
         type = float,
         default = (0, 0, 0, 0),
-        help = "Amount to crop from (left, bottom, right, top)",
+        help = "Amount to crop from (left, bottom, right, top).",
     )
     parser.add_argument(
         "--no-annotations",
         action = "store_true",
-        help = "Prevent rendering of PDF annotations",
+        help = "Prevent rendering of PDF annotations.",
     )
     parser.add_argument(
         "--no-forms",
         action = "store_true",
-        help = "Prevent rendering of PDF forms",
+        help = "Prevent rendering of PDF forms.",
     )
     parser.add_argument(
         "--no-antialias",
@@ -115,12 +115,12 @@ def attach(parser):
         default = (),
         choices = ("text", "image", "path"),
         type = str.lower,
-        help = "Item types that shall not be smoothed",
+        help = "Item types that shall not be smoothed.",
     )
     parser.add_argument(
         "--force-halftone",
         action = "store_true",
-        help = "Always use halftone for image stretching",
+        help = "Always use halftone for image stretching.",
     )
     
     bitmap = parser.add_argument_group(
@@ -137,7 +137,7 @@ def attach(parser):
     bitmap.add_argument(
         "--grayscale",
         action = "store_true",
-        help = "Whether to render in grayscale mode (no colors)",
+        help = "Whether to render in grayscale mode (no colors).",
     )
     # TODO consider making --rev-byteorder and --prefer-bgrx default for PIL
     bitmap.add_argument(
@@ -153,7 +153,7 @@ def attach(parser):
     
     parallel = parser.add_argument_group(
         title = "Parallelization",
-        description = "Options for rendering with multiple processes",
+        description = "Options for rendering with multiple processes.",
     )
     parallel.add_argument(
         "--linear",
@@ -398,6 +398,7 @@ def main(args):
         logger.info("Parallel rendering ...")
         
         ctx = mp.get_context(args.parallel_strategy)
+        # TODO unify using mp.pool.Pool(context=...) ?
         pool_backends = dict(
             mp = (ctx.Pool, "imap"),
             ft = (functools.partial(ft.ProcessPoolExecutor, mp_context=ctx), "map"),

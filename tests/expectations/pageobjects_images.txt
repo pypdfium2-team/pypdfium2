@@ -8,8 +8,8 @@ image
     Filters: ['CCITTFaxDecode']
     width: 115
     height: 48
-    horizontal_dpi: 38.19187927246094
-    vertical_dpi: 38.18785858154297
+    horizontal_dpi: 38.1919
+    vertical_dpi: 38.1879
     bits_per_pixel: 1
     colorspace: DeviceGray
     marked_content_id: 1
@@ -19,7 +19,7 @@ image
     Filters: ['CCITTFaxDecode']
     width: 115
     height: 48
-    horizontal_dpi: 72.03131103515625
+    horizontal_dpi: 72.0313
     vertical_dpi: 72.0
     bits_per_pixel: 1
     colorspace: DeviceGray
@@ -30,8 +30,8 @@ image
     Filters: ['CCITTFaxDecode']
     width: 115
     height: 48
-    horizontal_dpi: 22.159772872924805
-    vertical_dpi: 22.16094970703125
+    horizontal_dpi: 22.1598
+    vertical_dpi: 22.1609
     bits_per_pixel: 1
     colorspace: DeviceGray
     marked_content_id: 3
