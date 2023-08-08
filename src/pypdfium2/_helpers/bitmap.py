@@ -74,8 +74,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         self.p2d_args = None
         if needs_free:
             super().__init__(pdfium_c.FPDFBitmap_Destroy, obj=self.buffer)
-        else:
-            super().__init__(lambda raw: id(self.buffer), is_holder=True)
     
     
     @property
