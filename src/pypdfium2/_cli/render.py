@@ -252,8 +252,9 @@ class SavingReceiver:
 class PILReceiver (SavingReceiver):
     
     def __call__(self, page, bitmap, index, *args, **kwargs):
+        pos_conv = pdfium.PdfPosConv(page, bitmap)
         pil_image = pdfium.PdfBitmap.to_pil(bitmap)
-        pil_image = self.postprocess(page, pil_image, p2d_args=bitmap.p2d_args, *args, **kwargs)
+        pil_image = self.postprocess(page, pil_image, pos_conv, *args, **kwargs)
         out_path = self.get_path(index)
         pil_image.save(out_path)
         logger.info(f"Wrote page {index+1} as {out_path.name}")
@@ -269,17 +270,9 @@ class PILReceiver (SavingReceiver):
         l = 1 - l
         return colorsys.hls_to_rgb(h, l, s)
     
-    @staticmethod
-    def _convert_point(page, p2d_args, point):
-        page_x, page_y = point
-        device_x, device_y = ctypes.c_int(), ctypes.c_int()
-        ok = pdfium_c.FPDF_PageToDevice(page, *p2d_args, page_x, page_y, device_x, device_y)
-        assert ok
-        return (device_x.value, device_y.value)
-    
     
     @classmethod
-    def postprocess(cls, page, in_image, p2d_args, invert_lightness, exclude_images):
+    def postprocess(cls, page, in_image, pos_conv, invert_lightness, exclude_images):
         
         out_image = in_image
         
@@ -297,8 +290,8 @@ class PILReceiver (SavingReceiver):
                     mask = PIL.Image.new("1", in_image.size)
                     draw = PIL.ImageDraw.Draw(mask)
                     for obj in images:
-                        quad_bounds = [cls._convert_point(page, p2d_args, p) for p in obj.get_quad_points()]
-                        draw.polygon(quad_bounds, fill=1, outline=1)
+                        qpoints = [pos_conv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
+                        draw.polygon(qpoints, fill=1, outline=1)
                     out_image.paste(in_image, mask=mask)
         
         return out_image

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfPage", "PdfColorScheme")
+__all__ = ("PdfPage", "PdfColorScheme", "PdfPosConv")
 
 import math
 import ctypes
@@ -224,13 +224,14 @@ class PdfPage (pdfium_i.AutoCloseable):
         Parameters:
             pageobj (PdfObject): The page object to remove.
         """
-                
+        
         if pageobj.page is not self:
             raise ValueError("The page object you attempted to remove is not part of this page.")
         
         ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
         if not ok:
             raise PdfiumError("Failed to remove pageobject.")
+        
         pageobj.page = None
         pageobj._attach_finalizer()
     
@@ -403,12 +404,12 @@ class PdfPage (pdfium_i.AutoCloseable):
         if color_scheme and fill_to_stroke:
             flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
-        p2d_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
+        pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(0, 0, width, height, fill_color)
-        bitmap.p2d_args = p2d_args
+        bitmap._pos_args = pos_args
         
-        render_args = (bitmap, self, *p2d_args, flags)
+        render_args = (bitmap, self, *pos_args, flags)
         
         if color_scheme is None:
             pdfium_c.FPDF_RenderPageBitmap(*render_args)
@@ -426,6 +427,40 @@ class PdfPage (pdfium_i.AutoCloseable):
             pdfium_c.FPDF_FFLDraw(self.formenv, *render_args)
         
         return bitmap
+
+
+class PdfPosConv:
+    """
+    Pdf coordinate translator.
+    
+    Parameters:
+        page (PdfPage):
+            TODO
+        bitmap (PdfBitmap):
+            TODO
+    """
+    
+    # TODO add to test suite
+    
+    def __init__(self, page, bitmap):
+        if not bitmap._pos_args:
+            raise RuntimeError("This bitmap was not rendered from a page.")
+        self.page = page
+        self._args = bitmap._pos_args
+    
+    def to_page(self, bitmap_x, bitmap_y):
+        page_x, page_y = ctypes.c_double(), ctypes.c_double()
+        ok = pdfium_c.FPDF_DeviceToPage(self.page, *self._args, bitmap_x, bitmap_y, page_x, page_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to page coordinates.")
+        return (page_x.value, page_y.value)
+    
+    def to_bitmap(self, page_x, page_y):
+        bitmap_x, bitmap_y = ctypes.c_int(), ctypes.c_int()
+        ok = pdfium_c.FPDF_PageToDevice(self.page, *self._args, page_x, page_y, bitmap_x, bitmap_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to bitmap coordinates.")
+        return (bitmap_x.value, bitmap_y.value)
 
 
 def _auto_bitmap_format(fill_color, grayscale, prefer_bgrx):
