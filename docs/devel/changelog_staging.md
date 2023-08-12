@@ -7,7 +7,7 @@
 
 *API breaking changes*
 - Rendering:
-  * <!-- TODO PdfDocument.render() -->
+  <!-- TODO PdfDocument.render() -->
   * `PdfBitmap.get_info()` and `PdfBitmapInfo` have been removed since they only existed on behalf of data transfer in `PdfDocument.render()`.
 - Pageobjects:
   * Renamed `PdfObject.get_pos()` to `.get_bounds()`.
@@ -17,19 +17,23 @@
   Also provide signed count as-is rather than needlessly splitting it in two variables (unsigned int `n_kids` and bool `is_closed`).
 - Setup: renamed `$PDFIUM_PLATFORM` to `$PDFIUM_BINARY`.
 
+*Bug fixes*
+- Fixed XFA init (if V8/XFA support is enabled). This issue was caused by a typo in a struct field. Thanks to Benoît Blanchon.
+- Fixed sourcebuild with system libraries.
+
 *Improvements and new features*
+<!-- TODO command-line entrypoint -->
 - PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
   `pypdfium2.raw` is now a wrapper around the actual bindings file `raw_unsafe.py`.
   In this course, filtering has been installed to free the namespace of unwanted members.
 - `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
 - `PdfObject`: Added `.get_quad_points()`.
-- Embedders may now call into the command-line API using the entrypoint function `pypdfium2.main()`.
 - CLI: Implemented configurable input type for testing.
 - Major CLI renderer improvements:
   * Moved saving from main process into jobs. This avoids unnecessary data transfer and prevents images from queuing up in memory.
   * Avoid full state data transfer and object re-initialization for each job. Instead, use a pool initializer and exploit global variables.
-    This is an important improvement, and also makes bytes input tolerable for parallel rendering.
-  * Added options to configure parallelization and output prefix.
+    This important improvement also makes bytes input tolerable for parallel rendering.
   * Fixed parallel rendering with byte buffers on Linux by avoiding the process start method `fork`.
-- sourcebuild: fixed build with system libraries.
+  * Implemented miscellaneous new options.
+  * Added selective lightness inversion as post-processing feature.
 - Improved setup code.
