@@ -3,7 +3,7 @@
 
 from enum import Enum
 from pathlib import Path
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2._helpers as pdfium
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input
@@ -79,6 +79,6 @@ def main(args):
     h = units_to_pt(args.height, args.unit)
     
     src_pdf = get_input(args)
-    raw_dest = pdfium_c.FPDF_ImportNPagesToOne(src_pdf, w, h, args.cols, args.rows)
+    raw_dest = pdfium_r.FPDF_ImportNPagesToOne(src_pdf, w, h, args.cols, args.rows)
     dest_pdf = pdfium.PdfDocument(raw_dest)
     dest_pdf.save(args.output)

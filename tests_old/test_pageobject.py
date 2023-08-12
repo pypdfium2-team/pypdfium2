@@ -5,7 +5,7 @@ import io
 import pytest
 import PIL.Image
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 from .conftest import TestFiles, OutputDir
 
 
@@ -14,14 +14,14 @@ def test_image_objects():
     page = pdf[0]
     assert page.pdf is pdf
     
-    images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
+    images = list( page.get_objects(filter=[pdfium_r.FPDF_PAGEOBJ_IMAGE]) )
     assert len(images) == 3
     
     obj = images[0]
     assert isinstance(obj, pdfium.PdfObject)
     assert type(obj) is pdfium.PdfImage
-    assert obj.type == pdfium_c.FPDF_PAGEOBJ_IMAGE
-    assert isinstance(obj.raw, pdfium_c.FPDF_PAGEOBJECT)
+    assert obj.type == pdfium_r.FPDF_PAGEOBJ_IMAGE
+    assert isinstance(obj.raw, pdfium_r.FPDF_PAGEOBJECT)
     assert obj.level == 0
     assert obj.page is page
     assert obj.pdf is pdf
@@ -45,8 +45,8 @@ def test_misc_objects():
     
     for obj in page.get_objects():
         assert type(obj) is pdfium.PdfObject
-        assert isinstance(obj.raw, pdfium_c.FPDF_PAGEOBJECT)
-        assert obj.type in (pdfium_c.FPDF_PAGEOBJ_TEXT, pdfium_c.FPDF_PAGEOBJ_PATH)
+        assert isinstance(obj.raw, pdfium_r.FPDF_PAGEOBJECT)
+        assert obj.type in (pdfium_r.FPDF_PAGEOBJ_TEXT, pdfium_r.FPDF_PAGEOBJ_PATH)
         assert obj.level == 0
         assert obj.page is page
         assert obj.pdf is pdf
@@ -86,9 +86,9 @@ def test_new_image_from_jpeg():
     assert in_data == out_data
     
     metadata = image_a.get_metadata()
-    assert isinstance(metadata, pdfium_c.FPDF_IMAGEOBJ_METADATA)
+    assert isinstance(metadata, pdfium_r.FPDF_IMAGEOBJ_METADATA)
     assert metadata.bits_per_pixel == 24  # 3 channels, 8 bits each
-    assert metadata.colorspace == pdfium_c.FPDF_COLORSPACE_DEVICERGB
+    assert metadata.colorspace == pdfium_r.FPDF_COLORSPACE_DEVICERGB
     assert metadata.height == height == 120
     assert metadata.width == width == 120
     assert metadata.horizontal_dpi == 72
@@ -141,7 +141,7 @@ def test_new_image_from_bitmap():
     
     reopened_pdf = pdfium.PdfDocument(out_path)
     reopened_page = reopened_pdf[0]
-    reopened_image = next( reopened_page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
+    reopened_image = next( reopened_page.get_objects(filter=[pdfium_r.FPDF_PAGEOBJ_IMAGE]) )
     assert reopened_image.get_filters() == ["FlateDecode"]
 
 
@@ -150,7 +150,7 @@ def test_replace_image_with_jpeg():
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf[0]
     
-    images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
+    images = list( page.get_objects(filter=[pdfium_r.FPDF_PAGEOBJ_IMAGE]) )
     matrices = [img.get_matrix() for img in images]
     assert len(images) == 3
     image_1 = images[0]
@@ -183,7 +183,7 @@ def test_image_get_bitmap(render):
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf[0]
     
-    all_images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
+    all_images = list( page.get_objects(filter=[pdfium_r.FPDF_PAGEOBJ_IMAGE]) )
     image = all_images[0]
     
     metadata = image.get_metadata()
@@ -191,7 +191,7 @@ def test_image_get_bitmap(render):
     assert metadata.height == 48
     assert round(metadata.horizontal_dpi) == 38
     assert round(metadata.vertical_dpi) == 38
-    assert metadata.colorspace == pdfium_c.FPDF_COLORSPACE_DEVICEGRAY
+    assert metadata.colorspace == pdfium_r.FPDF_COLORSPACE_DEVICEGRAY
     assert metadata.marked_content_id == 1
     assert metadata.bits_per_pixel == 1
     
@@ -199,7 +199,7 @@ def test_image_get_bitmap(render):
     assert isinstance(bitmap, pdfium.PdfBitmap)
     
     if render:
-        assert bitmap.format == pdfium_c.FPDFBitmap_BGRA
+        assert bitmap.format == pdfium_r.FPDFBitmap_BGRA
         assert bitmap.n_channels == 4
         assert bitmap.width == 216
         assert bitmap.height == 90
@@ -207,7 +207,7 @@ def test_image_get_bitmap(render):
         assert bitmap.rev_byteorder is False
         output_path = OutputDir / "extract_rendered.png"
     else:
-        assert bitmap.format == pdfium_c.FPDFBitmap_Gray
+        assert bitmap.format == pdfium_r.FPDFBitmap_Gray
         assert bitmap.n_channels == 1
         assert bitmap.width == 115
         assert bitmap.height == 48
@@ -227,7 +227,7 @@ def test_remove_image():
     page_1 = pdf[0]
     
     # TODO order images by position
-    images = list( page_1.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
+    images = list( page_1.get_objects(filter=[pdfium_r.FPDF_PAGEOBJ_IMAGE]) )
     assert len(images) == 3
     
     # drop an image

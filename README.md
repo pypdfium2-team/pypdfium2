@@ -177,14 +177,14 @@ Here are some examples of using the support model API.
 While helper classes conveniently wrap the raw PDFium API, it may still be accessed directly and is available in the namespace `pypdfium2.raw`. Lower-level helpers that may aid with using the raw API are provided in `pypdfium2.internal`.
 
 ```python
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 ```
 
 Since PDFium is a large library, many components are not covered by helpers yet. You may seamlessly interact with the raw API while still using helpers where available. When used as ctypes function parameter, helper objects automatically resolve to the underlying raw object (but you may still access it explicitly if desired):
 ```python
-permission_flags = pdfium_c.FPDF_GetDocPermission(pdf.raw)  # explicit
-permission_flags = pdfium_c.FPDF_GetDocPermission(pdf)      # implicit
+permission_flags = pdfium_r.FPDF_GetDocPermission(pdf.raw)  # explicit
+permission_flags = pdfium_r.FPDF_GetDocPermission(pdf)      # implicit
 ```
 
 For PDFium documentation, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^pdfium_docs]
@@ -201,7 +201,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```python
   # arguments: filepath (bytes), password (bytes|None)
   # null-terminate filepath and encode as UTF-8
-  pdf = pdfium_c.FPDF_LoadDocument((filepath+"\x00").encode("utf-8"), None)
+  pdf = pdfium_r.FPDF_LoadDocument((filepath+"\x00").encode("utf-8"), None)
   ```
   This is the underlying bindings declaration,[^bindings_decl] which loads the function from the binary and
   contains the information required to convert Python types to their C equivalents.
@@ -222,7 +222,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Initialise an integer object (defaults to 0)
   c_version = ctypes.c_int()
   # Let the function assign a value to the c_int object, and capture its return code (True for success, False for failure)
-  ok = pdfium_c.FPDF_GetFileVersion(pdf, c_version)
+  ok = pdfium_r.FPDF_GetFileVersion(pdf, c_version)
   # If successful, get the Python int by accessing the `value` attribute of the c_int object
   # Otherwise, set the variable to None (in other cases, it may be desired to raise an exception instead)
   version = c_version.value if ok else None
@@ -241,8 +241,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # (Assuming `dest` is an FPDF_DEST)
   n_params = ctypes.c_ulong()
   # Create a C array to store up to four coordinates
-  view_pos = (pdfium_c.FS_FLOAT * 4)()
-  view_mode = pdfium_c.FPDFDest_GetView(dest, n_params, view_pos)
+  view_pos = (pdfium_r.FS_FLOAT * 4)()
+  view_mode = pdfium_r.FPDFDest_GetView(dest, n_params, view_pos)
   # Convert the C array to a Python list and cut it down to the actual number of coordinates
   view_pos = list(view_pos)[:n_params.value]
   ```
@@ -254,11 +254,11 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
   # First call to get the required number of bytes (not characters!), including space for a null terminator
-  n_bytes = pdfium_c.FPDFBookmark_GetTitle(bookmark, None, 0)
+  n_bytes = pdfium_r.FPDFBookmark_GetTitle(bookmark, None, 0)
   # Initialise the output buffer
   buffer = ctypes.create_string_buffer(n_bytes)
   # Second call with the actual buffer
-  pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
+  pdfium_r.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
   # Decode to string, cutting off the null terminator
   # Encoding: UTF-16LE (2 bytes per character)
   title = buffer.raw[:n_bytes-2].decode("utf-16-le")
@@ -270,7 +270,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Store common arguments for the two calls
   args = (textpage, left, top, right, bottom)
   # First call to get the required number of characters (not bytes!) - a possible null terminator is not included
-  n_chars = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
+  n_chars = pdfium_r.FPDFText_GetBoundedText(*args, None, 0)
   # If no characters were found, return an empty string
   if n_chars <= 0:
       return ""
@@ -281,7 +281,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Re-interpret the type from char to unsigned short as required by the function
   buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
   # Second call with the actual buffer
-  pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
+  pdfium_r.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
   # Decode to string (You may want to pass `errors="ignore"` to skip possible errors in the PDF's encoding)
   text = buffer.raw.decode("utf-16-le")
   ```
@@ -296,7 +296,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   enc_text = (text + "\x00").encode("utf-16-le")
   # cast `enc_text` to a c_ushort pointer
   text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
-  search = pdfium_c.FPDFText_FindStart(textpage, text_ptr, 0, 0)
+  search = pdfium_r.FPDFText_FindStart(textpage, text_ptr, 0, 0)
   ```
 
 * Leaving strings, let's suppose you have a C memory buffer allocated by PDFium and wish to read its data.
@@ -304,7 +304,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   To access the data, you'll want to re-interpret the pointer using `ctypes.cast()` to encompass the whole array:
   ```python
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
-  first_item = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
+  first_item = pdfium_r.FPDFBitmap_GetBuffer(bitmap)
   buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * size))
   # Buffer as ctypes array (referencing the original buffer, will be unavailable as soon as the bitmap is destroyed)
   c_array = buffer.contents
@@ -328,7 +328,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```python
   # (Assuming `pdf` is an FPDF_DOCUMENT)
   seen = set()
-  bookmark = pdfium_c.FPDFBookmark_GetFirstChild(pdf, None)
+  bookmark = pdfium_r.FPDFBookmark_GetFirstChild(pdf, None)
   while bookmark:
       # bookmark is a pointer, so we need to use its `contents` attribute to get the object the pointer refers to
       # (otherwise we'd only get the memory address of the pointer itself, which would result in random behavior)
@@ -337,7 +337,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
           break  # circular reference detected
       else:
           seen.add(address)
-      bookmark = pdfium_c.FPDFBookmark_GetNextSibling(pdf, bookmark)
+      bookmark = pdfium_r.FPDFBookmark_GetNextSibling(pdf, bookmark)
   ```
   
   [^ctypes_no_oor]: Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
@@ -370,14 +370,14 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   py_buffer.seek(0)
   
   # Set up an interface structure for custom file access
-  fileaccess = pdfium_c.FPDF_FILEACCESS()
+  fileaccess = pdfium_r.FPDF_FILEACCESS()
   fileaccess.m_FileLen = file_len
   
   # Assign the callback, wrapped in its CFUNCTYPE
   fileaccess.m_GetBlock = type(fileaccess.m_GetBlock)( _reader_class(py_buffer) )
   
   # Finally, load the document
-  pdf = pdfium_c.FPDF_LoadCustomDocument(fileaccess, None)
+  pdf = pdfium_r.FPDF_LoadCustomDocument(fileaccess, None)
   ```
 
 <!-- TODO mention pdfium_i.get_bufreader() as a shortcut to set up an FPDF_FILEACCESS interface -->
@@ -409,12 +409,12 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
   # (Assuming `py_buffer` is the buffer and `fileaccess` the FPDF_FILEACCESS interface)
   data_holder = PdfDataHolder(py_buffer, fileaccess.m_GetBlock)
-  pdf = pdfium_c.FPDF_LoadCustomDocument(fileaccess, None)
+  pdf = pdfium_r.FPDF_LoadCustomDocument(fileaccess, None)
   
   # ... work with the pdf
   
   # Close the PDF to free resources
-  pdfium_c.FPDF_CloseDocument(pdf)
+  pdfium_r.FPDF_CloseDocument(pdf)
   # Close the data holder, to keep the object itself and thereby the objects it
   # references alive up to this point, as well as to release the buffer
   data_holder.close()
@@ -426,27 +426,27 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   import ctypes
   import os.path
   import PIL.Image
-  import pypdfium2.raw as pdfium_c
+  import pypdfium2.raw as pdfium_r
   
   # Load the document
   filepath = os.path.abspath("tests/resources/render.pdf")
-  pdf = pdfium_c.FPDF_LoadDocument((filepath+"\x00").encode("utf-8"), None)
+  pdf = pdfium_r.FPDF_LoadDocument((filepath+"\x00").encode("utf-8"), None)
   
   # Check page count to make sure it was loaded correctly
-  page_count = pdfium_c.FPDF_GetPageCount(pdf)
+  page_count = pdfium_r.FPDF_GetPageCount(pdf)
   assert page_count >= 1
   
   # Load the first page and get its dimensions
-  page = pdfium_c.FPDF_LoadPage(pdf, 0)
-  width  = math.ceil(pdfium_c.FPDF_GetPageWidthF(page))
-  height = math.ceil(pdfium_c.FPDF_GetPageHeightF(page))
+  page = pdfium_r.FPDF_LoadPage(pdf, 0)
+  width  = math.ceil(pdfium_r.FPDF_GetPageWidthF(page))
+  height = math.ceil(pdfium_r.FPDF_GetPageHeightF(page))
   
   # Create a bitmap
   use_alpha = False  # We don't render with transparent background
-  bitmap = pdfium_c.FPDFBitmap_Create(width, height, int(use_alpha))
+  bitmap = pdfium_r.FPDFBitmap_Create(width, height, int(use_alpha))
   # Fill the whole bitmap with a white background
   # The color is given as a 32-bit integer in ARGB format (8 bits per channel)
-  pdfium_c.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
+  pdfium_r.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
   
   # Store common rendering arguments
   render_args = (
@@ -458,14 +458,14 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       width,   # horizontal size
       height,  # vertical size
       0,       # rotation (as constant, not in degrees!)
-      pdfium_c.FPDF_LCD_TEXT | pdfium_c.FPDF_ANNOT,  # rendering flags, combined with binary or
+      pdfium_r.FPDF_LCD_TEXT | pdfium_r.FPDF_ANNOT,  # rendering flags, combined with binary or
   )
   
   # Render the page
-  pdfium_c.FPDF_RenderPageBitmap(*render_args)
+  pdfium_r.FPDF_RenderPageBitmap(*render_args)
   
   # Get a pointer to the first item of the buffer
-  first_item = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
+  first_item = pdfium_r.FPDFBitmap_GetBuffer(bitmap)
   # Re-interpret the pointer to encompass the whole buffer
   buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
   
@@ -475,9 +475,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   img.save("out.png")
   
   # Free resources
-  pdfium_c.FPDFBitmap_Destroy(bitmap)
-  pdfium_c.FPDF_ClosePage(page)
-  pdfium_c.FPDF_CloseDocument(pdf)
+  pdfium_r.FPDFBitmap_Destroy(bitmap)
+  pdfium_r.FPDF_ClosePage(page)
+  pdfium_r.FPDF_CloseDocument(pdf)
   ```
 
 ### [Command-line Interface](https://pypdfium2.readthedocs.io/en/stable/shell_api.html)

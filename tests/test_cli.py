@@ -7,7 +7,7 @@ import contextlib
 from pathlib import Path
 import pytest
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 from .conftest import TestResources, TestExpectations
 
 
@@ -110,7 +110,7 @@ def test_tile(tmp_path):
     page = pdf[0]
     pageobjs = list( page.get_objects(max_depth=1) )
     assert len(pageobjs) == 3
-    assert all(o.type == pdfium_c.FPDF_PAGEOBJ_FORM for o in pageobjs)
+    assert all(o.type == pdfium_r.FPDF_PAGEOBJ_FORM for o in pageobjs)
 
 
 def test_render_multipage(tmp_path):

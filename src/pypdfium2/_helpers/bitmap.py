@@ -6,7 +6,7 @@ __all__ = ("PdfBitmap", )
 import ctypes
 import logging
 import weakref
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 
@@ -74,7 +74,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         self._pos_args = None
         
         if needs_free:
-            super().__init__(pdfium_c.FPDFBitmap_Destroy, obj=self.buffer)
+            super().__init__(pdfium_r.FPDFBitmap_Destroy, obj=self.buffer)
     
     
     @property
@@ -96,14 +96,14 @@ class PdfBitmap (pdfium_i.AutoCloseable):
                 If the bitmap was created from a buffer allocated by Python/ctypes, pass in the ctypes array to keep it referenced.
         """
         
-        width = pdfium_c.FPDFBitmap_GetWidth(raw)
-        height = pdfium_c.FPDFBitmap_GetHeight(raw)
-        format = pdfium_c.FPDFBitmap_GetFormat(raw)
-        stride = pdfium_c.FPDFBitmap_GetStride(raw)
+        width = pdfium_r.FPDFBitmap_GetWidth(raw)
+        height = pdfium_r.FPDFBitmap_GetHeight(raw)
+        format = pdfium_r.FPDFBitmap_GetFormat(raw)
+        stride = pdfium_r.FPDFBitmap_GetStride(raw)
         
         if ex_buffer is None:
             needs_free = True
-            first_item = pdfium_c.FPDFBitmap_GetBuffer(raw)
+            first_item = pdfium_r.FPDFBitmap_GetBuffer(raw)
             if first_item.value is None:
                 raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
             buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * (stride * height))).contents
@@ -128,7 +128,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         stride = width * pdfium_i.BitmapTypeToNChannels[format]
         if buffer is None:
             buffer = (ctypes.c_ubyte * (stride * height))()
-        raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
+        raw = pdfium_r.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
         
         # alternatively, we could call the constructor directly with the information from above
         return cls.from_raw(raw, rev_byteorder, buffer)
@@ -144,7 +144,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         See :meth:`.new_foreign` for an alternative function that supports more pixel formats.
         """
-        raw = pdfium_c.FPDFBitmap_Create(width, height, use_alpha)
+        raw = pdfium_r.FPDFBitmap_Create(width, height, use_alpha)
         return cls.from_raw(raw, rev_byteorder)
     
     
@@ -161,7 +161,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
                 Otherwise, attempt to force pdfium to create a packed buffer.
         """
         stride = width * pdfium_i.BitmapTypeToNChannels[format] if force_packed else 0
-        raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, None, stride)
+        raw = pdfium_r.FPDFBitmap_CreateEx(width, height, format, None, stride)
         return cls.from_raw(raw, rev_byteorder)
     
     
@@ -178,7 +178,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
                 RGBA fill color (a tuple of 4 integers ranging from 0 to 255).
         """
         c_color = pdfium_i.color_tohex(color, self.rev_byteorder)
-        pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
+        pdfium_r.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
     
     
     # Requirement: If the result is a view of the buffer (not a copy), it keeps the referenced memory valid.

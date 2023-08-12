@@ -6,7 +6,7 @@ __all__ = ("PdfPage", "PdfColorScheme", "PdfPosConv")
 import math
 import ctypes
 import logging
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.bitmap import PdfBitmap
@@ -34,8 +34,8 @@ class PdfPage (pdfium_i.AutoCloseable):
     @staticmethod
     def _close_impl(raw, formenv):
         if formenv:
-            pdfium_c.FORM_OnBeforeClosePage(raw, formenv)
-        pdfium_c.FPDF_ClosePage(raw)
+            pdfium_r.FORM_OnBeforeClosePage(raw, formenv)
+        pdfium_r.FPDF_ClosePage(raw)
     
     
     @property
@@ -49,14 +49,14 @@ class PdfPage (pdfium_i.AutoCloseable):
         Returns:
             float: Page width (horizontal size), in PDF canvas units.
         """
-        return pdfium_c.FPDF_GetPageWidthF(self)
+        return pdfium_r.FPDF_GetPageWidthF(self)
     
     def get_height(self):
         """
         Returns:
             float: Page height (vertical size), in PDF canvas units.
         """
-        return pdfium_c.FPDF_GetPageHeightF(self)
+        return pdfium_r.FPDF_GetPageHeightF(self)
     
     def get_size(self):
         """
@@ -73,13 +73,13 @@ class PdfPage (pdfium_i.AutoCloseable):
         Returns:
             int: Clockwise page rotation in degrees.
         """
-        return pdfium_i.RotationToDegrees[ pdfium_c.FPDFPage_GetRotation(self) ]
+        return pdfium_i.RotationToDegrees[ pdfium_r.FPDFPage_GetRotation(self) ]
     
     def set_rotation(self, rotation):
         """
         Define the absolute, clockwise page rotation (0, 90, 180, or 270 degrees).
         """
-        pdfium_c.FPDFPage_SetRotation(self, pdfium_i.RotationToConst[rotation])
+        pdfium_r.FPDFPage_SetRotation(self, pdfium_i.RotationToConst[rotation])
     
     
     def _get_box(self, box_func, fallback_func, fallback_ok):
@@ -102,65 +102,65 @@ class PdfPage (pdfium_i.AutoCloseable):
             do not inherit from parent nodes in the page tree (as of PDFium 5418).
         """
         # https://crbug.com/pdfium/1786
-        return self._get_box(pdfium_c.FPDFPage_GetMediaBox, lambda: (0, 0, 612, 792), fallback_ok)
+        return self._get_box(pdfium_r.FPDFPage_GetMediaBox, lambda: (0, 0, 612, 792), fallback_ok)
     
     def set_mediabox(self, l, b, r, t):
         """
         Set the page's MediaBox by passing four :class:`float` coordinates (usually x0, y0, x1, y1).
         """
-        pdfium_c.FPDFPage_SetMediaBox(self, l, b, r, t)
+        pdfium_r.FPDFPage_SetMediaBox(self, l, b, r, t)
     
     def get_cropbox(self, fallback_ok=True):
         """
         Returns:
             The page's CropBox (If not defined, falls back to MediaBox).
         """
-        return self._get_box(pdfium_c.FPDFPage_GetCropBox, self.get_mediabox, fallback_ok)
+        return self._get_box(pdfium_r.FPDFPage_GetCropBox, self.get_mediabox, fallback_ok)
     
     def set_cropbox(self, l, b, r, t):
         """
         Set the page's CropBox.
         """
-        pdfium_c.FPDFPage_SetCropBox(self, l, b, r, t)
+        pdfium_r.FPDFPage_SetCropBox(self, l, b, r, t)
     
     def get_bleedbox(self, fallback_ok=True):
         """
         Returns:
             The page's BleedBox (If not defined, falls back to CropBox).
         """
-        return self._get_box(pdfium_c.FPDFPage_GetBleedBox, self.get_cropbox, fallback_ok)
+        return self._get_box(pdfium_r.FPDFPage_GetBleedBox, self.get_cropbox, fallback_ok)
     
     def set_bleedbox(self, l, b, r, t):
         """
         Set the page's BleedBox.
         """
-        pdfium_c.FPDFPage_SetBleedBox(self, l, b, r, t)
+        pdfium_r.FPDFPage_SetBleedBox(self, l, b, r, t)
     
     def get_trimbox(self, fallback_ok=True):
         """
         Returns:
             The page's TrimBox (If not defined, falls back to CropBox).
         """
-        return self._get_box(pdfium_c.FPDFPage_GetTrimBox, self.get_cropbox, fallback_ok)
+        return self._get_box(pdfium_r.FPDFPage_GetTrimBox, self.get_cropbox, fallback_ok)
     
     def set_trimbox(self, l, b, r, t):
         """
         Set the page's TrimBox.
         """
-        pdfium_c.FPDFPage_SetTrimBox(self, l, b, r, t)
+        pdfium_r.FPDFPage_SetTrimBox(self, l, b, r, t)
     
     def get_artbox(self, fallback_ok=True):
         """
         Returns:
             The page's ArtBox (If not defined, falls back to CropBox).
         """
-        return self._get_box(pdfium_c.FPDFPage_GetArtBox, self.get_cropbox, fallback_ok)
+        return self._get_box(pdfium_r.FPDFPage_GetArtBox, self.get_cropbox, fallback_ok)
     
     def set_artbox(self, l, b, r, t):
         """
         Set the page's ArtBox.
         """
-        pdfium_c.FPDFPage_SetArtBox(self, l, b, r, t)
+        pdfium_r.FPDFPage_SetArtBox(self, l, b, r, t)
     
     
     def get_bbox(self):
@@ -168,8 +168,8 @@ class PdfPage (pdfium_i.AutoCloseable):
         Returns:
             The bounding box of the page (the intersection between its media box and crop box).
         """
-        rect = pdfium_c.FS_RECTF()
-        ok = pdfium_c.FPDF_GetPageBoundingBox(self, rect)
+        rect = pdfium_r.FS_RECTF()
+        ok = pdfium_r.FPDF_GetPageBoundingBox(self, rect)
         if not ok:
             raise PdfiumError("Failed to get page bounding box.")
         return (rect.left, rect.bottom, rect.right, rect.top)
@@ -183,7 +183,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         Returns:
             PdfTextPage: A new text page handle for this page.
         """
-        raw_textpage = pdfium_c.FPDFText_LoadPage(self)
+        raw_textpage = pdfium_r.FPDFText_LoadPage(self)
         if not raw_textpage:
             raise PdfiumError("Failed to load text page.")
         textpage = PdfTextPage(raw_textpage, self)
@@ -209,7 +209,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         if pageobj.pdf and (pageobj.pdf is not self.pdf):
             raise ValueError("The pageobject you attempted to insert belongs to a different PDF.")
         
-        pdfium_c.FPDFPage_InsertObject(self, pageobj)
+        pdfium_r.FPDFPage_InsertObject(self, pageobj)
         pageobj._detach_finalizer()
         pageobj.page = self
         pageobj.pdf = self.pdf
@@ -228,7 +228,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         if pageobj.page is not self:
             raise ValueError("The page object you attempted to remove is not part of this page.")
         
-        ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
+        ok = pdfium_r.FPDFPage_RemoveObject(self, pageobj)
         if not ok:
             raise PdfiumError("Failed to remove pageobject.")
         
@@ -242,7 +242,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         If page content was changed, this function should be called once before saving the document or re-loading the page.
         """
-        ok = pdfium_c.FPDFPage_GenerateContent(self)
+        ok = pdfium_r.FPDFPage_GenerateContent(self)
         if not ok:
             raise PdfiumError("Failed to generate page content.")
     
@@ -266,12 +266,12 @@ class PdfPage (pdfium_i.AutoCloseable):
         # CONSIDER close skipped objects explicitly ?
         
         if form:
-            count_objects = pdfium_c.FPDFFormObj_CountObjects
-            get_object = pdfium_c.FPDFFormObj_GetObject
+            count_objects = pdfium_r.FPDFFormObj_CountObjects
+            get_object = pdfium_r.FPDFFormObj_GetObject
             parent = form
         else:
-            count_objects = pdfium_c.FPDFPage_CountObjects
-            get_object = pdfium_c.FPDFPage_GetObject
+            count_objects = pdfium_r.FPDFPage_CountObjects
+            get_object = pdfium_r.FPDFPage_GetObject
             parent = self
         
         n_objects = count_objects(parent)
@@ -289,7 +289,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             if not filter or helper_obj.type in filter:
                 yield helper_obj
             
-            if helper_obj.type == pdfium_c.FPDF_PAGEOBJ_FORM and level < max_depth-1:
+            if helper_obj.type == pdfium_r.FPDF_PAGEOBJ_FORM and level < max_depth-1:
                 yield from self.get_objects(
                     filter = filter,
                     max_depth = max_depth,
@@ -299,7 +299,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     
     # non-public because it doesn't really work (returns success but does nothing on all samples we tried)
-    def _flatten(self, flag=pdfium_c.FLAT_NORMALDISPLAY):
+    def _flatten(self, flag=pdfium_r.FLAT_NORMALDISPLAY):
         """
         Attempt to flatten annotations and form fields into the page contents.
         
@@ -308,8 +308,8 @@ class PdfPage (pdfium_i.AutoCloseable):
         Returns:
             int: PDFium flattening status (:attr:`FLATTEN_*`). :attr:`FLATTEN_FAIL` is handled internally.
         """
-        rc = pdfium_c.FPDFPage_Flatten(self, flag)
-        if rc == pdfium_c.FLATTEN_FAIL:
+        rc = pdfium_r.FPDFPage_Flatten(self, flag)
+        if rc == pdfium_r.FLATTEN_FAIL:
             raise PdfiumError("Failed to flatten annotations / form fields.")
         return rc
     
@@ -402,7 +402,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         cl_format, rev_byteorder, fill_color, flags = _parse_renderopts(**kwargs)
         if color_scheme and fill_to_stroke:
-            flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
+            flags |= pdfium_r.FPDF_CONVERT_FILL_TO_STROKE
         
         pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
@@ -412,19 +412,19 @@ class PdfPage (pdfium_i.AutoCloseable):
         render_args = (bitmap, self, *pos_args, flags)
         
         if color_scheme is None:
-            pdfium_c.FPDF_RenderPageBitmap(*render_args)
+            pdfium_r.FPDF_RenderPageBitmap(*render_args)
             
         else:
-            pause = pdfium_c.IFSDK_PAUSE(version=1)
+            pause = pdfium_r.IFSDK_PAUSE(version=1)
             pdfium_i.set_callback(pause, "NeedToPauseNow", lambda _: False)
             
             fpdf_cs = color_scheme.convert(rev_byteorder)
-            status = pdfium_c.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_cs, pause)
-            assert status == pdfium_c.FPDF_RENDER_DONE
-            pdfium_c.FPDF_RenderPage_Close(self)
+            status = pdfium_r.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_cs, pause)
+            assert status == pdfium_r.FPDF_RENDER_DONE
+            pdfium_r.FPDF_RenderPage_Close(self)
         
         if may_draw_forms and self.formenv:
-            pdfium_c.FPDF_FFLDraw(self.formenv, *render_args)
+            pdfium_r.FPDF_FFLDraw(self.formenv, *render_args)
         
         return bitmap
 
@@ -450,14 +450,14 @@ class PdfPosConv:
     
     def to_page(self, bitmap_x, bitmap_y):
         page_x, page_y = ctypes.c_double(), ctypes.c_double()
-        ok = pdfium_c.FPDF_DeviceToPage(self.page, *self._args, bitmap_x, bitmap_y, page_x, page_y)
+        ok = pdfium_r.FPDF_DeviceToPage(self.page, *self._args, bitmap_x, bitmap_y, page_x, page_y)
         if not ok:
             raise PdfiumError("Failed to translate to page coordinates.")
         return (page_x.value, page_y.value)
     
     def to_bitmap(self, page_x, page_y):
         bitmap_x, bitmap_y = ctypes.c_int(), ctypes.c_int()
-        ok = pdfium_c.FPDF_PageToDevice(self.page, *self._args, page_x, page_y, bitmap_x, bitmap_y)
+        ok = pdfium_r.FPDF_PageToDevice(self.page, *self._args, page_x, page_y, bitmap_x, bitmap_y)
         if not ok:
             raise PdfiumError("Failed to translate to bitmap coordinates.")
         return (bitmap_x.value, bitmap_y.value)
@@ -465,13 +465,13 @@ class PdfPosConv:
 
 def _auto_bitmap_format(fill_color, grayscale, prefer_bgrx):
     if fill_color[3] < 255:
-        return pdfium_c.FPDFBitmap_BGRA
+        return pdfium_r.FPDFBitmap_BGRA
     elif grayscale:
-        return pdfium_c.FPDFBitmap_Gray
+        return pdfium_r.FPDFBitmap_Gray
     elif prefer_bgrx:
-        return pdfium_c.FPDFBitmap_BGRx
+        return pdfium_r.FPDFBitmap_BGRx
     else:
-        return pdfium_c.FPDFBitmap_BGR
+        return pdfium_r.FPDFBitmap_BGR
 
 
 def _parse_renderopts(
@@ -495,33 +495,33 @@ def _parse_renderopts(
     else:
         cl_format = force_bitmap_format
     
-    if cl_format == pdfium_c.FPDFBitmap_Gray:
+    if cl_format == pdfium_r.FPDFBitmap_Gray:
         rev_byteorder = False
     
     flags = extra_flags
     if grayscale:
-        flags |= pdfium_c.FPDF_GRAYSCALE
+        flags |= pdfium_r.FPDF_GRAYSCALE
     if draw_annots:
-        flags |= pdfium_c.FPDF_ANNOT
+        flags |= pdfium_r.FPDF_ANNOT
     if no_smoothtext:
-        flags |= pdfium_c.FPDF_RENDER_NO_SMOOTHTEXT
+        flags |= pdfium_r.FPDF_RENDER_NO_SMOOTHTEXT
     if no_smoothimage:
-        flags |= pdfium_c.FPDF_RENDER_NO_SMOOTHIMAGE
+        flags |= pdfium_r.FPDF_RENDER_NO_SMOOTHIMAGE
     if no_smoothpath:
-        flags |= pdfium_c.FPDF_RENDER_NO_SMOOTHPATH
+        flags |= pdfium_r.FPDF_RENDER_NO_SMOOTHPATH
     if force_halftone:
-        flags |= pdfium_c.FPDF_RENDER_FORCEHALFTONE
+        flags |= pdfium_r.FPDF_RENDER_FORCEHALFTONE
     if limit_image_cache:
-        flags |= pdfium_c.FPDF_RENDER_LIMITEDIMAGECACHE
+        flags |= pdfium_r.FPDF_RENDER_LIMITEDIMAGECACHE
     if rev_byteorder:
-        flags |= pdfium_c.FPDF_REVERSE_BYTE_ORDER
+        flags |= pdfium_r.FPDF_REVERSE_BYTE_ORDER
     
     if optimize_mode:
         optimize_mode = optimize_mode.lower()
         if optimize_mode == "lcd":
-            flags |= pdfium_c.FPDF_LCD_TEXT
+            flags |= pdfium_r.FPDF_LCD_TEXT
         elif optimize_mode == "print":
-            flags |= pdfium_c.FPDF_PRINTING
+            flags |= pdfium_r.FPDF_PRINTING
         else:
             raise ValueError(f"Invalid optimize_mode {optimize_mode}")
     
@@ -546,7 +546,7 @@ class PdfColorScheme:
         Returns:
             The color scheme as :class:`FPDF_COLORSCHEME` object.
         """
-        fpdf_cs = pdfium_c.FPDF_COLORSCHEME()
+        fpdf_cs = pdfium_r.FPDF_COLORSCHEME()
         for key, value in self.colors.items():
             if value is not None:
                 setattr(fpdf_cs, key, pdfium_i.color_tohex(value, rev_byteorder))

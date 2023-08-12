@@ -5,7 +5,7 @@ __all__ = ("PdfTextPage", "PdfTextSearcher")
 
 import ctypes
 import logging
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 
@@ -26,7 +26,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     def __init__(self, raw, page):
         self.raw = raw
         self.page = page
-        super().__init__(pdfium_c.FPDFText_ClosePage)
+        super().__init__(pdfium_r.FPDFText_ClosePage)
     
     @property
     def parent(self):  # AutoCloseable hook
@@ -56,7 +56,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         buffer = ctypes.create_string_buffer(n_bytes+2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         
-        pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
+        pdfium_r.FPDFText_GetText(self, index, count, buffer_ptr)
         return buffer.raw[:n_bytes].decode("utf-16-le", errors=errors)
     
     
@@ -82,14 +82,14 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             top = bbox[3]
         
         args = (self, left, top, right, bottom)
-        n_chars = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
+        n_chars = pdfium_r.FPDFText_GetBoundedText(*args, None, 0)
         if n_chars <= 0:
             return ""
         
         n_bytes = 2 * n_chars
         buffer = ctypes.create_string_buffer(n_bytes)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
-        pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
+        pdfium_r.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
         return buffer.raw.decode("utf-16-le", errors=errors)
     
     
@@ -98,7 +98,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         Returns:
             int: The number of characters on the text page.
         """
-        n_chars = pdfium_c.FPDFText_CountChars(self)
+        n_chars = pdfium_r.FPDFText_CountChars(self)
         if n_chars == -1:
             raise PdfiumError("Failed to get character count.")
         return n_chars
@@ -112,7 +112,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         Returns:
             int: The number of text rectangles in the given character range.
         """
-        n_rects = pdfium_c.FPDFText_CountRects(self, index, count)
+        n_rects = pdfium_r.FPDFText_CountRects(self, index, count)
         if n_rects == -1:
             raise PdfiumError("Failed to count rectangles.")
         return n_rects
@@ -131,7 +131,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             int | None: The index of the character at or nearby the point (x, y).
             May be None if there is no character or an error occurred.
         """
-        index = pdfium_c.FPDFText_GetCharIndexAtPos(self, x, y, x_tol, y_tol)
+        index = pdfium_r.FPDFText_GetCharIndexAtPos(self, x, y, x_tol, y_tol)
         if index < 0:
             return None
         return index
@@ -151,12 +151,12 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         """
         
         if loose:
-            rect = pdfium_c.FS_RECTF()
-            ok = pdfium_c.FPDFText_GetLooseCharBox(self, index, rect)
+            rect = pdfium_r.FS_RECTF()
+            ok = pdfium_r.FPDFText_GetLooseCharBox(self, index, rect)
             l, b, r, t = rect.left, rect.bottom, rect.right, rect.top
         else:
             l, b, r, t = c_double(), c_double(), c_double(), c_double()
-            ok = pdfium_c.FPDFText_GetCharBox(self, index, l, r, b, t)  # yes, lrbt!
+            ok = pdfium_r.FPDFText_GetCharBox(self, index, l, r, b, t)  # yes, lrbt!
             l, b, r, t = l.value, b.value, r.value, t.value
         
         if not ok:
@@ -175,7 +175,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             Float values for left, bottom, right and top in PDF canvas units.
         """
         l, b, r, t = c_double(), c_double(), c_double(), c_double()
-        ok = pdfium_c.FPDFText_GetRect(self, index, l, t, r, b)  # yes, ltrb!
+        ok = pdfium_r.FPDFText_GetRect(self, index, l, t, r, b)  # yes, ltrb!
         if not ok:
             raise PdfiumError("Failed to get rectangle. (Make sure count_rects() was called with default params once before subsequent get_rect() calls.)")
         return (l.value, b.value, r.value, t.value)
@@ -206,15 +206,15 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         
         flags = 0
         if match_case:
-            flags |= pdfium_c.FPDF_MATCHCASE
+            flags |= pdfium_r.FPDF_MATCHCASE
         if match_whole_word:
-            flags |= pdfium_c.FPDF_MATCHWHOLEWORD
+            flags |= pdfium_r.FPDF_MATCHWHOLEWORD
         if consecutive:
-            flags |= pdfium_c.FPDF_CONSECUTIVE
+            flags |= pdfium_r.FPDF_CONSECUTIVE
         
         enc_text = (text + "\x00").encode("utf-16-le")
         enc_text_ptr = ctypes.cast(enc_text, ctypes.POINTER(ctypes.c_ushort))
-        raw_searcher = pdfium_c.FPDFText_FindStart(self, enc_text_ptr, flags, index)
+        raw_searcher = pdfium_r.FPDFText_FindStart(self, enc_text_ptr, flags, index)
         searcher = PdfTextSearcher(raw_searcher, self)
         self._add_kid(searcher)
         return searcher
@@ -232,7 +232,7 @@ class PdfTextSearcher (pdfium_i.AutoCloseable):
     def __init__(self, raw, textpage):
         self.raw = raw
         self.textpage = textpage
-        super().__init__(pdfium_c.FPDFText_FindClose)
+        super().__init__(pdfium_r.FPDFText_FindClose)
     
     @property
     def parent(self):  # AutoCloseable hook
@@ -244,8 +244,8 @@ class PdfTextSearcher (pdfium_i.AutoCloseable):
         if not ok:
             return None
         # FIXME what's the point of `count`? isn't it always equal to the length of the search text?
-        index = pdfium_c.FPDFText_GetSchResultIndex(self)
-        count = pdfium_c.FPDFText_GetSchCount(self)
+        index = pdfium_r.FPDFText_GetSchResultIndex(self)
+        count = pdfium_r.FPDFText_GetSchCount(self)
         return index, count
     
     def get_next(self):
@@ -254,7 +254,7 @@ class PdfTextSearcher (pdfium_i.AutoCloseable):
             (int, int): Start character index and count of the next occurrence,
             or None if the last occurrence was passed.
         """
-        return self._get_occurrence(pdfium_c.FPDFText_FindNext)
+        return self._get_occurrence(pdfium_r.FPDFText_FindNext)
     
     def get_prev(self):
         """
@@ -262,4 +262,4 @@ class PdfTextSearcher (pdfium_i.AutoCloseable):
             (int, int): Start character index and count of the previous occurrence (i. e. the one before the last valid occurrence),
             or None if the last occurrence was passed.
         """
-        return self._get_occurrence(pdfium_c.FPDFText_FindPrev)
+        return self._get_occurrence(pdfium_r.FPDFText_FindPrev)

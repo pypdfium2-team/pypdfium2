@@ -17,7 +17,7 @@ import PIL.ImageDraw
 
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input, setup_logging
 
@@ -25,9 +25,9 @@ logger = logging.getLogger(__name__)
 
 
 def _bitmap_wrapper_foreign_simple(width, height, format, *args, **kwargs):
-    if format == pdfium_c.FPDFBitmap_BGRx:
+    if format == pdfium_r.FPDFBitmap_BGRx:
         use_alpha = False
-    elif format == pdfium_c.FPDFBitmap_BGRA:
+    elif format == pdfium_r.FPDFBitmap_BGRA:
         use_alpha = True
     else:
         raise RuntimeError(f"Cannot create foreign_simple bitmap with bitmap type {pdfium_i.BitmapTypeToStr[format]}.")
@@ -285,7 +285,7 @@ class PILReceiver (SavingReceiver):
                 
                 # FIXME apparently inaccurate, looks like we are often 1px off target ...
                 
-                images = list(page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE]))
+                images = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE]))
                 if len(images) > 0:
                     mask = PIL.Image.new("1", in_image.size)
                     draw = PIL.ImageDraw.Draw(mask)

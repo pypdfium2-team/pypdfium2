@@ -4,7 +4,7 @@
 import pytest
 import logging
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 from .conftest import TestResources
 
 
@@ -35,14 +35,14 @@ def test_gettoc():
         exp_title = "One",
         exp_count = -2,
         exp_index = 0,
-        exp_view = (pdfium_c.PDFDEST_VIEW_XYZ, (89, 758, 0)),
+        exp_view = (pdfium_r.PDFDEST_VIEW_XYZ, (89, 758, 0)),
     )
     
     # check common values
     for bookmark in toc:
         dest = bookmark.get_dest()
         view_mode, view_pos = dest.get_view()
-        assert view_mode == pdfium_c.PDFDEST_VIEW_XYZ
+        assert view_mode == pdfium_r.PDFDEST_VIEW_XYZ
         assert round(view_pos[0]) == 89
     
     # check last bookmark
@@ -51,7 +51,7 @@ def test_gettoc():
         exp_title = "Three-B",
         exp_count = 0,
         exp_index = 1,
-        exp_view = (pdfium_c.PDFDEST_VIEW_XYZ, (89, 657, 0)),
+        exp_view = (pdfium_r.PDFDEST_VIEW_XYZ, (89, 657, 0)),
     )
 
 

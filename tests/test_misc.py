@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pytest
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 
 
@@ -20,24 +20,24 @@ def test_color_tohex(color_in, rev_byteorder, exp_color):
     # PDFium's utility macros just encode/decode the given color positionally, regardless of byte order
     r, g, b, a = color_in
     channels = (a, b, g, r) if rev_byteorder else (a, r, g, b)
-    assert pdfium_c.FPDF_ARGB(*channels) == exp_color
-    assert pdfium_c.FPDF_GetAValue(exp_color) == channels[0]
-    assert pdfium_c.FPDF_GetRValue(exp_color) == channels[1]
-    assert pdfium_c.FPDF_GetGValue(exp_color) == channels[2]
-    assert pdfium_c.FPDF_GetBValue(exp_color) == channels[3]
+    assert pdfium_r.FPDF_ARGB(*channels) == exp_color
+    assert pdfium_r.FPDF_GetAValue(exp_color) == channels[0]
+    assert pdfium_r.FPDF_GetRValue(exp_color) == channels[1]
+    assert pdfium_r.FPDF_GetGValue(exp_color) == channels[2]
+    assert pdfium_r.FPDF_GetBValue(exp_color) == channels[3]
 
 
 def _filter(prefix, skips=[], type=int):
     items = []
-    for attr in dir(pdfium_c):
-        value = getattr(pdfium_c, attr)
+    for attr in dir(pdfium_r):
+        value = getattr(pdfium_r, attr)
         if not attr.startswith(prefix) or not isinstance(value, type) or value in skips:
             continue
         items.append(value)
     return items
 
 
-BitmapNsp = _filter("FPDFBitmap_", [pdfium_c.FPDFBitmap_Unknown])
+BitmapNsp = _filter("FPDFBitmap_", [pdfium_r.FPDFBitmap_Unknown])
 PageObjNsp = _filter("FPDF_PAGEOBJ_")
 
 
@@ -49,7 +49,7 @@ PageObjNsp = _filter("FPDF_PAGEOBJ_")
         (pdfium_i.BitmapTypeToStrReverse,  True,  BitmapNsp),
         (pdfium_i.BitmapStrToConst,        False, BitmapNsp),
         (pdfium_i.BitmapStrReverseToConst, False, BitmapNsp),
-        (pdfium_i.FormTypeToStr,           True,  _filter("FORMTYPE_", [pdfium_c.FORMTYPE_COUNT])),
+        (pdfium_i.FormTypeToStr,           True,  _filter("FORMTYPE_", [pdfium_r.FORMTYPE_COUNT])),
         (pdfium_i.ColorspaceToStr,         True,  _filter("FPDF_COLORSPACE_")),
         (pdfium_i.ViewmodeToStr,           True,  _filter("PDFDEST_VIEW_")),
         (pdfium_i.ObjectTypeToStr,         True,  PageObjNsp),

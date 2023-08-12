@@ -7,7 +7,7 @@ import warnings
 import PIL.Image
 import pytest
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 from .conftest import (
     TestFiles,
     PyVersion,
@@ -277,13 +277,13 @@ def test_numpy_nocopy(sample_page):
 @pytest.mark.parametrize(
     ("bitmap_format", "rev_byteorder", "is_referenced"),
     [
-        (pdfium_c.FPDFBitmap_BGR,  False, False),
-        (pdfium_c.FPDFBitmap_BGR,  True,  False),
-        (pdfium_c.FPDFBitmap_BGRA, False, False),
-        (pdfium_c.FPDFBitmap_BGRA, True,  True),
-        (pdfium_c.FPDFBitmap_BGRx, False, False),
-        (pdfium_c.FPDFBitmap_BGRx, True,  True),
-        (pdfium_c.FPDFBitmap_Gray, False, True),
+        (pdfium_r.FPDFBitmap_BGR,  False, False),
+        (pdfium_r.FPDFBitmap_BGR,  True,  False),
+        (pdfium_r.FPDFBitmap_BGRA, False, False),
+        (pdfium_r.FPDFBitmap_BGRA, True,  True),
+        (pdfium_r.FPDFBitmap_BGRx, False, False),
+        (pdfium_r.FPDFBitmap_BGRx, True,  True),
+        (pdfium_r.FPDFBitmap_Gray, False, True),
     ]
 )
 def test_pil_nocopy_where_possible(bitmap_format, rev_byteorder, is_referenced, sample_page):

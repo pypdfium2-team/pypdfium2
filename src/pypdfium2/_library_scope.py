@@ -3,7 +3,7 @@
 
 import atexit
 import os, sys
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 
 
@@ -12,7 +12,7 @@ def init_lib():
     assert not pdfium_i.LIBRARY_AVAILABLE
     if pdfium_i.DEBUG_AUTOCLOSE:
         print("Initialize PDFium", file=sys.stderr)
-    pdfium_c.FPDF_InitLibrary()
+    pdfium_r.FPDF_InitLibrary()
     pdfium_i.LIBRARY_AVAILABLE.value = True
 
 
@@ -21,7 +21,7 @@ def destroy_lib():
     if pdfium_i.DEBUG_AUTOCLOSE:
         # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
         os.write(sys.stderr.fileno(), b"Destroy PDFium\n")
-    pdfium_c.FPDF_DestroyLibrary()
+    pdfium_r.FPDF_DestroyLibrary()
     pdfium_i.LIBRARY_AVAILABLE.value = False
 
 

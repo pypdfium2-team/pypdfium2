@@ -4,7 +4,7 @@
 __all__ = ("PdfAttachment", )
 
 import ctypes
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 
@@ -44,10 +44,10 @@ class PdfAttachment (pdfium_i.AutoCastable):
         Returns:
             str: Name of the attachment.
         """
-        n_bytes = pdfium_c.FPDFAttachment_GetName(self, None, 0)
+        n_bytes = pdfium_r.FPDFAttachment_GetName(self, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
-        pdfium_c.FPDFAttachment_GetName(self, buffer_ptr, n_bytes)
+        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_r.FPDF_WCHAR))
+        pdfium_r.FPDFAttachment_GetName(self, buffer_ptr, n_bytes)
         return buffer.raw[:n_bytes-2].decode("utf-16-le")
     
     
@@ -58,14 +58,14 @@ class PdfAttachment (pdfium_i.AutoCastable):
         """
                 
         n_bytes = ctypes.c_ulong()
-        pdfium_c.FPDFAttachment_GetFile(self, None, 0, n_bytes)
+        pdfium_r.FPDFAttachment_GetFile(self, None, 0, n_bytes)
         n_bytes = n_bytes.value
         if n_bytes == 0:
             raise PdfiumError(f"Failed to extract attachment (buffer length {n_bytes}).")
         
         buffer = ctypes.create_string_buffer(n_bytes)
         out_buflen = ctypes.c_ulong()
-        ok = pdfium_c.FPDFAttachment_GetFile(self, buffer, n_bytes, out_buflen)
+        ok = pdfium_r.FPDFAttachment_GetFile(self, buffer, n_bytes, out_buflen)
         out_buflen = out_buflen.value
         if not ok:
             raise PdfiumError("Failed to extract attachment (error status).")
@@ -85,7 +85,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
             data (bytes | ctypes.Array):
                 New file data for the attachment. May be any data type that can be implicitly converted to :class:`~ctypes.c_void_p`.
         """
-        ok = pdfium_c.FPDFAttachment_SetFile(self, self.pdf, data, len(data))
+        ok = pdfium_r.FPDFAttachment_SetFile(self, self.pdf, data, len(data))
         if not ok:
             raise PdfiumError("Failed to set attachment data.")
     
@@ -98,7 +98,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         Returns:
             bool: True if *key* is contained in the params dictionary, False otherwise.
         """
-        return pdfium_c.FPDFAttachment_HasKey(self, _encode_key(key))
+        return pdfium_r.FPDFAttachment_HasKey(self, _encode_key(key))
     
     
     def get_value_type(self, key):
@@ -106,7 +106,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         Returns:
             int: Type of the value of *key* in the params dictionary (:attr:`FPDF_OBJECT_*`).
         """
-        return pdfium_c.FPDFAttachment_GetValueType(self, _encode_key(key))
+        return pdfium_r.FPDFAttachment_GetValueType(self, _encode_key(key))
     
     
     def get_str_value(self, key):
@@ -117,13 +117,13 @@ class PdfAttachment (pdfium_i.AutoCastable):
         """
         
         enc_key = _encode_key(key)
-        n_bytes = pdfium_c.FPDFAttachment_GetStringValue(self, enc_key, None, 0)
+        n_bytes = pdfium_r.FPDFAttachment_GetStringValue(self, enc_key, None, 0)
         if n_bytes <= 0:
             raise PdfiumError(f"Failed to get value of key '{key}'.")
         
         buffer = ctypes.create_string_buffer(n_bytes)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
-        pdfium_c.FPDFAttachment_GetStringValue(self, enc_key, buffer_ptr, n_bytes)
+        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_r.FPDF_WCHAR))
+        pdfium_r.FPDFAttachment_GetStringValue(self, enc_key, buffer_ptr, n_bytes)
         
         return buffer.raw[:n_bytes-2].decode("utf-16-le")
     
@@ -136,7 +136,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
             value (str): New string value for the attribute.
         """
         enc_value = (value + "\x00").encode("utf-16-le")
-        enc_value_ptr = ctypes.cast(enc_value, pdfium_c.FPDF_WIDESTRING)
-        ok = pdfium_c.FPDFAttachment_SetStringValue(self, _encode_key(key), enc_value_ptr)
+        enc_value_ptr = ctypes.cast(enc_value, pdfium_r.FPDF_WIDESTRING)
+        ok = pdfium_r.FPDFAttachment_SetStringValue(self, _encode_key(key), enc_value_ptr)
         if not ok:
             raise PdfiumError(f"Failed to set attachment param '{key}' to '{value}'.")

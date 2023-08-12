@@ -10,7 +10,7 @@ import pytest
 from .conftest import TestResources
 
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 
 
 parametrize_opener_files = pytest.mark.parametrize("input", [TestResources.empty])
@@ -140,7 +140,7 @@ def test_open_raw():
     pdf = pdfium.PdfDocument(TestResources.empty)
     pdf._finalizer.detach()
     input = pdf.raw
-    assert isinstance(input, pdfium_c.FPDF_DOCUMENT)
+    assert isinstance(input, pdfium_r.FPDF_DOCUMENT)
     pdf_new = pdfium.PdfDocument(input)
     _check_pdf(pdf_new)
 
@@ -195,11 +195,11 @@ def test_open_invalid():
 
 def test_misc():
     pdf = pdfium.PdfDocument(TestResources.empty)
-    assert pdf.get_formtype() == pdfium_c.FORMTYPE_NONE
+    assert pdf.get_formtype() == pdfium_r.FORMTYPE_NONE
     assert pdf.get_version() == 15
-    assert pdf.get_identifier(pdfium_c.FILEIDTYPE_PERMANENT) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
-    assert pdf.get_identifier(pdfium_c.FILEIDTYPE_CHANGING) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
-    assert pdf.get_pagemode() == pdfium_c.PAGEMODE_USENONE
+    assert pdf.get_identifier(pdfium_r.FILEIDTYPE_PERMANENT) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
+    assert pdf.get_identifier(pdfium_r.FILEIDTYPE_CHANGING) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
+    assert pdf.get_pagemode() == pdfium_r.PAGEMODE_USENONE
     page = pdf[0]
     assert pdf.get_page_size(0) == page.get_size()
     assert pdf.get_page_label(0) == ""

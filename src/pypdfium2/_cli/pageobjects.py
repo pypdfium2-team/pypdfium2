@@ -6,7 +6,7 @@
 from collections import OrderedDict
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import (
     add_input,
@@ -96,7 +96,7 @@ def main(args):
             if show_pos:
                 bounds = round_list(obj.get_bounds(), args.n_digits)
                 print(pad_1 + f"Bounding Box: {bounds}")
-                if obj.type in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
+                if obj.type in (pdfium_r.FPDF_PAGEOBJ_IMAGE, pdfium_r.FPDF_PAGEOBJ_TEXT):
                     quad_bounds = obj.get_quad_points()
                     print(pad_1 + f"Quad Points: {[round_list(p, args.n_digits) for p in quad_bounds]}")
             

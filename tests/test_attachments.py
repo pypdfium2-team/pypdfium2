@@ -6,7 +6,7 @@ import ctypes
 import pytest
 import hashlib
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 from .conftest import TestResources, OutputDir
 
 
@@ -17,7 +17,7 @@ def test_attachment():
     
     attachment_a = pdf.get_attachment(0)
     assert isinstance(attachment_a, pdfium.PdfAttachment)
-    assert isinstance(attachment_a.raw, pdfium_c.FPDF_ATTACHMENT)
+    assert isinstance(attachment_a.raw, pdfium_r.FPDF_ATTACHMENT)
     assert attachment_a.get_name() == "1.txt"
     data_a = attachment_a.get_data()
     assert isinstance(data_a, (ctypes.c_char * 4))
@@ -31,12 +31,12 @@ def test_attachment():
     assert attachment_a.get_str_value("ModDate") == moddate_new
     
     exp_checksum = "098f6bcd4621d373cade4e832627b4f6"
-    assert attachment_a.get_value_type("CheckSum") == pdfium_c.FPDF_OBJECT_STRING
+    assert attachment_a.get_value_type("CheckSum") == pdfium_r.FPDF_OBJECT_STRING
     assert attachment_a.get_str_value("CheckSum") == "<%s>" % (exp_checksum.upper(), )
     assert exp_checksum == hashlib.md5(data_a).hexdigest()
     
     assert attachment_a.has_key("Size")
-    assert attachment_a.get_value_type("Size") == pdfium_c.FPDF_OBJECT_NUMBER
+    assert attachment_a.get_value_type("Size") == pdfium_r.FPDF_OBJECT_NUMBER
     assert attachment_a.get_str_value("Size") == ""
     
     assert not attachment_a.has_key("asdf")

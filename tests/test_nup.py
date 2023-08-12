@@ -3,7 +3,7 @@
 
 import pytest
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 from .conftest import TestResources, OutputDir
 
 
@@ -24,7 +24,7 @@ def test_xobject_placement():
     
     po = xobject.as_pageobject()
     assert po.get_matrix() == pdfium.PdfMatrix()
-    assert po.type == pdfium_c.FPDF_PAGEOBJ_FORM
+    assert po.type == pdfium_r.FPDF_PAGEOBJ_FORM
     matrix = base_matrix.translate(0, h)
     assert matrix == pdfium.PdfMatrix(0.5, 0, 0, 0.5, 0, h)
     po.set_matrix(matrix)

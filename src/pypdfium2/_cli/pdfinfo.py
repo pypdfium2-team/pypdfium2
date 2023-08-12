@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 # CONSIDER dotted access
 from pypdfium2._cli._parsers import (
@@ -23,19 +23,19 @@ def main(args):
     print(f"Page Count: {len(pdf)}")
     print(f"PDF Version: {pdf.get_version() / 10}")
     
-    id_permanent = pdf.get_identifier(pdfium_c.FILEIDTYPE_PERMANENT)
-    id_changing  = pdf.get_identifier(pdfium_c.FILEIDTYPE_CHANGING)
+    id_permanent = pdf.get_identifier(pdfium_r.FILEIDTYPE_PERMANENT)
+    id_changing  = pdf.get_identifier(pdfium_r.FILEIDTYPE_CHANGING)
     print(f"ID (permanent): {id_permanent}")
     print(f"ID (changing):  {id_changing}")
     print(f"ID match? - {id_permanent == id_changing}")
     print(f"Tagged? - {pdf.is_tagged()}")
     
     pagemode = pdf.get_pagemode()
-    if pagemode != pdfium_c.PAGEMODE_USENONE:
+    if pagemode != pdfium_r.PAGEMODE_USENONE:
         print(f"Page Mode: {pdfium_i.PageModeToStr.get(pagemode)}")
     
     formtype = pdf.get_formtype()
-    if formtype != pdfium_c.FORMTYPE_NONE:
+    if formtype != pdfium_r.FORMTYPE_NONE:
         print(f"Form Type: {pdfium_i.FormTypeToStr.get(formtype)}")
     
     metadata = pdf.get_metadata_dict(skip_empty=True)
