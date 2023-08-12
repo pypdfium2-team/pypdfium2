@@ -227,16 +227,18 @@ def get_latest_version():
     return int( tag.split("/")[-1] )
 
 
-def call_ctypesgen(target_dir, include_dir):
+def call_ctypesgen(target_dir, include_dir, have_v8xfa=False):
     
     # see https://github.com/ctypesgen/ctypesgen/issues/160
     
     bindings = target_dir / BindingsFileName
-    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", f"--strip-build-path={include_dir}", *[h.name for h in sorted(include_dir.glob("*.h"))], "-o", bindings]
-    
+    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", f"--strip-build-path={include_dir}"]
+    if have_v8xfa:
+        args += ["-D", "PDF_ENABLE_XFA", "-D", "PDF_ENABLE_V8"]
     if CTYPESGEN_IS_FORK:
         # extra arguments for our pypdfium2-specific fork of ctypesgen, not available in mainline ctypesgen (yet)
         args += ["--no-srcinfo"]
+    args += [h.name for h in sorted(include_dir.glob("*.h"))] + ["-o", bindings]
     
     run_cmd(args, cwd=include_dir)
     

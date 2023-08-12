@@ -189,9 +189,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if V_PDFIUM_IS_V8 and formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
             ok = pdfium_c.FPDF_LoadXFA(self)
             if not ok:
-                # always fails as of this writing, thus warn instead of raising an exception for now
-                # probably this is due to an issue with pdfium-binaries - once fixed, this may be tightened to an exception
-                logger.warning(f"Failed to load XFA for document {self}.")
+                err = pdfium_c.FPDF_GetLastError()
+                logger.warning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}")
     
     
     def get_formtype(self):

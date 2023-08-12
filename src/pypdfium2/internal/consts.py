@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2.raw as pdfium_c
+from pypdfium2.version import V_PDFIUM_IS_V8
 
 
 class _fallback_dict (dict):
@@ -123,6 +124,13 @@ ErrorToStr = _fallback_dict({
     pdfium_c.FPDF_ERR_SECURITY: "Unsupported security scheme error",
     pdfium_c.FPDF_ERR_PAGE:     "Page not found or content error",
 })
+
+if V_PDFIUM_IS_V8:
+    #: Convert a PDFium XFA error constant (:attr:`FPDF_ERR_XFA*`) to string. Available only with V8/XFA enabled builds.
+    XFAErrorToStr = _fallback_dict({
+        pdfium_c.FPDF_ERR_XFALOAD:   "Load error",
+        pdfium_c.FPDF_ERR_XFALAYOUT: "Layout error",
+    })
 
 #: Convert a PDFium unsupported constant (:attr:`FPDF_UNSP_*`) to string.
 UnsupportedInfoToStr = _fallback_dict({
