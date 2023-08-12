@@ -39,7 +39,7 @@ test)
     python3 -m pytest tests/ tests_old/ $args;;
 
 coverage)
-    python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/_raw_unsafe.py,setupsrc/*" -m pytest tests/ tests_old/
+    python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/raw_unsafe.py,setupsrc/*" -m pytest tests/ tests_old/
     python3 -m coverage report;;
 
 docs-build)

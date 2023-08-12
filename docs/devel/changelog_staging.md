@@ -19,7 +19,7 @@
 
 *Improvements and new features*
 - PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
-  `pypdfium2.raw` is now a wrapper around the actual bindings file `_raw_unsafe.py`.
+  `pypdfium2.raw` is now a wrapper around the actual bindings file `raw_unsafe.py`.
   In this course, filtering has been installed to free the namespace of unwanted members.
 - `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
 - `PdfObject`: Added `.get_quad_points()`.

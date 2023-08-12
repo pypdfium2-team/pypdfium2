@@ -15,7 +15,7 @@ docs/build/
 sourcebuild/
 !sourcebuild/patches
 
-src/pypdfium2/_raw_unsafe.py
+src/pypdfium2/raw_unsafe.py
 src/pypdfium2/pdfium
 
 *.so

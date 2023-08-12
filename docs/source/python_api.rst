@@ -22,6 +22,9 @@ pypdfium2 provides multiple API layers:
 * The support model API, which is a nice set of Python helper classes around the raw API (namespace ``pypdfium2``).
 * The internal API, which contains various lower-level, semi-private utilities that aid with using the raw API. (``pypdfium2.internal``).
 
+Note that the ``raw`` namespace is filtered and wraps pdfium functions with a mutex (see below).
+If this is not desired, you may use ``raw_unsafe`` for the original, unaltered bindings file.
+
 All wrapper objects provide a ``raw`` attribute to access the underlying ctypes object.
 In addition, helpers automatically resolve to raw if used as C function parameter. [#ctypes_param_hook]_
 This allows you to conveniently use helpers where available, while the raw API can still be accessed as necessary.
@@ -71,7 +74,7 @@ Thread incompatibility
 
 PDFium is not thread-compatible, meaning that one must not use multiple pdfium functions simultaneously from different threads.
 
-Since version 5, pypdfium2 wraps pdfium functions with a mutex to ensure only a single pdfium call can run at a time.
+However, pypdfium2 wraps pdfium functions with a mutex to ensure only a single pdfium call can run at a time.
 This makes it safe for use in a threaded context, but threading pdfium calls themselves does not provide any performance advantage.
 
 

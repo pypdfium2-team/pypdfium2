@@ -11,7 +11,7 @@ Source: https://github.com/pypdfium2-team/pypdfium2
 
 Files:
     req/*.txt
-    bindings/_raw_unsafe.py
+    bindings/raw_unsafe.py
     autorelease/*
     RELEASE.md
     tests/expectations/*

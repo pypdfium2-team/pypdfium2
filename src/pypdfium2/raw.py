@@ -25,7 +25,7 @@ def _get_members():
     import ctypes
     import fnmatch
     from types import ModuleType
-    import pypdfium2._raw_unsafe
+    import pypdfium2.raw_unsafe
     
     _compile_wildcards = lambda *patterns: [re.compile(fnmatch.translate(p)) for p in patterns]
     
@@ -38,10 +38,10 @@ def _get_members():
         (lambda n, x: x.match(n), _compile_wildcards("fpdf_*_t")),
     )
     
-    for name in dir(pypdfium2._raw_unsafe):
+    for name in dir(pypdfium2.raw_unsafe):
         if any(any(func(name, x) for x in skips) for func, skips in NAME_FILTERS):
             continue
-        member = getattr(pypdfium2._raw_unsafe, name)
+        member = getattr(pypdfium2.raw_unsafe, name)
         if isinstance(member, ModuleType) or hasattr(ctypes, name):
             continue
         if isinstance(member, ctypes._CFuncPtr):
