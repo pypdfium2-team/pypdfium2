@@ -96,7 +96,7 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     def get_quad_points(self):
         """
-        Get the object's quadriliteral points, i.e. the corner positions.
+        Get the object's quadriliteral points, i.e. its corner positions.
         For transformed objects, this provides tighter bounds than a rectangle (e.g. shear, or rotation by a non-multiple of 90°).
         
         Note:
@@ -155,7 +155,7 @@ class PdfImage (PdfObject):
     """
     
     # cf. https://crbug.com/pdfium/1203
-    #: Filters applied by :func:`FPDFImageObj_GetImageDataDecoded`. Hereafter referred to as "simple filters", while non-simple filters will be called "complex filters".
+    #: Filters applied by :func:`FPDFImageObj_GetImageDataDecoded`. Hereafter referred to as "simple filters", while other filters will be called "complex filters".
     SIMPLE_FILTERS = ("ASCIIHexDecode", "ASCII85Decode", "RunLengthDecode", "FlateDecode", "LZWDecode")
     
     
@@ -263,7 +263,7 @@ class PdfImage (PdfObject):
             pages (list[PdfPage] | None):
                 A list of loaded pages that might contain the image object. See :meth:`.load_jpeg`.
         """
-        # FIXME the docs don't point out if the bitmap buffer needs to be kept alive - assume no
+        # FIXME pdfium's docs don't point out if the bitmap buffer needs to be kept alive - assume no
         c_pages, page_count = pdfium_i.pages_c_array(pages)
         ok = pdfium_c.FPDFImageObj_SetBitmap(c_pages, page_count, self, bitmap)
         if not ok:
@@ -283,7 +283,7 @@ class PdfImage (PdfObject):
         
         if render:
             if self.pdf is None:
-                raise RuntimeError("Cannot get rendered bitmap of loose page object.")
+                raise RuntimeError("Cannot get rendered bitmap of loose pageobject.")
             raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
         else:
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)
