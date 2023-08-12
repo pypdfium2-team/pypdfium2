@@ -171,7 +171,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if not config:
             if V_PDFIUM_IS_V8:
                 js_platform = pdfium_r.IPDF_JSPLATFORM(version=3)
-                config = pdfium_r.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, jsPlatform=js_platform)
+                config = pdfium_r.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, m_pJsPlatform=ctypes.pointer(js_platform))
             else:
                 config = pdfium_r.FPDF_FORMFILLINFO(version=2)
         
