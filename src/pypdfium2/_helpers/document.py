@@ -168,6 +168,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if formtype == pdfium_r.FORMTYPE_NONE or self.formenv:
             return
         
+        # safety check for older binaries to prevent a segfault (could be removed at some point)
+        # https://github.com/bblanchon/pdfium-binaries/issues/105
+        if V_PDFIUM_IS_V8 and int(V_LIBPDFIUM) <= 5677 and V_BUILDNAME == "pdfium-binaries":
+            raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
+        
         if not config:
             if V_PDFIUM_IS_V8:
                 js_platform = pdfium_r.IPDF_JSPLATFORM(version=3)
@@ -175,22 +180,23 @@ class PdfDocument (pdfium_i.AutoCloseable):
             else:
                 config = pdfium_r.FPDF_FORMFILLINFO(version=2)
         
-        # safety check for older binaries to prevent a segfault (could be removed at some point)
-        # https://github.com/bblanchon/pdfium-binaries/issues/105
-        if V_PDFIUM_IS_V8 and int(V_LIBPDFIUM) <= 5677 and V_BUILDNAME == "pdfium-binaries":
-            raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
-        
         raw = pdfium_r.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
         self.formenv = PdfFormEnv(raw, config, self)
         self._add_kid(self.formenv)
         
-        if V_PDFIUM_IS_V8 and formtype in (pdfium_r.FORMTYPE_XFA_FULL, pdfium_r.FORMTYPE_XFA_FOREGROUND):
-            ok = pdfium_r.FPDF_LoadXFA(self)
-            if not ok:
-                err = pdfium_r.FPDF_GetLastError()
-                logger.warning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}")
+        if formtype in (pdfium_r.FORMTYPE_XFA_FULL, pdfium_r.FORMTYPE_XFA_FOREGROUND):
+            if V_PDFIUM_IS_V8:
+                ok = pdfium_r.FPDF_LoadXFA(self)
+                if not ok:
+                    err = pdfium_r.FPDF_GetLastError()
+                    logger.warning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}")
+            else:
+                logger.warning(
+                    "init_forms() called on XFA pdf, but this pdfium binary was compiled without XFA support.\n"
+                    "Run `PDFIUM_BINARY=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2` to get a build with XFA support."
+                )
     
     
     def get_formtype(self):
