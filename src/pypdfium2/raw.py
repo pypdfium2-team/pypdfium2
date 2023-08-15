@@ -42,7 +42,7 @@ def _get_members():
         if any(any(func(name, x) for x in skips) for func, skips in NAME_FILTERS):
             continue
         member = getattr(pypdfium2.raw_unsafe, name)
-        if isinstance(member, ModuleType) or hasattr(ctypes, name):
+        if isinstance(member, ModuleType) or (hasattr(ctypes, name) and member is getattr(ctypes, name)):
             continue
         if isinstance(member, ctypes._CFuncPtr):
             member = _make_threadsafe(member)
