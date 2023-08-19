@@ -4,16 +4,19 @@
 
 package:
   name: pypdfium2
-  version: 5.0.0b1
+  # NOTE version must be given by the caller (the plan is to dynamically extract it from version.py in the script that will build the conda packages)
+  version: {{ environ["VERSION"] }}
 
 source:
-  # important: must have a clean checkout of the repository without any huge, generated sub-directories (like sourcebuild/pdfium),
+  # IMPORTANT must have a clean checkout of the repository without any huge, generated sub-directories (like sourcebuild/pdfium),
   # else conda would hang eternally on file copying (conda should really check .gitignore, though ...)
   path: ../..
 
 build:
   entry_points:
     - pypdfium2 = pypdfium2.__main__:cli_main
+  script_env:
+    - PDFIUM_BINARY
   script: {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
   number: 0
   # FIXME pypdfium2 is arch specific but python independent
@@ -30,10 +33,14 @@ requirements:
     - setuptools
     - build
     - wheel !=0.38.0,!=0.38.1
-    - ctypesgen-pypdfium2-team 1.1.1+4_g8a62d02
+    # TODO consider using the pre-generated bindings file so we don't have to rely on a package of our ctypesgen fork (which is currently supplied by a third-party)
+    - ctypesgen-pypdfium2-team
     - pip
   run:
     - python
+
+# NOTE duplication with pyproject.toml
+# in principle, we might be able to turn this recipe into a template and generate redundant sections automatically, but it's probably not worth it
 
 about:
   summary: Python bindings to PDFium
