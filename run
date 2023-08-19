@@ -14,7 +14,7 @@ function check() {
 }
 
 function clean() {
-    rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* tests_old/output/*
+    rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* tests_old/output/* conda/out/*
 }
 
 function packaging() {
@@ -55,6 +55,9 @@ clean)
 
 packaging)
     packaging;;
+
+packaging-conda)
+    python3 setupsrc/pypdfium2_setup/craft_packages.py --conda;;
 
 build)
     python3 setupsrc/pypdfium2_setup/build_pdfium.py $args;;

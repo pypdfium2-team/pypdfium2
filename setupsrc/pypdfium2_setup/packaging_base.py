@@ -4,6 +4,7 @@
 # No external dependencies shall be imported in this file
 # TODO improve consistency of variable names; think about variables to move in/out
 
+import os
 import re
 import sys
 import json
@@ -42,6 +43,8 @@ ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
 ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
 Changelog         = ProjectDir / "docs" / "devel" / "changelog.md"
 ChangelogStaging  = ProjectDir / "docs" / "devel" / "changelog_staging.md"
+CondaDir          = ProjectDir / "conda"
+CondaOutDir       = CondaDir / "out"
 HAVE_GIT_REPO     = (ProjectDir / ".git").exists()
 
 AutoreleaseDir   = ProjectDir / "autorelease"
@@ -95,6 +98,19 @@ ReleaseNames = {
     PlatNames.windows_x64      : "win-x64",
     PlatNames.windows_x86      : "win-x86",
     PlatNames.windows_arm64    : "win-arm64",
+}
+
+CondaNames = {
+    # NOTE looks like conda doesn't support musllinux yet ...
+    PlatNames.darwin_x64     : "osx-64",
+    PlatNames.darwin_arm64   : "osx-arm64",
+    PlatNames.linux_x64      : "linux-64",
+    PlatNames.linux_x86      : "linux-32",
+    PlatNames.linux_arm64    : "linux-aarch64",
+    PlatNames.linux_arm32    : "linux-armv7l",
+    PlatNames.windows_x64    : "win-64",
+    PlatNames.windows_x86    : "win-32",
+    PlatNames.windows_arm64  : "win-arm64",
 }
 
 LibnameForSystem = {
@@ -358,6 +374,12 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
 
 
 def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symbols=False):
+    
+    # quick and dirty fix to use the reference bindings
+    if int(os.environ["USE_REFBINDINGS"]):
+        print("!! Use refbindings", file=sys.stderr)
+        shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
+        return
     
     # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks

@@ -3,6 +3,7 @@
 
 build/
 dist/
+conda/out/
 tests/output/
 tests_old/output/
 

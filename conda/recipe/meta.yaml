@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: CC-BY-4.0
+
+# NOTE
+# 
+# This branch attempted to bundle the pdfium binaries with conda packages, like we do for pypi wheels.
+# However, conda does not support arch specific but python version independent packages, so we'd have to build for each version separately, which is not elegant.
+# Also, bundling dynamic libraries is against the spirit of conda (as a system package manager), contrary to PyPI (as python only).
+# 
+# Therefore, the clean solution would be to package pdfium-binaries separately on conda, so pypdfium2 can just depend on pdfium and be noarch.
+# This will require a new setup mode to bundle bindings only, and a way to pass additional runtime libdirs to ctypesgen.
+# Also we may need to pin the pdfium requirement to the exact version the bindings were built for. (Strictly speaking, binaries and bindings belong together. This may not seem overly relevant since ctypesgen makes if guards for symbols and pdfium's public API is very stable, but in principle mismatched bindings can cause undefined behavior if parameters changed.)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# FIXME since conda isolates each build, our data/ cache is no use...
+
+# usage: USE_REFBINDINGS=1 VERSION=... conda build conda/ --output-folder conda/out/
+# use `craft_packages.py --conda` to build for all platforms
+
+# {% set setup_cfg = load_file_data("setup.cfg") %}
+
+package:
+  name: pypdfium2
+  version: {{ environ["VERSION"] }}
+
+source:
+  # Using a local `git_url` instead of `path` so conda excludes generated directories from copying,
+  # else it would take eternally if a sourcebuild was made previously
+  # NOTE this seems to exclude uncommitted changes
+  git_url: ../..
+
+build:
+  entry_points:
+    - pypdfium2 = pypdfium2.__main__:cli_main
+  script_env:
+    - PDFIUM_PLATFORM
+    - USE_REFBINDINGS
+  script: {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  # FIXME not sure about conda's build/host distinction
+  # FIXME adds awkward hashes to filename
+  build:
+    - {{ compiler('c') }}
+    - git
+  host:
+    - python
+    - pip
+    - setuptools
+    - python-build
+    - wheel !=0.38.0,!=0.38.1
+  run:
+    - python
+
+about:
+  summary: Python bindings to PDFium
+  license: (Apache-2.0 OR BSD-3-Clause) AND LicenseRef-PdfiumThirdParty
+  license-files:
+    - LICENSES/Apache-2.0.txt
+    - LICENSES/BSD-3-Clause.txt
+    - LICENSES/CC-BY-4.0.txt
+    - LICENSES/LicenseRef-PdfiumThirdParty.txt
+    - .reuse/dep5-wheel
+  dev_url: https://github.com/pypdfium2-team/pypdfium2
+  doc_url: https://pypdfium2.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - mara004

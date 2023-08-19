@@ -42,14 +42,25 @@ class ArtifactStash:
         self.tmpdir.cleanup()
 
 
-def run_build(args):
+def run_pypi_build(args):
     run_cmd([sys.executable, "-m", "build", "--skip-dependency-check", "--no-isolation"] + args, cwd=ProjectDir, env=os.environ)
+
+
+def run_conda_build(pl_spec):
+    os.environ[PlatSpec_EnvVar] = pl_spec
+    run_cmd(["conda", "build", CondaDir, "--output-folder", CondaOutDir, "--variants", "{python: [3.8, 3.9, 3.10, 3.11]}"], cwd=ProjectDir, env=os.environ)
 
 
 def main():
     
     parser = argparse.ArgumentParser(
-        description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`.",
+        description = "Craft PyPI or conda packages for pypdfium2.",
+    )
+    parser.add_argument(
+        "--conda",
+        dest = "pypi",
+        action = "store_false",
+        help = "If given, build for conda instead of PyPI."
     )
     parser.add_argument(
         "--use-v8",
@@ -65,16 +76,40 @@ def main():
         args.version = PdfiumVer.get_latest()
     
     stash = ArtifactStash()
-    
-    os.environ[PlatSpec_EnvVar] = PlatTarget_None
-    run_build(["--sdist"])
-    clean_platfiles()
-    
     suffix = (PlatSpec_V8Sym if args.use_v8 else "") + PlatSpec_VerSep + str(args.version)
-    for plat in BinaryPlatforms:
-        os.environ[PlatSpec_EnvVar] = plat + suffix
-        run_build(["--wheel"])
+    
+    if args.pypi:
+        
+        os.environ[PlatSpec_EnvVar] = PlatTarget_None
+        run_pypi_build(["--sdist"])
         clean_platfiles()
+        
+        for plat in ReleaseNames.keys():
+            os.environ[PlatSpec_EnvVar] = plat + suffix
+            run_pypi_build(["--wheel"])
+            clean_platfiles()
+        
+    else:
+        
+        helpers_ver = merge_tag(parse_git_tag(), "py")
+        os.environ["VERSION"] = helpers_ver
+        os.environ["USE_REFBINDINGS"] = "1"
+        
+        platforms = CondaNames.copy()
+        conda_host = platforms.pop(Host.platform)
+        host_files = None
+        
+        for plat, conda_plat in platforms.items():
+            
+            run_conda_build(plat + suffix)
+            
+            if host_files is None:
+                host_files = list((CondaOutDir / conda_host).glob(f"pypdfium2-{helpers_ver}-*.tar.bz2"))
+            run_cmd(["conda", "convert", *host_files, "-p", conda_plat, "-o", CondaOutDir], cwd=ProjectDir, env=os.environ)
+            for hf in host_files:
+                hf.unlink()
+        
+        run_conda_build(Host.platform + suffix)
     
     stash.pop()
 
