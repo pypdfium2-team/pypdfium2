@@ -233,8 +233,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         Returns:
             PIL.Image.Image: PIL image (representation or copy of the bitmap buffer).
-        
-        .. versionchanged:: 4.16 Set ``image.readonly = False`` so that changes to the image are also reflected in the buffer.
         """
         
         # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.frombuffer
