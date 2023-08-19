@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: 2023 geisserml (mara004) <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2023 Jack Olivieri (boldorider4) <j.a.g.olivieri@gmail.com>
+# SPDX-License-Identifier: BSD-3-Clause
+
+package:
+  name: pypdfium2
+  version: 5.0.0b1
+
+source:
+  # important: must have a clean checkout of the repository without any huge, generated sub-directories (like sourcebuild/pdfium),
+  # else conda would hang eternally on file copying (conda should really check .gitignore, though ...)
+  path: ../..
+
+build:
+  entry_points:
+    - pypdfium2 = pypdfium2.__main__:cli_main
+  script: {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
+  number: 0
+  # FIXME pypdfium2 is arch specific but python independent
+  # If we have noarch we will be python independent but incorrect, if we don't have it we will be correct but tied to a specific python version
+  # So we see the following options, each with their own complications:
+  # - Build python specific packages (inelegant, but the only choice supported by conda)
+  # - Get conda changed (clean, but out of our hands)
+  # - Edit the generated archives (risky, but might achieve what we want)
+  noarch: python
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - build
+    - wheel !=0.38.0,!=0.38.1
+    - ctypesgen-pypdfium2-team 1.1.1+4_g8a62d02
+    - pip
+  run:
+    - python
+
+about:
+  summary: Python bindings to PDFium
+  description: |
+    pypdfium2 is an ABI-level Python 3 binding to PDFium, a powerful and liberal-licensed library for PDF rendering,
+    inspection, manipulation and creation.
+  license: Apache-2.0 OR BSD-3-Clause
+  license-files:
+    - LICENSES/Apache-2.0.txt
+    - LICENSES/BSD-3-Clause.txt
+    - LICENSES/LicenseRef-PdfiumThirdParty.txt
+    - LICENSES/CC-BY-4.0.txt
+    - .reuse/dep5
+  doc_url: https://pypdfium2.readthedocs.io/en/stable
+  dev_url: https://github.com/pypdfium2-team/pypdfium2
+
+extra:
+  recipe-maintainers:
+    - mara004
+    - boldorider4
