@@ -8,7 +8,7 @@ import os
 import sys
 import shutil
 import argparse
-import urllib.request
+import urllib.request as url_request
 from pathlib import Path, WindowsPath
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
@@ -20,7 +20,6 @@ PatchDir       = SBDir / "patches"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
-OutputDir      = DataDir / PlatNames.sourcebuild
 
 PatchesMain = [
     (PatchDir/"shared_library.patch", PDFiumDir),
@@ -106,15 +105,16 @@ def dl_pdfium(GClient, do_update, revision):
 
 def _dl_unbundler():
 
-    # Workaround: download missing tools for unbundle/replace_gn_files.py (syslibs build)
+    # Workaround: download missing tools for unbundle/replace_gn_files.py (to use ICU syslib)
+    # TODO get this fixed upstream
 
     tool_dir = PDFiumDir / "tools" / "generate_shim_headers"
     tool_file = tool_dir / "generate_shim_headers.py"
     tool_url = "https://raw.githubusercontent.com/chromium/chromium/main/tools/generate_shim_headers/generate_shim_headers.py"
 
-    tool_dir.mkdir(parents=True, exist_ok=True)
     if not tool_file.exists():
-        urllib.request.urlretrieve(tool_url, tool_file)
+        tool_dir.mkdir(parents=True, exist_ok=True)
+        url_request.urlretrieve(tool_url, tool_file)
 
 
 def get_pdfium_version():
@@ -133,10 +133,6 @@ def get_pdfium_version():
     v_libpdfium = int(tag) if head_commit == tag_commit else head_commit
     
     return v_libpdfium
-
-
-def update_version(v_libpdfium):
-    write_pdfium_info(OutputDir, version=v_libpdfium, origin="sourcebuild", flags=[])
 
 
 def _create_resources_rc(v_libpdfium):
@@ -176,46 +172,18 @@ def build(Ninja, target):
     run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
-def find_lib(src_libname=None, directory=PDFiumBuildDir):
+def pack(pdfium_ver):
     
-    if src_libname is not None:
-        path = directory / src_libname
-        if path.exists():
-            return path
-        else:
-            print("Warning: Binary not found under given name.", file=sys.stderr)
+    dest_dir = DataDir / ExtPlats.sourcebuild
+    dest_dir.mkdir(parents=True, exist_ok=True)
     
-    if sys.platform.startswith("linux"):
-        libname = "libpdfium.so"
-    elif sys.platform.startswith("darwin"):
-        libname = "libpdfium.dylib"
-    elif sys.platform.startswith("win32"):
-        libname = "pdfium.dll"
-    else:
-        # TODO implement fallback artifact detection
-        raise RuntimeError(f"Not sure how pdfium artifact is called on platform '{sys.platform}'")
+    libname = LibnameForSystem[Host.system]
+    shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
+    write_pdfium_info(dest_dir, version=pdfium_ver, origin="sourcebuild")
     
-    libpath = directory / libname
-    assert libpath.exists()
-    
-    return libpath
-
-
-def pack(src_libpath, v_libpdfium, destname=None):
-    
-    # TODO remove existing binary/bindings, just to be safe
-    
-    if destname is None:
-        destname = LibnameForSystem[Host.system]
-    
-    OutputDir.mkdir(parents=True, exist_ok=True)
-    destpath = OutputDir / destname
-    shutil.copy(src_libpath, destpath)
-    
-    update_version(v_libpdfium)
-    
-    include_dir = PDFiumDir / "public"
-    call_ctypesgen(OutputDir, include_dir, pl_name=Host.platform)
+    # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
+    # FIXME PDFIUM_BINDINGS=reference not honored
+    run_ctypesgen(dest_dir, headers_dir=PDFiumDir/"public", compile_lds=[dest_dir])
 
 
 def get_tool(name):
@@ -243,8 +211,6 @@ def serialise_config(config_dict):
 
 
 def main(
-        b_src_libname = None,
-        b_dest_libname = None,
         b_update = False,
         b_revision = None,
         b_target = None,
@@ -273,10 +239,10 @@ def main(
     Ninja   = get_tool("ninja")
     
     pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
-    v_libpdfium = get_pdfium_version()
+    pdfium_ver = get_pdfium_version()
     
     if pdfium_dl_done:
-        patch_pdfium(v_libpdfium)
+        patch_pdfium(pdfium_ver)
     if b_use_syslibs:
         _dl_unbundler()
 
@@ -291,23 +257,13 @@ def main(
     
     configure(GN, config_str)
     build(Ninja, b_target)
-    libpath = find_lib(b_src_libname)
-    pack(libpath, v_libpdfium, b_dest_libname)
+    pack(pdfium_ver)
 
 
 def parse_args(argv):
     
     parser = argparse.ArgumentParser(
         description = "A script to automate building PDFium from source and generating bindings with ctypesgen.",
-    )
-    
-    parser.add_argument(
-        "--src-libname",
-        help = "Name of the generated PDFium binary file. This script tries to automatically find the binary, which should usually work. If it does not, however, this option may be used to explicitly provide the file name to look for.",
-    )
-    parser.add_argument(
-        "--dest-libname",
-        help = "Rename the binary. Must be a name recognised by packaging code.",
     )
     parser.add_argument(
         "--update", "-u",

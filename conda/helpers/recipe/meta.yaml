@@ -1,0 +1,72 @@
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: CC-BY-4.0
+
+{% set pdfium_max = environ["PDFIUM_MAX"] %}
+{% set helpers_ver = environ["M_HELPERS_VER"] %}
+{% set git_depth = environ["M_GIT_DEPTH"] %}
+
+package:
+  name: pypdfium2
+  version: {{ helpers_ver }}
+
+source:
+  git_url: ../../..
+  git_depth: {{ git_depth }}
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - pypdfium2 = pypdfium2.__main__:cli_main
+  script_env:
+    - PYPDFIUM_MODULES=helpers
+  script:
+    - {{ PYTHON }} conda/prepare_script.py
+    - {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
+
+requirements:
+  build:
+    - git
+    - python
+    - pip
+    - setuptools
+    - wheel !=0.38.0,!=0.38.1
+  run:
+    # Set an upper boundary for pypdfium2_raw as defined in craft_packages.py
+    # NOTE There currently is no significant minimum pdfium requirement, but we could add one should the necessity arise.
+    - python
+    - pypdfium2_team::pypdfium2_raw <={{ pdfium_max }}
+
+test:
+  requires:
+    - pip
+    - pytest
+    - pillow
+    - numpy
+  imports:
+    - pypdfium2
+  source_files:
+    - tests/
+    - tests_old/
+  commands:
+    - pip check
+    - pypdfium2 --help
+    - pytest tests/ tests_old/
+
+about:
+  summary: Python bindings to PDFium (helpers, external bindings)
+  description: |
+    This package provides python helpers around pdfium.
+    Dependants are suggested to pin to a major version, but any tighter pinning is discouraged since it increases the risk for conflicts, and would lock you out from future fixes.
+  license: Apache-2.0 OR BSD-3-Clause
+  license-files:
+    - LICENSES/Apache-2.0.txt
+    - LICENSES/BSD-3-Clause.txt
+    - LICENSES/CC-BY-4.0.txt
+  dev_url: https://github.com/pypdfium2-team/pypdfium2
+  doc_url: https://pypdfium2.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - pypdfium2-team
+    - mara004

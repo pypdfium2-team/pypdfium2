@@ -82,8 +82,8 @@ jobs:
       - name: Run test suite
         run: ./run test
       
-      - name: Run packaging script
-        run: ./run packaging
+      - name: Run PyPI packaging script
+        run: ./run packaging_pypi
       
       - name: Upload release notes
         uses: actions/upload-artifact@v3

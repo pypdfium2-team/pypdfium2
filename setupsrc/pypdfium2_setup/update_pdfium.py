@@ -4,15 +4,15 @@
 
 import sys
 import shutil
+import tarfile
 import argparse
 import traceback
 import functools
 from pathlib import Path
-from urllib import request
+import urllib.request as url_request
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-from pypdfium2_setup._compat import safer_tar_unpack
 # TODO consider dotted access?
 from pypdfium2_setup.packaging_base import *
 
@@ -39,7 +39,7 @@ def _get_package(pl_name, version, robust, use_v8):
     print(f"'{fu}' -> '{fp}'")
     
     try:
-        request.urlretrieve(fu, fp)
+        url_request.urlretrieve(fu, fp)
     except Exception:
         if robust:
             traceback.print_exc()
@@ -50,7 +50,7 @@ def _get_package(pl_name, version, robust, use_v8):
     return pl_name, fp
 
 
-def download_releases(platforms, version, use_v8, max_workers, robust):
+def download(platforms, version, use_v8, max_workers, robust):
     
     if not max_workers:
         max_workers = len(platforms)
@@ -65,43 +65,22 @@ def download_releases(platforms, version, use_v8, max_workers, robust):
     return archives
 
 
-# TODO Do not unpack whole archives, instead extract only the binaries we need and retrieve headers from pdfium directly. This would allow us to get rid of the tar compat code.
-
-def unpack_archives(archives):
-    for pl_name, archive_path in archives.items():
-        dest_dir = DataDir / pl_name / "build_tar"
-        safer_tar_unpack(archive_path, dest_dir)
-        archive_path.unlink()
-
-
-def generate_bindings(archives, version, use_v8, ctypesgen_kws):
+def extract(archives, version, flags):
     
-    flags = []
-    if use_v8:
-        flags += ["V8", "XFA"]
-    
-    for pl_name in archives.keys():
+    for pl_name, arc_path in archives.items():
         
-        pl_dir = DataDir / pl_name
-        build_dir = pl_dir / "build_tar"
-        bin_dir = build_dir / "lib"
+        with tarfile.open(arc_path) as tar:
+            pl_dir = DataDir/pl_name
+            system = plat_to_system(pl_name)
+            libname = LibnameForSystem[system]
+            tar_libdir = "lib" if system != SysNames.windows else "bin"
+            tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
+            write_pdfium_info(pl_dir, version=version, origin="pdfium-binaries", flags=flags)
         
-        system = plat_to_system(pl_name)
-        if system == SysNames.windows:
-            bin_dir = build_dir / "bin"
-        
-        libname = LibnameForSystem[system]
-        src_libpath = bin_dir / libname
-        assert src_libpath.is_file()
-        shutil.copyfile(src_libpath, pl_dir/libname)
-        
-        call_ctypesgen(pl_dir, build_dir/"include", pl_name=pl_name, use_v8xfa=use_v8, **ctypesgen_kws)
-        write_pdfium_info(DataDir/pl_name, version=version, origin="pdfium-binaries", flags=flags)
-        
-        shutil.rmtree(build_dir)
+        arc_path.unlink()
 
 
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, ctypesgen_kws={}):
+def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     if not version:
         version = PdfiumVer.get_latest()
@@ -110,10 +89,11 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, 
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     
+    flags = ["V8", "XFA"] if use_v8 else []
+    
     clear_data(platforms)
-    archives = download_releases(platforms, version, use_v8, max_workers, robust)
-    unpack_archives(archives)
-    generate_bindings(archives, version, use_v8, ctypesgen_kws)
+    archives = download(platforms, version, use_v8, max_workers, robust)
+    extract(archives, version, flags)
 
 
 # low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py

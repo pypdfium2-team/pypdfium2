@@ -110,9 +110,9 @@ class _version_pdfium (_abc_version):
             desc += f"+{self.origin}"
         if self.flags:
             desc += ":{%s}" % ",".join(self.flags)
-        if self.bindings != "generated":
-            desc += f"@bindings:{self.bindings}"
         return desc
+
+# TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, pdfium headers version)
 
 
 # Current API
@@ -140,7 +140,6 @@ __all__ += ["V_PYPDFIUM2", "V_LIBPDFIUM", "V_LIBPDFIUM_FULL", "V_BUILDNAME", "V_
 
 
 # Docs
-
 
 PYPDFIUM_INFO = PYPDFIUM_INFO
 """
@@ -177,8 +176,8 @@ Parameters:
         - ``given``: Pre-supplied version file (e.g. packaged with sdist, or else created by caller).
         - ``record``: Parsed from autorelease record. Implies that possible changes after tag are unknown.\n
         Note that *given* and *record* are not "trustworthy", they can be easily abused to pass arbitrary values. *git* should be correct provided the installed version file is not corrupted.
-    is_editable (bool):
-        True for editable install, False otherwise.\n
+    is_editable (bool | None):
+        True for editable install, False otherwise. None if unknown.\n
         If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happened since. The actual current state is unknown.
 """
 
@@ -220,8 +219,6 @@ Parameters:
         - ``system``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
-    bindings (str):
-        Info on the used bindings (generated, reference). Note that the reference bindings can be ABI-unsafe. (This field is experimental. In the future, we may want to integrate bindings info separately with ctypesgen version.)
 """
 
 # -----

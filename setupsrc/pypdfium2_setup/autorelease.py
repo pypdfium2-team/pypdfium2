@@ -23,16 +23,9 @@ def run_local(*args, **kws):
 
 
 def update_refbindings(version):
-    
-    # re-generate host bindings
-    # TODO download headers from pdfium repo and call ctypesgen directly
-    host_bindings = DataDir / Host.platform / BindingsFN
-    host_bindings.unlink(missing_ok=True)
-    update_pdfium.main([Host.platform], version=version, ctypesgen_kws=dict(guard_symbols=True))
-    assert host_bindings.exists()
-    
-    # update reference bindings
-    shutil.copyfile(host_bindings, RefBindingsFile)  # yes this overwrites
+    RefBindingsFile.unlink()
+    build_pdfium_bindings(version, headers_dir=AutoreleaseDir, guard_symbols=True)
+    assert RefBindingsFile.exists()
 
 
 def do_versioning(config, record, prev_helpers, new_pdfium):
