@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # usage: VERSION=... conda build conda/ --output-folder conda/out/
-# use `craft_packages.py` --conda to build for all platforms
+# use `craft_packages.py --conda` to build for all platforms
 
 {% set pyproject = load_file_data("pyproject.toml") %}
 
