@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# TODO consider switching this to a yaml file and only assemble V_PYPDFIUM2 in the library?
-# advantages: denotes this is a static data file, easier r/w, accessibility in conda recipe via load_data_file()
+# TODO investigate if we could turn this into a yaml file?
 
 __all__ = ("V_PYPDFIUM2", "V_LIBPDFIUM", "V_BUILDNAME", "V_PDFIUM_IS_V8")
 
