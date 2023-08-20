@@ -1,4 +1,3 @@
-# PYTHON_ARGCOMPLETE_OK
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
@@ -7,11 +6,6 @@ import argparse
 import importlib
 from pypdfium2.version import *
 from pypdfium2._cli._parsers import setup_logging
-
-try:
-    import argcomplete
-except ImportError:
-    argcomplete = None
 
 
 SubCommands = {
@@ -46,9 +40,6 @@ def get_parser():
     for name, help in SubCommands.items():
         subparser = subparsers.add_parser(name, description=help, help=help)
         CmdToModule[name].attach(subparser)
-    
-    if argcomplete:
-        argcomplete.autocomplete(main_parser)
     
     return main_parser
 
