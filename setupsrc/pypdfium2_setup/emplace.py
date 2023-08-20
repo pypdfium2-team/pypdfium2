@@ -44,7 +44,7 @@ def get_pdfium(binary_spec):
     if BinarySpec_VersionSep in binary_spec:
         binary_spec, req_ver = binary_spec.rsplit(BinarySpec_VersionSep)
     if binary_spec.endswith(BinarySpec_V8Indicator):
-        binary_spec = binary_spec.rstrip(BinarySpec_V8Indicator)
+        binary_spec = binary_spec.rstrip(BinarySpec_V8Indicator)  # should be removesuffix() (pep616, python>=3.9)
         use_v8 = True
     
     if not binary_spec or binary_spec.lower() == PlatformTarget_Auto:
