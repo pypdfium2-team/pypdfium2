@@ -3,16 +3,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # usage: VERSION=... conda build conda/ --output-folder conda/out/
+# use `craft_packages.py` --conda to build for all platforms
 
 {% set pyproject = load_file_data("pyproject.toml") %}
 
 package:
   name: pypdfium2
-  # NOTE version must be given by the caller (the plan is to dynamically extract it from version.py in the script that will build the conda packages)
   version: {{ environ["VERSION"] }}
 
 source:
-  # use a local `git_url` instead of `path` so conda excludes generated directories from copying,
+  # using a local `git_url` instead of `path` so conda excludes generated directories from copying,
   # else it would take eternally if a sourcebuild was made previously
   git_url: ../..
 
@@ -24,12 +24,12 @@ build:
   script: {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
   number: 0
   # FIXME pypdfium2 is arch specific but python independent
-  # If we have noarch we will be python independent but incorrect, if we don't have it we will be correct but tied to a specific python version
+  # If we have `noarch: python` we will be python independent but incorrect, if we don't have it we will be correct but tied to a specific python version
   # So we see the following options, each with their own complications:
   # - Build python specific packages (inelegant, but the only choice supported by conda)
   # - Get conda changed (would be clean, but out of our hands)
   # - Edit the generated archives (risky, but might achieve what we want)
-  # noarch: python
+  # For now, we decided to build python specific packages, though it will consume a lot more CI runtime than PyPI packages.
 
 requirements:
   build:

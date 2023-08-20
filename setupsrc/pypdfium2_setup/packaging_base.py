@@ -28,6 +28,8 @@ AutoreleaseDir    = SourceTree / "autorelease"
 MajorUpdateFile   = AutoreleaseDir / "update_major.txt"
 BetaUpdateFile    = AutoreleaseDir / "update_beta.txt"
 RefBindingsFile   = SourceTree / "bindings" / BindingsFileName
+CondaDir          = SourceTree / "conda"
+CondaOutDir       = CondaDir / "out"
 
 BinarySpec_EnvVar      = "PDFIUM_BINARY"
 BinarySpec_VersionSep  = ":"
@@ -78,16 +80,29 @@ class PlatformNames:
 
 
 ReleaseNames = {
-    PlatformNames.darwin_x64     : "mac-x64",
-    PlatformNames.darwin_arm64   : "mac-arm64",
     PlatformNames.linux_x64      : "linux-x64",
     PlatformNames.linux_x86      : "linux-x86",
     PlatformNames.linux_arm64    : "linux-arm64",
     PlatformNames.linux_arm32    : "linux-arm",
     PlatformNames.linux_musl_x64 : "linux-musl-x64",
     PlatformNames.linux_musl_x86 : "linux-musl-x86",
+    PlatformNames.darwin_x64     : "mac-x64",
+    PlatformNames.darwin_arm64   : "mac-arm64",
     PlatformNames.windows_x64    : "win-x64",
     PlatformNames.windows_x86    : "win-x86",
+    PlatformNames.windows_arm64  : "win-arm64",
+}
+
+CondaNames = {
+    # FIXME not sure if/how conda supports linux_musl
+    PlatformNames.linux_x64      : "linux-64",
+    PlatformNames.linux_x86      : "linux-32",
+    PlatformNames.linux_arm64    : "linux-aarch64",
+    PlatformNames.linux_arm32    : "linux-armv7l",
+    PlatformNames.darwin_x64     : "osx-64",
+    PlatformNames.darwin_arm64   : "osx-arm64",
+    PlatformNames.windows_x64    : "win-64",
+    PlatformNames.windows_x86    : "win-32",
     PlatformNames.windows_arm64  : "win-arm64",
 }
 

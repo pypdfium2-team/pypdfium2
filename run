@@ -14,7 +14,7 @@ function check() {
 }
 
 function clean() {
-    rm -rf src/pypdfium2.egg-info/ dist data/*
+    rm -rf src/pypdfium2.egg-info/ dist data/* conda/out/*
     rm -f tests/output/* src/pypdfium2.egg-info/SOURCES.txt
 }
 
