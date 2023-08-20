@@ -2,6 +2,8 @@
 # SPDX-FileCopyrightText: 2023 Jack Olivieri (boldorider4) <j.a.g.olivieri@gmail.com>
 # SPDX-License-Identifier: BSD-3-Clause
 
+{% set pyproject = load_file_data("pyproject.toml") %}
+
 package:
   name: pypdfium2
   # NOTE version must be given by the caller (the plan is to dynamically extract it from version.py in the script that will build the conda packages)
@@ -39,21 +41,13 @@ requirements:
   run:
     - python
 
-# NOTE duplication with pyproject.toml
-# in principle, we might be able to turn this recipe into a template and generate redundant sections automatically, but it's probably not worth it
-
 about:
-  summary: Python bindings to PDFium
+  summary: {{ pyproject["project"]["description"] }}
   description: |
     pypdfium2 is an ABI-level Python 3 binding to PDFium, a powerful and liberal-licensed library for PDF rendering,
     inspection, manipulation and creation.
-  license: Apache-2.0 OR BSD-3-Clause
-  license-files:
-    - LICENSES/Apache-2.0.txt
-    - LICENSES/BSD-3-Clause.txt
-    - LICENSES/LicenseRef-PdfiumThirdParty.txt
-    - LICENSES/CC-BY-4.0.txt
-    - .reuse/dep5
+  license: {{ pyproject["project"]["license"]["text"] }}
+  license-files: {{ pyproject["tool"]["setuptools"]["license-files"] }}
   doc_url: https://pypdfium2.readthedocs.io/en/stable
   dev_url: https://github.com/pypdfium2-team/pypdfium2
 
