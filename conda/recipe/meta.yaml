@@ -1,6 +1,5 @@
-# SPDX-FileCopyrightText: 2023 geisserml (mara004) <geisserml@gmail.com>
-# SPDX-FileCopyrightText: 2023 Jack Olivieri (boldorider4) <j.a.g.olivieri@gmail.com>
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: BSD-3-Clause or Apache-2.0
 
 # usage: VERSION=... conda build conda/ --output-folder conda/out/
 # use `craft_packages.py --conda` to build for all platforms
@@ -53,4 +52,3 @@ about:
 extra:
   recipe-maintainers:
     - mara004
-    - boldorider4
