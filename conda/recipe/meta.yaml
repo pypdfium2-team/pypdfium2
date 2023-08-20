@@ -2,6 +2,8 @@
 # SPDX-FileCopyrightText: 2023 Jack Olivieri (boldorider4) <j.a.g.olivieri@gmail.com>
 # SPDX-License-Identifier: BSD-3-Clause
 
+# usage: VERSION=... conda build conda/ --output-folder conda/out/
+
 {% set pyproject = load_file_data("pyproject.toml") %}
 
 package:
@@ -25,7 +27,7 @@ build:
   # If we have noarch we will be python independent but incorrect, if we don't have it we will be correct but tied to a specific python version
   # So we see the following options, each with their own complications:
   # - Build python specific packages (inelegant, but the only choice supported by conda)
-  # - Get conda changed (clean, but out of our hands)
+  # - Get conda changed (would be clean, but out of our hands)
   # - Edit the generated archives (risky, but might achieve what we want)
   noarch: python
 
@@ -35,7 +37,7 @@ requirements:
     - setuptools
     - build
     - wheel !=0.38.0,!=0.38.1
-    # TODO consider using the pre-generated bindings file so we don't have to rely on a package of our ctypesgen fork (which is currently supplied by a third-party)
+    # TODO consider using the pre-generated bindings file so we don't have to rely on a package of our ctypesgen fork (which is currently supplied by a third party)
     - ctypesgen-pypdfium2-team
     - pip
   run:
@@ -44,12 +46,12 @@ requirements:
 about:
   summary: {{ pyproject["project"]["description"] }}
   description: |
-    pypdfium2 is an ABI-level Python 3 binding to PDFium, a powerful and liberal-licensed library for PDF rendering,
-    inspection, manipulation and creation.
+    pypdfium2 is an ABI-level Python 3 binding to PDFium, a powerful and liberal-licensed library
+    for PDF rendering, inspection, manipulation and creation.
   license: {{ pyproject["project"]["license"]["text"] }}
   license-files: {{ pyproject["tool"]["setuptools"]["license-files"] }}
-  doc_url: https://pypdfium2.readthedocs.io/en/stable
-  dev_url: https://github.com/pypdfium2-team/pypdfium2
+  dev_url: {{ pyproject["project"]["urls"]["homepage"] }}
+  doc_url: {{ pyproject["project"]["urls"]["documentation"] }}
 
 extra:
   recipe-maintainers:
