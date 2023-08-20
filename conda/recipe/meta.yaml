@@ -12,9 +12,9 @@ package:
   version: {{ environ["VERSION"] }}
 
 source:
-  # IMPORTANT must have a clean checkout of the repository without any huge, generated sub-directories (like sourcebuild/pdfium),
-  # else conda would hang eternally on file copying (conda should really check .gitignore, though ...)
-  path: ../..
+  # use a local `git_url` instead of `path` so conda excludes generated directories from copying,
+  # else it would take eternally if a sourcebuild was made previously
+  git_url: ../..
 
 build:
   entry_points:
@@ -29,7 +29,7 @@ build:
   # - Build python specific packages (inelegant, but the only choice supported by conda)
   # - Get conda changed (would be clean, but out of our hands)
   # - Edit the generated archives (risky, but might achieve what we want)
-  noarch: python
+  # noarch: python
 
 requirements:
   build:
@@ -45,9 +45,6 @@ requirements:
 
 about:
   summary: {{ pyproject["project"]["description"] }}
-  description: |
-    pypdfium2 is an ABI-level Python 3 binding to PDFium, a powerful and liberal-licensed library
-    for PDF rendering, inspection, manipulation and creation.
   license: {{ pyproject["project"]["license"]["text"] }}
   license-files: {{ pyproject["tool"]["setuptools"]["license-files"] }}
   dev_url: {{ pyproject["project"]["urls"]["homepage"] }}
