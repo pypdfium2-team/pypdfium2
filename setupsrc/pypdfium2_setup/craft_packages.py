@@ -122,8 +122,8 @@ def main():
             
             if host_files is None:
                 host_files = list((CondaOutDir / conda_host).glob(f"pypdfium2-{version}-*.tar.bz2"))
+            run_cmd(["conda", "convert", *host_files, "-p", conda_plat, "-o", CondaOutDir], cwd=SourceTree, env=os.environ)
             for hf in host_files:
-                run_cmd(["conda", "convert", hf, "-p", conda_plat, "-o", CondaOutDir], cwd=SourceTree, env=os.environ)
                 hf.unlink()
         
         run_conda_build(Host.platform + suffix)
