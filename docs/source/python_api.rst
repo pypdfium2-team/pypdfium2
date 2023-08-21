@@ -82,10 +82,6 @@ Version
 *******
 .. automodule:: pypdfium2.version
 
-CLI Entrypoint
-**************
-.. autofunction:: pypdfium2.main
-
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
@@ -118,6 +114,10 @@ Miscellaneous
 *************
 .. automodule:: pypdfium2._helpers.misc
 .. automodule:: pypdfium2._helpers.unsupported
+
+CLI Entrypoint
+**************
+.. autofunction:: pypdfium2.__main__.main
 
 
 Internal

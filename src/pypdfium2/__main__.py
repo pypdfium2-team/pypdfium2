@@ -45,21 +45,6 @@ def get_parser():
 
 
 def main(argv):
-    """
-    API entrypoint to pypdfium2's command-line interface.
-    See :doc:`./shell_api` or ``pypdfium2 --help``.
-    
-    Parameters:
-        argv (list[str]):
-            The command-line arguments.
-    
-    Example:
-        
-        .. code-block:: python
-            
-            # rendering
-            main(["render", "my_file.pdf", "-o=out/", "--prefix=result_", "--scale=4", "--rev-byteorder", "--prefer-bgrx"])
-    """
     
     parser = get_parser()
     args = parser.parse_args(argv)
