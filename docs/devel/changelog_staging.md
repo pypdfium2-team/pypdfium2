@@ -7,7 +7,8 @@
 
 *API breaking changes*
 - Rendering:
-  <!-- TODO PdfDocument.render() -->
+  * `PdfDocument.render()`, the parallel multi-page rendering API, has been removed.
+    Please use `PdfPage.render()` instead, and consider caller-side multiprocessing. See below for more info.
   * `PdfBitmap.get_info()` and `PdfBitmapInfo` have been removed since they only existed on behalf of data transfer in `PdfDocument.render()`.
 - Pageobjects:
   * Renamed `PdfObject.get_pos()` to `.get_bounds()`.
@@ -22,7 +23,6 @@
 - Fixed sourcebuild with system libraries.
 
 *Improvements and new features*
-<!-- TODO command-line entrypoint -->
 - PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
   `pypdfium2.raw` is now a wrapper around the actual bindings file `raw_unsafe.py`.
   In this course, filtering has been installed to free the namespace of unwanted members.
@@ -34,6 +34,18 @@
   * Avoid full state data transfer and object re-initialization for each job. Instead, use a pool initializer and exploit global variables.
     This important improvement also makes bytes input tolerable for parallel rendering.
   * Fixed parallel rendering with byte buffers on Linux by avoiding the process start method `fork`.
+    (Upstream is aware of problems with `fork`. `spawn` will become the default everywhere with Python 3.14)
   * Implemented miscellaneous new options.
   * Added selective lightness inversion as post-processing feature.
 - Improved setup code.
+
+*Rationales*
+- Removal of `PdfDocument.render()`:
+  The parallel rendering API unfortunately was an inherent design mistake:
+  Multiprocessing is not meant to transfer large amounts of pixel data from workers to the main process.
+  Instead, each bitmap should be processed (e.g. saved) in the job which created it.
+  Only a minimal, final result should be sent back to the main process (e.g. a file path).
+  This means we cannot reasonably provide a generic parallel renderer, instead it should be implemented by callers.
+  Apart from that, object re-construction is also better left in the control of callers.
+  pypdfium2's rendering CLI cleanly re-implements parallel rendering to files (fixing further mistakes, see above).
+  We are considering if this use case could eventually be turned into an API.
