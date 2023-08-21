@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: BSD-3-Clause or Apache-2.0
 
+# FIXME since conda isolates each build, our data/ cache is no use...
+
 # usage: VERSION=... conda build conda/ --output-folder conda/out/
 # use `craft_packages.py --conda` to build for all platforms
 
