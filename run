@@ -57,6 +57,9 @@ clean)
 packaging)
     packaging;;
 
+packaging-conda)
+    python3 setupsrc/pypdfium2_setup/craft_packages.py --conda;;
+
 build)
     python3 setupsrc/pypdfium2_setup/build_pdfium.py $args;;
 
