@@ -66,7 +66,7 @@ def run_pypi_build(args):
 
 def run_conda_build(binary):
     os.environ[BinarySpec_EnvVar] = binary
-    run_cmd(["conda", "build", CondaDir, "--output-folder", CondaOutDir], cwd=SourceTree, env=os.environ)
+    run_cmd(["conda", "build", CondaDir, "--output-folder", CondaOutDir, "--variants", "{python: [3.8, 3.9, 3.10, 3.11]}"], cwd=SourceTree, env=os.environ)
 
 
 def main():
@@ -114,18 +114,17 @@ def main():
         
         platforms = CondaNames.copy()
         conda_host = platforms.pop(Host.platform)
-        host_file = None
+        host_files = None
         
         for plat, conda_plat in platforms.items():
             
             run_conda_build(plat + suffix)
             
-            if host_file is None:
-                host_file = list((CondaOutDir / conda_host).glob(f"pypdfium2-{version}-*.tar.bz2"))
-                assert len(host_file) == 1; host_file = host_file[0]
-            
-            run_cmd(["conda", "convert", host_file, "-p", conda_plat, "-o", CondaOutDir], cwd=SourceTree, env=os.environ)
-            host_file.unlink()
+            if host_files is None:
+                host_files = list((CondaOutDir / conda_host).glob(f"pypdfium2-{version}-*.tar.bz2"))
+            for hf in host_files:
+                run_cmd(["conda", "convert", hf, "-p", conda_plat, "-o", CondaOutDir], cwd=SourceTree, env=os.environ)
+                hf.unlink()
         
         run_conda_build(Host.platform + suffix)
     
