@@ -39,14 +39,14 @@ test)
     python3 -m pytest tests/ tests_old/ $args;;
 
 coverage)
-    python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/raw_unsafe.py,setupsrc/*" -m pytest tests/ tests_old/
+    python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/raw_unsafe.py,setupsrc/*" -m pytest tests/ tests_old/ $args
     python3 -m coverage report;;
 
 docs-build)
-    python3 -m sphinx -b html docs/source docs/build/html;;
+    python3 -m sphinx -b html docs/source docs/build/html $args;;
 
 docs-open)
-    xdg-open docs/build/html/index.html &>/dev/null;;
+    xdg-open docs/build/html/index.html $args &>/dev/null;;
 
 check)
     check;;
