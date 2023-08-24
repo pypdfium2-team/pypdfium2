@@ -19,15 +19,19 @@
 - Setup: renamed `$PDFIUM_PLATFORM` to `$PDFIUM_BINARY`.
 
 *Bug fixes*
-- Fixed XFA init (if V8/XFA support is enabled). This issue was caused by a typo in a struct field. Thanks to Benoît Blanchon.
+- Fixed XFA init (relevant for V8/XFA enabled builds only). This issue was caused by a typo in a struct field. Thanks to Benoît Blanchon.
 - Fixed sourcebuild with system libraries.
 
 *Improvements and new features*
 - PDFium functions are now protected by a mutex to make them safe for use in a threaded context.
   `pypdfium2.raw` is now a wrapper around the actual bindings file `raw_unsafe.py`.
   In this course, filtering has been installed to free the namespace of unwanted members.
-- `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
+- For V8/XFA enabled builds, expose V8/XFA exclusive members in the bindings file by passing ctypesgen the pre-processor defines in question.
+- Added `PdfPosConv` helper for bidirectional translation between bitmap and page coordinates.
+  This wraps pdfium's `FPDF_DeviceToPage()` / `FPDF_PageToDevice()` APIs, which are limited to integer device coordinates.
+  Generic float based coordinate normalization is not supported yet.
 - `PdfObject`: Added `.get_quad_points()`.
+- `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
 - CLI: Implemented configurable input type for testing.
 - Major CLI renderer improvements:
   * Moved saving from main process into jobs. This avoids unnecessary data transfer and prevents images from queuing up in memory.
