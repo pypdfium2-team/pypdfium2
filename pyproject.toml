@@ -18,6 +18,9 @@ name = "pypdfium2"
 description = "Python bindings to PDFium"
 readme = "README.md"
 requires-python = ">= 3.6"
+dependencies = [
+    "pillow",
+]
 dynamic = ["version"]
 keywords = ["pdf", "pdfium"]
 authors = [
