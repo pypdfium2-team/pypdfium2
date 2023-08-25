@@ -5,7 +5,6 @@ __all__ = ("PdfBitmap", )
 
 import ctypes
 import logging
-import weakref
 import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError

@@ -3,7 +3,6 @@
 
 import os
 import math
-import ctypes
 import logging
 import colorsys
 import functools
@@ -11,9 +10,12 @@ from pathlib import Path
 import multiprocessing as mp
 import concurrent.futures as ft
 
-import PIL.Image
-import PIL.ImageFilter
-import PIL.ImageDraw
+try:
+    import PIL.Image
+    import PIL.ImageFilter
+    import PIL.ImageDraw
+except ImportError:
+    PIL = None
 
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
