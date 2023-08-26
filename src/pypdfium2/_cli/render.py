@@ -42,12 +42,12 @@ BitmapMakers = dict(
     foreign_simple = _bitmap_wrapper_foreign_simple,
 )
 
-CsFields = ("area_fill", "area_stroke", "text_fill", "text_stroke")
+CsFields = ("path_fill", "path_stroke", "text_fill", "text_stroke")
 ColorOpts = dict(metavar="C", nargs=4, type=int)
 SampleTheme = dict(
     # choose some random colors so we can distinguish the different drawings (TODO improve)
-    area_fill   = (170, 100, 0,   255),  # dark orange
-    area_stroke = (0,   150, 255, 255),  # sky blue
+    path_fill   = (170, 100, 0,   255),  # dark orange
+    path_stroke = (0,   150, 255, 255),  # sky blue
     text_fill   = (255, 255, 255, 255),  # white
     text_stroke = (150, 255, 0,   255),  # green
 )
@@ -192,6 +192,7 @@ def attach(parser):
         help = "The map function to use (backend specific, the default is an iterative map)."
     )
     
+    # TODO consider deprecation/removal (not useful, see below)
     color_scheme = parser.add_argument_group(
         title = "PDFium forced color scheme",
         description = "Options for rendering with forced color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues. For a dark theme, consider using lightness inversion post-processing instead.",
@@ -202,11 +203,11 @@ def attach(parser):
         help = "Use a dark background sample theme as base. Explicit color params override selectively."
     )
     color_scheme.add_argument(
-        "--area-fill",
+        "--path-fill",
         **ColorOpts
     )
     color_scheme.add_argument(
-        "--area-stroke",
+        "--path-stroke",
         **ColorOpts
     )
     color_scheme.add_argument(
@@ -220,7 +221,7 @@ def attach(parser):
     color_scheme.add_argument(
         "--fill-to-stroke",
         action = "store_true",
-        help = "Only draw borders around fill areas using the `area_stroke` color, instead of filling with the `area_fill` color.",
+        help = "Only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.",
     )
     
     postproc = parser.add_argument_group(

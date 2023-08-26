@@ -349,7 +349,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             color_scheme (PdfColorScheme | None):
                 An optional, custom rendering color scheme.
             fill_to_stroke (bool):
-                If True and rendering with custom color scheme, only draw borders around fill areas using the `area_stroke` color, instead of filling with the `area_fill` color.
+                If True and rendering with custom color scheme, only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.
             fill_color (tuple[int, int, int, int]):
                 Color the bitmap will be filled with before rendering (RGBA values from 0 to 255).
             grayscale (bool):
@@ -529,15 +529,17 @@ def _parse_renderopts(
     return cl_format, rev_byteorder, fill_color, flags
 
 
+# TODO consider deprecation/removal (not useful, see CLI help)
+
 class PdfColorScheme:
     """
     Rendering color scheme.
     Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
     """
     
-    def __init__(self, area_fill=None, area_stroke=None, text_fill=None, text_stroke=None):
+    def __init__(self, path_fill=None, path_stroke=None, text_fill=None, text_stroke=None):
         self.colors = dict(
-            path_fill_color=area_fill, path_stroke_color=area_stroke,
+            path_fill_color=path_fill, path_stroke_color=path_stroke,
             text_fill_color=text_fill, text_stroke_color=text_stroke,
         )
     
