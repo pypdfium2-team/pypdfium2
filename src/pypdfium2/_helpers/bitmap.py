@@ -30,10 +30,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         ``bitmap.close()``, which frees the buffer of foreign bitmaps, is not validated for safety.
         A bitmap must not be closed while other objects still depend on its buffer!
     
-    Hint:
-        This class provides built-in converters (e. g. :meth:`.to_pil`, :meth:`.to_numpy`) that may be used to create a different representation of the bitmap.
-        Converters may be applied on :class:`.PdfBitmap` objects either as bound method (``bitmap.to_*()``), or as function (``PdfBitmap.to_*(bitmap)``)
-    
     .. _PIL Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
     
     Attributes:
@@ -56,6 +52,10 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             Number of channels per pixel.
         mode (str):
             The bitmap format as string (see `PIL Modes`_).
+    
+    Hint:
+        If descriptive attributes are needed beyond the scope of the original bitmap buffer,
+        be sure to detach them from them bitmap, to avoid holding the buffer in memory unnecessarily.
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):

@@ -6,6 +6,7 @@ __all__ = ("PdfPage", "PdfColorScheme", "PdfPosConv")
 import math
 import ctypes
 import logging
+import weakref
 import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -426,11 +427,10 @@ class PdfPage (pdfium_i.AutoCloseable):
         if color_scheme and fill_to_stroke:
             flags |= pdfium_r.FPDF_CONVERT_FILL_TO_STROKE
         
-        pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(0, 0, width, height, fill_color)
-        bitmap._pos_args = pos_args
         
+        pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
         render_args = (bitmap, self, *pos_args, flags)
         
         if color_scheme is None:
@@ -448,41 +448,8 @@ class PdfPage (pdfium_i.AutoCloseable):
         if may_draw_forms and self.formenv:
             pdfium_r.FPDF_FFLDraw(self.formenv, *render_args)
         
+        bitmap._pos_args = (weakref.ref(self), *pos_args)
         return bitmap
-
-
-class PdfPosConv:
-    """
-    Pdf coordinate translator.
-    
-    Parameters:
-        page (PdfPage):
-            TODO
-        bitmap (PdfBitmap):
-            TODO
-    """
-    
-    # TODO add to test suite
-    
-    def __init__(self, page, bitmap):
-        if not bitmap._pos_args:
-            raise RuntimeError("This bitmap was not rendered from a page.")
-        self.page = page
-        self._args = bitmap._pos_args
-    
-    def to_page(self, bitmap_x, bitmap_y):
-        page_x, page_y = ctypes.c_double(), ctypes.c_double()
-        ok = pdfium_r.FPDF_DeviceToPage(self.page, *self._args, bitmap_x, bitmap_y, page_x, page_y)
-        if not ok:
-            raise PdfiumError("Failed to translate to page coordinates.")
-        return (page_x.value, page_y.value)
-    
-    def to_bitmap(self, page_x, page_y):
-        bitmap_x, bitmap_y = ctypes.c_int(), ctypes.c_int()
-        ok = pdfium_r.FPDF_PageToDevice(self.page, *self._args, page_x, page_y, bitmap_x, bitmap_y)
-        if not ok:
-            raise PdfiumError("Failed to translate to bitmap coordinates.")
-        return (bitmap_x.value, bitmap_y.value)
 
 
 def _auto_bitmap_format(fill_color, grayscale, prefer_bgrx):
@@ -549,6 +516,55 @@ def _parse_renderopts(
     
     # CONSIDER using a namedtuple or something
     return cl_format, rev_byteorder, fill_color, flags
+
+
+class PdfPosConv:
+    """
+    Pdf coordinate translator.
+    
+    Parameters:
+        page (PdfPage):
+            Handle to the page.
+        bitmap (PdfBitmap):
+            Handle to the bitmap, which must be a rendering of *page*.
+    """
+    
+    # TODO add to test suite
+    
+    def __init__(self, page, bitmap):
+        
+        if not bitmap._pos_args:
+            raise RuntimeError("This bitmap does not belong to a page.")
+        
+        assert page is not None
+        orig_page = bitmap._pos_args[0]()
+        if orig_page is not page:
+            raise RuntimeError("This bitmap was not rendered from the given page.")
+        
+        self.page = page
+        self._args = bitmap._pos_args[1:]
+    
+    
+    def to_page(self, bitmap_x, bitmap_y):
+        """
+        Translate coordinates from bitmap to page.
+        """
+        page_x, page_y = ctypes.c_double(), ctypes.c_double()
+        ok = pdfium_r.FPDF_DeviceToPage(self.page, *self._args, bitmap_x, bitmap_y, page_x, page_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to page coordinates.")
+        return (page_x.value, page_y.value)
+    
+    
+    def to_bitmap(self, page_x, page_y):
+        """
+        Translate coordinates from page to bitmap.
+        """
+        bitmap_x, bitmap_y = ctypes.c_int(), ctypes.c_int()
+        ok = pdfium_r.FPDF_PageToDevice(self.page, *self._args, page_x, page_y, bitmap_x, bitmap_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to bitmap coordinates.")
+        return (bitmap_x.value, bitmap_y.value)
 
 
 class PdfColorScheme:
