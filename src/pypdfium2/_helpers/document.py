@@ -28,6 +28,8 @@ from pypdfium2._helpers.attachment import PdfAttachment
 logger = logging.getLogger(__name__)
 
 
+# TODO rollback: remove support for non-native input types. Handle them in the CLI instead.
+
 class PdfDocument (pdfium_i.AutoCloseable):
     """
     Document helper class.

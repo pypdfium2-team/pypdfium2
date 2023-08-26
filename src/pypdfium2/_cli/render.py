@@ -227,13 +227,12 @@ def attach(parser):
         title = "Post processing",
         description = "Options to post-process rendered images. Note that this may have a strongly negative impact on performance.",
     )
+    # NOTE It may be possible to implement a smart default dark theme that automatically determines when to use lightness inversion, and whether to exclude images. One could even consider segmentation and selective inversion of page images (e.g. speechbubbles in a comic). However, such advanced logic is definitely out of scope for this project.
     postproc.add_argument(
         "--invert-lightness",
         action = "store_true",
         help = "Invert lightness using the HLS color space (light<->dark, e.g. white<->black, dark_blue<->light_blue). The intent is to achieve a dark theme for documents with light background, while providing better visual results than a forced color scheme or classical color inversion.",
     )
-    # NOTE it may be possible to implement a smart heuristical image exclusion mode
-    # e.g. if there's a single image filling a large part of the page, then we might have a scanned paper that needs to be inverted, while pictures in a device-generated pdf should be excluded
     postproc.add_argument(
         "--exclude-images",
         action = "store_true",
