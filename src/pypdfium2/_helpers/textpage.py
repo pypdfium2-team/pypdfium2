@@ -220,6 +220,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return searcher
 
 
+# TODO(apibreak) consider renaming to PdfTextSearch?
 class PdfTextSearcher (pdfium_i.AutoCloseable):
     """
     Text searcher helper class.

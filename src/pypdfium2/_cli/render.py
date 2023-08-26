@@ -192,10 +192,9 @@ def attach(parser):
         help = "The map function to use (backend specific, the default is an iterative map)."
     )
     
-    # TODO consider deprecation/removal (not useful, see below)
     color_scheme = parser.add_argument_group(
-        title = "PDFium forced color scheme",
-        description = "Options for rendering with forced color scheme. Note that pdfium is problematic here: It takes color params for certain object types and forces them on all instances in question, regardless of their original color, which means different colors are flattened into one (information loss). This can lead to readability issues. For a dark theme, consider using lightness inversion post-processing instead.",
+        title = "Forced color scheme",
+        description = "Options for using pdfium's forced color scheme renderer. Deprecated, considered not useful.",
     )
     color_scheme.add_argument(
         "--sample-theme",

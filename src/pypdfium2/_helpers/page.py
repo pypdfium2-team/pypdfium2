@@ -334,57 +334,79 @@ class PdfPage (pdfium_i.AutoCloseable):
         """
         Rasterize the page to a :class:`.PdfBitmap`.
         
+        Hint:
+            If targetting a PIL image, consider rev_byteorder and prefer_bgrx for a pixel format natively supported by PIL (zero-copy).
+        
         Parameters:
+            
             scale (float):
                 A factor scaling the number of pixels per PDF canvas unit. This defines the resolution of the image.
                 To convert a DPI value to a scale factor, multiply it by the size of 1 canvas unit in inches (usually 1/72in). [#user_unit]_
+            
             rotation (int):
                 Additional rotation in degrees (0, 90, 180, or 270).
+            
             crop (tuple[float, float, float, float]):
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top). Crop is applied after rotation.
+            
             may_draw_forms (bool):
                 If True, render form fields (provided the document has forms and :meth:`~PdfDocument.init_forms` was called).
+            
             bitmap_maker (typing.Callable):
                 Callback function used to create the :class:`.PdfBitmap`.
-            color_scheme (PdfColorScheme | None):
-                An optional, custom rendering color scheme.
-            fill_to_stroke (bool):
-                If True and rendering with custom color scheme, only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.
+            
             fill_color (tuple[int, int, int, int]):
                 Color the bitmap will be filled with before rendering (RGBA values from 0 to 255).
+            
             grayscale (bool):
                 If True, render in grayscale mode.
+            
             optimize_mode (None | str):
                 Page rendering optimization mode (None, "lcd", "print").
+            
             draw_annots (bool):
                 If True, render page annotations.
+            
             no_smoothtext (bool):
                 If True, disable text anti-aliasing. Overrides ``optimize_mode="lcd"``.
+            
             no_smoothimage (bool):
                 If True, disable image anti-aliasing.
+            
             no_smoothpath (bool):
                 If True, disable path anti-aliasing.
+            
             force_halftone (bool):
                 If True, always use halftone for image stretching.
+            
             limit_image_cache (bool):
                 If True, limit image cache size.
+            
             rev_byteorder (bool):
                 If True, render with reverse byte order, leading to ``RGB(A/X)`` output instead of ``BGR(A/X)``.
                 Other pixel formats are not affected.
+            
             prefer_bgrx (bool):
                 If True, prefer four-channel over three-channel pixel formats, even if the alpha byte is unused.
                 Other pixel formats are not affected.
+            
             force_bitmap_format (int | None):
                 If given, override automatic pixel format selection and enforce use of the given format (one of the :attr:`FPDFBitmap_*` constants).
+            
             extra_flags (int):
                 Additional PDFium rendering flags. May be combined with bitwise OR (``|`` operator).
+            
+            color_scheme (PdfColorScheme | None):
+                Deprecated since v5. (An optional, custom rendering color scheme.)
+            
+            fill_to_stroke (bool):
+                Deprecated since v5. (If True and rendering with custom color scheme, only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.)
         
         Returns:
             PdfBitmap: Bitmap of the rendered page.
         
-        Hint:
-            If you target a PIL image, consider setting rev_byteorder and prefer_bgrx to True
-            to achieve a pixel format natively supported by PIL.
+        .. deprecated:: 5
+            *color_scheme* and *fill_to_stroke* considered not useful (see :class:`.PdfColorScheme`)
         
         .. [#user_unit] Since PDF 1.6, pages may define an additional user unit factor. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. PDFium currently does not have an API to get the user unit, so this is not taken into account.
         """
@@ -529,12 +551,16 @@ def _parse_renderopts(
     return cl_format, rev_byteorder, fill_color, flags
 
 
-# TODO consider deprecation/removal (not useful, see CLI help)
-
 class PdfColorScheme:
     """
-    Rendering color scheme.
+    Forced rendering color scheme.
     Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
+    Unspecified params will be transparent.
+    
+    .. deprecated:: 5
+        This API has been considered not useful.
+        PDFium forces the color params on all instances in question, regardless of their original color (flattening, information loss).
+        This commonly leads to readability issues. For a dark theme, consider selective lightness inversion instead.
     """
     
     def __init__(self, path_fill=None, path_stroke=None, text_fill=None, text_stroke=None):
