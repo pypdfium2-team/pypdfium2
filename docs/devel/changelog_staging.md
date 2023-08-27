@@ -31,10 +31,10 @@
   This wraps pdfium's `FPDF_DeviceToPage()` / `FPDF_PageToDevice()` APIs, which are limited to integer device coordinates.
   Generic float based coordinate normalization is not supported yet.
 - `PdfObject`: Added `.get_quad_points()`.
-- `PdfDocument`: Added support for new input types `mmap`, `bytearray`, `memoryview` and `SharedMemory`. See the docs for more info.
 - CLI: Implemented configurable input type for testing.
 - Major CLI renderer improvements:
   * Moved saving from main process into jobs. This avoids unnecessary data transfer and prevents images from queuing up in memory.
+    (multiprocessing continues to produce results without limit regardless of where the receiving iteration may be. If receiving is slower than `task_duration / n_processes`, memory load will steadily increase until the pool has generated all results.)
   * Avoid full state data transfer and object re-initialization for each job. Instead, use a pool initializer and exploit global variables.
     This important improvement also makes bytes input tolerable for parallel rendering.
   * Fixed parallel rendering with byte buffers on Linux by avoiding the process start method `fork`.
@@ -45,11 +45,11 @@
 
 *Rationales*
 - Removal of `PdfDocument.render()`:
-  The parallel rendering API unfortunately was an inherent design mistake:
-  Multiprocessing is not meant to transfer large amounts of pixel data from workers to the main process.
-  Instead, each bitmap should be processed (e.g. saved) in the job which created it.
-  Only a minimal, final result should be sent back to the main process (e.g. a file path).
-  This means we cannot reasonably provide a generic parallel renderer, instead it should be implemented by callers.
-  Apart from that, object re-construction is also better left in the control of callers.
-  pypdfium2's rendering CLI cleanly re-implements parallel rendering to files (fixing further mistakes, see above).
-  We are considering if this use case could eventually be turned into an API.
+  * The parallel rendering API unfortunately was an inherent design mistake:
+    Multiprocessing is not meant to transfer large amounts of pixel data from workers to the main process.
+  * Instead, each bitmap should be processed (e.g. saved) in the job which created it.
+    Only a minimal, final result should be sent back to the main process (e.g. a file path).
+  * This means we cannot reasonably provide a generic parallel renderer, instead it should be implemented by callers.
+    Apart from that, object re-construction is also better left in the control of callers.
+  * pypdfium2's rendering CLI cleanly re-implements parallel rendering to files (fixing further mistakes, see above).
+    We are considering if this use case could eventually be turned into an API.
