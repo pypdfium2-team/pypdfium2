@@ -9,7 +9,8 @@ on:
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   # https://crontab.guru/
   schedule:
-    - cron: '0 4 * * 2'
+    # - cron: '0 4 * * 2'
+    - cron: '0 4 10 * *'
   workflow_dispatch:
 
 defaults:
