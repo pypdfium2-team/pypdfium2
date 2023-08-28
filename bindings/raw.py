@@ -32,20 +32,6 @@ def _get_ptrdiff_t():
 c_ptrdiff_t = _get_ptrdiff_t()
 
 
-# As of ctypes 1.0, ctypes does not support custom error-checking
-# functions on callbacks, nor does it support custom datatypes on
-# callbacks, so we must ensure that all callbacks return
-# primitive datatypes.
-#
-# Non-primitive return values wrapped with UNCHECKED won't be
-# typechecked, and will be converted to ctypes.c_void_p.
-def UNCHECKED(type):
-    if hasattr(type, "_type_") and isinstance(type._type_, str) and type._type_ != "P":
-        return type
-    else:
-        return ctypes.c_void_p
-
-
 # ctypes doesn't have direct support for variadic functions, so we have to write
 # our own wrapper class
 class _variadic_function(object):
@@ -812,7 +798,7 @@ struct_anon_4.__slots__ = [
 ]
 struct_anon_4._fields_ = [
     ('m_FileLen', c_ulong),
-    ('m_GetBlock', CFUNCTYPE(UNCHECKED(c_int), POINTER(None), c_ulong, POINTER(c_ubyte), c_ulong)),
+    ('m_GetBlock', CFUNCTYPE(c_int, POINTER(None), c_ulong, POINTER(c_ubyte), c_ulong)),
     ('m_Param', POINTER(None)),
 ]
 FPDF_FILEACCESS = struct_anon_4
@@ -830,12 +816,12 @@ struct_FPDF_FILEHANDLER_.__slots__ = [
 ]
 struct_FPDF_FILEHANDLER_._fields_ = [
     ('clientData', POINTER(None)),
-    ('Release', CFUNCTYPE(UNCHECKED(None), POINTER(None))),
-    ('GetSize', CFUNCTYPE(UNCHECKED(FPDF_DWORD), POINTER(None))),
-    ('ReadBlock', CFUNCTYPE(UNCHECKED(FPDF_RESULT), POINTER(None), FPDF_DWORD, POINTER(None), FPDF_DWORD)),
-    ('WriteBlock', CFUNCTYPE(UNCHECKED(FPDF_RESULT), POINTER(None), FPDF_DWORD, POINTER(None), FPDF_DWORD)),
-    ('Flush', CFUNCTYPE(UNCHECKED(FPDF_RESULT), POINTER(None))),
-    ('Truncate', CFUNCTYPE(UNCHECKED(FPDF_RESULT), POINTER(None), FPDF_DWORD)),
+    ('Release', CFUNCTYPE(None, POINTER(None))),
+    ('GetSize', CFUNCTYPE(FPDF_DWORD, POINTER(None))),
+    ('ReadBlock', CFUNCTYPE(FPDF_RESULT, POINTER(None), FPDF_DWORD, POINTER(None), FPDF_DWORD)),
+    ('WriteBlock', CFUNCTYPE(FPDF_RESULT, POINTER(None), FPDF_DWORD, POINTER(None), FPDF_DWORD)),
+    ('Flush', CFUNCTYPE(FPDF_RESULT, POINTER(None))),
+    ('Truncate', CFUNCTYPE(FPDF_RESULT, POINTER(None), FPDF_DWORD)),
 ]
 FPDF_FILEHANDLER = struct_FPDF_FILEHANDLER_
 
@@ -1095,21 +1081,21 @@ struct__IPDF_JsPlatform.__slots__ = [
 ]
 struct__IPDF_JsPlatform._fields_ = [
     ('version', c_int),
-    ('app_alert', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__IPDF_JsPlatform), FPDF_WIDESTRING, FPDF_WIDESTRING, c_int, c_int)),
-    ('app_beep', CFUNCTYPE(UNCHECKED(None), POINTER(struct__IPDF_JsPlatform), c_int)),
-    ('app_response', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__IPDF_JsPlatform), FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_BOOL, POINTER(None), c_int)),
-    ('Doc_getFilePath', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__IPDF_JsPlatform), POINTER(None), c_int)),
-    ('Doc_mail', CFUNCTYPE(UNCHECKED(None), POINTER(struct__IPDF_JsPlatform), POINTER(None), c_int, FPDF_BOOL, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING)),
-    ('Doc_print', CFUNCTYPE(UNCHECKED(None), POINTER(struct__IPDF_JsPlatform), FPDF_BOOL, c_int, c_int, FPDF_BOOL, FPDF_BOOL, FPDF_BOOL, FPDF_BOOL, FPDF_BOOL)),
-    ('Doc_submitForm', CFUNCTYPE(UNCHECKED(None), POINTER(struct__IPDF_JsPlatform), POINTER(None), c_int, FPDF_WIDESTRING)),
-    ('Doc_gotoPage', CFUNCTYPE(UNCHECKED(None), POINTER(struct__IPDF_JsPlatform), c_int)),
-    ('Field_browse', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__IPDF_JsPlatform), POINTER(None), c_int)),
+    ('app_alert', CFUNCTYPE(c_int, POINTER(struct__IPDF_JsPlatform), FPDF_WIDESTRING, FPDF_WIDESTRING, c_int, c_int)),
+    ('app_beep', CFUNCTYPE(None, POINTER(struct__IPDF_JsPlatform), c_int)),
+    ('app_response', CFUNCTYPE(c_int, POINTER(struct__IPDF_JsPlatform), FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_BOOL, POINTER(None), c_int)),
+    ('Doc_getFilePath', CFUNCTYPE(c_int, POINTER(struct__IPDF_JsPlatform), POINTER(None), c_int)),
+    ('Doc_mail', CFUNCTYPE(None, POINTER(struct__IPDF_JsPlatform), POINTER(None), c_int, FPDF_BOOL, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING)),
+    ('Doc_print', CFUNCTYPE(None, POINTER(struct__IPDF_JsPlatform), FPDF_BOOL, c_int, c_int, FPDF_BOOL, FPDF_BOOL, FPDF_BOOL, FPDF_BOOL, FPDF_BOOL)),
+    ('Doc_submitForm', CFUNCTYPE(None, POINTER(struct__IPDF_JsPlatform), POINTER(None), c_int, FPDF_WIDESTRING)),
+    ('Doc_gotoPage', CFUNCTYPE(None, POINTER(struct__IPDF_JsPlatform), c_int)),
+    ('Field_browse', CFUNCTYPE(c_int, POINTER(struct__IPDF_JsPlatform), POINTER(None), c_int)),
     ('m_pFormfillinfo', POINTER(None)),
     ('m_isolate', POINTER(None)),
     ('m_v8EmbedderSlot', c_uint),
 ]
 IPDF_JSPLATFORM = struct__IPDF_JsPlatform
-TimerCallback = CFUNCTYPE(UNCHECKED(None), c_int)
+TimerCallback = CFUNCTYPE(None, c_int)
 
 class struct__FPDF_SYSTEMTIME(Structure):
     pass
@@ -1176,40 +1162,40 @@ struct__FPDF_FORMFILLINFO.__slots__ = [
 ]
 struct__FPDF_FORMFILLINFO._fields_ = [
     ('version', c_int),
-    ('Release', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO))),
-    ('FFI_Invalidate', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, c_double, c_double, c_double, c_double)),
-    ('FFI_OutputSelectedRect', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, c_double, c_double, c_double, c_double)),
-    ('FFI_SetCursor', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), c_int)),
-    ('FFI_SetTimer', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__FPDF_FORMFILLINFO), c_int, TimerCallback)),
-    ('FFI_KillTimer', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), c_int)),
-    ('FFI_GetLocalTime', CFUNCTYPE(UNCHECKED(FPDF_SYSTEMTIME), POINTER(struct__FPDF_FORMFILLINFO))),
-    ('FFI_OnChange', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO))),
-    ('FFI_GetPage', CFUNCTYPE(UNCHECKED(FPDF_PAGE), POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT, c_int)),
-    ('FFI_GetCurrentPage', CFUNCTYPE(UNCHECKED(FPDF_PAGE), POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT)),
-    ('FFI_GetRotation', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE)),
-    ('FFI_ExecuteNamedAction', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_BYTESTRING)),
-    ('FFI_SetTextFieldFocus', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_WIDESTRING, FPDF_DWORD, FPDF_BOOL)),
-    ('FFI_DoURIAction', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_BYTESTRING)),
-    ('FFI_DoGoToAction', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), c_int, c_int, POINTER(c_float), c_int)),
+    ('Release', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO))),
+    ('FFI_Invalidate', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, c_double, c_double, c_double, c_double)),
+    ('FFI_OutputSelectedRect', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, c_double, c_double, c_double, c_double)),
+    ('FFI_SetCursor', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), c_int)),
+    ('FFI_SetTimer', CFUNCTYPE(c_int, POINTER(struct__FPDF_FORMFILLINFO), c_int, TimerCallback)),
+    ('FFI_KillTimer', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), c_int)),
+    ('FFI_GetLocalTime', CFUNCTYPE(FPDF_SYSTEMTIME, POINTER(struct__FPDF_FORMFILLINFO))),
+    ('FFI_OnChange', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO))),
+    ('FFI_GetPage', CFUNCTYPE(FPDF_PAGE, POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT, c_int)),
+    ('FFI_GetCurrentPage', CFUNCTYPE(FPDF_PAGE, POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT)),
+    ('FFI_GetRotation', CFUNCTYPE(c_int, POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE)),
+    ('FFI_ExecuteNamedAction', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_BYTESTRING)),
+    ('FFI_SetTextFieldFocus', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_WIDESTRING, FPDF_DWORD, FPDF_BOOL)),
+    ('FFI_DoURIAction', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_BYTESTRING)),
+    ('FFI_DoGoToAction', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), c_int, c_int, POINTER(c_float), c_int)),
     ('m_pJsPlatform', POINTER(IPDF_JSPLATFORM)),
     ('xfa_disabled', FPDF_BOOL),
-    ('FFI_DisplayCaret', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, FPDF_BOOL, c_double, c_double, c_double, c_double)),
-    ('FFI_GetCurrentPageIndex', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT)),
-    ('FFI_SetCurrentPage', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT, c_int)),
-    ('FFI_GotoURL', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT, FPDF_WIDESTRING)),
-    ('FFI_GetPageViewRect', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double))),
-    ('FFI_PageEvent', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), c_int, FPDF_DWORD)),
-    ('FFI_PopupMenu', CFUNCTYPE(UNCHECKED(FPDF_BOOL), POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, FPDF_WIDGET, c_int, c_float, c_float)),
-    ('FFI_OpenFile', CFUNCTYPE(UNCHECKED(POINTER(FPDF_FILEHANDLER)), POINTER(struct__FPDF_FORMFILLINFO), c_int, FPDF_WIDESTRING, POINTER(c_char))),
-    ('FFI_EmailTo', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), POINTER(FPDF_FILEHANDLER), FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING)),
-    ('FFI_UploadTo', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), POINTER(FPDF_FILEHANDLER), c_int, FPDF_WIDESTRING)),
-    ('FFI_GetPlatform', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__FPDF_FORMFILLINFO), POINTER(None), c_int)),
-    ('FFI_GetLanguage', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__FPDF_FORMFILLINFO), POINTER(None), c_int)),
-    ('FFI_DownloadFromURL', CFUNCTYPE(UNCHECKED(POINTER(FPDF_FILEHANDLER)), POINTER(struct__FPDF_FORMFILLINFO), FPDF_WIDESTRING)),
-    ('FFI_PostRequestURL', CFUNCTYPE(UNCHECKED(FPDF_BOOL), POINTER(struct__FPDF_FORMFILLINFO), FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, POINTER(FPDF_BSTR))),
-    ('FFI_PutRequestURL', CFUNCTYPE(UNCHECKED(FPDF_BOOL), POINTER(struct__FPDF_FORMFILLINFO), FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING)),
-    ('FFI_OnFocusChange', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_ANNOTATION, c_int)),
-    ('FFI_DoURIActionWithKeyboardModifier', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_FORMFILLINFO), FPDF_BYTESTRING, c_int)),
+    ('FFI_DisplayCaret', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, FPDF_BOOL, c_double, c_double, c_double, c_double)),
+    ('FFI_GetCurrentPageIndex', CFUNCTYPE(c_int, POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT)),
+    ('FFI_SetCurrentPage', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT, c_int)),
+    ('FFI_GotoURL', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_DOCUMENT, FPDF_WIDESTRING)),
+    ('FFI_GetPageViewRect', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double))),
+    ('FFI_PageEvent', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), c_int, FPDF_DWORD)),
+    ('FFI_PopupMenu', CFUNCTYPE(FPDF_BOOL, POINTER(struct__FPDF_FORMFILLINFO), FPDF_PAGE, FPDF_WIDGET, c_int, c_float, c_float)),
+    ('FFI_OpenFile', CFUNCTYPE(POINTER(FPDF_FILEHANDLER), POINTER(struct__FPDF_FORMFILLINFO), c_int, FPDF_WIDESTRING, POINTER(c_char))),
+    ('FFI_EmailTo', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), POINTER(FPDF_FILEHANDLER), FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING)),
+    ('FFI_UploadTo', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), POINTER(FPDF_FILEHANDLER), c_int, FPDF_WIDESTRING)),
+    ('FFI_GetPlatform', CFUNCTYPE(c_int, POINTER(struct__FPDF_FORMFILLINFO), POINTER(None), c_int)),
+    ('FFI_GetLanguage', CFUNCTYPE(c_int, POINTER(struct__FPDF_FORMFILLINFO), POINTER(None), c_int)),
+    ('FFI_DownloadFromURL', CFUNCTYPE(POINTER(FPDF_FILEHANDLER), POINTER(struct__FPDF_FORMFILLINFO), FPDF_WIDESTRING)),
+    ('FFI_PostRequestURL', CFUNCTYPE(FPDF_BOOL, POINTER(struct__FPDF_FORMFILLINFO), FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING, POINTER(FPDF_BSTR))),
+    ('FFI_PutRequestURL', CFUNCTYPE(FPDF_BOOL, POINTER(struct__FPDF_FORMFILLINFO), FPDF_WIDESTRING, FPDF_WIDESTRING, FPDF_WIDESTRING)),
+    ('FFI_OnFocusChange', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_ANNOTATION, c_int)),
+    ('FFI_DoURIActionWithKeyboardModifier', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_BYTESTRING, c_int)),
 ]
 FPDF_FORMFILLINFO = struct__FPDF_FORMFILLINFO
 
@@ -1795,7 +1781,7 @@ struct__FX_FILEAVAIL.__slots__ = [
 ]
 struct__FX_FILEAVAIL._fields_ = [
     ('version', c_int),
-    ('IsDataAvail', CFUNCTYPE(UNCHECKED(FPDF_BOOL), POINTER(struct__FX_FILEAVAIL), c_size_t, c_size_t)),
+    ('IsDataAvail', CFUNCTYPE(FPDF_BOOL, POINTER(struct__FX_FILEAVAIL), c_size_t, c_size_t)),
 ]
 FX_FILEAVAIL = struct__FX_FILEAVAIL
 
@@ -1817,7 +1803,7 @@ struct__FX_DOWNLOADHINTS.__slots__ = [
 ]
 struct__FX_DOWNLOADHINTS._fields_ = [
     ('version', c_int),
-    ('AddSegment', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FX_DOWNLOADHINTS), c_size_t, c_size_t)),
+    ('AddSegment', CFUNCTYPE(None, POINTER(struct__FX_DOWNLOADHINTS), c_size_t, c_size_t)),
 ]
 FX_DOWNLOADHINTS = struct__FX_DOWNLOADHINTS
 
@@ -2577,7 +2563,7 @@ struct__UNSUPPORT_INFO.__slots__ = [
 ]
 struct__UNSUPPORT_INFO._fields_ = [
     ('version', c_int),
-    ('FSDK_UnSupport_Handler', CFUNCTYPE(UNCHECKED(None), POINTER(struct__UNSUPPORT_INFO), c_int)),
+    ('FSDK_UnSupport_Handler', CFUNCTYPE(None, POINTER(struct__UNSUPPORT_INFO), c_int)),
 ]
 UNSUPPORT_INFO = struct__UNSUPPORT_INFO
 
@@ -2588,12 +2574,12 @@ if _libs["pdfium"].has("FSDK_SetUnSpObjProcessHandler", "cdecl"):
 
 if _libs["pdfium"].has("FSDK_SetTimeFunction", "cdecl"):
     FSDK_SetTimeFunction = _libs["pdfium"].get("FSDK_SetTimeFunction", "cdecl")
-    FSDK_SetTimeFunction.argtypes = [CFUNCTYPE(UNCHECKED(time_t), )]
+    FSDK_SetTimeFunction.argtypes = [CFUNCTYPE(time_t, )]
     FSDK_SetTimeFunction.restype = None
 
 if _libs["pdfium"].has("FSDK_SetLocaltimeFunction", "cdecl"):
     FSDK_SetLocaltimeFunction = _libs["pdfium"].get("FSDK_SetLocaltimeFunction", "cdecl")
-    FSDK_SetLocaltimeFunction.argtypes = [CFUNCTYPE(UNCHECKED(POINTER(struct_tm)), POINTER(time_t))]
+    FSDK_SetLocaltimeFunction.argtypes = [CFUNCTYPE(POINTER(struct_tm), POINTER(time_t))]
     FSDK_SetLocaltimeFunction.restype = None
 
 if _libs["pdfium"].has("FPDFDoc_GetPageMode", "cdecl"):
@@ -2857,7 +2843,7 @@ struct__IFSDK_PAUSE.__slots__ = [
 ]
 struct__IFSDK_PAUSE._fields_ = [
     ('version', c_int),
-    ('NeedToPauseNow', CFUNCTYPE(UNCHECKED(FPDF_BOOL), POINTER(struct__IFSDK_PAUSE))),
+    ('NeedToPauseNow', CFUNCTYPE(FPDF_BOOL, POINTER(struct__IFSDK_PAUSE))),
     ('user', POINTER(None)),
 ]
 IFSDK_PAUSE = struct__IFSDK_PAUSE
@@ -2890,7 +2876,7 @@ struct_FPDF_FILEWRITE_.__slots__ = [
 ]
 struct_FPDF_FILEWRITE_._fields_ = [
     ('version', c_int),
-    ('WriteBlock', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct_FPDF_FILEWRITE_), POINTER(None), c_ulong)),
+    ('WriteBlock', CFUNCTYPE(c_int, POINTER(struct_FPDF_FILEWRITE_), POINTER(None), c_ulong)),
 ]
 FPDF_FILEWRITE = struct_FPDF_FILEWRITE_
 
@@ -3104,14 +3090,14 @@ struct__FPDF_SYSFONTINFO.__slots__ = [
 ]
 struct__FPDF_SYSFONTINFO._fields_ = [
     ('version', c_int),
-    ('Release', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_SYSFONTINFO))),
-    ('EnumFonts', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_SYSFONTINFO), POINTER(None))),
-    ('MapFont', CFUNCTYPE(UNCHECKED(POINTER(c_ubyte)), POINTER(struct__FPDF_SYSFONTINFO), c_int, FPDF_BOOL, c_int, c_int, POINTER(c_char), POINTER(FPDF_BOOL))),
-    ('GetFont', CFUNCTYPE(UNCHECKED(POINTER(c_ubyte)), POINTER(struct__FPDF_SYSFONTINFO), POINTER(c_char))),
-    ('GetFontData', CFUNCTYPE(UNCHECKED(c_ulong), POINTER(struct__FPDF_SYSFONTINFO), POINTER(None), c_uint, POINTER(c_ubyte), c_ulong)),
-    ('GetFaceName', CFUNCTYPE(UNCHECKED(c_ulong), POINTER(struct__FPDF_SYSFONTINFO), POINTER(None), POINTER(c_char), c_ulong)),
-    ('GetFontCharset', CFUNCTYPE(UNCHECKED(c_int), POINTER(struct__FPDF_SYSFONTINFO), POINTER(None))),
-    ('DeleteFont', CFUNCTYPE(UNCHECKED(None), POINTER(struct__FPDF_SYSFONTINFO), POINTER(None))),
+    ('Release', CFUNCTYPE(None, POINTER(struct__FPDF_SYSFONTINFO))),
+    ('EnumFonts', CFUNCTYPE(None, POINTER(struct__FPDF_SYSFONTINFO), POINTER(None))),
+    ('MapFont', CFUNCTYPE(POINTER(c_ubyte), POINTER(struct__FPDF_SYSFONTINFO), c_int, FPDF_BOOL, c_int, c_int, POINTER(c_char), POINTER(FPDF_BOOL))),
+    ('GetFont', CFUNCTYPE(POINTER(c_ubyte), POINTER(struct__FPDF_SYSFONTINFO), POINTER(c_char))),
+    ('GetFontData', CFUNCTYPE(c_ulong, POINTER(struct__FPDF_SYSFONTINFO), POINTER(None), c_uint, POINTER(c_ubyte), c_ulong)),
+    ('GetFaceName', CFUNCTYPE(c_ulong, POINTER(struct__FPDF_SYSFONTINFO), POINTER(None), POINTER(c_char), c_ulong)),
+    ('GetFontCharset', CFUNCTYPE(c_int, POINTER(struct__FPDF_SYSFONTINFO), POINTER(None))),
+    ('DeleteFont', CFUNCTYPE(None, POINTER(struct__FPDF_SYSFONTINFO), POINTER(None))),
 ]
 FPDF_SYSFONTINFO = struct__FPDF_SYSFONTINFO
 
@@ -3176,6 +3162,11 @@ if _libs["pdfium"].has("FPDFText_IsGenerated", "cdecl"):
     FPDFText_IsGenerated = _libs["pdfium"].get("FPDFText_IsGenerated", "cdecl")
     FPDFText_IsGenerated.argtypes = [FPDF_TEXTPAGE, c_int]
     FPDFText_IsGenerated.restype = c_int
+
+if _libs["pdfium"].has("FPDFText_IsHyphen", "cdecl"):
+    FPDFText_IsHyphen = _libs["pdfium"].get("FPDFText_IsHyphen", "cdecl")
+    FPDFText_IsHyphen.argtypes = [FPDF_TEXTPAGE, c_int]
+    FPDFText_IsHyphen.restype = c_int
 
 if _libs["pdfium"].has("FPDFText_HasUnicodeMapError", "cdecl"):
     FPDFText_HasUnicodeMapError = _libs["pdfium"].get("FPDFText_HasUnicodeMapError", "cdecl")

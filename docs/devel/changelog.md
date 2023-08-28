@@ -7,6 +7,15 @@
 # Changelog
 
 
+## 4.19.0 (2023-08-28)
+
+- Updated PDFium from `5868` to `5975`.
+- Reset main branch to stable and shifted v5 development to a branch, so that pdfium updates (and possibly bug fixes) can still be handled.
+  v5 development is delayed and unexpectedly tough, so this seemed necessary.
+  The automated schedule has been slowed down from weekly to monthly for the time being.
+  Further manual releases may be triggered as necessary.
+
+
 ## 4.18.0 (2023-07-04)
 
 - Updated PDFium from `5854` to `5868`.
