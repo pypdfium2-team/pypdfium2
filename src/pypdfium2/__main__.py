@@ -33,7 +33,7 @@ def get_parser():
     main_parser.add_argument(
         "--version", "-v",
         action = "version",
-        version = f"pypdfium2 {V_PYPDFIUM2} (libpdfium {V_LIBPDFIUM}, {V_BUILDNAME} {'V8' if V_PDFIUM_IS_V8 else 'default'} build)",
+        version = f"pypdfium2 {V_PYPDFIUM2} (libpdfium {V_LIBPDFIUM_FULL}, {V_BUILDNAME} {'V8' if V_PDFIUM_IS_V8 else 'default'} build)",
     )
     subparsers = main_parser.add_subparsers(dest="subcommand")
     

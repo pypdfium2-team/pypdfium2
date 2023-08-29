@@ -26,6 +26,7 @@ from pypdfium2_setup.packaging_base import (
     clean_platfiles,
     emplace_platfiles,
     get_latest_version,
+    read_version_file,
 )
 
 
@@ -68,7 +69,7 @@ def get_pdfium(binary_spec):
     
     prev_ver = None
     if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
-        prev_ver = int( ver_file.read_text().strip() )
+        prev_ver = int( read_version_file(ver_file)[0] )
     
     if prev_ver != req_ver or had_v8 != use_v8:
         print(f"Switching pdfium binary from ({prev_ver}, v8 {had_v8}) to ({req_ver}, v8 {use_v8})", file=sys.stderr)

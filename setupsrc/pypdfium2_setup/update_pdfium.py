@@ -22,6 +22,7 @@ from pypdfium2_setup.packaging_base import (
     BinaryPlatforms,
     ReleaseURL,
     get_latest_version,
+    get_full_version,
     call_ctypesgen,
 )
 
@@ -81,6 +82,11 @@ def unpack_archives(archives):
         archive_path.unlink()
 
 
+def write_version_file(path, v_short):
+    v_short = str(v_short)
+    path.write_text(v_short + "\n" + get_full_version(v_short))
+
+
 def generate_bindings(archives, version, use_v8):
     
     for pl_name in archives.keys():
@@ -105,7 +111,7 @@ def generate_bindings(archives, version, use_v8):
         shutil.move(bin_dir/items[0], pl_dir/target_name)
         
         ver_file = DataTree / pl_name / VerStatusFileName
-        ver_file.write_text(str(version))
+        write_version_file(ver_file, version)
         if use_v8:
             (pl_dir / V8StatusFileName).touch(exist_ok=True)
         

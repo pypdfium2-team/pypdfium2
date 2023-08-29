@@ -146,8 +146,8 @@ def get_pdfium_version():
 
 
 def update_version(v_libpdfium):
-    ver_file = OutputDir / VerStatusFileName
-    ver_file.write_text( str(v_libpdfium) )
+    # full version unknown
+    (OutputDir / VerStatusFileName).write_text( str(v_libpdfium) )
 
 
 def _create_resources_rc(v_libpdfium):

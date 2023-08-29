@@ -4,12 +4,15 @@
 # No external dependencies shall be imported in this file
 # TODO improve consistency of variable names; think about variables to move in/out
 
+import re
 import sys
+import json
 import shutil
 import platform
 import sysconfig
 import subprocess
 from pathlib import Path
+import urllib.request as url_request
 
 
 VerStatusFileName = ".pdfium_version.txt"
@@ -36,11 +39,12 @@ PlatformTarget_None    = "none"  # sdist
 PlatformTarget_Auto    = "auto"  # host
 VersionTarget_Latest   = "latest"
 
-RepositoryURL     = "https://github.com/pypdfium2-team/pypdfium2"
-PDFium_URL        = "https://pdfium.googlesource.com/pdfium"
-DepotTools_URL    = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
-ReleaseRepo       = "https://github.com/bblanchon/pdfium-binaries"
-ReleaseURL        = ReleaseRepo + "/releases/download/chromium%2F"
+RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
+PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
+DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
+ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
+ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 
 # figure out whether our pypdfium2-specific fork of ctypesgen is installed
@@ -227,6 +231,22 @@ def get_latest_version():
     return int( tag.split("/")[-1] )
 
 
+def get_full_version(v_short):
+    info = url_request.urlopen(ReleaseInfoURL+v_short).read().decode("utf-8")
+    info = json.loads(info)
+    title = info["name"]
+    match = re.match(f"PDFium (\d+.\d+.{v_short}.\d+)", title)
+    return match.group(1)
+
+
+def read_version_file(path):
+    ver_info = path.read_text().strip().split("\n")
+    if len(ver_info) == 1:
+        ver_info.append("")
+    assert len(ver_info) == 2
+    return tuple(ver_info)
+
+
 def call_ctypesgen(target_dir, include_dir, have_v8xfa=False):
     
     # see https://github.com/ctypesgen/ctypesgen/issues/160
@@ -283,7 +303,7 @@ def emplace_platfiles(pl_name):
         raise RuntimeError(f"Missing PDFium version file for {pl_name}")
     
     ver_changes = dict()
-    ver_changes["V_LIBPDFIUM"] = ver_file.read_text().strip()
+    ver_changes["V_LIBPDFIUM"], ver_changes["V_LIBPDFIUM_FULL"] = read_version_file(ver_file)
     ver_changes["V_BUILDNAME"] = "source" if pl_name == PlatformNames.sourcebuild else "pdfium-binaries"
     ver_changes["V_PDFIUM_IS_V8"] = (pl_dir / V8StatusFileName).exists()
     set_versions(ver_changes)
