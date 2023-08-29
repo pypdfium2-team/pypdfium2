@@ -38,7 +38,7 @@
   * Avoid full state data transfer and object re-initialization for each job. Instead, use a pool initializer and exploit global variables.
     This important improvement also makes bytes input tolerable for parallel rendering.
   * Fixed parallel rendering with byte buffers on Linux by avoiding the process start method `fork`.
-    (Upstream is aware of problems with `fork`. `spawn` will become the default everywhere with Python 3.14)
+    (Upstream has declared problems with `fork`. `spawn` will become the default everywhere with Python 3.14)
   * Implemented miscellaneous new options.
   * Added selective lightness inversion as post-processing feature.
 - Improved setup code.

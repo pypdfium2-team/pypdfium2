@@ -557,10 +557,25 @@ With special platforms and/or code, sometimes unforeseen problems can occur [(ca
 
 
 ## Development
+<!-- TODO wheel tags, maintainer access, GitHub peculiarities -->
 
 This section contains some key information relevant for project maintainers.
 
-<!-- TODO wheel tags, maintainer access, GitHub peculiarities -->
+### Long lines policy
+
+The pypdfium2 code base deliberately does not hard wrap long lines.
+In our opinion, word wrap should always be done dynamically by the displaying editor.
+Dynamic wrapping at column 100 is recommended.
+
+Advantages:
+* Developers do not need to waste time on line wrapping while editing. (Doing this manually can be really annoying, and the results are usually inconsistent.)
+* Highest flexibility regarding window/monitor size.
+
+Configuration in VS Code:
+```
+editor.wordWrap = bounded
+editor.wordWrapColumn = 100
+```
 
 ### Documentation
 
