@@ -508,27 +508,22 @@ As of early 2023, a single developer is author and rightsholder of the code base
 ## Issues
 
 While using pypdfium2, you might encounter bugs or missing features.
-In this case, please file an issue report. Remember to include applicable details such as tracebacks, operating system and CPU architecture, as well as the versions of pypdfium2 and used dependencies.
+In this case, feel free to file an issue. If relevant, include details such as tracebacks, OS and CPU type, as well as the versions of pypdfium2 and used dependencies.
 
-In case your issue could be tracked down to a third-party dependency, we will accompany or conduct subsequent measures.
-
-Here is a roadmap of relevant places:
+Roadmap:
 * pypdfium2
-  - [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues): Initial reports of specific issues.
-    May need to be transferred to other projects if not caused by or fixable in pypdfium2 code alone.
+  - [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues): Initial bug reports and feature requests. May need to be transferred to other projects if not caused by or fixable in pypdfium2 code alone.
   - [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions): General questions and suggestions.
-  - In case you do not want to publicly disclose the issue or your code, you may also contact the maintainers privately via e-mail.
 * PDFium
-  - [Bug tracker](https://bugs.chromium.org/p/pdfium/issues/list): Defects in PDFium.
-    Beware: The bridge between Python and C increases the probability of integration issues or API misuse.
-    The symptoms can often make it look like a PDFium bug while it is not. In some cases, this may be quite difficult to distinguish.
+  - [Bug tracker](https://bugs.chromium.org/p/pdfium/issues/list): Issues in PDFium.
+    Beware: The bridge between Python and C increases the probability of integration issues or API misuse. The symptoms can often make it look like a PDFium bug while it is not.
   - [Mailing list](https://groups.google.com/g/pdfium/): Questions regarding PDFium usage.
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
 * [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues): Bindings generator.
 
 ### Known limitations
 
-pypdfium2 also has some drawbacks, of which you will be informed below.
+pypdfium2 also has some drawbacks:
 
 #### Incompatibility with CPython 3.7.6 and 3.8.1
 
