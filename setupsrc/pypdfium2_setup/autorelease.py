@@ -17,6 +17,7 @@ from pypdfium2_setup.packaging_base import (
     run_cmd,
     set_versions,
     get_version_ns,
+    get_full_version,
     get_latest_version,
     get_changelog_staging,
     Host,
@@ -91,6 +92,7 @@ def do_versioning(latest):
     if c_updates:
         # denote pdfium update
         ver_changes["V_LIBPDFIUM"] = str(latest)
+        ver_changes["V_LIBPDFIUM_FULL"] = get_full_version( ver_changes["V_LIBPDFIUM"] )
     
     if inc_major:
         # major update
