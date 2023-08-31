@@ -82,12 +82,7 @@ def unpack_archives(archives):
         archive_path.unlink()
 
 
-def write_version_file(path, v_short):
-    v_short = str(v_short)
-    path.write_text(v_short + "\n" + get_full_version(v_short))
-
-
-def generate_bindings(archives, version, use_v8):
+def generate_bindings(archives, version, full_version, use_v8):
     
     for pl_name in archives.keys():
         
@@ -111,7 +106,7 @@ def generate_bindings(archives, version, use_v8):
         shutil.move(bin_dir/items[0], pl_dir/target_name)
         
         ver_file = DataTree / pl_name / VerStatusFileName
-        write_version_file(ver_file, version)
+        ver_file.write_text(f"{version}\n{full_version}")
         if use_v8:
             (pl_dir / V8StatusFileName).touch(exist_ok=True)
         
@@ -127,11 +122,12 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
         platforms = BinaryPlatforms
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
-
+    
+    full_version = get_full_version(version)
     clear_data(platforms)
     archives = download_releases(platforms, version, use_v8, max_workers, robust)
     unpack_archives(archives)
-    generate_bindings(archives, version, use_v8)
+    generate_bindings(archives, version, full_version, use_v8)
 
 
 # low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py
