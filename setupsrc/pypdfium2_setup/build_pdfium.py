@@ -45,7 +45,6 @@ PatchesWindows = [
 DefaultConfig = {
     "is_debug": False,
     "treat_warnings_as_errors": False,
-    # "clang_use_chrome_plugins": False,
     "pdf_is_standalone": True,
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
@@ -60,6 +59,7 @@ SyslibsConfig = {
     "use_system_libpng": True,
     "use_system_zlib": True,
     "use_system_libtiff": True,
+    "clang_use_chrome_plugins": False,
 }
 
 
