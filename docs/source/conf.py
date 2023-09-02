@@ -59,8 +59,8 @@ extensions = [
 issues_github_path = "pypdfium2-team/pypdfium2"
 
 suppress_warnings = [
-    "ref.myst",
     "myst.header",
+    "myst.xref_missing",
 ]
 
 add_module_names = False
