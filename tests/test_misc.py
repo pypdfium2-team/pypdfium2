@@ -4,6 +4,7 @@
 import pytest
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
+from pypdfium2.version import V_PDFIUM_IS_V8
 
 
 @pytest.mark.parametrize(
@@ -39,6 +40,9 @@ def _filter(prefix, skips=[], type=int):
 
 BitmapNsp = _filter("FPDFBitmap_", [pdfium_c.FPDFBitmap_Unknown])
 PageObjNsp = _filter("FPDF_PAGEOBJ_")
+ErrorMapping = pdfium_i.ErrorToStr
+if V_PDFIUM_IS_V8:
+    ErrorMapping.update(pdfium_i.XFAErrorToStr)
 
 
 @pytest.mark.parametrize(
@@ -55,7 +59,7 @@ PageObjNsp = _filter("FPDF_PAGEOBJ_")
         (pdfium_i.ObjectTypeToStr,         True,  PageObjNsp),
         (pdfium_i.ObjectTypeToConst,       False, PageObjNsp),
         (pdfium_i.PageModeToStr,           True,  _filter("PAGEMODE_")),
-        (pdfium_i.ErrorToStr,              True,  _filter("FPDF_ERR_")),
+        (ErrorMapping,                     True,  _filter("FPDF_ERR_")),
         (pdfium_i.UnsupportedInfoToStr,    True,  _filter("FPDF_UNSP_")),
     ]
 )

@@ -60,9 +60,6 @@ def _get_package(pl_name, version, robust, use_v8):
         else:
             raise
     
-    if use_v8:
-        (pl_dir / V8StatusFileName).touch(exist_ok=True)
-    
     return pl_name, fp
 
 
@@ -103,7 +100,7 @@ def unpack_archives(archives):
         fp.unlink()
 
 
-def generate_bindings(archives, version):
+def generate_bindings(archives, version, use_v8):
     
     for pl_name in archives.keys():
         
@@ -128,8 +125,10 @@ def generate_bindings(archives, version):
         
         ver_file = DataTree / pl_name / VerStatusFileName
         ver_file.write_text(str(version))
+        if use_v8:
+            (pl_dir / V8StatusFileName).touch(exist_ok=True)
         
-        call_ctypesgen(pl_dir, build_dir/"include")
+        call_ctypesgen(pl_dir, build_dir/"include", use_v8)
         shutil.rmtree(build_dir)
 
 
@@ -152,7 +151,7 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, 
     clear_data(platforms)
     archives = download_releases(version, platforms, robust, max_workers, use_v8)
     unpack_archives(archives)
-    generate_bindings(archives, version)
+    generate_bindings(archives, version, use_v8)
     
     if emplace:
         emplace_platfiles(Host.platform)
