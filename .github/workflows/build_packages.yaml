@@ -79,8 +79,8 @@ jobs:
       - name: Install pypdfium2
         run: python3 -m pip install --no-build-isolation -e .
       
-      - name: Run test suite
-        run: ./run test
+      # - name: Run test suite
+      #   run: ./run test
       
       - name: Run packaging script
         run: ./run packaging
@@ -97,9 +97,9 @@ jobs:
           name: packages
           path: dist/*
       
-      # tag deliberately not pushed (see above)
-      - name: Push autorelease_tmp branch
-        run: git push -u origin autorelease_tmp
+      # # tag deliberately not pushed (see above)
+      # - name: Push autorelease_tmp branch
+      #   run: git push -u origin autorelease_tmp
   
   
   test:
@@ -184,34 +184,34 @@ jobs:
         with:
           name: release_notes
       
-      - name: Apply and push repository changes
-        run: |
-          git config user.email "geisserml@gmail.com"
-          git config user.name "geisserml"
-          git checkout main
-          git merge origin/autorelease_tmp
-          git tag -a ${{ needs.build.outputs.new_version }} -m "Autorelease"
-          git push
-          git push --tags
-          git checkout stable
-          git reset --hard main
-          git push --force
-          git checkout main
+      # - name: Apply and push repository changes
+      #   run: |
+      #     git config user.email "geisserml@gmail.com"
+      #     git config user.name "geisserml"
+      #     git checkout main
+      #     git merge origin/autorelease_tmp
+      #     git tag -a ${{ needs.build.outputs.new_version }} -m "Autorelease"
+      #     git push
+      #     git push --tags
+      #     git checkout stable
+      #     git reset --hard main
+      #     git push --force
+      #     git checkout main
       
-      - name: Publish to GitHub
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: 'dist/*'
-          bodyFile: 'RELEASE.md'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.build.outputs.new_version }}
-          prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
+      # - name: Publish to GitHub
+      #   uses: ncipollo/release-action@v1
+      #   with:
+      #     artifacts: 'dist/*'
+      #     bodyFile: 'RELEASE.md'
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     tag: ${{ needs.build.outputs.new_version }}
+      #     prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
       
-      - name: Publish to TestPyPI
-        run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
+      # - name: Publish to TestPyPI
+      #   run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
       
-      - name: Publish to PyPI
-        run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
+      # - name: Publish to PyPI
+      #   run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
       
       - name: Trigger GH Pages rebuild
         uses: benc-uk/workflow-dispatch@v1
@@ -219,17 +219,17 @@ jobs:
           workflow: gh_pages.yaml  # takes no inputs
   
   
-  cleanup:
-    needs: [build, test, publish]
-    if: always()
-    runs-on: ${{ inputs.runner }}
+  # cleanup:
+  #   needs: [build, test, publish]
+  #   if: always()
+  #   runs-on: ${{ inputs.runner }}
     
-    steps:
+  #   steps:
       
-      - name: Check out repository
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ github.repository }}
+  #     - name: Check out repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: ${{ github.repository }}
     
-      - name: Remove temporary branch
-        run: git push origin --delete autorelease_tmp
+  #     - name: Remove temporary branch
+  #       run: git push origin --delete autorelease_tmp
