@@ -6,7 +6,6 @@ __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem")
 import os
 import ctypes
 import logging
-import functools
 from pathlib import Path
 from collections import namedtuple
 from concurrent.futures import ProcessPoolExecutor
@@ -568,27 +567,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
             bookmark = pdfium_c.FPDFBookmark_GetNextSibling(self, bookmark)
     
     
-    @classmethod
-    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, mk_formconfig, **kwargs):
-        
-        pdf = cls(input_data, password=password)
-        if need_formenv:
-            pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
-        
-        page = pdf[index]
-        bitmap = renderer(page, **kwargs)
-        info = bitmap.get_info()
-        result = converter(bitmap)
-        
-        # NOTE We MUST NOT call bitmap.close() before the converted object is serialized to the main process, otherwise we would free the buffer of a foreign bitmap prematurely if the converted object references the buffer rather than owning a copy. Confirmed by POC.
-        # This is not an issue when freeing the bitmap on garbage collection, provided the converted object keeps the buffer alive.
-        
-        for g in (page, pdf):
-            g.close()
-        
-        return (result, info) if pass_info else result
-    
-    
     def render(
             self,
             converter,
@@ -600,6 +578,12 @@ class PdfDocument (pdfium_i.AutoCloseable):
             **kwargs
         ):
         """
+        .. deprecated:: 4.19
+            This method will be removed with the next major release (v5) due to serious conceptual problems. See the upcoming changelog for more info.
+        
+        .. versionchanged:: 4.19
+            Fixed major non-API implementation issues.
+        
         Render multiple pages in parallel, using a process pool executor.
         
         Hint:
@@ -622,13 +606,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 Keyword arguments to the renderer.
         
         Yields:
-            :data:`typing.Any`: Parameter-dependent result.
+            :data:`typing.Any`: Result as returned by the given converter.
         """
         
         # TODO(apibreak) remove mk_formconfig parameter (bloat)
         
-        if not isinstance(self._input, (Path, str)):
-            raise ValueError("Can only render in parallel with file path input.")
+        if not isinstance(self._input, (Path, str, bytes)):
+            raise ValueError(f"Cannot render in parallel with input type '{type(self._input).__name__}'.")
         
         n_pages = len(self)
         if not page_indices:
@@ -639,20 +623,36 @@ class PdfDocument (pdfium_i.AutoCloseable):
             if len(page_indices) != len(set(page_indices)):
                 raise ValueError("Duplicate page indices are prohibited.")
         
-        invoke_renderer = functools.partial(
-            PdfDocument._process_page,
-            input_data = self._input,
-            password = self._password,
-            renderer = renderer,
-            converter = converter,
-            pass_info = pass_info,
-            need_formenv = bool(self.formenv),
-            mk_formconfig = mk_formconfig,
-            **kwargs
+        # TODO consider `mp_context = multiprocessing.get_context("spawn")`
+        pool_kwargs = dict(
+            initializer = _parallel_renderer_init,
+            initargs = (self._input, self._password, bool(self.formenv), mk_formconfig, renderer, converter, pass_info, kwargs),
         )
-        
-        with ProcessPoolExecutor(n_processes) as pool:
-            yield from pool.map(invoke_renderer, page_indices)
+        with ProcessPoolExecutor(n_processes, **pool_kwargs) as pool:
+            yield from pool.map(_parallel_renderer_job, page_indices)
+
+
+def _parallel_renderer_init(input_data, password, need_formenv, mk_formconfig, renderer, converter, pass_info, kwargs):
+    
+    pdf = PdfDocument(input_data, password=password)
+    if need_formenv:
+        pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
+    
+    global _ParallelRenderObjs
+    _ParallelRenderObjs = (pdf, renderer, converter, pass_info, kwargs)
+
+
+def _parallel_renderer_job(index):
+    
+    global _ParallelRenderObjs
+    pdf, renderer, converter, pass_info, kwargs = _ParallelRenderObjs
+    
+    page = pdf[index]
+    bitmap = renderer(page, **kwargs)
+    info = bitmap.get_info()
+    result = converter(bitmap)
+    
+    return (result, info) if pass_info else result
 
 
 class PdfFormEnv (pdfium_i.AutoCloseable):
