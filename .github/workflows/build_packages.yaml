@@ -30,6 +30,7 @@ defaults:
 jobs:
   
   # TODO sync sourcebuild patches with pdfium-binaries on before release?
+  # TODO(201): schedule test_setup and test_sourcebuild separately?
   
   test_setup:
     if: ${{ inputs.pre_test }}
@@ -211,6 +212,11 @@ jobs:
       
       - name: Publish to PyPI
         run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
+      
+      - name: Trigger GH Pages rebuild
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: gh_pages.yaml  # takes no inputs
   
   
   cleanup:

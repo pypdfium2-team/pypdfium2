@@ -1,18 +1,10 @@
 <!-- SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
+<!-- TODO remove planned_changes.md and merge content into some other file -->
+
 # Planned Changes
 
-<!-- Currently, no API breaking changes are planned. -->
-
-```{note}
-You may search for `TODO(apibreak)` to find the code spots in question.
-```
-
-The following API breaking changes are in consideration for a future release:
-
-- The `PdfDocument.get_toc()` / `PdfOutlineItem` API will be changed.
-  * The parameters `is_closed` (bool) and `n_kids` (abs int) will be replaced by `count` (int),
-    where the state corresponds to the value's sign.
-  * Instead of loading bookmark info into namedtuples in a predefined fashion, a wrapper
-    around the raw pdfium object with on-demand properties shall be returned.
+To find out about possible planned changes, you can ...
+* Search the codebase for `TODO(apibreak)`.
+* Check if there is a development branch. If so, take a look at its changelog (`docs/devel/changelog_staging.md`).

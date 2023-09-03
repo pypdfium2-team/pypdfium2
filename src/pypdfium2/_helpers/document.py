@@ -6,10 +6,10 @@ __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem")
 import os
 import ctypes
 import logging
-import functools
+import inspect
 from pathlib import Path
 from collections import namedtuple
-from concurrent.futures import ProcessPoolExecutor
+import multiprocessing as mp
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -155,17 +155,17 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if formtype == pdfium_c.FORMTYPE_NONE or self.formenv:
             return
         
-        if not config:
-            if V_PDFIUM_IS_V8:
-                js_platform = pdfium_c.IPDF_JSPLATFORM(version=3)
-                config = pdfium_c.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, jsPlatform=js_platform)
-            else:
-                config = pdfium_c.FPDF_FORMFILLINFO(version=2)
-        
         # safety check for older binaries to prevent a segfault (could be removed at some point)
         # https://github.com/bblanchon/pdfium-binaries/issues/105
         if V_PDFIUM_IS_V8 and int(V_LIBPDFIUM) <= 5677 and V_BUILDNAME == "pdfium-binaries":
             raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
+        
+        if not config:
+            if V_PDFIUM_IS_V8:
+                js_platform = pdfium_c.IPDF_JSPLATFORM(version=3)
+                config = pdfium_c.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, m_pJsPlatform=ctypes.pointer(js_platform))
+            else:
+                config = pdfium_c.FPDF_FORMFILLINFO(version=2)
         
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
@@ -173,12 +173,17 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self.formenv = PdfFormEnv(raw, config, self)
         self._add_kid(self.formenv)
         
-        if V_PDFIUM_IS_V8 and formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
-            ok = pdfium_c.FPDF_LoadXFA(self)
-            if not ok:
-                # always fails as of this writing, thus warn instead of raising an exception for now
-                # probably this is due to an issue with pdfium-binaries - once fixed, this may be tightened to an exception
-                logger.warning(f"Failed to load XFA for document {self}.")
+        if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
+            if V_PDFIUM_IS_V8:
+                ok = pdfium_c.FPDF_LoadXFA(self)
+                if not ok:
+                    err = pdfium_c.FPDF_GetLastError()
+                    logger.warning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}")
+            else:
+                logger.warning(
+                    "init_forms() called on XFA pdf, but this pdfium binary was compiled without XFA support.\n"
+                    "Run `PDFIUM_BINARY=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2` to get a build with XFA support."
+                )
     
     
     # TODO?(v5) consider cached property
@@ -563,27 +568,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
             bookmark = pdfium_c.FPDFBookmark_GetNextSibling(self, bookmark)
     
     
-    @classmethod
-    def _process_page(cls, index, input_data, password, renderer, converter, pass_info, need_formenv, mk_formconfig, **kwargs):
-        
-        pdf = cls(input_data, password=password)
-        if need_formenv:
-            pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
-        
-        page = pdf[index]
-        bitmap = renderer(page, **kwargs)
-        info = bitmap.get_info()
-        result = converter(bitmap)
-        
-        # NOTE We MUST NOT call bitmap.close() before the converted object is serialized to the main process, otherwise we would free the buffer of a foreign bitmap prematurely if the converted object references the buffer rather than owning a copy. Confirmed by POC.
-        # This is not an issue when freeing the bitmap on garbage collection, provided the converted object keeps the buffer alive.
-        
-        for g in (page, pdf):
-            g.close()
-        
-        return (result, info) if pass_info else result
-    
-    
     def render(
             self,
             converter,
@@ -595,6 +579,12 @@ class PdfDocument (pdfium_i.AutoCloseable):
             **kwargs
         ):
         """
+        .. deprecated:: 4.19
+            This method will be removed with the next major release (v5) due to serious conceptual problems. See the upcoming changelog for more info.
+        
+        .. versionchanged:: 4.19
+            Fixed some major non-API implementation issues.
+        
         Render multiple pages in parallel, using a process pool executor.
         
         Hint:
@@ -617,13 +607,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 Keyword arguments to the renderer.
         
         Yields:
-            :data:`typing.Any`: Parameter-dependent result.
+            :data:`typing.Any`: Result as returned by the given converter.
         """
         
         # TODO(apibreak) remove mk_formconfig parameter (bloat)
         
-        if not isinstance(self._input, (Path, str)):
-            raise ValueError("Can only render in parallel with file path input.")
+        if not isinstance(self._input, (Path, str, bytes)):
+            raise ValueError(f"Cannot render in parallel with input type '{type(self._input).__name__}'.")
         
         n_pages = len(self)
         if not page_indices:
@@ -634,20 +624,45 @@ class PdfDocument (pdfium_i.AutoCloseable):
             if len(page_indices) != len(set(page_indices)):
                 raise ValueError("Duplicate page indices are prohibited.")
         
-        invoke_renderer = functools.partial(
-            PdfDocument._process_page,
-            input_data = self._input,
-            password = self._password,
-            renderer = renderer,
-            converter = converter,
-            pass_info = pass_info,
-            need_formenv = bool(self.formenv),
-            mk_formconfig = mk_formconfig,
-            **kwargs
-        )
+        converter_params = list( inspect.signature(converter).parameters )[1:]
         
-        with ProcessPoolExecutor(n_processes) as pool:
-            yield from pool.map(invoke_renderer, page_indices)
+        pool_kwargs = dict(
+            initializer = _parallel_renderer_init,
+            initargs = (self._input, self._password, bool(self.formenv), mk_formconfig, renderer, converter, converter_params, pass_info, kwargs),
+        )
+        with mp.Pool(n_processes, **pool_kwargs) as pool:
+            yield from pool.imap(_parallel_renderer_job, page_indices)
+
+
+def _parallel_renderer_init(input_data, password, need_formenv, mk_formconfig, renderer, converter, converter_params, pass_info, kwargs):
+    
+    logger.info(f"Initializing PID {os.getpid()}")
+    
+    pdf = PdfDocument(input_data, password=password)
+    if need_formenv:
+        pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
+    
+    global _ParallelRenderObjs
+    _ParallelRenderObjs = (pdf, renderer, converter, converter_params, pass_info, kwargs)
+
+
+def _parallel_renderer_job(index):
+    
+    logger.info(f"Starting page {index}")
+    
+    global _ParallelRenderObjs
+    pdf, renderer, converter, converter_params, pass_info, kwargs = _ParallelRenderObjs
+    
+    page = pdf[index]
+    bitmap = renderer(page, **kwargs)
+    info = bitmap.get_info()
+    page.close()
+    
+    # in principle, we could expose any local variables here
+    local_vars = dict(index=index)
+    result = converter(bitmap, **{p: local_vars[p] for p in converter_params})
+    
+    return (result, info) if pass_info else result
 
 
 class PdfFormEnv (pdfium_i.AutoCloseable):
