@@ -6,9 +6,10 @@ __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem")
 import os
 import ctypes
 import logging
+import inspect
 from pathlib import Path
 from collections import namedtuple
-from concurrent.futures import ProcessPoolExecutor
+import multiprocessing as mp
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -582,7 +583,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             This method will be removed with the next major release (v5) due to serious conceptual problems. See the upcoming changelog for more info.
         
         .. versionchanged:: 4.19
-            Fixed major non-API implementation issues.
+            Fixed some major non-API implementation issues.
         
         Render multiple pages in parallel, using a process pool executor.
         
@@ -623,34 +624,43 @@ class PdfDocument (pdfium_i.AutoCloseable):
             if len(page_indices) != len(set(page_indices)):
                 raise ValueError("Duplicate page indices are prohibited.")
         
-        # TODO consider `mp_context = multiprocessing.get_context("spawn")`
+        converter_params = list( inspect.signature(converter).parameters )[1:]
+        
         pool_kwargs = dict(
             initializer = _parallel_renderer_init,
-            initargs = (self._input, self._password, bool(self.formenv), mk_formconfig, renderer, converter, pass_info, kwargs),
+            initargs = (self._input, self._password, bool(self.formenv), mk_formconfig, renderer, converter, converter_params, pass_info, kwargs),
         )
-        with ProcessPoolExecutor(n_processes, **pool_kwargs) as pool:
-            yield from pool.map(_parallel_renderer_job, page_indices)
+        with mp.Pool(n_processes, **pool_kwargs) as pool:
+            yield from pool.imap(_parallel_renderer_job, page_indices)
 
 
-def _parallel_renderer_init(input_data, password, need_formenv, mk_formconfig, renderer, converter, pass_info, kwargs):
+def _parallel_renderer_init(input_data, password, need_formenv, mk_formconfig, renderer, converter, converter_params, pass_info, kwargs):
+    
+    logger.info(f"Initializing PID {os.getpid()}")
     
     pdf = PdfDocument(input_data, password=password)
     if need_formenv:
         pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
     
     global _ParallelRenderObjs
-    _ParallelRenderObjs = (pdf, renderer, converter, pass_info, kwargs)
+    _ParallelRenderObjs = (pdf, renderer, converter, converter_params, pass_info, kwargs)
 
 
 def _parallel_renderer_job(index):
     
+    logger.info(f"Starting page {index}")
+    
     global _ParallelRenderObjs
-    pdf, renderer, converter, pass_info, kwargs = _ParallelRenderObjs
+    pdf, renderer, converter, converter_params, pass_info, kwargs = _ParallelRenderObjs
     
     page = pdf[index]
     bitmap = renderer(page, **kwargs)
     info = bitmap.get_info()
-    result = converter(bitmap)
+    page.close()
+    
+    # in principle, we could expose any local variables here
+    local_vars = dict(index=index)
+    result = converter(bitmap, **{p: local_vars[p] for p in converter_params})
     
     return (result, info) if pass_info else result
 

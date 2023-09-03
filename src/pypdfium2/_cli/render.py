@@ -2,10 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import logging
 from pathlib import Path
 import pypdfium2._helpers as pdfium
 # TODO? consider dotted access
 from pypdfium2._cli._parsers import add_input, get_input
+
+logger = logging.getLogger(__name__)
 
 
 ColorOpts = dict(
@@ -130,6 +133,19 @@ def attach(parser):
     )
 
 
+class PILSaver:
+    
+    def __init__(self, fn_args):
+        self._fn_args = fn_args
+    
+    def __call__(self, bitmap, index):
+        out_dir, out_prefix, out_suffix, n_digits, format = self._fn_args
+        out_path = out_dir / (out_prefix + out_suffix % (n_digits, index+1, format))
+        pil_image = pdfium.PdfBitmap.to_pil(bitmap)
+        pil_image.save(out_path)
+        # return out_path
+
+
 def main(args):
     
     pdf = get_input(args)
@@ -170,8 +186,6 @@ def main(args):
         kwargs[f"no_smooth{type}"] = True
     
     n_digits = len(str( max(args.pages)+1 ))
-    renderer = pdf.render(pdfium.PdfBitmap.to_pil, **kwargs)
+    converter = PILSaver( (args.output, args.input.stem, "_%0*d.%s", n_digits, args.format) )
     
-    for image, index in zip(renderer, args.pages):
-        output_path = args.output / (args.input.stem + "_%0*d.%s" % (n_digits, index+1, args.format))
-        image.save(output_path)
+    for _ in pdf.render(converter, **kwargs): pass
