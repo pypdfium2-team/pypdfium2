@@ -213,8 +213,6 @@ jobs:
       - name: Publish to PyPI
         run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
       
-      # Although the GH pages workflow has a trigger to run on push to main, the release commit (which is made from a workflow bot) fails to trigger a rebuild. Presumably the GH actions listener excludes such commits as a safety measure against possible infinite loops.
-      # Therefore, trigger the rebuild manually using the workflow dispatch action.
       - name: Trigger GH Pages rebuild
         uses: benc-uk/workflow-dispatch@v1
         with:
