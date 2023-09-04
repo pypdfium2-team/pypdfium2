@@ -22,6 +22,7 @@ from pypdfium2_setup.packaging_base import (
     VerStatusFileName,
     V8StatusFileName,
     PlatformNames,
+    set_versions,
     get_platfiles,
     get_latest_version,
 )
@@ -66,6 +67,7 @@ def packaging_handler(target):
     from pypdfium2_setup.setup_base import mkwheel, SetupKws
     
     if target == BinaryTarget_None:
+        set_versions( dict(V_LIBPDFIUM="unknown", V_BUILDNAME="unknown", V_PDFIUM_IS_V8=None) )
         setuptools.setup(**SetupKws)
     elif hasattr(PlatformNames, target):
         mkwheel( getattr(PlatformNames, target) )

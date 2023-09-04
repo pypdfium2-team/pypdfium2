@@ -11,5 +11,6 @@ This release backports some key fixes/improvements from the development branch:
 - Fixed some major non-API implementation issues with multipage rendering:
   * Avoid full state data transfer and object re-initialization for each job. Instead, use a pool initializer and exploit global variables. This also makes bytes input tolerable for parallel rendering.
   * In the CLI, use a custom converter to save directly in workers instead of serializing bitmaps to the main process.
+- Set pdfium version fields to unknown for `PDFIUM_PLATFORM=none` (sdist). This prevents encoding a potentially incorrect version. Also improve CLI version print.
 - Fixed sourcebuild with system libraries.
 - Attempt to fix automatic GH pages rebuild on release.
