@@ -13,4 +13,5 @@ This release backports some key fixes/improvements from the development branch:
   * In the CLI, use a custom converter to save directly in workers instead of serializing bitmaps to the main process.
 - Set pdfium version fields to unknown for `PDFIUM_PLATFORM=none` (sdist). This prevents encoding a potentially incorrect version. Also improve CLI version print.
 - Fixed sourcebuild with system libraries.
+- Fixed RTD build (`system_packages` option removal).
 - Attempt to fix automatic GH pages rebuild on release.
