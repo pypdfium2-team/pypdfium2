@@ -1,7 +1,7 @@
 r"""Wrapper for fpdf_annot.h
 
 Generated with:
-/opt/hostedtoolcache/Python/3.10.12/x64/bin/ctypesgen --library pdfium --runtime-libdir . ./fpdf_annot.h ./fpdf_attachment.h ./fpdf_catalog.h ./fpdf_dataavail.h ./fpdf_doc.h ./fpdf_edit.h ./fpdf_ext.h ./fpdf_flatten.h ./fpdf_formfill.h ./fpdf_fwlevent.h ./fpdf_javascript.h ./fpdf_ppo.h ./fpdf_progressive.h ./fpdf_save.h ./fpdf_searchex.h ./fpdf_signature.h ./fpdf_structtree.h ./fpdf_sysfontinfo.h ./fpdf_text.h ./fpdf_thumbnail.h ./fpdf_transformpage.h ./fpdfview.h -o ~/work/pypdfium2/pypdfium2/data/linux_x64/raw.py --no-srcinfo
+/tmp/pip-build-env-kk019prs/overlay/bin/ctypesgen --library pdfium --runtime-libdir . --no-srcinfo fpdf_annot.h fpdf_attachment.h fpdf_catalog.h fpdf_dataavail.h fpdf_doc.h fpdf_edit.h fpdf_ext.h fpdf_flatten.h fpdf_formfill.h fpdf_fwlevent.h fpdf_javascript.h fpdf_ppo.h fpdf_progressive.h fpdf_save.h fpdf_searchex.h fpdf_signature.h fpdf_structtree.h fpdf_sysfontinfo.h fpdf_text.h fpdf_thumbnail.h fpdf_transformpage.h fpdfview.h -o ~/projects/pypdfium2/data/linux_x64/raw.py
 
 Do not modify this file.
 """
@@ -498,116 +498,116 @@ FPDF_TEXTRENDERMODE_CLIP = 7
 FPDF_TEXTRENDERMODE_LAST = FPDF_TEXTRENDERMODE_CLIP
 FPDF_TEXT_RENDERMODE = enum_anon_2
 
-class struct_fpdf_action_t__(Structure):
+class struct_fpdf_action_t__ (Structure):
     pass
 FPDF_ACTION = POINTER(struct_fpdf_action_t__)
 
-class struct_fpdf_annotation_t__(Structure):
+class struct_fpdf_annotation_t__ (Structure):
     pass
 FPDF_ANNOTATION = POINTER(struct_fpdf_annotation_t__)
 
-class struct_fpdf_attachment_t__(Structure):
+class struct_fpdf_attachment_t__ (Structure):
     pass
 FPDF_ATTACHMENT = POINTER(struct_fpdf_attachment_t__)
 
-class struct_fpdf_avail_t__(Structure):
+class struct_fpdf_avail_t__ (Structure):
     pass
 FPDF_AVAIL = POINTER(struct_fpdf_avail_t__)
 
-class struct_fpdf_bitmap_t__(Structure):
+class struct_fpdf_bitmap_t__ (Structure):
     pass
 FPDF_BITMAP = POINTER(struct_fpdf_bitmap_t__)
 
-class struct_fpdf_bookmark_t__(Structure):
+class struct_fpdf_bookmark_t__ (Structure):
     pass
 FPDF_BOOKMARK = POINTER(struct_fpdf_bookmark_t__)
 
-class struct_fpdf_clippath_t__(Structure):
+class struct_fpdf_clippath_t__ (Structure):
     pass
 FPDF_CLIPPATH = POINTER(struct_fpdf_clippath_t__)
 
-class struct_fpdf_dest_t__(Structure):
+class struct_fpdf_dest_t__ (Structure):
     pass
 FPDF_DEST = POINTER(struct_fpdf_dest_t__)
 
-class struct_fpdf_document_t__(Structure):
+class struct_fpdf_document_t__ (Structure):
     pass
 FPDF_DOCUMENT = POINTER(struct_fpdf_document_t__)
 
-class struct_fpdf_font_t__(Structure):
+class struct_fpdf_font_t__ (Structure):
     pass
 FPDF_FONT = POINTER(struct_fpdf_font_t__)
 
-class struct_fpdf_form_handle_t__(Structure):
+class struct_fpdf_form_handle_t__ (Structure):
     pass
 FPDF_FORMHANDLE = POINTER(struct_fpdf_form_handle_t__)
 
-class struct_fpdf_glyphpath_t__(Structure):
+class struct_fpdf_glyphpath_t__ (Structure):
     pass
 FPDF_GLYPHPATH = POINTER(struct_fpdf_glyphpath_t__)
 
-class struct_fpdf_javascript_action_t(Structure):
+class struct_fpdf_javascript_action_t (Structure):
     pass
 FPDF_JAVASCRIPT_ACTION = POINTER(struct_fpdf_javascript_action_t)
 
-class struct_fpdf_link_t__(Structure):
+class struct_fpdf_link_t__ (Structure):
     pass
 FPDF_LINK = POINTER(struct_fpdf_link_t__)
 
-class struct_fpdf_page_t__(Structure):
+class struct_fpdf_page_t__ (Structure):
     pass
 FPDF_PAGE = POINTER(struct_fpdf_page_t__)
 
-class struct_fpdf_pagelink_t__(Structure):
+class struct_fpdf_pagelink_t__ (Structure):
     pass
 FPDF_PAGELINK = POINTER(struct_fpdf_pagelink_t__)
 
-class struct_fpdf_pageobject_t__(Structure):
+class struct_fpdf_pageobject_t__ (Structure):
     pass
 FPDF_PAGEOBJECT = POINTER(struct_fpdf_pageobject_t__)
 
-class struct_fpdf_pageobjectmark_t__(Structure):
+class struct_fpdf_pageobjectmark_t__ (Structure):
     pass
 FPDF_PAGEOBJECTMARK = POINTER(struct_fpdf_pageobjectmark_t__)
 
-class struct_fpdf_pagerange_t__(Structure):
+class struct_fpdf_pagerange_t__ (Structure):
     pass
 FPDF_PAGERANGE = POINTER(struct_fpdf_pagerange_t__)
 
-class struct_fpdf_pathsegment_t(Structure):
+class struct_fpdf_pathsegment_t (Structure):
     pass
 FPDF_PATHSEGMENT = POINTER(struct_fpdf_pathsegment_t)
 
-class struct_fpdf_schhandle_t__(Structure):
+class struct_fpdf_schhandle_t__ (Structure):
     pass
 FPDF_SCHHANDLE = POINTER(struct_fpdf_schhandle_t__)
 
-class struct_fpdf_signature_t__(Structure):
+class struct_fpdf_signature_t__ (Structure):
     pass
 FPDF_SIGNATURE = POINTER(struct_fpdf_signature_t__)
 FPDF_SKIA_CANVAS = POINTER(None)
 
-class struct_fpdf_structelement_t__(Structure):
+class struct_fpdf_structelement_t__ (Structure):
     pass
 FPDF_STRUCTELEMENT = POINTER(struct_fpdf_structelement_t__)
 
-class struct_fpdf_structelement_attr_t__(Structure):
+class struct_fpdf_structelement_attr_t__ (Structure):
     pass
 FPDF_STRUCTELEMENT_ATTR = POINTER(struct_fpdf_structelement_attr_t__)
 
-class struct_fpdf_structtree_t__(Structure):
+class struct_fpdf_structtree_t__ (Structure):
     pass
 FPDF_STRUCTTREE = POINTER(struct_fpdf_structtree_t__)
 
-class struct_fpdf_textpage_t__(Structure):
+class struct_fpdf_textpage_t__ (Structure):
     pass
 FPDF_TEXTPAGE = POINTER(struct_fpdf_textpage_t__)
 
-class struct_fpdf_widget_t__(Structure):
+class struct_fpdf_widget_t__ (Structure):
     pass
 FPDF_WIDGET = POINTER(struct_fpdf_widget_t__)
 
-class struct_fpdf_xobject_t__(Structure):
+class struct_fpdf_xobject_t__ (Structure):
     pass
 FPDF_XOBJECT = POINTER(struct_fpdf_xobject_t__)
 FPDF_BOOL = c_int
@@ -624,12 +624,11 @@ FPDF_WCHAR = c_ushort
 FPDF_BYTESTRING = POINTER(c_char)
 FPDF_WIDESTRING = POINTER(FPDF_WCHAR)
 
-class struct_FPDF_BSTR_(Structure):
-    pass
-struct_FPDF_BSTR_.__slots__ = [
-    'str',
-    'len',
-]
+class struct_FPDF_BSTR_ (Structure):
+    __slots__ = [
+        'str',
+        'len',
+    ]
 struct_FPDF_BSTR_._fields_ = [
     ('str', POINTER(c_char)),
     ('len', c_int),
@@ -637,16 +636,15 @@ struct_FPDF_BSTR_._fields_ = [
 FPDF_BSTR = struct_FPDF_BSTR_
 FPDF_STRING = POINTER(c_char)
 
-class struct__FS_MATRIX_(Structure):
-    pass
-struct__FS_MATRIX_.__slots__ = [
-    'a',
-    'b',
-    'c',
-    'd',
-    'e',
-    'f',
-]
+class struct__FS_MATRIX_ (Structure):
+    __slots__ = [
+        'a',
+        'b',
+        'c',
+        'd',
+        'e',
+        'f',
+    ]
 struct__FS_MATRIX_._fields_ = [
     ('a', c_float),
     ('b', c_float),
@@ -657,14 +655,13 @@ struct__FS_MATRIX_._fields_ = [
 ]
 FS_MATRIX = struct__FS_MATRIX_
 
-class struct__FS_RECTF_(Structure):
-    pass
-struct__FS_RECTF_.__slots__ = [
-    'left',
-    'top',
-    'right',
-    'bottom',
-]
+class struct__FS_RECTF_ (Structure):
+    __slots__ = [
+        'left',
+        'top',
+        'right',
+        'bottom',
+    ]
 struct__FS_RECTF_._fields_ = [
     ('left', c_float),
     ('top', c_float),
@@ -675,12 +672,11 @@ FS_LPRECTF = POINTER(struct__FS_RECTF_)
 FS_RECTF = struct__FS_RECTF_
 FS_LPCRECTF = POINTER(FS_RECTF)
 
-class struct_FS_SIZEF_(Structure):
-    pass
-struct_FS_SIZEF_.__slots__ = [
-    'width',
-    'height',
-]
+class struct_FS_SIZEF_ (Structure):
+    __slots__ = [
+        'width',
+        'height',
+    ]
 struct_FS_SIZEF_._fields_ = [
     ('width', c_float),
     ('height', c_float),
@@ -689,12 +685,11 @@ FS_LPSIZEF = POINTER(struct_FS_SIZEF_)
 FS_SIZEF = struct_FS_SIZEF_
 FS_LPCSIZEF = POINTER(FS_SIZEF)
 
-class struct_FS_POINTF_(Structure):
-    pass
-struct_FS_POINTF_.__slots__ = [
-    'x',
-    'y',
-]
+class struct_FS_POINTF_ (Structure):
+    __slots__ = [
+        'x',
+        'y',
+    ]
 struct_FS_POINTF_._fields_ = [
     ('x', c_float),
     ('y', c_float),
@@ -703,18 +698,17 @@ FS_LPPOINTF = POINTER(struct_FS_POINTF_)
 FS_POINTF = struct_FS_POINTF_
 FS_LPCPOINTF = POINTER(FS_POINTF)
 
-class struct__FS_QUADPOINTSF(Structure):
-    pass
-struct__FS_QUADPOINTSF.__slots__ = [
-    'x1',
-    'y1',
-    'x2',
-    'y2',
-    'x3',
-    'y3',
-    'x4',
-    'y4',
-]
+class struct__FS_QUADPOINTSF (Structure):
+    __slots__ = [
+        'x1',
+        'y1',
+        'x2',
+        'y2',
+        'x3',
+        'y3',
+        'x4',
+        'y4',
+    ]
 struct__FS_QUADPOINTSF._fields_ = [
     ('x1', FS_FLOAT),
     ('y1', FS_FLOAT),
@@ -734,16 +728,15 @@ FPDF_RENDERERTYPE_AGG = 0
 FPDF_RENDERERTYPE_SKIA = 1
 FPDF_RENDERER_TYPE = enum_anon_3
 
-class struct_FPDF_LIBRARY_CONFIG_(Structure):
-    pass
-struct_FPDF_LIBRARY_CONFIG_.__slots__ = [
-    'version',
-    'm_pUserFontPaths',
-    'm_pIsolate',
-    'm_v8EmbedderSlot',
-    'm_pPlatform',
-    'm_RendererType',
-]
+class struct_FPDF_LIBRARY_CONFIG_ (Structure):
+    __slots__ = [
+        'version',
+        'm_pUserFontPaths',
+        'm_pIsolate',
+        'm_v8EmbedderSlot',
+        'm_pPlatform',
+        'm_RendererType',
+    ]
 struct_FPDF_LIBRARY_CONFIG_._fields_ = [
     ('version', c_int),
     ('m_pUserFontPaths', POINTER(POINTER(c_char))),
@@ -789,13 +782,12 @@ if _libs["pdfium"].has("FPDF_LoadMemDocument64", "cdecl"):
     FPDF_LoadMemDocument64.argtypes = [POINTER(None), c_size_t, FPDF_BYTESTRING]
     FPDF_LoadMemDocument64.restype = FPDF_DOCUMENT
 
-class struct_anon_4(Structure):
-    pass
-struct_anon_4.__slots__ = [
-    'm_FileLen',
-    'm_GetBlock',
-    'm_Param',
-]
+class struct_anon_4 (Structure):
+    __slots__ = [
+        'm_FileLen',
+        'm_GetBlock',
+        'm_Param',
+    ]
 struct_anon_4._fields_ = [
     ('m_FileLen', c_ulong),
     ('m_GetBlock', CFUNCTYPE(c_int, POINTER(None), c_ulong, POINTER(c_ubyte), c_ulong)),
@@ -803,17 +795,16 @@ struct_anon_4._fields_ = [
 ]
 FPDF_FILEACCESS = struct_anon_4
 
-class struct_FPDF_FILEHANDLER_(Structure):
-    pass
-struct_FPDF_FILEHANDLER_.__slots__ = [
-    'clientData',
-    'Release',
-    'GetSize',
-    'ReadBlock',
-    'WriteBlock',
-    'Flush',
-    'Truncate',
-]
+class struct_FPDF_FILEHANDLER_ (Structure):
+    __slots__ = [
+        'clientData',
+        'Release',
+        'GetSize',
+        'ReadBlock',
+        'WriteBlock',
+        'Flush',
+        'Truncate',
+    ]
 struct_FPDF_FILEHANDLER_._fields_ = [
     ('clientData', POINTER(None)),
     ('Release', CFUNCTYPE(None, POINTER(None))),
@@ -905,14 +896,13 @@ if _libs["pdfium"].has("FPDF_GetPageSizeByIndex", "cdecl"):
     FPDF_GetPageSizeByIndex.argtypes = [FPDF_DOCUMENT, c_int, POINTER(c_double), POINTER(c_double)]
     FPDF_GetPageSizeByIndex.restype = c_int
 
-class struct_FPDF_COLORSCHEME_(Structure):
-    pass
-struct_FPDF_COLORSCHEME_.__slots__ = [
-    'path_fill_color',
-    'path_stroke_color',
-    'text_fill_color',
-    'text_stroke_color',
-]
+class struct_FPDF_COLORSCHEME_ (Structure):
+    __slots__ = [
+        'path_fill_color',
+        'path_stroke_color',
+        'text_fill_color',
+        'text_stroke_color',
+    ]
 struct_FPDF_COLORSCHEME_._fields_ = [
     ('path_fill_color', FPDF_DWORD),
     ('path_stroke_color', FPDF_DWORD),
@@ -1062,23 +1052,22 @@ if _libs["pdfium"].has("FPDF_GetXFAPacketContent", "cdecl"):
     FPDF_GetXFAPacketContent.argtypes = [FPDF_DOCUMENT, c_int, POINTER(None), c_ulong, POINTER(c_ulong)]
     FPDF_GetXFAPacketContent.restype = FPDF_BOOL
 
-class struct__IPDF_JsPlatform(Structure):
-    pass
-struct__IPDF_JsPlatform.__slots__ = [
-    'version',
-    'app_alert',
-    'app_beep',
-    'app_response',
-    'Doc_getFilePath',
-    'Doc_mail',
-    'Doc_print',
-    'Doc_submitForm',
-    'Doc_gotoPage',
-    'Field_browse',
-    'm_pFormfillinfo',
-    'm_isolate',
-    'm_v8EmbedderSlot',
-]
+class struct__IPDF_JsPlatform (Structure):
+    __slots__ = [
+        'version',
+        'app_alert',
+        'app_beep',
+        'app_response',
+        'Doc_getFilePath',
+        'Doc_mail',
+        'Doc_print',
+        'Doc_submitForm',
+        'Doc_gotoPage',
+        'Field_browse',
+        'm_pFormfillinfo',
+        'm_isolate',
+        'm_v8EmbedderSlot',
+    ]
 struct__IPDF_JsPlatform._fields_ = [
     ('version', c_int),
     ('app_alert', CFUNCTYPE(c_int, POINTER(struct__IPDF_JsPlatform), FPDF_WIDESTRING, FPDF_WIDESTRING, c_int, c_int)),
@@ -1097,18 +1086,17 @@ struct__IPDF_JsPlatform._fields_ = [
 IPDF_JSPLATFORM = struct__IPDF_JsPlatform
 TimerCallback = CFUNCTYPE(None, c_int)
 
-class struct__FPDF_SYSTEMTIME(Structure):
-    pass
-struct__FPDF_SYSTEMTIME.__slots__ = [
-    'wYear',
-    'wMonth',
-    'wDayOfWeek',
-    'wDay',
-    'wHour',
-    'wMinute',
-    'wSecond',
-    'wMilliseconds',
-]
+class struct__FPDF_SYSTEMTIME (Structure):
+    __slots__ = [
+        'wYear',
+        'wMonth',
+        'wDayOfWeek',
+        'wDay',
+        'wHour',
+        'wMinute',
+        'wSecond',
+        'wMilliseconds',
+    ]
 struct__FPDF_SYSTEMTIME._fields_ = [
     ('wYear', c_ushort),
     ('wMonth', c_ushort),
@@ -1121,45 +1109,44 @@ struct__FPDF_SYSTEMTIME._fields_ = [
 ]
 FPDF_SYSTEMTIME = struct__FPDF_SYSTEMTIME
 
-class struct__FPDF_FORMFILLINFO(Structure):
-    pass
-struct__FPDF_FORMFILLINFO.__slots__ = [
-    'version',
-    'Release',
-    'FFI_Invalidate',
-    'FFI_OutputSelectedRect',
-    'FFI_SetCursor',
-    'FFI_SetTimer',
-    'FFI_KillTimer',
-    'FFI_GetLocalTime',
-    'FFI_OnChange',
-    'FFI_GetPage',
-    'FFI_GetCurrentPage',
-    'FFI_GetRotation',
-    'FFI_ExecuteNamedAction',
-    'FFI_SetTextFieldFocus',
-    'FFI_DoURIAction',
-    'FFI_DoGoToAction',
-    'm_pJsPlatform',
-    'xfa_disabled',
-    'FFI_DisplayCaret',
-    'FFI_GetCurrentPageIndex',
-    'FFI_SetCurrentPage',
-    'FFI_GotoURL',
-    'FFI_GetPageViewRect',
-    'FFI_PageEvent',
-    'FFI_PopupMenu',
-    'FFI_OpenFile',
-    'FFI_EmailTo',
-    'FFI_UploadTo',
-    'FFI_GetPlatform',
-    'FFI_GetLanguage',
-    'FFI_DownloadFromURL',
-    'FFI_PostRequestURL',
-    'FFI_PutRequestURL',
-    'FFI_OnFocusChange',
-    'FFI_DoURIActionWithKeyboardModifier',
-]
+class struct__FPDF_FORMFILLINFO (Structure):
+    __slots__ = [
+        'version',
+        'Release',
+        'FFI_Invalidate',
+        'FFI_OutputSelectedRect',
+        'FFI_SetCursor',
+        'FFI_SetTimer',
+        'FFI_KillTimer',
+        'FFI_GetLocalTime',
+        'FFI_OnChange',
+        'FFI_GetPage',
+        'FFI_GetCurrentPage',
+        'FFI_GetRotation',
+        'FFI_ExecuteNamedAction',
+        'FFI_SetTextFieldFocus',
+        'FFI_DoURIAction',
+        'FFI_DoGoToAction',
+        'm_pJsPlatform',
+        'xfa_disabled',
+        'FFI_DisplayCaret',
+        'FFI_GetCurrentPageIndex',
+        'FFI_SetCurrentPage',
+        'FFI_GotoURL',
+        'FFI_GetPageViewRect',
+        'FFI_PageEvent',
+        'FFI_PopupMenu',
+        'FFI_OpenFile',
+        'FFI_EmailTo',
+        'FFI_UploadTo',
+        'FFI_GetPlatform',
+        'FFI_GetLanguage',
+        'FFI_DownloadFromURL',
+        'FFI_PostRequestURL',
+        'FFI_PutRequestURL',
+        'FFI_OnFocusChange',
+        'FFI_DoURIActionWithKeyboardModifier',
+    ]
 struct__FPDF_FORMFILLINFO._fields_ = [
     ('version', c_int),
     ('Release', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO))),
@@ -1773,12 +1760,11 @@ if _libs["pdfium"].has("FPDFCatalog_IsTagged", "cdecl"):
     FPDFCatalog_IsTagged.argtypes = [FPDF_DOCUMENT]
     FPDFCatalog_IsTagged.restype = FPDF_BOOL
 
-class struct__FX_FILEAVAIL(Structure):
-    pass
-struct__FX_FILEAVAIL.__slots__ = [
-    'version',
-    'IsDataAvail',
-]
+class struct__FX_FILEAVAIL (Structure):
+    __slots__ = [
+        'version',
+        'IsDataAvail',
+    ]
 struct__FX_FILEAVAIL._fields_ = [
     ('version', c_int),
     ('IsDataAvail', CFUNCTYPE(FPDF_BOOL, POINTER(struct__FX_FILEAVAIL), c_size_t, c_size_t)),
@@ -1795,12 +1781,11 @@ if _libs["pdfium"].has("FPDFAvail_Destroy", "cdecl"):
     FPDFAvail_Destroy.argtypes = [FPDF_AVAIL]
     FPDFAvail_Destroy.restype = None
 
-class struct__FX_DOWNLOADHINTS(Structure):
-    pass
-struct__FX_DOWNLOADHINTS.__slots__ = [
-    'version',
-    'AddSegment',
-]
+class struct__FX_DOWNLOADHINTS (Structure):
+    __slots__ = [
+        'version',
+        'AddSegment',
+    ]
 struct__FX_DOWNLOADHINTS._fields_ = [
     ('version', c_int),
     ('AddSegment', CFUNCTYPE(None, POINTER(struct__FX_DOWNLOADHINTS), c_size_t, c_size_t)),
@@ -1983,17 +1968,16 @@ uint8_t = __uint8_t
 uint16_t = __uint16_t
 uint32_t = __uint32_t
 
-class struct_FPDF_IMAGEOBJ_METADATA(Structure):
-    pass
-struct_FPDF_IMAGEOBJ_METADATA.__slots__ = [
-    'width',
-    'height',
-    'horizontal_dpi',
-    'vertical_dpi',
-    'bits_per_pixel',
-    'colorspace',
-    'marked_content_id',
-]
+class struct_FPDF_IMAGEOBJ_METADATA (Structure):
+    __slots__ = [
+        'width',
+        'height',
+        'horizontal_dpi',
+        'vertical_dpi',
+        'bits_per_pixel',
+        'colorspace',
+        'marked_content_id',
+    ]
 struct_FPDF_IMAGEOBJ_METADATA._fields_ = [
     ('width', c_uint),
     ('height', c_uint),
@@ -2526,21 +2510,20 @@ if _libs["pdfium"].has("FPDFFormObj_GetObject", "cdecl"):
     FPDFFormObj_GetObject.restype = FPDF_PAGEOBJECT
 time_t = __time_t
 
-class struct_tm(Structure):
-    pass
-struct_tm.__slots__ = [
-    'tm_sec',
-    'tm_min',
-    'tm_hour',
-    'tm_mday',
-    'tm_mon',
-    'tm_year',
-    'tm_wday',
-    'tm_yday',
-    'tm_isdst',
-    'tm_gmtoff',
-    'tm_zone',
-]
+class struct_tm (Structure):
+    __slots__ = [
+        'tm_sec',
+        'tm_min',
+        'tm_hour',
+        'tm_mday',
+        'tm_mon',
+        'tm_year',
+        'tm_wday',
+        'tm_yday',
+        'tm_isdst',
+        'tm_gmtoff',
+        'tm_zone',
+    ]
 struct_tm._fields_ = [
     ('tm_sec', c_int),
     ('tm_min', c_int),
@@ -2555,12 +2538,11 @@ struct_tm._fields_ = [
     ('tm_zone', POINTER(c_char)),
 ]
 
-class struct__UNSUPPORT_INFO(Structure):
-    pass
-struct__UNSUPPORT_INFO.__slots__ = [
-    'version',
-    'FSDK_UnSupport_Handler',
-]
+class struct__UNSUPPORT_INFO (Structure):
+    __slots__ = [
+        'version',
+        'FSDK_UnSupport_Handler',
+    ]
 struct__UNSUPPORT_INFO._fields_ = [
     ('version', c_int),
     ('FSDK_UnSupport_Handler', CFUNCTYPE(None, POINTER(struct__UNSUPPORT_INFO), c_int)),
@@ -2834,13 +2816,12 @@ if _libs["pdfium"].has("FPDF_CopyViewerPreferences", "cdecl"):
     FPDF_CopyViewerPreferences.argtypes = [FPDF_DOCUMENT, FPDF_DOCUMENT]
     FPDF_CopyViewerPreferences.restype = FPDF_BOOL
 
-class struct__IFSDK_PAUSE(Structure):
-    pass
-struct__IFSDK_PAUSE.__slots__ = [
-    'version',
-    'NeedToPauseNow',
-    'user',
-]
+class struct__IFSDK_PAUSE (Structure):
+    __slots__ = [
+        'version',
+        'NeedToPauseNow',
+        'user',
+    ]
 struct__IFSDK_PAUSE._fields_ = [
     ('version', c_int),
     ('NeedToPauseNow', CFUNCTYPE(FPDF_BOOL, POINTER(struct__IFSDK_PAUSE))),
@@ -2868,12 +2849,11 @@ if _libs["pdfium"].has("FPDF_RenderPage_Close", "cdecl"):
     FPDF_RenderPage_Close.argtypes = [FPDF_PAGE]
     FPDF_RenderPage_Close.restype = None
 
-class struct_FPDF_FILEWRITE_(Structure):
-    pass
-struct_FPDF_FILEWRITE_.__slots__ = [
-    'version',
-    'WriteBlock',
-]
+class struct_FPDF_FILEWRITE_ (Structure):
+    __slots__ = [
+        'version',
+        'WriteBlock',
+    ]
 struct_FPDF_FILEWRITE_._fields_ = [
     ('version', c_int),
     ('WriteBlock', CFUNCTYPE(c_int, POINTER(struct_FPDF_FILEWRITE_), POINTER(None), c_ulong)),
@@ -3075,19 +3055,18 @@ if _libs["pdfium"].has("FPDF_StructElement_GetMarkedContentIdAtIndex", "cdecl"):
     FPDF_StructElement_GetMarkedContentIdAtIndex.argtypes = [FPDF_STRUCTELEMENT, c_int]
     FPDF_StructElement_GetMarkedContentIdAtIndex.restype = c_int
 
-class struct__FPDF_SYSFONTINFO(Structure):
-    pass
-struct__FPDF_SYSFONTINFO.__slots__ = [
-    'version',
-    'Release',
-    'EnumFonts',
-    'MapFont',
-    'GetFont',
-    'GetFontData',
-    'GetFaceName',
-    'GetFontCharset',
-    'DeleteFont',
-]
+class struct__FPDF_SYSFONTINFO (Structure):
+    __slots__ = [
+        'version',
+        'Release',
+        'EnumFonts',
+        'MapFont',
+        'GetFont',
+        'GetFontData',
+        'GetFaceName',
+        'GetFontCharset',
+        'DeleteFont',
+    ]
 struct__FPDF_SYSFONTINFO._fields_ = [
     ('version', c_int),
     ('Release', CFUNCTYPE(None, POINTER(struct__FPDF_SYSFONTINFO))),
@@ -3101,12 +3080,11 @@ struct__FPDF_SYSFONTINFO._fields_ = [
 ]
 FPDF_SYSFONTINFO = struct__FPDF_SYSFONTINFO
 
-class struct_FPDF_CharsetFontMap_(Structure):
-    pass
-struct_FPDF_CharsetFontMap_.__slots__ = [
-    'charset',
-    'fontname',
-]
+class struct_FPDF_CharsetFontMap_ (Structure):
+    __slots__ = [
+        'charset',
+        'fontname',
+    ]
 struct_FPDF_CharsetFontMap_._fields_ = [
     ('charset', c_int),
     ('fontname', POINTER(c_char)),
