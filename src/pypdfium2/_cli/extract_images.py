@@ -5,9 +5,9 @@
 
 import traceback
 from pathlib import Path
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2._helpers as pdfium
-# TODO? consider dotted access
+# CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input
 
 
@@ -17,7 +17,7 @@ def attach(parser):
         "--output-dir", "-o",
         required = True,
         type = Path,
-        help = "Output directory to take the extracted images",
+        help = "Output directory to take the extracted images.",
     )
     parser.add_argument(
         "--max-depth",
@@ -55,7 +55,7 @@ def main(args):
         
         page = pdf[i]
         images = page.get_objects(
-            filter = (pdfium_c.FPDF_PAGEOBJ_IMAGE, ),
+            filter = (pdfium_r.FPDF_PAGEOBJ_IMAGE, ),
             max_depth = args.max_depth,
         )
         

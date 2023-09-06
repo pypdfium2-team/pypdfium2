@@ -5,9 +5,10 @@ __all__ = ("PdfUnspHandler", )
 
 import atexit
 import logging
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 
+# CONSIDER use local logger instead of main library logger (we don't do this elsewhere)
 lib_logger = logging.getLogger("pypdfium2")
 
 
@@ -39,9 +40,9 @@ class PdfUnspHandler:
                 If True, add a default callback that will log unsupported features as warning.
         """
         
-        self._config = pdfium_c.UNSUPPORT_INFO(version=1)
+        self._config = pdfium_r.UNSUPPORT_INFO(version=1)
         pdfium_i.set_callback(self._config, "FSDK_UnSupport_Handler", self)
-        pdfium_c.FSDK_SetUnSpObjProcessHandler(self._config)
+        pdfium_r.FSDK_SetUnSpObjProcessHandler(self._config)
         
         atexit.register(self._keep)
         

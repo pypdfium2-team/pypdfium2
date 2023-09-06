@@ -80,10 +80,10 @@ jobs:
         run: python3 -m pip install --no-build-isolation -e .
       
       - name: Run test suite
-        run: make test
+        run: ./run test
       
       - name: Run packaging script
-        run: make packaging
+        run: ./run packaging
       
       - name: Upload release notes
         uses: actions/upload-artifact@v3
@@ -149,7 +149,7 @@ jobs:
         run: python3 -m pip install ${{ matrix.wheel }}
       
       - name: Run Test Suite
-        run: make test
+        run: ./run test
   
   
   publish:

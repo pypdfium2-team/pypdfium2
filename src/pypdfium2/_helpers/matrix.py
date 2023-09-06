@@ -5,10 +5,10 @@ __all__ = ("PdfMatrix", )
 
 import math
 import ctypes
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 
 
-# TODO consider adding PdfRectangle support model to calculate size and corner points
+# CONSIDER adding PdfRectangle support model to calculate size and corner points
 # NOTE the code below was written by a non-mathematician - might contain mistakes!
 
 
@@ -75,7 +75,7 @@ class PdfMatrix:
         """
         Convert the matrix to a raw :class:`FS_MATRIX` object.
         """
-        return pdfium_c.FS_MATRIX(*self.get())
+        return pdfium_r.FS_MATRIX(*self.get())
     
     
     def multiply(self, other):

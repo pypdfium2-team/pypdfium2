@@ -8,7 +8,7 @@ import traceback
 from pathlib import Path
 import PIL.Image
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pytest
 from .conftest import TestFiles, ExpRenderPixels
 
@@ -142,7 +142,7 @@ def test_open_new():
     dest_pdf = pdfium.PdfDocument.new()
     
     assert isinstance(dest_pdf, pdfium.PdfDocument)
-    assert isinstance(dest_pdf.raw, pdfium_c.FPDF_DOCUMENT)
+    assert isinstance(dest_pdf.raw, pdfium_r.FPDF_DOCUMENT)
     assert dest_pdf._data_holder == []
     assert dest_pdf._data_closer == []
     
@@ -164,27 +164,27 @@ def test_object_hierarchy():
     
     pdf = pdfium.PdfDocument(TestFiles.images)
     assert isinstance(pdf, pdfium.PdfDocument)
-    assert isinstance(pdf.raw, pdfium_c.FPDF_DOCUMENT)
+    assert isinstance(pdf.raw, pdfium_r.FPDF_DOCUMENT)
     
     page = pdf[0]
     assert isinstance(page, pdfium.PdfPage)
-    assert isinstance(page.raw, pdfium_c.FPDF_PAGE)
+    assert isinstance(page.raw, pdfium_r.FPDF_PAGE)
     assert page.pdf is pdf
     
     pageobj = next(page.get_objects())
     assert isinstance(pageobj, pdfium.PdfObject)
-    assert isinstance(pageobj.raw, pdfium_c.FPDF_PAGEOBJECT)
+    assert isinstance(pageobj.raw, pdfium_r.FPDF_PAGEOBJECT)
     assert isinstance(pageobj.type, int)
     assert pageobj.page is page
     
     textpage = page.get_textpage()
     assert isinstance(textpage, pdfium.PdfTextPage)
-    assert isinstance(textpage.raw, pdfium_c.FPDF_TEXTPAGE)
+    assert isinstance(textpage.raw, pdfium_r.FPDF_TEXTPAGE)
     assert textpage.page is page
     
     searcher = textpage.search("abcd")
     assert isinstance(searcher, pdfium.PdfTextSearcher)
-    assert isinstance(searcher.raw, pdfium_c.FPDF_SCHHANDLE)
+    assert isinstance(searcher.raw, pdfium_r.FPDF_SCHHANDLE)
     assert searcher.textpage is textpage
     
     for obj in (searcher, textpage, page, pdf):

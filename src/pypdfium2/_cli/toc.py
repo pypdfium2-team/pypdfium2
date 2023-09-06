@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2.internal as pdfium_i
-# TODO? consider dotted access
+# CONSIDER dotted access
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,
@@ -25,18 +25,23 @@ def attach(parser):
 def main(args):
     
     pdf = get_input(args)
-    toc = pdf.get_toc(
-        max_depth = args.max_depth,
-    )
+    toc = pdf.get_toc(max_depth=args.max_depth)
     
-    for item in toc:
-        state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
-        target = "?" if item.page_index is None else item.page_index+1
-        print(
-            "    " * item.level +
-            "[%s] %s -> %s  # %s %s" % (
-                state, item.title, target,
-                pdfium_i.ViewmodeToStr.get(item.view_mode),
-                round_list(item.view_pos, args.n_digits),
-            )
+    for bm in toc:
+        count, dest = bm.get_count(), bm.get_dest()
+        out = "    " * bm.level
+        out += "[%s] %s -> " % (
+            "*" if count == 0 else f"{count:+}",
+            bm.get_title(),
         )
+        # distinguish between "no dest" and "dest with invalid values" while keeping result machine readable
+        if dest:
+            index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
+            out += "%s  # %s %s" % (
+                index+1 if index is not None else "?",
+                pdfium_i.ViewmodeToStr.get(view_mode),
+                round_list(view_pos, args.n_digits),
+            )
+        else:
+            out += "_"
+        print(out)

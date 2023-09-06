@@ -2,16 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import re
+import os
+import mmap
 import ctypes
 import pathlib
 import pytest
 from .conftest import TestResources
 
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 
 
-parametrize_opener_files = pytest.mark.parametrize("file", [TestResources.empty])
+parametrize_opener_files = pytest.mark.parametrize("input", [TestResources.empty])
 
 
 def _check_pdf(pdf):
@@ -30,35 +32,101 @@ def _check_pdf(pdf):
 
 
 @parametrize_opener_files
-def test_open_path(file):
-    assert isinstance(file, pathlib.Path)
-    pdf = pdfium.PdfDocument(file)
-    assert pdf._data_holder == []
-    assert pdf._data_closer == []
-    _check_pdf(pdf)
-
-
-@parametrize_opener_files
-def test_open_str(file):
-    pdf = pdfium.PdfDocument( str(file) )
-    assert pdf._data_holder == []
-    assert pdf._data_closer == []
-    _check_pdf(pdf)
-
-
-@parametrize_opener_files
-def test_open_bytes(file):
-    input = file.read_bytes()
+def test_open_path(input):
+    assert isinstance(input, pathlib.Path)
     pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
+    assert pdf._data_holder == []
+    assert pdf._data_closer == []
+
+
+@parametrize_opener_files
+def test_open_str(input):
+    input = str(input)
+    assert isinstance(input, str)
+    pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
+    assert pdf._data_holder == []
+    assert pdf._data_closer == []
+
+
+@parametrize_opener_files
+def test_open_bytes(input):
+    input = input.read_bytes()
+    assert isinstance(input, bytes)
+    pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
     assert pdf._data_holder == [input]
     assert pdf._data_closer == []
+
+
+@parametrize_opener_files
+def test_open_ctypes_array(input):
+    buffer = input.open("rb")
+    length = buffer.seek(0, os.SEEK_END)
+    buffer.seek(0)
+    
+    input = (ctypes.c_ubyte * length)()
+    buffer.readinto(input)
+    assert isinstance(input, ctypes.Array)
+    
+    pdf = pdfium.PdfDocument(input)
     _check_pdf(pdf)
+    assert pdf._data_holder == [input]
+    assert pdf._data_closer == []
+
+
+@parametrize_opener_files
+def test_open_bytearray(input):
+    input = bytearray(input.read_bytes())
+    assert isinstance(input, bytearray)
+    pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
+    assert isinstance(pdf._input, ctypes.Array)
+    assert pdf._data_holder == [pdf._input]
+    assert pdf._data_closer == []
+
+
+@parametrize_opener_files
+def test_open_memoryview_writable(input):
+    input = memoryview(bytearray( input.read_bytes() ))
+    assert isinstance(input, memoryview)
+    assert not input.readonly
+    pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
+    assert isinstance(pdf._input, ctypes.Array)
+    assert pdf._data_holder == [pdf._input]
+    assert pdf._data_closer == []
+
+
+@parametrize_opener_files
+def test_open_memoryview_readonly(input):
+    input = memoryview(input.read_bytes())
+    assert isinstance(input, memoryview)
+    assert input.readonly
+    pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
+    assert isinstance(pdf._input, bytes)
+    assert pdf._data_holder == [pdf._input]
+    assert pdf._data_closer == []
+
+
+# TODO test autoclose recognition
+@parametrize_opener_files
+def test_open_mmap(input):
+    fh = input.open("r+b")
+    input = mmap.mmap(fh.fileno(), 0)
+    assert isinstance(input, mmap.mmap)
+    pdf = pdfium.PdfDocument(input)
+    _check_pdf(pdf)
+    assert len(pdf._data_holder) == 1
+    assert pdf._data_closer == []
 
 
 @parametrize_opener_files
 @pytest.mark.parametrize("autoclose", [False, True])
-def test_open_buffer(file, autoclose):
-    input = file.open("rb")
+def test_open_buffer(input, autoclose):
+    input = input.open("rb")
     pdf = pdfium.PdfDocument(input, autoclose=autoclose)
     assert len(pdf._data_holder) == 1
     _check_pdf(pdf)
@@ -67,27 +135,12 @@ def test_open_buffer(file, autoclose):
     assert input.closed == autoclose
 
 
-@parametrize_opener_files
-def test_open_ctypes_array(file):
-    
-    buffer = file.open("rb")
-    buffer.seek(0, 2)
-    length = buffer.tell()
-    buffer.seek(0)
-    
-    array = (ctypes.c_ubyte * length)()
-    buffer.readinto(array)
-    
-    pdf = pdfium.PdfDocument(array)
-    _check_pdf(pdf)
-
-
 def test_open_raw():
     # not meant for embedders, but works for testing all the same
     pdf = pdfium.PdfDocument(TestResources.empty)
     pdf._finalizer.detach()
     input = pdf.raw
-    assert isinstance(input, pdfium_c.FPDF_DOCUMENT)
+    assert isinstance(input, pdfium_r.FPDF_DOCUMENT)
     pdf_new = pdfium.PdfDocument(input)
     _check_pdf(pdf_new)
 
@@ -142,11 +195,11 @@ def test_open_invalid():
 
 def test_misc():
     pdf = pdfium.PdfDocument(TestResources.empty)
-    assert pdf.get_formtype() == pdfium_c.FORMTYPE_NONE
+    assert pdf.get_formtype() == pdfium_r.FORMTYPE_NONE
     assert pdf.get_version() == 15
-    assert pdf.get_identifier(pdfium_c.FILEIDTYPE_PERMANENT) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
-    assert pdf.get_identifier(pdfium_c.FILEIDTYPE_CHANGING) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
-    assert pdf.get_pagemode() == pdfium_c.PAGEMODE_USENONE
+    assert pdf.get_identifier(pdfium_r.FILEIDTYPE_PERMANENT) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
+    assert pdf.get_identifier(pdfium_r.FILEIDTYPE_CHANGING) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
+    assert pdf.get_pagemode() == pdfium_r.PAGEMODE_USENONE
     page = pdf[0]
     assert pdf.get_page_size(0) == page.get_size()
     assert pdf.get_page_label(0) == ""

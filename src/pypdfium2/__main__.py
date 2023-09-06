@@ -1,20 +1,11 @@
-# PYTHON_ARGCOMPLETE_OK
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
 import sys
-import logging
 import argparse
 import importlib
-import pypdfium2 as pdfium  # yes this is legal in __main__
-import pypdfium2.internal as pdfium_i
+from pypdfium2._cli._parsers import setup_logging
 from pypdfium2.version import *
-
-try:
-    import argcomplete
-except ImportError:
-    argcomplete = None
 
 
 SubCommands = {
@@ -35,6 +26,10 @@ CmdToModule = {n: importlib.import_module(f"pypdfium2._cli.{n.replace('-', '_')}
 
 def get_parser():
     
+    pdfium_ver = V_LIBPDFIUM_FULL
+    if not pdfium_ver:
+        pdfium_ver = V_LIBPDFIUM
+    
     main_parser = argparse.ArgumentParser(
         prog = "pypdfium2",
         description = "Command line interface to the pypdfium2 library (Python binding to PDFium)",
@@ -42,7 +37,7 @@ def get_parser():
     main_parser.add_argument(
         "--version", "-v",
         action = "version",
-        version = f"pypdfium2 {V_PYPDFIUM2} (libpdfium {V_LIBPDFIUM}, origin: {V_BUILDNAME}, flags: {['V8', 'XFA'] if V_PDFIUM_IS_V8 else []})",
+        version = f"pypdfium2 {V_PYPDFIUM2} (libpdfium {pdfium_ver}, origin: {V_BUILDNAME}, flags: {['V8', 'XFA'] if V_PDFIUM_IS_V8 else []})",
     )
     subparsers = main_parser.add_subparsers(dest="subcommand")
     
@@ -50,27 +45,13 @@ def get_parser():
         subparser = subparsers.add_parser(name, description=help, help=help)
         CmdToModule[name].attach(subparser)
     
-    if argcomplete:
-        argcomplete.autocomplete(main_parser)
-    
     return main_parser
 
 
-def setup_logging():
-    
-    pdfium_i.DEBUG_AUTOCLOSE.value = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
-    
-    lib_logger = logging.getLogger("pypdfium2")
-    lib_logger.addHandler(logging.StreamHandler())
-    lib_logger.setLevel(logging.DEBUG)
-    
-    pdfium.PdfUnspHandler().setup()
-
-
-def api_main(raw_args=sys.argv[1:]):
+def main(argv):
     
     parser = get_parser()
-    args = parser.parse_args(raw_args)
+    args = parser.parse_args(argv)
     
     if not args.subcommand:
         parser.print_help()
@@ -81,7 +62,7 @@ def api_main(raw_args=sys.argv[1:]):
 
 def cli_main():
     setup_logging()
-    api_main()
+    main(sys.argv[1:])
 
 
 if __name__ == "__main__":

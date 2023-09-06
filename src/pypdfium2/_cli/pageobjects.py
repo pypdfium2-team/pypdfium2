@@ -3,11 +3,11 @@
 
 # TODO test-confirm filter and info params
 
-from enum import Enum
+from collections import OrderedDict
 import pypdfium2._helpers as pdfium
-import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
-# TODO? consider dotted access
+import pypdfium2.raw as pdfium_r
+# CONSIDER dotted access
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,
@@ -16,9 +16,9 @@ from pypdfium2._cli._parsers import (
 )
 
 
-class InfoParams (Enum):
-    pos = 0
-    imageinfo = 1
+PARAM_POS = "pos"
+PARAM_IMGINFO = "imginfo"
+INFO_PARAMS = (PARAM_POS, PARAM_IMGINFO)
 
 
 def attach(parser):
@@ -44,20 +44,28 @@ def attach(parser):
     parser.add_argument(
         "--info",
         nargs = "*",
-        type = lambda s: InfoParams[s.lower()],
-        default = (InfoParams.pos, InfoParams.imageinfo),
-        help = "Object details to show (pos, imageinfo).",
+        type = str.lower,
+        choices = INFO_PARAMS,
+        default = INFO_PARAMS,
+        help = "Object details to show.",
     )
 
 
-def print_img_metadata(metadata, pad=""):
-    for attr in pdfium_c.FPDF_IMAGEOBJ_METADATA.__slots__:
-        value = getattr(metadata, attr)
-        if attr == "colorspace":
-            value = pdfium_i.ColorspaceToStr.get(value)
-        elif attr == "marked_content_id" and value == -1:
-            continue
-        print(pad + f"{attr}: {value}\n", end="")
+def print_img_metadata(m, n_digits, pad=""):
+    
+    members = OrderedDict(
+        width = m.width,
+        height = m.height,
+        horizontal_dpi = round(m.horizontal_dpi, n_digits),
+        vertical_dpi = round(m.vertical_dpi, n_digits),
+        bits_per_pixel = m.bits_per_pixel,
+        colorspace = pdfium_i.ColorspaceToStr.get(m.colorspace),
+    )
+    if m.marked_content_id != -1:
+        members["marked_content_id"] = m.marked_content_id
+    
+    for key, value in members.items():
+        print(pad + f"{key}: {value}")
 
 
 def main(args):
@@ -68,17 +76,14 @@ def main(args):
     if args.filter:
         args.filter = [pdfium_i.ObjectTypeToConst[t] for t in args.filter]
     
-    show_pos = (InfoParams.pos in args.info)
-    show_imageinfo = (InfoParams.imageinfo in args.info)
+    show_pos = (PARAM_POS in args.info)
+    show_imageinfo = (PARAM_IMGINFO in args.info)
     total_count = 0
     
     for i in args.pages:
         
         page = pdf[i]
-        obj_searcher = page.get_objects(
-            filter = args.filter,
-            max_depth = args.max_depth,
-        )
+        obj_searcher = page.get_objects(args.filter, max_depth=args.max_depth)
         preamble = f"# Page {i+1}\n"
         count = 0
         
@@ -89,14 +94,17 @@ def main(args):
             print(preamble + pad_0 + pdfium_i.ObjectTypeToStr.get(obj.type))
             
             if show_pos:
-                pos = round_list(obj.get_pos(), args.n_digits)
-                print(pad_1 + f"Position: {pos}")
+                bounds = round_list(obj.get_bounds(), args.n_digits)
+                print(pad_1 + f"Bounding Box: {bounds}")
+                if obj.type in (pdfium_r.FPDF_PAGEOBJ_IMAGE, pdfium_r.FPDF_PAGEOBJ_TEXT):
+                    quad_bounds = obj.get_quad_points()
+                    print(pad_1 + f"Quad Points: {[round_list(p, args.n_digits) for p in quad_bounds]}")
             
-            # TODO? also call get_size() for coverage
             if show_imageinfo and isinstance(obj, pdfium.PdfImage):
                 print(pad_1 + f"Filters: {obj.get_filters()}")
                 metadata = obj.get_metadata()
-                print_img_metadata(metadata, pad=pad_1)
+                assert (metadata.width, metadata.height) == obj.get_px_size()
+                print_img_metadata(metadata, args.n_digits, pad=pad_1)
             
             count += 1
             preamble = ""

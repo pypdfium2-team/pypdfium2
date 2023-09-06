@@ -1,17 +1,19 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem")
+__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
-import os
+import sys
 import ctypes
 import logging
-import inspect
 from pathlib import Path
-from collections import namedtuple
-import multiprocessing as mp
+try:
+    from multiprocessing.shared_memory import SharedMemory
+except ImportError:
+    SharedMemory = None
+    assert sys.version_info < (3, 8)
 
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 from pypdfium2.version import (
     V_LIBPDFIUM,
@@ -26,20 +28,30 @@ from pypdfium2._helpers.attachment import PdfAttachment
 logger = logging.getLogger(__name__)
 
 
+# TODO rollback: remove support for non-native input types. Handle them in the CLI instead.
+
 class PdfDocument (pdfium_i.AutoCloseable):
     """
     Document helper class.
     
     Parameters:
-        input_data (str | pathlib.Path | bytes | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
-            The input PDF given as file path, bytes, ctypes array, byte buffer, or raw PDFium document handle.
-            A byte buffer is defined as an object that implements ``seek() tell() read() readinto()``.
+        
+        input (pathlib.Path | str | typing.BinaryIO | ~mmap.mmap | ctypes.Array | bytes | bytearray | memoryview | ~multiprocessing.shared_memory.SharedMemory | FPDF_DOCUMENT | typing.Callable):
+            The input PDF given as file path, byte buffer, bytes-like object, raw PDFium document handle, or wrapper around another supported object (see the type definition above).
+            Native support is available for :class:`~pathlib.Path`, byte buffers, :class:`bytes` and :class:`ctypes.Array`.
+            The other input types are resolved to these, as far as possible.
+            In this context, "byte buffer" refers to an object implementing ``seek() tell() (readinto() | read())`` in a :class:`~io.BufferedIOBase` like fashion.
+            Buffers that do not provide ``readinto()`` fall back to ``read()`` and :func:`~ctypes.memmove`.
+            Memory maps are currently treated as buffer (including SharedMemory, which is supported through the underlying mmap). Convert to a ctypes array on the caller side if handling as bytes-like object is desired instead.
+        
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
             If a password is given but the PDF is not encrypted, it will be ignored (as of PDFium 5418).
+        
         autoclose (bool):
             Whether byte buffer input should be automatically closed on finalization.
-    
+            If True and the input is shared memory, it will be closed but not destroyed.
+        
     Raises:
         PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
         FileNotFoundError: Raised if an invalid or non-existent file path was given.
@@ -54,44 +66,45 @@ class PdfDocument (pdfium_i.AutoCloseable):
         raw (FPDF_DOCUMENT):
             The underlying PDFium document handle.
         formenv (PdfFormEnv | None):
-            Form env, if the document has forms and :meth:`.init_forms` was called.
+            Form env, if :meth:`.init_forms` was called and the document has forms.
     """
     
     def __init__(self, input, password=None, autoclose=False):
         
-        if isinstance(input, str):
-            input = Path(input)
-        if isinstance(input, Path):
-            input = input.expanduser().resolve()
-            if not input.is_file():
-                raise FileNotFoundError(input)
+        # CONSIDER adding a public method to inject into data_holder/data_closer
         
-        self._input = input
-        self._password = password
+        self._orig_input = input
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
         
-        # question: can we make attributes like formenv effectively immutable for the caller?
-        self.formenv = None
+        self._input, to_close = _preprocess_input(self._orig_input)
+        if autoclose:
+            self._data_closer.extend(to_close)
         
-        if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
+        self.formenv = None
+        if isinstance(self._input, pdfium_r.FPDF_DOCUMENT):
             self.raw = self._input
         else:
-            self.raw, to_hold, to_close = _open_pdf(self._input, self._password, self._autoclose)
-            self._data_holder += to_hold
-            self._data_closer += to_close
+            self.raw, to_hold, to_close = _open_pdf(self._input, password)
+            self._data_holder.extend(to_hold)
+            if autoclose:
+                self._data_closer.extend(to_close)
         
         super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
     
     
+    # TODO improve to show all input stages
     def __repr__(self):
-        if isinstance(self._input, Path):
-            input_r = repr( str(self._input) )
-        elif isinstance(self._input, bytes):
-            input_r = f"<bytes object at {hex(id(self._input))}>"
-        elif isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
-            input_r = f"<FPDF_DOCUMENT at {hex(id(self._input))}>"
+        orig_in = self._orig_input
+        if isinstance(orig_in, Path):
+            input_r = repr( str(orig_in) )
+        elif isinstance(orig_in, (bytes, bytearray, memoryview)):
+            input_r = f"<{type(orig_in).__name__} at {hex(id(orig_in))}>"
+        elif isinstance(orig_in, pdfium_r.FPDF_DOCUMENT):
+            input_r = f"<FPDF_DOCUMENT at {hex(id(orig_in))}>"
+        elif callable(orig_in):
+            input_r = f"<callable at {hex(id(orig_in))}: {type(self._input).__name__}>"
         else:
             input_r = repr(self._input)
         return f"{super().__repr__()[:-1]} from {input_r}>"
@@ -104,17 +117,19 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     @staticmethod
     def _close_impl(raw, data_holder, data_closer):
-        pdfium_c.FPDF_CloseDocument(raw)
+        pdfium_r.FPDF_CloseDocument(raw)
+        
         for data in data_holder:
             id(data)
-        for data in data_closer:
-            data.close()
         data_holder.clear()
+        
+        for to_call in data_closer:
+            to_call()  # TODO autoclose debug prints?
         data_closer.clear()
     
     
     def __len__(self):
-        return pdfium_c.FPDF_GetPageCount(self)
+        return pdfium_r.FPDF_GetPageCount(self)
     
     def __iter__(self):
         for i in range( len(self) ):
@@ -133,7 +148,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Returns:
             PdfDocument: A new, empty document.
         """
-        new_pdf = pdfium_c.FPDF_CreateNewDocument()
+        new_pdf = pdfium_r.FPDF_CreateNewDocument()
         return cls(new_pdf)
     
     
@@ -152,32 +167,33 @@ class PdfDocument (pdfium_i.AutoCloseable):
         """
         
         formtype = self.get_formtype()
-        if formtype == pdfium_c.FORMTYPE_NONE or self.formenv:
+        if formtype == pdfium_r.FORMTYPE_NONE or self.formenv:
             return
         
         # safety check for older binaries to prevent a segfault (could be removed at some point)
         # https://github.com/bblanchon/pdfium-binaries/issues/105
+        # (note: V_BUILDNAME check must go first for an implicit guarantee that we have an digit version)
         if V_PDFIUM_IS_V8 and V_BUILDNAME == "pdfium-binaries" and int(V_LIBPDFIUM) <= 5677:
             raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
         
         if not config:
             if V_PDFIUM_IS_V8:
-                js_platform = pdfium_c.IPDF_JSPLATFORM(version=3)
-                config = pdfium_c.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, m_pJsPlatform=ctypes.pointer(js_platform))
+                js_platform = pdfium_r.IPDF_JSPLATFORM(version=3)
+                config = pdfium_r.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, m_pJsPlatform=ctypes.pointer(js_platform))
             else:
-                config = pdfium_c.FPDF_FORMFILLINFO(version=2)
+                config = pdfium_r.FPDF_FORMFILLINFO(version=2)
         
-        raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
+        raw = pdfium_r.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
         self.formenv = PdfFormEnv(raw, config, self)
         self._add_kid(self.formenv)
         
-        if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
+        if formtype in (pdfium_r.FORMTYPE_XFA_FULL, pdfium_r.FORMTYPE_XFA_FOREGROUND):
             if V_PDFIUM_IS_V8:
-                ok = pdfium_c.FPDF_LoadXFA(self)
+                ok = pdfium_r.FPDF_LoadXFA(self)
                 if not ok:
-                    err = pdfium_c.FPDF_GetLastError()
+                    err = pdfium_r.FPDF_GetLastError()
                     logger.warning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}")
             else:
                 logger.warning(
@@ -186,35 +202,32 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 )
     
     
-    # TODO?(v5) consider cached property
     def get_formtype(self):
         """
         Returns:
             int: PDFium form type that applies to the document (:attr:`FORMTYPE_*`).
             :attr:`FORMTYPE_NONE` if the document has no forms.
         """
-        return pdfium_c.FPDF_GetFormType(self)
+        return pdfium_r.FPDF_GetFormType(self)
     
     
-    # TODO?(v5) consider cached property
     def get_pagemode(self):
         """
         Returns:
             int: Page displaying mode (:attr:`PAGEMODE_*`).
         """
-        return pdfium_c.FPDFDoc_GetPageMode(self)
+        return pdfium_r.FPDFDoc_GetPageMode(self)
     
     
-    # TODO?(v5) consider cached property
     def is_tagged(self):
         """
         Returns:
             bool: Whether the document is tagged (cf. PDF 1.7, 10.7 "Tagged PDF").
         """
-        return bool( pdfium_c.FPDFCatalog_IsTagged(self) )
+        return bool( pdfium_r.FPDFCatalog_IsTagged(self) )
     
     
-    def save(self, dest, version=None, flags=pdfium_c.FPDF_NO_INCREMENTAL):
+    def save(self, dest, version=None, flags=pdfium_r.FPDF_NO_INCREMENTAL):
         """
         Save the document at its current state.
         
@@ -237,7 +250,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         try:
             saveargs = (self, pdfium_i.get_bufwriter(buffer), flags)
-            ok = pdfium_c.FPDF_SaveAsCopy(*saveargs) if version is None else pdfium_c.FPDF_SaveWithVersion(*saveargs, version)
+            ok = pdfium_r.FPDF_SaveAsCopy(*saveargs) if version is None else pdfium_r.FPDF_SaveWithVersion(*saveargs, version)
             if not ok:
                 raise PdfiumError("Failed to save document.")
         finally:
@@ -245,7 +258,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 buffer.close()
     
     
-    def get_identifier(self, type=pdfium_c.FILEIDTYPE_PERMANENT):
+    def get_identifier(self, type=pdfium_r.FILEIDTYPE_PERMANENT):
         """
         Parameters:
             type (int):
@@ -256,9 +269,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
             bytes: Unique file identifier from the PDF's trailer dictionary.
             See PDF 1.7, Section 14.4 "File Identifiers".
         """
-        n_bytes = pdfium_c.FPDF_GetFileIdentifier(self, type, None, 0)
+        n_bytes = pdfium_r.FPDF_GetFileIdentifier(self, type, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
-        pdfium_c.FPDF_GetFileIdentifier(self, type, buffer, n_bytes)
+        pdfium_r.FPDF_GetFileIdentifier(self, type, buffer, n_bytes)
         return buffer.raw[:n_bytes-2]
     
     
@@ -269,7 +282,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             or None if the document is new or its version could not be determined.
         """
         version = ctypes.c_int()
-        ok = pdfium_c.FPDF_GetFileVersion(self, version)
+        ok = pdfium_r.FPDF_GetFileVersion(self, version)
         if not ok:
             return None
         return version.value
@@ -282,9 +295,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
             If the key is not contained, an empty string will be returned.
         """
         enc_key = (key + "\x00").encode("utf-8")
-        n_bytes = pdfium_c.FPDF_GetMetaText(self, enc_key, None, 0)
+        n_bytes = pdfium_r.FPDF_GetMetaText(self, enc_key, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
-        pdfium_c.FPDF_GetMetaText(self, enc_key, buffer, n_bytes)
+        pdfium_r.FPDF_GetMetaText(self, enc_key, buffer, n_bytes)
         return buffer.raw[:n_bytes-2].decode("utf-16-le")
     
     
@@ -312,7 +325,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Returns:
             int: The number of embedded files in the document.
         """
-        return pdfium_c.FPDFDoc_GetAttachmentCount(self)
+        return pdfium_r.FPDFDoc_GetAttachmentCount(self)
     
     
     def get_attachment(self, index):
@@ -320,7 +333,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Returns:
             PdfAttachment: The attachment at *index* (zero-based).
         """
-        raw_attachment = pdfium_c.FPDFDoc_GetAttachment(self, index)
+        raw_attachment = pdfium_r.FPDFDoc_GetAttachment(self, index)
         if not raw_attachment:
             raise PdfiumError(f"Failed to get attachment at index {index}.")
         return PdfAttachment(raw_attachment, self)
@@ -337,8 +350,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
             PdfAttachment: Handle to the new, empty attachment.
         """
         enc_name = (name + "\x00").encode("utf-16-le")
-        enc_name_ptr = ctypes.cast(enc_name, pdfium_c.FPDF_WIDESTRING)
-        raw_attachment = pdfium_c.FPDFDoc_AddAttachment(self, enc_name_ptr)
+        enc_name_ptr = ctypes.cast(enc_name, pdfium_r.FPDF_WIDESTRING)
+        raw_attachment = pdfium_r.FPDFDoc_AddAttachment(self, enc_name_ptr)
         if not raw_attachment:
             raise PdfiumError(f"Failed to create new attachment '{name}'.")
         return PdfAttachment(raw_attachment, self)
@@ -353,12 +366,12 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Handles to the attachment in question received from :meth:`.get_attachment`
         must not be accessed anymore after this method has been called.
         """
-        ok = pdfium_c.FPDFDoc_DeleteAttachment(self, index)
+        ok = pdfium_r.FPDFDoc_DeleteAttachment(self, index)
         if not ok:
             raise PdfiumError(f"Failed to delete attachment at index {index}.")
     
     
-    # TODO deprecate in favour of index access?
+    # CONSIDER deprecating in favour of index access?
     def get_page(self, index):
         """
         Returns:
@@ -368,13 +381,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
             The form env must not be closed before the page is closed!
         """
         
-        raw_page = pdfium_c.FPDF_LoadPage(self, index)
+        raw_page = pdfium_r.FPDF_LoadPage(self, index)
         if not raw_page:
             raise PdfiumError("Failed to load page.")
         page = PdfPage(raw_page, self, self.formenv)
         
         if self.formenv:
-            pdfium_c.FORM_OnAfterLoadPage(page, self.formenv)
+            pdfium_r.FORM_OnAfterLoadPage(page, self.formenv)
             self.formenv._add_kid(page)
         else:
             self._add_kid(page)
@@ -399,9 +412,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
         """
         if index is None:
             index = len(self)
-        raw_page = pdfium_c.FPDFPage_New(self, index, width, height)
+        raw_page = pdfium_r.FPDFPage_New(self, index, width, height)
         page = PdfPage(raw_page, self, None)
-        # not doing formenv calls for new pages as we don't see the point
+        # not doing formenv calls for new pages as it does not seem necessary
         self._add_kid(page)
         return page
     
@@ -411,7 +424,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Remove the page at *index* (zero-based).
         """
         # FIXME what if the caller still has a handle to the page?
-        pdfium_c.FPDFPage_Delete(self, index)
+        pdfium_r.FPDFPage_Delete(self, index)
     
     
     def import_pages(self, pdf, pages=None, index=None):
@@ -432,14 +445,14 @@ class PdfDocument (pdfium_i.AutoCloseable):
             index = len(self)
         
         if isinstance(pages, str):
-            ok = pdfium_c.FPDF_ImportPages(self, pdf, pages.encode("ascii"), index)
+            ok = pdfium_r.FPDF_ImportPages(self, pdf, (pages+"\x00").encode("ascii"), index)
         else:
             page_count = 0
             c_pages = None
             if pages:
                 page_count = len(pages)
                 c_pages = (ctypes.c_int * page_count)(*pages)
-            ok = pdfium_c.FPDF_ImportPagesByIndex(self, pdf, c_pages, page_count, index)
+            ok = pdfium_r.FPDF_ImportPagesByIndex(self, pdf, c_pages, page_count, index)
         
         if not ok:
             raise PdfiumError("Failed to import pages.")
@@ -450,8 +463,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Returns:
             (float, float): Width and height in PDF canvas units of the page at *index* (zero-based).
         """
-        size = pdfium_c.FS_SIZEF()
-        ok = pdfium_c.FPDF_GetPageSizeByIndexF(self, index, size)
+        size = pdfium_r.FS_SIZEF()
+        ok = pdfium_r.FPDF_GetPageSizeByIndexF(self, index, size)
         if not ok:
             raise PdfiumError("Failed to get page size by index.")
         return (size.width, size.height)
@@ -463,9 +476,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
             str: Label of the page at *index* (zero-based).
             (A page label is essentially an alias that may be displayed instead of the page number.)
         """
-        n_bytes = pdfium_c.FPDF_GetPageLabel(self, index, None, 0)
+        n_bytes = pdfium_r.FPDF_GetPageLabel(self, index, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
-        pdfium_c.FPDF_GetPageLabel(self, index, buffer, n_bytes)
+        pdfium_r.FPDF_GetPageLabel(self, index, buffer, n_bytes)
         return buffer.raw[:n_bytes-2].decode("utf-16-le")
     
     
@@ -481,7 +494,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Returns:
             PdfXObject: The page as XObject.
         """
-        raw_xobject = pdfium_c.FPDF_NewXObjectFromPage(dest_pdf, self, index)
+        raw_xobject = pdfium_r.FPDF_NewXObjectFromPage(dest_pdf, self, index)
         if raw_xobject is None:
             raise PdfiumError(f"Failed to capture page at index {index} as FPDF_XOBJECT.")
         xobject = PdfXObject(raw=raw_xobject, pdf=dest_pdf)
@@ -489,42 +502,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return xobject
     
     
-    # TODO(apibreak) consider switching to a wrapper class around the raw bookmark
-    # (either with getter methods, or possibly cached properties)
-    def _get_bookmark(self, bookmark, level):
-        
-        n_bytes = pdfium_c.FPDFBookmark_GetTitle(bookmark, None, 0)
-        buffer = ctypes.create_string_buffer(n_bytes)
-        pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
-        title = buffer.raw[:n_bytes-2].decode('utf-16-le')
-        
-        # TODO(apibreak) just expose count as-is rather than using two variables and doing extra work
-        count = pdfium_c.FPDFBookmark_GetCount(bookmark)
-        is_closed = True if count < 0 else None if count == 0 else False
-        n_kids = abs(count)
-        
-        dest = pdfium_c.FPDFBookmark_GetDest(self, bookmark)
-        page_index = pdfium_c.FPDFDest_GetDestPageIndex(self, dest)
-        if page_index == -1:
-            page_index = None
-        
-        n_params = ctypes.c_ulong()
-        view_pos = (pdfium_c.FS_FLOAT * 4)()
-        view_mode = pdfium_c.FPDFDest_GetView(dest, n_params, view_pos)
-        view_pos = list(view_pos)[:n_params.value]
-        
-        return PdfOutlineItem(
-            level = level,
-            title = title,
-            is_closed = is_closed,
-            n_kids = n_kids,
-            page_index = page_index,
-            view_mode = view_mode,
-            view_pos = view_pos,
-        )
-    
-    
-    # TODO(apibreak) change outline API (see above)
     def get_toc(
             self,
             max_depth = 15,
@@ -533,136 +510,83 @@ class PdfDocument (pdfium_i.AutoCloseable):
             seen = None,
         ):
         """
-        Iterate through the bookmarks in the document's table of contents.
+        Iterate through the bookmarks in the document's table of contents (TOC).
         
         Parameters:
             max_depth (int):
                 Maximum recursion depth to consider.
         Yields:
-            :class:`.PdfOutlineItem`: Bookmark information.
+            :class:`.PdfBookmark`
         """
+        
+        # CONSIDER warn if max_depth reached?
         
         if seen is None:
             seen = set()
         
-        bookmark = pdfium_c.FPDFBookmark_GetFirstChild(self, parent)
+        bookmark_ptr = pdfium_r.FPDFBookmark_GetFirstChild(self, parent)
         
-        while bookmark:
+        while bookmark_ptr:
             
-            address = ctypes.addressof(bookmark.contents)
+            address = ctypes.addressof(bookmark_ptr.contents)
             if address in seen:
                 logger.warning("A circular bookmark reference was detected whilst parsing the table of contents.")
                 break
             else:
                 seen.add(address)
             
-            yield self._get_bookmark(bookmark, level)
+            yield PdfBookmark(bookmark_ptr, self, level)
             if level < max_depth-1:
-                yield from self.get_toc(
-                    max_depth = max_depth,
-                    parent = bookmark,
-                    level = level + 1,
-                    seen = seen,
-                )
+                yield from self.get_toc(max_depth=max_depth, parent=bookmark_ptr, level=level+1, seen=seen)
             
-            bookmark = pdfium_c.FPDFBookmark_GetNextSibling(self, bookmark)
-    
-    
-    def render(
-            self,
-            converter,
-            renderer = PdfPage.render,
-            page_indices = None,
-            n_processes = os.cpu_count(),
-            pass_info = False,
-            mk_formconfig = None,
-            **kwargs
-        ):
-        """
-        .. deprecated:: 4.19
-            This method will be removed with the next major release (v5) due to serious conceptual problems. See the upcoming changelog for more info.
-        
-        .. versionchanged:: 4.19
-            Fixed some major non-API implementation issues.
-        
-        Render multiple pages in parallel, using a process pool executor.
-        
-        Hint:
-            If your code shall be frozen into an executable, :func:`multiprocessing.freeze_support`
-            needs to be called at the start of the ``if __name__ == "__main__":`` block if using this method.
-        
-        Parameters:
-            converter (typing.Callable):
-                A function to convert the rendering output. See :class:`.PdfBitmap` for built-in converters.
-            page_indices (list[int] | None):
-                A sequence of zero-based indices of the pages to render. Duplicate page indices are prohibited.
-                If None, all pages will be included. The order of results is supposed to match the order of given page indices.
-            n_processes (int):
-                The number of parallel process to use.
-            renderer (typing.Callable):
-                The page rendering function to use. This may be used to plug in custom renderers other than :meth:`.PdfPage.render`.
-            mk_formconfig (typing.Callable[FPDF_FORMFILLINFO] | None):
-                Optional callback returning a custom form config to use when initializing a form env in worker jobs.
-            kwargs (dict):
-                Keyword arguments to the renderer.
-        
-        Yields:
-            :data:`typing.Any`: Result as returned by the given converter.
-        """
-        
-        # TODO(apibreak) remove mk_formconfig parameter (bloat)
-        
-        if not isinstance(self._input, (Path, str, bytes)):
-            raise ValueError(f"Cannot render in parallel with input type '{type(self._input).__name__}'.")
-        
-        n_pages = len(self)
-        if not page_indices:
-            page_indices = [i for i in range(n_pages)]
-        else:
-            if not all(0 <= i < n_pages for i in page_indices):
-                raise ValueError("Out-of-bounds page indices are prohibited.")
-            if len(page_indices) != len(set(page_indices)):
-                raise ValueError("Duplicate page indices are prohibited.")
-        
-        converter_params = list( inspect.signature(converter).parameters )[1:]
-        
-        pool_kwargs = dict(
-            initializer = _parallel_renderer_init,
-            initargs = (self._input, self._password, bool(self.formenv), mk_formconfig, renderer, converter, converter_params, pass_info, kwargs),
-        )
-        with mp.Pool(n_processes, **pool_kwargs) as pool:
-            yield from pool.imap(_parallel_renderer_job, page_indices)
+            bookmark_ptr = pdfium_r.FPDFBookmark_GetNextSibling(self, bookmark_ptr)
 
 
-def _parallel_renderer_init(input_data, password, need_formenv, mk_formconfig, renderer, converter, converter_params, pass_info, kwargs):
-    
-    logger.info(f"Initializing PID {os.getpid()}")
-    
-    pdf = PdfDocument(input_data, password=password)
-    if need_formenv:
-        pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
-    
-    global _ParallelRenderObjs
-    _ParallelRenderObjs = (pdf, renderer, converter, converter_params, pass_info, kwargs)
+def _preprocess_input(input):
+    to_close = []
+    if callable(input):
+        input = input()
+    if isinstance(input, str):
+        input = Path(input)
+    if isinstance(input, Path):
+        input = input.expanduser().resolve()
+        if not input.is_file():
+            raise FileNotFoundError(input)
+    else:
+        if SharedMemory and isinstance(input, SharedMemory):
+            # currently the resolution path is shm -> memoryview -> mmap
+            to_close.append(input.close)
+            input = input.buf
+        if isinstance(input, memoryview):
+            input = input.obj
+        # NOTE in theory it might be good to handle mmap as bytes-like object, at least for SharedMemory to avoid callbacks and data copying - however, we currently don't do this due to complications with views held on an mmap - see PR(237)
+        if isinstance(input, bytearray):
+            input = (ctypes.c_ubyte * len(input)).from_buffer(input)
+    return input, to_close
 
 
-def _parallel_renderer_job(index):
+def _open_pdf(input, password):
     
-    logger.info(f"Starting page {index}")
+    to_hold, to_close = (), ()
+    password = (password+"\x00").encode("utf-8") if password else None
     
-    global _ParallelRenderObjs
-    pdf, renderer, converter, converter_params, pass_info, kwargs = _ParallelRenderObjs
+    if isinstance(input, Path):
+        pdf = pdfium_r.FPDF_LoadDocument((str(input)+"\x00").encode("utf-8"), password)
+    elif isinstance(input, (bytes, ctypes.Array)):
+        pdf = pdfium_r.FPDF_LoadMemDocument64(input, len(input), password)
+        to_hold = (input, )
+    elif pdfium_i.is_buffer(input, "r"):
+        bufaccess, to_hold = pdfium_i.get_bufreader(input)
+        to_close = (input.close, )
+        pdf = pdfium_r.FPDF_LoadCustomDocument(bufaccess, password)
+    else:
+        raise TypeError(f"Invalid input type '{type(input).__name__}'")
     
-    page = pdf[index]
-    bitmap = renderer(page, **kwargs)
-    info = bitmap.get_info()
-    page.close()
+    if pdfium_r.FPDF_GetPageCount(pdf) < 1:
+        err_code = pdfium_r.FPDF_GetLastError()
+        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
     
-    # in principle, we could expose any local variables here
-    local_vars = dict(index=index)
-    result = converter(bitmap, **{p: local_vars[p] for p in converter_params})
-    
-    return (result, info) if pass_info else result
+    return pdf, to_hold, to_close
 
 
 class PdfFormEnv (pdfium_i.AutoCloseable):
@@ -688,7 +612,7 @@ class PdfFormEnv (pdfium_i.AutoCloseable):
     
     @staticmethod
     def _close_impl(raw, config, pdf):
-        pdfium_c.FPDFDOC_ExitFormFillEnvironment(raw)
+        pdfium_r.FPDFDOC_ExitFormFillEnvironment(raw)
         id(config)
         pdf.formenv = None
 
@@ -704,7 +628,7 @@ class PdfXObject (pdfium_i.AutoCloseable):
     
     def __init__(self, raw, pdf):
         self.raw, self.pdf = raw, pdf
-        super().__init__(pdfium_c.FPDF_CloseXObject)
+        super().__init__(pdfium_r.FPDF_CloseXObject)
     
     @property
     def parent(self):  # AutoCloseable hook
@@ -717,61 +641,96 @@ class PdfXObject (pdfium_i.AutoCloseable):
             If multiple page objects are created from one XObject, they share resources.
             Page objects created from an XObject remain valid after the XObject is closed.
         """
-        raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
+        raw_pageobj = pdfium_r.FPDF_NewFormObjectFromXObject(self)
         return PdfObject(  # not a child object (see above)
             raw = raw_pageobj,
             pdf = self.pdf,
         )
 
 
-def _open_pdf(input_data, password, autoclose):
+class PdfBookmark (pdfium_i.AutoCastable):
+    """
+    Bookmark helper class.
     
-    to_hold, to_close = (), ()
-    if password is not None:
-        password = (password+"\x00").encode("utf-8")
+    Attributes:
+        raw (FPDF_BOOKMARK):
+            The underlying PDFium bookmark handle.
+        pdf (PdfDocument):
+            Reference to the document this bookmark belongs to.
+        level (int):
+            The bookmark's nesting level in the TOC tree. Corresponds to the number of parent bookmarks.
+    """
     
-    if isinstance(input_data, Path):
-        pdf = pdfium_c.FPDF_LoadDocument((str(input_data)+"\x00").encode("utf-8"), password)
-    elif isinstance(input_data, (bytes, ctypes.Array)):
-        pdf = pdfium_c.FPDF_LoadMemDocument64(input_data, len(input_data), password)
-        to_hold = (input_data, )
-    elif pdfium_i.is_buffer(input_data, "r"):
-        bufaccess, to_hold = pdfium_i.get_bufreader(input_data)
-        if autoclose:
-            to_close = (input_data, )
-        pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
-    else:
-        raise TypeError(f"Invalid input type '{type(input_data).__name__}'")
+    def __init__(self, raw, pdf, level):
+        self.raw, self.pdf, self.level = raw, pdf, level
     
-    if pdfium_c.FPDF_GetPageCount(pdf) < 1:
-        err_code = pdfium_c.FPDF_GetLastError()
-        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
+    @property
+    def parent(self):  # no hook, just for consistency
+        return self.pdf
     
-    return pdf, to_hold, to_close
+    def get_title(self):
+        """
+        Returns:
+            str: The bookmark's title string.
+        """
+        n_bytes = pdfium_r.FPDFBookmark_GetTitle(self, None, 0)
+        buffer = ctypes.create_string_buffer(n_bytes)
+        pdfium_r.FPDFBookmark_GetTitle(self, buffer, n_bytes)
+        return buffer.raw[:n_bytes-2].decode("utf-16-le")
+    
+    def get_count(self):
+        """
+        Returns:
+            int: Signed number of child bookmarks (fully recursive). Zero if the bookmark has no descendants.
+            The initial state shall be closed (collapsed) if negative, open (expanded) if positive.
+        """
+        return pdfium_r.FPDFBookmark_GetCount(self)
+    
+    def get_dest(self):
+        """
+        Returns:
+            PdfDest | None: The bookmark's destination (page index, viewport), or None on failure.
+        """
+        raw_dest = pdfium_r.FPDFBookmark_GetDest(self.pdf, self)
+        if not raw_dest:
+            return None
+        return PdfDest(raw_dest, pdf=self.pdf)
 
 
-# TODO(apibreak) change outline API (see above)
-PdfOutlineItem = namedtuple("PdfOutlineItem", "level title is_closed n_kids page_index view_mode view_pos")
-"""
-Bookmark information.
-
-Parameters:
-    level (int):
-        Number of parent items.
-    title (str):
-        Title string of the bookmark.
-    is_closed (bool):
-        True if child items shall be collapsed, False if they shall be expanded.
-        None if the item has no descendants (i. e. ``n_kids == 0``).
-    n_kids (int):
-        Absolute number of child items, according to the PDF.
-    page_index (int | None):
-        Zero-based index of the page the bookmark points to.
-        May be None if the bookmark has no target page (or it could not be determined).
-    view_mode (int):
-        A view mode constant (:data:`PDFDEST_VIEW_*`) defining how the coordinates of *view_pos* shall be interpreted.
-    view_pos (list[float]):
-        Target position on the page the viewport should jump to when the bookmark is clicked.
-        It is a sequence of :class:`float` values in PDF canvas units.
-        Depending on *view_mode*, it may contain between 0 and 4 coordinates.
-"""
+class PdfDest (pdfium_i.AutoCastable):
+    """
+    Destination helper class.
+    
+    Attributes:
+        raw (FPDF_DEST): The underlying PDFium destination handle.
+        pdf (PdfDocument): Reference to the document this dest belongs to.
+    """
+    
+    def __init__(self, raw, pdf):
+        self.raw, self.pdf = raw, pdf
+    
+    @property
+    def parent(self):  # no hook, just for consistency
+        return self.pdf
+    
+    def get_index(self):
+        """
+        Returns:
+            int | None: Zero-based index of the page the dest points to, or None on failure.
+        """
+        val = pdfium_r.FPDFDest_GetDestPageIndex(self.pdf, self)
+        return val if val >= 0 else None
+    
+    def get_view(self):
+        """
+        Returns:
+            (int, list[float]): A tuple of (view_mode, view_pos).
+            *view_mode* is a constant (one-of :data:`PDFDEST_VIEW_*`) defining how *view_pos* shall be interpreted.
+            *view_pos* is the target position on the page the dest points to.
+            It may contain between 0 to 4 float coordinates, depending on the view mode.
+        """
+        n_params = ctypes.c_ulong()
+        pos = (pdfium_r.FS_FLOAT * 4)()
+        mode = pdfium_r.FPDFDest_GetView(self, n_params, pos)
+        pos = list(pos)[:n_params.value]
+        return (mode, pos)

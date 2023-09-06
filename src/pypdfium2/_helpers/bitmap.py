@@ -1,13 +1,11 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfBitmap", "PdfBitmapInfo")
+__all__ = ("PdfBitmap", )
 
 import ctypes
 import logging
-import weakref
-from collections import namedtuple
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 
@@ -28,49 +26,59 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     """
     Bitmap helper class.
     
-    Hint:
-        This class provides built-in converters (e. g. :meth:`.to_pil`, :meth:`.to_numpy`) that may be used to create a different representation of the bitmap.
-        Converters can be applied on :class:`.PdfBitmap` objects either as bound method (``bitmap.to_*()``), or as function (``PdfBitmap.to_*(bitmap)``)
-        The second pattern is useful for API methods that need to apply a caller-provided converter (e. g. :meth:`.PdfDocument.render`)
-    
-    .. _PIL Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
-    
-    Note:
-        All attributes of :class:`.PdfBitmapInfo` are available in this class as well.
-    
     Warning:
         ``bitmap.close()``, which frees the buffer of foreign bitmaps, is not validated for safety.
-        A bitmap must not be closed when other objects still depend on its buffer!
+        A bitmap must not be closed while other objects still depend on its buffer!
+    
+    .. _PIL Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
     
     Attributes:
         raw (FPDF_BITMAP):
             The underlying PDFium bitmap handle.
-        buffer (~ctypes.c_ubyte):
-            A ctypes array representation of the pixel data (each item is an unsigned byte, i. e. a number ranging from 0 to 255).
+        buffer (~ctypes.c_ubyte | bytes):
+            A buffer containing the pixel data. May be either mutable or immutable, depening on how the bitmap was created.
+        width (int):
+            Width of the bitmap (horizontal size).
+        height (int):
+            Height of the bitmap (vertical size).
+        stride (int):
+            Number of bytes per line in the bitmap buffer.
+            Depending on how the bitmap was created, there may be a padding of unused bytes at the end of each line, so this value can be greater than ``width * n_channels``.
+        format (int):
+            PDFium bitmap format constant (:attr:`FPDFBitmap_*`)
+        rev_byteorder (bool):
+            Whether the bitmap is using reverse byte order.
+        n_channels (int):
+            Number of channels per pixel.
+        mode (str):
+            The bitmap format as string (see `PIL Modes`_).
+    
+    Hint:
+        If descriptive attributes are needed beyond the scope of the original bitmap buffer,
+        be sure to detach them from them bitmap, to avoid holding the buffer in memory unnecessarily.
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
-        self.raw, self.buffer, self.width, self.height = raw, buffer, width, height
-        self.stride, self.format, self.rev_byteorder = stride, format, rev_byteorder
+        
+        self.raw = raw
+        self.buffer = buffer
+        self.width, self.height = width, height
+        self.stride = stride
+        self.format = format
+        self.rev_byteorder = rev_byteorder
         self.n_channels = pdfium_i.BitmapTypeToNChannels[self.format]
         self.mode = (pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else pdfium_i.BitmapTypeToStr)[self.format]
-        super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
+        
+        # slot to store arguments for PdfPosConv, set on page rendering
+        self._pos_args = None
+        
+        if needs_free:
+            super().__init__(pdfium_r.FPDFBitmap_Destroy, obj=self.buffer)
     
     
     @property
     def parent(self):  # AutoCloseable hook
         return None
-    
-    
-    def get_info(self):
-        """
-        Returns:
-            PdfBitmapInfo: A namedtuple describing the bitmap.
-        """
-        return PdfBitmapInfo(
-            width=self.width, height=self.height, stride=self.stride, format=self.format,
-            rev_byteorder=self.rev_byteorder, n_channels=self.n_channels, mode=self.mode,
-        )
     
     
     @classmethod
@@ -87,14 +95,14 @@ class PdfBitmap (pdfium_i.AutoCloseable):
                 If the bitmap was created from a buffer allocated by Python/ctypes, pass in the ctypes array to keep it referenced.
         """
         
-        width = pdfium_c.FPDFBitmap_GetWidth(raw)
-        height = pdfium_c.FPDFBitmap_GetHeight(raw)
-        format = pdfium_c.FPDFBitmap_GetFormat(raw)
-        stride = pdfium_c.FPDFBitmap_GetStride(raw)
+        width = pdfium_r.FPDFBitmap_GetWidth(raw)
+        height = pdfium_r.FPDFBitmap_GetHeight(raw)
+        format = pdfium_r.FPDFBitmap_GetFormat(raw)
+        stride = pdfium_r.FPDFBitmap_GetStride(raw)
         
         if ex_buffer is None:
             needs_free = True
-            first_item = pdfium_c.FPDFBitmap_GetBuffer(raw)
+            first_item = pdfium_r.FPDFBitmap_GetBuffer(raw)
             if first_item.value is None:
                 raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
             buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * (stride * height))).contents
@@ -113,39 +121,46 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     def new_native(cls, width, height, format, rev_byteorder=False, buffer=None):
         """
         Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by Python/ctypes.
-        Bitmaps created by this function are always packed (no unused bytes at line end).
+        Bitmaps created by this function are packed (no unused bytes between lines).
         """
         
         stride = width * pdfium_i.BitmapTypeToNChannels[format]
         if buffer is None:
             buffer = (ctypes.c_ubyte * (stride * height))()
-        raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
+        raw = pdfium_r.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
         
         # alternatively, we could call the constructor directly with the information from above
         return cls.from_raw(raw, rev_byteorder, buffer)
     
     
     @classmethod
-    def new_foreign(cls, width, height, format, rev_byteorder=False, force_packed=False):
+    def new_foreign_simple(cls, width, height, use_alpha, rev_byteorder=False):
         """
-        Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by PDFium.
+        Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by pdfium.
         
-        Using this method is discouraged. Prefer :meth:`.new_native` instead.
+        The resulting buffer is supposed to be packed (no unused bytes between lines),
+        and the first byte double word aligned. If the OS allows, the pdfium function can allocate up to 4 GB of memory.
+        
+        See :meth:`.new_foreign` for an alternative function that supports more pixel formats.
         """
-        stride = width * pdfium_i.BitmapTypeToNChannels[format] if force_packed else 0
-        raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, None, stride)
+        raw = pdfium_r.FPDFBitmap_Create(width, height, use_alpha)
         return cls.from_raw(raw, rev_byteorder)
     
     
     @classmethod
-    def new_foreign_simple(cls, width, height, use_alpha, rev_byteorder=False):
+    def new_foreign(cls, width, height, format, rev_byteorder=False, force_packed=False):
         """
-        Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by PDFium.
-        The resulting bitmap is supposed to be packed (i. e. no gap of unused bytes between lines).
+        Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by pdfium.
         
-        Using this method is discouraged. Prefer :meth:`.new_native` instead.
+        An alternative function is :meth:`.new_foreign_simple`, but it suppotrs less pixel formats.
+        
+        Parameters:
+            force_packed (bool):
+                If False (the default), there may be a gap of unused bytes between lines (offset = :attr:`.stride` - width*n_channels).
+                Otherwise, attempt to force pdfium to create a packed buffer.
         """
-        raw = pdfium_c.FPDFBitmap_Create(width, height, use_alpha)
+        stride = width * pdfium_i.BitmapTypeToNChannels[format] if force_packed else 0
+        raw = pdfium_r.FPDFBitmap_CreateEx(width, height, format, None, stride)
         return cls.from_raw(raw, rev_byteorder)
     
     
@@ -162,7 +177,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
                 RGBA fill color (a tuple of 4 integers ranging from 0 to 255).
         """
         c_color = pdfium_i.color_tohex(color, self.rev_byteorder)
-        pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
+        pdfium_r.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
     
     
     # Requirement: If the result is a view of the buffer (not a copy), it keeps the referenced memory valid.
@@ -217,8 +232,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         Returns:
             PIL.Image.Image: PIL image (representation or copy of the bitmap buffer).
-        
-        .. versionchanged:: 4.16 Set ``image.readonly = False`` so that changes to the image are also reflected in the buffer.
         """
         
         # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.frombuffer
@@ -239,9 +252,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         return image
     
     
-    # FIXME might want to rename *recopy* to *mutable* ?
     @classmethod
-    def from_pil(cls, pil_image, recopy=False):
+    def from_pil(cls, pil_image):
         """
         Convert a :mod:`PIL` image to a PDFium bitmap.
         Due to the restricted number of color formats and bit depths supported by PDFium's
@@ -250,34 +262,22 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Parameters:
             pil_image (PIL.Image.Image):
                 The image.
-            recopy (bool):
-                If False (the default), reuse the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying. This is recommended if you do not modify the bitmap, though the buffer does not actually enforce immutability.
-                If True (otherwise), copy memory into a new buffer that is mutable by design. This is recommended if you modify the bitmap, e.g. using :meth:`.fill_rect`.
-                Note that the resulting bitmap is always independent of the PIL image, regardless of this option.
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
-        
-        .. versionchanged:: 4.15 reference bytes object instead of copying
-        .. versionadded:: 4.16 opt-in re-copying for mutability within Python API contract
         """
         
         if pil_image.mode in pdfium_i.BitmapStrToConst:
-            # PIL always seems to represent BGR(A/X) input as RGB(A/X), so this code passage is probably only hit for L
+            # PIL apparently always represents BGR(A/X) as RGB(A/X), so this code passage is only hit for L
             format = pdfium_i.BitmapStrToConst[pil_image.mode]
         else:
             pil_image = _pil_convert_for_pdfium(pil_image)
             format = pdfium_i.BitmapStrReverseToConst[pil_image.mode]
         
+        # FIXME PIL does not seem to expose the actual image buffer directly?
         py_buffer = pil_image.tobytes()
-        if recopy:
-            c_buffer = (ctypes.c_ubyte * len(py_buffer)).from_buffer_copy(py_buffer)
-        else:
-            # see docs above and https://stackoverflow.com/a/21490290/15547292
-            c_buffer = ctypes.cast(py_buffer, ctypes.POINTER(ctypes.c_ubyte * len(py_buffer))).contents
-            weakref.finalize(c_buffer, lambda: id(py_buffer))
-        
         w, h = pil_image.size
-        return cls.new_native(w, h, format, rev_byteorder=False, buffer=c_buffer)
+        
+        return cls.new_native(w, h, format, rev_byteorder=False, buffer=py_buffer)
     
     
     # TODO implement from_numpy()
@@ -309,24 +309,3 @@ def _pil_convert_for_pdfium(pil_image):
         pil_image = PIL.Image.merge("RGBX", (b, g, r, x))
     
     return pil_image
-
-
-PdfBitmapInfo = namedtuple("PdfBitmapInfo", "width height stride format rev_byteorder n_channels mode")
-"""
-Attributes:
-    width (int):
-        Width of the bitmap (horizontal size).
-    height (int):
-        Height of the bitmap (vertical size).
-    stride (int):
-        Number of bytes per line in the bitmap buffer.
-        Depending on how the bitmap was created, there may be a padding of unused bytes at the end of each line, so this value can be greater than ``width * n_channels``.
-    format (int):
-        PDFium bitmap format constant (:attr:`FPDFBitmap_*`)
-    rev_byteorder (bool):
-        Whether the bitmap is using reverse byte order.
-    n_channels (int):
-        Number of channels per pixel.
-    mode (str):
-        The bitmap format as string (see `PIL Modes`_).
-"""

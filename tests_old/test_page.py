@@ -3,7 +3,7 @@
 
 import pytest
 import pypdfium2 as pdfium
-# import pypdfium2.raw as pdfium_c
+# import pypdfium2.raw as pdfium_r
 from .conftest import TestFiles
 
 
@@ -59,6 +59,6 @@ def test_page_labels():
 #     page = pdf[0]
     
 #     rc = page._flatten()
-#     assert rc == pdfium_c.FLATTEN_SUCCESS
+#     assert rc == pdfium_r.FLATTEN_SUCCESS
     
 #     # pdf.save(OutputDir / "flattened.pdf")

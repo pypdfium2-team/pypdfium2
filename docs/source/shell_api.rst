@@ -17,6 +17,8 @@ Main Help
 .. command-output:: pypdfium2 --help
 
 
+.. FIXME we get a lot of duplication regarding input flags, which are attached to almost every subparser
+
 Arranger
 ********
 .. command-output:: pypdfium2 arrange --help

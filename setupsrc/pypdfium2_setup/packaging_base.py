@@ -2,37 +2,49 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # No external dependencies shall be imported in this file
+# TODO improve consistency of variable names; think about variables to move in/out
 
+import re
 import sys
+import json
 import shutil
 import platform
 import sysconfig
 import subprocess
 from pathlib import Path
+import urllib.request as url_request
 
-# TODO improve consistency of variable names; think about variables to move in/out
 
-BinaryTargetVar      = "PDFIUM_PLATFORM"
-BinaryTarget_None    = "none"
-BinaryTarget_Auto    = "auto"
-VersionTargetVar     = "PDFIUM_VERSION"
-VersionTarget_Latest = "latest"
-BindingsFileName     = "raw.py"  # NOTE if you rename this, delete the file `bindings/$VALUE`
-VerStatusFileName    = ".pdfium_version.txt"
-V8StatusFileName     = ".pdfium_is_v8.txt"
-HomeDir              = Path.home()
-SourceTree           = Path(__file__).parents[2]
-DataTree             = SourceTree / "data"
-SB_Dir               = SourceTree / "sourcebuild"
-ModuleDir            = SourceTree / "src" / "pypdfium2"
-VersionFile          = ModuleDir / "version.py"
-Changelog            = SourceTree / "docs" / "devel" / "changelog.md"
-ChangelogStaging     = SourceTree / "docs" / "devel" / "changelog_staging.md"
-RepositoryURL        = "https://github.com/pypdfium2-team/pypdfium2"
-PDFium_URL           = "https://pdfium.googlesource.com/pdfium"
-DepotTools_URL       = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
-ReleaseRepo          = "https://github.com/bblanchon/pdfium-binaries"
-ReleaseURL           = ReleaseRepo + "/releases/download/chromium%2F"
+VerStatusFileName = ".pdfium_version.txt"
+V8StatusFileName  = ".pdfium_is_v8.txt"
+BindingsFileName  = "raw_unsafe.py"  # NOTE if you rename this, also rename or delete the instance in the `bindings/` dir
+
+HomeDir           = Path.home()
+SourceTree        = Path(__file__).parents[2]
+DataTree          = SourceTree / "data"
+SB_Dir            = SourceTree / "sourcebuild"
+ModuleDir         = SourceTree / "src" / "pypdfium2"
+VersionFile       = ModuleDir / "version.py"
+Changelog         = SourceTree / "docs" / "devel" / "changelog.md"
+ChangelogStaging  = SourceTree / "docs" / "devel" / "changelog_staging.md"
+AutoreleaseDir    = SourceTree / "autorelease"
+MajorUpdateFile   = AutoreleaseDir / "update_major.txt"
+BetaUpdateFile    = AutoreleaseDir / "update_beta.txt"
+RefBindingsFile   = SourceTree / "bindings" / BindingsFileName
+
+BinarySpec_EnvVar      = "PDFIUM_BINARY"
+BinarySpec_VersionSep  = ":"
+BinarySpec_V8Indicator = "-v8"
+PlatformTarget_None    = "none"  # sdist
+PlatformTarget_Auto    = "auto"  # host
+VersionTarget_Latest   = "latest"
+
+RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
+PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
+DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
+ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
+ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 
 # figure out whether our pypdfium2-specific fork of ctypesgen is installed
@@ -109,7 +121,7 @@ class _host_platform:
         
         # Get information about the host platform (system and machine name)
         # For the machine name, the platform module just passes through information provided by the OS (The uname command on Unix, or an equivalent implementation on other systems like Windows), so we can determine the relevant names from Python's source code, system specs or information available online (e. g. https://en.wikipedia.org/wiki/Uname)
-        # There is also sysconfig.get_platform() which we used before, but its behaviour did not fully match our needs (esp. on macOS)
+        # There is also sysconfig.get_platform() which we used before, but its behavior did not fully match our needs (esp. on macOS)
         self._system_name = platform.system().lower()
         self._machine_name = platform.machine().lower()
         
@@ -219,6 +231,22 @@ def get_latest_version():
     return int( tag.split("/")[-1] )
 
 
+def get_full_version(v_short):
+    info = url_request.urlopen(f"{ReleaseInfoURL}{v_short}").read().decode("utf-8")
+    info = json.loads(info)
+    title = info["name"]
+    match = re.match(f"PDFium (\d+.\d+.{v_short}.\d+)", title)
+    return match.group(1)
+
+
+def read_version_file(path):
+    ver_info = path.read_text().strip().split("\n")
+    if len(ver_info) == 1:
+        ver_info.append("")
+    assert len(ver_info) == 2
+    return tuple(ver_info)
+
+
 def call_ctypesgen(target_dir, include_dir, have_v8xfa=False):
     
     # see https://github.com/ctypesgen/ctypesgen/issues/160
@@ -268,14 +296,14 @@ def emplace_platfiles(pl_name):
     
     pl_dir = DataTree / pl_name
     if not pl_dir.exists():
-        raise RuntimeError(f"Missing platform directory {pl_name} - you might have forgotten to run update_pdfium.py")
+        raise RuntimeError(f"Missing platform directory {pl_name}")
     
     ver_file = pl_dir / VerStatusFileName
     if not ver_file.exists():
         raise RuntimeError(f"Missing PDFium version file for {pl_name}")
     
     ver_changes = dict()
-    ver_changes["V_LIBPDFIUM"] = ver_file.read_text().strip()
+    ver_changes["V_LIBPDFIUM"], ver_changes["V_LIBPDFIUM_FULL"] = read_version_file(ver_file)
     ver_changes["V_BUILDNAME"] = "source" if pl_name == PlatformNames.sourcebuild else "pdfium-binaries"
     ver_changes["V_PDFIUM_IS_V8"] = (pl_dir / V8StatusFileName).exists()
     set_versions(ver_changes)
@@ -340,7 +368,7 @@ def set_versions(ver_changes):
         assert content.count(previous) == 1
         content = content.replace(previous, updated)
         
-        # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, no reliance can be placed upon the values of dynamic variables (V_PYPDFIUM2 !) after this method has been run. If you need the real value, VerNamespace needs to be re-created.
+        # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, dynamic values like V_PYPDFIUM2 cannot be relied on after this method has been run. If you need the actual current value, VerNamespace needs to be re-created.
         VerNamespace[var] = new_val
     
     VersionFile.write_text(content)

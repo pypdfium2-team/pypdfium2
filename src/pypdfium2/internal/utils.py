@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import ctypes
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 
 
 def color_tohex(color, rev_byteorder):
@@ -30,24 +31,31 @@ def set_callback(struct, fname, callback):
 
 
 def is_buffer(buf, spec="r"):
-    methods = []
-    assert set(spec).issubset( set("rw") )
+    assert set(spec).issubset( set("rw") ) and len(spec) > 0
+    ok = True
     if "r" in spec:
-        methods += ["seek", "tell", "read", "readinto"]
+        ok = all(hasattr(buf, a) for a in ("seek", "tell")) and (hasattr(buf, "readinto") or hasattr(buf, "read"))
     if "w" in spec:
-        methods += ["write"]
-    return all(callable(getattr(buf, a, None)) for a in methods)
+        ok = ok and hasattr(buf, "write")
+    return ok
 
 
 class _buffer_reader:
     
     def __init__(self, buffer):
         self.buffer = buffer
+        self._fill = self._readinto if hasattr(self.buffer, "readinto") else self._memmove
+    
+    def _readinto(self, cbuf, _):
+        self.buffer.readinto(cbuf)
+    
+    def _memmove(self, cbuf, size):
+        ctypes.memmove(cbuf, self.buffer.read(size), size)
     
     def __call__(self, _, position, p_buf, size):
-        c_buf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
+        cbuf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size)).contents
         self.buffer.seek(position)
-        self.buffer.readinto(c_buf.contents)
+        self._fill(cbuf, size)
         return 1
 
 
@@ -64,10 +72,11 @@ class _buffer_writer:
 
 def get_bufreader(buffer):
     
-    file_len = buffer.seek(0, 2)
+    buffer.seek(0, os.SEEK_END)
+    file_len = buffer.tell()
     buffer.seek(0)
     
-    reader = pdfium_c.FPDF_FILEACCESS()
+    reader = pdfium_r.FPDF_FILEACCESS()
     reader.m_FileLen = file_len
     set_callback(reader, "m_GetBlock", _buffer_reader(buffer))
     reader.m_Param = None
@@ -78,7 +87,7 @@ def get_bufreader(buffer):
 
 
 def get_bufwriter(buffer):
-    writer = pdfium_c.FPDF_FILEWRITE(version=1)
+    writer = pdfium_r.FPDF_FILEWRITE(version=1)
     set_callback(writer, "WriteBlock", _buffer_writer(buffer))
     return writer
 
@@ -87,5 +96,5 @@ def pages_c_array(pages):
     if not pages:
         return None, 0
     count = len(pages)
-    c_array = (pdfium_c.FPDF_PAGE * count)(*[p.raw for p in pages])
+    c_array = (pdfium_r.FPDF_PAGE * count)(*[p.raw for p in pages])
     return c_array, count

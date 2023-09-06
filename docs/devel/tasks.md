@@ -11,7 +11,7 @@ Also see the issues panel and inline `TODO`/`FIXME` marks in source code.
 * Add helpers for interruptible rendering.
 
 ### Setup Infrastructure
-* craft_packages: add means to skip platforms for which artefacts are missing.
+* craft_packages: add means to skip platforms for which artifacts are missing.
 * update_pdfium: only generate the bindings file once for all platforms.
 * update_pdfium/setup: re-think the general concept (thoughts following the addition of support for custom pdfium version and V8 support). Include version and V8 status in data dirname?
 * packaging_base: consider using a class for `VerNamespace`.

@@ -12,11 +12,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup import update_pdfium
-# TODO? consider glob import or dotted access
+# CONSIDER glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     set_versions,
     get_version_ns,
+    get_full_version,
     get_latest_version,
     get_changelog_staging,
     Host,
@@ -29,13 +30,12 @@ from pypdfium2_setup.packaging_base import (
     VersionFile,
     VerNamespace,
     BindingsFileName,
+    AutoreleaseDir,
+    MajorUpdateFile,
+    BetaUpdateFile,
+    RefBindingsFile,
 )
 
-
-AutoreleaseDir  = SourceTree / "autorelease"
-MajorUpdateFile = AutoreleaseDir / "update_major.txt"
-BetaUpdateFile  = AutoreleaseDir / "update_beta.txt"
-RefBindingsFile = SourceTree / "bindings" / BindingsFileName
 
 # these files/dirs do not necessarily need to have been changed, `git add` silently skips that
 PlacesToRegister = (AutoreleaseDir, VersionFile, Changelog, ChangelogStaging, RefBindingsFile)
@@ -92,6 +92,7 @@ def do_versioning(latest):
     if c_updates:
         # denote pdfium update
         ver_changes["V_LIBPDFIUM"] = str(latest)
+        ver_changes["V_LIBPDFIUM_FULL"] = get_full_version( ver_changes["V_LIBPDFIUM"] )
     
     if inc_major:
         # major update
@@ -191,6 +192,7 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     if c_updates:
         
         # FIXME is there a faster way to get pdfium's commit log?
+        # CONSIDER specifically show changes to public/ ?
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tmpdir)

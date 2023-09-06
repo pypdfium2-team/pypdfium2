@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# TODO? consider dotted access
+# CONSIDER dotted access
 from pypdfium2._cli._parsers import add_input, get_input
 
 EXTRACT_RANGE   = "range"

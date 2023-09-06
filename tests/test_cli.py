@@ -7,7 +7,7 @@ import contextlib
 from pathlib import Path
 import pytest
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 import pypdfium2.__main__ as pdfium_cli
 from .conftest import TestResources, TestExpectations
 
@@ -17,13 +17,13 @@ def run_cli(argv, exp_stdout=None, normalize_lfs=False):
     argv = [str(a) for a in argv]
     
     if exp_stdout is None:
-        pdfium_cli.api_main(argv)
+        pdfium_cli.main(argv)
         
     else:
         
         stdout_buf = io.StringIO()
         with contextlib.redirect_stdout(stdout_buf):
-            pdfium_cli.api_main(argv)
+            pdfium_cli.main(argv)
         
         if isinstance(exp_stdout, Path):
             exp_stdout = exp_stdout.read_text()
@@ -111,7 +111,7 @@ def test_tile(tmp_path):
     page = pdf[0]
     pageobjs = list( page.get_objects(max_depth=1) )
     assert len(pageobjs) == 3
-    assert all(o.type == pdfium_c.FPDF_PAGEOBJ_FORM for o in pageobjs)
+    assert all(o.type == pdfium_r.FPDF_PAGEOBJ_FORM for o in pageobjs)
 
 
 def test_render_multipage(tmp_path):

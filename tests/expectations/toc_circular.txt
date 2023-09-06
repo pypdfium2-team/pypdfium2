@@ -1,2 +1,2 @@
-[*] A Good Beginning -> ?  # ? []
-[*] A Good Ending -> ?  # ? []
+[*] A Good Beginning -> _
+[*] A Good Ending -> _

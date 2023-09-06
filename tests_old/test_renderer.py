@@ -7,7 +7,7 @@ import warnings
 import PIL.Image
 import pytest
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_r
 from .conftest import (
     TestFiles,
     PyVersion,
@@ -23,12 +23,6 @@ def sample_page():
     pdf = pdfium.PdfDocument(TestFiles.render)
     page = pdf[0]
     yield page
-
-
-@pytest.fixture
-def multipage_doc():
-    pdf = pdfium.PdfDocument(TestFiles.multipage)
-    yield pdf
 
 
 def _check_pixels(pil_image, pixels):
@@ -197,13 +191,12 @@ def test_render_page_tonumpy(rev_byteorder, sample_page):
     bitmap = sample_page.render(
         rev_byteorder = rev_byteorder,
     )
-    info, array = bitmap.get_info(), bitmap.to_numpy()
+    array = bitmap.to_numpy()
     assert isinstance(array, numpy.ndarray)
-    assert isinstance(info, pdfium.PdfBitmapInfo)
     if rev_byteorder:
-        assert info.mode == "RGB"
+        assert bitmap.mode == "RGB"
     else:
-        assert info.mode == "BGR"
+        assert bitmap.mode == "BGR"
     
     for (x, y), value in ExpRenderPixels:
         if rev_byteorder:
@@ -231,82 +224,14 @@ def test_render_page_noantialias(sample_page):
     assert isinstance(pil_image, PIL.Image.Image)
 
 
-def test_render_pages_no_concurrency(multipage_doc):
-    for page in multipage_doc:
+def test_render_pages_no_concurrency():
+    pdf = pdfium.PdfDocument(TestFiles.multipage)
+    for page in pdf:
         image = page.render(
             scale = 0.5,
             grayscale = True,
         ).to_pil()
         assert isinstance(image, PIL.Image.Image)
-
-
-@pytest.fixture
-def render_pdffile_topil(multipage_doc):
-    
-    renderer = multipage_doc.render(
-        pdfium.PdfBitmap.to_pil,
-        scale = 0.5,
-    )
-    imgs = []
-    
-    for image in renderer:
-        assert isinstance(image, PIL.Image.Image)
-        assert image.mode == "RGB"
-        imgs.append(image)
-    
-    assert len(imgs) == 3
-    yield imgs
-
-
-@pytest.fixture
-def render_pdffile_tonumpy(multipage_doc):
-    
-    renderer = multipage_doc.render(
-        pdfium.PdfBitmap.to_numpy,
-        scale = 0.5,
-        rev_byteorder = True,
-        pass_info = True,
-    )
-    imgs = []
-    
-    for array, info in renderer:
-        assert info.mode == "RGB"
-        assert isinstance(array, numpy.ndarray)
-        pil_image = PIL.Image.fromarray(array, mode=info.mode)
-        imgs.append(pil_image)
-    
-    # for i, img in enumerate(imgs):
-    #     img.save(OutputDir / ("numpy_%s.png" % i))
-    
-    assert len(imgs) == 3
-    yield imgs
-
-
-def test_render_pdffile(render_pdffile_topil, render_pdffile_tonumpy):
-    for a, b in zip(render_pdffile_topil, render_pdffile_tonumpy):
-        assert a == b
-
-
-def test_render_pdf_new():
-    
-    # two pages to actually reach the process pool and not just the single-page shortcut
-    pdf = pdfium.PdfDocument.new()
-    page_1 = pdf.new_page(50, 100)
-    page_2 = pdf.new_page(50, 100)
-    renderer = pdf.render(pdfium.PdfBitmap.to_pil)
-    
-    with pytest.raises(ValueError):
-        next(renderer)
-
-
-def test_render_pdfbuffer():
-    
-    buffer = open(TestFiles.multipage, "rb")
-    pdf = pdfium.PdfDocument(buffer)
-        
-    renderer = pdf.render(pdfium.PdfBitmap.to_pil)
-    with pytest.raises(ValueError):
-        next(renderer)
 
 
 @pytest.mark.parametrize(
@@ -352,13 +277,13 @@ def test_numpy_nocopy(sample_page):
 @pytest.mark.parametrize(
     ("bitmap_format", "rev_byteorder", "is_referenced"),
     [
-        (pdfium_c.FPDFBitmap_BGR,  False, False),
-        (pdfium_c.FPDFBitmap_BGR,  True,  False),
-        (pdfium_c.FPDFBitmap_BGRA, False, False),
-        (pdfium_c.FPDFBitmap_BGRA, True,  True),
-        (pdfium_c.FPDFBitmap_BGRx, False, False),
-        (pdfium_c.FPDFBitmap_BGRx, True,  True),
-        (pdfium_c.FPDFBitmap_Gray, False, True),
+        (pdfium_r.FPDFBitmap_BGR,  False, False),
+        (pdfium_r.FPDFBitmap_BGR,  True,  False),
+        (pdfium_r.FPDFBitmap_BGRA, False, False),
+        (pdfium_r.FPDFBitmap_BGRA, True,  True),
+        (pdfium_r.FPDFBitmap_BGRx, False, False),
+        (pdfium_r.FPDFBitmap_BGRx, True,  True),
+        (pdfium_r.FPDFBitmap_Gray, False, True),
     ]
 )
 def test_pil_nocopy_where_possible(bitmap_format, rev_byteorder, is_referenced, sample_page):

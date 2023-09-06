@@ -45,7 +45,7 @@ jobs:
           python3 -m pip install -r req/docs.txt
           python3 -m pip install -e .
       - name: Build documentation
-        run: make docs-build
+        run: ./run docs-build
       - name: Remove unnecessary files
         run: |
           cd docs/build/html

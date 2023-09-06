@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2._helpers as pdfium
-# TODO? consider dotted access
+# CONSIDER dotted access
 from pypdfium2._cli._parsers import parse_numtext
 
 
@@ -27,7 +27,7 @@ def attach(parser):
     parser.add_argument(
         "--output", "-o",
         required = True,
-        help = "Target path for the output document",
+        help = "Target path for the output document.",
     )
 
 
@@ -41,11 +41,7 @@ def main(args):
         args.passwords.append(None)
     
     dest_pdf = pdfium.PdfDocument.new()
-    index = 0
-    
     for in_path, pages, password in zip(args.inputs, args.pages, args.passwords):
         src_pdf = pdfium.PdfDocument(in_path, password=password)
         dest_pdf.import_pages(src_pdf, pages=pages)
-        index += len(src_pdf)
-    
     dest_pdf.save(args.output)
