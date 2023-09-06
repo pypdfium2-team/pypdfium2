@@ -235,7 +235,7 @@ def get_full_version(v_short):
     info = url_request.urlopen(f"{ReleaseInfoURL}{v_short}").read().decode("utf-8")
     info = json.loads(info)
     title = info["name"]
-    match = re.match(f"PDFium (\d+.\d+.{v_short}.\d+)", title)
+    match = re.match(rf"PDFium (\d+.\d+.{v_short}.\d+)", title)
     return match.group(1)
 
 
