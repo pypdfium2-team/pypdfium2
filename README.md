@@ -109,8 +109,9 @@ Here are some examples of using the support model API.
       page_indices = page_indices,
       scale = 300/72,  # 300dpi resolution
   )
+  n_digits = len(str(n_pages))
   for i, image in zip(page_indices, renderer):
-      image.save("out_%0*d.jpg" % (n_digits, i))
+      image.save("out_%0*d.jpg" % (n_digits, i+1))
   ```
 
 * Read the table of contents
@@ -121,8 +122,7 @@ Here are some examples of using the support model API.
       print(
           "    " * item.level +
           "[%s] %s -> %s  # %s %s" % (
-              state, item.title, target, item.view_mode,
-              [round(c, n_digits) for c in item.view_pos],
+              state, item.title, target, item.view_mode, item.view_pos,
           )
       )
   ```
