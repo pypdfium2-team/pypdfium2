@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.emplace import get_pdfium
 from pypdfium2_setup.packaging_base import (
+    purge_pdfium_versions,
     BinarySpec_EnvVar,
     PlatformTarget_None,
 )
@@ -23,6 +24,7 @@ def main():
     
     binary_spec = os.environ.get(BinarySpec_EnvVar, "").strip()
     if binary_spec == PlatformTarget_None:
+        purge_pdfium_versions()
         setuptools.setup(**SetupKws)
         return
     

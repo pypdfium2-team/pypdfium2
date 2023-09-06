@@ -27,6 +27,7 @@ from pypdfium2_setup.packaging_base import (
     emplace_platfiles,
     get_latest_version,
     read_version_file,
+    purge_pdfium_versions,
 )
 
 
@@ -38,7 +39,7 @@ def get_pdfium(binary_spec):
     
     if binary_spec == PlatformNames.sourcebuild:
         # for now, require that callers ran build_pdfium.py beforehand so they are in charge of the build config - don't trigger sourcebuild in here if platform files don't exist
-        return binary_spec
+        return PlatformNames.sourcebuild
     
     req_ver = None
     use_v8 = False
@@ -97,6 +98,7 @@ def main():
     if args.binary_spec == PlatformTarget_None:
         print("Removing existing in-tree platform files, if any.", file=sys.stderr)
         clean_platfiles()
+        purge_pdfium_versions()
         return
     
     pl_name = get_pdfium(args.binary_spec)

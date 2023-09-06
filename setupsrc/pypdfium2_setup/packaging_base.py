@@ -225,6 +225,51 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
         return comp_process
 
 
+def get_version_ns():
+    ver_ns = {}
+    exec(VersionFile.read_text(), ver_ns)
+    ver_ns = {k: v for k, v in ver_ns.items() if not k.startswith("_")}
+    return ver_ns
+
+VerNamespace = get_version_ns()
+
+
+def set_versions(ver_changes):
+    
+    if len(ver_changes) == 0:
+        return False
+    skip = {var for var, value in ver_changes.items() if value == VerNamespace[var]}
+    if len(skip) == len(ver_changes):
+        return False
+    
+    content = VersionFile.read_text()
+    
+    for var, new_val in ver_changes.items():
+        
+        if var in skip:
+            continue
+        
+        # this does not work universally - only one notation per type is supported, and switches between str and non-str types don't work
+        # FIXME see if we can restructure this code for improved flexibility
+        if isinstance(new_val, str):
+            template = '%s = "%s"'
+        else:
+            template = '%s = %s'
+        previous = template % (var, VerNamespace[var])
+        updated = template % (var, new_val)
+        
+        print(f"'{previous}' -> '{updated}'")
+        assert content.count(previous) == 1
+        content = content.replace(previous, updated)
+        
+        # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, dynamic values like V_PYPDFIUM2 cannot be relied on after this method has been run. If you need the actual current value, VerNamespace needs to be re-created.
+        VerNamespace[var] = new_val
+    
+    VersionFile.write_text(content)
+    
+    return True
+
+
 def get_latest_version():
     git_ls = run_cmd(["git", "ls-remote", f"{ReleaseRepo}.git"], cwd=None, capture=True)
     tag = git_ls.split("\t")[-1]
@@ -245,6 +290,15 @@ def read_version_file(path):
         ver_info.append("")
     assert len(ver_info) == 2
     return tuple(ver_info)
+
+
+def purge_pdfium_versions():
+    set_versions(dict(
+        V_LIBPDFIUM = "unknown",
+        V_LIBPDFIUM_FULL = "",
+        V_BUILDNAME = "unknown",
+        V_PDFIUM_IS_V8 = None,
+    ))
 
 
 def call_ctypesgen(target_dir, include_dir, have_v8xfa=False):
@@ -330,47 +384,3 @@ def get_changelog_staging(flush=False):
         ChangelogStaging.write_text(header)
     
     return devel_msg
-
-def get_version_ns():
-    ver_ns = {}
-    exec(VersionFile.read_text(), ver_ns)
-    ver_ns = {k: v for k, v in ver_ns.items() if not k.startswith("_")}
-    return ver_ns
-
-VerNamespace = get_version_ns()
-
-
-def set_versions(ver_changes):
-    
-    if len(ver_changes) == 0:
-        return False
-    skip = {var for var, value in ver_changes.items() if value == VerNamespace[var]}
-    if len(skip) == len(ver_changes):
-        return False
-    
-    content = VersionFile.read_text()
-    
-    for var, new_val in ver_changes.items():
-        
-        if var in skip:
-            continue
-        
-        # this does not work universally - only one notation per type is supported, and switches between str and non-str types don't work
-        # FIXME see if we can restructure this code for improved flexibility
-        if isinstance(new_val, str):
-            template = '%s = "%s"'
-        else:
-            template = '%s = %s'
-        previous = template % (var, VerNamespace[var])
-        updated = template % (var, new_val)
-        
-        print(f"'{previous}' -> '{updated}'")
-        assert content.count(previous) == 1
-        content = content.replace(previous, updated)
-        
-        # Beware: While this updates the VerNamespace entry itself, it will not update dependent entries, which may lead to inconsistent data. That is, dynamic values like V_PYPDFIUM2 cannot be relied on after this method has been run. If you need the actual current value, VerNamespace needs to be re-created.
-        VerNamespace[var] = new_val
-    
-    VersionFile.write_text(content)
-    
-    return True

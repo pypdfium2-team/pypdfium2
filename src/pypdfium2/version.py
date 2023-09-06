@@ -15,13 +15,13 @@ V_PYPDFIUM2 = f"{V_MAJOR}.{V_MINOR}.{V_PATCH}"
 if V_BETA is not None:
     V_PYPDFIUM2 += f"b{V_BETA}"
 
-#: str: Short pdfium version (git tag or commit hash).
+#: str: Short pdfium version (git tag, commit hash or "unknown").
 V_LIBPDFIUM = "5975"
 
-#: str: Full pdfium version (in Chromium version scheme). Unknown/empty if pdfium was built from source through pypdfium2's build script.
+#: str: Full pdfium version (in Chromium version scheme). Unset/empty if pdfium was built from source through pypdfium2's build script.
 V_LIBPDFIUM_FULL = "118.0.5975.0"
 
-#: str: The pdfium binary's origin (pdfium-binaries, source).
+#: str: The pdfium binary's origin (pdfium-binaries, source, unknown).
 V_BUILDNAME = "pdfium-binaries"
 
 # TODO consider renaming to V_IS_V8XFA or something
