@@ -48,11 +48,12 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   [^no_build_isolation]: Possible scenarios include using a locally modified version of a dependency, or supplying a dependency built from a certain commit.
   
-* Installing an unofficial distribution
+* Unofficial distributions
   
-  To the authors' knowledge, there currently are no other distributions of pypdfium2 apart from the official wheel releases on PyPI and GitHub.
-  There is no conda package yet.
-  So far, pypdfium2 has not been included in any operating system repositories. While we are interested in cooperation with external package maintainers to make this possible, the authors of this project have no control over and are not responsible for third-party distributions of pypdfium2.
+  pypdfium2 currently releases official builds on PyPI and GitHub.
+  The authors of this project have no control over and are not responsible for third-party distributions of pypdfium2 (such as unofficial conda packages/recipes).
+  However, we are interested in cooperation with external package maintainers for wider adoption of pypdfium2 (e.g. linux distros).
+
 
 ### Setup magic
 
