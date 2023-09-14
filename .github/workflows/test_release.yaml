@@ -29,7 +29,7 @@ jobs:
           python-version: ${{ matrix.py }}
       
       - name: Check out pypdfium2 repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
       
@@ -46,7 +46,7 @@ jobs:
         run: python3 -c "import pypdfium2; print('version=%s' % pypdfium2.V_PYPDFIUM2)" >> $GITHUB_OUTPUT
       
       - name: Check out pypdfium2 repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
           ref: ${{ steps.version.outputs.version }}
