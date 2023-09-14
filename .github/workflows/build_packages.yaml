@@ -179,9 +179,6 @@ jobs:
         with:
           python-version: ${{ inputs.py_version }}
       
-      - name: Install twine
-        run: python3 -m pip install -U twine
-      
       - name: Download packages
         uses: actions/download-artifact@v3
         with:
