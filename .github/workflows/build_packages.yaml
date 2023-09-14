@@ -163,8 +163,10 @@ jobs:
     # https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
     environment: release
     permissions:
-      # The permission below is mandatory for PyPI/TestPyPI upload via "trusted publishing".
+      # `id-token: write` is mandatory for PyPI/TestPyPI upload via "trusted publishing".
       id-token: write
+      # `contents: write` is required for the repository changes
+      contents: write
     
     steps:
       
