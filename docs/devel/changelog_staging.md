@@ -4,3 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Switched PyPI upload to "trusted publishing", which is considered safer.
