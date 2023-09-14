@@ -153,9 +153,18 @@ jobs:
   
   
   publish:
+    
     needs: [test_setup, test_sourcebuild, build, test]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
+    
+    # `environment: release` is mandatory for our PyPI/TestPyPI upload via "trusted publishing".
+    # (On PyPI config time, restricting the environment is optional, but strongly encouraged. Once installed on PyPI, it must be set in the workflow. This applies here.)
+    # https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
+    environment: release
+    permissions:
+      # The permission below is mandatory for PyPI/TestPyPI upload via "trusted publishing".
+      id-token: write
     
     steps:
       
@@ -207,11 +216,21 @@ jobs:
           tag: ${{ needs.build.outputs.new_version }}
           prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
       
+      # Upload to TestPyPI / PyPI via "trusted publishing".
+      # https://docs.pypi.org/trusted-publishers/adding-a-publisher/
+      # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+      # https://github.com/pypa/gh-action-pypi-publish
+      
       - name: Publish to TestPyPI
-        run: twine upload -u __token__ -p ${{ secrets.TESTPYPI_TOKEN }} --verbose --repository-url "https://test.pypi.org/legacy/" dist/*
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist/  # the default
       
       - name: Publish to PyPI
-        run: twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --verbose dist/*
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/  # the default
       
       - name: Trigger GH Pages rebuild
         uses: benc-uk/workflow-dispatch@v1
