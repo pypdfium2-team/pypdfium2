@@ -79,9 +79,6 @@ class PdfObject (pdfium_i.AutoCloseable):
         
         Returns:
             tuple[float*4]: A rectangle of four coordinates for left, bottom, right, and top.
-        
-        Hint:
-            Consider using :meth:`.get_quad_points` for tighter boundaries.
         """
         if self.page is None:
             raise RuntimeError("Must not call get_bounds() on a loose pageobject.")
@@ -96,14 +93,14 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     def get_quad_points(self):
         """
-        Get the object's quadriliteral points, i.e. its corner positions.
-        For transformed objects, this provides tighter bounds than a rectangle (e.g. shear, or rotation by a non-multiple of 90°).
+        Get the object's quadriliteral points (i.e. the positions of its corners).
+        For transformed objects, this provides tighter bounds than a rectangle (e.g. rotation by a non-multiple of 90°, shear).
         
         Note:
             This function only supports image and text objects.
         
         Returns:
-            tuple[tuple[float*2] * 4]: Four corner points of the form (x, y).
+            tuple[tuple[float*2] * 4]: Corner positions as (x, y) tuples, counter-clockwise from origin, i.e. bottom-left, bottom-right, top-right, top-left. Relative to the base coordinate system.
         """
         
         if self.type not in (pdfium_r.FPDF_PAGEOBJ_IMAGE, pdfium_r.FPDF_PAGEOBJ_TEXT):
