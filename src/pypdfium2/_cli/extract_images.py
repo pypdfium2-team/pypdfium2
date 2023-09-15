@@ -49,7 +49,7 @@ def main(args):
         args.format = "png"
     
     pdf = get_input(args)
-    n_pdigits = len(str( max(args.pages)+1 ))
+    n_pdigits = len(str( len(pdf) ))
     
     for i in args.pages:
         
