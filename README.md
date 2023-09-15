@@ -604,7 +604,7 @@ RTD supports hosting multiple versions, so we currently have one linked to the `
 New builds are automatically triggered by a webhook whenever you push to a linked branch.
 
 Additionally, one documentation build can also be hosted on [GitHub Pages](https://pypdfium2-team.github.io/pypdfium2/index.html).
-It is implemented with a CI workflow, which is currently linked to `main` and triggered on push as well.
+It is implemented with a CI workflow, which is supposed to be triggered automatically on release.
 This provides us with full control over the build environment and the used commands, whereas RTD is kind of limited in this regard.
 
 
