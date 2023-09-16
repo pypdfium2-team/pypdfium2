@@ -537,8 +537,8 @@ class PdfPosConv:
             raise RuntimeError("This bitmap does not belong to a page.")
         
         assert page is not None
-        orig_page = bitmap._pos_args[0]()
-        if orig_page is not page:
+        page_ref = bitmap._pos_args[0]
+        if page_ref() is not page:  # resolve weakref and check identity
             raise RuntimeError("This bitmap was not rendered from the given page.")
         
         self.page = page
