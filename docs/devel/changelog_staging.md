@@ -15,6 +15,7 @@
 - Pageobjects:
   * Renamed `PdfObject.get_pos()` to `.get_bounds()`.
   * Renamed `PdfImage.get_size()` to `.get_px_size()`.
+  * Removed `fb_render` parameter from `PdfImage.extract()` because it does not fit in this API. If the image's rendered bitmap is desired, use `.get_bitmap(render=True)` in the first place.
 - `PdfDocument.get_toc()`: Replaced bookmark namedtuples with method-oriented wrapper classes `PdfBookmark` and `PdfDest`,
   so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects.
   Also provide signed count as-is rather than needlessly splitting it in two variables (unsigned int `n_kids` and bool `is_closed`).

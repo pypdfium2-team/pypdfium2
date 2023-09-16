@@ -347,22 +347,20 @@ class PdfImage (PdfObject):
                 File prefix or byte buffer to which the image shall be written.
             fb_format (str):
                 The image format to use in case it is necessary to (re-)encode the data.
-            fb_render (bool):
-                Whether the image should be rendered if falling back to bitmap-based extraction.
         """
         
         # https://crbug.com/pdfium/1930
         
-        extraction_gen = _extract_smart(self, *args, **kwargs)
-        format = next(extraction_gen)
+        handler = _extract_smart(self, *args, **kwargs)
+        format = next(handler)
         
         if isinstance(dest, str):
             dest = Path(dest)
         if isinstance(dest, Path):
             with open(dest.with_suffix("."+format), "wb") as buf:
-                extraction_gen.send(buf)
+                handler.send(buf)
         elif pdfium_i.is_buffer(dest, "w"):
-            extraction_gen.send(dest)
+            handler.send(dest)
         else:
             raise ValueError(f"Cannot extract to '{dest}'")
 
@@ -386,7 +384,7 @@ def _get_pil_mode(colorspace, bpp):
         return None
 
 
-def _extract_smart(image_obj, fb_format=None, fb_render=False):
+def _extract_smart(image_obj, fb_format=None):
     
     # FIXME somewhat hard to read...
     
@@ -394,7 +392,7 @@ def _extract_smart(image_obj, fb_format=None, fb_render=False):
         data, info = _extract_direct(image_obj)
     except ImageNotExtractableError:
         # CONSIDER log reason why the image cannot be extracted directly
-        pil_image = image_obj.get_bitmap(render=fb_render).to_pil()
+        pil_image = image_obj.get_bitmap(render=False).to_pil()
     else:
         pil_image = None
         format = info.format

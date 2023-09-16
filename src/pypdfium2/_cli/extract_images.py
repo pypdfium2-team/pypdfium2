@@ -37,7 +37,7 @@ def attach(parser):
     parser.add_argument(
         "--render",
         action = "store_true",
-        help = "Whether to get rendered bitmaps, taking masks and transform matrices into account. (Fallback if doing smart extraction.)",
+        help = "Whether to get rendered bitmaps, applying masks and transform matrices. Implies --use-bitmap.",
     )
 
 
@@ -45,6 +45,8 @@ def main(args):
     
     if not args.output_dir.is_dir():
         raise NotADirectoryError(args.output_dir)
+    if args.render:
+        args.use_bitmap = True
     if args.use_bitmap and not args.format:
         args.format = "png"
     
@@ -59,7 +61,6 @@ def main(args):
             max_depth = args.max_depth,
         )
         
-        # not perfectly memory efficient, but we need image count for digit formatting
         images = list(images)
         n_idigits = len(str( len(images) ))
         
@@ -71,7 +72,7 @@ def main(args):
                     pil_image = image.get_bitmap(render=args.render).to_pil()
                     pil_image.save( prefix.with_suffix("."+args.format) )
                 else:
-                    image.extract(prefix, fb_format=args.format, fb_render=args.render)
+                    image.extract(prefix, fb_format=args.format)
             except pdfium.PdfiumError:
                 traceback.print_exc()
             image.close()
