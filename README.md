@@ -305,8 +305,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   To access the data, you'll want to re-interpret the pointer using `ctypes.cast()` to encompass the whole array:
   ```python
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
-  first_item = pdfium_r.FPDFBitmap_GetBuffer(bitmap)
-  buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * size))
+  buffer_ptr = pdfium_r.FPDFBitmap_GetBuffer(bitmap)
+  buffer = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * size))
   # Buffer as ctypes array (referencing the original buffer, will be unavailable as soon as the bitmap is destroyed)
   c_array = buffer.contents
   # Buffer as Python bytes (independent copy)
@@ -315,9 +315,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * Writing data from Python into a C buffer works in a similar fashion:
   ```python
-  # (Assuming `first_item` is a pointer to the first item of a C buffer to write into,
+  # (Assuming `buffer_ptr` is a pointer to the first item of a C buffer to write into,
   #  `size` the number of bytes it can store, and `py_buffer` a Python byte buffer)
-  c_buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_char * size))
+  c_buffer = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_char * size))
   # Read from the Python buffer, starting at its current position, directly into the C buffer
   # (until the target is full or the end of the source is reached)
   n_bytes = py_buffer.readinto(c_buffer.contents)  # returns the number of bytes read
@@ -466,9 +466,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   pdfium_r.FPDF_RenderPageBitmap(*render_args)
   
   # Get a pointer to the first item of the buffer
-  first_item = pdfium_r.FPDFBitmap_GetBuffer(bitmap)
+  buffer_ptr = pdfium_r.FPDFBitmap_GetBuffer(bitmap)
   # Re-interpret the pointer to encompass the whole buffer
-  buffer = ctypes.cast(first_item, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+  buffer = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
   
   # Create a PIL image from the buffer contents
   img = PIL.Image.frombuffer("RGBA", (width, height), buffer.contents, "raw", "BGRA", 0, 1)
