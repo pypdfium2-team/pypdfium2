@@ -238,20 +238,19 @@ def get_tool(name):
 
 def serialise_config(config_dict):
     
-    config_str = ""
-    sep = ""
+    parts = []
     
     for key, value in config_dict.items():
-        config_str += sep + f"{key} = "
+        p = f"{key} = "
         if isinstance(value, bool):
-            config_str += str(value).lower()
+            p += str(value).lower()
         elif isinstance(value, str):
-            config_str += f'"{value}"'
+            p += f'"{value}"'
         else:
             raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
-        sep = "\n"
+        parts.append(p)
     
-    return config_str
+    return "\n".join(parts)
 
 
 def main(
