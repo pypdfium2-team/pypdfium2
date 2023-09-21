@@ -47,17 +47,17 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             str: The text in the range in question, or an empty string if no text was found.
         """
         
+        # NOTE As of this writing, the GetText() API can't be called with a NULL buffer to get the required amount of memory first, thus calculate from char count.
+        # BUG(261) In some corner cases, the number of chars actually written to the buffer can be smaller, though, so use the char count returned by GetText() to slice the buffer.
+        
         if count == -1:
             count = self.count_chars() - index
         
-        # NOTE apparently, pdfium treats a surrogate pair like two separate chars, so this allocates enough memory and we end up with the right result
-        # (which however is no good API design - pdfium should properly handle surrogation and the API should tell the exact amount of memory needed)
-        n_bytes = count * 2
-        buffer = ctypes.create_string_buffer(n_bytes+2)
+        buffer = ctypes.create_string_buffer((count+1)*2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+        out_size = pdfium_r.FPDFText_GetText(self, index, count, buffer_ptr)
         
-        pdfium_r.FPDFText_GetText(self, index, count, buffer_ptr)
-        return buffer.raw[:n_bytes].decode("utf-16-le", errors=errors)
+        return buffer.raw[:(out_size-1)*2].decode("utf-16-le", errors=errors)
     
     
     def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
