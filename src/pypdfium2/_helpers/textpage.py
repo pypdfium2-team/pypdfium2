@@ -33,6 +33,22 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return self.page
     
     
+    def _get_active_text_range(self, c_start, c_end, l_passive=0, r_passive=0):
+        
+        if c_start > c_end:
+            return 0  # no active chars in range
+        
+        t_start = pdfium_c.FPDFText_GetTextIndexFromCharIndex(self, c_start)
+        if t_start == -1:
+            return self._get_active_text_range(c_start+1, c_end, l_passive=l_passive+1)
+        
+        t_end = pdfium_c.FPDFText_GetTextIndexFromCharIndex(self, c_end)
+        if t_end == -1:
+            return self._get_active_text_range(c_start, c_end-1, r_passive=r_passive+1)
+        
+        return t_start, t_end, l_passive, r_passive
+    
+    
     def get_text_range(self, index=0, count=-1, errors="ignore"):
         """
         Extract text from a given range.
@@ -47,15 +63,22 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             str: The text in the range in question, or an empty string if no text was found.
         """
         
-        # NOTE As of this writing, the GetText() API can't be called with a NULL buffer to get the required amount of memory first, thus calculate from char count.
-        # BUG(261) In some corner cases, the number of chars actually written to the buffer can be smaller, though, so use the char count returned by GetText() to slice the buffer.
-        
         if count == -1:
             count = self.count_chars() - index
         
-        buffer = ctypes.create_string_buffer((count+1)*2)
+        active_range = self._get_active_text_range(index, index+count-1)
+        if active_range == 0:
+            return ""
+        
+        t_start, t_end, l_passive, r_passive = active_range
+        index += l_passive
+        count -= l_passive + r_passive
+        in_size = (t_end - t_start) + 2
+        
+        buffer = ctypes.create_string_buffer(in_size * 2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         out_size = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
+        assert in_size == out_size, f"Buffer size mismatch: {in_size} vs {out_size}"
         
         return buffer.raw[:(out_size-1)*2].decode("utf-16-le", errors=errors)
     
