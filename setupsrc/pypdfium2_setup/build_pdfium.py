@@ -60,6 +60,7 @@ SyslibsConfig = {
     "use_system_zlib": True,
     "use_system_libtiff": True,
     "clang_use_chrome_plugins": False,
+    "use_allocator_shim": False,
 }
 
 
