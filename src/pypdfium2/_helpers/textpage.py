@@ -56,11 +56,19 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
         
         Parameters:
-            index (int): Index of the first character to include.
-            count (int): Number of characters to be extracted (defaults to -1 for all remaining characters after *index*).
-            errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
+            index (int): Index of the first char to include.
+            count (int): Number of chars to cover, relative to the internal char list. Defaults to -1 for all remaining chars after *index*.
+            errors (str): Error handling when decoding the data (see :meth:`bytes.decode`).
         Returns:
             str: The text in the range in question, or an empty string if no text was found.
+        
+        Important:
+            The returned text's length does not have to match *count*, even if it will for most PDFs.
+            This is because the underlying API may exclude/insert chars compared to the internal list, although rare in practice.
+            This means, if the char at ``i`` is excluded, ``get_text_range(i, 2)[1]`` will raise an index error.
+            Pdfium provides raw APIs ``FPDFText_GetTextIndexFromCharIndex() / FPDFText_GetCharIndexFromTextIndex()`` to translate between the two views and identify excluded/inserted chars.
+        Note:
+            In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
         """
         
         if count == -1:
@@ -266,7 +274,6 @@ class PdfTextSearcher (pdfium_i.AutoCloseable):
         ok = find_func(self)
         if not ok:
             return None
-        # FIXME what's the point of `count`? isn't it always equal to the length of the search text?
         index = pdfium_c.FPDFText_GetSchResultIndex(self)
         count = pdfium_c.FPDFText_GetSchCount(self)
         return index, count
