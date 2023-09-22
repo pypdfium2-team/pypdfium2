@@ -40,11 +40,11 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         
         t_start = pdfium_c.FPDFText_GetTextIndexFromCharIndex(self, c_start)
         if t_start == -1:
-            return self._get_active_text_range(c_start+1, c_end, l_passive=l_passive+1)
+            return self._get_active_text_range(c_start+1, c_end, l_passive+1, r_passive)
         
         t_end = pdfium_c.FPDFText_GetTextIndexFromCharIndex(self, c_end)
         if t_end == -1:
-            return self._get_active_text_range(c_start, c_end-1, r_passive=r_passive+1)
+            return self._get_active_text_range(c_start, c_end-1, l_passive, r_passive+1)
         
         return t_start, t_end, l_passive, r_passive
     
