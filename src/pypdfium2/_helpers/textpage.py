@@ -33,6 +33,22 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return self.page
     
     
+    def _get_active_text_range(self, c_start, c_end, l_passive=0, r_passive=0):
+        
+        if c_start > c_end:
+            return 0  # no active chars in range
+        
+        t_start = pdfium_r.FPDFText_GetTextIndexFromCharIndex(self, c_start)
+        if t_start == -1:
+            return self._get_active_text_range(c_start+1, c_end, l_passive+1, r_passive)
+        
+        t_end = pdfium_r.FPDFText_GetTextIndexFromCharIndex(self, c_end)
+        if t_end == -1:
+            return self._get_active_text_range(c_start, c_end-1, l_passive, r_passive+1)
+        
+        return t_start, t_end, l_passive, r_passive
+    
+    
     def get_text_range(self, index=0, count=-1, errors="ignore"):
         """
         Extract text from a given range.
@@ -40,22 +56,37 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
         
         Parameters:
-            index (int): Index of the first character to include.
-            count (int): Number of characters to be extracted (defaults to -1 for all remaining characters after *index*).
-            errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
+            index (int): Index of the first char to include.
+            count (int): Number of chars to cover, relative to the internal char list. Defaults to -1 for all remaining chars after *index*.
+            errors (str): Error handling when decoding the data (see :meth:`bytes.decode`).
         Returns:
             str: The text in the range in question, or an empty string if no text was found.
-        """
         
-        # NOTE As of this writing, the GetText() API can't be called with a NULL buffer to get the required amount of memory first, thus calculate from char count.
-        # BUG(261) In some corner cases, the number of chars actually written to the buffer can be smaller, though, so use the char count returned by GetText() to slice the buffer.
+        Important:
+            The returned text's length does not have to match *count*, even if it will for most PDFs.
+            This is because the underlying API may exclude/insert chars compared to the internal list, although rare in practice.
+            This means, if the char at ``i`` is excluded, ``get_text_range(i, 2)[1]`` will raise an index error.
+            Pdfium provides raw APIs ``FPDFText_GetTextIndexFromCharIndex() / FPDFText_GetCharIndexFromTextIndex()`` to translate between the two views and identify excluded/inserted chars.
+        Note:
+            In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
+        """
         
         if count == -1:
             count = self.count_chars() - index
         
-        buffer = ctypes.create_string_buffer((count+1)*2)
+        active_range = self._get_active_text_range(index, index+count-1)
+        if active_range == 0:
+            return ""
+        
+        t_start, t_end, l_passive, r_passive = active_range
+        index += l_passive
+        count -= l_passive + r_passive
+        in_size = (t_end - t_start) + 2
+        
+        buffer = ctypes.create_string_buffer(in_size * 2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         out_size = pdfium_r.FPDFText_GetText(self, index, count, buffer_ptr)
+        assert in_size == out_size, f"Buffer size mismatch: {in_size} vs {out_size}"
         
         return buffer.raw[:(out_size-1)*2].decode("utf-16-le", errors=errors)
     

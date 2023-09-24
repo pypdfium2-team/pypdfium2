@@ -48,10 +48,12 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   [^no_build_isolation]: Possible scenarios include using a locally modified version of a dependency, or supplying a dependency built from a certain commit.
   
-* Installing an unofficial distribution
+* Unofficial distributions
   
-  To the authors' knowledge, there currently are no other distributions of pypdfium2 apart from the official wheel releases on PyPI and GitHub. There is no conda package yet.
-  So far, pypdfium2 has not been included in any operating system repositories. While we are interested in cooperation with external package maintainers to make this possible, the authors of this project have no control over and are not responsible for third-party distributions of pypdfium2.
+  pypdfium2 currently releases official builds on PyPI and GitHub.
+  The authors of this project have no control over and are not responsible for third-party distributions of pypdfium2 (such as unofficial conda packages/recipes).
+  However, we are interested in cooperation with external package maintainers for wider adoption of pypdfium2 (e.g. linux distros).
+
 
 ### Setup magic
 
@@ -587,7 +589,7 @@ RTD supports hosting multiple versions, so we currently have one linked to the `
 New builds are automatically triggered by a webhook whenever you push to a linked branch.
 
 Additionally, one documentation build can also be hosted on [GitHub Pages](https://pypdfium2-team.github.io/pypdfium2/index.html).
-It is implemented with a CI workflow, which is currently linked to `main` and triggered on push as well.
+It is implemented with a CI workflow, which is supposed to be triggered automatically on release.
 This provides us with full control over the build environment and the used commands, whereas RTD is kind of limited in this regard.
 
 

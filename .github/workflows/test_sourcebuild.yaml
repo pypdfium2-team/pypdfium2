@@ -34,7 +34,7 @@ jobs:
           python-version: '3.10'
       
       - name: Check out pypdfium2 repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
       

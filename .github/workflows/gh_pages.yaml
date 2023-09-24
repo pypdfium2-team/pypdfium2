@@ -39,7 +39,7 @@ jobs:
         with:
           python-version: '3.10'
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install deps & pypdfium2
         run: |
           python3 -m pip install -r req/docs.txt
