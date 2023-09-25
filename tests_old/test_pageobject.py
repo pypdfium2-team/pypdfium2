@@ -207,6 +207,7 @@ def test_image_get_bitmap(render):
         assert bitmap.rev_byteorder is False
         output_path = OutputDir / "extract_rendered.png"
     else:
+        # NOTE fails with pdfium >= 1e1e173 (6015), < b5bc2e9 (6029), which returns RGB
         assert bitmap.format == pdfium_c.FPDFBitmap_Gray
         assert bitmap.n_channels == 1
         assert bitmap.width == 115
