@@ -75,6 +75,8 @@ def download_releases(platforms, version, use_v8, max_workers, robust):
     return archives
 
 
+# TODO Do not unpack whole archives, instead extract only the binaries we need and retrieve headers from pdfium directly. This would allow us to get rid of the tar compat code.
+
 def unpack_archives(archives):
     for pl_name, archive_path in archives.items():
         dest_dir = DataTree / pl_name / "build_tar"
