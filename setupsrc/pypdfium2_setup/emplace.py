@@ -75,8 +75,9 @@ def get_pdfium(binary_spec, force_rebuild=False):
     if need_rebuild or force_rebuild:
         if need_rebuild:
             print(f"Switching pdfium binary from ({prev_ver}, v8 {had_v8}) to ({req_ver}, v8 {use_v8})", file=sys.stderr)
-        else:
+        else:  # force_rebuild
             print(f"Force-rebuild ({req_ver}, v8 {use_v8}) despite cache", file=sys.stderr)
+        # NOTE update_pdfium cleans up pl_dir for us in case of mismatched existing cache
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
         print(f"Matching pdfium binary/bindings exists already ({req_ver}, v8 {use_v8})", file=sys.stderr)

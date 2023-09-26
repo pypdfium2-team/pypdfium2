@@ -109,8 +109,11 @@ def generate_bindings(archives, version, full_version, use_v8):
         
         ver_file = DataTree / pl_name / VerStatusFileName
         ver_file.write_text(f"{version}\n{full_version}")
+        v8_file = (pl_dir / V8StatusFileName)
         if use_v8:
-            (pl_dir / V8StatusFileName).touch(exist_ok=True)
+            v8_file.touch(exist_ok=True)
+        else:
+            assert not v8_file.exists()
         
         call_ctypesgen(pl_dir, build_dir/"include", use_v8)
         shutil.rmtree(build_dir)
