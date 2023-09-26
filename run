@@ -15,7 +15,7 @@ function check() {
 
 function clean() {
     rm -rf src/pypdfium2.egg-info/ dist data/*
-    rm -f tests/output/* src/pypdfium2.egg-info/SOURCES.txt
+    rm -f tests/output/* tests_old/output/* src/pypdfium2.egg-info/SOURCES.txt
 }
 
 function packaging() {
@@ -39,7 +39,7 @@ test)
     python3 -m pytest tests/ tests_old/ $args;;
 
 coverage)
-    python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/raw_unsafe.py,setupsrc/*" -m pytest tests/ tests_old/ $args
+    python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2/raw.py,setupsrc/*" -m pytest tests/ tests_old/ $args
     python3 -m coverage report;;
 
 docs-build)

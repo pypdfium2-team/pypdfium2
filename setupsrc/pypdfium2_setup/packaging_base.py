@@ -17,7 +17,8 @@ import urllib.request as url_request
 
 VerStatusFileName = ".pdfium_version.txt"
 V8StatusFileName  = ".pdfium_is_v8.txt"
-BindingsFileName  = "raw_unsafe.py"  # NOTE if you rename this, also rename or delete the instance in the `bindings/` dir
+# NOTE if renaming BindingsFileName, also rename `bindings/$FILE`
+BindingsFileName  = "raw.py"
 
 HomeDir           = Path.home()
 SourceTree        = Path(__file__).parents[2]
