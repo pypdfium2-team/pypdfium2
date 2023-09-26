@@ -12,7 +12,7 @@ from urllib import request
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-from pypdfium2_setup._compat import safe_unpack_tar
+from pypdfium2_setup._compat import safer_tar_unpack
 # CONSIDER glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     DataTree,
@@ -80,7 +80,7 @@ def download_releases(platforms, version, use_v8, max_workers, robust):
 def unpack_archives(archives):
     for pl_name, archive_path in archives.items():
         dest_dir = DataTree / pl_name / "build_tar"
-        safe_unpack_tar(archive_path, dest_dir)
+        safer_tar_unpack(archive_path, dest_dir)
         archive_path.unlink()
 
 

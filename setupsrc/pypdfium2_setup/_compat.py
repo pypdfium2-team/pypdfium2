@@ -1,16 +1,16 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Safe tar extraction preventing CVE-2007-4559
-# Tries to use the most elegant strategy available in the caller's python version
+# Safer tar extraction (hopefully) preventing CVE-2007-4559 etc.
+# Tries to use the most elegant strategy available in the caller's python version (>= 3.6)
 
-__all__ = ["safe_unpack_tar"]
+__all__ = ["safer_tar_unpack"]
 
 import sys
 
 if sys.version_info >= (3, 11, 4):  # PEP 706
     import shutil
-    def safe_unpack_tar(archive_path, dest_dir):
+    def safer_tar_unpack(archive_path, dest_dir):
         shutil.unpack_archive(archive_path, dest_dir, format="tar", filter="data")
 
 else:  # workaround
@@ -23,7 +23,7 @@ else:  # workaround
     
     import tarfile
     
-    def safe_unpack_tar(archive_path, dest_dir):
+    def safer_tar_unpack(archive_path, dest_dir):
         dest_dir = dest_dir.resolve()
         with tarfile.open(archive_path) as tar:
             for m in tar.getmembers():
