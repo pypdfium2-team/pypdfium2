@@ -35,7 +35,7 @@ from pypdfium2_setup.packaging_base import (
 # TODO add direct support for emplacing local pdfium from file
 
 
-def get_pdfium(binary_spec):
+def get_pdfium(binary_spec, force_rebuild=False):
     
     if binary_spec == PlatformNames.sourcebuild:
         # for now, require that callers ran build_pdfium.py beforehand so they are in charge of the build config - don't trigger sourcebuild in here if platform files don't exist
@@ -67,13 +67,16 @@ def get_pdfium(binary_spec):
     pl_dir = DataTree / pl_name
     ver_file = pl_dir / VerStatusFileName
     had_v8 = (pl_dir / V8StatusFileName).exists()
-    
     prev_ver = None
     if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
         prev_ver = int( read_version_file(ver_file)[0] )
     
-    if prev_ver != req_ver or had_v8 != use_v8:
-        print(f"Switching pdfium binary from ({prev_ver}, v8 {had_v8}) to ({req_ver}, v8 {use_v8})", file=sys.stderr)
+    need_rebuild = (prev_ver != req_ver or had_v8 != use_v8)
+    if need_rebuild or force_rebuild:
+        if need_rebuild:
+            print(f"Switching pdfium binary from ({prev_ver}, v8 {had_v8}) to ({req_ver}, v8 {use_v8})", file=sys.stderr)
+        else:
+            print(f"Force-rebuild ({req_ver}, v8 {use_v8}) despite cache", file=sys.stderr)
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
         print(f"Matching pdfium binary/bindings exists already ({req_ver}, v8 {use_v8})", file=sys.stderr)
@@ -93,6 +96,11 @@ def main():
         nargs = "?",
         help = f"The binary specifier. Same format as of ${BinarySpec_EnvVar} on setup.",
     )
+    parser.add_argument(
+        "--force-rebuild", "-f",
+        action = "store_true",
+        help = "If given, always rebuild platform files even if a matching cache exists already.",
+    )
     args = parser.parse_args()
     
     if args.binary_spec == PlatformTarget_None:
@@ -101,7 +109,7 @@ def main():
         purge_pdfium_versions()
         return
     
-    pl_name = get_pdfium(args.binary_spec)
+    pl_name = get_pdfium(args.binary_spec, args.force_rebuild)
     emplace_platfiles(pl_name)
 
 
