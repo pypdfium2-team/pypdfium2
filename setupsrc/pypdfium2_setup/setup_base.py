@@ -7,7 +7,7 @@ from pathlib import Path
 from wheel.bdist_wheel import bdist_wheel
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# TODO? consider glob import or dotted access
+# CONSIDER glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     VerNamespace,
     LibnameForSystem,
@@ -44,7 +44,6 @@ SetupKws = dict(
 def mkwheel(pl_name):
     
     emplace_platfiles(pl_name)
-    
     system = plat_to_system(pl_name)
     libname = LibnameForSystem[system]
     

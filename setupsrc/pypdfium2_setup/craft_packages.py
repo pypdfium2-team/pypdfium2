@@ -9,37 +9,41 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# TODO? consider glob import or dotted access
+# CONSIDER glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     run_cmd,
     clean_platfiles,
+    get_latest_version,
     Host,
     ModuleDir,
     BindingsFileName,
     LibnameForSystem,
     BinaryPlatforms,
     SourceTree,
-    BinaryTargetVar,
-    BinaryTarget_None,
+    BinarySpec_EnvVar,
+    BinarySpec_V8Indicator,
+    BinarySpec_VersionSep,
+    PlatformTarget_None,
 )
 
 
-class ArtefactStash:
+class ArtifactStash:
     
     # Preserve in-tree aftefacts from editable install
     
     def __init__(self):
         
         self.tmpdir = None
+        
+        # FIXME some degree of duplication with base::get_platfiles()
         file_names = [BindingsFileName, LibnameForSystem[Host.system]]
         self.files = [fp for fp in [ModuleDir / fn for fn in file_names] if fp.exists()]
-        
         if len(self.files) == 0:
             return
         elif len(self.files) != 2:
             print(f"Warning: Expected exactly 2 platform files, but found {len(self.files)}.", file=sys.stderr)
         
-        self.tmpdir = tempfile.TemporaryDirectory(prefix="pypdfium2_artefact_stash_")
+        self.tmpdir = tempfile.TemporaryDirectory(prefix="pypdfium2_artifact_stash_")
         self.tmpdir_path = Path(self.tmpdir.name)
         for fp in self.files:
             shutil.move(fp, self.tmpdir_path)
@@ -59,18 +63,30 @@ def run_build(args):
 def main():
     
     parser = argparse.ArgumentParser(
-        description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`. (This script does not take any arguments.)",
+        description = "Craft sdist and wheels for pypdfium2, using `python3 -m build`.",
     )
-    parser.parse_args()
+    parser.add_argument(
+        "--use-v8",
+        action = "store_true",
+    )
+    parser.add_argument(
+        "--version",
+        type = int,
+        default = None,
+    )
+    args = parser.parse_args()
+    if not args.version:
+        args.version = get_latest_version()
     
-    stash = ArtefactStash()
+    stash = ArtifactStash()
     
-    os.environ[BinaryTargetVar] = BinaryTarget_None
+    os.environ[BinarySpec_EnvVar] = PlatformTarget_None
     run_build(["--sdist"])
     clean_platfiles()
     
+    suffix = (BinarySpec_V8Indicator if args.use_v8 else "") + BinarySpec_VersionSep + str(args.version)
     for plat in BinaryPlatforms:
-        os.environ[BinaryTargetVar] = plat
+        os.environ[BinarySpec_EnvVar] = plat + suffix
         run_build(["--wheel"])
         clean_platfiles()
     
