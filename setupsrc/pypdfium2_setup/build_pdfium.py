@@ -147,7 +147,7 @@ def get_pdfium_version():
 
 
 def update_version(v_libpdfium):
-    # full version unknown
+    # NOTE this does not set the full version, not sure how to retrieve it
     (OutputDir / VerStatusFileName).write_text( str(v_libpdfium) )
 
 
