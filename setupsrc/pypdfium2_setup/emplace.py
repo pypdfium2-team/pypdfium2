@@ -58,7 +58,7 @@ def get_pdfium(binary_spec, force_rebuild=False):
     else:
         raise ValueError(f"Invalid binary spec '{binary_spec}'")
     
-    if not req_ver or (req_ver.lower() == VersionTarget_Latest):
+    if not req_ver or req_ver.lower() == VersionTarget_Latest:
         req_ver = get_latest_version()
     else:
         assert req_ver.isnumeric()
@@ -71,11 +71,11 @@ def get_pdfium(binary_spec, force_rebuild=False):
     if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
         prev_ver = int( read_version_file(ver_file)[0] )
     
-    need_rebuild = (prev_ver != req_ver or had_v8 != use_v8)
+    need_rebuild = prev_ver != req_ver or had_v8 != use_v8
     if need_rebuild or force_rebuild:
         if need_rebuild:
             print(f"Switching pdfium binary from ({prev_ver}, v8 {had_v8}) to ({req_ver}, v8 {use_v8})", file=sys.stderr)
-        else:  # force_rebuild
+        else:
             print(f"Force-rebuild ({req_ver}, v8 {use_v8}) despite cache", file=sys.stderr)
         # NOTE update_pdfium cleans up pl_dir for us in case of mismatched existing cache
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)

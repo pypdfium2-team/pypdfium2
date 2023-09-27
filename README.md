@@ -67,7 +67,7 @@ As pypdfium2 uses external binaries, there are some special setup aspects to con
   - Platform:
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If set to a certain platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
-    + If set to `sourcebuild`, binaries will be taken from the location where the build script places its artifacts, assuming a prior run of `build_pdfium.py`.
+    + If set to `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `build_pdfium.py`.
     + If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
     `sourcebuild` and `none` are standalone, they cannot be followed by additional specifiers.
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
