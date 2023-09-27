@@ -10,7 +10,7 @@ defaults:
   run:
     shell: bash
 
-# CONSIDER inlining setup test into build_packages:test job
+# TODO consider inlining setup test into build_packages:test job ?
 
 jobs:
   
