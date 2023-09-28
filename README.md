@@ -32,10 +32,10 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   * With a locally built PDFium binary
     ```bash
     python3 setupsrc/pypdfium2_setup/build_pdfium.py  # call with --help to list options
-    PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
+    PDFIUM_BINARY="sourcebuild" python3 -m pip install .
     ```
     Building PDFium may take a long time because it comes with its own toolchain and bundled dependencies, rather than using system-provided components.[^pdfium_buildsystem]
-    
+  
   The host system needs to provide `git` and a C pre-processor (`gcc` or `clang`).
   Setup code also depends on the Python packages `ctypesgen`, `wheel`, and `setuptools`, which will usually get installed automatically.
   
@@ -60,15 +60,18 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 As pypdfium2 uses external binaries, there are some special setup aspects to consider.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
-* The environment variable `$PDFIUM_PLATFORM` controls which binary to include on setup.
-  * If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
-    By default, the latest pdfium-binaries release is used, otherwise `$PDFIUM_VERSION` may be set to request a specific one.
-    Moreover, `$PDFIUM_USE_V8=1` may be set to use the V8 (JavaScript) enabled binaries.
-    (If matching platform files already exist in the `data/` cache, they will be reused as-is.)
-  * If set to a certain platform identifier, binaries for the requested platform will be used.[^platform_ids]
-    In this case, platform files will not be downloaded/generated automatically, but need to be supplied beforehand using the `update_pdfium.py` script.
-  * If set to `sourcebuild`, binaries will be taken from the location where the build script places its artefacts, assuming a prior run of `build_pdfium.py`.
-  * If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
+* The environment variable `$PDFIUM_BINARY` controls which binary to include on setup.
+  The format spec is `[$PLATFORM][-v8][:$VERSION]` (`[]` = segments, `$CAPS` = variables).
+* Examples: `auto`, `auto:5975` `auto-v8:5975` (`auto` may be subsituted by an explicit platform name, e.g. `linux_x64`).
+* Details:
+  - Platform:
+    + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
+    + If set to a certain platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
+    + If set to `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `build_pdfium.py`.
+    + If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
+    `sourcebuild` and `none` are standalone, they cannot be followed by additional specifiers.
+  - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
+  - Version: If given, use the specified pdfium-binaries release. Otherwise, use the latest one.
 
 [^platform_ids]: This is mainly of internal interest for packaging, so that wheels can be crafted for any platform without access to a native host.
 
@@ -100,49 +103,10 @@ Here are some examples of using the support model API.
   pdf = pdfium.PdfDocument("./path/to/document.pdf")
   version = pdf.get_version()  # get the PDF standard version
   n_pages = len(pdf)  # get the number of pages in the document
+  page = pdf[0]  # load a page
   ```
 
-* Render multiple pages concurrently
-  ```python
-  page_indices = [i for i in range(n_pages)]  # all pages
-  renderer = pdf.render(
-      pdfium.PdfBitmap.to_pil,
-      page_indices = page_indices,
-      scale = 300/72,  # 300dpi resolution
-  )
-  n_digits = len(str(n_pages))
-  for i, image in zip(page_indices, renderer):
-      image.save("out_%0*d.jpg" % (n_digits, i+1))
-  ```
-
-* Read the table of contents
-  ```python
-  for item in pdf.get_toc():
-      state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
-      target = "?" if item.page_index is None else item.page_index+1
-      print(
-          "    " * item.level +
-          "[%s] %s -> %s  # %s %s" % (
-              state, item.title, target, item.view_mode, item.view_pos,
-          )
-      )
-  ```
-
-* Load a page to work with
-  ```python
-  page = pdf[0]
-  
-  # Get page dimensions in PDF canvas units (1pt->1/72in by default)
-  width, height = page.get_size()
-  # Set the absolute page rotation to 90° clockwise
-  page.set_rotation(90)
-  
-  # Locate objects on the page
-  for obj in page.get_objects():
-      print(obj.level, obj.type, obj.get_pos())
-  ```
-
-* Render a single page
+* Render the page
   ```python
   bitmap = page.render(
       scale = 1,    # 72dpi resolution
@@ -151,6 +115,18 @@ Here are some examples of using the support model API.
   )
   pil_image = bitmap.to_pil()
   pil_image.show()
+  ```
+
+* Try some page methods
+  ```python
+  # Get page dimensions in PDF canvas units (1pt->1/72in by default)
+  width, height = page.get_size()
+  # Set the absolute page rotation to 90° clockwise
+  page.set_rotation(90)
+  
+  # Locate objects on the page
+  for obj in page.get_objects():
+      print(obj.level, obj.type, obj.get_pos())
   ```
 
 * Extract and search text
@@ -167,6 +143,20 @@ Here are some examples of using the support model API.
   searcher = textpage.search("something", match_case=False, match_whole_word=False)
   # This returns the next occurrence as (char_index, char_count), or None if not found
   first_occurrence = searcher.get_next()
+  ```
+
+<!-- TOC API will change with the next major release -->
+* Read the table of contents
+  ```python
+  for item in pdf.get_toc():
+      state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
+      target = "?" if item.page_index is None else item.page_index+1
+      print(
+          "    " * item.level +
+          "[%s] %s -> %s  # %s %s" % (
+              state, item.title, target, item.view_mode, item.view_pos,
+          )
+      )
   ```
 
 * Create a new PDF with an empty A4 sized page
@@ -571,7 +561,7 @@ As outlined in the raw API section, it is essential that Python-managed resource
 The problem is that the Python interpreter may garbage collect objects with reference count zero at any time. Thus, it can happen that an unreferenced but still required object by chance stays around long enough before it is garbage collected. Such dangling objects are likely to cause non-deterministic segmentation faults.
 If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that mistakes regarding object lifetime remain unnoticed for a long time.
 
-Although great care has been taken while developing the support model, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
+Although we intend to develop helpers carefully, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
 
 #### Missing raw PDF access
 
@@ -582,7 +572,7 @@ Theoretically, PDFium's non-public backend would provide these capabilities, but
 #### Drawbacks of ABI level bindings
 
 While ABI FFI bindings tend to be more convenient, they do have technical drawbacks compared to API bindings [(overview)](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api).
-With special platforms and/or code, sometimes unforseen problems can occur [(case study)](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1173170438).
+With special platforms and/or code, sometimes unforeseen problems can occur [(case study)](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1173170438).
 
 
 ## Development
@@ -612,7 +602,7 @@ This provides us with full control over the build environment and the used comma
 
 pypdfium2 contains a small test suite to verify the library's functionality. It is written with [pytest](https://github.com/pytest-dev/pytest/):
 ```bash
-python3 -m pytest tests/ tests_old/
+./run test
 ```
 
 Note that ...
@@ -621,7 +611,7 @@ Note that ...
 
 To get code coverage statistics, you can run
 ```bash
-make coverage
+./run coverage
 ```
 
 Sometimes, it can also be helpful to test code on many PDFs.[^testing_corpora]
@@ -730,7 +720,7 @@ Faulty PyPI releases may be yanked using the web interface.
 
 ### PDFium
 
-The PDFium code base was originally developped as part of the commercial Foxit SDK, before being acquired and open-sourced by Google, which maintains PDFium independently ever since, while Foxit continue to develop their SDK closed-source.
+The PDFium code base was originally developed as part of the commercial Foxit SDK, before being acquired and open-sourced by Google, who maintain PDFium independently ever since, while Foxit continue to develop their SDK closed-source.
 
 ### pypdfium2
 

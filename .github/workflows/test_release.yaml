@@ -52,4 +52,4 @@ jobs:
           ref: ${{ steps.version.outputs.version }}
       
       - name: Run tests
-        run: make test
+        run: ./run test

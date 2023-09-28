@@ -12,7 +12,7 @@ import urllib.request
 from pathlib import Path, WindowsPath
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# TODO? consider glob import or dotted access
+# CONSIDER glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     Host,
     SB_Dir,
@@ -60,6 +60,7 @@ SyslibsConfig = {
     "use_system_zlib": True,
     "use_system_libtiff": True,
     "clang_use_chrome_plugins": False,
+    "use_allocator_shim": False,
 }
 
 
@@ -146,8 +147,8 @@ def get_pdfium_version():
 
 
 def update_version(v_libpdfium):
-    ver_file = OutputDir / VerStatusFileName
-    ver_file.write_text( str(v_libpdfium) )
+    # NOTE this does not set the full version, not sure how to retrieve it
+    (OutputDir / VerStatusFileName).write_text( str(v_libpdfium) )
 
 
 def _create_resources_rc(v_libpdfium):
@@ -238,20 +239,19 @@ def get_tool(name):
 
 def serialise_config(config_dict):
     
-    config_str = ""
-    sep = ""
+    parts = []
     
     for key, value in config_dict.items():
-        config_str += sep + f"{key} = "
+        p = f"{key} = "
         if isinstance(value, bool):
-            config_str += str(value).lower()
+            p += str(value).lower()
         elif isinstance(value, str):
-            config_str += f'"{value}"'
+            p += f'"{value}"'
         else:
             raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
-        sep = "\n"
+        parts.append(p)
     
-    return config_str
+    return "\n".join(parts)
 
 
 def main(
