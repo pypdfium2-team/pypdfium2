@@ -290,7 +290,7 @@ def purge_pdfium_versions():
     ))
 
 
-def call_ctypesgen(target_dir, include_dir, have_v8xfa=False):
+def call_ctypesgen(target_dir, include_dir, use_v8xfa=False, guard_symbols=False):
     
     # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
@@ -298,8 +298,10 @@ def call_ctypesgen(target_dir, include_dir, have_v8xfa=False):
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
     
     bindings = target_dir / BindingsFileName
-    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdirs", ".", f"--strip-build-path={include_dir}", "--no-srcinfo"]
-    if have_v8xfa:
+    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdirs", ".", "--no-srcinfo", f"--strip-build-path={include_dir}"]
+    if not guard_symbols:
+        args += ["--no-symbol-guards"]
+    if use_v8xfa:
         args += ["-D", "PDF_ENABLE_XFA", "PDF_ENABLE_V8"]
     args += ["--headers"] + [h.name for h in sorted(include_dir.glob("*.h"))] + ["-o", bindings]
     

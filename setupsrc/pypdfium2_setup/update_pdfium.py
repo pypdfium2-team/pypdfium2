@@ -87,7 +87,7 @@ def unpack_archives(archives):
         archive_path.unlink()
 
 
-def generate_bindings(archives, version, full_version, use_v8):
+def generate_bindings(archives, version, full_version, use_v8, ctypesgen_kws):
     
     for pl_name in archives.keys():
         
@@ -112,11 +112,11 @@ def generate_bindings(archives, version, full_version, use_v8):
         else:
             assert not v8_file.exists()
         
-        call_ctypesgen(pl_dir, build_dir/"include", use_v8)
+        call_ctypesgen(pl_dir, build_dir/"include", use_v8xfa=use_v8, **ctypesgen_kws)
         shutil.rmtree(build_dir)
 
 
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
+def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, ctypesgen_kws=dict()):
     
     if not version:
         version = get_latest_version()
@@ -129,7 +129,7 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     clear_data(platforms)
     archives = download_releases(platforms, version, use_v8, max_workers, robust)
     unpack_archives(archives)
-    generate_bindings(archives, version, full_version, use_v8)
+    generate_bindings(archives, version, full_version, use_v8, ctypesgen_kws)
 
 
 # low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py

@@ -48,9 +48,10 @@ def run_local(*args, **kws):
 def update_refbindings():
     
     # re-generate host bindings
+    # TODO download headers from pdfium repo and call ctypesgen directly
     host_bindings = DataTree / Host.platform / BindingsFileName
     host_bindings.unlink(missing_ok=True)
-    update_pdfium.main([Host.platform])
+    update_pdfium.main([Host.platform], ctypesgen_kws=dict(guard_symbols=True))
     assert host_bindings.exists()
     
     # update reference bindings
