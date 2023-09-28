@@ -62,7 +62,7 @@ As pypdfium2 uses external binaries, there are some special setup aspects to con
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
 * The environment variable `$PDFIUM_BINARY` controls which binary to include on setup.
   The format spec is `[$PLATFORM][-v8][:$VERSION]` (`[]` = segments, `$CAPS` = variables).
-* Examples: `auto`, `auto:5975` `auto-v8:5975` (`auto` may be subsituted by an explicit platform name, e.g. `linux_x64`).
+* Examples: `auto`, `auto:5975` `auto-v8:5975` (`auto` may be substituted by an explicit platform name, e.g. `linux_x64`).
 * Details:
   - Platform:
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
