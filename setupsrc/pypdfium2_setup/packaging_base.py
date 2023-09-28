@@ -48,17 +48,6 @@ ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 
-# figure out whether our pypdfium2-specific fork of ctypesgen is installed
-try:
-    import ctypesgen
-except ImportError:
-    # ctypesgen not importable, might be installed on a different python version
-    # in that case, we don't know if it's our fork, so assume mainline ctypesgen for compatibility
-    CTYPESGEN_IS_FORK = False
-else:
-    CTYPESGEN_IS_FORK = getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
-
-
 class SystemNames:
     linux   = "linux"
     darwin  = "darwin"
@@ -304,16 +293,16 @@ def purge_pdfium_versions():
 
 def call_ctypesgen(target_dir, include_dir, have_v8xfa=False):
     
-    # see https://github.com/ctypesgen/ctypesgen/issues/160
+    # The commands below are tailored to our fork of ctypesgen, so make sure we have that
+    # Import ctypesgen only in this function so it does not have to be available for other setup tasks
+    import ctypesgen
+    assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
     
     bindings = target_dir / BindingsFileName
-    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdir", ".", f"--strip-build-path={include_dir}"]
+    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdirs", ".", f"--strip-build-path={include_dir}", "--no-srcinfo"]
     if have_v8xfa:
-        args += ["-D", "PDF_ENABLE_XFA", "-D", "PDF_ENABLE_V8"]
-    if CTYPESGEN_IS_FORK:
-        # extra arguments for our pypdfium2-specific fork of ctypesgen, not available in mainline ctypesgen (yet)
-        args += ["--no-srcinfo"]
-    args += [h.name for h in sorted(include_dir.glob("*.h"))] + ["-o", bindings]
+        args += ["-D", "PDF_ENABLE_XFA", "PDF_ENABLE_V8"]
+    args += ["--headers"] + [h.name for h in sorted(include_dir.glob("*.h"))] + ["-o", bindings]
     
     run_cmd(args, cwd=include_dir)
     
