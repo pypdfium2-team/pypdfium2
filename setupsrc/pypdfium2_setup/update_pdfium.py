@@ -21,6 +21,9 @@ from pypdfium2_setup.packaging_base import (
     ReleaseNames,
     BinaryPlatforms,
     ReleaseURL,
+    SystemNames,
+    LibnameForSystem,
+    plat_to_system,
     get_latest_version,
     get_full_version,
     call_ctypesgen,
@@ -91,21 +94,15 @@ def generate_bindings(archives, version, full_version, use_v8):
         pl_dir = DataTree / pl_name
         build_dir = pl_dir / "build_tar"
         bin_dir = build_dir / "lib"
-        dirname = pl_dir.name
         
-        if dirname.startswith("windows"):
-            target_name = "pdfium.dll"
+        system = plat_to_system(pl_name)
+        if system == SystemNames.windows:
             bin_dir = build_dir / "bin"
-        elif dirname.startswith("darwin"):
-            target_name = "pdfium.dylib"
-        elif "linux" in dirname:
-            target_name = "pdfium"
-        else:
-            raise ValueError(f"Unknown platform directory name '{dirname}'")
         
-        items = list(bin_dir.iterdir())
-        assert len(items) == 1
-        shutil.move(bin_dir/items[0], pl_dir/target_name)
+        libname = LibnameForSystem[system]
+        src_libpath = bin_dir / libname
+        assert src_libpath.is_file()
+        shutil.copyfile(src_libpath, pl_dir/libname)
         
         ver_file = DataTree / pl_name / VerStatusFileName
         ver_file.write_text(f"{version}\n{full_version}")

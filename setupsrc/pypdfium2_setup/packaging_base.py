@@ -85,10 +85,9 @@ ReleaseNames = {
     PlatformNames.windows_arm64  : "win-arm64",
 }
 
-# target names for pypdfium2/ctypesgen
 LibnameForSystem = {
-    SystemNames.linux:   "pdfium",
-    SystemNames.darwin:  "pdfium.dylib",
+    SystemNames.linux:   "libpdfium.so",
+    SystemNames.darwin:  "libpdfium.dylib",
     SystemNames.windows: "pdfium.dll",
 }
 
