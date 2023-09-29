@@ -13,21 +13,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup._compat import safer_tar_unpack
-# CONSIDER glob import or dotted access
-from pypdfium2_setup.packaging_base import (
-    DataTree,
-    VerStatusFileName,
-    V8StatusFileName,
-    ReleaseNames,
-    BinaryPlatforms,
-    ReleaseURL,
-    SystemNames,
-    LibnameForSystem,
-    plat_to_system,
-    get_latest_version,
-    get_full_version,
-    call_ctypesgen,
-)
+# TODO consider dotted access?
+from pypdfium2_setup.packaging_base import *
 
 
 def clear_data(download_files):

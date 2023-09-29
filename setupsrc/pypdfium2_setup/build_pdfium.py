@@ -12,19 +12,8 @@ import urllib.request
 from pathlib import Path, WindowsPath
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# CONSIDER glob import or dotted access
-from pypdfium2_setup.packaging_base import (
-    Host,
-    SB_Dir,
-    DataTree,
-    PDFium_URL,
-    DepotTools_URL,
-    LibnameForSystem,
-    VerStatusFileName,
-    PlatformNames,
-    run_cmd,
-    call_ctypesgen,
-)
+# TODO consider dotted access?
+from pypdfium2_setup.packaging_base import *
 
 
 PatchDir       = SB_Dir / "patches"

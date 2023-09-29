@@ -9,22 +9,8 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# CONSIDER glob import or dotted access
-from pypdfium2_setup.packaging_base import (
-    run_cmd,
-    clean_platfiles,
-    get_latest_version,
-    Host,
-    ModuleDir,
-    BindingsFileName,
-    LibnameForSystem,
-    BinaryPlatforms,
-    SourceTree,
-    BinarySpec_EnvVar,
-    BinarySpec_V8Indicator,
-    BinarySpec_VersionSep,
-    PlatformTarget_None,
-)
+# TODO consider dotted access?
+from pypdfium2_setup.packaging_base import *
 
 
 class ArtifactStash:

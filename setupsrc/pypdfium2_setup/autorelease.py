@@ -12,29 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup import update_pdfium
-# CONSIDER glob import or dotted access
-from pypdfium2_setup.packaging_base import (
-    run_cmd,
-    set_versions,
-    get_version_ns,
-    get_full_version,
-    get_latest_version,
-    get_changelog_staging,
-    Host,
-    DataTree,
-    SourceTree,
-    PDFium_URL,
-    RepositoryURL,
-    Changelog,
-    ChangelogStaging,
-    VersionFile,
-    VerNamespace,
-    BindingsFileName,
-    AutoreleaseDir,
-    MajorUpdateFile,
-    BetaUpdateFile,
-    RefBindingsFile,
-)
+# TODO consider dotted access?
+from pypdfium2_setup.packaging_base import *
 
 
 # these files/dirs do not necessarily need to have been changed, `git add` silently skips that

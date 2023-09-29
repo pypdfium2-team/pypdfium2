@@ -9,26 +9,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 from pypdfium2_setup import update_pdfium
-from pypdfium2_setup.packaging_base import (
-    # CONSIDER glob import or dotted access
-    Host,
-    DataTree,
-    BinarySpec_EnvVar,
-    BinarySpec_VersionSep,
-    BinarySpec_V8Indicator,
-    PlatformTarget_Auto,
-    PlatformTarget_None,
-    VersionTarget_Latest,
-    VerStatusFileName,
-    V8StatusFileName,
-    PlatformNames,
-    get_platfiles,
-    clean_platfiles,
-    emplace_platfiles,
-    get_latest_version,
-    read_version_file,
-    purge_pdfium_versions,
-)
+# TODO consider dotted access?
+from pypdfium2_setup.packaging_base import *
 
 
 # CONSIDER Linux/macOS: check that minimum OS version requirements are fulfilled

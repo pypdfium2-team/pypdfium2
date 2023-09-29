@@ -7,7 +7,7 @@ from pathlib import Path
 from wheel.bdist_wheel import bdist_wheel
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# CONSIDER glob import or dotted access
+# TODO consider glob import or dotted access
 from pypdfium2_setup.packaging_base import (
     VerNamespace,
     LibnameForSystem,
