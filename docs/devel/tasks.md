@@ -9,11 +9,13 @@ Also see the issues panel and inline `TODO`/`FIXME` marks in source code.
 ### Main Code
 * Add a matrix-based rendering method, and perhaps a support method around it for common transformations (crop, margins, rotate, mirror, ...).
 * Add helpers for interruptible rendering.
+* Check if we should use `FPDFPage_HasTransparency()` on rendering.
 
 ### Setup Infrastructure
+* update_pdfium: build bindings on native OS hosts so we can use OS preprocessor defines, to expose OS-specific members
+* Add means to plug in PDFium headers/binaries from an arbitrary location.
 * craft_packages: add means to skip platforms for which artefacts are missing.
-* update_pdfium: only generate the bindings file once for all platforms.
-* update_pdfium/setup: re-think the general concept (thoughts following the addition of support for custom pdfium version and V8 support). Include version and V8 status in data dirname?
+* update_pdfium/setup: re-think `data/` cache. Consider including version and V8 status in data dirname? Consider caching multiple versions?
 * packaging_base: consider using a class for `VerNamespace`.
 * Use the logging module rather than `print()`.
 
@@ -26,10 +28,8 @@ Also see the issues panel and inline `TODO`/`FIXME` marks in source code.
 * Add/rewrite remaining Readme sections.
 
 ### GitHub Workflows
-* build_packages: Re-think the problem outlined in https://github.com/orgs/community/discussions/38443. Maybe we should avoid setting a temporary tag during the build stage, to avoid confusion?
+* build_packages: Try to avoid setting a temporary tag during the build stage, to prevent confusion
 * Add a testing workflow to be run on PRs (Test suite, code coverage, ...)
-* Consider testing pypy interpreter as well
+* Consider testing PyPy interpreter as well
 
 ### Miscellaneous
-* Add means to plug in PDFium headers/binaries from an arbitrary location.
-* Check if we should use `FPDFPage_HasTransparency()` on rendering.
