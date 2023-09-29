@@ -309,6 +309,8 @@ def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symb
         args += ["--no-symbol-guards"]
     if use_v8xfa:
         args += ["-D", "PDF_ENABLE_XFA", "PDF_ENABLE_V8"]
+    if pl_name.startswith(SystemNames.windows):
+        args += ["-D", "_WIN32"]
     args += ["--headers"] + [h.name for h in sorted(include_dir.glob("*.h"))] + ["-o", bindings]
     
     run_cmd(args, cwd=include_dir)
