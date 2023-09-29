@@ -112,11 +112,11 @@ def generate_bindings(archives, version, full_version, use_v8, ctypesgen_kws):
         else:
             assert not v8_file.exists()
         
-        call_ctypesgen(pl_dir, build_dir/"include", use_v8xfa=use_v8, **ctypesgen_kws)
+        call_ctypesgen(pl_dir, build_dir/"include", pl_name=pl_name, use_v8xfa=use_v8, **ctypesgen_kws)
         shutil.rmtree(build_dir)
 
 
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, ctypesgen_kws=dict()):
+def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, ctypesgen_kws={}):
     
     if not version:
         version = get_latest_version()

@@ -290,7 +290,7 @@ def purge_pdfium_versions():
     ))
 
 
-def call_ctypesgen(target_dir, include_dir, use_v8xfa=False, guard_symbols=False):
+def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symbols=False):
     
     # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
@@ -298,7 +298,13 @@ def call_ctypesgen(target_dir, include_dir, use_v8xfa=False, guard_symbols=False
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
     
     bindings = target_dir / BindingsFileName
-    args = ["ctypesgen", "--library", "pdfium", "--runtime-libdirs", ".", "--no-srcinfo", f"--strip-build-path={include_dir}"]
+    
+    args = ["ctypesgen", f"--strip-build-path={include_dir}", "--no-srcinfo", "--library", "pdfium", "--runtime-libdirs", "."]
+    if pl_name == Host.platform:
+        # assuming the binary already lies in target_dir
+        args += ["--compile-libdirs", target_dir]
+    else:
+        args += ["--no-load-library"]
     if not guard_symbols:
         args += ["--no-symbol-guards"]
     if use_v8xfa:

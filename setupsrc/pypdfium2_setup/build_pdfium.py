@@ -227,7 +227,7 @@ def pack(src_libpath, v_libpdfium, destname=None):
     update_version(v_libpdfium)
     
     include_dir = PDFiumDir / "public"
-    call_ctypesgen(OutputDir, include_dir)
+    call_ctypesgen(OutputDir, include_dir, pl_name=Host.platform)
 
 
 def get_tool(name):
