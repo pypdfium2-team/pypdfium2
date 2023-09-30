@@ -16,8 +16,7 @@ requires = [
 name = "pypdfium2"
 description = "Python bindings to PDFium"
 readme = "README.md"
-requires-python = ">= 3.6"
-dynamic = ["version"]
+dynamic = ["version", "requires-python"]
 keywords = ["pdf", "pdfium"]
 authors = [
     {name = "pypdfium2-team"},
@@ -58,6 +57,3 @@ license-files = [
     "LICENSES/LicenseRef-PdfiumThirdParty.txt",
     ".reuse/dep5",
 ]
-
-[tool.setuptools.packages.find]
-where = ["src"]

@@ -230,7 +230,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion.
   When passing a string to a C function, it must always be null-terminated, as the function merely receives a pointer to the first item and then continues to read memory until it finds a null terminator.
   
-[^bindings_decl]: From the auto-generated bindings file, which is not part of the repository. It is built into wheels, or created on installation. If you have an editable install, the bindings file may be found at `src/raw.py`.
+[^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `bindings/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
 
 * While some functions are quite easy to use, things soon get more complex.
   First of all, function parameters are not only used for input, but also for output:

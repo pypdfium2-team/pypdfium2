@@ -8,13 +8,7 @@ from wheel.bdist_wheel import bdist_wheel
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 # TODO consider glob import or dotted access
-from pypdfium2_setup.packaging_base import (
-    VerNamespace,
-    LibnameForSystem,
-    plat_to_system,
-    get_wheel_tag,
-    emplace_platfiles,
-)
+from pypdfium2_setup.packaging_base import *
 
 
 def bdist_factory(pl_name):
@@ -36,12 +30,28 @@ class BinaryDistribution (setuptools.Distribution):
         return True
 
 
-SetupKws = dict(
-    version = VerNamespace["V_PYPDFIUM2"],
-)
+def get_setup_kws(modnames=None):
+    
+    if not modnames:
+        modnames = ModulesAll
+    
+    module_dirs = {}
+    if ModuleRaw in modnames:
+        module_dirs["pypdfium2_raw"] = "src/pypdfium2_raw"
+    if ModuleHelpers in modnames:
+        module_dirs["pypdfium2"] = "src/pypdfium2"
+    assert len(module_dirs) in (1, 2)
+    assert len(modnames) == len(module_dirs)
+    
+    return dict(
+        version = VerNamespace["V_PYPDFIUM2"],
+        package_dir = module_dirs,
+        # NOTE if necessary, python req could be set dynamically depending on included modules
+        python_requires = ">= 3.6",
+    )
 
 
-def mkwheel(pl_name):
+def mkwheel(pl_name, modnames=None):
     
     emplace_platfiles(pl_name)
     system = plat_to_system(pl_name)
@@ -51,5 +61,5 @@ def mkwheel(pl_name):
         package_data = {"": [libname]},
         cmdclass = {"bdist_wheel": bdist_factory(pl_name)},
         distclass = BinaryDistribution,
-        **SetupKws,
+        **get_setup_kws(modnames),
     )

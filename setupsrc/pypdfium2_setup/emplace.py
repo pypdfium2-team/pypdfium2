@@ -74,7 +74,6 @@ def main():
     )
     parser.add_argument(
         "binary_spec",
-        type = str.strip,
         default = os.environ.get(BinarySpec_EnvVar, ""),
         nargs = "?",
         help = f"The binary specifier. Same format as of ${BinarySpec_EnvVar} on setup.",

@@ -102,8 +102,8 @@ def test_paths():
     assert pkg_base.SourceTree == SourceTree
     assert pkg_base.DataTree == SourceTree / "data"
     assert pkg_base.SB_Dir == SourceTree / "sourcebuild"
-    assert pkg_base.ModuleDir == SourceTree / "src" / "pypdfium2"
-    assert pkg_base.VersionFile == Path(pkg_base.ModuleDir) / "version.py"
+    assert pkg_base.HelpersModuleDir == SourceTree / "src" / "pypdfium2"
+    assert pkg_base.VersionFile == Path(pkg_base.HelpersModuleDir) / "version.py"
 
 
 # update_pdfium

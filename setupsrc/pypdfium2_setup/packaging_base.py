@@ -18,14 +18,15 @@ import urllib.request as url_request
 VerStatusFileName = ".pdfium_version.txt"
 V8StatusFileName  = ".pdfium_is_v8.txt"
 # NOTE if renaming BindingsFileName, also rename `bindings/$FILE`
-BindingsFileName  = "raw.py"
+BindingsFileName  = "bindings.py"
 
 HomeDir           = Path.home()
 SourceTree        = Path(__file__).parents[2]
 DataTree          = SourceTree / "data"
 SB_Dir            = SourceTree / "sourcebuild"
-ModuleDir         = SourceTree / "src" / "pypdfium2"
-VersionFile       = ModuleDir / "version.py"
+RawModuleDir      = SourceTree / "src" / "pypdfium2_raw"
+HelpersModuleDir  = SourceTree / "src" / "pypdfium2"
+VersionFile       = HelpersModuleDir / "version.py"
 Changelog         = SourceTree / "docs" / "devel" / "changelog.md"
 ChangelogStaging  = SourceTree / "docs" / "devel" / "changelog_staging.md"
 AutoreleaseDir    = SourceTree / "autorelease"
@@ -39,6 +40,11 @@ BinarySpec_V8Indicator = "-v8"
 PlatformTarget_None    = "none"  # sdist
 PlatformTarget_Auto    = "auto"  # host
 VersionTarget_Latest   = "latest"
+
+ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
+ModuleRaw = "raw"
+ModuleHelpers = "helpers"
+ModulesAll = [ModuleRaw, ModuleHelpers]
 
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
@@ -325,9 +331,9 @@ def clean_platfiles():
     
     deletables = [
         SourceTree / "build",
-        ModuleDir / BindingsFileName,
+        RawModuleDir / BindingsFileName,
     ]
-    deletables += [ModuleDir / fn for fn in MainLibnames]
+    deletables += [RawModuleDir / fn for fn in MainLibnames]
     
     for fp in deletables:
         if fp.is_file():
@@ -367,7 +373,7 @@ def emplace_platfiles(pl_name):
     for fp in platfiles:
         if not fp.exists():
             raise RuntimeError(f"Platform file missing: {fp}")
-        shutil.copy(fp, ModuleDir)
+        shutil.copy(fp, RawModuleDir)
 
 
 def get_changelog_staging(flush=False):
