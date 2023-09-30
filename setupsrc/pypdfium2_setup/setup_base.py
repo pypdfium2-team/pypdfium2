@@ -7,7 +7,7 @@ from pathlib import Path
 from wheel.bdist_wheel import bdist_wheel
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# TODO consider glob import or dotted access
+# TODO consider dotted access?
 from pypdfium2_setup.packaging_base import *
 
 
@@ -25,6 +25,7 @@ def bdist_factory(pl_name):
     return pypdfium_bdist
 
 
+# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels
 class BinaryDistribution (setuptools.Distribution):
     def has_ext_modules(self):
         return True
@@ -58,7 +59,7 @@ def mkwheel(pl_name, modnames=None):
     libname = LibnameForSystem[system]
     
     setuptools.setup(
-        package_data = {"": [libname]},
+        package_data = {"pypdfium2_raw": [libname]},
         cmdclass = {"bdist_wheel": bdist_factory(pl_name)},
         distclass = BinaryDistribution,
         **get_setup_kws(modnames),
