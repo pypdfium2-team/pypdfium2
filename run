@@ -28,7 +28,7 @@ function packaging() {
 
     twine check dist/*
     # ignore W002: erroneous detection of __init__.py files as duplicates
-    check-wheel-contents dist/*.whl --ignore W002
+    check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw"
 }
 
 set -x
