@@ -33,7 +33,12 @@ class BinaryDistribution (setuptools.Distribution):
 
 # NOTE handle python_requires dynamically so we could adjust it depending on which modules are included
 def get_setup_kws(modnames):
-    moddirs = {n: f"src/{n}" for n in [ModulesSpec_Dict[n] for n in modnames]}
+    
+    if set(modnames) == set(ModulesAll):
+        moddirs = {"": "src"}
+    else:
+        moddirs = {n: f"src/{n}" for n in [ModulesSpec_Dict[n] for n in modnames]}
+    
     return dict(
         version = VerNamespace["V_PYPDFIUM2"],
         package_dir = moddirs,
