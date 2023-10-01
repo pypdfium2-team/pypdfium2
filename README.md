@@ -32,7 +32,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   * With a locally built PDFium binary
     ```bash
     python3 setupsrc/pypdfium2_setup/build_pdfium.py  # call with --help to list options
-    PDFIUM_BINARY="sourcebuild" python3 -m pip install .
+    PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
     ```
     Building PDFium may take a long time because it comes with its own toolchain and bundled dependencies, rather than using system-provided components.[^pdfium_buildsystem]
   
@@ -60,7 +60,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 As pypdfium2 uses external binaries, there are some special setup aspects to consider.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
-* The environment variable `$PDFIUM_BINARY` controls which binary to include on setup.
+* The environment variable `$PDFIUM_PLATFORM` controls which binary to include on setup.
   The format spec is `[$PLATFORM][-v8][:$VERSION]` (`[]` = segments, `$CAPS` = variables).
 * Examples: `auto`, `auto:5975` `auto-v8:5975` (`auto` may be substituted by an explicit platform name, e.g. `linux_x64`).
 * Details:

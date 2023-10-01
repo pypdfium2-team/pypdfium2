@@ -52,7 +52,7 @@ jobs:
           python3 ./setupsrc/pypdfium2_setup/build_pdfium.py --use-syslibs
       
       - name: Install & test
-        run: PDFIUM_BINARY="sourcebuild" python3 -m pip install .
+        run: PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
       
       - name: Run test suite
         run: ./run test

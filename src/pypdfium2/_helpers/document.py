@@ -182,7 +182,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             else:
                 logger.warning(
                     "init_forms() called on XFA pdf, but this pdfium binary was compiled without XFA support.\n"
-                    "Run `PDFIUM_BINARY=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2` to get a build with XFA support."
+                    "Run `PDFIUM_PLATFORM=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2` to get a build with XFA support."
                 )
     
     

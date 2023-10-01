@@ -34,7 +34,8 @@ MajorUpdateFile   = AutoreleaseDir / "update_major.txt"
 BetaUpdateFile    = AutoreleaseDir / "update_beta.txt"
 RefBindingsFile   = SourceTree / "bindings" / BindingsFileName
 
-BinarySpec_EnvVar      = "PDFIUM_BINARY"
+# TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
+BinarySpec_EnvVar      = "PDFIUM_PLATFORM"
 BinarySpec_VersionSep  = ":"
 BinarySpec_V8Indicator = "-v8"
 PlatformTarget_None    = "none"  # sdist
