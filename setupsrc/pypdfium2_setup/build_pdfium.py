@@ -20,7 +20,7 @@ PatchDir       = SB_Dir / "patches"
 DepotToolsDir  = SB_Dir / "depot_tools"
 PDFiumDir      = SB_Dir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
-OutputDir      = DataTree / PlatformNames.sourcebuild
+OutputDir      = DataTree / PlatNames.sourcebuild
 
 PatchesMain = [
     (PatchDir/"shared_library.patch", PDFiumDir),

@@ -19,9 +19,9 @@ from pypdfium2_setup.packaging_base import *
 
 def get_pdfium(plat_spec, force_rebuild=False):
     
-    if plat_spec == PlatformNames.sourcebuild:
+    if plat_spec == PlatNames.sourcebuild:
         # for now, require that callers ran build_pdfium.py beforehand so they are in charge of the build config - don't trigger sourcebuild in here if platform files don't exist
-        return PlatformNames.sourcebuild
+        return PlatNames.sourcebuild
     
     req_ver = None
     use_v8 = False
@@ -35,8 +35,8 @@ def get_pdfium(plat_spec, force_rebuild=False):
         pl_name = Host.platform
         if pl_name is None:
             raise RuntimeError(f"No pre-built binaries available for system {Host._system_name} (libc info {Host._libc_info}) on machine {Host._machine_name}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
-    elif hasattr(PlatformNames, plat_spec):
-        pl_name = getattr(PlatformNames, plat_spec)
+    elif hasattr(PlatNames, plat_spec):
+        pl_name = getattr(PlatNames, plat_spec)
     else:
         raise ValueError(f"Invalid binary spec '{plat_spec}'")
     

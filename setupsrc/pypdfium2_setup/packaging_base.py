@@ -56,47 +56,47 @@ ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 
-class SystemNames:
+class SysNames:
     linux   = "linux"
     darwin  = "darwin"
     windows = "windows"
 
 
-class PlatformNames:
+class PlatNames:
     # - Attribute names and values are expected to match
     # - Platform names are expected to start with the corresponding system name
-    linux_x64      = SystemNames.linux   + "_x64"
-    linux_x86      = SystemNames.linux   + "_x86"
-    linux_arm64    = SystemNames.linux   + "_arm64"
-    linux_arm32    = SystemNames.linux   + "_arm32"
-    linux_musl_x64 = SystemNames.linux   + "_musl_x64"
-    linux_musl_x86 = SystemNames.linux   + "_musl_x86"
-    darwin_x64     = SystemNames.darwin  + "_x64"
-    darwin_arm64   = SystemNames.darwin  + "_arm64"
-    windows_x64    = SystemNames.windows + "_x64"
-    windows_x86    = SystemNames.windows + "_x86"
-    windows_arm64  = SystemNames.windows + "_arm64"
+    linux_x64      = SysNames.linux   + "_x64"
+    linux_x86      = SysNames.linux   + "_x86"
+    linux_arm64    = SysNames.linux   + "_arm64"
+    linux_arm32    = SysNames.linux   + "_arm32"
+    linux_musl_x64 = SysNames.linux   + "_musl_x64"
+    linux_musl_x86 = SysNames.linux   + "_musl_x86"
+    darwin_x64     = SysNames.darwin  + "_x64"
+    darwin_arm64   = SysNames.darwin  + "_arm64"
+    windows_x64    = SysNames.windows + "_x64"
+    windows_x86    = SysNames.windows + "_x86"
+    windows_arm64  = SysNames.windows + "_arm64"
     sourcebuild    = "sourcebuild"
 
 
 ReleaseNames = {
-    PlatformNames.darwin_x64     : "mac-x64",
-    PlatformNames.darwin_arm64   : "mac-arm64",
-    PlatformNames.linux_x64      : "linux-x64",
-    PlatformNames.linux_x86      : "linux-x86",
-    PlatformNames.linux_arm64    : "linux-arm64",
-    PlatformNames.linux_arm32    : "linux-arm",
-    PlatformNames.linux_musl_x64 : "linux-musl-x64",
-    PlatformNames.linux_musl_x86 : "linux-musl-x86",
-    PlatformNames.windows_x64    : "win-x64",
-    PlatformNames.windows_x86    : "win-x86",
-    PlatformNames.windows_arm64  : "win-arm64",
+    PlatNames.darwin_x64     : "mac-x64",
+    PlatNames.darwin_arm64   : "mac-arm64",
+    PlatNames.linux_x64      : "linux-x64",
+    PlatNames.linux_x86      : "linux-x86",
+    PlatNames.linux_arm64    : "linux-arm64",
+    PlatNames.linux_arm32    : "linux-arm",
+    PlatNames.linux_musl_x64 : "linux-musl-x64",
+    PlatNames.linux_musl_x86 : "linux-musl-x86",
+    PlatNames.windows_x64    : "win-x64",
+    PlatNames.windows_x86    : "win-x86",
+    PlatNames.windows_arm64  : "win-arm64",
 }
 
 LibnameForSystem = {
-    SystemNames.linux:   "libpdfium.so",
-    SystemNames.darwin:  "libpdfium.dylib",
-    SystemNames.windows: "pdfium.dll",
+    SysNames.linux:   "libpdfium.so",
+    SysNames.darwin:  "libpdfium.dylib",
+    SysNames.windows: "pdfium.dll",
 }
 
 BinaryPlatforms = list(ReleaseNames.keys())
@@ -104,7 +104,7 @@ BinarySystems   = list(LibnameForSystem.keys())
 MainLibnames    = list(LibnameForSystem.values())
 
 def plat_to_system(pl_name):
-    if pl_name == PlatformNames.sourcebuild:
+    if pl_name == PlatNames.sourcebuild:
         # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downsteam with fallback value?
         return Host.system
     result = [s for s in BinarySystems if pl_name.startswith(s)]
@@ -147,23 +147,23 @@ class _host_platform:
         
         # some machine names are merely "qualified guesses", mistakes can't be fully excluded for platforms we don't have access to
         if self._is_plat("darwin", "x86_64"):
-            return PlatformNames.darwin_x64
+            return PlatNames.darwin_x64
         elif self._is_plat("darwin", "arm64"):
-            return PlatformNames.darwin_arm64
+            return PlatNames.darwin_arm64
         elif self._is_plat("linux", "x86_64"):
-            return PlatformNames.linux_x64 if self._is_glibc else PlatformNames.linux_musl_x64
+            return PlatNames.linux_x64 if self._is_glibc else PlatNames.linux_musl_x64
         elif self._is_plat("linux", "i686"):
-            return PlatformNames.linux_x86 if self._is_glibc else PlatformNames.linux_musl_x86
+            return PlatNames.linux_x86 if self._is_glibc else PlatNames.linux_musl_x86
         elif self._is_plat("linux", "armv7l"):
-            return PlatformNames.linux_arm32
+            return PlatNames.linux_arm32
         elif self._is_plat("linux", "aarch64"):
-            return PlatformNames.linux_arm64
+            return PlatNames.linux_arm64
         elif self._is_plat("windows", "amd64"):
-            return PlatformNames.windows_x64
+            return PlatNames.windows_x64
         elif self._is_plat("windows", "arm64"):
-            return PlatformNames.windows_arm64
+            return PlatNames.windows_arm64
         elif self._is_plat("windows", "x86"):
-            return PlatformNames.windows_x86
+            return PlatNames.windows_x86
         else:
             return None
 
@@ -172,32 +172,32 @@ Host = _host_platform()
 
 
 def get_wheel_tag(pl_name):
-    if pl_name == PlatformNames.darwin_x64:
+    if pl_name == PlatNames.darwin_x64:
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
         return "macosx_10_13_x86_64"
-    elif pl_name == PlatformNames.darwin_arm64:
+    elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
     # linux glibc requirement: see BUG(203) for discussion
-    elif pl_name == PlatformNames.linux_x64:
+    elif pl_name == PlatNames.linux_x64:
         return "manylinux_2_17_x86_64"
-    elif pl_name == PlatformNames.linux_x86:
+    elif pl_name == PlatNames.linux_x86:
         return "manylinux_2_17_i686"
-    elif pl_name == PlatformNames.linux_arm64:
+    elif pl_name == PlatNames.linux_arm64:
         return "manylinux_2_17_aarch64"
-    elif pl_name == PlatformNames.linux_arm32:
+    elif pl_name == PlatNames.linux_arm32:
         return "manylinux_2_17_armv7l"
-    elif pl_name == PlatformNames.linux_musl_x64:
+    elif pl_name == PlatNames.linux_musl_x64:
         return "musllinux_1_1_x86_64"
-    elif pl_name == PlatformNames.linux_musl_x86:
+    elif pl_name == PlatNames.linux_musl_x86:
         return "musllinux_1_1_i686"
-    elif pl_name == PlatformNames.windows_x64:
+    elif pl_name == PlatNames.windows_x64:
         return "win_amd64"
-    elif pl_name == PlatformNames.windows_arm64:
+    elif pl_name == PlatNames.windows_arm64:
         return "win_arm64"
-    elif pl_name == PlatformNames.windows_x86:
+    elif pl_name == PlatNames.windows_x86:
         return "win32"
-    elif pl_name == PlatformNames.sourcebuild:
+    elif pl_name == PlatNames.sourcebuild:
         tag = sysconfig.get_platform()
         for char in ("-", "."):
             tag = tag.replace(char, "_")
@@ -317,7 +317,7 @@ def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symb
         args += ["--no-symbol-guards"]
     if use_v8xfa:
         args += ["-D", "PDF_ENABLE_V8", "PDF_ENABLE_XFA"]
-    if pl_name.startswith(SystemNames.windows) and Host.system == SystemNames.windows:
+    if pl_name.startswith(SysNames.windows) and Host.system == SysNames.windows:
         args += ["-D", "_WIN32"]
     args += ["--headers"] + [h.name for h in sorted(include_dir.glob("*.h"))] + ["-o", bindings]
     
@@ -365,7 +365,7 @@ def emplace_platfiles(pl_name):
     
     ver_changes = dict()
     ver_changes["V_LIBPDFIUM"], ver_changes["V_LIBPDFIUM_FULL"] = read_version_file(ver_file)
-    ver_changes["V_BUILDNAME"] = "source" if pl_name == PlatformNames.sourcebuild else "pdfium-binaries"
+    ver_changes["V_BUILDNAME"] = "source" if pl_name == PlatNames.sourcebuild else "pdfium-binaries"
     ver_changes["V_PDFIUM_IS_V8"] = (pl_dir / V8StatusFileName).exists()
     set_versions(ver_changes)
     

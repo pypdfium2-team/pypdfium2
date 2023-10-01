@@ -11,7 +11,7 @@ from pypdfium2_setup import (
     packaging_base as pkg_base,
 )
 from pypdfium2_setup.packaging_base import (
-    PlatformNames,
+    PlatNames,
     BinaryPlatforms,
     ReleaseNames,
 )
@@ -20,7 +20,7 @@ from .conftest import SourceTree, get_members
 
 @pytest.fixture
 def all_platnames():
-    return list( get_members(PlatformNames) )
+    return list( get_members(PlatNames) )
 
 
 # module
@@ -47,25 +47,25 @@ def all_platnames():
 # setup_base
 
 ExpectedTags = (
-    (PlatformNames.linux_x64,      "manylinux_2_17_x86_64"),
-    (PlatformNames.linux_x86,      "manylinux_2_17_i686"),
-    (PlatformNames.linux_arm64,    "manylinux_2_17_aarch64"),
-    (PlatformNames.linux_arm32,    "manylinux_2_17_armv7l"),
-    (PlatformNames.linux_musl_x64, "musllinux_1_1_x86_64"),
-    (PlatformNames.linux_musl_x86, "musllinux_1_1_i686"),
-    (PlatformNames.darwin_x64,     "macosx_10_13_x86_64"),
-    (PlatformNames.darwin_arm64,   "macosx_11_0_arm64"),
-    (PlatformNames.windows_x64,    "win_amd64"),
-    (PlatformNames.windows_arm64,  "win_arm64"),
-    (PlatformNames.windows_x86,    "win32"),
-    (PlatformNames.sourcebuild,    sysconfig.get_platform().replace('-','_').replace('.','_')),
+    (PlatNames.linux_x64,      "manylinux_2_17_x86_64"),
+    (PlatNames.linux_x86,      "manylinux_2_17_i686"),
+    (PlatNames.linux_arm64,    "manylinux_2_17_aarch64"),
+    (PlatNames.linux_arm32,    "manylinux_2_17_armv7l"),
+    (PlatNames.linux_musl_x64, "musllinux_1_1_x86_64"),
+    (PlatNames.linux_musl_x86, "musllinux_1_1_i686"),
+    (PlatNames.darwin_x64,     "macosx_10_13_x86_64"),
+    (PlatNames.darwin_arm64,   "macosx_11_0_arm64"),
+    (PlatNames.windows_x64,    "win_amd64"),
+    (PlatNames.windows_arm64,  "win_arm64"),
+    (PlatNames.windows_x86,    "win32"),
+    (PlatNames.sourcebuild,    sysconfig.get_platform().replace('-','_').replace('.','_')),
 )
 
 
 def test_expected_tags(all_platnames):
     assert len(all_platnames) == len(ExpectedTags)
     for platform, tag in ExpectedTags:
-        assert hasattr(PlatformNames, platform)
+        assert hasattr(PlatNames, platform)
         assert isinstance(tag, str)
 
 
@@ -91,10 +91,10 @@ def test_libnames():
     for name in pkg_base.MainLibnames:
         assert "pdfium" in name
 
-def test_platformnames(all_platnames):
+def test_PlatNames(all_platnames):
     # make sure variable names and values are identical
     for name in all_platnames:
-        assert name == getattr(PlatformNames, name)
+        assert name == getattr(PlatNames, name)
 
 def test_paths():
     # FIXME not much point doing this?
@@ -112,7 +112,7 @@ def test_releasenames(all_platnames):
     assert len(ReleaseNames) == len(BinaryPlatforms) == len(all_platnames) - 1
     for key, value in ReleaseNames.items():
         assert key in BinaryPlatforms
-        assert hasattr(PlatformNames, key)
+        assert hasattr(PlatNames, key)
         system, cpu = value.replace("linux-musl", "musllinux").split("-", maxsplit=3)
         assert system in ("linux", "musllinux", "mac", "win")
         assert cpu in ("x64", "x86", "arm64", "arm")

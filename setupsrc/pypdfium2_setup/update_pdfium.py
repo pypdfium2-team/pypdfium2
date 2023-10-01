@@ -83,7 +83,7 @@ def generate_bindings(archives, version, full_version, use_v8, ctypesgen_kws):
         bin_dir = build_dir / "lib"
         
         system = plat_to_system(pl_name)
-        if system == SystemNames.windows:
+        if system == SysNames.windows:
             bin_dir = build_dir / "bin"
         
         libname = LibnameForSystem[system]
