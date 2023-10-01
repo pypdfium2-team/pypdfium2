@@ -31,28 +31,17 @@ class BinaryDistribution (setuptools.Distribution):
         return True
 
 
-def get_setup_kws(modnames=None):
-    
-    if not modnames:
-        modnames = ModulesAll
-    
-    module_dirs = {}
-    if ModuleRaw in modnames:
-        module_dirs["pypdfium2_raw"] = "src/pypdfium2_raw"
-    if ModuleHelpers in modnames:
-        module_dirs["pypdfium2"] = "src/pypdfium2"
-    assert len(module_dirs) in (1, 2)
-    assert len(modnames) == len(module_dirs)
-    
+# NOTE handle python_requires dynamically so we could adjust it depending on which modules are included
+def get_setup_kws(modnames):
+    moddirs = {n: f"src/{n}" for n in [ModulesSpec_Dict[n] for n in modnames]}
     return dict(
         version = VerNamespace["V_PYPDFIUM2"],
-        package_dir = module_dirs,
-        # NOTE if necessary, python req could be set dynamically depending on included modules
+        package_dir = moddirs,
         python_requires = ">= 3.6",
     )
 
 
-def mkwheel(pl_name, modnames=None):
+def mkwheel(pl_name, setup_kws):
     
     emplace_platfiles(pl_name)
     system = plat_to_system(pl_name)
@@ -62,5 +51,5 @@ def mkwheel(pl_name, modnames=None):
         package_data = {"pypdfium2_raw": [libname]},
         cmdclass = {"bdist_wheel": bdist_factory(pl_name)},
         distclass = BinaryDistribution,
-        **get_setup_kws(modnames),
+        **setup_kws,
     )

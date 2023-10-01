@@ -44,7 +44,8 @@ VersionTarget_Latest   = "latest"
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw = "raw"
 ModuleHelpers = "helpers"
-ModulesAll = [ModuleRaw, ModuleHelpers]
+ModulesSpec_Dict = {ModuleRaw: "pypdfium2_raw", ModuleHelpers: "pypdfium2"}
+ModulesAll = list(ModulesSpec_Dict.keys())
 
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
