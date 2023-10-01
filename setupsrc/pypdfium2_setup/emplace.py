@@ -17,30 +17,30 @@ from pypdfium2_setup.packaging_base import *
 # TODO add direct support for emplacing local pdfium from file
 
 
-def get_pdfium(binary_spec, force_rebuild=False):
+def get_pdfium(plat_spec, force_rebuild=False):
     
-    if binary_spec == PlatformNames.sourcebuild:
+    if plat_spec == PlatformNames.sourcebuild:
         # for now, require that callers ran build_pdfium.py beforehand so they are in charge of the build config - don't trigger sourcebuild in here if platform files don't exist
         return PlatformNames.sourcebuild
     
     req_ver = None
     use_v8 = False
-    if BinarySpec_VersionSep in binary_spec:
-        binary_spec, req_ver = binary_spec.rsplit(BinarySpec_VersionSep)
-    if binary_spec.endswith(BinarySpec_V8Indicator):
-        binary_spec = binary_spec.rstrip(BinarySpec_V8Indicator)  # should be removesuffix() (pep616, python>=3.9)
+    if PlatSpec_VerSep in plat_spec:
+        plat_spec, req_ver = plat_spec.rsplit(PlatSpec_VerSep)
+    if plat_spec.endswith(PlatSpec_V8Sym):
+        plat_spec = plat_spec.rstrip(PlatSpec_V8Sym)  # should be removesuffix() (pep616, python>=3.9)
         use_v8 = True
     
-    if not binary_spec or binary_spec.lower() == PlatformTarget_Auto:
+    if not plat_spec or plat_spec.lower() == PlatTarget_Auto:
         pl_name = Host.platform
         if pl_name is None:
-            raise RuntimeError(f"No pre-built binaries available for system {Host._system_name} (libc info {Host._libc_info}) on machine {Host._machine_name}. You may place custom binaries & bindings in data/sourcebuild and install with `{BinarySpec_EnvVar}=sourcebuild`.")
-    elif hasattr(PlatformNames, binary_spec):
-        pl_name = getattr(PlatformNames, binary_spec)
+            raise RuntimeError(f"No pre-built binaries available for system {Host._system_name} (libc info {Host._libc_info}) on machine {Host._machine_name}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
+    elif hasattr(PlatformNames, plat_spec):
+        pl_name = getattr(PlatformNames, plat_spec)
     else:
-        raise ValueError(f"Invalid binary spec '{binary_spec}'")
+        raise ValueError(f"Invalid binary spec '{plat_spec}'")
     
-    if not req_ver or req_ver.lower() == VersionTarget_Latest:
+    if not req_ver or req_ver.lower() == VerTarget_Latest:
         req_ver = get_latest_version()
     else:
         assert req_ver.isnumeric()
@@ -73,10 +73,10 @@ def main():
         description = "Manage in-tree artifacts from an editable install.",
     )
     parser.add_argument(
-        "binary_spec",
-        default = os.environ.get(BinarySpec_EnvVar, ""),
+        "plat_spec",
+        default = os.environ.get(PlatSpec_EnvVar, ""),
         nargs = "?",
-        help = f"The binary specifier. Same format as of ${BinarySpec_EnvVar} on setup.",
+        help = f"The platform specifier. Same format as of ${PlatSpec_EnvVar} on setup, except that 'none' removes existing artifacts.",
     )
     parser.add_argument(
         "--force-rebuild", "-f",
@@ -85,13 +85,13 @@ def main():
     )
     args = parser.parse_args()
     
-    if args.binary_spec == PlatformTarget_None:
-        print("Removing existing in-tree platform files, if any.", file=sys.stderr)
+    if args.plat_spec == PlatTarget_None:
+        print("Remove existing in-tree platform files, if any.", file=sys.stderr)
         clean_platfiles()
         purge_pdfium_versions()
         return
     
-    pl_name = get_pdfium(args.binary_spec, args.force_rebuild)
+    pl_name = get_pdfium(args.plat_spec, args.force_rebuild)
     emplace_platfiles(pl_name)
 
 

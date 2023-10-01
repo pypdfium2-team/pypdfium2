@@ -35,12 +35,12 @@ BetaUpdateFile    = AutoreleaseDir / "update_beta.txt"
 RefBindingsFile   = SourceTree / "bindings" / BindingsFileName
 
 # TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
-BinarySpec_EnvVar      = "PDFIUM_PLATFORM"
-BinarySpec_VersionSep  = ":"
-BinarySpec_V8Indicator = "-v8"
-PlatformTarget_None    = "none"  # sdist
-PlatformTarget_Auto    = "auto"  # host
-VersionTarget_Latest   = "latest"
+PlatSpec_EnvVar  = "PDFIUM_PLATFORM"
+PlatSpec_VerSep  = ":"
+PlatSpec_V8Sym   = "-v8"
+PlatTarget_None  = "none"  # sdist
+PlatTarget_Auto  = "auto"  # host
+VerTarget_Latest = "latest"
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw = "raw"

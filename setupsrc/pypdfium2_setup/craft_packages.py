@@ -66,13 +66,13 @@ def main():
     
     stash = ArtifactStash()
     
-    os.environ[BinarySpec_EnvVar] = PlatformTarget_None
+    os.environ[PlatSpec_EnvVar] = PlatTarget_None
     run_build(["--sdist"])
     clean_platfiles()
     
-    suffix = (BinarySpec_V8Indicator if args.use_v8 else "") + BinarySpec_VersionSep + str(args.version)
+    suffix = (PlatSpec_V8Sym if args.use_v8 else "") + PlatSpec_VerSep + str(args.version)
     for plat in BinaryPlatforms:
-        os.environ[BinarySpec_EnvVar] = plat + suffix
+        os.environ[PlatSpec_EnvVar] = plat + suffix
         run_build(["--wheel"])
         clean_platfiles()
     

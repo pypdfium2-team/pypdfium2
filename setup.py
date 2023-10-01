@@ -14,8 +14,8 @@ from pypdfium2_setup.emplace import get_pdfium
 from pypdfium2_setup.packaging_base import (
     # TODO consider glob import or dotted access?
     purge_pdfium_versions,
-    BinarySpec_EnvVar,
-    PlatformTarget_None,
+    PlatSpec_EnvVar,
+    PlatTarget_None,
     ModulesSpec_EnvVar,
     ModulesAll,
     ModuleRaw,
@@ -26,7 +26,7 @@ def main():
     
     from pypdfium2_setup.setup_base import mkwheel, get_setup_kws
     
-    binary_spec = os.environ.get(BinarySpec_EnvVar, "")
+    plat_spec = os.environ.get(PlatSpec_EnvVar, "")
     modnames = os.environ.get(ModulesSpec_EnvVar, "")
     if modnames:
         modnames = modnames.split(",")
@@ -36,13 +36,13 @@ def main():
     
     setup_kws = get_setup_kws(modnames)
     
-    if binary_spec == PlatformTarget_None or ModuleRaw not in modnames:
+    if plat_spec == PlatTarget_None or ModuleRaw not in modnames:
         # NOTE currently this will implicitly include the bindings file if present in the source tree - this should be taken into account if a pure sdist is desired
         # TODO consider if we can make this more explicit, e.g. split in a mode that strictly excludes all platform files, and another that always includes bindings?
         purge_pdfium_versions()
         setuptools.setup(**setup_kws)
     else:
-        pl_name = get_pdfium(binary_spec)
+        pl_name = get_pdfium(plat_spec)
         mkwheel(pl_name, setup_kws)
 
 
