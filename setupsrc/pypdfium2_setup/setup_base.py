@@ -17,6 +17,7 @@ def bdist_factory(pl_name):
         
         def finalize_options(self, *args, **kws):
             bdist_wheel.finalize_options(self, *args, **kws)
+            # root_is_pure: redundant, covered by BinaryDistribution below - TODO consider removal
             self.root_is_pure = False
         
         def get_tag(self, *args, **kws):
@@ -25,14 +26,15 @@ def bdist_factory(pl_name):
     return pypdfium_bdist
 
 
-# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels
+# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This also sets `Root-Is-Purelib: false` in the WHEEL file.
 class BinaryDistribution (setuptools.Distribution):
     def has_ext_modules(self):
         return True
 
 
-# NOTE handle python_requires dynamically so we could adjust it depending on which modules are included
 def get_setup_kws(modnames):
+    
+    # NOTE Handle python_requires dynamically so we could adjust it depending on which modules are included
     
     if set(modnames) == set(ModulesAll):
         moddirs = {"": "src"}
@@ -47,6 +49,8 @@ def get_setup_kws(modnames):
 
 
 def mkwheel(pl_name, setup_kws):
+    
+    # NOTE This will not be called for helpers-only installs
     
     emplace_platfiles(pl_name)
     system = plat_to_system(pl_name)
