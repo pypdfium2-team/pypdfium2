@@ -22,8 +22,8 @@ class ArtifactStash:
         self.tmpdir = None
         
         # FIXME some degree of duplication with base::get_platfiles()
-        file_names = [BindingsFileName, LibnameForSystem[Host.system]]
-        self.files = [fp for fp in [RawModuleDir / fn for fn in file_names] if fp.exists()]
+        file_names = [BindingsFN, LibnameForSystem[Host.system]]
+        self.files = [fp for fp in [ModuleDir_Raw / fn for fn in file_names] if fp.exists()]
         if len(self.files) == 0:
             return
         elif len(self.files) != 2:
@@ -38,12 +38,12 @@ class ArtifactStash:
         if self.tmpdir is None:
             return
         for fp in self.files:
-            shutil.move(self.tmpdir_path / fp.name, RawModuleDir)
+            shutil.move(self.tmpdir_path / fp.name, ModuleDir_Raw)
         self.tmpdir.cleanup()
 
 
 def run_build(args):
-    run_cmd([sys.executable, "-m", "build", "--skip-dependency-check", "--no-isolation"] + args, cwd=SourceTree, env=os.environ)
+    run_cmd([sys.executable, "-m", "build", "--skip-dependency-check", "--no-isolation"] + args, cwd=ProjectDir, env=os.environ)
 
 
 def main():

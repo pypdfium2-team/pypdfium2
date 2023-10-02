@@ -14,26 +14,6 @@ import subprocess
 from pathlib import Path
 import urllib.request as url_request
 
-
-VerStatusFileName = ".pdfium_version.txt"
-V8StatusFileName  = ".pdfium_is_v8.txt"
-# NOTE if renaming BindingsFileName, also rename `bindings/$FILE`
-BindingsFileName  = "bindings.py"
-
-HomeDir           = Path.home()
-SourceTree        = Path(__file__).parents[2]
-DataTree          = SourceTree / "data"
-SB_Dir            = SourceTree / "sourcebuild"
-RawModuleDir      = SourceTree / "src" / "pypdfium2_raw"
-HelpersModuleDir  = SourceTree / "src" / "pypdfium2"
-VersionFile       = HelpersModuleDir / "version.py"
-Changelog         = SourceTree / "docs" / "devel" / "changelog.md"
-ChangelogStaging  = SourceTree / "docs" / "devel" / "changelog_staging.md"
-AutoreleaseDir    = SourceTree / "autorelease"
-MajorUpdateFile   = AutoreleaseDir / "update_major.txt"
-BetaUpdateFile    = AutoreleaseDir / "update_beta.txt"
-RefBindingsFile   = SourceTree / "bindings" / BindingsFileName
-
 # TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
 PlatSpec_EnvVar  = "PDFIUM_PLATFORM"
 PlatSpec_VerSep  = ":"
@@ -43,14 +23,29 @@ PlatTarget_Auto  = "auto"  # host
 VerTarget_Latest = "latest"
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
-ModuleRaw = "raw"
-ModuleHelpers = "helpers"
-ModulesSpec_Dict = {ModuleRaw: "pypdfium2_raw", ModuleHelpers: "pypdfium2"}
-ModulesAll = list(ModulesSpec_Dict.keys())
+ModuleRaw          = "raw"
+ModuleHelpers      = "helpers"
+ModulesSpec_Dict   = {ModuleRaw: "pypdfium2_raw", ModuleHelpers: "pypdfium2"}
+ModulesAll         = list(ModulesSpec_Dict.keys())
+
+VerStatusFN = ".pdfium_version.txt"
+V8StatusFN  = ".pdfium_is_v8.txt"
+# NOTE if renaming BindingsFN, also rename `bindings/$FILE`
+BindingsFN  = "bindings.py"
+
+ProjectDir        = Path(__file__).parents[2]
+ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
+ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
+VersionFile       = ModuleDir_Helpers / "version.py"
+DataDir           = ProjectDir / "data"
+RefBindingsFile   = ProjectDir / "bindings" / BindingsFN
+Changelog         = ProjectDir / "docs" / "devel" / "changelog.md"
+ChangelogStaging  = ProjectDir / "docs" / "devel" / "changelog_staging.md"
+SourcebuildDir    = ProjectDir / "sourcebuild"
 
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
-PDFium_URL     = "https://pdfium.googlesource.com/pdfium"
-DepotTools_URL = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+PdfiumURL      = "https://pdfium.googlesource.com/pdfium"
+DepotToolsURL  = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
 ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
@@ -304,7 +299,7 @@ def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symb
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
     
-    bindings = target_dir / BindingsFileName
+    bindings = target_dir / BindingsFN
     
     args = ["ctypesgen", f"--strip-build-path={include_dir}", "--no-srcinfo", "--library", "pdfium", "--runtime-libdirs", "."]
     if pl_name == Host.platform:
@@ -324,17 +319,17 @@ def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symb
     
     text = bindings.read_text()
     text = text.replace(str(include_dir), ".")
-    text = text.replace(str(HomeDir), "~")
+    text = text.replace(str(Path.home()), "~")
     bindings.write_text(text)
 
 
 def clean_platfiles():
     
     deletables = [
-        SourceTree / "build",
-        RawModuleDir / BindingsFileName,
+        ProjectDir / "build",
+        ModuleDir_Raw / BindingsFN,
     ]
-    deletables += [RawModuleDir / fn for fn in MainLibnames]
+    deletables += [ModuleDir_Raw / fn for fn in MainLibnames]
     
     for fp in deletables:
         if fp.is_file():
@@ -346,26 +341,26 @@ def clean_platfiles():
 def get_platfiles(pl_name):
     system = plat_to_system(pl_name)
     platfiles = (
-        DataTree / pl_name / BindingsFileName,
-        DataTree / pl_name / LibnameForSystem[system],
+        DataDir / pl_name / BindingsFN,
+        DataDir / pl_name / LibnameForSystem[system],
     )
     return platfiles
 
 
 def emplace_platfiles(pl_name):
     
-    pl_dir = DataTree / pl_name
+    pl_dir = DataDir / pl_name
     if not pl_dir.exists():
         raise RuntimeError(f"Missing platform directory {pl_name}")
     
-    ver_file = pl_dir / VerStatusFileName
+    ver_file = pl_dir / VerStatusFN
     if not ver_file.exists():
         raise RuntimeError(f"Missing PDFium version file for {pl_name}")
     
     ver_changes = dict()
     ver_changes["V_LIBPDFIUM"], ver_changes["V_LIBPDFIUM_FULL"] = read_version_file(ver_file)
     ver_changes["V_BUILDNAME"] = "source" if pl_name == PlatNames.sourcebuild else "pdfium-binaries"
-    ver_changes["V_PDFIUM_IS_V8"] = (pl_dir / V8StatusFileName).exists()
+    ver_changes["V_PDFIUM_IS_V8"] = (pl_dir / V8StatusFN).exists()
     set_versions(ver_changes)
     
     clean_platfiles()
@@ -374,7 +369,7 @@ def emplace_platfiles(pl_name):
     for fp in platfiles:
         if not fp.exists():
             raise RuntimeError(f"Platform file missing: {fp}")
-        shutil.copy(fp, RawModuleDir)
+        shutil.copy(fp, ModuleDir_Raw)
 
 
 def get_changelog_staging(flush=False):

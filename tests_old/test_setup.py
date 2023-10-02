@@ -15,7 +15,7 @@ from pypdfium2_setup.packaging_base import (
     BinaryPlatforms,
     ReleaseNames,
 )
-from .conftest import SourceTree, get_members
+from .conftest import ProjectDir, get_members
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def all_platnames():
 # def test_entrypoint():
     
 #     setup_cfg = configparser.ConfigParser()
-#     setup_cfg.read( join(SourceTree, "setup.cfg") )
+#     setup_cfg.read( join(ProjectDir, "setup.cfg") )
 #     console_scripts = setup_cfg["options.entry_points"]["console_scripts"]
     
 #     entry_point = console_scripts.split("=")[-1].strip().split(":")
@@ -98,12 +98,11 @@ def test_PlatNames(all_platnames):
 
 def test_paths():
     # FIXME not much point doing this?
-    assert pkg_base.HomeDir == Path.home()
-    assert pkg_base.SourceTree == SourceTree
-    assert pkg_base.DataTree == SourceTree / "data"
-    assert pkg_base.SB_Dir == SourceTree / "sourcebuild"
-    assert pkg_base.HelpersModuleDir == SourceTree / "src" / "pypdfium2"
-    assert pkg_base.VersionFile == Path(pkg_base.HelpersModuleDir) / "version.py"
+    assert pkg_base.ProjectDir == ProjectDir
+    assert pkg_base.DataDir == ProjectDir / "data"
+    assert pkg_base.SourcebuildDir == ProjectDir / "sourcebuild"
+    assert pkg_base.ModuleDir_Helpers == ProjectDir / "src" / "pypdfium2"
+    assert pkg_base.VersionFile == Path(pkg_base.ModuleDir_Helpers) / "version.py"
 
 
 # update_pdfium

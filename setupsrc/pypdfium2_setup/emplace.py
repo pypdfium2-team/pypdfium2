@@ -46,9 +46,9 @@ def get_pdfium(plat_spec, force_rebuild=False):
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
     
-    pl_dir = DataTree / pl_name
-    ver_file = pl_dir / VerStatusFileName
-    had_v8 = (pl_dir / V8StatusFileName).exists()
+    pl_dir = DataDir / pl_name
+    ver_file = pl_dir / VerStatusFN
+    had_v8 = (pl_dir / V8StatusFN).exists()
     prev_ver = None
     if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
         prev_ver = int( read_version_file(ver_file)[0] )

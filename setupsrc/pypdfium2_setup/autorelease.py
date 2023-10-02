@@ -16,19 +16,22 @@ from pypdfium2_setup import update_pdfium
 from pypdfium2_setup.packaging_base import *
 
 
-# these files/dirs do not necessarily need to have been changed, `git add` silently skips that
+AutoreleaseDir    = ProjectDir / "autorelease"
+MajorUpdateFile   = AutoreleaseDir / "update_major.txt"
+BetaUpdateFile    = AutoreleaseDir / "update_beta.txt"
+# NOTE the files below do not necessarily need to have been changed, `git add` silently skips that
 PlacesToRegister = (AutoreleaseDir, VersionFile, Changelog, ChangelogStaging, RefBindingsFile)
 
 
 def run_local(*args, **kws):
-    return run_cmd(*args, **kws, cwd=SourceTree)
+    return run_cmd(*args, **kws, cwd=ProjectDir)
 
 
 def update_refbindings():
     
     # re-generate host bindings
     # TODO download headers from pdfium repo and call ctypesgen directly
-    host_bindings = DataTree / Host.platform / BindingsFileName
+    host_bindings = DataDir / Host.platform / BindingsFN
     host_bindings.unlink(missing_ok=True)
     update_pdfium.main([Host.platform], ctypesgen_kws=dict(guard_symbols=True))
     assert host_bindings.exists()
@@ -163,7 +166,7 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
     
     # even if python code was not updated, there will be a release commit
     relnotes += _get_log(
-        "pypdfium2", RepositoryURL, SourceTree,
+        "pypdfium2", RepositoryURL, ProjectDir,
         prev_ns["V_PYPDFIUM2"], curr_ns["V_PYPDFIUM2"],
         "/tree/", "/commit/", "",
     )
@@ -175,14 +178,14 @@ def make_releasenotes(summary, prev_ns, curr_ns, c_updates):
         # CONSIDER specifically show changes to public/ ?
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
-            run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PDFium_URL, "pdfium_history"], cwd=tmpdir)
+            run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
             relnotes += _get_log(
-                "PDFium", PDFium_URL, tmpdir/"pdfium_history",
+                "PDFium", PdfiumURL, tmpdir/"pdfium_history",
                 prev_ns["V_LIBPDFIUM"], curr_ns["V_LIBPDFIUM"],
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
             )
     
-    (SourceTree / "RELEASE.md").write_text(relnotes)
+    (ProjectDir / "RELEASE.md").write_text(relnotes)
 
 
 def main():
