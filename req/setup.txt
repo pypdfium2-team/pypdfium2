@@ -1,5 +1,6 @@
 pip
-setuptools
 build
+setuptools
+packaging
 wheel  # !=0.38.0,!=0.38.1
 ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2

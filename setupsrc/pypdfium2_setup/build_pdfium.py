@@ -15,10 +15,10 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 # TODO consider dotted access?
 from pypdfium2_setup.packaging_base import *
 
-
-PatchDir       = SourcebuildDir / "patches"
-DepotToolsDir  = SourcebuildDir / "depot_tools"
-PDFiumDir      = SourcebuildDir / "pdfium"
+SBDir = SourcebuildDir  # local alias for convenience
+PatchDir       = SBDir / "patches"
+DepotToolsDir  = SBDir / "depot_tools"
+PDFiumDir      = SBDir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
 OutputDir      = DataDir / PlatNames.sourcebuild
 
@@ -63,7 +63,7 @@ elif sys.platform.startswith("darwin"):
 
 def dl_depottools(do_update):
     
-    SourcebuildDir.mkdir(parents=True, exist_ok=True)
+    SBDir.mkdir(parents=True, exist_ok=True)
     
     is_update = True
     if DepotToolsDir.exists():
@@ -76,7 +76,7 @@ def dl_depottools(do_update):
             is_update = False
     else:
         print("DepotTools: Download ...")
-        run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SourcebuildDir)
+        run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SBDir)
     
     os.environ["PATH"] += os.pathsep + str(DepotToolsDir)
     
@@ -90,16 +90,16 @@ def dl_pdfium(GClient, do_update, revision):
     if PDFiumDir.exists():
         if do_update:
             print("PDFium: Revert / Sync  ...")
-            run_cmd([GClient, "revert"], cwd=SourcebuildDir)
+            run_cmd([GClient, "revert"], cwd=SBDir)
         else:
             is_sync = False
             print("PDFium: Using existing repository as-is.")
     else:
         print("PDFium: Download ...")
-        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SourcebuildDir)
+        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if is_sync:
-        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--with_branch_heads"], cwd=SourcebuildDir)
+        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--with_branch_heads"], cwd=SBDir)
     
     return is_sync
 
@@ -130,14 +130,13 @@ def get_pdfium_version():
     tag = ref.split("/")[-1]
     
     print(f"Current head {head_commit}, latest tagged commit {tag_commit} ({tag})", file=sys.stderr)
-    v_libpdfium = tag if head_commit == tag_commit else head_commit
+    v_libpdfium = int(tag) if head_commit == tag_commit else head_commit
     
     return v_libpdfium
 
 
 def update_version(v_libpdfium):
-    # NOTE this does not set the full version, not sure how to retrieve it
-    (OutputDir / VerStatusFN).write_text( str(v_libpdfium) )
+    write_pdfium_info(OutputDir, version=v_libpdfium, origin="sourcebuild", flags=[])
 
 
 def _create_resources_rc(v_libpdfium):

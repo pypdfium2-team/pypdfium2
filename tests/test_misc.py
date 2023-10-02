@@ -4,8 +4,7 @@
 import pytest
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
-from pypdfium2.version import V_PDFIUM_IS_V8
-
+from pypdfium2.version import PDFIUM_INFO
 
 @pytest.mark.parametrize(
     ["color_in", "rev_byteorder", "exp_color"],
@@ -41,7 +40,7 @@ def _filter(prefix, skips=[], type=int):
 BitmapNsp = _filter("FPDFBitmap_", [pdfium_c.FPDFBitmap_Unknown])
 PageObjNsp = _filter("FPDF_PAGEOBJ_")
 ErrorMapping = pdfium_i.ErrorToStr
-if V_PDFIUM_IS_V8:
+if "XFA" in PDFIUM_INFO.flags:
     ErrorMapping.update(pdfium_i.XFAErrorToStr)
 
 

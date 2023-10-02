@@ -33,23 +33,33 @@ jobs:
   
   build:
     runs-on: ubuntu-latest
+    
     steps:
+      
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+      
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          fetch-depth: 0  # quick fix for `git describe`
+      
       - name: Install deps & pypdfium2
         run: |
           python3 -m pip install -r req/docs.txt
-          python3 -m pip install -e .
+          python3 -m pip install .
+      
       - name: Build documentation
         run: ./run docs-build
+      
       - name: Remove unnecessary files
         run: |
           cd docs/build/html
           rm -rf .doctrees/
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
@@ -57,10 +67,12 @@ jobs:
   
   publish:
     needs: build
+    runs-on: ubuntu-latest
+    
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

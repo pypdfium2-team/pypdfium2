@@ -5,26 +5,21 @@ build/
 dist/
 tests/output/
 tests_old/output/
+
 data/
 !data/.gitkeep
-
 docs/build/
 !docs/build/.gitkeep
-
-# FIXME changes to patches are still ignored?
 sourcebuild/
 !sourcebuild/patches
-
-src/pypdfium2_raw/bindings.py
+src/pypdfium2/version.json
+src/pypdfium2_raw/
+!src/pypdfium2_raw/__init__.py
 
 *.so
 *.dll
 *.dylib
 
-**/__pycache__
-**/.mypy_cache
-**/.pytest_cache
-**/.hypothesis
 *.pyc
 *.vscode
 *.egg-info
@@ -32,3 +27,8 @@ src/pypdfium2_raw/bindings.py
 *.kate-swp
 *.python-version
 *.coverage
+
+**/__pycache__
+**/.mypy_cache
+**/.pytest_cache
+**/.hypothesis

@@ -16,13 +16,14 @@ from pypdfium2_setup.packaging_base import *
 class ArtifactStash:
     
     # Preserve in-tree aftefacts from editable install
+    # TODO update to version integration changes
     
     def __init__(self):
         
         self.tmpdir = None
         
         # FIXME some degree of duplication with base::get_platfiles()
-        file_names = [BindingsFN, LibnameForSystem[Host.system]]
+        file_names = [VersionFN, BindingsFN, LibnameForSystem[Host.system]]
         self.files = [fp for fp in [ModuleDir_Raw / fn for fn in file_names] if fp.exists()]
         if len(self.files) == 0:
             return
@@ -62,7 +63,7 @@ def main():
     )
     args = parser.parse_args()
     if not args.version:
-        args.version = get_latest_version()
+        args.version = PdfiumVer.get_latest()
     
     stash = ArtifactStash()
     

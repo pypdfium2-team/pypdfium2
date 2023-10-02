@@ -15,6 +15,11 @@ from pypdfium2_setup.packaging_base import *
 
 # CONSIDER Linux/macOS: check that minimum OS version requirements are fulfilled
 # TODO add direct support for emplacing local pdfium from file
+# FIXME V8 integration is a bit polluted (flags vs. bool)
+
+
+def _repr_info(version, flags):
+    return str(version) + (":{%s}" % ','.join(flags) if flags else "")
 
 
 def get_pdfium(plat_spec, force_rebuild=False):
@@ -24,45 +29,51 @@ def get_pdfium(plat_spec, force_rebuild=False):
         return PlatNames.sourcebuild
     
     req_ver = None
+    req_flags = []
     use_v8 = False
     if PlatSpec_VerSep in plat_spec:
         plat_spec, req_ver = plat_spec.rsplit(PlatSpec_VerSep)
     if plat_spec.endswith(PlatSpec_V8Sym):
-        plat_spec = plat_spec.rstrip(PlatSpec_V8Sym)  # should be removesuffix() (pep616, python>=3.9)
+        plat_spec = plat_spec[:-len(PlatSpec_V8Sym)]
+        req_flags += ["V8", "XFA"]
         use_v8 = True
     
     if not plat_spec or plat_spec.lower() == PlatTarget_Auto:
         pl_name = Host.platform
         if pl_name is None:
-            raise RuntimeError(f"No pre-built binaries available for system {Host._system_name} (libc info {Host._libc_info}) on machine {Host._machine_name}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
+            raise RuntimeError(f"No pre-built binaries available for {Host}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
     elif hasattr(PlatNames, plat_spec):
         pl_name = getattr(PlatNames, plat_spec)
     else:
         raise ValueError(f"Invalid binary spec '{plat_spec}'")
     
     if not req_ver or req_ver.lower() == VerTarget_Latest:
-        req_ver = get_latest_version()
+        req_ver = PdfiumVer.get_latest()
     else:
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
     
-    pl_dir = DataDir / pl_name
-    ver_file = pl_dir / VerStatusFN
-    had_v8 = (pl_dir / V8StatusFN).exists()
-    prev_ver = None
-    if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
-        prev_ver = int( read_version_file(ver_file)[0] )
-    
-    need_rebuild = prev_ver != req_ver or had_v8 != use_v8
-    if need_rebuild or force_rebuild:
-        if need_rebuild:
-            print(f"Switching pdfium binary from ({prev_ver}, v8 {had_v8}) to ({req_ver}, v8 {use_v8})", file=sys.stderr)
+    prev_repr = "(Unknown)"
+    if force_rebuild:
+        need_rebuild = True
+        prev_repr = "(Ignored)"
+    else:
+        pl_dir = DataDir / pl_name
+        ver_file = pl_dir / VersionFN
+        if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
+            prev_info = read_json(ver_file)
+            need_rebuild = prev_info["build"] != req_ver or set(prev_info["flags"]) != set(req_flags)
+            prev_repr = _repr_info(prev_info["build"], prev_info["flags"])
         else:
-            print(f"Force-rebuild ({req_ver}, v8 {use_v8}) despite cache", file=sys.stderr)
-        # NOTE update_pdfium cleans up pl_dir for us in case of mismatched existing cache
+            need_rebuild = True
+    
+    req_repr = _repr_info(req_ver, req_flags)
+    
+    if need_rebuild:
+        print(f"Switch from pdfium {prev_repr} to {req_repr}", file=sys.stderr)
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
-        print(f"Matching pdfium binary/bindings exists already ({req_ver}, v8 {use_v8})", file=sys.stderr)
+        print(f"Use existing cache for pdfium {req_repr}", file=sys.stderr)
     
     return pl_name
 
@@ -76,7 +87,7 @@ def main():
         "plat_spec",
         default = os.environ.get(PlatSpec_EnvVar, ""),
         nargs = "?",
-        help = f"The platform specifier. Same format as of ${PlatSpec_EnvVar} on setup, except that 'none' removes existing artifacts.",
+        help = f"The platform specifier. Same format as of ${PlatSpec_EnvVar} on setup. 'none' removes existing artifacts.",
     )
     parser.add_argument(
         "--force-rebuild", "-f",
@@ -88,7 +99,6 @@ def main():
     if args.plat_spec == PlatTarget_None:
         print("Remove existing in-tree platform files, if any.", file=sys.stderr)
         clean_platfiles()
-        purge_pdfium_versions()
         return
     
     pl_name = get_pdfium(args.plat_spec, args.force_rebuild)
