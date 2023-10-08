@@ -8,9 +8,9 @@ on:
   # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   # https://crontab.guru/
-  schedule:
-    # - cron: '0 4 * * 2'
-    - cron: '0 4 10 * *'
+  # schedule:
+    # - cron: '0 4 * * 2'   # old schedule
+    # - cron: '0 4 10 * *'  # new schedule, temporarily paused
   workflow_dispatch:
 
 defaults:
