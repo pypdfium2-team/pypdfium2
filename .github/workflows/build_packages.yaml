@@ -167,6 +167,8 @@ jobs:
       id-token: write
       # `contents: write` is required for the repository changes
       contents: write
+      # `actions: write` is required for GH pages workflow-dispatch
+      actions: write
     
     steps:
       
