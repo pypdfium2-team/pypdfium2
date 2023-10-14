@@ -16,7 +16,6 @@ from pypdfium2_setup.packaging_base import *
 class ArtifactStash:
     
     # Preserve in-tree aftefacts from editable install
-    # TODO update to version integration changes
     
     def __init__(self):
         

@@ -644,7 +644,7 @@ The autorelease script has some peculiarities maintainers should know about:
   Version changes are based on the following logic:
   * If PDFium was updated, the minor version is incremented.
   * If only pypdfium2 code was updated, the patch version is incremented instead.
-  * Major updates and beta marks are controlled via `autorelease/increments.json`.
+  * Major updates and beta marks are controlled via `autorelease/config.json`.
     If `major` is true, the major version is incremented.
     If `beta` is true, a new beta tag is set, or an existing one is incremented.
     The control file is automatically reset when the versioning is finished.
