@@ -63,35 +63,38 @@ class SysNames:
     windows = "windows"
 
 
+# TODO align with either python or google platform names?
 class PlatNames:
     # - Attribute names and values are expected to match
     # - Platform names are expected to start with the corresponding system name
-    linux_x64      = SysNames.linux   + "_x64"
-    linux_x86      = SysNames.linux   + "_x86"
-    linux_arm64    = SysNames.linux   + "_arm64"
-    linux_arm32    = SysNames.linux   + "_arm32"
-    linux_musl_x64 = SysNames.linux   + "_musl_x64"
-    linux_musl_x86 = SysNames.linux   + "_musl_x86"
-    darwin_x64     = SysNames.darwin  + "_x64"
-    darwin_arm64   = SysNames.darwin  + "_arm64"
-    windows_x64    = SysNames.windows + "_x64"
-    windows_x86    = SysNames.windows + "_x86"
-    windows_arm64  = SysNames.windows + "_arm64"
-    sourcebuild    = "sourcebuild"
+    linux_x64        = SysNames.linux   + "_x64"
+    linux_x86        = SysNames.linux   + "_x86"
+    linux_arm64      = SysNames.linux   + "_arm64"
+    linux_arm32      = SysNames.linux   + "_arm32"
+    linux_musl_x64   = SysNames.linux   + "_musl_x64"
+    linux_musl_x86   = SysNames.linux   + "_musl_x86"
+    linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
+    darwin_x64       = SysNames.darwin  + "_x64"
+    darwin_arm64     = SysNames.darwin  + "_arm64"
+    windows_x64      = SysNames.windows + "_x64"
+    windows_x86      = SysNames.windows + "_x86"
+    windows_arm64    = SysNames.windows + "_arm64"
+    sourcebuild      = "sourcebuild"
 
 
 ReleaseNames = {
-    PlatNames.darwin_x64     : "mac-x64",
-    PlatNames.darwin_arm64   : "mac-arm64",
-    PlatNames.linux_x64      : "linux-x64",
-    PlatNames.linux_x86      : "linux-x86",
-    PlatNames.linux_arm64    : "linux-arm64",
-    PlatNames.linux_arm32    : "linux-arm",
-    PlatNames.linux_musl_x64 : "linux-musl-x64",
-    PlatNames.linux_musl_x86 : "linux-musl-x86",
-    PlatNames.windows_x64    : "win-x64",
-    PlatNames.windows_x86    : "win-x86",
-    PlatNames.windows_arm64  : "win-arm64",
+    PlatNames.darwin_x64       : "mac-x64",
+    PlatNames.darwin_arm64     : "mac-arm64",
+    PlatNames.linux_x64        : "linux-x64",
+    PlatNames.linux_x86        : "linux-x86",
+    PlatNames.linux_arm64      : "linux-arm64",
+    PlatNames.linux_arm32      : "linux-arm",
+    PlatNames.linux_musl_x64   : "linux-musl-x64",
+    PlatNames.linux_musl_x86   : "linux-musl-x86",
+    PlatNames.linux_musl_arm64 : "linux-musl-arm64",  # not V8 AOTW
+    PlatNames.windows_x64      : "win-x64",
+    PlatNames.windows_x86      : "win-x86",
+    PlatNames.windows_arm64    : "win-arm64",
 }
 
 LibnameForSystem = {
@@ -282,7 +285,7 @@ class _host_platform:
         elif self._is_plat("linux", "i686"):
             return PlatNames.linux_x86 if self._libc_name != "musl" else PlatNames.linux_musl_x86
         elif self._is_plat("linux", "aarch64"):
-            return PlatNames.linux_arm64
+            return PlatNames.linux_arm64 if self._libc_name != "musl" else PlatNames.linux_musl_arm64
         elif self._is_plat("linux", "armv7l"):
             return PlatNames.linux_arm32
         elif self._is_plat("windows", "amd64"):
