@@ -66,7 +66,7 @@ class _version_pypdfium2 (_abc_version):
     def desc(self):
         desc = []
         if self.n_commits > 0:
-            desc += [f"{self.n_commits}", f"{self.hash}"]
+            desc += [str(self.n_commits), str(self.hash)]
         if self.dirty:
             desc += ["dirty"]
         return ".".join(desc)

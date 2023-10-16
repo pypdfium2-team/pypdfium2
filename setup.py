@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # NOTE Unfortunately, pip may run setup.py multiple times with different commands (dist_info, bdist_wheel).
-# However, guarding code depending on command is really tricky. You'd need to be careful not to cause inconsistent data. Also, it's hard to tell which command runs first because other tools (e.g. build) may run just bdist_wheel.
+# However, guarding code depending on command is tricky. You'd need to be careful not to cause inconsistent data. Also, it's hard to tell which command runs first because other tools (e.g. build) may run just bdist_wheel.
 
 import os
 import sys
@@ -148,13 +148,11 @@ def main():
         kwargs["package_dir"]["pypdfium2_raw"] = "src/pypdfium2_raw"
     
     if "pypdfium2_raw" not in kwargs["package_dir"]:
-        # Do not generate platform files and exclude any existing
-        # TODO consider ArtifactStash as an additional safety measure
         kwargs["exclude_package_data"] = {"pypdfium2_raw": [VersionFN, BindingsFN, *LibnameForSystem.values()]}
         if pl_name == PlatTarget_None:
             kwargs["license_files"] += LICENSES_SDIST
     elif pl_name == PlatTarget_Sys:
-        # TODO generate bindings/version here according to some caller input
+        # TODO generate bindings/version here according to some caller input?
         assert (ModuleDir_Raw/BindingsFN).exists() and (ModuleDir_Raw/VersionFN).exists(), "Bindings and version currently must be prepared by caller for sys target."
         kwargs["package_data"]["pypdfium2_raw"] = [BindingsFN, VersionFN]
     else:
