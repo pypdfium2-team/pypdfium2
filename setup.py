@@ -73,14 +73,14 @@ def get_helpers_info():
     if not have_git_describe:
         ver_file = ModuleDir_Helpers / VersionFN
         if ver_file.exists():
-            print("Falling back to supplied version info (e.g. sdist).", file=sys.stderr)
+            print("Falling back to given version info (e.g. sdist).", file=sys.stderr)
             helpers_info = read_json(ver_file)
-            helpers_info["data_source"] = "supplied"
+            helpers_info["data_source"] = "given"
         else:
             print("Falling back to autorelease record.", file=sys.stderr)
             record = read_json(AR_RecordFile)
             helpers_info = parse_given_tag(record["tag"])
-            helpers_info["data_source"] = "fallback"
+            helpers_info["data_source"] = "record"
     
     return helpers_info
 

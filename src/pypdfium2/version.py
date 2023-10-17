@@ -138,6 +138,14 @@ pypdfium2 helpers version.
 It is suggesed to compare against *api_tag* and possibly also *beta* (see below).
 
 Parameters:
+    version (str):
+        Joined tag and desc, forming the full version.
+    api_tag (tuple[int]):
+        Version ciphers joined as tuple, excluding possible beta.
+    tag (str):
+        Version ciphers joined as str, including possible beta. Corresponds to the latest release tag at install time.
+    desc (str):
+        Descriptors (n_commits, hash, dirty) represented as str.
     major (int):
         Major cipher.
     minor (int):
@@ -146,20 +154,21 @@ Parameters:
         Patch cipher.
     beta (int | None):
         Beta cipher, or None if not a beta version.
-    api_tag (tuple[int]):
-        Version ciphers joined as tuple, excluding possible beta.
-    tag (str):
-        Version ciphers joined as str, including possible beta. Corresponds to the latest release tag in the install env.
     n_commits (int):
-        Number of commits after tag. 0 for release.
+        Number of commits after tag at install time. 0 for release.
     hash (str | None):
         Hash of head commit if n_commits > 0, None otherwise.
     dirty (bool):
-        True if there were uncommitted changes in the install env, False otherwise.
-    desc (str):
-        Descriptors (n_commits, hash, dirty) represented as str.
-    version (str):
-        Joined tag and desc, forming the full version.
+        True if there were uncommitted changes at install time, False otherwise.
+    data_source (str):
+        Source of this version info. Possible values:\n
+        - ``git``: Parsed from git describe - highest accuracy.
+        - ``given``: Installed with a given version file (e.g. supplied with sdist, or created by caller).
+        - ``record``: Parsed from autorelease record. Implies that possible modifications after tag are unknown.\n
+        Note that *given* and *record* are not "trustworthy", they can be easily abused to set arbitrary values. *git* is correct provided the installed version file is not corrupted.
+    is_editable (bool):
+        True for editable install, False otherwise.
+        If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happend since. The actual current state is unknown.
 """
 
 
@@ -175,6 +184,14 @@ PDFium version.
 It is suggesed to compare against *build* (see below).
 
 Parameters:
+    version (str):
+        Joined tag and desc, forming the full version.
+    api_tag (tuple[int] | int | str):
+        Version ciphers joined as tuple, or just the build value (without tuple) if other ciphers are unknown.
+    tag (str):
+        Version ciphers joined as str. Just *str(build)* if other ciphers are unknown.
+    desc (str):
+        Descriptors (origin, flags) represented as str.
     major (int | None):
         Chromium major cipher. Unknown for origin sourcebuild.
     minor (int | None):
@@ -192,14 +209,6 @@ Parameters:
         - ``sys``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
-    api_tag (tuple[int] | int | str):
-        Version ciphers joined as tuple, or just the build value (without tuple) if other ciphers are unknown.
-    tag (str):
-        Version ciphers joined as str. Just *str(build)* if other ciphers are unknown.
-    desc (str):
-        Descriptors (origin, flags) represented as str.
-    version (str):
-        Joined tag and desc, forming the full version.
 """
 
 # -----
