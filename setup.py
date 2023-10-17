@@ -57,11 +57,11 @@ def get_helpers_info():
     
     # TODO consider adding some checks against record
     
+    have_git_describe = False
     if HAVE_GIT_REPO:
         try:
             helpers_info = parse_git_tag()
         except subprocess.CalledProcessError:
-            have_git_describe = False
             print("Version uncertain: git describe failure - possibly a shallow checkout", file=sys.stderr)
             traceback.print_exc()
         else:
