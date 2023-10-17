@@ -6,7 +6,7 @@
 ## pre-merge
 - Properly integrate version data source (git/supply/fallback) and editable info.
   * What is the cleanest way of embedding this the version file?
-  * Maybe we'll want to add add an abstrated `uncertain` property in the version file?
+  * Maybe we'll want to add add an abstracted `uncertain` property in the version file?
   * How should we add this to the version str? We'd need some separator other than dot to keep it parsable, but it seems like PEP 440 doesn't allow. Do we have to forego PEP 440 in the library, and exclude the info from PyPA tools?
 
 ## post-merge
