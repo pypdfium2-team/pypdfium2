@@ -308,6 +308,7 @@ def get_wheel_tag(pl_name):
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
     # linux glibc requirement: see BUG(203) for discussion
+    # TODO unify glibc/musl CPU translation
     elif pl_name == PlatNames.linux_x64:
         return "manylinux_2_17_x86_64"
     elif pl_name == PlatNames.linux_x86:
@@ -320,6 +321,8 @@ def get_wheel_tag(pl_name):
         return "musllinux_1_1_x86_64"
     elif pl_name == PlatNames.linux_musl_x86:
         return "musllinux_1_1_i686"
+    elif pl_name == PlatNames.linux_musl_arm64:
+        return "musllinux_1_1_aarch64"
     elif pl_name == PlatNames.windows_x64:
         return "win_amd64"
     elif pl_name == PlatNames.windows_arm64:

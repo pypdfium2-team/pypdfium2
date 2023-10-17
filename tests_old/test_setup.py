@@ -47,17 +47,18 @@ def all_platnames():
 # setup_base
 
 ExpectedTags = (
-    (PlatNames.linux_x64,      "manylinux_2_17_x86_64"),
-    (PlatNames.linux_x86,      "manylinux_2_17_i686"),
-    (PlatNames.linux_arm64,    "manylinux_2_17_aarch64"),
-    (PlatNames.linux_arm32,    "manylinux_2_17_armv7l"),
-    (PlatNames.linux_musl_x64, "musllinux_1_1_x86_64"),
-    (PlatNames.linux_musl_x86, "musllinux_1_1_i686"),
-    (PlatNames.darwin_x64,     "macosx_10_13_x86_64"),
-    (PlatNames.darwin_arm64,   "macosx_11_0_arm64"),
-    (PlatNames.windows_x64,    "win_amd64"),
-    (PlatNames.windows_arm64,  "win_arm64"),
-    (PlatNames.windows_x86,    "win32"),
+    (PlatNames.linux_x64,        "manylinux_2_17_x86_64"),
+    (PlatNames.linux_x86,        "manylinux_2_17_i686"),
+    (PlatNames.linux_arm64,      "manylinux_2_17_aarch64"),
+    (PlatNames.linux_arm32,      "manylinux_2_17_armv7l"),
+    (PlatNames.linux_musl_x64,   "musllinux_1_1_x86_64"),
+    (PlatNames.linux_musl_x86,   "musllinux_1_1_i686"),
+    (PlatNames.linux_musl_arm64, "musllinux_1_1_aarch64"),
+    (PlatNames.darwin_x64,       "macosx_10_13_x86_64"),
+    (PlatNames.darwin_arm64,     "macosx_11_0_arm64"),
+    (PlatNames.windows_x64,      "win_amd64"),
+    (PlatNames.windows_arm64,    "win_arm64"),
+    (PlatNames.windows_x86,      "win32"),
     # FIXME not sure how to test this
     # (PlatNames.sourcebuild,    ...),
 )
