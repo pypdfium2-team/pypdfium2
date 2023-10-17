@@ -64,12 +64,20 @@ class _version_pypdfium2 (_abc_version):
     
     @cached_property
     def desc(self):
+        
         desc = []
         if self.n_commits > 0:
             desc += [str(self.n_commits), str(self.hash)]
         if self.dirty:
             desc += ["dirty"]
-        return ".".join(desc)
+        desc = ".".join(desc)
+        
+        if self.data_source != "git":
+            desc += f":{self.data_source}"
+        if self.is_editable:
+            desc += "@editable"
+        
+        return desc
 
 
 class _version_pdfium (_abc_version):
@@ -145,7 +153,7 @@ Parameters:
     tag (str):
         Version ciphers joined as str, including possible beta. Corresponds to the latest release tag at install time.
     desc (str):
-        Descriptors (n_commits, hash, dirty) represented as str.
+        Non-cipher descriptors represented as str.
     major (int):
         Major cipher.
     minor (int):
@@ -162,9 +170,9 @@ Parameters:
         True if there were uncommitted changes at install time, False otherwise.
     data_source (str):
         Source of this version info. Possible values:\n
-        - ``git``: Parsed from git describe - highest accuracy.
-        - ``given``: Installed with a given version file (e.g. supplied with sdist, or created by caller).
-        - ``record``: Parsed from autorelease record. Implies that possible modifications after tag are unknown.\n
+        - ``git``: Parsed from git describe. Highest accuracy. Always used if ``git describe`` is available.
+        - ``given``: Pre-supplied version file (e.g. packaged with sdist, or else created by caller).
+        - ``record``: Parsed from autorelease record. Implies that possible changes after tag are unknown.\n
         Note that *given* and *record* are not "trustworthy", they can be easily abused to set arbitrary values. *git* is correct provided the installed version file is not corrupted.
     is_editable (bool):
         True for editable install, False otherwise.
