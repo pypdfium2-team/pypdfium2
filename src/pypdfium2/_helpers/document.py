@@ -625,11 +625,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 raise ValueError("Duplicate page indices are prohibited.")
         
         converter_params = list( inspect.signature(converter).parameters )[1:]
-        
         pool_kwargs = dict(
             initializer = _parallel_renderer_init,
             initargs = (self._input, self._password, bool(self.formenv), mk_formconfig, renderer, converter, converter_params, pass_info, kwargs),
         )
+        n_processes = min(n_processes, n_pages)
         with mp.Pool(n_processes, **pool_kwargs) as pool:
             yield from pool.imap(_parallel_renderer_job, page_indices)
 
