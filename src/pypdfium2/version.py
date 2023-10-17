@@ -137,8 +137,6 @@ __all__ += ["V_PYPDFIUM2", "V_LIBPDFIUM", "V_LIBPDFIUM_FULL", "V_BUILDNAME", "V_
 # Docs
 
 
-# TODO consider always setting hash, even if n_commits == 0 ?
-
 PYPDFIUM_INFO = PYPDFIUM_INFO
 """
 pypdfium2 helpers version.
@@ -148,12 +146,12 @@ It is suggesed to compare against *api_tag* and possibly also *beta* (see below)
 Parameters:
     version (str):
         Joined tag and desc, forming the full version.
-    api_tag (tuple[int]):
-        Version ciphers joined as tuple, excluding possible beta.
     tag (str):
         Version ciphers joined as str, including possible beta. Corresponds to the latest release tag at install time.
     desc (str):
         Non-cipher descriptors represented as str.
+    api_tag (tuple[int]):
+        Version ciphers joined as tuple, excluding possible beta.
     major (int):
         Major cipher.
     minor (int):
@@ -173,9 +171,9 @@ Parameters:
         - ``git``: Parsed from git describe. Highest accuracy. Always used if ``git describe`` is available.
         - ``given``: Pre-supplied version file (e.g. packaged with sdist, or else created by caller).
         - ``record``: Parsed from autorelease record. Implies that possible changes after tag are unknown.\n
-        Note that *given* and *record* are not "trustworthy", they can be easily abused to set arbitrary values. *git* is correct provided the installed version file is not corrupted.
+        Note that *given* and *record* are not "trustworthy", they can be easily abused to pass arbitrary values. *git* should be correct provided the installed version file is not corrupted.
     is_editable (bool):
-        True for editable install, False otherwise.
+        True for editable install, False otherwise.\n
         If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happend since. The actual current state is unknown.
 """
 
@@ -194,26 +192,26 @@ It is suggesed to compare against *build* (see below).
 Parameters:
     version (str):
         Joined tag and desc, forming the full version.
-    api_tag (tuple[int] | int | str):
-        Version ciphers joined as tuple, or just the build value (without tuple) if other ciphers are unknown.
     tag (str):
         Version ciphers joined as str. Just *str(build)* if other ciphers are unknown.
     desc (str):
         Descriptors (origin, flags) represented as str.
+    api_tag (tuple[int] | int | str):
+        Version ciphers joined as tuple, or just the build value (without tuple) if other ciphers are unknown.
     major (int | None):
-        Chromium major cipher. Unknown for origin sourcebuild.
+        Chromium major cipher.
     minor (int | None):
-        Chromium minor cipher. Unknown for origin sourcebuild.
+        Chromium minor cipher.
     build (int | str):
         PDFium tag rsp. Chromium build cipher (int), or commit hash (str).
         This value allows to uniquely identify the pdfium sources the binary was built from.
         For origin pdfium-binaries: always tag. For origin sourcebuild: tag if available, head commit otherwise.
     patch (int | None):
-        Chromium patch cipher. Unknown for origin sourcebuild.
+        Chromium patch cipher.
     origin (str):
         The pdfium binary's origin. Possible values:\n
-        - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2.
-        - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2.
+        - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2. Chromium ciphers known.
+        - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2. Chromium ciphers unknown.
         - ``sys``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
