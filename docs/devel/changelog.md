@@ -32,8 +32,9 @@
 
 ## 4.20.0 (2023-09-10)
 
+*This release backports some key fixes/improvements from the development branch*
+
 - Updated PDFium from `5975` to `5989`.
-This release backports some key fixes/improvements from the development branch:
 - [V8/XFA] Fixed XFA init. This issue was caused by a typo in a struct field. Thanks to Benoît Blanchon.
 - [ctypesgen fork] Prevent setting nonexistent struct fields.
 - [V8/XFA] Expose V8/XFA exclusive members in the bindings file by passing ctypesgen the pre-processor defines in question.
@@ -49,10 +50,8 @@ This release backports some key fixes/improvements from the development branch:
 ## 4.19.0 (2023-08-28)
 
 - Updated PDFium from `5868` to `5975`.
-- Reset main branch to stable and shifted v5 development to a branch, so that pdfium updates (and possibly bug fixes) can still be handled.
-  v5 development is delayed and unexpectedly tough, so this seemed necessary.
-  The automated schedule has been slowed down from weekly to monthly for the time being.
-  Further manual releases may be triggered as necessary.
+- Reset main branch to stable and shifted v5 development to a branch, so that pdfium updates (and possibly bug fixes) can still be handled. v5 development is delayed and unexpectedly tough, so this seemed necessary.
+- The automated schedule has been slowed down from weekly to monthly for the time being. Further manual releases may be triggered as necessary.
 
 
 ## 4.18.0 (2023-07-04)
