@@ -4,3 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Fixed faulty version repr (avoid trailing `+` if desc is empty).

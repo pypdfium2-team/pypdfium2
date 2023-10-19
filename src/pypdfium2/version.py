@@ -39,7 +39,10 @@ class _abc_version:
     
     @cached_property
     def version(self):
-        return f"{self.tag}+{self.desc}"
+        v = str(self.tag)
+        if self.desc:
+            v += "+" + str(self.desc)
+        return v
     
     def __repr__(self):
         return self.version
