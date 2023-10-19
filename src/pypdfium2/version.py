@@ -174,7 +174,7 @@ Parameters:
         Note that *given* and *record* are not "trustworthy", they can be easily abused to pass arbitrary values. *git* should be correct provided the installed version file is not corrupted.
     is_editable (bool):
         True for editable install, False otherwise.\n
-        If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happend since. The actual current state is unknown.
+        If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happened since. The actual current state is unknown.
 """
 
 
