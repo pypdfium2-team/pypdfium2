@@ -18,13 +18,13 @@ import urllib.request as url_request
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 # TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
-PlatSpec_EnvVar  = "PDFIUM_PLATFORM"
-PlatSpec_VerSep  = ":"
-PlatSpec_V8Sym   = "-v8"
-PlatTarget_None  = "none"  # sdist, no binary
-PlatTarget_Sys   = "sys"   # pdfium provided by system (if available)
-PlatTarget_Auto  = "auto"  # pdfium-binaries for host
-VerTarget_Latest = "latest"
+PlatSpec_EnvVar   = "PDFIUM_PLATFORM"
+PlatSpec_VerSep   = ":"
+PlatSpec_V8Sym    = "-v8"
+PlatTarget_None   = "none"   # sdist, no binary
+PlatTarget_System = "system" # pdfium provided by system (if available)
+PlatTarget_Auto   = "auto"   # pdfium-binaries for host
+VerTarget_Latest  = "latest"
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw          = "raw"

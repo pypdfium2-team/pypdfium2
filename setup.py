@@ -151,7 +151,7 @@ def main():
         kwargs["exclude_package_data"] = {"pypdfium2_raw": [VersionFN, BindingsFN, *LibnameForSystem.values()]}
         if pl_name == PlatTarget_None:
             kwargs["license_files"] += LICENSES_SDIST
-    elif pl_name == PlatTarget_Sys:
+    elif pl_name == PlatTarget_System:
         # TODO generate bindings/version here according to some caller input?
         assert (ModuleDir_Raw/BindingsFN).exists() and (ModuleDir_Raw/VersionFN).exists(), "Bindings and version currently must be prepared by caller for sys target."
         kwargs["package_data"]["pypdfium2_raw"] = [BindingsFN, VersionFN]
