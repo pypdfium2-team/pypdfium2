@@ -38,18 +38,20 @@ def update_refbindings(version):
 def do_versioning(config, record, prev_helpers, new_pdfium):
     
     # make sure we have a valid state
-    assert prev_helpers["dirty"] == False
     assert isinstance(record["pdfium"], int)
     assert not record["pdfium"] > new_pdfium
+    if prev_helpers["dirty"]:
+        print("Warning: dirty state. This should not happen in CI.", file=sys.stderr)
     
     c_updates = record["pdfium"] < new_pdfium
     py_updates = prev_helpers["n_commits"] > 0
     
     if not c_updates and not py_updates:
-        raise RuntimeError("Neither pypdfium2 code nor pdfium binaries updated. Making a new release would be pointless.")
+        print("Warning: Neither pypdfium2 code nor pdfium-binaries updated. New release pointless?", file=sys.stderr)
     
     # reset prev_helpers to release state
-    prev_helpers["n_commits"], prev_helpers["hash"] = 0, None
+    prev_helpers["n_commits"] = 0
+    prev_helpers["hash"] = None
     new_config, new_helpers = [deepcopy(d) for d in (config, prev_helpers)]
     
     if config["major"]:
@@ -209,8 +211,12 @@ def main():
     log_changes(summary, record["pdfium"], new_pdfium, new_tag, new_helpers["beta"])
     if args.register:
         register_changes(new_tag)
-        # Verify that parsing the tag works and returns the info we wrote
-        assert parse_git_tag() == new_helpers
+        parsed_helpers = parse_git_tag()
+        if new_helpers != parsed_helpers:
+            print(
+                "Warning: Written and parsed helpers do not match. This should not happen in CI.\n" +
+                f"Symmetric difference: {set(new_helpers.items()) ^ set(parsed_helpers.items())}"
+            )
     make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates)
 
 

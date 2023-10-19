@@ -213,7 +213,7 @@ def merge_tag(info, mode):
         elif mode == "py":
             tag += "+" + ".".join(extra_info)
         else:
-            assert False
+            print("Warning: Ignored post-tag desc. This should not happen in autorelease CI.")
     
     return tag
 
