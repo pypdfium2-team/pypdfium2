@@ -28,28 +28,21 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       
-      - name: Check out pypdfium2 repository
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository }}
-      
-      - name: Install/update deps
-        run: |
-          python3 -m pip install -U pip setuptools
-          python3 -m pip install -U -r req/converters.txt -r req/test.txt
-      
-      - name: Install pypdfium2
+      - name: Install pypdfium2 from package index
         run: python3 -m pip install -U --pre pypdfium2 --index-url ${{ inputs.index_url }}
       
       - name: Get pypdfium2 version
         id: version
-        run: python3 -c "import pypdfium2; print('version=%s' % pypdfium2.V_PYPDFIUM2)" >> $GITHUB_OUTPUT
+        run: python3 -c "from pypdfium2.version import *; print(f'version={PYPDFIUM_INFO.tag}')" >> $GITHUB_OUTPUT
       
-      - name: Check out pypdfium2 repository
+      - name: Check out pypdfium2 ${{ steps.version.outputs.version }}
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
           ref: ${{ steps.version.outputs.version }}
+      
+      - name: Install/update deps
+        run: python3 -m pip install -U -r req/converters.txt -r req/test.txt
       
       - name: Run tests
         run: ./run test

@@ -1,12 +1,25 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# This only includes a bare minimum of files required for local installation (and PyPI upload).
-# Note: If setuptools-scm is installed, it will include all files checked into version control, and it is not currently possible to opt out (setuptools_scm/issues/190)
+# MANIFEST.in defines the files to include in an sdist. sdists are also the starting point for wheels.
+# Additional files may be included using setuptools (e.g. package_data, license_files)
 
-# license files are already included through pyproject.toml
-recursive-include src *.py
+# We want this to be as narraw as possible, i.e. only the bare minimum of files needed for installation.
+# Note: If setuptools-scm is installed, it will include all files checked into version control, and as of this writing, it is not possible to opt out (setuptools_scm/issues/190)
+
+# Include library and setup sources
+recursive-include src/pypdfium2 *.py
 recursive-include setupsrc *.py
-recursive-include sourcebuild/patches/ *
-recursive-include bindings *.py
+recursive-include sourcebuild/patches *
+include autorelease/record.json
+
+# By design, the raw module only ships data files - exclude them by default
+recursive-exclude src/pypdfium_raw *
+include src/pypdfium2_raw/__init__.py
+
+# Include all license files as data files, so wheel-only licenses can be shipped with wheels installed from an sdist.
+recursive-include LICENSES/ *
+include .reuse/dep5-wheel
+
+# PyPA eagerly includes tests - exclude because we don't use them
 recursive-exclude tests *

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2.raw as pdfium_c
-from pypdfium2.version import V_PDFIUM_IS_V8
+from pypdfium2.version import PDFIUM_INFO
 
 
 class _fallback_dict (dict):
@@ -125,7 +125,9 @@ ErrorToStr = _fallback_dict({
     pdfium_c.FPDF_ERR_PAGE:     "Page not found or content error",
 })
 
-if V_PDFIUM_IS_V8:
+
+# known implication: causes eager evaluation of pdfium version
+if "XFA" in PDFIUM_INFO.flags:
     #: [V8/XFA builds only] Convert a PDFium XFA error constant (:attr:`FPDF_ERR_XFA*`) to string.
     XFAErrorToStr = _fallback_dict({
         pdfium_c.FPDF_ERR_XFALOAD:   "Load error",

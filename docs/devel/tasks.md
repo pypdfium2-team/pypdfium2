@@ -16,7 +16,6 @@ Also see the issues panel and inline `TODO`/`FIXME` marks in source code.
 * Add means to plug in PDFium headers/binaries from an arbitrary location.
 * craft_packages: add means to skip platforms for which artefacts are missing.
 * update_pdfium/setup: re-think `data/` cache. Consider including version and V8 status in data dirname? Consider caching multiple versions?
-* packaging_base: consider using a class for `VerNamespace`.
 * Use the logging module rather than `print()`.
 
 ### Tests

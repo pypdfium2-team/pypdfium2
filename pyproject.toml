@@ -1,59 +1,11 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
-# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
-
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
     "setuptools",
+    "packaging",
     "wheel !=0.38.0, !=0.38.1",
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
-]
-
-[project]
-name = "pypdfium2"
-description = "Python bindings to PDFium"
-readme = "README.md"
-dynamic = ["version", "requires-python"]
-keywords = ["pdf", "pdfium"]
-authors = [
-    {name = "pypdfium2-team"},
-    {name = "geisserml", email = "geisserml@gmail.com"},
-]
-license = {text = "Apache-2.0 or BSD-3-Clause"}
-classifiers = [
-    # TODO review/improve classifiers
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Information Technology",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Multimedia :: Graphics",
-    "Topic :: Software Development :: Libraries",
-]
-
-[project.urls]
-homepage = "https://github.com/pypdfium2-team/pypdfium2"  # FIXME not shown by pip
-documentation = "https://pypdfium2.readthedocs.io/"
-changelog = "https://pypdfium2.readthedocs.io/en/stable/changelog.html"
-
-[project.scripts]
-pypdfium2 = "pypdfium2.__main__:cli_main"
-
-# NOTE using requirements files instead - rationale:
-# - installation is independent of pypdfium2 (allows to install setup deps beforehand and then use --no-build-isolation)
-# - initial motivation: work around BUG(177 - PyPI upload refused due to custom dependency)
-# [project.optional-dependencies]
-
-[tool.setuptools]
-license-files = [
-    # As we do not distribute all project files, only a subset of licenses is needed
-    "LICENSES/Apache-2.0.txt",
-    "LICENSES/BSD-3-Clause.txt",
-    "LICENSES/CC-BY-4.0.txt",
-    "LICENSES/LicenseRef-PdfiumThirdParty.txt",
-    ".reuse/dep5",
 ]

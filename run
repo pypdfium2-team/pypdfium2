@@ -14,7 +14,7 @@ function check() {
 }
 
 function clean() {
-    rm -rf pypdfium2.egg-info/ src/pypdfium2.egg-info/ build/ dist/ data/* tests/output/* tests_old/output/*
+    rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* tests_old/output/*
 }
 
 function packaging() {

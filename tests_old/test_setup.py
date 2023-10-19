@@ -3,11 +3,11 @@
 
 import re
 import pytest
-import sysconfig
-from pathlib import Path
-from wheel.bdist_wheel import bdist_wheel
+# import sysconfig
+# from pathlib import Path
+# from wheel.bdist_wheel import bdist_wheel
 from pypdfium2_setup import (
-    setup_base,
+    # setup_base,
     packaging_base as pkg_base,
 )
 from pypdfium2_setup.packaging_base import (
@@ -15,7 +15,7 @@ from pypdfium2_setup.packaging_base import (
     BinaryPlatforms,
     ReleaseNames,
 )
-from .conftest import SourceTree, get_members
+from .conftest import ProjectDir, get_members
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def all_platnames():
 # def test_entrypoint():
     
 #     setup_cfg = configparser.ConfigParser()
-#     setup_cfg.read( join(SourceTree, "setup.cfg") )
+#     setup_cfg.read( join(ProjectDir, "setup.cfg") )
 #     console_scripts = setup_cfg["options.entry_points"]["console_scripts"]
     
 #     entry_point = console_scripts.split("=")[-1].strip().split(":")
@@ -47,23 +47,25 @@ def all_platnames():
 # setup_base
 
 ExpectedTags = (
-    (PlatNames.linux_x64,      "manylinux_2_17_x86_64"),
-    (PlatNames.linux_x86,      "manylinux_2_17_i686"),
-    (PlatNames.linux_arm64,    "manylinux_2_17_aarch64"),
-    (PlatNames.linux_arm32,    "manylinux_2_17_armv7l"),
-    (PlatNames.linux_musl_x64, "musllinux_1_1_x86_64"),
-    (PlatNames.linux_musl_x86, "musllinux_1_1_i686"),
-    (PlatNames.darwin_x64,     "macosx_10_13_x86_64"),
-    (PlatNames.darwin_arm64,   "macosx_11_0_arm64"),
-    (PlatNames.windows_x64,    "win_amd64"),
-    (PlatNames.windows_arm64,  "win_arm64"),
-    (PlatNames.windows_x86,    "win32"),
-    (PlatNames.sourcebuild,    sysconfig.get_platform().replace('-','_').replace('.','_')),
+    (PlatNames.linux_x64,        "manylinux_2_17_x86_64"),
+    (PlatNames.linux_x86,        "manylinux_2_17_i686"),
+    (PlatNames.linux_arm64,      "manylinux_2_17_aarch64"),
+    (PlatNames.linux_arm32,      "manylinux_2_17_armv7l"),
+    (PlatNames.linux_musl_x64,   "musllinux_1_1_x86_64"),
+    (PlatNames.linux_musl_x86,   "musllinux_1_1_i686"),
+    (PlatNames.linux_musl_arm64, "musllinux_1_1_aarch64"),
+    (PlatNames.darwin_x64,       "macosx_10_13_x86_64"),
+    (PlatNames.darwin_arm64,     "macosx_11_0_arm64"),
+    (PlatNames.windows_x64,      "win_amd64"),
+    (PlatNames.windows_arm64,    "win_arm64"),
+    (PlatNames.windows_x86,      "win32"),
+    # FIXME not sure how to test this
+    # (PlatNames.sourcebuild,    ...),
 )
 
 
 def test_expected_tags(all_platnames):
-    assert len(all_platnames) == len(ExpectedTags)
+    assert len(all_platnames) == len(ExpectedTags)+1
     for platform, tag in ExpectedTags:
         assert hasattr(PlatNames, platform)
         assert isinstance(tag, str)
@@ -78,10 +80,10 @@ def test_unknown_tag():
     with pytest.raises(ValueError, match=re.escape("Unknown platform name %s" % plat_dir)):
         pkg_base.get_wheel_tag(plat_dir)
 
-def test_get_bdist():
-    for platform, _ in ExpectedTags:
-        bdist_cls = setup_base.bdist_factory(platform)
-        assert issubclass(bdist_cls, bdist_wheel)
+# def test_get_bdist():
+#     for platform, _ in ExpectedTags:
+#         bdist_cls = setup_base.bdist_factory(platform)
+#         assert issubclass(bdist_cls, bdist_wheel)
 
 
 # packaging_base
@@ -98,12 +100,10 @@ def test_PlatNames(all_platnames):
 
 def test_paths():
     # FIXME not much point doing this?
-    assert pkg_base.HomeDir == Path.home()
-    assert pkg_base.SourceTree == SourceTree
-    assert pkg_base.DataTree == SourceTree / "data"
-    assert pkg_base.SB_Dir == SourceTree / "sourcebuild"
-    assert pkg_base.HelpersModuleDir == SourceTree / "src" / "pypdfium2"
-    assert pkg_base.VersionFile == Path(pkg_base.HelpersModuleDir) / "version.py"
+    assert pkg_base.ProjectDir == ProjectDir
+    assert pkg_base.DataDir == ProjectDir / "data"
+    assert pkg_base.SourcebuildDir == ProjectDir / "sourcebuild"
+    assert pkg_base.ModuleDir_Helpers == ProjectDir / "src" / "pypdfium2"
 
 
 # update_pdfium

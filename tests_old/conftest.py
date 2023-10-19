@@ -11,11 +11,11 @@ from pathlib import Path
 PyVersion = (sys.version_info.major, sys.version_info.minor)
 
 TestDir     = Path(__file__).absolute().parent
-SourceTree  = TestDir.parent
+ProjectDir  = TestDir.parent
 ResourceDir = TestDir / "resources"
 OutputDir   = TestDir / "output"
 
-sys.path.insert(0, str(SourceTree / "setupsrc"))
+sys.path.insert(0, str(ProjectDir / "setupsrc"))
 
 
 class TestFiles:
@@ -64,7 +64,7 @@ def get_members(cls):
 
 
 def test_testpaths():
-    for dirpath in (TestDir, SourceTree, ResourceDir, OutputDir):
+    for dirpath in (TestDir, ProjectDir, ResourceDir, OutputDir):
         assert dirpath.is_dir()
     for filepath in iterate_testfiles(False):
         assert filepath.is_file()

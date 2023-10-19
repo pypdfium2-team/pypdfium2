@@ -58,20 +58,24 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 ### Setup magic
 
 As pypdfium2 uses external binaries, there are some special setup aspects to consider.
+Note, the APIs below may change any time and are mostly of internal interset.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
-* The environment variable `$PDFIUM_PLATFORM` controls which binary to include on setup.
-  The format spec is `[$PLATFORM][-v8][:$VERSION]` (`[]` = segments, `$CAPS` = variables).
-* Examples: `auto`, `auto:5975` `auto-v8:5975` (`auto` may be substituted by an explicit platform name, e.g. `linux_x64`).
-* Details:
+* The env var `$PDFIUM_PLATFORM` controls which binary to include on setup.
+  - Format spec: `[$PLATFORM][-v8][:$VERSION]` (`[]` = segments, `$CAPS` = variables).
+  - Examples: `auto`, `auto:5975` `auto-v8:5975` (`auto` may be substituted by an explicit platform name, e.g. `linux_x64`).
   - Platform:
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
-    + If set to a certain platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
-    + If set to `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `build_pdfium.py`.
-    + If set to `none`, no platform-dependent files will be injected, so as to create a source distribution.
-    `sourcebuild` and `none` are standalone, they cannot be followed by additional specifiers.
+    + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
+    + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `build_pdfium.py`.
+    + If `system`, caller-supplied bindings loading system pdfium, and a version file will be expected. This may be changed to auto-generate these files from a given version shorthand in the future.
+    + If `none`, no platform-dependent files will be included, so as to create a source distribution.
+    `sourcebuild`, `system` and `none` are standalone, they cannot be followed by additional specifiers.
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
   - Version: If given, use the specified pdfium-binaries release. Otherwise, use the latest one.
+* `$PYPDFIUM_MODULES=[raw,helpers]` defines which modules to include. Metadata adapts dynamically.
+  - May be used by packagers to decouple raw bindings and helpers, which can be important if packaging against system pdfium.
+  - It would also allow to install only the raw module without helpers, or only helpers with a custom raw module.
 
 [^platform_ids]: This is mainly of internal interest for packaging, so that wheels can be crafted for any platform without access to a native host.
 
@@ -230,7 +234,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion.
   When passing a string to a C function, it must always be null-terminated, as the function merely receives a pointer to the first item and then continues to read memory until it finds a null terminator.
   
-[^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `bindings/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
+[^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `autorelease/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
 
 * While some functions are quite easy to use, things soon get more complex.
   First of all, function parameters are not only used for input, but also for output:
@@ -644,10 +648,10 @@ The autorelease script has some peculiarities maintainers should know about:
   Version changes are based on the following logic:
   * If PDFium was updated, the minor version is incremented.
   * If only pypdfium2 code was updated, the patch version is incremented instead.
-  * Major updates and beta marks are controlled via empty files in the `autorelease/` directory.
-    If `update_major.txt` exists, the major version is incremented.
-    If `update_beta.txt` exists, a new beta tag is set, or an existing one is incremented.
-    These files are removed automatically once the release is finished.
+  * Major updates and beta marks are controlled via `autorelease/config.json`.
+    If `major` is true, the major version is incremented.
+    If `beta` is true, a new beta tag is set, or an existing one is incremented.
+    The control file is automatically reset when the versioning is finished.
   * If switching from a beta release to a non-beta release, only the beta mark is removed while minor and patch versions remain unchanged.
 
 In case of necessity, you may also forego autorelease/CI and do the release manually, which will roughly work like this (though ideally it should never be needed):

@@ -10,13 +10,13 @@ import pypdfium2.__main__ as pdfium_cli
 pdfium_cli.setup_logging()
 
 TestDir         = Path(__file__).parent
-SourceTree      = TestDir.parent
+ProjectDir      = TestDir.parent
 ResourceDir     = TestDir / "resources"
 OutputDir       = TestDir / "output"
 ExpectationsDir = TestDir / "expectations"
 
 # Add setup helper module so we can import it in the test suite
-sys.path.insert(0, str(SourceTree / "setupsrc"))
+sys.path.insert(0, str(ProjectDir / "setupsrc"))
 
 
 def _gather_resources(dir, skip_exts=[".in"]):

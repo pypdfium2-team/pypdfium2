@@ -13,11 +13,7 @@ import multiprocessing as mp
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
-from pypdfium2.version import (
-    V_LIBPDFIUM,
-    V_BUILDNAME,
-    V_PDFIUM_IS_V8,
-)
+from pypdfium2.version import PDFIUM_INFO
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.pageobjects import PdfObject
@@ -157,11 +153,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         # safety check for older binaries to prevent a segfault (could be removed at some point)
         # https://github.com/bblanchon/pdfium-binaries/issues/105
-        if V_PDFIUM_IS_V8 and V_BUILDNAME == "pdfium-binaries" and int(V_LIBPDFIUM) <= 5677:
+        if "V8" in PDFIUM_INFO.flags and PDFIUM_INFO.origin == "pdfium-binaries" and PDFIUM_INFO.build <= 5677:
             raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
         
         if not config:
-            if V_PDFIUM_IS_V8:
+            if "XFA" in PDFIUM_INFO.flags:
                 js_platform = pdfium_c.IPDF_JSPLATFORM(version=3)
                 config = pdfium_c.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, m_pJsPlatform=ctypes.pointer(js_platform))
             else:
@@ -174,7 +170,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._add_kid(self.formenv)
         
         if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
-            if V_PDFIUM_IS_V8:
+            if "XFA" in PDFIUM_INFO.flags:
                 ok = pdfium_c.FPDF_LoadXFA(self)
                 if not ok:
                     err = pdfium_c.FPDF_GetLastError()

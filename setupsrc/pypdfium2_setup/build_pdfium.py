@@ -15,12 +15,12 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 # TODO consider dotted access?
 from pypdfium2_setup.packaging_base import *
 
-
-PatchDir       = SB_Dir / "patches"
-DepotToolsDir  = SB_Dir / "depot_tools"
-PDFiumDir      = SB_Dir / "pdfium"
+SBDir = SourcebuildDir  # local alias for convenience
+PatchDir       = SBDir / "patches"
+DepotToolsDir  = SBDir / "depot_tools"
+PDFiumDir      = SBDir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
-OutputDir      = DataTree / PlatNames.sourcebuild
+OutputDir      = DataDir / PlatNames.sourcebuild
 
 PatchesMain = [
     (PatchDir/"shared_library.patch", PDFiumDir),
@@ -63,20 +63,20 @@ elif sys.platform.startswith("darwin"):
 
 def dl_depottools(do_update):
     
-    SB_Dir.mkdir(parents=True, exist_ok=True)
+    SBDir.mkdir(parents=True, exist_ok=True)
     
     is_update = True
     if DepotToolsDir.exists():
         if do_update:
             print("DepotTools: Revert and update ...")
             run_cmd(["git", "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
-            run_cmd(["git", "pull", DepotTools_URL], cwd=DepotToolsDir)
+            run_cmd(["git", "pull", DepotToolsURL], cwd=DepotToolsDir)
         else:
             print("DepotTools: Using existing repository as-is.")
             is_update = False
     else:
         print("DepotTools: Download ...")
-        run_cmd(["git", "clone", "--depth", "1", DepotTools_URL, DepotToolsDir], cwd=SB_Dir)
+        run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SBDir)
     
     os.environ["PATH"] += os.pathsep + str(DepotToolsDir)
     
@@ -90,16 +90,16 @@ def dl_pdfium(GClient, do_update, revision):
     if PDFiumDir.exists():
         if do_update:
             print("PDFium: Revert / Sync  ...")
-            run_cmd([GClient, "revert"], cwd=SB_Dir)
+            run_cmd([GClient, "revert"], cwd=SBDir)
         else:
             is_sync = False
             print("PDFium: Using existing repository as-is.")
     else:
         print("PDFium: Download ...")
-        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PDFium_URL], cwd=SB_Dir)
+        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if is_sync:
-        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--with_branch_heads"], cwd=SB_Dir)
+        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--with_branch_heads"], cwd=SBDir)
     
     return is_sync
 
@@ -122,7 +122,7 @@ def get_pdfium_version():
     # FIXME awkward mix of local/remote git - this will fail to identify the tag if local and remote state do not match
     
     head_commit = run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
-    refs_string = run_cmd(["git", "ls-remote", "--heads", PDFium_URL, "chromium/*"], cwd=None, capture=True)
+    refs_string = run_cmd(["git", "ls-remote", "--heads", PdfiumURL, "chromium/*"], cwd=None, capture=True)
     
     latest = refs_string.split("\n")[-1]
     tag_commit, ref = latest.split("\t")
@@ -130,14 +130,13 @@ def get_pdfium_version():
     tag = ref.split("/")[-1]
     
     print(f"Current head {head_commit}, latest tagged commit {tag_commit} ({tag})", file=sys.stderr)
-    v_libpdfium = tag if head_commit == tag_commit else head_commit
+    v_libpdfium = int(tag) if head_commit == tag_commit else head_commit
     
     return v_libpdfium
 
 
 def update_version(v_libpdfium):
-    # NOTE this does not set the full version, not sure how to retrieve it
-    (OutputDir / VerStatusFileName).write_text( str(v_libpdfium) )
+    write_pdfium_info(OutputDir, version=v_libpdfium, origin="sourcebuild", flags=[])
 
 
 def _create_resources_rc(v_libpdfium):

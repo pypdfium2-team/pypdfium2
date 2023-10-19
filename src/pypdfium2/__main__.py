@@ -1,4 +1,3 @@
-# PYTHON_ARGCOMPLETE_OK
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
@@ -7,15 +6,9 @@ import sys
 import logging
 import argparse
 import importlib
-import pypdfium2 as pdfium  # yes this is legal in __main__
+import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
-from pypdfium2.version import *
-
-try:
-    import argcomplete
-except ImportError:
-    argcomplete = None
-
+from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
 
 SubCommands = {
     "arrange":        "rearrange/merge documents",
@@ -37,21 +30,19 @@ def get_parser():
     
     main_parser = argparse.ArgumentParser(
         prog = "pypdfium2",
+        formatter_class = argparse.RawTextHelpFormatter,
         description = "Command line interface to the pypdfium2 library (Python binding to PDFium)",
     )
     main_parser.add_argument(
         "--version", "-v",
         action = "version",
-        version = f"pypdfium2 {V_PYPDFIUM2} (libpdfium {V_LIBPDFIUM}, origin: {V_BUILDNAME}, flags: {['V8', 'XFA'] if V_PDFIUM_IS_V8 else []})",
+        version = f"pypdfium2 {PYPDFIUM_INFO}\npdfium {PDFIUM_INFO}",
     )
     subparsers = main_parser.add_subparsers(dest="subcommand")
     
     for name, help in SubCommands.items():
         subparser = subparsers.add_parser(name, description=help, help=help)
         CmdToModule[name].attach(subparser)
-    
-    if argcomplete:
-        argcomplete.autocomplete(main_parser)
     
     return main_parser
 

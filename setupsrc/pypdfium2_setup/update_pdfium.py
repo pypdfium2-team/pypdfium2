@@ -19,14 +19,14 @@ from pypdfium2_setup.packaging_base import *
 
 def clear_data(download_files):
     for pl_name in download_files:
-        pl_dir = DataTree / pl_name
+        pl_dir = DataDir / pl_name
         if pl_dir.exists():
             shutil.rmtree(pl_dir)
 
 
 def _get_package(pl_name, version, robust, use_v8):
     
-    pl_dir = DataTree / pl_name
+    pl_dir = DataDir / pl_name
     pl_dir.mkdir(parents=True, exist_ok=True)
     
     prefix = "pdfium-"
@@ -69,16 +69,20 @@ def download_releases(platforms, version, use_v8, max_workers, robust):
 
 def unpack_archives(archives):
     for pl_name, archive_path in archives.items():
-        dest_dir = DataTree / pl_name / "build_tar"
+        dest_dir = DataDir / pl_name / "build_tar"
         safer_tar_unpack(archive_path, dest_dir)
         archive_path.unlink()
 
 
-def generate_bindings(archives, version, full_version, use_v8, ctypesgen_kws):
+def generate_bindings(archives, version, use_v8, ctypesgen_kws):
+    
+    flags = []
+    if use_v8:
+        flags += ["V8", "XFA"]
     
     for pl_name in archives.keys():
         
-        pl_dir = DataTree / pl_name
+        pl_dir = DataDir / pl_name
         build_dir = pl_dir / "build_tar"
         bin_dir = build_dir / "lib"
         
@@ -91,32 +95,25 @@ def generate_bindings(archives, version, full_version, use_v8, ctypesgen_kws):
         assert src_libpath.is_file()
         shutil.copyfile(src_libpath, pl_dir/libname)
         
-        ver_file = DataTree / pl_name / VerStatusFileName
-        ver_file.write_text(f"{version}\n{full_version}")
-        v8_file = (pl_dir / V8StatusFileName)
-        if use_v8:
-            v8_file.touch(exist_ok=True)
-        else:
-            assert not v8_file.exists()
-        
         call_ctypesgen(pl_dir, build_dir/"include", pl_name=pl_name, use_v8xfa=use_v8, **ctypesgen_kws)
+        write_pdfium_info(DataDir/pl_name, version=version, origin="pdfium-binaries", flags=flags)
+        
         shutil.rmtree(build_dir)
 
 
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, ctypesgen_kws={}):
     
     if not version:
-        version = get_latest_version()
+        version = PdfiumVer.get_latest()
     if not platforms:
         platforms = BinaryPlatforms
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     
-    full_version = get_full_version(version)
     clear_data(platforms)
     archives = download_releases(platforms, version, use_v8, max_workers, robust)
     unpack_archives(archives)
-    generate_bindings(archives, version, full_version, use_v8, ctypesgen_kws)
+    generate_bindings(archives, version, use_v8, ctypesgen_kws)
 
 
 # low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py

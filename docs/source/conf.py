@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[2] / "setupsrc"))
 from pypdfium2_setup.packaging_base import (
     run_cmd,
-    SourceTree,
+    ProjectDir,
 )
 
 
@@ -26,7 +26,7 @@ def _get_build_type():
     if rtd_vn:
         return rtd_vn
     
-    branch = run_cmd(["git", "branch", "--show-current"], cwd=SourceTree, capture=True)
+    branch = run_cmd(["git", "branch", "--show-current"], cwd=ProjectDir, capture=True)
     if branch == "main":
         return "latest"
     else:

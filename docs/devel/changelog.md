@@ -22,6 +22,8 @@
 
 *Note: Earlier releases may fail to install from source due to API-breaking changes to our ctypesgen fork (see {issue}`264`). Where possible, avoid source installs and use the wheels instead (the default behavior). If you actually have to do this, consider `--no-build-isolation` and pre-installed dependencies, including ctypesgen prior to commit `61c638b`.*
 
+*Warning: musllinux wheels prior to pdfium-binaries `6043` might be invalid.*
+
 
 ## 4.21.0b1 (2023-09-14)
 

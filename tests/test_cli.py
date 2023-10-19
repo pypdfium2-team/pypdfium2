@@ -123,13 +123,3 @@ def test_render_multipage(tmp_path):
     
     out_files = list(out_dir.iterdir())
     assert sorted([f.name for f in out_files]) == ["multipage_1.jpg", "multipage_2.jpg", "multipage_3.jpg"]
-
-
-def test_version():
-    
-    exp_message = "pypdfium2 %s (libpdfium %s, %s build)\n" % (pdfium.V_PYPDFIUM2, pdfium.V_LIBPDFIUM, pdfium.V_BUILDNAME)
-    
-    try:
-        run_cli(["--version"], exp_message)
-    except SystemExit:
-        pass

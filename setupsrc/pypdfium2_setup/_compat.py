@@ -8,6 +8,7 @@ __all__ = ["safer_tar_unpack"]
 
 import sys
 
+
 if sys.version_info >= (3, 11, 4):  # PEP 706
     import shutil
     def safer_tar_unpack(archive_path, dest_dir):
