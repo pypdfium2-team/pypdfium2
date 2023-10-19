@@ -44,8 +44,6 @@ class pypdfium_build_py (build_py_orig):
     def run(self, *args, **kwargs):
         
         if self.editable_mode:
-            # TODO consider merging with data_source?
-            # TODO consider setting n_commits/hash to inf/editable due to high uncertainty? either here or in the receiver
             helpers_info = read_json(ModuleDir_Helpers/VersionFN)
             helpers_info["is_editable"] = True
             write_json(ModuleDir_Helpers/VersionFN, helpers_info)
@@ -153,7 +151,7 @@ def main():
             kwargs["license_files"] += LICENSES_SDIST
     elif pl_name == PlatTarget_System:
         # TODO generate bindings/version here according to some caller input?
-        assert (ModuleDir_Raw/BindingsFN).exists() and (ModuleDir_Raw/VersionFN).exists(), "Bindings and version currently must be prepared by caller for sys target."
+        assert (ModuleDir_Raw/BindingsFN).exists() and (ModuleDir_Raw/VersionFN).exists(), f"Bindings and version currently must be prepared by caller for {PlatTarget_System} target."
         kwargs["package_data"]["pypdfium2_raw"] = [BindingsFN, VersionFN]
     else:
         pl_name = get_pdfium(pl_name)

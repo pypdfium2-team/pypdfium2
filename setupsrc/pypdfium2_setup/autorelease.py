@@ -215,7 +215,7 @@ def main():
         if new_helpers != parsed_helpers:
             print(
                 "Warning: Written and parsed helpers do not match. This should not happen in CI.\n" +
-                f"Symmetric difference: {set(new_helpers.items()) ^ set(parsed_helpers.items())}"
+                f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
     make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates)
 

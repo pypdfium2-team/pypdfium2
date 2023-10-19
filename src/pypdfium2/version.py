@@ -215,7 +215,7 @@ Parameters:
         The pdfium binary's origin. Possible values:\n
         - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2. Chromium ciphers known.
         - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2. Chromium ciphers unknown.
-        - ``sys``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
+        - ``system``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
 """

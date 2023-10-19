@@ -158,17 +158,11 @@ jobs:
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
     
-    # `environment: release` is mandatory for our PyPI/TestPyPI upload via "trusted publishing".
-    # (On PyPI config time, restricting the environment is optional, but strongly encouraged. Once installed on PyPI, it must be set in the workflow. This applies here.)
-    # https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
-    environment: release
+    environment: release  # PyPI upload via "trusted publishing"
     permissions:
-      # `id-token: write` is mandatory for PyPI/TestPyPI upload via "trusted publishing".
-      id-token: write
-      # `contents: write` is required for the repository changes
-      contents: write
-      # `actions: write` is required for GH pages workflow-dispatch
-      actions: write
+      id-token: write  # PyPI upload via "trusted publishing"
+      contents: write  # autorelease repository changes
+      actions: write   # GH pages workflow-dispatch
     
     steps:
       
