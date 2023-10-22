@@ -15,7 +15,7 @@
 
 # FIXME since conda isolates each build, our data/ cache is no use...
 
-# usage: USE_REFBINDINGS=1 VERSION=... conda build conda/ --output-folder conda/out/
+# usage: VERSION=... conda build conda/ --output-folder conda/out/
 # use `craft_packages.py --conda` to build for all platforms
 
 # {% set setup_cfg = load_file_data("setup.cfg") %}
@@ -35,13 +35,12 @@ build:
     - pypdfium2 = pypdfium2.__main__:cli_main
   script_env:
     - PDFIUM_PLATFORM
-    - USE_REFBINDINGS
+    - USE_REFBINDINGS=1
   script: {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
   number: 0
 
 requirements:
   # FIXME not sure about conda's build/host distinction
-  # FIXME adds awkward hashes to filename
   build:
     - {{ compiler('c') }}
     - git

@@ -93,7 +93,6 @@ def main():
         
         helpers_ver = merge_tag(parse_git_tag(), "py")
         os.environ["VERSION"] = helpers_ver
-        os.environ["USE_REFBINDINGS"] = "1"
         
         platforms = CondaNames.copy()
         conda_host = platforms.pop(Host.platform)
