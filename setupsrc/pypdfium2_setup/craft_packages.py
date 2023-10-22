@@ -104,7 +104,7 @@ def main():
             
             if host_files is None:
                 host_files = list((CondaOutDir / conda_host).glob(f"pypdfium2-{helpers_ver}-*.tar.bz2"))
-            run_cmd(["conda", "convert", *host_files, "-p", conda_plat, "-o", CondaOutDir], cwd=ProjectDir, env=os.environ)
+            run_cmd(["conda", "convert", "-f", *host_files, "-p", conda_plat, "-o", CondaOutDir], cwd=ProjectDir, env=os.environ)
             for hf in host_files:
                 hf.unlink()
         
