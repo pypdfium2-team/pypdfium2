@@ -2,15 +2,9 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 # NOTE
-# 
-# This branch attempted to bundle the pdfium binaries with conda packages, like we do for pypi wheels.
-# However, conda does not support arch specific but python version independent packages, so we'd have to build for each version separately, which is not elegant.
-# Also, bundling dynamic libraries is against the spirit of conda (as a system package manager), contrary to PyPI (as python only).
-# 
-# Therefore, the clean solution would be to package pdfium-binaries separately on conda, so pypdfium2 can just depend on pdfium and be noarch.
-# This will require a new setup mode to bundle bindings only, and a way to pass additional runtime libdirs to ctypesgen.
-# Also we may need to pin the pdfium requirement to the exact version the bindings were built for. (Strictly speaking, binaries and bindings belong together. This may not seem overly relevant since ctypesgen makes if guards for symbols and pdfium's public API is very stable, but in principle mismatched bindings can cause undefined behavior if parameters changed.)
-
+# This is an attempt to bundle the pdfium binaries with conda packages, like we do for pypi wheels.
+# However, conda does not support CPU specific but Python version independent packages, meaning we'd have to build for each python version separately, so the better solution is probably to unbundle pdfium.
+# Nonetheless, we might want to retain this passively as a second option just in case a situation arises where bundling would be desired anyway.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # FIXME since conda isolates each build, our data/ cache is no use...
