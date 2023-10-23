@@ -17,7 +17,7 @@ include autorelease/record.json
 recursive-exclude src/pypdfium_raw *
 include src/pypdfium2_raw/__init__.py
 
-# Include all license files as data files, so wheel-only licenses can be shipped with wheels installed from an sdist.
+# Include all of licenses in an sdist (also wheel licenses), since we may build a wheel from the sdist
 recursive-include LICENSES/ *
 include .reuse/dep5-wheel
 

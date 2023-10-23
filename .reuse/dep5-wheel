@@ -4,7 +4,7 @@ Upstream-Contact: geisserml <geisserml@gmail.com>
 Source: https://github.com/pypdfium2-team/pypdfium2
 
 # This file contains copyright info for data files included in our wheel packages.
-# See also .reuse/dep5-wheel regarding copyright of data files in the project directory.
+# See also .reuse/dep5 regarding copyright of data files in the project directory.
 
 Files: pypdfium2_raw/version.json
        pypdfium2_raw/bindings.py
