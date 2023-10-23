@@ -75,7 +75,10 @@ Note, the APIs below may change any time and are mostly of internal interset.
   - Version: If given, use the specified pdfium-binaries release. Otherwise, use the latest one.
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines which modules to include. Metadata adapts dynamically.
   - May be used by packagers to decouple raw bindings and helpers, which can be important if packaging against system pdfium.
-  - It would also allow to install only the raw module without helpers, or only helpers with a custom raw module.
+  - Would also allow to install only the raw module without helpers, or only helpers with a custom raw module.
+* `$PDFIUM_BINDINGS=reference` allows to override ctypesgen and use the reference bindings file `autorelease/bindings.py` instead.
+  - This is a convenience option to get pypdfium2 installed from source even if a working ctypesgen is not available in the install env.
+  - Warning: This might not be ABI-safe. Please make sure binary/bindings build headers match to avoid ABI issues.
 
 [^platform_ids]: This is mainly of internal interest for packaging, so that wheels can be crafted for any platform without access to a native host.
 

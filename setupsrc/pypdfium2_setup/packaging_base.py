@@ -4,6 +4,7 @@
 # No external dependencies shall be imported in this file
 # TODO improve consistency of variable names; think about variables to move in/out
 
+import os
 import re
 import sys
 import json
@@ -25,6 +26,10 @@ PlatTarget_None   = "none"   # sdist, no binary
 PlatTarget_System = "system" # pdfium provided by system (if available)
 PlatTarget_Auto   = "auto"   # pdfium-binaries for host
 VerTarget_Latest  = "latest"
+
+BindSpec_EnvVar = "PDFIUM_BINDINGS"
+BindTarget_Ref  = "reference"
+BindTarget = os.environ.get(BindSpec_EnvVar, None)
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw          = "raw"
@@ -158,7 +163,9 @@ def write_json(fp, data, indent=2):
 
 def write_pdfium_info(dir, version, origin, flags=[]):
     # TODO(future) embed library search path for use with a custom ctypesgen loader
+    # TODO consider embedding ctypesgen version info, probably using a separate file and class?
     info = dict(**PdfiumVer.to_full(version, origin), origin=origin, flags=flags)
+    info["bindings"] = BindTarget_Ref if BindTarget == BindTarget_Ref else "generated"
     write_json(dir/VersionFN, info)
 
 
@@ -358,6 +365,14 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
 
 
 def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symbols=False):
+    
+    # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
+    if BindTarget == BindTarget_Ref:
+        print("Using ref bindings as requested by env var.",file=sys.stderr)
+        if use_v8xfa:
+            print("Warning: default ref bindings are not V8/XFA compatible, expecting prior overwrite.")
+        shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
+        return
     
     # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks

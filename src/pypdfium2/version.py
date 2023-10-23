@@ -37,18 +37,14 @@ class _abc_version:
     def __setattr__(self, name, value):
         raise AttributeError(f"Version class is immutable - assignment '{name} = {value}' not allowed")
     
-    @cached_property
-    def version(self):
-        v = str(self.tag)
-        if self.desc:
-            v += "+" + str(self.desc)
-        return v
-    
     def __repr__(self):
         return self.version
+    
+    @cached_property
+    def version(self):
+        return self.tag + self.desc
 
 
-# TODO handle data source & editable installs
 class _version_pypdfium2 (_abc_version):
     
     _FILE = Path(__file__).parent / "version.json"
@@ -68,13 +64,15 @@ class _version_pypdfium2 (_abc_version):
     @cached_property
     def desc(self):
         
-        desc = []
+        desc = ""
+        local_ver = []
         if self.n_commits > 0:
-            desc += [str(self.n_commits), str(self.hash)]
+            local_ver += [str(self.n_commits), str(self.hash)]
         if self.dirty:
-            desc += ["dirty"]
-        desc = ".".join(desc)
+            local_ver += ["dirty"]
         
+        if local_ver:
+            desc = "+" + ".".join(local_ver)
         if self.data_source != "git":
             desc += f":{self.data_source}"
         if self.is_editable:
@@ -107,9 +105,13 @@ class _version_pdfium (_abc_version):
     
     @cached_property
     def desc(self):
-        desc = f"{self.origin}"
+        desc = ""
+        if self.origin != "pdfium-binaries":
+            desc += f"+{self.origin}"
         if self.flags:
-            desc += ":{%s}" % ','.join(self.flags)
+            desc += ":{%s}" % ",".join(self.flags)
+        if self.bindings != "generated":
+            desc += f"@bindings:{self.bindings}"
         return desc
 
 
@@ -171,7 +173,7 @@ Parameters:
         True if there were uncommitted changes at install time, False otherwise.
     data_source (str):
         Source of this version info. Possible values:\n
-        - ``git``: Parsed from git describe. Highest accuracy. Always used if ``git describe`` is available.
+        - ``git``: Parsed from git describe. Always used if available. Highest accuracy.
         - ``given``: Pre-supplied version file (e.g. packaged with sdist, or else created by caller).
         - ``record``: Parsed from autorelease record. Implies that possible changes after tag are unknown.\n
         Note that *given* and *record* are not "trustworthy", they can be easily abused to pass arbitrary values. *git* should be correct provided the installed version file is not corrupted.
@@ -218,6 +220,8 @@ Parameters:
         - ``system``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
+    bindings (str):
+        Info on the used bindings (generated, reference). Note that the reference bindings can be ABI-unsafe. (This field is experimental. In the future, we may want to integrate bindings info separately with ctypesgen version.)
 """
 
 # -----
