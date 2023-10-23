@@ -26,7 +26,7 @@ class ArtifactStash:
         self.files = [fp for fp in [ModuleDir_Raw / fn for fn in file_names] if fp.exists()]
         if len(self.files) == 0:
             return
-        elif len(self.files) != 2:
+        elif len(self.files) != len(file_names):
             print(f"Warning: Expected exactly 2 platform files, but found {len(self.files)}.", file=sys.stderr)
         
         self.tmpdir = tempfile.TemporaryDirectory(prefix="pypdfium2_artifact_stash_")
