@@ -39,8 +39,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     python3 setupsrc/pypdfium2_setup/build_pdfium.py  # call with --help to list options
     PDFIUM_PLATFORM="sourcebuild" python3 -m pip install -v .
     ```
-    Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than expecting them from the system.[^pdfium_buildsystem]
-    However, there is an option `--use-syslibs` to build against some system-provided runtime libraries at least.
+    Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than consuming them from the system.[^pdfium_buildsystem]
+    However, there is at least an option `--use-syslibs` to build against system-provided runtime libraries.
   
   * With system-provided binary
     ```bash
@@ -68,13 +68,13 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   pypdfium2 will soon provide official conda packages in a custom channel.
   The main packaging code is merged, only CI integration / docs are not done yet.
 
-  There have been some third-party conda packaging attempts concerning pypdfium2 and pdfium-binaries in the past. **Any recipes/packages that might be provided by other distributors, including `anaconda/main` or `conda-forge`, are unofficial!**
+  **Beware:** There have been some third-party attempts to conda package pypdfium2/pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda/main` or `conda-forge`, are unofficial!**
 
 * Unoficial packages
   
-  **Be cautious! The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.**
+  The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
   
-  Nonetheless, we may assist external package maintainers on behalf of wider adoption of pypdfium2 (e.g. linux distros). However, this does not imply our approval. Even if we did approve at some point, and we cannot tell if a third-party package would be maintained correctly in the future.
+  Nonetheless, we may assist external package maintainers on behalf of wider adoption of pypdfium2 (e.g. linux distros). However, this does not imply our approval.
 
 
 ### Runtime Dependencies
@@ -392,7 +392,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * In many situations, callback functions come in handy.[^callback_usecases] Thanks to `ctypes`, it is seamlessly possible to use callbacks across Python/C language boundaries.
   
-  [^callback_usecases]: e. g. incremental reading/writing, progress bars, pausing of progressive tasks, ...
+  [^callback_usecases]: e. g. incremental read/write, management of progressive tasks, ...
   
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
   ```python
@@ -548,7 +548,7 @@ To the author's knowledge, pypdfium2 is one of the rare Python libraries that ar
 
 As of early 2023, a single developer is author and rightsholder of the code base (apart from a few minor [code contributions](https://github.com/pypdfium2-team/pypdfium2/graphs/contributors)).
 
-[^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the authors are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). `pdf.js` is limited to a web environment. Creating Python bindings to `PDFBox` might be possible but there is no serious solution yet (apart from amateurish wrappers around its command-line API).
+[^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java), but python bindings packages don't exist yet or are unsatisfactory. However, we wrote some gists that show it'd be possible in principle: [pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc) (+ [setup](https://gist.github.com/mara004/881d0c5a99b8444fd5d1d21a333b70f8)), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7).
 
 
 ## Issues
