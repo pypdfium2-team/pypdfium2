@@ -58,7 +58,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 ### Setup magic
 
 As pypdfium2 uses external binaries, there are some special setup aspects to consider.
-Note, the APIs below may change any time and are mostly of internal interset.
+Note, the APIs below may change any time and are mostly of internal interest.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
 * The env var `$PDFIUM_PLATFORM` controls which binary to include on setup.
@@ -80,7 +80,7 @@ Note, the APIs below may change any time and are mostly of internal interset.
   - This is a convenience option to get pypdfium2 installed from source even if a working ctypesgen is not available in the install env.
   - Warning: This might not be ABI-safe. Please make sure binary/bindings build headers match to avoid ABI issues.
 
-[^platform_ids]: This is mainly of internal interest for packaging, so that wheels can be crafted for any platform without access to a native host.
+[^platform_ids]: Intended for packaging, so that wheels can be crafted for any platform without access to a native host.
 
 ### Runtime Dependencies
 
