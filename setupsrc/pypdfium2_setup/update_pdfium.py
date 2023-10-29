@@ -75,7 +75,7 @@ def extract(archives, version, flags):
             libname = LibnameForSystem[system]
             tar_libdir = "lib" if system != SysNames.windows else "bin"
             tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
-            write_pdfium_info(pl_dir, version=version, origin="pdfium-binaries", flags=flags)
+            write_pdfium_info(pl_dir, version, origin="pdfium-binaries", flags=flags)
         
         arc_path.unlink()
 

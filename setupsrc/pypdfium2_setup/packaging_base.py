@@ -161,10 +161,8 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, version, origin, flags=[]):
-    # TODO(future) embed library search path for use with a custom ctypesgen loader
-    # TODO consider embedding ctypesgen version info, probably using a separate file and class?
-    info = dict(**PdfiumVer.to_full(version, origin), origin=origin, flags=flags)
+def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None):
+    info = dict(**PdfiumVer.to_full(build, origin), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
     write_json(dir/VersionFN, info)
     return info
 

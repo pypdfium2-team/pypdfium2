@@ -100,6 +100,9 @@ def dl_pdfium(GClient, do_update, revision):
     if is_sync:
         # TODO consider passing -D ?
         run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
+        # quick & dirty fix to make a version annotated commit available - pdfium gets versioned very frequently, so this should be more than enough
+        # TODO tigthen to check out only up to the latest tag
+        run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     
     return is_sync
 
@@ -118,36 +121,28 @@ def _dl_unbundler():
         url_request.urlretrieve(tool_url, tool_file)
 
 
-def get_pdfium_version():
+def identify_pdfium():
+    # if not updated, we'll always be dirty because of the patches, so not much point checking it
+    desc = run_cmd(["git", "describe", "--all"], cwd=PDFiumDir, capture=True)
+    desc = desc.rsplit("/", maxsplit=1)[-1]
+    build, *id_parts = desc.split("-")
+    assert len(id_parts) < 2
     
-    # FIXME awkward mix of local/remote git - this will fail to identify the tag if local and remote state do not match
+    info = dict(build=build, n_commits=0, hash=None)
+    if len(id_parts) > 0:
+        info["n_commits"] = int(id_parts[0])
+    if len(id_parts) > 1:
+        info["hash"] = id_parts[1]
     
-    head_commit = run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
-    refs_string = run_cmd(["git", "ls-remote", "--heads", PdfiumURL, "chromium/*"], cwd=None, capture=True)
-    
-    latest = refs_string.split("\n")[-1]
-    tag_commit, ref = latest.split("\t")
-    tag_commit = tag_commit[:7]
-    tag = ref.split("/")[-1]
-    
-    print(f"Current head {head_commit}, latest tagged commit {tag_commit} ({tag})", file=sys.stderr)
-    v_libpdfium = int(tag) if head_commit == tag_commit else head_commit
-    
-    return v_libpdfium
+    return info
 
 
-def _create_resources_rc(v_libpdfium):
-    
+def _create_resources_rc(pdfium_build):
     input_path = PatchDir / "win" / "resources.rc"
     output_path = PDFiumDir / "resources.rc"
     content = input_path.read_text()
-    
-    # NOTE RC does not seem to tolerate commit hash, so set a dummy version instead
-    if not isinstance(v_libpdfium, int):
-        v_libpdfium = "1.0"
-    
-    content = content.replace("$VERSION_CSV", str(v_libpdfium).replace(".", ","))
-    content = content.replace("$VERSION", str(v_libpdfium))
+    content = content.replace("$VERSION_CSV", str(pdfium_build))
+    content = content.replace("$VERSION", str(pdfium_build))
     output_path.write_text(content)
 
 
@@ -156,11 +151,11 @@ def _apply_patchset(patchset, check=True):
         run_cmd(["git", "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=check)
 
 
-def patch_pdfium(v_libpdfium):
+def patch_pdfium(pdfium_build):
     _apply_patchset(PatchesMain)
     if sys.platform.startswith("win32"):
         _apply_patchset(PatchesWindows)
-        _create_resources_rc(v_libpdfium)
+        _create_resources_rc(pdfium_build)
 
 
 def configure(GN, config):
@@ -173,14 +168,14 @@ def build(Ninja, target):
     run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
-def pack(pdfium_ver):
+def pack(pdfium_info):
     
     dest_dir = DataDir / ExtPlats.sourcebuild
     dest_dir.mkdir(parents=True, exist_ok=True)
     
     libname = LibnameForSystem[Host.system]
     shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
-    write_pdfium_info(dest_dir, version=pdfium_ver, origin="sourcebuild")
+    write_pdfium_info(dest_dir, origin="sourcebuild", **pdfium_info)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     # FIXME PDFIUM_BINDINGS=reference not honored
@@ -240,10 +235,10 @@ def main(
     Ninja   = get_tool("ninja")
     
     pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
-    pdfium_ver = get_pdfium_version()
+    pdfium_info = identify_pdfium()
     
     if pdfium_dl_done:
-        patch_pdfium(pdfium_ver)
+        patch_pdfium(pdfium_info["build"])
     if b_use_syslibs:
         _dl_unbundler()
 
@@ -258,7 +253,7 @@ def main(
     
     configure(GN, config_str)
     build(Ninja, b_target)
-    pack(pdfium_ver)
+    pack(pdfium_info)
 
 
 def parse_args(argv):
