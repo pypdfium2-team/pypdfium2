@@ -98,7 +98,8 @@ def dl_pdfium(GClient, do_update, revision):
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if is_sync:
-        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--with_branch_heads"], cwd=SBDir)
+        # TODO consider passing -D ?
+        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
     
     return is_sync
 
