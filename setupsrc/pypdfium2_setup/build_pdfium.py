@@ -142,11 +142,11 @@ def _create_resources_rc(v_libpdfium):
     content = input_path.read_text()
     
     # NOTE RC does not seem to tolerate commit hash, so set a dummy version instead
-    if not v_libpdfium.isnumeric():
+    if not isinstance(v_libpdfium, int):
         v_libpdfium = "1.0"
     
-    content = content.replace("$VERSION_CSV", v_libpdfium.replace(".", ","))
-    content = content.replace("$VERSION", v_libpdfium)
+    content = content.replace("$VERSION_CSV", str(v_libpdfium).replace(".", ","))
+    content = content.replace("$VERSION", str(v_libpdfium))
     output_path.write_text(content)
 
 
