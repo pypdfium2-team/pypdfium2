@@ -11,7 +11,6 @@ from pathlib import Path
 from copy import deepcopy
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-from pypdfium2_setup import update_pdfium
 # TODO consider dotted access?
 from pypdfium2_setup.packaging_base import *
 
@@ -24,7 +23,8 @@ def run_local(*args, **kws):
 
 def update_refbindings(version):
     RefBindingsFile.unlink()
-    build_pdfium_bindings(version, headers_dir=AutoreleaseDir, guard_symbols=True)
+    build_pdfium_bindings(version, guard_symbols=True)
+    shutil.copyfile(DataDir_Bindings/BindingsFN, RefBindingsFile)
     assert RefBindingsFile.exists()
 
 
