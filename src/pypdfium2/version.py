@@ -44,16 +44,15 @@ class _abc_version:
     def api_tag(self):
         return tuple(self._data[k] for k in self._TAG_FIELDS)
     
-    def _build_tag(self):
+    def _craft_tag(self):
         return ".".join(str(v) for v in self.api_tag)
     
-    def _build_desc(self):
+    def _craft_desc(self, extra=[]):
         
         local_ver = []
         if self.n_commits > 0:
             local_ver += [str(self.n_commits), str(self.hash)]
-        if self.dirty:
-            local_ver += ["dirty"]
+        local_ver += extra
         
         desc = ""
         if local_ver:
@@ -72,18 +71,24 @@ class _version_pypdfium2 (_abc_version):
     
     @cached_property
     def tag(self):
-        tag = self._build_tag()
+        tag = self._craft_tag()
         if self.beta is not None:
             tag += f"b{self.beta}"
         return tag
     
     @cached_property
     def desc(self):
-        desc = self._build_desc()
+        
+        extra = []
+        if self.dirty:
+            extra += ["dirty"]
+        
+        desc = self._craft_desc(extra)
         if self.data_source != "git":
             desc += f":{self.data_source}"
         if self.is_editable:
             desc += "@editable"
+        
         return desc
 
 
@@ -91,18 +96,17 @@ class _version_pdfium (_abc_version):
     
     _FILE = Path(pypdfium2_raw.__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "build", "patch")
-    dirty = None  # unknown
     
     def _process_data(self, data):
         data["flags"] = tuple(data["flags"])
     
     @cached_property
     def tag(self):
-        return self._build_tag()
+        return self._craft_tag()
     
     @cached_property
     def desc(self):
-        desc = self._build_desc()
+        desc = self._craft_desc()
         if self.flags:
             desc += ":{%s}" % ",".join(self.flags)
         if self.origin != "pdfium-binaries":
@@ -207,8 +211,6 @@ Parameters:
         Number of commits after tag at install time. 0 for tagged build commit.
     hash (str | None):
         Hash of head commit if n_commits > 0, None otherwise.
-    dirty (None):
-        Unknown - always None.
     origin (str):
         The pdfium binary's origin. Possible values:\n
         - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2.
