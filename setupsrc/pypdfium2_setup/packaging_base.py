@@ -433,10 +433,10 @@ def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **
         headers_dir = DataDir_Bindings / "headers"
         if headers_dir.exists():
             shutil.rmtree(headers_dir)
-        archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
-        archive_path = DataDir / "pdfium_public.tar.gz"
-        url_request.urlretrieve(archive_url, archive_path)
         headers_dir.mkdir(parents=True, exist_ok=True)
+        archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
+        archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
+        url_request.urlretrieve(archive_url, archive_path)
         with tarfile.open(archive_path) as tar:
             for m in tar.getmembers():
                 if m.isfile() and re.fullmatch(r"fpdf(\w+)\.h", m.name, flags=re.ASCII):
