@@ -126,30 +126,36 @@ class PdfiumVer:
         return int( tag.split("/")[-1] )
     
     @staticmethod
-    def to_full(v_short, origin, as_str=False):
+    @functools.lru_cache(maxsize=1)
+    def _get_version_conv():
         
-        # TODO determine from chromium tags instead. This would allow us to handle system and sourcebuild properly
+        ChromiumURL = "https://chromium.googlesource.com/chromium/src"
+        refs_txt = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True)
         
-        if origin == "sourcebuild":
-            # For sourcebuild, we don't actually set the full version (retrieving from chromium not implemented yet). Also note v_short may be a commit hash if building from an untagged commit.
-            # FIXME as_str not implemented
-            v_parts = (None, None, v_short, None)
+        # FIXME parses too much - we'd only need to read until we find a given v_short and then deepen on demand on further calls
+        to_full = {}
+        for ref in refs_txt.split("\n"):
+            ref = ref.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
+            major, minor, build, patch = [int(v) for v in ref.split(".")]
+            to_full[build] = (major, minor, build, patch)
+        return to_full
+    
+    @staticmethod
+    def to_full(v_short, type=dict):  # XXX origin
         
+        v_short = int(v_short)
+        ver_dict = PdfiumVer._get_version_conv()
+        v_parts = ver_dict[v_short]
+        assert v_parts[2] == v_short
+        
+        if type in (tuple, list):
+            return v_parts
+        elif type is str:
+            return v_parts.join(".")
+        elif type is dict:
+            return dict(zip(PdfiumVer.V_KEYS, v_parts))
         else:
-            info = url_request.urlopen(f"{ReleaseInfoURL}{v_short}").read().decode("utf-8")
-            info = json.loads(info)
-            title = info["name"]
-            match = re.match(rf"PDFium (\d+.\d+.{v_short}.\d+)", title)
-            v_string = match.group(1)
-            if as_str:
-                return v_string
-            v_parts = [int(v) for v in v_string.split(".")]
-            v_short = int(v_short)
-        
-        v_info = dict(zip(PdfiumVer.V_KEYS, v_parts))
-        assert v_info["build"] == v_short
-        
-        return v_info
+            assert False
 
 
 def read_json(fp):
@@ -162,7 +168,7 @@ def write_json(fp, data, indent=2):
 
 
 def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None):
-    info = dict(**PdfiumVer.to_full(build, origin), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
+    info = dict(**PdfiumVer.to_full(build, type=dict), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
     write_json(dir/VersionFN, info)
     return info
 
