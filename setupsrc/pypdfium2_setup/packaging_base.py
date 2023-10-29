@@ -141,7 +141,7 @@ class PdfiumVer:
         return to_full
     
     @staticmethod
-    def to_full(v_short, type=dict):  # XXX origin
+    def to_full(v_short, type=dict):
         
         v_short = int(v_short)
         ver_dict = PdfiumVer._get_version_conv()
