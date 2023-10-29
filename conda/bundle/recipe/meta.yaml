@@ -62,7 +62,7 @@ test:
 about:
   summary: Python bindings to PDFium (bundled helpers/binary/bindings)
   license: (Apache-2.0 OR BSD-3-Clause) AND LicenseRef-PdfiumThirdParty
-  license-files:
+  license_file:
     - LICENSES/Apache-2.0.txt
     - LICENSES/BSD-3-Clause.txt
     - LICENSES/CC-BY-4.0.txt
