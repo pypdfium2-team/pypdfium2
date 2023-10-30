@@ -206,7 +206,7 @@ class TmpCommitCtx:
         if self.have_mods:  # make tmp commit
             self.FILE.touch()
             run_cmd(["git", "add", "."], cwd=ProjectDir)
-            run_cmd(["git", "commit", "-m", "!!! tmp commit for conda-build", "-m", "make conda-build include uncommmitted changes"], cwd=ProjectDir)
+            run_cmd(["git", "commit", "-m", "!!! tmp commit for conda-build", "-m", "make conda-build include uncommitted changes"], cwd=ProjectDir)
     
     @classmethod
     def undo(cls):

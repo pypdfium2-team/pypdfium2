@@ -101,7 +101,7 @@ def dl_pdfium(GClient, do_update, revision):
         # TODO consider passing -D ?
         run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
         # quick & dirty fix to make a version annotated commit available - pdfium gets versioned very frequently, so this should be more than enough
-        # TODO tigthen to check out only up to the latest tag
+        # TODO tighten to check out only up to the latest tag
         # FIXME the repository is still left in a very confusing state - maybe we should just drop --no-history --shallow for simplicity?
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     

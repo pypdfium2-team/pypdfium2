@@ -54,7 +54,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   Support for source installs (esp. with self-built/system pdfium) is limited, as their integrity depends somewhat on a correctly acting caller.
   
-  Installing an `sdist` does not implicitly trigger a sourcebuild if no pre-built binary is available. It is preferred to let callers decide conciously what to do, and run the build script without pip encapsulation.
+  Installing an `sdist` does not implicitly trigger a sourcebuild if no pre-built binary is available. It is preferred to let callers decide consciously what to do, and run the build script without pip encapsulation.
   
   Relevant pip options:
   * `-v`: Verbose logging output. Useful for debugging.
@@ -579,7 +579,7 @@ Since version 4, pypdfium2 is built with a patched fork of ctypesgen that remove
 
 As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.
 
-The problem is that the Python interpreter may garbage collect objects with reference count zero at any time, so an unreferenced but still required object may either by chance stay around long enough or disapper too soon, resulting in non-deterministic memory issues that are hard to debug.
+The problem is that the Python interpreter may garbage collect objects with reference count zero at any time, so an unreferenced but still required object may either by chance stay around long enough or disappear too soon, resulting in non-deterministic memory issues that are hard to debug.
 If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that mistakes regarding object lifetime remain unnoticed for a long time.
 
 Although we intend to develop helpers carefully, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
