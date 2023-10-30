@@ -50,6 +50,8 @@ test:
   imports:
     - pypdfium2
     - pypdfium2_raw  # bundled
+  source_files:
+    - conda/raw/minitest.py
   commands:
     - pip check
     - pypdfium2 --help
