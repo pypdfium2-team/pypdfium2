@@ -10,6 +10,6 @@
   * Independent bindings cache. Download headers from pdfium. Extract archive members explicitly.
   * Cleaned up version integration of sourcebuild.
   * Changed `system` platform to generate files according to given version, instead of expecting given files.
-  * Added `provided!` prefix to platform spec, allowing to install with given files.
+  * Added `prepared!` prefix to platform spec, allowing to install with given files.
   * Added `PDFIUM_BINDINGS=reference` to use pre-built bindings when installing from source.
 - Updated Readme.
