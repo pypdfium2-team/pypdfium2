@@ -41,6 +41,25 @@ class _abc_version:
         return self.version
     
     @cached_property
+    def api_tag(self):
+        return tuple(self._data[k] for k in self._TAG_FIELDS)
+    
+    def _craft_tag(self):
+        return ".".join(str(v) for v in self.api_tag)
+    
+    def _craft_desc(self, extra=[]):
+        
+        local_ver = []
+        if self.n_commits > 0:
+            local_ver += [str(self.n_commits), str(self.hash)]
+        local_ver += extra
+        
+        desc = ""
+        if local_ver:
+            desc += "+" + ".".join(local_ver)
+        return desc
+    
+    @cached_property
     def version(self):
         return self.tag + self.desc
 
@@ -51,12 +70,8 @@ class _version_pypdfium2 (_abc_version):
     _TAG_FIELDS = ("major", "minor", "patch")
     
     @cached_property
-    def api_tag(self):
-        return tuple(self._data[k] for k in self._TAG_FIELDS)
-    
-    @cached_property
     def tag(self):
-        tag = ".".join(str(v) for v in self.api_tag)
+        tag = self._craft_tag()
         if self.beta is not None:
             tag += f"b{self.beta}"
         return tag
@@ -64,15 +79,11 @@ class _version_pypdfium2 (_abc_version):
     @cached_property
     def desc(self):
         
-        desc = ""
-        local_ver = []
-        if self.n_commits > 0:
-            local_ver += [str(self.n_commits), str(self.hash)]
+        extra = []
         if self.dirty:
-            local_ver += ["dirty"]
+            extra += ["dirty"]
         
-        if local_ver:
-            desc = "+" + ".".join(local_ver)
+        desc = self._craft_desc(extra)
         if self.data_source != "git":
             desc += f":{self.data_source}"
         if self.is_editable:
@@ -90,29 +101,19 @@ class _version_pdfium (_abc_version):
         data["flags"] = tuple(data["flags"])
     
     @cached_property
-    def api_tag(self):
-        if self.origin == "pdfium-binaries":
-            return tuple(self._data[k] for k in self._TAG_FIELDS)
-        else:
-            return self.build
-    
-    @cached_property
     def tag(self):
-        if self.origin == "pdfium-binaries":
-            return ".".join(str(v) for v in self.api_tag)
-        else:
-            return str(self.build)
+        return self._craft_tag()
     
     @cached_property
     def desc(self):
-        desc = ""
-        if self.origin != "pdfium-binaries":
-            desc += f"+{self.origin}"
+        desc = self._craft_desc()
         if self.flags:
             desc += ":{%s}" % ",".join(self.flags)
-        if self.bindings != "generated":
-            desc += f"@bindings:{self.bindings}"
+        if self.origin != "pdfium-binaries":
+            desc += f"@{self.origin}"
         return desc
+
+# TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
 
 
 # Current API
@@ -140,7 +141,6 @@ __all__ += ["V_PYPDFIUM2", "V_LIBPDFIUM", "V_LIBPDFIUM_FULL", "V_BUILDNAME", "V_
 
 
 # Docs
-
 
 PYPDFIUM_INFO = PYPDFIUM_INFO
 """
@@ -177,16 +177,11 @@ Parameters:
         - ``given``: Pre-supplied version file (e.g. packaged with sdist, or else created by caller).
         - ``record``: Parsed from autorelease record. Implies that possible changes after tag are unknown.\n
         Note that *given* and *record* are not "trustworthy", they can be easily abused to pass arbitrary values. *git* should be correct provided the installed version file is not corrupted.
-    is_editable (bool):
-        True for editable install, False otherwise.\n
+    is_editable (bool | None):
+        True for editable install, False otherwise. None if unknown.\n
         If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happened since. The actual current state is unknown.
 """
 
-
-# FIXME Integration of sourcebuild is quite polluted. Possible improvements:
-# - Always use the latest available tag, and add hash/n_commits similar to PYPDFIUM_INFO. This would require a sufficiently deep checkout, though.
-# - the build script might fail to check out tags - investigate and fix this
-# - Determine major/minor/patch on sourcebuild (pdfium-binaries show how to do this)
 
 PDFIUM_INFO = PDFIUM_INFO
 """
@@ -198,30 +193,31 @@ Parameters:
     version (str):
         Joined tag and desc, forming the full version.
     tag (str):
-        Version ciphers joined as str. Just *str(build)* if other ciphers are unknown.
+        Version ciphers joined as str.
     desc (str):
         Descriptors (origin, flags) represented as str.
-    api_tag (tuple[int] | int | str):
-        Version ciphers joined as tuple, or just the build value (without tuple) if other ciphers are unknown.
-    major (int | None):
+    api_tag (tuple[int]):
+        Version ciphers joined as tuple.
+    major (int):
         Chromium major cipher.
-    minor (int | None):
+    minor (int):
         Chromium minor cipher.
-    build (int | str):
-        PDFium tag rsp. Chromium build cipher (int), or commit hash (str).
+    build (int):
+        Chromium/pdfium build cipher.
         This value allows to uniquely identify the pdfium sources the binary was built from.
-        For origin pdfium-binaries: always tag. For origin sourcebuild: tag if available, head commit otherwise.
-    patch (int | None):
+    patch (int):
         Chromium patch cipher.
+    n_commits (int):
+        Number of commits after tag at install time. 0 for tagged build commit.
+    hash (str | None):
+        Hash of head commit if n_commits > 0, None otherwise.
     origin (str):
         The pdfium binary's origin. Possible values:\n
-        - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2. Chromium ciphers known.
-        - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2. Chromium ciphers unknown.
+        - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2.
+        - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2.
         - ``system``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
-    bindings (str):
-        Info on the used bindings (generated, reference). Note that the reference bindings can be ABI-unsafe. (This field is experimental. In the future, we may want to integrate bindings info separately with ctypesgen version.)
 """
 
 # -----

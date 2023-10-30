@@ -6,15 +6,13 @@
 
 import os
 import sys
-import traceback
-import subprocess
 from pathlib import Path
 import setuptools
 from wheel.bdist_wheel import bdist_wheel
 from setuptools.command.build_py import build_py as build_py_orig
 
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
-from pypdfium2_setup.emplace import get_pdfium
+from pypdfium2_setup.emplace import prepare_setup
 from pypdfium2_setup.packaging_base import *
 
 
@@ -43,44 +41,14 @@ class pypdfium_build_py (build_py_orig):
         
     def run(self, *args, **kwargs):
         
-        if self.editable_mode:
+        if hasattr(self, "editable_mode"):
             helpers_info = read_json(ModuleDir_Helpers/VersionFN)
-            helpers_info["is_editable"] = True
+            helpers_info["is_editable"] = bool(self.editable_mode)
             write_json(ModuleDir_Helpers/VersionFN, helpers_info)
+        else:
+            print("!!! Warning: cmdclass does not provide `editable_mode` attribute. Please file a bug report.")
         
         build_py_orig.run(self, *args, **kwargs)
-
-
-def get_helpers_info():
-    
-    # TODO consider adding some checks against record
-    
-    have_git_describe = False
-    if HAVE_GIT_REPO:
-        try:
-            helpers_info = parse_git_tag()
-        except subprocess.CalledProcessError:
-            print("Version uncertain: git describe failure - possibly a shallow checkout", file=sys.stderr)
-            traceback.print_exc()
-        else:
-            have_git_describe = True
-            helpers_info["data_source"] = "git"
-    else:
-        print("Version uncertain: git repo not available.")
-    
-    if not have_git_describe:
-        ver_file = ModuleDir_Helpers / VersionFN
-        if ver_file.exists():
-            print("Falling back to given version info (e.g. sdist).", file=sys.stderr)
-            helpers_info = read_json(ver_file)
-            helpers_info["data_source"] = "given"
-        else:
-            print("Falling back to autorelease record.", file=sys.stderr)
-            record = read_json(AR_RecordFile)
-            helpers_info = parse_given_tag(record["tag"])
-            helpers_info["data_source"] = "record"
-    
-    return helpers_info
 
 
 # semi-static metadata
@@ -99,17 +67,16 @@ LICENSES_SDIST = (
     ".reuse/dep5",
 )
 
+PLATFILES_GLOB = [BindingsFN, VersionFN, *LibnameForSystem.values()]
 
-def main():
-    
-    pl_name = os.environ.get(PlatSpec_EnvVar, "")
-    modnames = os.environ.get(ModulesSpec_EnvVar, "")
-    if modnames:
-        modnames = modnames.split(",")
-        assert set(modnames).issubset(ModulesAll)
-    else:
-        modnames = ModulesAll
-    assert len(modnames) in (1, 2)
+
+def assert_exists(dir, data_files):
+    missing = [f for f in data_files if not (dir/f).exists()]
+    if missing:
+        assert False, f"Missing data files: {missing}"
+
+
+def run_setup(modnames, pl_name, pdfium_ver):
     
     kwargs = dict(
         name = "pypdfium2",
@@ -123,39 +90,34 @@ def main():
         install_requires = [],
     )
     
-    # TODO consider using pdfium version for raw-only?
-    helpers_info = get_helpers_info()
-    kwargs["version"] = merge_tag(helpers_info, mode="py")
-    
     if modnames == [ModuleHelpers]:
         kwargs["description"] += " (helpers module)"
         kwargs["install_requires"] += ["pypdfium2_raw"]
     elif modnames == [ModuleRaw]:
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
+        kwargs["version"] = str(pdfium_ver)
     
-    with_helpers = ModuleHelpers in modnames
-    with_raw = ModuleRaw in modnames and pl_name != PlatTarget_None
-    if with_helpers:
-        helpers_info["is_editable"] = False  # default
+    if ModuleHelpers in modnames:
+        # is_editable = None: unknown/fallback in case the cmdclass is not reached
+        helpers_info = get_helpers_info()
+        kwargs["version"] = merge_tag(helpers_info, mode="py")
+        helpers_info["is_editable"] = None
         write_json(ModuleDir_Helpers/VersionFN, helpers_info)
         kwargs["cmdclass"]["build_py"] = pypdfium_build_py
         kwargs["package_dir"]["pypdfium2"] = "src/pypdfium2"
         kwargs["package_data"]["pypdfium2"] = [VersionFN]
-    if with_raw:
+        kwargs["entry_points"] = dict(console_scripts=["pypdfium2 = pypdfium2.__main__:cli_main"])
+    if ModuleRaw in modnames:
         kwargs["package_dir"]["pypdfium2_raw"] = "src/pypdfium2_raw"
     
-    if "pypdfium2_raw" not in kwargs["package_dir"]:
-        kwargs["exclude_package_data"] = {"pypdfium2_raw": [VersionFN, BindingsFN, *LibnameForSystem.values()]}
-        if pl_name == PlatTarget_None:
+    if ModuleRaw not in modnames:
+        kwargs["exclude_package_data"] = {"pypdfium2_raw": PLATFILES_GLOB}
+        if pl_name == ExtPlats.none:
             kwargs["license_files"] += LICENSES_SDIST
-    elif pl_name == PlatTarget_System:
-        # TODO generate bindings/version here according to some caller input?
-        assert (ModuleDir_Raw/BindingsFN).exists() and (ModuleDir_Raw/VersionFN).exists(), f"Bindings and version currently must be prepared by caller for {PlatTarget_System} target."
-        kwargs["package_data"]["pypdfium2_raw"] = [BindingsFN, VersionFN]
+    elif pl_name == ExtPlats.system:
+        kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
-        pl_name = get_pdfium(pl_name)
-        emplace_platfiles(pl_name)
         sys_name = plat_to_system(pl_name)
         libname = LibnameForSystem[sys_name]
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
@@ -164,7 +126,26 @@ def main():
         kwargs["license"] = f"({kwargs['license']}) AND LicenseRef-PdfiumThirdParty"
         kwargs["license_files"] += LICENSES_WHEEL
     
+    if "pypdfium2" in kwargs["package_data"]:
+        assert_exists(ModuleDir_Helpers, kwargs["package_data"]["pypdfium2"])
+    if "pypdfium2_raw" in kwargs["package_data"]:
+        assert_exists(ModuleDir_Raw, kwargs["package_data"]["pypdfium2_raw"])
+    
     setuptools.setup(**kwargs)
+
+
+def main():
+    
+    pl_spec = os.environ.get(PlatSpec_EnvVar, "")
+    modspec = os.environ.get(ModulesSpec_EnvVar, "")
+    
+    # TODO embed is_prepared in version file? - in principle, it could be arbitrary caller-given files
+    with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
+    modnames = parse_modspec(modspec, pl_name)
+    
+    if ModuleRaw in modnames and with_prepare:
+        prepare_setup(pl_name, pdfium_ver, use_v8)
+    run_setup(modnames, pl_name, pdfium_ver)
 
 
 if __name__ == "__main__":

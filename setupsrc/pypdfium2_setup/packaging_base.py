@@ -9,23 +9,19 @@ import re
 import sys
 import json
 import shutil
+import tarfile
 import platform
 import functools
 import sysconfig
+import traceback
 import subprocess
 from pathlib import Path
 import urllib.request as url_request
 
-sys.path.insert(0, str(Path(__file__).parents[1]))
-
 # TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
-PlatSpec_EnvVar   = "PDFIUM_PLATFORM"
-PlatSpec_VerSep   = ":"
-PlatSpec_V8Sym    = "-v8"
-PlatTarget_None   = "none"   # sdist, no binary
-PlatTarget_System = "system" # pdfium provided by system (if available)
-PlatTarget_Auto   = "auto"   # pdfium-binaries for host
-VerTarget_Latest  = "latest"
+PlatSpec_EnvVar = "PDFIUM_PLATFORM"
+PlatSpec_VerSep = ":"
+PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
 BindTarget_Ref  = "reference"
@@ -42,6 +38,7 @@ VersionFN  = "version.json"
 
 ProjectDir        = Path(__file__).parents[2]
 DataDir           = ProjectDir / "data"
+DataDir_Bindings  = DataDir / "bindings"
 SourcebuildDir    = ProjectDir / "sourcebuild"
 ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
 ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
@@ -49,10 +46,10 @@ Changelog         = ProjectDir / "docs" / "devel" / "changelog.md"
 ChangelogStaging  = ProjectDir / "docs" / "devel" / "changelog_staging.md"
 HAVE_GIT_REPO     = (ProjectDir / ".git").exists()
 
-AutoreleaseDir   = ProjectDir / "autorelease"
-AR_RecordFile    = AutoreleaseDir / "record.json"  # TODO verify contents on before merge
-AR_ConfigFile    = AutoreleaseDir / "config.json"
-RefBindingsFile  = AutoreleaseDir / BindingsFN
+AutoreleaseDir  = ProjectDir / "autorelease"
+AR_RecordFile   = AutoreleaseDir / "record.json"  # TODO verify contents on before merge
+AR_ConfigFile   = AutoreleaseDir / "config.json"
+RefBindingsFile = AutoreleaseDir / BindingsFN
 
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PdfiumURL      = "https://pdfium.googlesource.com/pdfium"
@@ -84,7 +81,13 @@ class PlatNames:
     windows_x64      = SysNames.windows + "_x64"
     windows_x86      = SysNames.windows + "_x86"
     windows_arm64    = SysNames.windows + "_arm64"
-    sourcebuild      = "sourcebuild"
+
+
+class ExtPlats:
+    sourcebuild = "sourcebuild"
+    system = "system"
+    none = "none"
+    auto = "auto"
 
 
 ReleaseNames = {
@@ -110,15 +113,13 @@ LibnameForSystem = {
 
 BinaryPlatforms = list(ReleaseNames.keys())
 BinarySystems   = list(LibnameForSystem.keys())
-MainLibnames    = list(LibnameForSystem.values())
 
 
 class PdfiumVer:
     
-    # TODO consider namedtuple?
     V_KEYS = ("major", "minor", "build", "patch")
+    _refs_cache = {"lines": None, "dict": {}, "cursor": None}
     
-    # TODO consider cached property?
     @staticmethod
     @functools.lru_cache(maxsize=1)
     def get_latest():
@@ -126,31 +127,36 @@ class PdfiumVer:
         tag = git_ls.split("\t")[-1]
         return int( tag.split("/")[-1] )
     
-    @staticmethod
-    def to_full(v_short, origin):
+    @classmethod
+    def to_full(cls, v_short, type=dict):
         
-        if origin == "pdfium-binaries":
-            # NOTE(future:conda) we may need this info to pin pdfium-binaries
-            info = url_request.urlopen(f"{ReleaseInfoURL}{v_short}").read().decode("utf-8")
-            info = json.loads(info)
-            title = info["name"]
-            match = re.match(rf"PDFium (\d+.\d+.{v_short}.\d+)", title)
-            v_string = match.group(1)
-            v_parts = [int(v) for v in v_string.split(".")]
-            v_short = int(v_short)
-        elif origin == "sourcebuild":
-            # For sourcebuild, we don't actually set the full version. Retrieving it from chromium is a bit complicated. Also note v_short may be a commit hash if building from an untagged commit.
-            v_parts = (None, None, v_short, None)
+        v_short = int(v_short)
+        rc = cls._refs_cache
+        
+        if rc["lines"] is None:
+            ChromiumURL = "https://chromium.googlesource.com/chromium/src"
+            rc["lines"] = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
+        
+        if rc["cursor"] is None or rc["cursor"] > v_short:
+            for i, line in enumerate(rc["lines"]):
+                ref = line.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
+                major, minor, build, patch = [int(v) for v in ref.split(".")]
+                rc["dict"][build] = (major, minor, build, patch)
+                if build == v_short:
+                    rc["cursor"] = build
+                    rc["lines"] = rc["lines"][i+1:]
+                    break
+        
+        v_parts = rc["dict"][v_short]
+        if type in (tuple, list):
+            return v_parts
+        elif type is str:
+            return ".".join([str(v) for v in v_parts])
+        elif type is dict:
+            return dict(zip(PdfiumVer.V_KEYS, v_parts))
         else:
             assert False
-        
-        v_info = dict(zip(PdfiumVer.V_KEYS, v_parts))
-        assert v_info["build"] == v_short
-        
-        return v_info
 
-
-# TODO Could consider adding a checksum to our JSON files as an barrier against corruption
 
 def read_json(fp):
     with open(fp, "r") as buf:
@@ -161,18 +167,17 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, version, origin, flags=[]):
-    # TODO(future) embed library search path for use with a custom ctypesgen loader
-    # TODO consider embedding ctypesgen version info, probably using a separate file and class?
-    info = dict(**PdfiumVer.to_full(version, origin), origin=origin, flags=flags)
-    info["bindings"] = BindTarget_Ref if BindTarget == BindTarget_Ref else "generated"
+def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None):
+    info = dict(**PdfiumVer.to_full(build, type=dict), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
     write_json(dir/VersionFN, info)
+    return info
 
 
 def parse_given_tag(full_tag):
     
     info = dict()
     
+    # TODO looks like `git describe --dirty` does not account for new committable files, but this could be relevant - consider evaluating dirty ourselves by checking if `git status --porcelain` is non-empty
     tag = full_tag
     dirty = tag.endswith("-dirty")
     if dirty:
@@ -226,7 +231,7 @@ def merge_tag(info, mode):
 
 
 def plat_to_system(pl_name):
-    if pl_name == PlatNames.sourcebuild:
+    if pl_name == ExtPlats.sourcebuild:
         # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downsteam with fallback value?
         return Host.system
     result = [s for s in BinarySystems if pl_name.startswith(s)]
@@ -336,7 +341,7 @@ def get_wheel_tag(pl_name):
         return "win_arm64"
     elif pl_name == PlatNames.windows_x86:
         return "win32"
-    elif pl_name == PlatNames.sourcebuild:
+    elif pl_name == ExtPlats.sourcebuild:
         # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         # The reason why we don't simply do `if Host.platform: return get_wheel_tag(Host.platform) else ...` is that version info for pdfium-binaries does not have to match the sourcebuild host.
         # NOTE On Linux, this just returns f"linux_{arch}" (which is a valid wheel tag). Leave it as-is since we don't know the build's lowest compatible libc. The caller may re-tag using the wheel module's CLI.
@@ -364,16 +369,13 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
         return comp_process
 
 
-def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symbols=False):
-    
-    # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
-    if BindTarget == BindTarget_Ref:
-        print("Using ref bindings as requested by env var.",file=sys.stderr)
-        if use_v8xfa:
-            print("Warning: default ref bindings are not V8/XFA compatible, expecting prior overwrite.")
-        shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
-        return
-    
+def tar_extract_file(tar, src, dst_path):
+    src_buf = tar.extractfile(src)  # src: path or tar member
+    with open(dst_path, "wb") as dst_buf:
+        shutil.copyfileobj(src_buf, dst_buf)
+
+
+def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compile_lds=[], run_lds=["."]):
     # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
@@ -381,26 +383,72 @@ def call_ctypesgen(target_dir, include_dir, pl_name, use_v8xfa=False, guard_symb
     
     bindings = target_dir / BindingsFN
     
-    args = ["ctypesgen", f"--strip-build-path={include_dir}", "--no-srcinfo", "--library", "pdfium", "--runtime-libdirs", "."]
-    if pl_name == Host.platform:
-        # assuming the binary already lies in target_dir
-        args += ["--compile-libdirs", target_dir]
+    args = ["ctypesgen", f"--strip-build-path={headers_dir}", "--no-srcinfo", "--library", "pdfium"]
+    
+    if run_lds:
+        args += ["--runtime-libdirs", *run_lds]
+    if compile_lds:
+        args += ["--compile-libdirs", *compile_lds]
     else:
         args += ["--no-load-library"]
+    
     if not guard_symbols:
         args += ["--no-symbol-guards"]
-    if use_v8xfa:
-        args += ["-D", "PDF_ENABLE_V8", "PDF_ENABLE_XFA"]
-    if pl_name.startswith(SysNames.windows) and Host.system == SysNames.windows:
+    if flags:
+        args += ["-D"] + [f"PDF_ENABLE_{f}" for f in flags]
+    if Host.system == SysNames.windows:
         args += ["-D", "_WIN32"]
-    args += ["--headers"] + [h.name for h in sorted(include_dir.glob("*.h"))] + ["-o", bindings]
     
-    run_cmd(args, cwd=include_dir)
+    args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", bindings]
+    
+    run_cmd(args, cwd=headers_dir)
     
     text = bindings.read_text()
-    text = text.replace(str(include_dir), ".")
+    text = text.replace(str(headers_dir), ".")
     text = text.replace(str(Path.home()), "~")
     bindings.write_text(text)
+
+
+def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **kwargs):
+    
+    ver_path = DataDir_Bindings/VersionFN
+    bind_path = DataDir_Bindings/BindingsFN
+    
+    # TODO move refbindings handling into run_ctypesgen on behalf of sourcebuild?
+    # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
+    if BindTarget == BindTarget_Ref:
+        print("Using refbindings as requested by env var.",file=sys.stderr)
+        if flags:
+            print("Warning: default refbindings are not flags-compatible.")
+        shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
+        ar_record = read_json(AR_RecordFile)
+        write_json(ver_path, dict(version=ar_record["pdfium"], flags=[], run_lds=["."], source="reference"))
+        return
+    
+    curr_info = dict(version=version, flags=list(flags), run_lds=list(run_lds), source="generated")
+    if bind_path.exists() and ver_path.exists():
+        prev_info = read_json(ver_path)
+        if prev_info == curr_info:
+            return
+        else:
+            print(f"{prev_info} != {curr_info}")
+    
+    if not headers_dir:
+        headers_dir = DataDir_Bindings / "headers"
+        if headers_dir.exists():
+            shutil.rmtree(headers_dir)
+        headers_dir.mkdir(parents=True, exist_ok=True)
+        archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
+        archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
+        url_request.urlretrieve(archive_url, archive_path)
+        with tarfile.open(archive_path) as tar:
+            for m in tar.getmembers():
+                if m.isfile() and re.fullmatch(r"fpdf(\w+)\.h", m.name, flags=re.ASCII):
+                    tar_extract_file(tar, m, headers_dir/m.name)
+        archive_path.unlink()
+    
+    run_ctypesgen(DataDir_Bindings, headers_dir, flags=flags, run_lds=run_lds, **kwargs)
+    write_json(ver_path, curr_info)
 
 
 def clean_platfiles():
@@ -410,7 +458,7 @@ def clean_platfiles():
         ModuleDir_Raw / BindingsFN,
         ModuleDir_Raw / VersionFN,
     ]
-    deletables += [ModuleDir_Raw / fn for fn in MainLibnames]
+    deletables += [ModuleDir_Raw / fn for fn in LibnameForSystem.values()]
     
     for fp in deletables:
         if fp.is_file():
@@ -419,29 +467,89 @@ def clean_platfiles():
             shutil.rmtree(fp)
 
 
-def get_platfiles(pl_name):
-    system = plat_to_system(pl_name)
-    platfiles = (
-        DataDir / pl_name / BindingsFN,
-        DataDir / pl_name / LibnameForSystem[system],
-    )
-    return platfiles
+def get_helpers_info():
+    
+    # TODO consider adding some checks against record
+    
+    have_git_describe = False
+    if HAVE_GIT_REPO:
+        try:
+            helpers_info = parse_git_tag()
+        except subprocess.CalledProcessError:
+            print("Version uncertain: git describe failure - possibly a shallow checkout", file=sys.stderr)
+            traceback.print_exc()
+        else:
+            have_git_describe = True
+            helpers_info["data_source"] = "git"
+    else:
+        print("Version uncertain: git repo not available.")
+    
+    if not have_git_describe:
+        ver_file = ModuleDir_Helpers / VersionFN
+        if ver_file.exists():
+            print("Falling back to given version info (e.g. sdist).", file=sys.stderr)
+            helpers_info = read_json(ver_file)
+            helpers_info["data_source"] = "given"
+        else:
+            print("Falling back to autorelease record.", file=sys.stderr)
+            record = read_json(AR_RecordFile)
+            helpers_info = parse_given_tag(record["tag"])
+            helpers_info["data_source"] = "record"
+    
+    return helpers_info
 
 
-def emplace_platfiles(pl_name):
+def build_pl_suffix(version, use_v8):
+    return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
+
+
+def parse_pl_spec(pl_spec, need_prepare=True):
     
-    pl_dir = DataDir / pl_name
-    ver_file = pl_dir / VersionFN
-    if not pl_dir.exists():
-        raise RuntimeError(f"Missing platform directory {pl_name}")
-    if not ver_file.exists():
-        raise RuntimeError(f"Missing PDFium version file for {pl_name}")
+    if pl_spec.startswith("prepared!"):
+        _, pl_spec = pl_spec.split("!", maxsplit=1)
+        return parse_pl_spec(pl_spec, need_prepare=False)
     
-    clean_platfiles()
-    platfiles = get_platfiles(pl_name)
-    shutil.copyfile(ver_file, ModuleDir_Raw/VersionFN)
+    req_ver = None
+    use_v8 = False
+    if PlatSpec_VerSep in pl_spec:
+        pl_spec, req_ver = pl_spec.rsplit(PlatSpec_VerSep)
+    if pl_spec.endswith(PlatSpec_V8Sym):
+        pl_spec = pl_spec[:-len(PlatSpec_V8Sym)]
+        use_v8 = True
     
-    for fp in platfiles:
-        if not fp.exists():
-            raise RuntimeError(f"Platform file missing: {fp}")
-        shutil.copy(fp, ModuleDir_Raw)
+    if not pl_spec or pl_spec == ExtPlats.auto:
+        pl_name = Host.platform
+        if pl_name is None:
+            raise RuntimeError(f"No pre-built binaries available for {Host}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
+    elif hasattr(ExtPlats, pl_spec):
+        pl_name = getattr(ExtPlats, pl_spec)
+    elif hasattr(PlatNames, pl_spec):
+        pl_name = getattr(PlatNames, pl_spec)
+    else:
+        raise ValueError(f"Invalid binary spec '{pl_spec}'")
+    
+    if pl_name == ExtPlats.system:
+        assert req_ver, "Version must be given explicitly for system target."
+        
+    if req_ver:
+        assert req_ver.isnumeric()
+        req_ver = int(req_ver)
+    else:
+        req_ver = PdfiumVer.get_latest()
+    
+    return need_prepare, pl_name, req_ver, use_v8
+
+
+def parse_modspec(modspec, pl_name):
+    if modspec:
+        modnames = modspec.split(",")
+        assert set(modnames).issubset(ModulesAll)
+        assert len(modnames) in (1, 2)
+    else:
+        modnames = ModulesAll
+    
+    modnames = list(modnames)
+    if pl_name == ExtPlats.none and ModuleRaw in modnames:
+        modnames.remove(ModuleRaw)
+    
+    return modnames

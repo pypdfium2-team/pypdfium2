@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: CC-BY-4.0
+
+{% set pdfium_short = environ["PDFIUM_SHORT"] %}
+{% set pdfium_full = environ["PDFIUM_FULL"] %}
+{% set git_depth = environ["M_GIT_DEPTH"] %}
+
+package:
+  name: pypdfium2_raw
+  version: {{ pdfium_short }}
+
+source:
+  git_url: ../../..
+  git_depth: {{ git_depth }}
+
+build:
+  number: 0
+  noarch: python
+  script_env:
+    - PYPDFIUM_MODULES=raw
+    - PDFIUM_PLATFORM=prepared!system:{{ pdfium_short }}
+  script:
+    - {{ PYTHON }} conda/prepare_script.py
+    - {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
+
+requirements:
+  build:
+    - git
+    - python
+    - pip
+    - setuptools
+    - wheel !=0.38.0,!=0.38.1
+  run:
+    # Pin pdfium-binaries to an exact version to ensure bindings/binary ABI match.
+    # As long as we rebuild pypdfium2_raw continuously in sync with pdfium-binaries, this should not become a flexibility problem.
+    - python
+    - bblanchon::pdfium-binaries =={{ pdfium_full }}
+
+test:
+  requires:
+    - pip
+    - python
+  imports:
+    - pypdfium2_raw
+  source_files:
+    - conda/raw/minitest.py
+  commands:
+    - pip check
+    - python conda/raw/minitest.py
+
+about:
+  summary: Python bindings to PDFium (raw, external binary)
+  description: |
+    This package provides raw ctypes bindings to pdfium.
+    Important: DO NOT PIN to an exact version, as pypdfium2_raw itself pins pdfium-binaries to achieve ABI safety.
+  license: Apache-2.0 OR BSD-3-Clause
+  license_file:
+    - LICENSES/Apache-2.0.txt
+    - LICENSES/BSD-3-Clause.txt
+    - LICENSES/CC-BY-4.0.txt
+  dev_url: https://github.com/pypdfium2-team/pypdfium2
+  doc_url: https://pypdfium2.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - pypdfium2-team
+    - mara004

@@ -11,7 +11,6 @@ from pathlib import Path
 from copy import deepcopy
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-from pypdfium2_setup import update_pdfium
 # TODO consider dotted access?
 from pypdfium2_setup.packaging_base import *
 
@@ -23,16 +22,10 @@ def run_local(*args, **kws):
 
 
 def update_refbindings(version):
-    
-    # re-generate host bindings
-    # TODO download headers from pdfium repo and call ctypesgen directly
-    host_bindings = DataDir / Host.platform / BindingsFN
-    host_bindings.unlink(missing_ok=True)
-    update_pdfium.main([Host.platform], version=version, ctypesgen_kws=dict(guard_symbols=True))
-    assert host_bindings.exists()
-    
-    # update reference bindings
-    shutil.copyfile(host_bindings, RefBindingsFile)  # yes this overwrites
+    RefBindingsFile.unlink()
+    build_pdfium_bindings(version, guard_symbols=True)
+    shutil.copyfile(DataDir_Bindings/BindingsFN, RefBindingsFile)
+    assert RefBindingsFile.exists()
 
 
 def do_versioning(config, record, prev_helpers, new_pdfium):

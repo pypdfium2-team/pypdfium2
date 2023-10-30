@@ -15,71 +15,68 @@ from pypdfium2_setup.packaging_base import *
 
 # CONSIDER Linux/macOS: check that minimum OS version requirements are fulfilled
 # TODO add direct support for emplacing local pdfium from file
-# FIXME V8 integration is a bit polluted (flags vs. bool)
 
 
-def _repr_info(version, flags):
-    return str(version) + (":{%s}" % ','.join(flags) if flags else "")
-
-
-def get_pdfium(plat_spec, force_rebuild=False):
+def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     
-    if plat_spec == PlatNames.sourcebuild:
-        # for now, require that callers ran build_pdfium.py beforehand so they are in charge of the build config - don't trigger sourcebuild in here if platform files don't exist
-        return PlatNames.sourcebuild
+    # TODO inline binary cache logic into update_pdfium ?
     
-    req_ver = None
-    req_flags = []
-    use_v8 = False
-    if PlatSpec_VerSep in plat_spec:
-        plat_spec, req_ver = plat_spec.rsplit(PlatSpec_VerSep)
-    if plat_spec.endswith(PlatSpec_V8Sym):
-        plat_spec = plat_spec[:-len(PlatSpec_V8Sym)]
-        req_flags += ["V8", "XFA"]
-        use_v8 = True
+    system = plat_to_system(pl_name)
+    pl_dir = DataDir / pl_name
+    binary = pl_dir / LibnameForSystem[system]
+    binary_ver = pl_dir / VersionFN
+    bindings = DataDir_Bindings / BindingsFN
     
-    if not plat_spec or plat_spec.lower() == PlatTarget_Auto:
-        pl_name = Host.platform
-        if pl_name is None:
-            raise RuntimeError(f"No pre-built binaries available for {Host}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
-    elif hasattr(PlatNames, plat_spec):
-        pl_name = getattr(PlatNames, plat_spec)
+    if all(f.exists() for f in (binary, binary_ver, bindings)):
+        prev_info = read_json(binary_ver)
+        update = prev_info["build"] != req_ver or set(prev_info["flags"]) != set(req_flags)
     else:
-        raise ValueError(f"Invalid binary spec '{plat_spec}'")
+        update = True
     
-    if not req_ver or req_ver.lower() == VerTarget_Latest:
-        req_ver = PdfiumVer.get_latest()
-    else:
-        assert req_ver.isnumeric()
-        req_ver = int(req_ver)
-    
-    prev_repr = "(Unknown)"
-    if force_rebuild:
-        need_rebuild = True
-        prev_repr = "(Ignored)"
-    else:
-        pl_dir = DataDir / pl_name
-        ver_file = pl_dir / VersionFN
-        if ver_file.exists() and all(fp.exists() for fp in get_platfiles(pl_name)):
-            prev_info = read_json(ver_file)
-            need_rebuild = prev_info["build"] != req_ver or set(prev_info["flags"]) != set(req_flags)
-            prev_repr = _repr_info(prev_info["build"], prev_info["flags"])
-        else:
-            need_rebuild = True
-    
-    req_repr = _repr_info(req_ver, req_flags)
-    
-    if need_rebuild:
-        print(f"Switch from pdfium {prev_repr} to {req_repr}", file=sys.stderr)
+    if update:  # TODO better repr
+        print(f"Updating to {req_ver} {req_flags}", file=sys.stderr)
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
-        print(f"Use existing cache for pdfium {req_repr}", file=sys.stderr)
+        print("Using cache")
     
-    return pl_name
+    # build_pdfium_bindings() has its own cache logic, so always call to ensure bindings match
+    compile_lds = [DataDir/Host.platform] if pl_name == Host.platform else []
+    build_pdfium_bindings(req_ver, flags=req_flags, compile_lds=compile_lds)
+
+
+def prepare_setup(pl_name, pdfium_ver, use_v8):
+    
+    clean_platfiles()
+    flags = ["V8", "XFA"] if use_v8 else []
+    
+    if pl_name == ExtPlats.system:
+        # TODO add option for caller to pass in custom run_lds and headers_dir
+        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=[])
+        shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
+        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
+        return [BindingsFN, VersionFN]
+    else:
+        platfiles = []
+        pl_dir = DataDir/pl_name
+        system = plat_to_system(pl_name)
+        
+        if pl_name == ExtPlats.sourcebuild:
+            # - sourcebuild bindings are captured once and can't really be re-generated, hence keep them in the platform directory so they are not overwritten
+            platfiles += [pl_dir/BindingsFN]
+        else:
+            platfiles += [DataDir_Bindings/BindingsFN]
+            _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8)
+        
+        platfiles += [pl_dir/LibnameForSystem[system], pl_dir/VersionFN]
+        for fp in platfiles:
+            shutil.copyfile(fp, ModuleDir_Raw/fp.name)
+        
+        return [fp.name for fp in platfiles]
 
 
 def main():
     
+    # TODO add option to force rebuild
     parser = argparse.ArgumentParser(
         description = "Manage in-tree artifacts from an editable install.",
     )
@@ -89,20 +86,16 @@ def main():
         nargs = "?",
         help = f"The platform specifier. Same format as of ${PlatSpec_EnvVar} on setup. 'none' removes existing artifacts.",
     )
-    parser.add_argument(
-        "--force-rebuild", "-f",
-        action = "store_true",
-        help = "If given, always rebuild platform files even if a matching cache exists already.",
-    )
     args = parser.parse_args()
     
-    if args.plat_spec == PlatTarget_None:
+    if args.plat_spec == ExtPlats.none:
         print("Remove existing in-tree platform files, if any.", file=sys.stderr)
         clean_platfiles()
         return
     
-    pl_name = get_pdfium(args.plat_spec, args.force_rebuild)
-    emplace_platfiles(pl_name)
+    need_prepare, *pl_info = parse_pl_spec(args.plat_spec)
+    assert need_prepare, "Can't use prepared target with emplace, would be no-op."
+    prepare_setup(*pl_info)
 
 
 if __name__ == "__main__":

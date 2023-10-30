@@ -15,9 +15,6 @@ ProjectDir  = TestDir.parent
 ResourceDir = TestDir / "resources"
 OutputDir   = TestDir / "output"
 
-sys.path.insert(0, str(ProjectDir / "setupsrc"))
-
-
 class TestFiles:
     render        = ResourceDir / "render.pdf"
     encrypted     = ResourceDir / "encrypted.pdf"
