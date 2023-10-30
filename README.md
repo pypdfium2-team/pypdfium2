@@ -7,7 +7,7 @@
 
 [pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is an [ABI-level](#drawbacks-of-abi-level-bindings) Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
 
-It is built with [ctypesgen](https://github.com/ctypesgen/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
+It is built with [ctypesgen](https://github.com/pypdfium2-team/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
 The custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms is supported with pre-built packages.
 
 pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ctypes API remains accessible as well.
@@ -24,8 +24,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 * From source
   
   * Dependencies:
-    - System: git, C pre-processor (gcc/clang)
-    - Python: ctypesgen, wheel, setuptools. Usually installed automatically.
+    - System: git, C pre-processor (gcc/clang, has to be in `$PATH`)
+    - Python: ctypesgen (pypdfium2-team fork), wheel, setuptools. Usually installed automatically.
   
   * With pre-built binary
     ```bash
@@ -235,11 +235,11 @@ permission_flags = pdfium_c.FPDF_GetDocPermission(pdf.raw)  # explicit
 permission_flags = pdfium_c.FPDF_GetDocPermission(pdf)      # implicit
 ```
 
-For PDFium documentation, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^pdfium_docs]
+For PDFium docs, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^pdfium_docs]
 A large variety of examples on how to interface with the raw API using [`ctypes`](https://docs.python.org/3/library/ctypes.html) is already provided with [support model source code](src/pypdfium2/_helpers).
 Nonetheless, the following guide may be helpful to get started with the raw API, especially for developers who are not familiar with `ctypes` yet.
 
-[^pdfium_docs]: Unfortunately, no recent HTML-rendered documentation is available for PDFium at the moment.
+[^pdfium_docs]: Unfortunately, no recent HTML-rendered docs are available for PDFium at the moment.
 
 <!-- TODO write something about weakref.finalize(); add example on creating a C page array -->
 
@@ -276,7 +276,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   version = c_version.value if ok else None
   ```
 
-* If an array is required as output parameter, you can initialise one like this (conceived in general terms):
+* If an array is required as output parameter, you can initialise one like this (in general terms):
   ```python
   # long form
   array_type = (c_type * array_length)
@@ -370,8 +370,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   n_bytes = py_buffer.readinto(buffer_ptr.contents)  # returns the number of bytes read
   ```
 
-* If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help you because `ctypes` does not have original object return (OOR),
-  i. e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^ctypes_no_oor] That's why you'll want to use `ctypes.addressof()` to get the memory addresses of the underlying C object.
+* If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help because `ctypes` does not have original object return (OOR), i. e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^ctypes_no_oor]
+  That's why you'll want to use `ctypes.addressof()` to get the memory addresses of the underlying C object.
   For instance, this is used to avoid infinite loops on circular bookmark references when iterating through the document outline:
   ```python
   # (Assuming `pdf` is an FPDF_DOCUMENT)
@@ -432,9 +432,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
   
-  If resources need to remain valid after the time of a function call, PDFium documentation usually indicates this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segmentation fault).
+  If resources need to remain valid after the time of a function call, PDFium docs usually indicate this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segfault).
   
-  For instance, the documentation on `FPDF_LoadCustomDocument()` states that
+  For instance, the docs on `FPDF_LoadCustomDocument()` state that
   > The application must keep the file resources |pFileAccess| points to valid until the returned FPDF_DOCUMENT is closed. |pFileAccess| itself does not need to outlive the FPDF_DOCUMENT.
   
   This means that the callback function and the Python buffer need to be kept alive as long as the `FPDF_DOCUMENT` is used.
@@ -468,7 +468,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   data_holder.close()
   ```
 
-* Finally, let's finish this guide with an example on how to render the first page of a document to a `PIL` image in `RGBA` color format.
+* Finally, let's finish with an example how to render the first page of a document to a `PIL` image in `RGBA` color format.
   ```python
   import math
   import ctypes
@@ -573,15 +573,13 @@ Roadmap:
 
 pypdfium2 built with mainstream ctypesgen cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that [broke](https://github.com/ctypesgen/ctypesgen/issues/77) ctypesgen-created string handling code.
 
-However, we are currently [making efforts](https://github.com/ctypesgen/ctypesgen/pull/162) to remove ctypesgen's wonky string code.
-Since version 4, pypdfium2 releases will be built with a patched variant of ctypesgen.
+Since version 4, pypdfium2 is built with a patched fork of ctypesgen that removes ctypesgen's problematic string code.
 
 #### Risk of unknown object lifetime violations
 
 As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.
 
-<!-- TODO rewrite paragraph -->
-The problem is that the Python interpreter may garbage collect objects with reference count zero at any time. Thus, it can happen that an unreferenced but still required object by chance stays around long enough before it is garbage collected. Such dangling objects are bound to result in non-deterministic memory corruption rsp. a segmentation fault.
+The problem is that the Python interpreter may garbage collect objects with reference count zero at any time, so an unreferenced but still required object may either by chance stay around long enough or disapper too soon, resulting in non-deterministic memory issues that are hard to debug.
 If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that mistakes regarding object lifetime remain unnoticed for a long time.
 
 Although we intend to develop helpers carefully, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
@@ -612,22 +610,23 @@ editor.wordWrap = bounded
 editor.wordWrapColumn = 100
 ```
 
+### Docs
 
-### Documentation
-
-pypdfium2 provides API documentation using [Sphinx](https://github.com/sphinx-doc/sphinx/). It can be rendered to various formats, including HTML:
+pypdfium2 provides API documentation using [Sphinx](https://github.com/sphinx-doc/sphinx/), which can be rendered to various formats, including HTML:
 ```bash
 sphinx-build -b html ./docs/source ./docs/build/html/
+# short alias
+./run build
 ```
 
-Built documentation is primarily hosted on [`readthedocs.org`](https://readthedocs.org/projects/pypdfium2/).
+Built docs are primarily hosted on [`readthedocs.org`](https://readthedocs.org/projects/pypdfium2/).
 It may be configured using a [`.readthedocs.yaml`](.readthedocs.yaml) file (see [instructions](https://docs.readthedocs.io/en/stable/config-file/v2.html)), and the administration page on the web interface.
 RTD supports hosting multiple versions, so we currently have one linked to the `main` branch and another to `stable`.
 New builds are automatically triggered by a webhook whenever you push to a linked branch.
 
-Additionally, one documentation build can also be hosted on [GitHub Pages](https://pypdfium2-team.github.io/pypdfium2/index.html).
+Additionally, one doc build can also be hosted on [GitHub Pages](https://pypdfium2-team.github.io/pypdfium2/index.html).
 It is implemented with a CI workflow, which is supposed to be triggered automatically on release.
-This provides us with full control over the build environment and the used commands, whereas RTD is kind of limited in this regard.
+This provides us with full control over the build env and the used commands, whereas RTD may be less liberal in this regard.
 
 
 ### Testing
@@ -641,7 +640,7 @@ Note that ...
 * you can pass `-sv` to get more detailed output.
 * `$DEBUG_AUTOCLOSE=1` may be set to get debugging information on automatic object finalization.
 
-To get code coverage statistics, you can run
+To get code coverage statistics, you may call
 ```bash
 ./run coverage
 ```
@@ -650,7 +649,7 @@ Sometimes, it can also be helpful to test code on many PDFs.[^testing_corpora]
 In this case, the command-line interface and `find` come in handy:
 ```bash
 # Example A: Analyse PDF images (in the current working directory)
-find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 pageobjects \"{}\" --types image" \;
+find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 pageobjects \"{}\" --filter image" \;
 # Example B: Parse PDF table of contents
 find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 ```
@@ -659,8 +658,7 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 
 ### Release workflow
 
-The release process is fully automated using Python scripts and a CI setup for GitHub Actions.
-A new release is triggered every Tuesday, one day after `pdfium-binaries`.
+The release process is fully automated using Python scripts and scheduled release workflows.
 You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
 
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
