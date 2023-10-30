@@ -151,7 +151,7 @@ class PdfiumVer:
         if type in (tuple, list):
             return v_parts
         elif type is str:
-            return v_parts.join(".")
+            return ".".join([str(v) for v in v_parts])
         elif type is dict:
             return dict(zip(PdfiumVer.V_KEYS, v_parts))
         else:
