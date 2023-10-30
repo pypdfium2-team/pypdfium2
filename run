@@ -56,6 +56,9 @@ clean)
 packaging_pypi)
     packaging_pypi;;
 
+update)
+    python3 setupsrc/pypdfium2_setup/update_pdfium.py $args;;
+
 craft)
     python3 setupsrc/pypdfium2_setup/craft_packages.py $args;;
 
