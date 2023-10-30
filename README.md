@@ -70,7 +70,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
   **Beware:** There have been some third-party attempts to conda package pypdfium2/pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda/main` or `conda-forge`, are unofficial!**
 
-* Unoficial packages
+* Unofficial packages
   
   The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
   
