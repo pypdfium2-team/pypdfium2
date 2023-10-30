@@ -37,6 +37,7 @@ requirements:
     - python
     - pypdfium2_team::pypdfium2_raw <={{ pdfium_max }}
 
+# FIXME this will embed the whole test suite in the package - not sure if that's a good idea
 test:
   requires:
     - pip

@@ -42,22 +42,18 @@ requirements:
     - python
 
 # pass --no-test if cross-building for non-host target
+# NOTE not embedding the whole helpers test suite to avoid blowing upload size
 test:
   requires:
     - pip
-    - pytest
-    - pillow
-    - numpy
+    - python
   imports:
     - pypdfium2
     - pypdfium2_raw  # bundled
-  source_files:
-    - tests/
-    - tests_old/
   commands:
     - pip check
     - pypdfium2 --help
-    - pytest tests/ tests_old/
+    - python conda/raw/minitest.py
 
 about:
   summary: Python bindings to PDFium (bundled helpers/binary/bindings)
