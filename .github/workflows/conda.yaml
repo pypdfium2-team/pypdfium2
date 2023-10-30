@@ -1,0 +1,149 @@
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Conda packaging
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        type: choice
+        default: raw
+        options:
+          - raw
+          - helpers
+      test:
+        default: true
+        type: boolean
+      publish:
+        default: false
+        type: boolean
+      py_version:
+        default: '3.11'
+        type: string
+
+# This is required for setup-miniconda / conda init
+# see https://github.com/conda-incubator/setup-miniconda#important
+defaults:
+  run:
+    shell: bash -el {0}
+
+jobs:
+  
+  build:
+    
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          fetch-depth: 0
+      
+      - name: Miniconda setup
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ inputs.py_version }}
+          channels: bblanchon,pypdfium2-team
+          channel-priority: strict
+      
+      - name: Prepare
+        run: |
+          python -VV
+          conda install -y conda-build conda-verify
+          git config --global user.email "geisserml@gmail.com"
+          git config --global user.name "geisserml"
+          python -m pip install -U -r req/setup.txt
+      
+      - name: Build package
+        run: ./run craft conda_${{ inputs.package }}
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: conda_package
+          path: conda/${{ inputs.package }}/out/
+  
+  test:
+    
+    if: ${{ inputs.test }}
+    needs: build
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        py: ['3.8', '3.9', '3.10', '3.11']
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+      
+      - name: Miniconda setup
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.py }}
+          channels: bblanchon,pypdfium2-team
+          channel-priority: strict
+      
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: conda_package
+          path: conda_dist/
+      
+      - name: Prepare
+        run: |
+          python -VV
+          ls -l conda_dist/
+          conda install -y pypdfium2_${{ inputs.package }} -c bblanchon -c pypdfium2-team -c ./conda_dist/
+      
+      - name: Test raw package
+        if: inputs.package == 'raw'
+        run: python conda/raw/minitest.py
+      
+      - name: Test helpers package
+        if: inputs.package == 'helpers'
+        run: |
+          conda install -y pytest pillow numpy
+          ./run test
+  
+  publish:
+    
+    if: ${{ inputs.publish }}
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    
+    steps:
+      
+      - name: Miniconda setup
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.py }}
+          channels: bblanchon,pypdfium2-team
+          channel-priority: strict
+      
+      - name: Install deps
+        run: conda install -y anaconda-client
+      
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: conda_package
+          path: conda_dist/
+      
+      # anaconda upload $ARTIFACT_PATH
+      - name: Upload to Anaconda
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${{ inputs.package }}-*.tar.bz2
+          file $ARTIFACT_PATH

@@ -3,15 +3,13 @@
 
 {% set pdfium_max = environ["PDFIUM_MAX"] %}
 {% set helpers_ver = environ["M_HELPERS_VER"] %}
-{% set git_depth = environ["M_GIT_DEPTH"] %}
 
 package:
-  name: pypdfium2
+  name: pypdfium2_helpers
   version: {{ helpers_ver }}
 
 source:
   git_url: ../../..
-  git_depth: {{ git_depth }}
 
 build:
   number: 0

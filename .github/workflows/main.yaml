@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Build Packages
+name: Main packaging
 on:
   workflow_dispatch:
     inputs:
@@ -12,6 +12,9 @@ on:
         default: true
         type: boolean
       publish:
+        default: false
+        type: boolean
+      conda:
         default: false
         type: boolean
       py_version:
@@ -232,10 +235,27 @@ jobs:
         with:
           workflow: gh_pages.yaml  # takes no inputs
   
+  conda_trigger:
+    needs: [build, test, publish]
+    if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
+    runs-on: ${{ inputs.runner }}
+    
+    steps:
+      - name: Trigger conda pypdfium2_helpers build
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: conda.yaml
+          inputs: |
+            {
+              "package": "helpers",
+              "test": "true",
+              "publish": "${{ inputs.publish }}",
+              "py_version": "3.11"
+            }
   
   cleanup:
-    needs: [build, test, publish]
-    if: always()
+    needs: [build, test, publish, conda_trigger]
+    if: ${{ !cancelled() }}
     runs-on: ${{ inputs.runner }}
     
     steps:

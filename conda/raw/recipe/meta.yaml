@@ -3,7 +3,6 @@
 
 {% set pdfium_short = environ["PDFIUM_SHORT"] %}
 {% set pdfium_full = environ["PDFIUM_FULL"] %}
-{% set git_depth = environ["M_GIT_DEPTH"] %}
 
 package:
   name: pypdfium2_raw
@@ -11,7 +10,6 @@ package:
 
 source:
   git_url: ../../..
-  git_depth: {{ git_depth }}
 
 build:
   number: 0

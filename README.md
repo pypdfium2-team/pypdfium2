@@ -15,11 +15,42 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 ## Installation
 
+<!-- TODO use linkable sub-sections? -->
+
 * From PyPI (recommended)
   ```bash
   python3 -m pip install -U pypdfium2
   ```
   This will use a pre-built wheel package, the easiest way of installing pypdfium2.
+
+
+* From Conda
+  
+  **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda/main` or `conda-forge`, are unofficial!** See below for more info.
+  
+  To install the official package:
+  ```bash
+  conda config --add channels bblanchon
+  conda config --add channels pypdfium2-team
+  conda config --set channel_priority strict
+  conda install pypdfium2-team::pypdfium2_helpers -c bblanchon -c pypdfium2-team
+  ```
+  You may add `--env` to the `conda config` calls for environment-local config.
+  
+  To check if the channels are correct:
+  ```bash
+  conda list --show-channel-urls "pypdfium2|pdfium-binaries"
+  conda config --show-sources
+  ```
+  
+  To depend on pypdfium2 in a recipe:
+  ```yaml
+  requirements:
+    run:
+      - pypdfium2-team::pypdfium2_helpers
+  ```
+  You'll want to have downstream callers add the channels as shown above.
+
 
 * From source
   
@@ -63,12 +94,6 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   [^pdfium_buildsystem]: This means pdfium may not compile on arbitrary hosts. The script is limited to build hosts supported by Google's toolchain. Ideally, we'd need an alternative build system that runs with system packages instead.
 
-* Conda
-  
-  pypdfium2 will soon provide official conda packages in a custom channel.
-  The main packaging code is merged, only CI integration / docs are not done yet.
-
-  **Beware:** There have been some third-party attempts to conda package pypdfium2/pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda/main` or `conda-forge`, are unofficial!**
 
 * Unofficial packages
   
