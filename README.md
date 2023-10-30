@@ -615,8 +615,7 @@ editor.wordWrapColumn = 100
 pypdfium2 provides API documentation using [Sphinx](https://github.com/sphinx-doc/sphinx/), which can be rendered to various formats, including HTML:
 ```bash
 sphinx-build -b html ./docs/source ./docs/build/html/
-# short alias
-./run build
+./run build  # short alias
 ```
 
 Built docs are primarily hosted on [`readthedocs.org`](https://readthedocs.org/projects/pypdfium2/).
