@@ -114,9 +114,11 @@ LibnameForSystem = {
 BinaryPlatforms = list(ReleaseNames.keys())
 BinarySystems   = list(LibnameForSystem.keys())
 
+
 class PdfiumVer:
     
     V_KEYS = ("major", "minor", "build", "patch")
+    _refs_cache = {"lines": None, "dict": {}, "cursor": None}
     
     @staticmethod
     @functools.lru_cache(maxsize=1)
@@ -125,29 +127,27 @@ class PdfiumVer:
         tag = git_ls.split("\t")[-1]
         return int( tag.split("/")[-1] )
     
-    @staticmethod
-    @functools.lru_cache(maxsize=1)
-    def _get_version_conv():
-        
-        ChromiumURL = "https://chromium.googlesource.com/chromium/src"
-        refs_txt = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True)
-        
-        # FIXME parses too much - we'd only need to read until we find a given v_short and then deepen on demand on further calls
-        to_full = {}
-        for ref in refs_txt.split("\n"):
-            ref = ref.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
-            major, minor, build, patch = [int(v) for v in ref.split(".")]
-            to_full[build] = (major, minor, build, patch)
-        return to_full
-    
-    @staticmethod
-    def to_full(v_short, type=dict):
+    @classmethod
+    def to_full(cls, v_short, type=dict):
         
         v_short = int(v_short)
-        ver_dict = PdfiumVer._get_version_conv()
-        v_parts = ver_dict[v_short]
-        assert v_parts[2] == v_short
+        rc = cls._refs_cache
         
+        if rc["lines"] is None:
+            ChromiumURL = "https://chromium.googlesource.com/chromium/src"
+            rc["lines"] = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
+        
+        if rc["cursor"] is None or rc["cursor"] > v_short:
+            for i, line in enumerate(rc["lines"]):
+                ref = line.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
+                major, minor, build, patch = [int(v) for v in ref.split(".")]
+                rc["dict"][build] = (major, minor, build, patch)
+                if build == v_short:
+                    rc["cursor"] = build
+                    rc["lines"] = rc["lines"][i+1:]
+                    break
+        
+        v_parts = rc["dict"][v_short]
         if type in (tuple, list):
             return v_parts
         elif type is str:
