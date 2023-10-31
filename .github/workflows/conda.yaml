@@ -113,7 +113,7 @@ jobs:
         if: inputs.package == 'helpers'
         run: |
           conda install -y pytest pillow numpy
-          ./run test
+          pytest tests/ tests_old/
   
   publish:
     
