@@ -35,22 +35,14 @@ requirements:
     - python
     - pypdfium2-team::pypdfium2_raw <={{ pdfium_max }}
 
-# FIXME this will embed the whole test suite in the package - not sure if that's a good idea
 test:
   requires:
     - pip
-    - pytest
-    - pillow
-    - numpy
   imports:
     - pypdfium2
-  source_files:
-    - tests/
-    - tests_old/
   commands:
     - pip check
     - pypdfium2 --help
-    - pytest tests/ tests_old/
 
 about:
   summary: Python bindings to PDFium (helpers, external bindings)
