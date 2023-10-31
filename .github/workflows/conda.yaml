@@ -140,10 +140,10 @@ jobs:
           name: conda_package
           path: conda_dist/
       
-      # anaconda upload $ARTIFACT_PATH
       - name: Upload to Anaconda
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
           ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${{ inputs.package }}-*.tar.bz2
           file $ARTIFACT_PATH
+          anaconda upload $ARTIFACT_PATH
