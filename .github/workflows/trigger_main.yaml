@@ -3,7 +3,7 @@
 
 # Separate trigger workflow because we can't configure inputs for scheduled workflow runs (and don't want publish enabled by default in the main workflow)
 
-name: Trigger Release
+name: Trigger main release
 on:
   # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
@@ -13,17 +13,13 @@ on:
     # - cron: '0 4 * * 2'   # old weekly schedule
   workflow_dispatch:
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   
-  release:
+  trigger:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Trigger Release
+      - name: Trigger
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: build_packages.yaml
@@ -32,6 +28,7 @@ jobs:
               "pre_test": "false",
               "test": "true",
               "publish": "true",
+              "conda": "true",
               "py_version": "3.10",
               "runner": "ubuntu-latest"
             }

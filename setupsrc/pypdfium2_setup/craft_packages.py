@@ -20,6 +20,7 @@ P_CONDA_BUNDLE = "conda_bundle"
 P_CONDA_RAW = "conda_raw"
 P_CONDA_HELPERS = "conda_helpers"
 
+CondaChannels = ("-c", "bblanchon", "-c", "pypdfium2-team")
 CondaDir = ProjectDir / "conda"
 
 
@@ -109,7 +110,7 @@ class ArtifactStash:
 
 def run_conda_build(recipe_dir, out_dir, args=[]):
     with TmpCommitCtx():
-        run_cmd(["conda", "build", recipe_dir, "--output-folder", out_dir, *args], cwd=ProjectDir, env=os.environ)
+        run_cmd(["conda", "build", recipe_dir, "--output-folder", out_dir, *args, *CondaChannels], cwd=ProjectDir, env=os.environ)
 
 
 CondaNames = {
@@ -174,6 +175,7 @@ def main_conda_raw(args):
 
 
 def main_conda_helpers(args):
+    
     # Set the current pdfium version as upper boundary, for inherent API safety.
     # Unfortunately, pdfium does not do semantic versioning, so it is hard to achieve safe upward flexibility.
     # See also https://groups.google.com/g/pdfium/c/kCmgW_gTFYE/m/BPoJgbwOCQAJ
@@ -185,6 +187,9 @@ def main_conda_helpers(args):
     # Assuming a month has 30 days, this would result in
     #   2 * 30 * (6-2) = 240
     os.environ["PDFIUM_MAX"] = str(args.pdfium_ver)
+    
+    # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
+    # args=["-c", CondaDir/"raw"/"out"]
     run_conda_build(CondaDir/"helpers", CondaDir/"helpers"/"out")
 
 
@@ -245,7 +250,6 @@ def main():
             main_pypi(args)
         elif args.parser.startswith("conda"):
             helpers_info = parse_git_tag()
-            os.environ["M_GIT_DEPTH"] = str(helpers_info["n_commits"] + 2)
             os.environ["M_HELPERS_VER"] = merge_tag(helpers_info, "py")
             if args.parser == P_CONDA_BUNDLE:
                 main_conda_bundle(args)

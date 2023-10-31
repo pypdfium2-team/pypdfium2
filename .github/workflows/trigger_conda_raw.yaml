@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Trigger conda_raw release
+on:
+  schedule:
+    # 1 day after pdfium-binaries
+    - cron: '0 4 * * 2'
+  workflow_dispatch:
+
+jobs:
+  
+  trigger:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: conda.yaml
+          inputs: |
+            {
+              "package": "raw",
+              "test": "true",
+              "publish": "true",
+              "py_version": "3.11"
+            }
