@@ -9,6 +9,8 @@
 
 ## 4.23.0 (2023-10-31)
 
+*Note: (Test)PyPI Upload of this release failed with an error in trusted publishing. We are investigating.*
+
 - Updated PDFium from `6070` to `6097`.
 - Fixed faulty version repr (avoid trailing `+` if desc is empty).
 - Merged conda packaging code, including CI and Readme integration.
