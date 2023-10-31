@@ -4,4 +4,3 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- Fixed (Test)PyPI upload.

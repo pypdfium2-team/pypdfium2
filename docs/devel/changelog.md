@@ -7,6 +7,12 @@
 # Changelog
 
 
+## 4.23.1 (2023-10-31)
+
+- No PDFium update.
+- Fixed (Test)PyPI upload.
+
+
 ## 4.23.0 (2023-10-31)
 
 *Note: (Test)PyPI upload failed for this release due to an oversight.*
