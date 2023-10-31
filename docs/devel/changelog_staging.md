@@ -5,7 +5,7 @@
 
 # Changelog for next release
 - Fixed faulty version repr (avoid trailing `+` if desc is empty).
-- Merged conda packaging code. The packages build, but there is no CI integration yet.
+- Merged conda packaging code, including CI and Readme integration.
 - Updated setup code, mainly to support conda.
   * Independent bindings cache. Download headers from pdfium. Extract archive members explicitly.
   * Cleaned up version integration of sourcebuild.
