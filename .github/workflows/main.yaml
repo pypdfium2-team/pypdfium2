@@ -205,15 +205,6 @@ jobs:
           git push --force
           git checkout main
       
-      - name: Publish to GitHub
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: 'dist/*'
-          bodyFile: 'RELEASE.md'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.build.outputs.new_version }}
-          prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
-      
       # Upload to TestPyPI / PyPI via "trusted publishing".
       # https://docs.pypi.org/trusted-publishers/adding-a-publisher/
       # https://docs.pypi.org/trusted-publishers/using-a-publisher/
@@ -229,6 +220,15 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/  # the default
+      
+      - name: Publish to GitHub
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'dist/*'
+          bodyFile: 'RELEASE.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.build.outputs.new_version }}
+          prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
       
       - name: Trigger GH Pages rebuild
         uses: benc-uk/workflow-dispatch@v1
