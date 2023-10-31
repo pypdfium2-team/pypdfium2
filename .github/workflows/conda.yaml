@@ -121,6 +121,8 @@ jobs:
     needs: [build, test]
     runs-on: ubuntu-latest
     
+    # TODO upload as GH release as well
+    
     steps:
       
       - name: Miniconda setup
