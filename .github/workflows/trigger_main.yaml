@@ -22,7 +22,7 @@ jobs:
       - name: Trigger
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: build_packages.yaml
+          workflow: main.yaml
           inputs: |
             {
               "pre_test": "false",
