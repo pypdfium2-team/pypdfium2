@@ -17,21 +17,18 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 <!-- TODO use linkable sub-sections? -->
 
-* From PyPI (recommended)
+* From PyPI (recommended, official)
   ```bash
   python3 -m pip install -U pypdfium2
   ```
   This will use a pre-built wheel package, the easiest way of installing pypdfium2.
 
 
-* From Conda
-  
-  **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda/main` or `conda-forge`, are unofficial!** See below for more info.
-  
-  To install the official package:
+* From Conda (official)
   ```bash
   conda install pypdfium2_helpers -c bblanchon -c pypdfium2-team
   ```
+  **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda/main` or `conda-forge`, are unofficial!** See below for more info.
   
   To depend on pypdfium2 in a recipe:
   ```yaml
