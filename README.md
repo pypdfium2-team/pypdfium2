@@ -30,17 +30,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   To install the official package:
   ```bash
-  conda config --add channels bblanchon
-  conda config --add channels pypdfium2-team
-  conda config --set channel_priority strict
-  conda install pypdfium2-team::pypdfium2_helpers -c bblanchon -c pypdfium2-team
-  ```
-  You may add `--env` to the `conda config` calls for environment-local config.
-  
-  To check if the channels are correct:
-  ```bash
-  conda list --show-channel-urls "pypdfium2|pdfium-binaries"
-  conda config --show-sources
+  conda install pypdfium2_helpers -c bblanchon -c pypdfium2-team
   ```
   
   To depend on pypdfium2 in a recipe:
@@ -49,7 +39,13 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     run:
       - pypdfium2-team::pypdfium2_helpers
   ```
-  You'll want to have downstream callers add the channels as shown above.
+  You'll want to have downstream callers allow the custom channels on install as shown above, otherwise conda will not be able to satisfy the dependencies.
+  
+  To check if the sources are correct:
+  ```bash
+  conda list --show-channel-urls "pypdfium2|pdfium-binaries"
+  ```
+  It should show `pypdfium2-team` and `bblanchon` in the channels column.
 
 
 * From source
