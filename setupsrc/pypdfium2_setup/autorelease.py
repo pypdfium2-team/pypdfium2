@@ -96,29 +96,26 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, beta):
     Changelog.write_text(content)
 
 
+# - git add: places don't need to have been changed, git silently skips this
+# - tag: The actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
 def register_changes(new_tag):
-    
     run_local(["git", "checkout", "-B", "autorelease_tmp"])
-    
-    # NOTE These places do not need to have been changed, `git add` silently skips that
     run_local(["git", "add", *PlacesToRegister])
     run_local(["git", "commit", "-m", "[autorelease] update changelog and version file"])
-    
-    # NOTE The actually pushed tag will be a different one, but it's nevertheless convenient to have this here because of changelog and describe
     run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
 
 
-# FIXME takes many parameters...
+# - takes many parameters
+# - add GH compare link?
+# - Consider skipping URLs for pypdfium2 (GH links commits automatically)
+# - Log fails if args.register is False - skip, or use HEAD and omit ver_b?
 def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
     log = ""
     log += "\n<details>\n"
     log += f"  <summary>{name} commit log</summary>\n\n"
-    # TODO add GH compare link?
     log += f"Commits between [`{ver_a}`]({url+prefix_ver+ver_a}) and [`{ver_b}`]({url+prefix_ver+ver_b})"
     log += " (latest commit first):\n\n"
     log += run_cmd(
-        # TODO Consider skipping URLs for pypdfium2 (GH links commits automatically)
-        # FIXME fails if args.register is False - skip, or use HEAD and omit ver_b entirely?
         ["git", "log", f"{prefix_tag+ver_a}..{prefix_tag+ver_b}", f"--pretty=format:* [`%h`]({url+prefix_commit}%H) %s"],
         capture=True, check=True, cwd=cwd,
     )
@@ -126,6 +123,8 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     return log
 
 
+# - is there a faster way to get pdfium's commit log?
+# - should we specifically show changes to public/ ?
 def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates):
     
     relnotes = ""
@@ -143,9 +142,6 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
     relnotes += "\n"
     
     if c_updates:
-        
-        # FIXME is there a faster way to get pdfium's commit log?
-        # CONSIDER specifically show changes to public/ ?
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
@@ -155,7 +151,7 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
             )
     
-    (ProjectDir / "RELEASE.md").write_text(relnotes)
+    (ProjectDir/"RELEASE.md").write_text(relnotes)
 
 
 def get_changelog_staging(beta):

@@ -61,7 +61,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
         system = plat_to_system(pl_name)
         
         if pl_name == ExtPlats.sourcebuild:
-            # - sourcebuild bindings are captured once and can't really be re-generated, hence keep them in the platform directory so they are not overwritten
+            # sourcebuild bindings are captured once and can't really be re-generated, hence keep them in the platform directory so they are not overwritten
             platfiles += [pl_dir/BindingsFN]
         else:
             platfiles += [DataDir_Bindings/BindingsFN]
