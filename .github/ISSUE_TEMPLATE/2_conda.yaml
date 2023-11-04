@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: CC-BY-4.0
+
+name: Conda package
+description: Use this if you installed pypdfium2 from an **official conda package**
+
+body:
+  
+  - type: textarea
+    attributes:
+      label: Description
+      description: Please explain your problem
+    validations:
+      required: true
+  
+  - type: textarea
+    attributes:
+      label: Install Info
+      render: shell
+      description: |
+        To provide information about your install, please run the following commands and paste the output below.
+        
+        **The commands have to be run in the conda env in question.**
+        
+        ```shell
+        python -m pypdfium2 -v
+        python -VV
+        python -c "import platform as p; print(p.platform())"
+        python -m pip show pypdfium2
+        conda -V
+        conda list --show-channel-urls "pypdfium2|pdfium-binaries"
+        conda config --show-sources
+        ```
+    validations:
+      required: true
+  
