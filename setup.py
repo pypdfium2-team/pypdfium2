@@ -91,6 +91,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
     )
     
     if modnames == [ModuleHelpers]:
+        kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
         kwargs["install_requires"] += ["pypdfium2_raw"]
     elif modnames == [ModuleRaw]:

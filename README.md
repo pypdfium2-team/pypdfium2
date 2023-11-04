@@ -28,7 +28,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   ```bash
   conda install pypdfium2_helpers -c bblanchon -c pypdfium2-team
   ```
-  **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda/main` or `conda-forge`, are unofficial!** See below for more info.
+  **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are unofficial!** See below for more info.
   
   To depend on pypdfium2 in a recipe:
   ```yaml

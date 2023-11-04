@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 name: PyPA package
-description: Use this if you installed pypdfium2 from an **official PyPA package**
+description: Use this if you installed pypdfium2 via pip (or a similar PyPA format compatible tool)
 
 body:
   
@@ -18,7 +18,7 @@ body:
       label: Install Info
       render: shell
       description: |
-        To provide information about your install, please run the following commands and paste the output below
+        To provide information about your install, please run the following commands and paste the output into the field below.
         ```shell
         python -m pypdfium2 -v
         python -VV
@@ -27,4 +27,9 @@ body:
         ```
     validations:
       required: true
-  
+  - type: checkboxes
+    attributes:
+      label: Output validity
+      options:
+        - label: I confirm that I ran all commands, and pasted the whole output
+          required: true
