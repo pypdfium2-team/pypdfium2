@@ -386,7 +386,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     args = ["ctypesgen", f"--strip-build-path={headers_dir}", "--no-srcinfo", "--library", "pdfium"]
     
     if run_lds:
-        args += ["--runtime-libdirs", *run_lds]
+        args += ["--no-system-libsearch", "--runtime-libdirs", *run_lds]
     if compile_lds:
         args += ["--compile-libdirs", *compile_lds]
     else:
