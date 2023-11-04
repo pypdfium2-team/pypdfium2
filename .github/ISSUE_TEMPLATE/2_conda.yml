@@ -41,6 +41,7 @@ body:
         python -m pip show pypdfium2_raw
         python -m pip show pypdfium2_helpers
         conda list --show-channel-urls "pypdfium2|pdfium-binaries"
+        conda config --get
         conda info
         ```
     validations:
