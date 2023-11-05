@@ -681,7 +681,7 @@ The release process is fully automated using Python scripts and scheduled releas
 You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
 
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
-* `update_pdfium.py` downloads binaries and generates the bindings.
+* `update_pdfium.py` downloads binaries.
 * `craft_packages.py pypi` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
 * `autorelease.py` takes care of versioning, changelog, release note generation and VCS checkin.
 
