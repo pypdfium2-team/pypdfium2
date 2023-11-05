@@ -25,15 +25,14 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     pl_dir = DataDir / pl_name
     binary = pl_dir / LibnameForSystem[system]
     binary_ver = pl_dir / VersionFN
-    bindings = DataDir_Bindings / BindingsFN
     
-    if all(f.exists() for f in (binary, binary_ver, bindings)):
+    if all(f.exists() for f in (binary, binary_ver)):
         prev_info = read_json(binary_ver)
-        update = prev_info["build"] != req_ver or set(prev_info["flags"]) != set(req_flags)
+        update_binary = prev_info["build"] != req_ver or set(prev_info["flags"]) != set(req_flags)
     else:
-        update = True
+        update_binary = True
     
-    if update:  # TODO better repr
+    if update_binary:  # TODO better repr
         print(f"Updating to {req_ver} {req_flags}", file=sys.stderr)
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
