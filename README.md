@@ -583,7 +583,6 @@ As of early 2023, a single developer is author and rightsholder of the code base
 While using pypdfium2, you might encounter bugs or missing features.
 In this case, feel free to file an issue. If applicable, include details such as tracebacks, OS and CPU type, as well as the versions of pypdfium2 and used dependencies.
 
-Roadmap:
 * pypdfium2
   - [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues): Initial bug reports and feature requests. May need to be transferred to dependencies.
   - [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions): General questions and suggestions.
