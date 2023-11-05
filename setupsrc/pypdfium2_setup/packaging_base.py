@@ -433,9 +433,11 @@ def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **
     if bind_path.exists() and ver_path.exists():
         prev_info = read_json(ver_path)
         if prev_info == curr_info:
+            print(f"Using cached bindings", file=sys.stderr)
             return
         else:
-            print(f"{prev_info} != {curr_info}")
+            print(f"Rebuilding bindings ...", file=sys.stderr)
+            # print(f"{prev_info} != {curr_info}", file=sys.stderr)
     
     if not headers_dir.exists() or not list(headers_dir.glob("fpdf*.h")):
         print("Downloading headers ...", file=sys.stderr)

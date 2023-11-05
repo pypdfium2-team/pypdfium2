@@ -32,11 +32,12 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     else:
         update_binary = True
     
-    if update_binary:  # TODO better repr
-        print(f"Updating to {req_ver} {req_flags}", file=sys.stderr)
+    if update_binary:
+        flags_repr = ":{%s}" % ",".join(req_flags) if req_flags else ""
+        print(f"Downloading binary {req_ver}{flags_repr} ...", file=sys.stderr)
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
-        print("Using cache")
+        print("Using cached binary")
     
     # build_pdfium_bindings() has its own cache logic, so always call to ensure bindings match
     compile_lds = [DataDir/Host.platform] if pl_name == Host.platform else []
