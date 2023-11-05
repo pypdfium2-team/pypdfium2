@@ -65,6 +65,16 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     ```
     A binary is downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2.
   
+  * With explicitly provided pre-downloaded binary (e.g. unpacked `pdfium-linux-x64.tgz`, useful for sandboxed offline packaging in Linux distributions):
+    ```bash
+    # Substitute `$PDFIUM_VER` with the system pdfium's numeric build version, e.g. `1234`.
+    # Substitute `linux_x64` with the corresponding platform name.
+    PDFIUM_PLATFORM="linux_x64:$PDFIUM_VER" \
+      PDFIUM_BINARIES_DIR=/path/to/pdfium/version/$PDFIUM_VER/ \
+      PDFIUM_HEADERS_DIR=/path/to/pdfium/version/$PDFIUM_VER/include/ \
+      python3 -m pip install -v .
+    ```
+
   * With self-built binary
     ```bash
     python3 setupsrc/pypdfium2_setup/build_pdfium.py  # call with --help to list options

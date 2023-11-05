@@ -34,6 +34,7 @@ def _get_package(pl_name, version, robust, use_v8):
         prefix += "v8-"
     
     fn = prefix + f"{ReleaseNames[pl_name]}.tgz"
+
     fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
     print(f"'{fu}' -> '{fp}'")
@@ -65,33 +66,37 @@ def download(platforms, version, use_v8, max_workers, robust):
     return archives
 
 
-def extract(archives, version, flags):
-    
-    for pl_name, arc_path in archives.items():
-        
-        with tarfile.open(arc_path) as tar:
-            pl_dir = DataDir/pl_name
-            system = plat_to_system(pl_name)
-            libname = LibnameForSystem[system]
-            tar_libdir = "lib" if system != SysNames.windows else "bin"
-            tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
-            write_pdfium_info(pl_dir, version, origin="pdfium-binaries", flags=flags)
+def extract(pl_name, arc_path, pl_dir):
+
+    with tarfile.open(arc_path) as tar:
+        pl_dir.mkdir(parents=True, exist_ok=True)
+        system = plat_to_system(pl_name)
+        libname = LibnameForSystem[system]
+        tar_libdir = LibDirnameForSystem[system]
+        tar_extract_file(tar, "VERSION", pl_dir/"VERSION")
+        tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
 
 
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
-    
+
     if not version:
         version = PdfiumVer.get_latest()
     if not platforms:
         platforms = BinaryPlatforms
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
-    
+
     flags = ["V8", "XFA"] if use_v8 else []
-    
+
     clear_data(platforms)
+
     archives = download(platforms, version, use_v8, max_workers, robust)
-    extract(archives, version, flags)
+
+    # Extract and remember which version uses which extracted files.
+    for pl_name, arc_path in archives.items():
+        pl_dir = DataDir/pl_name
+        extract(pl_name, arc_path, pl_dir)
+        write_pdfium_info(pl_dir, version, origin="pdfium-binaries", flags=flags)
 
 
 # low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py

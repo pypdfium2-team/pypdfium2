@@ -17,7 +17,7 @@ from pypdfium2_setup.packaging_base import *
 # TODO add direct support for emplacing local pdfium from file
 
 
-def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
+def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8, headers_dir):
     
     # TODO inline binary cache logic into update_pdfium ?
     
@@ -37,21 +37,17 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
         print(f"Updating to {req_ver} {req_flags}", file=sys.stderr)
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
-        print("Using cache")
+        print(f"Used cache to update to {req_ver} {req_flags}")
     
-    # build_pdfium_bindings() has its own cache logic, so always call to ensure bindings match
-    compile_lds = [DataDir/Host.platform] if pl_name == Host.platform else []
-    build_pdfium_bindings(req_ver, flags=req_flags, compile_lds=compile_lds)
 
-
-def prepare_setup(pl_name, pdfium_ver, use_v8):
+def prepare_setup(pl_name, pdfium_ver, use_v8, headers_dir=None, pdfium_binaries_dir=None):
     
     clean_platfiles()
     flags = ["V8", "XFA"] if use_v8 else []
     
     if pl_name == ExtPlats.system:
-        # TODO add option for caller to pass in custom run_lds and headers_dir
-        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=[])
+        # TODO add option for caller to pass in custom run_lds
+        build_pdfium_bindings(pdfium_ver, headers_dir=headers_dir, flags=flags, guard_symbols=True, run_lds=[])
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
         write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
         return [BindingsFN, VersionFN]
@@ -63,11 +59,24 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
         if pl_name == ExtPlats.sourcebuild:
             # - sourcebuild bindings are captured once and can't really be re-generated, hence keep them in the platform directory so they are not overwritten
             platfiles += [pl_dir/BindingsFN]
+            lib_dir = pl_dir
         else:
+            if pdfium_binaries_dir is not None:
+                write_pdfium_info(pl_dir, pdfium_ver, origin="pdfium-binaries", flags=flags, pdfium_binaries_dir=pdfium_binaries_dir)
+                lib_dir = pdfium_binaries_dir/LibDirnameForSystem[system]
+                compile_lds = [lib_dir]
+            else:
+                _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8, headers_dir)  # this calls `write_pdfium_info()`
+                lib_dir = pl_dir
+                compile_lds = [DataDir/Host.platform] if pl_name == Host.platform else []
+            # build_pdfium_bindings() has its own cache logic, so always call to ensure bindings match
+            build_pdfium_bindings(pdfium_ver, headers_dir=headers_dir, flags=flags, compile_lds=compile_lds)
             platfiles += [DataDir_Bindings/BindingsFN]
-            _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8)
-        
-        platfiles += [pl_dir/LibnameForSystem[system], pl_dir/VersionFN]
+
+        platfiles += [
+            lib_dir/LibnameForSystem[system],
+            pl_dir/VersionFN,  # written by `write_pdfium_info()`
+        ]
         for fp in platfiles:
             shutil.copyfile(fp, ModuleDir_Raw/fp.name)
         

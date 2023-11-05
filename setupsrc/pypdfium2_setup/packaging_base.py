@@ -111,8 +111,19 @@ LibnameForSystem = {
     SysNames.windows: "pdfium.dll",
 }
 
+# In what directory of a pdfium bindist the `LibnameForSystem` is to be found.
+LibDirnameForSystem = {
+    SysNames.linux:   "lib",
+    SysNames.darwin:  "lib",
+    SysNames.windows: "bin",
+}
+
 BinaryPlatforms = list(ReleaseNames.keys())
 BinarySystems   = list(LibnameForSystem.keys())
+
+
+def parse_chromium_version(version_string):  # e.g. `120.0.6097.0`
+    return [int(v) for v in ref.split(".")]
 
 
 class PdfiumVer:
@@ -128,9 +139,9 @@ class PdfiumVer:
         return int( tag.split("/")[-1] )
     
     @classmethod
-    def to_full(cls, v_short, type=dict):
+    def to_full_from_fetched_git_refs(cls, v_short, type=dict):
         
-        v_short = int(v_short)
+        v_short = int(v_short)  # e.g. `1234`
         rc = cls._refs_cache
         
         if rc["lines"] is None:
@@ -138,9 +149,9 @@ class PdfiumVer:
             rc["lines"] = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
         
         if rc["cursor"] is None or rc["cursor"] > v_short:
-            for i, line in enumerate(rc["lines"]):
-                ref = line.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
-                major, minor, build, patch = [int(v) for v in ref.split(".")]
+            for i, line in enumerate(rc["lines"]):  # e.g. `line` being `"362ccf5f3d76797ea458f2e39083b5177aedba8b\trefs/tags/120.0.6097.0"`
+                ref = line.split("\t")[-1].rsplit("/", maxsplit=1)[-1]  # e.g. `120.0.6097.0`
+                major, minor, build, patch = parse_chromium_version(ref)
                 rc["dict"][build] = (major, minor, build, patch)
                 if build == v_short:
                     rc["cursor"] = build
@@ -163,12 +174,39 @@ def read_json(fp):
         return json.load(buf)
 
 def write_json(fp, data, indent=2):
+    fp.parent.mkdir(parents=True, exist_ok=True)
     with open(fp, "w") as buf:
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None):
-    info = dict(**PdfiumVer.to_full(build, type=dict), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
+def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None, pdfium_binaries_dir=None):
+    # No need to look up the version with a networked git call if we have a VERSION file.
+
+    if pdfium_binaries_dir is None:  # If this is not given, look for `VERSION` in `dir`.
+        pdfium_binaries_dir = dir
+
+    # A chromium `VERSION` file looks like this:
+    #     MAJOR=120
+    #     MINOR=0
+    #     BUILD=6097
+    #     PATCH=0
+    version_file = pdfium_binaries_dir / "VERSION"
+    if version_file.exists():
+        print(f"Found {str(version_file)} file, using it to parse Chromium version")
+        lines = version_file.read_text().strip().split()
+        lines_split = [l.lower().split("=") for l in lines]
+        is_version_file = (
+            len(lines_split) == len(PdfiumVer.V_KEYS) and
+            all(len(ls) == 2 and ls[0] in PdfiumVer.V_KEYS for ls in lines_split)
+        )
+        assert is_version_file, f"VERSION file {str(version_file)} has unexpected format; split lines: {lines_split}"
+        version_dict = { k: v for k, v in lines_split }
+    else:
+        print(f"Did not find {str(version_file)} file, fetching Chromium version for release {build} via git")
+        version_dict = PdfiumVer.to_full_from_fetched_git_refs(build, type=dict)
+
+    info = dict(**version_dict, n_commits=n_commits, hash=hash, origin=origin, flags=flags)
+
     write_json(dir/VersionFN, info)
     return info
 
@@ -381,6 +419,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
     
+    target_dir.mkdir(parents=True, exist_ok=True)
     bindings = target_dir / BindingsFN
     
     args = ["ctypesgen", f"--strip-build-path={headers_dir}", "--no-srcinfo", "--library", "pdfium"]
@@ -433,7 +472,10 @@ def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **
         else:
             print(f"{prev_info} != {curr_info}")
     
-    if not headers_dir:
+    if headers_dir is not None:
+        print(f"Using given headers_dir{str(headers_dir)}")
+    else:
+        print(f"Fetching headers for version {version}")
         headers_dir = DataDir_Bindings / "headers"
         if headers_dir.exists():
             shutil.rmtree(headers_dir)

@@ -138,13 +138,19 @@ def main():
     
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
     modspec = os.environ.get(ModulesSpec_EnvVar, "")
+
+    pdfium_binaries_dir_str = os.environ.get("PDFIUM_BINARIES_DIR", None)
+    pdfium_binaries_dir = None if pdfium_binaries_dir_str is None else Path(pdfium_binaries_dir_str)
+
+    headers_dir_str = os.environ.get("PDFIUM_HEADERS_DIR", None)
+    headers_dir = None if headers_dir_str is None else Path(headers_dir_str)
     
     # TODO embed is_prepared in version file? - in principle, it could be arbitrary caller-given files
     with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
     modnames = parse_modspec(modspec, pl_name)
     
     if ModuleRaw in modnames and with_prepare:
-        prepare_setup(pl_name, pdfium_ver, use_v8)
+        prepare_setup(pl_name, pdfium_ver, use_v8, headers_dir, pdfium_binaries_dir)
     run_setup(modnames, pl_name, pdfium_ver)
 
 
