@@ -98,7 +98,7 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(
-        description = "Download pre-built PDFium packages and generate bindings.",
+        description = "Download and extract pre-built PDFium packages.",
     )
     parser.add_argument(
         # FIXME with metavar, choices are not visible in help by default - without it, the long choices list is repeated 4 times due to 2 flags and nargs="+"
