@@ -415,11 +415,13 @@ def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **
     
     ver_path = DataDir_Bindings/VersionFN
     bind_path = DataDir_Bindings/BindingsFN
+    if not headers_dir:
+        headers_dir = DataDir_Bindings / "headers"
     
     # TODO move refbindings handling into run_ctypesgen on behalf of sourcebuild?
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
     if BindTarget == BindTarget_Ref:
-        print("Using refbindings as requested by env var.",file=sys.stderr)
+        print("Using refbindings as requested by env var.", file=sys.stderr)
         if flags:
             print("Warning: default refbindings are not flags-compatible.")
         shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
@@ -435,10 +437,8 @@ def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **
         else:
             print(f"{prev_info} != {curr_info}")
     
-    if not headers_dir:
-        headers_dir = DataDir_Bindings / "headers"
-        if headers_dir.exists():
-            shutil.rmtree(headers_dir)
+    if not headers_dir.exists() or not list(headers_dir.glob("fpdf*.h")):
+        print("Downloading headers ...", file=sys.stderr)
         headers_dir.mkdir(parents=True, exist_ok=True)
         archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
