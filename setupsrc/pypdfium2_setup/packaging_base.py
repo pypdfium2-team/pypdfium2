@@ -411,7 +411,10 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     bindings.write_text(text)
 
 
-def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **kwargs):
+def build_pdfium_bindings(version, headers_dir=None, **kwargs):
+    defaults = dict(flags=[], run_lds=["."], guard_symbols=False)
+    for k, v in defaults.items():
+        kwargs.setdefault(k, v)
     
     ver_path = DataDir_Bindings/VersionFN
     bind_path = DataDir_Bindings/BindingsFN
@@ -422,14 +425,20 @@ def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
     if BindTarget == BindTarget_Ref:
         print("Using refbindings as requested by env var.", file=sys.stderr)
-        if flags:
+        if kwargs["flags"]:
             print("Warning: default refbindings are not flags-compatible.")
         shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
         ar_record = read_json(AR_RecordFile)
         write_json(ver_path, dict(version=ar_record["pdfium"], flags=[], run_lds=["."], source="reference"))
         return
     
-    curr_info = dict(version=version, flags=list(flags), run_lds=list(run_lds), source="generated")
+    curr_info = dict(
+        version = version,
+        flags = list(kwargs["flags"]),
+        run_lds = list(kwargs["run_lds"]),
+        guard_symbols = kwargs["guard_symbols"],
+        source = "generated",
+    )
     if bind_path.exists() and ver_path.exists():
         prev_info = read_json(ver_path)
         if prev_info == curr_info:
@@ -451,7 +460,7 @@ def build_pdfium_bindings(version, headers_dir=None, flags=[], run_lds=["."], **
                     tar_extract_file(tar, m, headers_dir/m.name)
         archive_path.unlink()
     
-    run_ctypesgen(DataDir_Bindings, headers_dir, flags=flags, run_lds=run_lds, **kwargs)
+    run_ctypesgen(DataDir_Bindings, headers_dir, **kwargs)
     write_json(ver_path, curr_info)
 
 
