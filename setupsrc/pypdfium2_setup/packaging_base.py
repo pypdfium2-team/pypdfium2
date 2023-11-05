@@ -375,7 +375,7 @@ def tar_extract_file(tar, src, dst_path):
         shutil.copyfileobj(src_buf, dst_buf)
 
 
-def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compile_lds=[], run_lds=["."]):
+def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compile_lds=[], run_lds=["."], allow_system_despite_libdirs=False):
     # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
@@ -386,7 +386,9 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     args = ["ctypesgen", f"--strip-build-path={headers_dir}", "--no-srcinfo", "--library", "pdfium"]
     
     if run_lds:
-        args += ["--no-system-libsearch", "--runtime-libdirs", *run_lds]
+        args += ["--runtime-libdirs", *run_lds]
+        if not allow_system_despite_libdirs:
+            args += ["--no-system-libsearch"]
     if compile_lds:
         args += ["--compile-libdirs", *compile_lds]
     else:

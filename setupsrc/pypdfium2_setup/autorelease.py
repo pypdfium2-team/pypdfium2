@@ -23,7 +23,7 @@ def run_local(*args, **kws):
 
 def update_refbindings(version):
     RefBindingsFile.unlink()
-    build_pdfium_bindings(version, guard_symbols=True)
+    build_pdfium_bindings(version, guard_symbols=True, allow_system_despite_libdirs=True)
     shutil.copyfile(DataDir_Bindings/BindingsFN, RefBindingsFile)
     assert RefBindingsFile.exists()
 
