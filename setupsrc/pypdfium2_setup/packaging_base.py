@@ -16,7 +16,7 @@ import sysconfig
 import traceback
 import subprocess
 from pathlib import Path
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 import urllib.request as url_request
 
 # TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
