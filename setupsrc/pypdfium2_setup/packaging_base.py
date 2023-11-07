@@ -136,21 +136,23 @@ class PdfiumVer:
         if v_short not in cls._ver_cache:
             if record:
                 print(f"Getting full version for {v_short} from pdfium-binaries record", file=sys.stderr)
-                cls._from_record(v_short, record)
+                cls._from_record(record)
             else:
                 print(f"Getting full version for {v_short} from chromium refs", file=sys.stderr)
                 cls._from_refs(v_short)
         else:
             print(f"Getting full version for {v_short} from cache", file=sys.stderr)
         
-        return cls._ver_cache[v_short]
+        v_full = cls._ver_cache[v_short]
+        assert v_full.build == v_short
+        return v_full
     
     @classmethod
-    def _from_record(cls, v_short, record):
+    def _from_record(cls, record):
         record = record.strip().replace(" ", "")
         parsed = {k.lower(): int(v) for k, v in [l.split("=") for l in record.split("\n")]}
-        cls._ver_cache[v_short] = cls.scheme(**parsed)
-        assert cls._ver_cache[v_short].build == v_short
+        v_full = cls.scheme(**parsed)
+        cls._ver_cache[v_full.build] = v_full
     
     @classmethod
     def _from_refs(cls, v_short):
