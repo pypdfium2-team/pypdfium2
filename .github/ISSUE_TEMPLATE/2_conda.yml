@@ -11,19 +11,18 @@ body:
       value: |
         #### Package origin
         There may be unofficial conda packages of pypdfium2/pdfium-binaries in other channels, including anaconda or conda-forge defaults. **We do not support third-party builds, and they are not eligible for a bug report.** Please use the official packages instead.
+  
   - type: checkboxes
     attributes:
       label: Checklist
       options:
         - label: I have verified to be using the official packages from the `pypdfium2-team` and `bblanchon` channels.
           required: true
-        - label: I understand that I may be blocked if I intentionally skip, remove, or set a fake value in a mandatory field.
-          required: true
   
   - type: textarea
     attributes:
       label: Description
-      description: Please explain your problem
+      description: Please explain your problem.
     validations:
       required: true
   
@@ -46,9 +45,10 @@ body:
         ```
     validations:
       required: true
+  
   - type: checkboxes
     attributes:
       label: Output validity
       options:
-        - label: I confirm that I ran all commands **in the active conda environment in question**, and pasted the whole output
+        - label: I confirm that I ran all commands **in the active conda environment in question**, and pasted the whole output.
           required: true

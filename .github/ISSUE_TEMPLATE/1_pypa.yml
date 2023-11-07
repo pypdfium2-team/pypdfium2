@@ -1,15 +1,27 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
+# TODO add separate template for source install issues?
+
 name: PyPA package
 description: Use this if you installed pypdfium2 via pip (or a similar PyPA format compatible tool)
 
 body:
   
+  - type: checkboxes
+    attributes:
+      label: Package origin
+      description: |
+        There might be unofficial PyPA packages of pypdfium2 in the wild.
+        **We do not support third-party builds, and they are not eligible for a bug report.** Please make sure to use our official releases only.
+      options:
+        - label: I confirm to be using an official `pypdfium2` package from `PyPI` or `GitHub/pypdfium2-team`.
+          required: true
+  
   - type: textarea
     attributes:
       label: Description
-      description: Please explain your problem
+      description: Please explain your problem.
     validations:
       required: true
   
@@ -27,9 +39,10 @@ body:
         ```
     validations:
       required: true
+  
   - type: checkboxes
     attributes:
       label: Output validity
       options:
-        - label: I confirm that I ran all commands, and pasted the whole output
+        - label: I confirm that I ran all commands, and pasted the whole output.
           required: true

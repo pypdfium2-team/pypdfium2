@@ -92,9 +92,9 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
   
-  Nonetheless, we may assist external package maintainers on behalf of wider adoption of pypdfium2 (e.g. linux distros). However, this does not imply our approval.
+  In particular, do not expect us to help with the creation of unofficial builds or add/change code to support restricted setup envs. Related PRs and issues may be closed (or locked) without further notice if we don't see fit for upstream.
   
-  If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
+  **If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.**
 
 
 ### Runtime Dependencies
