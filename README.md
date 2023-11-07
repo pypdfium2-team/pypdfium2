@@ -15,16 +15,16 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 ## Installation
 
-<!-- TODO use linkable sub-sections? -->
+<!-- FIXME is there a better/universal way to create linkable sub-sections without them being a heading? Note, the current solution is specific to GH and doesn't work on RTD. -->
 
-* From PyPI (recommended, official)
+* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI (recommended, official)</a>
   ```bash
   python3 -m pip install -U pypdfium2
   ```
   This will use a pre-built wheel package, the easiest way of installing pypdfium2.
 
 
-* From Conda (official)
+* <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda (official)</a>
   ```bash
   conda install pypdfium2_helpers -c bblanchon -c pypdfium2-team
   ```
@@ -45,20 +45,29 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   It should show `pypdfium2-team` and `bblanchon` in the channels column.
 
 
-* From source
+* <a id="user-content-install-unofficial" class="anchor" href="#install-unofficial">Unofficial packages</a>
+  
+  The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
+  
+  In particular, do not expect us to help with the creation of unofficial builds or add/change code to support restricted setup envs. Related PRs and issues may be closed (or locked) without further notice if we don't see fit for upstream.
+  
+  If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
+
+
+* <a id="user-content-install-source" class="anchor" href="#install-source">From source</a>
   
   * Dependencies:
     - System: git, C pre-processor (gcc/clang, has to be in `$PATH`)
     - Python: ctypesgen (pypdfium2-team fork), wheel, setuptools. Usually installed automatically.
   
-  * With pre-built binary
+  * <a id="user-content-install-source-default" class="anchor" href="#install-source-default">With pre-built binary</a>
     ```bash
     # In the directory containing the source code of pypdfium2
     python3 -m pip install -v .
     ```
     A binary is downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2.
   
-  * With self-built binary
+  * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary</a>
     ```bash
     python3 setupsrc/pypdfium2_setup/build_pdfium.py  # call with --help to list options
     PDFIUM_PLATFORM="sourcebuild" python3 -m pip install -v .
@@ -66,7 +75,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than consuming them from the system.[^pdfium_buildsystem]
     However, there is at least an option `--use-syslibs` to build against system-provided runtime libraries.
   
-  * With system-provided binary
+  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary</a>
     ```bash
     # Substitute `$PDFIUM_VER` with the system pdfium's build version.
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python3 -m pip install -v .
@@ -86,15 +95,6 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   * `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
   
   [^pdfium_buildsystem]: This means pdfium may not compile on arbitrary hosts. The script is limited to build hosts supported by Google's toolchain. Ideally, we'd need an alternative build system that runs with system packages instead.
-
-
-* Unofficial packages
-  
-  The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
-  
-  In particular, do not expect us to help with the creation of unofficial builds or add/change code to support restricted setup envs. Related PRs and issues may be closed (or locked) without further notice if we don't see fit for upstream.
-  
-  **If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.**
 
 
 ### Runtime Dependencies
