@@ -119,7 +119,8 @@ BinarySystems   = list(LibnameForSystem.keys())
 class PdfiumVer:
     
     scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
-    _refs_cache = {"lines": None, "dict": {}, "cursor": None}
+    _refs_cache = {"lines": None, "cursor": None}
+    _ver_cache = {}
     
     @staticmethod
     @functools.lru_cache(maxsize=1)
@@ -129,21 +130,31 @@ class PdfiumVer:
         return int( tag.split("/")[-1] )
     
     @classmethod
-    def full_from_record(cls, v_short, record):
+    def to_full(cls, v_short, record=None):
+        
+        v_short = int(v_short)
+        if v_short not in cls._ver_cache:
+            if record:
+                cls._from_record(v_short, record)
+            else:
+                cls._from_refs(v_short)
+        
+        return cls._ver_cache[v_short]
+    
+    @classmethod
+    def _from_record(cls, v_short, record):
         # Get full version from pdfium-binaries style VERSION file data.
         record = record.strip().replace(" ", "")
         parsed = {k.lower(): int(v) for k, v in [l.split("=") for l in record.split("\n")]}
-        v_full = cls.scheme(**parsed)
-        assert v_full.build == int(v_short)
-        return v_full
+        cls._ver_cache[v_short] = cls.scheme(**parsed)
+        assert cls._ver_cache[v_short].build == v_short
     
     @classmethod
-    def full_from_refs(cls, v_short):
+    def _from_refs(cls, v_short):
         
         # Get full version from chromium refs via ls-remote.
         # FIXME Can be fairly expensive. Consider disk cache to avoid slowdown for consecutive process calls.
         
-        v_short = int(v_short)
         rc = cls._refs_cache
         
         if rc["lines"] is None:
@@ -154,14 +165,11 @@ class PdfiumVer:
             for i, line in enumerate(rc["lines"]):
                 ref = line.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
                 major, minor, build, patch = [int(v) for v in ref.split(".")]
-                rc["dict"][build] = (major, minor, build, patch)
+                cls._ver_cache[build] = cls.scheme(major, minor, build, patch)
                 if build == v_short:
                     rc["cursor"] = build
                     rc["lines"] = rc["lines"][i+1:]
                     break
-        
-        v_parts = rc["dict"][v_short]
-        return cls.scheme(*v_parts)
 
 
 def read_json(fp):

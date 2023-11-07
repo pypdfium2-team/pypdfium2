@@ -80,7 +80,7 @@ def extract(archives, v_short, flags):
             # all archives will have the same version, so the full version only has to be retrieved once.
             if v_full is None:
                 v_record = tar.extractfile("VERSION").read().decode("utf-8")
-                v_full = PdfiumVer.full_from_record(v_short, v_record)
+                v_full = PdfiumVer.to_full(v_short, v_record)
             write_pdfium_info(pl_dir, v_full, origin="pdfium-binaries", flags=flags)
         
         arc_path.unlink()

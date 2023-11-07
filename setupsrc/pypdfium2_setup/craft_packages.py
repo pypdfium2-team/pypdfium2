@@ -168,7 +168,7 @@ def main_conda_bundle(args):
 
 def main_conda_raw(args):
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
-    v_full = PdfiumVer.full_from_refs(args.pdfium_ver)
+    v_full = PdfiumVer.to_full(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = ".".join([str(v) for v in v_full])
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
     with CondaExtPlatfiles(emplace_func):

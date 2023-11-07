@@ -53,7 +53,7 @@ def prepare_setup(pl_name, v_short, use_v8):
         # TODO add option for caller to pass in custom run_lds and headers_dir
         build_pdfium_bindings(v_short, flags=flags, guard_symbols=True, run_lds=[])
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
-        v_full = PdfiumVer.full_from_refs(v_short)
+        v_full = PdfiumVer.to_full(v_short)
         write_pdfium_info(ModuleDir_Raw, v_full, origin="system", flags=flags)
         return [BindingsFN, VersionFN]
     else:
