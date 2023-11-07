@@ -130,6 +130,9 @@ class PdfiumVer:
     @classmethod
     def to_full(cls, v_short, type=dict):
         
+        # FIXME The ls-remote call is fairly expensive. While cached in memory for a process lifetime, it can cause a significant slowdown for consecutive process runs.
+        # There may be multiple ways to improve this, like adding a disk cache to ensure it would only be called once for a whole session, or adding a second strategy that would parse the pdfium-binaries VERSION file, and use the chromium refs only for sourcebuild.
+        
         v_short = int(v_short)
         rc = cls._refs_cache
         
