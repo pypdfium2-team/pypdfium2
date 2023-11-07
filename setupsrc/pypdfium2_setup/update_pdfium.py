@@ -67,6 +67,8 @@ def download(platforms, version, use_v8, max_workers, robust):
 
 def extract(archives, v_short, flags):
     
+    v_full = None
+    
     for pl_name, arc_path in archives.items():
         
         with tarfile.open(arc_path) as tar:
@@ -75,9 +77,10 @@ def extract(archives, v_short, flags):
             libname = LibnameForSystem[system]
             tar_libdir = "lib" if system != SysNames.windows else "bin"
             tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
-            # FIXME all archives in this loop will have the same version info, so this would only have to be done once...
-            v_record = tar.extractfile("VERSION").read().decode()
-            v_full = PdfiumVer.full_from_record(v_short, v_record)
+            # all archives will have the same version, so the full version only has to be retrieved once.
+            if v_full is None:
+                v_record = tar.extractfile("VERSION").read().decode("utf-8")
+                v_full = PdfiumVer.full_from_record(v_short, v_record)
             write_pdfium_info(pl_dir, v_full, origin="pdfium-binaries", flags=flags)
         
         arc_path.unlink()
