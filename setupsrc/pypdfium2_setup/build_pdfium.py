@@ -126,17 +126,17 @@ def identify_pdfium():
     # if not updated, we'll always be dirty because of the patches, so not much point checking it
     desc = run_cmd(["git", "describe", "--all"], cwd=PDFiumDir, capture=True)
     desc = desc.rsplit("/", maxsplit=1)[-1]
-    build, *id_parts = desc.split("-")
+    v_short, *id_parts = desc.split("-")
     assert len(id_parts) < 2
     
     # FIXME some duplication with base::parse_given_tag()
-    info = dict(build=build, n_commits=0, hash=None)
+    v_post = dict(n_commits=0, hash=None)
     if len(id_parts) > 0:
-        info["n_commits"] = int(id_parts[0])
+        v_post["n_commits"] = int(id_parts[0])
     if len(id_parts) > 1:
-        info["hash"] = id_parts[1]
+        v_post["hash"] = id_parts[1]
     
-    return info
+    return v_short, v_post
 
 
 def _create_resources_rc(pdfium_build):
@@ -170,14 +170,15 @@ def build(Ninja, target):
     run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
-def pack(pdfium_info):
+def pack(v_short, v_post):
     
     dest_dir = DataDir / ExtPlats.sourcebuild
     dest_dir.mkdir(parents=True, exist_ok=True)
     
     libname = LibnameForSystem[Host.system]
     shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
-    write_pdfium_info(dest_dir, origin="sourcebuild", **pdfium_info)
+    v_full = PdfiumVer.full_from_refs(v_short)
+    write_pdfium_info(dest_dir, v_full, origin="sourcebuild", **v_post)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     # FIXME PDFIUM_BINDINGS=reference not honored
@@ -237,10 +238,10 @@ def main(
     Ninja   = get_tool("ninja")
     
     pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
-    pdfium_info = identify_pdfium()
+    v_short, v_post = identify_pdfium()
     
     if pdfium_dl_done:
-        patch_pdfium(pdfium_info["build"])
+        patch_pdfium(v_short)
     if b_use_syslibs:
         _dl_unbundler()
 
@@ -255,7 +256,7 @@ def main(
     
     configure(GN, config_str)
     build(Ninja, b_target)
-    pack(pdfium_info)
+    pack(v_short, v_post)
 
 
 def parse_args(argv):

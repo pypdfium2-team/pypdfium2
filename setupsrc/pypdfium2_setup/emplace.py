@@ -44,16 +44,17 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     build_pdfium_bindings(req_ver, flags=req_flags, compile_lds=compile_lds)
 
 
-def prepare_setup(pl_name, pdfium_ver, use_v8):
+def prepare_setup(pl_name, v_short, use_v8):
     
     clean_platfiles()
     flags = ["V8", "XFA"] if use_v8 else []
     
     if pl_name == ExtPlats.system:
         # TODO add option for caller to pass in custom run_lds and headers_dir
-        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=[])
+        build_pdfium_bindings(v_short, flags=flags, guard_symbols=True, run_lds=[])
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
-        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
+        v_full = PdfiumVer.full_from_refs(v_short)
+        write_pdfium_info(ModuleDir_Raw, v_full, origin="system", flags=flags)
         return [BindingsFN, VersionFN]
     else:
         platfiles = []
@@ -65,7 +66,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
             platfiles += [pl_dir/BindingsFN]
         else:
             platfiles += [DataDir_Bindings/BindingsFN]
-            _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8)
+            _get_pdfium_with_cache(pl_name, v_short, flags, use_v8)
         
         platfiles += [pl_dir/LibnameForSystem[system], pl_dir/VersionFN]
         for fp in platfiles:

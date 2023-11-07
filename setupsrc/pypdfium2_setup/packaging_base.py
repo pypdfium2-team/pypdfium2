@@ -16,6 +16,7 @@ import sysconfig
 import traceback
 import subprocess
 from pathlib import Path
+from collections import namedtuple, OrderedDict
 import urllib.request as url_request
 
 # TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
@@ -117,7 +118,7 @@ BinarySystems   = list(LibnameForSystem.keys())
 
 class PdfiumVer:
     
-    V_KEYS = ("major", "minor", "build", "patch")
+    scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
     _refs_cache = {"lines": None, "dict": {}, "cursor": None}
     
     @staticmethod
@@ -128,10 +129,19 @@ class PdfiumVer:
         return int( tag.split("/")[-1] )
     
     @classmethod
-    def to_full(cls, v_short, type=dict):
+    def full_from_record(cls, v_short, record):
+        # Get full version from pdfium-binaries style VERSION file data.
+        record = record.strip().replace(" ", "")
+        parsed = {k.lower(): int(v) for k, v in [l.split("=") for l in record.split("\n")]}
+        v_full = cls.scheme(**parsed)
+        assert v_full.build == int(v_short)
+        return v_full
+    
+    @classmethod
+    def full_from_refs(cls, v_short):
         
-        # FIXME The ls-remote call is fairly expensive. While cached in memory for a process lifetime, it can cause a significant slowdown for consecutive process runs.
-        # There may be multiple ways to improve this, like adding a disk cache to ensure it would only be called once for a whole session, or adding a second strategy that would parse the pdfium-binaries VERSION file, and use the chromium refs only for sourcebuild.
+        # Get full version from chromium refs via ls-remote.
+        # FIXME Can be fairly expensive. Consider disk cache to avoid slowdown for consecutive process calls.
         
         v_short = int(v_short)
         rc = cls._refs_cache
@@ -151,14 +161,7 @@ class PdfiumVer:
                     break
         
         v_parts = rc["dict"][v_short]
-        if type in (tuple, list):
-            return v_parts
-        elif type is str:
-            return ".".join([str(v) for v in v_parts])
-        elif type is dict:
-            return dict(zip(PdfiumVer.V_KEYS, v_parts))
-        else:
-            assert False
+        return cls.scheme(*v_parts)
 
 
 def read_json(fp):
@@ -170,8 +173,8 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None):
-    info = dict(**PdfiumVer.to_full(build, type=dict), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
+def write_pdfium_info(dir, v_full, origin, flags=[], n_commits=0, hash=None):
+    info = dict(**v_full._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
     write_json(dir/VersionFN, info)
     return info
 
