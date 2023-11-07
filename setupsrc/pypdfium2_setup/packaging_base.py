@@ -138,12 +138,14 @@ class PdfiumVer:
                 cls._from_record(v_short, record)
             else:
                 cls._from_refs(v_short)
+        else:
+            print(f"Getting full version for {v_short} from cache", file=sys.stderr)
         
         return cls._ver_cache[v_short]
     
     @classmethod
     def _from_record(cls, v_short, record):
-        # Get full version from pdfium-binaries style VERSION file data.
+        print(f"Getting full version for {v_short} from pdfium-binaries record", file=sys.stderr)
         record = record.strip().replace(" ", "")
         parsed = {k.lower(): int(v) for k, v in [l.split("=") for l in record.split("\n")]}
         cls._ver_cache[v_short] = cls.scheme(**parsed)
@@ -151,10 +153,9 @@ class PdfiumVer:
     
     @classmethod
     def _from_refs(cls, v_short):
+        # FIXME Can be fairly expensive - consider disk cache to avoid slowdown for consecutive process calls?
         
-        # Get full version from chromium refs via ls-remote.
-        # FIXME Can be fairly expensive. Consider disk cache to avoid slowdown for consecutive process calls.
-        
+        print(f"Getting full version for {v_short} from chromium refs", file=sys.stderr)
         rc = cls._refs_cache
         
         if rc["lines"] is None:
