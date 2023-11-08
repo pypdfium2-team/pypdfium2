@@ -17,14 +17,14 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 <!-- FIXME is there a better/universal way to create linkable sub-sections without them being a heading? Note, the current solution is specific to GH and doesn't work on RTD. -->
 
-* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI (recommended, official)</a>
+* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI 🔗</a> (recommended, official)
   ```bash
   python -m pip install -U pypdfium2
   ```
   This will use a pre-built wheel package, the easiest way of installing pypdfium2.
 
 
-* <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda (official)</a>
+* <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda 🔗</a> (official)
   ```bash
   conda install pypdfium2_helpers -c bblanchon -c pypdfium2-team
   ```
@@ -45,7 +45,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   It should show `pypdfium2-team` and `bblanchon` in the channels column.
 
 
-* <a id="user-content-install-unofficial" class="anchor" href="#install-unofficial">Unofficial packages</a>
+* <a id="user-content-install-unofficial" class="anchor" href="#install-unofficial">Unofficial packages 🔗</a>
   
   The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
   
@@ -54,7 +54,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
 
 
-* <a id="user-content-install-source" class="anchor" href="#install-source">From source</a>
+* <a id="user-content-install-source" class="anchor" href="#install-source">From source 🔗</a>
   
   * Dependencies:
     - System: git, C pre-processor (gcc/clang, has to be in `$PATH`)
@@ -66,14 +66,14 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     cd pypdfium2/
     ```
   
-  * <a id="user-content-install-source-default" class="anchor" href="#install-source-default">With pre-built binary</a>
+  * <a id="user-content-install-source-default" class="anchor" href="#install-source-default">With pre-built binary 🔗</a>
     ```bash
     # In the pypdfium2/ directory
     python -m pip install -v .
     ```
     A binary is downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2.
   
-  * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary</a>
+  * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary 🔗</a>
     ```bash
     # call build script with --help to list options
     python setupsrc/pypdfium2_setup/build_pdfium.py
@@ -82,7 +82,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than consuming them from the system.[^pdfium_buildsystem]
     However, there is at least an option `--use-syslibs` to build against system-provided runtime libraries.
   
-  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary</a>
+  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary 🔗</a>
     ```bash
     # Substitute $PDFIUM_VER with the system pdfium's build version.
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
@@ -90,7 +90,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Link against external pdfium instead of bundling it.
     For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
   
-  * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-built data files</a> (this is expected to work offline)
+  * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-built data files 🔗</a> (this is expected to work offline)
     ```bash
     # Call ctypesgen (see --help or packaging_base.py::run_ctypesgen() for further options)
     # Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
