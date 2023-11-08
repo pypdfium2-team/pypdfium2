@@ -30,6 +30,9 @@ PatchesWindows = [
     (PatchDir/"win"/"build.patch", PDFiumDir/"build"),
 ]
 
+
+# run `gn args out/Default/ --list` for flag docs
+
 DefaultConfig = {
     "is_debug": False,
     "treat_warnings_as_errors": False,
@@ -49,13 +52,13 @@ SyslibsConfig = {
     "use_system_libtiff": True,
     "clang_use_chrome_plugins": False,
     "use_allocator_shim": False,
+    "use_sysroot": False,
 }
 
 
-if sys.platform.startswith("linux"):
-    SyslibsConfig["use_custom_libcxx"] = False
-    SyslibsConfig["use_sysroot"] = False
-elif sys.platform.startswith("darwin"):
+# if sys.platform.startswith("linux"):
+    # SyslibsConfig["use_custom_libcxx"] = True
+if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     SyslibsConfig["use_system_xcode"] = True
 
