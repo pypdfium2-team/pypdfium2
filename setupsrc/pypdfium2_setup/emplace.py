@@ -14,8 +14,9 @@ from pypdfium2_setup.packaging_base import *
 
 
 # CONSIDER Linux/macOS: check that minimum OS version requirements are fulfilled
-# TODO add direct support for emplacing local pdfium from file
 
+def _repr_info(version, flags):
+    return str(version) + (":{%s}" % ','.join(flags) if flags else "")
 
 def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     
@@ -32,12 +33,12 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     else:
         update_binary = True
     
+    req_repr = _repr_info(req_ver, req_flags)
     if update_binary:
-        flags_repr = ":{%s}" % ",".join(req_flags) if req_flags else ""
-        print(f"Downloading binary {req_ver}{flags_repr} ...", file=sys.stderr)
+        print(f"Downloading binary {req_repr} ...", file=sys.stderr)
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
-        print("Using cached binary")
+        print(f"Using cached binary {req_repr}")
     
     # build_pdfium_bindings() has its own cache logic, so always call to ensure bindings match
     compile_lds = [DataDir/Host.platform] if pl_name == Host.platform else []
@@ -50,7 +51,8 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     flags = ["V8", "XFA"] if use_v8 else []
     
     if pl_name == ExtPlats.system:
-        # TODO add option for caller to pass in custom run_lds and headers_dir
+        # TODO add option for caller to pass in custom headers_dir, run_lds and flags? unfortunately it's not straightforward how to integrate this
+        # also want to consider accepting a full version for offline setup
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=[])
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
         write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)

@@ -140,7 +140,7 @@ def main():
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
     modspec = os.environ.get(ModulesSpec_EnvVar, "")
     
-    # TODO embed is_prepared in version file? - in principle, it could be arbitrary caller-given files
+    # FIXME do we really need `prepared!`? It should be possible to achieve the same just by preparing a cache in `data/`, though perhaps less obvious.
     with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
     modnames = parse_modspec(modspec, pl_name)
     
