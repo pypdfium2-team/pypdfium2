@@ -19,7 +19,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 * <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI (recommended, official)</a>
   ```bash
-  python3 -m pip install -U pypdfium2
+  python -m pip install -U pypdfium2
   ```
   This will use a pre-built wheel package, the easiest way of installing pypdfium2.
 
@@ -60,30 +60,69 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     - System: git, C pre-processor (gcc/clang, has to be in `$PATH`)
     - Python: ctypesgen (pypdfium2-team fork), wheel, setuptools. Usually installed automatically.
   
+  * Get the code
+    ```
+    git clone "https://github.com/pypdfium2-team/pypdfium2.git"
+    cd pypdfium2/
+    ```
+  
   * <a id="user-content-install-source-default" class="anchor" href="#install-source-default">With pre-built binary</a>
     ```bash
-    # In the directory containing the source code of pypdfium2
-    python3 -m pip install -v .
+    # In the pypdfium2/ directory
+    python -m pip install -v .
     ```
     A binary is downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2.
   
   * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary</a>
     ```bash
-    python3 setupsrc/pypdfium2_setup/build_pdfium.py  # call with --help to list options
-    PDFIUM_PLATFORM="sourcebuild" python3 -m pip install -v .
+    # call build script with --help to list options
+    python setupsrc/pypdfium2_setup/build_pdfium.py
+    PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
     Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than consuming them from the system.[^pdfium_buildsystem]
     However, there is at least an option `--use-syslibs` to build against system-provided runtime libraries.
   
   * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary</a>
     ```bash
-    # Substitute `$PDFIUM_VER` with the system pdfium's build version.
-    PDFIUM_PLATFORM="system:$PDFIUM_VER" python3 -m pip install -v .
+    # Substitute $PDFIUM_VER with the system pdfium's build version.
+    PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
     ```
     Link against external pdfium instead of bundling it.
     For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
   
-  See [Setup Magic](#setup-magic) for further options.
+  * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-built data files</a> (this is expected to work offline)
+    ```bash
+    # Call ctypesgen (see --help or packaging_base.py::run_ctypesgen() for further options)
+    # Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
+    ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py --strip-build-path=. --no-srcinfo [-D $MY_FLAGS]
+    
+    # Write the version file (substitute placeholders accordingly)
+    # major/minor/build/patch: integers forming the pdfium version being packaged
+    # n_commits/hash: git describe like post-tag info (0/null for release commit)
+    # origin: a string identifying the build (e.g. system-debian for a debian package against system pdfium)
+    # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
+    cat >"src/pypdfium2_raw/version.json" <<END
+    {
+      "major": $PDFIUM_MAJOR,
+      "minor": $PDFIUM_MINOR,
+      "build": $PDFIUM_BUILD,
+      "patch": $PDFIUM_PATCH,
+      "n_commits": $POST_TAG_COMMIT_COUNT,
+      "hash": $POST_TAG_HASH,
+      "origin": "$MY_PACKAGE_ID",
+      "flags": [$MY_FLAGS]
+    }
+    END
+    
+    # optional: copy in a binary if bundling
+    cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
+    
+    # Finally, install
+    # set $MY_PLATFORM to "system" if building against system pdfium, "auto" or the platform name otherwise
+    PDFIUM_PLATFORM='prepared!$MY_PLATFORM:$PDFIUM_BUILD' python -m pip install --no-build-isolation -v .
+    ```
+  
+  See [Setup Magic](#setup-magic) for details.
   
   Support for source installs (esp. with self-built/system pdfium) is limited, as their integrity depends somewhat on a correctly acting caller.
   
@@ -714,8 +753,8 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   ```
 * Build the packages
   ```bash
-  python3 setupsrc/pypdfium2_setup/update_pdfium.py
-  python3 setupsrc/pypdfium2_setup/craft_packages.py pypi
+  python setupsrc/pypdfium2_setup/update_pdfium.py
+  python setupsrc/pypdfium2_setup/craft_packages.py pypi
   ```
 * Upload to PyPI
   ```bash
