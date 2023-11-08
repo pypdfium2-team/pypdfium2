@@ -11,7 +11,7 @@ body:
     attributes:
       value: |
         #### Package origin
-        There may be unofficial conda packages of pypdfium2/pdfium-binaries in other channels, including anaconda or conda-forge defaults. **We do not support third-party builds, and they are not eligible for a bug report.** Please use the official packages instead.
+        There may be unofficial conda packages of pypdfium2/pdfium-binaries in other channels, including anaconda or conda-forge defaults. **We do not support third-party builds, and they are not eligible for a bug report.** Please use our official packages instead.
   
   - type: checkboxes
     attributes:

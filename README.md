@@ -49,7 +49,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
   
-  In particular, do not expect us to help with the creation of unofficial builds or add/change code to support restricted setup envs. Related PRs and issues may be closed (or locked) without further notice if we don't see fit for upstream.
+  Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed (or locked) without further notice if we don't see fit for upstream.
   
   If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
 
@@ -79,8 +79,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     python setupsrc/pypdfium2_setup/build_pdfium.py
     PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
-    Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than consuming them from the system.[^pdfium_buildsystem]
-    However, there is at least an option `--use-syslibs` to build against system-provided runtime libraries.
+    Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than taking them from the system.[^pdfium_buildsystem]
+    However, we can at least provide the `--use-syslibs` option to build against system-provided runtime libraries.
   
   * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary 🔗</a>
     ```bash

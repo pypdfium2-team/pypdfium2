@@ -17,8 +17,8 @@ body:
             *Otherwise, use one of the package templates (PyPA/conda).*
           required: true
         - label: |
-            In particular, I confirm this is **not about an unofficial build of pypdfium2**, or an effort to create a such.
-            *We do not support third-party builds, and they are not eligible for a bug report. Please make sure to use our official releases only.*
+            I confirm this is **not about an unofficial build of pypdfium2**, or an effort to create a such.
+            *We do not support third-party builds, and they are not eligible for a bug report. Please use our official packages instead.*
           required: true
   
   - type: input
