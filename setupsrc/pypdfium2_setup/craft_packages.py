@@ -168,7 +168,7 @@ def main_conda_bundle(args):
 
 def main_conda_raw(args):
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
-    os.environ["PDFIUM_FULL"] = PdfiumVer.to_full(args.pdfium_ver, type=str)
+    os.environ["PDFIUM_FULL"] = ".".join([str(v) for v in PdfiumVer.to_full(args.pdfium_ver)])
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
     with CondaExtPlatfiles(emplace_func):
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out")
@@ -179,7 +179,7 @@ def main_conda_helpers(args):
     # Set the current pdfium version as upper boundary, for inherent API safety.
     # Unfortunately, pdfium does not do semantic versioning, so it is hard to achieve safe upward flexibility.
     # See also https://groups.google.com/g/pdfium/c/kCmgW_gTFYE/m/BPoJgbwOCQAJ
-    # In case risk of conflicts becomes a problem, we could estimate an increase based on pdfium's deprecation period.
+    # In case the restrictive upper boundary becomes a problem, we could estimate an increase based on pdfium's deprecation period.
     # Relevant variables for such a calculation would be
     # - version increment speed (guess: average 2 per day)
     # - pdfium's lowest regular deprecation period (say: 6 months, as indicated by pdfium/CONTRIBUTING.md)

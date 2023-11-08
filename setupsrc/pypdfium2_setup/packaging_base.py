@@ -16,6 +16,7 @@ import sysconfig
 import traceback
 import subprocess
 from pathlib import Path
+from collections import namedtuple
 import urllib.request as url_request
 
 # TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
@@ -117,7 +118,7 @@ BinarySystems   = list(LibnameForSystem.keys())
 
 class PdfiumVer:
     
-    V_KEYS = ("major", "minor", "build", "patch")
+    scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
     _refs_cache = {"lines": None, "dict": {}, "cursor": None}
     
     @staticmethod
@@ -128,37 +129,33 @@ class PdfiumVer:
         return int( tag.split("/")[-1] )
     
     @classmethod
-    def to_full(cls, v_short, type=dict):
+    def to_full(cls, v_short):
         
         # FIXME The ls-remote call is fairly expensive. While cached in memory for a process lifetime, it can cause a significant slowdown for consecutive process runs.
-        # There may be multiple ways to improve this, like adding a disk cache to ensure it would only be called once for a whole session, or adding a second strategy that would parse the pdfium-binaries VERSION file, and use the chromium refs only for sourcebuild.
+        # There may be multiple ways to improve this, like adding some disk cache to ensure it would only be called once for a whole session, or maybe adding a second strategy that would parse the pdfium-binaries VERSION file, and use the chromium refs only for sourcebuild.
         
         v_short = int(v_short)
         rc = cls._refs_cache
         
         if rc["lines"] is None:
+            print(f"Fetching chromium refs ...", file=sys.stderr)
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
             rc["lines"] = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
         
         if rc["cursor"] is None or rc["cursor"] > v_short:
             for i, line in enumerate(rc["lines"]):
                 ref = line.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
-                major, minor, build, patch = [int(v) for v in ref.split(".")]
-                rc["dict"][build] = (major, minor, build, patch)
-                if build == v_short:
-                    rc["cursor"] = build
+                full_ver = cls.scheme(*[int(v) for v in ref.split(".")])
+                rc["dict"][full_ver.build] = full_ver
+                if full_ver.build == v_short:
+                    rc["cursor"] = full_ver.build
                     rc["lines"] = rc["lines"][i+1:]
                     break
         
-        v_parts = rc["dict"][v_short]
-        if type in (tuple, list):
-            return v_parts
-        elif type is str:
-            return ".".join([str(v) for v in v_parts])
-        elif type is dict:
-            return dict(zip(PdfiumVer.V_KEYS, v_parts))
-        else:
-            assert False
+        full_ver = rc["dict"][v_short]
+        print(f"Resolved {v_short} -> {full_ver}", file=sys.stderr)
+        
+        return full_ver
 
 
 def read_json(fp):
@@ -171,7 +168,7 @@ def write_json(fp, data, indent=2):
 
 
 def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None):
-    info = dict(**PdfiumVer.to_full(build, type=dict), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
+    info = dict(**PdfiumVer.to_full(build)._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
     write_json(dir/VersionFN, info)
     return info
 
