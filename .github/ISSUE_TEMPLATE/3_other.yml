@@ -10,14 +10,14 @@ body:
     attributes:
       label: Checklist
       options:
-        - label: I confirm this is not a mere question. *Otherwise, use the Discussions page.*
+        - label: I confirm this is **not a question, or helpers feature request**. *Otherwise, use the Discussions page.*
           required: true
         - label: |
-            I confirm this is not an issue encountered with an installed build of pypdfium2, but about some other aspect of the project (specify below).
-            *Otherwise, use one of the package templates (PyPA/conda), even if you believe your issue is not specific to that format.*
+            I confirm this is **not an issue encountered with an installed build of pypdfium2, but about some other aspect of the project** (specify below).
+            *Otherwise, use one of the package templates (PyPA/conda).*
           required: true
         - label: |
-            In particular, I confirm this is not about an unofficial build of pypdfium2, or an effort to create a such.
+            In particular, I confirm this is **not about an unofficial build of pypdfium2**, or an effort to create a such.
             *We do not support third-party builds, and they are not eligible for a bug report. Please make sure to use our official releases only.*
           required: true
   
@@ -31,4 +31,6 @@ body:
   - type: textarea
     attributes:
       label: Description
-      description: Please explain your problem
+      description: Please explain your problem.
+    validations:
+      required: true

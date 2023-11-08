@@ -15,7 +15,7 @@ body:
         There might be unofficial PyPA packages of pypdfium2 in the wild.
         **We do not support third-party builds, and they are not eligible for a bug report.** Please make sure to use our official releases only.
       options:
-        - label: I confirm to be using an official `pypdfium2` package from `PyPI` or `GitHub/pypdfium2-team`.
+        - label: I confirm to be using an **official package** of `pypdfium2` from `PyPI` or `GitHub/pypdfium2-team`.
           required: true
   
   - type: textarea

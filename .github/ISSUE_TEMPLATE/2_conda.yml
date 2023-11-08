@@ -6,6 +6,7 @@ description: Use this if you installed pypdfium2 via conda
 
 body:
   
+  # use a separate md section instead of a checklist description for better visibility since it's rather likely to come across an unofficial build with conda
   - type: markdown
     attributes:
       value: |
@@ -16,7 +17,7 @@ body:
     attributes:
       label: Checklist
       options:
-        - label: I have verified to be using the official packages from the `pypdfium2-team` and `bblanchon` channels.
+        - label: I have verified to be using the **official packages** from the `pypdfium2-team` and `bblanchon` channels.
           required: true
   
   - type: textarea
@@ -32,7 +33,7 @@ body:
       render: shell
       description: |
         To provide information about your install, please run the following commands and paste the output into the field below.
-        **Note, the commands have to be run in the active conda environment in question.**
+        **Note, the commands have to be run in the active conda env in question.**
         ```shell
         python -m pypdfium2 -v
         python -VV
@@ -50,5 +51,5 @@ body:
     attributes:
       label: Output validity
       options:
-        - label: I confirm that I ran all commands **in the active conda environment in question**, and pasted the whole output.
+        - label: I confirm that I ran all commands **in the active conda env in question**, and pasted the whole output.
           required: true
