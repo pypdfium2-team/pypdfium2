@@ -57,6 +57,7 @@ class _abc_version:
         desc = ""
         if local_ver:
             desc += "+" + ".".join(local_ver)
+        
         return desc
     
     @cached_property
@@ -111,6 +112,8 @@ class _version_pdfium (_abc_version):
             desc += ":{%s}" % ",".join(self.flags)
         if self.origin != "pdfium-binaries":
             desc += f"@{self.origin}"
+        if self.data_source != "internal" and self.origin != "conda-system":
+            desc += f"!{self.data_source}_source"  # external
         return desc
 
 # TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
@@ -215,9 +218,13 @@ Parameters:
         The pdfium binary's origin. Possible values:\n
         - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2.
         - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2.
-        - ``system``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
+        - ``system``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`. Prefixed with ``conda-`` if pypdfium2 was installed from conda.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
+    data_source (str):
+        Source of the bundled data files (binary/bindings/version). Possible values:\n
+        - ``internal`` if probably generated natively by setup code.
+        - ``external`` if provided by caller. Unsafe, can be arbitrary given files. This is evidence of a third-party build unless origin is ``conda-system`` (but not all third-party builds have to be external).
 """
 
 # -----

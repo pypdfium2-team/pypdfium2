@@ -129,7 +129,7 @@ CondaNames = {
 def _run_conda_bundle(args, pl_name, suffix, conda_args):
     
     os.environ["IN_"+PlatSpec_EnvVar] = pl_name + suffix
-    emplace_func = partial(prepare_setup, pl_name, args.pdfium_ver, args.use_v8)
+    emplace_func = partial(prepare_setup, pl_name, args.pdfium_ver, args.use_v8, is_conda=True)
     
     with CondaExtPlatfiles(emplace_func):
         run_conda_build(CondaDir/"bundle", CondaDir/"bundle"/"out", conda_args)
@@ -169,7 +169,7 @@ def main_conda_bundle(args):
 def main_conda_raw(args):
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = PdfiumVer.to_full(args.pdfium_ver, type=str)
-    emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
+    emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None, is_conda=True)
     with CondaExtPlatfiles(emplace_func):
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out")
 

@@ -544,8 +544,8 @@ def parse_pl_spec(pl_spec, need_prepare=True):
     else:
         raise ValueError(f"Invalid binary spec '{pl_spec}'")
     
-    if pl_name == ExtPlats.system:
-        assert req_ver, "Version must be given explicitly for system target."
+    if pl_name == ExtPlats.system or not need_prepare:
+        assert req_ver, "Version must be given explicitly for system or prepared targets."
         
     if req_ver:
         assert req_ver.isnumeric()

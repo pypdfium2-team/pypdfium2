@@ -140,12 +140,20 @@ def main():
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
     modspec = os.environ.get(ModulesSpec_EnvVar, "")
     
-    # TODO embed is_prepared in version file? - in principle, it could be arbitrary caller-given files
     with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
     modnames = parse_modspec(modspec, pl_name)
     
-    if ModuleRaw in modnames and with_prepare:
-        prepare_setup(pl_name, pdfium_ver, use_v8)
+    if ModuleRaw in modnames:
+        if with_prepare:
+            prepare_setup(pl_name, pdfium_ver, use_v8)
+        # TODO rewrite only if not with_prepare, and make internal default?
+        pdfium_info_file = ModuleDir_Raw/VersionFN
+        pdfium_info = read_json(pdfium_info_file)
+        if with_prepare:
+            pdfium_info["data_source"] = "internal"
+        else:
+            pdfium_info["data_source"] = "external"
+        write_json(pdfium_info_file, pdfium_info)
     run_setup(modnames, pl_name, pdfium_ver)
 
 

@@ -44,7 +44,9 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     build_pdfium_bindings(req_ver, flags=req_flags, compile_lds=compile_lds)
 
 
-def prepare_setup(pl_name, pdfium_ver, use_v8):
+def prepare_setup(pl_name, pdfium_ver, use_v8, is_conda=False):
+    
+    # TODO take is_conda into account for bundling
     
     clean_platfiles()
     flags = ["V8", "XFA"] if use_v8 else []
@@ -53,8 +55,10 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
         # TODO add option for caller to pass in custom run_lds and headers_dir
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=[])
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
-        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
+        origin = ("conda-" if is_conda else "") + "system"
+        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin=origin, flags=flags)
         return [BindingsFN, VersionFN]
+    
     else:
         platfiles = []
         pl_dir = DataDir/pl_name
