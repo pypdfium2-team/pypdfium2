@@ -80,6 +80,8 @@ def extract(archives, version, flags):
         arc_path.unlink()
 
 
+BinaryPlatforms = list(ReleaseNames.keys())
+
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     if not version:

@@ -60,11 +60,18 @@ ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 
+# TODO make SysNames/ExtPlats/PlatNames iterable, consider StrEnum or something
+
 class SysNames:
     linux   = "linux"
     darwin  = "darwin"
     windows = "windows"
 
+class ExtPlats:
+    sourcebuild = "sourcebuild"
+    system = "system"
+    none = "none"
+    auto = "auto"
 
 # TODO align with either python or google platform names?
 class PlatNames:
@@ -82,13 +89,6 @@ class PlatNames:
     windows_x64      = SysNames.windows + "_x64"
     windows_x86      = SysNames.windows + "_x86"
     windows_arm64    = SysNames.windows + "_arm64"
-
-
-class ExtPlats:
-    sourcebuild = "sourcebuild"
-    system = "system"
-    none = "none"
-    auto = "auto"
 
 
 ReleaseNames = {
@@ -234,9 +234,7 @@ def plat_to_system(pl_name):
     if pl_name == ExtPlats.sourcebuild:
         # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downsteam with fallback value?
         return Host.system
-    result = [s for s in BinarySystems if pl_name.startswith(s)]
-    assert len(result) == 1
-    return result[0]
+    return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
 
 
 # platform.libc_ver() currently returns an empty string for musl, so use the packaging module to confirm.
@@ -517,6 +515,9 @@ def build_pl_suffix(version, use_v8):
 
 
 def parse_pl_spec(pl_spec, need_prepare=True):
+    
+    # FIXME targets integration is very inflexible, need to restructure!
+    # In the future, we'll want to handle origin here using the "$LOADER_STRATEGY/$BINARY_PROVIDER" format. In particular, the system target needs a way to pass through the provider.
     
     if pl_spec.startswith("prepared!"):
         _, pl_spec = pl_spec.split("!", maxsplit=1)
