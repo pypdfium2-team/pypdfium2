@@ -517,7 +517,7 @@ def build_pl_suffix(version, use_v8):
 def parse_pl_spec(pl_spec, need_prepare=True):
     
     # FIXME targets integration is very inflexible, need to restructure!
-    # In the future, we'll want to handle origin here using the "$LOADER_STRATEGY/$BINARY_PROVIDER" format. In particular, the system target needs a way to pass through the provider.
+    # TODO add way to pass through package provider with system target
     
     if pl_spec.startswith("prepared!"):
         _, pl_spec = pl_spec.split("!", maxsplit=1)

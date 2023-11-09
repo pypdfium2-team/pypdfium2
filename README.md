@@ -96,10 +96,11 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     # Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
     ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py --strip-build-path=. --no-srcinfo [-D $MY_FLAGS]
     
-    # Write the version file (substitute placeholders accordingly)
+    # Write the version file (fill the placeholders).
+    # Note, this is not a mature interface yet and might change!
     # major/minor/build/patch: integers forming the pdfium version being packaged
     # n_commits/hash: git describe like post-tag info (0/null for release commit)
-    # origin: a string to identify the build, consisting of loader strategy (e.g. system, bundled, custom) and binary provider (e.g. pdfium-binaries, distro name) separated by a slash (e.g. "system/debian" if using system pdfium provided by debian)
+    # origin: a string to identify the build, consisting of binary source and package provider (e.g. "system/debian", "pdfium-binaries/debian")
     # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
     cat >"src/pypdfium2_raw/version.json" <<END
     {
@@ -109,7 +110,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
       "patch": $PDFIUM_PATCH,
       "n_commits": $POST_TAG_COMMIT_COUNT,
       "hash": $POST_TAG_HASH,
-      "origin": "$LOADER_STRATEGY/$BINARY_PROVIDER",
+      "origin": "$ORIGIN",
       "flags": [$MY_FLAGS]
     }
     END
