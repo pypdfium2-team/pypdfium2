@@ -31,7 +31,7 @@ PatchesWindows = [
 ]
 
 
-# run `gn args out/Default/ --list` for flag docs
+# run `gn args out/Default/ --list` for build config docs
 
 DefaultConfig = {
     "is_debug": False,
@@ -40,6 +40,7 @@ DefaultConfig = {
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
+    "use_allocator_shim": False,
 }
 
 SyslibsConfig = {
@@ -51,13 +52,13 @@ SyslibsConfig = {
     "use_system_zlib": True,
     "use_system_libtiff": True,
     "clang_use_chrome_plugins": False,
-    "use_allocator_shim": False,
+    "pdf_use_partition_alloc": False,
     "use_sysroot": False,
 }
 
 
-# if sys.platform.startswith("linux"):
-    # SyslibsConfig["use_custom_libcxx"] = True
+if sys.platform.startswith("linux"):
+    SyslibsConfig["use_custom_libcxx"] = False
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     SyslibsConfig["use_system_xcode"] = True
