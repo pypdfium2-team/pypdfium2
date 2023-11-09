@@ -140,7 +140,7 @@ def main():
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
     modspec = os.environ.get(ModulesSpec_EnvVar, "")
     
-    # FIXME do we really need `prepared!`? It should be possible to achieve the same just by preparing a cache in `data/`, though perhaps less obvious.
+    # NOTE in principle, it may be possible to achieve the same as `prepared!` by just filling the data/ cache manually, but this is more explicit, formally disabling the generating code paths
     with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
     modnames = parse_modspec(modspec, pl_name)
     
