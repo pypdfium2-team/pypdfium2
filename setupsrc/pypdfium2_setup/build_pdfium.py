@@ -103,11 +103,8 @@ def dl_pdfium(GClient, do_update, revision):
     
     if is_sync:
         # TODO consider passing -D ?
-        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
-        # quick & dirty fix to make a version annotated commit available - pdfium gets versioned very frequently, so this should be more than enough
-        # TODO tighten to check out only up to the latest tag
-        # FIXME the repository is still left in a very confusing state - maybe we should just drop --no-history --shallow for simplicity?
-        run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
+        # FIXME Have to use --with-branch-heads, and unable to use --shallow --no-history because of versioning. This probably makes checkout *much* slower, but not sure how to properly get the version heads afterwards. If we just fetch a fixed number of commits, the versions do appear in git log but land in the remotes refspace, which confuses git describe.
+        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--with_branch_heads"], cwd=SBDir)
     
     return is_sync
 
