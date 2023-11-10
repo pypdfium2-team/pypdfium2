@@ -6,7 +6,7 @@ Generated with:
 Do not modify this file.
 """
 
-# Begin preamble for Python
+# Begin preamble
 
 # TODO
 # - add c_ptrdiff_t and _variadic_function only on an as-needed basis
@@ -64,10 +64,11 @@ class _variadic_function(object):
 import sys
 import ctypes
 import ctypes.util
+import warnings
 from pathlib import Path
 
 
-def _find_library(libname, libdirs):
+def _find_library(libname, libdirs, allow_system_search):
     
     if sys.platform in ("win32", "cygwin", "msys"):
         patterns = ["{}.dll", "lib{}.dll", "{}"]
@@ -86,17 +87,29 @@ def _find_library(libname, libdirs):
             if libpath.is_file():
                 return str(libpath)
     
-    libpath = ctypes.util.find_library(libname)
-    if not libpath:
-        raise ImportError(f"Library '{libname} could not be found in {libdirs} or system.'")
-    return libpath
+    if allow_system_search:
+        if libdirs:
+            warnings.warn(f"Could not find library '{libname}' in libdirs {libdirs}, searching system...")
+        libpath = ctypes.util.find_library(libname)
+        if not libpath:
+            raise ImportError(f"Could not find library '{libname}' in system")
+        return libpath
+    else:
+        raise ImportError(f"Could not find library '{libname}' in libdirs {libdirs} (system search disabled)")
+    
+    assert False, "unreached"
+
+
+_loader_info = dict(
+    libname = "pdfium",
+    libdirs = ['.'],
+    allow_system_search = True,
+)
+_loader_info["libpath"] = _find_library(**_loader_info)
+_lib = ctypes.CDLL(_loader_info["libpath"])
 
 # End loader
 
-
-_libdirs = ['.']
-_libpath = _find_library("pdfium", _libdirs)
-_lib = ctypes.CDLL(_libpath)
 # No modules
 
 enum_anon_2 = c_int

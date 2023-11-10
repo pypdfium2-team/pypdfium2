@@ -7,6 +7,12 @@
 # Changelog
 
 
+## 4.24.0 (2023-11-10)
+
+- Updated PDFium from `6097` to `6110`.
+- Added GitHub issue templates
+
+
 ## 4.23.1 (2023-10-31)
 
 - No PDFium update.
