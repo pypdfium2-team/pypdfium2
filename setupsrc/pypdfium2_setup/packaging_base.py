@@ -70,7 +70,7 @@ class SysNames:
 class ExtPlats:
     sourcebuild = "sourcebuild"
     system = "system"
-    none = "none"
+    none = "none"  # FIXME rename to sdist?
     auto = "auto"
 
 # TODO align with either python or google platform names?
@@ -234,6 +234,7 @@ def plat_to_system(pl_name):
     if pl_name == ExtPlats.sourcebuild:
         # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downsteam with fallback value?
         return Host.system
+    # NOTE other ExtPlats not supported here
     return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
 
 
@@ -554,16 +555,11 @@ def parse_pl_spec(pl_spec, need_prepare=True):
     return need_prepare, pl_name, req_ver, use_v8
 
 
-def parse_modspec(modspec, pl_name):
+def parse_modspec(modspec):
     if modspec:
         modnames = modspec.split(",")
         assert set(modnames).issubset(ModulesAll)
         assert len(modnames) in (1, 2)
     else:
         modnames = ModulesAll
-    
-    modnames = list(modnames)
-    if pl_name == ExtPlats.none and ModuleRaw in modnames:
-        modnames.remove(ModuleRaw)
-    
     return modnames
