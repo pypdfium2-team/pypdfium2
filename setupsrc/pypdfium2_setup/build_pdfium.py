@@ -125,20 +125,20 @@ def _dl_unbundler():
         url_request.urlretrieve(tool_url, tool_file)
 
 
-def _emulate_git_describe(log):
-    # we didn't manage to get git describe working reliably with chromium's branch heads and the awkward state the repo's in, so emulate git describe on our own
+def _walk_refs(log):
     for i, line in enumerate(log.split("\n")):
         for ref in line.split(", "):
-            match = re.match(r"origin/chromium/(\d+)", ref)
+            match = re.fullmatch(r"origin/chromium/(\d+)", ref.strip())
             if match:
                 return int(match.group(1)), i
     assert False, "Failed to find versioned commit - log too small?"
 
 
 def identify_pdfium():
+    # we didn't manage to get git describe working reliably with chromium's branch heads and the awkward state the repo's in, so emulate git describe on our own
     # FIXME avoid static number of commits - need a better way to determine latest version and commit count diff
     log = run_cmd(["git", "log", "-100", "--pretty=%D"], cwd=PDFiumDir, capture=True)
-    v_short, n_commits = _emulate_git_describe(log)
+    v_short, n_commits = _walk_refs(log)
     if n_commits:
         hash = "g" + run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
     else:
