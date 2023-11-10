@@ -104,9 +104,8 @@ def dl_pdfium(GClient, do_update, revision):
     if is_sync:
         # TODO consider passing -D ?
         run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
-        # quick & dirty fix to make a version annotated commit available - pdfium gets versioned very frequently, so this should be more than enough
-        # TODO tighten to check out only up to the latest tag
-        # FIXME the repository is still left in a very confusing state - maybe we should just drop --no-history --shallow for simplicity?
+        # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
+        # FIXME avoid static number of commits, check out exactly up to latest versioned commit
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     
     return is_sync
@@ -126,23 +125,26 @@ def _dl_unbundler():
         url_request.urlretrieve(tool_url, tool_file)
 
 
+def _emulate_git_describe(log):
+    # we didn't manage to get git describe working reliably with chromium's branch heads and the awkward state the repo's in, so emulate git describe on our own
+    for i, line in enumerate(log.split("\n")):
+        for ref in line.split(", "):
+            match = re.match(r"origin/chromium/(\d+)", ref)
+            if match:
+                return int(match.group(1)), i
+    assert False, "Failed to find versioned commit - log too small?"
+
+
 def identify_pdfium():
-    # if not updated, we'll always be dirty because of the patches, so not much point checking it
-    # FIXME `git describe --all` stopped working correctly??
-    desc = run_cmd(["git", "describe", "--all"], cwd=PDFiumDir, capture=True)
-    desc = desc.rsplit("/", maxsplit=1)[-1]
-    v_short, *id_parts = desc.split("-")
-    v_short = int(v_short)
-    assert len(id_parts) < 2
-    
-    # FIXME some duplication with base::parse_given_tag()
-    v_post = dict(n_commits=0, hash=None)
-    if len(id_parts) > 0:
-        v_post["n_commits"] = int(id_parts[0])
-    if len(id_parts) > 1:
-        v_post["hash"] = id_parts[1]
-    
-    return v_short, v_post
+    # FIXME avoid static number of commits - need a better way to determine latest version and commit count diff
+    log = run_cmd(["git", "log", "-100", "--pretty=%D"], cwd=PDFiumDir, capture=True)
+    v_short, n_commits = _emulate_git_describe(log)
+    if n_commits:
+        hash = "g" + run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
+    else:
+        hash = None
+    v_info = dict(n_commits=n_commits, hash=hash)
+    return v_short, v_info
 
 
 def _create_resources_rc(pdfium_build):
@@ -244,6 +246,7 @@ def main(
     
     pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
     v_short, v_post = identify_pdfium()
+    print(f"Version {v_short} {v_post}", file=sys.stderr)
     
     if pdfium_dl_done:
         patch_pdfium(v_short)
