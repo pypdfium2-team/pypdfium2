@@ -128,9 +128,11 @@ def _dl_unbundler():
 
 def identify_pdfium():
     # if not updated, we'll always be dirty because of the patches, so not much point checking it
+    # FIXME `git describe --all` stopped working correctly??
     desc = run_cmd(["git", "describe", "--all"], cwd=PDFiumDir, capture=True)
     desc = desc.rsplit("/", maxsplit=1)[-1]
     v_short, *id_parts = desc.split("-")
+    v_short = int(v_short)
     assert len(id_parts) < 2
     
     # FIXME some duplication with base::parse_given_tag()
