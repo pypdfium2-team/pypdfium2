@@ -90,6 +90,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Link against external pdfium instead of bundling it.
     For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
   
+  <!-- TODO version.json: reconsider origin - should we add a new field for the packager? -->
   * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-built data files 🔗</a> (this is expected to work offline)
     ```bash
     # Call ctypesgen (see --help or packaging_base.py::run_ctypesgen() for further options)

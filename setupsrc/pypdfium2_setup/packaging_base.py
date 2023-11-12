@@ -515,14 +515,16 @@ def build_pl_suffix(version, use_v8):
     return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
 
 
-def parse_pl_spec(pl_spec, need_prepare=True):
+def parse_pl_spec(pl_spec, with_prepare=True):
     
-    # FIXME targets integration is very inflexible, need to restructure!
-    # TODO add way to pass through package provider with system target
+    # TODOs
+    # - targets integration is inflexible, need to restructure
+    # - add way to pass through package provider with system target?
+    # - variable name with_prepare is confusing
     
     if pl_spec.startswith("prepared!"):
         _, pl_spec = pl_spec.split("!", maxsplit=1)
-        return parse_pl_spec(pl_spec, need_prepare=False)
+        return parse_pl_spec(pl_spec, with_prepare=False)
     
     req_ver = None
     use_v8 = False
@@ -543,8 +545,8 @@ def parse_pl_spec(pl_spec, need_prepare=True):
     else:
         raise ValueError(f"Invalid binary spec '{pl_spec}'")
     
-    if pl_name == ExtPlats.system:
-        assert req_ver, "Version must be given explicitly for system target."
+    if pl_name == ExtPlats.system or not with_prepare:
+        assert req_ver, "Version must be given explicitly for system or prepared!... targets"
         
     if req_ver:
         assert req_ver.isnumeric()
@@ -552,7 +554,7 @@ def parse_pl_spec(pl_spec, need_prepare=True):
     else:
         req_ver = PdfiumVer.get_latest()
     
-    return need_prepare, pl_name, req_ver, use_v8
+    return with_prepare, pl_name, req_ver, use_v8
 
 
 def parse_modspec(modspec):
