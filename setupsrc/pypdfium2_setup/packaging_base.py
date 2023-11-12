@@ -544,14 +544,12 @@ def parse_pl_spec(pl_spec, with_prepare=True):
         pl_name = getattr(PlatNames, pl_spec)
     else:
         raise ValueError(f"Invalid binary spec '{pl_spec}'")
-    
-    if pl_name == ExtPlats.system or not with_prepare:
-        assert req_ver, "Version must be given explicitly for system or prepared!... targets"
         
     if req_ver:
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
     else:
+        assert pl_name != ExtPlats.system and with_prepare, "Version must be given explicitly for system or prepared!... targets"
         req_ver = PdfiumVer.get_latest()
     
     return with_prepare, pl_name, req_ver, use_v8
