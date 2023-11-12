@@ -38,7 +38,7 @@
 ## 4.22.0 (2023-10-19)
 
 - Updated PDFium from `6056` to `6070`.
-- Changed `PDFIUM_PLATFORM=none` to strictly exclude all data files. Added new target `system` consuming bindings and version files supplied by the caller. Again, the setup API implications were accepted. Packagers that used `none` to bind to system pdfium will have to update.
+- Changed `PDFIUM_PLATFORM=none` to strictly exclude all data files. Added new target `system` consuming bindings and version files supplied by the caller.
 - Enhanced integration of separate modules. This blazes the trail for conda packaging. We had to move metadata back to `setup.cfg` since we need a dynamic project name, which `pyproject.toml` does not support.
 - Major improvements to version integration.
   * Ship version info as JSON files, separately for each submodule. Expose as immutable classes. Legacy members have been retained for backwards compatibility.
@@ -55,7 +55,7 @@
 
 - Setup changes (partly ported from the devel branch)
   * ctypesgen fork: replaced the old, bloated library loader with a new, lean version
-  * Merged `$PDFIUM_VERSION` and `$PDFIUM_USE_V8` into the existing `$PDFIUM_PLATFORM` specifier (see Readme for updated description). The relatively minor setup API breakage was considered tolerable; the core library API is not affected.
+  * Merged `$PDFIUM_VERSION` and `$PDFIUM_USE_V8` into the existing `$PDFIUM_PLATFORM` specifier (see Readme for updated description).
   * Removed the `build` package from pyproject buildsystem requires, where it was unnecessary. Thanks to Anaconda Team.
   * Split in two separate modules: pypdfium2 for helpers (pure-python), pypdfium2_raw for the core bindings (data files).
 
