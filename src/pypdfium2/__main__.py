@@ -9,6 +9,8 @@ import importlib
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
+# the * import in pypdfium2.raw loses underscore-prefixed members, so import from the direct origin
+from pypdfium2_raw.bindings import _loader_info as loader_info
 
 SubCommands = {
     "arrange":        "rearrange/merge documents",
@@ -36,7 +38,9 @@ def get_parser():
     main_parser.add_argument(
         "--version", "-v",
         action = "version",
-        version = f"pypdfium2 {PYPDFIUM_INFO}\npdfium {PDFIUM_INFO}",
+        version = \
+            f"pypdfium2 {PYPDFIUM_INFO}\n" + f"pdfium {PDFIUM_INFO}\n" + \
+            "\n".join([f"    {k}: {v!r}" for k, v in loader_info.items()]),
     )
     subparsers = main_parser.add_subparsers(dest="subcommand")
     
