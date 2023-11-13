@@ -100,7 +100,7 @@ ReleaseNames = {
     PlatNames.linux_arm32      : "linux-arm",
     PlatNames.linux_musl_x64   : "linux-musl-x64",
     PlatNames.linux_musl_x86   : "linux-musl-x86",
-    PlatNames.linux_musl_arm64 : "linux-musl-arm64",  # not V8 AOTW
+    PlatNames.linux_musl_arm64 : "linux-musl-arm64",
     PlatNames.windows_x64      : "win-x64",
     PlatNames.windows_x86      : "win-x86",
     PlatNames.windows_arm64    : "win-arm64",
