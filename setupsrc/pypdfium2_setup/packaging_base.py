@@ -380,8 +380,6 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
     
-    bindings = target_dir / BindingsFN
-    
     args = ["ctypesgen", f"--strip-build-path={headers_dir}", "--no-srcinfo", "--library", "pdfium"]
     
     if run_lds:
@@ -400,6 +398,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     if Host.system == SysNames.windows:
         args += ["-D", "_WIN32"]
     
+    bindings = target_dir / BindingsFN
     args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", bindings]
     
     run_cmd(args, cwd=headers_dir)
