@@ -28,7 +28,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   ```bash
   conda install pypdfium2_helpers -c bblanchon -c pypdfium2-team
   ```
-  **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. **Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are unofficial!** See below for more info.
+  **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are [unofficial](#install-unofficial).
   
   To depend on pypdfium2 in a recipe:
   ```yaml
@@ -36,7 +36,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     run:
       - pypdfium2-team::pypdfium2_helpers
   ```
-  You'll want to have downstream callers allow the custom channels on install as shown above, otherwise conda will not be able to satisfy the dependencies.
+  You'll want to have downstream callers allow the custom channels on install as shown above, otherwise conda may not be able to satisfy the dependencies.
   
   To check if the sources are correct:
   ```bash
@@ -89,7 +89,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
     ```
     Link against external pdfium instead of bundling it.
-    Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case".
+    Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case" for now.
     For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
   
   <!-- TODO version.json: reconsider origin - should we add a new field for the packager? -->
