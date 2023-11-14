@@ -85,13 +85,15 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary 🔗</a>
     ```bash
     # Substitute $PDFIUM_VER with the system pdfium's build version.
+    # For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
     ```
     Link against external pdfium instead of bundling it.
-    For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
+    Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case".
+    For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
   
   <!-- TODO version.json: reconsider origin - should we add a new field for the packager? -->
-  * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-built data files 🔗</a> (this is expected to work offline)
+  * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)
     ```bash
     # Call ctypesgen (see --help or packaging_base.py::run_ctypesgen() for further options)
     # Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
