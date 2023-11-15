@@ -25,19 +25,23 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 
 * <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda 🔗</a> (official)
+  
+  To install with permanent channel config (encouraged):
   ```bash
   conda config --add channels bblanchon
   conda config --add channels pypdfium2-team
   conda config --set channel_priority strict
   conda install pypdfium2-team::pypdfium2_helpers
   ```
-  Adding the channels permanently and tightening priority is optional, but encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel.
-  If desired, you may limit the channel config to the current environment by adding `--env`.
   
-  The alternative is to allow the channels only once on install, but then you should be cautious when making changes to the environment:
+  Alternatively, with temporary channel config (discouraged):
   ```bash
   conda install pypdfium2-team::pypdfium2_helpers -c bblanchon -c pypdfium2-team
   ```
+  
+  Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel. (If desired, you may limit the channel config to the current environment by adding `--env`.)
+  
+  Otherwise, you should be cautious when making changes to the environment.
   
   To depend on pypdfium2 in a recipe:
   ```yaml
@@ -49,14 +53,14 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are [unofficial](#install-unofficial).
   
-  To check the sources are correct:
+  To verify the sources are correct:
   ```bash
   conda list --show-channel-urls "pypdfium2|pdfium-binaries"
   conda config --show-sources
   ```
   The table should show `pypdfium2-team` and `bblanchon` in the channels column.
   If added permanently, the config should also include these channels, ideally with top priority.
-  Please confirm this before reporting any issue with a conda install of pypdfium2.
+  Please check this before reporting any issue with a conda install of pypdfium2.
 
 
 * <a id="user-content-install-unofficial" class="anchor" href="#install-unofficial">Unofficial packages 🔗</a>
