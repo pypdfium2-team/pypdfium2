@@ -40,7 +40,7 @@ jobs:
           fetch-depth: 0  # quick fix for `git describe`
       
       - name: Install deps
-        run: python3 -m pip install -U -r req/default.txt
+        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Build PDFium (default)
         if: ${{ !matrix.use_syslibs }}

@@ -1,3 +1,0 @@
--r setup.txt
--r converters.txt
--r test.txt  # implies converters.txt

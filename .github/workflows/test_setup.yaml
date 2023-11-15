@@ -46,7 +46,7 @@ jobs:
         run: python3 -m pip install -e .
       
       - name: Install/update deps for non-isolated setup
-        run: python3 -m pip install -U -r req/default.txt -r req/docs.txt
+        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/docs.txt
       
       - name: Setup (default, no isolation)
         run: python3 -m pip install --no-build-isolation .
