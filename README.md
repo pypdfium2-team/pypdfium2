@@ -34,7 +34,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   Adding the channels permanently and tightening priority is optional, but encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel.
   If desired, you may limit the channel config to the current environment by adding `--env`.
   
-  Alternatively, it is possible to allow the channels only once on install, but then you should be cautious when making changes to the environment:
+  The alternative is to allow the channels only once on install, but then you should be cautious when making changes to the environment:
   ```bash
   conda install pypdfium2-team::pypdfium2_helpers -c bblanchon -c pypdfium2-team
   ```

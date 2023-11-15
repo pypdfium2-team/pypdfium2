@@ -19,6 +19,7 @@ body:
       options:
         - label: I have verified to be using the **official packages** from the `pypdfium2-team` and `bblanchon` channels.
           required: true
+        - label: I confirm to be working with the **conda env in question, and its proper python executable** (not system python).
   
   - type: textarea
     attributes:
@@ -33,9 +34,9 @@ body:
       render: shell
       description: |
         To provide information about your install, please run the following commands and paste the output into the field below.
-        **Note, the commands have to be run in the active conda env in question.**
         ```shell
         python -m pypdfium2 -v
+        which python
         python -VV
         python -c "import platform as p; print(p.platform())"
         python -m pip show pypdfium2_raw
@@ -48,7 +49,7 @@ body:
   
   - type: checkboxes
     attributes:
-      label: Output validity
+      label: Validity
       options:
-        - label: I confirm that I ran all commands **in the active conda env in question**, and pasted the whole output.
+        - label: I confirm that I ran all commands in the conda env in question, with its proper python executable, and pasted the whole output.
           required: true
