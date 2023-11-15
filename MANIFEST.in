@@ -19,6 +19,7 @@ include src/pypdfium2_raw/__init__.py
 
 # Include all of licenses in an sdist (also wheel licenses), since we may build a wheel from the sdist
 recursive-include LICENSES/ *
+include .reuse/dep5
 include .reuse/dep5-wheel
 
 # PyPA eagerly includes tests - exclude because we don't use them
