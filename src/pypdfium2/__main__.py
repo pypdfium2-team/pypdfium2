@@ -38,9 +38,7 @@ def get_parser():
     main_parser.add_argument(
         "--version", "-v",
         action = "version",
-        version = \
-            f"pypdfium2 {PYPDFIUM_INFO}\n" + f"pdfium {PDFIUM_INFO}\n" + \
-            "\n".join([f"    {k}: {v!r}" for k, v in loader_info.items()]),
+        version = f"pypdfium2 {PYPDFIUM_INFO}\n" f"pdfium {PDFIUM_INFO} at {loader_info['libpath']}"
     )
     subparsers = main_parser.add_subparsers(dest="subcommand")
     
