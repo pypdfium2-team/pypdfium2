@@ -1,1 +1,2 @@
 pytest
+-r converters.txt
