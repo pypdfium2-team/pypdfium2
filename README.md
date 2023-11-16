@@ -28,7 +28,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     
   _**Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
   
-  + To install directly
+  + To install
     
     With permanent channel config (encouraged):
     ```bash
@@ -38,7 +38,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     conda install pypdfium2-team::pypdfium2_helpers
     ```
     
-    Alternatively, with temporary channel config (discouraged):
+    Alternatively, with temporary channel config:
     ```bash
     conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon
     ```
