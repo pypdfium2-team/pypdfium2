@@ -99,11 +99,11 @@ jobs:
           name: conda_package
           path: conda_dist/
       
-      - name: Prepare
+      - name: Install
         run: |
           python -VV
           ls -l conda_dist/
-          conda install -y pypdfium2_${{ inputs.package }} -c bblanchon -c pypdfium2-team -c ./conda_dist/
+          conda install -y pypdfium2_${{ inputs.package }} -c ./conda_dist/
       
       - name: Test raw package
         if: inputs.package == 'raw'
