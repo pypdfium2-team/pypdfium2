@@ -17,50 +17,62 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 <!-- FIXME is there a better/universal way to create linkable sub-sections without them being a heading? Note, the current solution is specific to GH and doesn't work on RTD. -->
 
-* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI 🔗</a> (recommended, official)
+* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI 🔗</a> (recommended)
   ```bash
   python -m pip install -U pypdfium2
   ```
   This will use a pre-built wheel package, the easiest way of installing pypdfium2.
 
 
-* <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda 🔗</a> (official)
+* <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda 🔗</a>
+    
+  _**Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
   
-  To install with permanent channel config (encouraged):
-  ```bash
-  conda config --add channels bblanchon
-  conda config --add channels pypdfium2-team
-  conda config --set channel_priority strict
-  conda install pypdfium2-team::pypdfium2_helpers
-  ```
+  + To install directly
+    
+    With permanent channel config (encouraged):
+    ```bash
+    conda config --add channels bblanchon
+    conda config --add channels pypdfium2-team
+    conda config --set channel_priority strict
+    conda install pypdfium2-team::pypdfium2_helpers
+    ```
+    
+    Alternatively, with temporary channel config (discouraged):
+    ```bash
+    conda install pypdfium2-team::pypdfium2_helpers -c bblanchon -c pypdfium2-team
+    ```
   
-  Alternatively, with temporary channel config (discouraged):
-  ```bash
-  conda install pypdfium2-team::pypdfium2_helpers -c bblanchon -c pypdfium2-team
-  ```
+    Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel. (If desired, you may limit the channel config to the current environment by adding `--env`.)
+    Otherwise, you should be cautious when making changes to the environment.
   
-  Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel. (If desired, you may limit the channel config to the current environment by adding `--env`.)
+  + To depend on pypdfium2 in a `conda-build` recipe
+    ```yaml
+    requirements:
+      run:
+        - pypdfium2-team::pypdfium2_helpers
+    ```
+    You'll want to have downstream callers handle the custom channels as shown above, otherwise conda will not be able to satisfy requirements.
   
-  Otherwise, you should be cautious when making changes to the environment.
+  + To use set up channels in a GH workflow
+    ```yaml
+    - name: ...
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        # ... your options
+        channels: bblanchon,pypdfium2-team
+        channel-priority: strict
+    ```
+    This is just a suggestion, you can also call `conda config` manually, or pass channels on command basis using `-c`, as discussed above.
   
-  To depend on pypdfium2 in a recipe:
-  ```yaml
-  requirements:
-    run:
-      - pypdfium2-team::pypdfium2_helpers
-  ```
-  You'll want to have downstream callers handle the custom channels as shown above, otherwise conda will not be able to satisfy requirements.
-  
-  **Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are [unofficial](#install-unofficial).
-  
-  To verify the sources are correct:
-  ```bash
-  conda list --show-channel-urls "pypdfium2|pdfium-binaries"
-  conda config --show-sources
-  ```
-  The table should show `pypdfium2-team` and `bblanchon` in the channels column.
-  If added permanently, the config should also include these channels, ideally with top priority.
-  Please check this before reporting any issue with a conda install of pypdfium2.
+  + To verify the sources
+    ```bash
+    conda list --show-channel-urls "pypdfium2|pdfium-binaries"
+    conda config --show-sources
+    ```
+    The table should show `pypdfium2-team` and `bblanchon` in the channels column.
+    If added permanently, the config should also include these channels, ideally with top priority.
+    Please check this before reporting any issue with a conda install of pypdfium2.
 
 
 * <a id="user-content-install-unofficial" class="anchor" href="#install-unofficial">Unofficial packages 🔗</a>
