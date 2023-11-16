@@ -20,7 +20,6 @@ P_CONDA_BUNDLE = "conda_bundle"
 P_CONDA_RAW = "conda_raw"
 P_CONDA_HELPERS = "conda_helpers"
 
-CondaChannels = ("-c", "bblanchon", "-c", "pypdfium2-team")
 CondaDir = ProjectDir / "conda"
 
 
@@ -110,7 +109,7 @@ class ArtifactStash:
 
 def run_conda_build(recipe_dir, out_dir, args=[]):
     with TmpCommitCtx():
-        run_cmd(["conda", "build", recipe_dir, "--output-folder", out_dir, *args, *CondaChannels], cwd=ProjectDir, env=os.environ)
+        run_cmd(["conda", "build", recipe_dir, "--output-folder", out_dir, *args], cwd=ProjectDir, env=os.environ)
 
 
 CondaNames = {
@@ -171,7 +170,7 @@ def main_conda_raw(args):
     os.environ["PDFIUM_FULL"] = ".".join([str(v) for v in PdfiumVer.to_full(args.pdfium_ver)])
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
     with CondaExtPlatfiles(emplace_func):
-        run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out")
+        run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon"])
 
 
 def main_conda_helpers(args):
@@ -190,7 +189,7 @@ def main_conda_helpers(args):
     
     # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
     # args=["-c", CondaDir/"raw"/"out"]
-    run_conda_build(CondaDir/"helpers", CondaDir/"helpers"/"out")
+    run_conda_build(CondaDir/"helpers", CondaDir/"helpers"/"out", args=["--override-channels", "-c", "pypdfium2-team", "-c", "bblanchon"])
 
 
 class TmpCommitCtx:
