@@ -27,6 +27,8 @@ defaults:
   run:
     shell: bash -el {0}
 
+# TODO it would be nice to also support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be failry complicated
+
 jobs:
   
   build:
@@ -90,8 +92,6 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
-          channels: bblanchon,pypdfium2-team
-          channel-priority: strict
       
       - name: Download artifact
         uses: actions/download-artifact@v3
@@ -99,20 +99,23 @@ jobs:
           name: conda_package
           path: conda_dist/
       
-      - name: Install
+      - name: Show debug info
         run: |
           python -VV
           ls -l conda_dist/
-          conda install -y pypdfium2_${{ inputs.package }} -c ./conda_dist/
       
-      - name: Test raw package
+      # according to the docs, --override-channels disables searching config file channels, and -c options priority decreases from left to right
+      - name: Install/Test raw package
         if: inputs.package == 'raw'
-        run: python conda/raw/minitest.py
+        run: |
+          conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c bblanchon
+          python conda/raw/minitest.py
       
-      - name: Test helpers package
+      - name: Install/Test helpers package
         if: inputs.package == 'helpers'
         run: |
           conda install -y pytest pillow numpy
+          conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c pypdfium2-team -c bblanchon
           pytest tests/ tests_old/
   
   publish:
