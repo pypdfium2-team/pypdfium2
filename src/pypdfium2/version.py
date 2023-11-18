@@ -175,8 +175,7 @@ Parameters:
         Source of this version info. Possible values:\n
         - ``git``: Parsed from git describe. Always used if available. Highest accuracy.
         - ``given``: Pre-supplied version file (e.g. packaged with sdist, or else created by caller).
-        - ``record``: Parsed from autorelease record. Implies that possible changes after tag are unknown.\n
-        Note that *given* and *record* are not "trustworthy", they can be easily abused to pass arbitrary values. *git* should be correct provided the installed version file is not corrupted.
+        - ``record``: Parsed from autorelease record. Implies that possible changes after tag are unknown.
     is_editable (bool | None):
         True for editable install, False otherwise. None if unknown.\n
         If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happened since. The actual current state is unknown.
@@ -215,7 +214,7 @@ Parameters:
         The pdfium binary's origin. Possible values:\n
         - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2.
         - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2.
-        - ``system``: Dynamically loaded from a standard system location using :func:`ctypes.util.find_library`.
+        - ``system``: Loaded from a standard system location using :func:`ctypes.util.find_library()`, or an explicit directory provided at setup time.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
 """
