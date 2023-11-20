@@ -14,10 +14,10 @@ Source: https://github.com/pypdfium2-team/pypdfium2
 # License: ...
 
 Files:
-    RELEASE.md
     req/*.txt
     autorelease/record.json
     autorelease/config.json
+    .github/PULL_REQUEST_TEMPLATE.md
     tests/expectations/*
     tests/resources/render.pdf
     tests/resources/multipage.pdf
