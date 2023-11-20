@@ -369,7 +369,7 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
 
 
 def tar_extract_file(tar, src, dst_path):
-    src_buf = tar.extractfile(src)  # src: path or tar member
+    src_buf = tar.extractfile(src)  # src: path str or tar member object
     with open(dst_path, "wb") as dst_buf:
         shutil.copyfileobj(src_buf, dst_buf)
 
@@ -437,17 +437,19 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         guard_symbols = kwargs["guard_symbols"],
         source = "generated",
     )
-    if bind_path.exists() and ver_path.exists():
+    prev_ver = None
+    if ver_path.exists():
         prev_info = read_json(ver_path)
-        if prev_info == curr_info:
+        prev_ver = prev_info["version"]
+        if prev_info == curr_info and bind_path.exists():
             print(f"Using cached bindings", file=sys.stderr)
             return
-        else:
-            print(f"Rebuilding bindings ...", file=sys.stderr)
-            # print(f"{prev_info} != {curr_info}", file=sys.stderr)
     
-    if not headers_dir.exists() or not list(headers_dir.glob("fpdf*.h")):
-        print("Downloading headers ...", file=sys.stderr)
+    # We try to reuse headers if only bindings params differ, not version. Note that headers don't currently have an own version file; we reuse the bindings version file for simplicity.
+    if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
+        print("Using cached headers", file=sys.stderr)
+    else:
+        print("Downloading headers...", file=sys.stderr)
         headers_dir.mkdir(parents=True, exist_ok=True)
         archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
@@ -458,6 +460,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
                     tar_extract_file(tar, m, headers_dir/m.name)
         archive_path.unlink()
     
+    print(f"Building bindings ...", file=sys.stderr)
     run_ctypesgen(DataDir_Bindings, headers_dir, **kwargs)
     write_json(ver_path, curr_info)
 
