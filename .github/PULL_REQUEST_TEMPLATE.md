@@ -1,4 +1,4 @@
-**Important:** External contributors must comply with the template, otherwise PRs may be closed without further notice.
+**Important:** External contributors are urged to comply with the template.
 
 
 ## Description
@@ -9,18 +9,20 @@
 ## Checklist
 
 <!--
-- Choose the section(s) relevant to your PR, read its questions carefully and answer truthfully. (Never mind inapplicable sections - e.g. if the PR doesn't change setup code, you needn't handle the setup section.)
-- Place an `x` in the `[ ]` for "yes", leave it empty for "no". If a question is not applicable, remove the `[ ]`.
+- Choose the section(s) relevant to your PR and answer the questions. A section is indicated by ### Heading.
+- Non-applying sections can be ignored or removed.
+- Place an `x` in the `[ ]` for "yes", leave it empty for "no". If a question is not applicable, remove the `[ ]`, but keep the question in place.
 - Use the Preview tab to confirm the PR will render correctly.
 -->
 
 
 ### Setup
 
-- [ ] This PR changes setup code (`setupsrc/`, `setup.py`).
-- [ ] If acting on behalf of a downstream use case, I have assessed that it cannot reasonably be solved by existing means, or the change forms a significant improvement over possible alternatives.
+- [ ] This PR changes setup code (`setupsrc/`, `setup.py` etc.).
+- [ ] I have tested the change does not break internal callers.
 - [ ] I believe the change is maintainable and does not cause unreasonable complexity or code pollution.
-- [ ] I believe the targeted use case is supported by pypdfium2-team. *Note that this project tends to be unwilling to support esoteric or artificially restricted setup envs.*
+- [ ] If acting on behalf of a downstream use case, I have assessed that it cannot reasonably be solved by existing means, or the change forms a notable improvement over possible alternatives.
+- [ ] I believe the targeted use case is supported by pypdfium2-team. *Note that we might not want to support esoteric or artificially restricted setup envs.*
 
 
 ### Helpers
