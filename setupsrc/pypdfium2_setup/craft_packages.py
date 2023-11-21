@@ -8,7 +8,11 @@ import argparse
 import tempfile
 from pathlib import Path
 from functools import partial
-from build.__main__ import main as pybuild_cli
+try:
+    from build.__main__ import main as pybuild_cli
+except ImportError:
+    pybuild_cli = None
+    print("Warning: 'build' module not importable, will not be able to craft pypi packages.", file=sys.stderr)
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 # TODO consider dotted access?
@@ -191,8 +195,7 @@ def main_conda_helpers(args):
     os.environ["PDFIUM_MAX"] = str(args.pdfium_ver)
     
     # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
-    # args=["-c", CondaDir/"raw"/"out"]
-    os.environ[FlavorSpec_EnvVar] = "conda"
+    # ["-c", CondaDir/"raw"/"out"]
     run_conda_build(CondaDir/"helpers", CondaDir/"helpers"/"out", args=["--override-channels", "-c", "pypdfium2-team", "-c", "bblanchon"])
 
 

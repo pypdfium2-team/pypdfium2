@@ -17,6 +17,7 @@ build:
   entry_points:
     - pypdfium2 = pypdfium2.__main__:cli_main
   script_env:
+    - PYPDFIUM_DIST_FLAVOR=conda
     - PYPDFIUM_MODULES=helpers
   script:
     - {{ PYTHON }} conda/prepare_script.py

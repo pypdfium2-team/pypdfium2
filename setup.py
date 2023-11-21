@@ -150,7 +150,7 @@ def main():
     modnames = parse_modspec( os.environ.get(ModulesSpec_EnvVar, "") )
     dist_flavor = os.environ.get(FlavorSpec_EnvVar, "")
     if not dist_flavor:
-        # Flavor not given - probably an end user, or a third-party distributor. Try to give some identification by encoding host username and platform.
+        # Flavor not given - probably an end user, or a third-party distributor. Try to give some identification by encoding host username and platform. - FIXME quite long...
         dist_flavor = f"caller.{getpass.getuser()}.{Host.platform}"
         print(f"Warning: dist flavor not given, setting to {dist_flavor!r}", file=sys.stderr)
     

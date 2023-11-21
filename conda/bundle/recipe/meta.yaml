@@ -24,6 +24,7 @@ build:
     - pypdfium2 = pypdfium2.__main__:cli_main
   script_env:
     - PDFIUM_PLATFORM="prepared!{{ pl_spec }}"
+    - PYPDFIUM_DIST_FLAVOR=conda
   script:
     - {{ PYTHON }} conda/prepare_script.py
     - {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
