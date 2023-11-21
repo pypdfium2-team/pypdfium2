@@ -78,7 +78,7 @@ def assert_exists(dir, data_files):
         assert False, f"Missing data files: {missing}"
 
 
-def run_setup(modnames, bin_spec, dist_flavor):
+def run_setup(modnames, pl_name, bin_version, bin_creator, dist_flavor):
     
     kwargs = dict(
         name = "pypdfium2",
@@ -92,14 +92,14 @@ def run_setup(modnames, bin_spec, dist_flavor):
         install_requires = [],
     )
     
-    if modnames == [ModuleHelpers] and bin_spec.pl_name != ExtPlats.sdist:
+    if modnames == [ModuleHelpers] and pl_name != ExtPlats.sdist:
         kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
         kwargs["install_requires"] += ["pypdfium2_raw"]
     elif modnames == [ModuleRaw]:
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
-        kwargs["version"] = str(bin_spec.version)
+        kwargs["version"] = str(bin_version)
     
     if ModuleHelpers in modnames:
         # is_editable = None: unknown/fallback in case the cmdclass is not reached
@@ -113,24 +113,25 @@ def run_setup(modnames, bin_spec, dist_flavor):
         kwargs["package_data"]["pypdfium2"] = [VersionFN]
         kwargs["entry_points"] = dict(console_scripts=["pypdfium2 = pypdfium2.__main__:cli_main"])
     if ModuleRaw in modnames:
-        # FIXME not sure if managing creator/location this way is good? the alternative would be to add them directly on the initial write...
-        raw_info = read_json(ModuleDir_Raw/VersionFN)
-        raw_info["creator"] = bin_spec.creator
-        raw_info["location"] = "external" if ExtPlats.system else "bundled"
-        write_json(ModuleDir_Raw/VersionFN, raw_info)
+        if pl_name != ExtPlats.sdist:
+            # FIXME not sure if managing creator/location this way is good? the alternative would be to add them directly on the initial write...
+            raw_info = read_json(ModuleDir_Raw/VersionFN)
+            raw_info["creator"] = bin_creator
+            raw_info["location"] = "external" if ExtPlats.system else "bundled"
+            write_json(ModuleDir_Raw/VersionFN, raw_info)
         kwargs["package_dir"]["pypdfium2_raw"] = "src/pypdfium2_raw"
     
-    if ModuleRaw not in modnames or bin_spec.pl_name == ExtPlats.sdist:
+    if ModuleRaw not in modnames or pl_name == ExtPlats.sdist:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": PLATFILES_GLOB}
-        if bin_spec.pl_name == ExtPlats.sdist:
+        if pl_name == ExtPlats.sdist:
             kwargs["license_files"] += LICENSES_SDIST
-    elif bin_spec.pl_name == ExtPlats.system:
+    elif pl_name == ExtPlats.system:
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
-        sys_name = plat_to_system(bin_spec.pl_name)
+        sys_name = plat_to_system(pl_name)
         libname = LibnameForSystem[sys_name]
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
-        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(bin_spec.pl_name)
+        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["distclass"] = BinaryDistribution
         kwargs["license"] = f"({kwargs['license']}) AND LicenseRef-PdfiumThirdParty"
         kwargs["license_files"] += LICENSES_WHEEL
@@ -157,7 +158,7 @@ def main():
     # TODO just handle down spec to the functions?
     if ModuleRaw in modnames and spec.with_prepare and spec.pl_name != ExtPlats.sdist:
         prepare_setup(spec.pl_name, spec.version, spec.use_v8)
-    run_setup(modnames, spec, dist_flavor)
+    run_setup(modnames, spec.pl_name, spec.version, spec.creator, dist_flavor)
 
 
 if __name__ == "__main__":
