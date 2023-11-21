@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 name: Conda package
-description: Use this if you installed pypdfium2 via conda
+description: If you installed via conda, and encountered an issue while using the library. Use even if you believe it is not a package problem.
 
 body:
   
