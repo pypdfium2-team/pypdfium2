@@ -8,6 +8,7 @@ import argparse
 import tempfile
 from pathlib import Path
 from functools import partial
+from build.__main__ import main as pybuild_cli
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 # TODO consider dotted access?
@@ -15,7 +16,7 @@ from pypdfium2_setup.packaging_base import *
 from pypdfium2_setup.emplace import prepare_setup
 
 
-P_PYPI = "pypi"
+P_PYPI = "pypi"  # TODO rename to pypa
 P_CONDA_BUNDLE = "conda_bundle"
 P_CONDA_RAW = "conda_raw"
 P_CONDA_HELPERS = "conda_helpers"
@@ -66,12 +67,14 @@ def parse_args():
     return args
 
 
-def run_pypi_build(args):
-    run_cmd([sys.executable, "-m", "build", "--skip-dependency-check", "--no-isolation"] + args, cwd=ProjectDir, env=os.environ)
+def run_pypi_build(caller_args):
+    pybuild_cli([str(ProjectDir), "--skip-dependency-check", "--no-isolation", *caller_args])
 
 def main_pypi(args):
     
-    os.environ[PlatSpec_EnvVar] = ExtPlats.none
+    os.environ[FlavorSpec_EnvVar] = "pypa"
+    
+    os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
     run_pypi_build(["--sdist"])
     
     suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
@@ -189,6 +192,7 @@ def main_conda_helpers(args):
     
     # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
     # args=["-c", CondaDir/"raw"/"out"]
+    os.environ[FlavorSpec_EnvVar] = "conda"
     run_conda_build(CondaDir/"helpers", CondaDir/"helpers"/"out", args=["--override-channels", "-c", "pypdfium2-team", "-c", "bblanchon"])
 
 

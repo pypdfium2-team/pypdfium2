@@ -8,4 +8,6 @@ requires = [
     "packaging",
     "wheel !=0.38.0, !=0.38.1",
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
+    # There is an unguarded import of `build` in craft_packages.py - this is probably not triggered by other modules, but just include it to be on the safe side.
+    "build",
 ]

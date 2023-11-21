@@ -55,8 +55,9 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
         # also want to consider accepting a full version for offline setup
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=[])
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
-        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
+        write_pdfium_info(ModuleDir_Raw, pdfium_ver, flags=flags)
         return [BindingsFN, VersionFN]
+    
     else:
         platfiles = []
         pl_dir = DataDir/pl_name
@@ -83,21 +84,21 @@ def main():
         description = "Manage in-tree artifacts from an editable install.",
     )
     parser.add_argument(
-        "plat_spec",
+        "bin_spec",
         default = os.environ.get(PlatSpec_EnvVar, ""),
         nargs = "?",
         help = f"The platform specifier. Same format as of ${PlatSpec_EnvVar} on setup. 'none' removes existing artifacts.",
     )
     args = parser.parse_args()
+    bin_spec = parse_bin_spec(args.bin_spec)
     
-    if args.plat_spec == ExtPlats.none:
+    if bin_spec.pl_name == ExtPlats.sdist:
         print("Remove existing in-tree platform files, if any.", file=sys.stderr)
         clean_platfiles()
         return
     
-    with_prepare, *pl_info = parse_pl_spec(args.plat_spec)
-    assert with_prepare, "Can't use prepared target with emplace, would be no-op."
-    prepare_setup(*pl_info)
+    assert bin_spec.with_prepare, "Can't use prepared target with emplace, would be no-op."
+    prepare_setup(bin_spec.pl_name, bin_spec.version, bin_spec.use_v8)
 
 
 if __name__ == "__main__":

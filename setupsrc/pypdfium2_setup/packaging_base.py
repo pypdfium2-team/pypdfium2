@@ -19,7 +19,7 @@ from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
 
-# TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
+# TODO abbreviate internal variable names?
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
@@ -32,6 +32,8 @@ ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw          = "raw"
 ModuleHelpers      = "helpers"
 ModulesAll         = (ModuleRaw, ModuleHelpers)
+
+FlavorSpec_EnvVar = "PYPDFIUM_DIST_FLAVOR"
 
 # NOTE if renaming BindingsFN, also rename `bindings/$FILE`
 BindingsFN = "bindings.py"
@@ -70,8 +72,7 @@ class SysNames:
 class ExtPlats:
     sourcebuild = "sourcebuild"
     system = "system"
-    none = "none"  # FIXME rename to sdist?
-    auto = "auto"
+    sdist = "sdist"
 
 # TODO align with either python or google platform names?
 class PlatNames:
@@ -167,8 +168,8 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None):
-    info = dict(**PdfiumVer.to_full(build)._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
+def write_pdfium_info(dir, v_short, flags=[], n_commits=0, hash=None):
+    info = dict(**PdfiumVer.to_full(v_short)._asdict(), n_commits=n_commits, hash=hash, flags=flags)
     write_json(dir/VersionFN, info)
     return info
 
@@ -515,7 +516,9 @@ def build_pl_suffix(version, use_v8):
     return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
 
 
-def parse_pl_spec(pl_spec, with_prepare=True):
+PlSpec = namedtuple("PlSpec", ["pl_name", "version", "use_v8", "creator", "with_prepare"])
+
+def parse_bin_spec(pl_spec, with_prepare=True):
     
     # TODOs
     # - targets integration is inflexible, need to restructure
@@ -524,35 +527,45 @@ def parse_pl_spec(pl_spec, with_prepare=True):
     
     if pl_spec.startswith("prepared!"):
         _, pl_spec = pl_spec.split("!", maxsplit=1)
-        return parse_pl_spec(pl_spec, with_prepare=False)
+        return parse_bin_spec(pl_spec, with_prepare=False)
     
-    req_ver = None
+    version = None
     use_v8 = False
     if PlatSpec_VerSep in pl_spec:
-        pl_spec, req_ver = pl_spec.rsplit(PlatSpec_VerSep)
+        pl_spec, version = pl_spec.rsplit(PlatSpec_VerSep)
+        version = int(version)
     if pl_spec.endswith(PlatSpec_V8Sym):
         pl_spec = pl_spec[:-len(PlatSpec_V8Sym)]
         use_v8 = True
     
-    if not pl_spec or pl_spec == ExtPlats.auto:
-        pl_name = Host.platform
-        if pl_name is None:
+    if not with_prepare:
+        record = read_json(ModuleDir_Raw/VersionFN)
+        assert version == record["build"] and use_v8 == ("V8" in record["flags"]), "If using prepared!_, the matching target must be re-specified in confirmation."
+    
+    if not pl_spec or pl_spec == "auto":
+        pl_spec = Host.platform
+        if not pl_spec:
             raise RuntimeError(f"No pre-built binaries available for {Host}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
-    elif hasattr(ExtPlats, pl_spec):
+    
+    if hasattr(ExtPlats, pl_spec):
         pl_name = getattr(ExtPlats, pl_spec)
+        creator = pl_name  # not used for sdist (no binary)
+        if pl_name == ExtPlats.sourcebuild:
+            record = read_json(SourcebuildDir/VersionFN)
+            assert not version, "Don't re-specify version with sourcebuild target. Will be read from record."
+            version = record["build"]
+            use_v8 = "V8" in record["flags"]  # unused, set for consistency
+        elif pl_name == ExtPlats.system:
+            assert version, f"Version must be given explicitly for system target."
     elif hasattr(PlatNames, pl_spec):
         pl_name = getattr(PlatNames, pl_spec)
+        creator = "pdfium-binaries"
+        if not version:
+            version = PdfiumVer.get_latest()
     else:
         raise ValueError(f"Invalid binary spec '{pl_spec}'")
-        
-    if req_ver:
-        assert req_ver.isnumeric()
-        req_ver = int(req_ver)
-    else:
-        assert pl_name != ExtPlats.system and with_prepare, "Version must be given explicitly for system or prepared!... targets"
-        req_ver = PdfiumVer.get_latest()
     
-    return with_prepare, pl_name, req_ver, use_v8
+    return PlSpec(pl_name, version, use_v8, creator, with_prepare)
 
 
 def parse_modspec(modspec):

@@ -185,7 +185,7 @@ def pack(v_short, v_post):
     
     libname = LibnameForSystem[Host.system]
     shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
-    write_pdfium_info(dest_dir, v_short, origin="sourcebuild", **v_post)
+    write_pdfium_info(dest_dir, v_short, flags=[], **v_post)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     # FIXME PDFIUM_BINDINGS=reference not honored

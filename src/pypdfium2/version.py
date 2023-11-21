@@ -79,6 +79,8 @@ class _version_pypdfium2 (_abc_version):
     @cached_property
     def desc(self):
         
+        # TODO handle dist_flavor; rework separators?
+        
         extra = []
         if self.dirty:
             extra += ["dirty"]
@@ -106,11 +108,12 @@ class _version_pdfium (_abc_version):
     
     @cached_property
     def desc(self):
+        # TODO handle location?; rework separators?
         desc = self._craft_desc()
         if self.flags:
             desc += ":{%s}" % ",".join(self.flags)
-        if self.origin != "pdfium-binaries":
-            desc += f"@{self.origin}"
+        if self.creator != "pdfium-binaries":
+            desc += f"@{self.creator}"
         return desc
 
 # TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
@@ -131,7 +134,7 @@ __all__ += ["PYPDFIUM_INFO", "PDFIUM_INFO"]
 
 V_PYPDFIUM2 = PYPDFIUM_INFO.version
 V_LIBPDFIUM = str(PDFIUM_INFO.build)
-V_BUILDNAME = PDFIUM_INFO.origin
+V_BUILDNAME = PDFIUM_INFO.creator
 V_PDFIUM_IS_V8 = "V8" in PDFIUM_INFO.flags  # implies XFA
 V_LIBPDFIUM_FULL = PDFIUM_INFO.version
 
@@ -179,6 +182,8 @@ Parameters:
     is_editable (bool | None):
         True for editable install, False otherwise. None if unknown.\n
         If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happened since. The actual current state is unknown.
+    dist_flavor (str):
+        TODO
 """
 
 
@@ -194,7 +199,7 @@ Parameters:
     tag (str):
         Version ciphers joined as str.
     desc (str):
-        Descriptors (origin, flags) represented as str.
+        Descriptors (builder, flags) represented as str.
     api_tag (tuple[int]):
         Version ciphers joined as tuple.
     major (int):
@@ -210,11 +215,13 @@ Parameters:
         Number of commits after tag at install time. 0 for tagged build commit.
     hash (str | None):
         Hash of head commit if n_commits > 0, None otherwise.
-    origin (str):
-        The pdfium binary's origin. Possible values:\n
-        - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2.
-        - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2.
-        - ``system``: Loaded from a standard system location using :func:`ctypes.util.find_library()`, or an explicit directory provided at setup time.
+    creator (str):
+        Who built the binary. Possible values:\n
+        - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries.
+        - ``system``: Compiled by the OS.
+        - ``sourcebuild``: Compiled by the caller, commonly using pypdfium2's integrated build script.
+    location (str):
+        TODO
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
 """
