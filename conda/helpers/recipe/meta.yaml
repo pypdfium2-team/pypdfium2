@@ -17,8 +17,8 @@ build:
   entry_points:
     - pypdfium2 = pypdfium2.__main__:cli_main
   script_env:
-    - PYPDFIUM_DIST_FLAVOR=conda
     - PYPDFIUM_MODULES=helpers
+    - PYPDFIUM_DIST_FLAVOR=conda
   script:
     - {{ PYTHON }} conda/prepare_script.py
     - {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
@@ -61,4 +61,3 @@ about:
 extra:
   recipe-maintainers:
     - pypdfium2-team
-    - mara004
