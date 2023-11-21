@@ -153,7 +153,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         # safety check for older binaries to prevent a segfault (could be removed at some point)
         # https://github.com/bblanchon/pdfium-binaries/issues/105
-        if "V8" in PDFIUM_INFO.flags and PDFIUM_INFO.origin != "sourcebuild" and PDFIUM_INFO.build <= 5677:
+        if "V8" in PDFIUM_INFO.flags and PDFIUM_INFO.creator == "pdfium-binaries" and PDFIUM_INFO.build <= 5677:
             raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
         
         if not config:
