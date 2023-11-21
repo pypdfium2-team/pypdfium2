@@ -422,9 +422,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     # TODO move refbindings handling into run_ctypesgen on behalf of sourcebuild?
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
     if BindTarget == BindTarget_Ref:
-        print("Using refbindings as requested by env var.", file=sys.stderr)
-        if kwargs["flags"]:
-            print("Warning: default refbindings are not flags-compatible.")
+        print("Using refbindings as requested by env var. Note that this will bypass all bindings params (e.g. flags). The refbindings try to be as universal as possible, though.", file=sys.stderr)
         shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
         ar_record = read_json(AR_RecordFile)
         write_json(ver_path, dict(version=ar_record["pdfium"], flags=[], run_lds=["."], source="reference"))

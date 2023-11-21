@@ -22,8 +22,10 @@ def run_local(*args, **kws):
 
 
 def update_refbindings(version):
+    # We strive to make the reference bindings as universal and robust as possible
+    # We have symbol guards, so we can define all feature flags, except those that are platform specific, which can't be cross-compiled as they might depend on platform headers.
     RefBindingsFile.unlink()
-    build_pdfium_bindings(version, guard_symbols=True, allow_system_despite_libdirs=True)
+    build_pdfium_bindings(version, guard_symbols=True, flags=["V8", "XFA"], allow_system_despite_libdirs=True)
     shutil.copyfile(DataDir_Bindings/BindingsFN, RefBindingsFile)
     assert RefBindingsFile.exists()
 
