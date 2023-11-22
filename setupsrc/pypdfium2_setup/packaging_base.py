@@ -374,6 +374,13 @@ def tar_extract_file(tar, src, dst_path):
         shutil.copyfileobj(src_buf, dst_buf)
 
 
+PdfiumFlagsDict = {
+    "V8": "PDF_ENABLE_V8",
+    "XFA": "PDF_ENABLE_XFA",
+    "SKIA": "_SKIA_SUPPORT_",
+}
+
+
 def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compile_lds=[], run_lds=["."], allow_system_despite_libdirs=False):
     # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
@@ -394,8 +401,10 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     if not guard_symbols:
         args += ["--no-symbol-guards"]
     if flags:
-        args += ["-D"] + [f"PDF_ENABLE_{f}" for f in flags]
+        args += ["-D"] + [PdfiumFlagsDict[f] for f in flags]
     if Host.system == SysNames.windows:
+        # If we are on a windows host, add the relevant define to expose windows-only members.
+        # Note, this is not currently active for our wheels, since we're packaging everything on Linux. It might be possible to divide packaging in native OS hosts in the future, or specify external headers for cross compilation.
         args += ["-D", "_WIN32"]
     
     bindings = target_dir / BindingsFN
