@@ -13,7 +13,7 @@ from pypdfium2_setup.packaging_base import *
 def main():
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pdfium-ver", type=int, default=None)
+    parser.add_argument("--pdfium-ver", default=None)
     args = parser.parse_args()
     if not args.pdfium_ver or args.pdfium_ver == "latest":
         args.pdfium_ver = PdfiumVer.get_latest()

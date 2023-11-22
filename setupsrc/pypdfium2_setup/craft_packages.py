@@ -28,7 +28,6 @@ def parse_args():
     )
     root_parser.add_argument(
         "--pdfium-ver",
-        type = int,
         default = None,
     )
     subparsers = root_parser.add_subparsers(dest="parser")

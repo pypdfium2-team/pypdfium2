@@ -66,11 +66,11 @@ jobs:
         if: inputs.package == 'raw'
         run: |
           python setupsrc/pypdfium2_setup/autorelease_conda_raw.py --pdfium-ver ${{ inputs.raw_version }}
-          ./run craft conda_raw --pdfium-ver ${{ inputs.raw_version }}
+          ./run craft --pdfium-ver ${{ inputs.raw_version }} conda_raw
       
       - name: Build helpers package
         if: inputs.package == 'helpers'
-        run: ./run craft conda_helpers
+        run: ./run craft --pdfium-ver ${{ inputs.raw_version }} conda_helpers
       
       - name: Upload artifact
         uses: actions/upload-artifact@v3
