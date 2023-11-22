@@ -21,6 +21,7 @@ jobs:
           inputs: |
             {
               "package": "raw",
+              "pdfium_ver": "latest",
               "test": "true",
               "publish": "true",
               "py_version": "3.11"

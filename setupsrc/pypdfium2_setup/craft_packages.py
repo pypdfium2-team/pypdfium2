@@ -20,8 +20,6 @@ P_CONDA_BUNDLE = "conda_bundle"
 P_CONDA_RAW = "conda_raw"
 P_CONDA_HELPERS = "conda_helpers"
 
-CondaDir = ProjectDir / "conda"
-
 
 def parse_args():
     
@@ -30,7 +28,6 @@ def parse_args():
     )
     root_parser.add_argument(
         "--pdfium-ver",
-        type = int,
         default = None,
     )
     subparsers = root_parser.add_subparsers(dest="parser")
@@ -55,8 +52,10 @@ def parse_args():
         )
     
     args = root_parser.parse_args()
-    if not args.pdfium_ver:
+    if not args.pdfium_ver or args.pdfium_ver == "latest":
         args.pdfium_ver = PdfiumVer.get_latest()
+    else:
+        args.pdfium_ver = int(args.pdfium_ver)
     if args.parser == P_CONDA_BUNDLE:
         if args.platforms and args.platforms[0] == "all":
             args.platforms = list(CondaNames.keys())
@@ -168,6 +167,9 @@ def main_conda_bundle(args):
 def main_conda_raw(args):
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = ".".join([str(v) for v in PdfiumVer.to_full(args.pdfium_ver)])
+    assert CondaRaw_BuildNumF.exists(), "build number must be given explicitly through conda/raw/build_num.txt - run autorelease_conda_raw.py to create"
+    build_num = int(CondaRaw_BuildNumF.read_text().strip())
+    os.environ["BUILD_NUM"] = str(build_num)
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
     with CondaExtPlatfiles(emplace_func):
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon"])

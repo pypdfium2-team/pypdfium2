@@ -105,7 +105,7 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, beta):
 def register_changes(new_tag):
     run_local(["git", "checkout", "-B", "autorelease_tmp"])
     run_local(["git", "add", *PlacesToRegister])
-    run_local(["git", "commit", "-m", "[autorelease] update changelog and version file"])
+    run_local(["git", "commit", "-m", f"[autorelease main] update {new_tag}"])
     run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
 
 
