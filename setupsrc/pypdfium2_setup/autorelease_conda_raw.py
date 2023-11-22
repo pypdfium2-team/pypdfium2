@@ -15,8 +15,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdfium-ver", type=int, default=None)
     args = parser.parse_args()
-    if not args.pdfium_ver:
+    if not args.pdfium_ver or args.pdfium_ver == "latest":
         args.pdfium_ver = PdfiumVer.get_latest()
+    else:
+        args.pdfium_ver = int(args.pdfium_ver)
     
     # parse existing releases to automatically handle arbitrary version builds
     search = run_cmd(["conda", "search", "pypdfium2_raw", "--override-channels", "-c", "pypdfium2-team"], cwd=None, capture=True)

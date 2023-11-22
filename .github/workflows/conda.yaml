@@ -30,7 +30,7 @@ defaults:
   run:
     shell: bash -el {0}
 
-# TODO it would be nice to also support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be failry complicated
+# TODO it would be nice to also support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be fairly complicated
 
 jobs:
   
@@ -60,6 +60,10 @@ jobs:
           git config --global user.email "geisserml@gmail.com"
           git config --global user.name "geisserml"
           python -m pip install -U -r req/setup.txt
+      
+      # this is used to automatically manage build number for rebuilds of the raw package
+      - name: Autorelease (raw package)
+        run: python setupsrc/pypdfium2_setup/autorelease_conda_raw.py --pdfium-ver ${{ inputs.raw_version }}
       
       - name: Build package
         run: ./run craft conda_${{ inputs.package }}

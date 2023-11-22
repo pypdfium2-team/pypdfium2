@@ -53,8 +53,10 @@ def parse_args():
         )
     
     args = root_parser.parse_args()
-    if not args.pdfium_ver:
+    if not args.pdfium_ver or args.pdfium_ver == "latest":
         args.pdfium_ver = PdfiumVer.get_latest()
+    else:
+        args.pdfium_ver = int(args.pdfium_ver)
     if args.parser == P_CONDA_BUNDLE:
         if args.platforms and args.platforms[0] == "all":
             args.platforms = list(CondaNames.keys())
