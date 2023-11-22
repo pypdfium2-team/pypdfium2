@@ -49,6 +49,8 @@ about:
   summary: Python bindings to PDFium (helpers, external bindings)
   description: |
     This package provides python helpers around pdfium.
+    Note, `pypdfium2-team` (i.e. this) and `bblanchon` are the only official conda channels for the pypdfium2 and pdfium-binaries projects.
+    See [here](https://github.com/pypdfium2-team/pypdfium2/tree/main#install-conda) for installation instructions.
     Dependants are suggested to pin to a major version, but any tighter pinning is discouraged since it increases the risk for conflicts, and would lock you out from future fixes.
   license: Apache-2.0 OR BSD-3-Clause
   license_file:

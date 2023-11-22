@@ -50,7 +50,9 @@ about:
   summary: Python bindings to PDFium (raw, external binary)
   description: |
     This package provides raw ctypes bindings to pdfium.
-    Important: Do not pin to an exact version, as pypdfium2_raw itself pins pdfium-binaries to achieve ABI safety.
+    Note, `pypdfium2-team` (i.e. this) and `bblanchon` are the only official conda channels for the pypdfium2 and pdfium-binaries projects.
+    See [here](https://github.com/pypdfium2-team/pypdfium2/tree/main#install-conda) for installation instructions.
+    Do not pin to an exact version, as pypdfium2_raw itself pins pdfium-binaries to achieve ABI safety.
   license: Apache-2.0 OR BSD-3-Clause
   license_file:
     - LICENSES/Apache-2.0.txt
