@@ -61,7 +61,6 @@ jobs:
           git config --global user.name "geisserml"
           python -m pip install -U -r req/setup.txt
       
-      # the script is used to automatically manage build number for rebuilds of the raw package
       - name: Build raw package
         if: inputs.package == 'raw'
         run: |
