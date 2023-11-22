@@ -11,7 +11,7 @@ on:
         options:
           - raw
           - helpers
-      raw_version:
+      pdfium_ver:
         default: 'latest'
         type: string
       test:
@@ -65,12 +65,12 @@ jobs:
       - name: Build raw package
         if: inputs.package == 'raw'
         run: |
-          python setupsrc/pypdfium2_setup/autorelease_conda_raw.py --pdfium-ver ${{ inputs.raw_version }}
-          ./run craft --pdfium-ver ${{ inputs.raw_version }} conda_raw
+          python setupsrc/pypdfium2_setup/autorelease_conda_raw.py --pdfium-ver ${{ inputs.pdfium_ver }}
+          ./run craft --pdfium-ver ${{ inputs.pdfium_ver }} conda_raw
       
       - name: Build helpers package
         if: inputs.package == 'helpers'
-        run: ./run craft --pdfium-ver ${{ inputs.raw_version }} conda_helpers
+        run: ./run craft --pdfium-ver ${{ inputs.pdfium_ver }} conda_helpers
       
       - name: Upload artifact
         uses: actions/upload-artifact@v3
