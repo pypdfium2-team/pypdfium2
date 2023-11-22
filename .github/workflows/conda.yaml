@@ -61,12 +61,16 @@ jobs:
           git config --global user.name "geisserml"
           python -m pip install -U -r req/setup.txt
       
-      # this is used to automatically manage build number for rebuilds of the raw package
-      - name: Autorelease (raw package)
-        run: python setupsrc/pypdfium2_setup/autorelease_conda_raw.py --pdfium-ver ${{ inputs.raw_version }}
+      # the script is used to automatically manage build number for rebuilds of the raw package
+      - name: Build raw package
+        if: inputs.package == 'raw'
+        run: |
+          python setupsrc/pypdfium2_setup/autorelease_conda_raw.py --pdfium-ver ${{ inputs.raw_version }}
+          ./run craft conda_raw --pdfium-ver ${{ inputs.raw_version }}
       
-      - name: Build package
-        run: ./run craft conda_${{ inputs.package }}
+      - name: Build helpers package
+        if: inputs.package == 'helpers'
+        run: ./run craft conda_helpers
       
       - name: Upload artifact
         uses: actions/upload-artifact@v3
