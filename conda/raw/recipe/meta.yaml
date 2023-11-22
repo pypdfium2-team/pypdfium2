@@ -3,6 +3,7 @@
 
 {% set pdfium_short = environ["PDFIUM_SHORT"] %}
 {% set pdfium_full = environ["PDFIUM_FULL"] %}
+{% set build_num = environ["BUILD_NUM"] %}
 
 package:
   name: pypdfium2_raw
@@ -12,7 +13,7 @@ source:
   git_url: ../../..
 
 build:
-  number: 0
+  number: {{ build_num }}
   noarch: python
   script_env:
     - PYPDFIUM_MODULES=raw

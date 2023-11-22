@@ -20,8 +20,6 @@ P_CONDA_BUNDLE = "conda_bundle"
 P_CONDA_RAW = "conda_raw"
 P_CONDA_HELPERS = "conda_helpers"
 
-CondaDir = ProjectDir / "conda"
-
 
 def parse_args():
     
@@ -168,6 +166,10 @@ def main_conda_bundle(args):
 def main_conda_raw(args):
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = ".".join([str(v) for v in PdfiumVer.to_full(args.pdfium_ver)])
+    build_num = 0
+    if CondaRaw_BuildNumF.exists():
+        build_num = int(CondaRaw_BuildNumF.read_text().strip())
+    os.environ["BUILD_NUM"] = str(build_num)
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
     with CondaExtPlatfiles(emplace_func):
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon"])

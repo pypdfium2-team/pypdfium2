@@ -11,6 +11,9 @@ on:
         options:
           - raw
           - helpers
+      raw_version:
+        default: 'latest'
+        type: string
       test:
         default: true
         type: boolean

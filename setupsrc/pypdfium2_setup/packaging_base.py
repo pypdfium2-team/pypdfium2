@@ -48,9 +48,12 @@ ChangelogStaging  = ProjectDir / "docs" / "devel" / "changelog_staging.md"
 HAVE_GIT_REPO     = (ProjectDir / ".git").exists()
 
 AutoreleaseDir  = ProjectDir / "autorelease"
-AR_RecordFile   = AutoreleaseDir / "record.json"  # TODO verify contents on before merge
+AR_RecordFile   = AutoreleaseDir / "record.json"
 AR_ConfigFile   = AutoreleaseDir / "config.json"
 RefBindingsFile = AutoreleaseDir / BindingsFN
+
+CondaDir = ProjectDir / "conda"
+CondaRaw_BuildNumF = CondaDir / "raw" / "build_num.txt"
 
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PdfiumURL      = "https://pdfium.googlesource.com/pdfium"
