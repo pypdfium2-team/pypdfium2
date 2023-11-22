@@ -25,7 +25,7 @@ def main():
     search = reversed(json.loads(search)["pypdfium2_raw"])
     
     # determine build number
-    # TODO `search` is ordered descendingly, so we could break the iteration when we find a matching version. though for a new version, we have to traverse the full list anyway...
+    # TODO `search` seems to be ordered by date, so we could probably break the iteration when we find a matching version. though for a new version, we have to traverse the full list anyway...
     build = max([d["build_number"] for d in search if int(d["version"]) == args.pdfium_ver], default=None)
     build = 0 if build is None else build+1
     print(build, file=sys.stderr)

@@ -168,9 +168,8 @@ def main_conda_bundle(args):
 def main_conda_raw(args):
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = ".".join([str(v) for v in PdfiumVer.to_full(args.pdfium_ver)])
-    build_num = 0
-    if CondaRaw_BuildNumF.exists():
-        build_num = int(CondaRaw_BuildNumF.read_text().strip())
+    assert CondaRaw_BuildNumF.exists(), "build number must be given explicitly through conda/raw/build_num.txt - run autorelease_conda_raw.py to create"
+    build_num = int(CondaRaw_BuildNumF.read_text().strip())
     os.environ["BUILD_NUM"] = str(build_num)
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
     with CondaExtPlatfiles(emplace_func):
