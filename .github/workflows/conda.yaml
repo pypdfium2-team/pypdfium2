@@ -47,7 +47,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ inputs.py_version }}
-          channels: bblanchon,pypdfium2-team
+          channels: pypdfium2-team,bblanchon
           channel-priority: strict
       
       - name: Prepare
@@ -128,12 +128,13 @@ jobs:
     
     steps:
       
+      # FIXME custom channels probably not necessary here
       - name: Miniconda setup
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
-          channels: bblanchon,pypdfium2-team
+          channels: pypdfium2-team,bblanchon
           channel-priority: strict
       
       - name: Install deps

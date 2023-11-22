@@ -60,7 +60,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
       uses: conda-incubator/setup-miniconda@v2
       with:
         # ... your options
-        channels: bblanchon,pypdfium2-team
+        channels: pypdfium2-team,bblanchon
         channel-priority: strict
     ```
     This is just a suggestion, you can also call `conda config` manually, or pass channels on command basis using `-c`, as discussed above.
