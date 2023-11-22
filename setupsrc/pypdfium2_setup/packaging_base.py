@@ -374,6 +374,13 @@ def tar_extract_file(tar, src, dst_path):
         shutil.copyfileobj(src_buf, dst_buf)
 
 
+PdfiumFlagsDict = {
+    "V8": "PDF_ENABLE_V8",
+    "XFA": "PDF_ENABLE_XFA",
+    "SKIA": "_SKIA_SUPPORT_",
+}
+
+
 def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compile_lds=[], run_lds=["."], allow_system_despite_libdirs=False):
     # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
@@ -394,8 +401,13 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     if not guard_symbols:
         args += ["--no-symbol-guards"]
     if flags:
-        args += ["-D"] + [f"PDF_ENABLE_{f}" for f in flags]
+        args += ["-D"] + [PdfiumFlagsDict[f] for f in flags]
     if Host.system == SysNames.windows:
+        # NOTE untested and probably not that useful (only if installing from source on windows)
+        # if we can get hold on the windows headers (or even just a stub providing the few types used by pdfium), we might be able to cross-compile with the --include option
+        # This define implies we may be adding duplicate type handles, meaning the caller would have to cast between actual and pdfium-local types
+        # To do this more cleanly we'd need a ctypes binding to the Windows API and use --link-modules ("use symbols from Python module ..."), but that's overkill here
+        # Actually I doubt if we need to support pdfium's windows-only APIs at all, but it's good to have these capabilities in principle.
         args += ["-D", "_WIN32"]
     
     bindings = target_dir / BindingsFN
