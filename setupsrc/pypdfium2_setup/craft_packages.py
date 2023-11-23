@@ -3,6 +3,7 @@
 
 import os
 import sys
+import json
 import shutil
 import argparse
 import tempfile
@@ -52,7 +53,8 @@ def parse_args():
         )
     
     args = root_parser.parse_args()
-    if not args.pdfium_ver or args.pdfium_ver == "latest":
+    args.is_literal_latest = args.pdfium_ver == "latest"
+    if not args.pdfium_ver or args.is_literal_latest:
         args.pdfium_ver = PdfiumVer.get_latest()
     else:
         args.pdfium_ver = int(args.pdfium_ver)
@@ -164,12 +166,26 @@ def main_conda_bundle(args):
         _run_conda_bundle(args, Host.platform, suffix, conda_args)
 
 
+def _get_build_num(args):
+    
+    # parse existing releases to automatically handle arbitrary version builds
+    search = run_cmd(["conda", "search", "--json", "pypdfium2_raw", "--override-channels", "-c", "pypdfium2-team"], cwd=None, capture=True)
+    search = reversed(json.loads(search)["pypdfium2_raw"])
+    
+    if args.is_literal_latest:
+        assert args.pdfium_ver > max([int(d["version"]) for d in search]), "Literal latest must resolve to a new version. This is done to avoid rebuilds without new version in scheduled releases. If you want to rebuild, omit --pdfium-ver or pass the resolved value."
+    
+    # determine build number
+    build_num = max([d["build_number"] for d in search if int(d["version"]) == args.pdfium_ver], default=None)
+    build_num = 0 if build_num is None else build_num+1
+    
+    return build_num
+
+
 def main_conda_raw(args):
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = ".".join([str(v) for v in PdfiumVer.to_full(args.pdfium_ver)])
-    assert CondaRaw_BuildNumF.exists(), "build number must be given explicitly through conda/raw/build_num.txt - run autorelease_conda_raw.py to create"
-    build_num = int(CondaRaw_BuildNumF.read_text().strip())
-    os.environ["BUILD_NUM"] = str(build_num)
+    os.environ["BUILD_NUM"] = str(_get_build_num(args))
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
     with CondaExtPlatfiles(emplace_func):
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon"])

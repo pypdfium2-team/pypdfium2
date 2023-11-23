@@ -244,6 +244,7 @@ jobs:
       - name: Trigger conda pypdfium2_helpers build
         uses: benc-uk/workflow-dispatch@v1
         with:
+          # FIXME input not respected for py_version here
           workflow: conda.yaml
           inputs: |
             {
