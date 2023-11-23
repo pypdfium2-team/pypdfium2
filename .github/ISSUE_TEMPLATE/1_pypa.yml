@@ -4,7 +4,7 @@
 # TODO add separate template for source install issues?
 
 # FIXME we'd like a slightly longer description, but GH seems to impose some length limit (undocumented?, feels like 200 chars or something?)
-name: PyPA package
+name: PyPA install
 description: If you installed via pip (or other PyPA format tool), and encountered an issue while using the library. Use even if you believe it is not a package problem. Default template.
 
 body:
