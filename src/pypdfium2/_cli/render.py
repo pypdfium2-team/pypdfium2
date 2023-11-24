@@ -124,7 +124,7 @@ def attach(parser):
     
     bitmap = parser.add_argument_group(
         title = "Bitmap options",
-        description = "Bitmap config, including pixel format. Notes: 1) By default, an alpha channel will be used only if --fill-color has transparency. 2) The combination of --rev-byteorder and --prefer-bgrx may be used to achieve a pixel format natively supported by PIL, to avoid data copying.",
+        description = "Bitmap config, including pixel format.",
     )
     bitmap.add_argument(
         "--bitmap-maker",
@@ -138,16 +138,17 @@ def attach(parser):
         action = "store_true",
         help = "Whether to render in grayscale mode (no colors).",
     )
-    # TODO consider making --rev-byteorder and --prefer-bgrx default for PIL
     bitmap.add_argument(
-        "--rev-byteorder",
-        action = "store_true",
-        help = "Render with reverse byte order internally, i. e. RGB(A/X) instead of BGR(A/X).",
+        "--no-rev-byteorder",
+        dest = "rev_byteorder",
+        action = "store_false",
+        help = "Prefer BGR(A/X) over RGB(A/X)",
     )
     bitmap.add_argument(
-        "--prefer-bgrx",
-        action = "store_true",
-        help = "Use a four-channel pixel format for colored output, even if rendering without transparency.",
+        "--no-prefer-bgrx",
+        dest = "prefer_bgrx",
+        action = "store_false",
+        help = "Prefer 3-channel over 4-channel where possible.",
     )
     
     parallel = parser.add_argument_group(
