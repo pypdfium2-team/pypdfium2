@@ -294,9 +294,7 @@ def test_render_pdf_new():
     page_1 = pdf.new_page(50, 100)
     page_2 = pdf.new_page(50, 100)
     renderer = pdf.render(pdfium.PdfBitmap.to_pil)
-    
-    with pytest.raises(ValueError):
-        next(renderer)
+    bitmap_p1 = next(renderer)
 
 
 def test_render_pdfbuffer():
@@ -305,8 +303,7 @@ def test_render_pdfbuffer():
     pdf = pdfium.PdfDocument(buffer)
         
     renderer = pdf.render(pdfium.PdfBitmap.to_pil)
-    with pytest.raises(ValueError):
-        next(renderer)
+    bitmap_p1 = next(renderer)
 
 
 @pytest.mark.parametrize(

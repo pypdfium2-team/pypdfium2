@@ -1,8 +1,22 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
+import logging
 from pathlib import Path
 import pypdfium2._helpers as pdfium
+import pypdfium2.internal as pdfium_i
+
+
+def setup_logging():
+    
+    pdfium_i.DEBUG_AUTOCLOSE.value = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    
+    lib_logger = logging.getLogger("pypdfium2")
+    lib_logger.addHandler(logging.StreamHandler())
+    lib_logger.setLevel(logging.DEBUG)
+    
+    pdfium.PdfUnspHandler().setup()
 
 
 def parse_numtext(numtext):

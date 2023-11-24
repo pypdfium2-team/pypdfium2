@@ -7,6 +7,7 @@ import os
 import ctypes
 import logging
 import inspect
+import warnings
 from pathlib import Path
 from collections import namedtuple
 import multiprocessing as mp
@@ -569,96 +570,30 @@ class PdfDocument (pdfium_i.AutoCloseable):
             converter,
             renderer = PdfPage.render,
             page_indices = None,
-            n_processes = os.cpu_count(),
             pass_info = False,
-            mk_formconfig = None,
+            n_processes = None,    # ignored, retained for compat
+            mk_formconfig = None,  # ignored, retained for compat
             **kwargs
         ):
         """
         .. deprecated:: 4.19
-            This method will be removed with the next major release (v5) due to serious conceptual problems. See the upcoming changelog for more info.
+            This method will be removed with the next major release due to serious issues rooted in the original API design. Use :meth:`PdfPage.render()` instead. See the upcoming changelog or :issue:`#281` for more info.
+            *Note that the CLI provides parallel rendering using a proper caller-side process pool with inline saving in rendering jobs.*
         
-        .. versionchanged:: 4.19
-            Fixed some major non-API implementation issues.
-        
-        Render multiple pages in parallel, using a process pool executor.
-        
-        Hint:
-            If your code shall be frozen into an executable, :func:`multiprocessing.freeze_support`
-            needs to be called at the start of the ``if __name__ == "__main__":`` block if using this method.
-        
-        Parameters:
-            converter (typing.Callable):
-                A function to convert the rendering output. See :class:`.PdfBitmap` for built-in converters.
-            page_indices (list[int] | None):
-                A sequence of zero-based indices of the pages to render. Duplicate page indices are prohibited.
-                If None, all pages will be included. The order of results is supposed to match the order of given page indices.
-            n_processes (int):
-                The number of parallel process to use.
-            renderer (typing.Callable):
-                The page rendering function to use. This may be used to plug in custom renderers other than :meth:`.PdfPage.render`.
-            mk_formconfig (typing.Callable[FPDF_FORMFILLINFO] | None):
-                Optional callback returning a custom form config to use when initializing a form env in worker jobs.
-            kwargs (dict):
-                Keyword arguments to the renderer.
-        
-        Yields:
-            :data:`typing.Any`: Result as returned by the given converter.
+        .. versionchanged:: 4.25
+            Removed the original process pool implementation and turned this into a wrapper for linear rendering, due to the serious conceptual issues and possible memory load escalation, especially with expensive receiving code (e.g. PNG encoding) or long documents.
         """
         
-        # TODO(apibreak) remove mk_formconfig parameter (bloat)
+        warnings.warn("The document-level pdf.render() API is deprecated and uncored due to serious issues in the original concept. Use page.render() and a caller-side loop or process pool.", category=DeprecationWarning)
         
-        if not isinstance(self._input, (Path, str, bytes)):
-            raise ValueError(f"Cannot render in parallel with input type '{type(self._input).__name__}'.")
-        
-        n_pages = len(self)
         if not page_indices:
-            page_indices = [i for i in range(n_pages)]
-        else:
-            if not all(0 <= i < n_pages for i in page_indices):
-                raise ValueError("Out-of-bounds page indices are prohibited.")
-            if len(page_indices) != len(set(page_indices)):
-                raise ValueError("Duplicate page indices are prohibited.")
-        
-        converter_params = list( inspect.signature(converter).parameters )[1:]
-        pool_kwargs = dict(
-            initializer = _parallel_renderer_init,
-            initargs = (self._input, self._password, bool(self.formenv), mk_formconfig, renderer, converter, converter_params, pass_info, kwargs),
-        )
-        n_processes = min(n_processes, n_pages)
-        with mp.Pool(n_processes, **pool_kwargs) as pool:
-            yield from pool.imap(_parallel_renderer_job, page_indices)
-
-
-def _parallel_renderer_init(input_data, password, need_formenv, mk_formconfig, renderer, converter, converter_params, pass_info, kwargs):
-    
-    logger.info(f"Initializing PID {os.getpid()}")
-    
-    pdf = PdfDocument(input_data, password=password)
-    if need_formenv:
-        pdf.init_forms(config=mk_formconfig()) if mk_formconfig else pdf.init_forms()
-    
-    global _ParallelRenderObjs
-    _ParallelRenderObjs = (pdf, renderer, converter, converter_params, pass_info, kwargs)
-
-
-def _parallel_renderer_job(index):
-    
-    logger.info(f"Starting page {index}")
-    
-    global _ParallelRenderObjs
-    pdf, renderer, converter, converter_params, pass_info, kwargs = _ParallelRenderObjs
-    
-    page = pdf[index]
-    bitmap = renderer(page, **kwargs)
-    info = bitmap.get_info()
-    page.close()
-    
-    # in principle, we could expose any local variables here
-    local_vars = dict(index=index)
-    result = converter(bitmap, **{p: local_vars[p] for p in converter_params})
-    
-    return (result, info) if pass_info else result
+            page_indices = [i for i in range(len(self))]
+        for i in page_indices:
+            bitmap = renderer(self[i], **kwargs)
+            if pass_info:
+                yield (converter(bitmap), bitmap.get_info())
+            else:
+                yield converter(bitmap)
 
 
 class PdfFormEnv (pdfium_i.AutoCloseable):

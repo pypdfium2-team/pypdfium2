@@ -239,7 +239,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         return image
     
     
-    # FIXME might want to rename *recopy* to *mutable* ?
     @classmethod
     def from_pil(cls, pil_image, recopy=False):
         """
@@ -247,18 +246,16 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Due to the restricted number of color formats and bit depths supported by PDFium's
         bitmap implementation, this may be a lossy operation.
         
+        Bitmaps returned by this function should be treated as immutable (i.e. don't call :meth:`.fill_rect`).
+        
         Parameters:
             pil_image (PIL.Image.Image):
                 The image.
-            recopy (bool):
-                If False (the default), reuse the memory segment of an immutable bytes object as buffer to avoid an additional layer of copying. This is recommended if you do not modify the bitmap, though the buffer does not actually enforce immutability.
-                If True (otherwise), copy memory into a new buffer that is mutable by design. This is recommended if you modify the bitmap, e.g. using :meth:`.fill_rect`.
-                Note that the resulting bitmap is always independent of the PIL image, regardless of this option.
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
         
-        .. versionchanged:: 4.15 reference bytes object instead of copying
-        .. versionadded:: 4.16 opt-in re-copying for mutability within Python API contract
+        .. deprecated:: 4.25
+            The *recopy* parameter has been deprecated.
         """
         
         if pil_image.mode in pdfium_i.BitmapStrToConst:
@@ -270,14 +267,12 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         py_buffer = pil_image.tobytes()
         if recopy:
-            c_buffer = (ctypes.c_ubyte * len(py_buffer)).from_buffer_copy(py_buffer)
+            buffer = (ctypes.c_ubyte * len(py_buffer)).from_buffer_copy(py_buffer)
         else:
-            # see docs above and https://stackoverflow.com/a/21490290/15547292
-            c_buffer = ctypes.cast(py_buffer, ctypes.POINTER(ctypes.c_ubyte * len(py_buffer))).contents
-            weakref.finalize(c_buffer, lambda: id(py_buffer))
+            buffer = py_buffer
         
         w, h = pil_image.size
-        return cls.new_native(w, h, format, rev_byteorder=False, buffer=c_buffer)
+        return cls.new_native(w, h, format, rev_byteorder=False, buffer=buffer)
     
     
     # TODO implement from_numpy()
