@@ -261,7 +261,6 @@ def _render_parallel_job(i):
     page = pdf[i]
     bitmap = page.render(**kwargs)
     receiver(bitmap, i)
-    page.close()
 
 
 def main(args):
