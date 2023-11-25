@@ -10,9 +10,9 @@ import multiprocessing as mp
 import concurrent.futures as ft
 
 try:
-    import PIL.Image
+    import cv2
 except ImportError:
-    PIL = None
+    cv2 = None
 
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
@@ -51,7 +51,6 @@ SampleTheme = dict(
 
 
 def attach(parser):
-    # TODO implement numpy/opencv receiver
     add_input(parser, pages=True)
     parser.add_argument(
         "--output", "-o",
@@ -66,7 +65,14 @@ def attach(parser):
     parser.add_argument(
         "--format", "-f",
         default = "jpg",
+        type = str.lower,
         help = "The image format to use.",
+    )
+    parser.add_argument(
+        "--engine",
+        dest = "engine_cls",
+        type = lambda k: {"pil": PILEngine, "numpy+cv2": NumpyCV2Engine}[k.lower()],
+        help = "The saver engine to use (pil, numpy+cv2)",
     )
     parser.add_argument(
         "--scale",
@@ -100,12 +106,14 @@ def attach(parser):
     )
     parser.add_argument(
         "--no-annotations",
-        action = "store_true",
+        dest = "draw_annots",
+        action = "store_false",
         help = "Prevent rendering of PDF annotations.",
     )
     parser.add_argument(
         "--no-forms",
-        action = "store_true",
+        dest = "may_draw_forms",
+        action = "store_false",
         help = "Prevent rendering of PDF forms.",
     )
     parser.add_argument(
@@ -139,16 +147,19 @@ def attach(parser):
         help = "Whether to render in grayscale mode (no colors).",
     )
     bitmap.add_argument(
-        "--no-rev-byteorder",
+        "--byteorder",
         dest = "rev_byteorder",
-        action = "store_false",
-        help = "Prefer BGR(A/X) over RGB(A/X)",
+        type = lambda v: {"bgr": False, "rgb": True}[v.lower()],
+        help = "Whether to use BGR or RGB byteorder. The default is conditional.",
     )
     bitmap.add_argument(
-        "--no-prefer-bgrx",
-        dest = "prefer_bgrx",
-        action = "store_false",
-        help = "Prefer 3-channel over 4-channel where possible.",
+        # TODO(pyreq)(3.9) action=argparse.BooleanOptionalAction would be much more straightforward here
+        "--prefer-bgrx",
+        nargs = "?",
+        const = True,
+        default = None,
+        type = lambda v: {0: False, 1: True}[int(v)],
+        help = "If no value given or 1, prefer BGRx/RGBx. If 0, prefer BGR/RGB. The default is conditional.",
     )
     
     parallel = parser.add_argument_group(
@@ -159,9 +170,9 @@ def attach(parser):
         "--linear",
         nargs = "?",
         type = int,
-        default = 4,
+        default = 3,
         const = math.inf,
-        help = "Render non-parallel if the pdf is shorter than the specified value (defaults to 4). If this flag is given without a value, then render linear regardless of document length.",
+        help = "Render non-parallel if page count is less or equal to the specified value (defaults to 3). If this flag is given without a value, then render linear regardless of document length.",
     )
     parallel.add_argument(
         "--processes",
@@ -221,25 +232,31 @@ def attach(parser):
     )
 
 
-class SavingReceiver:
+class SavingEngine:
     
     def __init__(self, path_parts):
         self._path_parts = path_parts
     
-    def get_path(self, i):
+    def _get_path(self, i):
         output_dir, prefix, n_digits, format = self._path_parts
-        return output_dir / (prefix + "%0*d.%s" % (n_digits, i+1, format))
-
-
-class PILReceiver (SavingReceiver):
+        return output_dir / f"{prefix}{i:0{n_digits}d}.{format}"
     
-    def __call__(self, bitmap, index):
-        out_path = self.get_path(index)
+    def __call__(self, bitmap, i):
+        out_path = self._get_path(i)
+        self._saving_hook(out_path, bitmap)
+        logger.info(f"Wrote page {i+1} as {out_path.name}")
+
+
+class PILEngine (SavingEngine):
+    def _saving_hook(self, out_path, bitmap):
         bitmap.to_pil().save(out_path)
-        logger.info(f"Wrote page {index+1} as {out_path.name}")
+
+class NumpyCV2Engine (SavingEngine):
+    def _saving_hook(self, out_path, bitmap):
+        cv2.imwrite(str(out_path), bitmap.to_numpy())
 
 
-def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, receiver):
+def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, engine):
     
     if extra_init:
         extra_init()
@@ -251,21 +268,22 @@ def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, r
         pdf.init_forms()
     
     global ProcObjs
-    ProcObjs = (pdf, kwargs, receiver)
+    ProcObjs = (pdf, kwargs, engine)
 
 
-def _render_parallel_job(i):
+def _render_job(i, pdf, kwargs, engine):
     # logger.info(f"Started page {i+1} ...")
-    global ProcObjs
-    pdf, kwargs, receiver = ProcObjs
     page = pdf[i]
     bitmap = page.render(**kwargs)
-    receiver(bitmap, i)
+    engine(bitmap, i)
+
+def _render_parallel_job(i):
+    global ProcObjs; _render_job(i, *ProcObjs)
 
 
 def main(args):
     
-    # TODO turn into a python-usable API yielding output paths as they arrive
+    # TODO turn into a python-usable API yielding output paths as they are written
     
     pdf = get_input(args)
     
@@ -281,13 +299,22 @@ def main(args):
     if not args.fill_color:
         args.fill_color = (0, 0, 0, 255) if args.sample_theme else (255, 255, 255, 255)
     
+    # numpy+cv2 much faster for PNG, and PIL faster for JPG, but this migh simply be due to different encoding defaults
+    if args.engine_cls is None:
+        args.engine_cls = NumpyCV2Engine if args.format == "png" else PILEngine
+    # PIL is notably faster with RGBA/RGBX because it supports these natively, so copying / pixel reformatting can be avoided. For numpy+cv2 it doesn't seem to make a difference.
+    if args.rev_byteorder is None:
+        args.rev_byteorder = args.engine_cls is PILEngine
+    if args.prefer_bgrx is None:
+        # PIL can't save BGRX as PNG
+        args.prefer_bgrx = args.engine_cls is PILEngine and args.format != "png"
+    
     cs_kwargs = dict()
     if args.sample_theme:
         cs_kwargs.update(**SampleTheme)
     cs_kwargs.update(**{f: getattr(args, f) for f in CsFields if getattr(args, f)})
     cs = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
     
-    may_draw_forms = not args.no_forms
     kwargs = dict(
         scale = args.scale,
         rotation = args.rotation,
@@ -297,8 +324,8 @@ def main(args):
         color_scheme = cs,
         fill_to_stroke = args.fill_to_stroke,
         optimize_mode = args.optimize_mode,
-        draw_annots = not args.no_annotations,
-        may_draw_forms = may_draw_forms,
+        draw_annots = args.draw_annots,
+        may_draw_forms = args.may_draw_forms,
         force_halftone = args.force_halftone,
         rev_byteorder = args.rev_byteorder,
         prefer_bgrx = args.prefer_bgrx,
@@ -307,21 +334,20 @@ def main(args):
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True
     
+    logger.info(f"{args.engine_cls.__name__}, Format: {args.format}, rev_byteorder: {args.rev_byteorder}, prefer_bgrx {args.prefer_bgrx}")
+    
     n_digits = len(str(pdf_len))
     path_parts = (args.output, args.prefix, n_digits, args.format)
-    receiver = PILReceiver(path_parts)
+    engine = args.engine_cls(path_parts)
     
     if len(args.pages) <= args.linear:
         
         logger.info("Linear rendering ...")
-        if may_draw_forms:
+        if args.may_draw_forms:
             pdf.init_forms()
         
         for i in args.pages:
-            # logger.info(f"Started page {i+1} ...")
-            page = pdf[i]
-            bitmap = page.render(**kwargs)
-            receiver(bitmap, i)
+            _render_job(i, pdf, kwargs, engine)
         
     else:
         
@@ -340,7 +366,7 @@ def main(args):
         extra_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
         pool_kwargs = dict(
             initializer = _render_parallel_init,
-            initargs = (extra_init, pdf._input, args.password, may_draw_forms, kwargs, receiver),
+            initargs = (extra_init, pdf._input, args.password, args.may_draw_forms, kwargs, engine),
         )
         
         n_procs = min(args.processes, len(args.pages))
