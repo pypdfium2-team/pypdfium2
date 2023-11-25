@@ -584,7 +584,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             Removed the original process pool implementation and turned this into a wrapper for linear rendering, due to the serious conceptual issues and possible memory load escalation, especially with expensive receiving code (e.g. PNG encoding) or long documents.
         """
         
-        warnings.warn("The document-level pdf.render() API is deprecated and uncored due to serious issues in the original concept. Use page.render() and a caller-side loop or process pool.", category=DeprecationWarning)
+        warnings.warn("The document-level pdf.render() API is deprecated and uncored due to serious issues in the original concept. Use page.render() and a caller-side loop or process pool instead.", category=DeprecationWarning)
         
         if not page_indices:
             page_indices = [i for i in range(len(self))]
