@@ -170,9 +170,8 @@ def attach(parser):
         "--linear",
         nargs = "?",
         type = int,
-        default = 3,
         const = math.inf,
-        help = "Render non-parallel if page count is less or equal to the specified value (defaults to 3). If this flag is given without a value, then render linear regardless of document length.",
+        help = "Render non-parallel if page count is less or equal to the specified value (default is conditional). If this flag is given without a value, then render linear regardless of document length.",
     )
     parallel.add_argument(
         "--processes",
@@ -294,10 +293,12 @@ def main(args):
     if len(args.pages) != len(set(args.pages)):
         raise ValueError("Duplicate page indices are prohibited.")
     
-    if not args.prefix:
+    if args.prefix is None:
         args.prefix = f"{args.input.stem}_"
-    if not args.fill_color:
+    if args.fill_color is None:
         args.fill_color = (0, 0, 0, 255) if args.sample_theme else (255, 255, 255, 255)
+    if args.linear is None:
+        args.linear = 6 if args.format == "jpg" else 3
     
     # numpy+cv2 much faster for PNG, and PIL faster for JPG, but this migh simply be due to different encoding defaults
     if args.engine_cls is None:
