@@ -300,10 +300,14 @@ def main(args):
     if args.linear is None:
         args.linear = 6 if args.format == "jpg" else 3
     
-    # numpy+cv2 much faster for PNG, and PIL faster for JPG, but this migh simply be due to different encoding defaults
+    # numpy+cv2 is much faster for PNG, and PIL faster for JPG, but this might simply be due to different encoding defaults
     if args.engine_cls is None:
-        args.engine_cls = NumpyCV2Engine if args.format == "png" else PILEngine
-    # PIL is notably faster with RGBA/RGBX because it supports these natively, so copying / pixel reformatting can be avoided. For numpy+cv2 it doesn't seem to make a difference.
+        if cv2 != None and args.format == "png":
+            args.engine_cls = NumpyCV2Engine
+        else:
+            args.engine_cls = PILEngine
+    
+    # PIL is faster with rev_byteorder and prefer_bgrx = True, as this achieves a pixel format it supports natively. For numpy+cv2 there doesn't seem to be a difference.
     if args.rev_byteorder is None:
         args.rev_byteorder = args.engine_cls is PILEngine
     if args.prefer_bgrx is None:
