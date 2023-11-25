@@ -213,10 +213,11 @@ def main_conda_helpers(args):
 class TmpCommitCtx:
     
     # https://github.com/conda/conda-build/issues/5045
-    # Work around local conda `git_url` not including uncommitted changes
+    # Work around local conda `git_url` not including uncommitted changes.
     # We can't reasonably use `path` since it does not honor gitignore rules, but would copy all files, including big generated directories like sourcebuild/
-    # On the other hand, transferring generated files with `git_url` tends to be problematic, as a tmp commit renders the initial repo state invalid.
-    # Alternatively, we could perhaps make a clean copy of required files (e.g. using the sdist) and using `path` instead of git hacks?
+    # Including uncommitted changes is more convenient with development, and particularly relevant as we want to transfer externally generated data files.
+    # However, note that what we are doing is an unusual way of using conda: normally, packaging would be done in an external repo which downloads the source first, and all files would be generated within the conda-build call.
+    # We've been trying to bend conda into PyPA-like packaging within the project's infrastructure, but turns out it's not really intended like that....
     
     # use a tmp control file so we can also undo the commit in conda's isolated clone
     FILE = CondaDir / "with_tmp_commit.txt"
