@@ -25,8 +25,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 
 * <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda 🔗</a>
-    
-  _**Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
+  
+  _**Beware:** Any conda packages/recipes of pypdfium2 or pdfium-binaries that might be provided by other distributors, including `anaconda/main` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
   
   + To install
     
@@ -54,7 +54,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     ```
     You'll want to have downstream callers handle the custom channels as shown above, otherwise conda will not be able to satisfy requirements.
   
-  + To use set up channels in a GH workflow
+  + To set up channels in a GH workflow
     ```yaml
     - name: ...
       uses: conda-incubator/setup-miniconda@v2
@@ -73,13 +73,16 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     The table should show `pypdfium2-team` and `bblanchon` in the channels column.
     If added permanently, the config should also include these channels, ideally with top priority.
     Please check this before reporting any issue with a conda install of pypdfium2.
+  
+  _**Note:** Conda packages are normally managed using recipe feedstocks driven by third parties, in a Linux repository like fashion. However, with some quirks it is also possible to do conda packaging within the original project and publish to a custom channel, which is what pypdfium2-team does, and the above instructions are referring to._
 
 
 * <a id="user-content-install-unofficial" class="anchor" href="#install-unofficial">Unofficial packages 🔗</a>
   
-  The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
+  The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages where possible.
+  If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
   
-  Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed (or locked) without further notice if we don't see fit for upstream.
+  Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed without further notice if we don't see fit for upstream.
   
   If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
 
