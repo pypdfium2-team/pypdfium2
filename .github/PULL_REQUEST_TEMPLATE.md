@@ -13,14 +13,6 @@
 - Use the Preview tab to confirm the PR will render correctly.
 -->
 
-### Setup
-
-- [ ] This PR changes setup code (`setupsrc/`, `setup.py` etc.).
-- [ ] I have tested the change does not break internal callers.
-- [ ] I believe the change is maintainable and does not cause unreasonable complexity or code pollution.
-- [ ] If acting on behalf of a downstream use case, I have assessed that it cannot reasonably be solved by existing means, or the change forms a notable improvement over possible alternatives.
-- [ ] I believe the targeted use case is supported by pypdfium2-team. *Note that we may not want to support esoteric or artificially restricted setup envs.*
-
 ### Helpers
 
 - [ ] This PR changes helpers code.
@@ -30,3 +22,12 @@
 ### Other
 
 - [ ] This PR changes other things, namely: ... <!-- briefly specify what was changed -->
+
+### Setup
+
+- [ ] This PR changes setup code (`setupsrc/`, `setup.py` etc.).
+- [ ] I have tested the change does not break internal callers.
+- [ ] I believe the change is maintainable and does not cause unreasonable complexity or code pollution.
+- [ ] This does not try to shift a maintenance burden or upstream things that should be handled downstream. *Keep handlers generic, avoid overly downstream-specific or effectively dead code passages.*
+- [ ] I have assessed that the targeted use case cannot reasonably be satisfied by existing means, or the change forms a notable improvement over possible alternatives.
+- [ ] I believe the targeted use case is supported by pypdfium2-team. *Note that we may not want to support esoteric or artificially restricted setup envs.*
