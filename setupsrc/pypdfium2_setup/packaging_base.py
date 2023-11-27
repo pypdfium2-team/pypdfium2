@@ -63,6 +63,13 @@ ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 
+# We endeavor to make the reference bindings as universal and robust as possible.
+# Thanks to symbol guards, we can define all standalone feature flags.
+# We don't currently define flags that depend on external headers, though it should be possible in principle by adding them to $CPATH (or equivalent). Further, if we could get OS headers, this might even allow for cross-compilation with OS flags (e.g. _WIN32).
+# Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
+REFBINDINGS_FLAGS = ["V8", "XFA", "SKIA"]
+
+
 # TODO make SysNames/ExtPlats/PlatNames iterable, consider StrEnum or something
 
 class SysNames:
@@ -421,7 +428,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     bindings.write_text(text)
 
 
-def build_pdfium_bindings(version, headers_dir=None, **kwargs):
+def build_pdfium_bindings(version, headers_dir=None, flags=[], **kwargs):
     defaults = dict(flags=[], run_lds=["."], guard_symbols=False)
     for k, v in defaults.items():
         kwargs.setdefault(k, v)
@@ -431,13 +438,20 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     if not headers_dir:
         headers_dir = DataDir_Bindings / "headers"
     
-    # TODO move refbindings handling into run_ctypesgen on behalf of sourcebuild?
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
+    # TODO move handler into run_ctypesgen on behalf of sourcebuild?
+    # FIXME Bindings version file is ignored by upstream code, e.g. we don't handle the case of mismatched bindings/binary and only include the binary version in the end. Strictly speaking we might have to split the current PDFIUM_INFO in BINDINGS_INFO and BINARY_INFO ...
     if BindTarget == BindTarget_Ref:
-        print("Using refbindings as requested by env var. Note that this will bypass all bindings params (e.g. flags). The refbindings try to be as universal as possible, though.", file=sys.stderr)
+        print("Using reference bindings as requested by env var. This will bypass all bindings params.", file=sys.stderr)
+        record = read_json(AR_RecordFile)
+        bindings_ver = record["pdfium"]
+        if bindings_ver != version:
+            print(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!", file=sys.stderr)
+        flags_diff = set(flags).difference(REFBINDINGS_FLAGS)
+        if flags_diff:  # == not set(...).issubset(...)
+            print(f"Warning: The following requested flags are not available in the reference bindings and will be discarded: {flags_diff}")
         shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
-        ar_record = read_json(AR_RecordFile)
-        write_json(ver_path, dict(version=ar_record["pdfium"], flags=[], run_lds=["."], source="reference"))
+        write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."], source="reference"))
         return
     
     curr_info = dict(

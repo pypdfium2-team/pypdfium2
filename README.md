@@ -203,7 +203,7 @@ As pypdfium2 requires a C extension and has custom setup code, there are some sp
   - It is possible to prepend `prepared!` to install with existing platform files instead of generating on the fly; the value will be used for metadata / file inclusion. This can be helpful when installing in an isolated env where ctypesgen is not available, but it is not desirable to use the reference bindings (e.g. conda).
 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
-  - May be used by packagers to decouple raw bindings and helpers, which can be important if packaging against system pdfium.
+  - May be used by packagers to decouple raw bindings and helpers, which may be relevant if packaging against system pdfium.
   - Would also allow to install only the raw module without helpers, or only helpers with a custom raw module.
 
 * `$PDFIUM_BINDINGS=reference` allows to override ctypesgen and use the reference bindings file `autorelease/bindings.py` instead.
