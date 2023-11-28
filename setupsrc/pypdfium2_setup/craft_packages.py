@@ -166,6 +166,7 @@ def main_conda_bundle(args):
         _run_conda_bundle(args, Host.platform, suffix, conda_args)
 
 
+# TODO expand to pypdfium2_helpers as well, so we could rebuild with different pdfium bounds in a workflow
 def _get_build_num(args):
     
     # parse existing releases to automatically handle arbitrary version builds
