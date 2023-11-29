@@ -62,13 +62,12 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         Returns:
             str: The text in the range in question, or an empty string if no text was found.
         
-        Important:
-            The returned text's length does not have to match *count*, even if it will for most PDFs.
-            This is because the underlying API may exclude/insert chars compared to the internal list, although rare in practice.
-            This means, if the char at ``i`` is excluded, ``get_text_range(i, 2)[1]`` will raise an index error.
-            Pdfium provides raw APIs ``FPDFText_GetTextIndexFromCharIndex() / FPDFText_GetCharIndexFromTextIndex()`` to translate between the two views and identify excluded/inserted chars.
         Note:
-            In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
+            * The returned text's length does not have to match *count*, even if it will for most PDFs.
+              This is because the underlying API may exclude/insert chars compared to the internal list, although rare in practice.
+              This means, if the char at ``i`` is excluded, ``get_text_range(i, 2)[1]`` will raise an index error.
+              Pdfium provides raw APIs ``FPDFText_GetTextIndexFromCharIndex()`` / ``FPDFText_GetCharIndexFromTextIndex()`` to translate between the two views and identify excluded/inserted chars.
+            * In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
         """
         
         if count == -1:
@@ -78,6 +77,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if active_range == 0:
             return ""
         
+        # NOTE since we have converted indices from char to text, they will shift accordingly for inserted/excluded chars, so this will calculate the exact output size
         t_start, t_end, l_passive, r_passive = active_range
         index += l_passive
         count -= l_passive + r_passive
