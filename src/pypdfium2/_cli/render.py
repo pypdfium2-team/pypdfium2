@@ -18,7 +18,11 @@ import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 import pypdfium2.raw as pdfium_r
 # TODO? consider dotted access
-from pypdfium2._cli._parsers import add_input, get_input, setup_logging
+from pypdfium2._cli._parsers import (
+    add_input, get_input,
+    setup_logging,
+    BooleanOptionalAction,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +52,6 @@ SampleTheme = dict(
     text_fill   = (255, 255, 255, 255),  # white
     text_stroke = (150, 255, 0,   255),  # green
 )
-
 
 def attach(parser):
     add_input(parser, pages=True)
@@ -105,16 +108,16 @@ def attach(parser):
         help = "Amount to crop from (left, bottom, right, top).",
     )
     parser.add_argument(
-        "--no-annotations",
-        dest = "draw_annots",
-        action = "store_false",
-        help = "Prevent rendering of PDF annotations.",
+        "--draw-annots",
+        action = BooleanOptionalAction,
+        default = True,
+        help = "Whether annotations may be shown (default: true).",
     )
     parser.add_argument(
-        "--no-forms",
-        dest = "may_draw_forms",
-        action = "store_false",
-        help = "Prevent rendering of PDF forms.",
+        "--draw-forms",
+        action = BooleanOptionalAction,
+        default = True,
+        help = "Whether forms may be shown (default: true).",
     )
     parser.add_argument(
         "--no-antialias",
@@ -150,16 +153,13 @@ def attach(parser):
         "--byteorder",
         dest = "rev_byteorder",
         type = lambda v: {"bgr": False, "rgb": True}[v.lower()],
-        help = "Whether to use BGR or RGB byteorder. The default is conditional.",
+        help = "Whether to use BGR or RGB byteorder (default: conditional).",
     )
     bitmap.add_argument(
-        # TODO(pyreq)(3.9) action=argparse.BooleanOptionalAction would be much more straightforward here
-        "--prefer-bgrx",
-        nargs = "?",
-        const = True,
-        default = None,
-        type = lambda v: {0: False, 1: True}[int(v)],
-        help = "If no value given or 1, prefer BGRx/RGBx. If 0, prefer BGR/RGB. The default is conditional.",
+        "--x-channel",
+        dest = "prefer_bgrx",
+        action = BooleanOptionalAction,
+        help = "Whether to prefer BGRx/RGBx over BGR/RGB (default: conditional).",
     )
     
     parallel = parser.add_argument_group(
@@ -330,7 +330,7 @@ def main(args):
         fill_to_stroke = args.fill_to_stroke,
         optimize_mode = args.optimize_mode,
         draw_annots = args.draw_annots,
-        may_draw_forms = args.may_draw_forms,
+        may_draw_forms = args.draw_forms,
         force_halftone = args.force_halftone,
         rev_byteorder = args.rev_byteorder,
         prefer_bgrx = args.prefer_bgrx,
@@ -339,6 +339,7 @@ def main(args):
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True
     
+    # TODO dump all args except password?
     logger.info(f"{args.engine_cls.__name__}, Format: {args.format}, rev_byteorder: {args.rev_byteorder}, prefer_bgrx {args.prefer_bgrx}")
     
     n_digits = len(str(pdf_len))
@@ -348,7 +349,7 @@ def main(args):
     if len(args.pages) <= args.linear:
         
         logger.info("Linear rendering ...")
-        if args.may_draw_forms:
+        if args.draw_forms:
             pdf.init_forms()
         
         for i in args.pages:
@@ -371,7 +372,7 @@ def main(args):
         extra_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
         pool_kwargs = dict(
             initializer = _render_parallel_init,
-            initargs = (extra_init, pdf._input, args.password, args.may_draw_forms, kwargs, engine),
+            initargs = (extra_init, pdf._input, args.password, args.draw_forms, kwargs, engine),
         )
         
         n_procs = min(args.processes, len(args.pages))
