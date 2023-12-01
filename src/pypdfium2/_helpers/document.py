@@ -78,6 +78,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
             self._data_holder += to_hold
             self._data_closer += to_close
         
+        for data in self._data_holder:
+            pdfium_i.Py_IncRef(data)
+        
         super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
     
     
@@ -102,7 +105,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def _close_impl(raw, data_holder, data_closer):
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
-            id(data)
+            pdfium_i.Py_DecRef(data)
         for data in data_closer:
             data.close()
         data_holder.clear()
