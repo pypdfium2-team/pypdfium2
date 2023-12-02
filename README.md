@@ -684,12 +684,11 @@ Although we intend to develop helpers carefully, it cannot be fully excluded tha
 
 As of this writing, PDFium's public interface does not provide access to the raw PDF data structure (see [issue 1694](https://crbug.com/pdfium/1694)). It does not expose APIs to read/write PDF dictionaries, streams, name/number trees, etc. Instead, it merely offers a predefined set of abstracted functions. This considerably limits the library's potential, compared to other products such as `pikepdf`.
 
-Theoretically, PDFium's non-public backend would provide these capabilities, but it is not exported into the ABI and written in C++ (not pure C), so we cannot access it with `ctypes`. This means it's out of scope for this project.
+#### Limitations of ABI bindings
 
-#### Drawbacks of ABI level bindings
+PDFium's non-public backend would provide extended capabilities, including [raw access](#missing-raw-pdf-access), but it is not exported into the ABI and written in C++ (not pure C), so we cannot use it with `ctypes`. This means it's out of scope for this project.
 
-While ABI FFI bindings tend to be more convenient, they do have technical drawbacks compared to API bindings [(overview)](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api).
-With special platforms and/or code, sometimes unforeseen problems can occur [(case study)](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1173170438).
+Also, while ABI bindings tend to be more convenient, they have some technical drawbacks compared to API bindings (see e.g. [1](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api), [2](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1834684532))
 
 
 ## Development
