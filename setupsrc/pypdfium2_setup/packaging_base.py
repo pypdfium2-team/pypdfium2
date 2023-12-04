@@ -397,7 +397,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
     
-    args = ["ctypesgen", f"--strip-build-path={headers_dir}", "--no-srcinfo", "--library", "pdfium"]
+    args = ["ctypesgen", f"--strip-build-path={headers_dir}", "--library", "pdfium", "--no-srcinfo", "--no-macro-guards"]
     
     if run_lds:
         args += ["--runtime-libdirs", *run_lds]
