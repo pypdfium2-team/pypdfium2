@@ -1,16 +1,13 @@
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
 import sys
-import logging
 import argparse
 import importlib
-import pypdfium2._helpers as pdfium
-import pypdfium2.internal as pdfium_i
 from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
 # the * import in pypdfium2.raw loses underscore-prefixed members, so import from the direct origin
 from pypdfium2_raw.bindings import _loader_info as loader_info
+from pypdfium2._cli._parsers import setup_logging
 
 SubCommands = {
     "arrange":        "rearrange/merge documents",
@@ -47,17 +44,6 @@ def get_parser():
         CmdToModule[name].attach(subparser)
     
     return main_parser
-
-
-def setup_logging():
-    
-    pdfium_i.DEBUG_AUTOCLOSE.value = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
-    
-    lib_logger = logging.getLogger("pypdfium2")
-    lib_logger.addHandler(logging.StreamHandler())
-    lib_logger.setLevel(logging.DEBUG)
-    
-    pdfium.PdfUnspHandler().setup()
 
 
 def api_main(raw_args=sys.argv[1:]):

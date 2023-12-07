@@ -443,6 +443,8 @@ class PdfPage (pdfium_i.AutoCloseable):
 
 
 def _auto_bitmap_format(fill_color, grayscale, prefer_bgrx):
+    # TODO(apibreak) we'd like to also use BGRA if FPDFPage_HasTransparency(page) is True for performance reasons (see [1]), but this may break caller format expectations, and would make format selection document-dependent
+    # [1]: https://chromium.googlesource.com/chromium/src/+/21e456b92bfadc625c947c718a6c4c5bf0c4c61b
     if (fill_color[3] < 255):
         return pdfium_c.FPDFBitmap_BGRA
     elif grayscale:
