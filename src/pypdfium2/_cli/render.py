@@ -307,7 +307,7 @@ def main(args):
         else:
             args.engine_cls = PILEngine
     
-    # PIL is faster with rev_byteorder and prefer_bgrx = True, as this achieves a pixel format it supports natively. For numpy+cv2 there doesn't seem to be a difference.
+    # PIL is faster with rev_byteorder and prefer_bgrx = True, as this achieves a natively supported pixel format. For numpy+cv2 there doesn't seem to be a difference.
     if args.rev_byteorder is None:
         args.rev_byteorder = args.engine_cls is PILEngine
     if args.prefer_bgrx is None:
