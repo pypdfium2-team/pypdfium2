@@ -3,7 +3,7 @@
 
 # TODO add separate template for source install issues?
 
-# FIXME we'd like a slightly longer description, but GH seems to impose some length limit (undocumented?, feels like 200 chars or something?)
+# NOTE we'd like a slightly longer description, but GH seems to impose some length limit (undocumented?, feels like 200 chars or something)
 name: PyPA install
 description: If you installed via pip (or other PyPA format tool), and encountered an issue while using the library. Use even if you believe it is not a package problem. Default template.
 
@@ -32,7 +32,6 @@ body:
       render: shell
       description: |
         To provide information about your install, please run the following commands and paste the output into the field below.
-        **If you are not using pip, but another PyPA-compliant tool, replace the `pip show` call accordingly.**
         ```shell
         python -m pypdfium2 -v
         python -VV

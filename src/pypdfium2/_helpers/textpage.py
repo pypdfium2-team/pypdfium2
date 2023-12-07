@@ -176,7 +176,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             index (int):
                 Index of the character to work with, in the page's character array.
             loose (bool):
-                TODO
+                Get a more comprehensive box covering the entire font bounds, as opposed to the default tight box specific to the one character.
         Returns:
             Float values for left, bottom, right and top in PDF canvas units.
         """

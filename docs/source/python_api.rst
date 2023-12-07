@@ -71,12 +71,11 @@ Due to limitations in :mod:`weakref`, finalizers can only be attached to wrapper
 Version
 *******
 .. note::
-   Version info can be fooled by a malicious (or very careless) end user or other entity with write permission.
-   In general, prefer to see it as orientation rather than inherently reliable data.
+   Version info can be fooled. Prefer to see it as orientation rather than inherently reliable data.
 
 .. automodule:: pypdfium2.version
 
-.. deprecated:: 4.TODO
+.. deprecated:: 4.22
    The legacy members ``V_PYPDFIUM2, V_LIBPDFIUM, V_BUILDNAME, V_PDFIUM_IS_V8, V_LIBPDFIUM_FULL`` will be removed in version 5.
 
 Document
