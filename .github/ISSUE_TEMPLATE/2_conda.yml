@@ -19,7 +19,10 @@ body:
       options:
         - label: I have verified to be using the **official packages** from the `pypdfium2-team` and `bblanchon` channels.
           required: true
+        - label: I confirm **requirements are satisfied** and **no conflicting builds** of pypdfium2/pdfium-binaries installed at the same time.
+          required: true
         - label: I confirm to be working with the **conda env in question, and its proper python executable** (not system python).
+          required: true
   
   - type: textarea
     attributes:

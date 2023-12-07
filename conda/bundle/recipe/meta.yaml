@@ -23,7 +23,8 @@ build:
   entry_points:
     - pypdfium2 = pypdfium2.__main__:cli_main
   script_env:
-    - PDFIUM_PLATFORM="prepared!{{ pl_spec }}"
+    # NOTE conda neither needs nor likes env values being wrapped in quotes
+    - PDFIUM_PLATFORM=prepared!{{ pl_spec }}
   script:
     - {{ PYTHON }} conda/prepare_script.py
     - {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation

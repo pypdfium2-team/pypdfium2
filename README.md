@@ -25,8 +25,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 
 * <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda 🔗</a>
-    
-  _**Beware:** There have been some third-party attempts to conda package pypdfium2 and pdfium-binaries. Any recipes/packages that might be provided by other distributors, including `anaconda` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
+  
+  _**Beware:** Any conda packages/recipes of pypdfium2 or pdfium-binaries that might be provided by other distributors, including `anaconda/main` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
   
   + To install
     
@@ -54,7 +54,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     ```
     You'll want to have downstream callers handle the custom channels as shown above, otherwise conda will not be able to satisfy requirements.
   
-  + To use set up channels in a GH workflow
+  + To set up channels in a GH workflow
     ```yaml
     - name: ...
       uses: conda-incubator/setup-miniconda@v2
@@ -73,13 +73,16 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     The table should show `pypdfium2-team` and `bblanchon` in the channels column.
     If added permanently, the config should also include these channels, ideally with top priority.
     Please check this before reporting any issue with a conda install of pypdfium2.
+  
+  _**Note:** Conda packages are normally managed using recipe feedstocks driven by third parties, in a Linux repository like fashion. However, with some quirks it is also possible to do conda packaging within the original project and publish to a custom channel, which is what pypdfium2-team does, and the above instructions are referring to._
 
 
 * <a id="user-content-install-unofficial" class="anchor" href="#install-unofficial">Unofficial packages 🔗</a>
   
-  The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages instead.
+  The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages where possible.
+  If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
   
-  Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed (or locked) without further notice if we don't see fit for upstream.
+  Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed without further notice if we don't see fit for upstream.
   
   If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
 
@@ -87,7 +90,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 * <a id="user-content-install-source" class="anchor" href="#install-source">From source 🔗</a>
   
   * Dependencies:
-    - System: git, C pre-processor (gcc/clang, has to be in `$PATH`)
+    - System: git, C pre-processor (e.g. gcc, has to be in `$PATH`)
     - Python: ctypesgen (pypdfium2-team fork), wheel, setuptools. Usually installed automatically.
   
   * Get the code
@@ -200,7 +203,7 @@ As pypdfium2 requires a C extension and has custom setup code, there are some sp
   - It is possible to prepend `prepared!` to install with existing platform files instead of generating on the fly; the value will be used for metadata / file inclusion. This can be helpful when installing in an isolated env where ctypesgen is not available, but it is not desirable to use the reference bindings (e.g. conda).
 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
-  - May be used by packagers to decouple raw bindings and helpers, which can be important if packaging against system pdfium.
+  - May be used by packagers to decouple raw bindings and helpers, which may be relevant if packaging against system pdfium.
   - Would also allow to install only the raw module without helpers, or only helpers with a custom raw module.
 
 * `$PDFIUM_BINDINGS=reference` allows to override ctypesgen and use the reference bindings file `autorelease/bindings.py` instead.
@@ -681,12 +684,11 @@ Although we intend to develop helpers carefully, it cannot be fully excluded tha
 
 As of this writing, PDFium's public interface does not provide access to the raw PDF data structure (see [issue 1694](https://crbug.com/pdfium/1694)). It does not expose APIs to read/write PDF dictionaries, streams, name/number trees, etc. Instead, it merely offers a predefined set of abstracted functions. This considerably limits the library's potential, compared to other products such as `pikepdf`.
 
-Theoretically, PDFium's non-public backend would provide these capabilities, but it is not exported into the ABI and written in C++ (not pure C), so we cannot access it with `ctypes`. This means it's out of scope for this project.
+#### Limitations of ABI bindings
 
-#### Drawbacks of ABI level bindings
+PDFium's non-public backend would provide extended capabilities, including [raw access](#missing-raw-pdf-access), but it is not exported into the ABI and written in C++ (not pure C), so we cannot use it with `ctypes`. This means it's out of scope for this project.
 
-While ABI FFI bindings tend to be more convenient, they do have technical drawbacks compared to API bindings [(overview)](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api).
-With special platforms and/or code, sometimes unforeseen problems can occur [(case study)](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1173170438).
+Also, while ABI bindings tend to be more convenient, they have some technical drawbacks compared to API bindings (see e.g. [1](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api), [2](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1834684532))
 
 
 ## Development

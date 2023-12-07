@@ -30,7 +30,8 @@ defaults:
   run:
     shell: bash -el {0}
 
-# TODO it would be nice to also support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be fairly complicated
+# TODO it might be nice to support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be fairly complicated
+# TODO add ability to rebuild helpers with different pdfium version bounds
 
 jobs:
   
