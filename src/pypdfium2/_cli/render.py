@@ -238,7 +238,7 @@ class SavingEngine:
     
     def _get_path(self, i):
         output_dir, prefix, n_digits, format = self._path_parts
-        return output_dir / f"{prefix}{i:0{n_digits}d}.{format}"
+        return output_dir / f"{prefix}{i+1:0{n_digits}d}.{format}"
     
     def __call__(self, bitmap, i):
         out_path = self._get_path(i)
