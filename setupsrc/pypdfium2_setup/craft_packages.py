@@ -3,7 +3,6 @@
 
 import os
 import sys
-import json
 import shutil
 import argparse
 import tempfile
@@ -55,7 +54,12 @@ def parse_args():
     args = root_parser.parse_args()
     args.is_literal_latest = args.pdfium_ver == "latest"
     if not args.pdfium_ver or args.is_literal_latest:
-        args.pdfium_ver = PdfiumVer.get_latest()
+        if args.parser == P_CONDA_RAW:
+            args.pdfium_ver = PdfiumVer.get_latest_conda_pdfium()
+        elif args.parser == P_CONDA_HELPERS:
+            args.pdfium_ver = PdfiumVer.get_latest_conda_bindings()
+        else:
+            args.pdfium_ver = PdfiumVer.get_latest()
     else:
         args.pdfium_ver = int(args.pdfium_ver)
     if args.parser == P_CONDA_BUNDLE:
@@ -166,12 +170,12 @@ def main_conda_bundle(args):
         _run_conda_bundle(args, Host.platform, suffix, conda_args)
 
 
-# TODO expand to pypdfium2_helpers as well, so we could rebuild with different pdfium bounds in a workflow
 def _get_build_num(args):
     
     # parse existing releases to automatically handle arbitrary version builds
-    search = run_cmd(["conda", "search", "--json", "pypdfium2_raw", "--override-channels", "-c", "pypdfium2-team"], cwd=None, capture=True)
-    search = reversed(json.loads(search)["pypdfium2_raw"])
+    # TODO expand to pypdfium2_helpers as well, so we could rebuild with different pdfium bounds in a workflow
+    
+    search = reversed(run_conda_search("pypdfium2_raw", "pypdfium2-team"))
     
     if args.is_literal_latest:
         assert args.pdfium_ver > max([int(d["version"]) for d in search]), "Literal latest must resolve to a new version. This is done to avoid rebuilds without new version in scheduled releases. If you want to rebuild, omit --pdfium-ver or pass the resolved value."

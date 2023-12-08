@@ -126,6 +126,12 @@ BinaryPlatforms = list(ReleaseNames.keys())
 BinarySystems   = list(LibnameForSystem.keys())
 
 
+@functools.lru_cache(maxsize=2)
+def run_conda_search(package, channel):
+    output = run_cmd(["conda", "search", "--json", package, "--override-channels", "-c", channel], cwd=None, capture=True)
+    return json.loads(output)[package]
+
+
 class PdfiumVer:
     
     scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
@@ -137,6 +143,25 @@ class PdfiumVer:
         git_ls = run_cmd(["git", "ls-remote", f"{ReleaseRepo}.git"], cwd=None, capture=True)
         tag = git_ls.split("\t")[-1]
         return int( tag.split("/")[-1] )
+    
+    @staticmethod
+    @functools.lru_cache(maxsize=2)
+    def _get_latest_conda_for(package, channel, v_func):
+        search = run_conda_search(package, channel)
+        search = sorted(search, key=lambda d: v_func(d["version"]), reverse=True)
+        result = v_func(search[0]["version"])
+        print(f"Resolved latest {channel}::{package} to {result}", file=sys.stderr)
+        return result
+    
+    def get_latest_conda_pdfium():
+        return PdfiumVer._get_latest_conda_for(
+            "pdfium-binaries", "bblanchon", lambda v: int(v.split(".")[2])
+        )
+    
+    def get_latest_conda_bindings():
+        return PdfiumVer._get_latest_conda_for(
+            "pypdfium2_raw", "pypdfium2-team", lambda v: int(v)
+        )
     
     @classmethod
     def to_full(cls, v_short):
