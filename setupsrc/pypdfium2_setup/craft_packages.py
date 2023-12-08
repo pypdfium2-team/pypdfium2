@@ -199,15 +199,7 @@ def main_conda_raw(args):
 def main_conda_helpers(args):
     
     # Set the current pdfium version as upper boundary, for inherent API safety.
-    # Unfortunately, pdfium does not do semantic versioning, so it is hard to achieve safe upward flexibility.
-    # See also https://groups.google.com/g/pdfium/c/kCmgW_gTFYE/m/BPoJgbwOCQAJ
-    # In case the restrictive upper boundary becomes a problem, we could estimate an increase based on pdfium's deprecation period.
-    # Relevant variables for such a calculation would be
-    # - version increment speed (guess: average 2 per day)
-    # - pdfium's lowest regular deprecation period (say: 6 months, as indicated by pdfium/CONTRIBUTING.md)
-    # - a buffer zone for us to recognize a deprecation (say: 2 months)
-    # Assuming a month has 30 days, this would result in
-    #   2 * 30 * (6-2) = 240
+    # pdfium does not do semantic versioning, so upward flexibility is difficult.
     os.environ["PDFIUM_MAX"] = str(args.pdfium_ver)
     
     # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
@@ -217,12 +209,8 @@ def main_conda_helpers(args):
 
 class TmpCommitCtx:
     
-    # https://github.com/conda/conda-build/issues/5045
-    # Work around local conda `git_url` not including uncommitted changes.
-    # We can't reasonably use `path` since it does not honor gitignore rules, but would copy all files, including big generated directories like sourcebuild/
-    # Including uncommitted changes is more convenient with development, and particularly relevant as we want to transfer externally generated data files.
-    # However, note that what we are doing is an unusual way of using conda: normally, packaging would be done in an external repo which downloads the source first, and all files would be generated within the conda-build call.
-    # We've been trying to bend conda into PyPA-like packaging within the project's infrastructure, but turns out it's not really intended like that....
+    # Work around local conda `git_url` not including uncommitted changes
+    # In particular, this is used to transfer data files, so we can generate them externally and don't have to conda package ctypesgen.
     
     # use a tmp control file so we can also undo the commit in conda's isolated clone
     FILE = CondaDir / "with_tmp_commit.txt"
