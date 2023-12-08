@@ -4,8 +4,8 @@
 name: Trigger conda_raw release
 on:
   schedule:
-    # 1 day after pdfium-binaries
-    - cron: '0 4 * * 2'
+    # pdfium-binaries triggers conda on the first Monday of month at 4 o'clock UTC, so we'll want rebuild after that, but before the next main release (which will depend on the presence of the package)
+    - cron: '0 4 8 * *'  # monthly, 8th day
   workflow_dispatch:
 
 jobs:
