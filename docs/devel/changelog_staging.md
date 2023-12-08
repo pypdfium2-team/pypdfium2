@@ -6,12 +6,14 @@
 # Changelog for next release
 
 - Removed multiprocessing from deprecated `PdfDocument.render()` API and replaced with linear rendering. See below for more info.
-- Improved issue templates, added pull request template.
-- conda/workflows: Added ability to (re-)build pypdfium2_raw bindings with any given version of pdfium. Fixes {issue}`279`.
-- conda: Improved installation docs and channel config.
-- Made reference bindings more universal by including V8, XFA and Skia symbols. This is possible due to the dynamic symbol guards.
 - setup: Fixed blunder in headers cache logic that would cause existing headers to be always reused regardless of version. *Note, this did not affect release workflows, only local source re-installs.*
 - Show path of linked binary in `pypdfium2 -v`.
+- conda: Improved installation docs and channel config.
+- conda/workflows: Added ability to (re-)build pypdfium2_raw bindings with any given version of pdfium. Fixes {issue}`279`.
+- Made reference bindings more universal by including V8, XFA and Skia symbols. This is possible due to the dynamic symbol guards.
+- Instruct ctypesgen to exclude some unused alias symbols pulled in from struct tags.
+- Improved issue templates, added pull request template.
+- Improved ctypesgen (pypdfium2-team fork).
 
 #### Rationale for `PdfDocument.render()` deprecation
 

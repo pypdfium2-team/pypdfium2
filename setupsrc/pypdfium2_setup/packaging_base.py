@@ -417,6 +417,10 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
         # Note, this is not currently active for our wheels, since we're packaging everything on Linux. It might be possible to divide packaging in native OS hosts in the future, or specify external headers for cross compilation.
         args += ["-D", "_WIN32"]
     
+    # try to exclude some garbage aliases that get pulled in from struct tags
+    # (this captures anything that ends with _, _t, or begins with _, and is not needed by other symbols)
+    args += ["--symbol-rules", "if_needed=\w+_$|\w+_t$|_\w+"]
+    
     bindings = target_dir / BindingsFN
     args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", bindings]
     
