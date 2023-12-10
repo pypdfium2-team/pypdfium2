@@ -1,7 +1,7 @@
 r"""Wrapper for fpdf_annot.h
 
 Generated with:
-/opt/hostedtoolcache/Python/3.10.13/x64/bin/ctypesgen --no-srcinfo --library pdfium --runtime-libdirs . --no-load-library --headers fpdf_annot.h fpdf_attachment.h fpdf_catalog.h fpdf_dataavail.h fpdf_doc.h fpdf_edit.h fpdf_ext.h fpdf_flatten.h fpdf_formfill.h fpdf_fwlevent.h fpdf_javascript.h fpdf_ppo.h fpdf_progressive.h fpdf_save.h fpdf_searchex.h fpdf_signature.h fpdf_structtree.h fpdf_sysfontinfo.h fpdf_text.h fpdf_thumbnail.h fpdf_transformpage.h fpdfview.h -o ~/work/pypdfium2/pypdfium2/data/bindings/bindings.py
+/opt/hostedtoolcache/Python/3.10.13/x64/bin/ctypesgen --library pdfium --no-srcinfo --no-macro-guards --runtime-libdirs . --no-load-library --symbol-rules if_needed=\w+_$|\w+_t$|_\w+ --headers fpdf_annot.h fpdf_attachment.h fpdf_catalog.h fpdf_dataavail.h fpdf_doc.h fpdf_edit.h fpdf_ext.h fpdf_flatten.h fpdf_formfill.h fpdf_fwlevent.h fpdf_javascript.h fpdf_ppo.h fpdf_progressive.h fpdf_save.h fpdf_searchex.h fpdf_signature.h fpdf_structtree.h fpdf_sysfontinfo.h fpdf_text.h fpdf_thumbnail.h fpdf_transformpage.h fpdfview.h -o ~/work/pypdfium2/pypdfium2/data/bindings/bindings.py
 
 Do not modify this file.
 """
@@ -59,13 +59,13 @@ class _variadic_function(object):
 
 # End preamble
 
-# Begin loader
+# Begin loader template
 
 import sys
 import ctypes
 import ctypes.util
 import warnings
-from pathlib import Path
+import pathlib
 
 
 def _find_library(libname, libdirs, allow_system_search):
@@ -77,11 +77,18 @@ def _find_library(libname, libdirs, allow_system_search):
     else:  # assume unix pattern or plain libname
         patterns = ["lib{}.so", "{}.so", "{}"]
     
-    RELDIR = Path(__file__).parent
+    try:
+        THIS_DIR = pathlib.Path(__file__).parent
+    except NameError as e:
+        # Issue a warning if unable to determine the containing directory. After this, it's OK to just fail with NameError below if actually attempting to resolve a relative path.
+        assert e.name == "__file__"
+        warnings.warn("Bindings not stored as file, will be unable to resolve relative dirs")
     
     for dir in libdirs:
-        # joining an absolute path silently discardy the path before
-        dir = (RELDIR / dir).resolve(strict=False)
+        dir = pathlib.Path(dir)
+        if not dir.is_absolute():
+            # note, joining an absolute path silently discardy the path before
+            dir = (THIS_DIR / dir).resolve(strict=False)
         for pat in patterns:
             libpath = dir / pat.format(libname)
             if libpath.is_file():
@@ -89,26 +96,24 @@ def _find_library(libname, libdirs, allow_system_search):
     
     if allow_system_search:
         if libdirs:
-            warnings.warn(f"Could not find library '{libname}' in libdirs {libdirs}, searching system...")
+            warnings.warn(f"Could not find library '{libname}' in libdirs {libdirs}, falling back to system")
         libpath = ctypes.util.find_library(libname)
         if not libpath:
             raise ImportError(f"Could not find library '{libname}' in system")
         return libpath
     else:
         raise ImportError(f"Could not find library '{libname}' in libdirs {libdirs} (system search disabled)")
-    
-    assert False, "unreached"
 
+# End loader template
 
-_loader_info = dict(
-    libname = "pdfium",
-    libdirs = ['.'],
-    allow_system_search = True,
-)
+# Begin library load
+
+_loader_info = {'libname': 'pdfium', 'libdirs': ['.'], 'allow_system_search': True}
 _loader_info["libpath"] = _find_library(**_loader_info)
+assert _loader_info["libpath"], "Could not find library with config %s" % (_loader_info, )
 _lib = ctypes.CDLL(_loader_info["libpath"])
 
-# End loader
+# End library load
 
 # No modules
 
@@ -3163,53 +3168,6 @@ FXFONT_FW_BOLD = 700
 FPDF_MATCHCASE = 0x00000001
 FPDF_MATCHWHOLEWORD = 0x00000002
 FPDF_CONSECUTIVE = 0x00000004
-fpdf_action_t__ = struct_fpdf_action_t__
-fpdf_annotation_t__ = struct_fpdf_annotation_t__
-fpdf_attachment_t__ = struct_fpdf_attachment_t__
-fpdf_avail_t__ = struct_fpdf_avail_t__
-fpdf_bitmap_t__ = struct_fpdf_bitmap_t__
-fpdf_bookmark_t__ = struct_fpdf_bookmark_t__
-fpdf_clippath_t__ = struct_fpdf_clippath_t__
-fpdf_dest_t__ = struct_fpdf_dest_t__
-fpdf_document_t__ = struct_fpdf_document_t__
-fpdf_font_t__ = struct_fpdf_font_t__
-fpdf_form_handle_t__ = struct_fpdf_form_handle_t__
-fpdf_glyphpath_t__ = struct_fpdf_glyphpath_t__
-fpdf_javascript_action_t = struct_fpdf_javascript_action_t
-fpdf_link_t__ = struct_fpdf_link_t__
-fpdf_page_t__ = struct_fpdf_page_t__
-fpdf_pagelink_t__ = struct_fpdf_pagelink_t__
-fpdf_pageobject_t__ = struct_fpdf_pageobject_t__
-fpdf_pageobjectmark_t__ = struct_fpdf_pageobjectmark_t__
-fpdf_pagerange_t__ = struct_fpdf_pagerange_t__
-fpdf_pathsegment_t = struct_fpdf_pathsegment_t
-fpdf_schhandle_t__ = struct_fpdf_schhandle_t__
-fpdf_signature_t__ = struct_fpdf_signature_t__
-fpdf_structelement_t__ = struct_fpdf_structelement_t__
-fpdf_structelement_attr_t__ = struct_fpdf_structelement_attr_t__
-fpdf_structtree_t__ = struct_fpdf_structtree_t__
-fpdf_textpage_t__ = struct_fpdf_textpage_t__
-fpdf_widget_t__ = struct_fpdf_widget_t__
-fpdf_xobject_t__ = struct_fpdf_xobject_t__
-FPDF_BSTR_ = struct_FPDF_BSTR_
-_FS_MATRIX_ = struct__FS_MATRIX_
-_FS_RECTF_ = struct__FS_RECTF_
-FS_SIZEF_ = struct_FS_SIZEF_
-FS_POINTF_ = struct_FS_POINTF_
-_FS_QUADPOINTSF = struct__FS_QUADPOINTSF
-FPDF_LIBRARY_CONFIG_ = struct_FPDF_LIBRARY_CONFIG_
-FPDF_FILEHANDLER_ = struct_FPDF_FILEHANDLER_
-FPDF_COLORSCHEME_ = struct_FPDF_COLORSCHEME_
-_IPDF_JsPlatform = struct__IPDF_JsPlatform
-_FPDF_SYSTEMTIME = struct__FPDF_SYSTEMTIME
-_FPDF_FORMFILLINFO = struct__FPDF_FORMFILLINFO
-_FX_FILEAVAIL = struct__FX_FILEAVAIL
-_FX_DOWNLOADHINTS = struct__FX_DOWNLOADHINTS
 FPDF_IMAGEOBJ_METADATA = struct_FPDF_IMAGEOBJ_METADATA
-_UNSUPPORT_INFO = struct__UNSUPPORT_INFO
-_IFSDK_PAUSE = struct__IFSDK_PAUSE
-FPDF_FILEWRITE_ = struct_FPDF_FILEWRITE_
-_FPDF_SYSFONTINFO = struct__FPDF_SYSFONTINFO
-FPDF_CharsetFontMap_ = struct_FPDF_CharsetFontMap_
 # No inserted files
 
