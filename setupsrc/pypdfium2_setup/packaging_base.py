@@ -15,6 +15,7 @@ import functools
 import sysconfig
 import traceback
 import subprocess
+import contextlib
 from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
@@ -65,7 +66,7 @@ ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").repl
 
 # We endeavor to make the reference bindings as universal and robust as possible.
 # Thanks to symbol guards, we can define all standalone feature flags.
-# We don't currently define flags that depend on external headers, though it should be possible in principle by adding them to $CPATH (or equivalent). Further, if we could get OS headers, this might even allow for cross-compilation with OS flags (e.g. _WIN32).
+# We don't currently define flags that depend on external headers, though it should be possible in principle by adding them to $CPATH (or equivalent).
 # Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
 REFBINDINGS_FLAGS = ["V8", "XFA", "SKIA"]
 
@@ -260,7 +261,7 @@ def merge_tag(info, mode):
         elif mode == "py":
             tag += "+" + ".".join(extra_info)
         else:
-            print("Warning: Ignored post-tag desc. This should not happen in autorelease CI.")
+            print("Warning: Ignored post-tag desc. This should not happen in autorelease CI.", file=sys.stderr)
     
     return tag
 
@@ -416,13 +417,23 @@ PdfiumFlagsDict = {
 }
 
 
+@contextlib.contextmanager
+def tmp_cwd_context(tmp_cwd):
+    orig_cwd = os.getcwd()
+    os.chdir(str(tmp_cwd.resolve()))
+    try:
+        yield
+    finally:
+        os.chdir(orig_cwd)
+
+
 def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compile_lds=[], run_lds=["."], allow_system_despite_libdirs=False):
-    # The commands below are tailored to our fork of ctypesgen, so make sure we have that
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
-    assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False)
+    assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
+    import ctypesgen.__main__
     
-    args = ["ctypesgen", f"--strip-build-path={headers_dir}", "--library", "pdfium", "--no-srcinfo", "--no-macro-guards"]
+    args = ["--library", "pdfium", "--no-srcinfo", "--no-macro-guards"]
     
     if run_lds:
         args += ["--runtime-libdirs", *run_lds]
@@ -449,12 +460,8 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     bindings = target_dir / BindingsFN
     args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", bindings]
     
-    run_cmd(args, cwd=headers_dir)
-    
-    text = bindings.read_text()
-    text = text.replace(str(headers_dir), ".")
-    text = text.replace(str(Path.home()), "~")
-    bindings.write_text(text)
+    with tmp_cwd_context(headers_dir):
+        ctypesgen.__main__.main([str(a) for a in args])
 
 
 def build_pdfium_bindings(version, headers_dir=None, flags=[], **kwargs):
