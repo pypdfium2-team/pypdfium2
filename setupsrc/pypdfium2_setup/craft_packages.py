@@ -5,9 +5,12 @@
 
 import os
 import sys
+import json
 import shutil
 import argparse
 import tempfile
+import contextlib
+import urllib.request as url_request
 from pathlib import Path
 from functools import partial
 
@@ -78,7 +81,8 @@ def _run_pypi_build(args):
 def main_pypi(args):
     
     os.environ[PlatSpec_EnvVar] = ExtPlats.none
-    _run_pypi_build(["--sdist"])
+    with tmp_ctypesgen_pin():
+        _run_pypi_build(["--sdist"])
     
     suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
     for plat in ReleaseNames.keys():
@@ -153,6 +157,35 @@ class ArtifactStash:
         for fp in self.files:
             shutil.move(self.tmpdir_path / fp.name, ModuleDir_Raw)
         self.tmpdir.cleanup()
+
+
+@contextlib.contextmanager
+def tmp_replace_ctx(fp, orig, tmp):
+    orig_txt = fp.read_text()
+    tmp_txt = orig_txt.replace(orig, tmp)
+    fp.write_text(tmp_txt)
+    try:
+        yield
+    finally:
+        fp.write_text(orig_txt)
+
+
+@contextlib.contextmanager
+def tmp_ctypesgen_pin():
+    
+    head_url = "https://api.github.com/repos/pypdfium2-team/ctypesgen/git/refs/heads/pypdfium2"
+    with url_request.urlopen(head_url) as rq:
+        content = rq.read().decode()
+    content = json.loads(content)
+    sha = content["object"]["sha"]
+    print(f"Resolved pypdfium2 ctypesgen HEAD to {sha}", file=sys.stderr)
+    
+    base_txt = "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@"
+    ctx = tmp_replace_ctx(ProjectDir/"pyproject.toml", base_txt+"pypdfium2", base_txt+sha)
+    with ctx:
+        print(f"Wrote temporary pyproject.toml with ctypesgen pin", file=sys.stderr)
+        yield
+    print(f"Reset pyproject.toml", file=sys.stderr)
 
 
 class TmpCommitCtx:
