@@ -130,7 +130,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     ```bash
     # Call ctypesgen (see --help or packaging_base.py::run_ctypesgen() for further options)
     # Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
-    ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py --strip-build-path=. --no-srcinfo [-D $MY_FLAGS]
+    ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py --strip-build-path=. [-D $MY_FLAGS]
     
     # Write the version file (fill the placeholders).
     # Note, this is not a mature interface yet and might change!
