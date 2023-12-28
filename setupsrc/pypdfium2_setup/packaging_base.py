@@ -464,7 +464,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
         ctypesgen.__main__.main([str(a) for a in args])
 
 
-def build_pdfium_bindings(version, headers_dir=None, flags=[], **kwargs):
+def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     defaults = dict(flags=[], run_lds=["."], guard_symbols=False)
     for k, v in defaults.items():
         kwargs.setdefault(k, v)
@@ -483,7 +483,7 @@ def build_pdfium_bindings(version, headers_dir=None, flags=[], **kwargs):
         bindings_ver = record["pdfium"]
         if bindings_ver != version:
             print(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!", file=sys.stderr)
-        flags_diff = set(flags).difference(REFBINDINGS_FLAGS)
+        flags_diff = set(kwargs["flags"]).difference(REFBINDINGS_FLAGS)
         if flags_diff:  # == not set(...).issubset(...)
             print(f"Warning: The following requested flags are not available in the reference bindings and will be discarded: {flags_diff}")
         shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
