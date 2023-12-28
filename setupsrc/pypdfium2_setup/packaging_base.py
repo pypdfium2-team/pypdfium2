@@ -413,7 +413,7 @@ def tar_extract_file(tar, src, dst_path):
 PdfiumFlagsDict = {
     "V8": "PDF_ENABLE_V8",
     "XFA": "PDF_ENABLE_XFA",
-    "SKIA": "_SKIA_SUPPORT_",
+    "SKIA": "PDF_USE_SKIA",
 }
 
 
