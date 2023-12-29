@@ -325,7 +325,9 @@ class PdfPage (pdfium_i.AutoCloseable):
             rotation = 0,
             crop = (0, 0, 0, 0),
             may_draw_forms = True,
-            bitmap_maker = PdfBitmap.new_native,
+            # use foreign bitmap to work around https://crbug.com/pdfium/2112
+            # it should be changed back to native once the bug is fixed
+            bitmap_maker = PdfBitmap.new_foreign,
             color_scheme = None,
             fill_to_stroke = False,
             **kwargs
