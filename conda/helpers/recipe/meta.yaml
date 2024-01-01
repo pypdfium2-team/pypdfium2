@@ -32,8 +32,10 @@ requirements:
   run:
     # Set an upper boundary for pypdfium2_raw as defined in craft_packages.py
     # NOTE There currently is no significant minimum pdfium requirement, but we could add one should the necessity arise.
+    # pdfium 6219: blacklisted due to https://crbug.com/pdfium/2112
+    # (6205 is also affected, but not on conda due to monthly schedule)
     - python
-    - pypdfium2-team::pypdfium2_raw <={{ pdfium_max }}
+    - pypdfium2-team::pypdfium2_raw <={{ pdfium_max }},!=6219
 
 test:
   requires:
