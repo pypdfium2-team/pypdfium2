@@ -7,6 +7,12 @@
 # Changelog
 
 
+## 4.26.0 (2024-01-10)
+
+- Updated PDFium from `6164` to `6233`.
+- Pin ctypesgen in sdist to prevent reoccurrence of {issue}`264` / {issue}`286`. As a drawback, the pin is never committed, so the sdist is not simply reproducible at this time due to dependence on the latest commit hash of the ctypesgen fork at build time.
+
+
 ## 4.25.0 (2023-12-10)
 
 - Updated PDFium from `6110` to `6164`.
