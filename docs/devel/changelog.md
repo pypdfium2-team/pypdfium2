@@ -11,6 +11,7 @@
 
 - Updated PDFium from `6164` to `6233`.
 - Pin ctypesgen in sdist to prevent reoccurrence of {issue}`264` / {issue}`286`. As a drawback, the pin is never committed, so the sdist is not simply reproducible at this time due to dependence on the latest commit hash of the ctypesgen fork at build time.
+- Wheel tags: Added back `manylinux2014` in addition to `manylinux_{glibc_ver}` to be on the safe side. Suspected relation to the above issues.
 
 
 ## 4.25.0 (2023-12-10)
