@@ -4,8 +4,8 @@
 # MANIFEST.in defines the files to include in an sdist. sdists are also the starting point for wheels.
 # Additional files may be included using setuptools (e.g. package_data, license_files)
 
-# We want this to be as narraw as possible, i.e. only the bare minimum of files needed for installation.
-# Note: If setuptools-scm is installed, it will include all files checked into version control, and as of this writing, it is not possible to opt out (setuptools_scm/issues/190)
+# We want this to be a tight ruleset, i.e. only include the minimum of files we actually need for packaging/installation.
+# Note: If setuptools-scm is installed, it will include all files checked into version control, and as of this writing, it is not possible to opt out: https://github.com/pypa/setuptools_scm/issues/190
 
 # Include library and setup sources
 recursive-include src/pypdfium2 *.py
