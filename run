@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # FIXME can we support running multiple commands at once ?
 # FIXME auto-completion
