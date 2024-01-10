@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2023 geisserml <geisserml@gmail.com> -->
+<!-- SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 <!-- TODO remove planned_changes.md and merge content into some other file -->
