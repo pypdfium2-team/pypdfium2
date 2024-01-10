@@ -346,6 +346,10 @@ class _host_platform:
 Host = _host_platform()
 
 
+def _manylinux_tag(arch, glibc="2_17"):
+    # see BUG(203) for discussion of glibc requirement
+    return f"manylinux_{glibc}_{arch}.manylinux2014_{arch}"
+
 def get_wheel_tag(pl_name):
     if pl_name == PlatNames.darwin_x64:
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
@@ -353,16 +357,14 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
-    # linux glibc requirement: see BUG(203) for discussion
-    # TODO unify glibc/musl CPU translation
     elif pl_name == PlatNames.linux_x64:
-        return "manylinux_2_17_x86_64"
+        return _manylinux_tag("x86_64")
     elif pl_name == PlatNames.linux_x86:
-        return "manylinux_2_17_i686"
+        return _manylinux_tag("i686")
     elif pl_name == PlatNames.linux_arm64:
-        return "manylinux_2_17_aarch64"
+        return _manylinux_tag("aarch64")
     elif pl_name == PlatNames.linux_arm32:
-        return "manylinux_2_17_armv7l"
+        return _manylinux_tag("armv7l")
     elif pl_name == PlatNames.linux_musl_x64:
         return "musllinux_1_1_x86_64"
     elif pl_name == PlatNames.linux_musl_x86:
