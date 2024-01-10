@@ -90,7 +90,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
         install_requires = [],
     )
     
-    if modnames == [ModuleHelpers] and pl_name != ExtPlats.none:
+    if modnames == [ModuleHelpers] and pl_name != ExtPlats.sdist:
         # do not do this for sdist (none)
         kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
@@ -113,9 +113,9 @@ def run_setup(modnames, pl_name, pdfium_ver):
     if ModuleRaw in modnames:
         kwargs["package_dir"]["pypdfium2_raw"] = "src/pypdfium2_raw"
     
-    if ModuleRaw not in modnames or pl_name == ExtPlats.none:
+    if ModuleRaw not in modnames or pl_name == ExtPlats.sdist:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": PLATFILES_GLOB}
-        if pl_name == ExtPlats.none:
+        if pl_name == ExtPlats.sdist:
             kwargs["license_files"] += LICENSES_SDIST
     elif pl_name == ExtPlats.system:
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
@@ -145,7 +145,7 @@ def main():
     with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
     modnames = parse_modspec(modspec)
     
-    if ModuleRaw in modnames and with_prepare and pl_name != ExtPlats.none:
+    if ModuleRaw in modnames and with_prepare and pl_name != ExtPlats.sdist:
         prepare_setup(pl_name, pdfium_ver, use_v8)
     run_setup(modnames, pl_name, pdfium_ver)
 

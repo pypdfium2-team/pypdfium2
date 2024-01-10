@@ -81,8 +81,7 @@ class SysNames:
 class ExtPlats:
     sourcebuild = "sourcebuild"
     system = "system"
-    none = "none"  # FIXME rename to sdist?
-    auto = "auto"
+    sdist = "sdist"
 
 # TODO align with either python or google platform names?
 class PlatNames:
@@ -596,7 +595,7 @@ def parse_pl_spec(pl_spec, with_prepare=True):
         pl_spec = pl_spec[:-len(PlatSpec_V8Sym)]
         use_v8 = True
     
-    if not pl_spec or pl_spec == ExtPlats.auto:
+    if not pl_spec or pl_spec == "auto":
         pl_name = Host.platform
         if pl_name is None:
             raise RuntimeError(f"No pre-built binaries available for {Host}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")

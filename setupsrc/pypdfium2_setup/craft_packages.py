@@ -75,12 +75,13 @@ def main():
 
 
 def _run_pypi_build(args):
-    run_cmd([sys.executable, "-m", "build", "--skip-dependency-check", "--no-isolation"] + args, cwd=ProjectDir, env=os.environ)
+    # -nx: --no-isolation --skip-dependency-check
+    run_cmd([sys.executable, "-m", "build", "-nx"] + args, cwd=ProjectDir, env=os.environ)
 
 
 def main_pypi(args):
     
-    os.environ[PlatSpec_EnvVar] = ExtPlats.none
+    os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
     with tmp_ctypesgen_pin():
         _run_pypi_build(["--sdist"])
     

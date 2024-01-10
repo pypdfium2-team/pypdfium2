@@ -32,10 +32,7 @@ class AutoCastable:
 def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
     
     if DEBUG_AUTOCLOSE:
-        state = state.value
-        desc = "auto" if state == STATE_AUTO else "explicit" if state == STATE_EXPLICIT else "by parent" if state == STATE_BYPARENT else None
-        if desc is None:
-            raise
+        desc = {STATE_AUTO: "auto", STATE_EXPLICIT: "explicit", STATE_BYPARENT: "by parent"}[state.value]
         # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
         os.write(sys.stderr.fileno(), f"Close ({desc}) {obj_repr}\n".encode())
     

@@ -90,7 +90,7 @@ def main():
     )
     args = parser.parse_args()
     
-    if args.plat_spec == ExtPlats.none:
+    if args.plat_spec == ExtPlats.sdist:
         print("Remove existing in-tree platform files, if any.", file=sys.stderr)
         clean_platfiles()
         return
