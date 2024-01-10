@@ -103,6 +103,9 @@ def run_setup(modnames, pl_name, pdfium_ver):
     if ModuleHelpers in modnames:
         # is_editable = None: unknown/fallback in case the cmdclass is not reached
         helpers_info = get_helpers_info()
+        if pl_name == ExtPlats.sdist:
+            # ignore dirty state due to craft_packages::tmp_ctypesgen_pin()
+            helpers_info["dirty"] = False
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         helpers_info["is_editable"] = None
         write_json(ModuleDir_Helpers/VersionFN, helpers_info)
