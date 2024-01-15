@@ -35,14 +35,18 @@ def parse_args():
     )
     subparsers = root_parser.add_subparsers(dest="parser")
     pypi = subparsers.add_parser(P_PYPI)
-    pypi.add_argument(
-        "--use-v8",
-        action = "store_true",
-    )
+    pypi.add_argument("--use-v8", action="store_true")
+    pypi.add_argument("--wheels", action="store_true")
+    pypi.add_argument("--sdist", action="store_true")
     conda_raw = subparsers.add_parser(P_CONDA_RAW)
     conda_helpers = subparsers.add_parser(P_CONDA_HELPERS)
     
     args = root_parser.parse_args()
+    
+    if args.parser == P_PYPI:
+        if not any([args.wheels, args.sdist]):
+            args.wheels, args.sdist = True, True
+    
     args.is_literal_latest = args.pdfium_ver == "latest"
     if not args.pdfium_ver or args.is_literal_latest:
         if args.parser == P_CONDA_RAW:
@@ -81,15 +85,19 @@ def _run_pypi_build(args):
 
 def main_pypi(args):
     
-    os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
-    with tmp_ctypesgen_pin():
-        _run_pypi_build(["--sdist"])
+    assert args.sdist or args.wheels
     
-    suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
-    for plat in ReleaseNames.keys():
-        os.environ[PlatSpec_EnvVar] = plat + suffix
-        _run_pypi_build(["--wheel"])
-        clean_platfiles()
+    if args.sdist:
+        os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
+        with tmp_ctypesgen_pin():
+            _run_pypi_build(["--sdist"])
+    
+    if args.wheels:
+        suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
+        for plat in ReleaseNames.keys():
+            os.environ[PlatSpec_EnvVar] = plat + suffix
+            _run_pypi_build(["--wheel"])
+            clean_platfiles()
 
 
 def run_conda_build(recipe_dir, out_dir, args=[]):
