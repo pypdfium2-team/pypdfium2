@@ -196,8 +196,8 @@ As pypdfium2 requires a C extension and has custom setup code, there are some sp
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
     + If `system`, bind against system-provided pdfium instead of embedding a binary. Version must be given explicitly so matching bindings can be generated.
     + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `build_pdfium.py`.
-    + If `none`, no platform-dependent files will be included, so as to create a source distribution.
-    `sourcebuild` and `none` are standalone, they cannot be followed by additional specifiers.
+    + If `sdist`, no platform-dependent files will be included, so as to create a source distribution.
+    `sourcebuild` and `sdist` are standalone, they cannot be followed by additional specifiers.
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
   - Version: If given, use the specified pdfium-binaries release. Otherwise, use the latest one.
   - It is possible to prepend `prepared!` to install with existing platform files instead of generating on the fly; the value will be used for metadata / file inclusion. This can be helpful when installing in an isolated env where ctypesgen is not available, but it is not desirable to use the reference bindings (e.g. conda).
