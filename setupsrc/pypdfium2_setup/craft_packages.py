@@ -44,7 +44,7 @@ def parse_args():
     args = root_parser.parse_args()
     
     if args.parser == P_PYPI:
-        if not any([args.wheels, args.sdist]):
+        if not (args.wheels or args.sdist):
             args.wheels, args.sdist = True, True
     
     args.is_literal_latest = args.pdfium_ver == "latest"
