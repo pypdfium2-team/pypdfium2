@@ -102,14 +102,15 @@ def run_setup(modnames, pl_name, pdfium_ver):
     
     if ModuleHelpers in modnames:
         helpers_info = get_helpers_info()
-        # ignore dirty state due to craft_packages::tmp_ctypesgen_pin()
         if pl_name == ExtPlats.sdist:
             if helpers_info["dirty"]:
-                status = run_cmd(["git", "status", "--porcelain"], capture=True, cwd=ProjectDir).strip()
-                if status == "M pyproject.toml":
+                # ignore dirty state due to craft_packages::tmp_ctypesgen_pin()
+                if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
+                    status = run_cmd(["git", "status", "--porcelain"], capture=True, cwd=ProjectDir).strip()
+                    assert status == "M pyproject.toml"
                     helpers_info["dirty"] = False
             else:
-                print("Warning: sdist built without ctypesgen pin?", file=sys.stderr)
+                print("!!! Warning: sdist built without ctypesgen pin?", file=sys.stderr)
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         # is_editable = None: unknown/fallback in case the cmdclass is not reached
         helpers_info["is_editable"] = None

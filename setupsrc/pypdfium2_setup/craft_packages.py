@@ -96,7 +96,10 @@ def main_pypi(args):
     
     if args.sdist:
         os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
+        helpers_info = get_helpers_info()
         with tmp_ctypesgen_pin():
+            if not helpers_info["dirty"]:
+                os.environ["SDIST_IGNORE_DIRTY"] = "1"
             _run_pypi_build(["--sdist"])
     
     if args.wheels:
