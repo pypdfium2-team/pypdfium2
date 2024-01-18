@@ -434,8 +434,9 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
     import ctypesgen.__main__
     
-    args = ["--library", "pdfium", "--no-macro-guards"]
+    args = ["-l", "pdfium"]
     
+    # library loading
     if run_lds:
         args += ["--runtime-libdirs", *run_lds]
         if not allow_system_despite_libdirs:
@@ -445,21 +446,28 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     else:
         args += ["--no-load-library"]
     
+    # style
+    args += ["--no-macro-guards"]
     if not guard_symbols:
         args += ["--no-symbol-guards"]
+    
+    # pre-processor - if not given, pypdfium2-ctypesgen will try to auto-select as available (gcc/clang)
+    c_preproc = os.environ.get("CPP", None)
+    if c_preproc:
+        args += ["--cpp", c_preproc]
     if flags:
         args += ["-D"] + [PdfiumFlagsDict[f] for f in flags]
     if Host.system == SysNames.windows:
-        # If we are on a windows host, add the relevant define to expose windows-only members.
-        # Note, this is not currently active for our wheels, since we're packaging everything on Linux. It might be possible to divide packaging in native OS hosts in the future, or specify external headers for cross compilation.
+        # If we are on a Windows host, add the relevant define to expose Windows-only members.
+        # Note, this is not currently active for our wheels, since we're packaging everything on Linux. It might be possible to divide packaging in native OS hosts in the future, or specify external headers for symbol spoofing.
         args += ["-D", "_WIN32"]
     
-    # try to exclude some garbage aliases that get pulled in from struct tags
+    # symbols - try to exclude some garbage aliases that get pulled in from struct tags
     # (this captures anything that ends with _, _t, or begins with _, and is not needed by other symbols)
     args += ["--symbol-rules", r"if_needed=\w+_$|\w+_t$|_\w+"]
     
-    bindings = target_dir / BindingsFN
-    args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", bindings]
+    # input / output
+    args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", target_dir/BindingsFN]
     
     with tmp_cwd_context(headers_dir):
         ctypesgen.__main__.main([str(a) for a in args])
