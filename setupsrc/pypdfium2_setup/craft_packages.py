@@ -19,6 +19,11 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.packaging_base import *
 from pypdfium2_setup.emplace import prepare_setup
 
+try:
+    import build.__main__ as build_module
+except ImportError:
+    build_module = None
+
 
 P_PYPI = "pypi"
 P_CONDA_RAW = "conda_raw"
@@ -78,9 +83,11 @@ def main():
             assert False
 
 
-def _run_pypi_build(args):
+def _run_pypi_build(caller_args):
     # -nx: --no-isolation --skip-dependency-check
-    run_cmd([sys.executable, "-m", "build", "-nx"] + args, cwd=ProjectDir, env=os.environ)
+    assert build_module, "Module 'build' is not importable. Cannot craft PyPI packages."
+    with tmp_cwd_context(ProjectDir):
+        build_module.main([str(ProjectDir), "-nx", *caller_args])
 
 
 def main_pypi(args):
