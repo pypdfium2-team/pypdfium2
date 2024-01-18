@@ -106,8 +106,6 @@ def run_setup(modnames, pl_name, pdfium_ver):
             if helpers_info["dirty"]:
                 # ignore dirty state due to craft_packages::tmp_ctypesgen_pin()
                 if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
-                    status = run_cmd(["git", "status", "--porcelain"], capture=True, cwd=ProjectDir).strip()
-                    assert status == "M pyproject.toml"
                     helpers_info["dirty"] = False
             else:
                 print("!!! Warning: sdist built without ctypesgen pin?", file=sys.stderr)

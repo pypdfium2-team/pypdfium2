@@ -212,7 +212,7 @@ def parse_given_tag(full_tag):
     
     info = dict()
     
-    # TODO looks like `git describe --dirty` does not account for new committable files, but this could be relevant - consider evaluating dirty ourselves by checking if `git status --porcelain` is non-empty
+    # NOTE `git describe --dirty` does not account for new unregistered files
     tag = full_tag
     dirty = tag.endswith("-dirty")
     if dirty:
