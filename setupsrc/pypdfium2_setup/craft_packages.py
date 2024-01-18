@@ -178,6 +178,7 @@ class ArtifactStash:
 @contextlib.contextmanager
 def tmp_replace_ctx(fp, orig, tmp):
     orig_txt = fp.read_text()
+    assert orig_txt.count(orig) == 1
     tmp_txt = orig_txt.replace(orig, tmp)
     fp.write_text(tmp_txt)
     try:
