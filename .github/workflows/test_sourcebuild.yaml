@@ -55,5 +55,9 @@ jobs:
       - name: Install
         run: PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
       
+      # must show matching pdfium version with sourcebuild origin
+      - name: Check version
+        run: pypdfium2 -v
+      
       - name: Run test suite
         run: ./run test
