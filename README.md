@@ -586,7 +586,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   height = math.ceil(pdfium_c.FPDF_GetPageHeightF(page))
   
   # Create a bitmap
-  use_alpha = False  # We don't render with transparent background
+  # (Note, pdfium is faster at rendering transparency if we use BGRA rather than BGRx)
+  use_alpha = pdfium_c.FPDFPage_HasTransparency(page)
   bitmap = pdfium_c.FPDFBitmap_Create(width, height, int(use_alpha))
   # Fill the whole bitmap with a white background
   # The color is given as a 32-bit integer in ARGB format (8 bits per channel)
