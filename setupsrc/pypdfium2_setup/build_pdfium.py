@@ -105,7 +105,8 @@ def dl_pdfium(GClient, do_update, revision):
         # TODO consider passing -D ?
         run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
         # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
-        # FIXME avoid static number of commits, check out exactly up to latest versioned commit
+        # FIXME want to avoid static number of commits, and instead check out exactly up to latest versioned commit
+        run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     
     return is_sync
@@ -136,7 +137,7 @@ def _walk_refs(log):
 
 def identify_pdfium():
     # we didn't manage to get git describe working reliably with chromium's branch heads and the awkward state the repo's in, so emulate git describe on our own
-    # FIXME avoid static number of commits - need a better way to determine latest version and commit count diff
+    # FIXME want to avoid static number of commits - need a better way to determine latest version and commit count diff
     log = run_cmd(["git", "log", "-100", "--pretty=%D"], cwd=PDFiumDir, capture=True)
     v_short, n_commits = _walk_refs(log)
     if n_commits:
