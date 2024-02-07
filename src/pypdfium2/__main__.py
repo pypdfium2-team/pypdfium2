@@ -7,14 +7,8 @@ import importlib
 from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
 from pypdfium2._cli._parsers import setup_logging
 
-try:
-    from pypdfium2_raw.bindings import _libs_info
-    pdfium_path = _libs_info["pdfium"]["path"]
-except ImportError:
-    # retained for downward compatibility with conda pypdfium2_raw <= 6164 by date of initial build
-    # actually it's the ctypesgen version that matters, but we don't have info about that
-    from pypdfium2_raw.bindings import _loader_info
-    pdfium_path = _loader_info["libpath"]
+from pypdfium2_raw.bindings import _libs_info
+pdfium_path = _libs_info["pdfium"]["path"]
 
 SubCommands = {
     "arrange":        "rearrange/merge documents",
