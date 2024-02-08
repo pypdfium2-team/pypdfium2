@@ -19,7 +19,7 @@ jobs:
     
     steps:
       - name: Trigger
-        uses: benc-uk/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@v121
         with:
           workflow: main.yaml
           inputs: |

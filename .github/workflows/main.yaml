@@ -228,7 +228,7 @@ jobs:
           prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
       
       - name: Trigger GH Pages rebuild
-        uses: benc-uk/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@v121
         with:
           workflow: gh_pages.yaml  # takes no inputs
   
@@ -239,7 +239,7 @@ jobs:
     
     steps:
       - name: Trigger conda pypdfium2_helpers build
-        uses: benc-uk/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@v121
         with:
           # FIXME input not respected for py_version here
           workflow: conda.yaml
