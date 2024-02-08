@@ -820,6 +820,17 @@ git push --delete origin $TAGNAME
 Faulty PyPI releases may be yanked using the web interface.
 
 
+## Prominent Embedders
+
+pypdfium2 is used by prominent embedders such as
+[langchain](https://github.com/langchain-ai/langchain),
+[nougat](https://github.com/facebookresearch/nougat),
+[pdfplumber](https://github.com/jsvine/pdfplumber),
+and [doctr](https://github.com/mindee/doctr/).
+
+This results in pypdfium2 being part of a large dependency tree.
+
+
 ## Thanks to[^thanks_to]
 
 <!-- order: alphabetical by surname -->
