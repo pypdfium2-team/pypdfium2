@@ -49,7 +49,7 @@ jobs:
     steps:
       
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.py_version }}
       
@@ -124,7 +124,7 @@ jobs:
     steps:
       
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py }}
       
@@ -173,7 +173,7 @@ jobs:
           fetch-depth: 0
       
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.py_version }}
       
