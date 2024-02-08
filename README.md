@@ -143,7 +143,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   + To set up channels in a GH workflow
     ```yaml
     - name: ...
-      uses: conda-incubator/setup-miniconda@v3
+      uses: conda-incubator/setup-miniconda@v2
       with:
         # ... your options
         channels: pypdfium2-team,bblanchon

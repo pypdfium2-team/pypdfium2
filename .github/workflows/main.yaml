@@ -86,13 +86,13 @@ jobs:
         run: ./run packaging_pypi
       
       - name: Upload release notes
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: release_notes
           path: RELEASE.md
       
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: packages
           path: dist/*
@@ -135,7 +135,7 @@ jobs:
           ref: autorelease_tmp
       
       - name: Download packages
-        uses: actions/upload-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: packages
           path: dist/
@@ -178,13 +178,13 @@ jobs:
           python-version: ${{ inputs.py_version }}
       
       - name: Download packages
-        uses: actions/upload-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: packages
           path: dist/
       
       - name: Download release notes
-        uses: actions/upload-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: release_notes
       
