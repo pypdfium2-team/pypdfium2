@@ -7,6 +7,13 @@
 # Changelog
 
 
+## 4.27.0 (2024-02-10)
+
+- Updated PDFium from `6233` to `6281`.
+- Added ability to define `$CTYPESGEN_PIN` when building sdist via `./run craft pypi --sdist`, which allows to reproduce our sdists when set to the head commit hash of `pypdfium2-team/ctypesgen` at the time of the build to reproduce. Alternatively, you may patch the relevant `pyproject.toml` entry yourself and use `PDFIUM_PLATFORM=sdist python -m build --sdist` as usual.
+- Set up Dependabot for GH Actions. Updated dependencies accordingly.
+
+
 ## 4.26.0 (2024-01-10)
 
 - Updated PDFium from `6164` to `6233`.
