@@ -7,10 +7,12 @@
 ## Checklist
 
 <!--
-- Choose the section(s) relevant to your PR and answer the questions. A section is indicated by `### Heading`. Skip non-applying sections.
+- Answer the questions below, choosing the section(s) relevant to your PR.
 - Place an `x` in the [ ] for yes, leave it empty for no. If a question is not applicable, remove the [ ], but keep the message in place.
 - Use the Preview tab to confirm the PR will render correctly.
 -->
+
+- [ ] I have read and acknowledged the [response policy](https://github.com/pypdfium2-team/pypdfium2#contributions).
 
 ### Helpers
 

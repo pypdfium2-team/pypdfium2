@@ -11,12 +11,14 @@ body:
   
   - type: checkboxes
     attributes:
-      label: Package origin
+      label: Checklist
       description: |
         There might be unofficial PyPA packages of pypdfium2 in the wild.
         **We do not support third-party builds, and they are not eligible for a bug report.** Please make sure to use our official packages.
       options:
         - label: I confirm to be using an **official package** of `pypdfium2` from `PyPI` or `GitHub/pypdfium2-team`.
+          required: true
+        - label: I have read and acknowledged the [response policy](https://github.com/pypdfium2-team/pypdfium2#contributions).
           required: true
   
   - type: textarea

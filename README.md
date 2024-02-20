@@ -651,7 +651,8 @@ As of early 2023, a single developer is author and rightsholder of the code base
 ## Issues
 
 While using pypdfium2, you might encounter bugs or missing features.
-In this case, feel free to file an issue. If applicable, include details such as tracebacks, OS and CPU type, as well as the versions of pypdfium2 and used dependencies.
+In this case, feel free to open an issue or discuss thread. If applicable, include details such as tracebacks, OS and CPU type, as well as the versions of pypdfium2 and used dependencies.
+__However, please note our [response policy](#contributions).__
 
 Roadmap:
 * pypdfium2
@@ -695,7 +696,16 @@ Also, while ABI bindings tend to be more convenient, they have some technical dr
 ## Development
 <!-- TODO wheel tags, maintainer access, GitHub peculiarities -->
 
-This section contains some key information relevant for project maintainers.
+### Contributions
+<!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
+
+> We may accept contributions, but only if our code quality expectations are met.
+
+__Policy__:
+* We may not respond to your issue or PR.
+* We may close an issue or PR without much feedback.
+* We may lock discussions or contributions if our attention is getting DDOSed.
+* Do not expect us to help much with usage. We are not a code writing service.
 
 ### Long lines
 

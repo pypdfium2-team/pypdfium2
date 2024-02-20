@@ -23,6 +23,8 @@ body:
           required: true
         - label: I confirm to be working with the **conda env in question, and its proper python executable** (not system python).
           required: true
+        - label: I have read and acknowledged the [response policy](https://github.com/pypdfium2-team/pypdfium2#contributions).
+          required: true
   
   - type: textarea
     attributes:
