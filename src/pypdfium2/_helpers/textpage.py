@@ -81,14 +81,15 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         t_start, t_end, l_passive, r_passive = active_range
         index += l_passive
         count -= l_passive + r_passive
-        in_size = (t_end - t_start) + 2
+        # TODO once https://crbug.com/pdfium/2133 is fixed, revert to `t_end+2 - t_start` and tighten assert
+        in_count = (t_end+1 - t_start)*2 + 1
         
-        buffer = ctypes.create_string_buffer(in_size * 2)
+        buffer = ctypes.create_string_buffer(in_count * 2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
-        out_size = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
-        assert in_size == out_size, f"Buffer size mismatch: {in_size} vs {out_size}"
+        out_count = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
+        assert in_count >= out_count, f"Buffer too small: {in_count} vs {out_count}"
         
-        return buffer.raw[:(out_size-1)*2].decode("utf-16-le", errors=errors)
+        return buffer.raw[:(out_count-1)*2].decode("utf-16-le", errors=errors)
     
     
     def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
