@@ -705,7 +705,7 @@ __Policy__:
 * We may not respond to your issue or PR.
 * We may close an issue or PR without much feedback.
 * We may lock discussions or contributions if our attention is getting DDOSed.
-* Do not expect us to help much with usage. We are not a code writing service.
+* We may not provide much usage support.
 
 ### Long lines
 
