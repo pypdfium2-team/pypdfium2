@@ -53,7 +53,10 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         """
         Extract text from a given range.
         
-        See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
+        Warning:
+            Unexpected upstream changes have caused allocation size concerns with this API.
+            Using it is now discouraged unless you specifically need to extract a character range. Prefer :method:`.get_text_bounded` where possible.
+            Calling this method with default params now implicitly translates to :method:`.get_text_bounded`.
         
         Parameters:
             index (int): Index of the first char to include.
@@ -70,9 +73,15 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             * In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
         """
         
+        # https://crbug.com/pdfium/2133
+        if (index, count) == (0, -1):
+            return self.get_text_bounded(errors=errors)
+        
         if count == -1:
             count = self.count_chars() - index
         
+        # https://github.com/pypdfium2-team/pypdfium2/issues/261
+        # https://crbug.com/pdfium/2079
         active_range = self._get_active_text_range(index, index+count-1)
         if active_range == 0:
             return ""
@@ -81,7 +90,6 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         t_start, t_end, l_passive, r_passive = active_range
         index += l_passive
         count -= l_passive + r_passive
-        # TODO once https://crbug.com/pdfium/2133 is fixed, revert to `t_end+2 - t_start` and tighten assert
         in_count = (t_end+1 - t_start)*2 + 1
         
         buffer = ctypes.create_string_buffer(in_count * 2)
