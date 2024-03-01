@@ -5,6 +5,7 @@ __all__ = ("PdfTextPage", "PdfTextSearcher")
 
 import ctypes
 import logging
+import warnings
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -53,7 +54,10 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         """
         Extract text from a given range.
         
-        See `this benchmark <https://github.com/py-pdf/benchmarks>`_ for a performance and quality comparison with other tools.
+        Warning:
+            Unexpected upstream changes have caused allocation size concerns with this API.
+            Using it is now discouraged unless you specifically need to extract a character range. Prefer :method:`.get_text_bounded` where possible.
+            Calling this method with default params now implicitly translates to :method:`.get_text_bounded`.
         
         Parameters:
             index (int): Index of the first char to include.
@@ -70,9 +74,16 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             * In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
         """
         
+        # https://crbug.com/pdfium/2133
+        if (index, count) == (0, -1):
+            warnings.warn("get_text_range() call with default params will be implicitly redirected to get_text_bounded()")
+            return self.get_text_bounded(errors=errors)
+        
         if count == -1:
             count = self.count_chars() - index
         
+        # https://github.com/pypdfium2-team/pypdfium2/issues/261
+        # https://crbug.com/pdfium/2079
         active_range = self._get_active_text_range(index, index+count-1)
         if active_range == 0:
             return ""
@@ -81,14 +92,14 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         t_start, t_end, l_passive, r_passive = active_range
         index += l_passive
         count -= l_passive + r_passive
-        in_size = (t_end - t_start) + 2
+        in_count = (t_end+1 - t_start)*2 + 1
         
-        buffer = ctypes.create_string_buffer(in_size * 2)
+        buffer = ctypes.create_string_buffer(in_count * 2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
-        out_size = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
-        assert in_size == out_size, f"Buffer size mismatch: {in_size} vs {out_size}"
+        out_count = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
+        assert in_count >= out_count, f"Buffer too small: {in_count} vs {out_count}"
         
-        return buffer.raw[:(out_size-1)*2].decode("utf-16-le", errors=errors)
+        return buffer.raw[:(out_count-1)*2].decode("utf-16-le", errors=errors)
     
     
     def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
