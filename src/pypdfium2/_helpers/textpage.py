@@ -74,6 +74,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             * In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
         """
         
+        # https://github.com/pypdfium2-team/pypdfium2/issues/298
         # https://crbug.com/pdfium/2133
         if (index, count) == (0, -1):
             warnings.warn("get_text_range() call with default params will be implicitly redirected to get_text_bounded()")
