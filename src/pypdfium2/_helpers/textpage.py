@@ -5,6 +5,7 @@ __all__ = ("PdfTextPage", "PdfTextSearcher")
 
 import ctypes
 import logging
+import warnings
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -75,6 +76,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         
         # https://crbug.com/pdfium/2133
         if (index, count) == (0, -1):
+            warnings.warn("get_text_range() call with default params will be implicitly redirected to get_text_bounded()")
             return self.get_text_bounded(errors=errors)
         
         if count == -1:
