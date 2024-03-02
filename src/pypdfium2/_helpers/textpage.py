@@ -50,14 +50,15 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return t_start, t_end, l_passive, r_passive
     
     
-    def get_text_range(self, index=0, count=-1, errors="ignore"):
+    def get_text_range(self, index=0, count=-1, errors="ignore", force_this=False):
         """
-        Extract text from a given range.
-        
         Warning:
-            Unexpected upstream changes have caused allocation size concerns with this API.
-            Using it is now discouraged unless you specifically need to extract a character range. Prefer :meth:`.get_text_bounded` where possible.
-            Calling this method with default params now implicitly translates to :meth:`.get_text_bounded`.
+            .. versionchanged:: 4.28
+               Unexpected upstream changes have caused allocation size concerns with this API.
+               Using it is now discouraged unless you specifically need to extract a character range. Prefer :meth:`.get_text_bounded` where possible.
+               Calling this method with default params now implicitly translates to :meth:`.get_text_bounded` (pass ``force_this=True`` to circumvent).
+        
+        Extract text from a given range.
         
         Parameters:
             index (int): Index of the first char to include.
@@ -76,7 +77,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         
         # https://github.com/pypdfium2-team/pypdfium2/issues/298
         # https://crbug.com/pdfium/2133
-        if (index, count) == (0, -1):
+        if (index, count) == (0, -1) and not force_this:
             warnings.warn("get_text_range() call with default params will be implicitly redirected to get_text_bounded()")
             return self.get_text_bounded(errors=errors)
         
