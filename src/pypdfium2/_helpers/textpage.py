@@ -56,8 +56,8 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         
         Warning:
             Unexpected upstream changes have caused allocation size concerns with this API.
-            Using it is now discouraged unless you specifically need to extract a character range. Prefer :method:`.get_text_bounded` where possible.
-            Calling this method with default params now implicitly translates to :method:`.get_text_bounded`.
+            Using it is now discouraged unless you specifically need to extract a character range. Prefer :meth:`.get_text_bounded` where possible.
+            Calling this method with default params now implicitly translates to :meth:`.get_text_bounded`.
         
         Parameters:
             index (int): Index of the first char to include.
@@ -89,7 +89,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if active_range == 0:
             return ""
         
-        # NOTE since we have converted indices from char to text, they will shift accordingly for inserted/excluded chars, so this will calculate the exact output size
+        # NOTE since we have converted indices from char to text, they will shift accordingly for inserted/excluded chars, so this will calculate the exact output count
         t_start, t_end, l_passive, r_passive = active_range
         index += l_passive
         count -= l_passive + r_passive
@@ -129,8 +129,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if n_chars <= 0:
             return ""
         
-        n_bytes = 2 * n_chars
-        buffer = ctypes.create_string_buffer(n_bytes)
+        buffer = ctypes.create_string_buffer(n_chars * 2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
         return buffer.raw.decode("utf-16-le", errors=errors)
