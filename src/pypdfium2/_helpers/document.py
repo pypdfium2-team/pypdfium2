@@ -577,11 +577,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
         ):
         """
         .. deprecated:: 4.19
-            This method will be removed with the next major release due to serious issues rooted in the original API design. Use :meth:`.PdfPage.render()` instead.
-            *Note that the CLI provides parallel rendering using a proper caller-side process pool with inline saving in rendering jobs.*
+           This method will be removed with the next major release due to serious issues rooted in the original API design. Use :meth:`.PdfPage.render()` instead.
+           *Note that the CLI provides parallel rendering using a proper caller-side process pool with inline saving in rendering jobs.*
         
         .. versionchanged:: 4.25
-            Removed the original process pool implementation and turned this into a wrapper for linear rendering, due to the serious conceptual issues and possible memory load escalation, especially with expensive receiving code (e.g. PNG encoding) or long documents. See the changelog for more info
+           Removed the original process pool implementation and turned this into a wrapper for linear rendering, due to the serious conceptual issues and possible memory load escalation, especially with expensive receiving code (e.g. PNG encoding) or long documents. See the changelog for more info
         """
         
         warnings.warn("The document-level pdf.render() API is deprecated and uncored due to serious issues in the original concept. Use page.render() and a caller-side loop or process pool instead.", category=DeprecationWarning)

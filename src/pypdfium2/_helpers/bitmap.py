@@ -255,7 +255,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
         
         .. deprecated:: 4.25
-            The *recopy* parameter has been deprecated.
+           The *recopy* parameter has been deprecated.
         """
         
         if pil_image.mode in pdfium_i.BitmapStrToConst:
