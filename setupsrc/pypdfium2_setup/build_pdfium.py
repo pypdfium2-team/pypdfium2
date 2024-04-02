@@ -40,7 +40,8 @@ DefaultConfig = {
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
-    "use_allocator_shim": False,
+    # "use_allocator_shim": False,
+    "pdf_use_partition_alloc": False,
 }
 
 SyslibsConfig = {
@@ -52,7 +53,6 @@ SyslibsConfig = {
     "use_system_zlib": True,
     "use_system_libtiff": True,
     "clang_use_chrome_plugins": False,
-    "pdf_use_partition_alloc": False,
     "use_sysroot": False,
 }
 
