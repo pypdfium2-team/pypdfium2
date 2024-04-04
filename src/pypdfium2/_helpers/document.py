@@ -670,7 +670,7 @@ class PdfBookmark (pdfium_i.AutoCastable):
     def get_count(self):
         """
         Returns:
-            int: Signed number of child bookmarks (fully recursive). Zero if the bookmark has no descendants.
+            int: Signed number of child bookmarks, recursively counting all members in the subtree. Zero if the bookmark has no descendants.
             The initial state shall be closed (collapsed) if negative, open (expanded) if positive.
         """
         return pdfium_c.FPDFBookmark_GetCount(self)
