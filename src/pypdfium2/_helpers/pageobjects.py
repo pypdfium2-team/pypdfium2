@@ -23,8 +23,7 @@ class PdfObject (pdfium_i.AutoCloseable):
     """
     Page object helper class.
     
-    When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead,
-    depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
+    When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead, depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
     
     Attributes:
         raw (FPDF_PAGEOBJECT):
@@ -121,15 +120,13 @@ class PdfObject (pdfium_i.AutoCloseable):
         pdfium_c.FPDFPageObj_Transform(self, *matrix.get())
 
 
-# In principle, we would like to move PdfImage to a separate file, but it's not that easy because of the two-fold connection with PdfObject, which would run us into a circular import. (However, what we could do is externalize the class under a different name and turn PdfImage into a wrapper which merely inherits from that class.)
-
 class PdfImage (PdfObject):
     """
     Image object helper class (specific kind of page object).
     """
     
     # cf. https://crbug.com/pdfium/1203
-    #: Filters applied by :func:`FPDFImageObj_GetImageDataDecoded`. Hereafter referred to as "simple filters", while non-simple filters will be called "complex filters".
+    #: Filters applied by :func:`FPDFImageObj_GetImageDataDecoded`, referred to as "simple filters". Other filters are considered "complex filters".
     SIMPLE_FILTERS = ("ASCIIHexDecode", "ASCII85Decode", "RunLengthDecode", "FlateDecode", "LZWDecode")
     
     
@@ -141,7 +138,7 @@ class PdfImage (PdfObject):
         Returns:
             PdfImage: Handle to a new, empty image.
             Note that position and size of the image are defined by its matrix, which defaults to the identity matrix.
-            This means that new images will appear as a tiny square of 1x1 units on the bottom left corner of the page.
+            This means that new images will appear as a tiny square of 1x1 canvas units on the bottom left corner of the page.
             Use :class:`.PdfMatrix` and :meth:`.set_matrix` to adjust size and position.
         """
         raw_img = pdfium_c.FPDFPageObj_NewImageObj(pdf)
@@ -155,7 +152,7 @@ class PdfImage (PdfObject):
         
         Note:
             * The DPI values signify the resolution of the image on the PDF page, not the DPI metadata embedded in the image file.
-            * Due to issues in PDFium, this function can be slow. If you only need image size, prefer the faster :meth:`.get_size` instead.
+            * Due to issues in pdfium, this function might be slow on some kinds of images. If you only need size, prefer :meth:`.get_size` instead.
         
         Returns:
             FPDF_IMAGEOBJ_METADATA: Image metadata structure
@@ -170,8 +167,6 @@ class PdfImage (PdfObject):
     
     def get_size(self):
         """
-        .. versionadded:: 4.8/5731
-        
         Returns:
             (int, int): Image dimensions as a tuple of (width, height).
         """
@@ -310,23 +305,21 @@ class PdfImage (PdfObject):
     
     
     def extract(self, dest, *args, **kwargs):
-        # TODO rewrite/simplify docstring
         """
-        Extract the image into an independently usable file or byte buffer.
-        Where possible within PDFium's limited public API, it will be attempted to transfer the image data directly,
-        avoiding an unnecessary layer of decoding and re-encoding.
-        Otherwise, the fully decoded data will be retrieved and (re-)encoded using :mod:`PIL`.
+        Extract the image into an independently usable file or byte buffer, attempting to avoid re-encoding or quality loss, as far as pdfium's limited API permits.
         
-        As PDFium does not expose all required information, only DCTDecode (JPEG) and JPXDecode (JPEG 2000) images can be extracted directly.
-        For images with complex filters, the bitmap data is used. Otherwise, ``get_data(decode_simple=True)`` is used, which avoids lossy conversion for images whose bit depth or colour format is not supported by PDFium's bitmap implementation.
+        Only DCTDecode (JPEG) and JPXDecode (JPEG 2000) images can be extracted directly.
+        Otherwise, the pixel data is decoded, and re-encoded using :mod:`PIL`.
+        For images with simple filters only, ``get_data(decode_simple=True)`` is used for decoding to preserve higher bit depth or special color formats not supported by FPDF_BITMAP.
+        For images with complex filters, we have to resort to :meth:`.get_bitmap`, which can be a lossy operation.
+        
+        Note, this method ignores alpha masks and some other data stored separately from the main data stream (e.g. BlackIsWhite), which might lead to incorrect representation of the image.
         
         Parameters:
             dest (str | io.BytesIO):
                 File prefix or byte buffer to which the image shall be written.
             fb_format (str):
                 The image format to use in case it is necessary to (re-)encode the data.
-            fb_render (bool):
-                Whether the image should be rendered if falling back to bitmap-based extraction.
         """
         
         # https://crbug.com/pdfium/1930
@@ -367,15 +360,13 @@ def _get_pil_mode(colorspace, bpp):
         return None
 
 
-def _extract_smart(image_obj, fb_format=None, fb_render=False):
-    
-    # FIXME somewhat hard to read...
+def _extract_smart(image_obj, fb_format=None):
     
     try:
         data, info = _extract_direct(image_obj)
     except ImageNotExtractableError:
         # TODO? log reason why the image cannot be extracted directly
-        pil_image = image_obj.get_bitmap(render=fb_render).to_pil()
+        pil_image = image_obj.get_bitmap(render=False).to_pil()
     else:
         pil_image = None
         format = info.format
@@ -389,7 +380,9 @@ def _extract_smart(image_obj, fb_format=None, fb_render=False):
             )
     
     if pil_image:
-        format = fb_format if fb_format else "tiff" if pil_image.mode == "CMYK" else "png"
+        format = fb_format
+        if not format:
+            format = {"CMYK": "tiff"}.get(pil_image.mode, "png")
     
     buffer = yield format
     pil_image.save(buffer, format=format) if pil_image else buffer.write(data)
