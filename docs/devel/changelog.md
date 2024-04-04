@@ -43,10 +43,10 @@
 #### Rationale for `PdfDocument.render()` deprecation
 
 - The parallel rendering API unfortunately was an inherent design mistake: Multiprocessing is not meant to transfer large amounts of pixel data from workers to the main process.
-- This was such a heavy drawback that it basically outweighed the parallelization, so there was no real performance advantage, only higher memory load.
-- As a related problem, the worker pool produces bitmaps at an independent speed, regardless of where the receiving iteration might be, so bitmaps could queue up in memory, possibly causing an enormeous rise in memory consumption over time. This effect was pronounced e.g. with PNG saving via PIL, as exhibited in Facebook's `nougat` project.
+- Bitmap transfer is so expensive that it essentially outweighed parallelization, so there was no real performance advantage, only higher memory load.
+- As a related problem, the worker pool produces bitmaps at an independent speed, regardless of where the receiving iteration might be, so bitmaps could queue up in memory, possibly causing an enormeous rise in memory consumption over time. This effect was pronounced e.g. with PNG saving via PIL, as seen in Facebook's `nougat` project.
 - Instead, each bitmap should be processed (e.g. saved) in the job which created it. Only a minimal, final result should be sent back to the main process (e.g. a file path).
-- This means we cannot reasonably provide a generic parallel renderer, instead it needs to be implemented by callers.
+- This means we cannot reasonably provide a generic parallel renderer; instead it needs to be implemented by callers.
 - Historically, note that there had been even more faults in the implementation:
   * Prior to `4.22.0`, the pool was always initialized with `os.cpu_count()` processes by default, even when rendering less pages.
   * Prior to `4.20.0`, a full-scale input transfer was conducted on each job (rendering it unusable with bytes input). However, this can and should be done only once on process creation.
