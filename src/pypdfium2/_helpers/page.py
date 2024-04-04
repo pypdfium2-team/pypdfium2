@@ -27,7 +27,9 @@ class PdfPage (pdfium_i.AutoCloseable):
     """
     
     def __init__(self, raw, pdf, formenv):
-        self.raw, self.pdf, self.formenv = raw, pdf, formenv
+        self.raw = raw
+        self.pdf = pdf
+        self.formenv = formenv
         super().__init__(PdfPage._close_impl, self.formenv)
     
     

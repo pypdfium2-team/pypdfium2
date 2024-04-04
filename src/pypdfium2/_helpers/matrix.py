@@ -40,16 +40,13 @@ class PdfMatrix:
     def __init__(self, a=1, b=0, c=0, d=1, e=0, f=0):
         self.a, self.b, self.c, self.d, self.e, self.f = a, b, c, d, e, f
     
-    
     def __repr__(self):
         return f"PdfMatrix{self.get()}"
-    
     
     def __eq__(self, other):
         if type(self) is not type(other):
             return False
         return (self.get() == other.get())
-    
     
     @property
     def _as_parameter_(self):

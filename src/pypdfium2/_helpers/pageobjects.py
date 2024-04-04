@@ -55,7 +55,10 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     def __init__(self, raw, page=None, pdf=None, level=0):
         
-        self.raw, self.page, self.pdf, self.level = raw, page, pdf, level
+        self.raw = raw
+        self.page = page
+        self.pdf = pdf
+        self.level = level
         
         if page is not None:
             if self.pdf is None:

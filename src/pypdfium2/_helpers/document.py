@@ -172,7 +172,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
-        self.formenv = PdfFormEnv(raw, config, self)
+        self.formenv = PdfFormEnv(raw, self, config)
         self._add_kid(self.formenv)
         
         if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
@@ -543,8 +543,10 @@ class PdfFormEnv (pdfium_i.AutoCloseable):
             Parent document this form env belongs to.
     """
     
-    def __init__(self, raw, config, pdf):
-        self.raw, self.config, self.pdf = raw, config, pdf
+    def __init__(self, raw, pdf, config):
+        self.raw = raw
+        self.pdf = pdf
+        self.config = config
         super().__init__(PdfFormEnv._close_impl, self.config, self.pdf)
     
     @property
@@ -568,7 +570,8 @@ class PdfXObject (pdfium_i.AutoCloseable):
     """
     
     def __init__(self, raw, pdf):
-        self.raw, self.pdf = raw, pdf
+        self.raw = raw
+        self.pdf = pdf
         super().__init__(pdfium_c.FPDF_CloseXObject)
     
     @property
@@ -629,7 +632,9 @@ class PdfBookmark (pdfium_i.AutoCastable):
     """
     
     def __init__(self, raw, pdf, level):
-        self.raw, self.pdf, self.level = raw, pdf, level
+        self.raw = raw
+        self.pdf = pdf
+        self.level = level
     
     def get_title(self):
         """
@@ -670,7 +675,8 @@ class PdfDest (pdfium_i.AutoCastable):
     """
     
     def __init__(self, raw, pdf):
-        self.raw, self.pdf = raw, pdf
+        self.raw = raw
+        self.pdf = pdf
     
     def get_index(self):
         """
