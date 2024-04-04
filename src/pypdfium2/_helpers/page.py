@@ -280,7 +280,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         for i in range(n_objects):
             
             raw_obj = get_object(parent, i)
-            if raw_obj is None:
+            if not raw_obj:
                 raise PdfiumError("Failed to get page object.")
             
             helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, level=level)

@@ -258,7 +258,7 @@ class PdfImage (PdfObject):
         else:
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)
         
-        if raw_bitmap is None:
+        if not raw_bitmap:
             raise PdfiumError(f"Failed to get bitmap of image {self}.")
         
         return PdfBitmap.from_raw(raw_bitmap)
