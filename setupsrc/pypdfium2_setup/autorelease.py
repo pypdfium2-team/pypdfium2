@@ -140,6 +140,7 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
     if c_updates:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
+            # FIXME seems to take rather long - possibility to limit history size?
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
             relnotes += _get_log(
                 "PDFium", PdfiumURL, tmpdir/"pdfium_history",
