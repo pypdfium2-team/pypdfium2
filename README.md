@@ -27,7 +27,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 * <a id="user-content-install-source" class="anchor" href="#install-source">From source 🔗</a>
   
   * Dependencies:
-    - System: git, C pre-processor (gcc/clang - alternatively, specify the command to envoke via `$CPP`)
+    - System: git, C pre-processor (gcc/clang - alternatively, specify the command to invoke via `$CPP`)
     - Python: ctypesgen (pypdfium2-team fork), wheel, setuptools. Usually installed automatically.
   
   * Get the code

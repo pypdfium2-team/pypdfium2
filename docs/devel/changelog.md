@@ -23,7 +23,7 @@
 ## 4.26.0 (2024-01-10)
 
 - Updated PDFium from `6164` to `6233`.
-- Pin ctypesgen in sdist to prevent reoccurrence of {issue}`264` / {issue}`286`. As a drawback, the pin is never committed, so the sdist is not simply reproducible at this time due to dependence on the latest commit hash of the ctypesgen fork at build time.
+- Pin ctypesgen in sdist to prevent re-occurrence of {issue}`264` / {issue}`286`. As a drawback, the pin is never committed, so the sdist is not simply reproducible at this time due to dependence on the latest commit hash of the ctypesgen fork at build time.
 - Wheel tags: Added back `manylinux2014` in addition to `manylinux_{glibc_ver}` to be on the safe side. Suspected relation to the above issues.
 
 
@@ -44,7 +44,7 @@
 
 - The parallel rendering API unfortunately was an inherent design mistake: Multiprocessing is not meant to transfer large amounts of pixel data from workers to the main process.
 - This was such a heavy drawback that it basically outweighed the parallelization, so there was no real performance advantage, only higher memory load.
-- As a related problem, the worker pool produces bitmaps at an indepedent speed, regardless of where the receiving iteration might be, so bitmaps could queue up in memory, possibly causing an enormeous rise in memory consumption over time. This effect was pronounced e.g. with PNG saving via PIL, as exhibited in Facebook's `nougat` project.
+- As a related problem, the worker pool produces bitmaps at an independent speed, regardless of where the receiving iteration might be, so bitmaps could queue up in memory, possibly causing an enormeous rise in memory consumption over time. This effect was pronounced e.g. with PNG saving via PIL, as exhibited in Facebook's `nougat` project.
 - Instead, each bitmap should be processed (e.g. saved) in the job which created it. Only a minimal, final result should be sent back to the main process (e.g. a file path).
 - This means we cannot reasonably provide a generic parallel renderer, instead it needs to be implemented by callers.
 - Historically, note that there had been even more faults in the implementation:

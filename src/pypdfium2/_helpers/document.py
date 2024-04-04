@@ -3,14 +3,9 @@
 
 __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
-import os
 import ctypes
 import logging
-import inspect
-import warnings
 from pathlib import Path
-from collections import namedtuple
-import multiprocessing as mp
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
