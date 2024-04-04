@@ -519,7 +519,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
             if level < max_depth-1:
                 yield from self.get_toc(max_depth=max_depth, parent=bm_ptr, level=level+1, seen=seen)
             elif pdfium_c.FPDFBookmark_GetFirstChild(self, bm_ptr):
-                logger.warning(f"Maximum recursion depth {max_depth} reached. Children beyond this scope are ignored.")
+                # Warn only if there actually is a subtree. If level == max_depth but the tree ends there, it's fine as no information is skipped.
+                logger.warning(f"Maximum recursion depth {max_depth} reached (subtree skipped).")
             
             bm_ptr = pdfium_c.FPDFBookmark_GetNextSibling(self, bm_ptr)
     

@@ -13,7 +13,7 @@
                                                 [+1] 1.1.1.1.1.1.1.1.1.1.1.1.outline -> 1  # FitH [632.946]
                                                     [+1] 1.1.1.1.1.1.1.1.1.1.1.1.1.outline -> 1  # FitH [632.946]
                                                         [+1] 1.1.1.1.1.1.1.1.1.1.1.1.1.1.outline -> 1  # FitH [632.946]
-Maximum recursion depth 15 reached. Children beyond this scope are ignored.
+Maximum recursion depth 15 reached (subtree skipped).
 [+100] 2.outline -> 2  # FitH [749.4771]
     [+100] 2.1.outline -> 2  # FitH [699.36]
         [+100] 2.1.1.outline -> 2  # FitH [628.74]
