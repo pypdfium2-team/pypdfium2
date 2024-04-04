@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
+import logging
 import filecmp
 import contextlib
 from pathlib import Path
@@ -11,28 +12,57 @@ import pypdfium2.raw as pdfium_c
 import pypdfium2.__main__ as pdfium_cli
 from .conftest import TestResources, TestExpectations
 
+lib_logger = logging.getLogger("pypdfium2")
 
-def run_cli(argv, exp_stdout=None, normalize_lfs=False):
+@contextlib.contextmanager
+def logging_capture_handler(buf):
+    orig_handlers = lib_logger.handlers
+    lib_logger.handlers = []
+    handler = logging.StreamHandler(buf)
+    lib_logger.addHandler(handler)
+    yield
+    lib_logger.removeHandler(handler)
+    lib_logger.handlers = orig_handlers
+
+
+@contextlib.contextmanager
+def joined_ctx(ctxes):
+    with contextlib.ExitStack() as stack:
+        for ctx in ctxes: stack.enter_context(ctx)
+        yield
+
+
+def run_cli(argv, exp_output=None, capture=("out", "err", "log"), normalize_lfs=False):
     
     argv = [str(a) for a in argv]
     
-    if exp_stdout is None:
+    if exp_output is None:
         pdfium_cli.api_main(argv)
         
     else:
         
-        stdout_buf = io.StringIO()
-        with contextlib.redirect_stdout(stdout_buf):
+        output = io.StringIO()
+        ctxes = []
+        assert isinstance(capture, (tuple, list))
+        if "out" in capture:
+            ctxes += [contextlib.redirect_stdout(output)]
+        if "err" in capture:
+            ctxes += [contextlib.redirect_stderr(output)]
+        # for some reason, logging doesn't seem to go the usual stdout/stderr path, so explicitly install a stream handler to capture
+        if "log" in capture:
+            ctxes += [logging_capture_handler(output)]
+        assert len(ctxes) >= 1
+        with joined_ctx(ctxes):
             pdfium_cli.api_main(argv)
         
-        if isinstance(exp_stdout, Path):
-            exp_stdout = exp_stdout.read_text()
+        if isinstance(exp_output, Path):
+            exp_output = exp_output.read_text()
         
-        stdout = stdout_buf.getvalue()
+        output = output.getvalue()
         if normalize_lfs:
-            stdout = stdout.replace("\r\n", "\n")
+            output = output.replace("\r\n", "\n")
         
-        assert stdout == exp_stdout
+        assert output == exp_output
 
 
 def _get_files(dir):
@@ -57,7 +87,7 @@ def test_attachments(tmp_path):
     
     edited_pdf = tmp_path / "edited.pdf"
     run_cli(["attachments", TestResources.attachments, "edit", "--del-numbers", "1,2", "--add-files", TestResources.mona_lisa, "-o", edited_pdf])
-    run_cli(["attachments", edited_pdf, "list"], "[1] mona_lisa.jpg\n")
+    run_cli(["attachments", edited_pdf, "list"], "[1] mona_lisa.jpg\n", capture=["out"])
 
 
 def test_images(tmp_path):
