@@ -31,10 +31,10 @@ def main(args):
         count, dest = bm.get_count(), bm.get_dest()
         out = "    " * bm.level
         out += "[%s] %s -> " % (
-            "*" if count == 0 else f"{count:+}",
+            f"{count:+}" if count != 0 else "*",
             bm.get_title(),
         )
-        # distinguish between "no dest" and "dest with invalid values" while keeping result machine readable
+        # distinguish between "no dest" and "dest with unknown mode" while keeping result machine readable
         if dest:
             index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
             out += "%s  # %s %s" % (

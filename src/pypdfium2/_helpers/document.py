@@ -402,7 +402,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def del_page(self, index):
         """
         Remove the page at *index* (zero-based).
-        It is recommended to close any open handles to the page before deleting it.
+        It is recommended to close any open handles to the page before calling this method.
         """
         # FIXME not sure how pdfium would behave if the caller tries to access a handle to a deleted page...
         pdfium_c.FPDFPage_Delete(self, index)
@@ -519,7 +519,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             if level < max_depth-1:
                 yield from self.get_toc(max_depth=max_depth, parent=bm_ptr, level=level+1, seen=seen)
             elif pdfium_c.FPDFBookmark_GetFirstChild(self, bm_ptr):
-                # Warn only if there actually is a subtree. If level == max_depth but the tree ends there, it's fine as no information is skipped.
+                # Warn only if there actually is a subtree. If level == max_depth but the tree ends there, it's fine as no info is skipped.
                 logger.warning(f"Maximum recursion depth {max_depth} reached (subtree skipped).")
             
             bm_ptr = pdfium_c.FPDFBookmark_GetNextSibling(self, bm_ptr)
@@ -606,7 +606,7 @@ class PdfXObject (pdfium_i.AutoCloseable):
         Returns:
             PdfObject: An independent page object representation of the XObject.
             If multiple page objects are created from one XObject, they share resources.
-            Page objects created from an XObject remain valid after the XObject is closed.
+            Pageobjects created from an XObject remain valid after the XObject is closed.
         """
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
         return PdfObject(  # not a child object (see above)
@@ -651,7 +651,7 @@ class PdfBookmark (pdfium_i.AutoCastable):
         pdf (PdfDocument):
             Reference to the document this bookmark belongs to.
         level (int):
-            The bookmark's nesting level in the TOC tree. Corresponds to the number of parent bookmarks.
+            The bookmark's nesting level in the TOC tree (zero-based). Corresponds to the number of parent bookmarks.
     """
     
     def __init__(self, raw, pdf, level):

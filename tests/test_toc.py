@@ -42,7 +42,7 @@ def test_gettoc():
     for bm in toc:
         dest = bm.get_dest()
         view_mode, view_pos = dest.get_view()
-        assert view_mode is pdfium_c.PDFDEST_VIEW_XYZ
+        assert view_mode == pdfium_c.PDFDEST_VIEW_XYZ
         assert round(view_pos[0]) == 89
     
     # check last bookmark
