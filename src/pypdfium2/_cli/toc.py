@@ -34,7 +34,7 @@ def main(args):
             f"{count:+}" if count != 0 else "*",
             bm.get_title(),
         )
-        # distinguish between "no dest" and "dest with unknown mode" while keeping result machine readable
+        # distinguish between "dest == None" and "dest with unknown mode" while keeping the output machine readable
         if dest:
             index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
             out += "%s  # %s %s" % (

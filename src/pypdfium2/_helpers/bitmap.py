@@ -1,12 +1,10 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfBitmap", "PdfBitmapInfo")
+__all__ = ("PdfBitmap", )
 
 import ctypes
 import logging
-import weakref
-from collections import namedtuple
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -28,15 +26,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     """
     Bitmap helper class.
     
-    Hint:
-        This class provides built-in converters (e. g. :meth:`.to_pil`, :meth:`.to_numpy`) that may be used to create a different representation of the bitmap.
-        Converters can be applied on :class:`.PdfBitmap` objects either as bound method (``bitmap.to_*()``), or as function (``PdfBitmap.to_*(bitmap)``)
-        The second pattern is useful for API methods that need to apply a caller-provided converter (e. g. :meth:`.PdfDocument.render`)
-    
     .. _PIL Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
-    
-    Note:
-        All attributes of :class:`.PdfBitmapInfo` are available in this class as well.
     
     Warning:
         ``bitmap.close()``, which frees the buffer of foreign bitmaps, is not validated for safety.
@@ -47,31 +37,42 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             The underlying PDFium bitmap handle.
         buffer (~ctypes.c_ubyte):
             A ctypes array representation of the pixel data (each item is an unsigned byte, i. e. a number ranging from 0 to 255).
+        width (int):
+            Width of the bitmap (horizontal size).
+        height (int):
+            Height of the bitmap (vertical size).
+        stride (int):
+            Number of bytes per line in the bitmap buffer.
+            Depending on how the bitmap was created, there may be a padding of unused bytes at the end of each line, so this value can be greater than ``width * n_channels``.
+        format (int):
+            PDFium bitmap format constant (:attr:`FPDFBitmap_*`)
+        rev_byteorder (bool):
+            Whether the bitmap is using reverse byte order.
+        n_channels (int):
+            Number of channels per pixel.
+        mode (str):
+            The bitmap format as string (see `PIL Modes`_).
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
-        self.raw, self.buffer, self.width, self.height = raw, buffer, width, height
-        self.stride, self.format, self.rev_byteorder = stride, format, rev_byteorder
+        self.raw = raw
+        self.buffer = buffer
+        self.width = width
+        self.height = height
+        self.stride = stride
+        self.format = format
+        self.rev_byteorder = rev_byteorder
         self.n_channels = pdfium_i.BitmapTypeToNChannels[self.format]
-        self.mode = (pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else pdfium_i.BitmapTypeToStr)[self.format]
+        self.mode = {
+            False: pdfium_i.BitmapTypeToStr,
+            True: pdfium_i.BitmapTypeToStrReverse,
+        }[self.rev_byteorder][self.format]
         super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
     
     
     @property
     def parent(self):  # AutoCloseable hook
         return None
-    
-    
-    def get_info(self):
-        """
-        Returns:
-            PdfBitmapInfo: A namedtuple describing the bitmap.
-        """
-        return PdfBitmapInfo(
-            width=self.width, height=self.height, stride=self.stride, format=self.format,
-            rev_byteorder=self.rev_byteorder, n_channels=self.n_channels, mode=self.mode,
-        )
-    
     
     @classmethod
     def from_raw(cls, raw, rev_byteorder=False, ex_buffer=None):
@@ -95,7 +96,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         if ex_buffer is None:
             needs_free = True
             buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
-            if buffer_ptr is None:
+            if not buffer_ptr:
                 raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
             buffer = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * (stride * height))).contents
         else:
@@ -108,15 +109,15 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         )
     
     
-    # TODO support setting stride if external buffer is provided
     @classmethod
-    def new_native(cls, width, height, format, rev_byteorder=False, buffer=None):
+    def new_native(cls, width, height, format, rev_byteorder=False, buffer=None, stride=None):
         """
         Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by Python/ctypes.
         Bitmaps created by this function are always packed (no unused bytes at line end).
         """
         
-        stride = width * pdfium_i.BitmapTypeToNChannels[format]
+        if stride is None:
+            stride = width * pdfium_i.BitmapTypeToNChannels[format]
         if buffer is None:
             buffer = (ctypes.c_ubyte * (stride * height))()
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
@@ -211,14 +212,12 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         Convert the bitmap to a :mod:`PIL` image, using :func:`PIL.Image.frombuffer`.
         
-        For ``RGBA``, ``RGBX`` and ``L`` buffers, PIL is supposed to share memory with
-        the original bitmap buffer, so changes to the buffer should be reflected in the image, and vice versa.
+        For ``RGBA``, ``RGBX`` and ``L`` bitmaps, PIL is supposed to share memory with
+        the original buffer, so changes to the buffer should be reflected in the image, and vice versa.
         Otherwise, PIL will make a copy of the data.
         
         Returns:
             PIL.Image.Image: PIL image (representation or copy of the bitmap buffer).
-        
-        .. versionchanged:: 4.16 Set ``image.readonly = False`` so that changes to the image are also reflected in the buffer.
         """
         
         # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.frombuffer
@@ -234,53 +233,44 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             self.stride,                # bytes per line
             1,                          # orientation (top->bottom)
         )
+        # set `readonly = False` so changes to the image are reflected in the buffer, if the original buffer is used
         image.readonly = False
         
         return image
     
     
     @classmethod
-    def from_pil(cls, pil_image, recopy=False):
+    def from_pil(cls, pil_image):
         """
         Convert a :mod:`PIL` image to a PDFium bitmap.
-        Due to the restricted number of color formats and bit depths supported by PDFium's
-        bitmap implementation, this may be a lossy operation.
+        Due to the restricted number of color formats and bit depths supported by FPDF_BITMAP, this may be a lossy operation.
         
-        Bitmaps returned by this function should be treated as immutable (i.e. don't call :meth:`.fill_rect`).
+        Bitmaps returned by this function should be treated as immutable.
         
         Parameters:
             pil_image (PIL.Image.Image):
                 The image.
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
-        
-        .. deprecated:: 4.25
-           The *recopy* parameter has been deprecated.
         """
         
+        # FIXME possibility to get mutable buffer from PIL image?
+        
         if pil_image.mode in pdfium_i.BitmapStrToConst:
-            # PIL always seems to represent BGR(A/X) input as RGB(A/X), so this code passage is probably only hit for L
+            # PIL always seems to represent BGR(A/X) input as RGB(A/X), so this code passage would only be reached for L
             format = pdfium_i.BitmapStrToConst[pil_image.mode]
         else:
             pil_image = _pil_convert_for_pdfium(pil_image)
             format = pdfium_i.BitmapStrReverseToConst[pil_image.mode]
         
-        py_buffer = pil_image.tobytes()
-        if recopy:
-            buffer = (ctypes.c_ubyte * len(py_buffer)).from_buffer_copy(py_buffer)
-        else:
-            buffer = py_buffer
-        
         w, h = pil_image.size
-        return cls.new_native(w, h, format, rev_byteorder=False, buffer=buffer)
+        return cls.new_native(w, h, format, rev_byteorder=False, buffer=pil_image.tobytes())
     
     
     # TODO implement from_numpy()
 
 
 def _pil_convert_for_pdfium(pil_image):
-    
-    # FIXME? convoluted / hard to understand; improve control flow
     
     if pil_image.mode == "1":
         pil_image = pil_image.convert("L")
@@ -304,24 +294,3 @@ def _pil_convert_for_pdfium(pil_image):
         pil_image = PIL.Image.merge("RGBX", (b, g, r, x))
     
     return pil_image
-
-
-PdfBitmapInfo = namedtuple("PdfBitmapInfo", "width height stride format rev_byteorder n_channels mode")
-"""
-Attributes:
-    width (int):
-        Width of the bitmap (horizontal size).
-    height (int):
-        Height of the bitmap (vertical size).
-    stride (int):
-        Number of bytes per line in the bitmap buffer.
-        Depending on how the bitmap was created, there may be a padding of unused bytes at the end of each line, so this value can be greater than ``width * n_channels``.
-    format (int):
-        PDFium bitmap format constant (:attr:`FPDFBitmap_*`)
-    rev_byteorder (bool):
-        Whether the bitmap is using reverse byte order.
-    n_channels (int):
-        Number of channels per pixel.
-    mode (str):
-        The bitmap format as string (see `PIL Modes`_).
-"""

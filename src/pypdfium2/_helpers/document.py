@@ -42,9 +42,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
         FileNotFoundError: Raised if an invalid or non-existent file path was given.
     
     Hint:
+        * Documents may be used in a ``with``-block, closing the document on context manager exit.
+          This is recommended when *input_data* is a file path, to safely and immediately release the opened file handle.
         * :func:`len` may be called to get a document's number of pages.
-        * Looping over a document will yield its pages from beginning to end.
         * Pages may be loaded using list index access.
+        * Looping over a document will yield its pages from beginning to end.
         * The ``del`` keyword and list index access may be used to delete pages.
     
     Attributes:
@@ -68,8 +70,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
-        
-        # question: can we make attributes like formenv effectively immutable for the caller?
         self.formenv = None
         
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
@@ -80,6 +80,16 @@ class PdfDocument (pdfium_i.AutoCloseable):
             self._data_closer += to_close
         
         super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
+    
+    
+    # Support using PdfDocument in a with-block
+    # Note that pdfium objects have to be closed in hierarchial order, but as this is ensured by the parents/kids system, callers don't have to worry about that.
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, *_):
+        self.close()
     
     
     def __repr__(self):
@@ -523,37 +533,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 logger.warning(f"Maximum recursion depth {max_depth} reached (subtree skipped).")
             
             bm_ptr = pdfium_c.FPDFBookmark_GetNextSibling(self, bm_ptr)
-    
-    
-    def render(
-            self,
-            converter,
-            renderer = PdfPage.render,
-            page_indices = None,
-            pass_info = False,
-            n_processes = None,    # ignored, retained for compat
-            mk_formconfig = None,  # ignored, retained for compat
-            **kwargs
-        ):
-        """
-        .. deprecated:: 4.19
-           This method will be removed with the next major release due to serious issues rooted in the original API design. Use :meth:`.PdfPage.render()` instead.
-           *Note that the CLI provides parallel rendering using a proper caller-side process pool with inline saving in rendering jobs.*
-        
-        .. versionchanged:: 4.25
-           Removed the original process pool implementation and turned this into a wrapper for linear rendering, due to the serious conceptual issues and possible memory load escalation, especially with expensive receiving code (e.g. PNG encoding) or long documents. See the changelog for more info
-        """
-        
-        warnings.warn("The document-level pdf.render() API is deprecated and uncored due to serious issues in the original concept. Use page.render() and a caller-side loop or process pool instead.", category=DeprecationWarning)
-        
-        if not page_indices:
-            page_indices = [i for i in range(len(self))]
-        for i in page_indices:
-            bitmap = renderer(self[i], **kwargs)
-            if pass_info:
-                yield (converter(bitmap), bitmap.get_info())
-            else:
-                yield converter(bitmap)
 
 
 class PdfFormEnv (pdfium_i.AutoCloseable):
