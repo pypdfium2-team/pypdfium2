@@ -1,68 +1,48 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
+
 __all__ = ("PYPDFIUM_INFO", "PDFIUM_INFO")
 
-import sys
 import json
-import functools
 from pathlib import Path
-from types import MappingProxyType
 import pypdfium2_raw
-
-
-# TODO remove caching and just assign everything on init/lib startup
-
-if sys.version_info < (3, 8):
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-else:
-    cached_property = functools.cached_property
 
 
 class _abc_version:
     
-    @cached_property
-    def _data(self):
+    def __init__(self):
+        
         with open(self._FILE, "r") as buf:
             data = json.load(buf)
-        self._process_data(data)
-        return MappingProxyType(data)
-    
-    def _process_data(self, data):
-        pass
-    
-    def __getattr__(self, attr):
-        return self._data[attr]
-    
-    def __setattr__(self, name, value):
-        raise AttributeError(f"Version class is immutable - assignment '{name} = {value}' not allowed")
+        for k, v in data.items():
+            setattr(self, k, v)
+        self.api_tag = tuple(data[k] for k in self._TAG_FIELDS)
+        self._hook()
+        self.version = self.tag + self.desc
+        
+        def frozen_setattr(self, name, value):
+            raise AttributeError(f"Version class is immutable - assignment '{name} = {value}' not allowed")
+        self.__setattr__ = frozen_setattr
     
     def __repr__(self):
         return self.version
     
-    @cached_property
-    def api_tag(self):
-        return tuple(self._data[k] for k in self._TAG_FIELDS)
-    
     def _craft_tag(self):
         return ".".join(str(v) for v in self.api_tag)
     
-    def _craft_desc(self, extra=[]):
+    def _craft_desc(self, suffix=[]):
         
         local_ver = []
         if self.n_commits > 0:
             local_ver += [str(self.n_commits), str(self.hash)]
-        local_ver += extra
+        local_ver += suffix
         
         desc = ""
         if local_ver:
             desc += "+" + ".".join(local_ver)
         return desc
-    
-    @cached_property
-    def version(self):
-        return self.tag + self.desc
 
 
 class _version_pypdfium2 (_abc_version):
@@ -70,27 +50,18 @@ class _version_pypdfium2 (_abc_version):
     _FILE = Path(__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "patch")
     
-    @cached_property
-    def tag(self):
-        tag = self._craft_tag()
+    def _hook(self):
+        
+        self.tag = self._craft_tag()
         if self.beta is not None:
-            tag += f"b{self.beta}"
-        return tag
+            self.tag += f"b{self.beta}"
     
-    @cached_property
-    def desc(self):
-        
-        extra = []
-        if self.dirty:
-            extra += ["dirty"]
-        
-        desc = self._craft_desc(extra)
+        suffix = ["dirty"] if self.dirty else []
+        self.desc = self._craft_desc(suffix)
         if self.data_source != "git":
-            desc += f":{self.data_source}"
+            self.desc += f":{self.data_source}"
         if self.is_editable:
-            desc += "@editable"
-        
-        return desc
+            self.desc += "@editable"
 
 
 class _version_pdfium (_abc_version):
@@ -98,23 +69,16 @@ class _version_pdfium (_abc_version):
     _FILE = Path(pypdfium2_raw.__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "build", "patch")
     
-    def _process_data(self, data):
-        data["flags"] = tuple(data["flags"])
-    
-    @cached_property
-    def tag(self):
-        return self._craft_tag()
-    
-    @cached_property
-    def desc(self):
-        desc = self._craft_desc()
+    def _hook(self):
+        
+        self.flags = tuple(self.flags)
+        self.tag = self._craft_tag()
+        
+        self.desc = self._craft_desc()
         if self.flags:
-            desc += ":{%s}" % ",".join(self.flags)
+            self.desc += ":{%s}" % ",".join(self.flags)
         if self.origin != "pdfium-binaries":
-            desc += f"@{self.origin}"
-        return desc
-
-# TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
+            self.desc += f"@{self.origin}"
 
 
 # API

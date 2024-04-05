@@ -15,6 +15,7 @@
 
 *Improvements and new features*
 - Added context manager support to `PdfDocument`, so it can be used in a `with`-statement, because opening from a file path binds a file descriptor, which should be released safely and as soon as possible, given OS limits on the number of open FDs.
+- Simplified version implementation (no API change expected). All attributes are now assigned and show up in `dir(...)`, instead of `__getattr__` magic.
 
 <!-- TODO
 See https://github.com/pypdfium2-team/pypdfium2/blob/devel_old/docs/devel/changelog_staging.md
