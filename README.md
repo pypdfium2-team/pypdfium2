@@ -667,12 +667,6 @@ Roadmap:
 
 ### Known limitations
 
-#### Incompatibility with CPython 3.7.6 and 3.8.1
-
-pypdfium2 built with mainstream ctypesgen cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that [broke](https://github.com/ctypesgen/ctypesgen/issues/77) ctypesgen-created string handling code.
-
-Since version 4, pypdfium2 is built with a patched fork of ctypesgen that removes ctypesgen's problematic string code.
-
 #### Risk of unknown object lifetime violations
 
 As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.
