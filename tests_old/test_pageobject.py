@@ -2,11 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
+import re
 import pytest
 import PIL.Image
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 from .conftest import TestFiles, OutputDir
+
+
+def compare_n2(data, exp_data):
+    assert len(data) == len(exp_data)
+    for d, exp_d in zip(data, exp_data):
+        assert pytest.approx(d, abs=1) == exp_d
 
 
 def test_image_objects():
@@ -17,14 +24,14 @@ def test_image_objects():
     images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
     assert len(images) == 3
     
-    obj = images[0]
-    assert isinstance(obj, pdfium.PdfObject)
-    assert type(obj) is pdfium.PdfImage
-    assert obj.type == pdfium_c.FPDF_PAGEOBJ_IMAGE
-    assert isinstance(obj.raw, pdfium_c.FPDF_PAGEOBJECT)
-    assert obj.level == 0
-    assert obj.page is page
-    assert obj.pdf is pdf
+    img_0 = images[0]
+    assert isinstance(img_0, pdfium.PdfObject)
+    assert type(img_0) is pdfium.PdfImage
+    assert img_0.type == pdfium_c.FPDF_PAGEOBJ_IMAGE
+    assert isinstance(img_0.raw, pdfium_c.FPDF_PAGEOBJECT)
+    assert img_0.level == 0
+    assert img_0.page is page
+    assert img_0.pdf is pdf
     
     positions = [img.get_pos() for img in images]
     exp_positions = [
@@ -32,9 +39,12 @@ def test_image_objects():
         (48, 652, 163, 700),
         (204, 204, 577, 360),
     ]
-    assert len(positions) == len(exp_positions)
-    for pos, exp_pos in zip(positions, exp_positions):
-        assert pytest.approx(pos, abs=1) == exp_pos
+    compare_n2(positions, exp_positions)
+    
+    compare_n2(
+        img_0.get_quad_points(),
+        ((132.7, 459.2), (349.5, 459.2), (349.5, 549.7), (132.7, 549.7))
+    )
 
 
 def test_misc_objects():
@@ -52,6 +62,17 @@ def test_misc_objects():
         assert obj.pdf is pdf
         pos = obj.get_pos()
         assert len(pos) == 4
+    
+    text_obj = next(obj for obj in page.get_objects() if obj.type == pdfium_c.FPDF_PAGEOBJ_TEXT)
+    path_obj = next(obj for obj in page.get_objects() if obj.type == pdfium_c.FPDF_PAGEOBJ_PATH)
+    
+    compare_n2(
+        text_obj.get_quad_points(),
+        ((57.3, 767.4), (124.2, 767.4), (124.2, 780.9), (57.3, 780.9))
+    )
+    
+    with pytest.raises(RuntimeError, match=re.escape("Quad points only supported for image and text.")):
+        path_obj.get_quad_points()
 
 
 def test_new_image_from_jpeg():

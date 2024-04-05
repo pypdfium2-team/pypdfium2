@@ -93,6 +93,30 @@ class PdfObject (pdfium_i.AutoCloseable):
         return (l.value, b.value, r.value, t.value)
     
     
+    def get_quad_points(self):
+        """
+        Get the object's quadriliteral points (i.e. the positions of its corners).
+        For transformed objects, this provides tighter bounds than a rectangle (e.g. rotation by a non-multiple of 90°, shear).
+        
+        Note:
+            This function only supports image and text objects.
+        
+        Returns:
+            tuple[tuple[float*2] * 4]: Corner positions as (x, y) tuples, counter-clockwise from origin, i.e. bottom-left, bottom-right, top-right, top-left, in PDF page coordinates.
+        """
+        
+        if self.type not in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
+            # as of pdfium 5921
+            raise RuntimeError("Quad points only supported for image and text.")
+        
+        q = pdfium_c.FS_QUADPOINTSF()
+        ok = pdfium_c.FPDFPageObj_GetRotatedBounds(self, q)
+        if not ok:
+            raise PdfiumError("Failed to get quad points.")
+        
+        return (q.x1, q.y1), (q.x2, q.y2), (q.x3, q.y3), (q.x4, q.y4)
+    
+    
     def get_matrix(self):
         """
         Returns:
