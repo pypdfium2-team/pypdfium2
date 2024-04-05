@@ -9,6 +9,7 @@
 - Removed `PdfDocument.render()` (see deprecation rationale in v4.25 changelog).
   Instead, use `PdfPage.render()` with a loop or process pool.
 - Removed `PdfBitmap.get_info()` and `PdfBitmapInfo`, which existed only on behalf of data transfer with `PdfDocument.render()`.
+- Removed pdfium color scheme param from rendering, as it's not really useful: one can only set colors for certain object types, which are then forced on all instances of that type. This may flatten different colors into one, leading to a loss of visual information. To achieve a "dark them" for light PDFs, we suggest to instead post-process rendered images with selective lightness inversion.
 - `PdfDocument.get_toc()`: Replaced `PdfOutlineItem` namedtuple with method-oriented wrapper classes `PdfBookmark` and `PdfDest`, so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects. Provides signed count as-is rather than splitting in `n_kids` and `is_closed`. Also distinguishes between `dest == None` and an empty dest.
 - Removed `fb_render` param from `PdfImage.extract()` because it does not fit in this API. If the image's rendered bitmap is desired, use `.get_bitmap(render=True)` in the first place.
 - Removed some deprecated members/params (e.g. legacy version flags, `recopy` of `PdfBitmap.from_pil()`)
