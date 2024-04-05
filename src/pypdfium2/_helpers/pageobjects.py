@@ -75,7 +75,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         return self.pdf if self.page is None else self.page
     
     
-    def get_pos(self):
+    def get_bounds(self):
         """
         Get the position of the object on the page.
         
@@ -83,7 +83,7 @@ class PdfObject (pdfium_i.AutoCloseable):
             A tuple of four :class:`float` coordinates for left, bottom, right, and top.
         """
         if self.page is None:
-            raise RuntimeError("Must not call get_pos() on a loose pageobject.")
+            raise RuntimeError("Must not call get_bounds() on a loose pageobject.")
         
         l, b, r, t = c_float(), c_float(), c_float(), c_float()
         ok = pdfium_c.FPDFPageObj_GetBounds(self, l, b, r, t)
@@ -107,7 +107,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         
         if self.type not in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
             # as of pdfium 5921
-            raise RuntimeError("Quad points only supported for image and text.")
+            raise RuntimeError("Quad points only supported for image and text objects.")
         
         q = pdfium_c.FS_QUADPOINTSF()
         ok = pdfium_c.FPDFPageObj_GetRotatedBounds(self, q)
@@ -179,7 +179,7 @@ class PdfImage (PdfObject):
         
         Note:
             * The DPI values signify the resolution of the image on the PDF page, not the DPI metadata embedded in the image file.
-            * Due to issues in pdfium, this function might be slow on some kinds of images. If you only need size, prefer :meth:`.get_size` instead.
+            * Due to issues in pdfium, this function might be slow on some kinds of images. If you only need size, prefer :meth:`.get_px_size` instead.
         
         Returns:
             FPDF_IMAGEOBJ_METADATA: Image metadata structure
@@ -192,7 +192,7 @@ class PdfImage (PdfObject):
         return metadata
     
     
-    def get_size(self):
+    def get_px_size(self):
         """
         Returns:
             (int, int): Image dimensions as a tuple of (width, height).
