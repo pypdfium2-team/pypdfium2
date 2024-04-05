@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = []
+__all__ = ("PYPDFIUM_INFO", "PDFIUM_INFO")
 
 import sys
 import json
@@ -11,7 +11,8 @@ from types import MappingProxyType
 import pypdfium2_raw
 
 
-# TODO move to shared compat file
+# TODO remove caching and just assign everything on init/lib startup
+
 if sys.version_info < (3, 8):
     def cached_property(func):
         return property( functools.lru_cache(maxsize=1)(func) )
@@ -116,28 +117,10 @@ class _version_pdfium (_abc_version):
 # TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
 
 
-# Current API
+# API
 
 PYPDFIUM_INFO = _version_pypdfium2()
 PDFIUM_INFO = _version_pdfium()
-
-__all__ += ["PYPDFIUM_INFO", "PDFIUM_INFO"]
-
-# -----
-
-
-# Deprecated API, to be removed with v5
-# Known issue: causes eager evaluation of the new API's theoretically deferred properties.
-
-V_PYPDFIUM2 = PYPDFIUM_INFO.version
-V_LIBPDFIUM = str(PDFIUM_INFO.build)
-V_BUILDNAME = PDFIUM_INFO.origin
-V_PDFIUM_IS_V8 = "V8" in PDFIUM_INFO.flags  # implies XFA
-V_LIBPDFIUM_FULL = PDFIUM_INFO.version
-
-__all__ += ["V_PYPDFIUM2", "V_LIBPDFIUM", "V_LIBPDFIUM_FULL", "V_BUILDNAME", "V_PDFIUM_IS_V8"]
-
-# -----
 
 
 # Docs
