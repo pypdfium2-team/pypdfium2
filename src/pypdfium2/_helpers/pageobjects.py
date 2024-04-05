@@ -77,10 +77,10 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     def get_bounds(self):
         """
-        Get the position of the object on the page.
+        Get the bounds of the object on the page.
         
         Returns:
-            A tuple of four :class:`float` coordinates for left, bottom, right, and top.
+            tuple[float * 4]: Left, bottom, right and top, in PDF page coordinates.
         """
         if self.page is None:
             raise RuntimeError("Must not call get_bounds() on a loose pageobject.")

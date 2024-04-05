@@ -263,28 +263,39 @@ Here are some examples of using the support model API.
   textpage = page.get_textpage()
   
   # Extract text from the whole page
-  text_all = textpage.get_text_range()
+  text_all = textpage.get_text_bounded()
   # Extract text from a specific rectangular area
-  text_part = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
+  text_rect = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
+  # Extract text from a specific char range
+  text_span = textpage.get_text_range(index=10, count=15)
   
   # Locate text on the page
   searcher = textpage.search("something", match_case=False, match_whole_word=False)
   # This returns the next occurrence as (char_index, char_count), or None if not found
-  first_occurrence = searcher.get_next()
+  match = searcher.get_next()
   ```
 
-<!-- TOC API will change with the next major release -->
 * Read the table of contents
   ```python
-  for item in pdf.get_toc():
-      state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
-      target = "?" if item.page_index is None else item.page_index+1
-      print(
-          "    " * item.level +
-          "[%s] %s -> %s  # %s %s" % (
-              state, item.title, target, item.view_mode, item.view_pos,
-          )
+  import pypdfium2.internal as pdfium_i
+  
+  for bm in pdf.get_toc(max_depth=15):
+      count, dest = bm.get_count(), bm.get_dest()
+      out = "    " * bm.level
+      out += "[%s] %s -> " % (
+          f"{count:+}" if count != 0 else "*",
+          bm.get_title(),
       )
+      if dest:
+          index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
+          out += "%s  # %s %s" % (
+              index+1 if index != None else "?",
+              pdfium_i.ViewmodeToStr.get(view_mode),
+              round(view_pos, 3),
+          )
+      else:
+          out += "_"
+      print(out)
   ```
 
 * Create a new PDF with an empty A4 sized page
