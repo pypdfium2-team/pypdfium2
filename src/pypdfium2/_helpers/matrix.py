@@ -21,7 +21,7 @@ class PdfMatrix:
     Note:
         * The PDF format uses row vectors.
         * Transformations operate from the origin of the coordinate system
-          (PDF coordinates: bottom left corner, Device coordinates: top left corner).
+          (PDF coordinates: commonly bottom left, but can be any corner in principle. Device coordinates: top left).
         * Matrix calculations are implemented independently in Python.
         * Matrix objects are immutable, so transforming methods return a new matrix.
         * Matrix objects implement ctypes auto-conversion to ``FS_MATRIX`` for easy use as C function parameter.
@@ -130,7 +130,7 @@ class PdfMatrix:
         """
         Parameters:
             v (bool): Whether to mirror vertically (at the Y axis).
-            h (bool): Whether to mirror horizontall (at the X axis).
+            h (bool): Whether to mirror horizontally (at the X axis).
         """
         return self.scale(x=(-1 if v else 1), y=(-1 if h else 1))
     

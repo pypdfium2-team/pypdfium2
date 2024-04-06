@@ -510,7 +510,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         bm_ptr = pdfium_c.FPDFBookmark_GetFirstChild(self, parent)
         
-        # NOTE We need bool(ptr) here to handle cases where .contents is a null pointer (raises exception on access). Don't use ptr != None, it's always true.
+        # NOTE We need bool(ptr) here to handle null pointers (where accessing .contents would raise an exception). Don't use ptr != None, it's always true.
         while bm_ptr:
             
             address = ctypes.addressof(bm_ptr.contents)
@@ -586,10 +586,8 @@ class PdfXObject (pdfium_i.AutoCloseable):
             Pageobjects created from an XObject remain valid after the XObject is closed.
         """
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
-        return PdfObject(  # not a child object (see above)
-            raw = raw_pageobj,
-            pdf = self.pdf,
-        )
+        # not a child object (see above)
+        return PdfObject(raw=raw_pageobj, pdf=self.pdf)
 
 
 def _open_pdf(input_data, password, autoclose):
