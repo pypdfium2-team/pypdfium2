@@ -80,7 +80,7 @@ class AutoCloseable (AutoCastable):
     def _tree_closed(self):
         if self.raw is None:
             return True
-        if (self.parent is not None) and self.parent._tree_closed():
+        if self.parent != None and self.parent._tree_closed():
             return True
         return False
     

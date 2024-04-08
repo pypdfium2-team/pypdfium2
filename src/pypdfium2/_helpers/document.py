@@ -696,4 +696,4 @@ class PdfDest (pdfium_i.AutoCastable):
         pos = (pdfium_c.FS_FLOAT * 4)()
         mode = pdfium_c.FPDFDest_GetView(self, n_params, pos)
         pos = list(pos)[:n_params.value]
-        return (mode, pos)
+        return mode, pos

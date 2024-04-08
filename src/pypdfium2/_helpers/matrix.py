@@ -46,7 +46,7 @@ class PdfMatrix:
     def __eq__(self, other):
         if type(self) is not type(other):
             return False
-        return (self.get() == other.get())
+        return self.get() == other.get()
     
     @property
     def _as_parameter_(self):

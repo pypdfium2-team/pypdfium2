@@ -232,7 +232,10 @@ class PdfImage (PdfObject):
             raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte buffer.")
         
         bufaccess, to_hold = pdfium_i.get_bufreader(buffer)
-        loader = pdfium_c.FPDFImageObj_LoadJpegFileInline if inline else pdfium_c.FPDFImageObj_LoadJpegFile
+        loader = {
+            False: pdfium_c.FPDFImageObj_LoadJpegFile,
+            True: pdfium_c.FPDFImageObj_LoadJpegFileInline,
+        }[inline]
         
         c_pages, page_count = pdfium_i.pages_c_array(pages)
         ok = loader(c_pages, page_count, self, bufaccess)
@@ -300,7 +303,10 @@ class PdfImage (PdfObject):
         Returns:
             ctypes.Array: The data of the image stream (as :class:`~ctypes.c_ubyte` array).
         """
-        func = pdfium_c.FPDFImageObj_GetImageDataDecoded if decode_simple else pdfium_c.FPDFImageObj_GetImageDataRaw
+        func = {
+            False: pdfium_c.FPDFImageObj_GetImageDataRaw,
+            True: pdfium_c.FPDFImageObj_GetImageDataDecoded,
+        }[decode_simple]
         n_bytes = func(self, None, 0)
         buffer = (ctypes.c_ubyte * n_bytes)()
         func(self, buffer, n_bytes)
@@ -375,10 +381,7 @@ class ImageNotExtractableError (Exception):
 def _get_pil_mode(colorspace, bpp):
     # In theory, indexed (palettized) and ICC-based color spaces could be handled as well, but PDFium currently does not provide access to the palette or the ICC profile
     if colorspace == pdfium_c.FPDF_COLORSPACE_DEVICEGRAY:
-        if bpp == 1:
-            return "1"
-        else:
-            return "L"
+        return "1" if bpp == 1 else "L"
     elif colorspace == pdfium_c.FPDF_COLORSPACE_DEVICERGB:
         return "RGB"
     elif colorspace == pdfium_c.FPDF_COLORSPACE_DEVICECMYK:
