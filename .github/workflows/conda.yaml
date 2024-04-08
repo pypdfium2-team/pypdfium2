@@ -120,7 +120,7 @@ jobs:
         run: |
           conda install -y pytest pillow numpy
           conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c pypdfium2-team -c bblanchon
-          pytest tests/ tests_old/
+          pytest tests/
   
   publish:
     

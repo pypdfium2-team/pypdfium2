@@ -6,6 +6,8 @@ from pathlib import Path
 from argparse import Namespace
 import pypdfium2.__main__ as pdfium_cli
 
+PyVersion = (sys.version_info.major, sys.version_info.minor)
+
 
 pdfium_cli.setup_logging()
 
@@ -28,5 +30,40 @@ def _gather_resources(dir, skip_exts=[".in"]):
     return test_files
 
 
-TestResources = _gather_resources(ResourceDir)
+TestFiles = _gather_resources(ResourceDir)
 TestExpectations = _gather_resources(ExpectationsDir)
+
+
+ExpRenderPixels = (
+    ( (0,   0  ), (255, 255, 255) ),
+    ( (150, 180), (129, 212, 26 ) ),
+    ( (150, 390), (42,  96,  153) ),
+    ( (150, 570), (128, 0,   128) ),
+)
+
+
+def get_members(cls):
+    members = []
+    for attr in dir(cls):
+        if attr.startswith("_"):
+            continue
+        members.append( getattr(cls, attr) )
+    return members
+
+
+# def iterate_testfiles(skip_encrypted=True):
+#     encrypted = (TestFiles.encrypted, )
+#     for attr_name in dir(TestFiles):
+#         if attr_name.startswith("_"):
+#             continue
+#         member = getattr(TestFiles, attr_name)
+#         if skip_encrypted and member in encrypted:
+#             continue
+#         yield member
+#
+#
+# def test_testpaths():
+#     for dirpath in (TestDir, ProjectDir, ResourceDir, OutputDir):
+#         assert dirpath.is_dir()
+#     for filepath in iterate_testfiles(False):
+#         assert filepath.is_file()

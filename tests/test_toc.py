@@ -5,7 +5,7 @@ import pytest
 import logging
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-from .conftest import TestResources
+from .conftest import TestFiles
 
 
 def _compare_bookmark(bm, **kwargs):
@@ -25,7 +25,7 @@ def _compare_bookmark(bm, **kwargs):
 
 def test_gettoc():
     
-    pdf = pdfium.PdfDocument(TestResources.toc)
+    pdf = pdfium.PdfDocument(TestFiles.toc)
     toc = pdf.get_toc()
     
     # check first bookmark
@@ -58,7 +58,7 @@ def test_gettoc():
 
 def test_gettoc_circular(caplog):
     
-    pdf = pdfium.PdfDocument(TestResources.toc_circular)
+    pdf = pdfium.PdfDocument(TestFiles.toc_circular)
     toc = pdf.get_toc()
     
     _compare_bookmark(

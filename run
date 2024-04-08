@@ -8,13 +8,13 @@
 args="${@:2}"
 
 function check() {
-    autoflake src/ setupsrc/ tests/ tests_old/ setup.py docs/source/conf.py --recursive --remove-all-unused-imports --ignore-pass-statements --ignore-init-module-imports
-    codespell --skip="./docs/build,./tests/resources,./tests/output,./tests_old/output,./data,./sourcebuild,./dist,./.git,__pycache__,.mypy_cache,.hypothesis" -L "tabe,splitted,fith,flate"
+    autoflake src/ setupsrc/ tests/ setup.py docs/source/conf.py --recursive --remove-all-unused-imports --ignore-pass-statements --ignore-init-module-imports
+    codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sourcebuild,./dist,./.git,__pycache__,.mypy_cache,.hypothesis" -L "tabe,splitted,fith,flate"
     reuse lint
 }
 
 function clean() {
-    rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* tests_old/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
+    rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
 }
 
 function packaging_pypi() {
@@ -35,10 +35,10 @@ set -x
 case $1 in
 
 test)
-    python3 -m pytest tests/ tests_old/ $args;;
+    python3 -m pytest tests/ $args;;
 
 coverage)
-    python3 -m coverage run --omit "tests/*,tests_old/*,src/pypdfium2_raw/bindings.py,setupsrc/*" -m pytest tests/ tests_old/ $args
+    python3 -m coverage run --omit "tests/*,src/pypdfium2_raw/bindings.py,setupsrc/*" -m pytest tests/ $args
     python3 -m coverage report;;
 
 docs-build)

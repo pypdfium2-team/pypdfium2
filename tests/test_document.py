@@ -1,17 +1,19 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# TODO test formenv and page deletion
+
 import re
 import ctypes
 import pathlib
 import pytest
-from .conftest import TestResources
+from .conftest import TestFiles
 
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 
 
-parametrize_opener_files = pytest.mark.parametrize("file", [TestResources.empty])
+parametrize_opener_files = pytest.mark.parametrize("file", [TestFiles.empty])
 
 
 def _check_pdf(pdf):
@@ -84,7 +86,7 @@ def test_open_ctypes_array(file):
 
 def test_open_raw():
     # not meant for embedders, but works for testing all the same
-    pdf = pdfium.PdfDocument(TestResources.empty)
+    pdf = pdfium.PdfDocument(TestFiles.empty)
     pdf._finalizer.detach()
     input = pdf.raw
     assert isinstance(input, pdfium_c.FPDF_DOCUMENT)
@@ -115,7 +117,7 @@ def _make_encryption_cases(file, passwords):
 
 @pytest.mark.parametrize(
     ["input", "password"],
-    _make_encryption_cases(TestResources.encrypted, ["test_user", "test_owner"]),
+    _make_encryption_cases(TestFiles.encrypted, ["test_user", "test_owner"]),
 )
 def test_open_encrypted(input, password):
     pdf = pdfium.PdfDocument(input, password, autoclose=True)
@@ -124,7 +126,7 @@ def test_open_encrypted(input, password):
 
 @pytest.mark.parametrize(
     ["input", "password"],
-    _make_encryption_cases(TestResources.empty, ["superfluous"]),
+    _make_encryption_cases(TestFiles.empty, ["superfluous"]),
 )
 def test_open_with_excessive_password(input, password):
     pdf = pdfium.PdfDocument(input, password, autoclose=True)
@@ -137,11 +139,11 @@ def test_open_invalid():
     with pytest.raises(FileNotFoundError):
         pdf = pdfium.PdfDocument("invalid/path")
     with pytest.raises(pdfium.PdfiumError, match=re.escape("Failed to load document (PDFium: Incorrect password error).")):
-        pdf = pdfium.PdfDocument(TestResources.encrypted, password="wrong_password")
+        pdf = pdfium.PdfDocument(TestFiles.encrypted, password="wrong_password")
 
 
 def test_misc():
-    pdf = pdfium.PdfDocument(TestResources.empty)
+    pdf = pdfium.PdfDocument(TestFiles.empty)
     assert pdf.get_formtype() == pdfium_c.FORMTYPE_NONE
     assert pdf.get_version() == 15
     assert pdf.get_identifier(pdfium_c.FILEIDTYPE_PERMANENT) == b"\xec\xe5!\x04\xd6\x1b(R\x1a\x89f\x85\n\xbe\xa4"
@@ -154,7 +156,7 @@ def test_misc():
 
 def test_page_labels():
     # incidentally, it happens that this TOC test file also has page labels
-    pdf = pdfium.PdfDocument(TestResources.toc_viewmodes)
+    pdf = pdfium.PdfDocument(TestFiles.toc_viewmodes)
     exp_labels = ["i", "ii", "appendix-C", "appendix-D", "appendix-E", "appendix-F", "appendix-G", "appendix-H"]
     assert exp_labels == [pdf.get_page_label(i) for i in range(len(pdf))]
 
@@ -173,7 +175,7 @@ def _compare_metadata(pdf, metadata, exp_metadata):
 
 
 def test_metadata_dict():
-    pdf = pdfium.PdfDocument(TestResources.empty)
+    pdf = pdfium.PdfDocument(TestFiles.empty)
     metadata = pdf.get_metadata_dict()
     exp_metadata = {
         "Producer": "LibreOffice 6.4",
@@ -203,23 +205,19 @@ def test_new_page_on_new_pdf(new_pages):
     ]
 )
 def test_new_page_on_existing_pdf(new_pages):
-    pdf = pdfium.PdfDocument(TestResources.multipage)
+    pdf = pdfium.PdfDocument(TestFiles.multipage)
     for index, size in new_pages:
         page = pdf.new_page(*size, index=index)
         if index is None:
             index = len(pdf) - 1
         assert page.get_size() == pdf.get_page_size(index) == size
-    
-
-def test_del_page():
-    pass
 
 
 ImportTestSequence = [
-    (TestResources.empty, None, None, 1),
-    (TestResources.empty, "", 0, 1),
-    (TestResources.multipage, [1, 0, 1, 2, 1], 1, 5),
-    (TestResources.multipage, "2,1-3, 2", 4, 5),
+    (TestFiles.empty, None, None, 1),
+    (TestFiles.empty, "", 0, 1),
+    (TestFiles.multipage, [1, 0, 1, 2, 1], 1, 5),
+    (TestFiles.multipage, "2,1-3, 2", 4, 5),
 ]
 
 @pytest.mark.parametrize("sequence", [ImportTestSequence])
@@ -234,13 +232,9 @@ def test_import_pages(sequence):
         assert len(dest_pdf) == exp_len
 
 
-def test_formenv():
-    pass
-
-
 def test_closing_parent_closes_kids():
     
-    pdf = pdfium.PdfDocument(TestResources.multipage)
+    pdf = pdfium.PdfDocument(TestFiles.multipage)
     pages = list(pdf)
     assert len(pages) == 3
     pdf.close()
@@ -251,7 +245,7 @@ def test_closing_parent_closes_kids():
 
 
 def test_post_close():
-    pdf = pdfium.PdfDocument(TestResources.empty)
+    pdf = pdfium.PdfDocument(TestFiles.empty)
     pdf.close()
     with pytest.raises(ctypes.ArgumentError):
         pdf.get_version()

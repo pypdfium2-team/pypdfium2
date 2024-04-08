@@ -4,14 +4,14 @@
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-from .conftest import TestResources, OutputDir
+from .conftest import TestFiles, OutputDir
 
 
 def test_xobject_placement():
     
     # basic test to at least run through the code
     
-    src_pdf = pdfium.PdfDocument(TestResources.multipage)
+    src_pdf = pdfium.PdfDocument(TestFiles.multipage)
     dest_pdf = pdfium.PdfDocument.new()
     xobject = src_pdf.page_as_xobject(0, dest_pdf)
     

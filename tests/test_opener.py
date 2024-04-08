@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# FIXME merge with test_document and deduplicate
+
 import re
 import shutil
 import tempfile
