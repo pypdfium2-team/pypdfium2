@@ -392,7 +392,7 @@ def test_draw_image_borders():
     pdf_qpl = [i.get_quad_points() for i in images]
     
     bitmap = page.render(scale=1)
-    posconv = pdfium.PdfPosConv(page, bitmap)
+    posconv = page.get_posconv(bitmap)
     pil_image = bitmap.to_pil()
     bitmap_qpl  = [[posconv.to_bitmap(x, y) for x, y in qps] for qps in pdf_qpl]
     

@@ -300,7 +300,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 )
     
     
-    # non-public because it doesn't really work (returns success but does nothing on all samples we tried)
+    # non-public because it doesn't seem to work (returns success but does nothing on the samples we tried)
     def _flatten(self, flag=pdfium_c.FLAT_NORMALDISPLAY):
         """
         Attempt to flatten annotations and form fields into the page contents.
@@ -316,11 +316,20 @@ class PdfPage (pdfium_i.AutoCloseable):
         return rc
     
     
+    def get_posconv(self, bitmap):
+        """
+        Acquire a :class:`.PdfPosConv` coordinate translator for a :class:`PdfBitmap` rendered from this page.
+        """
+        # if the bitmap was rendered from a page, resolve weakref and check identity
+        if not bitmap._pos_args or bitmap._pos_args[0]() is not self:
+            raise RuntimeError("The given bitmap does not belong to this page.")
+        return PdfPosConv(self, bitmap._pos_args[1:])
+    
+    
     # TODO
     # - add helpers for matrix-based and interruptible rendering
     # - add lower-level renderer that takes a caller-provided bitmap
     # e. g. render(), render_ex(), render_matrix(), render_matrix_ex()
-    
     
     def render(
             self,
@@ -329,7 +338,6 @@ class PdfPage (pdfium_i.AutoCloseable):
             crop = (0, 0, 0, 0),
             may_draw_forms = True,
             bitmap_maker = PdfBitmap.new_native,
-            fill_to_stroke = False,
             **kwargs
         ):
         """
@@ -506,43 +514,30 @@ class PdfPosConv:
     Parameters:
         page (PdfPage):
             Handle to the page.
-        bitmap (PdfBitmap):
-            Handle to the bitmap, which must be a rendering of *page*.
+        pos_args (tuple[int*5]):
+            pdfium canvas args (start_x, start_y, size_x, size_y, rotate), as in ``FPDF_RenderPageBitmap()`` etc.
     """
     
-    # NOTE The reason for this API design is that neither page nor bitmap should hold a permanent reference to another, so they can be freed independently via finalizer. Obviously, a weak reference alone is not sufficient, as its object can disappear. So we need an explicit takeover of the page, ensuring it is held in memory.
-    
-    def __init__(self, page, bitmap):
-        
-        if not bitmap._pos_args:
-            raise RuntimeError("This bitmap does not belong to a page.")
-        
-        assert page != None
-        page_ref = bitmap._pos_args[0]
-        if page_ref() is not page:  # resolve weakref and check identity
-            raise RuntimeError("This bitmap was not rendered from the given page.")
-        
+    def __init__(self, page, pos_args):
         self.page = page
-        self._args = bitmap._pos_args[1:]
-    
+        self.pos_args = pos_args
     
     def to_page(self, bitmap_x, bitmap_y):
         """
         Translate coordinates from bitmap to page.
         """
         page_x, page_y = ctypes.c_double(), ctypes.c_double()
-        ok = pdfium_c.FPDF_DeviceToPage(self.page, *self._args, bitmap_x, bitmap_y, page_x, page_y)
+        ok = pdfium_c.FPDF_DeviceToPage(self.page, *self.pos_args, bitmap_x, bitmap_y, page_x, page_y)
         if not ok:
             raise PdfiumError("Failed to translate to page coordinates.")
         return (page_x.value, page_y.value)
-    
     
     def to_bitmap(self, page_x, page_y):
         """
         Translate coordinates from page to bitmap.
         """
         bitmap_x, bitmap_y = ctypes.c_int(), ctypes.c_int()
-        ok = pdfium_c.FPDF_PageToDevice(self.page, *self._args, page_x, page_y, bitmap_x, bitmap_y)
+        ok = pdfium_c.FPDF_PageToDevice(self.page, *self.pos_args, page_x, page_y, bitmap_x, bitmap_y)
         if not ok:
             raise PdfiumError("Failed to translate to bitmap coordinates.")
         return (bitmap_x.value, bitmap_y.value)

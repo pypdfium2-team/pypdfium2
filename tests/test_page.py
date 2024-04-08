@@ -3,7 +3,7 @@
 
 import pytest
 import pypdfium2 as pdfium
-# import pypdfium2.raw as pdfium_c
+import pypdfium2.raw as pdfium_c
 from .conftest import TestFiles
 
 
@@ -52,13 +52,10 @@ def test_page_labels():
     assert exp_labels == [pdf.get_page_label(i) for i in range(len(pdf))]
 
 
-# # disabled because flattening takes no effect
-# def test_flatten():
-    
-#     pdf = pdfium.PdfDocument(TestFiles.form)
-#     page = pdf[0]
-    
-#     rc = page._flatten()
-#     assert rc == pdfium_c.FLATTEN_SUCCESS
-    
-#     # pdf.save(OutputDir / "flattened.pdf")
+# seems to take no effect; probably a pdfium bug
+def test_flatten():
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    page = pdf[0]
+    rc = page._flatten()
+    assert rc == pdfium_c.FLATTEN_SUCCESS
+    # pdf.save(OutputDir / "flattened.pdf")
