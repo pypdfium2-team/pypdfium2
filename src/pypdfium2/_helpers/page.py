@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfPage", )
+__all__ = ("PdfPage", "PdfPosConv")
 
 import math
 import ctypes
@@ -499,7 +499,7 @@ def _parse_renderopts(
     return cl_format, rev_byteorder, fill_color, flags
 
 
-class PdfPosConv:  # TODO add to test suite
+class PdfPosConv:
     """
     Pdf coordinate translator.
     

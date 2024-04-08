@@ -7,13 +7,7 @@ import pytest
 import PIL.Image
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-from .conftest import TestFiles, OutputDir
-
-
-def compare_n2(data, exp_data):
-    assert len(data) == len(exp_data)
-    for d, exp_d in zip(data, exp_data):
-        assert pytest.approx(d, abs=1) == exp_d
+from .conftest import TestFiles, OutputDir, compare_n2
 
 
 def test_image_objects():

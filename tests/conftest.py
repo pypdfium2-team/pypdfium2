@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import sys
+import pytest
 from pathlib import Path
 from argparse import Namespace
 import pypdfium2.__main__ as pdfium_cli
@@ -29,17 +30,8 @@ def _gather_resources(dir, skip_exts=[".in"]):
         setattr(test_files, path.stem, (dir / path.name))
     return test_files
 
-
 TestFiles = _gather_resources(ResourceDir)
 TestExpectations = _gather_resources(ExpectationsDir)
-
-
-ExpRenderPixels = (
-    ( (0,   0  ), (255, 255, 255) ),
-    ( (150, 180), (129, 212, 26 ) ),
-    ( (150, 390), (42,  96,  153) ),
-    ( (150, 570), (128, 0,   128) ),
-)
 
 
 def get_members(cls):
@@ -49,6 +41,20 @@ def get_members(cls):
             continue
         members.append( getattr(cls, attr) )
     return members
+
+
+def compare_n2(data, exp_data, approx_abs=1):
+    assert len(data) == len(exp_data)
+    for d, exp_d in zip(data, exp_data):
+        assert pytest.approx(d, abs=approx_abs) == exp_d
+
+
+ExpRenderPixels = (
+    ( (0,   0  ), (255, 255, 255) ),
+    ( (150, 180), (129, 212, 26 ) ),
+    ( (150, 390), (42,  96,  153) ),
+    ( (150, 570), (128, 0,   128) ),
+)
 
 
 # def iterate_testfiles(skip_encrypted=True):

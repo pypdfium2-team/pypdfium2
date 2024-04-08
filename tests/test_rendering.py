@@ -5,6 +5,7 @@ import math
 import numpy
 import warnings
 import PIL.Image
+import PIL.ImageDraw
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
@@ -12,7 +13,8 @@ from .conftest import (
     TestFiles,
     PyVersion,
     OutputDir,
-    ExpRenderPixels
+    ExpRenderPixels,
+    compare_n2,
 )
 
 # TODO assert that bitmap and info are consistent
@@ -379,3 +381,28 @@ def test_pil_nocopy_where_possible(bitmap_format, rev_byteorder, is_referenced, 
             warnings.warn(f"PIL now references {bitmap.mode} mode bitmaps.")
         else:
             assert pil_image.getpixel((0, 0)) == pixel_a
+
+
+def test_draw_image_borders():
+    # this demonstrates posconv functionality
+    
+    pdf = pdfium.PdfDocument(TestFiles.images)
+    page = pdf[0]
+    images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
+    pdf_qpl = [i.get_quad_points() for i in images]
+    
+    bitmap = page.render(scale=1)
+    posconv = pdfium.PdfPosConv(page, bitmap)
+    pil_image = bitmap.to_pil()
+    bitmap_qpl  = [[posconv.to_bitmap(x, y) for x, y in qps] for qps in pdf_qpl]
+    
+    reverse_qpl = [[posconv.to_page(x, y) for x, y in qps] for qps in bitmap_qpl]
+    for qps_a, qps_b in zip(pdf_qpl, reverse_qpl):
+        compare_n2(qps_a, qps_b)
+    
+    draw = PIL.ImageDraw.Draw(pil_image)
+    GREEN = (50, 200, 10)
+    for qps in bitmap_qpl:
+        draw.polygon(qps, outline=GREEN, width=3)
+    
+    pil_image.save(OutputDir/"image_borders.png")
