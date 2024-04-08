@@ -393,9 +393,10 @@ def _get_pil_mode(colorspace, bpp):
 def _extract_smart(image_obj, fb_format=None):
     
     try:
+        # TODO can we change PdfImage.get_data() to take an mmap, so the data could be written directly into a file rather than an in-memory array?
         data, info = _extract_direct(image_obj)
     except ImageNotExtractableError:
-        # TODO? log reason why the image cannot be extracted directly
+        # TODO log reason why the image cannot be extracted directly?
         pil_image = image_obj.get_bitmap(render=False).to_pil()
     else:
         pil_image = None

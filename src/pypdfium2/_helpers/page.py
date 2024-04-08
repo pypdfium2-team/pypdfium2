@@ -6,6 +6,7 @@ __all__ = ("PdfPage", )
 import math
 import ctypes
 import logging
+import weakref
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -418,12 +419,14 @@ class PdfPage (pdfium_i.AutoCloseable):
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(0, 0, width, height, fill_color)
         
-        render_args = (bitmap, self, -crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation], flags)
+        pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
+        render_args = (bitmap, self, *pos_args, flags)
         
         pdfium_c.FPDF_RenderPageBitmap(*render_args)
-        
         if may_draw_forms and self.formenv:
             pdfium_c.FPDF_FFLDraw(self.formenv, *render_args)
+        
+        bitmap._pos_args = (weakref.ref(self), *pos_args)
         
         return bitmap
 
@@ -494,3 +497,52 @@ def _parse_renderopts(
     
     # TODO consider using a namedtuple or something
     return cl_format, rev_byteorder, fill_color, flags
+
+
+class PdfPosConv:  # TODO add to test suite
+    """
+    Pdf coordinate translator.
+    
+    Parameters:
+        page (PdfPage):
+            Handle to the page.
+        bitmap (PdfBitmap):
+            Handle to the bitmap, which must be a rendering of *page*.
+    """
+    
+    # NOTE The reason for this API design is that neither page nor bitmap should hold a permanent reference to another, so they can be freed independently via finalizer. Obviously, a weak reference alone is not sufficient, as its object can disappear. So we need an explicit takeover of the page, ensuring it is held in memory.
+    
+    def __init__(self, page, bitmap):
+        
+        if not bitmap._pos_args:
+            raise RuntimeError("This bitmap does not belong to a page.")
+        
+        assert page != None
+        page_ref = bitmap._pos_args[0]
+        if page_ref() is not page:  # resolve weakref and check identity
+            raise RuntimeError("This bitmap was not rendered from the given page.")
+        
+        self.page = page
+        self._args = bitmap._pos_args[1:]
+    
+    
+    def to_page(self, bitmap_x, bitmap_y):
+        """
+        Translate coordinates from bitmap to page.
+        """
+        page_x, page_y = ctypes.c_double(), ctypes.c_double()
+        ok = pdfium_c.FPDF_DeviceToPage(self.page, *self._args, bitmap_x, bitmap_y, page_x, page_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to page coordinates.")
+        return (page_x.value, page_y.value)
+    
+    
+    def to_bitmap(self, page_x, page_y):
+        """
+        Translate coordinates from page to bitmap.
+        """
+        bitmap_x, bitmap_y = ctypes.c_int(), ctypes.c_int()
+        ok = pdfium_c.FPDF_PageToDevice(self.page, *self._args, page_x, page_y, bitmap_x, bitmap_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to bitmap coordinates.")
+        return (bitmap_x.value, bitmap_y.value)

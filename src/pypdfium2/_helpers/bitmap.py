@@ -55,6 +55,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
+        
         self.raw = raw
         self.buffer = buffer
         self.width = width
@@ -67,6 +68,10 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             False: pdfium_i.BitmapTypeToStr,
             True: pdfium_i.BitmapTypeToStrReverse,
         }[self.rev_byteorder][self.format]
+        
+        # slot to store arguments for PdfPosConv, set on page rendering
+        self._pos_args = None
+        
         super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
     
     

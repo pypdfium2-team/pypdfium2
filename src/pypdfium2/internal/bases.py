@@ -26,6 +26,9 @@ class AutoCastable:
     
     @property
     def _as_parameter_(self):
+        # TODO tighten to `not isinstance(...)` (needs declaraction of C type)
+        if not self.raw:
+            raise RuntimeError("Cannot use closed object as C function parameter.")
         return self.raw
 
 
