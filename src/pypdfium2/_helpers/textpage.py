@@ -293,15 +293,13 @@ class PdfTextSearcher (pdfium_i.AutoCloseable):
     def get_next(self):
         """
         Returns:
-            (int, int): Start character index and count of the next occurrence,
-            or None if the last occurrence was passed.
+            (int, int) | None: Start character index and count of the next occurrence, or None if the last occurrence was passed.
         """
         return self._get_occurrence(pdfium_c.FPDFText_FindNext)
     
     def get_prev(self):
         """
         Returns:
-            (int, int): Start character index and count of the previous occurrence (i. e. the one before the last valid occurrence),
-            or None if the last occurrence was passed.
+            (int, int) | None: Start character index and count of the previous occurrence (i. e. the one before the last valid occurrence), or None if the last occurrence was passed.
         """
         return self._get_occurrence(pdfium_c.FPDFText_FindPrev)

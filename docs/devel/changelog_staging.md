@@ -19,10 +19,14 @@
 - Removed legacy version flags.
 
 *Improvements and new features*
+- Added `PdfPosConv` helper for bidirectional translation between page and bitmap coordinates.
 - Added `PdfObject.get_quad_points()` to get the corner points of an image or text object.
 - Added context manager support to `PdfDocument`, so it can be used in a `with`-statement, because opening from a file path binds a file descriptor, which should be released safely and as soon as possible, given OS limits on the number of open FDs.
 - Corrected some null pointer checks: we have to use `bool(ptr)` rather than `ptr is None`.
-- Simplified version implementation (no API change expected). Replaced `__getattr__` magic with assignments, so all attributes now show up in `dir()`.
+- Simplified version impl (no API change expected).
+
+*Project*
+- Merged `tests_old/` back into `tests/`.
 
 <!-- TODO
 See https://github.com/pypdfium2-team/pypdfium2/blob/devel_old/docs/devel/changelog_staging.md
