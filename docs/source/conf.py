@@ -5,7 +5,6 @@
 # See https://www.sphinx-doc.org/en/master/usage/configuration.html
 # and https://docs.readthedocs.io/en/stable/environment-variables.html
 
-import os
 import sys
 import time
 import collections
@@ -13,27 +12,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "setupsrc"))
 from pypdfium2_setup.packaging_base import (
-    run_cmd,
-    ProjectDir,
+    parse_git_tag,
+    get_next_changelog,
 )
 
-
-def _get_build_type():
-    
-    # RTD uses git checkout --force origin/... which results in a detached HEAD state, so we cannot easily get the branch name
-    # Thus query for an RTD-specific environment variable instead
-    rtd_vn = os.environ.get("READTHEDOCS_VERSION_NAME", None)
-    if rtd_vn:
-        return rtd_vn
-    
-    branch = run_cmd(["git", "branch", "--show-current"], cwd=ProjectDir, capture=True)
-    if branch == "main":
-        return "latest"
-    else:
-        return branch
-
-
-build_type = _get_build_type()
+# FIXME not sure if this will work on RTD
+tag_info = parse_git_tag()
+have_changes = tag_info["n_commits"] > 0 or tag_info["dirty"]
+if get_next_changelog():
+    assert have_changes
 
 project = "pypdfium2"
 author = "pypdfium2-team"
@@ -81,14 +68,10 @@ intersphinx_mapping = {
 
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-rst_prolog
 # .. |br| raw:: html
-
 #    <br/>
-rst_prolog = """
-.. |build_type| replace:: %(build_type)s
-""" % dict(
-    build_type = build_type,
-)
-
+rst_prolog = f"""
+.. |have_changes| replace:: {have_changes}
+"""
 
 def remove_namedtuple_aliases(app, what, name, obj, skip, options):
     if type(obj) is collections._tuplegetter:
@@ -98,4 +81,4 @@ def remove_namedtuple_aliases(app, what, name, obj, skip, options):
 
 def setup(app):
     app.connect('autodoc-skip-member', remove_namedtuple_aliases)
-    app.add_config_value("build_type", "latest", "env")
+    app.add_config_value("have_changes", True, "env")

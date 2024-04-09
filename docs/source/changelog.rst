@@ -4,7 +4,7 @@
 Changelog
 =========
 
-.. ifconfig:: build_type == 'latest'
+.. ifconfig:: have_changes
     
     .. warning::
          This is a documentation build for an unreleased version of pypdfium2, so it is possible that new changes are not logged yet.

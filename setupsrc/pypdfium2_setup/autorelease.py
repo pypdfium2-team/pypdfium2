@@ -151,21 +151,6 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
     (ProjectDir/"RELEASE.md").write_text(relnotes)
 
 
-def get_changelog_staging(beta):
-    
-    content = ChangelogStaging.read_text()
-    pos = content.index("\n", content.index("# Changelog")) + 1
-    header = content[:pos].strip() + "\n"
-    devel_msg = content[pos:].strip()
-    if devel_msg:
-        devel_msg += "\n"
-    
-    if beta is None:  # flush
-        ChangelogStaging.write_text(header)
-    
-    return devel_msg
-
-
 def main():
     
     parser = argparse.ArgumentParser(
@@ -193,7 +178,9 @@ def main():
     write_json(AR_RecordFile, dict(pdfium=new_pdfium, tag=new_tag))
     
     update_refbindings(latest_pdfium)
-    summary = get_changelog_staging(new_helpers["beta"])
+    summary = get_next_changelog(
+        flush = new_helpers["beta"] is None
+    )
     log_changes(summary, record["pdfium"], new_pdfium, new_tag, new_helpers["beta"])
     if args.register:
         register_changes(new_tag)
