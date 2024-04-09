@@ -384,7 +384,8 @@ def test_pil_nocopy_where_possible(bitmap_format, rev_byteorder, is_referenced, 
 
 
 def test_draw_image_borders():
-    # this demonstrates posconv functionality
+    # this demonstrates posconv functionality in the form of an embedder test
+    # see test_page::test_posconv for a more unittest-like example
     
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf[0]

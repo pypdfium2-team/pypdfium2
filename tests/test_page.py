@@ -59,3 +59,22 @@ def test_flatten():
     rc = page.flatten()
     assert rc == pdfium_c.FLATTEN_SUCCESS
     pdf.save(OutputDir / "flattened.pdf")
+
+
+def test_posconv():
+    pdf = pdfium.PdfDocument.new()
+    W, H = 100, 150
+    page = pdf.new_page(W, H)
+    posconv = pdfium.PdfPosConv(page, (0, 0, W, H, 0))
+    page_corners = [
+        (0, 0),  # bottom left == origin
+        (W, 0),  # bottom right
+        (0, H),  # top left
+        (W, H),  # top right
+    ]
+    # bitmaps use top-left as origin
+    bmp_corners = [posconv.to_bitmap(x, y) for x, y in page_corners]
+    exp_bmp_corners = [(x, H-y) for x, y in page_corners]
+    assert bmp_corners == exp_bmp_corners
+    reverse_page_corners = [posconv.to_page(x, y) for x, y in bmp_corners]
+    assert reverse_page_corners == page_corners
