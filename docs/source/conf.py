@@ -18,6 +18,7 @@ from pypdfium2_setup.packaging_base import (
 
 # FIXME not sure if this will work on RTD
 tag_info = parse_git_tag()
+print(tag_info, file=sys.stderr)
 have_changes = tag_info["n_commits"] > 0 or tag_info["dirty"]
 if get_next_changelog():
     assert have_changes
