@@ -5,6 +5,7 @@
 # See https://www.sphinx-doc.org/en/master/usage/configuration.html
 # and https://docs.readthedocs.io/en/stable/environment-variables.html
 
+import os
 import sys
 import time
 import collections
@@ -14,15 +15,13 @@ sys.path.insert(0, str(Path(__file__).parents[2] / "setupsrc"))
 from pypdfium2_setup.packaging_base import (
     parse_git_tag,
     get_next_changelog,
-    run_cmd,
-    ProjectDir,
 )
 
-# FIXME not sure if this will work on RTD
+
+# RTD modifies conf.py, so we have to ignore dirty state if on RTD
+is_rtd = os.environ.get("READTHEDOCS", "").lower() == "true"
 tag_info = parse_git_tag()
-print(tag_info, file=sys.stderr)
-print(run_cmd(["git", "status"], cwd=ProjectDir, capture=True), file=sys.stderr)
-have_changes = tag_info["n_commits"] > 0 or tag_info["dirty"]
+have_changes = tag_info["n_commits"] > 0 or (tag_info["dirty"] and not is_rtd)
 if get_next_changelog():
     assert have_changes
 
