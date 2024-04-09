@@ -517,6 +517,10 @@ class PdfPosConv:
     """
     Pdf coordinate translator.
     
+    Hint:
+        Use :meth:`.PdfPage.get_posconv` to obtain an instance of this class.
+        It is not normally necessary to access the :class:`.PdfPosConv` constructor directly.
+    
     Parameters:
         page (PdfPage):
             Handle to the page.

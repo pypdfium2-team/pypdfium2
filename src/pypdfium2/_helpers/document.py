@@ -363,7 +363,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             PdfPage: The page at *index* (zero-based).
         Note:
             This calls ``FORM_OnAfterLoadPage()`` if the document has an active form env.
-            Note that closing the formenv would implicitly close the page.
+            In that case, note that closing the formenv would implicitly close the page.
         """
         
         raw_page = pdfium_c.FPDF_LoadPage(self, index)
@@ -655,7 +655,7 @@ class PdfBookmark (pdfium_i.AutoCastable):
     def get_dest(self):
         """
         Returns:
-            PdfDest | None: The bookmark's destination (page index, viewport), or None on failure.
+            PdfDest | None: The bookmark's destination (an object providing page index and viewport), or None on failure.
         """
         raw_dest = pdfium_c.FPDFBookmark_GetDest(self.pdf, self)
         if not raw_dest:
