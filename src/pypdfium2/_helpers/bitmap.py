@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfBitmap", )
+__all__ = ("PdfBitmap", "PdfPosConv")
 
 import ctypes
 import logging
@@ -78,6 +78,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     @property
     def parent(self):  # AutoCloseable hook
         return None
+    
     
     @classmethod
     def from_raw(cls, raw, rev_byteorder=False, ex_buffer=None):
@@ -275,7 +276,16 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         return cls.new_native(w, h, format, rev_byteorder=False, buffer=pil_image.tobytes())
     
     
-    # TODO implement from_numpy()
+    def get_posconv(self, page):
+        """
+        Acquire a :class:`.PdfPosConv` coordinate translator for this bitmap and the page it was rendered from.
+        
+        This API requires passing in the page explicitly, to avoid holding a strong reference, so that bitmap and page can be freed by finalizer independently.
+        """
+        # if the bitmap was rendered from a page, resolve weakref and check identity
+        if not self._pos_args or self._pos_args[0]() is not page:
+            raise RuntimeError("This bitmap does not belong to the given page.")
+        return PdfPosConv(page, self._pos_args[1:])
 
 
 def _pil_convert_for_pdfium(pil_image):
@@ -302,3 +312,42 @@ def _pil_convert_for_pdfium(pil_image):
         pil_image = PIL.Image.merge("RGBX", (b, g, r, x))
     
     return pil_image
+
+
+class PdfPosConv:
+    """
+    Pdf coordinate translator.
+    
+    Hint:
+        You may want to use :meth:`.PdfBitmap.get_posconv` to obtain an instance of this class.
+    
+    Parameters:
+        page (PdfPage):
+            Handle to the page.
+        pos_args (tuple[int*5]):
+            pdfium canvas args (start_x, start_y, size_x, size_y, rotate), as in ``FPDF_RenderPageBitmap()`` etc.
+    """
+    
+    def __init__(self, page, pos_args):
+        self.page = page
+        self.pos_args = pos_args
+    
+    def to_page(self, bitmap_x, bitmap_y):
+        """
+        Translate coordinates from bitmap to page.
+        """
+        page_x, page_y = ctypes.c_double(), ctypes.c_double()
+        ok = pdfium_c.FPDF_DeviceToPage(self.page, *self.pos_args, bitmap_x, bitmap_y, page_x, page_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to page coordinates.")
+        return (page_x.value, page_y.value)
+    
+    def to_bitmap(self, page_x, page_y):
+        """
+        Translate coordinates from page to bitmap.
+        """
+        bitmap_x, bitmap_y = ctypes.c_int(), ctypes.c_int()
+        ok = pdfium_c.FPDF_PageToDevice(self.page, *self.pos_args, page_x, page_y, bitmap_x, bitmap_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to bitmap coordinates.")
+        return (bitmap_x.value, bitmap_y.value)

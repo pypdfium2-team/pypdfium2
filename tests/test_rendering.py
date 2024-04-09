@@ -393,7 +393,7 @@ def test_draw_image_borders():
     pdf_qpl = [i.get_quad_points() for i in images]
     
     bitmap = page.render(scale=1)
-    posconv = page.get_posconv(bitmap)
+    posconv = bitmap.get_posconv(page)
     pil_image = bitmap.to_pil()
     bitmap_qpl  = [[posconv.to_bitmap(x, y) for x, y in qps] for qps in pdf_qpl]
     
