@@ -20,8 +20,10 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     Text page helper class.
     
     Attributes:
-        raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
-        page (PdfPage): Reference to the page this textpage belongs to.
+        raw (FPDF_TEXTPAGE):
+            The underlying PDFium textpage handle.
+        page (PdfPage):
+            Reference to the page this textpage belongs to.
     """
     
     def __init__(self, raw, page):
@@ -211,8 +213,9 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     def get_rect(self, index):
         """
         Get the bounding box of a text rectangle at the given index.
-        Note that :meth:`.count_rects` must be called once with default parameters
-        before subsequent :meth:`.get_rect` calls for this function to work (due to PDFium's API).
+
+        Attention:
+            :meth:`.count_rects` must be called once with default params before subsequent :meth:`.get_rect` calls for this function to work.
         
         Returns:
             Float values for left, bottom, right and top in PDF canvas units.

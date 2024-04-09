@@ -23,9 +23,12 @@ class PdfPage (pdfium_i.AutoCloseable):
     Page helper class.
     
     Attributes:
-        raw (FPDF_PAGE): The underlying PDFium page handle.
-        pdf (PdfDocument): Reference to the document this page belongs to.
-        formenv (PdfFormEnv|None): Formenv handle, if the parent pdf had an active formenv at the time of page retrieval. None otherwise.
+        raw (FPDF_PAGE):
+            The underlying PDFium page handle.
+        pdf (PdfDocument):
+            Reference to the document this page belongs to.
+        formenv (PdfFormEnv | None):
+            Formenv handle, if the parent pdf had an active formenv at the time of page retrieval. None otherwise.
     """
     
     def __init__(self, raw, pdf, formenv):
@@ -101,9 +104,9 @@ class PdfPage (pdfium_i.AutoCloseable):
             (float, float, float, float) | None:
             The page MediaBox in PDF canvas units, consisting of four coordinates (usually x0, y0, x1, y1).
             If MediaBox is not defined, returns ANSI A (0, 0, 612, 792) if ``fallback_ok=True``, None otherwise.
-        Note:
-            Due to quirks in PDFium's public API, all ``get_*box()`` functions except :meth:`.get_bbox`
-            do not inherit from parent nodes in the page tree (as of PDFium 5418).
+        
+        .. admonition:: Known issue\n
+            Due to quirks in PDFium, all ``get_*box()`` functions except :meth:`.get_bbox` do not inherit from parent nodes in the page tree (as of PDFium 5418).
         """
         # https://crbug.com/pdfium/1786
         return self._get_box(pdfium_c.FPDFPage_GetMediaBox, lambda: (0, 0, 612, 792), fallback_ok)
@@ -266,7 +269,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             :class:`.PdfObject`: A page object.
         """
         
-        # TODO? close skipped objects explicitly ?
+        # TODO close skipped objects explicitly ?
         
         if form:
             count_objects = pdfium_c.FPDFFormObj_CountObjects
@@ -326,11 +329,11 @@ class PdfPage (pdfium_i.AutoCloseable):
         """
         Set up a coordinate normalizer object that may be used to apply PDF coordinate system transformations to values, or unapply them.
         
-        This may be useful when writing PDF position data to a format that assumes a strict coordinate system, or to conveniently translate visual input values to raw values (e.g. swapping crop for a page with rotated/mirrored coordinate system).
+        This may be useful to conveniently translate visual input values to raw values (e.g. swapping crop for a page with rotated/mirrored coordinate system), or when passing position data to a receiver that assumes a strict coordinate system.
         
         Note, as pdfium itself does not currently expose a generic coordinate normalizer, we are absusing the page <-> raster translator APIs by supplying a fictional raster of a certain scale, which is rather inelegant, as there is some back-and-forth calculation and an inherent loss of precision (though it can be made irrelevantly small), due to interjection of the raster.
         
-        Conversely, this means you should not use this method for translating to/from an actual bitmap. Instead, use :meth:`.PdfBitmap.get_posconv`/:class:`PdfPosConv` directly, to avoid even more unnecessary calculation.
+        Conversely, this means you should not use this method for translating to/from an actual bitmap. Instead, use :meth:`.PdfBitmap.get_posconv`/:class:`.PdfPosConv` directly, to avoid even more unnecessary calculation.
         
         Parameters:
             ps (float):
@@ -339,7 +342,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 The corner to use as origin (``bottom_left`` or ``top_left``).
                 The underlying pdfium API works with top left, but the default here is bottom left so that raw and normalized values align for a non-transformed coordinate system.
         Returns:
-            PdfPosNormalizer
+            PdfPosNormalizer: Position normalization helper.
         """
         w, h = self.get_size()
         w, h = round(w*ps), round(h*ps)

@@ -17,7 +17,6 @@ from pypdfium2_setup.packaging_base import (
     get_next_changelog,
 )
 
-
 # RTD modifies conf.py, so we have to ignore dirty state if on RTD
 is_rtd = os.environ.get("READTHEDOCS", "").lower() == "true"
 tag_info = parse_git_tag()

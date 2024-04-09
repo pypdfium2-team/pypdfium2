@@ -343,7 +343,7 @@ class PdfImage (PdfObject):
         
         This method can only extract DCTDecode (JPEG) and JPXDecode (JPEG 2000) images directly.
         Otherwise, the pixel data is decoded, and re-encoded using :mod:`PIL`.
-        For images with simple filters only, ``get_data(decode_simple=True)`` is used for decoding to preserve higher bit depth or special color formats not supported by ``FPDF_BITMAP``.
+        For images with simple filters only, ``get_data(decode_simple=True)`` is used to preserve higher bit depth or special color formats not supported by ``FPDF_BITMAP``.
         For images with complex filters, we have to resort to :meth:`.get_bitmap`, which can be a lossy operation.
         
         Note, this method ignores alpha masks, and potentially other data stored separately of the main data stream, which might lead to incorrect representation of the image.
