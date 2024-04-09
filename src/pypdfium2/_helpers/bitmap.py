@@ -122,10 +122,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         If an external buffer is provided, stride may be set if there is a padding.
         """
         
+        orig_stride = stride
         if stride is None:
-            assert buffer != None
             stride = width * pdfium_i.BitmapTypeToNChannels[format]
         if buffer is None:
+            assert orig_stride is None
             buffer = (ctypes.c_ubyte * (stride * height))()
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
         
