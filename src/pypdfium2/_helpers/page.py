@@ -25,6 +25,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     Attributes:
         raw (FPDF_PAGE): The underlying PDFium page handle.
         pdf (PdfDocument): Reference to the document this page belongs to.
+        formenv (PdfFormEnv|None): Formenv handle, if the parent pdf had an active formenv at the time of page retrieval. None otherwise.
     """
     
     def __init__(self, raw, pdf, formenv):
@@ -300,16 +301,21 @@ class PdfPage (pdfium_i.AutoCloseable):
                 )
     
     
-    # non-public because it doesn't seem to work (returns success but does nothing on the samples we tried)
-    def _flatten(self, flag=pdfium_c.FLAT_NORMALDISPLAY):
+    def flatten(self, flag=pdfium_c.FLAT_NORMALDISPLAY):
         """
-        Attempt to flatten annotations and form fields into the page contents.
+        Flatten form fields and annotations into page contents.
+        
+        Attention:
+            :meth:`~.PdfDocument.init_forms` must have been called on the parent pdf, before the page was retrieved, for this method to work.
+            In other words, :attr:`.PdfPage.formenv` must be non-null.
         
         Parameters:
             flag (int): PDFium flattening target (:attr:`FLAT_*`)
         Returns:
             int: PDFium flattening status (:attr:`FLATTEN_*`). :attr:`FLATTEN_FAIL` is handled internally.
         """
+        if not self.formenv:
+            raise RuntimeError("page.flatten() requires previous pdf.init_forms() before page retrieval.")
         rc = pdfium_c.FPDFPage_Flatten(self, flag)
         if rc == pdfium_c.FLATTEN_FAIL:
             raise PdfiumError("Failed to flatten annotations / form fields.")
@@ -318,7 +324,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def get_posconv(self, bitmap):
         """
-        Acquire a :class:`.PdfPosConv` coordinate translator for a :class:`PdfBitmap` rendered from this page.
+        Acquire a :class:`.PdfPosConv` coordinate translator for a :class:`.PdfBitmap` rendered from this page.
         """
         # if the bitmap was rendered from a page, resolve weakref and check identity
         if not bitmap._pos_args or bitmap._pos_args[0]() is not self:

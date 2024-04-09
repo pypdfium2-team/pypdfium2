@@ -4,7 +4,7 @@
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-from .conftest import TestFiles
+from .conftest import TestFiles, OutputDir
 
 
 def test_boxes():
@@ -25,9 +25,9 @@ def test_boxes():
         ("art",   (40, 40, 555, 802)),
     ]
     
-    for meth_name, exp_box in test_cases:
-        getattr(page, "set_%sbox" % meth_name)(*exp_box)
-        box = getattr(page, "get_%sbox" % meth_name)()
+    for mn, exp_box in test_cases:
+        getattr(page, f"set_{mn}box")(*exp_box)
+        box = getattr(page, f"get_{mn}box")()
         assert pytest.approx(box) == exp_box
 
 
@@ -52,10 +52,10 @@ def test_page_labels():
     assert exp_labels == [pdf.get_page_label(i) for i in range(len(pdf))]
 
 
-# seems to take no effect; probably a pdfium bug
 def test_flatten():
     pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
     page = pdf[0]
-    rc = page._flatten()
+    rc = page.flatten()
     assert rc == pdfium_c.FLATTEN_SUCCESS
-    # pdf.save(OutputDir / "flattened.pdf")
+    pdf.save(OutputDir / "flattened.pdf")
