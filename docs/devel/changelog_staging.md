@@ -19,7 +19,8 @@
 - Removed legacy version flags.
 
 *Improvements and new features*
-- Added `PdfPosConv` helper for bidirectional translation between page and bitmap coordinates.
+<!-- TODO change to PdfBitmap.get_posconv(page) ? because we can't use it unless a bitmap has been written from the page -->
+- Added `PdfPosConv` helper and `PdfPage.get_posconv(bitmap)` for bidirectional translation between page and bitmap coordinates.
 - Added `PdfObject.get_quad_points()` to get the corner points of an image or text object.
 - Added `PdfPage.flatten()` (previously non-public helper), after having found out how to correctly use it. Added an assertion to make sure requirements are met, and updated docs accordingly.
 - Added context manager support to `PdfDocument`, so it can be used in a `with`-statement, because opening from a file path binds a file descriptor, which should be released safely and as soon as possible, given OS limits on the number of open FDs.
