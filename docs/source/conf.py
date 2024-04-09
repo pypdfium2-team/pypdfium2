@@ -14,11 +14,14 @@ sys.path.insert(0, str(Path(__file__).parents[2] / "setupsrc"))
 from pypdfium2_setup.packaging_base import (
     parse_git_tag,
     get_next_changelog,
+    run_cmd,
+    ProjectDir,
 )
 
 # FIXME not sure if this will work on RTD
 tag_info = parse_git_tag()
 print(tag_info, file=sys.stderr)
+print(run_cmd(["git", "status"], cwd=ProjectDir, capture=True), file=sys.stderr)
 have_changes = tag_info["n_commits"] > 0 or tag_info["dirty"]
 if get_next_changelog():
     assert have_changes
