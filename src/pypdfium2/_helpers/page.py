@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfPage", )
+__all__ = ("PdfPage", "PdfPosNormalizer")
 
 import math
 import ctypes
@@ -10,7 +10,7 @@ import weakref
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2._helpers.bitmap import PdfBitmap
+from pypdfium2._helpers.bitmap import PdfBitmap, PdfPosConv
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers.pageobjects import PdfObject
 
@@ -322,6 +322,31 @@ class PdfPage (pdfium_i.AutoCloseable):
         return rc
     
     
+    def get_pos_normalizer(self, ps=5, origin="bottom_left"):
+        """
+        Set up a coordinate normalizer object that may be used to apply PDF coordinate system transformations to values, or unapply them.
+        
+        This may be useful when writing PDF position data to a format that assumes a strict coordinate system, or to conveniently translate visual input values to raw values (e.g. swapping crop for a page with rotated/mirrored coordinate system).
+        
+        Note, as pdfium itself does not currently expose a generic coordinate normalizer, we are absusing the page <-> raster translator APIs by supplying a fictional raster of a certain scale, which is rather inelegant, as there is some back-and-forth calculation and an inherent loss of precision (though it can be made irrelevantly small), due to interjection of the raster.
+        
+        Conversely, this means you should not use this method for translating to/from an actual bitmap. Instead, use :meth:`.PdfBitmap.get_posconv`/:class:`PdfPosConv` directly, to avoid even more unnecessary calculation.
+        
+        Parameters:
+            ps (float):
+                Scale factor to use for the fictional raster. Controls the precision of normalized values.
+            origin (str):
+                The corner to use as origin (``bottom_left`` or ``top_left``).
+                The underlying pdfium API works with top left, but the default here is bottom left so that raw and normalized values align for a non-transformed coordinate system.
+        Returns:
+            PdfPosNormalizer
+        """
+        w, h = self.get_size()
+        w, h = round(w*ps), round(h*ps)
+        posconv = PdfPosConv(self, (0, 0, w, h, 0))
+        return PdfPosNormalizer(posconv, ps, origin)
+    
+    
     # TODO
     # - add helpers for matrix-based and interruptible rendering
     # - add lower-level renderer that takes a caller-provided bitmap
@@ -501,3 +526,39 @@ def _parse_renderopts(
     
     # TODO consider using a namedtuple or something
     return cl_format, rev_byteorder, fill_color, flags
+
+
+class PdfPosNormalizer:
+    """
+    Pdf coordinate normalizer.
+    See :meth:`.PdfPage.get_pos_normalizer` for description.
+    """
+
+    def __init__(self, posconv, ps, origin):
+        self._posconv = posconv
+        self._ps = ps
+        if origin == "top_left":
+            self._translate_y = lambda y: y
+        elif origin == "bottom_left":
+            size_y = posconv.pos_args[3]
+            self._translate_y = lambda y: size_y - y
+        else:
+            raise ValueError(f"Origin {origin!r} is not a supported corner.")
+    
+    def to_norm(self, raw_x, raw_y):
+        """
+        Translate raw to normalized coordinates. This applies coordinate system transformations.
+        """
+        x, y = self._posconv.to_bitmap(raw_x, raw_y)
+        x = x / self._ps
+        y = self._translate_y(y) / self._ps
+        return x, y
+    
+    def to_raw(self, norm_x, norm_y):
+        """
+        Translate normalized to raw coordinates.
+        This unapplies coordinate system transformations by doing the inverse transformation.
+        """
+        x = round(norm_x * self._ps)
+        y = round(self._translate_y(norm_y * self._ps))
+        return self._posconv.to_page(x, y)

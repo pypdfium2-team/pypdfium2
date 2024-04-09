@@ -278,9 +278,9 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     def get_posconv(self, page):
         """
-        Acquire a :class:`.PdfPosConv` coordinate translator for this bitmap and the page it was rendered from.
+        Acquire a :class:`.PdfPosConv` object to translate between coordinates on the bitmap and the page it was rendered from.
         
-        This API requires passing in the page explicitly, to avoid holding a strong reference, so that bitmap and page can be freed by finalizer independently.
+        This method requires passing in the page explicitly, to avoid holding a strong reference, so that bitmap and page can be independently freed by finalizer.
         """
         # if the bitmap was rendered from a page, resolve weakref and check identity
         if not self._pos_args or self._pos_args[0]() is not page:
@@ -327,6 +327,8 @@ class PdfPosConv:
         pos_args (tuple[int*5]):
             pdfium canvas args (start_x, start_y, size_x, size_y, rotate), as in ``FPDF_RenderPageBitmap()`` etc.
     """
+    
+    # FIXME would we have to do overflow checking against too large sizes?
     
     def __init__(self, page, pos_args):
         self.page = page
