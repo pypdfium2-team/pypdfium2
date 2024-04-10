@@ -335,6 +335,9 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         Conversely, this means you should not use this method for translating to/from an actual bitmap. Instead, use :meth:`.PdfBitmap.get_posconv`/:class:`.PdfPosConv` directly, to avoid even more unnecessary calculation.
         
+        Attention:
+            Whenever modifications to page geometry were made, the object has to be re-created to update the underlying fictional raster.
+        
         Parameters:
             ps (float):
                 Scale factor to use for the fictional raster. Controls the precision of normalized values.
