@@ -26,8 +26,7 @@ class AutoCastable:
     
     @property
     def _as_parameter_(self):
-        # TODO tighten to `not isinstance(...)` (needs declaraction of C type)
-        if not self.raw:
+        if self.raw is None:
             raise RuntimeError("Cannot use closed object as C function parameter.")
         return self.raw
 
@@ -43,7 +42,7 @@ def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
         os.write(sys.stderr.fileno(), f"-> Cannot close object, library is destroyed. This may cause a memory leak!\n".encode())
         return
     
-    assert (parent is None) or not parent._tree_closed()
+    assert parent is None or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
 
 
@@ -51,7 +50,7 @@ class AutoCloseable (AutoCastable):
     
     def __init__(self, close_func, *args, obj=None, needs_free=True, **kwargs):
         
-        # NOTE proactively prevent accidental double initialization
+        # proactively prevent accidental double initialization
         assert not hasattr(self, "_finalizer")
         
         self._close_func = close_func
@@ -72,7 +71,7 @@ class AutoCloseable (AutoCastable):
     
     
     def _attach_finalizer(self):
-        # NOTE this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
+        # NOTE this function captures the value of the `parent` property at finalizer installation time
         assert self._finalizer is None
         self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, repr(self), self._autoclose_state, self.parent, *self._ex_args, **self._ex_kwargs)
     
