@@ -119,16 +119,25 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     def new_native(cls, width, height, format, rev_byteorder=False, buffer=None, stride=None):
         """
         Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by Python/ctypes, or provided by the caller.
-        Buffers allocated by this function are packed (i.e. no unused bytes at line end).
-        If an external buffer is provided, stride may be set if there is a padding.
+        
+        If buffer and stride are None, a packed buffer is created.
+        If buffer is None but a custom stride is given, a stride-agnostic buffer is created.
+        If both custom buffer and stride are given, they are used as-is.
+        
+        Caller-provided buffers or strides are subject to a logical validation.
         """
         
-        orig_stride = stride
+        bpc = pdfium_i.BitmapTypeToNChannels[format]
         if stride is None:
-            stride = width * pdfium_i.BitmapTypeToNChannels[format]
+            stride = width * bpc
+        else:
+            assert stride >= width * bpc
+        
         if buffer is None:
-            assert orig_stride is None
             buffer = (ctypes.c_ubyte * (stride * height))()
+        else:
+            assert len(buffer) >= stride * height
+        
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
         
         # alternatively, we could call the constructor directly with the information from above
