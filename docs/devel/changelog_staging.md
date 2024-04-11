@@ -28,6 +28,7 @@
 
 *Project*
 - Merged `tests_old/` back into `tests/`.
+- Docs: Improved logic when to include the unreleased version warning and upcoming changelog.
 
 <!-- TODO
 See https://github.com/pypdfium2-team/pypdfium2/blob/devel_old/docs/devel/changelog_staging.md
