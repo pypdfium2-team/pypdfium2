@@ -529,6 +529,32 @@ class PdfDocument (pdfium_i.AutoCloseable):
             bm_ptr = pdfium_c.FPDFBookmark_GetNextSibling(self, bm_ptr)
 
 
+def _open_pdf(input_data, password, autoclose):
+    
+    to_hold, to_close = (), ()
+    if password is not None:
+        password = (password+"\x00").encode("utf-8")
+    
+    if isinstance(input_data, Path):
+        pdf = pdfium_c.FPDF_LoadDocument((str(input_data)+"\x00").encode("utf-8"), password)
+    elif isinstance(input_data, (bytes, ctypes.Array)):
+        pdf = pdfium_c.FPDF_LoadMemDocument64(input_data, len(input_data), password)
+        to_hold = (input_data, )
+    elif pdfium_i.is_buffer(input_data, "r"):
+        bufaccess, to_hold = pdfium_i.get_bufreader(input_data)
+        if autoclose:
+            to_close = (input_data, )
+        pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
+    else:
+        raise TypeError(f"Invalid input type '{type(input_data).__name__}'")
+    
+    if pdfium_c.FPDF_GetPageCount(pdf) < 1:
+        err_code = pdfium_c.FPDF_GetLastError()
+        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
+    
+    return pdf, to_hold, to_close
+
+
 class PdfFormEnv (pdfium_i.AutoCloseable):
     """
     Form environment helper class.
@@ -587,32 +613,6 @@ class PdfXObject (pdfium_i.AutoCloseable):
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
         # not a child object (see above)
         return PdfObject(raw=raw_pageobj, pdf=self.pdf)
-
-
-def _open_pdf(input_data, password, autoclose):
-    
-    to_hold, to_close = (), ()
-    if password is not None:
-        password = (password+"\x00").encode("utf-8")
-    
-    if isinstance(input_data, Path):
-        pdf = pdfium_c.FPDF_LoadDocument((str(input_data)+"\x00").encode("utf-8"), password)
-    elif isinstance(input_data, (bytes, ctypes.Array)):
-        pdf = pdfium_c.FPDF_LoadMemDocument64(input_data, len(input_data), password)
-        to_hold = (input_data, )
-    elif pdfium_i.is_buffer(input_data, "r"):
-        bufaccess, to_hold = pdfium_i.get_bufreader(input_data)
-        if autoclose:
-            to_close = (input_data, )
-        pdf = pdfium_c.FPDF_LoadCustomDocument(bufaccess, password)
-    else:
-        raise TypeError(f"Invalid input type '{type(input_data).__name__}'")
-    
-    if pdfium_c.FPDF_GetPageCount(pdf) < 1:
-        err_code = pdfium_c.FPDF_GetLastError()
-        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
-    
-    return pdf, to_hold, to_close
 
 
 class PdfBookmark (pdfium_i.AutoCastable):
