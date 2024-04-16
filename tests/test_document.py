@@ -138,8 +138,10 @@ def test_open_invalid():
         pdf = pdfium.PdfDocument(123)
     with pytest.raises(FileNotFoundError):
         pdf = pdfium.PdfDocument("invalid/path")
-    with pytest.raises(pdfium.PdfiumError, match=re.escape("Failed to load document (PDFium: Incorrect password error).")):
+    with pytest.raises(pdfium.PdfiumError, match=re.escape("Failed to load document (PDFium: Incorrect password error).")) as e:
         pdf = pdfium.PdfDocument(TestFiles.encrypted, password="wrong_password")
+    e = e.value
+    assert e.err_code == pdfium_c.FPDF_ERR_PASSWORD
 
 
 def test_misc():

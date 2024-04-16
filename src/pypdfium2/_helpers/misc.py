@@ -5,5 +5,16 @@ __all__ = ("PdfiumError", )
 
 
 class PdfiumError (RuntimeError):
-    """ An exception from the PDFium library, detected by function return code. """
-    pass
+    """
+    An exception from the PDFium library, detected by function return code.
+    
+    Attributes:
+        err_code (int | None): PDFium error code, for programmatic handling of error subtypes, if provided by the API in question (e.g. document loading). None otherwise.
+    
+    Tip:
+        Use ``str(exc)`` to get the message of a caught exception.
+    """
+    
+    def __init__(self, msg, err_code=None):
+        super().__init__(msg)
+        self.err_code = err_code

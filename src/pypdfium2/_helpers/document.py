@@ -33,7 +33,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             Whether byte buffer input should be automatically closed on finalization.
     
     Raises:
-        PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
+        PdfiumError: Raised if the document failed to load. The exception is annotated with the reason reported by PDFium (via message and :attr:`~.PdfiumError.err_code`).
         FileNotFoundError: Raised if an invalid or non-existent file path was given.
     
     Hint:
@@ -178,6 +178,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             if "XFA" in PDFIUM_INFO.flags:
                 ok = pdfium_c.FPDF_LoadXFA(self)
                 if not ok:
+                    # FIXME ability to propagate an optional exception with error code info?
                     err = pdfium_c.FPDF_GetLastError()
                     logger.warning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}")
             else:
@@ -550,7 +551,7 @@ def _open_pdf(input_data, password, autoclose):
     
     if pdfium_c.FPDF_GetPageCount(pdf) < 1:
         err_code = pdfium_c.FPDF_GetLastError()
-        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
+        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).", err_code=err_code)
     
     return pdf, to_hold, to_close
 
