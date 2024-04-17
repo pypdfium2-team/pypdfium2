@@ -30,7 +30,7 @@ def main(args):
         
         # TODO let caller pass in possible range/boundary parameters
         if args.strategy == EXTRACT_RANGE:
-            text = textpage.get_text_range(force_this=True)
+            text = textpage.get_text_range()
         elif args.strategy == EXTRACT_BOUNDED:
             text = textpage.get_text_bounded()
         else:

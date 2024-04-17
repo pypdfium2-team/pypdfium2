@@ -5,10 +5,10 @@ __all__ = ("PdfTextPage", "PdfTextSearcher")
 
 import ctypes
 import logging
-import warnings
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
+from pypdfium2.version import PDFIUM_INFO
 
 c_double = ctypes.c_double
 
@@ -52,14 +52,8 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return t_start, t_end, l_passive, r_passive
     
     
-    def get_text_range(self, index=0, count=-1, errors="ignore", force_this=False):
+    def get_text_range(self, index=0, count=-1, errors="ignore"):
         """
-        Warning:
-            .. versionchanged:: 4.28
-               Unexpected upstream changes have caused allocation size concerns with this API.
-               Using it is now discouraged unless you specifically need to extract a character range. Prefer :meth:`.get_text_bounded` where possible.
-               Calling this method with default params now implicitly translates to :meth:`.get_text_bounded` (pass ``force_this=True`` to circumvent).
-        
         Extract text from a given range.
         
         Parameters:
@@ -77,12 +71,6 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             * In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
         """
         
-        # https://github.com/pypdfium2-team/pypdfium2/issues/298
-        # https://crbug.com/pdfium/2133
-        if (index, count) == (0, -1) and not force_this:
-            warnings.warn("get_text_range() call with default params will be implicitly redirected to get_text_bounded()")
-            return self.get_text_bounded(errors=errors)
-        
         if count == -1:
             count = self.count_chars() - index
         
@@ -96,7 +84,16 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         t_start, t_end, l_passive, r_passive = active_range
         index += l_passive
         count -= l_passive + r_passive
-        in_count = (t_end+1 - t_start)*2 + 1
+        in_count = t_end+1 - t_start
+        
+        # pdfium fea01fa9e2 to d6a4b27d80 requires assuming 4 bytes per character
+        # this corresponds to approx. >6167,<6415 or pdfium-binaries >=6191,<=6406
+        # https://github.com/pypdfium2-team/pypdfium2/issues/298
+        # https://crbug.com/pdfium/2133
+        # -> NOTE(geisserml) may be removed once pdfium-binaries > d6a4b27d80 is released
+        if 6167 < PDFIUM_INFO.build < 6415:
+            in_count *= 2
+        in_count += 1  # null terminator
         
         buffer = ctypes.create_string_buffer(in_count * 2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
