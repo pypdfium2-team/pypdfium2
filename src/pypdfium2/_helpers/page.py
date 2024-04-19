@@ -355,7 +355,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top). Crop is applied after rotation.
                 
             may_draw_forms (bool):
-                If True, render form fields (provided the document has forms and :meth:`~PdfDocument.init_forms` was called).
+                If True, render form fields (provided the document has forms and :meth:`~.PdfDocument.init_forms` was called).
             
             bitmap_maker (typing.Callable):
                 Callback function used to create the :class:`.PdfBitmap`.
