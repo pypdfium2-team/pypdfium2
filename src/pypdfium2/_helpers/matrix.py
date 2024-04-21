@@ -88,6 +88,7 @@ class PdfMatrix:
             b = self.a*other.b + self.b*other.d,
             c = self.c*other.a + self.d*other.c,
             d = self.c*other.b + self.d*other.d,
+            # corresponds to: e, f = other.on_point(self.e, self.f) - transforms X/Y translation
             e = self.e*other.a + self.f*other.c + other.e,
             f = self.e*other.b + self.f*other.d + other.f,
         )
