@@ -244,7 +244,7 @@ def main(args):
     
     # TODO turn into a python-usable API yielding output paths as they are written
     
-    pdf = get_input(args)
+    pdf = get_input(args, init_forms=args.draw_forms)
     
     # TODO move to parsers?
     pdf_len = len(pdf)
@@ -301,9 +301,6 @@ def main(args):
     if len(args.pages) <= args.linear:
         
         logger.info("Linear rendering ...")
-        if args.draw_forms:
-            pdf.init_forms()
-        
         for i in args.pages:
             _render_job(i, pdf, kwargs, engine)
         

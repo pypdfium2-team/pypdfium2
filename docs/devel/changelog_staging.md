@@ -28,6 +28,9 @@
 - Corrected some null pointer checks: we have to use `bool(ptr)` rather than `ptr is None`.
 - Simplified version impl (no API change expected).
 
+*Bug fixes*
+- XFA / rendering CLI: Fixed incorrect recognition of document length. `pdf.init_forms()` must be called before `len(pdf)`.
+
 *Project*
 - Merged `tests_old/` back into `tests/`.
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.

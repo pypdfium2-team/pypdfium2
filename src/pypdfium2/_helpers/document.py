@@ -145,7 +145,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         See the :attr:`formenv` attribute.
     
         Attention:
-            If form rendering is desired, this method must be called after constructing the document, before getting any page handles.
+            If form rendering is desired, this method shall be called immediately after document construction, before getting document length or page handles.
         
         Parameters:
             config (FPDF_FORMFILLINFO | None):
