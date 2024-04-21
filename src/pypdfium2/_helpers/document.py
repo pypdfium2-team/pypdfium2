@@ -139,9 +139,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Initialize a form env, if the document has forms. If already initialized, nothing will be done.
         See the :attr:`formenv` attribute.
     
-        Note:
-            If form rendering is desired, this method should be called directly after constructing the document,
-            before getting any page handles (due to PDFium's API).
+        Attention:
+            If form rendering is desired, this method shall be called immediately after document construction, before getting document length or page handles.
         
         Parameters:
             config (FPDF_FORMFILLINFO | None):
