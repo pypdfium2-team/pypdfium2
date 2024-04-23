@@ -337,9 +337,10 @@ class PdfPosConv:
             pdfium canvas args (start_x, start_y, size_x, size_y, rotate), as in ``FPDF_RenderPageBitmap()`` etc.
     """
     
-    # FIXME would we have to do overflow checking against too large sizes?
+    # FIXME do we have to do overflow checking against too large sizes?
     
     def __init__(self, page, pos_args):
+        assert bool(page)
         self.page = page
         self.pos_args = pos_args
     
