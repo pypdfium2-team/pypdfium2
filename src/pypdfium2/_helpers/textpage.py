@@ -224,7 +224,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return (l.value, b.value, r.value, t.value)
     
     
-    def search(self, text, index=0, match_case=False, match_whole_word=False, consecutive=False):
+    def search(self, text, index=0, match_case=False, match_whole_word=False, consecutive=False, flags=0):
         """
         Locate text on the page.
         
@@ -240,6 +240,8 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             consecutive (bool):
                 If False (the default), :meth:`.search` will skip past the current match to look for the next match.
                 If True, parts of the previous match may be caught again (e. g. searching for `aa` in `aaaa` would match 3 rather than 2 times).
+            flags (int):
+                Passthrough of raw pdfium searching flags. Note that you may want to use the boolean options instead.
         Returns:
             PdfTextSearcher: A helper object to search text.
         """
@@ -247,7 +249,6 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if len(text) == 0:
             raise ValueError("Text length must be greater than 0.")
         
-        flags = 0
         if match_case:
             flags |= pdfium_c.FPDF_MATCHCASE
         if match_whole_word:
