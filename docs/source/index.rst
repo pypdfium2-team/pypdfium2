@@ -16,9 +16,8 @@ Welcome to the documentation for the support model of pypdfium2.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Progress
+   :caption: Release Notes
    
-   planned_changes
    changelog
 
 
