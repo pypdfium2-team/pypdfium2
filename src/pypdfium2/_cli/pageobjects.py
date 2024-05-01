@@ -3,6 +3,7 @@
 
 # TODO test-confirm filter and info params
 
+from itertools import chain
 from collections import OrderedDict
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
@@ -83,10 +84,16 @@ def main(args):
         
         page = pdf[i]
         obj_searcher = page.get_objects(args.filter, max_depth=args.max_depth)
+        # note, more_itertools.peekable() could handle this more elegantly
+        try:
+            first_obj = next(obj_searcher)
+        except StopIteration:
+            continue
+        
         print(f"# Page {i+1}")
         count = 0
         
-        for obj in obj_searcher:
+        for obj in chain([first_obj], obj_searcher):
             
             pad_0 = "    " * obj.level
             pad_1 = pad_0 + "    "
