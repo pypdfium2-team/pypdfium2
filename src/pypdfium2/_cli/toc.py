@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2.internal as pdfium_i
-# TODO? consider dotted access
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,

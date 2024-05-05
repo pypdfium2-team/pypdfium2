@@ -17,7 +17,6 @@ except ImportError:
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 import pypdfium2.raw as pdfium_r
-# TODO? consider dotted access
 from pypdfium2._cli._parsers import (
     add_input, get_input,
     setup_logging,
@@ -240,13 +239,11 @@ def _render_parallel_job(i):
     global ProcObjs; _render_job(i, *ProcObjs)
 
 
+# TODO turn into a python-usable API yielding output paths as they are written
 def main(args):
-    
-    # TODO turn into a python-usable API yielding output paths as they are written
     
     pdf = get_input(args, init_forms=args.draw_forms)
     
-    # TODO move to parsers?
     pdf_len = len(pdf)
     if not all(0 <= i < pdf_len for i in args.pages):
         raise ValueError("Out-of-bounds page indices are prohibited.")
@@ -309,7 +306,6 @@ def main(args):
         logger.info("Parallel rendering ...")
         
         ctx = mp.get_context(args.parallel_strategy)
-        # TODO unify using mp.pool.Pool(context=...) ?
         pool_backends = dict(
             mp = (ctx.Pool, "imap"),
             ft = (functools.partial(ft.ProcessPoolExecutor, mp_context=ctx), "map"),
