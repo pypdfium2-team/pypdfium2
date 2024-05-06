@@ -5,7 +5,7 @@
 
 # NOTE we'd like a slightly longer description, but GH seems to impose some length limit (undocumented?, feels like 200 chars or something)
 name: PyPA install
-description: If you installed via pip (or other PyPA format tool), and encountered an issue while using the library. Use even if you believe it is not a package problem. Default template.
+description: If you installed via pip (or other PyPA format tool), and encountered an issue with the library. Use even if you believe it is not a package problem. Default template.
 
 body:
   
@@ -17,8 +17,6 @@ body:
         **We do not support third-party builds, and they are not eligible for a bug report.** Please make sure to use our official packages.
       options:
         - label: I confirm to be using an **official package** of `pypdfium2` from `PyPI` or `GitHub/pypdfium2-team`.
-          required: true
-        - label: I have read and acknowledged the [response policy](https://github.com/pypdfium2-team/pypdfium2#contributions).
           required: true
   
   - type: textarea
@@ -34,18 +32,12 @@ body:
       render: shell
       description: |
         To provide information about your install, please run the following commands and paste the output into the field below.
+        If the install failed, the last 2 commands may be skipped.
         ```shell
-        python -m pypdfium2 -v
         python -VV
         python -c "import platform as p; print(p.platform())"
+        python -m pypdfium2 -v
         python -m pip show pypdfium2
         ```
     validations:
       required: true
-  
-  - type: checkboxes
-    attributes:
-      label: Validity
-      options:
-        - label: I confirm that I ran all commands, and pasted the whole output.
-          required: true

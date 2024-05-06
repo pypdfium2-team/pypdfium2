@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 name: Conda install
-description: If you installed via conda, and encountered an issue while using the library. Use even if you believe it is not a package problem.
+description: If you installed via conda, and encountered an issue with the library. Use even if you believe it is not a package problem.
 
 body:
   
@@ -23,8 +23,6 @@ body:
           required: true
         - label: I confirm to be working with the **conda env in question, and its proper python executable** (not system python).
           required: true
-        - label: I have read and acknowledged the [response policy](https://github.com/pypdfium2-team/pypdfium2#contributions).
-          required: true
   
   - type: textarea
     attributes:
@@ -38,23 +36,17 @@ body:
       label: Install Info
       render: shell
       description: |
-        To provide information about your install, please run the following commands and paste the output into the field below.
+        To provide information about your install, please run the following commands **with the right conda env and python executable**, and paste the output into the field below.
+        If the install failed, the last 3 commands may be skipped.
         ```shell
-        python -m pypdfium2 -v
         which python
         python -VV
         python -c "import platform as p; print(p.platform())"
-        python -m pip show pypdfium2_raw
-        python -m pip show pypdfium2_helpers
         conda list --show-channel-urls "pypdfium2|pdfium-binaries"
         conda config --show-sources
+        python -m pypdfium2 -v
+        python -m pip show pypdfium2_raw
+        python -m pip show pypdfium2_helpers
         ```
     validations:
       required: true
-  
-  - type: checkboxes
-    attributes:
-      label: Validity
-      options:
-        - label: I confirm that I ran all commands in the conda env in question, with its proper python executable, and pasted the whole output.
-          required: true

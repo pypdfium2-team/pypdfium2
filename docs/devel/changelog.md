@@ -7,6 +7,11 @@
 # Changelog
 
 
+## 4.29.0 (2024-04-10)
+
+- Updated PDFium from `6337` to `6406`.
+
+
 ## 4.28.0 (2024-03-10)
 
 - Updated PDFium from `6281` to `6337`.
