@@ -32,10 +32,11 @@ body:
       render: shell
       description: |
         To provide information about your install, please run the following commands and paste the output into the field below.
+        If the install failed, the last 2 commands may be skipped.
         ```shell
-        python -m pypdfium2 -v
         python -VV
         python -c "import platform as p; print(p.platform())"
+        python -m pypdfium2 -v
         python -m pip show pypdfium2
         ```
     validations:

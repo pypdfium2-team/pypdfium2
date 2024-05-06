@@ -37,15 +37,16 @@ body:
       render: shell
       description: |
         To provide information about your install, please run the following commands **with the right conda env and python executable**, and paste the output into the field below.
+        If the install failed, the last 3 commands may be skipped.
         ```shell
-        python -m pypdfium2 -v
         which python
         python -VV
         python -c "import platform as p; print(p.platform())"
-        python -m pip show pypdfium2_raw
-        python -m pip show pypdfium2_helpers
         conda list --show-channel-urls "pypdfium2|pdfium-binaries"
         conda config --show-sources
+        python -m pypdfium2 -v
+        python -m pip show pypdfium2_raw
+        python -m pip show pypdfium2_helpers
         ```
     validations:
       required: true
