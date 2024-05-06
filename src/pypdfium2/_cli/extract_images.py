@@ -21,7 +21,7 @@ def attach(parser):
     parser.add_argument(
         "--max-depth",
         type = int,
-        default = 2,
+        default = 15,
         help = "Maximum recursion depth to consider when looking for page objects.",
     )
     parser.add_argument(
