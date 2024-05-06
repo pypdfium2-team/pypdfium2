@@ -9,6 +9,7 @@ import warnings
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
+from pypdfium2.version import PDFIUM_INFO
 
 c_double = ctypes.c_double
 
@@ -94,7 +95,14 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         t_start, t_end, l_passive, r_passive = active_range
         index += l_passive
         count -= l_passive + r_passive
-        in_count = (t_end+1 - t_start)*2 + 1
+        in_count = t_end+1 - t_start
+        
+        # pdfium fea01fa9e2 (>6167) to d6a4b27d80 (<6415) requires assuming 4 bytes per character
+        # https://github.com/pypdfium2-team/pypdfium2/issues/298
+        # https://crbug.com/pdfium/2133
+        if 6167 < PDFIUM_INFO.build < 6415:
+            in_count *= 2
+        in_count += 1  # null terminator
         
         buffer = ctypes.create_string_buffer(in_count * 2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
