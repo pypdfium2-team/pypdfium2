@@ -16,8 +16,6 @@ body:
           required: true
         - label: I confirm this is **not about an unofficial build of pypdfium2**. *We do not support third-party builds, and they are not eligible for a bug report.*
           required: true
-        - label: I have read and acknowledged the [response policy](https://github.com/pypdfium2-team/pypdfium2#contributions).
-          required: true
   
   - type: input
     attributes:
