@@ -19,6 +19,10 @@
 - `get_text_range()`: Restored pre-v4.28 behavior, as pdfium reverted `FPDFText_GetText()` to UCS-2. Removed implicit translation of default calls to `get_text_bounded()`. However, the latter should be preferred due to full Unicode support.
 - Removed legacy version flags.
 
+*Bug fixes*
+- Fixed blunder in `PdfImage.extract()` producing an incorrect output path for prefixes containing a dot. In the `extract-images` CLI, this caused all output images of a type to be written to the same path for a document containing a non-extension dot in the filename.
+- XFA / rendering CLI: Fixed incorrect recognition of document length. `pdf.init_forms()` must be called before `len(pdf)`.
+
 *Improvements and new features*
 - Added `PdfPosConv` helper and `PdfBitmap.get_posconv(page)` for bidirectional translation between page and bitmap coordinates.
 - Added `PdfObject.get_quad_points()` to get the corner points of an image or text object.
@@ -27,9 +31,6 @@
 - If document loading failed, `err_code` is now assigned to the `PdfiumError` instance so callers may programatticaly handle the error subtype.
 - Corrected some null pointer checks: we have to use `bool(ptr)` rather than `ptr is None`.
 - Simplified version impl (no API change expected).
-
-*Bug fixes*
-- XFA / rendering CLI: Fixed incorrect recognition of document length. `pdf.init_forms()` must be called before `len(pdf)`.
 
 *Project*
 - Merged `tests_old/` back into `tests/`.
