@@ -120,11 +120,12 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by Python/ctypes, or provided by the caller.
         
-        If buffer and stride are None, a packed buffer is created.
-        If buffer is None but a custom stride is given, a stride-agnostic buffer is created.
-        If both custom buffer and stride are given, they are used as-is.
+        * If buffer and stride are None, a packed buffer is created.
+        * If a custom buffer is given but no stride, the buffer is assumed to be packed.
+        * If a custom stride is given but no buffer, a stride-agnostic buffer is created.
+        * If both custom buffer and stride are given, they are used as-is.
         
-        Caller-provided buffers or strides are subject to a logical validation.
+        Caller-provided buffer/stride are subject to a logical validation.
         """
         
         bpc = pdfium_i.BitmapTypeToNChannels[format]
