@@ -36,6 +36,38 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return self.page
     
     
+    def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
+        """
+        Extract text from given boundaries in PDF coordinates.
+        If a boundary value is None, it defaults to the corresponding value of :meth:`.PdfPage.get_bbox`.
+        
+        Parameters:
+            errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
+        Returns:
+            str: The text on the page area in question, or an empty string if no text was found.
+        """
+        
+        bbox = self.page.get_bbox()
+        if left is None:
+            left = bbox[0]
+        if bottom is None:
+            bottom = bbox[1]
+        if right is None:
+            right = bbox[2]
+        if top is None:
+            top = bbox[3]
+        
+        args = (self, left, top, right, bottom)
+        n_chars = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
+        if n_chars <= 0:
+            return ""
+        
+        buffer = ctypes.create_string_buffer(n_chars * 2)
+        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+        pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
+        return buffer.raw.decode("utf-16-le", errors=errors)
+    
+    
     def _get_active_text_range(self, c_start, c_end, l_passive=0, r_passive=0):
         
         if c_start > c_end:
@@ -55,6 +87,9 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     def get_text_range(self, index=0, count=-1, errors="ignore"):
         """
         Extract text from a given range.
+        
+        Warning:
+            This method is limited to UCS-2, whereas :meth:`.get_text_bounded` provides full Unicode support.
         
         Parameters:
             index (int): Index of the first char to include.
@@ -86,11 +121,9 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         count -= l_passive + r_passive
         in_count = t_end+1 - t_start
         
-        # pdfium fea01fa9e2 to d6a4b27d80 requires assuming 4 bytes per character
-        # this corresponds to approx. >6167,<6415 or pdfium-binaries >=6191,<=6406
+        # pdfium builds from fea01fa9e2 (>6167) to d6a4b27d80 (<6415) require assuming 4 bytes per character
         # https://github.com/pypdfium2-team/pypdfium2/issues/298
         # https://crbug.com/pdfium/2133
-        # -> NOTE(geisserml) may be removed once pdfium-binaries > d6a4b27d80 is released
         if 6167 < PDFIUM_INFO.build < 6415:
             in_count *= 2
         in_count += 1  # null terminator
@@ -101,38 +134,6 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         assert in_count >= out_count, f"Buffer too small: {in_count} vs {out_count}"
         
         return buffer.raw[:(out_count-1)*2].decode("utf-16-le", errors=errors)
-    
-    
-    def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
-        """
-        Extract text from given boundaries in PDF coordinates.
-        If a boundary value is None, it defaults to the corresponding value of :meth:`.PdfPage.get_bbox`.
-        
-        Parameters:
-            errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
-        Returns:
-            str: The text on the page area in question, or an empty string if no text was found.
-        """
-        
-        bbox = self.page.get_bbox()
-        if left is None:
-            left = bbox[0]
-        if bottom is None:
-            bottom = bbox[1]
-        if right is None:
-            right = bbox[2]
-        if top is None:
-            top = bbox[3]
-        
-        args = (self, left, top, right, bottom)
-        n_chars = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
-        if n_chars <= 0:
-            return ""
-        
-        buffer = ctypes.create_string_buffer(n_chars * 2)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
-        pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
-        return buffer.raw.decode("utf-16-le", errors=errors)
     
     
     def count_chars(self):

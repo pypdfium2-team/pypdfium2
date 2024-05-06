@@ -5,7 +5,7 @@
 
 # Changelog for next release
 
-*API-breaking changes*
+*API changes*
 - Rendering / Bitmap
   * Removed `PdfDocument.render()` (see deprecation rationale in v4.25 changelog). Instead, use `PdfPage.render()` with a loop or process pool.
   * Removed `PdfBitmap.get_info()` and `PdfBitmapInfo`, which existed only on behalf of data transfer with `PdfDocument.render()`.
@@ -16,6 +16,7 @@
   * Renamed `PdfImage.get_size()` to `.get_px_size()`.
   * `PdfImage.extract()`: Removed `fb_render` param because it does not fit in this API. If the image's rendered bitmap is desired, use `.get_bitmap(render=True)` in the first place.
 - `PdfDocument.get_toc()`: Replaced `PdfOutlineItem` namedtuple with method-oriented wrapper classes `PdfBookmark` and `PdfDest`, so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects. Provides signed count as-is rather than splitting in `n_kids` and `is_closed`. Also distinguishes between `dest == None` and an empty dest.
+- `get_text_range()`: Restored pre-v4.28 behavior, as pdfium reverted `FPDFText_GetText()` to UCS-2. Removed implicit translation of default calls to `get_text_bounded()`. However, the latter should be preferred due to full Unicode support.
 - Removed legacy version flags.
 
 *Improvements and new features*
@@ -24,7 +25,6 @@
 - Exposed `PdfPage.flatten()` (previously non-public helper), after having found out how to correctly use it. Added check and updated docs accordingly.
 - Added context manager support to `PdfDocument`, so it can be used in a `with`-statement, because opening from a file path binds a file descriptor, which should be released safely and as soon as possible, given OS limits on the number of open FDs.
 - If document loading failed, `err_code` is now assigned to the `PdfiumError` instance so callers may programatticaly handle the error subtype.
-- Restored `get_text_range()` to its pre-v4.28 behavior, as pdfium reverted `FPDFText_GetText()` to UCS-2.
 - Corrected some null pointer checks: we have to use `bool(ptr)` rather than `ptr is None`.
 - Simplified version impl (no API change expected).
 
