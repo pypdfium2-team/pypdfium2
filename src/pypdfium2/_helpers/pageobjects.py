@@ -360,9 +360,7 @@ class PdfImage (PdfObject):
         extraction_gen = _extract_smart(self, *args, **kwargs)
         format = next(extraction_gen)
         
-        if isinstance(dest, Path):
-            dest = str(dest)
-        if isinstance(dest, str):
+        if isinstance(dest, (str, Path)):
             with open(f"{dest}.{format}", "wb") as buf:
                 extraction_gen.send(buf)
         elif pdfium_i.is_buffer(dest, "w"):
