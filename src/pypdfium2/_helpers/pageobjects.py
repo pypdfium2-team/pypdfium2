@@ -330,9 +330,10 @@ class PdfImage (PdfObject):
             buffer = ctypes.create_string_buffer(length)
             pdfium_c.FPDFImageObj_GetImageFilter(self, i, buffer, length)
             f = buffer.value.decode("utf-8")
-            if skip_simple and f in self.SIMPLE_FILTERS:
-                continue
             filters.append(f)
+        
+        if skip_simple:
+            filters = [f for f in filters if f not in self.SIMPLE_FILTERS]
         
         return filters
     
