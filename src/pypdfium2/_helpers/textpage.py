@@ -55,9 +55,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         """
         Warning:
             .. versionchanged:: 4.28
-               Unexpected upstream changes have caused allocation size concerns with this API.
-               Using it is now discouraged unless you specifically need to extract a character range. Prefer :meth:`.get_text_bounded` where possible.
-               Calling this method with default params now implicitly translates to :meth:`.get_text_bounded` (pass ``force_this=True`` to circumvent).
+               For various reasons, calling this method with default params now implicitly translates to :meth:`.get_text_bounded` (pass ``force_this=True`` to circumvent).
         
         Extract text from a given range.
         
