@@ -9,8 +9,9 @@
 
 ## 4.30.0 (2024-05-09)
 
-- Updated PDFium from `6406` to `6462`.
 *Backported bug fixes / corrections from current development branch to preferably leave v4 in a clean state.*
+
+- Updated PDFium from `6406` to `6462`.
 - Fixed blunder in `PdfImage.extract()` producing an incorrect output path for prefixes containing a dot. In the `extract-images` CLI, this caused all output images of a type to be written to the same path for a document containing a non-extension dot in the filename.
 - XFA / rendering CLI: Fixed incorrect recognition of document length. `pdf.init_forms()` must be called before `len(pdf)`.
 - Made `get_text_range()` allocation adapt to pdfium version, as `FPDFText_GetText()` has been reverted to UCS-2. (See v4.28 changelog for background.)
