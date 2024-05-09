@@ -16,12 +16,8 @@
   * Renamed `PdfImage.get_size()` to `.get_px_size()`.
   * `PdfImage.extract()`: Removed `fb_render` param because it does not fit in this API. If the image's rendered bitmap is desired, use `.get_bitmap(render=True)` in the first place.
 - `PdfDocument.get_toc()`: Replaced `PdfOutlineItem` namedtuple with method-oriented wrapper classes `PdfBookmark` and `PdfDest`, so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects. Provides signed count as-is rather than splitting in `n_kids` and `is_closed`. Also distinguishes between `dest == None` and an empty dest.
-- `get_text_range()`: Restored pre-v4.28 behavior, as pdfium reverted `FPDFText_GetText()` to UCS-2. Removed implicit translation of default calls to `get_text_bounded()`. However, the latter should be preferred due to full Unicode support.
+- `get_text_range()`: Removed implicit translation of default calls to `get_text_bounded()`, as pdfium reverted `FPDFText_GetText()` to UCS-2, which resolves the allocation concern. However, callers are encouraged to explicitly use `get_text_bounded()` for full Unicode support.
 - Removed legacy version flags.
-
-*Bug fixes*
-- Fixed blunder in `PdfImage.extract()` producing an incorrect output path for prefixes containing a dot. In the `extract-images` CLI, this caused all output images of a type to be written to the same path for a document containing a non-extension dot in the filename.
-- XFA / rendering CLI: Fixed incorrect recognition of document length. `pdf.init_forms()` must be called before `len(pdf)`.
 
 *Improvements and new features*
 - Added `PdfPosConv` helper and `PdfBitmap.get_posconv(page)` for bidirectional translation between page and bitmap coordinates.
