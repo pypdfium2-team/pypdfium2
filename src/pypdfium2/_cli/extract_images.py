@@ -22,7 +22,7 @@ def attach(parser):
         "--max-depth",
         type = int,
         default = 15,
-        help = "Maximum recursion depth to consider when looking for page objects.",
+        help = "Maximum recursion depth to consider when looking for pageobjects.",
     )
     parser.add_argument(
         "--use-bitmap",

@@ -21,7 +21,7 @@ except ImportError:
 
 class PdfObject (pdfium_i.AutoCloseable):
     """
-    Page object helper class.
+    Pageobject helper class.
     
     When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead, depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
     
@@ -146,14 +146,14 @@ class PdfObject (pdfium_i.AutoCloseable):
     def transform(self, matrix):
         """
         Parameters:
-            matrix (PdfMatrix): Multiply the page object's current transform matrix by this matrix.
+            matrix (PdfMatrix): Multiply the pageobject's current transform matrix by this matrix.
         """
         pdfium_c.FPDFPageObj_Transform(self, *matrix.get())
 
 
 class PdfImage (PdfObject):
     """
-    Image object helper class (specific kind of page object).
+    Image object helper class (specific kind of pageobject).
     """
     
     # cf. https://crbug.com/pdfium/1203
@@ -287,7 +287,7 @@ class PdfImage (PdfObject):
         
         if render:
             if self.pdf is None:
-                raise RuntimeError("Cannot get rendered bitmap of loose page object.")
+                raise RuntimeError("Cannot get rendered bitmap of loose pageobject.")
             raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
         else:
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)

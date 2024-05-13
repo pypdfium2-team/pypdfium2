@@ -202,15 +202,15 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def insert_obj(self, pageobj):
         """
-        Insert a page object into the page.
+        Insert a pageobject into the page.
         
-        The page object must not belong to a page yet. If it belongs to a PDF, this page must be part of the PDF.
+        The pageobject must not belong to a page yet. If it belongs to a PDF, this page must be part of the PDF.
         
         Position and form are defined by the object's matrix.
         If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.
         
         Parameters:
-            pageobj (PdfObject): The page object to insert.
+            pageobj (PdfObject): The pageobject to insert.
         """
         
         if pageobj.page:
@@ -226,19 +226,19 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def remove_obj(self, pageobj):
         """
-        Remove a page object from the page.
-        As of PDFium 5692, detached page objects may be only re-inserted into existing pages of the same document.
-        If the page object is not re-inserted into a page, its ``close()`` method may be called.
+        Remove a pageobject from the page.
+        As of PDFium 5692, detached pageobjects may be only re-inserted into existing pages of the same document.
+        If the pageobject is not re-inserted into a page, its ``close()`` method may be called.
         
         Note:
             If the object's :attr:`~.PdfObject.type` is :data:`FPDF_PAGEOBJ_TEXT`, any :class:`.PdfTextPage` handles to the page should be closed before removing the object.
         
         Parameters:
-            pageobj (PdfObject): The page object to remove.
+            pageobj (PdfObject): The pageobject to remove.
         """
                 
         if pageobj.page is not self:
-            raise ValueError("The page object you attempted to remove is not part of this page.")
+            raise ValueError("The pageobject you attempted to remove is not part of this page.")
         
         # https://pdfium-review.googlesource.com/c/pdfium/+/118914
         if pageobj.type == pdfium_c.FPDF_PAGEOBJ_TEXT:
@@ -257,7 +257,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def gen_content(self):
         """
-        Generate page content to apply additions, removals or modifications of page objects.
+        Generate page content to apply additions, removals or modifications of pageobjects.
         
         If page content was changed, this function should be called once before saving the document or re-loading the page.
         """
@@ -268,18 +268,18 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def get_objects(self, filter=None, max_depth=15, form=None, level=0):
         """
-        Iterate through the page objects on this page.
+        Iterate through the pageobjects on this page.
         
         Parameters:
             filter (list[int] | None):
-                An optional list of page object types to filter (:attr:`FPDF_PAGEOBJ_*`).
+                An optional list of pageobject types to filter (:attr:`FPDF_PAGEOBJ_*`).
                 Any objects whose type is not contained will be skipped.
                 If None or empty, all objects will be provided, regardless of their type.
             max_depth (int):
                 Maximum recursion depth to consider when descending into Form XObjects.
         
         Yields:
-            :class:`.PdfObject`: A page object.
+            :class:`.PdfObject`: A pageobject.
         """
         
         # TODO close skipped objects explicitly ?
@@ -295,13 +295,13 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         n_objects = count_objects(parent)
         if n_objects < 0:
-            raise PdfiumError("Failed to get number of page objects.")
+            raise PdfiumError("Failed to get number of pageobjects.")
         
         for i in range(n_objects):
             
             raw_obj = get_object(parent, i)
             if not raw_obj:
-                raise PdfiumError("Failed to get page object.")
+                raise PdfiumError("Failed to get pageobject.")
             
             helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, level=level)
             self._add_kid(helper_obj)

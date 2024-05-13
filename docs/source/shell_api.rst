@@ -46,8 +46,8 @@ Image Converter
 .. command-output:: pypdfium2 imgtopdf --help
 
 
-Page Objects Info
-*****************
+Pageobjects Info
+****************
 .. command-output:: pypdfium2 pageobjects --help
 
 

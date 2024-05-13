@@ -607,8 +607,8 @@ class PdfXObject (pdfium_i.AutoCloseable):
     def as_pageobject(self):
         """
         Returns:
-            PdfObject: An independent page object representation of the XObject.
-            If multiple page objects are created from one XObject, they share resources.
+            PdfObject: An independent pageobject representation of the XObject.
+            If multiple pageobjects are created from one XObject, they share resources.
             Pageobjects created from an XObject remain valid after the XObject is closed.
         """
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)

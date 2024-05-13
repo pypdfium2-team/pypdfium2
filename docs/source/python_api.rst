@@ -84,8 +84,8 @@ Page
 ****
 .. automodule:: pypdfium2._helpers.page
 
-Page Objects
-************
+Pageobjects
+***********
 .. automodule:: pypdfium2._helpers.pageobjects
 
 Text Page
