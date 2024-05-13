@@ -228,6 +228,9 @@ class PdfPage (pdfium_i.AutoCloseable):
         As of PDFium 5692, detached page objects may be only re-inserted into existing pages of the same document.
         If the page object is not re-inserted into a page, its ``close()`` method may be called.
         
+        Caution:
+            If the object's :attr:`~.PdfObject.type` is :data:`FPDF_PAGEOBJ_TEXT`, all :class:`.PdfTextPage` handles ought to be closed before removing the object.
+        
         Parameters:
             pageobj (PdfObject): The page object to remove.
         """
