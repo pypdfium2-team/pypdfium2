@@ -35,6 +35,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         self.raw = raw
         self.pdf = pdf
         self.formenv = formenv
+        self._textpage_wrefs = []
         super().__init__(PdfPage._close_impl, self.formenv)
     
     
@@ -195,6 +196,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to load text page.")
         textpage = PdfTextPage(raw_textpage, self)
         self._add_kid(textpage)
+        self._textpage_wrefs.append( weakref.ref(textpage) )
         return textpage
     
     
@@ -228,8 +230,8 @@ class PdfPage (pdfium_i.AutoCloseable):
         As of PDFium 5692, detached page objects may be only re-inserted into existing pages of the same document.
         If the page object is not re-inserted into a page, its ``close()`` method may be called.
         
-        Caution:
-            If the object's :attr:`~.PdfObject.type` is :data:`FPDF_PAGEOBJ_TEXT`, all :class:`.PdfTextPage` handles ought to be closed before removing the object.
+        Note:
+            If the object's :attr:`~.PdfObject.type` is :data:`FPDF_PAGEOBJ_TEXT`, any :class:`.PdfTextPage` handles to the page should be closed before removing the object.
         
         Parameters:
             pageobj (PdfObject): The page object to remove.
@@ -237,6 +239,14 @@ class PdfPage (pdfium_i.AutoCloseable):
                 
         if pageobj.page is not self:
             raise ValueError("The page object you attempted to remove is not part of this page.")
+        
+        # https://pdfium-review.googlesource.com/c/pdfium/+/118914
+        if pageobj.type == pdfium_c.FPDF_PAGEOBJ_TEXT:
+            for wref in self._textpage_wrefs:
+                textpage = wref()
+                if textpage and textpage.raw:
+                    logger.warning(f"When removing a text pageobject, any textpage handles ought to be closed beforehand - auto-closing {textpage}.")
+                    textpage.close()
         
         ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
         if not ok:
