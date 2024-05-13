@@ -343,15 +343,18 @@ class PdfImage (PdfObject):
         Extract the image into an independently usable file or byte buffer, attempting to avoid re-encoding or quality loss, as far as pdfium's limited API permits.
         
         This method can only extract DCTDecode (JPEG) and JPXDecode (JPEG 2000) images directly.
-        Otherwise, the pixel data is decoded, and re-encoded using :mod:`PIL`.
+        Otherwise, the pixel data is decoded and re-encoded using :mod:`PIL`, which is slower and loses the original encoding.
         For images with simple filters only, ``get_data(decode_simple=True)`` is used to preserve higher bit depth or special color formats not supported by ``FPDF_BITMAP``.
-        For images with complex filters, we have to resort to :meth:`.get_bitmap`, which can be a lossy operation.
+        For images with complex filters other than those extracted directly, we have to resort to :meth:`.get_bitmap`.
         
-        Note, this method ignores alpha masks, and potentially other data stored separately of the main data stream, which might lead to incorrect representation of the image.
+        Note, this method is not able to account for alpha masks, and potentially other data stored separately of the main image stream, which might lead to incorrect representation of the image.
+        
+        Tip:
+            The ``pikepdf`` library is capable of preserving the original encoding in many cases where this method is not.
         
         Parameters:
             dest (str | pathlib.Path | io.BytesIO):
-                File prefix or byte buffer to which the image shall be written.
+                File path prefix or byte buffer to which the image shall be written.
             fb_format (str):
                 The image format to use in case it is necessary to (re-)encode the data.
         """
