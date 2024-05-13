@@ -10,9 +10,6 @@ class PdfiumError (RuntimeError):
     
     Attributes:
         err_code (int | None): PDFium error code, for programmatic handling of error subtypes, if provided by the API in question (e.g. document loading). None otherwise.
-    
-    Tip:
-        Use ``str(exc)`` to get the message of a caught exception.
     """
     
     def __init__(self, msg, err_code=None):
