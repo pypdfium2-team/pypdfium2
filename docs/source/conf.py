@@ -8,7 +8,7 @@
 import os
 import sys
 import time
-import collections
+# import collections
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "setupsrc"))
@@ -59,7 +59,6 @@ autodoc_default_options = {
     "members": True,
     "undoc-members": True,
     "show-inheritance": True,
-    # "inherited-members": True,
     "member-order": "bysource",
 }
 intersphinx_mapping = {
@@ -75,12 +74,11 @@ rst_prolog = f"""
 .. |have_changes| replace:: {have_changes}
 """
 
-def remove_namedtuple_aliases(app, what, name, obj, skip, options):
-    if type(obj) is collections._tuplegetter:
-        return True
-    return skip
-
+# def remove_namedtuple_aliases(app, what, name, obj, skip, options):
+#     if type(obj) is collections._tuplegetter:
+#         return True
+#     return skip
 
 def setup(app):
-    app.connect('autodoc-skip-member', remove_namedtuple_aliases)
+    # app.connect('autodoc-skip-member', remove_namedtuple_aliases)
     app.add_config_value("have_changes", True, "env")

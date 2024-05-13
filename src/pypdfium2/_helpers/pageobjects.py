@@ -35,7 +35,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         type (int):
             The object's type (:data:`FPDF_PAGEOBJ_*`).
         page (PdfPage):
-            Reference to the page this pageobject belongs to. May be None if it does not belong to a page yet.
+            Reference to the page this pageobject belongs to. May be None if not part of a page (e.g. new or detached object).
         pdf (PdfDocument):
             Reference to the document this pageobject belongs to. May be None if the object does not belong to a document yet.
             This attribute is always set if :attr:`.page` is set.
