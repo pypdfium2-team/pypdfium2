@@ -253,7 +253,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to generate page content.")
     
     
-    def get_objects(self, filter=None, max_depth=2, form=None, level=0):
+    def get_objects(self, filter=None, max_depth=15, form=None, level=0):
         """
         Iterate through the page objects on this page.
         
