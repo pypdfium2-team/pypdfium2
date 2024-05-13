@@ -25,6 +25,10 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead, depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
     
+    Note:
+        :meth:`.PdfObject.close` only takes effect on loose pageobjects.
+        It is a no-op otherwise, because pageobjects that are part of a page are owned by pdfium, not the caller.
+    
     Attributes:
         raw (FPDF_PAGEOBJECT):
             The underlying PDFium pageobject handle.
