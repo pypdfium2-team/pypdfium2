@@ -172,11 +172,14 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             y_tol (float): Vertical tolerance.
         Returns:
             int | None: The index of the character at or nearby the point (x, y).
-            May be None if there is no character or an error occurred.
+            May be None if there is no character. If an internal error occurred, an exception will be raised.
         """
         index = pdfium_c.FPDFText_GetCharIndexAtPos(self, x, y, x_tol, y_tol)
-        if index < 0:
+        if index == -1:
             return None
+        elif index == -3:
+            raise PdfiumError("An error occurred on attempt to get char index by pos.")
+        assert index >= 0, "Negative return is not permitted (unhandled error code?)"
         return index
     
     
