@@ -776,14 +776,7 @@ The autorelease script has some peculiarities maintainers should know about:
   On release, it will be moved into the main changelog under `docs/source/changelog.md`, annotated with the PDFium version update.
   It will also be shown on the GitHub release page.
 * pypdfium2 versioning uses the pattern `major.minor.patch`, optionally with an appended beta mark (e. g. `2.7.1`, `2.11.0`, `3.0.0b1`, ...).
-  Version changes are based on the following logic:
-  * If PDFium was updated, the minor version is incremented.
-  * If only pypdfium2 code was updated, the patch version is incremented instead.
-  * Major updates and beta marks are controlled via `autorelease/config.json`.
-    If `major` is true, the major version is incremented.
-    If `beta` is true, a new beta tag is set, or an existing one is incremented.
-    The control file is automatically reset when the versioning is finished.
-  * If switching from a beta release to a non-beta release, only the beta mark is removed while minor and patch versions remain unchanged.
+  Update types such as major or beta may be controlled via `autorelease/config.json`
 
 In case of necessity, you may also forego autorelease/CI and do the release manually, which will roughly work like this (though ideally it should never be needed):
 * Commit changes to the version file
