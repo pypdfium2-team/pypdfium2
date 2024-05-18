@@ -303,8 +303,8 @@ class PdfPage (pdfium_i.AutoCloseable):
             if not raw_obj:
                 raise PdfiumError("Failed to get pageobject.")
             
+            # Not a child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The .page reference is enough to keep the parent alive, unless the caller explicitly closes it (which may not merit storing countless of weakrefs).
             helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, level=level)
-            self._add_kid(helper_obj)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
             
