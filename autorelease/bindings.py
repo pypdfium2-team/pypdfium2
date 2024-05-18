@@ -3736,103 +3736,103 @@ if hasattr(_libs['pdfium'], 'FPDFText_GetCharIndexAtPos'):
     FPDFText_GetCharIndexAtPos.argtypes = [FPDF_TEXTPAGE, c_double, c_double, c_double, c_double]
     FPDFText_GetCharIndexAtPos.restype = c_int
 
-# ./fpdf_text.h: 394
+# ./fpdf_text.h: 393
 if hasattr(_libs['pdfium'], 'FPDFText_GetText'):
     FPDFText_GetText = _libs['pdfium']['FPDFText_GetText']
     FPDFText_GetText.argtypes = [FPDF_TEXTPAGE, c_int, c_int, POINTER(c_ushort)]
     FPDFText_GetText.restype = c_int
 
-# ./fpdf_text.h: 417
+# ./fpdf_text.h: 416
 if hasattr(_libs['pdfium'], 'FPDFText_CountRects'):
     FPDFText_CountRects = _libs['pdfium']['FPDFText_CountRects']
     FPDFText_CountRects.argtypes = [FPDF_TEXTPAGE, c_int, c_int]
     FPDFText_CountRects.restype = c_int
 
-# ./fpdf_text.h: 443
+# ./fpdf_text.h: 442
 if hasattr(_libs['pdfium'], 'FPDFText_GetRect'):
     FPDFText_GetRect = _libs['pdfium']['FPDFText_GetRect']
     FPDFText_GetRect.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     FPDFText_GetRect.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 474
+# ./fpdf_text.h: 473
 if hasattr(_libs['pdfium'], 'FPDFText_GetBoundedText'):
     FPDFText_GetBoundedText = _libs['pdfium']['FPDFText_GetBoundedText']
     FPDFText_GetBoundedText.argtypes = [FPDF_TEXTPAGE, c_double, c_double, c_double, c_double, POINTER(c_ushort), c_int]
     FPDFText_GetBoundedText.restype = c_int
 
-# ./fpdf_text.h: 504
+# ./fpdf_text.h: 503
 if hasattr(_libs['pdfium'], 'FPDFText_FindStart'):
     FPDFText_FindStart = _libs['pdfium']['FPDFText_FindStart']
     FPDFText_FindStart.argtypes = [FPDF_TEXTPAGE, FPDF_WIDESTRING, c_ulong, c_int]
     FPDFText_FindStart.restype = FPDF_SCHHANDLE
 
-# ./fpdf_text.h: 517
+# ./fpdf_text.h: 516
 if hasattr(_libs['pdfium'], 'FPDFText_FindNext'):
     FPDFText_FindNext = _libs['pdfium']['FPDFText_FindNext']
     FPDFText_FindNext.argtypes = [FPDF_SCHHANDLE]
     FPDFText_FindNext.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 527
+# ./fpdf_text.h: 526
 if hasattr(_libs['pdfium'], 'FPDFText_FindPrev'):
     FPDFText_FindPrev = _libs['pdfium']['FPDFText_FindPrev']
     FPDFText_FindPrev.argtypes = [FPDF_SCHHANDLE]
     FPDFText_FindPrev.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 537
+# ./fpdf_text.h: 536
 if hasattr(_libs['pdfium'], 'FPDFText_GetSchResultIndex'):
     FPDFText_GetSchResultIndex = _libs['pdfium']['FPDFText_GetSchResultIndex']
     FPDFText_GetSchResultIndex.argtypes = [FPDF_SCHHANDLE]
     FPDFText_GetSchResultIndex.restype = c_int
 
-# ./fpdf_text.h: 547
+# ./fpdf_text.h: 546
 if hasattr(_libs['pdfium'], 'FPDFText_GetSchCount'):
     FPDFText_GetSchCount = _libs['pdfium']['FPDFText_GetSchCount']
     FPDFText_GetSchCount.argtypes = [FPDF_SCHHANDLE]
     FPDFText_GetSchCount.restype = c_int
 
-# ./fpdf_text.h: 557
+# ./fpdf_text.h: 556
 if hasattr(_libs['pdfium'], 'FPDFText_FindClose'):
     FPDFText_FindClose = _libs['pdfium']['FPDFText_FindClose']
     FPDFText_FindClose.argtypes = [FPDF_SCHHANDLE]
     FPDFText_FindClose.restype = None
 
-# ./fpdf_text.h: 579
+# ./fpdf_text.h: 578
 if hasattr(_libs['pdfium'], 'FPDFLink_LoadWebLinks'):
     FPDFLink_LoadWebLinks = _libs['pdfium']['FPDFLink_LoadWebLinks']
     FPDFLink_LoadWebLinks.argtypes = [FPDF_TEXTPAGE]
     FPDFLink_LoadWebLinks.restype = FPDF_PAGELINK
 
-# ./fpdf_text.h: 588
+# ./fpdf_text.h: 587
 if hasattr(_libs['pdfium'], 'FPDFLink_CountWebLinks'):
     FPDFLink_CountWebLinks = _libs['pdfium']['FPDFLink_CountWebLinks']
     FPDFLink_CountWebLinks.argtypes = [FPDF_PAGELINK]
     FPDFLink_CountWebLinks.restype = c_int
 
-# ./fpdf_text.h: 609
+# ./fpdf_text.h: 608
 if hasattr(_libs['pdfium'], 'FPDFLink_GetURL'):
     FPDFLink_GetURL = _libs['pdfium']['FPDFLink_GetURL']
     FPDFLink_GetURL.argtypes = [FPDF_PAGELINK, c_int, POINTER(c_ushort), c_int]
     FPDFLink_GetURL.restype = c_int
 
-# ./fpdf_text.h: 623
+# ./fpdf_text.h: 622
 if hasattr(_libs['pdfium'], 'FPDFLink_CountRects'):
     FPDFLink_CountRects = _libs['pdfium']['FPDFLink_CountRects']
     FPDFLink_CountRects.argtypes = [FPDF_PAGELINK, c_int]
     FPDFLink_CountRects.restype = c_int
 
-# ./fpdf_text.h: 646
+# ./fpdf_text.h: 645
 if hasattr(_libs['pdfium'], 'FPDFLink_GetRect'):
     FPDFLink_GetRect = _libs['pdfium']['FPDFLink_GetRect']
     FPDFLink_GetRect.argtypes = [FPDF_PAGELINK, c_int, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     FPDFLink_GetRect.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 669
+# ./fpdf_text.h: 668
 if hasattr(_libs['pdfium'], 'FPDFLink_GetTextRange'):
     FPDFLink_GetTextRange = _libs['pdfium']['FPDFLink_GetTextRange']
     FPDFLink_GetTextRange.argtypes = [FPDF_PAGELINK, c_int, POINTER(c_int), POINTER(c_int)]
     FPDFLink_GetTextRange.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 681
+# ./fpdf_text.h: 680
 if hasattr(_libs['pdfium'], 'FPDFLink_CloseWebLinks'):
     FPDFLink_CloseWebLinks = _libs['pdfium']['FPDFLink_CloseWebLinks']
     FPDFLink_CloseWebLinks.argtypes = [FPDF_PAGELINK]
@@ -4834,13 +4834,13 @@ FXFONT_FW_NORMAL = 400
 # ./fpdf_sysfontinfo.h: 37
 FXFONT_FW_BOLD = 700
 
-# ./fpdf_text.h: 485
+# ./fpdf_text.h: 484
 FPDF_MATCHCASE = 0x00000001
 
-# ./fpdf_text.h: 487
+# ./fpdf_text.h: 486
 FPDF_MATCHWHOLEWORD = 0x00000002
 
-# ./fpdf_text.h: 489
+# ./fpdf_text.h: 488
 FPDF_CONSECUTIVE = 0x00000004
 
 # ./fpdf_edit.h: 93
