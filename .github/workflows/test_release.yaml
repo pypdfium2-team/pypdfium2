@@ -18,7 +18,7 @@ jobs:
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
         os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']
-        py: ['3.8', '3.9', '3.10', '3.11']
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12']
     
     runs-on: ${{ matrix.os }}
     
