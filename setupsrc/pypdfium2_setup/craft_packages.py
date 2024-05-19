@@ -138,7 +138,7 @@ def main_conda_raw(args):
     os.environ["BUILD_NUM"] = str(_get_build_num(args))
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
     with CondaExtPlatfiles(emplace_func):
-        run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon"])
+        run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon", "-c", "defaults"])
 
 
 def main_conda_helpers(args):
@@ -149,7 +149,7 @@ def main_conda_helpers(args):
     
     # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
     # args=["-c", CondaDir/"raw"/"out"]
-    run_conda_build(CondaDir/"helpers", CondaDir/"helpers"/"out", args=["--override-channels", "-c", "pypdfium2-team", "-c", "bblanchon"])
+    run_conda_build(CondaDir/"helpers", CondaDir/"helpers"/"out", args=["--override-channels", "-c", "pypdfium2-team", "-c", "bblanchon", "-c", "defaults"])
 
 
 class ArtifactStash:
