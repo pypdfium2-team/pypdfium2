@@ -68,7 +68,7 @@ def main(args):
             try:
                 if args.use_bitmap:
                     pil_image = image.get_bitmap(render=args.render).to_pil()
-                    pil_image.save( prefix.with_suffix("."+args.format) )
+                    pil_image.save(f"{prefix}.{args.format}")
                 else:
                     image.extract(prefix, fb_format=args.format)
             except pdfium.PdfiumError:
