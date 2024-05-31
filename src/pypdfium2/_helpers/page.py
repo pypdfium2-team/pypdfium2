@@ -35,7 +35,6 @@ class PdfPage (pdfium_i.AutoCloseable):
         self.raw = raw
         self.pdf = pdf
         self.formenv = formenv
-        self._textpage_wrefs = []
         super().__init__(PdfPage._close_impl, self.formenv)
     
     
@@ -196,7 +195,6 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to load text page.")
         textpage = PdfTextPage(raw_textpage, self)
         self._add_kid(textpage)
-        self._textpage_wrefs.append( weakref.ref(textpage) )
         return textpage
     
     
@@ -242,11 +240,12 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         # https://pdfium-review.googlesource.com/c/pdfium/+/118914
         if pageobj.type == pdfium_c.FPDF_PAGEOBJ_TEXT:
-            for wref in self._textpage_wrefs:
-                textpage = wref()
-                if textpage and textpage.raw:
-                    logger.warning(f"When removing a text pageobject, any textpage handles ought to be closed beforehand - auto-closing {textpage}.")
-                    textpage.close()
+            for wref in self._kids:
+                obj = wref()
+                if obj and obj.raw:
+                    assert isinstance(obj, PdfTextPage), "This code assumes all kids of a page are textpages."
+                    logger.warning(f"Removing text pageobbject implicitly closes affected textpage {obj}.")
+                    obj.close()
         
         ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
         if not ok:

@@ -162,9 +162,9 @@ def test_autoclose_with_remove_obj(caplog, explicit_close):
     pdf = pdfium.PdfDocument(TestFiles.text)
     page = pdf[0]
     textobj = next( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT]) )
-    assert len(page._textpage_wrefs) == 0
+    assert len(page._kids) == 0
     textpage = page.get_textpage()
-    assert len(page._textpage_wrefs) == 1
+    assert len(page._kids) == 1
     
     if explicit_close:
         textpage.close()
@@ -174,4 +174,4 @@ def test_autoclose_with_remove_obj(caplog, explicit_close):
     if explicit_close:
         assert not caplog.text
     else:
-        assert f"When removing a text pageobject, any textpage handles ought to be closed beforehand - auto-closing {textpage}." in caplog.text
+        assert f"Removing text pageobbject implicitly closes affected textpage {textpage}." in caplog.text

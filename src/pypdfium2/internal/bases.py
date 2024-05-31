@@ -92,8 +92,9 @@ class AutoCloseable (AutoCastable):
     
     def close(self, _by_parent=False):
         
+        # TODO remove object from parent's kids cache on finalization to avoid unnecessary accumulation
+        # -> pre-requisite would be to handle kids inside finalizer, but IIRC there was some weird issue with that?
         # TODO invalidate self.raw if closing object without finalizer to prevent access after a lifetime-managing parent is closed
-        # TODO remove object from parent's kids cache on finalization to avoid unnecessary accumulation (also for PdfPage._textpage_wrefs)
         
         if not self.raw or not self._finalizer:
             return False
