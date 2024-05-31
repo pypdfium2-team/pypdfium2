@@ -21,7 +21,7 @@ on:
         default: false
         type: boolean
       py_version:
-        default: '3.11'
+        default: '3.12'
         type: string
 
 # This is required for setup-miniconda / conda init
@@ -81,7 +81,7 @@ jobs:
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
         os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']
-        py: ['3.8', '3.9', '3.10', '3.11']
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12']
     
     runs-on: ${{ matrix.os }}
     
@@ -113,14 +113,14 @@ jobs:
       - name: Install/Test raw package
         if: inputs.package == 'raw'
         run: |
-          conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c bblanchon
+          conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c bblanchon -c defaults
           python conda/raw/minitest.py
       
       - name: Install/Test helpers package
         if: inputs.package == 'helpers'
         run: |
           conda install -y pytest pillow numpy
-          conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c pypdfium2-team -c bblanchon
+          conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c pypdfium2-team -c bblanchon -c defaults
           pytest tests/
   
   publish:

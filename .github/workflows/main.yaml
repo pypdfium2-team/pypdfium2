@@ -18,7 +18,7 @@ on:
         default: false
         type: boolean
       py_version:
-        default: '3.10'
+        default: '3.12'
         type: string
       runner:
         default: 'ubuntu-latest'
@@ -111,7 +111,7 @@ jobs:
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
         os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']
-        py: ['3.8', '3.9', '3.10', '3.11']
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12']
         include:
           - os: ubuntu-latest
             wheel: dist/*manylinux_*_x86_64*.whl
@@ -252,7 +252,7 @@ jobs:
               "pdfium_ver": "latest",
               "test": "true",
               "publish": "${{ inputs.publish }}",
-              "py_version": "3.11"
+              "py_version": "3.12"
             }
   
   cleanup:

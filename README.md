@@ -126,7 +126,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     
     Alternatively, with temporary channel config:
     ```bash
-    conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon
+    conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon -c defaults
     ```
     
     If desired, you may limit the channel config to the current environment by adding `--env`.
