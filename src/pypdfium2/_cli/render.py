@@ -17,7 +17,6 @@ except ImportError:
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 import pypdfium2.raw as pdfium_r
-# TODO? consider dotted access
 from pypdfium2._cli._parsers import (
     add_input, get_input,
     setup_logging,
@@ -43,15 +42,6 @@ BitmapMakers = dict(
     foreign_simple = _bitmap_wrapper_foreign_simple,
 )
 
-CsFields = ("path_fill", "path_stroke", "text_fill", "text_stroke")
-ColorOpts = dict(metavar="C", nargs=4, type=int)
-SampleTheme = dict(
-    # TODO improve colors - currently it's just some random ones to distinguish the different drawings
-    path_fill   = (170, 100, 0,   255),  # dark orange
-    path_stroke = (0,   150, 255, 255),  # sky blue
-    text_fill   = (255, 255, 255, 255),  # white
-    text_stroke = (150, 255, 0,   255),  # green
-)
 
 def attach(parser):
     add_input(parser, pages=True)
@@ -92,8 +82,8 @@ def attach(parser):
     )
     parser.add_argument(
         "--fill-color",
-        help = "Color the bitmap will be filled with before rendering. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
-        **ColorOpts,
+        metavar="C", nargs=4, type=int,
+        help = "Color the bitmap will be filled with before rendering. Shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
     )
     parser.add_argument(
         "--optimize-mode",
@@ -198,37 +188,6 @@ def attach(parser):
         type = str.lower,
         help = "The map function to use (backend specific, the default is an iterative map)."
     )
-    
-    color_scheme = parser.add_argument_group(
-        title = "Forced color scheme",
-        description = "Options for using pdfium's forced color scheme renderer. Deprecated, considered not useful.",
-    )
-    color_scheme.add_argument(
-        "--sample-theme",
-        action = "store_true",
-        help = "Use a dark background sample theme as base. Explicit color params override selectively."
-    )
-    color_scheme.add_argument(
-        "--path-fill",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--path-stroke",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--text-fill",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--text-stroke",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--fill-to-stroke",
-        action = "store_true",
-        help = "Only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.",
-    )
 
 
 class SavingEngine:
@@ -280,13 +239,11 @@ def _render_parallel_job(i):
     global ProcObjs; _render_job(i, *ProcObjs)
 
 
+# TODO turn into a python-usable API yielding output paths as they are written
 def main(args):
-    
-    # TODO turn into a python-usable API yielding output paths as they are written
     
     pdf = get_input(args, init_forms=args.draw_forms)
     
-    # TODO move to parsers?
     pdf_len = len(pdf)
     if not all(0 <= i < pdf_len for i in args.pages):
         raise ValueError("Out-of-bounds page indices are prohibited.")
@@ -296,7 +253,7 @@ def main(args):
     if args.prefix is None:
         args.prefix = f"{args.input.stem}_"
     if args.fill_color is None:
-        args.fill_color = (0, 0, 0, 255) if args.sample_theme else (255, 255, 255, 255)
+        args.fill_color = (255, 255, 255, 255)
     if args.linear is None:
         args.linear = 6 if args.format == "jpg" else 3
     
@@ -314,20 +271,12 @@ def main(args):
         # PIL can't save BGRX as PNG
         args.prefer_bgrx = args.engine_cls is PILEngine and args.format != "png"
     
-    cs_kwargs = dict()
-    if args.sample_theme:
-        cs_kwargs.update(**SampleTheme)
-    cs_kwargs.update(**{f: getattr(args, f) for f in CsFields if getattr(args, f)})
-    cs = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
-    
     kwargs = dict(
         scale = args.scale,
         rotation = args.rotation,
         crop = args.crop,
         grayscale = args.grayscale,
         fill_color = args.fill_color,
-        color_scheme = cs,
-        fill_to_stroke = args.fill_to_stroke,
         optimize_mode = args.optimize_mode,
         draw_annots = args.draw_annots,
         may_draw_forms = args.draw_forms,
@@ -357,7 +306,6 @@ def main(args):
         logger.info("Parallel rendering ...")
         
         ctx = mp.get_context(args.parallel_strategy)
-        # TODO unify using mp.pool.Pool(context=...) ?
         pool_backends = dict(
             mp = (ctx.Pool, "imap"),
             ft = (functools.partial(ft.ProcessPoolExecutor, mp_context=ctx), "map"),

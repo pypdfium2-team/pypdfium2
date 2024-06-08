@@ -633,3 +633,18 @@ def parse_modspec(modspec):
     else:
         modnames = ModulesAll
     return modnames
+
+
+def get_next_changelog(flush=False):
+    
+    content = ChangelogStaging.read_text()
+    pos = content.index("\n", content.index("# Changelog")) + 1
+    header = content[:pos].strip() + "\n"
+    devel_msg = content[pos:].strip()
+    if devel_msg:
+        devel_msg += "\n"
+    
+    if flush:
+        ChangelogStaging.write_text(header)
+    
+    return devel_msg

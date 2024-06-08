@@ -76,9 +76,6 @@ Version
 
 .. automodule:: pypdfium2.version
 
-.. deprecated:: 4.22
-   The legacy members ``V_PYPDFIUM2, V_LIBPDFIUM, V_BUILDNAME, V_PDFIUM_IS_V8, V_LIBPDFIUM_FULL`` will be removed in version 5.
-
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
@@ -87,8 +84,8 @@ Page
 ****
 .. automodule:: pypdfium2._helpers.page
 
-Page Objects
-************
+Pageobjects
+***********
 .. automodule:: pypdfium2._helpers.pageobjects
 
 Text Page

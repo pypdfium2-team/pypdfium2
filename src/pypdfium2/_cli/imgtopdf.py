@@ -56,7 +56,7 @@ def main(args):
             image_obj.set_bitmap(bitmap)
             bitmap.close()
         
-        w, h = image_obj.get_size()
+        w, h = image_obj.get_px_size()
         image_obj.set_matrix( pdfium.PdfMatrix().scale(w, h) )
         page = pdf.new_page(w, h)
         page.insert_obj(image_obj)

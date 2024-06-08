@@ -1,12 +1,10 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfBitmap", "PdfBitmapInfo")
+__all__ = ("PdfBitmap", "PdfPosConv")
 
 import ctypes
 import logging
-import weakref
-from collections import namedtuple
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -28,15 +26,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     """
     Bitmap helper class.
     
-    Hint:
-        This class provides built-in converters (e. g. :meth:`.to_pil`, :meth:`.to_numpy`) that may be used to create a different representation of the bitmap.
-        Converters can be applied on :class:`.PdfBitmap` objects either as bound method (``bitmap.to_*()``), or as function (``PdfBitmap.to_*(bitmap)``)
-        The second pattern is useful for API methods that need to apply a caller-provided converter (e. g. :meth:`.PdfDocument.render`)
-    
     .. _PIL Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
-    
-    Note:
-        All attributes of :class:`.PdfBitmapInfo` are available in this class as well.
     
     Warning:
         ``bitmap.close()``, which frees the buffer of foreign bitmaps, is not validated for safety.
@@ -47,30 +37,47 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             The underlying PDFium bitmap handle.
         buffer (~ctypes.c_ubyte):
             A ctypes array representation of the pixel data (each item is an unsigned byte, i. e. a number ranging from 0 to 255).
+        width (int):
+            Width of the bitmap (horizontal size).
+        height (int):
+            Height of the bitmap (vertical size).
+        stride (int):
+            Number of bytes per line in the bitmap buffer.
+            Depending on how the bitmap was created, there may be a padding of unused bytes at the end of each line, so this value can be greater than ``width * n_channels``.
+        format (int):
+            PDFium bitmap format constant (:attr:`FPDFBitmap_*`)
+        rev_byteorder (bool):
+            Whether the bitmap is using reverse byte order.
+        n_channels (int):
+            Number of channels per pixel.
+        mode (str):
+            The bitmap format as string (see `PIL Modes`_).
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
-        self.raw, self.buffer, self.width, self.height = raw, buffer, width, height
-        self.stride, self.format, self.rev_byteorder = stride, format, rev_byteorder
+        
+        self.raw = raw
+        self.buffer = buffer
+        self.width = width
+        self.height = height
+        self.stride = stride
+        self.format = format
+        self.rev_byteorder = rev_byteorder
         self.n_channels = pdfium_i.BitmapTypeToNChannels[self.format]
-        self.mode = (pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else pdfium_i.BitmapTypeToStr)[self.format]
+        self.mode = {
+            False: pdfium_i.BitmapTypeToStr,
+            True: pdfium_i.BitmapTypeToStrReverse,
+        }[self.rev_byteorder][self.format]
+        
+        # slot to store arguments for PdfPosConv, set on page rendering
+        self._pos_args = None
+        
         super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
     
     
     @property
     def parent(self):  # AutoCloseable hook
         return None
-    
-    
-    def get_info(self):
-        """
-        Returns:
-            PdfBitmapInfo: A namedtuple describing the bitmap.
-        """
-        return PdfBitmapInfo(
-            width=self.width, height=self.height, stride=self.stride, format=self.format,
-            rev_byteorder=self.rev_byteorder, n_channels=self.n_channels, mode=self.mode,
-        )
     
     
     @classmethod
@@ -95,7 +102,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         if ex_buffer is None:
             needs_free = True
             buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
-            if buffer_ptr is None:
+            if not buffer_ptr:
                 raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
             buffer = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * (stride * height))).contents
         else:
@@ -108,17 +115,30 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         )
     
     
-    # TODO support setting stride if external buffer is provided
     @classmethod
-    def new_native(cls, width, height, format, rev_byteorder=False, buffer=None):
+    def new_native(cls, width, height, format, rev_byteorder=False, buffer=None, stride=None):
         """
-        Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by Python/ctypes.
-        Bitmaps created by this function are always packed (no unused bytes at line end).
+        Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by Python/ctypes, or provided by the caller.
+        
+        * If buffer and stride are None, a packed buffer is created.
+        * If a custom buffer is given but no stride, the buffer is assumed to be packed.
+        * If a custom stride is given but no buffer, a stride-agnostic buffer is created.
+        * If both custom buffer and stride are given, they are used as-is.
+        
+        Caller-provided buffer/stride are subject to a logical validation.
         """
         
-        stride = width * pdfium_i.BitmapTypeToNChannels[format]
+        bpc = pdfium_i.BitmapTypeToNChannels[format]
+        if stride is None:
+            stride = width * bpc
+        else:
+            assert stride >= width * bpc
+        
         if buffer is None:
             buffer = (ctypes.c_ubyte * (stride * height))()
+        else:
+            assert len(buffer) >= stride * height
+        
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
         
         # alternatively, we could call the constructor directly with the information from above
@@ -129,8 +149,9 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     def new_foreign(cls, width, height, format, rev_byteorder=False, force_packed=False):
         """
         Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by PDFium.
+        There may be a padding of unused bytes at line end, unless *force_packed=True* is given.
         
-        Using this method is discouraged. Prefer :meth:`.new_native` instead.
+        Note that is encouraged to prefer :meth:`.new_native`.
         """
         stride = width * pdfium_i.BitmapTypeToNChannels[format] if force_packed else 0
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, None, stride)
@@ -140,10 +161,9 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     @classmethod
     def new_foreign_simple(cls, width, height, use_alpha, rev_byteorder=False):
         """
-        Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by PDFium.
-        The resulting bitmap is supposed to be packed (i. e. no gap of unused bytes between lines).
+        Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by PDFium, and supposed to be packed (i. e. no gap of unused bytes between lines).
         
-        Using this method is discouraged. Prefer :meth:`.new_native` instead.
+        Note that it is encouraged to prefer :meth:`.new_native`.
         """
         raw = pdfium_c.FPDFBitmap_Create(width, height, use_alpha)
         return cls.from_raw(raw, rev_byteorder)
@@ -211,14 +231,12 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         Convert the bitmap to a :mod:`PIL` image, using :func:`PIL.Image.frombuffer`.
         
-        For ``RGBA``, ``RGBX`` and ``L`` buffers, PIL is supposed to share memory with
-        the original bitmap buffer, so changes to the buffer should be reflected in the image, and vice versa.
+        For ``RGBA``, ``RGBX`` and ``L`` bitmaps, PIL is supposed to share memory with
+        the original buffer, so changes to the buffer should be reflected in the image, and vice versa.
         Otherwise, PIL will make a copy of the data.
         
         Returns:
             PIL.Image.Image: PIL image (representation or copy of the bitmap buffer).
-        
-        .. versionchanged:: 4.16 Set ``image.readonly = False`` so that changes to the image are also reflected in the buffer.
         """
         
         # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.frombuffer
@@ -234,53 +252,53 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             self.stride,                # bytes per line
             1,                          # orientation (top->bottom)
         )
+        # set `readonly = False` so changes to the image are reflected in the buffer, if the original buffer is used
         image.readonly = False
         
         return image
     
     
     @classmethod
-    def from_pil(cls, pil_image, recopy=False):
+    def from_pil(cls, pil_image):
         """
         Convert a :mod:`PIL` image to a PDFium bitmap.
-        Due to the restricted number of color formats and bit depths supported by PDFium's
-        bitmap implementation, this may be a lossy operation.
+        Due to the restricted number of color formats and bit depths supported by FPDF_BITMAP, this may be a lossy operation.
         
-        Bitmaps returned by this function should be treated as immutable (i.e. don't call :meth:`.fill_rect`).
+        Bitmaps returned by this function should be treated as immutable.
         
         Parameters:
             pil_image (PIL.Image.Image):
                 The image.
         Returns:
             PdfBitmap: PDFium bitmap (with a copy of the PIL image's data).
-        
-        .. deprecated:: 4.25
-           The *recopy* parameter has been deprecated.
         """
         
+        # FIXME possibility to get mutable buffer from PIL image?
+        
         if pil_image.mode in pdfium_i.BitmapStrToConst:
-            # PIL always seems to represent BGR(A/X) input as RGB(A/X), so this code passage is probably only hit for L
+            # PIL always seems to represent BGR(A/X) input as RGB(A/X), so this code passage would only be reached for L
             format = pdfium_i.BitmapStrToConst[pil_image.mode]
         else:
             pil_image = _pil_convert_for_pdfium(pil_image)
             format = pdfium_i.BitmapStrReverseToConst[pil_image.mode]
         
-        py_buffer = pil_image.tobytes()
-        if recopy:
-            buffer = (ctypes.c_ubyte * len(py_buffer)).from_buffer_copy(py_buffer)
-        else:
-            buffer = py_buffer
-        
         w, h = pil_image.size
-        return cls.new_native(w, h, format, rev_byteorder=False, buffer=buffer)
+        return cls.new_native(w, h, format, rev_byteorder=False, buffer=pil_image.tobytes())
     
     
-    # TODO implement from_numpy()
+    def get_posconv(self, page):
+        """
+        Acquire a :class:`.PdfPosConv` object to translate between coordinates on the bitmap and the page it was rendered from.
+        
+        This method requires passing in the page explicitly, to avoid holding a strong reference, so that bitmap and page can be independently freed by finalizer.
+        """
+        # if the bitmap was rendered from a page, resolve weakref and check identity
+        if not self._pos_args or self._pos_args[0]() is not page:
+            raise RuntimeError("This bitmap does not belong to the given page.")
+        return PdfPosConv(page, self._pos_args[1:])
 
 
 def _pil_convert_for_pdfium(pil_image):
-    
-    # FIXME? convoluted / hard to understand; improve control flow
     
     if pil_image.mode == "1":
         pil_image = pil_image.convert("L")
@@ -306,22 +324,43 @@ def _pil_convert_for_pdfium(pil_image):
     return pil_image
 
 
-PdfBitmapInfo = namedtuple("PdfBitmapInfo", "width height stride format rev_byteorder n_channels mode")
-"""
-Attributes:
-    width (int):
-        Width of the bitmap (horizontal size).
-    height (int):
-        Height of the bitmap (vertical size).
-    stride (int):
-        Number of bytes per line in the bitmap buffer.
-        Depending on how the bitmap was created, there may be a padding of unused bytes at the end of each line, so this value can be greater than ``width * n_channels``.
-    format (int):
-        PDFium bitmap format constant (:attr:`FPDFBitmap_*`)
-    rev_byteorder (bool):
-        Whether the bitmap is using reverse byte order.
-    n_channels (int):
-        Number of channels per pixel.
-    mode (str):
-        The bitmap format as string (see `PIL Modes`_).
-"""
+class PdfPosConv:
+    """
+    Pdf coordinate translator.
+    
+    Hint:
+        You may want to use :meth:`.PdfBitmap.get_posconv` to obtain an instance of this class.
+    
+    Parameters:
+        page (PdfPage):
+            Handle to the page.
+        pos_args (tuple[int*5]):
+            pdfium canvas args (start_x, start_y, size_x, size_y, rotate), as in ``FPDF_RenderPageBitmap()`` etc.
+    """
+    
+    # FIXME do we have to do overflow checking against too large sizes?
+    
+    def __init__(self, page, pos_args):
+        assert bool(page)
+        self.page = page
+        self.pos_args = pos_args
+    
+    def to_page(self, bitmap_x, bitmap_y):
+        """
+        Translate coordinates from bitmap to page.
+        """
+        page_x, page_y = ctypes.c_double(), ctypes.c_double()
+        ok = pdfium_c.FPDF_DeviceToPage(self.page, *self.pos_args, bitmap_x, bitmap_y, page_x, page_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to page coordinates.")
+        return (page_x.value, page_y.value)
+    
+    def to_bitmap(self, page_x, page_y):
+        """
+        Translate coordinates from page to bitmap.
+        """
+        bitmap_x, bitmap_y = ctypes.c_int(), ctypes.c_int()
+        ok = pdfium_c.FPDF_PageToDevice(self.page, *self.pos_args, page_x, page_y, bitmap_x, bitmap_y)
+        if not ok:
+            raise PdfiumError("Failed to translate to bitmap coordinates.")
+        return (bitmap_x.value, bitmap_y.value)

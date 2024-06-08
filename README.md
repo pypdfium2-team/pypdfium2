@@ -27,7 +27,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 * <a id="user-content-install-source" class="anchor" href="#install-source">From source 🔗</a>
   
   * Dependencies:
-    - System: git, C pre-processor (gcc/clang - alternatively, specify the command to envoke via `$CPP`)
+    - System: git, C pre-processor (gcc/clang - alternatively, specify the command to invoke via `$CPP`)
     - Python: ctypesgen (pypdfium2-team fork), wheel, setuptools. Usually installed automatically.
   
   * Get the code
@@ -50,7 +50,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
     Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than taking them from the system.[^pdfium_buildsystem]
-    However, we can at least provide the `--use-syslibs` option to build against system-provided runtime libraries.
+    However, we can at least provide the `--use-syslibs` option to build against system runtime libraries.
   
   * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary 🔗</a>
     ```bash
@@ -98,14 +98,14 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   See [Setup Magic](#setup-magic) for details.
   
-  Support for source installs (esp. with self-built/system pdfium) is limited, as their integrity depends somewhat on a correctly acting caller.
+  Support for source installs (esp. with self-built/system pdfium) is limited, as their integrity somewhat depends on a correctly acting caller.
   
-  Installing an `sdist` does not implicitly trigger a sourcebuild if no pre-built binary is available. It is preferred to let callers decide consciously what to do, and run the build script without pip encapsulation.
+  Installing an `sdist` does not implicitly trigger a sourcebuild if no pre-built binary is available. We prefer to let callers decide consciously what to do, and run the build script without pip encapsulation.
   
   Relevant pip options:
   * `-v`: Verbose logging output. Useful for debugging.
   * `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
-  * `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
+  * `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
   
   [^pdfium_buildsystem]: This means pdfium may not compile on arbitrary hosts. The script is limited to build hosts supported by Google's toolchain. Ideally, we'd need an alternative build system that runs with system packages instead.
 
@@ -129,7 +129,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon -c defaults
     ```
     
-    Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel. (If desired, you may limit the channel config to the current environment by adding `--env`.)
+    If desired, you may limit the channel config to the current environment by adding `--env`.
+    Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel.
     Otherwise, you should be cautious when making changes to the environment.
   
   + To depend on pypdfium2 in a `conda-build` recipe
@@ -254,7 +255,7 @@ Here are some examples of using the support model API.
   
   # Locate objects on the page
   for obj in page.get_objects():
-      print(obj.level, obj.type, obj.get_pos())
+      print(obj.level, obj.type, obj.get_bounds())
   ```
 
 * Extract and search text
@@ -263,28 +264,39 @@ Here are some examples of using the support model API.
   textpage = page.get_textpage()
   
   # Extract text from the whole page
-  text_all = textpage.get_text_range()
+  text_all = textpage.get_text_bounded()
   # Extract text from a specific rectangular area
-  text_part = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
+  text_rect = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
+  # Extract text from a specific char range
+  text_span = textpage.get_text_range(index=10, count=15)
   
   # Locate text on the page
   searcher = textpage.search("something", match_case=False, match_whole_word=False)
   # This returns the next occurrence as (char_index, char_count), or None if not found
-  first_occurrence = searcher.get_next()
+  match = searcher.get_next()
   ```
 
-<!-- TOC API will change with the next major release -->
 * Read the table of contents
   ```python
-  for item in pdf.get_toc():
-      state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
-      target = "?" if item.page_index is None else item.page_index+1
-      print(
-          "    " * item.level +
-          "[%s] %s -> %s  # %s %s" % (
-              state, item.title, target, item.view_mode, item.view_pos,
-          )
+  import pypdfium2.internal as pdfium_i
+  
+  for bm in pdf.get_toc(max_depth=15):
+      count, dest = bm.get_count(), bm.get_dest()
+      out = "    " * bm.level
+      out += "[%s] %s -> " % (
+          f"{count:+}" if count != 0 else "*",
+          bm.get_title(),
       )
+      if dest:
+          index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
+          out += "%s  # %s %s" % (
+              index+1 if index != None else "?",
+              pdfium_i.ViewmodeToStr.get(view_mode),
+              round(view_pos, 3),
+          )
+      else:
+          out += "_"
+      print(out)
   ```
 
 * Create a new PDF with an empty A4 sized page
@@ -300,7 +312,7 @@ Here are some examples of using the support model API.
   
   image = pdfium.PdfImage.new(pdf)
   image.load_jpeg("./tests/resources/mona_lisa.jpg")
-  width, height = image.get_size()
+  width, height = image.get_px_size()
   
   matrix = pdfium.PdfMatrix().scale(width, height)
   image.set_matrix(matrix)
@@ -666,12 +678,6 @@ Roadmap:
 * [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues): Bindings generator.
 
 ### Known limitations
-
-#### Incompatibility with CPython 3.7.6 and 3.8.1
-
-pypdfium2 built with mainstream ctypesgen cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that [broke](https://github.com/ctypesgen/ctypesgen/issues/77) ctypesgen-created string handling code.
-
-Since version 4, pypdfium2 is built with a patched fork of ctypesgen that removes ctypesgen's problematic string code.
 
 #### Risk of unknown object lifetime violations
 
