@@ -18,8 +18,10 @@ except ImportError:
     PIL = None
 try:
     import cv2
+    import numpy as np
 except ImportError:
     cv2 = None
+    np = None
 
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
@@ -249,21 +251,21 @@ class PILEngine (SavingEngine):
         return PIL.ImageFilter.Color3DLUT.generate(cls.LINV_LUT_SIZE, cls._invert_px_lightness)
     
     @classmethod
-    def postprocess(cls, orig_image, page, posconv, invert_lightness, exclude_images):
-        out_image = orig_image
+    def postprocess(cls, src_image, page, posconv, invert_lightness, exclude_images):
+        dst_image = src_image
         if invert_lightness:
-            out_image = out_image.filter(cls._get_linv_lut())
+            dst_image = dst_image.filter(cls._get_linv_lut())
             if exclude_images:
                 # don't descend into XObjects as I'm not sure how to translate XObject to page coordinates
                 image_objs = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
                 if len(image_objs) > 0:
-                    mask = PIL.Image.new("1", orig_image.size)
+                    mask = PIL.Image.new("1", src_image.size)
                     draw = PIL.ImageDraw.Draw(mask)
                     for obj in image_objs:
                         qpoints = [posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
                         draw.polygon(qpoints, fill=1, outline=1)
-                    out_image.paste(orig_image, mask=mask)
-        return out_image
+                    dst_image.paste(src_image, mask=mask)
+        return dst_image
 
 
 class NumpyCV2Engine (SavingEngine):
@@ -274,9 +276,9 @@ class NumpyCV2Engine (SavingEngine):
         cv2.imwrite(str(out_path), np_array)
     
     @classmethod
-    def postprocess(cls, image, bitmap, page, invert_lightness, exclude_images):
+    def postprocess(cls, src_image, bitmap, page, invert_lightness, exclude_images):
+        dst_image = src_image
         if invert_lightness:
-            # posconv = bitmap.get_posconv(page)
             assert bitmap.format == pdfium_r.FPDFBitmap_BGR, "Lightness inversion is only implemented for RGB/BGR"
             if bitmap.rev_byteorder:
                 convert_to = cv2.COLOR_RGB2HLS
@@ -284,12 +286,22 @@ class NumpyCV2Engine (SavingEngine):
             else:
                 convert_to = cv2.COLOR_BGR2HLS
                 convert_from = cv2.COLOR_HLS2BGR
-            image = cv2.cvtColor(image, convert_to)
-            h, l, s = cv2.split(image)
+            dst_image = cv2.cvtColor(dst_image, convert_to)
+            h, l, s = cv2.split(dst_image)
             l = ~l
-            image = cv2.merge([h, l, s])
-            image = cv2.cvtColor(image, convert_from)
-        return image
+            dst_image = cv2.merge([h, l, s])
+            dst_image = cv2.cvtColor(dst_image, convert_from)
+            if exclude_images:
+                posconv = bitmap.get_posconv(page)
+                image_objs = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
+                if len(image_objs) > 0:
+                    mask = np.zeros((bitmap.height, bitmap.width, 1), np.uint8)
+                    for obj in image_objs:
+                        qpoints = [posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
+                        qpoints = np.array(qpoints, np.int32)
+                        cv2.fillPoly(mask, [qpoints], 1)
+                    cv2.copyTo(src_image, mask=mask, dst=dst_image)
+        return dst_image
 
 
 def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, engine, postproc_kwargs):
