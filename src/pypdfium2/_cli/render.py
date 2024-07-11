@@ -4,11 +4,18 @@
 import os
 import math
 import logging
+import colorsys
 import functools
 from pathlib import Path
 import multiprocessing as mp
 import concurrent.futures as ft
 
+try:
+    import PIL.Image
+    import PIL.ImageFilter
+    import PIL.ImageDraw
+except ImportError:
+    PIL = None
 try:
     import cv2
 except ImportError:
@@ -188,6 +195,21 @@ def attach(parser):
         type = str.lower,
         help = "The map function to use (backend specific, the default is an iterative map)."
     )
+    
+    postproc = parser.add_argument_group(
+        title = "Post processing",
+        description = "Options to post-process rendered images. Note, this may have a strongly negative impact on performance.",
+    )
+    postproc.add_argument(
+        "--invert-lightness",
+        action = "store_true",
+        help = "Invert lightness using the HLS color space (e.g. white<->black, dark_blue<->light_blue). The intent is to achieve a dark theme for documents with light background, while providing better visual results than classical color inversion or a flat pdfium color scheme.",
+    )
+    postproc.add_argument(
+        "--exclude-images",
+        action = "store_true",
+        help = "Whether to exclude PDF images from lightness inversion.",
+    )
 
 
 class SavingEngine:
@@ -199,22 +221,58 @@ class SavingEngine:
         output_dir, prefix, n_digits, format = self._path_parts
         return output_dir / f"{prefix}{i+1:0{n_digits}d}.{format}"
     
-    def __call__(self, bitmap, i):
+    def __call__(self, i, bitmap, page, postproc_kwargs):
         out_path = self._get_path(i)
-        self._saving_hook(out_path, bitmap)
+        self._saving_hook(out_path, bitmap, page, postproc_kwargs)
         logger.info(f"Wrote page {i+1} as {out_path.name}")
 
 
 class PILEngine (SavingEngine):
-    def _saving_hook(self, out_path, bitmap):
-        bitmap.to_pil().save(out_path)
+    
+    def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
+        pil_image = bitmap.to_pil()
+        posconv = bitmap.get_posconv(page)
+        pil_image = self.postprocess(pil_image, page, posconv, **postproc_kwargs)
+        pil_image.save(out_path)
+    
+    LINV_LUT_SIZE = 17
+    
+    @staticmethod
+    def _invert_px_lightness(r, g, b):
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
+        l = 1 - l
+        return colorsys.hls_to_rgb(h, l, s)
+    
+    @classmethod
+    @functools.lru_cache(maxsize=1)
+    def _get_linv_lut(cls):
+        return PIL.ImageFilter.Color3DLUT.generate(cls.LINV_LUT_SIZE, cls._invert_px_lightness)
+    
+    @classmethod
+    def postprocess(cls, image, page, posconv, invert_lightness, exclude_images):
+        out_image = image
+        if invert_lightness:
+            out_image = image.filter(cls._get_linv_lut())
+            if exclude_images:
+                # don't descend into XObjects as I'm not sure how to translate XObject to page coordinates
+                images = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
+                if len(images) > 0:
+                    mask = PIL.Image.new("1", image.size)
+                    draw = PIL.ImageDraw.Draw(mask)
+                    for obj in images:
+                        qpoints = [posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
+                        draw.polygon(qpoints, fill=1, outline=1)
+                    out_image.paste(image, mask=mask)
+        return out_image
+
 
 class NumpyCV2Engine (SavingEngine):
-    def _saving_hook(self, out_path, bitmap):
+    def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
+        # TODO post-processing
         cv2.imwrite(str(out_path), bitmap.to_numpy())
 
 
-def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, engine):
+def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, engine, postproc_kwargs):
     
     if extra_init:
         extra_init()
@@ -226,17 +284,18 @@ def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, e
         pdf.init_forms()
     
     global ProcObjs
-    ProcObjs = (pdf, kwargs, engine)
+    ProcObjs = (pdf, kwargs, engine, postproc_kwargs)
 
 
-def _render_job(i, pdf, kwargs, engine):
+def _render_job(i, pdf, kwargs, engine, postproc_kwargs):
     # logger.info(f"Started page {i+1} ...")
     page = pdf[i]
     bitmap = page.render(**kwargs)
-    engine(bitmap, i)
+    engine(i, bitmap, page, postproc_kwargs)
 
 def _render_parallel_job(i):
-    global ProcObjs; _render_job(i, *ProcObjs)
+    global ProcObjs
+    _render_job(i, *ProcObjs)
 
 
 # TODO turn into a python-usable API yielding output paths as they are written
@@ -288,6 +347,11 @@ def main(args):
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True
     
+    postproc_kwargs = dict(
+        invert_lightness = args.invert_lightness,
+        exclude_images = args.exclude_images,
+    )
+    
     # TODO dump all args except password?
     logger.info(f"{args.engine_cls.__name__}, Format: {args.format}, rev_byteorder: {args.rev_byteorder}, prefer_bgrx {args.prefer_bgrx}")
     
@@ -299,7 +363,7 @@ def main(args):
         
         logger.info("Linear rendering ...")
         for i in args.pages:
-            _render_job(i, pdf, kwargs, engine)
+            _render_job(i, pdf, kwargs, engine, postproc_kwargs)
         
     else:
         
@@ -317,7 +381,7 @@ def main(args):
         extra_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
         pool_kwargs = dict(
             initializer = _render_parallel_init,
-            initargs = (extra_init, pdf._input, args.password, args.draw_forms, kwargs, engine),
+            initargs = (extra_init, pdf._input, args.password, args.draw_forms, kwargs, engine, postproc_kwargs),
         )
         
         n_procs = min(args.processes, len(args.pages))
