@@ -296,10 +296,8 @@ class NumpyCV2Engine (SavingEngine):
                 image_objs = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
                 if len(image_objs) > 0:
                     mask = np.zeros((bitmap.height, bitmap.width, 1), np.uint8)
-                    for obj in image_objs:
-                        qpoints = [posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
-                        qpoints = np.array(qpoints, np.int32)
-                        cv2.fillPoly(mask, [qpoints], 1)
+                    polygons = [np.array([posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()], np.int32) for obj in image_objs]
+                    cv2.fillPoly(mask, polygons, 1)
                     cv2.copyTo(src_image, mask=mask, dst=dst_image)
         return dst_image
 
