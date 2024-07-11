@@ -278,19 +278,23 @@ class NumpyCV2Engine (SavingEngine):
     @classmethod
     def postprocess(cls, src_image, bitmap, page, invert_lightness, exclude_images):
         dst_image = src_image
+        
         if invert_lightness:
             assert bitmap.format == pdfium_r.FPDFBitmap_BGR, "Lightness inversion is only implemented for RGB/BGR"
+            
             if bitmap.rev_byteorder:
                 convert_to = cv2.COLOR_RGB2HLS
                 convert_from = cv2.COLOR_HLS2RGB
             else:
                 convert_to = cv2.COLOR_BGR2HLS
                 convert_from = cv2.COLOR_HLS2BGR
+            
             dst_image = cv2.cvtColor(dst_image, convert_to)
             h, l, s = cv2.split(dst_image)
             l = ~l
             dst_image = cv2.merge([h, l, s])
             dst_image = cv2.cvtColor(dst_image, convert_from)
+            
             if exclude_images:
                 posconv = bitmap.get_posconv(page)
                 image_objs = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
@@ -300,6 +304,7 @@ class NumpyCV2Engine (SavingEngine):
                         qpoints = np.array([posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()], np.int32)
                         cv2.fillPoly(mask, [qpoints], 1)
                     cv2.copyTo(src_image, mask=mask, dst=dst_image)
+            
         return dst_image
 
 
