@@ -12,6 +12,7 @@ import concurrent.futures as ft
 
 try:
     import PIL.Image
+    import PIL.ImageOps
     import PIL.ImageFilter
     import PIL.ImageDraw
 except ImportError:
@@ -254,7 +255,10 @@ class PILEngine (SavingEngine):
     def postprocess(cls, src_image, page, posconv, invert_lightness, exclude_images):
         dst_image = src_image
         if invert_lightness:
-            dst_image = dst_image.filter(cls._get_linv_lut())
+            if src_image.mode == "L":
+                dst_image = PIL.ImageOps.invert(src_image)
+            else:
+                dst_image = dst_image.filter(cls._get_linv_lut())
             if exclude_images:
                 # don't descend into XObjects as I'm not sure how to translate XObject to page coordinates
                 image_objs = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
@@ -280,22 +284,26 @@ class NumpyCV2Engine (SavingEngine):
         dst_image = src_image
         
         if invert_lightness:
-            assert bitmap.format == pdfium_r.FPDFBitmap_BGR, "Lightness inversion is only implemented for RGB/BGR"
             
-            if bitmap.rev_byteorder:
-                convert_to = cv2.COLOR_RGB2HLS
-                convert_from = cv2.COLOR_HLS2RGB
+            if bitmap.format == pdfium_r.FPDFBitmap_Gray:
+                dst_image = 255 - src_image
             else:
-                convert_to = cv2.COLOR_BGR2HLS
-                convert_from = cv2.COLOR_HLS2BGR
-            
-            dst_image = cv2.cvtColor(dst_image, convert_to)
-            h, l, s = cv2.split(dst_image)
-            l = ~l
-            dst_image = cv2.merge([h, l, s])
-            dst_image = cv2.cvtColor(dst_image, convert_from)
+                
+                if bitmap.rev_byteorder:
+                    convert_to = cv2.COLOR_RGB2HLS
+                    convert_from = cv2.COLOR_HLS2RGB
+                else:
+                    convert_to = cv2.COLOR_BGR2HLS
+                    convert_from = cv2.COLOR_HLS2BGR
+                
+                dst_image = cv2.cvtColor(dst_image, convert_to)
+                h, l, s = cv2.split(dst_image)
+                l = ~l
+                dst_image = cv2.merge([h, l, s])
+                dst_image = cv2.cvtColor(dst_image, convert_from)
             
             if exclude_images:
+                assert bitmap.format != pdfium_r.FPDFBitmap_BGRx, "Not sure how to paste with mask on {RGB,BGR}X image using cv2"
                 posconv = bitmap.get_posconv(page)
                 image_objs = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
                 if len(image_objs) > 0:
@@ -303,7 +311,7 @@ class NumpyCV2Engine (SavingEngine):
                     for obj in image_objs:
                         qpoints = np.array([posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()], np.int32)
                         cv2.fillPoly(mask, [qpoints], 1)
-                    cv2.copyTo(src_image, mask=mask, dst=dst_image)
+                    dst_image = cv2.copyTo(src_image, mask=mask, dst=dst_image)
             
         return dst_image
 
