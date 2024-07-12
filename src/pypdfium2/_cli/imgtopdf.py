@@ -38,8 +38,6 @@ def main(args):
     # Due to limitations in PDFium's public API, this function may be inefficient/lossy for non-JPEG input.
     # The technically best available open-source tool for image to PDF conversion is probably img2pdf (although its code style can be regarded as displeasing).
     
-    # Development note: We are closing objects explicitly because loading JPEGs non-inline binds file handles to the PDF, which need to be released as soon as possible. Without this, we have already run into "OSError: Too many open files" while testing.
-    
     pdf = pdfium.PdfDocument.new()
     
     for fp in args.images:
