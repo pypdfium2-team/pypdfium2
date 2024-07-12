@@ -263,7 +263,7 @@ class PILEngine (SavingEngine):
                     draw = PIL.ImageDraw.Draw(mask)
                     for obj in image_objs:
                         qpoints = [posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
-                        draw.polygon(qpoints, fill=1, outline=1)
+                        draw.polygon(qpoints, fill=1)
                     dst_image.paste(src_image, mask=mask)
         return dst_image
 
