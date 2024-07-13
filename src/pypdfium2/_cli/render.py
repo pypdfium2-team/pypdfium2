@@ -259,7 +259,8 @@ class PILEngine (SavingEngine):
             else:
                 dst_image = dst_image.filter(cls._get_linv_lut())
             if exclude_images:
-                # don't descend into XObjects as I'm not sure how to translate XObject to page coordinates
+                # FIXME Not sure how to translate XObject to page coordinates. pdfium does not seem to provide an API for this, so we're currently unable to descend into XObjects.
+                # FIXME We'd also like to take into account alpha masks, but this may be difficult as long as pdfium does not expose them directly.
                 image_objs = list(page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1))
                 if len(image_objs) > 0:
                     mask = PIL.Image.new("1", src_image.size)
