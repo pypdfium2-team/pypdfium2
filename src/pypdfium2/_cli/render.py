@@ -291,7 +291,7 @@ class NumpyCV2Engine (SavingEngine):
         if invert_lightness:
             
             if bitmap.format == pdfium_r.FPDFBitmap_Gray:
-                dst_image = 255 - src_image
+                dst_image = ~src_image
             else:
                 
                 if bitmap.rev_byteorder:
