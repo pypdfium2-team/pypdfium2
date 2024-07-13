@@ -13,7 +13,7 @@ from importlib.util import find_spec
 
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
-import pypdfium2.raw as pdfium_r
+import pypdfium2.raw as pdfium_c
 from pypdfium2._cli._parsers import (
     add_input, get_input,
     setup_logging,
@@ -26,9 +26,9 @@ logger = logging.getLogger(__name__)
 
 
 def _bitmap_wrapper_foreign_simple(width, height, format, *args, **kwargs):
-    if format == pdfium_r.FPDFBitmap_BGRx:
+    if format == pdfium_c.FPDFBitmap_BGRx:
         use_alpha = False
-    elif format == pdfium_r.FPDFBitmap_BGRA:
+    elif format == pdfium_c.FPDFBitmap_BGRA:
         use_alpha = True
     else:
         raise RuntimeError(f"Cannot create foreign_simple bitmap with bitmap type {pdfium_i.BitmapTypeToStr[format]}.")
@@ -260,7 +260,7 @@ class PILEngine (SavingEngine):
                 dst_image = dst_image.filter(cls._get_linv_lut())
             if exclude_images:
                 # don't descend into XObjects as I'm not sure how to translate XObject to page coordinates
-                image_objs = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
+                image_objs = list(page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1))
                 if len(image_objs) > 0:
                     mask = PIL.Image.new("1", src_image.size)
                     draw = PIL.ImageDraw.Draw(mask)
@@ -290,7 +290,7 @@ class NumpyCV2Engine (SavingEngine):
         
         if invert_lightness:
             
-            if bitmap.format == pdfium_r.FPDFBitmap_Gray:
+            if bitmap.format == pdfium_c.FPDFBitmap_Gray:
                 dst_image = ~src_image
             else:
                 
@@ -308,9 +308,9 @@ class NumpyCV2Engine (SavingEngine):
                 dst_image = cv2.cvtColor(dst_image, convert_from)
             
             if exclude_images:
-                assert bitmap.format != pdfium_r.FPDFBitmap_BGRx, "Not sure how to paste with mask on {RGB,BGR}X image using cv2"
+                assert bitmap.format != pdfium_c.FPDFBitmap_BGRx, "Not sure how to paste with mask on {RGB,BGR}X image using cv2"
                 posconv = bitmap.get_posconv(page)
-                image_objs = list(page.get_objects([pdfium_r.FPDF_PAGEOBJ_IMAGE], max_depth=1))
+                image_objs = list(page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1))
                 if len(image_objs) > 0:
                     mask = np.zeros((bitmap.height, bitmap.width, 1), np.uint8)
                     for obj in image_objs:

@@ -144,7 +144,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by PDFium.
         There may be a padding of unused bytes at line end, unless *force_packed=True* is given.
         
-        Note that is encouraged to prefer :meth:`.new_native`.
+        Note that it is recommended to prefer :meth:`.new_native`.
         """
         stride = width * pdfium_i.BitmapTypeToNChannels[format] if force_packed else 0
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, None, stride)
@@ -156,7 +156,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by PDFium, and supposed to be packed (i. e. no gap of unused bytes between lines).
         
-        Note that it is encouraged to prefer :meth:`.new_native`.
+        Note that it is recommended to prefer :meth:`.new_native`.
         """
         raw = pdfium_c.FPDFBitmap_Create(width, height, use_alpha)
         return cls.from_raw(raw, rev_byteorder)
