@@ -20,6 +20,7 @@ from pypdfium2._cli._parsers import (
     BooleanOptionalAction,
 )
 
+have_pil = find_spec("PIL") is not None
 have_cv2 = find_spec("cv2") is not None
 logger = logging.getLogger(__name__)
 
@@ -272,11 +273,11 @@ class PILEngine (SavingEngine):
 
 class NumpyCV2Engine (SavingEngine):
     
-    @staticmethod
-    def do_imports():
+    def do_imports(self):
         global cv2, np
         import cv2
-        import numpy as np
+        if self.postproc_kwargs["exclude_images"]:
+            import numpy as np
     
     def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
         np_array = bitmap.to_numpy()
@@ -367,7 +368,8 @@ def main(args):
     
     # numpy+cv2 is much faster for PNG, and PIL faster for JPG, but this might simply be due to different encoding defaults
     if args.engine_cls is None:
-        if have_cv2 != None and args.format == "png":
+        assert have_pil or have_cv2, "Either pillow or numpy+cv2 must be installed for rendering CLI."
+        if (not have_pil) or (have_cv2 and args.format == "png"):
             args.engine_cls = NumpyCV2Engine
         else:
             args.engine_cls = PILEngine

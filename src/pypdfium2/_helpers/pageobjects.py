@@ -12,6 +12,8 @@ import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
+from pypdfium2._utils import deferred_import
+PIL_Image = deferred_import("PIL.Image")
 
 
 class PdfObject (pdfium_i.AutoCloseable):
@@ -393,8 +395,6 @@ def _get_pil_mode(cs, bpp):
 
 def _extract_smart(image_obj, fb_format=None):
     
-    import PIL.Image
-    
     try:
         # TODO can we change PdfImage.get_data() to take an mmap, so the data could be written directly into a file rather than an in-memory array?
         data, info = _extract_direct(image_obj)
@@ -406,7 +406,7 @@ def _extract_smart(image_obj, fb_format=None):
         format = info.format
         if format == "raw":
             metadata = info.metadata
-            pil_image = PIL.Image.frombuffer(
+            pil_image = PIL_Image.frombuffer(
                 info.mode,
                 (metadata.width, metadata.height),
                 image_obj.get_data(decode_simple=True),

@@ -8,6 +8,9 @@ import logging
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
+from pypdfium2._utils import deferred_import
+numpy = deferred_import("numpy")
+PIL_Image = deferred_import("PIL.Image")
 
 logger = logging.getLogger(__name__)
 
@@ -205,8 +208,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         # https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray
         
-        import numpy
-        
         array = numpy.ndarray(
             # layout: row major
             shape = (self.height, self.width, self.n_channels),
@@ -234,10 +235,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.frombuffer
         # https://pillow.readthedocs.io/en/stable/handbook/writing-your-own-image-plugin.html#the-raw-decoder
         
-        import PIL.Image
-        
         dest_mode = pdfium_i.BitmapTypeToStrReverse[self.format]
-        image = PIL.Image.frombuffer(
+        image = PIL_Image.frombuffer(
             dest_mode,                  # target color format
             (self.width, self.height),  # size
             self.buffer,                # buffer
@@ -294,8 +293,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
 
 def _pil_convert_for_pdfium(pil_image):
     
-    import PIL.Image
-    
     if pil_image.mode == "1":
         pil_image = pil_image.convert("L")
     elif pil_image.mode.startswith("RGB"):
@@ -308,14 +305,14 @@ def _pil_convert_for_pdfium(pil_image):
     # convert RGB(A/X) to BGR(A) for PDFium
     if pil_image.mode == "RGB":
         r, g, b = pil_image.split()
-        pil_image = PIL.Image.merge("RGB", (b, g, r))
+        pil_image = PIL_Image.merge("RGB", (b, g, r))
     elif pil_image.mode == "RGBA":
         r, g, b, a = pil_image.split()
-        pil_image = PIL.Image.merge("RGBA", (b, g, r, a))
+        pil_image = PIL_Image.merge("RGBA", (b, g, r, a))
     elif pil_image.mode == "RGBX":
         # technically the x channel may be unnecessary, but preserve what the caller passes in
         r, g, b, x = pil_image.split()
-        pil_image = PIL.Image.merge("RGBX", (b, g, r, x))
+        pil_image = PIL_Image.merge("RGBX", (b, g, r, x))
     
     return pil_image
 

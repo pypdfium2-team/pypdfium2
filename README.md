@@ -183,7 +183,7 @@ However, some optional support model features need additional packages:
 * [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. Similar to `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
 * [`opencv-python`](https://github.com/opencv/opencv-python) (module `cv2`) is an imaging library built around numpy arrays. It can be used in the rendering CLI to save with pypdfium2's numpy adapter.
 
-pypdfium2 tries to defer imports of optional dependencies to the scopes where they are actually accessed, so there should be no startup overhead if you don't use them.
+pypdfium2 tries to defer imports of optional dependencies until they are actually needed, so there should be no startup overhead if you don't use them.
 
 ### Setup Magic
 

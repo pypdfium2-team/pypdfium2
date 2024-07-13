@@ -5,7 +5,8 @@
 
 from pathlib import Path
 import pypdfium2._helpers as pdfium
-
+from pypdfium2._utils import deferred_import
+PIL_Image = deferred_import("PIL.Image")
 
 def attach(parser):
     parser.add_argument(
@@ -29,11 +30,6 @@ def attach(parser):
 
 def main(args):
     
-    try:
-        import PIL.Image
-    except ImportError:
-        PIL = None  # JPEG can be convered without PIL
-    
     # Rudimentary image to PDF conversion (testing / proof of concept)
     # Due to limitations in PDFium's public API, this function may be inefficient/lossy for non-JPEG input.
     # The technically best available open-source tool for image to PDF conversion is probably img2pdf (although its code style can be regarded as displeasing).
@@ -48,7 +44,7 @@ def main(args):
         if fp.suffix.lower() in (".jpg", ".jpeg"):
             image_obj.load_jpeg(fp, inline=args.inline)
         else:
-            pil_image = PIL.Image.open(fp)
+            pil_image = PIL_Image.open(fp)
             bitmap = pdfium.PdfBitmap.from_pil(pil_image)
             pil_image.close()
             image_obj.set_bitmap(bitmap)
