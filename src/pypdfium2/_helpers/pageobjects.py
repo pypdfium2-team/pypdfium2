@@ -13,11 +13,6 @@ from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
 
-try:
-    import PIL.Image
-except ImportError:
-    PIL = None
-
 
 class PdfObject (pdfium_i.AutoCloseable):
     """
@@ -384,19 +379,21 @@ class ImageNotExtractableError (Exception):
     pass
 
 
-def _get_pil_mode(colorspace, bpp):
+def _get_pil_mode(cs, bpp):
     # In theory, indexed (palettized) and ICC-based color spaces could be handled as well, but PDFium currently does not provide access to the palette or the ICC profile
-    if colorspace == pdfium_c.FPDF_COLORSPACE_DEVICEGRAY:
+    if cs == pdfium_c.FPDF_COLORSPACE_DEVICEGRAY:
         return "1" if bpp == 1 else "L"
-    elif colorspace == pdfium_c.FPDF_COLORSPACE_DEVICERGB:
+    elif cs == pdfium_c.FPDF_COLORSPACE_DEVICERGB:
         return "RGB"
-    elif colorspace == pdfium_c.FPDF_COLORSPACE_DEVICECMYK:
+    elif cs == pdfium_c.FPDF_COLORSPACE_DEVICECMYK:
         return "CMYK"
     else:
         return None
 
 
 def _extract_smart(image_obj, fb_format=None):
+    
+    import PIL.Image
     
     try:
         # TODO can we change PdfImage.get_data() to take an mmap, so the data could be written directly into a file rather than an in-memory array?

@@ -176,12 +176,14 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 ### Runtime Dependencies
 
-As of this writing, pypdfium2 does not need any mandatory runtime dependencies apart from Python itself.
+As of this writing, pypdfium2 does not require any mandatory runtime dependencies apart from Python itself.
 
-However, some optional support model features require additional packages:
-* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module name `PIL`) is a pouplar imaging library for Python. pypdfium2 provides convenience methods to translate between raw bitmap buffers and PIL images.
+However, some optional support model features need additional packages:
+* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a pouplar imaging library for Python. pypdfium2 provides convenience adapters to translate between raw bitmap buffers and PIL images. It also uses PIL for some command-line functionality (e.g. image saving).
 * [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. Similar to `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
+* [`opencv-python`](https://github.com/opencv/opencv-python) (module `cv2`) is an imaging library built around numpy arrays. It can be used in the rendering CLI to save with pypdfium2's numpy adapter.
 
+pypdfium2 tries to defer imports of optional dependencies to the scopes where they are actually accessed, so there should be no startup overhead if you don't use them.
 
 ### Setup Magic
 

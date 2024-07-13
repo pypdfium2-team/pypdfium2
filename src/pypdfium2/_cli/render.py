@@ -9,20 +9,7 @@ import functools
 from pathlib import Path
 import multiprocessing as mp
 import concurrent.futures as ft
-
-try:
-    import PIL.Image
-    import PIL.ImageOps
-    import PIL.ImageFilter
-    import PIL.ImageDraw
-except ImportError:
-    PIL = None
-try:
-    import cv2
-    import numpy as np
-except ImportError:
-    cv2 = None
-    np = None
+from importlib.util import find_spec
 
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
@@ -33,6 +20,7 @@ from pypdfium2._cli._parsers import (
     BooleanOptionalAction,
 )
 
+have_cv2 = find_spec("cv2") is not None
 logger = logging.getLogger(__name__)
 
 
@@ -217,20 +205,30 @@ def attach(parser):
 
 class SavingEngine:
     
-    def __init__(self, path_parts):
+    def __init__(self, path_parts, postproc_kwargs):
         self._path_parts = path_parts
+        self.postproc_kwargs = postproc_kwargs
     
     def _get_path(self, i):
         output_dir, prefix, n_digits, format = self._path_parts
         return output_dir / f"{prefix}{i+1:0{n_digits}d}.{format}"
     
-    def __call__(self, i, bitmap, page, postproc_kwargs):
+    def __call__(self, i, bitmap, page):
         out_path = self._get_path(i)
-        self._saving_hook(out_path, bitmap, page, postproc_kwargs)
+        self._saving_hook(out_path, bitmap, page, self.postproc_kwargs)
         logger.info(f"Wrote page {i+1} as {out_path.name}")
 
 
 class PILEngine (SavingEngine):
+    
+    def do_imports(self):
+        if not self.postproc_kwargs["invert_lightness"]:
+            return
+        global PIL
+        import PIL.Image
+        import PIL.ImageOps
+        import PIL.ImageFilter
+        import PIL.ImageDraw
     
     def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
         posconv = bitmap.get_posconv(page)
@@ -274,6 +272,12 @@ class PILEngine (SavingEngine):
 
 class NumpyCV2Engine (SavingEngine):
     
+    @staticmethod
+    def do_imports():
+        global cv2, np
+        import cv2
+        import numpy as np
+    
     def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
         np_array = bitmap.to_numpy()
         np_array = self.postprocess(np_array, bitmap, page, **postproc_kwargs)
@@ -316,7 +320,7 @@ class NumpyCV2Engine (SavingEngine):
         return dst_image
 
 
-def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, engine, postproc_kwargs):
+def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, engine):
     
     if extra_init:
         extra_init()
@@ -327,15 +331,17 @@ def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, e
     if may_init_forms:
         pdf.init_forms()
     
+    engine.do_imports()
+    
     global ProcObjs
-    ProcObjs = (pdf, kwargs, engine, postproc_kwargs)
+    ProcObjs = (pdf, kwargs, engine)
 
 
-def _render_job(i, pdf, kwargs, engine, postproc_kwargs):
+def _render_job(i, pdf, kwargs, engine):
     # logger.info(f"Started page {i+1} ...")
     page = pdf[i]
     bitmap = page.render(**kwargs)
-    engine(i, bitmap, page, postproc_kwargs)
+    engine(i, bitmap, page)
 
 def _render_parallel_job(i):
     global ProcObjs
@@ -362,7 +368,7 @@ def main(args):
     
     # numpy+cv2 is much faster for PNG, and PIL faster for JPG, but this might simply be due to different encoding defaults
     if args.engine_cls is None:
-        if cv2 != None and args.format == "png":
+        if have_cv2 != None and args.format == "png":
             args.engine_cls = NumpyCV2Engine
         else:
             args.engine_cls = PILEngine
@@ -401,13 +407,14 @@ def main(args):
     
     n_digits = len(str(pdf_len))
     path_parts = (args.output, args.prefix, n_digits, args.format)
-    engine = args.engine_cls(path_parts)
+    engine = args.engine_cls(path_parts, postproc_kwargs)
     
     if len(args.pages) <= args.linear:
         
         logger.info("Linear rendering ...")
+        engine.do_imports()
         for i in args.pages:
-            _render_job(i, pdf, kwargs, engine, postproc_kwargs)
+            _render_job(i, pdf, kwargs, engine)
         
     else:
         
@@ -425,7 +432,7 @@ def main(args):
         extra_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
         pool_kwargs = dict(
             initializer = _render_parallel_init,
-            initargs = (extra_init, pdf._input, args.password, args.draw_forms, kwargs, engine, postproc_kwargs),
+            initargs = (extra_init, pdf._input, args.password, args.draw_forms, kwargs, engine),
         )
         
         n_procs = min(args.processes, len(args.pages))

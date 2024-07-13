@@ -6,11 +6,6 @@
 from pathlib import Path
 import pypdfium2._helpers as pdfium
 
-try:
-    import PIL.Image
-except ImportError:
-    PIL = None
-
 
 def attach(parser):
     parser.add_argument(
@@ -33,6 +28,11 @@ def attach(parser):
 
 
 def main(args):
+    
+    try:
+        import PIL.Image
+    except ImportError:
+        PIL = None  # JPEG can be convered without PIL
     
     # Rudimentary image to PDF conversion (testing / proof of concept)
     # Due to limitations in PDFium's public API, this function may be inefficient/lossy for non-JPEG input.

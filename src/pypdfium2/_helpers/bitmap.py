@@ -11,16 +11,6 @@ from pypdfium2._helpers.misc import PdfiumError
 
 logger = logging.getLogger(__name__)
 
-try:
-    import PIL.Image
-except ImportError:
-    PIL = None
-
-try:
-    import numpy
-except ImportError:
-    numpy = None
-
 
 class PdfBitmap (pdfium_i.AutoCloseable):
     """
@@ -215,6 +205,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         # https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray
         
+        import numpy
+        
         array = numpy.ndarray(
             # layout: row major
             shape = (self.height, self.width, self.n_channels),
@@ -241,6 +233,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.frombuffer
         # https://pillow.readthedocs.io/en/stable/handbook/writing-your-own-image-plugin.html#the-raw-decoder
+        
+        import PIL.Image
         
         dest_mode = pdfium_i.BitmapTypeToStrReverse[self.format]
         image = PIL.Image.frombuffer(
@@ -299,6 +293,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
 
 
 def _pil_convert_for_pdfium(pil_image):
+    
+    import PIL.Image
     
     if pil_image.mode == "1":
         pil_image = pil_image.convert("L")
