@@ -320,18 +320,15 @@ class NumpyCV2Engine (SavingEngine):
         return dst_image
 
 
-def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, engine):
+def _render_parallel_init(logging_init, engine_init, input, password, may_init_forms, kwargs, engine):
     
-    if extra_init:
-        extra_init()
-    
+    logging_init()
     logger.info(f"Initializing data for process {os.getpid()}")
+    engine_init()
     
     pdf = pdfium.PdfDocument(input, password=password, autoclose=True)
     if may_init_forms:
         pdf.init_forms()
-    
-    engine.do_imports()
     
     global ProcObjs
     ProcObjs = (pdf, kwargs, engine)
@@ -346,6 +343,8 @@ def _render_job(i, pdf, kwargs, engine):
 def _render_parallel_job(i):
     global ProcObjs
     _render_job(i, *ProcObjs)
+
+def _do_nothing(): pass
 
 
 # TODO turn into a python-usable API yielding output paths as they are written
@@ -429,10 +428,15 @@ def main(args):
         if args.parallel_map:
             map_attr = args.parallel_map
         
-        extra_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
+        if args.parallel_strategy == "fork":
+            logging_init, engine_init = _do_nothing, _do_nothing
+            engine.do_imports()
+        else:
+            logging_init, engine_init = setup_logging, engine.do_imports
+        
         pool_kwargs = dict(
             initializer = _render_parallel_init,
-            initargs = (extra_init, pdf._input, args.password, args.draw_forms, kwargs, engine),
+            initargs = (logging_init, engine_init, pdf._input, args.password, args.draw_forms, kwargs, engine),
         )
         
         n_procs = min(args.processes, len(args.pages))
