@@ -15,7 +15,7 @@
   * Renamed `PdfObject.get_pos()` to `.get_bounds()`.
   * Renamed `PdfImage.get_size()` to `.get_px_size()`.
   * `PdfImage.extract()`: Removed `fb_render` param because it does not fit in this API. If the image's rendered bitmap is desired, use `.get_bitmap(render=True)` in the first place.
-- `PdfDocument.get_toc()`: Replaced `PdfOutlineItem` namedtuple with method-oriented wrapper classes `PdfBookmark` and `PdfDest`, so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects. Provides signed count as-is rather than splitting in `n_kids` and `is_closed`. Also distinguishes between `dest == None` and an empty dest.
+- `PdfDocument.get_toc()`: Replaced `PdfOutlineItem` namedtuple with method-oriented wrapper classes `PdfBookmark` and `PdfDest`, so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects. Provides signed count as-is rather than splitting in `n_kids` and `is_closed`. Also distinguishes between `dest is None` and a dest with unknown mode.
 - `get_text_range()`: Removed implicit translation of default calls to `get_text_bounded()`, as pdfium reverted `FPDFText_GetText()` to UCS-2, which resolves the allocation concern. However, callers are encouraged to explicitly use `get_text_bounded()` for full Unicode support.
 - Removed legacy version flags.
 
@@ -27,7 +27,7 @@
 - If document loading failed, `err_code` is now assigned to the `PdfiumError` instance so callers may programatticaly handle the error subtype.
 - Corrected some null pointer checks: we have to use `bool(ptr)` rather than `ptr is None`.
 - Improved startup performance by deferring imports of optional dependencies to the point where they are actually needed, to avoid overhead if you do not use them.
-- Simplified version impl (no API change expected).
+- Simplified version classes (no API change expected).
 
 *Project*
 - Merged `tests_old/` back into `tests/`.

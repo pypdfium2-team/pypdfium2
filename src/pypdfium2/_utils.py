@@ -7,7 +7,7 @@ import importlib.util
 
 def deferred_import(modpath):
     
-    # FIXME If modpath points to a submodule, the parent module will be loaded immediately when this function is called. This is a limitation of the find_spec() importlib API used here. However, this may still be useful if the parent is a mere namespace package that does not contain anything expensive, as in the case of PIL.
+    # FIXME If modpath points to a submodule, the parent module will be loaded immediately when this function is called, which is a limitation of the find_spec() importlib API used here. However, this may still be useful if the parent is a mere namespace package that does not contain anything expensive, as in the case of PIL.
     
     module = sys.modules.get(modpath, None)
     if module is not None:

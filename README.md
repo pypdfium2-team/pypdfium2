@@ -98,14 +98,14 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   See [Setup Magic](#setup-magic) for details.
   
-  Support for source installs (esp. with self-built/system pdfium) is limited, as their integrity somewhat depends on a correctly acting caller.
-  
   Installing an `sdist` does not implicitly trigger a sourcebuild if no pre-built binary is available. We prefer to let callers decide consciously what to do, and run the build script without pip encapsulation.
   
   Relevant pip options:
   * `-v`: Verbose logging output. Useful for debugging.
   * `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
   * `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
+  
+  That said, do not expect us to provide much guidance with source installs, or to support the result, as this may be a crafty process, and we can't be sure whether it was done correctly (e.g. ABI safety, ctypesgen version used, etc.).
   
   [^pdfium_buildsystem]: This means pdfium may not compile on arbitrary hosts. The script is limited to build hosts supported by Google's toolchain. Ideally, we'd need an alternative build system that runs with system packages instead.
 
@@ -180,7 +180,7 @@ As of this writing, pypdfium2 does not require any mandatory runtime dependencie
 
 However, some optional support model features need additional packages:
 * [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a pouplar imaging library for Python. pypdfium2 provides convenience adapters to translate between raw bitmap buffers and PIL images. It also uses PIL for some command-line functionality (e.g. image saving).
-* [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. Similar to `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
+* [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. As with `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
 * [`opencv-python`](https://github.com/opencv/opencv-python) (module `cv2`) is an imaging library built around numpy arrays. It can be used in the rendering CLI to save with pypdfium2's numpy adapter.
 
 pypdfium2 tries to defer imports of optional dependencies until they are actually needed, so there should be no startup overhead if you don't use them.
@@ -649,7 +649,7 @@ Usage should be largely self-explanatory, assuming a minimum of familiarity with
 
 ## Licensing
 
-PDFium and pypdfium2 are available by the terms and conditions of either [`Apache-2.0`](LICENSES/Apache-2.0.txt) or [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt), at your choice.
+pypdfium2 is available by the terms and conditions of either [`Apache-2.0`](LICENSES/Apache-2.0.txt) or [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt), at your choice.
 Various other open-source licenses apply to dependencies bundled with PDFium. Verbatim copies of their respective licenses are contained in the file [`LicenseRef-PdfiumThirdParty.txt`](LICENSES/LicenseRef-PdfiumThirdParty.txt), which also has to be shipped with binary redistributions.
 Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSES/CC-BY-4.0.txt).
 
@@ -657,16 +657,13 @@ pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by in
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
 
-As of early 2023, a single developer is author and rightsholder of the code base (apart from a few minor [code contributions](https://github.com/pypdfium2-team/pypdfium2/graphs/contributors)).
-
 [^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java), but python bindings packages don't exist yet or are unsatisfactory. However, we wrote some gists that show it'd be possible in principle: [pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc) (+ [setup](https://gist.github.com/mara004/881d0c5a99b8444fd5d1d21a333b70f8)), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7).
 
 
-## Issues
+## Issues / Contributions
 
 While using pypdfium2, you might encounter bugs or missing features.
-In this case, feel free to open an issue or discuss thread. If applicable, include details such as tracebacks, OS and CPU type, as well as the versions of pypdfium2 and used dependencies.
-__However, please note our [response policy](#contributions).__
+In this case, feel free to open an issue or discussion thread. If applicable, include details such as tracebacks, OS and CPU type, as well as the versions of pypdfium2 and used dependencies.
 
 Roadmap:
 * pypdfium2
@@ -678,6 +675,13 @@ Roadmap:
   - [Mailing list](https://groups.google.com/g/pdfium/): Questions regarding PDFium usage.
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
 * [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues): Bindings generator.
+
+### Response policy
+<!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
+
+Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide usage support.
+
+The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and we are free to silently reject PRs we do not like.
 
 ### Known limitations
 
@@ -703,17 +707,6 @@ Also, while ABI bindings tend to be more convenient, they have some technical dr
 
 ## Development
 <!-- TODO wheel tags, maintainer access, GitHub peculiarities -->
-
-### Contributions
-<!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
-
-> We may accept contributions, but only if our code quality expectations are met.
-
-__Policy__:
-* We may not respond to your issue or PR.
-* We may close an issue or PR without much feedback.
-* We may lock discussions or contributions if our attention is getting DDOSed.
-* We may not provide much usage support.
 
 ### Long lines
 
@@ -877,7 +870,7 @@ Inspired by *wowpng*, the first known proof of concept Python binding to PDFium 
 *pypdfium-reboot* then added a script to automate binary deployment and bindings generation to simplify regular updates. However, it was still not platform specific.
 
 pypdfium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels and consolidate the setup scripts. Further additions include ...
-* A CI workflow to automatically release new wheels every Tuesday
-* Support models that conveniently wrap the raw PDFium/ctypes API
+* A CI workflow to automatically release new wheels at a defined schedule
+* Convenience support models that wrap the raw PDFium/ctypes API
 * Test code
 * A script to build PDFium from source

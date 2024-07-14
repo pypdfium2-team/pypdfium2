@@ -10,7 +10,7 @@ from pathlib import Path
 import pypdfium2_raw
 
 
-class _abc_version:
+class _version_interface:
     
     def __init__(self):
         
@@ -45,7 +45,7 @@ class _abc_version:
         return desc
 
 
-class _version_pypdfium2 (_abc_version):
+class _version_pypdfium2 (_version_interface):
     
     _FILE = Path(__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "patch")
@@ -64,7 +64,7 @@ class _version_pypdfium2 (_abc_version):
             self.desc += "@editable"
 
 
-class _version_pdfium (_abc_version):
+class _version_pdfium (_version_interface):
     
     _FILE = Path(pypdfium2_raw.__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "build", "patch")
