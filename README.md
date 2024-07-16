@@ -332,14 +332,14 @@ Here are some examples of using the support model API.
 
 ### Raw PDFium API
 
-While helper classes conveniently wrap the raw PDFium API, it may still be accessed directly and is available in the namespace `pypdfium2.raw`. Lower-level helpers that may aid with using the raw API are provided in `pypdfium2.internal`.
+While helper classes conveniently wrap the raw PDFium API, it may still be accessed directly and is available in the namespace `pypdfium2.raw`. Lower-level utilities that may aid with using the raw API are provided in `pypdfium2.internal`.
 
 ```python
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 ```
 
-Since PDFium is a large library, many components are not covered by helpers yet. You may seamlessly interact with the raw API while still using helpers where available. When used as ctypes function parameter, helper objects automatically resolve to the underlying raw object (but you may still access it explicitly if desired):
+Since PDFium is a large library, many components are not covered by helpers yet. However, as helpers expose their underlying raw objects, you may seamlessly integrate raw APIs while using helpers as available. When passed as ctypes function parameter, helpers automatically resolve to the raw object handle (but you may still access it explicitly if desired):
 ```python
 permission_flags = pdfium_c.FPDF_GetDocPermission(pdf.raw)  # explicit
 permission_flags = pdfium_c.FPDF_GetDocPermission(pdf)      # implicit
@@ -347,14 +347,14 @@ permission_flags = pdfium_c.FPDF_GetDocPermission(pdf)      # implicit
 
 For PDFium docs, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^pdfium_docs]
 A large variety of examples on how to interface with the raw API using [`ctypes`](https://docs.python.org/3/library/ctypes.html) is already provided with [support model source code](src/pypdfium2/_helpers).
-Nonetheless, the following guide may be helpful to get started with the raw API, especially for developers who are not familiar with `ctypes` yet.
+Nonetheless, the following guide may be helpful to get started with the raw API, if you are not familiar with `ctypes` yet.
 
 [^pdfium_docs]: Unfortunately, no recent HTML-rendered docs are available for PDFium at the moment.
 
 <!-- TODO write something about weakref.finalize(); add example on creating a C page array -->
 
 * In general, PDFium functions can be called just like normal Python functions.
-  However, parameters may only be passed positionally, i. e. it is not possible to use keyword arguments.
+  However, parameters may only be passed positionally, i.e. it is not possible to use keyword arguments.
   There are no defaults, so you always need to provide a value for each argument.
   ```python
   # arguments: filepath (bytes), password (bytes|None)
@@ -369,12 +369,12 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       FPDF_LoadDocument.argtypes = [FPDF_STRING, FPDF_BYTESTRING]
       FPDF_LoadDocument.restype = FPDF_DOCUMENT
   ```
-  Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion.
+  Python `bytes` are converted to `FPDF_STRING` (which is an alias to `POINTER(c_char)`, rps. `char*` in C notation) by ctypes autoconversion.
   When passing a string to a C function, it must always be null-terminated, as the function merely receives a pointer to the first item and then continues to read memory until it finds a null terminator.
   
 [^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `autorelease/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
 
-* While some functions are quite easy to use, things soon get more complex.
+* While some functions are quite easy to use, things may soon get more peculiar.
   First of all, function parameters are not only used for input, but also for output:
   ```python
   # Initialise an integer object (defaults to 0)
@@ -406,7 +406,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```
 
 * For string output parameters, callers needs to provide a sufficiently long, pre-allocated buffer.
-  This may work differently depending on what type the function requires, which encoding is used, whether the number of bytes or characters is returned, and whether space for a null terminator is included or not. Carefully review the documentation for the function in question to fulfill its requirements.
+  This may work differently depending on what type the function requires, which encoding is used, whether the number of bytes or characters is returned, and whether space for a null terminator is included or not. Carefully review the documentation of the function in question to fulfill its requirements.
   
   Example A: Getting the title string of a bookmark.
   ```python
@@ -446,8 +446,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * Not only are there different ways of string output that need to be handled according to the requirements of the function in question.
   String input, too, can work differently depending on encoding and type.
-  We have already discussed `FPDF_LoadDocument()`, which takes a UTF-8 encoded string as `char *`.
-  A different examples is `FPDFText_FindStart()`, which needs a UTF-16LE encoded string, given as `unsigned short *`:
+  We have already discussed `FPDF_LoadDocument()`, which takes a UTF-8 encoded string as `char*`.
+  A different examples is `FPDFText_FindStart()`, which needs a UTF-16LE encoded string, given as `unsigned short*`:
   ```python
   # (Assuming `text` is a str and `textpage` an FPDF_TEXTPAGE)
   # Add the null terminator and encode as UTF-16LE
@@ -459,7 +459,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * Leaving strings, let's suppose you have a C memory buffer allocated by PDFium and wish to read its data.
   PDFium will provide you with a pointer to the first item of the byte array.
-  To access the data, you'll want to re-interpret the pointer using `ctypes.cast()` to encompass the whole array:
+  To access the data, you'll want to re-interpret the pointer with `ctypes.cast()` to encompass the whole array:
   ```python
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
   buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
@@ -480,7 +480,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   n_bytes = py_buffer.readinto(buffer_ptr.contents)  # returns the number of bytes read
   ```
 
-* If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help because `ctypes` does not have original object return (OOR), i. e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^ctypes_no_oor]
+* If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help because `ctypes` does not have original object return (OOR), i.e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^ctypes_no_oor]
   That's why you'll want to use `ctypes.addressof()` to get the memory addresses of the underlying C object.
   For instance, this is used to avoid infinite loops on circular bookmark references when iterating through the document outline:
   ```python
@@ -504,7 +504,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
   [^callback_usecases]: e. g. incremental read/write, management of progressive tasks, ...
   
-  Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
+  Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the data does not need to be in memory at once.
   ```python
   import os
   
@@ -542,7 +542,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
   
-  If resources need to remain valid after the time of a function call, PDFium docs usually indicate this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segfault).
+  If resources need to remain valid after the time of a function call, PDFium docs usually indicate this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segfault sooner or later).
   
   For instance, the docs on `FPDF_LoadCustomDocument()` state that
   > The application must keep the file resources |pFileAccess| points to valid until the returned FPDF_DOCUMENT is closed. |pFileAccess| itself does not need to outlive the FPDF_DOCUMENT.
