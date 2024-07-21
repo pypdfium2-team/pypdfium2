@@ -24,13 +24,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     Parameters:
         input_data (str | pathlib.Path | bytes | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
-            The input PDF given as file path, bytes, ctypes array, byte buffer, or raw PDFium document handle.
-            A byte buffer is defined as an object that implements ``seek() tell() read() readinto()``.
+            The input PDF given as file path, bytes, ctypes array, byte stream, or raw PDFium document handle.
+            A byte stream is defined as an object that implements ``seek() tell() read() readinto()``.
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
             If a password is given but the PDF is not encrypted, it will be ignored (as of PDFium 5418).
         autoclose (bool):
-            Whether byte buffer input should be automatically closed on finalization.
+            Whether byte stream input should be automatically closed on finalization.
     
     Raises:
         PdfiumError: Raised if the document failed to load. The exception is annotated with the reason reported by PDFium (via message and :attr:`~.PdfiumError.err_code`).
@@ -219,7 +219,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         Parameters:
             dest (str | pathlib.Path | io.BytesIO):
-                File path or byte buffer the document shall be written to.
+                File path or byte stream the document shall be written to.
             version (int | None):
                 The PDF version to use, given as an integer (14 for 1.4, 15 for 1.5, ...).
                 If None (the default), PDFium will set a version automatically.

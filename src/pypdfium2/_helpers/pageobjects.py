@@ -212,7 +212,7 @@ class PdfImage (PdfObject):
         
         Parameters:
             source (str | pathlib.Path | typing.BinaryIO):
-                Input JPEG, given as file path or readable byte buffer.
+                Input JPEG, given as file path or readable byte stream.
             pages (list[PdfPage] | None):
                 If replacing an image, pass in a list of loaded pages that might contain it, to update their cache.
                 (The same image may be shown multiple times in different transforms across a PDF.)
@@ -230,7 +230,7 @@ class PdfImage (PdfObject):
         elif pdfium_i.is_buffer(source, "r"):
             buffer = source
         else:
-            raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte buffer.")
+            raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte stream.")
         
         bufaccess, to_hold = pdfium_i.get_bufreader(buffer)
         loader = {
@@ -341,7 +341,7 @@ class PdfImage (PdfObject):
     
     def extract(self, dest, *args, **kwargs):
         """
-        Extract the image into an independently usable file or byte buffer, attempting to avoid re-encoding or quality loss, as far as pdfium's limited API permits.
+        Extract the image into an independently usable file or byte stream, attempting to avoid re-encoding or quality loss, as far as pdfium's limited API permits.
         
         This method can only extract DCTDecode (JPEG) and JPXDecode (JPEG 2000) images directly.
         Otherwise, the pixel data is decoded and re-encoded using :mod:`PIL`, which is slower and loses the original encoding.
@@ -355,7 +355,7 @@ class PdfImage (PdfObject):
         
         Parameters:
             dest (str | pathlib.Path | io.BytesIO):
-                File path prefix or byte buffer to which the image shall be written.
+                File path prefix or byte stream to which the image shall be written.
             fb_format (str):
                 The image format to use in case it is necessary to (re-)encode the data.
         """
