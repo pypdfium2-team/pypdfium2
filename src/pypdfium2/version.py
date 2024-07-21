@@ -165,5 +165,3 @@ Parameters:
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
 """
-
-# -----
