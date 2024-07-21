@@ -369,7 +369,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       FPDF_LoadDocument.argtypes = [FPDF_STRING, FPDF_BYTESTRING]
       FPDF_LoadDocument.restype = FPDF_DOCUMENT
   ```
-  Python `bytes` are converted to `FPDF_STRING` (which is an alias to `POINTER(c_char)`, rps. `char*` in C notation) by ctypes autoconversion.
+  Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion. This works because `FPDF_STRING` is actually an alias to `POINTER(c_char)` (i.e. `char*`), which is a primitive pointer type.
   When passing a string to a C function, it must always be null-terminated, as the function merely receives a pointer to the first item and then continues to read memory until it finds a null terminator.
   
 [^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `autorelease/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
@@ -411,14 +411,13 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   Example A: Getting the title string of a bookmark.
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
-  # First call to get the required number of bytes (not characters!), including space for a null terminator
+  # First call to get the required number of bytes (not units!), including space for a null terminator
   n_bytes = pdfium_c.FPDFBookmark_GetTitle(bookmark, None, 0)
   # Initialise the output buffer
   buffer = ctypes.create_string_buffer(n_bytes)
   # Second call with the actual buffer
   pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
-  # Decode to string, cutting off the null terminator
-  # Encoding: UTF-16LE (2 bytes per character)
+  # Decode to string, cutting off the null terminator (encoding: UTF-16LE)
   title = buffer.raw[:n_bytes-2].decode("utf-16-le")
   ```
   
@@ -427,16 +426,17 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set)
   # Store common arguments for the two calls
   args = (textpage, left, top, right, bottom)
-  # First call to get the required number of characters (not bytes!) - a possible null terminator is not included
+  # First call to get the required number of units (not bytes!) - a possible null terminator is not included
   n_chars = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
   # If no characters were found, return an empty string
   if n_chars <= 0:
       return ""
-  # Calculate the required number of bytes (UTF-16LE encoding again)
+  # Calculate the required number of bytes (encoding: UTF-16LE again)
+  # The function signature uses c_ushort, so 1 unit takes sizeof(c_ushort) == 2 bytes
   n_bytes = 2 * n_chars
   # Initialise the output buffer - this function can work without null terminator, so skip it
   buffer = ctypes.create_string_buffer(n_bytes)
-  # Re-interpret the type from char to unsigned short as required by the function
+  # Re-interpret the type from char to unsigned short* as required by the function
   buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
   # Second call with the actual buffer
   pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
