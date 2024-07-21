@@ -317,7 +317,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def get_attachment(self, index):
         """
         Returns:
-            PdfAttachment: The attachment at *index* (zero-based).
+            PdfAttachment: The attachment at given index (zero-based).
         """
         raw_attachment = pdfium_c.FPDFDoc_GetAttachment(self, index)
         if not raw_attachment:
@@ -345,7 +345,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def del_attachment(self, index):
         """
-        Unlink the attachment at *index* (zero-based).
+        Unlink the attachment at given index (zero-based).
         It will be hidden from the viewer, but is still present in the file (as of PDFium 5418).
         Following attachments shift one slot to the left in the array representation used by PDFium's API.
         
@@ -360,7 +360,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def get_page(self, index):
         """
         Returns:
-            PdfPage: The page at *index* (zero-based).
+            PdfPage: The page at given index (zero-based).
         Note:
             This calls ``FORM_OnAfterLoadPage()`` if the document has an active form env.
             In that case, note that closing the formenv would implicitly close the page.
@@ -406,7 +406,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def del_page(self, index):
         """
-        Remove the page at *index* (zero-based).
+        Remove the page at given index (zero-based).
         It is recommended to close any open handles to the page before calling this method.
         """
         # FIXME not sure how pdfium would behave if the caller tries to access a handle to a deleted page...
@@ -447,7 +447,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def get_page_size(self, index):
         """
         Returns:
-            (float, float): Width and height in PDF canvas units of the page at *index* (zero-based).
+            (float, float): Width and height of the page at given index (zero-based), in PDF canvas units.
         """
         size = pdfium_c.FS_SIZEF()
         ok = pdfium_c.FPDF_GetPageSizeByIndexF(self, index, size)
@@ -459,7 +459,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def get_page_label(self, index):
         """
         Returns:
-            str: Label of the page at *index* (zero-based).
+            str: Label of the page at given index (zero-based).
             (A page label is essentially an alias that may be displayed instead of the page number.)
         """
         n_bytes = pdfium_c.FPDF_GetPageLabel(self, index, None, 0)

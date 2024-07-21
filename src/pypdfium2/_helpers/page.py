@@ -202,7 +202,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         """
         Insert a pageobject into the page.
         
-        The pageobject must not belong to a page yet. If it belongs to a PDF, this page must be part of the PDF.
+        The pageobject must not belong to a page yet. If it belongs to a PDF, the target page must be part of that PDF.
         
         Position and form are defined by the object's matrix.
         If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.

@@ -21,7 +21,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     
     Hint:
         (py)pdfium itself does not implement layout analysis, such as detecting words/lines/paragraphs.
-        However, there is a fancy third-party extension to pypdfium2 that fills this gap:
+        However, there is a fancy third-party extension that fills this gap:
         https://github.com/VikParuchuri/pdftext
     
     Attributes:
@@ -43,7 +43,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     
     def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
         """
-        Extract text from given boundaries in PDF coordinates.
+        Extract text from given boundaries, in PDF canvas units.
         If a boundary value is None, it defaults to the corresponding value of :meth:`.PdfPage.get_bbox`.
         
         Parameters:
