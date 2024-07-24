@@ -281,8 +281,6 @@ class PdfPage (pdfium_i.AutoCloseable):
             :class:`.PdfObject`: A pageobject.
         """
         
-        # TODO close skipped objects explicitly ?
-        
         if form:
             count_objects = pdfium_c.FPDFFormObj_CountObjects
             get_object = pdfium_c.FPDFFormObj_GetObject

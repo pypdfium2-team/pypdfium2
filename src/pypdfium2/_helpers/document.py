@@ -38,7 +38,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     Hint:
         * Documents may be used in a ``with``-block, closing the document on context manager exit.
-          This is recommended when *input_data* is a file path, to safely and immediately release the opened file handle.
+          This is recommended when *input_data* is a file path, to safely and immediately release the bound file handle.
         * :func:`len` may be called to get a document's number of pages.
         * Pages may be loaded using list index access.
         * Looping over a document will yield its pages from beginning to end.
@@ -608,8 +608,8 @@ class PdfXObject (pdfium_i.AutoCloseable):
         """
         Returns:
             PdfObject: An independent pageobject representation of the XObject.
-            If multiple pageobjects are created from one XObject, they share resources.
-            Pageobjects created from an XObject remain valid after the XObject is closed.
+            If multiple pageobjects are created from an XObject, they share resources.
+            Returned pageobjects remain valid after the XObject is closed.
         """
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
         # not a child object (see above)

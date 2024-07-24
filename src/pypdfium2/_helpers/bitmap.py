@@ -23,7 +23,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     Warning:
         ``bitmap.close()``, which frees the buffer of foreign bitmaps, is not validated for safety.
-        A bitmap must not be closed when other objects still depend on its buffer!
+        A bitmap must not be closed while other objects still depend on its buffer!
     
     Attributes:
         raw (FPDF_BITMAP):
