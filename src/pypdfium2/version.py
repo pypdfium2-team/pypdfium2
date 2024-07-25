@@ -55,7 +55,7 @@ class _version_pypdfium2 (_version_interface):
         self.tag = self._craft_tag()
         if self.beta is not None:
             self.tag += f"b{self.beta}"
-    
+        
         suffix = ["dirty"] if self.dirty else []
         self.desc = self._craft_desc(suffix)
         if self.data_source != "git":
