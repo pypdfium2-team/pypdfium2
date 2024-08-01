@@ -4,14 +4,14 @@
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-from .conftest import TestResources, OutputDir
+from .conftest import TestFiles, OutputDir
 
 
 def test_xobject_placement():
     
     # basic test to at least run through the code
     
-    src_pdf = pdfium.PdfDocument(TestResources.multipage)
+    src_pdf = pdfium.PdfDocument(TestFiles.multipage)
     dest_pdf = pdfium.PdfDocument.new()
     xobject = src_pdf.page_as_xobject(0, dest_pdf)
     
@@ -32,7 +32,7 @@ def test_xobject_placement():
     dest_page_1.insert_obj(po)
     assert po.pdf is dest_pdf
     assert po.page is dest_page_1
-    pos_a = po.get_pos()
+    pos_a = po.get_bounds()
     # xfail with pdfium < 5370, https://crbug.com/pdfium/1905
     assert pytest.approx(pos_a, abs=0.5) == (19, 440, 279, 823)
     

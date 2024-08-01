@@ -16,7 +16,7 @@ SubCommands = {
     "extract-images": "extract images",
     "extract-text":   "extract text",
     "imgtopdf":       "convert images to PDF",
-    "pageobjects":    "print info on page objects",
+    "pageobjects":    "print info on pageobjects",
     "pdfinfo":        "print info on document and pages",
     "render":         "rasterize pages",
     "tile":           "tile pages (N-up)",

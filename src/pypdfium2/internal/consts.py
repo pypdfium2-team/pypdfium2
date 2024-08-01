@@ -126,9 +126,8 @@ ErrorToStr = _fallback_dict({
 })
 
 
-# known implication: causes eager evaluation of pdfium version
 if "XFA" in PDFIUM_INFO.flags:
-    #: [V8/XFA builds only] Convert a PDFium XFA error constant (:attr:`FPDF_ERR_XFA*`) to string.
+    #: [XFA builds only] Convert a PDFium XFA error constant (:attr:`FPDF_ERR_XFA*`) to string.
     XFAErrorToStr = _fallback_dict({
         pdfium_c.FPDF_ERR_XFALOAD:   "Load error",
         pdfium_c.FPDF_ERR_XFALAYOUT: "Layout error",

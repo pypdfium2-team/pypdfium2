@@ -36,7 +36,8 @@ class PdfAttachment (pdfium_i.AutoCastable):
     
     
     def __init__(self, raw, pdf):
-        self.raw, self.pdf = raw, pdf
+        self.raw = raw
+        self.pdf = pdf
     
     
     def get_name(self):
