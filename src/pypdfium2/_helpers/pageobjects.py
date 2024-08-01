@@ -145,7 +145,9 @@ class PdfObject (pdfium_i.AutoCloseable):
         Parameters:
             matrix (PdfMatrix): Multiply the pageobject's current transform matrix by this matrix.
         """
-        pdfium_c.FPDFPageObj_Transform(self, *matrix.get())
+        ok = pdfium_c.FPDFPageObj_TransformF(self, matrix)
+        if not ok:
+            raise PdfiumError("Failed to transform pageobject with matrix.")
 
 
 class PdfImage (PdfObject):
