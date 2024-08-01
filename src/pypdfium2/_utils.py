@@ -1,32 +1,39 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# see https://gist.github.com/mara004/6915e904797916b961e9c53b4fc874ec for alternative approaches to deferred imports
+
 import sys
-import importlib.util
+import importlib
+import functools
+
+if sys.version_info < (3, 8):
+    # NOTE This is not as good as a real cached property.
+    # https://github.com/penguinolog/backports.cached_property might be better.
+    def cached_property(func):
+        return property( functools.lru_cache(maxsize=1)(func) )
+else:
+    cached_property = functools.cached_property
+
+
+class _DeferredModule:
+    
+    # NOTE Attribute assigment will affect only the wrapper, not the actual module.
+    
+    def __init__(self, modpath):
+        self._modpath = modpath
+    
+    def __repr__(self):
+        return f"<deferred module wrapper {self._modpath!r}>"
+    
+    @cached_property
+    def _module(self):
+        # print("actually importing module...")
+        return importlib.import_module(self._modpath)
+    
+    def __getattr__(self, k):
+        return getattr(self._module, k)
 
 
 def deferred_import(modpath):
-    
-    # FIXME If modpath points to a submodule, the parent module will be loaded immediately when this function is called, which is a limitation of the find_spec() importlib API used here. However, this may still be useful if the parent is a mere namespace package that does not contain anything expensive, as in the case of PIL.
-    
-    module = sys.modules.get(modpath, None)
-    if module is not None:
-        return module  # shortcut
-    
-    # assuming an optional dependency
-    # returning None will simply let it fail with an AttributeError when attempting to access the module
-    try:
-        spec = importlib.util.find_spec(modpath)
-    except ModuleNotFoundError:
-        return None
-    if spec is None:
-        return None
-    
-    # see https://docs.python.org/3/library/importlib.html#implementing-lazy-imports
-    loader = importlib.util.LazyLoader(spec.loader)
-    spec.loader = loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[modpath] = module
-    loader.exec_module(module)
-    
-    return module
+    return _DeferredModule(modpath)
