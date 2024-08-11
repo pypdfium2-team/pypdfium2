@@ -37,21 +37,21 @@ def test_xobject_placement():
     assert pytest.approx(pos_a, abs=0.5) == (19, 440, 279, 823)
     
     po = xobject.as_pageobject()
-    matrix = base_matrix.mirror(v=True, h=False).translate(w, 0).translate(w, h)
+    matrix = base_matrix.mirror(invert_x=True, invert_y=False).translate(w, 0).translate(w, h)
     assert matrix == pdfium.PdfMatrix(-0.5, 0, 0, 0.5, 2*w, h)
     po.transform(matrix)
     dest_page_1.insert_obj(po)
     
     po = xobject.as_pageobject()
     assert po.get_matrix() == pdfium.PdfMatrix()
-    matrix = base_matrix.mirror(v=False, h=True).translate(0, h).translate(w, 0)
+    matrix = base_matrix.mirror(invert_x=False, invert_y=True).translate(0, h).translate(w, 0)
     assert matrix == pdfium.PdfMatrix(0.5, 0, 0, -0.5, w, h)
     po.set_matrix(matrix)
     assert po.get_matrix() == matrix
     dest_page_1.insert_obj(po)
     
     po = xobject.as_pageobject()
-    matrix = base_matrix.mirror(v=True, h=True).translate(w, h)
+    matrix = base_matrix.mirror(invert_x=True, invert_y=True).translate(w, h)
     assert matrix == pdfium.PdfMatrix(-0.5, 0, 0, -0.5, w, h)
     po.set_matrix(matrix)
     dest_page_1.insert_obj(po)

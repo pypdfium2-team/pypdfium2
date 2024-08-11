@@ -127,13 +127,15 @@ class PdfMatrix:
         return self.multiply( PdfMatrix(c, s, -s, c) if ccw else PdfMatrix(c, -s, s, c) )
     
     
-    def mirror(self, v, h):
+    def mirror(self, invert_x, invert_y):
         """
         Parameters:
-            v (bool): Whether to mirror vertically (at the Y axis).
-            h (bool): Whether to mirror horizontally (at the X axis).
+            invert_x (bool): If True, invert X coordinates (horizontal transform). Corresponds to flipping around the Y axis.
+            invert_y (bool): If True, invert Y coordinates (vertical transform). Corresponds to flipping around the X axis.
+        Note:
+            Flipping around a vertical axis leads to a horizontal transform, and vice versa.
         """
-        return self.scale(x=(-1 if v else 1), y=(-1 if h else 1))
+        return self.scale(x=(-1 if invert_x else 1), y=(-1 if invert_y else 1))
     
     
     def skew(self, x_angle, y_angle, rad=False):
