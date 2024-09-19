@@ -51,7 +51,7 @@ Files:
     tests/resources/attachments.pdf
     tests/resources/mona_lisa.jpg
 Copyright: 2022 PDFium developers
-License: BSD-3-Clause OR Apache-2.0
+License: BSD-3-Clause, Apache-2.0
 Comment:
     Obtained from:
     https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf
@@ -67,7 +67,7 @@ Files:
 Copyright:
     2022 PDFium developers
     2024 geisserml <geisserml@gmail.com>
-License: BSD-3-Clause OR Apache-2.0
+License: BSD-3-Clause, Apache-2.0
 
 Files: tests/resources/images.pdf
 Copyright:

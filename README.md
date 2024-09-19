@@ -649,11 +649,17 @@ Usage should be largely self-explanatory, assuming a minimum of familiarity with
 
 ## Licensing
 
-pypdfium2 is available by the terms and conditions of either [`Apache-2.0`](LICENSES/Apache-2.0.txt) or [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt), at your choice.
-Various other open-source licenses apply to dependencies bundled with PDFium. Verbatim copies of their respective licenses are contained in the file [`LicenseRef-PdfiumThirdParty.txt`](LICENSES/LicenseRef-PdfiumThirdParty.txt), which also has to be shipped with binary redistributions.
+*Important: This is NOT LEGAL ADVICE, and there is ABSOLUTELY NO WARRANTY for any information provided in this document or elsewhere in the pypdfium2 project, including earlier revisions.*
+
+pypdfium2 itself is available by the terms and conditions of [`Apache-2.0`](LICENSES/Apache-2.0.txt) / [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt).
 Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSES/CC-BY-4.0.txt).
 
-pypdfium2 complies with the [reuse standard](https://reuse.software/spec/) by including [SPDX](https://spdx.org/licenses/) headers in source files, and license information for data files in [`.reuse/dep5`](.reuse/dep5).
+PDFium is available under a BSD-style license that can be found in its [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file.
+Various other open-source licenses apply to dependencies bundled with PDFium. These also have to be shipped alongside binary redistributions. Copies of identified licenses are provided in [`LicenseRef-PdfiumThirdParty.txt`](LICENSES/LicenseRef-PdfiumThirdParty.txt).
+There is no guarantee of completeness, and pdfium's dependencies might change over time. Please do notify us if you think this misses a relevant license.
+
+pypdfium2 includes [SPDX](https://spdx.org/licenses/) headers in source files.
+License information for data files is provided in [`.reuse/dep5`](.reuse/dep5) as per the [`reuse` standard](https://reuse.software/spec/).
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
 
