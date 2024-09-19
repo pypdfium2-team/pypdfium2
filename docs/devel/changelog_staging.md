@@ -25,7 +25,7 @@
 - Added `PdfObject.get_quad_points()` to get the corner points of an image or text object.
 - Exposed `PdfPage.flatten()` (previously semi-private `_flatten()`), after having found out how to correctly use it. Added check and updated docs accordingly.
 - Added context manager support to `PdfDocument`, so it can be used in a `with`-statement, because opening from a file path binds a file descriptor, which should be released explicitly, given OS limits on the number of open FDs.
-- If document loading failed, `err_code` is now assigned to the `PdfiumError` instance so callers may programatticaly handle the error subtype.
+- If document loading failed, `err_code` is now assigned to the `PdfiumError` instance so callers may programmatically handle the error subtype.
 - Corrected some null pointer checks: we have to use `bool(ptr)` rather than `ptr is None`.
 - Improved startup performance by deferring imports of optional dependencies to the point where they are actually needed, to avoid overhead if you do not use them.
 - Simplified version classes (no API change expected).
