@@ -319,8 +319,8 @@ class PdfPage (pdfium_i.AutoCloseable):
         Flatten form fields and annotations into page contents.
         
         Attention:
-            :meth:`~.PdfDocument.init_forms` must have been called on the parent pdf, before the page was retrieved, for this method to work.
-            In other words, :attr:`.PdfPage.formenv` must be non-null.
+            * :meth:`~.PdfDocument.init_forms` must have been called on the parent pdf, before the page was retrieved, for this method to work. In other words, :attr:`.PdfPage.formenv` must be non-null.
+            * Flattening may invalidate existing handles to the page, so you'll want to re-initialize them after flattening.
         
         Parameters:
             flag (int): PDFium flattening target (:attr:`FLAT_*`)
