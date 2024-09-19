@@ -81,7 +81,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
     kwargs = dict(
         name = "pypdfium2",
         description = "Python bindings to PDFium",
-        license = "Apache-2.0 OR BSD-3-Clause",
+        license = "BSD-3-Clause, Apache-2.0, PdfiumThirdParty",
         license_files = LICENSES_SHARED,
         python_requires = ">= 3.6",
         cmdclass = {},
@@ -132,7 +132,6 @@ def run_setup(modnames, pl_name, pdfium_ver):
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["distclass"] = BinaryDistribution
-        kwargs["license"] = f"({kwargs['license']}) AND LicenseRef-PdfiumThirdParty"
         kwargs["license_files"] += LICENSES_WHEEL
     
     if "pypdfium2" in kwargs["package_data"]:

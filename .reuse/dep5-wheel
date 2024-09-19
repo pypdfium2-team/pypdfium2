@@ -26,4 +26,4 @@ Copyright:
     2024 PDFium developers
     2024 Developers of projects mentioned in PdfiumThirdParty
     2024 Benoît Blanchon and pdfium-binaries contributors
-License: (Apache-2.0 OR BSD-3-Clause) AND LicenseRef-PdfiumThirdParty
+License: (BSD-3-Clause, Apache-2.0) AND LicenseRef-PdfiumThirdParty

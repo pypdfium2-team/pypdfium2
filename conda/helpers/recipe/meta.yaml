@@ -51,10 +51,10 @@ about:
   description: |
     This package provides python helpers around pdfium.
     Dependants are suggested to pin to a major version, but any tighter pinning is discouraged since it increases the risk for conflicts, and would lock you out from future fixes.
-  license: Apache-2.0 OR BSD-3-Clause
+  license: BSD-3-Clause, Apache-2.0
   license_file:
-    - LICENSES/Apache-2.0.txt
     - LICENSES/BSD-3-Clause.txt
+    - LICENSES/Apache-2.0.txt
     - LICENSES/CC-BY-4.0.txt
   dev_url: https://github.com/pypdfium2-team/pypdfium2
   doc_url: https://pypdfium2.readthedocs.io
