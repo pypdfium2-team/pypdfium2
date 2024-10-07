@@ -321,9 +321,9 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def render(
             self,
-            scale = 1,
+            scale = 1.0,
             rotation = 0,
-            crop = (0, 0, 0, 0),
+            crop = (0.0, 0.0, 0.0, 0.0),
             may_draw_forms = True,
             bitmap_maker = PdfBitmap.new_native,
             color_scheme = None,
