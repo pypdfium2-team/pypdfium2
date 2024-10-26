@@ -9,6 +9,7 @@
 - Rendering / Bitmap
   * Removed `PdfDocument.render()` (see deprecation rationale in v4.25 changelog). Instead, use `PdfPage.render()` with a loop or process pool.
   * Removed `PdfBitmap.get_info()` and `PdfBitmapInfo`, which existed only on behalf of data transfer with `PdfDocument.render()`.
+  * `PdfBitmap.to_numpy()`: If the bitmap is single-channel (grayscale), use a 2d shape to avoid needlessly wrapping each pixel value in a list.
   * `PdfBitmap.from_pil()`: Removed `recopy` param.
   * Removed pdfium color scheme param from rendering, as it's not really useful: one can only set colors for certain object types, which are then forced on all instances of that type. This may flatten different colors into one, leading to a loss of visual information. To achieve a "dark theme" for light PDFs, we suggest to instead post-process rendered images with selective lightness inversion, as is now implemented in pypdfium2's rendering CLI.
 - Pageobjects

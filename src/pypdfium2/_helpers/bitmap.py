@@ -197,7 +197,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         The array contains as many rows as the bitmap is high.
         Each row contains as many pixels as the bitmap is wide.
-        The length of each pixel corresponds to the number of channels.
+        Each pixel will be an array of values per channel, or just a value if there is only one channel.
         
         The resulting array is supposed to share memory with the original bitmap buffer,
         so changes to the buffer should be reflected in the array, and vice versa.
@@ -210,11 +210,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         array = numpy.ndarray(
             # layout: row major
-            shape = (self.height, self.width, self.n_channels),
+            shape = (self.height, self.width, self.n_channels) if self.n_channels > 1 else (self.height, self.width),
             dtype = ctypes.c_ubyte,
             buffer = self.buffer,
-            # number of bytes per item for each nesting level (outer->inner, i. e. row, pixel, value)
-            strides = (self.stride, self.n_channels, 1),
+            # number of bytes per item for each nesting level (outer->inner: row, pixel, value - or row, value for a single-channel bitmap)
+            strides = (self.stride, self.n_channels, 1) if self.n_channels > 1 else (self.stride, 1),
         )
         
         return array
