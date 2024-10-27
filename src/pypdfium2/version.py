@@ -81,15 +81,7 @@ class _version_pdfium (_version_interface):
             self.desc += f"@{self.origin}"
 
 
-# API
-
 PYPDFIUM_INFO = _version_pypdfium2()
-PDFIUM_INFO = _version_pdfium()
-
-
-# Docs
-
-PYPDFIUM_INFO = PYPDFIUM_INFO
 """
 pypdfium2 helpers version.
 
@@ -129,7 +121,7 @@ Parameters:
 """
 
 
-PDFIUM_INFO = PDFIUM_INFO
+PDFIUM_INFO = _version_pdfium()
 """
 PDFium version.
 
