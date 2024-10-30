@@ -17,6 +17,7 @@ import pypdfium2.raw as pdfium_c
 from pypdfium2._cli._parsers import (
     add_input, get_input,
     setup_logging,
+    iterator_hasvalue,
     BooleanOptionalAction,
 )
 
@@ -288,37 +289,26 @@ class NumpyCV2Engine (SavingEngine):
     @classmethod
     def postprocess(cls, src_image, bitmap, page, invert_lightness, exclude_images):
         dst_image = src_image
-        
         if invert_lightness:
-            
             if bitmap.format == pdfium_c.FPDFBitmap_Gray:
                 dst_image = ~src_image
             else:
-                
-                if bitmap.rev_byteorder:
-                    convert_to = cv2.COLOR_RGB2HLS
-                    convert_from = cv2.COLOR_HLS2RGB
-                else:
-                    convert_to = cv2.COLOR_BGR2HLS
-                    convert_from = cv2.COLOR_HLS2BGR
-                
+                convert_to, convert_from = (cv2.COLOR_RGB2HLS, cv2.COLOR_HLS2RGB) if bitmap.rev_byteorder else (cv2.COLOR_BGR2HLS, cv2.COLOR_HLS2BGR)
                 dst_image = cv2.cvtColor(dst_image, convert_to)
                 h, l, s = cv2.split(dst_image)
                 l = ~l
                 dst_image = cv2.merge([h, l, s])
                 dst_image = cv2.cvtColor(dst_image, convert_from)
-            
             if exclude_images:
-                assert bitmap.format != pdfium_c.FPDFBitmap_BGRx, "Not sure how to paste with mask on {RGB,BGR}X image using cv2"
+                assert bitmap.format != pdfium_c.FPDFBitmap_BGRx, "Not sure how to paste with mask on {RGB,BGR}X image using cv2"  # FIXME?
                 posconv = bitmap.get_posconv(page)
-                image_objs = list(page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1))
-                if len(image_objs) > 0:
+                have_images, obj_searcher = iterator_hasvalue( page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1) )
+                if have_images:
                     mask = np.zeros((bitmap.height, bitmap.width, 1), np.uint8)
-                    for obj in image_objs:
+                    for obj in obj_searcher:
                         qpoints = np.array([posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()], np.int32)
                         cv2.fillPoly(mask, [qpoints], 1)
                     dst_image = cv2.copyTo(src_image, mask=mask, dst=dst_image)
-            
         return dst_image
 
 

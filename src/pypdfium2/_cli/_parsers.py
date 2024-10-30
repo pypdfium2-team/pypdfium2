@@ -3,8 +3,8 @@
 
 import os
 import sys
-import argparse
 import logging
+import argparse
 from pathlib import Path
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
@@ -89,6 +89,20 @@ def get_input(args, init_forms=False, **kwargs):
     if "pages" in args and not args.pages:
         args.pages = [i for i in range(len(pdf))]
     return pdf
+
+
+# dummy more_itertools.peekable().__bool__ alternative
+
+def _postpeek_generator(value, iterator):
+    yield value; yield from iterator
+
+def iterator_hasvalue(iterator):
+    try:
+        first_value = next(iterator)
+    except StopIteration:
+        return False, None
+    else:
+        return True, _postpeek_generator(first_value, iterator)
 
 
 if sys.version_info >= (3, 9):

@@ -3,7 +3,6 @@
 
 # TODO test-confirm filter and info params
 
-from itertools import chain
 from collections import OrderedDict
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
@@ -13,6 +12,7 @@ from pypdfium2._cli._parsers import (
     add_n_digits,
     get_input,
     round_list,
+    iterator_hasvalue,
 )
 
 
@@ -43,7 +43,7 @@ def attach(parser):
     )
     parser.add_argument(
         "--info",
-        nargs = "*",
+        nargs = "+",
         type = str.lower,
         choices = INFO_PARAMS,
         default = INFO_PARAMS,
@@ -76,24 +76,21 @@ def main(args):
     if args.filter:
         args.filter = [pdfium_i.ObjectTypeToConst[t] for t in args.filter]
     
-    show_pos = (PARAM_POS in args.info)
-    show_imageinfo = (PARAM_IMGINFO in args.info)
-    total_count = 0
+    show_pos = PARAM_POS in args.info
+    show_imginfo = PARAM_IMGINFO in args.info
+    assert show_pos or show_imginfo
     
+    total_count = 0
     for i in args.pages:
         
         page = pdf[i]
-        obj_searcher = page.get_objects(args.filter, max_depth=args.max_depth)
-        # note, more_itertools.peekable() could handle this more elegantly
-        try:
-            first_obj = next(obj_searcher)
-        except StopIteration:
-            continue
+        hasvalue, obj_searcher = iterator_hasvalue( page.get_objects(args.filter, max_depth=args.max_depth) )
+        if not hasvalue: continue
         
         print(f"# Page {i+1}")
         count = 0
         
-        for obj in chain([first_obj], obj_searcher):
+        for obj in obj_searcher:
             
             pad_0 = "    " * obj.level
             pad_1 = pad_0 + "    "
@@ -106,7 +103,7 @@ def main(args):
                     quad_bounds = obj.get_quad_points()
                     print(pad_1 + f"Quad Points: {[round_list(p, args.n_digits) for p in quad_bounds]}")
             
-            if show_imageinfo and isinstance(obj, pdfium.PdfImage):
+            if show_imginfo and isinstance(obj, pdfium.PdfImage):
                 print(pad_1 + f"Filters: {obj.get_filters()}")
                 metadata = obj.get_metadata()
                 assert (metadata.width, metadata.height) == obj.get_px_size()
