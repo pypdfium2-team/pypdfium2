@@ -262,11 +262,11 @@ class PILEngine (SavingEngine):
             if exclude_images:
                 # FIXME pdfium does not seem to provide APIs to translate XObject to page coordinates, so not sure how to handle images nested in XObjects.
                 # FIXME we'd also like to take alpha masks into account, but this may be difficult as long as pdfium does not expose them directly.
-                image_objs = list(page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1))
-                if len(image_objs) > 0:
+                have_images, obj_walker = iterator_hasvalue( page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1) )
+                if have_images:
                     mask = PIL.Image.new("1", src_image.size)
                     draw = PIL.ImageDraw.Draw(mask)
-                    for obj in image_objs:
+                    for obj in obj_walker:
                         qpoints = [posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
                         draw.polygon(qpoints, fill=1)
                     dst_image.paste(src_image, mask=mask)
@@ -302,10 +302,10 @@ class NumpyCV2Engine (SavingEngine):
             if exclude_images:
                 assert bitmap.format != pdfium_c.FPDFBitmap_BGRx, "Not sure how to paste with mask on {RGB,BGR}X image using cv2"  # FIXME?
                 posconv = bitmap.get_posconv(page)
-                have_images, obj_searcher = iterator_hasvalue( page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1) )
+                have_images, obj_walker = iterator_hasvalue( page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1) )
                 if have_images:
                     mask = np.zeros((bitmap.height, bitmap.width, 1), np.uint8)
-                    for obj in obj_searcher:
+                    for obj in obj_walker:
                         qpoints = np.array([posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()], np.int32)
                         cv2.fillPoly(mask, [qpoints], 1)
                     dst_image = cv2.copyTo(src_image, mask=mask, dst=dst_image)
