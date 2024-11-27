@@ -57,10 +57,10 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         self.format = format
         self.rev_byteorder = rev_byteorder
         self.n_channels = pdfium_i.BitmapTypeToNChannels[self.format]
-        self.mode = {
-            False: pdfium_i.BitmapTypeToStr,
-            True: pdfium_i.BitmapTypeToStrReverse,
-        }[self.rev_byteorder][self.format]
+        self.mode = (
+            pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else \
+            pdfium_i.BitmapTypeToStr
+        )[self.format]
         
         # slot to store arguments for PdfPosConv, set on page rendering
         self._pos_args = None

@@ -235,10 +235,8 @@ class PdfImage (PdfObject):
             raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte stream.")
         
         bufaccess, to_hold = pdfium_i.get_bufreader(buffer)
-        loader = {
-            False: pdfium_c.FPDFImageObj_LoadJpegFile,
-            True: pdfium_c.FPDFImageObj_LoadJpegFileInline,
-        }[inline]
+        loader = pdfium_c.FPDFImageObj_LoadJpegFileInline if inline else \
+                 pdfium_c.FPDFImageObj_LoadJpegFile
         
         c_pages, page_count = pdfium_i.pages_c_array(pages)
         ok = loader(c_pages, page_count, self, bufaccess)
@@ -306,10 +304,8 @@ class PdfImage (PdfObject):
         Returns:
             ctypes.Array: The data of the image stream (as :class:`~ctypes.c_ubyte` array).
         """
-        func = {
-            False: pdfium_c.FPDFImageObj_GetImageDataRaw,
-            True: pdfium_c.FPDFImageObj_GetImageDataDecoded,
-        }[decode_simple]
+        func = pdfium_c.FPDFImageObj_GetImageDataDecoded if decode_simple else \
+               pdfium_c.FPDFImageObj_GetImageDataRaw
         n_bytes = func(self, None, 0)
         buffer = (ctypes.c_ubyte * n_bytes)()
         func(self, buffer, n_bytes)
