@@ -32,12 +32,12 @@ class _version_interface:
     def _craft_tag(self):
         return ".".join(str(v) for v in self.api_tag)
     
-    def _craft_desc(self, suffix=[]):
+    def _craft_desc(self, *suffixes):
         
         local_ver = []
         if self.n_commits > 0:
             local_ver += [str(self.n_commits), str(self.hash)]
-        local_ver += suffix
+        local_ver += suffixes
         
         desc = ""
         if local_ver:
@@ -56,8 +56,8 @@ class _version_pypdfium2 (_version_interface):
         if self.beta is not None:
             self.tag += f"b{self.beta}"
         
-        suffix = ["dirty"] if self.dirty else []
-        self.desc = self._craft_desc(suffix)
+        suffixes = ["dirty"] if self.dirty else []
+        self.desc = self._craft_desc(*suffixes)
         if self.data_source != "git":
             self.desc += f":{self.data_source}"
         if self.is_editable:
