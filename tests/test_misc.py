@@ -40,6 +40,7 @@ def _filter(prefix, skips=[], type=int):
 BitmapNsp = _filter("FPDFBitmap_", [pdfium_c.FPDFBitmap_Unknown])
 PageObjNsp = _filter("FPDF_PAGEOBJ_")
 ErrorMapping = pdfium_i.ErrorToStr
+# FIXME this will cause an erroneous test failure when using the reference bindings with a non-XFA build
 if "XFA" in PDFIUM_INFO.flags:
     ErrorMapping.update(pdfium_i.XFAErrorToStr)
 
