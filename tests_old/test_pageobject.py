@@ -201,9 +201,10 @@ def test_image_get_bitmap(render):
     if render:
         assert bitmap.format == pdfium_c.FPDFBitmap_BGRA
         assert bitmap.n_channels == 4
-        assert bitmap.width == 216
-        assert bitmap.height == 90
-        assert bitmap.stride == 864
+        # Somewhere between pdfium 6462 and 6899, size/stride expectation changed here
+        assert bitmap.width == 217
+        assert bitmap.height == 91
+        assert bitmap.stride == 868
         assert bitmap.rev_byteorder is False
         output_path = OutputDir / "extract_rendered.png"
     else:
