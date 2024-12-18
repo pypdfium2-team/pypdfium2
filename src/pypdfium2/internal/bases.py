@@ -37,7 +37,7 @@ def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
         os.write(sys.stderr.fileno(), f"Close ({desc}) {obj_repr}\n".encode())
     
     if not LIBRARY_AVAILABLE:
-        os.write(sys.stderr.fileno(), f"-> Cannot close object; library is destroyed. This may happen on process exit, but should not during runtime.\n".encode())
+        os.write(sys.stderr.fileno(), f"-> Cannot close object, library is destroyed. This may cause a memory leak!\n".encode())
         return
     
     assert (parent is None) or not parent._tree_closed()
