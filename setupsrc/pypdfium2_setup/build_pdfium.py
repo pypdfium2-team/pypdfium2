@@ -26,7 +26,6 @@ PatchesMain = [
     (PatchDir/"public_headers.patch", PDFiumDir),
 ]
 PatchesWindows = [
-    (PatchDir/"win"/"pdfium.patch", PDFiumDir),
     (PatchDir/"win"/"build.patch", PDFiumDir/"build"),
 ]
 
