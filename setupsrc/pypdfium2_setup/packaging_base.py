@@ -305,8 +305,12 @@ class _host_platform:
         # If we are on Linux, check if we have glibc or musl
         self._libc_name, self._libc_ver = _get_libc_info()
         
-        # TODO consider cached property for platform and system
-        self.platform = self._get_platform()
+        # TODO consider cached property for platform and system?
+        try:
+            self.platform = self._get_platform()
+        except Exception as e:
+            self.platform = None
+            self._exc = e
         self.system = None
         if self.platform is not None:
             self.system = plat_to_system(self.platform)
@@ -320,19 +324,30 @@ class _host_platform:
     def _is_plat(self, system, machine):
         return self._system_name.startswith(system) and self._machine_name.startswith(machine)
     
+    def _handle_linux_libc(self, archid):
+        if self._libc_name == "glibc":
+            return getattr(PlatNames, f"linux_{archid}")
+        elif self._libc_name == "musl":
+            return getattr(PlatNames, f"linux_musl_{archid}")
+        elif self._libc_name == "libc":
+            raise RuntimeError(f"Android {archid!r} prior to PEP 738 - not handled in pypdfium2 yet.")
+        else:
+            raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
+    
     def _get_platform(self):
-        # some machine names are merely "qualified guesses", mistakes can't be fully excluded for platforms we don't have access to
         if self._is_plat("darwin", "x86_64"):
             return PlatNames.darwin_x64
         elif self._is_plat("darwin", "arm64"):
             return PlatNames.darwin_arm64
         elif self._is_plat("linux", "x86_64"):
-            return PlatNames.linux_x64 if self._libc_name != "musl" else PlatNames.linux_musl_x64
+            return self._handle_linux_libc("x64")
         elif self._is_plat("linux", "i686"):
-            return PlatNames.linux_x86 if self._libc_name != "musl" else PlatNames.linux_musl_x86
+            return self._handle_linux_libc("x86")
         elif self._is_plat("linux", "aarch64"):
-            return PlatNames.linux_arm64 if self._libc_name != "musl" else PlatNames.linux_musl_arm64
+            return self._handle_linux_libc("arm64")
         elif self._is_plat("linux", "armv7l"):
+            if self._libc_name != "glibc":
+                raise RuntimeError(f"armv7l: only glibc supported at this time, you have {self._libc_name!r}")  # no musl/android
             return PlatNames.linux_arm32
         elif self._is_plat("windows", "amd64"):
             return PlatNames.windows_x64
@@ -340,8 +355,10 @@ class _host_platform:
             return PlatNames.windows_arm64
         elif self._is_plat("windows", "x86"):
             return PlatNames.windows_x86
+        elif self._system_name.startswith("android"):
+            raise RuntimeError(f"Android {self._machine_name!r} with PEP 738 - not handled in pypdfium2 yet.")
         else:
-            return None
+            raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
 
@@ -608,7 +625,8 @@ def parse_pl_spec(pl_spec, with_prepare=True):
     if not pl_spec or pl_spec == "auto":
         pl_name = Host.platform
         if pl_name is None:
-            raise RuntimeError(f"No pre-built binaries available for {Host}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
+            print(f"No pre-built binaries available for this host. You may place custom binaries & bindings in data/sourcebuild/ and install with `{PlatSpec_EnvVar}=sourcebuild`.", file=sys.stderr)
+            raise Host._exc
     elif hasattr(ExtPlats, pl_spec):
         pl_name = getattr(ExtPlats, pl_spec)
     elif hasattr(PlatNames, pl_spec):
