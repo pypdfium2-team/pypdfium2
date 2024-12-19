@@ -8,7 +8,10 @@ import os
 import sys
 from pathlib import Path
 import setuptools
-from wheel.bdist_wheel import bdist_wheel
+try:
+    from setuptools.command.bdist_wheel import bdist_wheel
+except ImportError:
+    from wheel.bdist_wheel import bdist_wheel
 from setuptools.command.build_py import build_py as build_py_orig
 
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
