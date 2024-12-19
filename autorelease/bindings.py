@@ -268,73 +268,80 @@ class struct_fpdf_structelement_attr_t__ (Structure):
 FPDF_STRUCTELEMENT_ATTR = POINTER(struct_fpdf_structelement_attr_t__)
 
 # ./fpdfview.h: 87
-class struct_fpdf_structtree_t__ (Structure):
+class struct_fpdf_structelement_attr_value_t__ (Structure):
     pass
 
 # ./fpdfview.h: 87
+FPDF_STRUCTELEMENT_ATTR_VALUE = POINTER(struct_fpdf_structelement_attr_value_t__)
+
+# ./fpdfview.h: 89
+class struct_fpdf_structtree_t__ (Structure):
+    pass
+
+# ./fpdfview.h: 89
 FPDF_STRUCTTREE = POINTER(struct_fpdf_structtree_t__)
 
-# ./fpdfview.h: 88
+# ./fpdfview.h: 90
 class struct_fpdf_textpage_t__ (Structure):
     pass
 
-# ./fpdfview.h: 88
+# ./fpdfview.h: 90
 FPDF_TEXTPAGE = POINTER(struct_fpdf_textpage_t__)
 
-# ./fpdfview.h: 89
+# ./fpdfview.h: 91
 class struct_fpdf_widget_t__ (Structure):
     pass
 
-# ./fpdfview.h: 89
+# ./fpdfview.h: 91
 FPDF_WIDGET = POINTER(struct_fpdf_widget_t__)
 
-# ./fpdfview.h: 90
+# ./fpdfview.h: 92
 class struct_fpdf_xobject_t__ (Structure):
     pass
 
-# ./fpdfview.h: 90
+# ./fpdfview.h: 92
 FPDF_XOBJECT = POINTER(struct_fpdf_xobject_t__)
 
-# ./fpdfview.h: 93
+# ./fpdfview.h: 95
 FPDF_BOOL = c_int
 
-# ./fpdfview.h: 94
+# ./fpdfview.h: 96
 FPDF_RESULT = c_int
 
-# ./fpdfview.h: 95
+# ./fpdfview.h: 97
 FPDF_DWORD = c_ulong
 
-# ./fpdfview.h: 96
+# ./fpdfview.h: 98
 FS_FLOAT = c_float
 
-# ./fpdfview.h: 104
+# ./fpdfview.h: 106
 enum__FPDF_DUPLEXTYPE_ = c_int
 
-# ./fpdfview.h: 104
+# ./fpdfview.h: 106
 DuplexUndefined = 0
 
-# ./fpdfview.h: 104
+# ./fpdfview.h: 106
 Simplex = (DuplexUndefined + 1)
 
-# ./fpdfview.h: 104
+# ./fpdfview.h: 106
 DuplexFlipShortEdge = (Simplex + 1)
 
-# ./fpdfview.h: 104
+# ./fpdfview.h: 106
 DuplexFlipLongEdge = (DuplexFlipShortEdge + 1)
 
-# ./fpdfview.h: 104
+# ./fpdfview.h: 106
 FPDF_DUPLEXTYPE = enum__FPDF_DUPLEXTYPE_
 
-# ./fpdfview.h: 107
+# ./fpdfview.h: 109
 FPDF_WCHAR = c_ushort
 
-# ./fpdfview.h: 113
+# ./fpdfview.h: 115
 FPDF_BYTESTRING = POINTER(c_char)
 
-# ./fpdfview.h: 117
+# ./fpdfview.h: 119
 FPDF_WIDESTRING = POINTER(FPDF_WCHAR)
 
-# ./fpdfview.h: 125
+# ./fpdfview.h: 127
 class struct_FPDF_BSTR_ (Structure):
     __slots__ = ['str', 'len']
 
@@ -343,13 +350,13 @@ struct_FPDF_BSTR_._fields_ = [
     ('len', c_int),
 ]
 
-# ./fpdfview.h: 125
+# ./fpdfview.h: 127
 FPDF_BSTR = struct_FPDF_BSTR_
 
-# ./fpdfview.h: 134
+# ./fpdfview.h: 136
 FPDF_STRING = POINTER(c_char)
 
-# ./fpdfview.h: 151
+# ./fpdfview.h: 153
 class struct__FS_MATRIX_ (Structure):
     __slots__ = ['a', 'b', 'c', 'd', 'e', 'f']
 
@@ -362,10 +369,10 @@ struct__FS_MATRIX_._fields_ = [
     ('f', c_float),
 ]
 
-# ./fpdfview.h: 151
+# ./fpdfview.h: 153
 FS_MATRIX = struct__FS_MATRIX_
 
-# ./fpdfview.h: 154
+# ./fpdfview.h: 156
 class struct__FS_RECTF_ (Structure):
     __slots__ = ['left', 'top', 'right', 'bottom']
 
@@ -376,16 +383,16 @@ struct__FS_RECTF_._fields_ = [
     ('bottom', c_float),
 ]
 
-# ./fpdfview.h: 163
+# ./fpdfview.h: 165
 FS_LPRECTF = POINTER(struct__FS_RECTF_)
 
-# ./fpdfview.h: 163
+# ./fpdfview.h: 165
 FS_RECTF = struct__FS_RECTF_
 
-# ./fpdfview.h: 166
+# ./fpdfview.h: 168
 FS_LPCRECTF = POINTER(FS_RECTF)
 
-# ./fpdfview.h: 169
+# ./fpdfview.h: 171
 class struct_FS_SIZEF_ (Structure):
     __slots__ = ['width', 'height']
 
@@ -394,16 +401,16 @@ struct_FS_SIZEF_._fields_ = [
     ('height', c_float),
 ]
 
-# ./fpdfview.h: 172
+# ./fpdfview.h: 174
 FS_LPSIZEF = POINTER(struct_FS_SIZEF_)
 
-# ./fpdfview.h: 172
+# ./fpdfview.h: 174
 FS_SIZEF = struct_FS_SIZEF_
 
-# ./fpdfview.h: 175
+# ./fpdfview.h: 177
 FS_LPCSIZEF = POINTER(FS_SIZEF)
 
-# ./fpdfview.h: 178
+# ./fpdfview.h: 180
 class struct_FS_POINTF_ (Structure):
     __slots__ = ['x', 'y']
 
@@ -412,16 +419,16 @@ struct_FS_POINTF_._fields_ = [
     ('y', c_float),
 ]
 
-# ./fpdfview.h: 181
+# ./fpdfview.h: 183
 FS_LPPOINTF = POINTER(struct_FS_POINTF_)
 
-# ./fpdfview.h: 181
+# ./fpdfview.h: 183
 FS_POINTF = struct_FS_POINTF_
 
-# ./fpdfview.h: 184
+# ./fpdfview.h: 186
 FS_LPCPOINTF = POINTER(FS_POINTF)
 
-# ./fpdfview.h: 195
+# ./fpdfview.h: 197
 class struct__FS_QUADPOINTSF (Structure):
     __slots__ = ['x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4']
 
@@ -436,31 +443,31 @@ struct__FS_QUADPOINTSF._fields_ = [
     ('y4', FS_FLOAT),
 ]
 
-# ./fpdfview.h: 195
+# ./fpdfview.h: 197
 FS_QUADPOINTSF = struct__FS_QUADPOINTSF
 
-# ./fpdfview.h: 198
+# ./fpdfview.h: 200
 FPDF_ANNOTATION_SUBTYPE = c_int
 
-# ./fpdfview.h: 199
+# ./fpdfview.h: 201
 FPDF_ANNOT_APPEARANCEMODE = c_int
 
-# ./fpdfview.h: 202
+# ./fpdfview.h: 204
 FPDF_OBJECT_TYPE = c_int
 
-# ./fpdfview.h: 242
+# ./fpdfview.h: 244
 enum_anon_3 = c_int
 
-# ./fpdfview.h: 242
+# ./fpdfview.h: 244
 FPDF_RENDERERTYPE_AGG = 0
 
-# ./fpdfview.h: 242
+# ./fpdfview.h: 244
 FPDF_RENDERERTYPE_SKIA = 1
 
-# ./fpdfview.h: 242
+# ./fpdfview.h: 244
 FPDF_RENDERER_TYPE = enum_anon_3
 
-# ./fpdfview.h: 281
+# ./fpdfview.h: 283
 class struct_FPDF_LIBRARY_CONFIG_ (Structure):
     __slots__ = ['version', 'm_pUserFontPaths', 'm_pIsolate', 'm_v8EmbedderSlot', 'm_pPlatform', 'm_RendererType']
 
@@ -473,52 +480,52 @@ struct_FPDF_LIBRARY_CONFIG_._fields_ = [
     ('m_RendererType', FPDF_RENDERER_TYPE),
 ]
 
-# ./fpdfview.h: 281
+# ./fpdfview.h: 283
 FPDF_LIBRARY_CONFIG = struct_FPDF_LIBRARY_CONFIG_
 
-# ./fpdfview.h: 293
+# ./fpdfview.h: 295
 if hasattr(_libs['pdfium'], 'FPDF_InitLibraryWithConfig'):
     FPDF_InitLibraryWithConfig = _libs['pdfium']['FPDF_InitLibraryWithConfig']
     FPDF_InitLibraryWithConfig.argtypes = [POINTER(FPDF_LIBRARY_CONFIG)]
     FPDF_InitLibraryWithConfig.restype = None
 
-# ./fpdfview.h: 306
+# ./fpdfview.h: 308
 if hasattr(_libs['pdfium'], 'FPDF_InitLibrary'):
     FPDF_InitLibrary = _libs['pdfium']['FPDF_InitLibrary']
     FPDF_InitLibrary.argtypes = []
     FPDF_InitLibrary.restype = None
 
-# ./fpdfview.h: 322
+# ./fpdfview.h: 324
 if hasattr(_libs['pdfium'], 'FPDF_DestroyLibrary'):
     FPDF_DestroyLibrary = _libs['pdfium']['FPDF_DestroyLibrary']
     FPDF_DestroyLibrary.argtypes = []
     FPDF_DestroyLibrary.restype = None
 
-# ./fpdfview.h: 335
+# ./fpdfview.h: 337
 if hasattr(_libs['pdfium'], 'FPDF_SetSandBoxPolicy'):
     FPDF_SetSandBoxPolicy = _libs['pdfium']['FPDF_SetSandBoxPolicy']
     FPDF_SetSandBoxPolicy.argtypes = [FPDF_DWORD, FPDF_BOOL]
     FPDF_SetSandBoxPolicy.restype = None
 
-# ./fpdfview.h: 389
+# ./fpdfview.h: 391
 if hasattr(_libs['pdfium'], 'FPDF_LoadDocument'):
     FPDF_LoadDocument = _libs['pdfium']['FPDF_LoadDocument']
     FPDF_LoadDocument.argtypes = [FPDF_STRING, FPDF_BYTESTRING]
     FPDF_LoadDocument.restype = FPDF_DOCUMENT
 
-# ./fpdfview.h: 413
+# ./fpdfview.h: 415
 if hasattr(_libs['pdfium'], 'FPDF_LoadMemDocument'):
     FPDF_LoadMemDocument = _libs['pdfium']['FPDF_LoadMemDocument']
     FPDF_LoadMemDocument.argtypes = [POINTER(None), c_int, FPDF_BYTESTRING]
     FPDF_LoadMemDocument.restype = FPDF_DOCUMENT
 
-# ./fpdfview.h: 438
+# ./fpdfview.h: 440
 if hasattr(_libs['pdfium'], 'FPDF_LoadMemDocument64'):
     FPDF_LoadMemDocument64 = _libs['pdfium']['FPDF_LoadMemDocument64']
     FPDF_LoadMemDocument64.argtypes = [POINTER(None), c_size_t, FPDF_BYTESTRING]
     FPDF_LoadMemDocument64.restype = FPDF_DOCUMENT
 
-# ./fpdfview.h: 462
+# ./fpdfview.h: 464
 class struct_anon_4 (Structure):
     __slots__ = ['m_FileLen', 'm_GetBlock', 'm_Param']
 
@@ -528,10 +535,10 @@ struct_anon_4._fields_ = [
     ('m_Param', POINTER(None)),
 ]
 
-# ./fpdfview.h: 462
+# ./fpdfview.h: 464
 FPDF_FILEACCESS = struct_anon_4
 
-# ./fpdfview.h: 558
+# ./fpdfview.h: 544
 class struct_FPDF_FILEHANDLER_ (Structure):
     __slots__ = ['clientData', 'Release', 'GetSize', 'ReadBlock', 'WriteBlock', 'Flush', 'Truncate']
 
@@ -545,112 +552,112 @@ struct_FPDF_FILEHANDLER_._fields_ = [
     ('Truncate', CFUNCTYPE(FPDF_RESULT, POINTER(None), FPDF_DWORD)),
 ]
 
-# ./fpdfview.h: 558
+# ./fpdfview.h: 544
 FPDF_FILEHANDLER = struct_FPDF_FILEHANDLER_
 
-# ./fpdfview.h: 581
+# ./fpdfview.h: 567
 if hasattr(_libs['pdfium'], 'FPDF_LoadCustomDocument'):
     FPDF_LoadCustomDocument = _libs['pdfium']['FPDF_LoadCustomDocument']
     FPDF_LoadCustomDocument.argtypes = [POINTER(FPDF_FILEACCESS), FPDF_BYTESTRING]
     FPDF_LoadCustomDocument.restype = FPDF_DOCUMENT
 
-# ./fpdfview.h: 594
+# ./fpdfview.h: 580
 if hasattr(_libs['pdfium'], 'FPDF_GetFileVersion'):
     FPDF_GetFileVersion = _libs['pdfium']['FPDF_GetFileVersion']
     FPDF_GetFileVersion.argtypes = [FPDF_DOCUMENT, POINTER(c_int)]
     FPDF_GetFileVersion.restype = FPDF_BOOL
 
-# ./fpdfview.h: 619
+# ./fpdfview.h: 605
 if hasattr(_libs['pdfium'], 'FPDF_GetLastError'):
     FPDF_GetLastError = _libs['pdfium']['FPDF_GetLastError']
     FPDF_GetLastError.argtypes = []
     FPDF_GetLastError.restype = c_ulong
 
-# ./fpdfview.h: 634
+# ./fpdfview.h: 620
 if hasattr(_libs['pdfium'], 'FPDF_DocumentHasValidCrossReferenceTable'):
     FPDF_DocumentHasValidCrossReferenceTable = _libs['pdfium']['FPDF_DocumentHasValidCrossReferenceTable']
     FPDF_DocumentHasValidCrossReferenceTable.argtypes = [FPDF_DOCUMENT]
     FPDF_DocumentHasValidCrossReferenceTable.restype = FPDF_BOOL
 
-# ./fpdfview.h: 651
+# ./fpdfview.h: 637
 if hasattr(_libs['pdfium'], 'FPDF_GetTrailerEnds'):
     FPDF_GetTrailerEnds = _libs['pdfium']['FPDF_GetTrailerEnds']
     FPDF_GetTrailerEnds.argtypes = [FPDF_DOCUMENT, POINTER(c_uint), c_ulong]
     FPDF_GetTrailerEnds.restype = c_ulong
 
-# ./fpdfview.h: 664
+# ./fpdfview.h: 650
 if hasattr(_libs['pdfium'], 'FPDF_GetDocPermissions'):
     FPDF_GetDocPermissions = _libs['pdfium']['FPDF_GetDocPermissions']
     FPDF_GetDocPermissions.argtypes = [FPDF_DOCUMENT]
     FPDF_GetDocPermissions.restype = c_ulong
 
-# ./fpdfview.h: 676
+# ./fpdfview.h: 662
 if hasattr(_libs['pdfium'], 'FPDF_GetDocUserPermissions'):
     FPDF_GetDocUserPermissions = _libs['pdfium']['FPDF_GetDocUserPermissions']
     FPDF_GetDocUserPermissions.argtypes = [FPDF_DOCUMENT]
     FPDF_GetDocUserPermissions.restype = c_ulong
 
-# ./fpdfview.h: 687
+# ./fpdfview.h: 673
 if hasattr(_libs['pdfium'], 'FPDF_GetSecurityHandlerRevision'):
     FPDF_GetSecurityHandlerRevision = _libs['pdfium']['FPDF_GetSecurityHandlerRevision']
     FPDF_GetSecurityHandlerRevision.argtypes = [FPDF_DOCUMENT]
     FPDF_GetSecurityHandlerRevision.restype = c_int
 
-# ./fpdfview.h: 695
+# ./fpdfview.h: 681
 if hasattr(_libs['pdfium'], 'FPDF_GetPageCount'):
     FPDF_GetPageCount = _libs['pdfium']['FPDF_GetPageCount']
     FPDF_GetPageCount.argtypes = [FPDF_DOCUMENT]
     FPDF_GetPageCount.restype = c_int
 
-# ./fpdfview.h: 707
+# ./fpdfview.h: 693
 if hasattr(_libs['pdfium'], 'FPDF_LoadPage'):
     FPDF_LoadPage = _libs['pdfium']['FPDF_LoadPage']
     FPDF_LoadPage.argtypes = [FPDF_DOCUMENT, c_int]
     FPDF_LoadPage.restype = FPDF_PAGE
 
-# ./fpdfview.h: 718
+# ./fpdfview.h: 704
 if hasattr(_libs['pdfium'], 'FPDF_GetPageWidthF'):
     FPDF_GetPageWidthF = _libs['pdfium']['FPDF_GetPageWidthF']
     FPDF_GetPageWidthF.argtypes = [FPDF_PAGE]
     FPDF_GetPageWidthF.restype = c_float
 
-# ./fpdfview.h: 730
+# ./fpdfview.h: 716
 if hasattr(_libs['pdfium'], 'FPDF_GetPageWidth'):
     FPDF_GetPageWidth = _libs['pdfium']['FPDF_GetPageWidth']
     FPDF_GetPageWidth.argtypes = [FPDF_PAGE]
     FPDF_GetPageWidth.restype = c_double
 
-# ./fpdfview.h: 740
+# ./fpdfview.h: 726
 if hasattr(_libs['pdfium'], 'FPDF_GetPageHeightF'):
     FPDF_GetPageHeightF = _libs['pdfium']['FPDF_GetPageHeightF']
     FPDF_GetPageHeightF.argtypes = [FPDF_PAGE]
     FPDF_GetPageHeightF.restype = c_float
 
-# ./fpdfview.h: 752
+# ./fpdfview.h: 738
 if hasattr(_libs['pdfium'], 'FPDF_GetPageHeight'):
     FPDF_GetPageHeight = _libs['pdfium']['FPDF_GetPageHeight']
     FPDF_GetPageHeight.argtypes = [FPDF_PAGE]
     FPDF_GetPageHeight.restype = c_double
 
-# ./fpdfview.h: 764
+# ./fpdfview.h: 750
 if hasattr(_libs['pdfium'], 'FPDF_GetPageBoundingBox'):
     FPDF_GetPageBoundingBox = _libs['pdfium']['FPDF_GetPageBoundingBox']
     FPDF_GetPageBoundingBox.argtypes = [FPDF_PAGE, POINTER(FS_RECTF)]
     FPDF_GetPageBoundingBox.restype = FPDF_BOOL
 
-# ./fpdfview.h: 778
+# ./fpdfview.h: 764
 if hasattr(_libs['pdfium'], 'FPDF_GetPageSizeByIndexF'):
     FPDF_GetPageSizeByIndexF = _libs['pdfium']['FPDF_GetPageSizeByIndexF']
     FPDF_GetPageSizeByIndexF.argtypes = [FPDF_DOCUMENT, c_int, POINTER(FS_SIZEF)]
     FPDF_GetPageSizeByIndexF.restype = FPDF_BOOL
 
-# ./fpdfview.h: 796
+# ./fpdfview.h: 782
 if hasattr(_libs['pdfium'], 'FPDF_GetPageSizeByIndex'):
     FPDF_GetPageSizeByIndex = _libs['pdfium']['FPDF_GetPageSizeByIndex']
     FPDF_GetPageSizeByIndex.argtypes = [FPDF_DOCUMENT, c_int, POINTER(c_double), POINTER(c_double)]
     FPDF_GetPageSizeByIndex.restype = c_int
 
-# ./fpdfview.h: 844
+# ./fpdfview.h: 830
 class struct_FPDF_COLORSCHEME_ (Structure):
     __slots__ = ['path_fill_color', 'path_stroke_color', 'text_fill_color', 'text_stroke_color']
 
@@ -661,208 +668,208 @@ struct_FPDF_COLORSCHEME_._fields_ = [
     ('text_stroke_color', FPDF_DWORD),
 ]
 
-# ./fpdfview.h: 844
+# ./fpdfview.h: 830
 FPDF_COLORSCHEME = struct_FPDF_COLORSCHEME_
 
-# ./fpdfview.h: 904
+# ./fpdfview.h: 891
 if hasattr(_libs['pdfium'], 'FPDF_RenderPageBitmap'):
     FPDF_RenderPageBitmap = _libs['pdfium']['FPDF_RenderPageBitmap']
     FPDF_RenderPageBitmap.argtypes = [FPDF_BITMAP, FPDF_PAGE, c_int, c_int, c_int, c_int, c_int, c_int]
     FPDF_RenderPageBitmap.restype = None
 
-# ./fpdfview.h: 932
+# ./fpdfview.h: 919
 if hasattr(_libs['pdfium'], 'FPDF_RenderPageBitmapWithMatrix'):
     FPDF_RenderPageBitmapWithMatrix = _libs['pdfium']['FPDF_RenderPageBitmapWithMatrix']
     FPDF_RenderPageBitmapWithMatrix.argtypes = [FPDF_BITMAP, FPDF_PAGE, POINTER(FS_MATRIX), POINTER(FS_RECTF), c_int]
     FPDF_RenderPageBitmapWithMatrix.restype = None
 
-# ./fpdfview.h: 949
+# ./fpdfview.h: 936
 if hasattr(_libs['pdfium'], 'FPDF_RenderPageSkia'):
     FPDF_RenderPageSkia = _libs['pdfium']['FPDF_RenderPageSkia']
     FPDF_RenderPageSkia.argtypes = [FPDF_SKIA_CANVAS, FPDF_PAGE, c_int, c_int]
     FPDF_RenderPageSkia.restype = None
 
-# ./fpdfview.h: 961
+# ./fpdfview.h: 948
 if hasattr(_libs['pdfium'], 'FPDF_ClosePage'):
     FPDF_ClosePage = _libs['pdfium']['FPDF_ClosePage']
     FPDF_ClosePage.argtypes = [FPDF_PAGE]
     FPDF_ClosePage.restype = None
 
-# ./fpdfview.h: 969
+# ./fpdfview.h: 956
 if hasattr(_libs['pdfium'], 'FPDF_CloseDocument'):
     FPDF_CloseDocument = _libs['pdfium']['FPDF_CloseDocument']
     FPDF_CloseDocument.argtypes = [FPDF_DOCUMENT]
     FPDF_CloseDocument.restype = None
 
-# ./fpdfview.h: 1012
+# ./fpdfview.h: 999
 if hasattr(_libs['pdfium'], 'FPDF_DeviceToPage'):
     FPDF_DeviceToPage = _libs['pdfium']['FPDF_DeviceToPage']
     FPDF_DeviceToPage.argtypes = [FPDF_PAGE, c_int, c_int, c_int, c_int, c_int, c_int, c_int, POINTER(c_double), POINTER(c_double)]
     FPDF_DeviceToPage.restype = FPDF_BOOL
 
-# ./fpdfview.h: 1049
+# ./fpdfview.h: 1036
 if hasattr(_libs['pdfium'], 'FPDF_PageToDevice'):
     FPDF_PageToDevice = _libs['pdfium']['FPDF_PageToDevice']
     FPDF_PageToDevice.argtypes = [FPDF_PAGE, c_int, c_int, c_int, c_int, c_int, c_double, c_double, POINTER(c_int), POINTER(c_int)]
     FPDF_PageToDevice.restype = FPDF_BOOL
 
-# ./fpdfview.h: 1090
+# ./fpdfview.h: 1077
 if hasattr(_libs['pdfium'], 'FPDFBitmap_Create'):
     FPDFBitmap_Create = _libs['pdfium']['FPDFBitmap_Create']
     FPDFBitmap_Create.argtypes = [c_int, c_int, c_int]
     FPDFBitmap_Create.restype = FPDF_BITMAP
 
-# ./fpdfview.h: 1139
+# ./fpdfview.h: 1126
 if hasattr(_libs['pdfium'], 'FPDFBitmap_CreateEx'):
     FPDFBitmap_CreateEx = _libs['pdfium']['FPDFBitmap_CreateEx']
     FPDFBitmap_CreateEx.argtypes = [c_int, c_int, c_int, POINTER(None), c_int]
     FPDFBitmap_CreateEx.restype = FPDF_BITMAP
 
-# ./fpdfview.h: 1155
+# ./fpdfview.h: 1142
 if hasattr(_libs['pdfium'], 'FPDFBitmap_GetFormat'):
     FPDFBitmap_GetFormat = _libs['pdfium']['FPDFBitmap_GetFormat']
     FPDFBitmap_GetFormat.argtypes = [FPDF_BITMAP]
     FPDFBitmap_GetFormat.restype = c_int
 
-# ./fpdfview.h: 1181
+# ./fpdfview.h: 1168
 if hasattr(_libs['pdfium'], 'FPDFBitmap_FillRect'):
     FPDFBitmap_FillRect = _libs['pdfium']['FPDFBitmap_FillRect']
     FPDFBitmap_FillRect.argtypes = [FPDF_BITMAP, c_int, c_int, c_int, c_int, FPDF_DWORD]
-    FPDFBitmap_FillRect.restype = None
+    FPDFBitmap_FillRect.restype = FPDF_BOOL
 
-# ./fpdfview.h: 1203
+# ./fpdfview.h: 1190
 if hasattr(_libs['pdfium'], 'FPDFBitmap_GetBuffer'):
     FPDFBitmap_GetBuffer = _libs['pdfium']['FPDFBitmap_GetBuffer']
     FPDFBitmap_GetBuffer.argtypes = [FPDF_BITMAP]
     FPDFBitmap_GetBuffer.restype = POINTER(None)
 
-# ./fpdfview.h: 1212
+# ./fpdfview.h: 1199
 if hasattr(_libs['pdfium'], 'FPDFBitmap_GetWidth'):
     FPDFBitmap_GetWidth = _libs['pdfium']['FPDFBitmap_GetWidth']
     FPDFBitmap_GetWidth.argtypes = [FPDF_BITMAP]
     FPDFBitmap_GetWidth.restype = c_int
 
-# ./fpdfview.h: 1221
+# ./fpdfview.h: 1208
 if hasattr(_libs['pdfium'], 'FPDFBitmap_GetHeight'):
     FPDFBitmap_GetHeight = _libs['pdfium']['FPDFBitmap_GetHeight']
     FPDFBitmap_GetHeight.argtypes = [FPDF_BITMAP]
     FPDFBitmap_GetHeight.restype = c_int
 
-# ./fpdfview.h: 1232
+# ./fpdfview.h: 1219
 if hasattr(_libs['pdfium'], 'FPDFBitmap_GetStride'):
     FPDFBitmap_GetStride = _libs['pdfium']['FPDFBitmap_GetStride']
     FPDFBitmap_GetStride.argtypes = [FPDF_BITMAP]
     FPDFBitmap_GetStride.restype = c_int
 
-# ./fpdfview.h: 1244
+# ./fpdfview.h: 1231
 if hasattr(_libs['pdfium'], 'FPDFBitmap_Destroy'):
     FPDFBitmap_Destroy = _libs['pdfium']['FPDFBitmap_Destroy']
     FPDFBitmap_Destroy.argtypes = [FPDF_BITMAP]
     FPDFBitmap_Destroy.restype = None
 
-# ./fpdfview.h: 1253
+# ./fpdfview.h: 1240
 if hasattr(_libs['pdfium'], 'FPDF_VIEWERREF_GetPrintScaling'):
     FPDF_VIEWERREF_GetPrintScaling = _libs['pdfium']['FPDF_VIEWERREF_GetPrintScaling']
     FPDF_VIEWERREF_GetPrintScaling.argtypes = [FPDF_DOCUMENT]
     FPDF_VIEWERREF_GetPrintScaling.restype = FPDF_BOOL
 
-# ./fpdfview.h: 1262
+# ./fpdfview.h: 1249
 if hasattr(_libs['pdfium'], 'FPDF_VIEWERREF_GetNumCopies'):
     FPDF_VIEWERREF_GetNumCopies = _libs['pdfium']['FPDF_VIEWERREF_GetNumCopies']
     FPDF_VIEWERREF_GetNumCopies.argtypes = [FPDF_DOCUMENT]
     FPDF_VIEWERREF_GetNumCopies.restype = c_int
 
-# ./fpdfview.h: 1271
+# ./fpdfview.h: 1258
 if hasattr(_libs['pdfium'], 'FPDF_VIEWERREF_GetPrintPageRange'):
     FPDF_VIEWERREF_GetPrintPageRange = _libs['pdfium']['FPDF_VIEWERREF_GetPrintPageRange']
     FPDF_VIEWERREF_GetPrintPageRange.argtypes = [FPDF_DOCUMENT]
     FPDF_VIEWERREF_GetPrintPageRange.restype = FPDF_PAGERANGE
 
-# ./fpdfview.h: 1281
+# ./fpdfview.h: 1268
 if hasattr(_libs['pdfium'], 'FPDF_VIEWERREF_GetPrintPageRangeCount'):
     FPDF_VIEWERREF_GetPrintPageRangeCount = _libs['pdfium']['FPDF_VIEWERREF_GetPrintPageRangeCount']
     FPDF_VIEWERREF_GetPrintPageRangeCount.argtypes = [FPDF_PAGERANGE]
     FPDF_VIEWERREF_GetPrintPageRangeCount.restype = c_size_t
 
-# ./fpdfview.h: 1293
+# ./fpdfview.h: 1280
 if hasattr(_libs['pdfium'], 'FPDF_VIEWERREF_GetPrintPageRangeElement'):
     FPDF_VIEWERREF_GetPrintPageRangeElement = _libs['pdfium']['FPDF_VIEWERREF_GetPrintPageRangeElement']
     FPDF_VIEWERREF_GetPrintPageRangeElement.argtypes = [FPDF_PAGERANGE, c_size_t]
     FPDF_VIEWERREF_GetPrintPageRangeElement.restype = c_int
 
-# ./fpdfview.h: 1303
+# ./fpdfview.h: 1290
 if hasattr(_libs['pdfium'], 'FPDF_VIEWERREF_GetDuplex'):
     FPDF_VIEWERREF_GetDuplex = _libs['pdfium']['FPDF_VIEWERREF_GetDuplex']
     FPDF_VIEWERREF_GetDuplex.argtypes = [FPDF_DOCUMENT]
     FPDF_VIEWERREF_GetDuplex.restype = FPDF_DUPLEXTYPE
 
-# ./fpdfview.h: 1321
+# ./fpdfview.h: 1308
 if hasattr(_libs['pdfium'], 'FPDF_VIEWERREF_GetName'):
     FPDF_VIEWERREF_GetName = _libs['pdfium']['FPDF_VIEWERREF_GetName']
     FPDF_VIEWERREF_GetName.argtypes = [FPDF_DOCUMENT, FPDF_BYTESTRING, POINTER(c_char), c_ulong]
     FPDF_VIEWERREF_GetName.restype = c_ulong
 
-# ./fpdfview.h: 1333
+# ./fpdfview.h: 1320
 if hasattr(_libs['pdfium'], 'FPDF_CountNamedDests'):
     FPDF_CountNamedDests = _libs['pdfium']['FPDF_CountNamedDests']
     FPDF_CountNamedDests.argtypes = [FPDF_DOCUMENT]
     FPDF_CountNamedDests.restype = FPDF_DWORD
 
-# ./fpdfview.h: 1343
+# ./fpdfview.h: 1330
 if hasattr(_libs['pdfium'], 'FPDF_GetNamedDestByName'):
     FPDF_GetNamedDestByName = _libs['pdfium']['FPDF_GetNamedDestByName']
     FPDF_GetNamedDestByName.argtypes = [FPDF_DOCUMENT, FPDF_BYTESTRING]
     FPDF_GetNamedDestByName.restype = FPDF_DEST
 
-# ./fpdfview.h: 1366
+# ./fpdfview.h: 1353
 if hasattr(_libs['pdfium'], 'FPDF_GetNamedDest'):
     FPDF_GetNamedDest = _libs['pdfium']['FPDF_GetNamedDest']
     FPDF_GetNamedDest.argtypes = [FPDF_DOCUMENT, c_int, POINTER(None), POINTER(c_long)]
     FPDF_GetNamedDest.restype = FPDF_DEST
 
-# ./fpdfview.h: 1378
+# ./fpdfview.h: 1365
 if hasattr(_libs['pdfium'], 'FPDF_GetXFAPacketCount'):
     FPDF_GetXFAPacketCount = _libs['pdfium']['FPDF_GetXFAPacketCount']
     FPDF_GetXFAPacketCount.argtypes = [FPDF_DOCUMENT]
     FPDF_GetXFAPacketCount.restype = c_int
 
-# ./fpdfview.h: 1396
+# ./fpdfview.h: 1383
 if hasattr(_libs['pdfium'], 'FPDF_GetXFAPacketName'):
     FPDF_GetXFAPacketName = _libs['pdfium']['FPDF_GetXFAPacketName']
     FPDF_GetXFAPacketName.argtypes = [FPDF_DOCUMENT, c_int, POINTER(None), c_ulong]
     FPDF_GetXFAPacketName.restype = c_ulong
 
-# ./fpdfview.h: 1423
+# ./fpdfview.h: 1410
 if hasattr(_libs['pdfium'], 'FPDF_GetXFAPacketContent'):
     FPDF_GetXFAPacketContent = _libs['pdfium']['FPDF_GetXFAPacketContent']
     FPDF_GetXFAPacketContent.argtypes = [FPDF_DOCUMENT, c_int, POINTER(None), c_ulong, POINTER(c_ulong)]
     FPDF_GetXFAPacketContent.restype = FPDF_BOOL
 
-# ./fpdfview.h: 1440
+# ./fpdfview.h: 1427
 if hasattr(_libs['pdfium'], 'FPDF_GetRecommendedV8Flags'):
     FPDF_GetRecommendedV8Flags = _libs['pdfium']['FPDF_GetRecommendedV8Flags']
     FPDF_GetRecommendedV8Flags.argtypes = []
     FPDF_GetRecommendedV8Flags.restype = POINTER(c_char)
 
-# ./fpdfview.h: 1458
+# ./fpdfview.h: 1445
 if hasattr(_libs['pdfium'], 'FPDF_GetArrayBufferAllocatorSharedInstance'):
     FPDF_GetArrayBufferAllocatorSharedInstance = _libs['pdfium']['FPDF_GetArrayBufferAllocatorSharedInstance']
     FPDF_GetArrayBufferAllocatorSharedInstance.argtypes = []
     FPDF_GetArrayBufferAllocatorSharedInstance.restype = POINTER(None)
 
-# ./fpdfview.h: 1464
+# ./fpdfview.h: 1451
 if hasattr(_libs['pdfium'], 'FPDF_BStr_Init'):
     FPDF_BStr_Init = _libs['pdfium']['FPDF_BStr_Init']
     FPDF_BStr_Init.argtypes = [POINTER(FPDF_BSTR)]
     FPDF_BStr_Init.restype = FPDF_RESULT
 
-# ./fpdfview.h: 1468
+# ./fpdfview.h: 1455
 if hasattr(_libs['pdfium'], 'FPDF_BStr_Set'):
     FPDF_BStr_Set = _libs['pdfium']['FPDF_BStr_Set']
     FPDF_BStr_Set.argtypes = [POINTER(FPDF_BSTR), POINTER(c_char), c_int]
     FPDF_BStr_Set.restype = FPDF_RESULT
 
-# ./fpdfview.h: 1474
+# ./fpdfview.h: 1461
 if hasattr(_libs['pdfium'], 'FPDF_BStr_Clear'):
     FPDF_BStr_Clear = _libs['pdfium']['FPDF_BStr_Clear']
     FPDF_BStr_Clear.argtypes = [POINTER(FPDF_BSTR)]
@@ -888,13 +895,13 @@ struct__IPDF_JsPlatform._fields_ = [
     ('m_v8EmbedderSlot', c_uint),
 ]
 
-# ./fpdf_formfill.h: 323
+# ./fpdf_formfill.h: 300
 IPDF_JSPLATFORM = struct__IPDF_JsPlatform
 
-# ./fpdf_formfill.h: 341
+# ./fpdf_formfill.h: 316
 TimerCallback = CFUNCTYPE(None, c_int)
 
-# ./fpdf_formfill.h: 355
+# ./fpdf_formfill.h: 328
 class struct__FPDF_SYSTEMTIME (Structure):
     __slots__ = ['wYear', 'wMonth', 'wDayOfWeek', 'wDay', 'wHour', 'wMinute', 'wSecond', 'wMilliseconds']
 
@@ -909,10 +916,10 @@ struct__FPDF_SYSTEMTIME._fields_ = [
     ('wMilliseconds', c_ushort),
 ]
 
-# ./fpdf_formfill.h: 355
+# ./fpdf_formfill.h: 328
 FPDF_SYSTEMTIME = struct__FPDF_SYSTEMTIME
 
-# ./fpdf_formfill.h: 377
+# ./fpdf_formfill.h: 350
 class struct__FPDF_FORMFILLINFO (Structure):
     __slots__ = ['version', 'Release', 'FFI_Invalidate', 'FFI_OutputSelectedRect', 'FFI_SetCursor', 'FFI_SetTimer', 'FFI_KillTimer', 'FFI_GetLocalTime', 'FFI_OnChange', 'FFI_GetPage', 'FFI_GetCurrentPage', 'FFI_GetRotation', 'FFI_ExecuteNamedAction', 'FFI_SetTextFieldFocus', 'FFI_DoURIAction', 'FFI_DoGoToAction', 'm_pJsPlatform', 'xfa_disabled', 'FFI_DisplayCaret', 'FFI_GetCurrentPageIndex', 'FFI_SetCurrentPage', 'FFI_GotoURL', 'FFI_GetPageViewRect', 'FFI_PageEvent', 'FFI_PopupMenu', 'FFI_OpenFile', 'FFI_EmailTo', 'FFI_UploadTo', 'FFI_GetPlatform', 'FFI_GetLanguage', 'FFI_DownloadFromURL', 'FFI_PostRequestURL', 'FFI_PutRequestURL', 'FFI_OnFocusChange', 'FFI_DoURIActionWithKeyboardModifier']
 
@@ -954,256 +961,256 @@ struct__FPDF_FORMFILLINFO._fields_ = [
     ('FFI_DoURIActionWithKeyboardModifier', CFUNCTYPE(None, POINTER(struct__FPDF_FORMFILLINFO), FPDF_BYTESTRING, c_int)),
 ]
 
-# ./fpdf_formfill.h: 1139
+# ./fpdf_formfill.h: 1044
 FPDF_FORMFILLINFO = struct__FPDF_FORMFILLINFO
 
-# ./fpdf_formfill.h: 1155
+# ./fpdf_formfill.h: 1058
 if hasattr(_libs['pdfium'], 'FPDFDOC_InitFormFillEnvironment'):
     FPDFDOC_InitFormFillEnvironment = _libs['pdfium']['FPDFDOC_InitFormFillEnvironment']
     FPDFDOC_InitFormFillEnvironment.argtypes = [FPDF_DOCUMENT, POINTER(FPDF_FORMFILLINFO)]
     FPDFDOC_InitFormFillEnvironment.restype = FPDF_FORMHANDLE
 
-# ./fpdf_formfill.h: 1170
+# ./fpdf_formfill.h: 1071
 if hasattr(_libs['pdfium'], 'FPDFDOC_ExitFormFillEnvironment'):
     FPDFDOC_ExitFormFillEnvironment = _libs['pdfium']['FPDFDOC_ExitFormFillEnvironment']
     FPDFDOC_ExitFormFillEnvironment.argtypes = [FPDF_FORMHANDLE]
     FPDFDOC_ExitFormFillEnvironment.restype = None
 
-# ./fpdf_formfill.h: 1183
+# ./fpdf_formfill.h: 1082
 if hasattr(_libs['pdfium'], 'FORM_OnAfterLoadPage'):
     FORM_OnAfterLoadPage = _libs['pdfium']['FORM_OnAfterLoadPage']
     FORM_OnAfterLoadPage.argtypes = [FPDF_PAGE, FPDF_FORMHANDLE]
     FORM_OnAfterLoadPage.restype = None
 
-# ./fpdf_formfill.h: 1197
+# ./fpdf_formfill.h: 1094
 if hasattr(_libs['pdfium'], 'FORM_OnBeforeClosePage'):
     FORM_OnBeforeClosePage = _libs['pdfium']['FORM_OnBeforeClosePage']
     FORM_OnBeforeClosePage.argtypes = [FPDF_PAGE, FPDF_FORMHANDLE]
     FORM_OnBeforeClosePage.restype = None
 
-# ./fpdf_formfill.h: 1215
+# ./fpdf_formfill.h: 1110
 if hasattr(_libs['pdfium'], 'FORM_DoDocumentJSAction'):
     FORM_DoDocumentJSAction = _libs['pdfium']['FORM_DoDocumentJSAction']
     FORM_DoDocumentJSAction.argtypes = [FPDF_FORMHANDLE]
     FORM_DoDocumentJSAction.restype = None
 
-# ./fpdf_formfill.h: 1231
+# ./fpdf_formfill.h: 1124
 if hasattr(_libs['pdfium'], 'FORM_DoDocumentOpenAction'):
     FORM_DoDocumentOpenAction = _libs['pdfium']['FORM_DoDocumentOpenAction']
     FORM_DoDocumentOpenAction.argtypes = [FPDF_FORMHANDLE]
     FORM_DoDocumentOpenAction.restype = None
 
-# ./fpdf_formfill.h: 1260
+# ./fpdf_formfill.h: 1151
 if hasattr(_libs['pdfium'], 'FORM_DoDocumentAAction'):
     FORM_DoDocumentAAction = _libs['pdfium']['FORM_DoDocumentAAction']
     FORM_DoDocumentAAction.argtypes = [FPDF_FORMHANDLE, c_int]
     FORM_DoDocumentAAction.restype = None
 
-# ./fpdf_formfill.h: 1285
+# ./fpdf_formfill.h: 1174
 if hasattr(_libs['pdfium'], 'FORM_DoPageAAction'):
     FORM_DoPageAAction = _libs['pdfium']['FORM_DoPageAAction']
     FORM_DoPageAAction.argtypes = [FPDF_PAGE, FPDF_FORMHANDLE, c_int]
     FORM_DoPageAAction.restype = None
 
-# ./fpdf_formfill.h: 1304
+# ./fpdf_formfill.h: 1191
 if hasattr(_libs['pdfium'], 'FORM_OnMouseMove'):
     FORM_OnMouseMove = _libs['pdfium']['FORM_OnMouseMove']
     FORM_OnMouseMove.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_double, c_double]
     FORM_OnMouseMove.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1335
+# ./fpdf_formfill.h: 1220
 if hasattr(_libs['pdfium'], 'FORM_OnMouseWheel'):
     FORM_OnMouseWheel = _libs['pdfium']['FORM_OnMouseWheel']
     FORM_OnMouseWheel.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, POINTER(FS_POINTF), c_int, c_int]
     FORM_OnMouseWheel.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1360
+# ./fpdf_formfill.h: 1243
 if hasattr(_libs['pdfium'], 'FORM_OnFocus'):
     FORM_OnFocus = _libs['pdfium']['FORM_OnFocus']
     FORM_OnFocus.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_double, c_double]
     FORM_OnFocus.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1382
+# ./fpdf_formfill.h: 1263
 if hasattr(_libs['pdfium'], 'FORM_OnLButtonDown'):
     FORM_OnLButtonDown = _libs['pdfium']['FORM_OnLButtonDown']
     FORM_OnLButtonDown.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_double, c_double]
     FORM_OnLButtonDown.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1395
+# ./fpdf_formfill.h: 1274
 if hasattr(_libs['pdfium'], 'FORM_OnRButtonDown'):
     FORM_OnRButtonDown = _libs['pdfium']['FORM_OnRButtonDown']
     FORM_OnRButtonDown.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_double, c_double]
     FORM_OnRButtonDown.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1414
+# ./fpdf_formfill.h: 1291
 if hasattr(_libs['pdfium'], 'FORM_OnLButtonUp'):
     FORM_OnLButtonUp = _libs['pdfium']['FORM_OnLButtonUp']
     FORM_OnLButtonUp.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_double, c_double]
     FORM_OnLButtonUp.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1427
+# ./fpdf_formfill.h: 1302
 if hasattr(_libs['pdfium'], 'FORM_OnRButtonUp'):
     FORM_OnRButtonUp = _libs['pdfium']['FORM_OnRButtonUp']
     FORM_OnRButtonUp.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_double, c_double]
     FORM_OnRButtonUp.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1450
+# ./fpdf_formfill.h: 1323
 if hasattr(_libs['pdfium'], 'FORM_OnLButtonDoubleClick'):
     FORM_OnLButtonDoubleClick = _libs['pdfium']['FORM_OnLButtonDoubleClick']
     FORM_OnLButtonDoubleClick.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_double, c_double]
     FORM_OnLButtonDoubleClick.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1470
+# ./fpdf_formfill.h: 1341
 if hasattr(_libs['pdfium'], 'FORM_OnKeyDown'):
     FORM_OnKeyDown = _libs['pdfium']['FORM_OnKeyDown']
     FORM_OnKeyDown.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_int]
     FORM_OnKeyDown.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1492
+# ./fpdf_formfill.h: 1361
 if hasattr(_libs['pdfium'], 'FORM_OnKeyUp'):
     FORM_OnKeyUp = _libs['pdfium']['FORM_OnKeyUp']
     FORM_OnKeyUp.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_int]
     FORM_OnKeyUp.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1511
+# ./fpdf_formfill.h: 1378
 if hasattr(_libs['pdfium'], 'FORM_OnChar'):
     FORM_OnChar = _libs['pdfium']['FORM_OnChar']
     FORM_OnChar.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, c_int]
     FORM_OnChar.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1534
+# ./fpdf_formfill.h: 1399
 if hasattr(_libs['pdfium'], 'FORM_GetFocusedText'):
     FORM_GetFocusedText = _libs['pdfium']['FORM_GetFocusedText']
     FORM_GetFocusedText.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, POINTER(None), c_ulong]
     FORM_GetFocusedText.restype = c_ulong
 
-# ./fpdf_formfill.h: 1557
+# ./fpdf_formfill.h: 1420
 if hasattr(_libs['pdfium'], 'FORM_GetSelectedText'):
     FORM_GetSelectedText = _libs['pdfium']['FORM_GetSelectedText']
     FORM_GetSelectedText.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, POINTER(None), c_ulong]
     FORM_GetSelectedText.restype = c_ulong
 
-# ./fpdf_formfill.h: 1580
+# ./fpdf_formfill.h: 1441
 if hasattr(_libs['pdfium'], 'FORM_ReplaceAndKeepSelection'):
     FORM_ReplaceAndKeepSelection = _libs['pdfium']['FORM_ReplaceAndKeepSelection']
     FORM_ReplaceAndKeepSelection.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, FPDF_WIDESTRING]
     FORM_ReplaceAndKeepSelection.restype = None
 
-# ./fpdf_formfill.h: 1600
+# ./fpdf_formfill.h: 1459
 if hasattr(_libs['pdfium'], 'FORM_ReplaceSelection'):
     FORM_ReplaceSelection = _libs['pdfium']['FORM_ReplaceSelection']
     FORM_ReplaceSelection.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, FPDF_WIDESTRING]
     FORM_ReplaceSelection.restype = None
 
-# ./fpdf_formfill.h: 1617
+# ./fpdf_formfill.h: 1474
 if hasattr(_libs['pdfium'], 'FORM_SelectAllText'):
     FORM_SelectAllText = _libs['pdfium']['FORM_SelectAllText']
     FORM_SelectAllText.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE]
     FORM_SelectAllText.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1630
+# ./fpdf_formfill.h: 1485
 if hasattr(_libs['pdfium'], 'FORM_CanUndo'):
     FORM_CanUndo = _libs['pdfium']['FORM_CanUndo']
     FORM_CanUndo.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE]
     FORM_CanUndo.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1644
+# ./fpdf_formfill.h: 1497
 if hasattr(_libs['pdfium'], 'FORM_CanRedo'):
     FORM_CanRedo = _libs['pdfium']['FORM_CanRedo']
     FORM_CanRedo.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE]
     FORM_CanRedo.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1657
+# ./fpdf_formfill.h: 1508
 if hasattr(_libs['pdfium'], 'FORM_Undo'):
     FORM_Undo = _libs['pdfium']['FORM_Undo']
     FORM_Undo.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE]
     FORM_Undo.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1670
+# ./fpdf_formfill.h: 1519
 if hasattr(_libs['pdfium'], 'FORM_Redo'):
     FORM_Redo = _libs['pdfium']['FORM_Redo']
     FORM_Redo.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE]
     FORM_Redo.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1685
+# ./fpdf_formfill.h: 1532
 if hasattr(_libs['pdfium'], 'FORM_ForceToKillFocus'):
     FORM_ForceToKillFocus = _libs['pdfium']['FORM_ForceToKillFocus']
     FORM_ForceToKillFocus.argtypes = [FPDF_FORMHANDLE]
     FORM_ForceToKillFocus.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1710
+# ./fpdf_formfill.h: 1555
 if hasattr(_libs['pdfium'], 'FORM_GetFocusedAnnot'):
     FORM_GetFocusedAnnot = _libs['pdfium']['FORM_GetFocusedAnnot']
     FORM_GetFocusedAnnot.argtypes = [FPDF_FORMHANDLE, POINTER(c_int), POINTER(FPDF_ANNOTATION)]
     FORM_GetFocusedAnnot.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1729
+# ./fpdf_formfill.h: 1572
 if hasattr(_libs['pdfium'], 'FORM_SetFocusedAnnot'):
     FORM_SetFocusedAnnot = _libs['pdfium']['FORM_SetFocusedAnnot']
     FORM_SetFocusedAnnot.argtypes = [FPDF_FORMHANDLE, FPDF_ANNOTATION]
     FORM_SetFocusedAnnot.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1785
+# ./fpdf_formfill.h: 1626
 if hasattr(_libs['pdfium'], 'FPDFPage_HasFormFieldAtPoint'):
     FPDFPage_HasFormFieldAtPoint = _libs['pdfium']['FPDFPage_HasFormFieldAtPoint']
     FPDFPage_HasFormFieldAtPoint.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_double, c_double]
     FPDFPage_HasFormFieldAtPoint.restype = c_int
 
-# ./fpdf_formfill.h: 1804
+# ./fpdf_formfill.h: 1643
 if hasattr(_libs['pdfium'], 'FPDFPage_FormFieldZOrderAtPoint'):
     FPDFPage_FormFieldZOrderAtPoint = _libs['pdfium']['FPDFPage_FormFieldZOrderAtPoint']
     FPDFPage_FormFieldZOrderAtPoint.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_double, c_double]
     FPDFPage_FormFieldZOrderAtPoint.restype = c_int
 
-# ./fpdf_formfill.h: 1832
+# ./fpdf_formfill.h: 1669
 if hasattr(_libs['pdfium'], 'FPDF_SetFormFieldHighlightColor'):
     FPDF_SetFormFieldHighlightColor = _libs['pdfium']['FPDF_SetFormFieldHighlightColor']
     FPDF_SetFormFieldHighlightColor.argtypes = [FPDF_FORMHANDLE, c_int, c_ulong]
     FPDF_SetFormFieldHighlightColor.restype = None
 
-# ./fpdf_formfill.h: 1851
+# ./fpdf_formfill.h: 1686
 if hasattr(_libs['pdfium'], 'FPDF_SetFormFieldHighlightAlpha'):
     FPDF_SetFormFieldHighlightAlpha = _libs['pdfium']['FPDF_SetFormFieldHighlightAlpha']
     FPDF_SetFormFieldHighlightAlpha.argtypes = [FPDF_FORMHANDLE, c_ubyte]
     FPDF_SetFormFieldHighlightAlpha.restype = None
 
-# ./fpdf_formfill.h: 1866
+# ./fpdf_formfill.h: 1699
 if hasattr(_libs['pdfium'], 'FPDF_RemoveFormFieldHighlight'):
     FPDF_RemoveFormFieldHighlight = _libs['pdfium']['FPDF_RemoveFormFieldHighlight']
     FPDF_RemoveFormFieldHighlight.argtypes = [FPDF_FORMHANDLE]
     FPDF_RemoveFormFieldHighlight.restype = None
 
-# ./fpdf_formfill.h: 1905
+# ./fpdf_formfill.h: 1736
 if hasattr(_libs['pdfium'], 'FPDF_FFLDraw'):
     FPDF_FFLDraw = _libs['pdfium']['FPDF_FFLDraw']
     FPDF_FFLDraw.argtypes = [FPDF_FORMHANDLE, FPDF_BITMAP, FPDF_PAGE, c_int, c_int, c_int, c_int, c_int, c_int]
     FPDF_FFLDraw.restype = None
 
-# ./fpdf_formfill.h: 1916
+# ./fpdf_formfill.h: 1747
 if hasattr(_libs['pdfium'], 'FPDF_FFLDrawSkia'):
     FPDF_FFLDrawSkia = _libs['pdfium']['FPDF_FFLDrawSkia']
     FPDF_FFLDrawSkia.argtypes = [FPDF_FORMHANDLE, FPDF_SKIA_CANVAS, FPDF_PAGE, c_int, c_int, c_int, c_int, c_int, c_int]
     FPDF_FFLDrawSkia.restype = None
 
-# ./fpdf_formfill.h: 1938
+# ./fpdf_formfill.h: 1767
 if hasattr(_libs['pdfium'], 'FPDF_GetFormType'):
     FPDF_GetFormType = _libs['pdfium']['FPDF_GetFormType']
     FPDF_GetFormType.argtypes = [FPDF_DOCUMENT]
     FPDF_GetFormType.restype = c_int
 
-# ./fpdf_formfill.h: 1964
+# ./fpdf_formfill.h: 1791
 if hasattr(_libs['pdfium'], 'FORM_SetIndexSelected'):
     FORM_SetIndexSelected = _libs['pdfium']['FORM_SetIndexSelected']
     FORM_SetIndexSelected.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int, FPDF_BOOL]
     FORM_SetIndexSelected.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 1989
+# ./fpdf_formfill.h: 1814
 if hasattr(_libs['pdfium'], 'FORM_IsIndexSelected'):
     FORM_IsIndexSelected = _libs['pdfium']['FORM_IsIndexSelected']
     FORM_IsIndexSelected.argtypes = [FPDF_FORMHANDLE, FPDF_PAGE, c_int]
     FORM_IsIndexSelected.restype = FPDF_BOOL
 
-# ./fpdf_formfill.h: 2001
+# ./fpdf_formfill.h: 1824
 if hasattr(_libs['pdfium'], 'FPDF_LoadXFA'):
     FPDF_LoadXFA = _libs['pdfium']['FPDF_LoadXFA']
     FPDF_LoadXFA.argtypes = [FPDF_DOCUMENT]
@@ -1533,67 +1540,73 @@ if hasattr(_libs['pdfium'], 'FPDFAnnot_GetFontSize'):
     FPDFAnnot_GetFontSize.argtypes = [FPDF_FORMHANDLE, FPDF_ANNOTATION, POINTER(c_float)]
     FPDFAnnot_GetFontSize.restype = FPDF_BOOL
 
-# ./fpdf_annot.h: 857
+# ./fpdf_annot.h: 859
+if hasattr(_libs['pdfium'], 'FPDFAnnot_GetFontColor'):
+    FPDFAnnot_GetFontColor = _libs['pdfium']['FPDFAnnot_GetFontColor']
+    FPDFAnnot_GetFontColor.argtypes = [FPDF_FORMHANDLE, FPDF_ANNOTATION, POINTER(c_uint), POINTER(c_uint), POINTER(c_uint)]
+    FPDFAnnot_GetFontColor.restype = FPDF_BOOL
+
+# ./fpdf_annot.h: 874
 if hasattr(_libs['pdfium'], 'FPDFAnnot_IsChecked'):
     FPDFAnnot_IsChecked = _libs['pdfium']['FPDFAnnot_IsChecked']
     FPDFAnnot_IsChecked.argtypes = [FPDF_FORMHANDLE, FPDF_ANNOTATION]
     FPDFAnnot_IsChecked.restype = FPDF_BOOL
 
-# ./fpdf_annot.h: 872
+# ./fpdf_annot.h: 889
 if hasattr(_libs['pdfium'], 'FPDFAnnot_SetFocusableSubtypes'):
     FPDFAnnot_SetFocusableSubtypes = _libs['pdfium']['FPDFAnnot_SetFocusableSubtypes']
     FPDFAnnot_SetFocusableSubtypes.argtypes = [FPDF_FORMHANDLE, POINTER(FPDF_ANNOTATION_SUBTYPE), c_size_t]
     FPDFAnnot_SetFocusableSubtypes.restype = FPDF_BOOL
 
-# ./fpdf_annot.h: 885
+# ./fpdf_annot.h: 902
 if hasattr(_libs['pdfium'], 'FPDFAnnot_GetFocusableSubtypesCount'):
     FPDFAnnot_GetFocusableSubtypesCount = _libs['pdfium']['FPDFAnnot_GetFocusableSubtypesCount']
     FPDFAnnot_GetFocusableSubtypesCount.argtypes = [FPDF_FORMHANDLE]
     FPDFAnnot_GetFocusableSubtypesCount.restype = c_int
 
-# ./fpdf_annot.h: 901
+# ./fpdf_annot.h: 918
 if hasattr(_libs['pdfium'], 'FPDFAnnot_GetFocusableSubtypes'):
     FPDFAnnot_GetFocusableSubtypes = _libs['pdfium']['FPDFAnnot_GetFocusableSubtypes']
     FPDFAnnot_GetFocusableSubtypes.argtypes = [FPDF_FORMHANDLE, POINTER(FPDF_ANNOTATION_SUBTYPE), c_size_t]
     FPDFAnnot_GetFocusableSubtypes.restype = FPDF_BOOL
 
-# ./fpdf_annot.h: 912
+# ./fpdf_annot.h: 929
 if hasattr(_libs['pdfium'], 'FPDFAnnot_GetLink'):
     FPDFAnnot_GetLink = _libs['pdfium']['FPDFAnnot_GetLink']
     FPDFAnnot_GetLink.argtypes = [FPDF_ANNOTATION]
     FPDFAnnot_GetLink.restype = FPDF_LINK
 
-# ./fpdf_annot.h: 926
+# ./fpdf_annot.h: 943
 if hasattr(_libs['pdfium'], 'FPDFAnnot_GetFormControlCount'):
     FPDFAnnot_GetFormControlCount = _libs['pdfium']['FPDFAnnot_GetFormControlCount']
     FPDFAnnot_GetFormControlCount.argtypes = [FPDF_FORMHANDLE, FPDF_ANNOTATION]
     FPDFAnnot_GetFormControlCount.restype = c_int
 
-# ./fpdf_annot.h: 940
+# ./fpdf_annot.h: 957
 if hasattr(_libs['pdfium'], 'FPDFAnnot_GetFormControlIndex'):
     FPDFAnnot_GetFormControlIndex = _libs['pdfium']['FPDFAnnot_GetFormControlIndex']
     FPDFAnnot_GetFormControlIndex.argtypes = [FPDF_FORMHANDLE, FPDF_ANNOTATION]
     FPDFAnnot_GetFormControlIndex.restype = c_int
 
-# ./fpdf_annot.h: 957
+# ./fpdf_annot.h: 974
 if hasattr(_libs['pdfium'], 'FPDFAnnot_GetFormFieldExportValue'):
     FPDFAnnot_GetFormFieldExportValue = _libs['pdfium']['FPDFAnnot_GetFormFieldExportValue']
     FPDFAnnot_GetFormFieldExportValue.argtypes = [FPDF_FORMHANDLE, FPDF_ANNOTATION, POINTER(FPDF_WCHAR), c_ulong]
     FPDFAnnot_GetFormFieldExportValue.restype = c_ulong
 
-# ./fpdf_annot.h: 969
+# ./fpdf_annot.h: 986
 if hasattr(_libs['pdfium'], 'FPDFAnnot_SetURI'):
     FPDFAnnot_SetURI = _libs['pdfium']['FPDFAnnot_SetURI']
     FPDFAnnot_SetURI.argtypes = [FPDF_ANNOTATION, POINTER(c_char)]
     FPDFAnnot_SetURI.restype = FPDF_BOOL
 
-# ./fpdf_annot.h: 979
+# ./fpdf_annot.h: 996
 if hasattr(_libs['pdfium'], 'FPDFAnnot_GetFileAttachment'):
     FPDFAnnot_GetFileAttachment = _libs['pdfium']['FPDFAnnot_GetFileAttachment']
     FPDFAnnot_GetFileAttachment.argtypes = [FPDF_ANNOTATION]
     FPDFAnnot_GetFileAttachment.restype = FPDF_ATTACHMENT
 
-# ./fpdf_annot.h: 989
+# ./fpdf_annot.h: 1006
 if hasattr(_libs['pdfium'], 'FPDFAnnot_AddFileAttachment'):
     FPDFAnnot_AddFileAttachment = _libs['pdfium']['FPDFAnnot_AddFileAttachment']
     FPDFAnnot_AddFileAttachment.argtypes = [FPDF_ANNOTATION, FPDF_WIDESTRING]
@@ -1665,11 +1678,17 @@ if hasattr(_libs['pdfium'], 'FPDFAttachment_GetFile'):
     FPDFAttachment_GetFile.argtypes = [FPDF_ATTACHMENT, POINTER(None), c_ulong, POINTER(c_ulong)]
     FPDFAttachment_GetFile.restype = FPDF_BOOL
 
-# ./fpdf_catalog.h: 28
+# ./fpdf_catalog.h: 26
 if hasattr(_libs['pdfium'], 'FPDFCatalog_IsTagged'):
     FPDFCatalog_IsTagged = _libs['pdfium']['FPDFCatalog_IsTagged']
     FPDFCatalog_IsTagged.argtypes = [FPDF_DOCUMENT]
     FPDFCatalog_IsTagged.restype = FPDF_BOOL
+
+# ./fpdf_catalog.h: 36
+if hasattr(_libs['pdfium'], 'FPDFCatalog_SetLanguage'):
+    FPDFCatalog_SetLanguage = _libs['pdfium']['FPDFCatalog_SetLanguage']
+    FPDFCatalog_SetLanguage.argtypes = [FPDF_DOCUMENT, FPDF_BYTESTRING]
+    FPDFCatalog_SetLanguage.restype = FPDF_BOOL
 
 # ./fpdf_dataavail.h: 33
 class struct__FX_FILEAVAIL (Structure):
@@ -1997,595 +2016,631 @@ if hasattr(_libs['pdfium'], 'FPDFPage_InsertObject'):
     FPDFPage_InsertObject.argtypes = [FPDF_PAGE, FPDF_PAGEOBJECT]
     FPDFPage_InsertObject.restype = None
 
-# ./fpdf_edit.h: 201
+# ./fpdf_edit.h: 203
 if hasattr(_libs['pdfium'], 'FPDFPage_RemoveObject'):
     FPDFPage_RemoveObject = _libs['pdfium']['FPDFPage_RemoveObject']
     FPDFPage_RemoveObject.argtypes = [FPDF_PAGE, FPDF_PAGEOBJECT]
     FPDFPage_RemoveObject.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 208
+# ./fpdf_edit.h: 210
 if hasattr(_libs['pdfium'], 'FPDFPage_CountObjects'):
     FPDFPage_CountObjects = _libs['pdfium']['FPDFPage_CountObjects']
     FPDFPage_CountObjects.argtypes = [FPDF_PAGE]
     FPDFPage_CountObjects.restype = c_int
 
-# ./fpdf_edit.h: 216
+# ./fpdf_edit.h: 218
 if hasattr(_libs['pdfium'], 'FPDFPage_GetObject'):
     FPDFPage_GetObject = _libs['pdfium']['FPDFPage_GetObject']
     FPDFPage_GetObject.argtypes = [FPDF_PAGE, c_int]
     FPDFPage_GetObject.restype = FPDF_PAGEOBJECT
 
-# ./fpdf_edit.h: 224
+# ./fpdf_edit.h: 226
 if hasattr(_libs['pdfium'], 'FPDFPage_HasTransparency'):
     FPDFPage_HasTransparency = _libs['pdfium']['FPDFPage_HasTransparency']
     FPDFPage_HasTransparency.argtypes = [FPDF_PAGE]
     FPDFPage_HasTransparency.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 234
+# ./fpdf_edit.h: 236
 if hasattr(_libs['pdfium'], 'FPDFPage_GenerateContent'):
     FPDFPage_GenerateContent = _libs['pdfium']['FPDFPage_GenerateContent']
     FPDFPage_GenerateContent.argtypes = [FPDF_PAGE]
     FPDFPage_GenerateContent.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 243
+# ./fpdf_edit.h: 245
 if hasattr(_libs['pdfium'], 'FPDFPageObj_Destroy'):
     FPDFPageObj_Destroy = _libs['pdfium']['FPDFPageObj_Destroy']
     FPDFPageObj_Destroy.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_Destroy.restype = None
 
-# ./fpdf_edit.h: 251
+# ./fpdf_edit.h: 253
 if hasattr(_libs['pdfium'], 'FPDFPageObj_HasTransparency'):
     FPDFPageObj_HasTransparency = _libs['pdfium']['FPDFPageObj_HasTransparency']
     FPDFPageObj_HasTransparency.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_HasTransparency.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 259
+# ./fpdf_edit.h: 261
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetType'):
     FPDFPageObj_GetType = _libs['pdfium']['FPDFPageObj_GetType']
     FPDFPageObj_GetType.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_GetType.restype = c_int
 
-# ./fpdf_edit.h: 276
+# ./fpdf_edit.h: 277
+if hasattr(_libs['pdfium'], 'FPDFPageObj_GetIsActive'):
+    FPDFPageObj_GetIsActive = _libs['pdfium']['FPDFPageObj_GetIsActive']
+    FPDFPageObj_GetIsActive.argtypes = [FPDF_PAGEOBJECT, POINTER(FPDF_BOOL)]
+    FPDFPageObj_GetIsActive.restype = FPDF_BOOL
+
+# ./fpdf_edit.h: 293
+if hasattr(_libs['pdfium'], 'FPDFPageObj_SetIsActive'):
+    FPDFPageObj_SetIsActive = _libs['pdfium']['FPDFPageObj_SetIsActive']
+    FPDFPageObj_SetIsActive.argtypes = [FPDF_PAGEOBJECT, FPDF_BOOL]
+    FPDFPageObj_SetIsActive.restype = FPDF_BOOL
+
+# ./fpdf_edit.h: 310
 if hasattr(_libs['pdfium'], 'FPDFPageObj_Transform'):
     FPDFPageObj_Transform = _libs['pdfium']['FPDFPageObj_Transform']
     FPDFPageObj_Transform.argtypes = [FPDF_PAGEOBJECT, c_double, c_double, c_double, c_double, c_double, c_double]
     FPDFPageObj_Transform.restype = None
 
-# ./fpdf_edit.h: 302
+# ./fpdf_edit.h: 331
+if hasattr(_libs['pdfium'], 'FPDFPageObj_TransformF'):
+    FPDFPageObj_TransformF = _libs['pdfium']['FPDFPageObj_TransformF']
+    FPDFPageObj_TransformF.argtypes = [FPDF_PAGEOBJECT, POINTER(FS_MATRIX)]
+    FPDFPageObj_TransformF.restype = FPDF_BOOL
+
+# ./fpdf_edit.h: 351
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetMatrix'):
     FPDFPageObj_GetMatrix = _libs['pdfium']['FPDFPageObj_GetMatrix']
     FPDFPageObj_GetMatrix.argtypes = [FPDF_PAGEOBJECT, POINTER(FS_MATRIX)]
     FPDFPageObj_GetMatrix.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 317
+# ./fpdf_edit.h: 366
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetMatrix'):
     FPDFPageObj_SetMatrix = _libs['pdfium']['FPDFPageObj_SetMatrix']
     FPDFPageObj_SetMatrix.argtypes = [FPDF_PAGEOBJECT, POINTER(FS_MATRIX)]
     FPDFPageObj_SetMatrix.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 333
+# ./fpdf_edit.h: 382
 if hasattr(_libs['pdfium'], 'FPDFPage_TransformAnnots'):
     FPDFPage_TransformAnnots = _libs['pdfium']['FPDFPage_TransformAnnots']
     FPDFPage_TransformAnnots.argtypes = [FPDF_PAGE, c_double, c_double, c_double, c_double, c_double, c_double]
     FPDFPage_TransformAnnots.restype = None
 
-# ./fpdf_edit.h: 347
+# ./fpdf_edit.h: 396
 if hasattr(_libs['pdfium'], 'FPDFPageObj_NewImageObj'):
     FPDFPageObj_NewImageObj = _libs['pdfium']['FPDFPageObj_NewImageObj']
     FPDFPageObj_NewImageObj.argtypes = [FPDF_DOCUMENT]
     FPDFPageObj_NewImageObj.restype = FPDF_PAGEOBJECT
 
-# ./fpdf_edit.h: 357
+# ./fpdf_edit.h: 405
+if hasattr(_libs['pdfium'], 'FPDFPageObj_GetMarkedContentID'):
+    FPDFPageObj_GetMarkedContentID = _libs['pdfium']['FPDFPageObj_GetMarkedContentID']
+    FPDFPageObj_GetMarkedContentID.argtypes = [FPDF_PAGEOBJECT]
+    FPDFPageObj_GetMarkedContentID.restype = c_int
+
+# ./fpdf_edit.h: 415
 if hasattr(_libs['pdfium'], 'FPDFPageObj_CountMarks'):
     FPDFPageObj_CountMarks = _libs['pdfium']['FPDFPageObj_CountMarks']
     FPDFPageObj_CountMarks.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_CountMarks.restype = c_int
 
-# ./fpdf_edit.h: 370
+# ./fpdf_edit.h: 428
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetMark'):
     FPDFPageObj_GetMark = _libs['pdfium']['FPDFPageObj_GetMark']
     FPDFPageObj_GetMark.argtypes = [FPDF_PAGEOBJECT, c_ulong]
     FPDFPageObj_GetMark.restype = FPDF_PAGEOBJECTMARK
 
-# ./fpdf_edit.h: 383
+# ./fpdf_edit.h: 441
 if hasattr(_libs['pdfium'], 'FPDFPageObj_AddMark'):
     FPDFPageObj_AddMark = _libs['pdfium']['FPDFPageObj_AddMark']
     FPDFPageObj_AddMark.argtypes = [FPDF_PAGEOBJECT, FPDF_BYTESTRING]
     FPDFPageObj_AddMark.restype = FPDF_PAGEOBJECTMARK
 
-# ./fpdf_edit.h: 394
+# ./fpdf_edit.h: 452
 if hasattr(_libs['pdfium'], 'FPDFPageObj_RemoveMark'):
     FPDFPageObj_RemoveMark = _libs['pdfium']['FPDFPageObj_RemoveMark']
     FPDFPageObj_RemoveMark.argtypes = [FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK]
     FPDFPageObj_RemoveMark.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 410
+# ./fpdf_edit.h: 469
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetName'):
     FPDFPageObjMark_GetName = _libs['pdfium']['FPDFPageObjMark_GetName']
-    FPDFPageObjMark_GetName.argtypes = [FPDF_PAGEOBJECTMARK, POINTER(None), c_ulong, POINTER(c_ulong)]
+    FPDFPageObjMark_GetName.argtypes = [FPDF_PAGEOBJECTMARK, POINTER(FPDF_WCHAR), c_ulong, POINTER(c_ulong)]
     FPDFPageObjMark_GetName.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 423
+# ./fpdf_edit.h: 482
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_CountParams'):
     FPDFPageObjMark_CountParams = _libs['pdfium']['FPDFPageObjMark_CountParams']
     FPDFPageObjMark_CountParams.argtypes = [FPDF_PAGEOBJECTMARK]
     FPDFPageObjMark_CountParams.restype = c_int
 
-# ./fpdf_edit.h: 440
+# ./fpdf_edit.h: 500
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetParamKey'):
     FPDFPageObjMark_GetParamKey = _libs['pdfium']['FPDFPageObjMark_GetParamKey']
-    FPDFPageObjMark_GetParamKey.argtypes = [FPDF_PAGEOBJECTMARK, c_ulong, POINTER(None), c_ulong, POINTER(c_ulong)]
+    FPDFPageObjMark_GetParamKey.argtypes = [FPDF_PAGEOBJECTMARK, c_ulong, POINTER(FPDF_WCHAR), c_ulong, POINTER(c_ulong)]
     FPDFPageObjMark_GetParamKey.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 454
+# ./fpdf_edit.h: 514
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetParamValueType'):
     FPDFPageObjMark_GetParamValueType = _libs['pdfium']['FPDFPageObjMark_GetParamValueType']
     FPDFPageObjMark_GetParamValueType.argtypes = [FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING]
     FPDFPageObjMark_GetParamValueType.restype = FPDF_OBJECT_TYPE
 
-# ./fpdf_edit.h: 469
+# ./fpdf_edit.h: 529
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetParamIntValue'):
     FPDFPageObjMark_GetParamIntValue = _libs['pdfium']['FPDFPageObjMark_GetParamIntValue']
     FPDFPageObjMark_GetParamIntValue.argtypes = [FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(c_int)]
     FPDFPageObjMark_GetParamIntValue.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 489
+# ./fpdf_edit.h: 549
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetParamStringValue'):
     FPDFPageObjMark_GetParamStringValue = _libs['pdfium']['FPDFPageObjMark_GetParamStringValue']
-    FPDFPageObjMark_GetParamStringValue.argtypes = [FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(None), c_ulong, POINTER(c_ulong)]
+    FPDFPageObjMark_GetParamStringValue.argtypes = [FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(FPDF_WCHAR), c_ulong, POINTER(c_ulong)]
     FPDFPageObjMark_GetParamStringValue.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 510
+# ./fpdf_edit.h: 571
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetParamBlobValue'):
     FPDFPageObjMark_GetParamBlobValue = _libs['pdfium']['FPDFPageObjMark_GetParamBlobValue']
-    FPDFPageObjMark_GetParamBlobValue.argtypes = [FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(None), c_ulong, POINTER(c_ulong)]
+    FPDFPageObjMark_GetParamBlobValue.argtypes = [FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(c_ubyte), c_ulong, POINTER(c_ulong)]
     FPDFPageObjMark_GetParamBlobValue.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 529
+# ./fpdf_edit.h: 590
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_SetIntParam'):
     FPDFPageObjMark_SetIntParam = _libs['pdfium']['FPDFPageObjMark_SetIntParam']
     FPDFPageObjMark_SetIntParam.argtypes = [FPDF_DOCUMENT, FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, c_int]
     FPDFPageObjMark_SetIntParam.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 548
+# ./fpdf_edit.h: 609
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_SetStringParam'):
     FPDFPageObjMark_SetStringParam = _libs['pdfium']['FPDFPageObjMark_SetStringParam']
     FPDFPageObjMark_SetStringParam.argtypes = [FPDF_DOCUMENT, FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, FPDF_BYTESTRING]
     FPDFPageObjMark_SetStringParam.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 568
+# ./fpdf_edit.h: 629
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_SetBlobParam'):
     FPDFPageObjMark_SetBlobParam = _libs['pdfium']['FPDFPageObjMark_SetBlobParam']
-    FPDFPageObjMark_SetBlobParam.argtypes = [FPDF_DOCUMENT, FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(None), c_ulong]
+    FPDFPageObjMark_SetBlobParam.argtypes = [FPDF_DOCUMENT, FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(c_ubyte), c_ulong]
     FPDFPageObjMark_SetBlobParam.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 584
+# ./fpdf_edit.h: 645
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_RemoveParam'):
     FPDFPageObjMark_RemoveParam = _libs['pdfium']['FPDFPageObjMark_RemoveParam']
     FPDFPageObjMark_RemoveParam.argtypes = [FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING]
     FPDFPageObjMark_RemoveParam.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 603
+# ./fpdf_edit.h: 664
 if hasattr(_libs['pdfium'], 'FPDFImageObj_LoadJpegFile'):
     FPDFImageObj_LoadJpegFile = _libs['pdfium']['FPDFImageObj_LoadJpegFile']
     FPDFImageObj_LoadJpegFile.argtypes = [POINTER(FPDF_PAGE), c_int, FPDF_PAGEOBJECT, POINTER(FPDF_FILEACCESS)]
     FPDFImageObj_LoadJpegFile.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 625
+# ./fpdf_edit.h: 686
 if hasattr(_libs['pdfium'], 'FPDFImageObj_LoadJpegFileInline'):
     FPDFImageObj_LoadJpegFileInline = _libs['pdfium']['FPDFImageObj_LoadJpegFileInline']
     FPDFImageObj_LoadJpegFileInline.argtypes = [POINTER(FPDF_PAGE), c_int, FPDF_PAGEOBJECT, POINTER(FPDF_FILEACCESS)]
     FPDFImageObj_LoadJpegFileInline.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 649
+# ./fpdf_edit.h: 710
 if hasattr(_libs['pdfium'], 'FPDFImageObj_SetMatrix'):
     FPDFImageObj_SetMatrix = _libs['pdfium']['FPDFImageObj_SetMatrix']
     FPDFImageObj_SetMatrix.argtypes = [FPDF_PAGEOBJECT, c_double, c_double, c_double, c_double, c_double, c_double]
     FPDFImageObj_SetMatrix.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 666
+# ./fpdf_edit.h: 727
 if hasattr(_libs['pdfium'], 'FPDFImageObj_SetBitmap'):
     FPDFImageObj_SetBitmap = _libs['pdfium']['FPDFImageObj_SetBitmap']
     FPDFImageObj_SetBitmap.argtypes = [POINTER(FPDF_PAGE), c_int, FPDF_PAGEOBJECT, FPDF_BITMAP]
     FPDFImageObj_SetBitmap.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 681
+# ./fpdf_edit.h: 742
 if hasattr(_libs['pdfium'], 'FPDFImageObj_GetBitmap'):
     FPDFImageObj_GetBitmap = _libs['pdfium']['FPDFImageObj_GetBitmap']
     FPDFImageObj_GetBitmap.argtypes = [FPDF_PAGEOBJECT]
     FPDFImageObj_GetBitmap.restype = FPDF_BITMAP
 
-# ./fpdf_edit.h: 697
+# ./fpdf_edit.h: 758
 if hasattr(_libs['pdfium'], 'FPDFImageObj_GetRenderedBitmap'):
     FPDFImageObj_GetRenderedBitmap = _libs['pdfium']['FPDFImageObj_GetRenderedBitmap']
     FPDFImageObj_GetRenderedBitmap.argtypes = [FPDF_DOCUMENT, FPDF_PAGE, FPDF_PAGEOBJECT]
     FPDFImageObj_GetRenderedBitmap.restype = FPDF_BITMAP
 
-# ./fpdf_edit.h: 712
+# ./fpdf_edit.h: 773
 if hasattr(_libs['pdfium'], 'FPDFImageObj_GetImageDataDecoded'):
     FPDFImageObj_GetImageDataDecoded = _libs['pdfium']['FPDFImageObj_GetImageDataDecoded']
     FPDFImageObj_GetImageDataDecoded.argtypes = [FPDF_PAGEOBJECT, POINTER(None), c_ulong]
     FPDFImageObj_GetImageDataDecoded.restype = c_ulong
 
-# ./fpdf_edit.h: 726
+# ./fpdf_edit.h: 787
 if hasattr(_libs['pdfium'], 'FPDFImageObj_GetImageDataRaw'):
     FPDFImageObj_GetImageDataRaw = _libs['pdfium']['FPDFImageObj_GetImageDataRaw']
     FPDFImageObj_GetImageDataRaw.argtypes = [FPDF_PAGEOBJECT, POINTER(None), c_ulong]
     FPDFImageObj_GetImageDataRaw.restype = c_ulong
 
-# ./fpdf_edit.h: 736
+# ./fpdf_edit.h: 797
 if hasattr(_libs['pdfium'], 'FPDFImageObj_GetImageFilterCount'):
     FPDFImageObj_GetImageFilterCount = _libs['pdfium']['FPDFImageObj_GetImageFilterCount']
     FPDFImageObj_GetImageFilterCount.argtypes = [FPDF_PAGEOBJECT]
     FPDFImageObj_GetImageFilterCount.restype = c_int
 
-# ./fpdf_edit.h: 750
+# ./fpdf_edit.h: 811
 if hasattr(_libs['pdfium'], 'FPDFImageObj_GetImageFilter'):
     FPDFImageObj_GetImageFilter = _libs['pdfium']['FPDFImageObj_GetImageFilter']
     FPDFImageObj_GetImageFilter.argtypes = [FPDF_PAGEOBJECT, c_int, POINTER(None), c_ulong]
     FPDFImageObj_GetImageFilter.restype = c_ulong
 
-# ./fpdf_edit.h: 767
+# ./fpdf_edit.h: 828
 if hasattr(_libs['pdfium'], 'FPDFImageObj_GetImageMetadata'):
     FPDFImageObj_GetImageMetadata = _libs['pdfium']['FPDFImageObj_GetImageMetadata']
     FPDFImageObj_GetImageMetadata.argtypes = [FPDF_PAGEOBJECT, FPDF_PAGE, POINTER(FPDF_IMAGEOBJ_METADATA)]
     FPDFImageObj_GetImageMetadata.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 780
+# ./fpdf_edit.h: 841
 if hasattr(_libs['pdfium'], 'FPDFImageObj_GetImagePixelSize'):
     FPDFImageObj_GetImagePixelSize = _libs['pdfium']['FPDFImageObj_GetImagePixelSize']
     FPDFImageObj_GetImagePixelSize.argtypes = [FPDF_PAGEOBJECT, POINTER(c_uint), POINTER(c_uint)]
     FPDFImageObj_GetImagePixelSize.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 790
+# ./fpdf_edit.h: 864
+if hasattr(_libs['pdfium'], 'FPDFImageObj_GetIccProfileDataDecoded'):
+    FPDFImageObj_GetIccProfileDataDecoded = _libs['pdfium']['FPDFImageObj_GetIccProfileDataDecoded']
+    FPDFImageObj_GetIccProfileDataDecoded.argtypes = [FPDF_PAGEOBJECT, FPDF_PAGE, POINTER(uint8_t), c_size_t, POINTER(c_size_t)]
+    FPDFImageObj_GetIccProfileDataDecoded.restype = FPDF_BOOL
+
+# ./fpdf_edit.h: 876
 if hasattr(_libs['pdfium'], 'FPDFPageObj_CreateNewPath'):
     FPDFPageObj_CreateNewPath = _libs['pdfium']['FPDFPageObj_CreateNewPath']
     FPDFPageObj_CreateNewPath.argtypes = [c_float, c_float]
     FPDFPageObj_CreateNewPath.restype = FPDF_PAGEOBJECT
 
-# ./fpdf_edit.h: 801
+# ./fpdf_edit.h: 887
 if hasattr(_libs['pdfium'], 'FPDFPageObj_CreateNewRect'):
     FPDFPageObj_CreateNewRect = _libs['pdfium']['FPDFPageObj_CreateNewRect']
     FPDFPageObj_CreateNewRect.argtypes = [c_float, c_float, c_float, c_float]
     FPDFPageObj_CreateNewRect.restype = FPDF_PAGEOBJECT
 
-# ./fpdf_edit.h: 816
+# ./fpdf_edit.h: 902
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetBounds'):
     FPDFPageObj_GetBounds = _libs['pdfium']['FPDFPageObj_GetBounds']
     FPDFPageObj_GetBounds.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
     FPDFPageObj_GetBounds.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 838
+# ./fpdf_edit.h: 924
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetRotatedBounds'):
     FPDFPageObj_GetRotatedBounds = _libs['pdfium']['FPDFPageObj_GetRotatedBounds']
     FPDFPageObj_GetRotatedBounds.argtypes = [FPDF_PAGEOBJECT, POINTER(FS_QUADPOINTSF)]
     FPDFPageObj_GetRotatedBounds.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 850
+# ./fpdf_edit.h: 936
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetBlendMode'):
     FPDFPageObj_SetBlendMode = _libs['pdfium']['FPDFPageObj_SetBlendMode']
     FPDFPageObj_SetBlendMode.argtypes = [FPDF_PAGEOBJECT, FPDF_BYTESTRING]
     FPDFPageObj_SetBlendMode.restype = None
 
-# ./fpdf_edit.h: 863
+# ./fpdf_edit.h: 949
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetStrokeColor'):
     FPDFPageObj_SetStrokeColor = _libs['pdfium']['FPDFPageObj_SetStrokeColor']
     FPDFPageObj_SetStrokeColor.argtypes = [FPDF_PAGEOBJECT, c_uint, c_uint, c_uint, c_uint]
     FPDFPageObj_SetStrokeColor.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 879
+# ./fpdf_edit.h: 965
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetStrokeColor'):
     FPDFPageObj_GetStrokeColor = _libs['pdfium']['FPDFPageObj_GetStrokeColor']
     FPDFPageObj_GetStrokeColor.argtypes = [FPDF_PAGEOBJECT, POINTER(c_uint), POINTER(c_uint), POINTER(c_uint), POINTER(c_uint)]
     FPDFPageObj_GetStrokeColor.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 892
+# ./fpdf_edit.h: 978
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetStrokeWidth'):
     FPDFPageObj_SetStrokeWidth = _libs['pdfium']['FPDFPageObj_SetStrokeWidth']
     FPDFPageObj_SetStrokeWidth.argtypes = [FPDF_PAGEOBJECT, c_float]
     FPDFPageObj_SetStrokeWidth.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 901
+# ./fpdf_edit.h: 987
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetStrokeWidth'):
     FPDFPageObj_GetStrokeWidth = _libs['pdfium']['FPDFPageObj_GetStrokeWidth']
     FPDFPageObj_GetStrokeWidth.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float)]
     FPDFPageObj_GetStrokeWidth.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 911
+# ./fpdf_edit.h: 997
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetLineJoin'):
     FPDFPageObj_GetLineJoin = _libs['pdfium']['FPDFPageObj_GetLineJoin']
     FPDFPageObj_GetLineJoin.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_GetLineJoin.restype = c_int
 
-# ./fpdf_edit.h: 921
+# ./fpdf_edit.h: 1007
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetLineJoin'):
     FPDFPageObj_SetLineJoin = _libs['pdfium']['FPDFPageObj_SetLineJoin']
     FPDFPageObj_SetLineJoin.argtypes = [FPDF_PAGEOBJECT, c_int]
     FPDFPageObj_SetLineJoin.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 931
+# ./fpdf_edit.h: 1017
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetLineCap'):
     FPDFPageObj_GetLineCap = _libs['pdfium']['FPDFPageObj_GetLineCap']
     FPDFPageObj_GetLineCap.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_GetLineCap.restype = c_int
 
-# ./fpdf_edit.h: 941
+# ./fpdf_edit.h: 1027
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetLineCap'):
     FPDFPageObj_SetLineCap = _libs['pdfium']['FPDFPageObj_SetLineCap']
     FPDFPageObj_SetLineCap.argtypes = [FPDF_PAGEOBJECT, c_int]
     FPDFPageObj_SetLineCap.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 953
+# ./fpdf_edit.h: 1039
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetFillColor'):
     FPDFPageObj_SetFillColor = _libs['pdfium']['FPDFPageObj_SetFillColor']
     FPDFPageObj_SetFillColor.argtypes = [FPDF_PAGEOBJECT, c_uint, c_uint, c_uint, c_uint]
     FPDFPageObj_SetFillColor.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 969
+# ./fpdf_edit.h: 1055
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetFillColor'):
     FPDFPageObj_GetFillColor = _libs['pdfium']['FPDFPageObj_GetFillColor']
     FPDFPageObj_GetFillColor.argtypes = [FPDF_PAGEOBJECT, POINTER(c_uint), POINTER(c_uint), POINTER(c_uint), POINTER(c_uint)]
     FPDFPageObj_GetFillColor.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 983
+# ./fpdf_edit.h: 1069
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetDashPhase'):
     FPDFPageObj_GetDashPhase = _libs['pdfium']['FPDFPageObj_GetDashPhase']
     FPDFPageObj_GetDashPhase.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float)]
     FPDFPageObj_GetDashPhase.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 993
+# ./fpdf_edit.h: 1079
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetDashPhase'):
     FPDFPageObj_SetDashPhase = _libs['pdfium']['FPDFPageObj_SetDashPhase']
     FPDFPageObj_SetDashPhase.argtypes = [FPDF_PAGEOBJECT, c_float]
     FPDFPageObj_SetDashPhase.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1002
+# ./fpdf_edit.h: 1088
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetDashCount'):
     FPDFPageObj_GetDashCount = _libs['pdfium']['FPDFPageObj_GetDashCount']
     FPDFPageObj_GetDashCount.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_GetDashCount.restype = c_int
 
-# ./fpdf_edit.h: 1013
+# ./fpdf_edit.h: 1099
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetDashArray'):
     FPDFPageObj_GetDashArray = _libs['pdfium']['FPDFPageObj_GetDashArray']
     FPDFPageObj_GetDashArray.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float), c_size_t]
     FPDFPageObj_GetDashArray.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1027
+# ./fpdf_edit.h: 1113
 if hasattr(_libs['pdfium'], 'FPDFPageObj_SetDashArray'):
     FPDFPageObj_SetDashArray = _libs['pdfium']['FPDFPageObj_SetDashArray']
     FPDFPageObj_SetDashArray.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float), c_size_t, c_float]
     FPDFPageObj_SetDashArray.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1040
+# ./fpdf_edit.h: 1126
 if hasattr(_libs['pdfium'], 'FPDFPath_CountSegments'):
     FPDFPath_CountSegments = _libs['pdfium']['FPDFPath_CountSegments']
     FPDFPath_CountSegments.argtypes = [FPDF_PAGEOBJECT]
     FPDFPath_CountSegments.restype = c_int
 
-# ./fpdf_edit.h: 1049
+# ./fpdf_edit.h: 1135
 if hasattr(_libs['pdfium'], 'FPDFPath_GetPathSegment'):
     FPDFPath_GetPathSegment = _libs['pdfium']['FPDFPath_GetPathSegment']
     FPDFPath_GetPathSegment.argtypes = [FPDF_PAGEOBJECT, c_int]
     FPDFPath_GetPathSegment.restype = FPDF_PATHSEGMENT
 
-# ./fpdf_edit.h: 1059
+# ./fpdf_edit.h: 1145
 if hasattr(_libs['pdfium'], 'FPDFPathSegment_GetPoint'):
     FPDFPathSegment_GetPoint = _libs['pdfium']['FPDFPathSegment_GetPoint']
     FPDFPathSegment_GetPoint.argtypes = [FPDF_PATHSEGMENT, POINTER(c_float), POINTER(c_float)]
     FPDFPathSegment_GetPoint.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1067
+# ./fpdf_edit.h: 1153
 if hasattr(_libs['pdfium'], 'FPDFPathSegment_GetType'):
     FPDFPathSegment_GetType = _libs['pdfium']['FPDFPathSegment_GetType']
     FPDFPathSegment_GetType.argtypes = [FPDF_PATHSEGMENT]
     FPDFPathSegment_GetType.restype = c_int
 
-# ./fpdf_edit.h: 1075
+# ./fpdf_edit.h: 1161
 if hasattr(_libs['pdfium'], 'FPDFPathSegment_GetClose'):
     FPDFPathSegment_GetClose = _libs['pdfium']['FPDFPathSegment_GetClose']
     FPDFPathSegment_GetClose.argtypes = [FPDF_PATHSEGMENT]
     FPDFPathSegment_GetClose.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1087
+# ./fpdf_edit.h: 1173
 if hasattr(_libs['pdfium'], 'FPDFPath_MoveTo'):
     FPDFPath_MoveTo = _libs['pdfium']['FPDFPath_MoveTo']
     FPDFPath_MoveTo.argtypes = [FPDF_PAGEOBJECT, c_float, c_float]
     FPDFPath_MoveTo.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1100
+# ./fpdf_edit.h: 1186
 if hasattr(_libs['pdfium'], 'FPDFPath_LineTo'):
     FPDFPath_LineTo = _libs['pdfium']['FPDFPath_LineTo']
     FPDFPath_LineTo.argtypes = [FPDF_PAGEOBJECT, c_float, c_float]
     FPDFPath_LineTo.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1115
+# ./fpdf_edit.h: 1201
 if hasattr(_libs['pdfium'], 'FPDFPath_BezierTo'):
     FPDFPath_BezierTo = _libs['pdfium']['FPDFPath_BezierTo']
     FPDFPath_BezierTo.argtypes = [FPDF_PAGEOBJECT, c_float, c_float, c_float, c_float, c_float, c_float]
     FPDFPath_BezierTo.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1131
+# ./fpdf_edit.h: 1217
 if hasattr(_libs['pdfium'], 'FPDFPath_Close'):
     FPDFPath_Close = _libs['pdfium']['FPDFPath_Close']
     FPDFPath_Close.argtypes = [FPDF_PAGEOBJECT]
     FPDFPath_Close.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1140
+# ./fpdf_edit.h: 1226
 if hasattr(_libs['pdfium'], 'FPDFPath_SetDrawMode'):
     FPDFPath_SetDrawMode = _libs['pdfium']['FPDFPath_SetDrawMode']
     FPDFPath_SetDrawMode.argtypes = [FPDF_PAGEOBJECT, c_int, FPDF_BOOL]
     FPDFPath_SetDrawMode.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1151
+# ./fpdf_edit.h: 1237
 if hasattr(_libs['pdfium'], 'FPDFPath_GetDrawMode'):
     FPDFPath_GetDrawMode = _libs['pdfium']['FPDFPath_GetDrawMode']
     FPDFPath_GetDrawMode.argtypes = [FPDF_PAGEOBJECT, POINTER(c_int), POINTER(FPDF_BOOL)]
     FPDFPath_GetDrawMode.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1163
+# ./fpdf_edit.h: 1249
 if hasattr(_libs['pdfium'], 'FPDFPageObj_NewTextObj'):
     FPDFPageObj_NewTextObj = _libs['pdfium']['FPDFPageObj_NewTextObj']
     FPDFPageObj_NewTextObj.argtypes = [FPDF_DOCUMENT, FPDF_BYTESTRING, c_float]
     FPDFPageObj_NewTextObj.restype = FPDF_PAGEOBJECT
 
-# ./fpdf_edit.h: 1174
+# ./fpdf_edit.h: 1260
 if hasattr(_libs['pdfium'], 'FPDFText_SetText'):
     FPDFText_SetText = _libs['pdfium']['FPDFText_SetText']
     FPDFText_SetText.argtypes = [FPDF_PAGEOBJECT, FPDF_WIDESTRING]
     FPDFText_SetText.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1186
+# ./fpdf_edit.h: 1272
 if hasattr(_libs['pdfium'], 'FPDFText_SetCharcodes'):
     FPDFText_SetCharcodes = _libs['pdfium']['FPDFText_SetCharcodes']
     FPDFText_SetCharcodes.argtypes = [FPDF_PAGEOBJECT, POINTER(uint32_t), c_size_t]
     FPDFText_SetCharcodes.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1203
+# ./fpdf_edit.h: 1289
 if hasattr(_libs['pdfium'], 'FPDFText_LoadFont'):
     FPDFText_LoadFont = _libs['pdfium']['FPDFText_LoadFont']
     FPDFText_LoadFont.argtypes = [FPDF_DOCUMENT, POINTER(uint8_t), uint32_t, c_int, FPDF_BOOL]
     FPDFText_LoadFont.restype = FPDF_FONT
 
-# ./fpdf_edit.h: 1221
+# ./fpdf_edit.h: 1307
 if hasattr(_libs['pdfium'], 'FPDFText_LoadStandardFont'):
     FPDFText_LoadStandardFont = _libs['pdfium']['FPDFText_LoadStandardFont']
     FPDFText_LoadStandardFont.argtypes = [FPDF_DOCUMENT, FPDF_BYTESTRING]
     FPDFText_LoadStandardFont.restype = FPDF_FONT
 
-# ./fpdf_edit.h: 1240
+# ./fpdf_edit.h: 1326
 if hasattr(_libs['pdfium'], 'FPDFText_LoadCidType2Font'):
     FPDFText_LoadCidType2Font = _libs['pdfium']['FPDFText_LoadCidType2Font']
     FPDFText_LoadCidType2Font.argtypes = [FPDF_DOCUMENT, POINTER(uint8_t), uint32_t, FPDF_BYTESTRING, POINTER(uint8_t), uint32_t]
     FPDFText_LoadCidType2Font.restype = FPDF_FONT
 
-# ./fpdf_edit.h: 1255
+# ./fpdf_edit.h: 1341
 if hasattr(_libs['pdfium'], 'FPDFTextObj_GetFontSize'):
     FPDFTextObj_GetFontSize = _libs['pdfium']['FPDFTextObj_GetFontSize']
     FPDFTextObj_GetFontSize.argtypes = [FPDF_PAGEOBJECT, POINTER(c_float)]
     FPDFTextObj_GetFontSize.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1260
+# ./fpdf_edit.h: 1346
 if hasattr(_libs['pdfium'], 'FPDFFont_Close'):
     FPDFFont_Close = _libs['pdfium']['FPDFFont_Close']
     FPDFFont_Close.argtypes = [FPDF_FONT]
     FPDFFont_Close.restype = None
 
-# ./fpdf_edit.h: 1270
+# ./fpdf_edit.h: 1356
 if hasattr(_libs['pdfium'], 'FPDFPageObj_CreateTextObj'):
     FPDFPageObj_CreateTextObj = _libs['pdfium']['FPDFPageObj_CreateTextObj']
     FPDFPageObj_CreateTextObj.argtypes = [FPDF_DOCUMENT, FPDF_FONT, c_float]
     FPDFPageObj_CreateTextObj.restype = FPDF_PAGEOBJECT
 
-# ./fpdf_edit.h: 1281
+# ./fpdf_edit.h: 1367
 if hasattr(_libs['pdfium'], 'FPDFTextObj_GetTextRenderMode'):
     FPDFTextObj_GetTextRenderMode = _libs['pdfium']['FPDFTextObj_GetTextRenderMode']
     FPDFTextObj_GetTextRenderMode.argtypes = [FPDF_PAGEOBJECT]
     FPDFTextObj_GetTextRenderMode.restype = FPDF_TEXT_RENDERMODE
 
-# ./fpdf_edit.h: 1292
+# ./fpdf_edit.h: 1378
 if hasattr(_libs['pdfium'], 'FPDFTextObj_SetTextRenderMode'):
     FPDFTextObj_SetTextRenderMode = _libs['pdfium']['FPDFTextObj_SetTextRenderMode']
     FPDFTextObj_SetTextRenderMode.argtypes = [FPDF_PAGEOBJECT, FPDF_TEXT_RENDERMODE]
     FPDFTextObj_SetTextRenderMode.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1309
+# ./fpdf_edit.h: 1395
 if hasattr(_libs['pdfium'], 'FPDFTextObj_GetText'):
     FPDFTextObj_GetText = _libs['pdfium']['FPDFTextObj_GetText']
     FPDFTextObj_GetText.argtypes = [FPDF_PAGEOBJECT, FPDF_TEXTPAGE, POINTER(FPDF_WCHAR), c_ulong]
     FPDFTextObj_GetText.restype = c_ulong
 
-# ./fpdf_edit.h: 1328
+# ./fpdf_edit.h: 1414
 if hasattr(_libs['pdfium'], 'FPDFTextObj_GetRenderedBitmap'):
     FPDFTextObj_GetRenderedBitmap = _libs['pdfium']['FPDFTextObj_GetRenderedBitmap']
     FPDFTextObj_GetRenderedBitmap.argtypes = [FPDF_DOCUMENT, FPDF_PAGE, FPDF_PAGEOBJECT, c_float]
     FPDFTextObj_GetRenderedBitmap.restype = FPDF_BITMAP
 
-# ./fpdf_edit.h: 1339
+# ./fpdf_edit.h: 1425
 if hasattr(_libs['pdfium'], 'FPDFTextObj_GetFont'):
     FPDFTextObj_GetFont = _libs['pdfium']['FPDFTextObj_GetFont']
     FPDFTextObj_GetFont.argtypes = [FPDF_PAGEOBJECT]
     FPDFTextObj_GetFont.restype = FPDF_FONT
 
-# ./fpdf_edit.h: 1355
-if hasattr(_libs['pdfium'], 'FPDFFont_GetFontName'):
-    FPDFFont_GetFontName = _libs['pdfium']['FPDFFont_GetFontName']
-    FPDFFont_GetFontName.argtypes = [FPDF_FONT, POINTER(c_char), c_ulong]
-    FPDFFont_GetFontName.restype = c_ulong
+# ./fpdf_edit.h: 1441
+if hasattr(_libs['pdfium'], 'FPDFFont_GetBaseFontName'):
+    FPDFFont_GetBaseFontName = _libs['pdfium']['FPDFFont_GetBaseFontName']
+    FPDFFont_GetBaseFontName.argtypes = [FPDF_FONT, POINTER(c_char), c_size_t]
+    FPDFFont_GetBaseFontName.restype = c_size_t
 
-# ./fpdf_edit.h: 1376
+# ./fpdf_edit.h: 1458
+if hasattr(_libs['pdfium'], 'FPDFFont_GetFamilyName'):
+    FPDFFont_GetFamilyName = _libs['pdfium']['FPDFFont_GetFamilyName']
+    FPDFFont_GetFamilyName.argtypes = [FPDF_FONT, POINTER(c_char), c_size_t]
+    FPDFFont_GetFamilyName.restype = c_size_t
+
+# ./fpdf_edit.h: 1481
 if hasattr(_libs['pdfium'], 'FPDFFont_GetFontData'):
     FPDFFont_GetFontData = _libs['pdfium']['FPDFFont_GetFontData']
     FPDFFont_GetFontData.argtypes = [FPDF_FONT, POINTER(uint8_t), c_size_t, POINTER(c_size_t)]
     FPDFFont_GetFontData.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1387
+# ./fpdf_edit.h: 1492
 if hasattr(_libs['pdfium'], 'FPDFFont_GetIsEmbedded'):
     FPDFFont_GetIsEmbedded = _libs['pdfium']['FPDFFont_GetIsEmbedded']
     FPDFFont_GetIsEmbedded.argtypes = [FPDF_FONT]
     FPDFFont_GetIsEmbedded.restype = c_int
 
-# ./fpdf_edit.h: 1396
+# ./fpdf_edit.h: 1501
 if hasattr(_libs['pdfium'], 'FPDFFont_GetFlags'):
     FPDFFont_GetFlags = _libs['pdfium']['FPDFFont_GetFlags']
     FPDFFont_GetFlags.argtypes = [FPDF_FONT]
     FPDFFont_GetFlags.restype = c_int
 
-# ./fpdf_edit.h: 1405
+# ./fpdf_edit.h: 1510
 if hasattr(_libs['pdfium'], 'FPDFFont_GetWeight'):
     FPDFFont_GetWeight = _libs['pdfium']['FPDFFont_GetWeight']
     FPDFFont_GetWeight.argtypes = [FPDF_FONT]
     FPDFFont_GetWeight.restype = c_int
 
-# ./fpdf_edit.h: 1417
+# ./fpdf_edit.h: 1522
 if hasattr(_libs['pdfium'], 'FPDFFont_GetItalicAngle'):
     FPDFFont_GetItalicAngle = _libs['pdfium']['FPDFFont_GetItalicAngle']
     FPDFFont_GetItalicAngle.argtypes = [FPDF_FONT, POINTER(c_int)]
     FPDFFont_GetItalicAngle.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1431
+# ./fpdf_edit.h: 1536
 if hasattr(_libs['pdfium'], 'FPDFFont_GetAscent'):
     FPDFFont_GetAscent = _libs['pdfium']['FPDFFont_GetAscent']
     FPDFFont_GetAscent.argtypes = [FPDF_FONT, c_float, POINTER(c_float)]
     FPDFFont_GetAscent.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1446
+# ./fpdf_edit.h: 1551
 if hasattr(_libs['pdfium'], 'FPDFFont_GetDescent'):
     FPDFFont_GetDescent = _libs['pdfium']['FPDFFont_GetDescent']
     FPDFFont_GetDescent.argtypes = [FPDF_FONT, c_float, POINTER(c_float)]
     FPDFFont_GetDescent.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1462
+# ./fpdf_edit.h: 1567
 if hasattr(_libs['pdfium'], 'FPDFFont_GetGlyphWidth'):
     FPDFFont_GetGlyphWidth = _libs['pdfium']['FPDFFont_GetGlyphWidth']
     FPDFFont_GetGlyphWidth.argtypes = [FPDF_FONT, uint32_t, c_float, POINTER(c_float)]
     FPDFFont_GetGlyphWidth.restype = FPDF_BOOL
 
-# ./fpdf_edit.h: 1475
+# ./fpdf_edit.h: 1580
 if hasattr(_libs['pdfium'], 'FPDFFont_GetGlyphPath'):
     FPDFFont_GetGlyphPath = _libs['pdfium']['FPDFFont_GetGlyphPath']
     FPDFFont_GetGlyphPath.argtypes = [FPDF_FONT, uint32_t, c_float]
     FPDFFont_GetGlyphPath.restype = FPDF_GLYPHPATH
 
-# ./fpdf_edit.h: 1486
+# ./fpdf_edit.h: 1591
 if hasattr(_libs['pdfium'], 'FPDFGlyphPath_CountGlyphSegments'):
     FPDFGlyphPath_CountGlyphSegments = _libs['pdfium']['FPDFGlyphPath_CountGlyphSegments']
     FPDFGlyphPath_CountGlyphSegments.argtypes = [FPDF_GLYPHPATH]
     FPDFGlyphPath_CountGlyphSegments.restype = c_int
 
-# ./fpdf_edit.h: 1496
+# ./fpdf_edit.h: 1601
 if hasattr(_libs['pdfium'], 'FPDFGlyphPath_GetGlyphPathSegment'):
     FPDFGlyphPath_GetGlyphPathSegment = _libs['pdfium']['FPDFGlyphPath_GetGlyphPathSegment']
     FPDFGlyphPath_GetGlyphPathSegment.argtypes = [FPDF_GLYPHPATH, c_int]
     FPDFGlyphPath_GetGlyphPathSegment.restype = FPDF_PATHSEGMENT
 
-# ./fpdf_edit.h: 1504
+# ./fpdf_edit.h: 1609
 if hasattr(_libs['pdfium'], 'FPDFFormObj_CountObjects'):
     FPDFFormObj_CountObjects = _libs['pdfium']['FPDFFormObj_CountObjects']
     FPDFFormObj_CountObjects.argtypes = [FPDF_PAGEOBJECT]
     FPDFFormObj_CountObjects.restype = c_int
 
-# ./fpdf_edit.h: 1513
+# ./fpdf_edit.h: 1618
 if hasattr(_libs['pdfium'], 'FPDFFormObj_GetObject'):
     FPDFFormObj_GetObject = _libs['pdfium']['FPDFFormObj_GetObject']
     FPDFFormObj_GetObject.argtypes = [FPDF_PAGEOBJECT, c_ulong]
@@ -3282,28 +3337,28 @@ struct__IFSDK_PAUSE._fields_ = [
     ('user', POINTER(None)),
 ]
 
-# ./fpdf_progressive.h: 47
+# ./fpdf_progressive.h: 43
 IFSDK_PAUSE = struct__IFSDK_PAUSE
 
-# ./fpdf_progressive.h: 83
+# ./fpdf_progressive.h: 79
 if hasattr(_libs['pdfium'], 'FPDF_RenderPageBitmapWithColorScheme_Start'):
     FPDF_RenderPageBitmapWithColorScheme_Start = _libs['pdfium']['FPDF_RenderPageBitmapWithColorScheme_Start']
     FPDF_RenderPageBitmapWithColorScheme_Start.argtypes = [FPDF_BITMAP, FPDF_PAGE, c_int, c_int, c_int, c_int, c_int, c_int, POINTER(FPDF_COLORSCHEME), POINTER(IFSDK_PAUSE)]
     FPDF_RenderPageBitmapWithColorScheme_Start.restype = c_int
 
-# ./fpdf_progressive.h: 121
+# ./fpdf_progressive.h: 117
 if hasattr(_libs['pdfium'], 'FPDF_RenderPageBitmap_Start'):
     FPDF_RenderPageBitmap_Start = _libs['pdfium']['FPDF_RenderPageBitmap_Start']
     FPDF_RenderPageBitmap_Start.argtypes = [FPDF_BITMAP, FPDF_PAGE, c_int, c_int, c_int, c_int, c_int, c_int, POINTER(IFSDK_PAUSE)]
     FPDF_RenderPageBitmap_Start.restype = c_int
 
-# ./fpdf_progressive.h: 142
+# ./fpdf_progressive.h: 138
 if hasattr(_libs['pdfium'], 'FPDF_RenderPage_Continue'):
     FPDF_RenderPage_Continue = _libs['pdfium']['FPDF_RenderPage_Continue']
     FPDF_RenderPage_Continue.argtypes = [FPDF_PAGE, POINTER(IFSDK_PAUSE)]
     FPDF_RenderPage_Continue.restype = c_int
 
-# ./fpdf_progressive.h: 153
+# ./fpdf_progressive.h: 149
 if hasattr(_libs['pdfium'], 'FPDF_RenderPage_Close'):
     FPDF_RenderPage_Close = _libs['pdfium']['FPDF_RenderPage_Close']
     FPDF_RenderPage_Close.argtypes = [FPDF_PAGE]
@@ -3393,169 +3448,187 @@ if hasattr(_libs['pdfium'], 'FPDFSignatureObj_GetDocMDPPermission'):
     FPDFSignatureObj_GetDocMDPPermission.argtypes = [FPDF_SIGNATURE]
     FPDFSignatureObj_GetDocMDPPermission.restype = c_uint
 
-# ./fpdf_structtree.h: 25
+# ./fpdf_structtree.h: 27
 if hasattr(_libs['pdfium'], 'FPDF_StructTree_GetForPage'):
     FPDF_StructTree_GetForPage = _libs['pdfium']['FPDF_StructTree_GetForPage']
     FPDF_StructTree_GetForPage.argtypes = [FPDF_PAGE]
     FPDF_StructTree_GetForPage.restype = FPDF_STRUCTTREE
 
-# ./fpdf_structtree.h: 35
+# ./fpdf_structtree.h: 37
 if hasattr(_libs['pdfium'], 'FPDF_StructTree_Close'):
     FPDF_StructTree_Close = _libs['pdfium']['FPDF_StructTree_Close']
     FPDF_StructTree_Close.argtypes = [FPDF_STRUCTTREE]
     FPDF_StructTree_Close.restype = None
 
-# ./fpdf_structtree.h: 45
+# ./fpdf_structtree.h: 47
 if hasattr(_libs['pdfium'], 'FPDF_StructTree_CountChildren'):
     FPDF_StructTree_CountChildren = _libs['pdfium']['FPDF_StructTree_CountChildren']
     FPDF_StructTree_CountChildren.argtypes = [FPDF_STRUCTTREE]
     FPDF_StructTree_CountChildren.restype = c_int
 
-# ./fpdf_structtree.h: 56
+# ./fpdf_structtree.h: 63
 if hasattr(_libs['pdfium'], 'FPDF_StructTree_GetChildAtIndex'):
     FPDF_StructTree_GetChildAtIndex = _libs['pdfium']['FPDF_StructTree_GetChildAtIndex']
     FPDF_StructTree_GetChildAtIndex.argtypes = [FPDF_STRUCTTREE, c_int]
     FPDF_StructTree_GetChildAtIndex.restype = FPDF_STRUCTELEMENT
 
-# ./fpdf_structtree.h: 74
+# ./fpdf_structtree.h: 81
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetAltText'):
     FPDF_StructElement_GetAltText = _libs['pdfium']['FPDF_StructElement_GetAltText']
     FPDF_StructElement_GetAltText.argtypes = [FPDF_STRUCTELEMENT, POINTER(None), c_ulong]
     FPDF_StructElement_GetAltText.restype = c_ulong
 
-# ./fpdf_structtree.h: 95
+# ./fpdf_structtree.h: 102
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetActualText'):
     FPDF_StructElement_GetActualText = _libs['pdfium']['FPDF_StructElement_GetActualText']
     FPDF_StructElement_GetActualText.argtypes = [FPDF_STRUCTELEMENT, POINTER(None), c_ulong]
     FPDF_StructElement_GetActualText.restype = c_ulong
 
-# ./fpdf_structtree.h: 115
+# ./fpdf_structtree.h: 122
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetID'):
     FPDF_StructElement_GetID = _libs['pdfium']['FPDF_StructElement_GetID']
     FPDF_StructElement_GetID.argtypes = [FPDF_STRUCTELEMENT, POINTER(None), c_ulong]
     FPDF_StructElement_GetID.restype = c_ulong
 
-# ./fpdf_structtree.h: 136
+# ./fpdf_structtree.h: 143
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetLang'):
     FPDF_StructElement_GetLang = _libs['pdfium']['FPDF_StructElement_GetLang']
     FPDF_StructElement_GetLang.argtypes = [FPDF_STRUCTELEMENT, POINTER(None), c_ulong]
     FPDF_StructElement_GetLang.restype = c_ulong
 
-# ./fpdf_structtree.h: 158
+# ./fpdf_structtree.h: 165
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetStringAttribute'):
     FPDF_StructElement_GetStringAttribute = _libs['pdfium']['FPDF_StructElement_GetStringAttribute']
     FPDF_StructElement_GetStringAttribute.argtypes = [FPDF_STRUCTELEMENT, FPDF_BYTESTRING, POINTER(None), c_ulong]
     FPDF_StructElement_GetStringAttribute.restype = c_ulong
 
-# ./fpdf_structtree.h: 171
+# ./fpdf_structtree.h: 182
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetMarkedContentID'):
     FPDF_StructElement_GetMarkedContentID = _libs['pdfium']['FPDF_StructElement_GetMarkedContentID']
     FPDF_StructElement_GetMarkedContentID.argtypes = [FPDF_STRUCTELEMENT]
     FPDF_StructElement_GetMarkedContentID.restype = c_int
 
-# ./fpdf_structtree.h: 189
+# ./fpdf_structtree.h: 200
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetType'):
     FPDF_StructElement_GetType = _libs['pdfium']['FPDF_StructElement_GetType']
     FPDF_StructElement_GetType.argtypes = [FPDF_STRUCTELEMENT, POINTER(None), c_ulong]
     FPDF_StructElement_GetType.restype = c_ulong
 
-# ./fpdf_structtree.h: 210
+# ./fpdf_structtree.h: 221
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetObjType'):
     FPDF_StructElement_GetObjType = _libs['pdfium']['FPDF_StructElement_GetObjType']
     FPDF_StructElement_GetObjType.argtypes = [FPDF_STRUCTELEMENT, POINTER(None), c_ulong]
     FPDF_StructElement_GetObjType.restype = c_ulong
 
-# ./fpdf_structtree.h: 230
+# ./fpdf_structtree.h: 241
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetTitle'):
     FPDF_StructElement_GetTitle = _libs['pdfium']['FPDF_StructElement_GetTitle']
     FPDF_StructElement_GetTitle.argtypes = [FPDF_STRUCTELEMENT, POINTER(None), c_ulong]
     FPDF_StructElement_GetTitle.restype = c_ulong
 
-# ./fpdf_structtree.h: 241
+# ./fpdf_structtree.h: 252
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_CountChildren'):
     FPDF_StructElement_CountChildren = _libs['pdfium']['FPDF_StructElement_CountChildren']
     FPDF_StructElement_CountChildren.argtypes = [FPDF_STRUCTELEMENT]
     FPDF_StructElement_CountChildren.restype = c_int
 
-# ./fpdf_structtree.h: 254
+# ./fpdf_structtree.h: 267
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetChildAtIndex'):
     FPDF_StructElement_GetChildAtIndex = _libs['pdfium']['FPDF_StructElement_GetChildAtIndex']
     FPDF_StructElement_GetChildAtIndex.argtypes = [FPDF_STRUCTELEMENT, c_int]
     FPDF_StructElement_GetChildAtIndex.restype = FPDF_STRUCTELEMENT
 
-# ./fpdf_structtree.h: 271
+# ./fpdf_structtree.h: 286
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetChildMarkedContentID'):
     FPDF_StructElement_GetChildMarkedContentID = _libs['pdfium']['FPDF_StructElement_GetChildMarkedContentID']
     FPDF_StructElement_GetChildMarkedContentID.argtypes = [FPDF_STRUCTELEMENT, c_int]
     FPDF_StructElement_GetChildMarkedContentID.restype = c_int
 
-# ./fpdf_structtree.h: 285
+# ./fpdf_structtree.h: 300
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetParent'):
     FPDF_StructElement_GetParent = _libs['pdfium']['FPDF_StructElement_GetParent']
     FPDF_StructElement_GetParent.argtypes = [FPDF_STRUCTELEMENT]
     FPDF_StructElement_GetParent.restype = FPDF_STRUCTELEMENT
 
-# ./fpdf_structtree.h: 294
+# ./fpdf_structtree.h: 309
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetAttributeCount'):
     FPDF_StructElement_GetAttributeCount = _libs['pdfium']['FPDF_StructElement_GetAttributeCount']
     FPDF_StructElement_GetAttributeCount.argtypes = [FPDF_STRUCTELEMENT]
     FPDF_StructElement_GetAttributeCount.restype = c_int
 
-# ./fpdf_structtree.h: 309
+# ./fpdf_structtree.h: 327
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetAttributeAtIndex'):
     FPDF_StructElement_GetAttributeAtIndex = _libs['pdfium']['FPDF_StructElement_GetAttributeAtIndex']
     FPDF_StructElement_GetAttributeAtIndex.argtypes = [FPDF_STRUCTELEMENT, c_int]
     FPDF_StructElement_GetAttributeAtIndex.restype = FPDF_STRUCTELEMENT_ATTR
 
-# ./fpdf_structtree.h: 319
+# ./fpdf_structtree.h: 337
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetCount'):
     FPDF_StructElement_Attr_GetCount = _libs['pdfium']['FPDF_StructElement_Attr_GetCount']
     FPDF_StructElement_Attr_GetCount.argtypes = [FPDF_STRUCTELEMENT_ATTR]
     FPDF_StructElement_Attr_GetCount.restype = c_int
 
-# ./fpdf_structtree.h: 339
+# ./fpdf_structtree.h: 357
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetName'):
     FPDF_StructElement_Attr_GetName = _libs['pdfium']['FPDF_StructElement_Attr_GetName']
     FPDF_StructElement_Attr_GetName.argtypes = [FPDF_STRUCTELEMENT_ATTR, c_int, POINTER(None), c_ulong, POINTER(c_ulong)]
     FPDF_StructElement_Attr_GetName.restype = FPDF_BOOL
 
-# ./fpdf_structtree.h: 355
+# ./fpdf_structtree.h: 375
+if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetValue'):
+    FPDF_StructElement_Attr_GetValue = _libs['pdfium']['FPDF_StructElement_Attr_GetValue']
+    FPDF_StructElement_Attr_GetValue.argtypes = [FPDF_STRUCTELEMENT_ATTR, FPDF_BYTESTRING]
+    FPDF_StructElement_Attr_GetValue.restype = FPDF_STRUCTELEMENT_ATTR_VALUE
+
+# ./fpdf_structtree.h: 388
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetType'):
     FPDF_StructElement_Attr_GetType = _libs['pdfium']['FPDF_StructElement_Attr_GetType']
-    FPDF_StructElement_Attr_GetType.argtypes = [FPDF_STRUCTELEMENT_ATTR, FPDF_BYTESTRING]
+    FPDF_StructElement_Attr_GetType.argtypes = [FPDF_STRUCTELEMENT_ATTR_VALUE]
     FPDF_StructElement_Attr_GetType.restype = FPDF_OBJECT_TYPE
 
-# ./fpdf_structtree.h: 371
+# ./fpdf_structtree.h: 403
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetBooleanValue'):
     FPDF_StructElement_Attr_GetBooleanValue = _libs['pdfium']['FPDF_StructElement_Attr_GetBooleanValue']
-    FPDF_StructElement_Attr_GetBooleanValue.argtypes = [FPDF_STRUCTELEMENT_ATTR, FPDF_BYTESTRING, POINTER(FPDF_BOOL)]
+    FPDF_StructElement_Attr_GetBooleanValue.argtypes = [FPDF_STRUCTELEMENT_ATTR_VALUE, POINTER(FPDF_BOOL)]
     FPDF_StructElement_Attr_GetBooleanValue.restype = FPDF_BOOL
 
-# ./fpdf_structtree.h: 389
+# ./fpdf_structtree.h: 419
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetNumberValue'):
     FPDF_StructElement_Attr_GetNumberValue = _libs['pdfium']['FPDF_StructElement_Attr_GetNumberValue']
-    FPDF_StructElement_Attr_GetNumberValue.argtypes = [FPDF_STRUCTELEMENT_ATTR, FPDF_BYTESTRING, POINTER(c_float)]
+    FPDF_StructElement_Attr_GetNumberValue.argtypes = [FPDF_STRUCTELEMENT_ATTR_VALUE, POINTER(c_float)]
     FPDF_StructElement_Attr_GetNumberValue.restype = FPDF_BOOL
 
-# ./fpdf_structtree.h: 413
+# ./fpdf_structtree.h: 441
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetStringValue'):
     FPDF_StructElement_Attr_GetStringValue = _libs['pdfium']['FPDF_StructElement_Attr_GetStringValue']
-    FPDF_StructElement_Attr_GetStringValue.argtypes = [FPDF_STRUCTELEMENT_ATTR, FPDF_BYTESTRING, POINTER(None), c_ulong, POINTER(c_ulong)]
+    FPDF_StructElement_Attr_GetStringValue.argtypes = [FPDF_STRUCTELEMENT_ATTR_VALUE, POINTER(None), c_ulong, POINTER(c_ulong)]
     FPDF_StructElement_Attr_GetStringValue.restype = FPDF_BOOL
 
-# ./fpdf_structtree.h: 438
+# ./fpdf_structtree.h: 463
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetBlobValue'):
     FPDF_StructElement_Attr_GetBlobValue = _libs['pdfium']['FPDF_StructElement_Attr_GetBlobValue']
-    FPDF_StructElement_Attr_GetBlobValue.argtypes = [FPDF_STRUCTELEMENT_ATTR, FPDF_BYTESTRING, POINTER(None), c_ulong, POINTER(c_ulong)]
+    FPDF_StructElement_Attr_GetBlobValue.argtypes = [FPDF_STRUCTELEMENT_ATTR_VALUE, POINTER(None), c_ulong, POINTER(c_ulong)]
     FPDF_StructElement_Attr_GetBlobValue.restype = FPDF_BOOL
 
-# ./fpdf_structtree.h: 452
+# ./fpdf_structtree.h: 476
+if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_CountChildren'):
+    FPDF_StructElement_Attr_CountChildren = _libs['pdfium']['FPDF_StructElement_Attr_CountChildren']
+    FPDF_StructElement_Attr_CountChildren.argtypes = [FPDF_STRUCTELEMENT_ATTR_VALUE]
+    FPDF_StructElement_Attr_CountChildren.restype = c_int
+
+# ./fpdf_structtree.h: 490
+if hasattr(_libs['pdfium'], 'FPDF_StructElement_Attr_GetChildAtIndex'):
+    FPDF_StructElement_Attr_GetChildAtIndex = _libs['pdfium']['FPDF_StructElement_Attr_GetChildAtIndex']
+    FPDF_StructElement_Attr_GetChildAtIndex.argtypes = [FPDF_STRUCTELEMENT_ATTR_VALUE, c_int]
+    FPDF_StructElement_Attr_GetChildAtIndex.restype = FPDF_STRUCTELEMENT_ATTR_VALUE
+
+# ./fpdf_structtree.h: 501
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetMarkedContentIdCount'):
     FPDF_StructElement_GetMarkedContentIdCount = _libs['pdfium']['FPDF_StructElement_GetMarkedContentIdCount']
     FPDF_StructElement_GetMarkedContentIdCount.argtypes = [FPDF_STRUCTELEMENT]
     FPDF_StructElement_GetMarkedContentIdCount.restype = c_int
 
-# ./fpdf_structtree.h: 464
+# ./fpdf_structtree.h: 517
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetMarkedContentIdAtIndex'):
     FPDF_StructElement_GetMarkedContentIdAtIndex = _libs['pdfium']['FPDF_StructElement_GetMarkedContentIdAtIndex']
     FPDF_StructElement_GetMarkedContentIdAtIndex.argtypes = [FPDF_STRUCTELEMENT, c_int]
@@ -3577,10 +3650,10 @@ struct__FPDF_SYSFONTINFO._fields_ = [
     ('DeleteFont', CFUNCTYPE(None, POINTER(struct__FPDF_SYSFONTINFO), POINTER(None))),
 ]
 
-# ./fpdf_sysfontinfo.h: 227
+# ./fpdf_sysfontinfo.h: 209
 FPDF_SYSFONTINFO = struct__FPDF_SYSFONTINFO
 
-# ./fpdf_sysfontinfo.h: 236
+# ./fpdf_sysfontinfo.h: 216
 class struct_FPDF_CharsetFontMap_ (Structure):
     __slots__ = ['charset', 'fontname']
 
@@ -3589,34 +3662,46 @@ struct_FPDF_CharsetFontMap_._fields_ = [
     ('fontname', POINTER(c_char)),
 ]
 
-# ./fpdf_sysfontinfo.h: 236
+# ./fpdf_sysfontinfo.h: 216
 FPDF_CharsetFontMap = struct_FPDF_CharsetFontMap_
 
-# ./fpdf_sysfontinfo.h: 248
+# ./fpdf_sysfontinfo.h: 230
 if hasattr(_libs['pdfium'], 'FPDF_GetDefaultTTFMap'):
     FPDF_GetDefaultTTFMap = _libs['pdfium']['FPDF_GetDefaultTTFMap']
     FPDF_GetDefaultTTFMap.argtypes = []
     FPDF_GetDefaultTTFMap.restype = POINTER(FPDF_CharsetFontMap)
 
-# ./fpdf_sysfontinfo.h: 263
+# ./fpdf_sysfontinfo.h: 241
+if hasattr(_libs['pdfium'], 'FPDF_GetDefaultTTFMapCount'):
+    FPDF_GetDefaultTTFMapCount = _libs['pdfium']['FPDF_GetDefaultTTFMapCount']
+    FPDF_GetDefaultTTFMapCount.argtypes = []
+    FPDF_GetDefaultTTFMapCount.restype = c_size_t
+
+# ./fpdf_sysfontinfo.h: 252
+if hasattr(_libs['pdfium'], 'FPDF_GetDefaultTTFMapEntry'):
+    FPDF_GetDefaultTTFMapEntry = _libs['pdfium']['FPDF_GetDefaultTTFMapEntry']
+    FPDF_GetDefaultTTFMapEntry.argtypes = [c_size_t]
+    FPDF_GetDefaultTTFMapEntry.restype = POINTER(FPDF_CharsetFontMap)
+
+# ./fpdf_sysfontinfo.h: 266
 if hasattr(_libs['pdfium'], 'FPDF_AddInstalledFont'):
     FPDF_AddInstalledFont = _libs['pdfium']['FPDF_AddInstalledFont']
     FPDF_AddInstalledFont.argtypes = [POINTER(None), POINTER(c_char), c_int]
     FPDF_AddInstalledFont.restype = None
 
-# ./fpdf_sysfontinfo.h: 283
+# ./fpdf_sysfontinfo.h: 284
 if hasattr(_libs['pdfium'], 'FPDF_SetSystemFontInfo'):
     FPDF_SetSystemFontInfo = _libs['pdfium']['FPDF_SetSystemFontInfo']
     FPDF_SetSystemFontInfo.argtypes = [POINTER(FPDF_SYSFONTINFO)]
     FPDF_SetSystemFontInfo.restype = None
 
-# ./fpdf_sysfontinfo.h: 300
+# ./fpdf_sysfontinfo.h: 299
 if hasattr(_libs['pdfium'], 'FPDF_GetDefaultSystemFontInfo'):
     FPDF_GetDefaultSystemFontInfo = _libs['pdfium']['FPDF_GetDefaultSystemFontInfo']
     FPDF_GetDefaultSystemFontInfo.argtypes = []
     FPDF_GetDefaultSystemFontInfo.restype = POINTER(FPDF_SYSFONTINFO)
 
-# ./fpdf_sysfontinfo.h: 314
+# ./fpdf_sysfontinfo.h: 311
 if hasattr(_libs['pdfium'], 'FPDF_FreeDefaultSystemFontInfo'):
     FPDF_FreeDefaultSystemFontInfo = _libs['pdfium']['FPDF_FreeDefaultSystemFontInfo']
     FPDF_FreeDefaultSystemFontInfo.argtypes = [POINTER(FPDF_SYSFONTINFO)]
@@ -3647,192 +3732,192 @@ if hasattr(_libs['pdfium'], 'FPDFText_GetUnicode'):
     FPDFText_GetUnicode.restype = c_uint
 
 # ./fpdf_text.h: 90
+if hasattr(_libs['pdfium'], 'FPDFText_GetTextObject'):
+    FPDFText_GetTextObject = _libs['pdfium']['FPDFText_GetTextObject']
+    FPDFText_GetTextObject.argtypes = [FPDF_TEXTPAGE, c_int]
+    FPDFText_GetTextObject.restype = FPDF_PAGEOBJECT
+
+# ./fpdf_text.h: 105
 if hasattr(_libs['pdfium'], 'FPDFText_IsGenerated'):
     FPDFText_IsGenerated = _libs['pdfium']['FPDFText_IsGenerated']
     FPDFText_IsGenerated.argtypes = [FPDF_TEXTPAGE, c_int]
     FPDFText_IsGenerated.restype = c_int
 
-# ./fpdf_text.h: 105
+# ./fpdf_text.h: 120
 if hasattr(_libs['pdfium'], 'FPDFText_IsHyphen'):
     FPDFText_IsHyphen = _libs['pdfium']['FPDFText_IsHyphen']
     FPDFText_IsHyphen.argtypes = [FPDF_TEXTPAGE, c_int]
     FPDFText_IsHyphen.restype = c_int
 
-# ./fpdf_text.h: 120
+# ./fpdf_text.h: 135
 if hasattr(_libs['pdfium'], 'FPDFText_HasUnicodeMapError'):
     FPDFText_HasUnicodeMapError = _libs['pdfium']['FPDFText_HasUnicodeMapError']
     FPDFText_HasUnicodeMapError.argtypes = [FPDF_TEXTPAGE, c_int]
     FPDFText_HasUnicodeMapError.restype = c_int
 
-# ./fpdf_text.h: 133
+# ./fpdf_text.h: 148
 if hasattr(_libs['pdfium'], 'FPDFText_GetFontSize'):
     FPDFText_GetFontSize = _libs['pdfium']['FPDFText_GetFontSize']
     FPDFText_GetFontSize.argtypes = [FPDF_TEXTPAGE, c_int]
     FPDFText_GetFontSize.restype = c_double
 
-# ./fpdf_text.h: 156
+# ./fpdf_text.h: 171
 if hasattr(_libs['pdfium'], 'FPDFText_GetFontInfo'):
     FPDFText_GetFontInfo = _libs['pdfium']['FPDFText_GetFontInfo']
     FPDFText_GetFontInfo.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(None), c_ulong, POINTER(c_int)]
     FPDFText_GetFontInfo.restype = c_ulong
 
-# ./fpdf_text.h: 174
+# ./fpdf_text.h: 189
 if hasattr(_libs['pdfium'], 'FPDFText_GetFontWeight'):
     FPDFText_GetFontWeight = _libs['pdfium']['FPDFText_GetFontWeight']
     FPDFText_GetFontWeight.argtypes = [FPDF_TEXTPAGE, c_int]
     FPDFText_GetFontWeight.restype = c_int
 
-# ./fpdf_text.h: 191
-if hasattr(_libs['pdfium'], 'FPDFText_GetTextRenderMode'):
-    FPDFText_GetTextRenderMode = _libs['pdfium']['FPDFText_GetTextRenderMode']
-    FPDFText_GetTextRenderMode.argtypes = [FPDF_TEXTPAGE, c_int]
-    FPDFText_GetTextRenderMode.restype = FPDF_TEXT_RENDERMODE
-
-# ./fpdf_text.h: 213
+# ./fpdf_text.h: 212
 if hasattr(_libs['pdfium'], 'FPDFText_GetFillColor'):
     FPDFText_GetFillColor = _libs['pdfium']['FPDFText_GetFillColor']
     FPDFText_GetFillColor.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(c_uint), POINTER(c_uint), POINTER(c_uint), POINTER(c_uint)]
     FPDFText_GetFillColor.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 240
+# ./fpdf_text.h: 239
 if hasattr(_libs['pdfium'], 'FPDFText_GetStrokeColor'):
     FPDFText_GetStrokeColor = _libs['pdfium']['FPDFText_GetStrokeColor']
     FPDFText_GetStrokeColor.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(c_uint), POINTER(c_uint), POINTER(c_uint), POINTER(c_uint)]
     FPDFText_GetStrokeColor.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 259
+# ./fpdf_text.h: 258
 if hasattr(_libs['pdfium'], 'FPDFText_GetCharAngle'):
     FPDFText_GetCharAngle = _libs['pdfium']['FPDFText_GetCharAngle']
     FPDFText_GetCharAngle.argtypes = [FPDF_TEXTPAGE, c_int]
     FPDFText_GetCharAngle.restype = c_float
 
-# ./fpdf_text.h: 283
+# ./fpdf_text.h: 282
 if hasattr(_libs['pdfium'], 'FPDFText_GetCharBox'):
     FPDFText_GetCharBox = _libs['pdfium']['FPDFText_GetCharBox']
     FPDFText_GetCharBox.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     FPDFText_GetCharBox.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 308
+# ./fpdf_text.h: 307
 if hasattr(_libs['pdfium'], 'FPDFText_GetLooseCharBox'):
     FPDFText_GetLooseCharBox = _libs['pdfium']['FPDFText_GetLooseCharBox']
     FPDFText_GetLooseCharBox.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(FS_RECTF)]
     FPDFText_GetLooseCharBox.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 324
+# ./fpdf_text.h: 323
 if hasattr(_libs['pdfium'], 'FPDFText_GetMatrix'):
     FPDFText_GetMatrix = _libs['pdfium']['FPDFText_GetMatrix']
     FPDFText_GetMatrix.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(FS_MATRIX)]
     FPDFText_GetMatrix.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 344
+# ./fpdf_text.h: 343
 if hasattr(_libs['pdfium'], 'FPDFText_GetCharOrigin'):
     FPDFText_GetCharOrigin = _libs['pdfium']['FPDFText_GetCharOrigin']
     FPDFText_GetCharOrigin.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(c_double), POINTER(c_double)]
     FPDFText_GetCharOrigin.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 367
+# ./fpdf_text.h: 366
 if hasattr(_libs['pdfium'], 'FPDFText_GetCharIndexAtPos'):
     FPDFText_GetCharIndexAtPos = _libs['pdfium']['FPDFText_GetCharIndexAtPos']
     FPDFText_GetCharIndexAtPos.argtypes = [FPDF_TEXTPAGE, c_double, c_double, c_double, c_double]
     FPDFText_GetCharIndexAtPos.restype = c_int
 
-# ./fpdf_text.h: 393
+# ./fpdf_text.h: 392
 if hasattr(_libs['pdfium'], 'FPDFText_GetText'):
     FPDFText_GetText = _libs['pdfium']['FPDFText_GetText']
     FPDFText_GetText.argtypes = [FPDF_TEXTPAGE, c_int, c_int, POINTER(c_ushort)]
     FPDFText_GetText.restype = c_int
 
-# ./fpdf_text.h: 416
+# ./fpdf_text.h: 415
 if hasattr(_libs['pdfium'], 'FPDFText_CountRects'):
     FPDFText_CountRects = _libs['pdfium']['FPDFText_CountRects']
     FPDFText_CountRects.argtypes = [FPDF_TEXTPAGE, c_int, c_int]
     FPDFText_CountRects.restype = c_int
 
-# ./fpdf_text.h: 442
+# ./fpdf_text.h: 441
 if hasattr(_libs['pdfium'], 'FPDFText_GetRect'):
     FPDFText_GetRect = _libs['pdfium']['FPDFText_GetRect']
     FPDFText_GetRect.argtypes = [FPDF_TEXTPAGE, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     FPDFText_GetRect.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 473
+# ./fpdf_text.h: 472
 if hasattr(_libs['pdfium'], 'FPDFText_GetBoundedText'):
     FPDFText_GetBoundedText = _libs['pdfium']['FPDFText_GetBoundedText']
     FPDFText_GetBoundedText.argtypes = [FPDF_TEXTPAGE, c_double, c_double, c_double, c_double, POINTER(c_ushort), c_int]
     FPDFText_GetBoundedText.restype = c_int
 
-# ./fpdf_text.h: 503
+# ./fpdf_text.h: 502
 if hasattr(_libs['pdfium'], 'FPDFText_FindStart'):
     FPDFText_FindStart = _libs['pdfium']['FPDFText_FindStart']
     FPDFText_FindStart.argtypes = [FPDF_TEXTPAGE, FPDF_WIDESTRING, c_ulong, c_int]
     FPDFText_FindStart.restype = FPDF_SCHHANDLE
 
-# ./fpdf_text.h: 516
+# ./fpdf_text.h: 515
 if hasattr(_libs['pdfium'], 'FPDFText_FindNext'):
     FPDFText_FindNext = _libs['pdfium']['FPDFText_FindNext']
     FPDFText_FindNext.argtypes = [FPDF_SCHHANDLE]
     FPDFText_FindNext.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 526
+# ./fpdf_text.h: 525
 if hasattr(_libs['pdfium'], 'FPDFText_FindPrev'):
     FPDFText_FindPrev = _libs['pdfium']['FPDFText_FindPrev']
     FPDFText_FindPrev.argtypes = [FPDF_SCHHANDLE]
     FPDFText_FindPrev.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 536
+# ./fpdf_text.h: 535
 if hasattr(_libs['pdfium'], 'FPDFText_GetSchResultIndex'):
     FPDFText_GetSchResultIndex = _libs['pdfium']['FPDFText_GetSchResultIndex']
     FPDFText_GetSchResultIndex.argtypes = [FPDF_SCHHANDLE]
     FPDFText_GetSchResultIndex.restype = c_int
 
-# ./fpdf_text.h: 546
+# ./fpdf_text.h: 545
 if hasattr(_libs['pdfium'], 'FPDFText_GetSchCount'):
     FPDFText_GetSchCount = _libs['pdfium']['FPDFText_GetSchCount']
     FPDFText_GetSchCount.argtypes = [FPDF_SCHHANDLE]
     FPDFText_GetSchCount.restype = c_int
 
-# ./fpdf_text.h: 556
+# ./fpdf_text.h: 555
 if hasattr(_libs['pdfium'], 'FPDFText_FindClose'):
     FPDFText_FindClose = _libs['pdfium']['FPDFText_FindClose']
     FPDFText_FindClose.argtypes = [FPDF_SCHHANDLE]
     FPDFText_FindClose.restype = None
 
-# ./fpdf_text.h: 578
+# ./fpdf_text.h: 577
 if hasattr(_libs['pdfium'], 'FPDFLink_LoadWebLinks'):
     FPDFLink_LoadWebLinks = _libs['pdfium']['FPDFLink_LoadWebLinks']
     FPDFLink_LoadWebLinks.argtypes = [FPDF_TEXTPAGE]
     FPDFLink_LoadWebLinks.restype = FPDF_PAGELINK
 
-# ./fpdf_text.h: 587
+# ./fpdf_text.h: 586
 if hasattr(_libs['pdfium'], 'FPDFLink_CountWebLinks'):
     FPDFLink_CountWebLinks = _libs['pdfium']['FPDFLink_CountWebLinks']
     FPDFLink_CountWebLinks.argtypes = [FPDF_PAGELINK]
     FPDFLink_CountWebLinks.restype = c_int
 
-# ./fpdf_text.h: 608
+# ./fpdf_text.h: 607
 if hasattr(_libs['pdfium'], 'FPDFLink_GetURL'):
     FPDFLink_GetURL = _libs['pdfium']['FPDFLink_GetURL']
     FPDFLink_GetURL.argtypes = [FPDF_PAGELINK, c_int, POINTER(c_ushort), c_int]
     FPDFLink_GetURL.restype = c_int
 
-# ./fpdf_text.h: 622
+# ./fpdf_text.h: 621
 if hasattr(_libs['pdfium'], 'FPDFLink_CountRects'):
     FPDFLink_CountRects = _libs['pdfium']['FPDFLink_CountRects']
     FPDFLink_CountRects.argtypes = [FPDF_PAGELINK, c_int]
     FPDFLink_CountRects.restype = c_int
 
-# ./fpdf_text.h: 645
+# ./fpdf_text.h: 644
 if hasattr(_libs['pdfium'], 'FPDFLink_GetRect'):
     FPDFLink_GetRect = _libs['pdfium']['FPDFLink_GetRect']
     FPDFLink_GetRect.argtypes = [FPDF_PAGELINK, c_int, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     FPDFLink_GetRect.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 668
+# ./fpdf_text.h: 667
 if hasattr(_libs['pdfium'], 'FPDFLink_GetTextRange'):
     FPDFLink_GetTextRange = _libs['pdfium']['FPDFLink_GetTextRange']
     FPDFLink_GetTextRange.argtypes = [FPDF_PAGELINK, c_int, POINTER(c_int), POINTER(c_int)]
     FPDFLink_GetTextRange.restype = FPDF_BOOL
 
-# ./fpdf_text.h: 680
+# ./fpdf_text.h: 679
 if hasattr(_libs['pdfium'], 'FPDFLink_CloseWebLinks'):
     FPDFLink_CloseWebLinks = _libs['pdfium']['FPDFLink_CloseWebLinks']
     FPDFLink_CloseWebLinks.argtypes = [FPDF_PAGELINK]
@@ -3856,115 +3941,115 @@ if hasattr(_libs['pdfium'], 'FPDFPage_GetThumbnailAsBitmap'):
     FPDFPage_GetThumbnailAsBitmap.argtypes = [FPDF_PAGE]
     FPDFPage_GetThumbnailAsBitmap.restype = FPDF_BITMAP
 
-# ./fpdf_transformpage.h: 26
+# ./fpdf_transformpage.h: 24
 if hasattr(_libs['pdfium'], 'FPDFPage_SetMediaBox'):
     FPDFPage_SetMediaBox = _libs['pdfium']['FPDFPage_SetMediaBox']
     FPDFPage_SetMediaBox.argtypes = [FPDF_PAGE, c_float, c_float, c_float, c_float]
     FPDFPage_SetMediaBox.restype = None
 
-# ./fpdf_transformpage.h: 41
+# ./fpdf_transformpage.h: 37
 if hasattr(_libs['pdfium'], 'FPDFPage_SetCropBox'):
     FPDFPage_SetCropBox = _libs['pdfium']['FPDFPage_SetCropBox']
     FPDFPage_SetCropBox.argtypes = [FPDF_PAGE, c_float, c_float, c_float, c_float]
     FPDFPage_SetCropBox.restype = None
 
-# ./fpdf_transformpage.h: 56
+# ./fpdf_transformpage.h: 50
 if hasattr(_libs['pdfium'], 'FPDFPage_SetBleedBox'):
     FPDFPage_SetBleedBox = _libs['pdfium']['FPDFPage_SetBleedBox']
     FPDFPage_SetBleedBox.argtypes = [FPDF_PAGE, c_float, c_float, c_float, c_float]
     FPDFPage_SetBleedBox.restype = None
 
-# ./fpdf_transformpage.h: 71
+# ./fpdf_transformpage.h: 63
 if hasattr(_libs['pdfium'], 'FPDFPage_SetTrimBox'):
     FPDFPage_SetTrimBox = _libs['pdfium']['FPDFPage_SetTrimBox']
     FPDFPage_SetTrimBox.argtypes = [FPDF_PAGE, c_float, c_float, c_float, c_float]
     FPDFPage_SetTrimBox.restype = None
 
-# ./fpdf_transformpage.h: 86
+# ./fpdf_transformpage.h: 76
 if hasattr(_libs['pdfium'], 'FPDFPage_SetArtBox'):
     FPDFPage_SetArtBox = _libs['pdfium']['FPDFPage_SetArtBox']
     FPDFPage_SetArtBox.argtypes = [FPDF_PAGE, c_float, c_float, c_float, c_float]
     FPDFPage_SetArtBox.restype = None
 
-# ./fpdf_transformpage.h: 104
+# ./fpdf_transformpage.h: 92
 if hasattr(_libs['pdfium'], 'FPDFPage_GetMediaBox'):
     FPDFPage_GetMediaBox = _libs['pdfium']['FPDFPage_GetMediaBox']
     FPDFPage_GetMediaBox.argtypes = [FPDF_PAGE, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
     FPDFPage_GetMediaBox.restype = FPDF_BOOL
 
-# ./fpdf_transformpage.h: 122
+# ./fpdf_transformpage.h: 108
 if hasattr(_libs['pdfium'], 'FPDFPage_GetCropBox'):
     FPDFPage_GetCropBox = _libs['pdfium']['FPDFPage_GetCropBox']
     FPDFPage_GetCropBox.argtypes = [FPDF_PAGE, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
     FPDFPage_GetCropBox.restype = FPDF_BOOL
 
-# ./fpdf_transformpage.h: 140
+# ./fpdf_transformpage.h: 124
 if hasattr(_libs['pdfium'], 'FPDFPage_GetBleedBox'):
     FPDFPage_GetBleedBox = _libs['pdfium']['FPDFPage_GetBleedBox']
     FPDFPage_GetBleedBox.argtypes = [FPDF_PAGE, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
     FPDFPage_GetBleedBox.restype = FPDF_BOOL
 
-# ./fpdf_transformpage.h: 158
+# ./fpdf_transformpage.h: 140
 if hasattr(_libs['pdfium'], 'FPDFPage_GetTrimBox'):
     FPDFPage_GetTrimBox = _libs['pdfium']['FPDFPage_GetTrimBox']
     FPDFPage_GetTrimBox.argtypes = [FPDF_PAGE, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
     FPDFPage_GetTrimBox.restype = FPDF_BOOL
 
-# ./fpdf_transformpage.h: 176
+# ./fpdf_transformpage.h: 156
 if hasattr(_libs['pdfium'], 'FPDFPage_GetArtBox'):
     FPDFPage_GetArtBox = _libs['pdfium']['FPDFPage_GetArtBox']
     FPDFPage_GetArtBox.argtypes = [FPDF_PAGE, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
     FPDFPage_GetArtBox.restype = FPDF_BOOL
 
-# ./fpdf_transformpage.h: 198
+# ./fpdf_transformpage.h: 176
 if hasattr(_libs['pdfium'], 'FPDFPage_TransFormWithClip'):
     FPDFPage_TransFormWithClip = _libs['pdfium']['FPDFPage_TransFormWithClip']
     FPDFPage_TransFormWithClip.argtypes = [FPDF_PAGE, POINTER(FS_MATRIX), POINTER(FS_RECTF)]
     FPDFPage_TransFormWithClip.restype = FPDF_BOOL
 
-# ./fpdf_transformpage.h: 215
+# ./fpdf_transformpage.h: 191
 if hasattr(_libs['pdfium'], 'FPDFPageObj_TransformClipPath'):
     FPDFPageObj_TransformClipPath = _libs['pdfium']['FPDFPageObj_TransformClipPath']
     FPDFPageObj_TransformClipPath.argtypes = [FPDF_PAGEOBJECT, c_double, c_double, c_double, c_double, c_double, c_double]
     FPDFPageObj_TransformClipPath.restype = None
 
-# ./fpdf_transformpage.h: 233
+# ./fpdf_transformpage.h: 209
 if hasattr(_libs['pdfium'], 'FPDFPageObj_GetClipPath'):
     FPDFPageObj_GetClipPath = _libs['pdfium']['FPDFPageObj_GetClipPath']
     FPDFPageObj_GetClipPath.argtypes = [FPDF_PAGEOBJECT]
     FPDFPageObj_GetClipPath.restype = FPDF_CLIPPATH
 
-# ./fpdf_transformpage.h: 241
+# ./fpdf_transformpage.h: 217
 if hasattr(_libs['pdfium'], 'FPDFClipPath_CountPaths'):
     FPDFClipPath_CountPaths = _libs['pdfium']['FPDFClipPath_CountPaths']
     FPDFClipPath_CountPaths.argtypes = [FPDF_CLIPPATH]
     FPDFClipPath_CountPaths.restype = c_int
 
-# ./fpdf_transformpage.h: 251
+# ./fpdf_transformpage.h: 227
 if hasattr(_libs['pdfium'], 'FPDFClipPath_CountPathSegments'):
     FPDFClipPath_CountPathSegments = _libs['pdfium']['FPDFClipPath_CountPathSegments']
     FPDFClipPath_CountPathSegments.argtypes = [FPDF_CLIPPATH, c_int]
     FPDFClipPath_CountPathSegments.restype = c_int
 
-# ./fpdf_transformpage.h: 264
+# ./fpdf_transformpage.h: 240
 if hasattr(_libs['pdfium'], 'FPDFClipPath_GetPathSegment'):
     FPDFClipPath_GetPathSegment = _libs['pdfium']['FPDFClipPath_GetPathSegment']
     FPDFClipPath_GetPathSegment.argtypes = [FPDF_CLIPPATH, c_int, c_int]
     FPDFClipPath_GetPathSegment.restype = FPDF_PATHSEGMENT
 
-# ./fpdf_transformpage.h: 279
+# ./fpdf_transformpage.h: 253
 if hasattr(_libs['pdfium'], 'FPDF_CreateClipPath'):
     FPDF_CreateClipPath = _libs['pdfium']['FPDF_CreateClipPath']
     FPDF_CreateClipPath.argtypes = [c_float, c_float, c_float, c_float]
     FPDF_CreateClipPath.restype = FPDF_CLIPPATH
 
-# ./fpdf_transformpage.h: 289
+# ./fpdf_transformpage.h: 261
 if hasattr(_libs['pdfium'], 'FPDF_DestroyClipPath'):
     FPDF_DestroyClipPath = _libs['pdfium']['FPDF_DestroyClipPath']
     FPDF_DestroyClipPath.argtypes = [FPDF_CLIPPATH]
     FPDF_DestroyClipPath.restype = None
 
-# ./fpdf_transformpage.h: 301
+# ./fpdf_transformpage.h: 271
 if hasattr(_libs['pdfium'], 'FPDFPage_InsertClipPath'):
     FPDFPage_InsertClipPath = _libs['pdfium']['FPDFPage_InsertClipPath']
     FPDFPage_InsertClipPath.argtypes = [FPDF_PAGE, FPDF_CLIPPATH]
@@ -4000,91 +4085,91 @@ FPDF_OBJECT_NULLOBJ = 8
 # ./fpdfview.h: 45
 FPDF_OBJECT_REFERENCE = 9
 
-# ./fpdfview.h: 325
+# ./fpdfview.h: 327
 FPDF_POLICY_MACHINETIME_ACCESS = 0
 
-# ./fpdfview.h: 597
+# ./fpdfview.h: 583
 FPDF_ERR_SUCCESS = 0
 
-# ./fpdfview.h: 598
+# ./fpdfview.h: 584
 FPDF_ERR_UNKNOWN = 1
 
-# ./fpdfview.h: 599
+# ./fpdfview.h: 585
 FPDF_ERR_FILE = 2
 
-# ./fpdfview.h: 600
+# ./fpdfview.h: 586
 FPDF_ERR_FORMAT = 3
 
-# ./fpdfview.h: 601
+# ./fpdfview.h: 587
 FPDF_ERR_PASSWORD = 4
 
-# ./fpdfview.h: 602
+# ./fpdfview.h: 588
 FPDF_ERR_SECURITY = 5
 
-# ./fpdfview.h: 603
+# ./fpdfview.h: 589
 FPDF_ERR_PAGE = 6
 
-# ./fpdfview.h: 605
+# ./fpdfview.h: 591
 FPDF_ERR_XFALOAD = 7
 
-# ./fpdfview.h: 606
+# ./fpdfview.h: 592
 FPDF_ERR_XFALAYOUT = 8
 
-# ./fpdfview.h: 804
+# ./fpdfview.h: 790
 FPDF_ANNOT = 0x01
 
-# ./fpdfview.h: 807
+# ./fpdfview.h: 793
 FPDF_LCD_TEXT = 0x02
 
-# ./fpdfview.h: 809
+# ./fpdfview.h: 795
 FPDF_NO_NATIVETEXT = 0x04
 
-# ./fpdfview.h: 811
+# ./fpdfview.h: 797
 FPDF_GRAYSCALE = 0x08
 
-# ./fpdfview.h: 813
+# ./fpdfview.h: 799
 FPDF_DEBUG_INFO = 0x80
 
-# ./fpdfview.h: 815
+# ./fpdfview.h: 801
 FPDF_NO_CATCH = 0x100
 
-# ./fpdfview.h: 817
+# ./fpdfview.h: 803
 FPDF_RENDER_LIMITEDIMAGECACHE = 0x200
 
-# ./fpdfview.h: 819
+# ./fpdfview.h: 805
 FPDF_RENDER_FORCEHALFTONE = 0x400
 
-# ./fpdfview.h: 821
+# ./fpdfview.h: 807
 FPDF_PRINTING = 0x800
 
-# ./fpdfview.h: 824
+# ./fpdfview.h: 810
 FPDF_RENDER_NO_SMOOTHTEXT = 0x1000
 
-# ./fpdfview.h: 826
+# ./fpdfview.h: 812
 FPDF_RENDER_NO_SMOOTHIMAGE = 0x2000
 
-# ./fpdfview.h: 828
+# ./fpdfview.h: 814
 FPDF_RENDER_NO_SMOOTHPATH = 0x4000
 
-# ./fpdfview.h: 831
+# ./fpdfview.h: 817
 FPDF_REVERSE_BYTE_ORDER = 0x10
 
-# ./fpdfview.h: 835
+# ./fpdfview.h: 821
 FPDF_CONVERT_FILL_TO_STROKE = 0x20
 
-# ./fpdfview.h: 1096
+# ./fpdfview.h: 1083
 FPDFBitmap_Unknown = 0
 
-# ./fpdfview.h: 1098
+# ./fpdfview.h: 1085
 FPDFBitmap_Gray = 1
 
-# ./fpdfview.h: 1100
+# ./fpdfview.h: 1087
 FPDFBitmap_BGR = 2
 
-# ./fpdfview.h: 1102
+# ./fpdfview.h: 1089
 FPDFBitmap_BGRx = 3
 
-# ./fpdfview.h: 1104
+# ./fpdfview.h: 1091
 FPDFBitmap_BGRA = 4
 
 # ./fpdf_formfill.h: 16
@@ -4162,127 +4247,127 @@ JSPLATFORM_BEEP_STATUS = 3
 # ./fpdf_formfill.h: 45
 JSPLATFORM_BEEP_DEFAULT = 4
 
-# ./fpdf_formfill.h: 326
+# ./fpdf_formfill.h: 303
 FXCT_ARROW = 0
 
-# ./fpdf_formfill.h: 327
+# ./fpdf_formfill.h: 304
 FXCT_NESW = 1
 
-# ./fpdf_formfill.h: 328
+# ./fpdf_formfill.h: 305
 FXCT_NWSE = 2
 
-# ./fpdf_formfill.h: 329
+# ./fpdf_formfill.h: 306
 FXCT_VBEAM = 3
 
-# ./fpdf_formfill.h: 330
+# ./fpdf_formfill.h: 307
 FXCT_HBEAM = 4
 
-# ./fpdf_formfill.h: 331
+# ./fpdf_formfill.h: 308
 FXCT_HAND = 5
 
-# ./fpdf_formfill.h: 360
+# ./fpdf_formfill.h: 333
 FXFA_PAGEVIEWEVENT_POSTADDED = 1
 
-# ./fpdf_formfill.h: 361
+# ./fpdf_formfill.h: 334
 FXFA_PAGEVIEWEVENT_POSTREMOVED = 3
 
-# ./fpdf_formfill.h: 364
+# ./fpdf_formfill.h: 337
 FXFA_MENU_COPY = 1
 
-# ./fpdf_formfill.h: 365
+# ./fpdf_formfill.h: 338
 FXFA_MENU_CUT = 2
 
-# ./fpdf_formfill.h: 366
+# ./fpdf_formfill.h: 339
 FXFA_MENU_SELECTALL = 4
 
-# ./fpdf_formfill.h: 367
+# ./fpdf_formfill.h: 340
 FXFA_MENU_UNDO = 8
 
-# ./fpdf_formfill.h: 368
+# ./fpdf_formfill.h: 341
 FXFA_MENU_REDO = 16
 
-# ./fpdf_formfill.h: 369
+# ./fpdf_formfill.h: 342
 FXFA_MENU_PASTE = 32
 
-# ./fpdf_formfill.h: 372
+# ./fpdf_formfill.h: 345
 FXFA_SAVEAS_XML = 1
 
-# ./fpdf_formfill.h: 373
+# ./fpdf_formfill.h: 346
 FXFA_SAVEAS_XDP = 2
 
-# ./fpdf_formfill.h: 1239
+# ./fpdf_formfill.h: 1132
 FPDFDOC_AACTION_WC = 0x10
 
-# ./fpdf_formfill.h: 1240
+# ./fpdf_formfill.h: 1133
 FPDFDOC_AACTION_WS = 0x11
 
-# ./fpdf_formfill.h: 1241
+# ./fpdf_formfill.h: 1134
 FPDFDOC_AACTION_DS = 0x12
 
-# ./fpdf_formfill.h: 1242
+# ./fpdf_formfill.h: 1135
 FPDFDOC_AACTION_WP = 0x13
 
-# ./fpdf_formfill.h: 1243
+# ./fpdf_formfill.h: 1136
 FPDFDOC_AACTION_DP = 0x14
 
-# ./fpdf_formfill.h: 1266
+# ./fpdf_formfill.h: 1157
 FPDFPAGE_AACTION_OPEN = 0
 
-# ./fpdf_formfill.h: 1267
+# ./fpdf_formfill.h: 1158
 FPDFPAGE_AACTION_CLOSE = 1
 
-# ./fpdf_formfill.h: 1734
+# ./fpdf_formfill.h: 1577
 FPDF_FORMFIELD_UNKNOWN = 0
 
-# ./fpdf_formfill.h: 1735
+# ./fpdf_formfill.h: 1578
 FPDF_FORMFIELD_PUSHBUTTON = 1
 
-# ./fpdf_formfill.h: 1736
+# ./fpdf_formfill.h: 1579
 FPDF_FORMFIELD_CHECKBOX = 2
 
-# ./fpdf_formfill.h: 1737
+# ./fpdf_formfill.h: 1580
 FPDF_FORMFIELD_RADIOBUTTON = 3
 
-# ./fpdf_formfill.h: 1738
+# ./fpdf_formfill.h: 1581
 FPDF_FORMFIELD_COMBOBOX = 4
 
-# ./fpdf_formfill.h: 1739
+# ./fpdf_formfill.h: 1582
 FPDF_FORMFIELD_LISTBOX = 5
 
-# ./fpdf_formfill.h: 1740
+# ./fpdf_formfill.h: 1583
 FPDF_FORMFIELD_TEXTFIELD = 6
 
-# ./fpdf_formfill.h: 1741
+# ./fpdf_formfill.h: 1584
 FPDF_FORMFIELD_SIGNATURE = 7
 
-# ./fpdf_formfill.h: 1743
+# ./fpdf_formfill.h: 1586
 FPDF_FORMFIELD_XFA = 8
 
-# ./fpdf_formfill.h: 1744
+# ./fpdf_formfill.h: 1587
 FPDF_FORMFIELD_XFA_CHECKBOX = 9
 
-# ./fpdf_formfill.h: 1745
+# ./fpdf_formfill.h: 1588
 FPDF_FORMFIELD_XFA_COMBOBOX = 10
 
-# ./fpdf_formfill.h: 1746
+# ./fpdf_formfill.h: 1589
 FPDF_FORMFIELD_XFA_IMAGEFIELD = 11
 
-# ./fpdf_formfill.h: 1747
+# ./fpdf_formfill.h: 1590
 FPDF_FORMFIELD_XFA_LISTBOX = 12
 
-# ./fpdf_formfill.h: 1748
+# ./fpdf_formfill.h: 1591
 FPDF_FORMFIELD_XFA_PUSHBUTTON = 13
 
-# ./fpdf_formfill.h: 1749
+# ./fpdf_formfill.h: 1592
 FPDF_FORMFIELD_XFA_SIGNATURE = 14
 
-# ./fpdf_formfill.h: 1750
+# ./fpdf_formfill.h: 1593
 FPDF_FORMFIELD_XFA_TEXTFIELD = 15
 
-# ./fpdf_formfill.h: 1754
+# ./fpdf_formfill.h: 1597
 FPDF_FORMFIELD_COUNT = 16
 
-# ./fpdf_formfill.h: 1760
+# ./fpdf_formfill.h: 1603
 def IS_XFA_FORMFIELD(type):
     return ((((((((type == FPDF_FORMFIELD_XFA) or (type == FPDF_FORMFIELD_XFA_CHECKBOX)) or (type == FPDF_FORMFIELD_XFA_COMBOBOX)) or (type == FPDF_FORMFIELD_XFA_IMAGEFIELD)) or (type == FPDF_FORMFIELD_XFA_LISTBOX)) or (type == FPDF_FORMFIELD_XFA_PUSHBUTTON)) or (type == FPDF_FORMFIELD_XFA_SIGNATURE)) or (type == FPDF_FORMFIELD_XFA_TEXTFIELD))
 
@@ -4777,70 +4862,70 @@ FPDF_NO_INCREMENTAL = 2
 # ./fpdf_save.h: 47
 FPDF_REMOVE_SECURITY = 3
 
-# ./fpdf_sysfontinfo.h: 15
+# ./fpdf_sysfontinfo.h: 17
 FXFONT_ANSI_CHARSET = 0
 
-# ./fpdf_sysfontinfo.h: 16
+# ./fpdf_sysfontinfo.h: 18
 FXFONT_DEFAULT_CHARSET = 1
 
-# ./fpdf_sysfontinfo.h: 17
+# ./fpdf_sysfontinfo.h: 19
 FXFONT_SYMBOL_CHARSET = 2
 
-# ./fpdf_sysfontinfo.h: 18
+# ./fpdf_sysfontinfo.h: 20
 FXFONT_SHIFTJIS_CHARSET = 128
 
-# ./fpdf_sysfontinfo.h: 19
+# ./fpdf_sysfontinfo.h: 21
 FXFONT_HANGEUL_CHARSET = 129
 
-# ./fpdf_sysfontinfo.h: 20
+# ./fpdf_sysfontinfo.h: 22
 FXFONT_GB2312_CHARSET = 134
 
-# ./fpdf_sysfontinfo.h: 21
+# ./fpdf_sysfontinfo.h: 23
 FXFONT_CHINESEBIG5_CHARSET = 136
 
-# ./fpdf_sysfontinfo.h: 22
+# ./fpdf_sysfontinfo.h: 24
 FXFONT_GREEK_CHARSET = 161
 
-# ./fpdf_sysfontinfo.h: 23
+# ./fpdf_sysfontinfo.h: 25
 FXFONT_VIETNAMESE_CHARSET = 163
 
-# ./fpdf_sysfontinfo.h: 24
+# ./fpdf_sysfontinfo.h: 26
 FXFONT_HEBREW_CHARSET = 177
 
-# ./fpdf_sysfontinfo.h: 25
+# ./fpdf_sysfontinfo.h: 27
 FXFONT_ARABIC_CHARSET = 178
 
-# ./fpdf_sysfontinfo.h: 26
+# ./fpdf_sysfontinfo.h: 28
 FXFONT_CYRILLIC_CHARSET = 204
 
-# ./fpdf_sysfontinfo.h: 27
+# ./fpdf_sysfontinfo.h: 29
 FXFONT_THAI_CHARSET = 222
 
-# ./fpdf_sysfontinfo.h: 28
+# ./fpdf_sysfontinfo.h: 30
 FXFONT_EASTERNEUROPEAN_CHARSET = 238
 
-# ./fpdf_sysfontinfo.h: 31
+# ./fpdf_sysfontinfo.h: 33
 FXFONT_FF_FIXEDPITCH = (1 << 0)
 
-# ./fpdf_sysfontinfo.h: 32
+# ./fpdf_sysfontinfo.h: 34
 FXFONT_FF_ROMAN = (1 << 4)
 
-# ./fpdf_sysfontinfo.h: 33
+# ./fpdf_sysfontinfo.h: 35
 FXFONT_FF_SCRIPT = (4 << 4)
 
-# ./fpdf_sysfontinfo.h: 36
+# ./fpdf_sysfontinfo.h: 38
 FXFONT_FW_NORMAL = 400
 
-# ./fpdf_sysfontinfo.h: 37
+# ./fpdf_sysfontinfo.h: 39
 FXFONT_FW_BOLD = 700
 
-# ./fpdf_text.h: 484
+# ./fpdf_text.h: 483
 FPDF_MATCHCASE = 0x00000001
 
-# ./fpdf_text.h: 486
+# ./fpdf_text.h: 485
 FPDF_MATCHWHOLEWORD = 0x00000002
 
-# ./fpdf_text.h: 488
+# ./fpdf_text.h: 487
 FPDF_CONSECUTIVE = 0x00000004
 
 # ./fpdf_edit.h: 93
