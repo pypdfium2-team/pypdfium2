@@ -321,9 +321,6 @@ class _host_platform:
             info += f", {self._libc_name} {self._libc_ver}"
         return f"<Host: {info}>"
     
-    def _is_plat(self, system, machine):
-        return self._system_name.startswith(system) and self._machine_name.startswith(machine)
-    
     def _handle_linux_libc(self, archid):
         if self._libc_name == "glibc":
             return getattr(PlatNames, f"linux_{archid}")
@@ -335,30 +332,32 @@ class _host_platform:
             raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
     
     def _get_platform(self):
-        if self._is_plat("darwin", "x86_64"):
-            return PlatNames.darwin_x64
-        elif self._is_plat("darwin", "arm64"):
-            return PlatNames.darwin_arm64
-        elif self._is_plat("linux", "x86_64"):
-            return self._handle_linux_libc("x64")
-        elif self._is_plat("linux", "i686"):
-            return self._handle_linux_libc("x86")
-        elif self._is_plat("linux", "aarch64"):
-            return self._handle_linux_libc("arm64")
-        elif self._is_plat("linux", "armv7l"):
-            if self._libc_name != "glibc":
-                raise RuntimeError(f"armv7l: only glibc supported at this time, you have {self._libc_name!r}")  # no musl/android
-            return PlatNames.linux_arm32
-        elif self._is_plat("windows", "amd64"):
-            return PlatNames.windows_x64
-        elif self._is_plat("windows", "arm64"):
-            return PlatNames.windows_arm64
-        elif self._is_plat("windows", "x86"):
-            return PlatNames.windows_x86
-        elif self._system_name.startswith("android"):
+        if self._system_name == "darwin":
+            if self._machine_name == "x86_64":
+                return PlatNames.darwin_x64
+            elif self._machine_name == "arm64":
+                return PlatNames.darwin_arm64
+        elif self._system_name == "linux":
+            if self._machine_name == "x86_64":
+                return self._handle_linux_libc("x64")
+            elif self._machine_name == "i686":
+                return self._handle_linux_libc("x86")
+            elif self._machine_name == "aarch64":
+                return self._handle_linux_libc("arm64")
+            elif self._machine_name == "armv7l":
+                if self._libc_name != "glibc":
+                    raise RuntimeError(f"armv7l: only glibc supported at this time, you have {self._libc_name!r}")  # no musl/android
+                return PlatNames.linux_arm32
+        elif self._system_name == "windows":
+            if self._machine_name == "amd64":
+                return PlatNames.windows_x64
+            elif self._machine_name == "x86":
+                return PlatNames.windows_x86
+            elif self._machine_name == "arm64":
+                return PlatNames.windows_arm64
+        elif self._system_name == "android":
             raise RuntimeError(f"Android {self._machine_name!r} with PEP 738 - not handled in pypdfium2 yet.")
-        else:
-            raise RuntimeError(f"Unhandled platform: {self!r}")
+        raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
 
