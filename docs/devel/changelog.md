@@ -9,7 +9,7 @@
 
 ## 4.30.0 (2024-05-09)
 
-*Backported bug fixes / corrections from current development branch to preferably leave v4 in a clean state.*
+*Backported bug fixes / corrections from current development branch.*
 
 - Updated PDFium from `6406` to `6462`.
 - Fixed blunder in `PdfImage.extract()` producing an incorrect output path for prefixes containing a dot. In the `extract-images` CLI, this caused all output images of a type to be written to the same path for a document containing a non-extension dot in the filename.
