@@ -4,33 +4,32 @@
 import os
 import math
 import logging
+import colorsys
 import functools
 from pathlib import Path
 import multiprocessing as mp
 import concurrent.futures as ft
-
-try:
-    import cv2
-except ImportError:
-    cv2 = None
+from importlib.util import find_spec
 
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
-import pypdfium2.raw as pdfium_r
-# TODO? consider dotted access
+import pypdfium2.raw as pdfium_c
 from pypdfium2._cli._parsers import (
     add_input, get_input,
     setup_logging,
+    iterator_hasvalue,
     BooleanOptionalAction,
 )
 
+have_pil = find_spec("PIL") is not None
+have_cv2 = find_spec("cv2") is not None
 logger = logging.getLogger(__name__)
 
 
 def _bitmap_wrapper_foreign_simple(width, height, format, *args, **kwargs):
-    if format == pdfium_r.FPDFBitmap_BGRx:
+    if format == pdfium_c.FPDFBitmap_BGRx:
         use_alpha = False
-    elif format == pdfium_r.FPDFBitmap_BGRA:
+    elif format == pdfium_c.FPDFBitmap_BGRA:
         use_alpha = True
     else:
         raise RuntimeError(f"Cannot create foreign_simple bitmap with bitmap type {pdfium_i.BitmapTypeToStr[format]}.")
@@ -43,15 +42,6 @@ BitmapMakers = dict(
     foreign_simple = _bitmap_wrapper_foreign_simple,
 )
 
-CsFields = ("path_fill", "path_stroke", "text_fill", "text_stroke")
-ColorOpts = dict(metavar="C", nargs=4, type=int)
-SampleTheme = dict(
-    # TODO improve colors - currently it's just some random ones to distinguish the different drawings
-    path_fill   = (170, 100, 0,   255),  # dark orange
-    path_stroke = (0,   150, 255, 255),  # sky blue
-    text_fill   = (255, 255, 255, 255),  # white
-    text_stroke = (150, 255, 0,   255),  # green
-)
 
 def attach(parser):
     add_input(parser, pages=True)
@@ -92,8 +82,8 @@ def attach(parser):
     )
     parser.add_argument(
         "--fill-color",
-        help = "Color the bitmap will be filled with before rendering. It shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
-        **ColorOpts,
+        metavar="C", nargs=4, type=int,
+        help = "Color the bitmap will be filled with before rendering. Shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
     )
     parser.add_argument(
         "--optimize-mode",
@@ -199,68 +189,134 @@ def attach(parser):
         help = "The map function to use (backend specific, the default is an iterative map)."
     )
     
-    color_scheme = parser.add_argument_group(
-        title = "Forced color scheme",
-        description = "Options for using pdfium's forced color scheme renderer. Deprecated, considered not useful.",
+    postproc = parser.add_argument_group(
+        title = "Post processing",
+        description = "Options to post-process rendered images. Note, this may have a strongly negative impact on performance.",
     )
-    color_scheme.add_argument(
-        "--sample-theme",
+    postproc.add_argument(
+        "--invert-lightness",
         action = "store_true",
-        help = "Use a dark background sample theme as base. Explicit color params override selectively."
+        help = "Invert lightness using the HLS color space (e.g. white<->black, dark_blue<->light_blue). The intent is to achieve a dark theme for documents with light background, while providing better visual results than classical color inversion or a flat pdfium color scheme.",
     )
-    color_scheme.add_argument(
-        "--path-fill",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--path-stroke",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--text-fill",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--text-stroke",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--fill-to-stroke",
+    postproc.add_argument(
+        "--exclude-images",
         action = "store_true",
-        help = "Only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.",
+        help = "Whether to exclude PDF images from lightness inversion.",
     )
 
 
 class SavingEngine:
     
-    def __init__(self, path_parts):
+    def __init__(self, path_parts, postproc_kwargs):
         self._path_parts = path_parts
+        self.postproc_kwargs = postproc_kwargs
     
     def _get_path(self, i):
         output_dir, prefix, n_digits, format = self._path_parts
         return output_dir / f"{prefix}{i+1:0{n_digits}d}.{format}"
     
-    def __call__(self, bitmap, i):
+    def __call__(self, i, bitmap, page):
         out_path = self._get_path(i)
-        self._saving_hook(out_path, bitmap)
+        self._saving_hook(out_path, bitmap, page, self.postproc_kwargs)
         logger.info(f"Wrote page {i+1} as {out_path.name}")
 
 
 class PILEngine (SavingEngine):
-    def _saving_hook(self, out_path, bitmap):
-        bitmap.to_pil().save(out_path)
+    
+    def do_imports(self):
+        if not self.postproc_kwargs["invert_lightness"]:
+            return
+        global PIL
+        import PIL.Image
+        import PIL.ImageOps
+        import PIL.ImageFilter
+        import PIL.ImageDraw
+    
+    def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
+        posconv = bitmap.get_posconv(page)
+        pil_image = bitmap.to_pil()
+        pil_image = self.postprocess(pil_image, page, posconv, **postproc_kwargs)
+        pil_image.save(out_path)
+    
+    @staticmethod
+    def _invert_px_lightness(r, g, b):
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
+        l = 1 - l
+        return colorsys.hls_to_rgb(h, l, s)
+    
+    LINV_LUT_SIZE = 17
+    
+    @classmethod
+    @functools.lru_cache(maxsize=1)
+    def _get_linv_lut(cls):
+        return PIL.ImageFilter.Color3DLUT.generate(cls.LINV_LUT_SIZE, cls._invert_px_lightness)
+    
+    @classmethod
+    def postprocess(cls, src_image, page, posconv, invert_lightness, exclude_images):
+        dst_image = src_image
+        if invert_lightness:
+            if src_image.mode == "L":
+                dst_image = PIL.ImageOps.invert(src_image)
+            else:
+                dst_image = dst_image.filter(cls._get_linv_lut())
+            if exclude_images:
+                # FIXME pdfium does not seem to provide APIs to translate XObject to page coordinates, so not sure how to handle images nested in XObjects.
+                # FIXME we'd also like to take alpha masks into account, but this may be difficult as long as pdfium does not expose them directly.
+                have_images, obj_walker = iterator_hasvalue( page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1) )
+                if have_images:
+                    mask = PIL.Image.new("1", src_image.size)
+                    draw = PIL.ImageDraw.Draw(mask)
+                    for obj in obj_walker:
+                        qpoints = [posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
+                        draw.polygon(qpoints, fill=1)
+                    dst_image.paste(src_image, mask=mask)
+        return dst_image
+
 
 class NumpyCV2Engine (SavingEngine):
-    def _saving_hook(self, out_path, bitmap):
-        cv2.imwrite(str(out_path), bitmap.to_numpy())
+    
+    def do_imports(self):
+        global cv2, np
+        import cv2
+        if self.postproc_kwargs["exclude_images"]:
+            import numpy as np
+    
+    def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
+        np_array = bitmap.to_numpy()
+        np_array = self.postprocess(np_array, bitmap, page, **postproc_kwargs)
+        cv2.imwrite(str(out_path), np_array)
+    
+    @classmethod
+    def postprocess(cls, src_image, bitmap, page, invert_lightness, exclude_images):
+        dst_image = src_image
+        if invert_lightness:
+            if bitmap.format == pdfium_c.FPDFBitmap_Gray:
+                dst_image = ~src_image
+            else:
+                convert_to, convert_from = (cv2.COLOR_RGB2HLS, cv2.COLOR_HLS2RGB) if bitmap.rev_byteorder else (cv2.COLOR_BGR2HLS, cv2.COLOR_HLS2BGR)
+                dst_image = cv2.cvtColor(dst_image, convert_to)
+                h, l, s = cv2.split(dst_image)
+                l = ~l
+                dst_image = cv2.merge([h, l, s])
+                dst_image = cv2.cvtColor(dst_image, convert_from)
+            if exclude_images:
+                assert bitmap.format != pdfium_c.FPDFBitmap_BGRx, "Not sure how to paste with mask on {RGB,BGR}X image using cv2"  # FIXME?
+                posconv = bitmap.get_posconv(page)
+                have_images, obj_walker = iterator_hasvalue( page.get_objects([pdfium_c.FPDF_PAGEOBJ_IMAGE], max_depth=1) )
+                if have_images:
+                    mask = np.zeros((bitmap.height, bitmap.width, 1), np.uint8)
+                    for obj in obj_walker:
+                        qpoints = np.array([posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()], np.int32)
+                        cv2.fillPoly(mask, [qpoints], 1)
+                    dst_image = cv2.copyTo(src_image, mask=mask, dst=dst_image)
+        return dst_image
 
 
-def _render_parallel_init(extra_init, input, password, may_init_forms, kwargs, engine):
+def _render_parallel_init(logging_init, engine_init, input, password, may_init_forms, kwargs, engine):
     
-    if extra_init:
-        extra_init()
-    
+    logging_init()
     logger.info(f"Initializing data for process {os.getpid()}")
+    engine_init()
     
     pdf = pdfium.PdfDocument(input, password=password, autoclose=True)
     if may_init_forms:
@@ -274,19 +330,20 @@ def _render_job(i, pdf, kwargs, engine):
     # logger.info(f"Started page {i+1} ...")
     page = pdf[i]
     bitmap = page.render(**kwargs)
-    engine(bitmap, i)
+    engine(i, bitmap, page)
 
 def _render_parallel_job(i):
-    global ProcObjs; _render_job(i, *ProcObjs)
+    global ProcObjs
+    _render_job(i, *ProcObjs)
+
+def _do_nothing(): pass
 
 
+# TODO turn into a python-usable API yielding output paths as they are written
 def main(args):
-    
-    # TODO turn into a python-usable API yielding output paths as they are written
     
     pdf = get_input(args, init_forms=args.draw_forms)
     
-    # TODO move to parsers?
     pdf_len = len(pdf)
     if not all(0 <= i < pdf_len for i in args.pages):
         raise ValueError("Out-of-bounds page indices are prohibited.")
@@ -296,13 +353,14 @@ def main(args):
     if args.prefix is None:
         args.prefix = f"{args.input.stem}_"
     if args.fill_color is None:
-        args.fill_color = (0, 0, 0, 255) if args.sample_theme else (255, 255, 255, 255)
+        args.fill_color = (255, 255, 255, 255)
     if args.linear is None:
         args.linear = 6 if args.format == "jpg" else 3
     
     # numpy+cv2 is much faster for PNG, and PIL faster for JPG, but this might simply be due to different encoding defaults
     if args.engine_cls is None:
-        if cv2 != None and args.format == "png":
+        assert have_pil or have_cv2, "Either pillow or numpy+cv2 must be installed for rendering CLI."
+        if (not have_pil) or (have_cv2 and args.format == "png"):
             args.engine_cls = NumpyCV2Engine
         else:
             args.engine_cls = PILEngine
@@ -314,20 +372,12 @@ def main(args):
         # PIL can't save BGRX as PNG
         args.prefer_bgrx = args.engine_cls is PILEngine and args.format != "png"
     
-    cs_kwargs = dict()
-    if args.sample_theme:
-        cs_kwargs.update(**SampleTheme)
-    cs_kwargs.update(**{f: getattr(args, f) for f in CsFields if getattr(args, f)})
-    cs = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
-    
     kwargs = dict(
         scale = args.scale,
         rotation = args.rotation,
         crop = args.crop,
         grayscale = args.grayscale,
         fill_color = args.fill_color,
-        color_scheme = cs,
-        fill_to_stroke = args.fill_to_stroke,
         optimize_mode = args.optimize_mode,
         draw_annots = args.draw_annots,
         may_draw_forms = args.draw_forms,
@@ -339,16 +389,22 @@ def main(args):
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True
     
+    postproc_kwargs = dict(
+        invert_lightness = args.invert_lightness,
+        exclude_images = args.exclude_images,
+    )
+    
     # TODO dump all args except password?
     logger.info(f"{args.engine_cls.__name__}, Format: {args.format}, rev_byteorder: {args.rev_byteorder}, prefer_bgrx {args.prefer_bgrx}")
     
     n_digits = len(str(pdf_len))
     path_parts = (args.output, args.prefix, n_digits, args.format)
-    engine = args.engine_cls(path_parts)
+    engine = args.engine_cls(path_parts, postproc_kwargs)
     
     if len(args.pages) <= args.linear:
         
         logger.info("Linear rendering ...")
+        engine.do_imports()
         for i in args.pages:
             _render_job(i, pdf, kwargs, engine)
         
@@ -357,7 +413,6 @@ def main(args):
         logger.info("Parallel rendering ...")
         
         ctx = mp.get_context(args.parallel_strategy)
-        # TODO unify using mp.pool.Pool(context=...) ?
         pool_backends = dict(
             mp = (ctx.Pool, "imap"),
             ft = (functools.partial(ft.ProcessPoolExecutor, mp_context=ctx), "map"),
@@ -366,10 +421,15 @@ def main(args):
         if args.parallel_map:
             map_attr = args.parallel_map
         
-        extra_init = (setup_logging if args.parallel_strategy in ("spawn", "forkserver") else None)
+        if args.parallel_strategy == "fork":
+            logging_init, engine_init = _do_nothing, _do_nothing
+            engine.do_imports()
+        else:
+            logging_init, engine_init = setup_logging, engine.do_imports
+        
         pool_kwargs = dict(
             initializer = _render_parallel_init,
-            initargs = (extra_init, pdf._input, args.password, args.draw_forms, kwargs, engine),
+            initargs = (logging_init, engine_init, pdf._input, args.password, args.draw_forms, kwargs, engine),
         )
         
         n_procs = min(args.processes, len(args.pages))

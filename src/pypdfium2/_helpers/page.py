@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfPage", "PdfColorScheme")
+__all__ = ("PdfPage", )
 
 import math
 import ctypes
 import logging
+import weakref
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -22,12 +23,18 @@ class PdfPage (pdfium_i.AutoCloseable):
     Page helper class.
     
     Attributes:
-        raw (FPDF_PAGE): The underlying PDFium page handle.
-        pdf (PdfDocument): Reference to the document this page belongs to.
+        raw (FPDF_PAGE):
+            The underlying PDFium page handle.
+        pdf (PdfDocument):
+            Reference to the document this page belongs to.
+        formenv (PdfFormEnv | None):
+            Formenv handle, if the parent pdf had an active formenv at the time of page retrieval. None otherwise.
     """
     
     def __init__(self, raw, pdf, formenv):
-        self.raw, self.pdf, self.formenv = raw, pdf, formenv
+        self.raw = raw
+        self.pdf = pdf
+        self.formenv = formenv
         super().__init__(PdfPage._close_impl, self.formenv)
     
     
@@ -97,9 +104,9 @@ class PdfPage (pdfium_i.AutoCloseable):
             (float, float, float, float) | None:
             The page MediaBox in PDF canvas units, consisting of four coordinates (usually x0, y0, x1, y1).
             If MediaBox is not defined, returns ANSI A (0, 0, 612, 792) if ``fallback_ok=True``, None otherwise.
-        Note:
-            Due to quirks in PDFium's public API, all ``get_*box()`` functions except :meth:`.get_bbox`
-            do not inherit from parent nodes in the page tree (as of PDFium 5418).
+        
+        .. admonition:: Known issue\n
+            Due to quirks in PDFium, all ``get_*box()`` functions except :meth:`.get_bbox` do not inherit from parent nodes in the page tree (as of PDFium 5418).
         """
         # https://crbug.com/pdfium/1786
         return self._get_box(pdfium_c.FPDFPage_GetMediaBox, lambda: (0, 0, 612, 792), fallback_ok)
@@ -193,15 +200,15 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def insert_obj(self, pageobj):
         """
-        Insert a page object into the page.
+        Insert a pageobject into the page.
         
-        The page object must not belong to a page yet. If it belongs to a PDF, this page must be part of the PDF.
+        The pageobject must not belong to a page yet. If it belongs to a PDF, the target page must be part of that PDF.
         
         Position and form are defined by the object's matrix.
         If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.
         
         Parameters:
-            pageobj (PdfObject): The page object to insert.
+            pageobj (PdfObject): The pageobject to insert.
         """
         
         if pageobj.page:
@@ -217,16 +224,28 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def remove_obj(self, pageobj):
         """
-        Remove a page object from the page.
-        As of PDFium 5692, detached page objects may be only re-inserted into existing pages of the same document.
-        If the page object is not re-inserted into a page, its ``close()`` method may be called.
+        Remove a pageobject from the page.
+        As of PDFium 5692, detached pageobjects may be only re-inserted into existing pages of the same document.
+        If the pageobject is not re-inserted into a page, its ``close()`` method may be called.
+        
+        Note:
+            If the object's :attr:`~.PdfObject.type` is :data:`FPDF_PAGEOBJ_TEXT`, any :class:`.PdfTextPage` handles to the page should be closed before removing the object.
         
         Parameters:
-            pageobj (PdfObject): The page object to remove.
+            pageobj (PdfObject): The pageobject to remove.
         """
                 
         if pageobj.page is not self:
-            raise ValueError("The page object you attempted to remove is not part of this page.")
+            raise ValueError("The pageobject you attempted to remove is not part of this page.")
+        
+        # https://pdfium-review.googlesource.com/c/pdfium/+/118914
+        if pageobj.type == pdfium_c.FPDF_PAGEOBJ_TEXT:
+            for wref in self._kids:
+                obj = wref()
+                if obj and obj.raw:
+                    assert isinstance(obj, PdfTextPage), "This code assumes all kids of a page are textpages."
+                    logger.warning(f"Removing text pageobbject implicitly closes affected textpage {obj}.")
+                    obj.close()
         
         ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
         if not ok:
@@ -237,7 +256,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def gen_content(self):
         """
-        Generate page content to apply additions, removals or modifications of page objects.
+        Generate page content to apply additions, removals or modifications of pageobjects.
         
         If page content was changed, this function should be called once before saving the document or re-loading the page.
         """
@@ -246,23 +265,21 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to generate page content.")
     
     
-    def get_objects(self, filter=None, max_depth=2, form=None, level=0):
+    def get_objects(self, filter=None, max_depth=15, form=None, level=0):
         """
-        Iterate through the page objects on this page.
+        Iterate through the pageobjects on this page.
         
         Parameters:
             filter (list[int] | None):
-                An optional list of page object types to filter (:attr:`FPDF_PAGEOBJ_*`).
+                An optional list of pageobject types to filter (:attr:`FPDF_PAGEOBJ_*`).
                 Any objects whose type is not contained will be skipped.
                 If None or empty, all objects will be provided, regardless of their type.
             max_depth (int):
                 Maximum recursion depth to consider when descending into Form XObjects.
         
         Yields:
-            :class:`.PdfObject`: A page object.
+            :class:`.PdfObject`: A pageobject.
         """
-        
-        # TODO? close skipped objects explicitly ?
         
         if form:
             count_objects = pdfium_c.FPDFFormObj_CountObjects
@@ -275,13 +292,13 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         n_objects = count_objects(parent)
         if n_objects < 0:
-            raise PdfiumError("Failed to get number of page objects.")
+            raise PdfiumError("Failed to get number of pageobjects.")
         
         for i in range(n_objects):
             
             raw_obj = get_object(parent, i)
-            if raw_obj is None:
-                raise PdfiumError("Failed to get page object.")
+            if not raw_obj:
+                raise PdfiumError("Failed to get pageobject.")
             
             # Not a child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The .page reference is enough to keep the parent alive, unless the caller explicitly closes it (which may not merit storing countless of weakrefs).
             helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, level=level)
@@ -297,16 +314,21 @@ class PdfPage (pdfium_i.AutoCloseable):
                 )
     
     
-    # non-public because it doesn't really work (returns success but does nothing on all samples we tried)
-    def _flatten(self, flag=pdfium_c.FLAT_NORMALDISPLAY):
+    def flatten(self, flag=pdfium_c.FLAT_NORMALDISPLAY):
         """
-        Attempt to flatten annotations and form fields into the page contents.
+        Flatten form fields and annotations into page contents.
+        
+        Attention:
+            * :meth:`~.PdfDocument.init_forms` must have been called on the parent pdf, before the page was retrieved, for this method to work. In other words, :attr:`.PdfPage.formenv` must be non-null.
+            * Flattening may invalidate existing handles to the page, so you'll want to re-initialize them after flattening.
         
         Parameters:
             flag (int): PDFium flattening target (:attr:`FLAT_*`)
         Returns:
             int: PDFium flattening status (:attr:`FLATTEN_*`). :attr:`FLATTEN_FAIL` is handled internally.
         """
+        if not self.formenv:
+            raise RuntimeError("page.flatten() requires previous pdf.init_forms() before page retrieval.")
         rc = pdfium_c.FPDFPage_Flatten(self, flag)
         if rc == pdfium_c.FLATTEN_FAIL:
             raise PdfiumError("Failed to flatten annotations / form fields.")
@@ -318,7 +340,6 @@ class PdfPage (pdfium_i.AutoCloseable):
     # - add lower-level renderer that takes a caller-provided bitmap
     # e. g. render(), render_ex(), render_matrix(), render_matrix_ex()
     
-    
     def render(
             self,
             scale = 1,
@@ -326,8 +347,6 @@ class PdfPage (pdfium_i.AutoCloseable):
             crop = (0, 0, 0, 0),
             may_draw_forms = True,
             bitmap_maker = PdfBitmap.new_native,
-            color_scheme = None,
-            fill_to_stroke = False,
             **kwargs
         ):
         """
@@ -346,13 +365,10 @@ class PdfPage (pdfium_i.AutoCloseable):
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top). Crop is applied after rotation.
                 
             may_draw_forms (bool):
-                If True, render form fields (provided the document has forms and :meth:`~PdfDocument.init_forms` was called).
+                If True, render form fields (provided the document has forms and :meth:`~.PdfDocument.init_forms` was called).
             
             bitmap_maker (typing.Callable):
                 Callback function used to create the :class:`.PdfBitmap`.
-                
-            color_scheme (PdfColorScheme | None):
-                An optional, custom rendering color scheme.
                 
             fill_to_stroke (bool):
                 If True and rendering with custom color scheme, fill paths will be stroked.
@@ -416,28 +432,18 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise ValueError("Crop exceeds page dimensions")
         
         cl_format, rev_byteorder, fill_color, flags = _parse_renderopts(**kwargs)
-        if (color_scheme is not None) and fill_to_stroke:
-            flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(0, 0, width, height, fill_color)
         
-        render_args = (bitmap, self, -crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation], flags)
+        pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
+        render_args = (bitmap, self, *pos_args, flags)
         
-        if color_scheme is None:
-            pdfium_c.FPDF_RenderPageBitmap(*render_args)
-        else:
-            
-            pause = pdfium_c.IFSDK_PAUSE(version=1)
-            pdfium_i.set_callback(pause, "NeedToPauseNow", lambda _: False)
-            
-            fpdf_cs = color_scheme.convert(rev_byteorder)
-            status = pdfium_c.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_cs, pause)
-            assert status == pdfium_c.FPDF_RENDER_DONE
-            pdfium_c.FPDF_RenderPage_Close(self)
-        
+        pdfium_c.FPDF_RenderPageBitmap(*render_args)
         if may_draw_forms and self.formenv:
             pdfium_c.FPDF_FFLDraw(self.formenv, *render_args)
+        
+        bitmap._pos_args = (weakref.ref(self), *pos_args)
         
         return bitmap
 
@@ -508,26 +514,3 @@ def _parse_renderopts(
     
     # TODO consider using a namedtuple or something
     return cl_format, rev_byteorder, fill_color, flags
-
-
-class PdfColorScheme:
-    """
-    Rendering color scheme.
-    Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
-    """
-    
-    def __init__(self, path_fill, path_stroke, text_fill, text_stroke):
-        self.colors = dict(
-            path_fill_color=path_fill, path_stroke_color=path_stroke,
-            text_fill_color=text_fill, text_stroke_color=text_stroke,
-        )
-    
-    def convert(self, rev_byteorder):
-        """
-        Returns:
-            The color scheme as :class:`FPDF_COLORSCHEME` object.
-        """
-        fpdf_cs = pdfium_c.FPDF_COLORSCHEME()
-        for key, value in self.colors.items():
-            setattr(fpdf_cs, key, pdfium_i.color_tohex(value, rev_byteorder))
-        return fpdf_cs

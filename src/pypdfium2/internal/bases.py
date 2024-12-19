@@ -26,6 +26,8 @@ class AutoCastable:
     
     @property
     def _as_parameter_(self):
+        if self.raw is None:
+            raise RuntimeError("Cannot use closed object as C function parameter.")
         return self.raw
 
 
@@ -37,10 +39,10 @@ def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
         os.write(sys.stderr.fileno(), f"Close ({desc}) {obj_repr}\n".encode())
     
     if not LIBRARY_AVAILABLE:
-        os.write(sys.stderr.fileno(), f"-> Cannot close object, library is destroyed. This may cause a memory leak!\n".encode())
+        os.write(sys.stderr.fileno(), f"-> Cannot close object; library is destroyed. This may happen on process exit, but should not during runtime.\n".encode())
         return
     
-    assert (parent is None) or not parent._tree_closed()
+    assert parent is None or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
 
 
@@ -48,7 +50,7 @@ class AutoCloseable (AutoCastable):
     
     def __init__(self, close_func, *args, obj=None, needs_free=True, **kwargs):
         
-        # NOTE proactively prevent accidental double initialization
+        # proactively prevent accidental double initialization
         assert not hasattr(self, "_finalizer")
         
         self._close_func = close_func
@@ -69,7 +71,7 @@ class AutoCloseable (AutoCastable):
     
     
     def _attach_finalizer(self):
-        # NOTE this function captures the value of the `parent` property at finalizer installation time - if it changes, detach the old finalizer and create a new one
+        # NOTE this function captures the value of the `parent` property at finalizer installation time
         assert self._finalizer is None
         self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, repr(self), self._autoclose_state, self.parent, *self._ex_args, **self._ex_kwargs)
     
@@ -80,7 +82,7 @@ class AutoCloseable (AutoCastable):
     def _tree_closed(self):
         if self.raw is None:
             return True
-        if (self.parent is not None) and self.parent._tree_closed():
+        if self.parent != None and self.parent._tree_closed():
             return True
         return False
     
@@ -89,6 +91,10 @@ class AutoCloseable (AutoCastable):
     
     
     def close(self, _by_parent=False):
+        
+        # TODO remove object from parent's kids cache on finalization to avoid unnecessary accumulation
+        # -> pre-requisite would be to handle kids inside finalizer, but IIRC there was some weird issue with that?
+        # TODO invalidate self.raw if closing object without finalizer to prevent access after a lifetime-managing parent is closed
         
         if not self.raw or not self._finalizer:
             return False

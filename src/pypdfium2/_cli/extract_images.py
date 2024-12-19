@@ -7,7 +7,6 @@ import traceback
 from pathlib import Path
 import pypdfium2.raw as pdfium_c
 import pypdfium2._helpers as pdfium
-# TODO? consider dotted access
 from pypdfium2._cli._parsers import add_input, get_input
 
 
@@ -22,8 +21,8 @@ def attach(parser):
     parser.add_argument(
         "--max-depth",
         type = int,
-        default = 2,
-        help = "Maximum recursion depth to consider when looking for page objects.",
+        default = 15,
+        help = "Maximum recursion depth to consider when looking for pageobjects.",
     )
     parser.add_argument(
         "--use-bitmap",
@@ -37,7 +36,7 @@ def attach(parser):
     parser.add_argument(
         "--render",
         action = "store_true",
-        help = "Whether to get rendered bitmaps, taking masks and transform matrices into account. (Fallback if doing smart extraction.)",
+        help = "Whether to get rendered bitmaps, taking masks and transform matrices into account. (requires --use-bitmap, ignored with smart extraction)",
     )
 
 
@@ -71,7 +70,7 @@ def main(args):
                     pil_image = image.get_bitmap(render=args.render).to_pil()
                     pil_image.save(f"{prefix}.{args.format}")
                 else:
-                    image.extract(prefix, fb_format=args.format, fb_render=args.render)
+                    image.extract(prefix, fb_format=args.format)
             except pdfium.PdfiumError:
                 traceback.print_exc()
             image.close()
