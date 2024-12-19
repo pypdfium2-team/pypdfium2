@@ -12,6 +12,7 @@ recursive-include src/pypdfium2 *.py
 recursive-include setupsrc *.py
 recursive-include sourcebuild/patches *
 include autorelease/record.json
+include autorelease/bindings.py
 
 # By design, the raw module only ships data files - exclude them by default
 recursive-exclude src/pypdfium_raw *
