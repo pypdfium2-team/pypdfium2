@@ -210,11 +210,12 @@ jobs:
       # https://docs.pypi.org/trusted-publishers/using-a-publisher/
       # https://github.com/pypa/gh-action-pypi-publish
       
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: dist/  # the default
+      # - name: Publish to TestPyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     repository-url: https://test.pypi.org/legacy/
+      #     packages-dir: dist/  # the default
+      #     attestations: false  # https://github.com/pypa/gh-action-pypi-publish/issues/283#issuecomment-2499296440
       
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
