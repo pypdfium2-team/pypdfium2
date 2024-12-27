@@ -53,7 +53,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     if pl_name == ExtPlats.system:
         # TODO add option for caller to pass in custom headers_dir, run_lds and flags? unfortunately it's not straightforward how to integrate this
         # also want to consider accepting a full version for offline setup
-        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=[])
+        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
         write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
         return [BindingsFN, VersionFN]

@@ -27,7 +27,7 @@ def test_color_tohex(color_in, rev_byteorder, exp_color):
     assert pdfium_c.FPDF_GetBValue(exp_color) == channels[3]
 
 
-def _filter(prefix, skips=[], type=int):
+def _filter(prefix, skips=(), type=int):
     items = []
     for attr in dir(pdfium_c):
         value = getattr(pdfium_c, attr)

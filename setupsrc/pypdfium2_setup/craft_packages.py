@@ -110,7 +110,7 @@ def main_pypi(args):
             clean_platfiles()
 
 
-def run_conda_build(recipe_dir, out_dir, args=[]):
+def run_conda_build(recipe_dir, out_dir, args=()):
     with TmpCommitCtx():
         run_cmd(["conda", "build", recipe_dir, "--output-folder", out_dir, *args], cwd=ProjectDir, env=os.environ)
 
