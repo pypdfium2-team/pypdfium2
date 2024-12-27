@@ -444,7 +444,7 @@ def tmp_cwd_context(tmp_cwd):
         os.chdir(orig_cwd)
 
 
-def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compile_lds=[], run_lds=["."], allow_system_despite_libdirs=False):
+def run_ctypesgen(target_dir, headers_dir, flags=[], compile_lds=[], run_lds=["."], allow_system_despite_libdirs=False, guard_symbols=False, no_srcinfo=False):
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
@@ -465,6 +465,8 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     args += ["--no-macro-guards"]
     if not guard_symbols:
         args += ["--no-symbol-guards"]
+    if no_srcinfo:
+        args += ["--no-srcinfo"]
     
     # pre-processor - if not given, pypdfium2-ctypesgen will try to auto-select as available (gcc/clang)
     c_preproc = os.environ.get("CPP", None)
