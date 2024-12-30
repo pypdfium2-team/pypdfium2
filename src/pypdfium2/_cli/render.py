@@ -196,7 +196,7 @@ def attach(parser):
     postproc.add_argument(
         "--invert-lightness",
         action = "store_true",
-        help = "Invert lightness using the HLS color space (e.g. white<->black, dark_blue<->light_blue). The intent is to achieve a dark theme for documents with light background, while providing better visual results than classical color inversion or a flat pdfium color scheme.",
+        help = "Invert lightness using the HLS color space (e.g. white<->black, dark_blue<->light_blue). The intent is to achieve a dark theme for documents with light background, while providing better visual results than classical color inversion or a flat pdfium color scheme. However, note that --optimize-mode lcd is not recommendable when inverting lightness.",
     )
     postproc.add_argument(
         "--exclude-images",
@@ -393,6 +393,8 @@ def main(args):
         invert_lightness = args.invert_lightness,
         exclude_images = args.exclude_images,
     )
+    if args.invert_lightness and args.optimize_mode == "lcd":
+        logger.warning("LCD optimization clashes with lightness inversion, as post-processing colours defeats the idea of subpixel rendering.")
     
     # TODO dump all args except password?
     logger.info(f"{args.engine_cls.__name__}, Format: {args.format}, rev_byteorder: {args.rev_byteorder}, prefer_bgrx {args.prefer_bgrx}")
