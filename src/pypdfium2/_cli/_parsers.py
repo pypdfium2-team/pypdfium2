@@ -88,6 +88,7 @@ def get_input(args, init_forms=False, **kwargs):
         pdf.init_forms()
     if "pages" in args and not args.pages:
         args.pages = [i for i in range(len(pdf))]
+    # TODO else validate pages, as seen in ./render.py
     return pdf
 
 
