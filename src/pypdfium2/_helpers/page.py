@@ -432,10 +432,14 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise ValueError("Crop exceeds page dimensions")
         
         cl_format, rev_byteorder, fill_color, flags = _parse_renderopts(**kwargs)
+        if cl_format == pdfium_c.FPDFBitmap_BGRA:
+            need_fill = fill_color[3] != 0
+        else:
+            need_fill = fill_color[:3] == [0, 0, 0]
         
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
-        if fill_color[3] > 0:
-            # assuming the buffer is initialized with zeroes
+        if need_fill:
+            # assuming the buffer is initialized with zeroes, we can skip filling the bitmap under certain conditions
             bitmap.fill_rect(0, 0, width, height, fill_color)
         
         pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
