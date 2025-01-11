@@ -314,6 +314,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         This method requires passing in the page explicitly, to avoid holding a strong reference, so that bitmap and page can be independently freed by finalizer.
         """
         # if the bitmap was rendered from a page, resolve weakref and check identity
+        # first, make sure *page* isn't None because that's what the weakref might resolve to if the referenced object is not alive anymore.
+        assert page, "Page must be non-null"
         if not self._pos_args or self._pos_args[0]() is not page:
             raise RuntimeError("This bitmap does not belong to the given page.")
         return PdfPosConv(page, self._pos_args[1:])
@@ -362,7 +364,6 @@ class PdfPosConv:
     # FIXME do we have to do overflow checking against too large sizes?
     
     def __init__(self, page, pos_args):
-        assert bool(page)
         self.page = page
         self.pos_args = pos_args
     
