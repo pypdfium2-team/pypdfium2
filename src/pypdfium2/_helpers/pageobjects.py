@@ -380,7 +380,8 @@ class ImageNotExtractableError (Exception):
 
 
 def _get_pil_mode(cs, bpp):
-    # In theory, indexed (palettized) and ICC-based color spaces could be handled as well, but PDFium currently does not provide access to the palette or the ICC profile
+    # As of Jan 2025, pdfium does not provide access to the palette, so we cannot handle indexed (palettized) color space.
+    # TODO Handle ICC-based color spaces (pdfium now provides access to the ICC profile via FPDFImageObj_GetIccProfileDataDecoded(), see commit edd7c5cf)
     if cs == pdfium_c.FPDF_COLORSPACE_DEVICEGRAY:
         return "1" if bpp == 1 else "L"
     elif cs == pdfium_c.FPDF_COLORSPACE_DEVICERGB:
