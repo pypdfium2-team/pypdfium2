@@ -252,7 +252,7 @@ class PILEngine (SavingEngine):
         return PIL.ImageFilter.Color3DLUT.generate(cls.LINV_LUT_SIZE, cls._invert_px_lightness)
     
     @classmethod
-    def postprocess(cls, src_image, page, posconv, invert_lightness, exclude_images, convert_to_la):
+    def postprocess(cls, src_image, page, posconv, invert_lightness, exclude_images):
         dst_image = src_image
         if invert_lightness:
             if src_image.mode == "L":
@@ -270,8 +270,6 @@ class PILEngine (SavingEngine):
                         qpoints = [posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()]
                         draw.polygon(qpoints, fill=1)
                     dst_image.paste(src_image, mask=mask)
-        if convert_to_la:
-            dst_image = dst_image.convert("LA")
         return dst_image
 
 
@@ -289,7 +287,7 @@ class NumpyCV2Engine (SavingEngine):
         cv2.imwrite(str(out_path), np_array)
     
     @classmethod
-    def postprocess(cls, src_image, bitmap, page, invert_lightness, exclude_images, convert_to_la):
+    def postprocess(cls, src_image, bitmap, page, invert_lightness, exclude_images):
         dst_image = src_image
         if invert_lightness:
             if bitmap.format == pdfium_c.FPDFBitmap_Gray:
@@ -311,7 +309,6 @@ class NumpyCV2Engine (SavingEngine):
                         qpoints = np.array([posconv.to_bitmap(x, y) for x, y in obj.get_quad_points()], np.int32)
                         cv2.fillPoly(mask, [qpoints], 1)
                     dst_image = cv2.copyTo(src_image, mask=mask, dst=dst_image)
-        # convert_to_la is not implement with the cv2 engine
         return dst_image
 
 
@@ -349,6 +346,7 @@ def main(args):
         # make sure the output directory exists (PIL throws an error if it doesn't, but cv2 may silently skip)
         raise ValueError(f"Output path is not an existing directory: {args.output!r}")
     
+    pages_str = args.pages  # save for later info printing
     pdf = get_input(args, init_forms=args.draw_forms)
     pdf_len = len(pdf)
     if not all(0 <= i < pdf_len for i in args.pages):
@@ -401,15 +399,16 @@ def main(args):
     postproc_kwargs = dict(
         invert_lightness = args.invert_lightness,
         exclude_images = args.exclude_images,
-        # pdfium does not natively support Gray+Alpha, so if the background has transparency, PdfPage.render() will select FPDFBitmap_BGRA by default. In this case, we can convert to LA to reduce file size.
-        convert_to_la = args.grayscale and (args.fill_color[3] < 255) and args.engine_cls is PILEngine,
     )
     if args.invert_lightness and args.optimize_mode == "lcd":
         logger.warning("LCD optimization clashes with lightness inversion, as post-processing colours defeats the idea of subpixel rendering.")
     
-    # TODO dump all args except password?
-    logger.info(f"{args.engine_cls.__name__}, Format: {args.format}, rev_byteorder: {args.rev_byteorder}, prefer_bgrx {args.prefer_bgrx}")
-    logger.info(f"Post-processing? {postproc_kwargs}")
+    print_args = vars(args).copy()
+    del print_args["subcommand"]
+    print_args["pages"] = pages_str
+    if print_args["password"]:
+        print_args["password"] = "<obfuscated>"
+    logger.info(f"{print_args}")  # TODO prettier?
     
     n_digits = len(str(pdf_len))
     path_parts = (args.output, args.prefix, n_digits, args.format)
