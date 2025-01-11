@@ -283,7 +283,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     def from_pil(cls, pil_image):
         """
         Convert a :mod:`PIL` image to a PDFium bitmap.
-        Due to the restricted number of color formats and bit depths supported by :attr:`FPDF_BITMAP`, this may be a lossy operation.
+        Due to the limited number of color formats and bit depths supported by :attr:`FPDF_BITMAP`, this may be a lossy operation.
         
         Bitmaps returned by this function should be treated as immutable.
         
@@ -314,7 +314,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         This method requires passing in the page explicitly, to avoid holding a strong reference, so that bitmap and page can be independently freed by finalizer.
         """
         # if the bitmap was rendered from a page, resolve weakref and check identity
-        # first, make sure *page* isn't None because that's what the weakref might resolve to if the referenced object is not alive anymore.
+        # before that, make sure *page* isn't None because that's what the weakref might resolve to if the referenced object is not alive anymore.
         assert page, "Page must be non-null"
         if not self._pos_args or self._pos_args[0]() is not page:
             raise RuntimeError("This bitmap does not belong to the given page.")
