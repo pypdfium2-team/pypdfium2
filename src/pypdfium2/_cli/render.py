@@ -161,7 +161,7 @@ def attach(parser):
         nargs = "?",
         type = int,
         const = math.inf,
-        help = "Render non-parallel if page count is less or equal to the specified value (default is conditional). If this flag is given without a value, then render linear regardless of document length.",
+        help = "Render non-parallel if page count is less or equal to the specified value (default: 4). If this flag is given without a value, then render linear regardless of document length.",
     )
     parallel.add_argument(
         "--processes",
@@ -362,7 +362,7 @@ def main(args):
         # can't use jpeg with transparency rsp. when there is an alpha channel
         args.format = "jpg" if args.fill_color[3] == 255 else "png"
     if args.linear is None:
-        args.linear = 6 if args.format == "jpg" else 3
+        args.linear = 4
     
     # numpy+cv2 is much faster for PNG, and PIL faster for JPG, but this might simply be due to different encoding defaults
     if args.engine_cls is None:
