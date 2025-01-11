@@ -47,7 +47,7 @@ def attach(parser):
     add_input(parser, pages=True)
     parser.add_argument(
         "--output", "-o",
-        type = Path,
+        type = lambda p: Path(p).expanduser().resolve(),
         required = True,
         help = "Output directory where the serially numbered images shall be placed.",
     )
@@ -342,8 +342,11 @@ def _do_nothing(): pass
 # TODO turn into a python-usable API yielding output paths as they are written
 def main(args):
     
-    pdf = get_input(args, init_forms=args.draw_forms)
+    if not args.output.is_dir():
+        # make sure the output directory exists (PIL throws an error if it doesn't, but cv2 may silently skip)
+        raise ValueError(f"Output path is not an existing directory: {args.output!r}")
     
+    pdf = get_input(args, init_forms=args.draw_forms)
     pdf_len = len(pdf)
     if not all(0 <= i < pdf_len for i in args.pages):
         raise ValueError("Out-of-bounds page indices are prohibited.")
