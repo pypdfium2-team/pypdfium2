@@ -97,7 +97,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Construct a :class:`.PdfBitmap` wrapper around a raw PDFium bitmap handle.
         
         Note:
-            This method is meant for bitmaps exposed by pdfium. For bitmaps created by the caller, where the parameters are already known, it may be preferable to call the :class:`.PdfBitmap` constructor directly.
+            This method is meant for bitmaps exposed by pdfium (as in :meth:`.PdfImage.get_bitmap`). For bitmaps created by the caller, where the parameters are already known, it may be preferable to call the :class:`.PdfBitmap` constructor directly.
         
         Parameters:
             raw (FPDF_BITMAP):
@@ -107,8 +107,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             ex_buffer (~ctypes.c_ubyte | None):
                 If the bitmap was created from a buffer allocated by Python/ctypes, pass in the ctypes array to keep it referenced.
         """
-        
-        # e.g. PdfImage.get_bitmap() uses this method
         
         width = pdfium_c.FPDFBitmap_GetWidth(raw)
         height = pdfium_c.FPDFBitmap_GetHeight(raw)
@@ -152,7 +150,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         # Alternatively, we could do:
         # return cls.from_raw(raw, rev_byteorder, buffer)
-        # This implies some (technically nnecessary) API calls. Note, for a short time, there was a bug in pdfium where retrieving the params of a caller-created bitmap through the FPDFBitmap_Get*() APIs didn't work correctly, so better avoid doing this if we can help it.
+        # This implies some (technically unnecessary) API calls. Note, for a short time, there was a bug in pdfium where retrieving the params of a caller-created bitmap through the FPDFBitmap_Get*() APIs didn't work correctly, so better avoid doing this if we can help it.
     
     
     @classmethod
@@ -177,7 +175,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by PDFium. 
         
-        At this time, PDFium docs specify that each line uses width * 4 bytes, with no gap between adjacent lines, i.e. the resuling buffer should be packed.
+        PDFium docs specify that each line uses width * 4 bytes, with no gap between adjacent lines, i.e. the resuling buffer should be packed.
         
         Note, the recommended default bitmap creation strategy is :meth:`.new_native`.
         """
@@ -191,7 +189,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     def fill_rect(self, left, top, width, height, color):
         """
         Fill a rectangle on the bitmap with the given color.
-        The coordinate system starts at the top left corner of the image.
+        The coordinate system's origin is the top left corner of the image.
         
         Note:
             This function replaces the color values in the given rectangle. It does not perform alpha compositing.
