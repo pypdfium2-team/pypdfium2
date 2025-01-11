@@ -88,7 +88,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Construct a :class:`.PdfBitmap` wrapper around a raw PDFium bitmap handle.
         
         Note:
-            This method is meant for bitmaps managed by pdfium. For bitmaps created by the caller, where the parameters are already known, it may be preferable to call the :class:`.PdfBitmap` constructor directly.
+            This method is meant for bitmaps exposed by pdfium. For bitmaps created by the caller, where the parameters are already known, it may be preferable to call the :class:`.PdfBitmap` constructor directly.
         
         Parameters:
             raw (FPDF_BITMAP):
@@ -98,6 +98,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             ex_buffer (~ctypes.c_ubyte | None):
                 If the bitmap was created from a buffer allocated by Python/ctypes, pass in the ctypes array to keep it referenced.
         """
+        
+        # e.g. PdfImage.get_bitmap() uses this method
         
         width = pdfium_c.FPDFBitmap_GetWidth(raw)
         height = pdfium_c.FPDFBitmap_GetHeight(raw)
@@ -139,9 +141,9 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
         return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=False)
         
-        # alternatively, we could do retrieve the params through pdfium's API:
+        # Alternatively, we could do:
         # return cls.from_raw(raw, rev_byteorder, buffer)
-        # note, for a short time, there was a bug in pdfium where retrieving the params of a caller-created bitmap through the FPDFBitmap_Get*() APIs didn't work correctly, so better avoid the unnecessary API calls if we can help it
+        # This implies some (technically nnecessary) API calls. Note, for a short time, there was a bug in pdfium where retrieving the params of a caller-created bitmap through the FPDFBitmap_Get*() APIs didn't work correctly, so better avoid doing this if we can help it.
     
     
     @classmethod
