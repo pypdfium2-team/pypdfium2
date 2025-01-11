@@ -156,10 +156,10 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         stride = width * pdfium_i.BitmapTypeToNChannels[format] if force_packed else 0
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, None, stride)
-        buffer = cls._get_buffer(raw)
         # Retrieve stride set by pdfium, if we passed in 0. Otherwise, trust in pdfium to use the requested stride.
         if not force_packed:  # stride == 0
             stride = pdfium_c.FPDFBitmap_GetStride(raw)
+        buffer = cls._get_buffer(raw, stride, height)
         return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=True)
     
     
@@ -173,8 +173,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Note, the recommended default bitmap creation strategy is :meth:`.new_native`.
         """
         raw = pdfium_c.FPDFBitmap_Create(width, height, use_alpha)
-        buffer = cls._get_buffer(raw)
         stride = width * 4  # see above
+        buffer = cls._get_buffer(raw, stride, height)
         format = pdfium_c.FPDFBitmap_BGRA if use_alpha else pdfium_c.FPDFBitmap_BGRx
         return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=True)
     
