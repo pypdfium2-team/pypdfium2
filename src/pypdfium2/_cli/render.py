@@ -57,9 +57,8 @@ def attach(parser):
     )
     parser.add_argument(
         "--format", "-f",
-        default = "jpg",
         type = str.lower,
-        help = "The image format to use.",
+        help = "The image format to use (default: conditional).",
     )
     parser.add_argument(
         "--engine",
@@ -357,6 +356,9 @@ def main(args):
         args.prefix = f"{args.input.stem}_"
     if args.fill_color is None:
         args.fill_color = (255, 255, 255, 255)
+    if args.format is None:
+        # can't use jpeg with transparency rsp. when there is an alpha channel
+        args.format = "jpg" if args.fill_color[3] == 255 else "png"
     if args.linear is None:
         args.linear = 6 if args.format == "jpg" else 3
     
