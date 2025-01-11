@@ -73,6 +73,15 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         return None
     
     
+    # NOTE To test all bitmap creation strategies through the CLI:
+    # MAKERS=(native foreign foreign_packed foreign_simple)
+    # DOCPATH="..."  # ideally use a short one or pass e.g. --pages "1-3"
+    # for MAKER in ${MAKERS[@]}; do echo "$MAKER"; mkdir -p out/$MAKER; pypdfium2 render "$DOCPATH" -o out/$MAKER --bitmap-maker $MAKER; done
+    
+    # To test .from_raw():
+    # pypdfium2 extract-images "$DOCPATH" -o out/ --use-bitmap
+    
+    
     @classmethod
     def _get_buffer(cls, raw, stride, height):
         buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
