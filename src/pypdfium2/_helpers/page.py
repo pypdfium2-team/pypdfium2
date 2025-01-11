@@ -434,7 +434,9 @@ class PdfPage (pdfium_i.AutoCloseable):
         cl_format, rev_byteorder, fill_color, flags = _parse_renderopts(**kwargs)
         
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
-        bitmap.fill_rect(0, 0, width, height, fill_color)
+        if fill_color[3] > 0:
+            # assuming the buffer is initialized with zeroes
+            bitmap.fill_rect(0, 0, width, height, fill_color)
         
         pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
         render_args = (bitmap, self, *pos_args, flags)
