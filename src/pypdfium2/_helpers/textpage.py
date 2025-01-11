@@ -130,6 +130,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         # https://github.com/pypdfium2-team/pypdfium2/issues/298
         # https://crbug.com/pdfium/2133
         if 6167 < PDFIUM_INFO.build < 6415:
+            logger.warning(f"Due to API issues, pdfium builds between 6167 and 6415 (you have {PDFIUM_INFO.build}) require allocating twice the amount of memory in get_text_range().")
             in_count *= 2
         in_count += 1  # null terminator
         
