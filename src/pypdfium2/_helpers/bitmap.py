@@ -202,6 +202,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         c_color = pdfium_i.color_tohex(color, self.rev_byteorder)
         ok = pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
+        # Assuming pdfium >= 6635 (first tag to include commit ae9dbb6). With lower pdfium versions, this would always return None and fail.
         if not ok:
             raise PdfiumError("Failed to fill bitmap rectangle.")
     
