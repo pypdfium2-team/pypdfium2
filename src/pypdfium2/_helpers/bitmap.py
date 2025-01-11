@@ -175,6 +175,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         raw = pdfium_c.FPDFBitmap_Create(width, height, use_alpha)
         buffer = cls._get_buffer(raw)
         stride = width * 4  # see above
+        format = pdfium_c.FPDFBitmap_BGRA if use_alpha else pdfium_c.FPDFBitmap_BGRx
         return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=True)
     
     
