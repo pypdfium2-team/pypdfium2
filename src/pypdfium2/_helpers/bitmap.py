@@ -175,7 +175,9 @@ class PdfBitmap (pdfium_i.AutoCloseable):
                 RGBA fill color (a tuple of 4 integers ranging from 0 to 255).
         """
         c_color = pdfium_i.color_tohex(color, self.rev_byteorder)
-        pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
+        ok = pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
+        if not ok:
+            raise PdfiumError("Failed to fill bitmap rectangle.")
     
     
     # Requirement: If the result is a view of the buffer (not a copy), it keeps the referenced memory valid.
