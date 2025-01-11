@@ -435,7 +435,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         if cl_format == pdfium_c.FPDFBitmap_BGRA:
             need_fill = fill_color[3] != 0
         else:
-            need_fill = fill_color[:3] == [0, 0, 0]
+            need_fill = fill_color[:3] != [0, 0, 0]
         
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         if need_fill:
