@@ -177,6 +177,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         PDFium docs specify that each line uses width * 4 bytes, with no gap between adjacent lines, i.e. the resuling buffer should be packed.
         
+        Contrary to the other ``PdfBitmap.new_*()`` methods, this method does not take a format constant, but a *use_alpha* boolean. If True, the format will be :attr:`FPDFBitmap_BGRA`, :attr:`FPFBitmap_BGRx` otherwise. Other bitmap formats cannot be used with this method.
+        
         Note, the recommended default bitmap creation strategy is :meth:`.new_native`.
         """
         raw = pdfium_c.FPDFBitmap_Create(width, height, use_alpha)
@@ -281,7 +283,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     def from_pil(cls, pil_image):
         """
         Convert a :mod:`PIL` image to a PDFium bitmap.
-        Due to the restricted number of color formats and bit depths supported by FPDF_BITMAP, this may be a lossy operation.
+        Due to the restricted number of color formats and bit depths supported by :attr:`FPDF_BITMAP`, this may be a lossy operation.
         
         Bitmaps returned by this function should be treated as immutable.
         
