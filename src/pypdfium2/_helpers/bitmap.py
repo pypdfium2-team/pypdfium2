@@ -74,9 +74,21 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     
     @classmethod
+    def _get_buffer(cls, raw, stride, height):
+        buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
+        if not buffer_ptr:
+            raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
+        buffer = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * (stride * height))).contents
+        return buffer
+    
+    
+    @classmethod
     def from_raw(cls, raw, rev_byteorder=False, ex_buffer=None):
         """
         Construct a :class:`.PdfBitmap` wrapper around a raw PDFium bitmap handle.
+        
+        Note:
+            This method is meant for bitmaps managed by pdfium. For bitmaps created by the caller, where the parameters are already known, it may be preferable to call the :class:`.PdfBitmap` constructor directly.
         
         Parameters:
             raw (FPDF_BITMAP):
@@ -93,19 +105,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         stride = pdfium_c.FPDFBitmap_GetStride(raw)
         
         if ex_buffer is None:
-            needs_free = True
-            buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
-            if not buffer_ptr:
-                raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
-            buffer = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * (stride * height))).contents
+            needs_free, buffer = True, cls._get_buffer(raw, stride, height)
         else:
-            needs_free = False
-            buffer = ex_buffer
+            needs_free, buffer = False, ex_buffer
         
-        return cls(
-            raw=raw, buffer=buffer, width=width, height=height, stride=stride,
-            format=format, rev_byteorder=rev_byteorder, needs_free=needs_free,
-        )
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free)
     
     
     @classmethod
@@ -133,9 +137,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             assert len(buffer) >= stride * height
         
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=False)
         
-        # alternatively, we could call the constructor directly with the information from above
-        return cls.from_raw(raw, rev_byteorder, buffer)
+        # alternatively, we could do retrieve the params through pdfium's API:
+        # return cls.from_raw(raw, rev_byteorder, buffer)
+        # note, for a short time, there was a bug in pdfium where retrieving the params of a caller-created bitmap through the FPDFBitmap_Get*() APIs didn't work correctly, so better avoid the unnecessary API calls if we can help it
     
     
     @classmethod
@@ -144,22 +150,30 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Create a new bitmap using :func:`FPDFBitmap_CreateEx`, with a buffer allocated by PDFium.
         There may be a padding of unused bytes at line end, unless *force_packed=True* is given.
         
-        Note that it is recommended to prefer :meth:`.new_native`.
+        Note, the recommended default bitmap creation strategy is :meth:`.new_native`.
         """
         stride = width * pdfium_i.BitmapTypeToNChannels[format] if force_packed else 0
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, None, stride)
-        return cls.from_raw(raw, rev_byteorder)
+        buffer = cls._get_buffer(raw)
+        # Retrieve stride set by pdfium, if we passed in 0. Otherwise, trust in pdfium to use the requested stride.
+        if not force_packed:  # stride == 0
+            stride = pdfium_c.FPDFBitmap_GetStride(raw)
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=True)
     
     
     @classmethod
     def new_foreign_simple(cls, width, height, use_alpha, rev_byteorder=False):
         """
-        Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by PDFium, and supposed to be packed (i. e. no gap of unused bytes between lines).
+        Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by PDFium. 
         
-        Note that it is recommended to prefer :meth:`.new_native`.
+        At this time, PDFium docs specify that each line uses width * 4 bytes, with no gap between adjacent lines, i.e. the resuling buffer should be packed.
+        
+        Note, the recommended default bitmap creation strategy is :meth:`.new_native`.
         """
         raw = pdfium_c.FPDFBitmap_Create(width, height, use_alpha)
-        return cls.from_raw(raw, rev_byteorder)
+        buffer = cls._get_buffer(raw)
+        stride = width * 4  # see above
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=True)
     
     
     def fill_rect(self, left, top, width, height, color):
