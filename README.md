@@ -660,14 +660,14 @@ Usage should be largely self-explanatory, assuming a minimum of familiarity with
 
 ## Licensing
 
-*Important: This is NOT LEGAL ADVICE, and there is ABSOLUTELY NO WARRANTY for any information provided in this document or elsewhere in the pypdfium2 project, including earlier revisions.*
+*Important disclaimer: This project is provided on an "as-is" basis. This is not legal advice, and there is ABSOLUTELY NO WARRANTY for any information provided in this document or elsewhere in the pypdfium2 project, including earlier revisions. Please keep in mind that we are only humans and can make mistakes. We disclaim liability for any possible damages resulting from using this license information. It is the embedder's responsibility to check on licensing. See also [GitHub's disclaimer](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository#disclaimer).*
 
 pypdfium2 itself is available by the terms and conditions of [`Apache-2.0`](LICENSES/Apache-2.0.txt) / [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt).
 Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSES/CC-BY-4.0.txt).
 
 PDFium is available under a BSD-style license that can be found in its [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file.
 Various other open-source licenses apply to dependencies bundled with PDFium. These also have to be shipped alongside binary redistributions. Copies of identified licenses are provided in [`LicenseRef-PdfiumThirdParty.txt`](LICENSES/LicenseRef-PdfiumThirdParty.txt).
-There is no guarantee of completeness, and pdfium's dependencies might change over time. Please do notify us if you think this misses a relevant license.
+While we try to do our best, there is no guarantee of completeness, and pdfium's dependencies might change over time. Please do notify us if you think this misses a relevant license.
 
 pypdfium2 includes [SPDX](https://spdx.org/licenses/) headers in source files.
 License information for data files is provided in [`.reuse/dep5`](.reuse/dep5) as per the [`reuse` standard](https://reuse.software/spec/).
