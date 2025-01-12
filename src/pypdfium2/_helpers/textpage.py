@@ -21,8 +21,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     
     Hint:
         (py)pdfium itself does not implement layout analysis, such as detecting words/lines/paragraphs.
-        However, there is a fancy third-party extension that fills this gap:
-        https://github.com/VikParuchuri/pdftext
+        However, there may be third-party extensions for this job, e.g.: https://github.com/VikParuchuri/pdftext
     
     Attributes:
         raw (FPDF_TEXTPAGE):
