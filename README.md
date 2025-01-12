@@ -52,7 +52,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than taking them from the system.[^pdfium_buildsystem]
     However, we can at least provide the `--use-syslibs` option to build against system runtime libraries.
   
-  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary 🔗</a>
+  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-level binary 🔗</a>
     ```bash
     # Substitute $PDFIUM_VER with the system pdfium's build version.
     # For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
@@ -62,16 +62,17 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case" for now.
     For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
 
-  * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system pdfium (LibreOffice) 🔗</a>
+  * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system-level binary (LibreOffice) 🔗</a>
     ```bash
     sudo ln -s /usr/lib/libreoffice/program/libpdfiumlo.so /usr/local/lib/libpdfium.so
+    PDFIUM_VER=....  # to be determined by caller
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
     ```
-    Symlink pdfium from Libreoffice to a standard system location, determine the version, and install with system pdfium [as above](#install-source-system).
+    Symlink pdfium from Libreoffice to a standard system location, determine the version, and install with system pdfium [as described above](#install-source-system).
     At this time, Linux/BSD distributions do not usually provide pdfium as an own package. However, some may ship a pdfium shared library as part of Libreoffice.
     This may be helpful to get pypdfium2 installed on platforms not covered by pdfium-binaries (e.g. `ppc64le`, `s390x`, `freebsd`).
     Libreoffice actually uses its own build system for pdfium, so your distributor may be able to do this even on platforms not supported by Google's toolchain.
-    At this time, Debian/Ubuntu are known to build Libreoffice with pdfium; however, Red Hat unfortunately do not.
+    At this time, Debian/Ubuntu and FreeBSD seem to build Libreoffice with pdfium; however, Red Hat unfortunately do not.
   
   <!-- TODO version.json: reconsider origin - should we add a new field for the packager? -->
   * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)
