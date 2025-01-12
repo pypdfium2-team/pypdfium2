@@ -84,6 +84,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     @classmethod
     def _get_buffer(cls, raw, stride, height):
+        # Note, there is a subtle difference in output between oldschool and pypdfium2-team ctypesgen regarding APIs that return void* (the former did some quirks to bypass auto-casting and use a wrapper object, whereas the latter returns the value directly). However, bool(buffer_ptr) might work with both.
         buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
         if not buffer_ptr:
             raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
