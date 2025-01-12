@@ -82,10 +82,11 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py [-D $MY_FLAGS]
     
     # Write the version file (fill the placeholders).
+    # See https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO for field documentation
     # Note, this is not a mature interface yet and might change!
     # major/minor/build/patch: integers forming the pdfium version being packaged
     # n_commits/hash: git describe like post-tag info (0/null for release commit)
-    # origin: a string to identify the build. If the binary is not bundled, it should be `system`. You may add more information separated by a slash. The binary builder should go last. Examples: `pdfium-binaries`, `system/pdfium-binaries`, `system/conda/pdfium-binaries`.
+    # origin: a string to identify the build, in the form `$BUIDLER`, `system/$BUILDER` or `system/$ENV/$BUILDER` (depending on whether the binary is bundled or loaded from a system path).
     # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
     cat >"src/pypdfium2_raw/version.json" <<END
     {
