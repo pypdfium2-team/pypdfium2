@@ -85,7 +85,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     # Note, this is not a mature interface yet and might change!
     # major/minor/build/patch: integers forming the pdfium version being packaged
     # n_commits/hash: git describe like post-tag info (0/null for release commit)
-    # origin: a string to identify the build, consisting of binary source and package provider (e.g. "system/debian", "pdfium-binaries/debian")
+    # origin: a string to identify the build. If the binary is not bundled, it should be `system`. You may add more information separated by a slash. The binary builder should go last. Examples: `pdfium-binaries`, `system/pdfium-binaries`, `system/conda/pdfium-binaries`.
     # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
     cat >"src/pypdfium2_raw/version.json" <<END
     {
