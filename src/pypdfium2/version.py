@@ -152,8 +152,9 @@ Parameters:
     origin (str):
         The pdfium binary's origin. Example values/formats:\n
         - ``$BUILDER``: If the binary is bundled with pypdfium2, just the builder project's name. Commonly `pdfium-binaries <https://github.com/bblanchon/pdfium-binaries>`_.
+        - ``$DISTNAME/$BUILDER``: If the binary is bundled with pypdfium2, and the package belongs to a specific distribution or environment that is re-packing another builder's binaries, e.g. ``nixos/pdfium-binaries``.
         - ``sourcebuild``: Compiled using pypdfium2's integrated build script (or otherwise supplied by the caller), and bundled into pypdfium2.
-        - ``system``, ``system/$BUILDER``, or ``system/$ENV/$BUILDER``: Loaded from a system location (i.e. not bundled with pypdfium2). The library will be searched for in directories given at setup time, and/or with :func:`ctypes.util.find_library()`. Note, this specifier may include the binary builder, e.g. ``system/pdfium-binaries`` if the distributor is re-packaging the pdfium-binaries. Otherwise, if the distributor is building their own binaries, it could be the name of the distribution, e.g. hypothetically ``system/debian``. If the package belongs to a specific environment, this extra information may be included before the builder, e.g. ``system/conda/pdfium-binaries``.
+        - ``system``, ``system/$BUILDER``, or ``system/$DISTNAME/$BUILDER``: Loaded from a system location (i.e. not bundled with pypdfium2). The library will be searched for in directories given at setup time, and/or with :func:`ctypes.util.find_library()`. Note, if applicable, this specifier may include ``$BUILDER`` or ``$DISTNAME/$BUILDER``, as described above, e.g. ``system/nixos`` (if nixos were the builder), or ``system/nixos/pdfium-binaries`` (if nixos were re-packaging the pdfium-binaries).
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
 """
