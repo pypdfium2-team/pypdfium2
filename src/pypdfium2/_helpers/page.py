@@ -300,7 +300,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             if not raw_obj:
                 raise PdfiumError("Failed to get pageobject.")
             
-            # Not a child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The .page reference is enough to keep the parent alive, unless the caller explicitly closes it (which may not merit storing countless of weakrefs).
+            # Don't register as child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The parent page should remain alive while a pageobject is used, but it seems unjustified to store countless of weakrefs just to lock pageobjects when the parent page is closed.
             helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, level=level)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
@@ -457,7 +457,7 @@ class PdfPage (pdfium_i.AutoCloseable):
 def _auto_bitmap_format(fill_color, grayscale, prefer_bgrx):
     # TODO(apibreak) we'd like to also use BGRA if FPDFPage_HasTransparency(page) is True for performance reasons (see [1]), but this may break caller format expectations, and would make format selection page-dependent
     # [1]: https://chromium.googlesource.com/chromium/src/+/21e456b92bfadc625c947c718a6c4c5bf0c4c61b
-    if (fill_color[3] < 255):
+    if fill_color[3] < 255:
         return pdfium_c.FPDFBitmap_BGRA
     elif grayscale:
         return pdfium_c.FPDFBitmap_Gray
