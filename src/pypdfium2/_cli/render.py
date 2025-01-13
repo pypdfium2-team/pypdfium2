@@ -150,6 +150,12 @@ def attach(parser):
         action = BooleanOptionalAction,
         help = "Whether to prefer BGRx/RGBx over BGR/RGB (default: conditional).",
     )
+    bitmap.add_argument(
+        "--bgra-on-transparency",
+        dest="use_bgra_on_transparency",
+        action = BooleanOptionalAction,
+        help = "Use BGRA if there is page content that has transparency. Note, this makes format selection page-dependent. As this behavior can be confusing, it is not currently the default, but strongly recommended for performance in these cases.",
+    )
     # TODO expose force_bitmap_format
     
     parallel = parser.add_argument_group(
@@ -391,6 +397,7 @@ def main(args):
         force_halftone = args.force_halftone,
         rev_byteorder = args.rev_byteorder,
         prefer_bgrx = args.prefer_bgrx,
+        use_bgra_on_transparency = args.use_bgra_on_transparency,
         bitmap_maker = BitmapMakers[args.bitmap_maker],
     )
     for type in args.no_antialias:
