@@ -98,7 +98,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Construct a :class:`.PdfBitmap` wrapper around a raw PDFium bitmap handle.
         
         Note:
-            This method is meant for bitmaps exposed by pdfium (as in :meth:`.PdfImage.get_bitmap`). For bitmaps created by the caller, where the parameters are already known, it may be preferable to call the :class:`.PdfBitmap` constructor directly.
+            This method is primarily meant for bitmaps provided by pdfium (as in :meth:`.PdfImage.get_bitmap`). For bitmaps created by the caller, where the parameters are already known, it may be preferable to call the :class:`.PdfBitmap` constructor directly.
         
         Parameters:
             raw (FPDF_BITMAP):
@@ -111,8 +111,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         width = pdfium_c.FPDFBitmap_GetWidth(raw)
         height = pdfium_c.FPDFBitmap_GetHeight(raw)
-        format = pdfium_c.FPDFBitmap_GetFormat(raw)
         stride = pdfium_c.FPDFBitmap_GetStride(raw)
+        format = pdfium_c.FPDFBitmap_GetFormat(raw)
         
         if ex_buffer is None:
             needs_free, buffer = True, cls._get_buffer(raw, stride, height)
@@ -227,7 +227,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         The array contains as many rows as the bitmap is high.
         Each row contains as many pixels as the bitmap is wide.
-        Each pixel will be an array of values per channel, or just a value if there is only one channel.
+        Each pixel will be an array with a value for each channel, or just a value if there is only one channel (cf. :attr:`.n_channels` and :attr:`.format`).
         
         The resulting array is supposed to share memory with the original bitmap buffer,
         so changes to the buffer should be reflected in the array, and vice versa.
