@@ -360,9 +360,10 @@ class PdfPage (pdfium_i.AutoCloseable):
             * ``prefer_bgrx=True``: ``BGRx``
             * ``grayscale=True``: ``L``
             * ``prefer_bgra_on_transparency=True``: ``BGRA`` if the page has transparency, else the format selected otherwise
+            * ``fill_color[3] < 255``: ``BGRA`` (background color with transparency)
             * ``force_bitmap_format=...`` -> any
             
-            Additionally, *rev_byteorder* will swap ``BGR{A/X}`` to ``RGB{A/X}`` if applicable.
+            Additionally, *rev_byteorder* will swap ``BGR{A/x}`` to ``RGB{A/x}`` if applicable.
         
         Parameters:
             
@@ -386,7 +387,8 @@ class PdfPage (pdfium_i.AutoCloseable):
                 If True and rendering with custom color scheme, fill paths will be stroked.
             
             fill_color (tuple[int, int, int, int]):
-                Color the bitmap will be filled with before rendering (RGBA values from 0 to 255).
+                Color the bitmap will be filled with before rendering. This uses RGBA syntax regardless of the pixel format used, with values from 0 to 255.
+                If the fill color is not opaque (i.e. has transparency), ``{BGR,RGB}A`` will be used.
             
             grayscale (bool):
                 If True, render in grayscale mode.
@@ -413,7 +415,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 If True, limit image cache size.
             
             rev_byteorder (bool):
-                If True, render with reverse byte order, leading to ``RGB{A/X}`` output rather than ``BGR{A/X}``.
+                If True, render with reverse byte order, leading to ``RGB{A/x}`` output rather than ``BGR{A/x}``.
                 Other pixel formats are not affected.
             
             prefer_bgrx (bool):
