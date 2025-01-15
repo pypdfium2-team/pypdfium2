@@ -3,6 +3,7 @@
 
 # TODO test-cover use_bitmap, format and render
 
+import logging
 import traceback
 from pathlib import Path
 import pypdfium2.raw as pdfium_c
@@ -11,6 +12,8 @@ from pypdfium2._cli._parsers import (
     add_input, get_input,
     BooleanOptionalAction,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def attach(parser):
@@ -72,8 +75,9 @@ def main(args):
         n_idigits = len(str( len(images) ))
         
         for j, image in enumerate(images):
-            stem = "%s_%0*d_%0*d" % (args.input.stem, n_pdigits, i+1, n_idigits, j+1)
-            prefix = args.output_dir / stem
+            tag = "%0*d_%0*d" % (n_pdigits, i+1, n_idigits, j+1)
+            prefix = args.output_dir / f"{args.input.stem}_{tag}"
+            logger.debug(f"\n{tag}")
             try:
                 if args.use_bitmap:
                     pil_image = image.get_bitmap(render=args.render, scale=args.scale_to_original).to_pil()
