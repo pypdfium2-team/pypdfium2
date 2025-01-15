@@ -191,15 +191,14 @@ def test_replace_image_with_jpeg():
 
 
 @pytest.mark.parametrize(
-    "render", [False, True]
+    "render, scale_to_original",
+    [(False, None), (True, False), (True, True)]
 )
-def test_image_get_bitmap(render):
+def test_image_get_bitmap(render, scale_to_original):
     
     pdf = pdfium.PdfDocument(TestFiles.images)
     page = pdf[0]
-    
-    all_images = list( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
-    image = all_images[0]
+    image = next( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]) )
     
     metadata = image.get_metadata()
     assert metadata.width == 115
@@ -210,25 +209,27 @@ def test_image_get_bitmap(render):
     assert metadata.marked_content_id == 1
     assert metadata.bits_per_pixel == 1
     
-    bitmap = image.get_bitmap(render=render)
+    kwargs = dict(render=render)
+    if scale_to_original is not None:
+        kwargs["scale_to_original"] = scale_to_original
+    bitmap = image.get_bitmap(**kwargs)
     assert isinstance(bitmap, pdfium.PdfBitmap)
     
     if render:
         assert bitmap.format == pdfium_c.FPDFBitmap_BGRA
         assert bitmap.n_channels == 4
         # Somewhere between pdfium 6462 and 6899, size/stride expectation changed here
-        assert bitmap.width == 217
-        assert bitmap.height == 91
-        assert bitmap.stride == 868
+        if scale_to_original:
+            assert (bitmap.width, bitmap.height, bitmap.stride) == (115, 49, 460)
+        else:
+            assert (bitmap.width, bitmap.height, bitmap.stride) == (217, 91, 868)
         assert bitmap.rev_byteorder is False
         output_path = OutputDir / "extract_rendered.png"
     else:
         # NOTE fails with pdfium >= 1e1e173 (6015), < b5bc2e9 (6029), which returns RGB
         assert bitmap.format == pdfium_c.FPDFBitmap_Gray
         assert bitmap.n_channels == 1
-        assert bitmap.width == 115
-        assert bitmap.height == 48
-        assert bitmap.stride == 116
+        assert (bitmap.width, bitmap.height, bitmap.stride) == (115, 48, 116)
         assert bitmap.rev_byteorder is False
         output_path = OutputDir / "extract.png"
     

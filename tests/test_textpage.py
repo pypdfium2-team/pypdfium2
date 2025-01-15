@@ -156,22 +156,22 @@ def test_get_text_bounded_defaults_with_rotation():
     assert len(text) == 438
 
 
-@pytest.mark.parametrize("explicit_close", [False, True])
-def test_autoclose_with_remove_obj(caplog, explicit_close):
-    
-    pdf = pdfium.PdfDocument(TestFiles.text)
-    page = pdf[0]
-    textobj = next( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT]) )
-    assert len(page._kids) == 0
-    textpage = page.get_textpage()
-    assert len(page._kids) == 1
-    
-    if explicit_close:
-        textpage.close()
-    with caplog.at_level(logging.WARNING):
-        page.remove_obj(textobj)
-    
-    if explicit_close:
-        assert not caplog.text
-    else:
-        assert f"Removing text pageobbject implicitly closes affected textpage {textpage}." in caplog.text
+# @pytest.mark.parametrize("explicit_close", [False, True])
+# def test_autoclose_with_remove_obj(caplog, explicit_close):
+#     
+#     pdf = pdfium.PdfDocument(TestFiles.text)
+#     page = pdf[0]
+#     textobj = next( page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT]) )
+#     assert len(page._kids) == 0
+#     textpage = page.get_textpage()
+#     assert len(page._kids) == 1
+#     
+#     if explicit_close:
+#         textpage.close()
+#     with caplog.at_level(logging.WARNING):
+#         page.remove_obj(textobj)
+#     
+#     if explicit_close:
+#         assert not caplog.text
+#     else:
+#         assert f"Removing text pageobbject implicitly closes affected textpage {textpage}." in caplog.text

@@ -325,7 +325,7 @@ class PdfImage (PdfObject):
         
         bitmap = PdfBitmap.from_raw(raw_bitmap)
         if render and scale_to_original:
-            logger.debug(f"Extracted size: {bitmap.width}, {bitmap.height}\n")
+            logger.debug(f"Extracted size: {bitmap.width}, {bitmap.height}")
         
         return bitmap
     

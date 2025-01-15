@@ -87,3 +87,4 @@ def main(args):
             except pdfium.PdfiumError:
                 traceback.print_exc()
             image.close()
+            logger.debug()  # newline
