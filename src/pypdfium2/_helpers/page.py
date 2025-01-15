@@ -424,7 +424,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             
             use_bgra_on_transparency (bool):
                 If True, use a pixel format with alpha channel (i.e. ``BGRA`` rather than ``BGR`` or ``BGRx``) if page content has transparency.
-                This is strongly recommended for performance in these cases, but as page-dependent format selection is somewhat unexpected, it is not enabled by default.
+                This is recommended for performance in these cases, but as page-dependent format selection is somewhat unexpected, it is not enabled by default.
             
             force_bitmap_format (int | None):
                 If given, override automatic pixel format selection and enforce use of the given format (one of the :attr:`FPDFBitmap_*` constants). In this case, you should not pass any other format selection options, except potentially *rev_byteorder*.

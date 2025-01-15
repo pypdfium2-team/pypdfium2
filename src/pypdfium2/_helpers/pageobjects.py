@@ -97,7 +97,7 @@ class PdfObject (pdfium_i.AutoCloseable):
     def get_quad_points(self):
         """
         Get the object's quadriliteral points (i.e. the positions of its corners).
-        For transformed objects, this provides tighter bounds than a rectangle (e.g. rotation by a non-multiple of 90°, shear).
+        For transformed objects, this may provide tighter bounds than a rectangle (e.g. rotation by a non-multiple of 90°, shear).
         
         Note:
             This function only supports image and text objects.
