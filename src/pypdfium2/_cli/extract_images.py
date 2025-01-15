@@ -7,7 +7,10 @@ import traceback
 from pathlib import Path
 import pypdfium2.raw as pdfium_c
 import pypdfium2._helpers as pdfium
-from pypdfium2._cli._parsers import add_input, get_input
+from pypdfium2._cli._parsers import (
+    add_input, get_input,
+    BooleanOptionalAction,
+)
 
 
 def attach(parser):
@@ -36,7 +39,13 @@ def attach(parser):
     parser.add_argument(
         "--render",
         action = "store_true",
-        help = "Whether to get rendered bitmaps, taking masks and transform matrices into account. (requires --use-bitmap, ignored with smart extraction)",
+        help = "When --use-bitmap is given, whether to get rendered bitmaps, taking masks and transform matrices into account.",
+    )
+    parser.add_argument(
+        "--scale-to-original",
+        action = BooleanOptionalAction,
+        default = True,
+        help = "When --use-bitmap --render is given, whether to scale the image so it is extracted at its native resolution, or close to that. This should improve quality of the output. The default is True, but you may opt out.",
     )
 
 
@@ -67,7 +76,7 @@ def main(args):
             prefix = args.output_dir / stem
             try:
                 if args.use_bitmap:
-                    pil_image = image.get_bitmap(render=args.render).to_pil()
+                    pil_image = image.get_bitmap(render=args.render, scale=args.scale_to_original).to_pil()
                     pil_image.save(f"{prefix}.{args.format}")
                 else:
                     image.extract(prefix, fb_format=args.format)
