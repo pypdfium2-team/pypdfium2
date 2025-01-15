@@ -300,12 +300,14 @@ class PdfImage (PdfObject):
                 if swap:
                     px_w, px_h = px_h, px_w
                 orig_mat = self.get_matrix()
-                x_scale, y_scale = px_w/content_w, px_h/content_h
-                scaled_mat = orig_mat.scale(x_scale, y_scale)
+                # if there is strech/compression, prefer partial upscaling over partial downscaling
+                # (not using separate x/y scaling, to make the image look as in the PDF, and in case an alpha mask depends on the aspect ratio)
+                scale = max(px_w/content_w, px_h/content_h)
+                scaled_mat = orig_mat.scale(scale, scale)
                 logger.debug(
                     f"Pixel size: {px_w}, {px_h} (did swap? {swap})\n"
                     f"Size in page coords: {content_w}, {content_h}\n"
-                    f"X/Y scale: {x_scale}, {y_scale}\n"
+                    f"Scale: {scale}\n"
                     f"Current matrix: {orig_mat}\n"
                     f"Scaled matrix: {scaled_mat}"
                 )
