@@ -80,7 +80,7 @@ def main(args):
             logger.debug(tag)
             try:
                 if args.use_bitmap:
-                    pil_image = image.get_bitmap(render=args.render, scale=args.scale_to_original).to_pil()
+                    pil_image = image.get_bitmap(render=args.render, scale_to_original=args.scale_to_original).to_pil()
                     pil_image.save(f"{prefix}.{args.format}")
                 else:
                     image.extract(prefix, fb_format=args.format)

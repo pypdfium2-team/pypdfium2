@@ -274,14 +274,14 @@ class PdfImage (PdfObject):
             raise PdfiumError("Failed to set image to bitmap.")
     
     
-    def get_bitmap(self, render=False, scale=True):
+    def get_bitmap(self, render=False, scale_to_original=True):
         """
         Get a bitmap rasterization of the image.
         
         Parameters:
             render (bool):
                 Whether the image should be rendered, thereby applying possible transform matrices and alpha masks.
-            scale (bool):
+            scale_to_original (bool):
                 When rendering the image, whether to temporarily scale up the image to its native resolution, or close to that (defaults to True). This should improve output quality. This is only relevant if *render=True* is given, and ignored otherwise.
         Returns:
             PdfBitmap: Image bitmap (with a buffer allocated by PDFium).
@@ -290,7 +290,7 @@ class PdfImage (PdfObject):
         if render:
             if self.pdf is None:
                 raise RuntimeError("Cannot get rendered bitmap of loose pageobject.")
-            if scale:
+            if scale_to_original:
                 # Suggested by pdfium dev Lei Zhang in https://groups.google.com/g/pdfium/c/2czGFBcWHHQ/m/g0wzOJR-BAAJ
                 px_w, px_h = self.get_px_size()
                 l, b, r, t = self.get_bounds()
@@ -302,12 +302,12 @@ class PdfImage (PdfObject):
                 orig_mat = self.get_matrix()
                 # if the image is squashed/streched, prefer partial upscaling over partial downscaling
                 # (not using separate x/y scaling, to make the image look as in the PDF, and in case an alpha mask might depend on the aspect ratio)
-                scale = max(px_w/content_w, px_h/content_h)
-                scaled_mat = orig_mat.scale(scale, scale)
+                scale_factor = max(px_w/content_w, px_h/content_h)
+                scaled_mat = orig_mat.scale(scale_factor, scale_factor)
                 logger.debug(
                     f"Pixel size: {px_w}, {px_h} (did swap? {swap})\n"
                     f"Size in page coords: {content_w}, {content_h}\n"
-                    f"Scale: {scale}\n"
+                    f"Scale: {scale_factor}\n"
                     f"Current matrix: {orig_mat}\n"
                     f"Scaled matrix: {scaled_mat}"
                 )
@@ -315,7 +315,8 @@ class PdfImage (PdfObject):
             try:
                 raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
             finally:
-                if scale: self.set_matrix(orig_mat)
+                if scale_to_original:
+                    self.set_matrix(orig_mat)
         else:
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)
         
@@ -323,7 +324,7 @@ class PdfImage (PdfObject):
             raise PdfiumError(f"Failed to get bitmap of image {self}.")
         
         bitmap = PdfBitmap.from_raw(raw_bitmap)
-        if scale:
+        if render and scale_to_original:
             logger.debug(f"Extracted size: {bitmap.width}, {bitmap.height}\n")
         
         return bitmap
