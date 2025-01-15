@@ -3,6 +3,7 @@
 
 import os
 import math
+import types
 import logging
 import colorsys
 import functools
@@ -91,8 +92,7 @@ def attach(parser):
     )
     parser.add_argument(
         "--crop",
-        nargs = 4,
-        type = float,
+        metavar="C", nargs=4, type=float,
         default = (0, 0, 0, 0),
         help = "Amount to crop from (left, bottom, right, top).",
     )
@@ -154,7 +154,7 @@ def attach(parser):
         "--bgra-on-transparency",
         dest="use_bgra_on_transparency",
         action = BooleanOptionalAction,
-        help = "Use BGRA if there is page content that has transparency. Note, this makes format selection page-dependent. As this behavior can be confusing, it is not currently the default, but strongly recommended for performance in these cases.",
+        help = "Whether to use BGRA if there is page content that has transparency. Note, this makes format selection page-dependent. As this behavior can be confusing, it is not currently the default, but recommended for performance in these cases.",
     )
     # TODO expose force_bitmap_format
     
@@ -213,16 +213,23 @@ def attach(parser):
 
 class SavingEngine:
     
-    def __init__(self, path_parts, postproc_kwargs):
-        self._path_parts = path_parts
+    def __init__(self, saver_args, postproc_kwargs):
+        self.args = saver_args
         self.postproc_kwargs = postproc_kwargs
     
-    def _get_path(self, i):
-        output_dir, prefix, n_digits, format = self._path_parts
-        return output_dir / f"{prefix}{i+1:0{n_digits}d}.{format}"
+    def _get_path(self, i, format_override=None):
+        args = self.args
+        format = args.format if format_override is None else format_override
+        return args.output_dir / f"{args.prefix}{i+1:0{args.n_digits}d}.{format}"
     
     def __call__(self, i, bitmap, page):
-        out_path = self._get_path(i)
+        if self.args.use_bgra_on_transparency and self.args.format in ("jpg", "jpeg") and pdfium_c.FPDFPage_HasTransparency(page):
+            # alternatively, we could perhaps convert to RGB
+            logger.info("Page has transparency - overriding output format to PNG.")
+            format_override = "png"
+        else:
+            format_override = None
+        out_path = self._get_path(i, format_override)
         self._saving_hook(out_path, bitmap, page, self.postproc_kwargs)
         logger.info(f"Wrote page {i+1} as {out_path.name}")
 
@@ -352,7 +359,6 @@ def main(args):
         # make sure the output directory exists (PIL throws an error if it doesn't, but cv2 may silently skip)
         raise ValueError(f"Output path is not an existing directory: {args.output!r}")
     
-    pages_str = args.pages  # save for later info printing
     pdf = get_input(args, init_forms=args.draw_forms)
     pdf_len = len(pdf)
     if not all(0 <= i < pdf_len for i in args.pages):
@@ -403,6 +409,13 @@ def main(args):
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True
     
+    saver_args = types.SimpleNamespace(
+        output_dir = args.output,
+        prefix = args.prefix,
+        n_digits = len(str(pdf_len)),
+        format = args.format,
+        use_bgra_on_transparency = args.use_bgra_on_transparency,
+    )
     postproc_kwargs = dict(
         invert_lightness = args.invert_lightness,
         exclude_images = args.exclude_images,
@@ -411,15 +424,12 @@ def main(args):
         logger.warning("LCD optimization clashes with lightness inversion, as post-processing colours defeats the idea of subpixel rendering.")
     
     print_args = vars(args).copy()
-    del print_args["subcommand"]
-    print_args["pages"] = pages_str
+    del print_args["subcommand"], print_args["pages"]
     if print_args["password"]:
         print_args["password"] = "<obfuscated>"
     logger.info(f"{print_args}")  # TODO prettier?
     
-    n_digits = len(str(pdf_len))
-    path_parts = (args.output, args.prefix, n_digits, args.format)
-    engine = args.engine_cls(path_parts, postproc_kwargs)
+    engine = args.engine_cls(saver_args, postproc_kwargs)
     
     if len(args.pages) <= args.linear:
         
