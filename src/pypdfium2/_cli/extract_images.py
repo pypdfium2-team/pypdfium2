@@ -77,7 +77,7 @@ def main(args):
         for j, image in enumerate(images):
             tag = "%0*d_%0*d" % (n_pdigits, i+1, n_idigits, j+1)
             prefix = args.output_dir / f"{args.input.stem}_{tag}"
-            logger.debug(f"\n{tag}")
+            logger.debug(tag)
             try:
                 if args.use_bitmap:
                     pil_image = image.get_bitmap(render=args.render, scale=args.scale_to_original).to_pil()
