@@ -45,7 +45,7 @@ def attach(parser):
         "--scale-to-original",
         action = BooleanOptionalAction,
         default = True,
-        help = "When --use-bitmap --render is given, whether to scale the image so it is extracted at its native resolution, or close to that. This should improve quality of the output. The default is True, but you may opt out.",
+        help = "When --use-bitmap --render is given, whether to scale the image so it is rendered at its native resolution, or close to that. This should improve output quality. The default is True, but you may opt out.",
     )
 
 
