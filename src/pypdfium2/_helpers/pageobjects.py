@@ -282,7 +282,7 @@ class PdfImage (PdfObject):
             render (bool):
                 Whether the image should be rendered, thereby applying possible transform matrices and alpha masks.
             scale_to_original (bool):
-                When rendering the image, whether to temporarily scale up the image to its native resolution, or close to that (defaults to True). This should improve output quality. This is only relevant if *render=True* is given, and ignored otherwise.
+                When rendering the image, whether to temporarily scale the image to its native resolution, or close to that (defaults to True). This should improve output quality. This is only relevant if *render=True* is given, and ignored otherwise.
         Returns:
             PdfBitmap: Image bitmap (with a buffer allocated by PDFium).
         """
