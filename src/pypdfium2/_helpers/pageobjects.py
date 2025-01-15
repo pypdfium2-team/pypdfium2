@@ -5,6 +5,7 @@ __all__ = ("PdfObject", "PdfImage")
 
 import ctypes
 from ctypes import c_uint, c_float
+import logging
 from pathlib import Path
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
@@ -13,6 +14,8 @@ from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
 from pypdfium2._utils import deferred_import
+
+logger = logging.getLogger(__name__)
 PIL_Image = deferred_import("PIL.Image")
 
 
@@ -271,13 +274,15 @@ class PdfImage (PdfObject):
             raise PdfiumError("Failed to set image to bitmap.")
     
     
-    def get_bitmap(self, render=False):
+    def get_bitmap(self, render=False, scale=True):
         """
         Get a bitmap rasterization of the image.
         
         Parameters:
             render (bool):
                 Whether the image should be rendered, thereby applying possible transform matrices and alpha masks.
+            scale (bool):
+                When rendering the image, whether to temporarily scale up the image to its real size (defaults to True). This is only relevant if *render=True*, and ignored otherwise.
         Returns:
             PdfBitmap: Image bitmap (with a buffer allocated by PDFium).
         """
@@ -285,14 +290,41 @@ class PdfImage (PdfObject):
         if render:
             if self.pdf is None:
                 raise RuntimeError("Cannot get rendered bitmap of loose pageobject.")
-            raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
+            if scale:
+                # Suggested by pdfium dev Lei Zhang in https://groups.google.com/g/pdfium/c/2czGFBcWHHQ/m/g0wzOJR-BAAJ
+                px_w, px_h = self.get_px_size()
+                l, b, r, t = self.get_bounds()
+                content_w, content_h = r-l, t-b
+                # align pixel and content width/height relation if swapped due to rotation (e.g. 90°, 270°)
+                swap = (px_w < px_h) != (content_w < content_h)
+                if swap:
+                    px_w, px_h = px_h, px_w
+                orig_mat = self.get_matrix()
+                x_scale, y_scale = px_w/content_w, px_h/content_h
+                scaled_mat = orig_mat.scale(x_scale, y_scale)
+                logger.debug(
+                    f"Pixel size: {px_w}, {px_h} (did swap? {swap})\n"
+                    f"Size in page coords: {content_w}, {content_h}\n"
+                    f"X/Y scale: {x_scale}, {y_scale}\n"
+                    f"Current matrix: {orig_mat}\n"
+                    f"Scaled matrix: {scaled_mat}"
+                )
+                self.set_matrix(scaled_mat)
+            try:
+                raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
+            finally:
+                if scale: self.set_matrix(orig_mat)
         else:
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)
         
         if not raw_bitmap:
             raise PdfiumError(f"Failed to get bitmap of image {self}.")
         
-        return PdfBitmap.from_raw(raw_bitmap)
+        bitmap = PdfBitmap.from_raw(raw_bitmap)
+        if scale:
+            logger.debug(f"Extracted size: {bitmap.width}, {bitmap.height}")
+        
+        return bitmap
     
     
     def get_data(self, decode_simple=False):
