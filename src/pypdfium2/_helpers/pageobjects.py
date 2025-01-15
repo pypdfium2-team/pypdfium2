@@ -300,8 +300,8 @@ class PdfImage (PdfObject):
                 if swap:
                     px_w, px_h = px_h, px_w
                 orig_mat = self.get_matrix()
-                # if there is strech/compression, prefer partial upscaling over partial downscaling
-                # (not using separate x/y scaling, to make the image look as in the PDF, and in case an alpha mask depends on the aspect ratio)
+                # if the image is squashed/streched, prefer partial upscaling over partial downscaling
+                # (not using separate x/y scaling, to make the image look as in the PDF, and in case an alpha mask might depend on the aspect ratio)
                 scale = max(px_w/content_w, px_h/content_h)
                 scaled_mat = orig_mat.scale(scale, scale)
                 logger.debug(
