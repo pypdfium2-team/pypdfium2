@@ -23,6 +23,8 @@ def run_local(*args, **kws):
 
 def update_refbindings(version):
     RefBindingsFile.unlink()
+    # we endeavour to make the refbindings as universal and robust as possible, thus the symbol guards, flags, runtime libdir ["."] + system search
+    # also, skip symbol source info to make for cleaner diffs, so one can see pdfium API changes at a glance
     build_pdfium_bindings(version, guard_symbols=True, flags=REFBINDINGS_FLAGS, allow_system_despite_libdirs=True, no_srcinfo=True)
     shutil.copyfile(DataDir_Bindings/BindingsFN, RefBindingsFile)
     assert RefBindingsFile.exists()

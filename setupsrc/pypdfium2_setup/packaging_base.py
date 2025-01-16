@@ -20,7 +20,6 @@ from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
 
-# TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
@@ -64,7 +63,7 @@ ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 
-# We endeavor to make the reference bindings as universal and robust as possible.
+# We endeavor to make the reference bindings as universal as possible.
 # Thanks to symbol guards, we can define all standalone feature flags.
 # We don't currently define flags that depend on external headers, though it should be possible in principle by adding them to $CPATH (or equivalent).
 # Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
