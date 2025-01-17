@@ -91,6 +91,7 @@ class PlatNames:
     linux_x86        = SysNames.linux   + "_x86"
     linux_arm64      = SysNames.linux   + "_arm64"
     linux_arm32      = SysNames.linux   + "_arm32"
+    linux_ppc64le    = SysNames.linux   + "_ppc64le"
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
@@ -108,6 +109,7 @@ ReleaseNames = {
     PlatNames.linux_x86        : "linux-x86",
     PlatNames.linux_arm64      : "linux-arm64",
     PlatNames.linux_arm32      : "linux-arm",
+    PlatNames.linux_ppc64le    : "linux-ppc64le",
     PlatNames.linux_musl_x64   : "linux-musl-x64",
     PlatNames.linux_musl_x86   : "linux-musl-x86",
     PlatNames.linux_musl_arm64 : "linux-musl-arm64",
@@ -334,6 +336,8 @@ class _host_platform:
             return PlatNames.linux_arm64 if self._libc_name != "musl" else PlatNames.linux_musl_arm64
         elif self._is_plat("linux", "armv7l"):
             return PlatNames.linux_arm32
+        elif self._is_plat("linux", "ppc64le"):
+            return PlatNames.linux_ppc64le
         elif self._is_plat("windows", "amd64"):
             return PlatNames.windows_x64
         elif self._is_plat("windows", "arm64"):
@@ -365,6 +369,8 @@ def get_wheel_tag(pl_name):
         return _manylinux_tag("aarch64")
     elif pl_name == PlatNames.linux_arm32:
         return _manylinux_tag("armv7l")
+    elif pl_name == PlatNames.linux_ppc64le:
+        return _manylinux_tag("ppc64le")
     elif pl_name == PlatNames.linux_musl_x64:
         return "musllinux_1_1_x86_64"
     elif pl_name == PlatNames.linux_musl_x86:
