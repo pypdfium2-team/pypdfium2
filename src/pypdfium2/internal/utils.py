@@ -44,10 +44,10 @@ class _buffer_reader:
     def __init__(self, buffer):
         self.buffer = buffer
     
-    def __call__(self, _, position, p_buf, size):
-        c_buf = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
+    def __call__(self, _, position, p_buf_first, size):
+        p_buf = ctypes.cast(p_buf_first, ctypes.POINTER(ctypes.c_char * size))
         self.buffer.seek(position)
-        self.buffer.readinto(c_buf.contents)
+        self.buffer.readinto(p_buf.contents)
         return 1
 
 
@@ -56,9 +56,9 @@ class _buffer_writer:
     def __init__(self, buffer):
         self.buffer = buffer
     
-    def __call__(self, _, data, size):
-        block = ctypes.cast(data, ctypes.POINTER(ctypes.c_ubyte * size))
-        self.buffer.write(block.contents)
+    def __call__(self, _, p_data_first, size):
+        p_data = ctypes.cast(p_data_first, ctypes.POINTER(ctypes.c_ubyte * size))
+        self.buffer.write(p_data.contents)
         return 1
 
 
