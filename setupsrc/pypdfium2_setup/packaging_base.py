@@ -429,7 +429,7 @@ def get_wheel_tag(pl_name):
         # The reason why we don't simply do `if Host.platform: return get_wheel_tag(Host.platform) else ...` is that version info for pdfium-binaries does not have to match the sourcebuild host.
         # NOTE On Linux, this just returns f"linux_{arch}" (which is a valid wheel tag). Leave it as-is since we don't know the build's lowest compatible libc. The caller may re-tag using the wheel module's CLI.
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
-        if tag.startswith("macosx") and tag.endswith("universal2"):  # removesuffix
+        if tag.startswith("macosx") and tag.endswith("universal2"):
             tag = tag[:-len("universal2")] + Host._machine_name
         return tag
     else:
@@ -657,8 +657,8 @@ def parse_pl_spec(pl_spec):
     if not pl_spec or pl_spec == "auto":
         pl_name = Host.platform
         if pl_name is None:
-            print(f"No pre-built binaries available for this host. You may place custom binaries & bindings in data/sourcebuild/ and install with `{PlatSpec_EnvVar}=sourcebuild`.", file=sys.stderr)
-            raise Host._exc
+            # delegate handling of unknown platforms to the caller (setup.py)
+            return None
     elif hasattr(ExtPlats, pl_spec):
         pl_name = getattr(ExtPlats, pl_spec)
     elif hasattr(PlatNames, pl_spec):

@@ -31,10 +31,13 @@
 - If document loading failed, `err_code` is now assigned to the `PdfiumError` instance so callers may programmatically handle the error subtype.
 - In `PdfPage.render()`, added a new option `use_bgra_on_transparency`. If there is page content with transparency, using BGR(x) may slow down PDFium. Therefore, it is recommended to set this option to True if dynamic (page-dependent) pixel format selection is acceptable. Alternatively, you might want to use only BGRA via `force_bitmap_format=pypdfium2.raw.FPDFBitmap_BGRA` (at the cost of occupying more memory compared to BGR).
 - In `PdfBitmap.new_*()` methods, avoid use of `.from_raw()`, and instead call the constructor directly, as most parameters are already known on the caller side when creating a bitmap.
+- In the rendering CLI, added `--invert-lightness --exclude-images` post-processing options to render with selective lightness inversion. This may be useful to achieve a "dark theme" for light PDFs while preserving different colors, but goes at the cost of performance. (PDFium also provides a color scheme option, but this only allows you to set colors for certain object types, which are then forced on all instances of that type. This may flatten different colors into one, leading to a loss of visual information.)
 - Corrected some null pointer checks: we have to use `bool(ptr)` rather than `ptr is None`.
 - Improved startup performance by deferring imports of optional dependencies to the point where they are actually needed, to avoid overhead if you do not use them.
 - Simplified version classes (no API change expected).
-- In the rendering CLI, added `--invert-lightness --exclude-images` post-processing options to render with selective lightness inversion. This may be useful to achieve a "dark theme" for light PDFs while preserving different colors, but goes at the cost of performance. (PDFium also provides a color scheme option, but it has the drawback that one can only set colors for certain object types, which are then forced on all instances of that type. This may flatten different colors into one, leading to a loss of visual information.)
+
+*Setup*
+- Experimental Android support added. We are now packaging `android_21_arm64_v8a` wheels. Other Android targets (`armeabi_v7a`, `x86_64`, `x86`) are handled in setup and should implicitly download the binaries, but we don't currently build wheels for these, due to lower relevance (`x86_64` and `x86` are emulators, i.e. only relevant to developers) and uncertainty if supported by PyPI (`armeabi_v7a` and `x86` are not covered by PEP 738's Tier 3 support). Note, platform detection is provided on a best effort basis, but untested. Please report success or failure.
 
 *Project*
 - Merged `tests_old/` back into `tests/`.

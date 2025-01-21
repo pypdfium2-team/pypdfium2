@@ -95,7 +95,10 @@ def main():
         clean_platfiles()
         return
     
-    do_prepare, *pl_info = parse_pl_spec(args.plat_spec)
+    parsed_spec = parse_pl_spec(args.plat_spec)
+    if parsed_spec is None:
+        raise Host._exc
+    do_prepare, *pl_info = parsed_spec
     assert do_prepare, "Can't use already-prepared target with emplace, would be no-op."
     prepare_setup(*pl_info)
 
