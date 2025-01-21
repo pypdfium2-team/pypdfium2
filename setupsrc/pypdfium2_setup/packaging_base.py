@@ -429,7 +429,7 @@ def get_wheel_tag(pl_name):
         # The reason why we don't simply do `if Host.platform: return get_wheel_tag(Host.platform) else ...` is that version info for pdfium-binaries does not have to match the sourcebuild host.
         # NOTE On Linux, this just returns f"linux_{arch}" (which is a valid wheel tag). Leave it as-is since we don't know the build's lowest compatible libc. The caller may re-tag using the wheel module's CLI.
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
-        if tag.startswith("macosx") and tag.endswith("universal2"):
+        if tag.startswith("macosx") and tag.endswith("universal2"):  # removesuffix
             tag = tag[:-len("universal2")] + Host._machine_name
         return tag
     else:
@@ -635,16 +635,16 @@ def build_pl_suffix(version, use_v8):
     return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
 
 
-def parse_pl_spec(pl_spec, with_prepare=True):
+def parse_pl_spec(pl_spec):
     
     # TODOs
     # - targets integration is inflexible, need to restructure
     # - add way to pass through package provider with system target?
-    # - variable name with_prepare is confusing
     
+    do_prepare = True
     if pl_spec.startswith("prepared!"):
-        _, pl_spec = pl_spec.split("!", maxsplit=1)
-        return parse_pl_spec(pl_spec, with_prepare=False)
+        pl_spec = pl_spec[len("prepared!"):]  # removeprefix
+        do_prepare = False
     
     req_ver = None
     use_v8 = False
@@ -670,10 +670,10 @@ def parse_pl_spec(pl_spec, with_prepare=True):
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
     else:
-        assert pl_name != ExtPlats.system and with_prepare, "Version must be given explicitly for system or prepared!... targets"
+        assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
         req_ver = PdfiumVer.get_latest()
     
-    return with_prepare, pl_name, req_ver, use_v8
+    return do_prepare, pl_name, req_ver, use_v8
 
 
 def parse_modspec(modspec):

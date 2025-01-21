@@ -147,12 +147,12 @@ def main():
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
     modspec = os.environ.get(ModulesSpec_EnvVar, "")
     
-    with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
+    do_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
     modnames = parse_modspec(modspec)
     if pl_name == ExtPlats.sdist and modnames != ModulesAll:
         raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
-    if ModuleRaw in modnames and with_prepare and pl_name != ExtPlats.sdist:
+    if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
         prepare_setup(pl_name, pdfium_ver, use_v8)
     run_setup(modnames, pl_name, pdfium_ver)
 
