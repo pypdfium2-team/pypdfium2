@@ -26,4 +26,7 @@ Copyright:
     2024 PDFium developers
     2024 Developers of projects mentioned in PdfiumThirdParty
     2024 Benoît Blanchon and pdfium-binaries contributors
-License: (BSD-3-Clause, Apache-2.0) AND LicenseRef-PdfiumThirdParty
+License: BSD-3-Clause AND Apache-2.0 AND LicenseRef-PdfiumThirdParty
+Comment:
+    pdfium's LICENSE file includes both BSD-3-Clause and Apache-2.0 texts
+    We're not sure if this meant as SPDX "AND" or "OR", so use the conservative (safe) assumption "AND".

@@ -51,8 +51,10 @@ Files:
     tests/resources/attachments.pdf
     tests/resources/mona_lisa.jpg
 Copyright: 2022 PDFium developers
-License: BSD-3-Clause, Apache-2.0
+License: BSD-3-Clause AND Apache-2.0
 Comment:
+    pdfium's LICENSE file includes both BSD-3-Clause and Apache-2.0 texts
+    We're not sure if this meant as SPDX "AND" or "OR", so use the conservative (safe) assumption "AND".
     Obtained from:
     https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/bookmarks_circular.pdf
     https://pdfium.googlesource.com/pdfium_tests/+/refs/heads/main/fx/other/8.2_outline.pdf
@@ -67,7 +69,9 @@ Files:
 Copyright:
     2022 PDFium developers
     2024 geisserml <geisserml@gmail.com>
-License: BSD-3-Clause, Apache-2.0
+License: BSD-3-Clause AND Apache-2.0
+Comment:
+    See above regarding pdfium's double-license.
 
 Files: tests/resources/images.pdf
 Copyright:
