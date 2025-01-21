@@ -176,7 +176,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         Create a new bitmap using :func:`FPDFBitmap_Create`. The buffer is allocated by PDFium. 
         
-        PDFium docs specify that each line uses width * 4 bytes, with no gap between adjacent lines, i.e. the resuling buffer should be packed.
+        PDFium docs specify that each line uses width * 4 bytes, with no gap between adjacent lines, i.e. the resulting buffer should be packed.
         
         Contrary to the other ``PdfBitmap.new_*()`` methods, this method does not take a format constant, but a *use_alpha* boolean. If True, the format will be :attr:`FPDFBitmap_BGRA`, :attr:`FPFBitmap_BGRx` otherwise. Other bitmap formats cannot be used with this method.
         

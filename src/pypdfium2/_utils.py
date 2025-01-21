@@ -18,7 +18,7 @@ else:
 
 class _DeferredModule:
     
-    # NOTE Attribute assigment will affect only the wrapper, not the actual module.
+    # NOTE Attribute assignment will affect only the wrapper, not the actual module.
     
     def __init__(self, modpath):
         self._modpath = modpath
