@@ -3,9 +3,9 @@
 
 import re
 import pytest
-import logging
+# import logging
+# import pypdfium2.raw as pdfium_c
 import pypdfium2 as pdfium
-import pypdfium2.raw as pdfium_c
 from .conftest import TestFiles
 
 
