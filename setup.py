@@ -43,14 +43,12 @@ def bdist_factory(pl_name):
 class pypdfium_build_py (build_py_orig):
         
     def run(self, *args, **kwargs):
-        
         if hasattr(self, "editable_mode"):
             helpers_info = read_json(ModuleDir_Helpers/VersionFN)
             helpers_info["is_editable"] = bool(self.editable_mode)
             write_json(ModuleDir_Helpers/VersionFN, helpers_info)
         else:
-            print("!!! Warning: cmdclass does not provide `editable_mode` attribute. Please file a bug report.")
-        
+            print("!!! Warning: cmdclass does not provide `editable_mode` attribute.")
         build_py_orig.run(self, *args, **kwargs)
 
 
@@ -93,8 +91,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
         install_requires = [],
     )
     
-    if modnames == [ModuleHelpers] and pl_name != ExtPlats.sdist:
-        # do not do this for sdist (none)
+    if modnames == [ModuleHelpers]:
         kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
         kwargs["install_requires"] += ["pypdfium2_raw"]
@@ -150,9 +147,10 @@ def main():
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
     modspec = os.environ.get(ModulesSpec_EnvVar, "")
     
-    # NOTE in principle, it may be possible to achieve the same as `prepared!` by just filling the data/ cache manually, but this is more explicit, formally disabling the generating code paths
     with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
     modnames = parse_modspec(modspec)
+    if pl_name == ExtPlats.sdist and modnames != ModulesAll:
+        raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
     if ModuleRaw in modnames and with_prepare and pl_name != ExtPlats.sdist:
         prepare_setup(pl_name, pdfium_ver, use_v8)

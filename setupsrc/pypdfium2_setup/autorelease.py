@@ -22,9 +22,16 @@ def run_local(*args, **kws):
 
 
 def update_refbindings(version):
+    
+    # We endeavor to make the reference bindings as universal and robust as possible, thus the symbol guards, flags, runtime libdir ["."] + system search.
+    # Also, skip symbol source info to make for cleaner diffs, so one can see pdfium API changes at a glance.
+    
+    # REFBINDINGS_FLAGS:
+    # Given the symbol guards, we can define all standalone feature flags.
+    # We don't currently define flags that depend on external headers, though it should be possible in principle by adding them to $CPATH (or equivalent).
+    # Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
+    
     RefBindingsFile.unlink()
-    # we endeavour to make the refbindings as universal and robust as possible, thus the symbol guards, flags, runtime libdir ["."] + system search
-    # also, skip symbol source info to make for cleaner diffs, so one can see pdfium API changes at a glance
     build_pdfium_bindings(version, guard_symbols=True, flags=REFBINDINGS_FLAGS, allow_system_despite_libdirs=True, no_srcinfo=True)
     shutil.copyfile(DataDir_Bindings/BindingsFN, RefBindingsFile)
     assert RefBindingsFile.exists()

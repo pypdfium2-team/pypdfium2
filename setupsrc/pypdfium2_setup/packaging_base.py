@@ -33,7 +33,6 @@ ModuleRaw          = "raw"
 ModuleHelpers      = "helpers"
 ModulesAll         = (ModuleRaw, ModuleHelpers)
 
-# NOTE if renaming BindingsFN, also rename `bindings/$FILE`
 BindingsFN = "bindings.py"
 VersionFN  = "version.json"
 
@@ -62,11 +61,6 @@ ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
-
-# We endeavor to make the reference bindings as universal as possible.
-# Thanks to symbol guards, we can define all standalone feature flags.
-# We don't currently define flags that depend on external headers, though it should be possible in principle by adding them to $CPATH (or equivalent).
-# Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
 REFBINDINGS_FLAGS = ["V8", "XFA", "SKIA"]
 
 
@@ -99,8 +93,8 @@ class PlatNames:
     windows_x86      = SysNames.windows + "_x86"
     windows_arm64    = SysNames.windows + "_arm64"
 
-
-ReleaseNames = {
+# Map platform names to the package names used by pdfium-binaries/google
+PdfiumBinariesMap = {
     PlatNames.darwin_x64       : "mac-x64",
     PlatNames.darwin_arm64     : "mac-arm64",
     PlatNames.linux_x64        : "linux-x64",
@@ -115,14 +109,14 @@ ReleaseNames = {
     PlatNames.windows_arm64    : "win-arm64",
 }
 
+# Platforms we build wheels for
+WheelPlatforms = list(PdfiumBinariesMap.keys())
+
 LibnameForSystem = {
     SysNames.linux:   "libpdfium.so",
     SysNames.darwin:  "libpdfium.dylib",
     SysNames.windows: "pdfium.dll",
 }
-
-BinaryPlatforms = list(ReleaseNames.keys())
-BinarySystems   = list(LibnameForSystem.keys())
 
 
 @functools.lru_cache(maxsize=2)

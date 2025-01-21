@@ -33,7 +33,7 @@ def _get_package(pl_name, version, robust, use_v8):
     if use_v8:
         prefix += "v8-"
     
-    fn = prefix + f"{ReleaseNames[pl_name]}.tgz"
+    fn = prefix + f"{PdfiumBinariesMap[pl_name]}.tgz"
     fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
     print(f"'{fu}' -> '{fp}'")
@@ -80,14 +80,12 @@ def extract(archives, version, flags):
         arc_path.unlink()
 
 
-BinaryPlatforms = list(ReleaseNames.keys())
-
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     if not version:
         version = PdfiumVer.get_latest()
     if not platforms:
-        platforms = BinaryPlatforms
+        platforms = WheelPlatforms
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     
@@ -109,8 +107,8 @@ def parse_args(argv):
         "--platforms", "-p",
         nargs = "+",
         metavar = "ID",
-        choices = BinaryPlatforms,
-        help = f"The platform(s) to include. Choices: {BinaryPlatforms}",
+        choices = list(PdfiumBinariesMap.keys()),
+        help = f"The platform(s) to include. Defaults to the platforms we build wheels for. Choices: {list(PdfiumBinariesMap.keys())}",
     )
     parser.add_argument(
         "--use-v8",

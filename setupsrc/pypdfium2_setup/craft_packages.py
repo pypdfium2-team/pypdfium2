@@ -104,7 +104,7 @@ def main_pypi(args):
     
     if args.wheels:
         suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
-        for plat in ReleaseNames.keys():
+        for plat in WheelPlatforms:
             os.environ[PlatSpec_EnvVar] = plat + suffix
             _run_pypi_build(["--wheel"])
             clean_platfiles()
