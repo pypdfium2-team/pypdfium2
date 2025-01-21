@@ -80,6 +80,11 @@ class ExtPlats:
 class PlatNames:
     # - Attribute names and values are expected to match
     # - Platform names are expected to start with the corresponding system name
+    darwin_x64       = SysNames.darwin  + "_x64"
+    darwin_arm64     = SysNames.darwin  + "_arm64"
+    windows_x64      = SysNames.windows + "_x64"
+    windows_x86      = SysNames.windows + "_x86"
+    windows_arm64    = SysNames.windows + "_arm64"
     linux_x64        = SysNames.linux   + "_x64"
     linux_x86        = SysNames.linux   + "_x86"
     linux_arm64      = SysNames.linux   + "_arm64"
@@ -87,16 +92,14 @@ class PlatNames:
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
-    darwin_x64       = SysNames.darwin  + "_x64"
-    darwin_arm64     = SysNames.darwin  + "_arm64"
-    windows_x64      = SysNames.windows + "_x64"
-    windows_x86      = SysNames.windows + "_x86"
-    windows_arm64    = SysNames.windows + "_arm64"
 
 # Map platform names to the package names used by pdfium-binaries/google
 PdfiumBinariesMap = {
     PlatNames.darwin_x64       : "mac-x64",
     PlatNames.darwin_arm64     : "mac-arm64",
+    PlatNames.windows_x64      : "win-x64",
+    PlatNames.windows_x86      : "win-x86",
+    PlatNames.windows_arm64    : "win-arm64",
     PlatNames.linux_x64        : "linux-x64",
     PlatNames.linux_x86        : "linux-x86",
     PlatNames.linux_arm64      : "linux-arm64",
@@ -104,18 +107,15 @@ PdfiumBinariesMap = {
     PlatNames.linux_musl_x64   : "linux-musl-x64",
     PlatNames.linux_musl_x86   : "linux-musl-x86",
     PlatNames.linux_musl_arm64 : "linux-musl-arm64",
-    PlatNames.windows_x64      : "win-x64",
-    PlatNames.windows_x86      : "win-x86",
-    PlatNames.windows_arm64    : "win-arm64",
 }
 
-# Platforms we build wheels for
+# Platforms we build wheels for. This may be a subset of PdfiumBinariesMap.keys(), because we don't build wheels for simulators
 WheelPlatforms = list(PdfiumBinariesMap.keys())
 
 LibnameForSystem = {
-    SysNames.linux:   "libpdfium.so",
     SysNames.darwin:  "libpdfium.dylib",
     SysNames.windows: "pdfium.dll",
+    SysNames.linux:   "libpdfium.so",
 }
 
 
@@ -366,6 +366,12 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
+    elif pl_name == PlatNames.windows_x64:
+        return "win_amd64"
+    elif pl_name == PlatNames.windows_arm64:
+        return "win_arm64"
+    elif pl_name == PlatNames.windows_x86:
+        return "win32"
     elif pl_name == PlatNames.linux_x64:
         return _manylinux_tag("x86_64")
     elif pl_name == PlatNames.linux_x86:
@@ -380,12 +386,6 @@ def get_wheel_tag(pl_name):
         return "musllinux_1_1_i686"
     elif pl_name == PlatNames.linux_musl_arm64:
         return "musllinux_1_1_aarch64"
-    elif pl_name == PlatNames.windows_x64:
-        return "win_amd64"
-    elif pl_name == PlatNames.windows_arm64:
-        return "win_arm64"
-    elif pl_name == PlatNames.windows_x86:
-        return "win32"
     elif pl_name == ExtPlats.sourcebuild:
         # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         # The reason why we don't simply do `if Host.platform: return get_wheel_tag(Host.platform) else ...` is that version info for pdfium-binaries does not have to match the sourcebuild host.
