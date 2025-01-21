@@ -67,9 +67,10 @@ REFBINDINGS_FLAGS = ["V8", "XFA", "SKIA"]
 # TODO make SysNames/ExtPlats/PlatNames iterable, consider StrEnum or something
 
 class SysNames:
-    linux   = "linux"
     darwin  = "darwin"
     windows = "windows"
+    linux   = "linux"
+    android = "android"
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
@@ -92,30 +93,47 @@ class PlatNames:
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
+    android_arm64    = SysNames.android + "_arm64"
+    android_arm32    = SysNames.android + "_arm32"
+    android_x64      = SysNames.android + "_x64"  # emulator
+    android_x86      = SysNames.android + "_x86"  # emulator
 
-# Map platform names to the package names used by pdfium-binaries/google
+# Map platform names to the package names used by pdfium-binaries/google.
 PdfiumBinariesMap = {
-    PlatNames.darwin_x64       : "mac-x64",
-    PlatNames.darwin_arm64     : "mac-arm64",
-    PlatNames.windows_x64      : "win-x64",
-    PlatNames.windows_x86      : "win-x86",
-    PlatNames.windows_arm64    : "win-arm64",
-    PlatNames.linux_x64        : "linux-x64",
-    PlatNames.linux_x86        : "linux-x86",
-    PlatNames.linux_arm64      : "linux-arm64",
-    PlatNames.linux_arm32      : "linux-arm",
-    PlatNames.linux_musl_x64   : "linux-musl-x64",
-    PlatNames.linux_musl_x86   : "linux-musl-x86",
-    PlatNames.linux_musl_arm64 : "linux-musl-arm64",
+    PlatNames.darwin_x64:       "mac-x64",
+    PlatNames.darwin_arm64:     "mac-arm64",
+    PlatNames.windows_x64:      "win-x64",
+    PlatNames.windows_x86:      "win-x86",
+    PlatNames.windows_arm64:    "win-arm64",
+    PlatNames.linux_x64:        "linux-x64",
+    PlatNames.linux_x86:        "linux-x86",
+    PlatNames.linux_arm64:      "linux-arm64",
+    PlatNames.linux_arm32:      "linux-arm",
+    PlatNames.linux_musl_x64:   "linux-musl-x64",
+    PlatNames.linux_musl_x86:   "linux-musl-x86",
+    PlatNames.linux_musl_arm64: "linux-musl-arm64",
+    PlatNames.android_arm64:    "android-arm64",
 }
 
-# Platforms we build wheels for. This may be a subset of PdfiumBinariesMap.keys(), because we don't build wheels for simulators
+# Capture the platforms we package wheels for
 WheelPlatforms = list(PdfiumBinariesMap.keys())
 
+# Additional platforms we don't currently package wheels for in craft_packages.py
+# To package these manually, you can do (in bash):
+# export PLATFORMS=(android_arm64 android_arm32 android_x64 android_x86)
+# for PLAT in ${PLATFORMS[@]}; do echo $PLAT; ./run emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
+PdfiumBinariesMap.update({
+    PlatNames.android_arm32: "android-arm",
+    PlatNames.android_x64:   "android-x64",
+    PlatNames.android_x86:   "android-x86",
+})
+
+# Map system to pdfium shared library name
 LibnameForSystem = {
     SysNames.darwin:  "libpdfium.dylib",
     SysNames.windows: "pdfium.dll",
     SysNames.linux:   "libpdfium.so",
+    SysNames.android: "libpdfium.so",
 }
 
 
@@ -320,7 +338,8 @@ class _host_platform:
         elif self._libc_name == "musl":
             return getattr(PlatNames, f"linux_musl_{archid}")
         elif self._libc_name == "libc":
-            raise RuntimeError(f"Android {archid!r} prior to PEP 738 - not handled in pypdfium2 yet.")
+            # Android prior to PEP 738 (e.g. Termux)
+            return getattr(PlatNames, f"android_{archid}")
         else:
             raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
     
@@ -338,9 +357,10 @@ class _host_platform:
             elif self._machine_name == "aarch64":
                 return self._handle_linux_libc("arm64")
             elif self._machine_name == "armv7l":
-                if self._libc_name != "glibc":
-                    raise RuntimeError(f"armv7l: only glibc supported at this time, you have {self._libc_name!r}")  # no musl/android
-                return PlatNames.linux_arm32
+                if self._libc_name == "musl":
+                    raise RuntimeError(f"armv7l: musl not supported at this time.")
+                return self._handle_linux_libc("arm32")
+            # FIXME not sure how to handle android_arm32 prior to PEP 738
         elif self._system_name == "windows":
             if self._machine_name == "amd64":
                 return PlatNames.windows_x64
@@ -349,7 +369,15 @@ class _host_platform:
             elif self._machine_name == "arm64":
                 return PlatNames.windows_arm64
         elif self._system_name == "android":
-            raise RuntimeError(f"Android {self._machine_name!r} with PEP 738 - not handled in pypdfium2 yet.")
+            # PEP 738 isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
+            if self._machine_name == "aarch64":
+                return PlatNames.android_arm64
+            elif self._machine_name == "armv7l":
+                return PlatNames.android_arm32
+            elif self._machine_name == "x86_64":
+                return PlatNames.android_x64
+            elif self._machine_name == "i686":
+                return PlatNames.android_x86
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
@@ -386,6 +414,16 @@ def get_wheel_tag(pl_name):
         return "musllinux_1_1_i686"
     elif pl_name == PlatNames.linux_musl_arm64:
         return "musllinux_1_1_aarch64"
+    # Android. See PEP 738 # Packaging.
+    # At this time, we only build wheels for android_arm64, but handle the others as well in case callers want to build their own wheels
+    elif pl_name == PlatNames.android_arm64:
+        return "android_21_arm64_v8a"
+    elif pl_name == PlatNames.android_arm32:
+        return "android_21_armeabi_v7a"
+    elif pl_name == PlatNames.android_x64:
+        return "android_21_x86_64"
+    elif pl_name == PlatNames.android_x86:
+        return "android_21_x86"
     elif pl_name == ExtPlats.sourcebuild:
         # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         # The reason why we don't simply do `if Host.platform: return get_wheel_tag(Host.platform) else ...` is that version info for pdfium-binaries does not have to match the sourcebuild host.
@@ -395,7 +433,7 @@ def get_wheel_tag(pl_name):
             tag = tag[:-len("universal2")] + Host._machine_name
         return tag
     else:
-        raise ValueError(f"Unknown platform name {pl_name}")
+        raise ValueError(f"Unhandled platform name {pl_name}")
 
 
 def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
