@@ -5,8 +5,6 @@
 
 # Changelog for next release
 
-<!-- TODO add back rendering with custom color scheme -->
-
 *API changes*
 - Rendering / Bitmap
   * Removed `PdfDocument.render()` (see deprecation rationale in v4.25 changelog). Instead, use `PdfPage.render()` with a loop or process pool.

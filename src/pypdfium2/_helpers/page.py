@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfPage", )
+__all__ = ("PdfPage", "PdfColorScheme")
 
 import math
 import ctypes
@@ -346,6 +346,8 @@ class PdfPage (pdfium_i.AutoCloseable):
             crop = (0, 0, 0, 0),
             may_draw_forms = True,
             bitmap_maker = PdfBitmap.new_native,
+            color_scheme = None,
+            fill_to_stroke = False,
             **kwargs
         ):
         """
@@ -430,6 +432,12 @@ class PdfPage (pdfium_i.AutoCloseable):
             
             extra_flags (int):
                 Additional PDFium rendering flags. May be combined with bitwise OR (``|`` operator).
+            
+            color_scheme (PdfColorScheme | None):
+                A custom pdfium color scheme. Note that this may flatten different colors into one, so the usability of this is limited.
+            
+            fill_to_stroke (bool):
+                If a *color_scheme* is given, whether to only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.
         
         Returns:
             PdfBitmap: Bitmap of the rendered page.
@@ -449,6 +457,8 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise ValueError("Crop exceeds page dimensions")
         
         cl_format, rev_byteorder, fill_color, flags = _parse_renderopts(self, **kwargs)
+        if (color_scheme is not None) and fill_to_stroke:
+            flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(0, 0, width, height, fill_color)
@@ -456,12 +466,20 @@ class PdfPage (pdfium_i.AutoCloseable):
         pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
         render_args = (bitmap, self, *pos_args, flags)
         
-        pdfium_c.FPDF_RenderPageBitmap(*render_args)
+        if color_scheme is None:
+            pdfium_c.FPDF_RenderPageBitmap(*render_args)
+        else:
+            pause = pdfium_c.IFSDK_PAUSE(version=1)
+            pdfium_i.set_callback(pause, "NeedToPauseNow", lambda _: False)
+            fpdf_cs = color_scheme.convert(rev_byteorder)
+            status = pdfium_c.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_cs, pause)
+            assert status == pdfium_c.FPDF_RENDER_DONE
+            pdfium_c.FPDF_RenderPage_Close(self)
+        
         if may_draw_forms and self.formenv:
             pdfium_c.FPDF_FFLDraw(self.formenv, *render_args)
         
         bitmap._pos_args = (weakref.ref(self), *pos_args)
-        
         return bitmap
 
 
@@ -533,3 +551,26 @@ def _parse_renderopts(
     
     # TODO consider using a namedtuple or something
     return cl_format, rev_byteorder, fill_color, flags
+
+
+class PdfColorScheme:
+    """
+    Rendering color scheme.
+    Each color shall be provided as a list of values for red, green, blue and alpha, ranging from 0 to 255.
+    """
+    
+    def __init__(self, path_fill, path_stroke, text_fill, text_stroke):
+        self.colors = dict(
+            path_fill_color=path_fill, path_stroke_color=path_stroke,
+            text_fill_color=text_fill, text_stroke_color=text_stroke,
+        )
+    
+    def convert(self, rev_byteorder):
+        """
+        Returns:
+            The color scheme as :class:`FPDF_COLORSCHEME` object.
+        """
+        fpdf_cs = pdfium_c.FPDF_COLORSCHEME()
+        for key, value in self.colors.items():
+            setattr(fpdf_cs, key, pdfium_i.color_tohex(value, rev_byteorder))
+        return fpdf_cs

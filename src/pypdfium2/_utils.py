@@ -8,8 +8,7 @@ import importlib
 import functools
 
 if sys.version_info < (3, 8):
-    # NOTE This is not as good as a real cached property.
-    # https://github.com/penguinolog/backports.cached_property might be better.
+    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
     def cached_property(func):
         return property( functools.lru_cache(maxsize=1)(func) )
 else:

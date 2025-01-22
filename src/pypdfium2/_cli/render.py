@@ -43,6 +43,15 @@ BitmapMakers = dict(
     foreign_simple = _bitmap_wrapper_foreign_simple,
 )
 
+ColorSchemeFields = ("path_fill", "path_stroke", "text_fill", "text_stroke")
+ColorOpts = dict(metavar="C", nargs=4, type=int)
+SampleTheme = dict(
+    # TODO improve colors - currently it's just some random colors to distinguish the different drawings
+    path_fill   = (170, 100, 0,   255),  # dark orange
+    path_stroke = (0,   150, 255, 255),  # sky blue
+    text_fill   = (255, 255, 255, 255),  # white
+    text_stroke = (150, 255, 0,   255),  # green
+)
 
 def attach(parser):
     add_input(parser, pages=True)
@@ -82,8 +91,8 @@ def attach(parser):
     )
     parser.add_argument(
         "--fill-color",
-        metavar="C", nargs=4, type=int,
         help = "Color the bitmap will be filled with before rendering. Shall be given in RGBA format as a sequence of integers ranging from 0 to 255. Defaults to white.",
+        **ColorOpts,
     )
     parser.add_argument(
         "--optimize-mode",
@@ -193,6 +202,37 @@ def attach(parser):
         "--parallel-map",
         type = str.lower,
         help = "The map function to use (backend specific, the default is an iterative map)."
+    )
+    
+    color_scheme = parser.add_argument_group(
+        title = "Flat color scheme",
+        description = "Options for using pdfium's color scheme renderer. Note that this may flatten different colors into one, so the usability of this is limited. Alternatively, consider post-processing with lightness inversion (see below).",
+    )
+    color_scheme.add_argument(
+        "--sample-theme",
+        action = "store_true",
+        help = "Use a dark background sample theme as base. Explicit color params override selectively."
+    )
+    color_scheme.add_argument(
+        "--path-fill",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--path-stroke",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--text-fill",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--text-stroke",
+        **ColorOpts
+    )
+    color_scheme.add_argument(
+        "--fill-to-stroke",
+        action = "store_true",
+        help = "Only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.",
     )
     
     postproc = parser.add_argument_group(
@@ -369,7 +409,7 @@ def main(args):
     if args.prefix is None:
         args.prefix = f"{args.input.stem}_"
     if args.fill_color is None:
-        args.fill_color = (255, 255, 255, 255)
+        args.fill_color = (0, 0, 0, 255) if args.sample_theme else (255, 255, 255, 255)
     if args.format is None:
         # can't use jpeg with transparency rsp. when there is an alpha channel
         args.format = "jpg" if args.fill_color[3] == 255 else "png"
@@ -391,6 +431,12 @@ def main(args):
         # PIL can't save BGRX as PNG
         args.prefer_bgrx = args.engine_cls is PILEngine and args.format != "png"
     
+    cs_kwargs = dict()
+    if args.sample_theme:
+        cs_kwargs.update(**SampleTheme)
+    cs_kwargs.update(**{f: getattr(args, f) for f in ColorSchemeFields if getattr(args, f)})
+    color_scheme = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
+    
     kwargs = dict(
         scale = args.scale,
         rotation = args.rotation,
@@ -405,6 +451,8 @@ def main(args):
         prefer_bgrx = args.prefer_bgrx,
         use_bgra_on_transparency = args.use_bgra_on_transparency,
         bitmap_maker = BitmapMakers[args.bitmap_maker],
+        color_scheme = color_scheme,
+        fill_to_stroke = args.fill_to_stroke,
     )
     for type in args.no_antialias:
         kwargs[f"no_smooth{type}"] = True

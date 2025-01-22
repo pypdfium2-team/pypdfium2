@@ -173,6 +173,26 @@ def test_render_page_fill_color(fill_color, sample_page):
     assert bg_pixel == fill_color
 
 
+@pytest.mark.parametrize("fill_to_stroke", [False, True])
+def test_render_page_colorscheme(fill_to_stroke):
+    pdf = pdfium.PdfDocument(TestFiles.text)
+    page = pdf[0]
+    color_scheme = pdfium.PdfColorScheme(
+        path_fill   = (15,  15,  15,  255),
+        path_stroke = (255, 255, 255, 255),
+        text_fill   = (255, 255, 255, 255),
+        text_stroke = (255, 255, 255, 255),
+    )
+    image = page.render(
+        grayscale = True,
+        fill_color = (0, 0, 0, 255),
+        color_scheme = color_scheme,
+        fill_to_stroke = fill_to_stroke,
+    ).to_pil()
+    assert image.mode == "L"
+    image.save(OutputDir / f"render_colorscheme_{int(fill_to_stroke)}.png")
+
+
 @pytest.mark.parametrize("rev_byteorder", [False, True])
 def test_render_page_tonumpy(rev_byteorder, sample_page):
     
