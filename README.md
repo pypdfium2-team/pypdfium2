@@ -62,6 +62,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case" for now.
     For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
 
+  <!-- TODO add dedicated PDFIUM_PLATFORM=libreoffice strategy to bundle a symlink, so we don't need write privileges in system space? -->
   * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system-level binary (LibreOffice) 🔗</a>
     ```bash
     sudo ln -s /usr/lib/libreoffice/program/libpdfiumlo.so /usr/local/lib/libpdfium.so
@@ -105,7 +106,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
     
     # Finally, install
-    # set $MY_PLATFORM to "system" if building against system pdfium, "auto" or the platform name otherwise
+    # set $MY_PLATFORM to "system" if building against system pdfium (not bundled), "auto", "sourcebuild" or the platform name otherwise.
     PDFIUM_PLATFORM='prepared!$MY_PLATFORM:$PDFIUM_BUILD' python -m pip install --no-build-isolation -v .
     ```
   
