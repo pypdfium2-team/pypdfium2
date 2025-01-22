@@ -213,22 +213,10 @@ def attach(parser):
         action = "store_true",
         help = "Use a dark background sample theme as base. Explicit color params override selectively."
     )
-    color_scheme.add_argument(
-        "--path-fill",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--path-stroke",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--text-fill",
-        **ColorOpts
-    )
-    color_scheme.add_argument(
-        "--text-stroke",
-        **ColorOpts
-    )
+    color_scheme.add_argument("--path-fill",   **ColorOpts)
+    color_scheme.add_argument("--path-stroke", **ColorOpts)
+    color_scheme.add_argument("--text-fill",   **ColorOpts)
+    color_scheme.add_argument("--text-stroke", **ColorOpts)
     color_scheme.add_argument(
         "--fill-to-stroke",
         action = "store_true",
