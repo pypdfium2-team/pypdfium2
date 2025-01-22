@@ -565,6 +565,9 @@ class PdfColorScheme:
             text_fill_color=text_fill, text_stroke_color=text_stroke,
         )
     
+    def __repr__(self):
+        return f"{type(self).__name__}(**{self.colors})"
+    
     def convert(self, rev_byteorder):
         """
         Returns:

@@ -423,7 +423,7 @@ def main(args):
     if args.sample_theme:
         cs_kwargs.update(**SampleTheme)
     cs_kwargs.update(**{f: getattr(args, f) for f in ColorSchemeFields if getattr(args, f)})
-    color_scheme = pdfium.PdfColorScheme(**cs_kwargs) if len(cs_kwargs) > 0 else None
+    color_scheme = pdfium.PdfColorScheme(**cs_kwargs) if cs_kwargs else None
     
     kwargs = dict(
         scale = args.scale,
@@ -464,6 +464,8 @@ def main(args):
     if print_args["password"]:
         print_args["password"] = "<obfuscated>"
     logger.info(f"{print_args}")  # TODO prettier?
+    if color_scheme:
+        logger.info(f"{color_scheme}")
     
     engine = args.engine_cls(saver_args, postproc_kwargs)
     
