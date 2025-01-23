@@ -789,7 +789,7 @@ You may also trigger the workflow manually using the GitHub Actions panel or the
 
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
 * `update_pdfium.py` downloads binaries.
-* `craft_packages.py pypi` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
+* `craft.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
 * `autorelease.py` takes care of versioning, changelog, release note generation and VCS checkin.
 
 The autorelease script has some peculiarities maintainers should know about:
@@ -815,7 +815,7 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
 * Build the packages
   ```bash
   python setupsrc/pypdfium2_setup/update_pdfium.py
-  python setupsrc/pypdfium2_setup/craft_packages.py pypi
+  python setupsrc/pypdfium2_setup/craft.py
   ```
 * Upload to PyPI
   ```bash

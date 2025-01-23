@@ -40,6 +40,7 @@
 *Project*
 - Merged `tests_old/` back into `tests/`.
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.
+- Cleanly split out conda packaging into an own file, and confined it to the `conda/` directory, to avoid polluting the main setup code.
 
 <!-- TODO
 See https://github.com/pypdfium2-team/pypdfium2/blob/devel_old/docs/devel/changelog_staging.md

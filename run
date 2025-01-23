@@ -23,7 +23,7 @@ function packaging_pypi() {
 
     # calling update_pdfium is not strictly necessary, but may improve performance because downloads are done in parallel, rather than linear with each package
     python3 setupsrc/pypdfium2_setup/update_pdfium.py
-    python3 setupsrc/pypdfium2_setup/craft_packages.py pypi
+    python3 setupsrc/pypdfium2_setup/craft.py
 
     twine check dist/*
     # ignore W002: erroneous detection of __init__.py files as duplicates
@@ -60,7 +60,10 @@ update)
     python3 setupsrc/pypdfium2_setup/update_pdfium.py $args;;
 
 craft)
-    python3 setupsrc/pypdfium2_setup/craft_packages.py $args;;
+    python3 setupsrc/pypdfium2_setup/craft.py $args;;
+
+craft-conda)
+    python3 conda/craft_conda_pkgs.py $args;;
 
 build)
     python3 setupsrc/pypdfium2_setup/build_pdfium.py $args;;

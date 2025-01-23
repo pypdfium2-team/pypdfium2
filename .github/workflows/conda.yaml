@@ -62,8 +62,9 @@ jobs:
           git config --global user.name "geisserml"
           python -m pip install -U -r req/setup.txt
       
+      # TODO make --new-only optional
       - name: Build package
-        run: ./run craft --pdfium-ver "${{ inputs.pdfium_ver }}" conda_${{ inputs.package }}
+        run: ./run craft-conda ${{ inputs.package }} --pdfium-ver "${{ inputs.pdfium_ver }}" --new-only
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4

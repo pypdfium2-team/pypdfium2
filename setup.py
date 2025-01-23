@@ -104,7 +104,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
         helpers_info = get_helpers_info()
         if pl_name == ExtPlats.sdist:
             if helpers_info["dirty"]:
-                # ignore dirty state due to craft_packages::tmp_ctypesgen_pin()
+                # ignore dirty state due to craft.py::tmp_ctypesgen_pin()
                 if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
                     helpers_info["dirty"] = False
             else:

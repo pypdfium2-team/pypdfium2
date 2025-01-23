@@ -51,9 +51,6 @@ AR_RecordFile   = AutoreleaseDir / "record.json"
 AR_ConfigFile   = AutoreleaseDir / "config.json"
 RefBindingsFile = AutoreleaseDir / BindingsFN
 
-CondaDir = ProjectDir / "conda"
-CondaRaw_BuildNumF = CondaDir / "raw" / "build_num.txt"
-
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PdfiumURL      = "https://pdfium.googlesource.com/pdfium"
 DepotToolsURL  = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
@@ -77,7 +74,6 @@ class ExtPlats:
     system = "system"
     sdist = "sdist"
 
-# TODO align with either python or google platform names?
 class PlatNames:
     # - Attribute names and values are expected to match
     # - Platform names are expected to start with the corresponding system name
@@ -115,12 +111,12 @@ PdfiumBinariesMap = {
     PlatNames.android_arm64:    "android-arm64",
 }
 
-# Capture the platforms we package wheels for
+# Capture the platforms we build wheels for
 WheelPlatforms = list(PdfiumBinariesMap.keys())
 
-# Additional platforms we don't currently package wheels for in craft_packages.py
+# Additional platforms we don't currently build wheels for in craft.py
 # To package these manually, you can do (in bash):
-# export PLATFORMS=(android_arm64 android_arm32 android_x64 android_x86)
+# export PLATFORMS=(android_arm32 android_x64 android_x86)
 # for PLAT in ${PLATFORMS[@]}; do echo $PLAT; ./run emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
     PlatNames.android_arm32: "android-arm",
@@ -137,12 +133,6 @@ LibnameForSystem = {
 }
 
 
-@functools.lru_cache(maxsize=2)
-def run_conda_search(package, channel):
-    output = run_cmd(["conda", "search", "--json", package, "--override-channels", "-c", channel], cwd=None, capture=True)
-    return json.loads(output)[package]
-
-
 class PdfiumVer:
     
     scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
@@ -154,25 +144,6 @@ class PdfiumVer:
         git_ls = run_cmd(["git", "ls-remote", f"{ReleaseRepo}.git"], cwd=None, capture=True)
         tag = git_ls.split("\t")[-1]
         return int( tag.split("/")[-1] )
-    
-    @staticmethod
-    @functools.lru_cache(maxsize=2)
-    def _get_latest_conda_for(package, channel, v_func):
-        search = run_conda_search(package, channel)
-        search = sorted(search, key=lambda d: v_func(d["version"]), reverse=True)
-        result = v_func(search[0]["version"])
-        print(f"Resolved latest {channel}::{package} to {result}", file=sys.stderr)
-        return result
-    
-    def get_latest_conda_pdfium():
-        return PdfiumVer._get_latest_conda_for(
-            "pdfium-binaries", "bblanchon", lambda v: int(v.split(".")[2])
-        )
-    
-    def get_latest_conda_bindings():
-        return PdfiumVer._get_latest_conda_for(
-            "pypdfium2_raw", "pypdfium2-team", lambda v: int(v)
-        )
     
     @classmethod
     def to_full(cls, v_short):
