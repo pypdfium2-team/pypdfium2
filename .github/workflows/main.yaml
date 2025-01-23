@@ -251,6 +251,7 @@ jobs:
             {
               "package": "helpers",
               "pdfium_ver": "latest",
+              "new_only": "false",
               "test": "true",
               "publish": "${{ inputs.publish }}",
               "py_version": "3.12"

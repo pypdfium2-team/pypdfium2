@@ -14,6 +14,10 @@ on:
       pdfium_ver:
         default: 'latest'
         type: string
+      new_only:
+        # only with package == "raw", ignored otherwise (actually the default should be false in that case, but I don't know if GH supports dynamic defaults depending on other inputs)
+        default: true
+        type: boolean
       test:
         default: true
         type: boolean
@@ -62,9 +66,15 @@ jobs:
           git config --global user.name "geisserml"
           python -m pip install -U -r req/setup.txt
       
-      # TODO make --new-only optional
+      # TODO might be able to unify with ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }} or something
+      
       - name: Build package
-        run: ./run craft-conda ${{ inputs.package }} --pdfium-ver "${{ inputs.pdfium_ver }}" --new-only
+        if: ${{ inputs.package == 'helpers' || !inputs.new_only }}
+        run: ./run craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }}
+      
+      - name: Build package (new only)
+        if: ${{ inputs.package == 'raw' && inputs.new_only }}
+        run: ./run craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }} --new-only
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
