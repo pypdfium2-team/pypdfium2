@@ -384,9 +384,6 @@ class PdfPage (pdfium_i.AutoCloseable):
             bitmap_maker (typing.Callable):
                 Callback function used to create the :class:`.PdfBitmap`.
             
-            fill_to_stroke (bool):
-                If True and rendering with custom color scheme, fill paths will be stroked.
-            
             fill_color (tuple[int, int, int, int]):
                 Color the bitmap will be filled with before rendering. This uses RGBA syntax regardless of the pixel format used, with values from 0 to 255.
                 If the fill color is not opaque (i.e. has transparency), ``{BGR,RGB}A`` will be used.

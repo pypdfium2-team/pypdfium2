@@ -175,21 +175,21 @@ def test_render_page_fill_color(fill_color, sample_page):
 
 @pytest.mark.parametrize("fill_to_stroke", [False, True])
 def test_render_page_colorscheme(fill_to_stroke):
-    pdf = pdfium.PdfDocument(TestFiles.text)
+    pdf = pdfium.PdfDocument(TestFiles.render)
     page = pdf[0]
+    # from _cli/render.py::SampleTheme
     color_scheme = pdfium.PdfColorScheme(
-        path_fill   = (15,  15,  15,  255),
-        path_stroke = (255, 255, 255, 255),
-        text_fill   = (255, 255, 255, 255),
-        text_stroke = (255, 255, 255, 255),
+        path_fill   = (170, 100, 0,   255),  # dark orange
+        path_stroke = (0,   150, 255, 255),  # sky blue
+        text_fill   = (255, 255, 255, 255),  # white
+        text_stroke = (150, 255, 0,   255),  # green
     )
     image = page.render(
-        grayscale = True,
         fill_color = (0, 0, 0, 255),
         color_scheme = color_scheme,
         fill_to_stroke = fill_to_stroke,
     ).to_pil()
-    assert image.mode == "L"
+    assert image.mode == "RGB"
     image.save(OutputDir / f"render_colorscheme_{int(fill_to_stroke)}.png")
 
 
