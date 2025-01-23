@@ -11,8 +11,7 @@ from pathlib import Path
 from copy import deepcopy
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# TODO consider dotted access?
-from pypdfium2_setup.packaging_base import *
+from pypdfium2_setup.base import *
 
 
 PlacesToRegister = (AutoreleaseDir, Changelog, ChangelogStaging, RefBindingsFile)

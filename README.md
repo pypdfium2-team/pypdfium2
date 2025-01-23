@@ -46,7 +46,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary 🔗</a>
     ```bash
     # call build script with --help to list options
-    python setupsrc/pypdfium2_setup/build_pdfium.py
+    python setupsrc/pypdfium2_setup/sourcebuild.py
     PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
     Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than taking them from the system.[^pdfium_buildsystem]
@@ -78,7 +78,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   <!-- TODO version.json: reconsider origin - should we add a new field for the packager? -->
   * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)
     ```bash
-    # Call ctypesgen (see --help or packaging_base.py::run_ctypesgen() for further options)
+    # Call ctypesgen (see --help or base.py::run_ctypesgen() for further options)
     # Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
     ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py [-D $MY_FLAGS]
     
@@ -212,7 +212,7 @@ As pypdfium2 requires a C extension and has custom setup code, there are some sp
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
     + If `system`, bind against system-provided pdfium instead of embedding a binary. Version must be given explicitly so matching bindings can be generated.
-    + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `build_pdfium.py`.
+    + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `sourcebuild.py`.
     + If `sdist`, no platform-dependent files will be included, so as to create a source distribution.
     `sourcebuild` and `sdist` are standalone, they cannot be followed by additional specifiers.
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
@@ -788,7 +788,7 @@ The release process is fully automated using Python scripts and scheduled releas
 You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
 
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
-* `update_pdfium.py` downloads binaries.
+* `update.py` downloads binaries.
 * `craft.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
 * `autorelease.py` takes care of versioning, changelog, release note generation and VCS checkin.
 
@@ -814,7 +814,7 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   ```
 * Build the packages
   ```bash
-  python setupsrc/pypdfium2_setup/update_pdfium.py
+  python setupsrc/pypdfium2_setup/update.py
   python setupsrc/pypdfium2_setup/craft.py
   ```
 * Upload to PyPI

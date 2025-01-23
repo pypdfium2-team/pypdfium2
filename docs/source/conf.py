@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "setupsrc"))
-from pypdfium2_setup.packaging_base import (
+from pypdfium2_setup.base import (
     parse_git_tag,
     get_next_changelog,
 )

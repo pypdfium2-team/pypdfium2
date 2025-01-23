@@ -12,8 +12,7 @@ import urllib.request as url_request
 from pathlib import Path, WindowsPath
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# TODO consider dotted access?
-from pypdfium2_setup.packaging_base import *
+from pypdfium2_setup.base import *
 
 SBDir = SourcebuildDir  # local alias for convenience
 PatchDir       = SBDir / "patches"

@@ -12,7 +12,7 @@ import urllib.request as url_request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-from pypdfium2_setup.packaging_base import *
+from pypdfium2_setup.base import *
 
 try:
     import build.__main__ as build_module

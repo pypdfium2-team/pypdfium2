@@ -16,7 +16,7 @@ from setuptools.command.build_py import build_py as build_py_orig
 
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.emplace import prepare_setup
-from pypdfium2_setup.packaging_base import *
+from pypdfium2_setup.base import *
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This also sets `Root-Is-Purelib: false` in the WHEEL file.

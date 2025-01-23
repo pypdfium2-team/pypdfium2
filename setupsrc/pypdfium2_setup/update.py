@@ -13,8 +13,7 @@ import urllib.request as url_request
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# TODO consider dotted access?
-from pypdfium2_setup.packaging_base import *
+from pypdfium2_setup.base import *
 
 
 def clear_data(download_files):

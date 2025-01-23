@@ -8,9 +8,8 @@ import argparse
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
-from pypdfium2_setup import update_pdfium
-# TODO consider dotted access?
-from pypdfium2_setup.packaging_base import *
+from pypdfium2_setup.base import *
+from pypdfium2_setup import update as update_pdfium
 
 
 # CONSIDER Linux/macOS: check that minimum OS version requirements are fulfilled
@@ -20,7 +19,7 @@ def _repr_info(version, flags):
 
 def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     
-    # TODO inline binary cache logic into update_pdfium ?
+    # TODO inline binary cache logic into update.py ?
     
     system = plat_to_system(pl_name)
     pl_dir = DataDir / pl_name

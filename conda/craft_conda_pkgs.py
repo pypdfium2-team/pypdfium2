@@ -7,7 +7,7 @@ from pathlib import Path
 from functools import partial
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from pypdfium2_setup.packaging_base import *
+from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
 
 CondaDir = ProjectDir / "conda"
