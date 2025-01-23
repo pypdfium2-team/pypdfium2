@@ -9,6 +9,7 @@ from functools import partial
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
+from pypdfium2_setup.craft import ArtifactStash
 
 CondaDir = ProjectDir / "conda"
 CondaRaw_BuildNumF = CondaDir / "raw" / "build_num.txt"
@@ -31,7 +32,8 @@ def main():
     
     args = parser.parse_args()
     if args.type == T_RAW:
-        main_conda_raw(args)
+        with ArtifactStash():
+            main_conda_raw(args)
     elif args.type == T_HELPERS:
         assert not args.new_only, "--new-only / buildnum handling not implemented for helpers package"
         main_conda_helpers(args)
