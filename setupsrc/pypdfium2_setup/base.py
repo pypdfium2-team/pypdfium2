@@ -404,7 +404,6 @@ def get_wheel_tag(pl_name):
         return "android_21_x86"
     elif pl_name == ExtPlats.sourcebuild:
         # Random notes:
-        # - This code passage is currently inactive, as overriding the distclass's has_ext_modules() seems to be enough to get a host-specific tag, so we don't actually call this function with the sourcebuild platform.
         # - sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         # - Part of the reason why we don't call this function recursively with Host.platform is that version info for pdfium-binaries does not have to match the sourcebuild host.
         # - On Linux, this just returns f"linux_{arch}" (which is a valid wheel tag). Leave it as-is since we don't know the build's lowest compatible libc. The caller may re-tag using the wheel module's CLI.

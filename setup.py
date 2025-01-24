@@ -18,7 +18,7 @@ from pypdfium2_setup.emplace import prepare_setup
 from pypdfium2_setup.base import *
 
 
-# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and cause the wheel tag to be platform specific by default.
+# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file.
 
 class BinaryDistribution (setuptools.Distribution):
     
@@ -130,9 +130,8 @@ def run_setup(modnames, pl_name, pdfium_ver):
         libname = LibnameForSystem[sys_name]
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
         kwargs["distclass"] = BinaryDistribution
-        if pl_name != ExtPlats.sourcebuild:
-            # Try omitting this for sourcebuild, as setting the distclass should be enough to get a platform-specific tag. Alternatively, base.py::get_wheel_tag() would use sysconfig.get_platform().
-            kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
+        # we could omit the bdist_wheel override for sourcebuild, but this would cause the wheel to be tagged not only platform specific, but also python specific, which we probably don't want
+        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["license_files"] += LICENSES_WHEEL
     
     if "pypdfium2" in kwargs["package_data"]:
