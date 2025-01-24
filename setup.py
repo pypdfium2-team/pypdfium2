@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE Unfortunately, pip may run setup.py multiple times with different commands (dist_info, bdist_wheel).
-# However, guarding code depending on command is tricky. You'd need to be careful not to cause inconsistent data. Also, it's hard to tell which command runs first because other tools (e.g. build) may run just bdist_wheel.
+# See also https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it and https://github.com/innodatalabs/redstork/blob/master/setup.py
 
 import os
 import sys
@@ -19,7 +18,7 @@ from pypdfium2_setup.emplace import prepare_setup
 from pypdfium2_setup.base import *
 
 
-# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This also sets `Root-Is-Purelib: false` in the WHEEL file.
+# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and cause the wheel tag to be platform specific by default.
 
 class BinaryDistribution (setuptools.Distribution):
     
@@ -130,8 +129,10 @@ def run_setup(modnames, pl_name, pdfium_ver):
         sys_name = plat_to_system(pl_name)
         libname = LibnameForSystem[sys_name]
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
-        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["distclass"] = BinaryDistribution
+        if pl_name != ExtPlats.sourcebuild:
+            # Try omitting this for sourcebuild, as setting the distclass should be enough to get a platform-specific tag. Alternatively, base.py::get_wheel_tag() would use sysconfig.get_platform().
+            kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["license_files"] += LICENSES_WHEEL
     
     if "pypdfium2" in kwargs["package_data"]:

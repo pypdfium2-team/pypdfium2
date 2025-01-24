@@ -79,6 +79,7 @@ class PlatNames:
     # - Platform names are expected to start with the corresponding system name
     darwin_x64       = SysNames.darwin  + "_x64"
     darwin_arm64     = SysNames.darwin  + "_arm64"
+    darwin_universal = SysNames.darwin  + "_universal"
     windows_x64      = SysNames.windows + "_x64"
     windows_x86      = SysNames.windows + "_x86"
     windows_arm64    = SysNames.windows + "_arm64"
@@ -115,13 +116,14 @@ PdfiumBinariesMap = {
 WheelPlatforms = list(PdfiumBinariesMap.keys())
 
 # Additional platforms we don't currently build wheels for in craft.py
-# To package these manually, you can do (in bash):
+# To package these manually, you can do e.g. (in bash):
 # export PLATFORMS=(android_arm32 android_x64 android_x86)
 # for PLAT in ${PLATFORMS[@]}; do echo $PLAT; ./run emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
-    PlatNames.android_arm32: "android-arm",
-    PlatNames.android_x64:   "android-x64",
-    PlatNames.android_x86:   "android-x86",
+    PlatNames.darwin_universal: "mac-univ",
+    PlatNames.android_arm32:    "android-arm",
+    PlatNames.android_x64:      "android-x64",
+    PlatNames.android_x86:      "android-x86",
 })
 
 # Map system to pdfium shared library name
@@ -316,6 +318,7 @@ class _host_platform:
     
     def _get_platform(self):
         if self._system_name == "darwin":
+            # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
             if self._machine_name == "x86_64":
                 return PlatNames.darwin_x64
             elif self._machine_name == "arm64":
@@ -361,10 +364,14 @@ def _manylinux_tag(arch, glibc="2_17"):
 def get_wheel_tag(pl_name):
     if pl_name == PlatNames.darwin_x64:
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
+        # "intel" instead of "x86_64" might work too, but I think it's considered legacy
         return "macosx_10_13_x86_64"
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
+    elif pl_name == PlatNames.darwin_universal:
+        # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
+        return "macosx_10_13_universal2"
     elif pl_name == PlatNames.windows_x64:
         return "win_amd64"
     elif pl_name == PlatNames.windows_arm64:
@@ -396,9 +403,11 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatNames.android_x86:
         return "android_21_x86"
     elif pl_name == ExtPlats.sourcebuild:
-        # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
-        # The reason why we don't simply do `if Host.platform: return get_wheel_tag(Host.platform) else ...` is that version info for pdfium-binaries does not have to match the sourcebuild host.
-        # NOTE On Linux, this just returns f"linux_{arch}" (which is a valid wheel tag). Leave it as-is since we don't know the build's lowest compatible libc. The caller may re-tag using the wheel module's CLI.
+        # Random notes:
+        # - This code passage is currently inactive, as overriding the distclass's has_ext_modules() seems to be enough to get a host-specific tag, so we don't actually call this function with the sourcebuild platform.
+        # - sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
+        # - Part of the reason why we don't call this function recursively with Host.platform is that version info for pdfium-binaries does not have to match the sourcebuild host.
+        # - On Linux, this just returns f"linux_{arch}" (which is a valid wheel tag). Leave it as-is since we don't know the build's lowest compatible libc. The caller may re-tag using the wheel module's CLI.
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
         if tag.startswith("macosx") and tag.endswith("universal2"):
             tag = tag[:-len("universal2")] + Host._machine_name
