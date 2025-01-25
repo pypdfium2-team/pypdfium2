@@ -276,7 +276,6 @@ def _get_libc_info():
         # try to be future proof in case libc_ver() gets musl support but uses "muslc" rather than just "musl"
         name = "musl"
     elif name == "":
-        # TODO add test ensuring this continues to work
         import packaging._musllinux
         musl_ver = packaging._musllinux._get_musl_version(sys.executable)
         if musl_ver:

@@ -1,7 +1,10 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import sys
 import pytest
+import platform
+import warnings
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2.version import PDFIUM_INFO
@@ -84,3 +87,22 @@ def test_const_converters(mapping, use_keys, items):
 def test_const_converters_rotation(degrees, const):
     assert pdfium_i.RotationToConst[degrees] == const
     assert pdfium_i.RotationToDegrees[const] == degrees
+
+
+def test_musllinux_api_avail():
+    
+    # Test availability of the non-public API we use to detect musllinux on setup.
+    # `packaging` is a pretty fundamental package so expect it to be installed
+    
+    import packaging._musllinux
+    assert hasattr(packaging._musllinux, "_get_musl_version")
+    
+    libc_name, libc_ver = platform.libc_ver()
+    musl_ver = packaging._musllinux._get_musl_version(sys.executable)
+    
+    if libc_name in ("glibc", "libc"):
+        assert not musl_ver
+    else:
+        assert musl_ver, "Not glibc or android libc, expected musl"
+        if libc_name:
+            warnings.warn(f"platform.libc_ver() now returns {(libc_name, libc_ver)} for musl")
