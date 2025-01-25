@@ -68,6 +68,7 @@ class SysNames:
     windows = "windows"
     linux   = "linux"
     android = "android"
+    ios     = "ios"
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
@@ -90,10 +91,13 @@ class PlatNames:
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
-    android_arm64    = SysNames.android + "_arm64"
-    android_arm32    = SysNames.android + "_arm32"
-    android_x64      = SysNames.android + "_x64"  # emulator
-    android_x86      = SysNames.android + "_x86"  # emulator
+    android_arm64    = SysNames.android + "_arm64"      # device
+    android_arm32    = SysNames.android + "_arm32"      # device
+    android_x64      = SysNames.android + "_x64"        # emulator
+    android_x86      = SysNames.android + "_x86"        # emulator
+    ios_arm64_dev    = SysNames.ios     + "_arm64_dev"  # device
+    ios_arm64_simu   = SysNames.ios     + "_arm64_simu" # simulator
+    ios_x64_simu     = SysNames.ios     + "_x64_simu"   # simulator
 
 # Map platform names to the package names used by pdfium-binaries/google.
 PdfiumBinariesMap = {
@@ -117,21 +121,25 @@ WheelPlatforms = list(PdfiumBinariesMap.keys())
 
 # Additional platforms we don't currently build wheels for in craft.py
 # To package these manually, you can do e.g. (in bash):
-# export PLATFORMS=(android_arm32 android_x64 android_x86)
+# export PLATFORMS=(darwin_universal android_arm32 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
 # for PLAT in ${PLATFORMS[@]}; do echo $PLAT; ./run emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
     PlatNames.darwin_universal: "mac-univ",
     PlatNames.android_arm32:    "android-arm",
     PlatNames.android_x64:      "android-x64",
     PlatNames.android_x86:      "android-x86",
+    PlatNames.ios_arm64_dev:    "ios-device-arm64",
+    PlatNames.ios_arm64_simu:   "ios-simulator-arm64",
+    PlatNames.ios_x64_simu:     "ios-simulator-x64",
 })
 
 # Map system to pdfium shared library name
 LibnameForSystem = {
-    SysNames.darwin:  "libpdfium.dylib",
     SysNames.windows: "pdfium.dll",
+    SysNames.darwin:  "libpdfium.dylib",
+    SysNames.ios:     "libpdfium.dylib",  # darwin derivative
     SysNames.linux:   "libpdfium.so",
-    SysNames.android: "libpdfium.so",
+    SysNames.android: "libpdfium.so",     # linux derivative
 }
 
 
@@ -323,6 +331,13 @@ class _host_platform:
                 return PlatNames.darwin_x64
             elif self._machine_name == "arm64":
                 return PlatNames.darwin_arm64
+        elif self._system_name == "windows":
+            if self._machine_name == "amd64":
+                return PlatNames.windows_x64
+            elif self._machine_name == "x86":
+                return PlatNames.windows_x86
+            elif self._machine_name == "arm64":
+                return PlatNames.windows_arm64
         elif self._system_name == "linux":
             if self._machine_name == "x86_64":
                 return self._handle_linux_libc("x64")
@@ -334,16 +349,8 @@ class _host_platform:
                 if self._libc_name == "musl":
                     raise RuntimeError(f"armv7l: musl not supported at this time.")
                 return self._handle_linux_libc("arm32")
-            # FIXME not sure how to handle android_arm32 prior to PEP 738
-        elif self._system_name == "windows":
-            if self._machine_name == "amd64":
-                return PlatNames.windows_x64
-            elif self._machine_name == "x86":
-                return PlatNames.windows_x86
-            elif self._machine_name == "arm64":
-                return PlatNames.windows_arm64
-        elif self._system_name == "android":
-            # PEP 738 isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
+        elif self._system_name == "android":  # PEP 738
+            # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
             if self._machine_name == "aarch64":
                 return PlatNames.android_arm64
             elif self._machine_name == "armv7l":
@@ -352,6 +359,14 @@ class _host_platform:
                 return PlatNames.android_x64
             elif self._machine_name == "i686":
                 return PlatNames.android_x86
+        elif self._system_name in ("iOS", "iPadOS"):  # PEP 730
+            # NOTE iOS detection is untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
+            ios_ver = platform.ios_ver()
+            if self._machine_name == "arm64":
+                return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
+            elif self._machine_name == "x86_64":
+                assert ios_ver.is_simulator, "iOS x86_64 can only be simulator"
+                return PlatNames.ios_x64_simu
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
@@ -392,8 +407,8 @@ def get_wheel_tag(pl_name):
         return "musllinux_1_1_i686"
     elif pl_name == PlatNames.linux_musl_arm64:
         return "musllinux_1_1_aarch64"
-    # Android. See PEP 738 # Packaging.
-    # At this time, we only build wheels for android_arm64, but handle the others as well in case callers want to build their own wheels
+    # Android - see PEP 738 # Packaging
+    # At this time, we only build wheels for android_arm64, but handle the others as well so the code is ready if we want to in the future (or in case callers want to build their own wheels)
     elif pl_name == PlatNames.android_arm64:
         return "android_21_arm64_v8a"
     elif pl_name == PlatNames.android_arm32:
@@ -402,6 +417,16 @@ def get_wheel_tag(pl_name):
         return "android_21_x86_64"
     elif pl_name == PlatNames.android_x86:
         return "android_21_x86"
+    # iOS - see PEP 730 # Packaging
+    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Bear in mind that iOS is currently completely untested. In particular, the PEP says
+    # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
+    # I take it this means you may need to change the library search path to that Frameworks location.
+    elif pl_name == PlatNames.ios_arm64_dev:
+        return "ios_12_0_arm64_iphoneos"
+    elif pl_name == PlatNames.ios_arm64_simu:
+        return "ios_12_0_arm64_iphonesimulator"
+    elif pl_name == PlatNames.ios_x64_simu:
+        return "ios_12_0_x86_64_iphonesimulator"
     # The sourcebuild clause is currently inactive; setup.py will simply forward the tag determined by bdist_wheel. Anyway, this should be roughly equivalent.
     elif pl_name == ExtPlats.sourcebuild:
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
