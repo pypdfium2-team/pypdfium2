@@ -35,7 +35,7 @@
 - Simplified version classes (no API change expected).
 
 *Setup*
-- Experimental Android support added. We are now packaging `android_21_arm64_v8a` wheels. Other Android targets (`armeabi_v7a`, `x86_64`, `x86`) are handled in setup and should implicitly download the binaries, but we don't currently build wheels for these, due to lower relevance (`x86_64` and `x86` are emulators, i.e. only relevant to developers) and uncertainty if supported by PyPI (`armeabi_v7a` and `x86` are not covered by PEP 738's Tier 3 support). Note, platform detection is provided on a best effort basis, but untested. Please report success or failure.
+- Experimental Android support added. We are now packaging `android_21_arm64_v8a` wheels. Other Android targets (`armeabi_v7a`, `x86_64`, `x86`) are handled in setup as well and should implicitly download the binaries, but we don't currently build wheels for these, due to lower relevance (`x86_64` and `x86` are emulators, i.e. only relevant to developers) and uncertainty if supported by PyPI (`armeabi_v7a` and `x86` are not covered by PEP 738's Tier 3 support). Note, platform detection is provided on a best effort basis, but largely untested. Please report success or failure.
 
 *Project*
 - Merged `tests_old/` back into `tests/`.

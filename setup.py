@@ -18,7 +18,7 @@ from pypdfium2_setup.emplace import prepare_setup
 from pypdfium2_setup.base import *
 
 
-# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file.
+# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
 
 class BinaryDistribution (setuptools.Distribution):
     
@@ -32,9 +32,17 @@ def bdist_factory(pl_name):
         
         def finalize_options(self, *args, **kws):
             bdist_wheel.finalize_options(self, *args, **kws)
+            # should be handled by the distclass already, but set it again to be on the safe side
+            self.root_is_pure = False
         
         def get_tag(self, *args, **kws):
-            return "py3", "none", get_wheel_tag(pl_name)
+            if pl_name == ExtPlats.sourcebuild:
+                # if using the sourcebuild target, forward the native tag
+                # alternatively, the sourcebuild clause in get_wheel_tag() should be roughly equivalent (it uses sysconfig.get_platform() directly)
+                _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
+            else:
+                plat_tag = get_wheel_tag(pl_name)
+            return "py3", "none", plat_tag
     
     return pypdfium_bdist
 
@@ -130,7 +138,6 @@ def run_setup(modnames, pl_name, pdfium_ver):
         libname = LibnameForSystem[sys_name]
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
         kwargs["distclass"] = BinaryDistribution
-        # we could omit the bdist_wheel override for sourcebuild, but this would cause the wheel to be tagged not only platform specific, but also python specific, which we probably don't want
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["license_files"] += LICENSES_WHEEL
     
