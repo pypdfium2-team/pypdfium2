@@ -130,14 +130,20 @@ PdfiumBinariesMap.update({
     PlatNames.ios_x64_simu:     "ios-simulator-x64",
 })
 
+
 # Map system to pdfium shared library name
-LibnameForSystem = {
-    SysNames.windows: "pdfium.dll",
-    SysNames.darwin:  "libpdfium.dylib",
-    SysNames.ios:     "libpdfium.dylib",  # darwin derivative
-    SysNames.linux:   "libpdfium.so",
-    SysNames.android: "libpdfium.so",     # linux derivative
-}
+def libname_for_system(system):
+    if system == SysNames.windows:
+        return "pdfium.dll"
+    elif system in (SysNames.darwin, SysNames.ios):
+        return "libpdfium.dylib"
+    elif system in (SysNames.linux, SysNames.android):
+        return "libpdfium.so"
+    else:
+        # TODO fallback logic if system is None?
+        raise ValueError(f"Unhandled system {system!r}")
+
+AllLibnames = ["pdfium.dll", "libpdfium.dylib", "libpdfium.so"]
 
 
 class PdfiumVer:
@@ -588,7 +594,7 @@ def clean_platfiles():
         ModuleDir_Raw / BindingsFN,
         ModuleDir_Raw / VersionFN,
     ]
-    deletables += [ModuleDir_Raw / fn for fn in LibnameForSystem.values()]
+    deletables += [ModuleDir_Raw / fn for fn in AllLibnames]
     
     for fp in deletables:
         if fp.is_file():

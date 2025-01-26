@@ -75,7 +75,7 @@ LICENSES_SDIST = (
     ".reuse/dep5",
 )
 
-PLATFILES_GLOB = [BindingsFN, VersionFN, *LibnameForSystem.values()]
+PLATFILES_GLOB = [BindingsFN, VersionFN, *AllLibnames]
 
 
 def assert_exists(dir, data_files):
@@ -135,7 +135,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
         sys_name = plat_to_system(pl_name)
-        libname = LibnameForSystem[sys_name]
+        libname = libname_for_system(sys_name)
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)

@@ -21,7 +21,7 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     
     system = plat_to_system(pl_name)
     pl_dir = DataDir / pl_name
-    binary = pl_dir / LibnameForSystem[system]
+    binary = pl_dir / libname_for_system(system)
     binary_ver = pl_dir / VersionFN
     
     if all(f.exists() for f in (binary, binary_ver)):
@@ -66,7 +66,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
             platfiles += [DataDir_Bindings/BindingsFN]
             _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8)
         
-        platfiles += [pl_dir/LibnameForSystem[system], pl_dir/VersionFN]
+        platfiles += [pl_dir/libname_for_system(system), pl_dir/VersionFN]
         for fp in platfiles:
             shutil.copyfile(fp, ModuleDir_Raw/fp.name)
         

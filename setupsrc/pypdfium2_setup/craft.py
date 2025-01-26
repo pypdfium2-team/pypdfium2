@@ -77,7 +77,7 @@ class ArtifactStash:
         
         self.tmpdir = None
         
-        file_names = [VersionFN, BindingsFN, LibnameForSystem[Host.system]]
+        file_names = [VersionFN, BindingsFN, libname_for_system(Host.system)]
         self.files = [fp for fp in [ModuleDir_Raw / fn for fn in file_names] if fp.exists()]
         if len(self.files) == 0:
             return

@@ -180,7 +180,7 @@ def pack(v_short, v_post):
     dest_dir = DataDir / ExtPlats.sourcebuild
     dest_dir.mkdir(parents=True, exist_ok=True)
     
-    libname = LibnameForSystem[Host.system]
+    libname = libname_for_system(Host.system)
     shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
     write_pdfium_info(dest_dir, v_short, origin="sourcebuild", **v_post)
     
