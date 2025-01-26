@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE")
+__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE", "_safe_debug")
 
 import os
 import sys
@@ -11,6 +11,29 @@ import weakref
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class _SafeDebugClass:
+    
+    # try to use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
+    
+    def __init__(self):
+        try:
+            # capture sys.stderr.fileno() at import time, so in case the caller redirects into a python stream later, we still use the original stderr
+            self._fileno = sys.stderr.fileno()
+        except Exception:
+            _SafeDebugClass.__call__ = _SafeDebugClass._impl_print
+        else:
+            _SafeDebugClass.__call__ = _SafeDebugClass._impl_oswrite
+    
+    def _impl_oswrite(self, msg):
+        os.write(self._fileno, (msg+"\n").encode())
+    
+    def _impl_print(self, msg):
+        print(msg, file=sys.stderr)
+
+_safe_debug = _SafeDebugClass()
+
 
 class _Mutable:
     
@@ -23,8 +46,10 @@ class _Mutable:
     def __bool__(self):
         return bool(self.value)
 
+
 DEBUG_AUTOCLOSE = _Mutable(False)
 LIBRARY_AVAILABLE = _Mutable(False)  # set to true on library init
+
 
 class _STATE (enum.Enum):
     INVALID  = -1
@@ -37,19 +62,18 @@ class AutoCastable:
     
     @property
     def _as_parameter_(self):
-        if self.raw is None:
-            raise RuntimeError("Cannot use closed object as C function parameter.")
+        if not self.raw:
+            raise RuntimeError("bool(obj.raw) must evaluate to True for use as C function parameter")
         return self.raw
 
 
 def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
     
     if DEBUG_AUTOCLOSE:
-        # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
-        os.write(sys.stderr.fileno(), f"Close ({state.value.name.lower()}) {obj_repr}\n".encode())
+        _safe_debug(f"Close ({state.value.name.lower()}) {obj_repr}")
     
     if not LIBRARY_AVAILABLE:
-        os.write(sys.stderr.fileno(), f"-> Cannot close object; library is destroyed. This may cause a memory leak!\n".encode())
+        _safe_debug(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak!")
         return
     
     assert state.value != _STATE.INVALID
@@ -104,10 +128,11 @@ class AutoCloseable (AutoCastable):
     def close(self, _by_parent=False):
         
         # TODO remove object from parent's kids cache on finalization to avoid unnecessary accumulation
-        # -> pre-requisite would be to handle kids inside finalizer, but IIRC there was some weird issue with that?
-        # TODO invalidate self.raw if closing object without finalizer to prevent access after a lifetime-managing parent is closed
         
-        if not self.raw or not self._finalizer:
+        if not self.raw:
+            return False
+        if not self._finalizer:
+            self.raw = None
             return False
         
         for k_ref in self._kids:

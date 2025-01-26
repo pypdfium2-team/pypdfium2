@@ -32,6 +32,16 @@ def joined_ctx(ctxes):
         yield
 
 
+# class StringIOWithFileno (io.StringIO):
+    
+#     def __init__(self, orig_fileno):
+#         super().__init__()
+#         self._orig_fileno = orig_fileno
+    
+#     def fileno(self):
+#         return self._orig_fileno
+
+
 def run_cli(argv, exp_output=None, capture=("out", "err", "log"), normalize_lfs=False):
     
     argv = [str(a) for a in argv]
@@ -41,6 +51,7 @@ def run_cli(argv, exp_output=None, capture=("out", "err", "log"), normalize_lfs=
         
     else:
         
+        # output = StringIOWithFileno(sys.stderr.fileno())
         output = io.StringIO()
         ctxes = []
         assert isinstance(capture, (tuple, list))

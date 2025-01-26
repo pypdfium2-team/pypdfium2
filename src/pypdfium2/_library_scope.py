@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import os
 import sys
 import atexit
 import pypdfium2.raw as pdfium_c
@@ -11,8 +10,8 @@ import pypdfium2.internal as pdfium_i
 def init_lib():
     assert not pdfium_i.LIBRARY_AVAILABLE
     if pdfium_i.DEBUG_AUTOCLOSE:
-        # FIXME never shown, because DEBUG_AUTOCLOSE can only be set on the caller side after pypdfium2 has been imported...
-        print("Initialize PDFium (auto)", file=sys.stderr)
+        # FIXME not shown on auto-init, because DEBUG_AUTOCLOSE can only be set on the caller side after pypdfium2 has been imported...
+        print("Initialize PDFium", file=sys.stderr)
     
     # PDFium init API may change in the future: https://crbug.com/pdfium/1446
     # NOTE Technically, FPDF_InitLibrary() would be sufficient for our purposes, but since it's formally marked for deprecation, don't use it to be on the safe side. Also, avoid experimental config versions that might not be promoted to stable.
@@ -32,8 +31,7 @@ def init_lib():
 def destroy_lib():
     assert pdfium_i.LIBRARY_AVAILABLE
     if pdfium_i.DEBUG_AUTOCLOSE:
-        # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
-        os.write(sys.stderr.fileno(), b"Destroy PDFium\n")
+        pdfium_i._safe_debug("Destroy PDFium")
     pdfium_c.FPDF_DestroyLibrary()
     pdfium_i.LIBRARY_AVAILABLE.value = False
 
