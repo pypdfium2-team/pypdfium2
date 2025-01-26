@@ -1,9 +1,6 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# No external dependencies shall be imported in this file
-# TODO improve consistency of variable names; think about variables to move in/out
-
 import os
 import re
 import sys
@@ -61,7 +58,7 @@ ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").repl
 REFBINDINGS_FLAGS = ["V8", "XFA", "SKIA"]
 
 
-# TODO make SysNames/ExtPlats/PlatNames iterable, consider StrEnum or something
+# TODO consider StrEnum or something
 
 class SysNames:
     darwin  = "darwin"

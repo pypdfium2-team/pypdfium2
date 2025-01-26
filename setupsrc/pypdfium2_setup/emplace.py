@@ -12,10 +12,8 @@ from pypdfium2_setup.base import *
 from pypdfium2_setup import update as update_pdfium
 
 
-# CONSIDER Linux/macOS: check that minimum OS version requirements are fulfilled
-
 def _repr_info(version, flags):
-    return str(version) + (":{%s}" % ','.join(flags) if flags else "")
+    return str(version) + (f":{','.join(flags)}" if flags else "")
 
 def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     
@@ -77,7 +75,6 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
 
 def main():
     
-    # TODO add option to force rebuild
     parser = argparse.ArgumentParser(
         description = "Manage in-tree artifacts from an editable install.",
     )
