@@ -5,21 +5,32 @@ __all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABL
 
 import os
 import sys
-import ctypes
+import enum
+import uuid
 import weakref
 import logging
-import uuid
 
 logger = logging.getLogger(__name__)
 
-# mutable bools
-DEBUG_AUTOCLOSE = ctypes.c_bool(False)
-LIBRARY_AVAILABLE = ctypes.c_bool(False)  # set to true on library init
+class _Mutable:
+    
+    def __init__(self, value):
+        self.value = value
+    
+    def __repr__(self):
+        return f"_Mutable({self.value})"
+    
+    def __bool__(self):
+        return bool(self.value)
 
-STATE_INVALID = -1
-STATE_AUTO = 0
-STATE_EXPLICIT = 1
-STATE_BYPARENT = 2
+DEBUG_AUTOCLOSE = _Mutable(False)
+LIBRARY_AVAILABLE = _Mutable(False)  # set to true on library init
+
+class _STATE (enum.Enum):
+    INVALID  = -1
+    AUTO     = 0
+    EXPLICIT = 1
+    BYPARENT = 2
 
 
 class AutoCastable:
@@ -34,14 +45,14 @@ class AutoCastable:
 def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
     
     if DEBUG_AUTOCLOSE:
-        desc = {STATE_AUTO: "auto", STATE_EXPLICIT: "explicit", STATE_BYPARENT: "by parent"}[state.value]
         # use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
-        os.write(sys.stderr.fileno(), f"Close ({desc}) {obj_repr}\n".encode())
+        os.write(sys.stderr.fileno(), f"Close ({state.value.name.lower()}) {obj_repr}\n".encode())
     
     if not LIBRARY_AVAILABLE:
-        os.write(sys.stderr.fileno(), f"-> Cannot close object; library is destroyed. This may happen on process exit, but should not during runtime.\n".encode())
+        os.write(sys.stderr.fileno(), f"-> Cannot close object; library is destroyed. This may cause a memory leak!\n".encode())
         return
     
+    assert state.value != _STATE.INVALID
     assert parent is None or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
 
@@ -58,7 +69,7 @@ class AutoCloseable (AutoCastable):
         self._uuid = uuid.uuid4()
         self._ex_args = args
         self._ex_kwargs = kwargs
-        self._autoclose_state = ctypes.c_int8(STATE_AUTO)  # mutable int
+        self._autoclose_state = _Mutable(_STATE.AUTO)
         
         self._finalizer = None
         self._kids = []
@@ -104,9 +115,9 @@ class AutoCloseable (AutoCastable):
             if k and k.raw:
                 k.close(_by_parent=True)
         
-        self._autoclose_state.value = STATE_BYPARENT if _by_parent else STATE_EXPLICIT
+        self._autoclose_state.value = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT
         self._finalizer()
-        self._autoclose_state.value = STATE_INVALID
+        self._autoclose_state.value = _STATE.INVALID
         self.raw = None
         self._finalizer = None
         self._kids.clear()
