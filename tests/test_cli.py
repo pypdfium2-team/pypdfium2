@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import io
+import sys
 import logging
 import filecmp
 import contextlib
@@ -32,14 +33,14 @@ def joined_ctx(ctxes):
         yield
 
 
-# class StringIOWithFileno (io.StringIO):
+class StringIOWithFileno (io.StringIO):
     
-#     def __init__(self, orig_fileno):
-#         super().__init__()
-#         self._orig_fileno = orig_fileno
+    def __init__(self, orig_stderr):
+        super().__init__()
+        self._orig_stderr = orig_stderr
     
-#     def fileno(self):
-#         return self._orig_fileno
+    def fileno(self):
+        return self._orig_stderr.fileno()
 
 
 def run_cli(argv, exp_output=None, capture=("out", "err", "log"), normalize_lfs=False):
@@ -51,8 +52,7 @@ def run_cli(argv, exp_output=None, capture=("out", "err", "log"), normalize_lfs=
         
     else:
         
-        # output = StringIOWithFileno(sys.stderr.fileno())
-        output = io.StringIO()
+        output = StringIOWithFileno(sys.stderr)
         ctxes = []
         assert isinstance(capture, (tuple, list))
         if "out" in capture:

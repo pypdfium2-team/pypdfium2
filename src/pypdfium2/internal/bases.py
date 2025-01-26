@@ -13,26 +13,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class _SafeDebugClass:
-    
+def _safe_debug(msg):
     # try to use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
-    
-    def __init__(self):
-        try:
-            # capture sys.stderr.fileno() at import time, so in case the caller redirects into a python stream later, we still use the original stderr
-            self._fileno = sys.stderr.fileno()
-        except Exception:
-            _SafeDebugClass.__call__ = _SafeDebugClass._impl_print
-        else:
-            _SafeDebugClass.__call__ = _SafeDebugClass._impl_oswrite
-    
-    def _impl_oswrite(self, msg):
-        os.write(self._fileno, (msg+"\n").encode())
-    
-    def _impl_print(self, msg):
+    try:
+        os.write(sys.stderr.fileno(), (msg+"\n").encode())
+    except Exception:
         print(msg, file=sys.stderr)
-
-_safe_debug = _SafeDebugClass()
 
 
 class _Mutable:
