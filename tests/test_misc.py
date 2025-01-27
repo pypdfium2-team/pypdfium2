@@ -89,6 +89,7 @@ def test_const_converters_rotation(degrees, const):
     assert pdfium_i.RotationToDegrees[const] == degrees
 
 
+@pytest.mark.skipif(sys.platform.startswith("linux"))
 def test_musllinux_api_avail():
     
     # Test availability of the non-public API we use to detect musllinux on setup.
