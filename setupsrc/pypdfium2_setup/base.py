@@ -327,21 +327,35 @@ class _host_platform:
             raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
     
     def _get_platform(self):
+        
         if self._system_name == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
+            print(f"macOS {self._machine_name} {platform.mac_ver()}", file=sys.stderr)
             if self._machine_name == "x86_64":
                 return PlatNames.darwin_x64
             elif self._machine_name == "arm64":
                 return PlatNames.darwin_arm64
+        
         elif self._system_name == "windows":
+            print(f"windows {self._machine_name} {platform.win32_ver()}", file=sys.stderr)
             if self._machine_name == "amd64":
                 return PlatNames.windows_x64
             elif self._machine_name == "x86":
                 return PlatNames.windows_x86
             elif self._machine_name == "arm64":
                 return PlatNames.windows_arm64
+        
         elif self._system_name == "linux":
+            
             self._libc_name, self._libc_ver = _get_libc_info()
+            
+            print(f"linux {self._machine_name} ({self._libc_name!r}, {self._libc_ver!r})", file=sys.stderr)
+            # if sys.version_info >= (3, 10):
+            #     try:
+            #         print(f"os release {platform.freedesktop_os_release()}", file=sys.stderr)
+            #     except Exception:  # OSError
+            #         print("Unable to read os release", file=sys.stderr)
+            
             if self._machine_name == "x86_64":
                 return self._handle_linux_libc("x64")
             elif self._machine_name == "i686":
@@ -352,9 +366,10 @@ class _host_platform:
                 if self._libc_name == "musl":
                     raise RuntimeError(f"armv7l: musl not supported at this time.")
                 return self._handle_linux_libc("arm32")
+        
         elif self._system_name == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
-            print(f"{self._system_name} {self._machine_name} {platform.android_ver()}", file=sys.stderr)
+            print(f"android {self._machine_name} {platform.android_ver()}", file=sys.stderr)
             if self._machine_name == "aarch64":
                 return PlatNames.android_arm64
             elif self._machine_name == "armv7l":
@@ -363,6 +378,7 @@ class _host_platform:
                 return PlatNames.android_x64
             elif self._machine_name == "i686":
                 return PlatNames.android_x86
+        
         elif self._system_name in ("ios", "ipados"):  # PEP 730
             # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
             ios_ver = platform.ios_ver()
@@ -372,6 +388,7 @@ class _host_platform:
             elif self._machine_name == "x86_64":
                 assert ios_ver.is_simulator, "iOS x86_64 can only be simulator"
                 return PlatNames.ios_x64_simu
+        
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
