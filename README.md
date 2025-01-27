@@ -62,18 +62,24 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case" for now.
     For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
 
-  <!-- TODO add dedicated PDFIUM_PLATFORM=libreoffice strategy to bundle a symlink, so we don't need write privileges in system space? -->
-  * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system-level binary (LibreOffice) 🔗</a>
+  * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With symlink (e.g. pdfium from libreoffice) 🔗</a>
     ```bash
+    # Substitute $PDFIUM_VER with the pdfium's build version.
+    # Option 1: If root privileges are available and targetting /usr/local/lib is OK
     sudo ln -s /usr/lib/libreoffice/program/libpdfiumlo.so /usr/local/lib/libpdfium.so
-    PDFIUM_VER=....  # to be determined by caller
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
+    
+    # Option 2: Bundle a symlink with pypdfium2
+    export PDFIUM_PATH=/usr/lib/libreoffice/program/libpdfiumlo.so
+    PDFIUM_PLATFORM="symlink:$PDFIUM_VER" python -m pip install -v .
     ```
-    Symlink pdfium from Libreoffice to a standard system location, determine the version, and install with system pdfium [as described above](#install-source-system).
-    At this time, Linux/BSD distributions do not usually provide pdfium as an own package. However, some may ship a pdfium shared library as part of Libreoffice.
-    This may be helpful to get pypdfium2 installed on platforms not covered by pdfium-binaries (e.g. `ppc64le`, `s390x`, `freebsd`).
+    
+    Install pdfium from a non-standard system location by either manually symlinking it to a location that is on the search path (probably needs root privileges, or setting `LD_LIBRARY_PATH`), or by using the integrated `symlink` target to bundle a symlink into pypdfium2's package directory.
+    
+    Background: At this time, Linux/BSD distributions do not usually provide pdfium as an own package. However, some may ship a pdfium shared library as part of Libreoffice.
+    This may be helpful to get pypdfium2 installed on platforms not covered by pdfium-binaries yet (e.g. `linux ppc64le/s390x`, `freebsd`).
     Libreoffice actually uses its own build system for pdfium, so your distributor may be able to do this even on platforms not supported by Google's toolchain.
-    At this time, Debian/Ubuntu and FreeBSD seem to build Libreoffice with pdfium; however, Red Hat unfortunately do not.
+    At this time, Debian/Ubuntu and FreeBSD seem to build Libreoffice with pdfium; however, Red Hat do not.
   
   <!-- TODO version.json: reconsider origin - should we add a new field for the packager? -->
   * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)

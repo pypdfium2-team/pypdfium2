@@ -69,8 +69,9 @@ class SysNames:
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
-    system = "system"
-    sdist = "sdist"
+    system      = "system"
+    symlink     = "symlink"
+    sdist       = "sdist"
 
 class PlatNames:
     # - Attribute names and values are expected to match
@@ -673,7 +674,7 @@ def parse_pl_spec(pl_spec):
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
     else:
-        assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
+        assert pl_name not in (ExtPlats.system, ExtPlats.symlink) and do_prepare, "Version must be given explicitly for system or prepared!... targets"
         req_ver = PdfiumVer.get_latest()
     
     return do_prepare, pl_name, req_ver, use_v8

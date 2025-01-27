@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import os.path
 import sys
 import argparse
 from pathlib import Path
@@ -45,14 +46,36 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     clean_platfiles()
     flags = ["V8", "XFA"] if use_v8 else []
     
-    if pl_name == ExtPlats.system:
-        # TODO add option for caller to pass in custom headers_dir, run_lds and flags? unfortunately it's not straightforward how to integrate this
-        # also want to consider accepting a full version for offline setup
-        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
+    # TODO for PDFIUM_PLATFORM=system, add option for caller to pass in custom headers_dir, run_lds and flags? unfortunately it's not straightforward how to integrate this
+    # also want to consider accepting a full version for offline setup
+    
+    if pl_name in (ExtPlats.system, ExtPlats.symlink):
+        
+        run_lds = ()
+        platfiles = [BindingsFN, VersionFN]
+        
+        if pl_name == ExtPlats.symlink:
+            try:
+                pdfium_path = os.environ["PDFIUM_PATH"]
+            except KeyError:
+                raise RuntimeError("PDFIUM_PATH must be set with symlink target")
+            else:
+                pdfium_path = Path(pdfium_path).expanduser().resolve()
+                assert pdfium_path.is_file(), "PDFIUM_PATH must point to an existing file"
+            target_path = ModuleDir_Raw/libname_for_system(Host.system)
+            if os.path.lexists(target_path):  # target_path.exists(follow_symlinks=False)
+                target_path.unlink()  # overwrite existing binary or symlink
+            target_path.symlink_to(pdfium_path)
+            run_lds = (".", )
+            platfiles += [target_path.name]
+        
+        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=run_lds)
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
-        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
-        return [BindingsFN, VersionFN]
+        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin=pl_name, flags=flags)
+        return platfiles
+    
     else:
+        
         platfiles = []
         pl_dir = DataDir/pl_name
         system = plat_to_system(pl_name)
