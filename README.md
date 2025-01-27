@@ -62,7 +62,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case" for now.
     For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
 
-  * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With symlink (e.g. pdfium from libreoffice) 🔗</a>
+  * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With symlinked binary (e.g. from libreoffice) 🔗</a>
     ```bash
     # Substitute $PDFIUM_VER with the pdfium's build version.
     # Option 1: If root privileges are available and targetting /usr/local/lib is OK
