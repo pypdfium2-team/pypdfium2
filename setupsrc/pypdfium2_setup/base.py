@@ -297,14 +297,14 @@ class _host_platform:
         self._system_name = platform.system().lower()
         self._machine_name = platform.machine().lower()
         
-        # If we are on Linux, check which libc we have
-        self._libc_name, self._libc_ver = _get_libc_info()
+        self._libc_name, self._libc_ver = "", ""
         
         try:
             self.platform = self._get_platform()
         except Exception as e:
             self.platform = None
             self._exc = e
+        
         self.system = None
         if self.platform is not None:
             self.system = plat_to_system(self.platform)
@@ -341,6 +341,7 @@ class _host_platform:
             elif self._machine_name == "arm64":
                 return PlatNames.windows_arm64
         elif self._system_name == "linux":
+            self._libc_name, self._libc_ver = _get_libc_info()
             if self._machine_name == "x86_64":
                 return self._handle_linux_libc("x64")
             elif self._machine_name == "i686":
