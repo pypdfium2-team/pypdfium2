@@ -147,6 +147,14 @@ def libname_for_system(system):
 AllLibnames = ["pdfium.dll", "libpdfium.dylib", "libpdfium.so"]
 
 
+if sys.version_info < (3, 8):
+    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
+    def cached_property(func):
+        return property( functools.lru_cache(maxsize=1)(func) )
+else:
+    cached_property = functools.cached_property
+
+
 class PdfiumVer:
     
     scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
@@ -297,17 +305,24 @@ class _host_platform:
         self._system_name = platform.system().lower()
         self._machine_name = platform.machine().lower()
         
+        # empty slots
         self._libc_name, self._libc_ver = "", ""
-        
+        self._exc = None
+    
+    @cached_property
+    def platform(self):
         try:
-            self.platform = self._get_platform()
+            return self._get_platform()
         except Exception as e:
-            self.platform = None
             self._exc = e
-        
-        self.system = None
+            return None
+    
+    @cached_property
+    def system(self):
         if self.platform is not None:
-            self.system = plat_to_system(self.platform)
+            return plat_to_system(self.platform)
+        else:
+            return None
     
     def __repr__(self):
         info = f"{self._system_name} {self._machine_name}"
