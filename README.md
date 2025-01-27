@@ -528,9 +528,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
     def __init__(self, py_buffer):
         self.py_buffer = py_buffer
     
-    def __call__(self, _, position, p_buf, size):
+    def __call__(self, _, position, buffer_ptr, size):
         # Write data from Python buffer into C buffer, as explained before
-        buffer_ptr = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
+        buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_char * size))
         self.py_buffer.seek(position)
         self.py_buffer.readinto(buffer_ptr.contents)
         return 1  # non-zero return code for success
