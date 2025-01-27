@@ -414,6 +414,7 @@ def _manylinux_tag(arch, glibc="2_17"):
     return f"manylinux_{glibc}_{arch}.manylinux2014_{arch}"
 
 def get_wheel_tag(pl_name):
+    
     if pl_name == PlatNames.darwin_x64:
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
         # "intel" instead of "x86_64" might work too, but I think it's considered legacy
@@ -424,12 +425,14 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatNames.darwin_universal:
         # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
         return "macosx_10_13_universal2"
+    
     elif pl_name == PlatNames.windows_x64:
         return "win_amd64"
     elif pl_name == PlatNames.windows_arm64:
         return "win_arm64"
     elif pl_name == PlatNames.windows_x86:
         return "win32"
+    
     elif pl_name == PlatNames.linux_x64:
         return _manylinux_tag("x86_64")
     elif pl_name == PlatNames.linux_x86:
@@ -438,12 +441,14 @@ def get_wheel_tag(pl_name):
         return _manylinux_tag("aarch64")
     elif pl_name == PlatNames.linux_arm32:
         return _manylinux_tag("armv7l")
+    
     elif pl_name == PlatNames.linux_musl_x64:
         return "musllinux_1_1_x86_64"
     elif pl_name == PlatNames.linux_musl_x86:
         return "musllinux_1_1_i686"
     elif pl_name == PlatNames.linux_musl_arm64:
         return "musllinux_1_1_aarch64"
+    
     # Android - see PEP 738 # Packaging
     # At this time, we only build wheels for android_arm64, but handle the others as well so the code is ready if we want to in the future (or in case callers want to build their own wheels)
     elif pl_name == PlatNames.android_arm64:
@@ -454,6 +459,7 @@ def get_wheel_tag(pl_name):
         return "android_21_x86_64"
     elif pl_name == PlatNames.android_x86:
         return "android_21_x86"
+    
     # iOS - see PEP 730 # Packaging
     # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Bear in mind that the resulting iOS packages are currently completely untested. In particular, the PEP says
     # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
@@ -464,6 +470,7 @@ def get_wheel_tag(pl_name):
         return "ios_12_0_arm64_iphonesimulator"
     elif pl_name == PlatNames.ios_x64_simu:
         return "ios_12_0_x86_64_iphonesimulator"
+    
     # The sourcebuild clause is currently inactive; setup.py will simply forward the tag determined by bdist_wheel. Anyway, this should be roughly equivalent.
     elif pl_name == ExtPlats.sourcebuild:
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
@@ -471,6 +478,7 @@ def get_wheel_tag(pl_name):
         if tag.startswith("macosx") and tag.endswith("universal2"):
             tag = tag[:-len("universal2")] + Host._machine_name
         return tag
+    
     else:
         raise ValueError(f"Unhandled platform name {pl_name}")
 
