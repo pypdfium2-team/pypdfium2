@@ -354,6 +354,7 @@ class _host_platform:
                 return self._handle_linux_libc("arm32")
         elif self._system_name == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
+            print(f"{self._system_name} {self._machine_name} {platform.android_ver()}", file=sys.stderr)
             if self._machine_name == "aarch64":
                 return PlatNames.android_arm64
             elif self._machine_name == "armv7l":
@@ -362,9 +363,10 @@ class _host_platform:
                 return PlatNames.android_x64
             elif self._machine_name == "i686":
                 return PlatNames.android_x86
-        elif self._system_name in ("iOS", "iPadOS"):  # PEP 730
+        elif self._system_name in ("ios", "ipados"):  # PEP 730
             # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
             ios_ver = platform.ios_ver()
+            print(f"{self._system_name} {self._machine_name} {ios_ver}", file=sys.stderr)
             if self._machine_name == "arm64":
                 return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
             elif self._machine_name == "x86_64":
