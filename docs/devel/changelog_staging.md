@@ -34,9 +34,12 @@
 - Improved startup performance by deferring imports of optional dependencies to the point where they are actually needed, to avoid overhead if you do not use them.
 - Simplified version classes (no API change expected).
 
-*Setup*
+*Platforms*
 - Experimental Android support added (cf. PEP 738). We are now packaging `android_21_arm64_v8a` wheels. Other Android targets (`armeabi_v7a`, `x86_64`, `x86`) are handled in setup as well and should implicitly download the right binaries, but we don't currently build wheels for these, due to lower relevance (`x86_64` and `x86` are emulators, i.e. only relevant to developers), and `armeabi_v7a`, `x86` not being officially supported by Python. Note, this is provided on a best effort basis, and largely untested (only arm64 Termux prior to PEP 738 has been tested on the author's phone). Please report success or failure.
 - Experimental iOS support added as well (cf. PEP 730). `arm64` device and simulator, and `x86_64` simulator are now handled and should implicitly download the right binaries. However, this is untested and may not be enough to get all the way through. In particular, the PEP hints that the binary needs to be moved to a Frameworks location, in which case you'd also need to change the library search path. No iOS wheels will be provided at this time. However, if there are testers and an actual demand, iOS arm64 wheels may be enabled in the future.
+
+*Setup*
+- Avoid needlessly calling `_get_libc_ver()`. Instead, call it only on Linux. (A negative side effect of calling this unconditionally is that, on non-Linux platforms, an empty string may be returned, in which case the musllinux handler would be reached, which uses non-public API and altogether shouldn't be called on other platforms.)
 
 *Project*
 - Merged `tests_old/` back into `tests/`.
