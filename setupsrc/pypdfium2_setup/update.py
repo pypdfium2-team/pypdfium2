@@ -98,6 +98,7 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
 # low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py
 
 def parse_args(argv):
+    platform_choices = list(PdfiumBinariesMap.keys())
     parser = argparse.ArgumentParser(
         description = "Download pre-built PDFium packages.",
     )
@@ -106,8 +107,8 @@ def parse_args(argv):
         "--platforms", "-p",
         nargs = "+",
         metavar = "ID",
-        choices = list(PdfiumBinariesMap.keys()),
-        help = f"The platform(s) to include. Defaults to the platforms we build wheels for. Choices: {list(PdfiumBinariesMap.keys())}",
+        choices = platform_choices,
+        help = f"The platform(s) to include. Defaults to the platforms we build wheels for. Choices: {platform_choices}",
     )
     parser.add_argument(
         "--use-v8",

@@ -23,7 +23,7 @@ def run_local(*args, **kws):
 def update_refbindings(version):
     
     # We endeavor to make the reference bindings as universal and robust as possible, thus the symbol guards, flags, runtime libdir ["."] + system search.
-    # Also, skip symbol source info to make for cleaner diffs, so one can see pdfium API changes at a glance.
+    # Also, skip symbol source info for cleaner diffs, so one can see pdfium API changes at a glance.
     
     # REFBINDINGS_FLAGS:
     # Given the symbol guards, we can define all standalone feature flags.
@@ -44,7 +44,6 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
     if prev_helpers["dirty"]:
         print("Warning: dirty state. This should not happen in CI.", file=sys.stderr)
     
-    # TODO actually, we care only about updates to src/
     py_updates = prev_helpers["n_commits"] > 0
     c_updates = record["pdfium"] < new_pdfium
     

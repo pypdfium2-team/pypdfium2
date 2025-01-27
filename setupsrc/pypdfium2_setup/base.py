@@ -55,7 +55,7 @@ ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
-REFBINDINGS_FLAGS = ["V8", "XFA", "SKIA"]
+REFBINDINGS_FLAGS = ("V8", "XFA", "SKIA")
 
 
 # TODO consider StrEnum or something
@@ -88,13 +88,13 @@ class PlatNames:
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
-    android_arm64    = SysNames.android + "_arm64"      # device
-    android_arm32    = SysNames.android + "_arm32"      # device
-    android_x64      = SysNames.android + "_x64"        # emulator
-    android_x86      = SysNames.android + "_x86"        # emulator
-    ios_arm64_dev    = SysNames.ios     + "_arm64_dev"  # device
-    ios_arm64_simu   = SysNames.ios     + "_arm64_simu" # simulator
-    ios_x64_simu     = SysNames.ios     + "_x64_simu"   # simulator
+    android_arm64    = SysNames.android + "_arm64"       # device
+    android_arm32    = SysNames.android + "_arm32"       # device
+    android_x64      = SysNames.android + "_x64"         # emulator
+    android_x86      = SysNames.android + "_x86"         # emulator
+    ios_arm64_dev    = SysNames.ios     + "_arm64_dev"   # device
+    ios_arm64_simu   = SysNames.ios     + "_arm64_simu"  # simulator
+    ios_x64_simu     = SysNames.ios     + "_x64_simu"    # simulator
 
 # Map platform names to the package names used by pdfium-binaries/google.
 PdfiumBinariesMap = {
@@ -207,7 +207,7 @@ def parse_given_tag(full_tag):
     
     info = dict()
     
-    # NOTE `git describe --dirty` does not account for new unregistered files
+    # note, `git describe --dirty` ignores new unregistered files
     tag = full_tag
     dirty = tag.endswith("-dirty")
     if dirty:
@@ -237,7 +237,7 @@ def parse_git_tag():
 
 def merge_tag(info, mode):
     
-    # FIXME some duplication with src/pypdfium2/version.py
+    # some duplication with src/pypdfium2/version.py ...
     
     tag = ".".join([str(info[k]) for k in ("major", "minor", "patch")])
     if info['beta'] is not None:
@@ -264,13 +264,13 @@ def plat_to_system(pl_name):
     if pl_name == ExtPlats.sourcebuild:
         # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downsteam with fallback value?
         return Host.system
-    # NOTE other ExtPlats not supported here
+    # other ExtPlats intentionally not handled here
     return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
 
 
 # platform.libc_ver() currently returns an empty string for musl, so use the packaging module to confirm.
 # See https://github.com/python/cpython/issues/87414 and https://github.com/pypa/packaging/blob/f13c298f0a623f3f7e01cc8395956b718d21503a/src/packaging/_musllinux.py#L32
-# NOTE could consider packaging.tags.sys_tags() as a possible public-API alternative - see https://packaging.pypa.io/en/stable/tags.html#packaging.tags.sys_tags or https://stackoverflow.com/a/75172415/15547292
+# (could consider packaging.tags.sys_tags() as a possible public-API alternative - see https://packaging.pypa.io/en/stable/tags.html#packaging.tags.sys_tags or https://stackoverflow.com/a/75172415/15547292)
 
 def _get_libc_info():
     
@@ -296,10 +296,9 @@ class _host_platform:
         self._system_name = platform.system().lower()
         self._machine_name = platform.machine().lower()
         
-        # If we are on Linux, check if we have glibc or musl
+        # If we are on Linux, check which libc we have
         self._libc_name, self._libc_ver = _get_libc_info()
         
-        # TODO consider cached property for platform and system?
         try:
             self.platform = self._get_platform()
         except Exception as e:
@@ -362,7 +361,7 @@ class _host_platform:
             elif self._machine_name == "i686":
                 return PlatNames.android_x86
         elif self._system_name in ("iOS", "iPadOS"):  # PEP 730
-            # NOTE iOS detection is untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
+            # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
             ios_ver = platform.ios_ver()
             if self._machine_name == "arm64":
                 return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
@@ -420,7 +419,7 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatNames.android_x86:
         return "android_21_x86"
     # iOS - see PEP 730 # Packaging
-    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Bear in mind that iOS is currently completely untested. In particular, the PEP says
+    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Bear in mind that the resulting iOS packages are currently completely untested. In particular, the PEP says
     # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
     # I take it this means you may need to change the library search path to that Frameworks location.
     elif pl_name == PlatNames.ios_arm64_dev:
@@ -605,7 +604,7 @@ def clean_platfiles():
 
 def get_helpers_info():
     
-    # TODO consider adding some checks against record
+    # TODO add some checks against record?
     
     have_git_describe = False
     if HAVE_GIT_REPO:

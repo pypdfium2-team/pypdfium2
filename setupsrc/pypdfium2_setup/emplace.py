@@ -17,8 +17,6 @@ def _repr_info(version, flags):
 
 def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     
-    # TODO inline binary cache logic into update.py ?
-    
     system = plat_to_system(pl_name)
     pl_dir = DataDir / pl_name
     binary = pl_dir / libname_for_system(system)

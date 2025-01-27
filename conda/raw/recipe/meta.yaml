@@ -51,7 +51,7 @@ about:
   summary: Python bindings to PDFium (raw, external binary)
   description: |
     This package provides raw ctypes bindings to pdfium.
-    Note, dependants should not pin this package to an exact version, as pypdfium2_raw itself pins pdfium-binaries to achieve ABI safety.
+    Note, dependants should not pin this package to an exact version, as pypdfium2_raw itself pins pdfium-binaries for ABI safety reasons.
     In general, pypdfium2_helpers is the canonical package (i.e. roughly equivalent to pypdfium2 on PyPI), so it is recommended to depend on that rather than on pypdfium2_raw directly.
   license: BSD-3-Clause, Apache-2.0
   license_file:
