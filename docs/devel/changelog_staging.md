@@ -42,6 +42,7 @@
 - Avoid needlessly calling `_get_libc_ver()`. Instead, call it only on Linux. (A negative side effect of calling this unconditionally is that, on non-Linux platforms, an empty string may be returned, in which case the musllinux handler would be reached, which uses non-public API and altogether shouldn't be called on other platforms.)
 
 *Project*
+- CI: Added Linux aarch64 (GH now provides free runners) and Python 3.13 to the test matrix.
 - Merged `tests_old/` back into `tests/`.
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.
 - Cleanly split out conda packaging into an own file, and confined it to the `conda/` directory, to avoid polluting the main setup code.
