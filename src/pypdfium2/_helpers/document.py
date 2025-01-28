@@ -78,7 +78,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     # Support using PdfDocument in a with-block
-    # Note that pdfium objects have to be closed in hierarchial order, but as this is ensured by the parents/kids system, callers don't have to worry about that.
+    # Note that pdfium objects should be closed in hierarchial order, but this is managed by our parents/kids system, so callers don't need to mind that.
     
     def __enter__(self):
         return self
