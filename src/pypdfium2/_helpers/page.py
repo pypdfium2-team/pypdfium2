@@ -235,16 +235,10 @@ class PdfPage (pdfium_i.AutoCloseable):
             pageobj (PdfObject): The pageobject to remove.
         """
                 
+        # note https://pdfium-review.googlesource.com/c/pdfium/+/118914
+        
         if pageobj.page is not self:
             raise ValueError("The pageobject you attempted to remove is not part of this page.")
-        
-        # https://pdfium-review.googlesource.com/c/pdfium/+/118914
-        # if pageobj.type == pdfium_c.FPDF_PAGEOBJ_TEXT:
-        #     for wref in self._kids:
-        #         obj = wref()
-        #         if isinstance(obj, PdfTextPage) and obj.raw:
-        #             logger.warning(f"Removing text pageobbject implicitly closes affected textpage {obj}.")
-        #             obj.close()
         
         ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
         if not ok:
