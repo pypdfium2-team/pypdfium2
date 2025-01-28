@@ -10,7 +10,6 @@ import tarfile
 import platform
 import functools
 import sysconfig
-import traceback
 import subprocess
 import contextlib
 from pathlib import Path
@@ -646,9 +645,9 @@ def get_helpers_info():
     if HAVE_GIT_REPO:
         try:
             helpers_info = parse_git_tag()
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as e:
+            print(str(e), file=sys.stderr)
             print("Version uncertain: git describe failure - possibly a shallow checkout", file=sys.stderr)
-            traceback.print_exc()
         else:
             have_git_describe = True
             helpers_info["data_source"] = "git"

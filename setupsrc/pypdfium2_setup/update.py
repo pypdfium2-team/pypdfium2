@@ -6,7 +6,6 @@ import sys
 import shutil
 import tarfile
 import argparse
-import traceback
 import functools
 from pathlib import Path
 import urllib.request as url_request
@@ -39,9 +38,9 @@ def _get_package(pl_name, version, robust, use_v8):
     
     try:
         url_request.urlretrieve(fu, fp)
-    except Exception:
+    except Exception as e:
         if robust:
-            traceback.print_exc()
+            print(str(e), file=sys.stderr)
             return None, None
         else:
             raise
