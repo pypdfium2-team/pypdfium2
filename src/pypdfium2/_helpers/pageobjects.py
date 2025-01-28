@@ -13,10 +13,9 @@ import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
-from pypdfium2._utils import deferred_import
+from pypdfium2._deferred import PIL_Image
 
 logger = logging.getLogger(__name__)
-PIL_Image = deferred_import("PIL.Image")
 
 
 class PdfObject (pdfium_i.AutoCloseable):

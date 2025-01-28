@@ -5,8 +5,7 @@
 
 from pathlib import Path
 import pypdfium2._helpers as pdfium
-from pypdfium2._utils import deferred_import
-PIL_Image = deferred_import("PIL.Image")
+from pypdfium2._deferred import PIL_Image
 
 def attach(parser):
     parser.add_argument(

@@ -8,9 +8,7 @@ import logging
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2._utils import deferred_import
-numpy = deferred_import("numpy")
-PIL_Image = deferred_import("PIL.Image")
+from pypdfium2._deferred import PIL_Image, numpy
 
 logger = logging.getLogger(__name__)
 

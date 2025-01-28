@@ -36,7 +36,9 @@ class _DeferredModule:
     def __getattr__(self, k):
         return getattr(self._module, k)
 
+# @functools.lru_cache(maxsize=5)
+# def _deferred_import(modpath):
+#     return _DeferredModule(modpath)
 
-@functools.lru_cache(maxsize=5)
-def deferred_import(modpath):
-    return _DeferredModule(modpath)
+PIL_Image = _DeferredModule("PIL.Image")
+numpy     = _DeferredModule("numpy")
