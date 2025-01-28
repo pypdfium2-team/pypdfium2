@@ -245,19 +245,18 @@ class SavingEngine:
         self.args = saver_args
         self.postproc_kwargs = postproc_kwargs
     
-    def _get_path(self, i, format_override=None):
+    def _get_path(self, i, ext):
         args = self.args
-        format = args.format if format_override is None else format_override
-        return args.output_dir / f"{args.prefix}{i+1:0{args.n_digits}d}.{format}"
+        return args.output_dir / f"{args.prefix}{i+1:0{args.n_digits}d}.{ext}"
     
     def __call__(self, i, bitmap, page):
         if self.args.use_bgra_on_transparency and self.args.format in ("jpg", "jpeg") and pdfium_c.FPDFPage_HasTransparency(page):
             # alternatively, we could perhaps convert to RGB
             logger.info("Page has transparency - overriding output format to PNG.")
-            format_override = "png"
+            ext = "png"
         else:
-            format_override = None
-        out_path = self._get_path(i, format_override)
+            ext = self.args.format
+        out_path = self._get_path(i, ext)
         self._saving_hook(out_path, bitmap, page, self.postproc_kwargs)
         logger.info(f"Wrote page {i+1} as {out_path.name}")
 
