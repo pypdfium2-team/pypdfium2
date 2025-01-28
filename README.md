@@ -54,7 +54,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-level binary 🔗</a>
     ```bash
-    # Substitute $PDFIUM_VER with the system pdfium's build version.
+    # Substitute $PDFIUM_VER with the system pdfium build's version.
     # For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
     ```
@@ -66,11 +66,11 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     ```bash
     # if root rights are available and targetting /usr/local/lib is OK
     sudo ln -s /usr/lib/libreoffice/program/libpdfiumlo.so /usr/local/lib/libpdfium.so
-    # Substitute $PDFIUM_VER with the pdfium's build version.
+    # Substitute $PDFIUM_VER with the pdfium build's version.
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
     ```
     
-    Symlink pdfium from a non-standard location (e.g. pdfium from libreoffice) to a directory that is on the search path, determine the version, and install with system pdfium [as described above](#install-source-system).
+    Symlink pdfium from a non-standard location (e.g. libreoffice libdir) to a directory that is on the search path, determine the version, and install with system pdfium [as described above](#install-source-system).
     
     Note, if elevated privileges are not available, you can target e.g. `~/.local/lib` and add it to [`LD_LIBRARY_PATH`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) in your `~/.bashrc` file.
     
