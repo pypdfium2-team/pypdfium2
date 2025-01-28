@@ -39,7 +39,7 @@
 - Experimental iOS support added as well (cf. PEP 730). `arm64` device and simulator, and `x86_64` simulator are now handled and should implicitly download the right binaries. However, this is untested and may not be enough to get all the way through. In particular, the PEP hints that the binary needs to be moved to a Frameworks location, in which case you'd also need to change the library search path. No iOS wheels will be provided at this time. However, if there are testers and an actual demand, iOS arm64 wheels may be enabled in the future.
 
 *Setup*
-- Avoid needlessly calling `_get_libc_ver()`. Instead, call it only on Linux. (A negative side effect of calling this unconditionally is that, on non-Linux platforms, an empty string may be returned, in which case the musllinux handler would be reached, which uses non-public API and altogether shouldn't be called on other platforms.)
+- Avoid needlessly calling `_get_libc_ver()`. Instead, call it only on Linux. A negative side effect of calling this unconditionally is that, on non-Linux platforms, an empty string may be returned, in which case the musllinux handler would be reached, which uses non-public API and isn't meant to be called on other platforms (though it seems to have passed).
 
 *Project*
 - CI: Added Linux aarch64 (GH now provides free runners) and Python 3.13 to the test matrix.
