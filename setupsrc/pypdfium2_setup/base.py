@@ -463,7 +463,7 @@ def get_wheel_tag(pl_name):
         return "ios_12_0_x86_64_iphonesimulator"
     
     # The sourcebuild clause is currently inactive; setup.py will simply forward the tag determined by bdist_wheel. Anyway, this should be roughly equivalent.
-    elif pl_name == ExtPlats.sourcebuild:
+    elif pl_name in (ExtPlats.sourcebuild, ExtPlats.symlink):
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
         # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         if tag.startswith("macosx") and tag.endswith("universal2"):

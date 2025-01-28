@@ -36,7 +36,7 @@ def bdist_factory(pl_name):
             self.root_is_pure = False
         
         def get_tag(self, *args, **kws):
-            if pl_name == ExtPlats.sourcebuild:
+            if pl_name in (ExtPlats.sourcebuild, ExtPlats.symlink):
                 # if using the sourcebuild target, forward the native tag
                 # alternatively, the sourcebuild clause in get_wheel_tag() should be roughly equivalent (it uses sysconfig.get_platform() directly)
                 _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
@@ -134,7 +134,10 @@ def run_setup(modnames, pl_name, pdfium_ver):
     elif pl_name == ExtPlats.system:
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
-        sys_name = plat_to_system(pl_name)
+        if pl_name == ExtPlats.symlink:
+            sys_name = Host.system
+        else:
+            sys_name = plat_to_system(pl_name)
         libname = libname_for_system(sys_name)
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
         kwargs["distclass"] = BinaryDistribution
