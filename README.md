@@ -64,22 +64,20 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
   * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system-level binary (non-standard location, e.g. LibreOffice) 🔗</a>
     ```bash
-    # Option 1) if root rights are available and targetting /usr/local/lib is OK
+    # if root rights are available and targetting /usr/local/lib is OK
     sudo ln -s /usr/lib/libreoffice/program/libpdfiumlo.so /usr/local/lib/libpdfium.so
-    
-    # Option 2) without elevated privileges, using LD_LIBRARY_PATH and e.g. ~/.local/lib
-    ln -s /usr/lib/libreoffice/program/libpdfiumlo.so ~/.local/lib/libpdfium.so
-    cp -n ~/.bashrc ~/.bashrc_backup
-    printf "\nLD_LIBRARY_PATH=\${LD_LIBRARY_PATH}:~/.local/lib\n" >> ~/.bashrc
-    source ~/.bashrc
-    
     # Substitute $PDFIUM_VER with the pdfium's build version.
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
     ```
-    Symlink pdfium from Libreoffice to a standard system location, determine the version, and install with system pdfium [as described above](#install-source-system).
-    At this time, Linux/BSD distributions do not usually provide pdfium as an own package. However, some may ship a pdfium shared library as part of Libreoffice.
-    This may be helpful to get pypdfium2 installed on platforms not covered by pdfium-binaries (e.g. `ppc64le`, `s390x`, `freebsd`).
-    Libreoffice actually uses its own build system for pdfium, so your distributor may be able to do this even on platforms not supported by Google's toolchain.
+    
+    Symlink pdfium from a non-standard location (e.g. pdfium from libreoffice) to a directory that is on the search path, determine the version, and install with system pdfium [as described above](#install-source-system).
+    
+    Note, if elevated privileges are not available, you can target e.g. `~/.local/lib` and add it to [`LD_LIBRARY_PATH`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) in your `~/.bashrc` file.
+    
+    Background: At this time, Linux/BSD distributions do not usually provide pdfium as an own package. However, some may ship a pdfium shared library as part of Libreoffice.
+    This may be helpful to get pypdfium2 installed on platforms not covered by pdfium-binaries yet (e.g. `linux ppc64le/s390x`, `freebsd`).
+    
+    Libreoffice actually uses its own build system for pdfium, so your distributor may be able to do this even for platforms not supported by Google's toolchain.
     At this time, Debian/Ubuntu and FreeBSD seem to build Libreoffice with pdfium; however, Red Hat do not.
   
   <!-- TODO version.json: reconsider origin - should we use a separate field for the packager? -->
@@ -96,7 +94,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     # n_commits/hash: git describe like post-tag info (0/null for release commit)
     # origin: a string to identify the build, in the form `$BUIDLER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
     # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
-    cat >"src/pypdfium2_raw/version.json" <<END
+    cat > "src/pypdfium2_raw/version.json" <<END
     {
       "major": $PDFIUM_MAJOR,
       "minor": $PDFIUM_MINOR,
