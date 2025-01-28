@@ -361,16 +361,8 @@ class _host_platform:
                 return PlatNames.windows_arm64
         
         elif self._system_name == "linux":
-            
             self._libc_name, self._libc_ver = _get_libc_info()
-            
             print(f"linux {self._machine_name} ({self._libc_name!r}, {self._libc_ver!r})", file=sys.stderr)
-            # if sys.version_info >= (3, 10):
-            #     try:
-            #         print(f"os release {platform.freedesktop_os_release()}", file=sys.stderr)
-            #     except Exception:  # OSError
-            #         print("Unable to read os release", file=sys.stderr)
-            
             if self._machine_name == "x86_64":
                 return self._handle_linux_libc("x64")
             elif self._machine_name == "i686":
