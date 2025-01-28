@@ -3,6 +3,8 @@
 
 # see https://gist.github.com/mara004/6915e904797916b961e9c53b4fc874ec for alternative approaches to deferred imports
 
+__all__ = ("PIL_Image", "numpy")
+
 import sys
 import logging
 import importlib
@@ -20,8 +22,6 @@ else:
 
 class _DeferredModule:
     
-    # FIXME Attribute assignment will affect only the wrapper, not the actual module.
-    
     def __init__(self, modpath):
         self._modpath = modpath
     
@@ -36,9 +36,14 @@ class _DeferredModule:
     def __getattr__(self, k):
         return getattr(self._module, k)
 
-# @functools.lru_cache(maxsize=5)
+# @functools.lru_cache(maxsize=2)
 # def _deferred_import(modpath):
 #     return _DeferredModule(modpath)
 
 PIL_Image = _DeferredModule("PIL.Image")
 numpy     = _DeferredModule("numpy")
+
+# add setattr after we have initialized the modpaths
+def _setattr_impl(self, k, v):
+    return setattr(self._module, k, v)
+_DeferredModule.__setattr__ = _setattr_impl
