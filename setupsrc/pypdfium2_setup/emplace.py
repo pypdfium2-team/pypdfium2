@@ -46,7 +46,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     clean_platfiles()
     flags = ["V8", "XFA"] if use_v8 else []
     
-    # TODO for PDFIUM_PLATFORM=system, add option for caller to pass in custom headers_dir, run_lds and flags? unfortunately it's not straightforward how to integrate this
+    # TODO for PDFIUM_PLATFORM=system, add option for caller to pass in custom headers_dir, run_lds and flags? this might cause more fragmentation, though
     # also want to consider accepting a full version for offline setup
     
     if pl_name == ExtPlats.system:
