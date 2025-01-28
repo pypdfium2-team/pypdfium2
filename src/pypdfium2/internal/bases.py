@@ -48,8 +48,9 @@ class AutoCastable:
     
     @property
     def _as_parameter_(self):
-        if not self.raw:
-            raise RuntimeError("bool(obj.raw) must evaluate to True for use as C function parameter")
+        # trust in the caller not to invoke APIs on an object after .close()
+        # if not self.raw:
+        #     raise RuntimeError("bool(obj.raw) must evaluate to True for use as C function parameter")
         return self.raw
 
 
