@@ -69,7 +69,6 @@ class SysNames:
 class ExtPlats:
     sourcebuild = "sourcebuild"
     system      = "system"
-    symlink     = "symlink"
     sdist       = "sdist"
 
 class PlatNames:
@@ -463,7 +462,7 @@ def get_wheel_tag(pl_name):
         return "ios_12_0_x86_64_iphonesimulator"
     
     # The sourcebuild clause is currently inactive; setup.py will simply forward the tag determined by bdist_wheel. Anyway, this should be roughly equivalent.
-    elif pl_name in (ExtPlats.sourcebuild, ExtPlats.symlink):
+    elif pl_name == ExtPlats.sourcebuild:
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
         # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         if tag.startswith("macosx") and tag.endswith("universal2"):
@@ -708,7 +707,7 @@ def parse_pl_spec(pl_spec):
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
     else:
-        assert pl_name not in (ExtPlats.system, ExtPlats.symlink) and do_prepare, "Version must be given explicitly for system or prepared!... targets"
+        assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
         req_ver = PdfiumVer.get_latest()
     
     return do_prepare, pl_name, req_ver, use_v8

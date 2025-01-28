@@ -49,30 +49,11 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     # TODO for PDFIUM_PLATFORM=system, add option for caller to pass in custom headers_dir, run_lds and flags? unfortunately it's not straightforward how to integrate this
     # also want to consider accepting a full version for offline setup
     
-    if pl_name in (ExtPlats.system, ExtPlats.symlink):
-        
-        run_lds = ()
-        platfiles = [BindingsFN, VersionFN]
-        
-        if pl_name == ExtPlats.symlink:
-            try:
-                pdfium_path = os.environ["PDFIUM_PATH"]
-            except KeyError:
-                raise RuntimeError("PDFIUM_PATH must be set with symlink target")
-            else:
-                pdfium_path = Path(pdfium_path).expanduser().resolve()
-                assert pdfium_path.is_file(), "PDFIUM_PATH must point to an existing file"
-            target_path = ModuleDir_Raw/libname_for_system(Host.system)
-            if os.path.lexists(target_path):  # target_path.exists(follow_symlinks=False)
-                target_path.unlink()  # overwrite existing binary or symlink
-            target_path.symlink_to(pdfium_path)
-            run_lds = (".", )
-            platfiles += [target_path.name]
-        
-        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=run_lds)
+    if pl_name == ExtPlats.system:
+        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
         shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
-        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin=pl_name, flags=flags)
-        return platfiles
+        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
+        return [BindingsFN, VersionFN]
     
     else:
         
