@@ -40,7 +40,7 @@
 
 *Setup*
 - Avoid needlessly calling `_get_libc_ver()`. Instead, call it only on Linux. A negative side effect of calling this unconditionally is that, on non-Linux platforms, an empty string may be returned, in which case the musllinux handler would be reached, which uses non-public API and isn't meant to be called on other platforms (though it seems to have passed).
-- If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results on macOS, and 32-bit interpreters running on 64-bit linux.
+- If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results for macOS, and 32-bit interpreters running on 64-bit Linux.
 
 *Project*
 - CI: Added Linux aarch64 (GH now provides free runners) and Python 3.13 to the test matrix.
