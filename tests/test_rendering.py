@@ -26,12 +26,10 @@ def sample_page():
     page = pdf[0]
     yield page
 
-
 @pytest.fixture
 def multipage_doc():
     pdf = pdfium.PdfDocument(TestFiles.multipage)
     yield pdf
-
 
 def _check_pixels(pil_image, pixels):
     for pos, value in pixels:
@@ -199,13 +197,11 @@ def test_render_page_tonumpy(rev_byteorder, sample_page):
     bitmap = sample_page.render(
         rev_byteorder = rev_byteorder,
     )
-    info, array = bitmap.get_info(), bitmap.to_numpy()
+    mode = bitmap.mode
+    array = bitmap.to_numpy()
+    
     assert isinstance(array, numpy.ndarray)
-    assert isinstance(info, pdfium.PdfBitmapInfo)
-    if rev_byteorder:
-        assert info.mode == "RGB"
-    else:
-        assert info.mode == "BGR"
+    assert mode == ("RGB" if rev_byteorder else "BGR")
     
     for (x, y), value in ExpRenderPixels:
         if rev_byteorder:
@@ -233,7 +229,7 @@ def test_render_page_noantialias(sample_page):
     assert isinstance(pil_image, PIL.Image.Image)
 
 
-def test_render_pages_no_concurrency(multipage_doc):
+def test_render_pages(multipage_doc):
     for page in multipage_doc:
         image = page.render(
             scale = 0.5,
@@ -242,70 +238,29 @@ def test_render_pages_no_concurrency(multipage_doc):
         assert isinstance(image, PIL.Image.Image)
 
 
-@pytest.fixture
-def render_pdffile_topil(multipage_doc):
-    
-    renderer = multipage_doc.render(
-        pdfium.PdfBitmap.to_pil,
-        scale = 0.5,
-    )
-    imgs = []
-    
-    for image in renderer:
-        assert isinstance(image, PIL.Image.Image)
-        assert image.mode == "RGB"
-        imgs.append(image)
-    
-    assert len(imgs) == 3
-    yield imgs
+def test_render_pil_numpy_eq(multipage_doc):
+    for page in multipage_doc:
+        # render at formats supported by PIL natively (i.e. without copying) so that pil_image and np_array are backed by the same memory
+        bitmap = page.render(scale=0.5, rev_byteorder=True, prefer_bgrx=True)
+        pil_image = bitmap.to_pil()
+        np_array = bitmap.to_numpy()
+        assert isinstance(pil_image, PIL.Image.Image)
+        assert isinstance(np_array, numpy.ndarray)
+        pil_image_from_array = PIL.Image.fromarray(np_array, mode="RGBX")
+        assert pil_image == pil_image_from_array
 
 
-@pytest.fixture
-def render_pdffile_tonumpy(multipage_doc):
-    
-    renderer = multipage_doc.render(
-        pdfium.PdfBitmap.to_numpy,
-        scale = 0.5,
-        rev_byteorder = True,
-        pass_info = True,
-    )
-    imgs = []
-    
-    for array, info in renderer:
-        assert info.mode == "RGB"
-        assert isinstance(array, numpy.ndarray)
-        pil_image = PIL.Image.fromarray(array, mode=info.mode)
-        imgs.append(pil_image)
-    
-    # for i, img in enumerate(imgs):
-    #     img.save(OutputDir / ("numpy_%s.png" % i))
-    
-    assert len(imgs) == 3
-    yield imgs
-
-
-def test_render_pdffile(render_pdffile_topil, render_pdffile_tonumpy):
-    for a, b in zip(render_pdffile_topil, render_pdffile_tonumpy):
-        assert a == b
-
-
-def test_render_pdf_new():
-    
-    # two pages to actually reach the process pool and not just the single-page shortcut
+def test_render_new():
     pdf = pdfium.PdfDocument.new()
-    page_1 = pdf.new_page(50, 100)
-    page_2 = pdf.new_page(50, 100)
-    renderer = pdf.render(pdfium.PdfBitmap.to_pil)
-    bitmap_p1 = next(renderer)
+    page = pdf.new_page(50, 100)
+    bitmap = page.render()
 
 
-def test_render_pdfbuffer():
-    
-    buffer = open(TestFiles.multipage, "rb")
-    pdf = pdfium.PdfDocument(buffer)
-        
-    renderer = pdf.render(pdfium.PdfBitmap.to_pil)
-    bitmap_p1 = next(renderer)
+def test_render_with_stream_read():
+    stream = open(TestFiles.multipage, "rb")
+    pdf = pdfium.PdfDocument(stream)
+    page = pdf[0]
+    bitmap = page.render()
 
 
 @pytest.mark.parametrize(
