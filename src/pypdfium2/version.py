@@ -24,7 +24,8 @@ class _version_interface:
         
         def frozen_setattr(self, name, value):
             raise AttributeError(f"Version class is immutable - assignment '{name} = {value}' not allowed")
-        self.__setattr__ = frozen_setattr
+        # assuming we only have a single instance of a version class
+        self.__class__.__setattr__ = frozen_setattr
     
     def __repr__(self):
         return self.version
@@ -76,7 +77,7 @@ class _version_pdfium (_version_interface):
         
         self.desc = self._craft_desc()
         if self.flags:
-            self.desc += ":{%s}" % ",".join(self.flags)
+            self.desc += f":{','.join(self.flags)}"
         if self.origin != "pdfium-binaries":
             self.desc += f"@{self.origin}"
 
