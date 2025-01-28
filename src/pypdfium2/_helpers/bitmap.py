@@ -84,7 +84,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     @classmethod
     def _get_buffer(cls, raw, stride, height):
-        # Note, there is a subtle difference in output between oldschool and pypdfium2-team ctypesgen regarding APIs that return void* (the former did some quirks to bypass auto-casting and use a wrapper object, whereas the latter returns the value directly). However, bool(buffer_ptr) might work with both.
         buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
         if not buffer_ptr:
             raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
@@ -315,8 +314,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         This method requires passing in the page explicitly, to avoid holding a strong reference, so that bitmap and page can be independently freed by finalizer.
         """
-        # if the bitmap was rendered from a page, resolve weakref and check identity
-        # before that, make sure *page* isn't None because that's what the weakref might resolve to if the referenced object is not alive anymore.
+        # if the bitmap was rendered from a page, resolve the weakref and check identity
+        # before that, make sure *page* isn't None because that's what the weakref may resolve to if the referenced object is not alive anymore.
         assert page, "Page must be non-null"
         if not self._pos_args or self._pos_args[0]() is not page:
             raise RuntimeError("This bitmap does not belong to the given page.")
