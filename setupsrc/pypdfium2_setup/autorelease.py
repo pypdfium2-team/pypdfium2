@@ -87,7 +87,7 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
     return (c_updates, new_pdfium), (py_updates, new_helpers)
 
 
-def log_changes(summary, prev_pdfium, new_pdfium, new_tag, beta):
+def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     
     pdfium_msg = f"## {new_tag} ({time.strftime('%Y-%m-%d')})\n\n"
     if prev_pdfium != new_pdfium:
@@ -100,7 +100,9 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, beta):
     part_a = content[:pos].strip() + "\n"
     part_b = content[pos:].strip() + "\n"
     content = part_a + "\n\n" + pdfium_msg + "\n"
-    if beta is None:
+    if is_beta:
+        content += f"See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/{new_tag})"
+    else:
         content += summary
     content += "\n\n" + part_b
     Changelog.write_text(content)
@@ -188,10 +190,9 @@ def main():
     write_json(AR_RecordFile, dict(pdfium=new_pdfium, tag=new_tag))
     
     update_refbindings(latest_pdfium)
-    summary = get_next_changelog(
-        flush = new_helpers["beta"] is None
-    )
-    log_changes(summary, record["pdfium"], new_pdfium, new_tag, new_helpers["beta"])
+    is_beta = new_helpers["beta"] is not None
+    summary = get_next_changelog(flush=(not is_beta))
+    log_changes(summary, record["pdfium"], new_pdfium, new_tag, is_beta)
     if args.register:
         register_changes(new_tag)
         parsed_helpers = parse_git_tag()
