@@ -116,20 +116,18 @@ def register_changes(new_tag):
     run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
 
 
-def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag, actually_log):
+def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag, target_known):
     log = ""
     log += "\n<details>\n"
     log += f"  <summary>{name} commit log</summary>\n\n"
     log += f"Commits between [`{ver_a}`]({url+prefix_ver+ver_a}) and [`{ver_b}`]({url+prefix_ver+ver_b})"
     log += " (latest commit first):\n\n"
-    if actually_log:
-        log += run_cmd(
-            ["git", "log", f"{prefix_tag+ver_a}..{prefix_tag+ver_b}", f"--pretty=format:* [`%h`]({url+prefix_commit}%H) %s"],
-            capture=True, check=True, cwd=cwd,
-        )
-    else:
-        # FIXME log up to HEAD instead?
-        log += "(log skipped due to actually_log=False)"
+    ref_a = prefix_tag+ver_a
+    ref_b = prefix_tag+ver_b if target_known else "HEAD"
+    log += run_cmd(
+        ["git", "log", f"{ref_a}..{ref_b}", f"--pretty=format:* [`%h`]({url+prefix_commit}%H) %s"],
+        capture=True, check=True, cwd=cwd,
+    )
     log += "\n\n</details>\n"
     return log
 
@@ -149,7 +147,7 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
         "pypdfium2", RepositoryURL, ProjectDir,
         prev_tag, new_tag,
         "/tree/", "/commit/", "",
-        actually_log=register
+        target_known=register
     )
     relnotes += "\n"
     
@@ -162,7 +160,7 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
                 "PDFium", PdfiumURL, tmpdir/"pdfium_history",
                 str(prev_pdfium), str(new_pdfium),
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
-                actually_log=True
+                target_known=True
             )
     
     (ProjectDir/"RELEASE.md").write_text(relnotes)
