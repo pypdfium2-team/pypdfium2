@@ -17,7 +17,7 @@ def _safe_debug(msg):
     # try to use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
     try:
         os.write(sys.stderr.fileno(), (msg+"\n").encode())
-    except Exception:
+    except Exception:  # e.g. io.UnsupportedOperation
         print(msg, file=sys.stderr)
 
 
@@ -77,10 +77,10 @@ class AutoCloseable (AutoCastable):
         
         self._close_func = close_func
         self._obj = self if obj is None else obj
-        self._uuid = uuid.uuid4()
         self._ex_args = args
         self._ex_kwargs = kwargs
         self._autoclose_state = _Mutable(_STATE.AUTO)
+        self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
         
         self._finalizer = None
         self._kids = []
@@ -89,7 +89,8 @@ class AutoCloseable (AutoCastable):
     
     
     def __repr__(self):
-        return f"<{type(self).__name__} uuid:{str(self._uuid)[:8]}>"
+        identifier = hex(id(self)) if self._uuid is None else self._uuid.hex[:14]
+        return f"<{type(self).__name__} {identifier}>"
     
     
     def _attach_finalizer(self):
