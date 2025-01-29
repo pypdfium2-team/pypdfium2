@@ -512,7 +512,7 @@ def tmp_cwd_context(tmp_cwd):
         os.chdir(orig_cwd)
 
 
-def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), allow_system_despite_libdirs=False, guard_symbols=False, no_srcinfo=False):
+def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False):
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
@@ -522,7 +522,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
     args = ["-l", "pdfium"]
     if run_lds:
         args += ["--runtime-libdirs", *run_lds]
-        if not allow_system_despite_libdirs:
+        if not search_sys_despite_libdirs:
             args += ["--no-system-libsearch"]
     if compile_lds:
         args += ["--compile-libdirs", *compile_lds]

@@ -31,7 +31,7 @@ def update_refbindings(version):
     # Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
     
     RefBindingsFile.unlink()
-    build_pdfium_bindings(version, guard_symbols=True, flags=REFBINDINGS_FLAGS, allow_system_despite_libdirs=True, no_srcinfo=True)
+    build_pdfium_bindings(version, guard_symbols=True, flags=REFBINDINGS_FLAGS, search_sys_despite_libdirs=True, no_srcinfo=True)
     shutil.copyfile(DataDir_Bindings/BindingsFN, RefBindingsFile)
     assert RefBindingsFile.exists()
 
