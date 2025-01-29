@@ -101,7 +101,7 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     part_b = content[pos:].strip() + "\n"
     content = part_a + "\n\n" + pdfium_msg + "\n"
     if is_beta:
-        content += f"See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/{new_tag})"
+        content += f"- See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/{new_tag})"
     else:
         content += summary
     content += "\n\n" + part_b
@@ -116,22 +116,25 @@ def register_changes(new_tag):
     run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
 
 
-def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag):
-    # known issue: log fails if args.register is False
+def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag, actually_log):
     log = ""
     log += "\n<details>\n"
     log += f"  <summary>{name} commit log</summary>\n\n"
     log += f"Commits between [`{ver_a}`]({url+prefix_ver+ver_a}) and [`{ver_b}`]({url+prefix_ver+ver_b})"
     log += " (latest commit first):\n\n"
-    log += run_cmd(
-        ["git", "log", f"{prefix_tag+ver_a}..{prefix_tag+ver_b}", f"--pretty=format:* [`%h`]({url+prefix_commit}%H) %s"],
-        capture=True, check=True, cwd=cwd,
-    )
+    if actually_log:
+        log += run_cmd(
+            ["git", "log", f"{prefix_tag+ver_a}..{prefix_tag+ver_b}", f"--pretty=format:* [`%h`]({url+prefix_commit}%H) %s"],
+            capture=True, check=True, cwd=cwd,
+        )
+    else:
+        # FIXME log up to HEAD instead?
+        log += "(log skipped due to actually_log=False)"
     log += "\n\n</details>\n"
     return log
 
 
-def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates):
+def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register):
     
     # TODO specifically show changes to public/ ?
     
@@ -146,6 +149,7 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
         "pypdfium2", RepositoryURL, ProjectDir,
         prev_tag, new_tag,
         "/tree/", "/commit/", "",
+        actually_log=register
     )
     relnotes += "\n"
     
@@ -158,6 +162,7 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
                 "PDFium", PdfiumURL, tmpdir/"pdfium_history",
                 str(prev_pdfium), str(new_pdfium),
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
+                actually_log=True
             )
     
     (ProjectDir/"RELEASE.md").write_text(relnotes)
@@ -201,7 +206,7 @@ def main():
                 "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
-    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates)
+    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, args.register)
 
 
 if __name__ == "__main__":
