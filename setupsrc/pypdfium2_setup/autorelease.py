@@ -101,7 +101,7 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     part_b = content[pos:].strip() + "\n"
     content = part_a + "\n\n" + pdfium_msg + "\n"
     if is_beta:
-        content += f"- See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/{new_tag})"
+        content += f"- See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/{new_tag})\n"
     else:
         content += summary
     content += "\n\n" + part_b
