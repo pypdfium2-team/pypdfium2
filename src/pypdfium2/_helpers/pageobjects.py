@@ -281,7 +281,7 @@ class PdfImage (PdfObject):
             render (bool):
                 Whether the image should be rendered, thereby applying possible transform matrices and alpha masks.
             scale_to_original (bool):
-                When rendering the image, whether to temporarily scale the image to its native resolution, or close to that (defaults to True). This should improve output quality. This is only applicable if *render=True*, and ignored otherwise.
+                If *render* is True, whether to temporarily scale the image to its native resolution, or close to that (defaults to True). This should improve output quality. Ignored if *render* is False.
         Returns:
             PdfBitmap: Image bitmap (with a buffer allocated by PDFium).
         """
@@ -337,8 +337,8 @@ class PdfImage (PdfObject):
         """
         Parameters:
             decode_simple (bool):
-                If True, apply simple filters, resulting in semi-decoded data (see :attr:`.SIMPLE_FILTERS`).
-                Otherwise, the raw data will be returned.
+                If True, decode simple filters (see :attr:`.SIMPLE_FILTERS`), so only complex filters will remain, if any. If there are no complex filters, this provides the decoded pixel data.
+                If False, the raw stream data will be returned instead.
         Returns:
             ctypes.Array: The data of the image stream (as :class:`~ctypes.c_ubyte` array).
         """

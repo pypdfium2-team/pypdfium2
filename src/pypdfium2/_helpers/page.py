@@ -402,7 +402,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 Other pixel formats are not affected.
             
             use_bgra_on_transparency (bool):
-                If True, use a pixel format with alpha channel (i.e. ``BGRA`` rather than ``BGR`` or ``BGRx``) if page content has transparency.
+                If True, use a pixel format with alpha channel (i.e. ``{BGR/RGB}A``) if page content has transparency.
                 This is recommended for performance in these cases, but as page-dependent format selection is somewhat unexpected, it is not enabled by default.
             
             force_bitmap_format (int | None):
@@ -433,7 +433,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             
             Additionally, *rev_byteorder* will swap ``BGR{A/x}`` to ``RGB{A/x}`` if applicable.
         
-        .. [#user_unit] Since PDF 1.6, pages may define an additional user unit factor. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. PDFium currently does not have an API to get the user unit, so this is not taken into account.
+        .. [#user_unit] Since PDF 1.6, pages may define an additional user unit factor. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. PDFium does not currently provide an API to get the user unit, so this is not taken into account.
         """
         
         src_width  = math.ceil(self.get_width()  * scale)

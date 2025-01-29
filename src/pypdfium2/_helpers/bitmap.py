@@ -224,7 +224,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         The array contains as many rows as the bitmap is high.
         Each row contains as many pixels as the bitmap is wide.
-        Each pixel will be an array with a value for each channel, or just a value if there is only one channel (cf. :attr:`.n_channels` and :attr:`.format`).
+        Each pixel will be an array holding the channel values, or just a value if there is only one channel (see :attr:`.n_channels` and :attr:`.format`).
         
         The resulting array is supposed to share memory with the original bitmap buffer,
         so changes to the buffer should be reflected in the array, and vice versa.
