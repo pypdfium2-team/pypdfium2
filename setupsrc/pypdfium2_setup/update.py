@@ -78,6 +78,18 @@ def extract(archives, version, flags):
         arc_path.unlink()
 
 
+def postprocess_android(platforms):
+    # see https://wiki.termux.com/wiki/FAQ#Why_does_a_compiled_program_show_warnings
+    if Host.system == SysNames.android and Host.platform in platforms:
+        elf_cleaner = shutil.which("termux-elf-cleaner")
+        if elf_cleaner:
+            print("Invoking termux-elf-cleaner to clean up possible linker warnings...", file=sys.stderr)
+            libpath = DataDir / Host.platform / libname_for_system(Host.system)
+            subprocess.run([elf_cleaner, libpath], check=True)
+        else:
+            print("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.", file=sys.stderr)
+
+
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     if not version:
@@ -92,6 +104,7 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     clear_data(platforms)
     archives = download(platforms, version, use_v8, max_workers, robust)
     extract(archives, version, flags)
+    postprocess_android(platforms)
 
 
 # low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py
