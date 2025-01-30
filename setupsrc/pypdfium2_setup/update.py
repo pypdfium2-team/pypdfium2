@@ -85,7 +85,7 @@ def postprocess_android(platforms):
         if elf_cleaner:
             print("Invoking termux-elf-cleaner to clean up possible linker warnings...", file=sys.stderr)
             libpath = DataDir / Host.platform / libname_for_system(Host.system)
-            subprocess.run([elf_cleaner, libpath], check=True)
+            run_cmd([elf_cleaner, str(libpath)], cwd=None)
         else:
             print("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.", file=sys.stderr)
 
