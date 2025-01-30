@@ -294,6 +294,14 @@ def _get_libc_info():
     return name.lower(), ver
 
 
+def _android_api():
+    try:
+        # this is available since python 3.7 (i.e. earlier than PEP 738)
+        return sys.getandroidapilevel()
+    except AttributeError:
+        return None
+
+
 class _host_platform:
     
     def __init__(self):
@@ -333,8 +341,8 @@ class _host_platform:
             return getattr(PlatNames, f"linux_{archid}")
         elif self._libc_name == "musl":
             return getattr(PlatNames, f"linux_musl_{archid}")
-        elif self._libc_name == "libc":
-            print(f"Warning: OS is Linux, but platform.libc_ver() returned 'libc' (not glibc or musl). Assuming Android prior to PEP 738 (e.g. Termux). If this is not right, override with {PlatSpec_EnvVar} (and file a bug report).", file=sys.stderr)
+        elif _android_api():  # seems to imply self._libc_name == "libc"
+            print("Android prior to PEP 738 (e.g. Termux)", file=sys.stderr)
             return getattr(PlatNames, f"android_{archid}")
         else:
             raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
@@ -374,7 +382,7 @@ class _host_platform:
         
         elif self._system_name == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
-            print(f"android {self._machine_name} {platform.android_ver()}", file=sys.stderr)
+            print(f"android {self._machine_name} {sys.getandroidapilevel()} {platform.android_ver()}", file=sys.stderr)
             if self._machine_name == "aarch64":
                 return PlatNames.android_arm64
             elif self._machine_name == "armv7l":
