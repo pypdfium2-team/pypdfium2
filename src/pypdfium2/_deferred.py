@@ -21,6 +21,8 @@ else:
 
 
 class _DeferredModule:
+    # This is a simple deferred object proxy.
+    # TODO: use the lazy_object_proxy module, if installed?
     
     def __init__(self, modpath):
         self._modpath = modpath
@@ -36,9 +38,6 @@ class _DeferredModule:
     def __getattr__(self, k):
         return getattr(self._module, k)
 
-# @functools.lru_cache(maxsize=2)
-# def _deferred_import(modpath):
-#     return _DeferredModule(modpath)
 
 PIL_Image = _DeferredModule("PIL.Image")
 numpy     = _DeferredModule("numpy")
