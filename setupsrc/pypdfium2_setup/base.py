@@ -336,7 +336,7 @@ class _host_platform:
             info += f", {self._libc_name} {self._libc_ver}"
         return f"<Host: {info}>"
     
-    def _handle_linux_libc(self, archid):
+    def _handle_linux(self, archid):
         if self._libc_name == "glibc":
             return getattr(PlatNames, f"linux_{archid}")
         elif self._libc_name == "musl":
@@ -368,17 +368,17 @@ class _host_platform:
         
         elif self._system_name == "linux":
             self._libc_name, self._libc_ver = _get_libc_info()
-            print(f"linux {self._machine_name} ({self._libc_name!r}, {self._libc_ver!r})", file=sys.stderr)
+            print(f"linux {self._machine_name} {self._libc_name, self._libc_ver}", file=sys.stderr)
             if self._machine_name == "x86_64":
-                return self._handle_linux_libc("x64")
+                return self._handle_linux("x64")
             elif self._machine_name == "i686":
-                return self._handle_linux_libc("x86")
+                return self._handle_linux("x86")
             elif self._machine_name == "aarch64":
-                return self._handle_linux_libc("arm64")
+                return self._handle_linux("arm64")
             elif self._machine_name == "armv7l":
                 if self._libc_name == "musl":
                     raise RuntimeError(f"armv7l: musl not supported at this time.")
-                return self._handle_linux_libc("arm32")
+                return self._handle_linux("arm32")
         
         elif self._system_name == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
