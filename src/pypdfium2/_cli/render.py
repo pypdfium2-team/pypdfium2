@@ -266,6 +266,7 @@ class PILEngine (SavingEngine):
     def do_imports(self):
         if not self.postproc_kwargs["invert_lightness"]:
             return
+        logger.debug("PIL engine imports for post-processing")
         global PIL
         import PIL.Image
         import PIL.ImageOps
@@ -316,6 +317,7 @@ class PILEngine (SavingEngine):
 class NumpyCV2Engine (SavingEngine):
     
     def do_imports(self):
+        logger.debug("cv2 engine imports")
         global cv2, np
         import cv2
         if self.postproc_kwargs["exclude_images"]:
