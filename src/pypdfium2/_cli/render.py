@@ -220,7 +220,7 @@ def attach(parser):
     color_scheme.add_argument(
         "--fill-to-stroke",
         action = "store_true",
-        help = "Only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.",
+        help = "When rendering with custom color scheme, only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color. This is actually recommended, since with a single fill color for paths the boundaries of adjacent fill paths are less visible.",
     )
     
     postproc = parser.add_argument_group(
