@@ -349,6 +349,8 @@ class _host_platform:
     
     def _get_platform(self):
         
+        # TODO 32-bit interpreters running on 64-bit machines?
+        
         if self._system_name == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
             print(f"macOS {self._machine_name} {platform.mac_ver()}", file=sys.stderr)
