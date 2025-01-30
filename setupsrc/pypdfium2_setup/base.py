@@ -291,7 +291,7 @@ def _get_libc_info():
         if musl_ver:
             name, ver = "musl", f"{musl_ver.major}.{musl_ver.minor}"
     
-    return name, ver
+    return name.lower(), ver
 
 
 class _host_platform:
@@ -334,7 +334,7 @@ class _host_platform:
         elif self._libc_name == "musl":
             return getattr(PlatNames, f"linux_musl_{archid}")
         elif self._libc_name == "libc":
-            # Android prior to PEP 738 (e.g. Termux)
+            print(f"Warning: OS is Linux, but platform.libc_ver() returned 'libc' (not glibc or musl). Assuming Android prior to PEP 738 (e.g. Termux). If this is not right, override with {PlatSpec_EnvVar} (and file a bug report).", file=sys.stderr)
             return getattr(PlatNames, f"android_{archid}")
         else:
             raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
