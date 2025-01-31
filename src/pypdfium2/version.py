@@ -13,7 +13,6 @@ import pypdfium2_raw
 class _version_interface:
     
     def __init__(self):
-        
         with open(self._FILE, "r") as buf:
             data = json.load(buf)
         for k, v in data.items():
@@ -21,11 +20,6 @@ class _version_interface:
         self.api_tag = tuple(data[k] for k in self._TAG_FIELDS)
         self._hook()
         self.version = self.tag + self.desc
-        
-        def frozen_setattr(self, name, value):
-            raise AttributeError(f"Version class is immutable - assignment '{name} = {value}' not allowed")
-        # assuming we only have a single instance of a version class
-        self.__class__.__setattr__ = frozen_setattr
     
     def __repr__(self):
         return self.version
@@ -159,3 +153,8 @@ Parameters:
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
 """
+
+# Freeze the base class after we have constructed the instance objects
+def _frozen_setattr(self, name, value):
+    raise AttributeError(f"Version class is read-only - assignment '{name} = {value}' not allowed")
+_version_interface.__setattr__ = _frozen_setattr
