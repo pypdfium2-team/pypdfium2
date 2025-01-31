@@ -25,8 +25,6 @@ def setup_logging():
 
 def parse_numtext(numtext):
     
-    # TODO enhancement: take count and verify page numbers
-    
     if not numtext:
         return None
     indices = []
