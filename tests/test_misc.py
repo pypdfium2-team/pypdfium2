@@ -5,9 +5,11 @@ import sys
 import pytest
 import platform
 import warnings
+import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2.version import PDFIUM_INFO
+from .conftest import OutputDir
 
 @pytest.mark.parametrize(
     ["color_in", "rev_byteorder", "exp_color"],
@@ -89,7 +91,43 @@ def test_const_converters_rotation(degrees, const):
     assert pdfium_i.RotationToDegrees[const] == degrees
 
 
-@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="libc_ver()/musl test only makes sense on linux")
+def test_bitmap_makers_to_images():
+    
+    # Run through the various bitmap maker strategies, and make sure we can add them all as images to a PDF.
+    # Admittedly, this is a bit off-practice, as the bitmap maker are mainly for rendering. When embedding an existing image, you probably have a native buffer on the caller side, and don't want to create a new foreign buffer.
+    
+    w, h = 10, 10
+    native = pdfium.PdfBitmap.new_native(w, h, pdfium_c.FPDFBitmap_BGR)
+    foreign = pdfium.PdfBitmap.new_foreign(w, h, pdfium_c.FPDFBitmap_BGR)
+    foreign_packed = pdfium.PdfBitmap.new_foreign(w, h, pdfium_c.FPDFBitmap_BGR, force_packed=True)
+    foreign_simple = pdfium.PdfBitmap.new_foreign_simple(w, h, use_alpha=False)
+    
+    rect = 0, 0, w, h
+    native.fill_rect((255, 130, 0, 255), *rect)
+    foreign.fill_rect((130, 255, 0, 255), *rect)
+    foreign_packed.fill_rect((0, 130, 255, 255), *rect)
+    foreign_simple.fill_rect((130, 0, 255, 255), *rect)
+    
+    pdf = pdfium.PdfDocument.new()
+    page = pdf.new_page(w*2, h*2)
+    common_mat = pdfium.PdfMatrix().scale(w, h)
+    
+    def _add_bitmap_at_pos(bitmap, x, y):
+        img = pdfium.PdfImage.new(pdf)
+        img.set_bitmap(bitmap)
+        img.set_matrix(common_mat.translate(x, y))
+        page.insert_obj(img)
+    
+    _add_bitmap_at_pos(native, 0, 0)
+    _add_bitmap_at_pos(foreign, 10, 0)
+    _add_bitmap_at_pos(foreign_packed, 0, 10)
+    _add_bitmap_at_pos(foreign_simple, 10, 10)
+    
+    page.gen_content()
+    pdf.save(OutputDir / "bitmap_makers_imgs.pdf")
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="libc_ver/musl test only makes sense on linux")
 def test_musllinux_api_avail():
     
     # Test availability of the non-public API we use to detect musllinux on setup.
