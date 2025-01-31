@@ -452,7 +452,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
-        bitmap.fill_rect(0, 0, width, height, fill_color)
+        bitmap.fill_rect(fill_color, 0, 0, width, height)
         
         pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
         render_args = (bitmap, self, *pos_args, flags)

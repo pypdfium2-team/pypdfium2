@@ -186,7 +186,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=True)
     
     
-    def fill_rect(self, left, top, width, height, color):
+    def fill_rect(self, color, left, top, width, height):
         """
         Fill a rectangle on the bitmap with the given color.
         The coordinate system's origin is the top left corner of the image.
