@@ -174,7 +174,6 @@ class PdfMatrix:
             self.on_point(right, top),
             self.on_point(right, bottom),
         )
-        # NOTE maybe a single loop with min/max x/y vars and </> comparisons would be more efficient...
         return (  # new rect
             min(p[0] for p in points),  # left
             min(p[1] for p in points),  # bottom
