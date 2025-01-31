@@ -12,12 +12,14 @@ import pypdfium2.internal as pdfium_i
 
 def setup_logging():
     
-    pdfium_i.DEBUG_AUTOCLOSE.value = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    # could also pass through the log level by parameter, but using an env var seemed easiest for now
+    debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    loglevel = getattr(logging, os.environ.get("PYPDFIUM_LOGLEVEL", "debug").upper())
     
+    pdfium_i.DEBUG_AUTOCLOSE.value = debug_autoclose
     lib_logger = logging.getLogger("pypdfium2")
     lib_logger.addHandler(logging.StreamHandler())
-    lib_logger.setLevel(logging.DEBUG)
-    
+    lib_logger.setLevel(loglevel)
     pdfium.PdfUnspHandler().setup()
 
 

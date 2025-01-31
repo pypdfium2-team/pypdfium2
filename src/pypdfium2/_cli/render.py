@@ -464,9 +464,9 @@ def main(args):
     del print_args["subcommand"], print_args["pages"]
     if print_args["password"]:
         print_args["password"] = "<obfuscated>"
-    logger.info(f"{print_args}")  # TODO prettier?
+    logger.debug(f"{print_args}")  # TODO prettier?
     if color_scheme:
-        logger.info(f"{color_scheme}")
+        logger.debug(f"{color_scheme}")
     
     engine = args.engine_cls(saver_args, postproc_kwargs)
     
