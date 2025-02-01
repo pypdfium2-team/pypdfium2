@@ -14,8 +14,8 @@ path = [
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
-    "2024 geisserml",
-    "2024 ctypesgen developers"
+    "2025 ctypesgen developers",
+    "2025 geisserml <geisserml@gmail.com>"
 ]
 SPDX-License-Identifier = "Apache-2.0 OR BSD-3-Clause"
 SPDX-FileComment = '''
@@ -31,9 +31,9 @@ path = [
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
-    "2024 PDFium developers",
-    "2024 Developers of projects mentioned in PdfiumThirdParty",
-    "2024 Benoît Blanchon and pdfium-binaries contributors"
+    "2025 PDFium developers",
+    "2025 Developers of projects mentioned in PdfiumThirdParty",
+    "2025 Benoît Blanchon and pdfium-binaries contributors"
 ]
 SPDX-License-Identifier = "BSD-3-Clause AND Apache-2.0 AND LicenseRef-PdfiumThirdParty"
 SPDX-FileComment = '''
