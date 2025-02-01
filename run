@@ -17,7 +17,7 @@ function clean() {
 }
 
 function packaging_pypi() {
-    # Note, in the future, we might want to add some `|| true` to avoid failing the release workflow just because an autoflake/codespell/reuse complaint.
+    # Note, in the future, we might want to add some `|| true` to avoid failing the release workflow just because of an autoflake/codespell/reuse complaint.
     clean
     check
 
