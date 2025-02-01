@@ -16,7 +16,7 @@
 
 - [ ] This PR changes helpers code.
 - [ ] The change comes with sufficient test cases to confirm correct functionality.
-- [ ] Any new test files are under a suitable license and have been registered in `reuse/dep5`.
+- [ ] Any new test files are under a suitable license and have been registered in `REUSE.toml`.
 
 </details>
 <details open><summary>Setup</summary>

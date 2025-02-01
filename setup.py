@@ -68,11 +68,11 @@ LICENSES_SHARED = (
 )
 LICENSES_WHEEL = (
     "LICENSES/LicenseRef-PdfiumThirdParty.txt",
-    ".reuse/dep5-wheel",
+    "REUSE-wheel.toml",
 )
 LICENSES_SDIST = (
     "LICENSES/LicenseRef-FairUse.txt",
-    ".reuse/dep5",
+    "REUSE.toml",
 )
 
 PLATFILES_GLOB = [BindingsFN, VersionFN, *AllLibnames]

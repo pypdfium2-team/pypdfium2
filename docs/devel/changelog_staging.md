@@ -47,6 +47,7 @@
 - Made the runfile fail fast and propagate errors via bash `-eu`. This is actually quite important to avoid potentially continuing on a broken state in CI.
 - CI: Added Linux aarch64 (GH now provides free runners) and Python 3.13 to the test matrix.
 - Merged `tests_old/` back into `tests/`.
+- Migrated from deprecated `.reuse/dep5`/`.reuse/dep5-wheel` to more visible `REUSE.toml`/`REUSE-wheel.toml`.
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.
 - Cleanly split out conda packaging into an own file, and confined it to the `conda/` directory, to avoid polluting the main setup code.
 

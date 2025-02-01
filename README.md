@@ -678,7 +678,7 @@ Various other open-source licenses apply to dependencies bundled with PDFium. Th
 Note that pdfium's dependencies might change over time. Although we try to keep an eye on the situation, there is no guarantee of completeness. Please notify us if you think this misses a relevant license.
 
 pypdfium2 includes [SPDX](https://spdx.org/licenses/) headers in source files.
-License information for data files is provided in [`.reuse/dep5`](.reuse/dep5) as per the [`reuse` standard](https://reuse.software/spec/).
+License information for data files is provided in [`REUSE.toml`](REUSE.toml) as per the [`reuse` standard](https://reuse.software/spec/).
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
 
