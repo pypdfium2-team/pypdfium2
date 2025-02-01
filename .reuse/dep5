@@ -103,6 +103,14 @@ Comment:
     Dummy to prevent reuse lint from reporting LicenseRef-PdfiumThirdParty as unused.
     The file is actually auto-generated and not copyrighted.
 
+Files:
+    RELEASE.md
+    docs/build/.gitkeep
+Copyright: 2024 geisserml
+License: CC-BY-4.0
+Comment:
+    Make reuse lint happy in CI.
+
 # Files: tests/resources/NotoSans-Regular.ttf
 # Copyright: 2022 Google Inc.
 # License: OFL-1.1
