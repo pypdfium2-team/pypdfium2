@@ -2,10 +2,7 @@
 # SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# FIXME
-# - auto-completion?
-# - running multiple commands at once
-# - exit code propagation, stop-on-error
+# TODO: auto-completion?, running multiple commands at once?
 
 args="${@:2}"
 
@@ -20,6 +17,7 @@ function clean() {
 }
 
 function packaging_pypi() {
+    # Note, in the future, we might want to add some `|| true` to avoid failing the release workflow just because an autoflake/codespell/reuse complaint.
     clean
     check
 

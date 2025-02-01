@@ -44,7 +44,7 @@
 - If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results, e.g. on macOS.
 
 *Project*
-- Made the runfile fail fast and propagate the error via bash `-eu`. This is actually quite important to avoid potentially continuing on a broken state in CI.
+- Made the runfile fail fast and propagate errors via bash `-eu`. This is actually quite important to avoid potentially continuing on a broken state in CI.
 - CI: Added Linux aarch64 (GH now provides free runners) and Python 3.13 to the test matrix.
 - Merged `tests_old/` back into `tests/`.
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.
