@@ -158,11 +158,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         # safety check for older binaries to prevent a segfault (could be removed at some point)
         # https://github.com/bblanchon/pdfium-binaries/issues/105
-        if "V8" in PDFIUM_INFO.flags and "pdfium-binaries" in PDFIUM_INFO.origin and PDFIUM_INFO.build <= 5677:
+        if "V8" in PDFIUM_INFO.flags and "pdfium-binaries" in PDFIUM_INFO.origin and PDFIUM_INFO.build <= 5677:  # pragma: no cover
             raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
         
         if not config:
-            if "XFA" in PDFIUM_INFO.flags:
+            if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
                 js_platform = pdfium_c.IPDF_JSPLATFORM(version=3)
                 config = pdfium_c.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, m_pJsPlatform=ctypes.pointer(js_platform))
             else:
@@ -175,7 +175,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._add_kid(self.formenv)
         
         if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
-            if "XFA" in PDFIUM_INFO.flags:
+            if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
                 ok = pdfium_c.FPDF_LoadXFA(self)
                 if not ok:
                     # FIXME ability to propagate an optional exception with error code info?

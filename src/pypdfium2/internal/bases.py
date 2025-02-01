@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def _safe_debug(msg):
+def _safe_debug(msg):  # pragma: no cover
     # try to use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
     try:
         os.write(sys.stderr.fileno(), (msg+"\n").encode())
@@ -56,10 +56,10 @@ class AutoCastable:
 
 def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
     
-    if DEBUG_AUTOCLOSE:
+    if DEBUG_AUTOCLOSE:  # pragma: no cover
         _safe_debug(f"Close ({state.value.name.lower()}) {obj_repr}")
     
-    if not LIBRARY_AVAILABLE:
+    if not LIBRARY_AVAILABLE:  # pragma: no cover
         _safe_debug(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak!")
         return
     
