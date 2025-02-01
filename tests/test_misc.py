@@ -9,7 +9,7 @@ import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2.version import PDFIUM_INFO
-from .conftest import OutputDir
+# from .conftest import OutputDir
 
 @pytest.mark.parametrize(
     ["color_in", "rev_byteorder", "exp_color"],
@@ -105,7 +105,7 @@ def test_const_converters_rotation(degrees, const):
 )
 def test_bitmap_makers_to_images(mode_str, rev_byteorder):
     
-    # Run through the various bitmap maker strategies, and make sure we can add them all as images to a PDF.
+    # Exercise the various bitmap maker strategies, and confirm we can add them all as images to a PDF.
     # Admittedly, this is a bit off-practice, as the bitmap maker are mainly for rendering. When embedding an existing image, you probably have a native buffer on the caller side, and don't want to create a new foreign buffer.
     
     w, h = 10, 10
@@ -148,7 +148,7 @@ def test_bitmap_makers_to_images(mode_str, rev_byteorder):
 
 
 @pytest.mark.skipif(not sys.platform.startswith("linux"), reason="libc_ver/musl test only makes sense on linux")
-def test_musllinux_api_avail():
+def test_musllinux_api_available():
     
     # Test availability of the non-public API we use to detect musllinux on setup.
     # `packaging` is a pretty fundamental package so expect it to be installed
