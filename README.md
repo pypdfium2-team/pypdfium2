@@ -64,7 +64,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
   * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system-level binary (non-standard location, e.g. LibreOffice) 🔗</a>
     ```bash
-    # if root rights are available and targetting /usr/local/lib is OK
+    # if root rights are available and targeting /usr/local/lib is OK
     sudo ln -s /usr/lib/libreoffice/program/libpdfiumlo.so /usr/local/lib/libpdfium.so
     # Substitute $PDFIUM_VER with the pdfium build's version.
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
