@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # This script has been tested on Linux/macOS/Windows x86_64 on GH Actions CI
-# However, it does not currently work on Linux aarch64 natively, since Google's toolchain doesn't seem to support that. However, cross-compilation (by setting target_cpu in config) should work.
+# However, it does not currently work on Linux aarch64 natively, since Google's toolchain doesn't seem to support that. Cross-compilation (by setting target_cpu in config) should work, though.
 
 import os
 import sys
