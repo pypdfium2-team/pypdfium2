@@ -2,6 +2,8 @@
 # It is shipped with our sdist packages, although not all members are actually included.
 # See also REUSE-wheel.toml regarding copyright of data files in our wheel packages.
 
+# Note, this file has been auto-converted from .reuse/dep5 by `reuse convert-dep5`
+
 version = 1
 SPDX-PackageName = "pypdfium2"
 SPDX-PackageSupplier = "geisserml <geisserml@gmail.com>"

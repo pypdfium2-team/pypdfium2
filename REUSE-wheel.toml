@@ -1,6 +1,8 @@
 # This file contains copyright info for data files included in our wheel packages.
 # See also REUSE.toml regarding copyright of data files in the project directory.
 
+# Note, this file has been auto-converted from .reuse/dep5-wheel by `reuse convert-dep5`
+
 version = 1
 SPDX-PackageName = "pypdfium2"
 SPDX-PackageSupplier = "geisserml <geisserml@gmail.com>"
