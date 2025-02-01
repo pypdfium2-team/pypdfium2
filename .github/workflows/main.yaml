@@ -64,13 +64,14 @@ jobs:
       
       # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
       # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
+      # In the future, we might want to move away from using a git branch & tag at this stage, and instead transfer the changes as a patchfile.
       - name: Run autorelease script
         run: |
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
           git reset --hard HEAD
+          # autorelease.py --register automatically switches us onto the autorelease_tmp branch
           python3 setupsrc/pypdfium2_setup/autorelease.py --register
-          git checkout autorelease_tmp
       
       - name: Get new version
         id: get_version
