@@ -38,7 +38,10 @@ test)
     python3 -m pytest tests/ $args;;
 
 coverage)
-    python3 -m coverage run --omit "tests/*,src/pypdfium2_raw/bindings.py,setupsrc/*" -m pytest tests/ $args
+    # you can add src/pypdfium2/__main__.py,src/pypdfium2/_cli/* to omission list to check only the core library
+    # also, you may want to add src/pypdfium2/_library_scope.py because coverage seems to be unreliable for that one
+    # BTW, you may get a minor increase in coverage by setting DEBUG_AUTOCLOSE=1
+    python3 -m coverage run --omit "src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" -m pytest tests/ $args
     python3 -m coverage report;;
 
 docs-build)
