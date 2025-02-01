@@ -92,7 +92,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     # Note, this is not a mature interface yet and might change!
     # major/minor/build/patch: integers forming the pdfium version being packaged
     # n_commits/hash: git describe like post-tag info (0/null for release commit)
-    # origin: a string to identify the build, in the form `$BUIDLER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
+    # origin: a string to identify the build, in the form `$BUILDER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
     # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
     cat > "src/pypdfium2_raw/version.json" <<END
     {
@@ -795,7 +795,7 @@ You may also trigger the workflow manually using the GitHub Actions panel or the
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
 * `update.py` downloads binaries.
 * `craft.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
-* `autorelease.py` takes care of versioning, changelog, release note generation and VCS checkin.
+* `autorelease.py` takes care of versioning, changelog, release note generation and VCS check-in.
 
 The autorelease script has some peculiarities maintainers should know about:
 * The changelog for the next release shall be written into `docs/devel/changelog_staging.md`.

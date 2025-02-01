@@ -48,7 +48,7 @@ def attach(parser):
         required = True,
         help = "Number of columns (vertical tiles)",
     )
-    # NOTE no short aliases for width and height since -h would confilct with argparse help
+    # NOTE no short aliases for width and height since -h would conflict with argparse help
     parser.add_argument(
         "--width",
         type = float,
