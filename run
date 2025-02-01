@@ -11,7 +11,7 @@ args="${@:2}"
 
 function check() {
     autoflake src/ setupsrc/ tests/ setup.py docs/source/conf.py --recursive --remove-all-unused-imports --ignore-pass-statements --ignore-init-module-imports
-    codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sourcebuild,./dist,./.git,__pycache__,.mypy_cache,.hypothesis" -L "tabe,splitted,fith,flate"
+    codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sourcebuild,./dist,./RELEASE.md,./.git,__pycache__,.mypy_cache,.hypothesis" -L "tabe,splitted,fith,flate"
     reuse lint
 }
 
