@@ -70,11 +70,12 @@ def attach(parser):
         type = str.lower,
         help = "The image format to use (default: conditional).",
     )
+    engines_map = {"pil": PILEngine, "numpy+pil": NumpyPILEngine, "numpy+cv2": NumpyCV2Engine}
     parser.add_argument(
         "--engine",
         dest = "engine_cls",
-        type = lambda k: {"pil": PILEngine, "numpy+cv2": NumpyCV2Engine}[k.lower()],
-        help = "The saver engine to use (pil, numpy+cv2)",
+        type = lambda k: engines_map[k.lower()],
+        help = f"The saver engine to use {tuple(engines_map.keys())}",
     )
     parser.add_argument(
         "--scale",
@@ -273,9 +274,12 @@ class PILEngine (SavingEngine):
         import PIL.ImageFilter
         import PIL.ImageDraw
     
+    def _to_pil_hook(self, bitmap):
+        return bitmap.to_pil()
+    
     def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
         posconv = bitmap.get_posconv(page)
-        pil_image = bitmap.to_pil()
+        pil_image = self._to_pil_hook(bitmap)
         pil_image = self.postprocess(pil_image, page, posconv, **postproc_kwargs)
         pil_image.save(out_path)
     
@@ -314,10 +318,22 @@ class PILEngine (SavingEngine):
         return dst_image
 
 
+class NumpyPILEngine (PILEngine):
+    
+    def do_imports(self):
+        logger.debug("NumPy+PIL engine imports")
+        global PIL
+        import PIL.Image
+        super().do_imports()
+    
+    def _to_pil_hook(self, bitmap):
+        return PIL.Image.fromarray(bitmap.to_numpy(), bitmap.mode)
+
+
 class NumpyCV2Engine (SavingEngine):
     
     def do_imports(self):
-        logger.debug("cv2 engine imports")
+        logger.debug("NumPy+cv2 engine imports")
         global cv2, np
         import cv2
         if self.postproc_kwargs["exclude_images"]:
@@ -415,10 +431,10 @@ def main(args):
     
     # PIL is faster with rev_byteorder and prefer_bgrx = True, as this achieves a natively supported pixel format. For numpy+cv2 there doesn't seem to be a difference.
     if args.rev_byteorder is None:
-        args.rev_byteorder = args.engine_cls is PILEngine
+        args.rev_byteorder = issubclass(args.engine_cls, PILEngine)
     if args.prefer_bgrx is None:
         # PIL can't save BGRX as PNG
-        args.prefer_bgrx = args.engine_cls is PILEngine and args.format != "png"
+        args.prefer_bgrx = issubclass(args.engine_cls, PILEngine) and args.format != "png"
     
     cs_kwargs = dict()
     if args.sample_theme:

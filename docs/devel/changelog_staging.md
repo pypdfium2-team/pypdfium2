@@ -8,7 +8,7 @@
 *API changes*
 - Rendering / Bitmap
   * Removed `PdfDocument.render()` (see deprecation rationale in v4.25 changelog). Instead, use `PdfPage.render()` with a loop or process pool.
-  * Removed `PdfBitmap.get_info()` and `PdfBitmapInfo`, which existed mainly on behalf of data transfer with `PdfDocument.render()`.
+  * Removed `PdfBitmap.get_info()` and `PdfBitmapInfo`, which existed mainly on behalf of data transfer with `PdfDocument.render()`. Instead, take the info from the `PdfBitmap` object directly. (If using an adapter that copies, you may want to store the relevant info in variables to avoid holding a reference to the original buffer.)
   * `PdfBitmap.fill_rect()`: Changed argument order. The `color` parameter now goes first.
   * `PdfBitmap.to_numpy()`: If the bitmap is single-channel (grayscale), use a 2d shape to avoid needlessly wrapping each pixel value in a list.
   * `PdfBitmap.from_pil()`: Removed `recopy` parameter.
