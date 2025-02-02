@@ -44,7 +44,7 @@ SPDX-License-Identifier = "LicenseRef-FairUse"
 SPDX-FileComment = '''
 Obtained from: https://github.com/pikepdf/pikepdf/blob/master/tests/resources/outlines.pdf
 No individual license stated for this data file. Project license is MPL-2.0.
-https://github.com/pikepdf/pikepdf/blob/2662d9da649a3b354422673fb62bcfe0a1b9ba4c/REUSE.toml#L154 says "License assumed from LICENSE.txt in project root.")
+(https://github.com/pikepdf/pikepdf/blob/2662d9da649a3b354422673fb62bcfe0a1b9ba4c/REUSE.toml#L154 says "License assumed from LICENSE.txt in project root.")
 '''
 
 [[annotations]]
