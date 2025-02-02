@@ -20,13 +20,15 @@ jobs:
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
         # FIXME Google's toolchain doesn't seem to run on Linux arm64 natively
-        os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']  # 'ubuntu-24.04-arm'
-        use_syslibs: [false]
-        include:
-          - os: 'ubuntu-latest'
-            use_syslibs: [true]
-          # - os: 'ubuntu-24.04-arm'
-          #   use_syslibs: [true]
+        # os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']  # 'ubuntu-24.04-arm'
+        # use_syslibs: [false]
+        # include:
+        #   - os: 'ubuntu-latest'
+        #     use_syslibs: [true]
+        #   # - os: 'ubuntu-24.04-arm'
+        #   #   use_syslibs: [true]
+        os: ['ubuntu-latest']
+        use_syslibs: [true]
     
     runs-on: ${{ matrix.os }}
     
