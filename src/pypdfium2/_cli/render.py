@@ -474,7 +474,7 @@ def main(args):
         exclude_images = args.exclude_images,
     )
     if args.invert_lightness and args.optimize_mode == "lcd":
-        logger.warning("LCD optimization clashes with lightness inversion, as post-processing colours defeats the idea of subpixel rendering.")
+        logger.warning("LCD optimization clashes with lightness inversion, as post-processing colors defeats the idea of subpixel rendering.")
     
     print_args = vars(args).copy()
     del print_args["subcommand"], print_args["pages"]
