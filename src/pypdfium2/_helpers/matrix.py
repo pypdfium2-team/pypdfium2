@@ -7,10 +7,8 @@ import math
 import ctypes
 import pypdfium2.raw as pdfium_c
 
-
-# TODO consider adding PdfRectangle support model to calculate size and corner points
-# NOTE the code below was written by a non-mathematician - might contain mistakes!
-
+# Note, the code below was written by a non-mathematician - might contain mistakes!
+# In the future, we may want to consider adding a PdfRectangle support model to calculate size and corner points.
 
 class PdfMatrix:
     """
