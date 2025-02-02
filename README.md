@@ -710,6 +710,10 @@ The same applies to Pull Requests. We will accept contributions only if we find 
 
 ### Known limitations
 
+#### Incompatibility with Threading
+
+PDFium is inherently not thread-safe. See the [API docs](https://pypdfium2.readthedocs.io/en/stable/python_api.html#incompatibility-with-threading) for more information.
+
 #### Risk of unknown object lifetime violations
 
 As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.

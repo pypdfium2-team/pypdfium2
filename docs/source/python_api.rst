@@ -8,10 +8,10 @@ Python API
 Preface
 *******
 
-Thread incompatibility
-----------------------
+Incompatibility with Threading
+------------------------------
 
-PDFium is not thread-safe. It is not allowed to call pdfium functions simultaneously across different threads, not even with different documents. [#illegal_threading]_
+PDFium is inherently not thread-safe. It is not allowed to call pdfium functions simultaneously across different threads, not even with different documents. [#illegal_threading]_
 However, you may still use pdfium in a threaded context if it is ensured that only a single pdfium call can be made at a time (e.g. via mutex).
 It is fine to do pdfium work in one thread and other work in other threads.
 
