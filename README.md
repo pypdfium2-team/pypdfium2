@@ -393,7 +393,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
 [^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `autorelease/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
 
-* While some functions are quite easy to use, things may soon get more peculiar.
+* While some functions are quite easy to use, things may soon get more special.
   First of all, function parameters are not only used for input, but also for output:
   ```python
   # Initialise an integer object (defaults to 0)
@@ -597,7 +597,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   data_holder.close()
   ```
 
-* Finally, let's finish with an example how to render the first page of a document to a `PIL` image in `RGBA` color format.
+* Finally, let's finish this guide with an example how to render the first page of a document to a `PIL` image in `RGBA` color format.
   ```python
   import math
   import ctypes
