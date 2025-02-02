@@ -89,7 +89,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     
     # Write the version file (fill the placeholders).
     # See https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO for field documentation
-    # Note, this is not a mature interface yet and might change!
+    # Note, this is not a mature interface yet and might change any time!
     # major/minor/build/patch: integers forming the pdfium version being packaged
     # n_commits/hash: git describe like post-tag info (0/null for release commit)
     # origin: a string to identify the build, in the form `$BUILDER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
