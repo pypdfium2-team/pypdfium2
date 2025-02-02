@@ -148,8 +148,12 @@ jobs:
       
       - name: Install dependencies
         run: |
-          python3 -m pip install -U pip setuptools
-          python3 -m pip install -U pytest pillow numpy wheel
+          python3 -m pip install -U pip setuptools auditwheel
+          python3 -m pip install -U pytest pillow numpy
+      
+      - name: Run auditwheel (informational)
+        if: startsWith(${{ matrix.os }}, 'ubuntu')
+        run: python3 -m auditwheel show ${{ matrix.wheel }}
       
       - name: Install pypdfium2 from artifact
         run: python3 -m pip install ${{ matrix.wheel }}
