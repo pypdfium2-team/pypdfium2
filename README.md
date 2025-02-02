@@ -714,7 +714,7 @@ The same applies to Pull Requests. We will accept contributions only if we find 
 
 As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.
 
-The problem is that the Python interpreter may garbage collect objects with reference count zero at any time, so an unreferenced but still required object may either by chance stay around long enough or disappear too soon, resulting in non-deterministic memory issues that are hard to debug.
+The problem is that the Python interpreter may garbage collect objects with reference count zero at any time, so it can happen that an unreferenced but still required object by chance stays around long enough before it is garbage collected. However, it could also disappear too soon and cause breakage. Such dangling objects result in non-deterministic memory issues that are hard to debug.
 If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that mistakes regarding object lifetime remain unnoticed for a long time.
 
 Although we intend to develop helpers carefully, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
@@ -725,7 +725,7 @@ As of this writing, PDFium's public interface does not provide access to the raw
 
 #### Limitations of ABI bindings
 
-PDFium's non-public backend would provide extended capabilities, including [raw access](#missing-raw-pdf-access), but it is not exported into the ABI and written in C++ (not pure C), so we cannot use it with `ctypes`. This means it's out of scope for this project.
+PDFium's non-public backend would provide extended capabilities, including [raw access](#missing-raw-pdf-access), but it is written in C++, which (unlike pure C) does not result in a stable ABI, so we cannot use it with `ctypes`. This means it's out of scope for this project.
 
 Also, while ABI bindings tend to be more convenient, they have some technical drawbacks compared to API bindings (see e.g. [1](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api), [2](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1834684532))
 
@@ -849,10 +849,11 @@ git push --delete origin $TAGNAME
 Faulty PyPI releases may be yanked using the web interface.
 
 
-## Prominent Embedders
+## Popular dependents
 
-pypdfium2 is used by prominent embedders such as
+pypdfium2 is used by popular packages such as
 [langchain](https://github.com/langchain-ai/langchain),
+[docling](https://github.com/DS4SD/docling),
 [nougat](https://github.com/facebookresearch/nougat),
 [pdfplumber](https://github.com/jsvine/pdfplumber),
 and [doctr](https://github.com/mindee/doctr/).
