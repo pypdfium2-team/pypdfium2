@@ -190,7 +190,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed without further notice if we don't see fit for upstream.
   
-  If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
+  If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
 
 
 ### Runtime Dependencies
@@ -721,7 +721,7 @@ As outlined in the raw API section, it is essential that Python-managed resource
 The problem is that the Python interpreter may garbage collect objects with reference count zero at any time, so it can happen that an unreferenced but still required object by chance stays around long enough before it is garbage collected. However, it could also disappear too soon and cause breakage. Such dangling objects result in non-deterministic memory issues that are hard to debug.
 If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that mistakes regarding object lifetime remain unnoticed for a long time.
 
-Although we intend to develop helpers carefully, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
+Although we intend to develop helpers carefully, it cannot be fully excluded that unknown object lifetime violations might still be lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
 
 #### Missing raw PDF access
 
