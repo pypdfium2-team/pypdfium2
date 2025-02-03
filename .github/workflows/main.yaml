@@ -234,7 +234,7 @@ jobs:
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
         with:
-          artifacts: 'dist/*.whl'
+          artifacts: 'dist/*.whl,dist/*.tar.gz'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.build.outputs.new_version }}
