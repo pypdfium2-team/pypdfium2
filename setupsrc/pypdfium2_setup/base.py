@@ -109,7 +109,6 @@ PdfiumBinariesMap = {
     PlatNames.linux_musl_x64:   "linux-musl-x64",
     PlatNames.linux_musl_x86:   "linux-musl-x86",
     PlatNames.linux_musl_arm64: "linux-musl-arm64",
-    PlatNames.android_arm64:    "android-arm64",
 }
 
 # Capture the platforms we build wheels for
@@ -121,6 +120,7 @@ WheelPlatforms = list(PdfiumBinariesMap.keys())
 # for PLAT in ${PLATFORMS[@]}; do echo $PLAT; ./run emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
     PlatNames.darwin_universal: "mac-univ",
+    PlatNames.android_arm64:    "android-arm64",
     PlatNames.android_arm32:    "android-arm",
     PlatNames.android_x64:      "android-x64",
     PlatNames.android_x86:      "android-x86",
