@@ -128,9 +128,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         # pdfium builds from fea01fa9e2 (>6167) to d6a4b27d80 (<6415) require assuming 4 bytes per character
         # https://github.com/pypdfium2-team/pypdfium2/issues/298
         # https://crbug.com/pdfium/2133
-        if 6167 < PDFIUM_INFO.build < 6415:  # pragma: no cover
-            logger.warning(f"Due to API issues, pdfium builds between 6167 and 6415 (you have {PDFIUM_INFO.build}) require allocating twice the amount of memory in get_text_range().")
-            in_count *= 2
+        assert not (6167 < PDFIUM_INFO.build < 6415)
         in_count += 1  # null terminator
         
         buffer = ctypes.create_string_buffer(in_count * 2)

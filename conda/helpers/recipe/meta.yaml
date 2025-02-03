@@ -32,7 +32,6 @@ requirements:
   run:
     # -- Reasons for pdfium version bounds --
     # >6635 (effectively >=6638) : new pdfium errchecks
-    # (before that: >6164 : API-breaking changes to ctypesgen)
     # !=6219 : Blacklisted due to https://crbug.com/pdfium/2112 (6205 is also affected, but not on conda due to monthly schedule)
     # <={{ pdfium_max }} : Prevents future versions for API safety reasons
     - python

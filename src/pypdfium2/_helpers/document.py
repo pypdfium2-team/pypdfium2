@@ -156,11 +156,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if formtype == pdfium_c.FORMTYPE_NONE or self.formenv:
             return
         
-        # safety check for older binaries to prevent a segfault (could be removed at some point)
-        # https://github.com/bblanchon/pdfium-binaries/issues/105
-        if "V8" in PDFIUM_INFO.flags and "pdfium-binaries" in PDFIUM_INFO.origin and PDFIUM_INFO.build <= 5677:  # pragma: no cover
-            raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
-        
         if not config:
             if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
                 js_platform = pdfium_c.IPDF_JSPLATFORM(version=3)
