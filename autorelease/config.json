@@ -1,5 +1,5 @@
 {
-  "beta": true,
-  "major": true,
+  "beta": false,
+  "major": false,
   "humble": null
 }
