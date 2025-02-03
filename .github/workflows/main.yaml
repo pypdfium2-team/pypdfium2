@@ -223,6 +223,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist/  # the default
           attestations: false  # https://github.com/pypa/gh-action-pypi-publish/issues/283#issuecomment-2499296440
+          verbose: true
       
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
