@@ -166,6 +166,6 @@ jobs:
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${{ inputs.package }}-*.tar.bz2
+          ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${{ inputs.package }}-*.conda
           file $ARTIFACT_PATH
           anaconda upload $ARTIFACT_PATH
