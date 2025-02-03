@@ -1,4 +1,4 @@
-.. SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+.. SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 .. SPDX-License-Identifier: CC-BY-4.0
 
 Python API
@@ -8,10 +8,10 @@ Python API
 Preface
 *******
 
-Thread incompatibility
-----------------------
+Incompatibility with Threading
+------------------------------
 
-PDFium is not thread-safe. It is not allowed to call pdfium functions simultaneously across different threads, not even with different documents. [#illegal_threading]_
+PDFium is inherently not thread-safe. It is not allowed to call pdfium functions simultaneously across different threads, not even with different documents. [#illegal_threading]_
 However, you may still use pdfium in a threaded context if it is ensured that only a single pdfium call can be made at a time (e.g. via mutex).
 It is fine to do pdfium work in one thread and other work in other threads.
 
@@ -76,9 +76,6 @@ Version
 
 .. automodule:: pypdfium2.version
 
-.. deprecated:: 4.22
-   The legacy members ``V_PYPDFIUM2, V_LIBPDFIUM, V_BUILDNAME, V_PDFIUM_IS_V8, V_LIBPDFIUM_FULL`` will be removed in version 5.
-
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
@@ -87,8 +84,8 @@ Page
 ****
 .. automodule:: pypdfium2._helpers.page
 
-Page Objects
-************
+Pageobjects
+***********
 .. automodule:: pypdfium2._helpers.pageobjects
 
 Text Page

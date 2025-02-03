@@ -1,11 +1,10 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 __all__ = ("PdfTextPage", "PdfTextSearcher")
 
 import ctypes
 import logging
-import warnings
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -20,9 +19,15 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     """
     Text page helper class.
     
+    Hint:
+        (py)pdfium itself does not implement layout analysis, such as detecting words/lines/paragraphs.
+        However, there may be third-party extensions for this job, e.g.: https://github.com/VikParuchuri/pdftext
+    
     Attributes:
-        raw (FPDF_TEXTPAGE): The underlying PDFium textpage handle.
-        page (PdfPage): Reference to the page this textpage belongs to.
+        raw (FPDF_TEXTPAGE):
+            The underlying PDFium textpage handle.
+        page (PdfPage):
+            Reference to the page this textpage belongs to.
     """
     
     def __init__(self, raw, page):
@@ -35,84 +40,9 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return self.page
     
     
-    def _get_active_text_range(self, c_start, c_end, l_passive=0, r_passive=0):
-        
-        if c_start > c_end:
-            return 0  # no active chars in range
-        
-        t_start = pdfium_c.FPDFText_GetTextIndexFromCharIndex(self, c_start)
-        if t_start == -1:
-            return self._get_active_text_range(c_start+1, c_end, l_passive+1, r_passive)
-        
-        t_end = pdfium_c.FPDFText_GetTextIndexFromCharIndex(self, c_end)
-        if t_end == -1:
-            return self._get_active_text_range(c_start, c_end-1, l_passive, r_passive+1)
-        
-        return t_start, t_end, l_passive, r_passive
-    
-    
-    def get_text_range(self, index=0, count=-1, errors="ignore", force_this=False):
-        """
-        Warning:
-            .. versionchanged:: 4.28
-               For various reasons, calling this method with default params now implicitly translates to :meth:`.get_text_bounded` (pass ``force_this=True`` to circumvent).
-        
-        Extract text from a given range.
-        
-        Parameters:
-            index (int): Index of the first char to include.
-            count (int): Number of chars to cover, relative to the internal char list. Defaults to -1 for all remaining chars after *index*.
-            errors (str): Error handling when decoding the data (see :meth:`bytes.decode`).
-        Returns:
-            str: The text in the range in question, or an empty string if no text was found.
-        
-        Note:
-            * The returned text's length does not have to match *count*, even if it will for most PDFs.
-              This is because the underlying API may exclude/insert chars compared to the internal list, although rare in practice.
-              This means, if the char at ``i`` is excluded, ``get_text_range(i, 2)[1]`` will raise an index error.
-              Pdfium provides raw APIs ``FPDFText_GetTextIndexFromCharIndex()`` / ``FPDFText_GetCharIndexFromTextIndex()`` to translate between the two views and identify excluded/inserted chars.
-            * In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
-        """
-        
-        # https://github.com/pypdfium2-team/pypdfium2/issues/298
-        # https://crbug.com/pdfium/2133
-        if (index, count) == (0, -1) and not force_this:
-            warnings.warn("get_text_range() call with default params will be implicitly redirected to get_text_bounded()")
-            return self.get_text_bounded(errors=errors)
-        
-        if count == -1:
-            count = self.count_chars() - index
-        
-        # https://github.com/pypdfium2-team/pypdfium2/issues/261
-        # https://crbug.com/pdfium/2079
-        active_range = self._get_active_text_range(index, index+count-1)
-        if active_range == 0:
-            return ""
-        
-        # NOTE since we have converted indices from char to text, they will shift accordingly for inserted/excluded chars, so this will calculate the exact output count
-        t_start, t_end, l_passive, r_passive = active_range
-        index += l_passive
-        count -= l_passive + r_passive
-        in_count = t_end+1 - t_start
-        
-        # pdfium fea01fa9e2 (>6167) to d6a4b27d80 (<6415) requires assuming 4 bytes per character
-        # https://github.com/pypdfium2-team/pypdfium2/issues/298
-        # https://crbug.com/pdfium/2133
-        if 6167 < PDFIUM_INFO.build < 6415:
-            in_count *= 2
-        in_count += 1  # null terminator
-        
-        buffer = ctypes.create_string_buffer(in_count * 2)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
-        out_count = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
-        assert in_count >= out_count, f"Buffer too small: {in_count} vs {out_count}"
-        
-        return buffer.raw[:(out_count-1)*2].decode("utf-16-le", errors=errors)
-    
-    
     def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
         """
-        Extract text from given boundaries in PDF coordinates.
+        Extract text from given boundaries, in PDF canvas units.
         If a boundary value is None, it defaults to the corresponding value of :meth:`.PdfPage.get_bbox`.
         
         Parameters:
@@ -140,6 +70,75 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
         return buffer.raw.decode("utf-16-le", errors=errors)
+    
+    
+    def _get_active_text_range(self, c_start, c_end, l_passive=0, r_passive=0):
+        
+        if c_start > c_end:
+            return 0  # no active chars in range
+        
+        t_start = pdfium_c.FPDFText_GetTextIndexFromCharIndex(self, c_start)
+        if t_start == -1:
+            return self._get_active_text_range(c_start+1, c_end, l_passive+1, r_passive)
+        
+        t_end = pdfium_c.FPDFText_GetTextIndexFromCharIndex(self, c_end)
+        if t_end == -1:
+            return self._get_active_text_range(c_start, c_end-1, l_passive, r_passive+1)
+        
+        return t_start, t_end, l_passive, r_passive
+    
+    
+    def get_text_range(self, index=0, count=-1, errors="ignore"):
+        """
+        Extract text from a given range.
+        
+        Warning:
+            This method is limited to UCS-2, whereas :meth:`.get_text_bounded` provides full Unicode support.
+        
+        Parameters:
+            index (int): Index of the first char to include.
+            count (int): Number of chars to cover, relative to the internal char list. Defaults to -1 for all remaining chars after *index*.
+            errors (str): Error handling when decoding the data (see :meth:`bytes.decode`).
+        Returns:
+            str: The text in the range in question, or an empty string if no text was found.
+        
+        Note:
+            * The returned text's length does not have to match *count*, even if it will for most PDFs.
+              This is because the underlying API may exclude/insert chars compared to the internal list, although rare in practice.
+              This means, if the char at ``i`` is excluded, ``get_text_range(i, 2)[1]`` will raise an index error.
+              Pdfium provides raw APIs ``FPDFText_GetTextIndexFromCharIndex()`` / ``FPDFText_GetCharIndexFromTextIndex()`` to translate between the two views and identify excluded/inserted chars.
+            * In case of leading/trailing excluded characters, pypdfium2 modifies *index* and *count* accordingly to prevent pdfium from unexpectedly reading beyond ``range(index, index+count)``.
+        """
+        
+        if count == -1:
+            count = self.count_chars() - index
+        
+        # https://github.com/pypdfium2-team/pypdfium2/issues/261
+        # https://crbug.com/pdfium/2079
+        active_range = self._get_active_text_range(index, index+count-1)
+        if active_range == 0:
+            return ""
+        
+        # NOTE since we have converted indices from char to text, they will shift accordingly for inserted/excluded chars, so this will calculate the exact output count
+        t_start, t_end, l_passive, r_passive = active_range
+        index += l_passive
+        count -= l_passive + r_passive
+        in_count = t_end+1 - t_start
+        
+        # pdfium builds from fea01fa9e2 (>6167) to d6a4b27d80 (<6415) require assuming 4 bytes per character
+        # https://github.com/pypdfium2-team/pypdfium2/issues/298
+        # https://crbug.com/pdfium/2133
+        if 6167 < PDFIUM_INFO.build < 6415:  # pragma: no cover
+            logger.warning(f"Due to API issues, pdfium builds between 6167 and 6415 (you have {PDFIUM_INFO.build}) require allocating twice the amount of memory in get_text_range().")
+            in_count *= 2
+        in_count += 1  # null terminator
+        
+        buffer = ctypes.create_string_buffer(in_count * 2)
+        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+        out_count = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
+        assert in_count >= out_count, f"Buffer too small: {in_count} vs {out_count}"
+        
+        return buffer.raw[:(out_count-1)*2].decode("utf-16-le", errors=errors)
     
     
     def count_chars(self):
@@ -178,11 +177,14 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             y_tol (float): Vertical tolerance.
         Returns:
             int | None: The index of the character at or nearby the point (x, y).
-            May be None if there is no character or an error occurred.
+            May be None if there is no character. If an internal error occurred, an exception will be raised.
         """
         index = pdfium_c.FPDFText_GetCharIndexAtPos(self, x, y, x_tol, y_tol)
-        if index < 0:
+        if index == -1:
             return None
+        elif index == -3:
+            raise PdfiumError("An error occurred on attempt to get char index by pos.")
+        assert index >= 0, "Negative return is not permitted (unhandled error code?)"
         return index
     
     
@@ -217,8 +219,9 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     def get_rect(self, index):
         """
         Get the bounding box of a text rectangle at the given index.
-        Note that :meth:`.count_rects` must be called once with default parameters
-        before subsequent :meth:`.get_rect` calls for this function to work (due to PDFium's API).
+
+        Attention:
+            :meth:`.count_rects` must be called once with default params before subsequent :meth:`.get_rect` calls for this function to work.
         
         Returns:
             Float values for left, bottom, right and top in PDF canvas units.
@@ -230,7 +233,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return (l.value, b.value, r.value, t.value)
     
     
-    def search(self, text, index=0, match_case=False, match_whole_word=False, consecutive=False):
+    def search(self, text, index=0, match_case=False, match_whole_word=False, consecutive=False, flags=0):
         """
         Locate text on the page.
         
@@ -246,6 +249,8 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             consecutive (bool):
                 If False (the default), :meth:`.search` will skip past the current match to look for the next match.
                 If True, parts of the previous match may be caught again (e. g. searching for `aa` in `aaaa` would match 3 rather than 2 times).
+            flags (int):
+                Passthrough of raw pdfium searching flags. Note that you may want to use the boolean options instead.
         Returns:
             PdfTextSearcher: A helper object to search text.
         """
@@ -253,7 +258,6 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if len(text) == 0:
             raise ValueError("Text length must be greater than 0.")
         
-        flags = 0
         if match_case:
             flags |= pdfium_c.FPDF_MATCHCASE
         if match_whole_word:
@@ -299,15 +303,13 @@ class PdfTextSearcher (pdfium_i.AutoCloseable):
     def get_next(self):
         """
         Returns:
-            (int, int): Start character index and count of the next occurrence,
-            or None if the last occurrence was passed.
+            (int, int) | None: Start character index and count of the next occurrence, or None if the last occurrence was passed.
         """
         return self._get_occurrence(pdfium_c.FPDFText_FindNext)
     
     def get_prev(self):
         """
         Returns:
-            (int, int): Start character index and count of the previous occurrence (i. e. the one before the last valid occurrence),
-            or None if the last occurrence was passed.
+            (int, int) | None: Start character index and count of the previous occurrence (i. e. the one before the last valid occurrence), or None if the last occurrence was passed.
         """
         return self._get_occurrence(pdfium_c.FPDFText_FindPrev)

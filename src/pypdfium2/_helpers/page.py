@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 __all__ = ("PdfPage", "PdfColorScheme")
@@ -6,6 +6,7 @@ __all__ = ("PdfPage", "PdfColorScheme")
 import math
 import ctypes
 import logging
+import weakref
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -22,12 +23,18 @@ class PdfPage (pdfium_i.AutoCloseable):
     Page helper class.
     
     Attributes:
-        raw (FPDF_PAGE): The underlying PDFium page handle.
-        pdf (PdfDocument): Reference to the document this page belongs to.
+        raw (FPDF_PAGE):
+            The underlying PDFium page handle.
+        pdf (PdfDocument):
+            Reference to the document this page belongs to.
+        formenv (PdfFormEnv | None):
+            Formenv handle, if the parent pdf had an active formenv at the time of page retrieval. None otherwise.
     """
     
     def __init__(self, raw, pdf, formenv):
-        self.raw, self.pdf, self.formenv = raw, pdf, formenv
+        self.raw = raw
+        self.pdf = pdf
+        self.formenv = formenv
         super().__init__(PdfPage._close_impl, self.formenv)
     
     
@@ -40,7 +47,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     @property
     def parent(self):  # AutoCloseable hook
-        # Might want to have this point to the direct parent, i. e. (self.pdf if formenv is None else self.formenv), but this might confuse callers expecting that parent be always pdf for pages.
+        # Might want to have this point to the nearest dependency, i.e. (self.pdf if formenv is None else self.formenv), but this would confuse callers expecting that parent be always pdf for pages.
         return self.pdf
     
     
@@ -97,9 +104,9 @@ class PdfPage (pdfium_i.AutoCloseable):
             (float, float, float, float) | None:
             The page MediaBox in PDF canvas units, consisting of four coordinates (usually x0, y0, x1, y1).
             If MediaBox is not defined, returns ANSI A (0, 0, 612, 792) if ``fallback_ok=True``, None otherwise.
-        Note:
-            Due to quirks in PDFium's public API, all ``get_*box()`` functions except :meth:`.get_bbox`
-            do not inherit from parent nodes in the page tree (as of PDFium 5418).
+        
+        .. admonition:: Known issue\n
+            Due to quirks in PDFium, all ``get_*box()`` functions except :meth:`.get_bbox` do not inherit from parent nodes in the page tree (as of PDFium 5418).
         """
         # https://crbug.com/pdfium/1786
         return self._get_box(pdfium_c.FPDFPage_GetMediaBox, lambda: (0, 0, 612, 792), fallback_ok)
@@ -193,15 +200,15 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def insert_obj(self, pageobj):
         """
-        Insert a page object into the page.
+        Insert a pageobject into the page.
         
-        The page object must not belong to a page yet. If it belongs to a PDF, this page must be part of the PDF.
+        The pageobject must not belong to a page yet. If it belongs to a PDF, the target page must be part of that PDF.
         
         Position and form are defined by the object's matrix.
         If it is the identity matrix, the object will appear as-is on the bottom left corner of the page.
         
         Parameters:
-            pageobj (PdfObject): The page object to insert.
+            pageobj (PdfObject): The pageobject to insert.
         """
         
         if pageobj.page:
@@ -217,16 +224,21 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def remove_obj(self, pageobj):
         """
-        Remove a page object from the page.
-        As of PDFium 5692, detached page objects may be only re-inserted into existing pages of the same document.
-        If the page object is not re-inserted into a page, its ``close()`` method may be called.
+        Remove a pageobject from the page.
+        As of PDFium 5692, detached pageobjects may be only re-inserted into existing pages of the same document.
+        If the pageobject is not re-inserted into a page, its ``close()`` method may be called.
+        
+        Note:
+            If the object's :attr:`~.PdfObject.type` is :data:`FPDF_PAGEOBJ_TEXT`, any :class:`.PdfTextPage` handles to the page should be closed before removing the object.
         
         Parameters:
-            pageobj (PdfObject): The page object to remove.
+            pageobj (PdfObject): The pageobject to remove.
         """
                 
+        # note https://pdfium-review.googlesource.com/c/pdfium/+/118914
+        
         if pageobj.page is not self:
-            raise ValueError("The page object you attempted to remove is not part of this page.")
+            raise ValueError("The pageobject you attempted to remove is not part of this page.")
         
         ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
         if not ok:
@@ -237,7 +249,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     def gen_content(self):
         """
-        Generate page content to apply additions, removals or modifications of page objects.
+        Generate page content to apply additions, removals or modifications of pageobjects.
         
         If page content was changed, this function should be called once before saving the document or re-loading the page.
         """
@@ -246,23 +258,21 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to generate page content.")
     
     
-    def get_objects(self, filter=None, max_depth=2, form=None, level=0):
+    def get_objects(self, filter=None, max_depth=15, form=None, level=0):
         """
-        Iterate through the page objects on this page.
+        Iterate through the pageobjects on this page.
         
         Parameters:
             filter (list[int] | None):
-                An optional list of page object types to filter (:attr:`FPDF_PAGEOBJ_*`).
+                An optional list of pageobject types to filter (:attr:`FPDF_PAGEOBJ_*`).
                 Any objects whose type is not contained will be skipped.
                 If None or empty, all objects will be provided, regardless of their type.
             max_depth (int):
                 Maximum recursion depth to consider when descending into Form XObjects.
         
         Yields:
-            :class:`.PdfObject`: A page object.
+            :class:`.PdfObject`: A pageobject.
         """
-        
-        # TODO? close skipped objects explicitly ?
         
         if form:
             count_objects = pdfium_c.FPDFFormObj_CountObjects
@@ -275,15 +285,15 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         n_objects = count_objects(parent)
         if n_objects < 0:
-            raise PdfiumError("Failed to get number of page objects.")
+            raise PdfiumError("Failed to get number of pageobjects.")
         
         for i in range(n_objects):
             
             raw_obj = get_object(parent, i)
-            if raw_obj is None:
-                raise PdfiumError("Failed to get page object.")
+            if not raw_obj:
+                raise PdfiumError("Failed to get pageobject.")
             
-            # Not a child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The .page reference is enough to keep the parent alive, unless the caller explicitly closes it (which may not merit storing countless of weakrefs).
+            # Don't register as child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The parent page should remain alive while a pageobject is used, but it seems unjustified to store countless of weakrefs just to lock pageobjects when the parent page is closed.
             helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, level=level)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
@@ -297,16 +307,21 @@ class PdfPage (pdfium_i.AutoCloseable):
                 )
     
     
-    # non-public because it doesn't really work (returns success but does nothing on all samples we tried)
-    def _flatten(self, flag=pdfium_c.FLAT_NORMALDISPLAY):
+    def flatten(self, flag=pdfium_c.FLAT_NORMALDISPLAY):
         """
-        Attempt to flatten annotations and form fields into the page contents.
+        Flatten form fields and annotations into page contents.
+        
+        Attention:
+            * :meth:`~.PdfDocument.init_forms` must have been called on the parent pdf, before the page was retrieved, for this method to work. In other words, :attr:`.PdfPage.formenv` must be non-null.
+            * Flattening may invalidate existing handles to the page, so you may want to re-initialize these afterwards.
         
         Parameters:
             flag (int): PDFium flattening target (:attr:`FLAT_*`)
         Returns:
             int: PDFium flattening status (:attr:`FLATTEN_*`). :attr:`FLATTEN_FAIL` is handled internally.
         """
+        if not self.formenv:
+            raise RuntimeError("page.flatten() requires previous pdf.init_forms() before page retrieval.")
         rc = pdfium_c.FPDFPage_Flatten(self, flag)
         if rc == pdfium_c.FLATTEN_FAIL:
             raise PdfiumError("Failed to flatten annotations / form fields.")
@@ -317,7 +332,6 @@ class PdfPage (pdfium_i.AutoCloseable):
     # - add helpers for matrix-based and interruptible rendering
     # - add lower-level renderer that takes a caller-provided bitmap
     # e. g. render(), render_ex(), render_matrix(), render_matrix_ex()
-    
     
     def render(
             self,
@@ -338,70 +352,88 @@ class PdfPage (pdfium_i.AutoCloseable):
             scale (float):
                 A factor scaling the number of pixels per PDF canvas unit. This defines the resolution of the image.
                 To convert a DPI value to a scale factor, multiply it by the size of 1 canvas unit in inches (usually 1/72in). [#user_unit]_
-                
+            
             rotation (int):
                 Additional rotation in degrees (0, 90, 180, or 270).
-                
+            
             crop (tuple[float, float, float, float]):
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top). Crop is applied after rotation.
-                
+            
             may_draw_forms (bool):
-                If True, render form fields (provided the document has forms and :meth:`~PdfDocument.init_forms` was called).
+                If True, render form fields (provided the document has forms and :meth:`~.PdfDocument.init_forms` was called).
             
             bitmap_maker (typing.Callable):
                 Callback function used to create the :class:`.PdfBitmap`.
-                
-            color_scheme (PdfColorScheme | None):
-                An optional, custom rendering color scheme.
-                
-            fill_to_stroke (bool):
-                If True and rendering with custom color scheme, fill paths will be stroked.
-                
+            
             fill_color (tuple[int, int, int, int]):
-                Color the bitmap will be filled with before rendering (RGBA values from 0 to 255).
-                
+                Color the bitmap will be filled with before rendering. This uses RGBA syntax regardless of the pixel format used, with values from 0 to 255.
+                If the fill color is not opaque (i.e. has transparency), ``{BGR,RGB}A`` will be used.
+            
             grayscale (bool):
                 If True, render in grayscale mode.
-                
+            
             optimize_mode (None | str):
                 Page rendering optimization mode (None, "lcd", "print").
-                
+            
             draw_annots (bool):
                 If True, render page annotations.
-                
+            
             no_smoothtext (bool):
                 If True, disable text anti-aliasing. Overrides ``optimize_mode="lcd"``.
-                
+            
             no_smoothimage (bool):
                 If True, disable image anti-aliasing.
-                
+            
             no_smoothpath (bool):
                 If True, disable path anti-aliasing.
-                
+            
             force_halftone (bool):
                 If True, always use halftone for image stretching.
-                
+            
             limit_image_cache (bool):
                 If True, limit image cache size.
-                
+            
             rev_byteorder (bool):
-                If True, render with reverse byte order, leading to ``RGB(A/X)`` output instead of ``BGR(A/X)``.
+                If True, render with reverse byte order, leading to ``RGB{A/x}`` output rather than ``BGR{A/x}``.
                 Other pixel formats are not affected.
-                
+            
             prefer_bgrx (bool):
-                If True, prefer four-channel over three-channel pixel formats, even if the alpha byte is unused.
+                If True, use 4-byte ``{BGR/RGB}x`` rather than 3-byte ``{BGR/RGB}`` (i.e. add an unused byte).
                 Other pixel formats are not affected.
-                
+            
+            use_bgra_on_transparency (bool):
+                If True, use a pixel format with alpha channel (i.e. ``{BGR/RGB}A``) if page content has transparency.
+                This is recommended for performance in these cases, but as page-dependent format selection is somewhat unexpected, it is not enabled by default.
+            
             force_bitmap_format (int | None):
-                If given, override automatic pixel format selection and enforce use of the given format (one of the :attr:`FPDFBitmap_*` constants).
-                
+                If given, override automatic pixel format selection and enforce use of the given format (one of the :attr:`FPDFBitmap_*` constants). In this case, you should not pass any other format selection options, except potentially *rev_byteorder*.
+            
             extra_flags (int):
                 Additional PDFium rendering flags. May be combined with bitwise OR (``|`` operator).
+            
+            color_scheme (PdfColorScheme | None):
+                A custom pdfium color scheme. Note that this may flatten different colors into one, so the usability of this is limited.
+            
+            fill_to_stroke (bool):
+                If a *color_scheme* is given, whether to only draw borders around fill areas using the `path_stroke` color, instead of filling with the `path_fill` color.
         
         Returns:
             PdfBitmap: Bitmap of the rendered page.
         
-        .. [#user_unit] Since PDF 1.6, pages may define an additional user unit factor. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. PDFium currently does not have an API to get the user unit, so this is not taken into account.
+        .. admonition:: Format selection
+            
+            This is the format selection hierarchy used by :meth:`.render`, from lowest to highest priority:
+            
+            * default: ``BGR``
+            * ``prefer_bgrx=True``: ``BGRx``
+            * ``grayscale=True``: ``L``
+            * ``prefer_bgra_on_transparency=True``: ``BGRA`` if the page has transparency, else the format selected otherwise
+            * ``fill_color[3] < 255``: ``BGRA`` (background color with transparency)
+            * ``force_bitmap_format=...`` -> any supported by pdfium
+            
+            Additionally, *rev_byteorder* will swap ``BGR{A/x}`` to ``RGB{A/x}`` if applicable.
+        
+        .. [#user_unit] Since PDF 1.6, pages may define an additional user unit factor. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. PDFium does not currently provide an API to get the user unit, so this is not taken into account.
         """
         
         src_width  = math.ceil(self.get_width()  * scale)
@@ -415,22 +447,21 @@ class PdfPage (pdfium_i.AutoCloseable):
         if any(d < 1 for d in (width, height)):
             raise ValueError("Crop exceeds page dimensions")
         
-        cl_format, rev_byteorder, fill_color, flags = _parse_renderopts(**kwargs)
+        cl_format, rev_byteorder, fill_color, flags = _parse_renderopts(self, **kwargs)
         if (color_scheme is not None) and fill_to_stroke:
             flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
-        bitmap.fill_rect(0, 0, width, height, fill_color)
+        bitmap.fill_rect(fill_color, 0, 0, width, height)
         
-        render_args = (bitmap, self, -crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation], flags)
+        pos_args = (-crop[0], -crop[3], src_width, src_height, pdfium_i.RotationToConst[rotation])
+        render_args = (bitmap, self, *pos_args, flags)
         
         if color_scheme is None:
             pdfium_c.FPDF_RenderPageBitmap(*render_args)
         else:
-            
             pause = pdfium_c.IFSDK_PAUSE(version=1)
             pdfium_i.set_callback(pause, "NeedToPauseNow", lambda _: False)
-            
             fpdf_cs = color_scheme.convert(rev_byteorder)
             status = pdfium_c.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_cs, pause)
             assert status == pdfium_c.FPDF_RENDER_DONE
@@ -439,13 +470,14 @@ class PdfPage (pdfium_i.AutoCloseable):
         if may_draw_forms and self.formenv:
             pdfium_c.FPDF_FFLDraw(self.formenv, *render_args)
         
+        bitmap._pos_args = (weakref.ref(self), *pos_args)
         return bitmap
 
 
-def _auto_bitmap_format(fill_color, grayscale, prefer_bgrx):
-    # TODO(apibreak) we'd like to also use BGRA if FPDFPage_HasTransparency(page) is True for performance reasons (see [1]), but this may break caller format expectations, and would make format selection document-dependent
-    # [1]: https://chromium.googlesource.com/chromium/src/+/21e456b92bfadc625c947c718a6c4c5bf0c4c61b
-    if (fill_color[3] < 255):
+def _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, use_bgra_on_transparency):
+    # regarding use_bgra_on_transparency, see
+    # https://chromium.googlesource.com/chromium/src/+/21e456b92bfadc625c947c718a6c4c5bf0c4c61b
+    if fill_color[3] < 255 or (use_bgra_on_transparency and pdfium_c.FPDFPage_HasTransparency(page)):
         return pdfium_c.FPDFBitmap_BGRA
     elif grayscale:
         return pdfium_c.FPDFBitmap_Gray
@@ -456,6 +488,7 @@ def _auto_bitmap_format(fill_color, grayscale, prefer_bgrx):
 
 
 def _parse_renderopts(
+        page,
         fill_color = (255, 255, 255, 255),
         grayscale = False,
         optimize_mode = None,
@@ -467,12 +500,13 @@ def _parse_renderopts(
         limit_image_cache = False,
         rev_byteorder = False,
         prefer_bgrx = False,
+        use_bgra_on_transparency = False,
         force_bitmap_format = None,
         extra_flags = 0,
     ):
     
     if force_bitmap_format is None:
-        cl_format = _auto_bitmap_format(fill_color, grayscale, prefer_bgrx)
+        cl_format = _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, use_bgra_on_transparency)
     else:
         cl_format = force_bitmap_format
     
@@ -521,6 +555,9 @@ class PdfColorScheme:
             path_fill_color=path_fill, path_stroke_color=path_stroke,
             text_fill_color=text_fill, text_stroke_color=text_stroke,
         )
+    
+    def __repr__(self):
+        return f"{type(self).__name__}(**{self.colors})"
     
     def convert(self, rev_byteorder):
         """

@@ -1,16 +1,11 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfOutlineItem")
+__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
-import os
 import ctypes
 import logging
-import inspect
-import warnings
 from pathlib import Path
-from collections import namedtuple
-import multiprocessing as mp
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -29,22 +24,24 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     Parameters:
         input_data (str | pathlib.Path | bytes | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
-            The input PDF given as file path, bytes, ctypes array, byte buffer, or raw PDFium document handle.
-            A byte buffer is defined as an object that implements ``seek() tell() read() readinto()``.
+            The input PDF given as file path, bytes, ctypes array, byte stream, or raw PDFium document handle.
+            A byte stream is defined as an object that implements ``seek() tell() read() readinto()``.
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
             If a password is given but the PDF is not encrypted, it will be ignored (as of PDFium 5418).
         autoclose (bool):
-            Whether byte buffer input should be automatically closed on finalization.
+            Whether byte stream input should be automatically closed on finalization.
     
     Raises:
-        PdfiumError: Raised if the document failed to load. The exception message is annotated with the reason reported by PDFium.
+        PdfiumError: Raised if the document failed to load. The exception is annotated with the reason reported by PDFium (via message and :attr:`~.PdfiumError.err_code`).
         FileNotFoundError: Raised if an invalid or non-existent file path was given.
     
     Hint:
+        * Documents may be used in a ``with``-block, closing the document on context manager exit.
+          This is recommended when *input_data* is a file path, to safely and immediately release the bound file handle.
         * :func:`len` may be called to get a document's number of pages.
-        * Looping over a document will yield its pages from beginning to end.
         * Pages may be loaded using list index access.
+        * Looping over a document will yield its pages from beginning to end.
         * The ``del`` keyword and list index access may be used to delete pages.
     
     Attributes:
@@ -68,8 +65,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
-        
-        # question: can we make attributes like formenv effectively immutable for the caller?
         self.formenv = None
         
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
@@ -80,6 +75,16 @@ class PdfDocument (pdfium_i.AutoCloseable):
             self._data_closer += to_close
         
         super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
+    
+    
+    # Support using PdfDocument in a with-block
+    # Note that pdfium objects should be closed in hierarchial order, but this is managed by our parents/kids system, so callers don't need to mind that.
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, *_):
+        self.close()
     
     
     def __repr__(self):
@@ -140,7 +145,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         See the :attr:`formenv` attribute.
     
         Attention:
-            If form rendering is desired, this method shall be called immediately after document construction, before getting document length or page handles.
+            If form rendering is desired, this method shall be called right after document construction, before getting document length or page handles.
         
         Parameters:
             config (FPDF_FORMFILLINFO | None):
@@ -153,11 +158,11 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         # safety check for older binaries to prevent a segfault (could be removed at some point)
         # https://github.com/bblanchon/pdfium-binaries/issues/105
-        if "V8" in PDFIUM_INFO.flags and PDFIUM_INFO.origin != "sourcebuild" and PDFIUM_INFO.build <= 5677:
+        if "V8" in PDFIUM_INFO.flags and "pdfium-binaries" in PDFIUM_INFO.origin and PDFIUM_INFO.build <= 5677:  # pragma: no cover
             raise RuntimeError("V8 enabled pdfium-binaries builds <= 5677 crash on init_forms().")
         
         if not config:
-            if "XFA" in PDFIUM_INFO.flags:
+            if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
                 js_platform = pdfium_c.IPDF_JSPLATFORM(version=3)
                 config = pdfium_c.FPDF_FORMFILLINFO(version=2, xfa_disabled=False, m_pJsPlatform=ctypes.pointer(js_platform))
             else:
@@ -166,13 +171,14 @@ class PdfDocument (pdfium_i.AutoCloseable):
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
-        self.formenv = PdfFormEnv(raw, config, self)
+        self.formenv = PdfFormEnv(raw, self, config)
         self._add_kid(self.formenv)
         
         if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
-            if "XFA" in PDFIUM_INFO.flags:
+            if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
                 ok = pdfium_c.FPDF_LoadXFA(self)
                 if not ok:
+                    # FIXME ability to propagate an optional exception with error code info?
                     err = pdfium_c.FPDF_GetLastError()
                     logger.warning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}")
             else:
@@ -182,7 +188,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 )
     
     
-    # TODO?(v5) consider cached property
     def get_formtype(self):
         """
         Returns:
@@ -192,7 +197,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return pdfium_c.FPDF_GetFormType(self)
     
     
-    # TODO?(v5) consider cached property
     def get_pagemode(self):
         """
         Returns:
@@ -201,7 +205,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return pdfium_c.FPDFDoc_GetPageMode(self)
     
     
-    # TODO?(v5) consider cached property
     def is_tagged(self):
         """
         Returns:
@@ -216,7 +219,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         Parameters:
             dest (str | pathlib.Path | io.BytesIO):
-                File path or byte buffer the document shall be written to.
+                File path or byte stream the document shall be written to.
             version (int | None):
                 The PDF version to use, given as an integer (14 for 1.4, 15 for 1.5, ...).
                 If None (the default), PDFium will set a version automatically.
@@ -314,7 +317,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def get_attachment(self, index):
         """
         Returns:
-            PdfAttachment: The attachment at *index* (zero-based).
+            PdfAttachment: The attachment at given index (zero-based).
         """
         raw_attachment = pdfium_c.FPDFDoc_GetAttachment(self, index)
         if not raw_attachment:
@@ -342,7 +345,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def del_attachment(self, index):
         """
-        Unlink the attachment at *index* (zero-based).
+        Unlink the attachment at given index (zero-based).
         It will be hidden from the viewer, but is still present in the file (as of PDFium 5418).
         Following attachments shift one slot to the left in the array representation used by PDFium's API.
         
@@ -354,14 +357,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
             raise PdfiumError(f"Failed to delete attachment at index {index}.")
     
     
-    # TODO deprecate in favour of index access?
     def get_page(self, index):
         """
         Returns:
-            PdfPage: The page at *index* (zero-based).
+            PdfPage: The page at given index (zero-based).
         Note:
             This calls ``FORM_OnAfterLoadPage()`` if the document has an active form env.
-            The form env must not be closed before the page is closed!
+            In that case, note that closing the formenv would implicitly close the page.
         """
         
         raw_page = pdfium_c.FPDF_LoadPage(self, index)
@@ -397,16 +399,17 @@ class PdfDocument (pdfium_i.AutoCloseable):
             index = len(self)
         raw_page = pdfium_c.FPDFPage_New(self, index, width, height)
         page = PdfPage(raw_page, self, None)
-        # not doing formenv calls for new pages as we don't see the point
+        # not doing formenv calls for new pages
         self._add_kid(page)
         return page
     
     
     def del_page(self, index):
         """
-        Remove the page at *index* (zero-based).
+        Remove the page at given index (zero-based).
+        It is recommended to close any open handles to the page before calling this method.
         """
-        # FIXME what if the caller still has a handle to the page?
+        # FIXME not sure how pdfium would behave if the caller tries to access a handle to a deleted page...
         pdfium_c.FPDFPage_Delete(self, index)
     
     
@@ -444,7 +447,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def get_page_size(self, index):
         """
         Returns:
-            (float, float): Width and height in PDF canvas units of the page at *index* (zero-based).
+            (float, float): Width and height of the page at given index (zero-based), in PDF canvas units.
         """
         size = pdfium_c.FS_SIZEF()
         ok = pdfium_c.FPDF_GetPageSizeByIndexF(self, index, size)
@@ -456,7 +459,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def get_page_label(self, index):
         """
         Returns:
-            str: Label of the page at *index* (zero-based).
+            str: Label of the page at given index (zero-based).
             (A page label is essentially an alias that may be displayed instead of the page number.)
         """
         n_bytes = pdfium_c.FPDF_GetPageLabel(self, index, None, 0)
@@ -478,49 +481,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
             PdfXObject: The page as XObject.
         """
         raw_xobject = pdfium_c.FPDF_NewXObjectFromPage(dest_pdf, self, index)
-        if raw_xobject is None:
+        if not raw_xobject:
             raise PdfiumError(f"Failed to capture page at index {index} as FPDF_XOBJECT.")
         xobject = PdfXObject(raw=raw_xobject, pdf=dest_pdf)
         self._add_kid(xobject)
         return xobject
     
     
-    # TODO(apibreak) consider switching to a wrapper class around the raw bookmark
-    # (either with getter methods, or possibly cached properties)
-    def _get_bookmark(self, bookmark, level):
-        
-        n_bytes = pdfium_c.FPDFBookmark_GetTitle(bookmark, None, 0)
-        buffer = ctypes.create_string_buffer(n_bytes)
-        pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
-        title = buffer.raw[:n_bytes-2].decode('utf-16-le')
-        
-        # TODO(apibreak) just expose count as-is rather than using two variables and doing extra work
-        count = pdfium_c.FPDFBookmark_GetCount(bookmark)
-        is_closed = True if count < 0 else None if count == 0 else False
-        n_kids = abs(count)
-        
-        dest = pdfium_c.FPDFBookmark_GetDest(self, bookmark)
-        page_index = pdfium_c.FPDFDest_GetDestPageIndex(self, dest)
-        if page_index == -1:
-            page_index = None
-        
-        n_params = ctypes.c_ulong()
-        view_pos = (pdfium_c.FS_FLOAT * 4)()
-        view_mode = pdfium_c.FPDFDest_GetView(dest, n_params, view_pos)
-        view_pos = list(view_pos)[:n_params.value]
-        
-        return PdfOutlineItem(
-            level = level,
-            title = title,
-            is_closed = is_closed,
-            n_kids = n_kids,
-            page_index = page_index,
-            view_mode = view_mode,
-            view_pos = view_pos,
-        )
-    
-    
-    # TODO(apibreak) change outline API (see above)
     def get_toc(
             self,
             max_depth = 15,
@@ -529,129 +496,38 @@ class PdfDocument (pdfium_i.AutoCloseable):
             seen = None,
         ):
         """
-        Iterate through the bookmarks in the document's table of contents.
+        Iterate through the bookmarks in the document's table of contents (TOC).
         
         Parameters:
             max_depth (int):
                 Maximum recursion depth to consider.
         Yields:
-            :class:`.PdfOutlineItem`: Bookmark information.
+            :class:`.PdfBookmark`
         """
         
         if seen is None:
             seen = set()
         
-        bookmark = pdfium_c.FPDFBookmark_GetFirstChild(self, parent)
+        bm_ptr = pdfium_c.FPDFBookmark_GetFirstChild(self, parent)
         
-        while bookmark:
+        # NOTE We need bool(ptr) here to handle null pointers (where accessing .contents would raise an exception). Don't use ptr != None, it's always true.
+        while bm_ptr:
             
-            address = ctypes.addressof(bookmark.contents)
+            address = ctypes.addressof(bm_ptr.contents)
             if address in seen:
-                logger.warning("A circular bookmark reference was detected whilst parsing the table of contents.")
+                logger.warning("A circular bookmark reference was detected while traversing the table of contents.")
                 break
             else:
                 seen.add(address)
             
-            yield self._get_bookmark(bookmark, level)
+            yield PdfBookmark(bm_ptr, self, level)
             if level < max_depth-1:
-                yield from self.get_toc(
-                    max_depth = max_depth,
-                    parent = bookmark,
-                    level = level + 1,
-                    seen = seen,
-                )
+                yield from self.get_toc(max_depth=max_depth, parent=bm_ptr, level=level+1, seen=seen)
+            elif pdfium_c.FPDFBookmark_GetFirstChild(self, bm_ptr):
+                # Warn only if there actually is a subtree. If level == max_depth but the tree ends there, it's fine as no info is skipped.
+                logger.warning(f"Maximum recursion depth {max_depth} reached (subtree skipped).")
             
-            bookmark = pdfium_c.FPDFBookmark_GetNextSibling(self, bookmark)
-    
-    
-    def render(
-            self,
-            converter,
-            renderer = PdfPage.render,
-            page_indices = None,
-            pass_info = False,
-            n_processes = None,    # ignored, retained for compat
-            mk_formconfig = None,  # ignored, retained for compat
-            **kwargs
-        ):
-        """
-        .. deprecated:: 4.19
-           This method will be removed with the next major release due to serious issues rooted in the original API design. Use :meth:`.PdfPage.render()` instead.
-           *Note that the CLI provides parallel rendering using a proper caller-side process pool with inline saving in rendering jobs.*
-        
-        .. versionchanged:: 4.25
-           Removed the original process pool implementation and turned this into a wrapper for linear rendering, due to the serious conceptual issues and possible memory load escalation, especially with expensive receiving code (e.g. PNG encoding) or long documents. See the changelog for more info
-        """
-        
-        warnings.warn("The document-level pdf.render() API is deprecated and uncored due to serious issues in the original concept. Use page.render() and a caller-side loop or process pool instead.", category=DeprecationWarning)
-        
-        if not page_indices:
-            page_indices = [i for i in range(len(self))]
-        for i in page_indices:
-            bitmap = renderer(self[i], **kwargs)
-            if pass_info:
-                yield (converter(bitmap), bitmap.get_info())
-            else:
-                yield converter(bitmap)
-
-
-class PdfFormEnv (pdfium_i.AutoCloseable):
-    """
-    Form environment helper class.
-    
-    Attributes:
-        raw (FPDF_FORMHANDLE):
-            The underlying PDFium form env handle.
-        config (FPDF_FORMFILLINFO):
-            Accompanying form configuration interface, to be kept alive.
-        pdf (PdfDocument):
-            Parent document this form env belongs to.
-    """
-    
-    def __init__(self, raw, config, pdf):
-        self.raw, self.config, self.pdf = raw, config, pdf
-        super().__init__(PdfFormEnv._close_impl, self.config, self.pdf)
-    
-    @property
-    def parent(self):  # AutoCloseable hook
-        return self.pdf
-    
-    @staticmethod
-    def _close_impl(raw, config, pdf):
-        pdfium_c.FPDFDOC_ExitFormFillEnvironment(raw)
-        id(config)
-        pdf.formenv = None
-
-
-class PdfXObject (pdfium_i.AutoCloseable):
-    """
-    XObject helper class.
-    
-    Attributes:
-        raw (FPDF_XOBJECT): The underlying PDFium XObject handle.
-        pdf (PdfDocument): Reference to the document this XObject belongs to.
-    """
-    
-    def __init__(self, raw, pdf):
-        self.raw, self.pdf = raw, pdf
-        super().__init__(pdfium_c.FPDF_CloseXObject)
-    
-    @property
-    def parent(self):  # AutoCloseable hook
-        return self.pdf
-    
-    def as_pageobject(self):
-        """
-        Returns:
-            PdfObject: An independent page object representation of the XObject.
-            If multiple page objects are created from one XObject, they share resources.
-            Page objects created from an XObject remain valid after the XObject is closed.
-        """
-        raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
-        return PdfObject(  # not a child object (see above)
-            raw = raw_pageobj,
-            pdf = self.pdf,
-        )
+            bm_ptr = pdfium_c.FPDFBookmark_GetNextSibling(self, bm_ptr)
 
 
 def _open_pdf(input_data, password, autoclose):
@@ -675,33 +551,150 @@ def _open_pdf(input_data, password, autoclose):
     
     if pdfium_c.FPDF_GetPageCount(pdf) < 1:
         err_code = pdfium_c.FPDF_GetLastError()
-        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).")
+        raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).", err_code=err_code)
     
     return pdf, to_hold, to_close
 
 
-# TODO(apibreak) change outline API (see above)
-PdfOutlineItem = namedtuple("PdfOutlineItem", "level title is_closed n_kids page_index view_mode view_pos")
-"""
-Bookmark information.
+class PdfFormEnv (pdfium_i.AutoCloseable):
+    """
+    Form environment helper class.
+    
+    Attributes:
+        raw (FPDF_FORMHANDLE):
+            The underlying PDFium form env handle.
+        config (FPDF_FORMFILLINFO):
+            Accompanying form configuration interface, to be kept alive.
+        pdf (PdfDocument):
+            Parent document this form env belongs to.
+    """
+    
+    def __init__(self, raw, pdf, config):
+        self.raw = raw
+        self.pdf = pdf
+        self.config = config
+        super().__init__(PdfFormEnv._close_impl, self.config, self.pdf)
+    
+    @property
+    def parent(self):  # AutoCloseable hook
+        return self.pdf
+    
+    @staticmethod
+    def _close_impl(raw, config, pdf):
+        pdfium_c.FPDFDOC_ExitFormFillEnvironment(raw)
+        id(config)
+        pdf.formenv = None
 
-Parameters:
-    level (int):
-        Number of parent items.
-    title (str):
-        Title string of the bookmark.
-    is_closed (bool):
-        True if child items shall be collapsed, False if they shall be expanded.
-        None if the item has no descendants (i. e. ``n_kids == 0``).
-    n_kids (int):
-        Absolute number of child items, according to the PDF.
-    page_index (int | None):
-        Zero-based index of the page the bookmark points to.
-        May be None if the bookmark has no target page (or it could not be determined).
-    view_mode (int):
-        A view mode constant (:data:`PDFDEST_VIEW_*`) defining how the coordinates of *view_pos* shall be interpreted.
-    view_pos (list[float]):
-        Target position on the page the viewport should jump to when the bookmark is clicked.
-        It is a sequence of :class:`float` values in PDF canvas units.
-        Depending on *view_mode*, it may contain between 0 and 4 coordinates.
-"""
+
+class PdfXObject (pdfium_i.AutoCloseable):
+    """
+    XObject helper class.
+    
+    Attributes:
+        raw (FPDF_XOBJECT): The underlying PDFium XObject handle.
+        pdf (PdfDocument): Reference to the document this XObject belongs to.
+    """
+    
+    def __init__(self, raw, pdf):
+        self.raw = raw
+        self.pdf = pdf
+        super().__init__(pdfium_c.FPDF_CloseXObject)
+    
+    @property
+    def parent(self):  # AutoCloseable hook
+        return self.pdf
+    
+    def as_pageobject(self):
+        """
+        Returns:
+            PdfObject: An independent pageobject representation of the XObject.
+            If multiple pageobjects are created from an XObject, they share resources.
+            Returned pageobjects remain valid after the XObject is closed.
+        """
+        raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
+        # not a child object (see above)
+        return PdfObject(raw=raw_pageobj, pdf=self.pdf)
+
+
+class PdfBookmark (pdfium_i.AutoCastable):
+    """
+    Bookmark helper class.
+    
+    Attributes:
+        raw (FPDF_BOOKMARK):
+            The underlying PDFium bookmark handle.
+        pdf (PdfDocument):
+            Reference to the document this bookmark belongs to.
+        level (int):
+            The bookmark's nesting level in the TOC tree (zero-based). Corresponds to the number of parent bookmarks.
+    """
+    
+    def __init__(self, raw, pdf, level):
+        self.raw = raw
+        self.pdf = pdf
+        self.level = level
+    
+    def get_title(self):
+        """
+        Returns:
+            str: The bookmark's title string.
+        """
+        n_bytes = pdfium_c.FPDFBookmark_GetTitle(self, None, 0)
+        buffer = ctypes.create_string_buffer(n_bytes)
+        pdfium_c.FPDFBookmark_GetTitle(self, buffer, n_bytes)
+        return buffer.raw[:n_bytes-2].decode("utf-16-le")
+    
+    def get_count(self):
+        """
+        Returns:
+            int: Signed number of child bookmarks that would be visible if the bookmark were open (i.e. recursively counting children of open children).
+            The bookmark's initial state is open (expanded) if the number is positive, closed (collapsed) if negative.
+            Zero if the bookmark has no descendants.
+        """
+        return pdfium_c.FPDFBookmark_GetCount(self)
+    
+    def get_dest(self):
+        """
+        Returns:
+            PdfDest | None: The bookmark's destination (an object providing page index and viewport), or None on failure.
+        """
+        raw_dest = pdfium_c.FPDFBookmark_GetDest(self.pdf, self)
+        if not raw_dest:
+            return None
+        return PdfDest(raw_dest, pdf=self.pdf)
+
+
+class PdfDest (pdfium_i.AutoCastable):
+    """
+    Destination helper class.
+    
+    Attributes:
+        raw (FPDF_DEST): The underlying PDFium destination handle.
+        pdf (PdfDocument): Reference to the document this dest belongs to.
+    """
+    
+    def __init__(self, raw, pdf):
+        self.raw = raw
+        self.pdf = pdf
+    
+    def get_index(self):
+        """
+        Returns:
+            int | None: Zero-based index of the page the dest points to, or None on failure.
+        """
+        val = pdfium_c.FPDFDest_GetDestPageIndex(self.pdf, self)
+        return val if val >= 0 else None
+    
+    def get_view(self):
+        """
+        Returns:
+            (int, list[float]): A tuple of (view_mode, view_pos).
+            *view_mode* is a constant (one of :data:`PDFDEST_VIEW_*`) defining how *view_pos* shall be interpreted.
+            *view_pos* is the target position on the page the dest points to.
+            It may contain between 0 to 4 float coordinates, depending on the view mode.
+        """
+        n_params = ctypes.c_ulong()
+        pos = (pdfium_c.FS_FLOAT * 4)()
+        mode = pdfium_c.FPDFDest_GetView(self, n_params, pos)
+        pos = list(pos)[:n_params.value]
+        return mode, pos

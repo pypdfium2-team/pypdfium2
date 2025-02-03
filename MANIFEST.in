@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # MANIFEST.in defines the files to include in an sdist. sdists are also the starting point for wheels.
@@ -20,8 +20,8 @@ include src/pypdfium2_raw/__init__.py
 
 # Include all of licenses in an sdist (also wheel licenses), since we may build a wheel from the sdist
 recursive-include LICENSES/ *
-include .reuse/dep5
-include .reuse/dep5-wheel
+include REUSE.toml
+include REUSE-wheel.toml
 
 # PyPA eagerly includes tests - exclude because we don't use them
 recursive-exclude tests *

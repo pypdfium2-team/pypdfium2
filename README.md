@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com> -->
+<!-- SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # pypdfium2
@@ -27,7 +27,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 * <a id="user-content-install-source" class="anchor" href="#install-source">From source 🔗</a>
   
   * Dependencies:
-    - System: git, C pre-processor (gcc/clang - alternatively, specify the command to envoke via `$CPP`)
+    - System: git, C pre-processor (gcc/clang - alternatively, specify the command to invoke via `$CPP`)
     - Python: ctypesgen (pypdfium2-team fork), wheel, setuptools. Usually installed automatically.
   
   * Get the code
@@ -46,36 +46,55 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary 🔗</a>
     ```bash
     # call build script with --help to list options
-    python setupsrc/pypdfium2_setup/build_pdfium.py
+    python setupsrc/pypdfium2_setup/sourcebuild.py
     PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
     Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than taking them from the system.[^pdfium_buildsystem]
-    However, we can at least provide the `--use-syslibs` option to build against system-provided runtime libraries.
+    However, we can at least provide the `--use-syslibs` option to build against system runtime libraries.
   
-  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-provided binary 🔗</a>
+  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-level binary 🔗</a>
     ```bash
-    # Substitute $PDFIUM_VER with the system pdfium's build version.
+    # Substitute $PDFIUM_VER with the system pdfium build's version.
     # For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
     PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
     ```
     Link against external pdfium instead of bundling it.
     Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case" for now.
     For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
+
+  * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system-level binary (non-standard location, e.g. LibreOffice) 🔗</a>
+    ```bash
+    # if root rights are available and targeting /usr/local/lib is OK
+    sudo ln -s /usr/lib/libreoffice/program/libpdfiumlo.so /usr/local/lib/libpdfium.so
+    # Substitute $PDFIUM_VER with the pdfium build's version.
+    PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
+    ```
+    
+    Symlink pdfium from a non-standard location (e.g. libreoffice libdir) to a directory that is on the search path, determine the version, and install with system pdfium [as described above](#install-source-system).
+    
+    Note, if elevated privileges are not available, you can target e.g. `~/.local/lib` and add it to [`LD_LIBRARY_PATH`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) in your `~/.bashrc` file.
+    
+    Background: At this time, Linux/BSD distributions do not usually provide pdfium as an own package. However, some may ship a pdfium shared library as part of Libreoffice.
+    This may be helpful to get pypdfium2 installed on platforms not covered by pdfium-binaries yet (e.g. `linux ppc64le/s390x`, `freebsd`).
+    
+    Libreoffice actually uses its own build system for pdfium, so your distributor may be able to do this even for platforms not supported by Google's toolchain.
+    At this time, Debian/Ubuntu and FreeBSD seem to build Libreoffice with pdfium; however, Red Hat do not.
   
-  <!-- TODO version.json: reconsider origin - should we add a new field for the packager? -->
+  <!-- TODO version.json: reconsider origin - should we use a separate field for the packager? -->
   * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)
     ```bash
-    # Call ctypesgen (see --help or packaging_base.py::run_ctypesgen() for further options)
+    # Call ctypesgen (see --help or base.py::run_ctypesgen() for further options)
     # Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
     ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py [-D $MY_FLAGS]
     
     # Write the version file (fill the placeholders).
-    # Note, this is not a mature interface yet and might change!
+    # See https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO for field documentation
+    # Note, this is not a mature interface yet and might change any time!
     # major/minor/build/patch: integers forming the pdfium version being packaged
     # n_commits/hash: git describe like post-tag info (0/null for release commit)
-    # origin: a string to identify the build, consisting of binary source and package provider (e.g. "system/debian", "pdfium-binaries/debian")
+    # origin: a string to identify the build, in the form `$BUILDER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
     # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
-    cat >"src/pypdfium2_raw/version.json" <<END
+    cat > "src/pypdfium2_raw/version.json" <<END
     {
       "major": $PDFIUM_MAJOR,
       "minor": $PDFIUM_MINOR,
@@ -92,20 +111,20 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
     
     # Finally, install
-    # set $MY_PLATFORM to "system" if building against system pdfium, "auto" or the platform name otherwise
+    # set $MY_PLATFORM to "system" if building against system pdfium (not bundled), "auto", "sourcebuild" or the platform name otherwise.
     PDFIUM_PLATFORM='prepared!$MY_PLATFORM:$PDFIUM_BUILD' python -m pip install --no-build-isolation -v .
     ```
   
   See [Setup Magic](#setup-magic) for details.
   
-  Support for source installs (esp. with self-built/system pdfium) is limited, as their integrity depends somewhat on a correctly acting caller.
-  
-  Installing an `sdist` does not implicitly trigger a sourcebuild if no pre-built binary is available. It is preferred to let callers decide consciously what to do, and run the build script without pip encapsulation.
+  Installing an `sdist` does not implicitly trigger a sourcebuild if no pre-built binary is available. We prefer to let callers decide consciously what to do, and run the build script without pip encapsulation.
   
   Relevant pip options:
   * `-v`: Verbose logging output. Useful for debugging.
   * `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
-  * `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
+  * `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
+  
+  That said, do not expect us to provide much guidance with source installs, or to support the result, as this may be a crafty process, and we can't be sure whether it was done correctly (e.g. ABI safety, ctypesgen version used, etc.).
   
   [^pdfium_buildsystem]: This means pdfium may not compile on arbitrary hosts. The script is limited to build hosts supported by Google's toolchain. Ideally, we'd need an alternative build system that runs with system packages instead.
 
@@ -129,7 +148,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon -c defaults
     ```
     
-    Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel. (If desired, you may limit the channel config to the current environment by adding `--env`.)
+    If desired, you may limit the channel config to the current environment by adding `--env`.
+    Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel.
     Otherwise, you should be cautious when making changes to the environment.
   
   + To depend on pypdfium2 in a `conda-build` recipe
@@ -170,17 +190,19 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed without further notice if we don't see fit for upstream.
   
-  If you are a third-party distributor, please point out clearly and visibly in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
+  If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
 
 
 ### Runtime Dependencies
 
-As of this writing, pypdfium2 does not need any mandatory runtime dependencies apart from Python itself.
+As of this writing, pypdfium2 does not require any mandatory runtime dependencies apart from Python itself.
 
-However, some optional support model features require additional packages:
-* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module name `PIL`) is a pouplar imaging library for Python. pypdfium2 provides convenience methods to translate between raw bitmap buffers and PIL images.
-* [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. Similar to `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
+However, some optional support model features need additional packages:
+* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a pouplar imaging library for Python. pypdfium2 provides convenience adapters to translate between raw bitmap buffers and PIL images. It also uses PIL for some command-line functionality (e.g. image saving).
+* [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. As with `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
+* [`opencv-python`](https://github.com/opencv/opencv-python) (module `cv2`) is an imaging library built around numpy arrays. It can be used in the rendering CLI to save with pypdfium2's numpy adapter.
 
+pypdfium2 tries to defer imports of optional dependencies until they are actually needed, so there should be no startup overhead if you don't use them.
 
 ### Setup Magic
 
@@ -195,7 +217,7 @@ As pypdfium2 requires a C extension and has custom setup code, there are some sp
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
     + If `system`, bind against system-provided pdfium instead of embedding a binary. Version must be given explicitly so matching bindings can be generated.
-    + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `build_pdfium.py`.
+    + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `sourcebuild.py`.
     + If `sdist`, no platform-dependent files will be included, so as to create a source distribution.
     `sourcebuild` and `sdist` are standalone, they cannot be followed by additional specifiers.
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
@@ -254,7 +276,7 @@ Here are some examples of using the support model API.
   
   # Locate objects on the page
   for obj in page.get_objects():
-      print(obj.level, obj.type, obj.get_pos())
+      print(obj.level, obj.type, obj.get_bounds())
   ```
 
 * Extract and search text
@@ -263,28 +285,39 @@ Here are some examples of using the support model API.
   textpage = page.get_textpage()
   
   # Extract text from the whole page
-  text_all = textpage.get_text_range()
+  text_all = textpage.get_text_bounded()
   # Extract text from a specific rectangular area
-  text_part = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
+  text_rect = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
+  # Extract text from a specific char range
+  text_span = textpage.get_text_range(index=10, count=15)
   
   # Locate text on the page
   searcher = textpage.search("something", match_case=False, match_whole_word=False)
   # This returns the next occurrence as (char_index, char_count), or None if not found
-  first_occurrence = searcher.get_next()
+  match = searcher.get_next()
   ```
 
-<!-- TOC API will change with the next major release -->
 * Read the table of contents
   ```python
-  for item in pdf.get_toc():
-      state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
-      target = "?" if item.page_index is None else item.page_index+1
-      print(
-          "    " * item.level +
-          "[%s] %s -> %s  # %s %s" % (
-              state, item.title, target, item.view_mode, item.view_pos,
-          )
+  import pypdfium2.internal as pdfium_i
+  
+  for bm in pdf.get_toc(max_depth=15):
+      count, dest = bm.get_count(), bm.get_dest()
+      out = "    " * bm.level
+      out += "[%s] %s -> " % (
+          f"{count:+}" if count != 0 else "*",
+          bm.get_title(),
       )
+      if dest:
+          index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
+          out += "%s  # %s %s" % (
+              index+1 if index != None else "?",
+              pdfium_i.ViewmodeToStr.get(view_mode),
+              round(view_pos, 3),
+          )
+      else:
+          out += "_"
+      print(out)
   ```
 
 * Create a new PDF with an empty A4 sized page
@@ -300,7 +333,7 @@ Here are some examples of using the support model API.
   
   image = pdfium.PdfImage.new(pdf)
   image.load_jpeg("./tests/resources/mona_lisa.jpg")
-  width, height = image.get_size()
+  width, height = image.get_px_size()
   
   matrix = pdfium.PdfMatrix().scale(width, height)
   image.set_matrix(matrix)
@@ -318,14 +351,14 @@ Here are some examples of using the support model API.
 
 ### Raw PDFium API
 
-While helper classes conveniently wrap the raw PDFium API, it may still be accessed directly and is available in the namespace `pypdfium2.raw`. Lower-level helpers that may aid with using the raw API are provided in `pypdfium2.internal`.
+While helper classes conveniently wrap the raw PDFium API, it may still be accessed directly and is available in the namespace `pypdfium2.raw`. Lower-level utilities that may aid with using the raw API are provided in `pypdfium2.internal`.
 
 ```python
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 ```
 
-Since PDFium is a large library, many components are not covered by helpers yet. You may seamlessly interact with the raw API while still using helpers where available. When used as ctypes function parameter, helper objects automatically resolve to the underlying raw object (but you may still access it explicitly if desired):
+Since PDFium is a large library, many components are not covered by helpers yet. However, as helpers expose their underlying raw objects, you may seamlessly integrate raw APIs while using helpers as available. When passed as ctypes function parameter, helpers automatically resolve to the raw object handle (but you may still access it explicitly if desired):
 ```python
 permission_flags = pdfium_c.FPDF_GetDocPermission(pdf.raw)  # explicit
 permission_flags = pdfium_c.FPDF_GetDocPermission(pdf)      # implicit
@@ -333,14 +366,14 @@ permission_flags = pdfium_c.FPDF_GetDocPermission(pdf)      # implicit
 
 For PDFium docs, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^pdfium_docs]
 A large variety of examples on how to interface with the raw API using [`ctypes`](https://docs.python.org/3/library/ctypes.html) is already provided with [support model source code](src/pypdfium2/_helpers).
-Nonetheless, the following guide may be helpful to get started with the raw API, especially for developers who are not familiar with `ctypes` yet.
+Nonetheless, the following guide may be helpful to get started with the raw API, if you are not familiar with `ctypes` yet.
 
 [^pdfium_docs]: Unfortunately, no recent HTML-rendered docs are available for PDFium at the moment.
 
 <!-- TODO write something about weakref.finalize(); add example on creating a C page array -->
 
 * In general, PDFium functions can be called just like normal Python functions.
-  However, parameters may only be passed positionally, i. e. it is not possible to use keyword arguments.
+  However, parameters may only be passed positionally, i.e. it is not possible to use keyword arguments.
   There are no defaults, so you always need to provide a value for each argument.
   ```python
   # arguments: filepath (bytes), password (bytes|None)
@@ -355,12 +388,12 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       FPDF_LoadDocument.argtypes = [FPDF_STRING, FPDF_BYTESTRING]
       FPDF_LoadDocument.restype = FPDF_DOCUMENT
   ```
-  Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion.
+  Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion. This works because `FPDF_STRING` is actually an alias to `POINTER(c_char)` (i.e. `char*`), which is a primitive pointer type.
   When passing a string to a C function, it must always be null-terminated, as the function merely receives a pointer to the first item and then continues to read memory until it finds a null terminator.
   
 [^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `autorelease/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
 
-* While some functions are quite easy to use, things soon get more complex.
+* While some functions are quite easy to use, things may soon get more special.
   First of all, function parameters are not only used for input, but also for output:
   ```python
   # Initialise an integer object (defaults to 0)
@@ -392,19 +425,18 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```
 
 * For string output parameters, callers needs to provide a sufficiently long, pre-allocated buffer.
-  This may work differently depending on what type the function requires, which encoding is used, whether the number of bytes or characters is returned, and whether space for a null terminator is included or not. Carefully review the documentation for the function in question to fulfill its requirements.
+  This may work differently depending on what type the function requires, which encoding is used, whether the number of bytes or characters is returned, and whether space for a null terminator is included or not. Carefully review the documentation of the function in question to fulfill its requirements.
   
   Example A: Getting the title string of a bookmark.
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
-  # First call to get the required number of bytes (not characters!), including space for a null terminator
+  # First call to get the required number of bytes (not units!), including space for a null terminator
   n_bytes = pdfium_c.FPDFBookmark_GetTitle(bookmark, None, 0)
   # Initialise the output buffer
   buffer = ctypes.create_string_buffer(n_bytes)
   # Second call with the actual buffer
   pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
-  # Decode to string, cutting off the null terminator
-  # Encoding: UTF-16LE (2 bytes per character)
+  # Decode to string, cutting off the null terminator (encoding: UTF-16LE)
   title = buffer.raw[:n_bytes-2].decode("utf-16-le")
   ```
   
@@ -413,16 +445,17 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set)
   # Store common arguments for the two calls
   args = (textpage, left, top, right, bottom)
-  # First call to get the required number of characters (not bytes!) - a possible null terminator is not included
+  # First call to get the required number of units (not bytes!) - a possible null terminator is not included
   n_chars = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
   # If no characters were found, return an empty string
   if n_chars <= 0:
       return ""
-  # Calculate the required number of bytes (UTF-16LE encoding again)
+  # Calculate the required number of bytes (encoding: UTF-16LE again)
+  # The function signature uses c_ushort, so 1 unit takes sizeof(c_ushort) == 2 bytes
   n_bytes = 2 * n_chars
   # Initialise the output buffer - this function can work without null terminator, so skip it
   buffer = ctypes.create_string_buffer(n_bytes)
-  # Re-interpret the type from char to unsigned short as required by the function
+  # Re-interpret the type from char to unsigned short* as required by the function
   buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
   # Second call with the actual buffer
   pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
@@ -432,8 +465,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * Not only are there different ways of string output that need to be handled according to the requirements of the function in question.
   String input, too, can work differently depending on encoding and type.
-  We have already discussed `FPDF_LoadDocument()`, which takes a UTF-8 encoded string as `char *`.
-  A different examples is `FPDFText_FindStart()`, which needs a UTF-16LE encoded string, given as `unsigned short *`:
+  We have already discussed `FPDF_LoadDocument()`, which takes a UTF-8 encoded string as `char*`.
+  A different examples is `FPDFText_FindStart()`, which needs a UTF-16LE encoded string, given as `unsigned short*`:
   ```python
   # (Assuming `text` is a str and `textpage` an FPDF_TEXTPAGE)
   # Add the null terminator and encode as UTF-16LE
@@ -445,7 +478,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * Leaving strings, let's suppose you have a C memory buffer allocated by PDFium and wish to read its data.
   PDFium will provide you with a pointer to the first item of the byte array.
-  To access the data, you'll want to re-interpret the pointer using `ctypes.cast()` to encompass the whole array:
+  To access the data, you'll want to re-interpret the pointer with `ctypes.cast()` to encompass the whole array:
   ```python
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
   buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
@@ -466,7 +499,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   n_bytes = py_buffer.readinto(buffer_ptr.contents)  # returns the number of bytes read
   ```
 
-* If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help because `ctypes` does not have original object return (OOR), i. e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^ctypes_no_oor]
+* If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help because `ctypes` does not have original object return (OOR), i.e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^ctypes_no_oor]
   That's why you'll want to use `ctypes.addressof()` to get the memory addresses of the underlying C object.
   For instance, this is used to avoid infinite loops on circular bookmark references when iterating through the document outline:
   ```python
@@ -490,7 +523,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
   [^callback_usecases]: e. g. incremental read/write, management of progressive tasks, ...
   
-  Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the whole data does not need to be in memory at once.
+  Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the data does not need to be in memory at once.
   ```python
   import os
   
@@ -500,9 +533,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
     def __init__(self, py_buffer):
         self.py_buffer = py_buffer
     
-    def __call__(self, _, position, p_buf, size):
+    def __call__(self, _, position, buffer_ptr, size):
         # Write data from Python buffer into C buffer, as explained before
-        buffer_ptr = ctypes.cast(p_buf, ctypes.POINTER(ctypes.c_char * size))
+        buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_char * size))
         self.py_buffer.seek(position)
         self.py_buffer.readinto(buffer_ptr.contents)
         return 1  # non-zero return code for success
@@ -528,7 +561,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
   
-  If resources need to remain valid after the time of a function call, PDFium docs usually indicate this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segfault).
+  If resources need to remain valid after the time of a function call, PDFium docs usually indicate this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segfault sooner or later).
   
   For instance, the docs on `FPDF_LoadCustomDocument()` state that
   > The application must keep the file resources |pFileAccess| points to valid until the returned FPDF_DOCUMENT is closed. |pFileAccess| itself does not need to outlive the FPDF_DOCUMENT.
@@ -564,7 +597,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   data_holder.close()
   ```
 
-* Finally, let's finish with an example how to render the first page of a document to a `PIL` image in `RGBA` color format.
+* Finally, let's finish this guide with an example how to render the first page of a document to a `PIL` image in `RGBA` color format.
   ```python
   import math
   import ctypes
@@ -635,28 +668,27 @@ Usage should be largely self-explanatory, assuming a minimum of familiarity with
 
 ## Licensing
 
-*Important: This is NOT LEGAL ADVICE, and there is ABSOLUTELY NO WARRANTY for any information provided in this document or elsewhere in the pypdfium2 project, including earlier revisions.*
+*Disclaimer: This project is provided on an "as-is" basis. This is not legal advice, and there is ABSOLUTELY NO WARRANTY for any information provided in this document or elsewhere in the pypdfium2 project, including earlier revisions. We disclaim liability for any possible damages resulting from using this license information. It is the embedder's responsibility to check on licensing. See also [GitHub's disclaimer](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository#disclaimer).*
 
 pypdfium2 itself is available by the terms and conditions of [`Apache-2.0`](LICENSES/Apache-2.0.txt) / [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt).
 Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSES/CC-BY-4.0.txt).
 
 PDFium is available under a BSD-style license that can be found in its [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file.
 Various other open-source licenses apply to dependencies bundled with PDFium. These also have to be shipped alongside binary redistributions. Copies of identified licenses are provided in [`LicenseRef-PdfiumThirdParty.txt`](LICENSES/LicenseRef-PdfiumThirdParty.txt).
-There is no guarantee of completeness, and pdfium's dependencies might change over time. Please do notify us if you think this misses a relevant license.
+Note that pdfium's dependencies might change over time. Although we try to keep an eye on the situation, there is no guarantee of completeness. Please notify us if you think this misses a relevant license.
 
 pypdfium2 includes [SPDX](https://spdx.org/licenses/) headers in source files.
-License information for data files is provided in [`.reuse/dep5`](.reuse/dep5) as per the [`reuse` standard](https://reuse.software/spec/).
+License information for data files is provided in [`REUSE.toml`](REUSE.toml) as per the [`reuse` standard](https://reuse.software/spec/).
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
 
 [^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java), but python bindings packages don't exist yet or are unsatisfactory. However, we wrote some gists that show it'd be possible in principle: [pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc) (+ [setup](https://gist.github.com/mara004/881d0c5a99b8444fd5d1d21a333b70f8)), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7).
 
 
-## Issues
+## Issues / Contributions
 
 While using pypdfium2, you might encounter bugs or missing features.
-In this case, feel free to open an issue or discuss thread. If applicable, include details such as tracebacks, OS and CPU type, as well as the versions of pypdfium2 and used dependencies.
-__However, please note our [response policy](#contributions).__
+In this case, feel free to open an issue or discussion thread. If applicable, include details such as tracebacks, OS and CPU type, as well as the versions of pypdfium2 and used dependencies.
 
 Roadmap:
 * pypdfium2
@@ -669,22 +701,27 @@ Roadmap:
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
 * [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues): Bindings generator.
 
+### Response policy
+<!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
+
+Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide usage support.
+
+The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and we are free to silently reject PRs we do not like.
+
 ### Known limitations
 
-#### Incompatibility with CPython 3.7.6 and 3.8.1
+#### Incompatibility with Threading
 
-pypdfium2 built with mainstream ctypesgen cannot be used with releases 3.7.6 and 3.8.1 of the CPython interpreter due to a [regression](https://github.com/python/cpython/pull/16799#issuecomment-612353119) that [broke](https://github.com/ctypesgen/ctypesgen/issues/77) ctypesgen-created string handling code.
-
-Since version 4, pypdfium2 is built with a patched fork of ctypesgen that removes ctypesgen's problematic string code.
+PDFium is inherently not thread-safe. See the [API docs](https://pypdfium2.readthedocs.io/en/stable/python_api.html#incompatibility-with-threading) for more information.
 
 #### Risk of unknown object lifetime violations
 
 As outlined in the raw API section, it is essential that Python-managed resources remain available as long as they are needed by PDFium.
 
-The problem is that the Python interpreter may garbage collect objects with reference count zero at any time, so an unreferenced but still required object may either by chance stay around long enough or disappear too soon, resulting in non-deterministic memory issues that are hard to debug.
+The problem is that the Python interpreter may garbage collect objects with reference count zero at any time, so it can happen that an unreferenced but still required object by chance stays around long enough before it is garbage collected. However, it could also disappear too soon and cause breakage. Such dangling objects result in non-deterministic memory issues that are hard to debug.
 If the timeframe between reaching reference count zero and removal is sufficiently large and roughly consistent across different runs, it is even possible that mistakes regarding object lifetime remain unnoticed for a long time.
 
-Although we intend to develop helpers carefully, it cannot be fully excluded that unknown object lifetime violations are still lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
+Although we intend to develop helpers carefully, it cannot be fully excluded that unknown object lifetime violations might still be lurking around somewhere, especially if unexpected requirements were not documented by the time the code was written.
 
 #### Missing raw PDF access
 
@@ -692,24 +729,13 @@ As of this writing, PDFium's public interface does not provide access to the raw
 
 #### Limitations of ABI bindings
 
-PDFium's non-public backend would provide extended capabilities, including [raw access](#missing-raw-pdf-access), but it is not exported into the ABI and written in C++ (not pure C), so we cannot use it with `ctypes`. This means it's out of scope for this project.
+PDFium's non-public backend would provide extended capabilities, including [raw access](#missing-raw-pdf-access), but it is written in C++, which (unlike pure C) does not result in a stable ABI, so we cannot use it with `ctypes`. This means it's out of scope for this project.
 
 Also, while ABI bindings tend to be more convenient, they have some technical drawbacks compared to API bindings (see e.g. [1](https://cffi.readthedocs.io/en/latest/overview.html#abi-versus-api), [2](https://github.com/ocrmypdf/OCRmyPDF/issues/541#issuecomment-1834684532))
 
 
 ## Development
 <!-- TODO wheel tags, maintainer access, GitHub peculiarities -->
-
-### Contributions
-<!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
-
-> We may accept contributions, but only if our code quality expectations are met.
-
-__Policy__:
-* We may not respond to your issue or PR.
-* We may close an issue or PR without much feedback.
-* We may lock discussions or contributions if our attention is getting DDOSed.
-* We may not provide much usage support.
 
 ### Long lines
 
@@ -771,9 +797,9 @@ The release process is fully automated using Python scripts and scheduled releas
 You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
 
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
-* `update_pdfium.py` downloads binaries.
-* `craft_packages.py pypi` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
-* `autorelease.py` takes care of versioning, changelog, release note generation and VCS checkin.
+* `update.py` downloads binaries.
+* `craft.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
+* `autorelease.py` takes care of versioning, changelog, release note generation and VCS check-in.
 
 The autorelease script has some peculiarities maintainers should know about:
 * The changelog for the next release shall be written into `docs/devel/changelog_staging.md`.
@@ -797,8 +823,8 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   ```
 * Build the packages
   ```bash
-  python setupsrc/pypdfium2_setup/update_pdfium.py
-  python setupsrc/pypdfium2_setup/craft_packages.py pypi
+  python setupsrc/pypdfium2_setup/update.py
+  python setupsrc/pypdfium2_setup/craft.py
   ```
 * Upload to PyPI
   ```bash
@@ -827,10 +853,11 @@ git push --delete origin $TAGNAME
 Faulty PyPI releases may be yanked using the web interface.
 
 
-## Prominent Embedders
+## Popular dependents
 
-pypdfium2 is used by prominent embedders such as
+pypdfium2 is used by popular packages such as
 [langchain](https://github.com/langchain-ai/langchain),
+[docling](https://github.com/DS4SD/docling),
 [nougat](https://github.com/facebookresearch/nougat),
 [pdfplumber](https://github.com/jsvine/pdfplumber),
 and [doctr](https://github.com/mindee/doctr/).
@@ -840,20 +867,18 @@ This results in pypdfium2 being part of a large dependency tree.
 
 ## Thanks to[^thanks_to]
 
-<!-- order: alphabetical by surname -->
-
-* [Benoît Blanchon](https://github.com/bblanchon): Author of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](sourcebuild/patches/).
-* [Anderson Bravalheri](https://github.com/abravalheri): Help with PEP 517/518 compliance. Hint to use an environment variable rather than separate setup files.
-* [Bastian Germann](https://github.com/bgermann): Help with inclusion of licenses for third-party components of PDFium.
-* [Tim Head](https://github.com/betatim): Original idea for Python bindings to PDFium with ctypesgen in `wowpng`.
 * [Yinlin Hu](https://github.com/YinlinHu): `pypdfium` prototype and `kuafu` PDF viewer.
+* [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium in `redstork`, `redstork-ui` and `pdfbrain`.
+* [Tim Head](https://github.com/betatim): Original idea for Python bindings to PDFium with ctypesgen in `wowpng`.
+* [Benoît Blanchon](https://github.com/bblanchon): Author of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](sourcebuild/patches/).
 * [Adam Huganir](https://github.com/adam-huganir): Help with maintenance and development decisions since the beginning of the project.
 * [kobaltcore](https://github.com/kobaltcore): Bug fix for `PdfDocument.save()`.
-* [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium with ctypes in `redstork` and `pdfbrain`.
+* [Anderson Bravalheri](https://github.com/abravalheri): Help with PEP 517/518 compliance. Hint to use an environment variable rather than separate setup files.
+* [Bastian Germann](https://github.com/bgermann): Help with inclusion of licenses for third-party components of PDFium.
 
 ... and further [code contributors](https://github.com/pypdfium2-team/pypdfium2/graphs/contributors) (GitHub stats).
 
-*If you have somehow contributed to this project but we forgot to mention you here, please let us know.*
+*If you have contributed to this project but are not mentioned here yet, please let us know.*
 
 [^thanks_to]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
 
@@ -873,7 +898,7 @@ Inspired by *wowpng*, the first known proof of concept Python binding to PDFium 
 *pypdfium-reboot* then added a script to automate binary deployment and bindings generation to simplify regular updates. However, it was still not platform specific.
 
 pypdfium2 is a full rewrite of *pypdfium-reboot* to build platform-specific wheels and consolidate the setup scripts. Further additions include ...
-* A CI workflow to automatically release new wheels every Tuesday
-* Support models that conveniently wrap the raw PDFium/ctypes API
+* A CI workflow to automatically release new wheels at a defined schedule
+* Convenience support models that wrap the raw PDFium/ctypes API
 * Test code
 * A script to build PDFium from source

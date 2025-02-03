@@ -1,17 +1,17 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-from .conftest import TestResources, OutputDir
+from .conftest import TestFiles, OutputDir
 
 
 def test_xobject_placement():
     
     # basic test to at least run through the code
     
-    src_pdf = pdfium.PdfDocument(TestResources.multipage)
+    src_pdf = pdfium.PdfDocument(TestFiles.multipage)
     dest_pdf = pdfium.PdfDocument.new()
     xobject = src_pdf.page_as_xobject(0, dest_pdf)
     
@@ -32,26 +32,26 @@ def test_xobject_placement():
     dest_page_1.insert_obj(po)
     assert po.pdf is dest_pdf
     assert po.page is dest_page_1
-    pos_a = po.get_pos()
+    pos_a = po.get_bounds()
     # xfail with pdfium < 5370, https://crbug.com/pdfium/1905
     assert pytest.approx(pos_a, abs=0.5) == (19, 440, 279, 823)
     
     po = xobject.as_pageobject()
-    matrix = base_matrix.mirror(v=True, h=False).translate(w, 0).translate(w, h)
+    matrix = base_matrix.mirror(invert_x=True, invert_y=False).translate(w, 0).translate(w, h)
     assert matrix == pdfium.PdfMatrix(-0.5, 0, 0, 0.5, 2*w, h)
     po.transform(matrix)
     dest_page_1.insert_obj(po)
     
     po = xobject.as_pageobject()
     assert po.get_matrix() == pdfium.PdfMatrix()
-    matrix = base_matrix.mirror(v=False, h=True).translate(0, h).translate(w, 0)
+    matrix = base_matrix.mirror(invert_x=False, invert_y=True).translate(0, h).translate(w, 0)
     assert matrix == pdfium.PdfMatrix(0.5, 0, 0, -0.5, w, h)
     po.set_matrix(matrix)
     assert po.get_matrix() == matrix
     dest_page_1.insert_obj(po)
     
     po = xobject.as_pageobject()
-    matrix = base_matrix.mirror(v=True, h=True).translate(w, h)
+    matrix = base_matrix.mirror(invert_x=True, invert_y=True).translate(w, h)
     assert matrix == pdfium.PdfMatrix(-0.5, 0, 0, -0.5, w, h)
     po.set_matrix(matrix)
     dest_page_1.insert_obj(po)

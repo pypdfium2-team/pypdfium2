@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE Works on Linux/macOS/Windows (that is, at least on GitHub Actions)
+# This script has been tested on Linux/macOS/Windows x86_64 on GH Actions CI
+# However, it does not currently work on Linux aarch64 natively, since Google's toolchain doesn't seem to support that. Cross-compilation (by setting target_cpu in config) should work, though.
 
 import os
 import sys
@@ -12,8 +13,7 @@ import urllib.request as url_request
 from pathlib import Path, WindowsPath
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-# TODO consider dotted access?
-from pypdfium2_setup.packaging_base import *
+from pypdfium2_setup.base import *
 
 SBDir = SourcebuildDir  # local alias for convenience
 PatchDir       = SBDir / "patches"
@@ -87,20 +87,18 @@ def dl_depottools(do_update):
 
 def dl_pdfium(GClient, do_update, revision):
     
-    is_sync = True
-    
     if PDFiumDir.exists():
         if do_update:
             print("PDFium: Revert / Sync  ...")
             run_cmd([GClient, "revert"], cwd=SBDir)
         else:
-            is_sync = False
             print("PDFium: Using existing repository as-is.")
     else:
         print("PDFium: Download ...")
+        do_update = True
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
-    if is_sync:
+    if do_update:
         # TODO consider passing -D ?
         run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
         # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
@@ -108,7 +106,7 @@ def dl_pdfium(GClient, do_update, revision):
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     
-    return is_sync
+    return do_update
 
 
 def _dl_unbundler():
@@ -183,7 +181,7 @@ def pack(v_short, v_post):
     dest_dir = DataDir / ExtPlats.sourcebuild
     dest_dir.mkdir(parents=True, exist_ok=True)
     
-    libname = LibnameForSystem[Host.system]
+    libname = libname_for_system(Host.system)
     shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
     write_pdfium_info(dest_dir, v_short, origin="sourcebuild", **v_post)
     
@@ -244,21 +242,19 @@ def main(
     GN      = get_tool("gn")
     Ninja   = get_tool("ninja")
     
-    pdfium_dl_done = dl_pdfium(GClient, b_update, b_revision)
+    did_pdfium_sync = dl_pdfium(GClient, b_update, b_revision)
     v_short, v_post = identify_pdfium()
     print(f"Version {v_short} {v_post}", file=sys.stderr)
     
-    if pdfium_dl_done:
+    if did_pdfium_sync:
         patch_pdfium(v_short)
-    if b_use_syslibs:
-        _dl_unbundler()
-
-    if b_use_syslibs:
-        run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
+        _dl_unbundler()
+        run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)
+    
     config_str = serialise_config(config_dict)
     print(f"\nBuild configuration:\n{config_str}\n")
     

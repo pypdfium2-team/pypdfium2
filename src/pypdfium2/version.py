@@ -1,148 +1,82 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = []
+# TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
 
-import sys
+__all__ = ("PYPDFIUM_INFO", "PDFIUM_INFO")
+
 import json
-import functools
 from pathlib import Path
-from types import MappingProxyType
 import pypdfium2_raw
 
 
-# TODO move to shared compat file
-if sys.version_info < (3, 8):
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-else:
-    cached_property = functools.cached_property
-
-
-class _abc_version:
+class _version_interface:
     
-    @cached_property
-    def _data(self):
+    def __init__(self):
         with open(self._FILE, "r") as buf:
             data = json.load(buf)
-        self._process_data(data)
-        return MappingProxyType(data)
-    
-    def _process_data(self, data):
-        pass
-    
-    def __getattr__(self, attr):
-        return self._data[attr]
-    
-    def __setattr__(self, name, value):
-        raise AttributeError(f"Version class is immutable - assignment '{name} = {value}' not allowed")
+        for k, v in data.items():
+            setattr(self, k, v)
+        self.api_tag = tuple(data[k] for k in self._TAG_FIELDS)
+        self._hook()
+        self.version = self.tag + self.desc
     
     def __repr__(self):
         return self.version
     
-    @cached_property
-    def api_tag(self):
-        return tuple(self._data[k] for k in self._TAG_FIELDS)
-    
     def _craft_tag(self):
         return ".".join(str(v) for v in self.api_tag)
     
-    def _craft_desc(self, extra=[]):
+    def _craft_desc(self, *suffixes):
         
         local_ver = []
         if self.n_commits > 0:
             local_ver += [str(self.n_commits), str(self.hash)]
-        local_ver += extra
+        local_ver += suffixes
         
         desc = ""
         if local_ver:
             desc += "+" + ".".join(local_ver)
         return desc
-    
-    @cached_property
-    def version(self):
-        return self.tag + self.desc
 
 
-class _version_pypdfium2 (_abc_version):
+class _version_pypdfium2 (_version_interface):
     
     _FILE = Path(__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "patch")
     
-    @cached_property
-    def tag(self):
-        tag = self._craft_tag()
+    def _hook(self):
+        
+        self.tag = self._craft_tag()
         if self.beta is not None:
-            tag += f"b{self.beta}"
-        return tag
-    
-    @cached_property
-    def desc(self):
+            self.tag += f"b{self.beta}"
         
-        extra = []
-        if self.dirty:
-            extra += ["dirty"]
-        
-        desc = self._craft_desc(extra)
+        suffixes = ["dirty"] if self.dirty else []
+        self.desc = self._craft_desc(*suffixes)
         if self.data_source != "git":
-            desc += f":{self.data_source}"
+            self.desc += f":{self.data_source}"
         if self.is_editable:
-            desc += "@editable"
-        
-        return desc
+            self.desc += "@editable"
 
 
-class _version_pdfium (_abc_version):
+class _version_pdfium (_version_interface):
     
     _FILE = Path(pypdfium2_raw.__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "build", "patch")
     
-    def _process_data(self, data):
-        data["flags"] = tuple(data["flags"])
-    
-    @cached_property
-    def tag(self):
-        return self._craft_tag()
-    
-    @cached_property
-    def desc(self):
-        desc = self._craft_desc()
+    def _hook(self):
+        
+        self.flags = tuple(self.flags)
+        self.tag = self._craft_tag()
+        
+        self.desc = self._craft_desc()
         if self.flags:
-            desc += ":{%s}" % ",".join(self.flags)
+            self.desc += f":{','.join(self.flags)}"
         if self.origin != "pdfium-binaries":
-            desc += f"@{self.origin}"
-        return desc
+            self.desc += f"@{self.origin}"
 
-# TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
-
-
-# Current API
 
 PYPDFIUM_INFO = _version_pypdfium2()
-PDFIUM_INFO = _version_pdfium()
-
-__all__ += ["PYPDFIUM_INFO", "PDFIUM_INFO"]
-
-# -----
-
-
-# Deprecated API, to be removed with v5
-# Known issue: causes eager evaluation of the new API's theoretically deferred properties.
-
-V_PYPDFIUM2 = PYPDFIUM_INFO.version
-V_LIBPDFIUM = str(PDFIUM_INFO.build)
-V_BUILDNAME = PDFIUM_INFO.origin
-V_PDFIUM_IS_V8 = "V8" in PDFIUM_INFO.flags  # implies XFA
-V_LIBPDFIUM_FULL = PDFIUM_INFO.version
-
-__all__ += ["V_PYPDFIUM2", "V_LIBPDFIUM", "V_LIBPDFIUM_FULL", "V_BUILDNAME", "V_PDFIUM_IS_V8"]
-
-# -----
-
-
-# Docs
-
-PYPDFIUM_INFO = PYPDFIUM_INFO
 """
 pypdfium2 helpers version.
 
@@ -178,11 +112,11 @@ Parameters:
         - ``record``: Parsed from autorelease record. Implies that possible changes after tag are unknown.
     is_editable (bool | None):
         True for editable install, False otherwise. None if unknown.\n
-        If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happened since. The actual current state is unknown.
+        If True, the version info is the one captured at install time. An arbitrary number of forward or reverse changes may have happened since.
 """
 
 
-PDFIUM_INFO = PDFIUM_INFO
+PDFIUM_INFO = _version_pdfium()
 """
 PDFium version.
 
@@ -192,18 +126,18 @@ Parameters:
     version (str):
         Joined tag and desc, forming the full version.
     tag (str):
-        Version ciphers joined as str.
+        Version ciphers joined as string.
     desc (str):
-        Descriptors (origin, flags) represented as str.
+        Descriptors (origin, flags) as string.
     api_tag (tuple[int]):
-        Version ciphers joined as tuple.
+        Version ciphers grouped as tuple.
     major (int):
         Chromium major cipher.
     minor (int):
         Chromium minor cipher.
     build (int):
         Chromium/pdfium build cipher.
-        This value allows to uniquely identify the pdfium sources the binary was built from.
+        This value uniquely identifies the pdfium version.
     patch (int):
         Chromium patch cipher.
     n_commits (int):
@@ -211,12 +145,12 @@ Parameters:
     hash (str | None):
         Hash of head commit if n_commits > 0, None otherwise.
     origin (str):
-        The pdfium binary's origin. Possible values:\n
-        - ``pdfium-binaries``: Compiled by bblanchon/pdfium-binaries, and bundled into pypdfium2.
-        - ``sourcebuild``: Provided by the caller (commonly compiled using pypdfium2's integrated build script), and bundled into pypdfium2.
-        - ``system``: Loaded from a standard system location using :func:`ctypes.util.find_library()`, or an explicit directory provided at setup time.
+        The pdfium binary's origin.
     flags (tuple[str]):
         Tuple of pdfium feature flags. Empty for default build. (V8, XFA) for pdfium-binaries V8 build.
 """
 
-# -----
+# Freeze the base class after we have constructed the instance objects
+def _frozen_setattr(self, name, value):
+    raise AttributeError(f"Version class is read-only - assignment '{name} = {value}' not allowed")
+_version_interface.__setattr__ = _frozen_setattr

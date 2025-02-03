@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2.raw as pdfium_c
@@ -126,9 +126,8 @@ ErrorToStr = _fallback_dict({
 })
 
 
-# known implication: causes eager evaluation of pdfium version
-if "XFA" in PDFIUM_INFO.flags:
-    #: [V8/XFA builds only] Convert a PDFium XFA error constant (:attr:`FPDF_ERR_XFA*`) to string.
+if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
+    #: [XFA builds only] Convert a PDFium XFA error constant (:attr:`FPDF_ERR_XFA*`) to string.
     XFAErrorToStr = _fallback_dict({
         pdfium_c.FPDF_ERR_XFALOAD:   "Load error",
         pdfium_c.FPDF_ERR_XFALAYOUT: "Layout error",

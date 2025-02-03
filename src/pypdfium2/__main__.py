@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import sys
@@ -7,6 +7,7 @@ import importlib
 from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
 from pypdfium2._cli._parsers import setup_logging
 
+# Note, this requires the pypdfium2-team fork of ctypesgen. With oldschool ctypesgen (or even older versions of the fork), this will fail.
 from pypdfium2_raw.bindings import _libs_info
 pdfium_path = _libs_info["pdfium"]["path"]
 
@@ -16,7 +17,7 @@ SubCommands = {
     "extract-images": "extract images",
     "extract-text":   "extract text",
     "imgtopdf":       "convert images to PDF",
-    "pageobjects":    "print info on page objects",
+    "pageobjects":    "print info on pageobjects",
     "pdfinfo":        "print info on document and pages",
     "render":         "rasterize pages",
     "tile":           "tile pages (N-up)",

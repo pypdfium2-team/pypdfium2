@@ -1,14 +1,19 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # TODO test-cover use_bitmap, format and render
 
+import logging
 import traceback
 from pathlib import Path
 import pypdfium2.raw as pdfium_c
 import pypdfium2._helpers as pdfium
-# TODO? consider dotted access
-from pypdfium2._cli._parsers import add_input, get_input
+from pypdfium2._cli._parsers import (
+    add_input, get_input,
+    BooleanOptionalAction,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def attach(parser):
@@ -22,8 +27,8 @@ def attach(parser):
     parser.add_argument(
         "--max-depth",
         type = int,
-        default = 2,
-        help = "Maximum recursion depth to consider when looking for page objects.",
+        default = 15,
+        help = "Maximum recursion depth to consider when looking for pageobjects.",
     )
     parser.add_argument(
         "--use-bitmap",
@@ -37,7 +42,13 @@ def attach(parser):
     parser.add_argument(
         "--render",
         action = "store_true",
-        help = "Whether to get rendered bitmaps, taking masks and transform matrices into account. (Fallback if doing smart extraction.)",
+        help = "When --use-bitmap is given, whether to get rendered bitmaps, taking masks and transform matrices into account.",
+    )
+    parser.add_argument(
+        "--scale-to-original",
+        action = BooleanOptionalAction,
+        default = True,
+        help = "When --use-bitmap --render is given, whether to scale the image so it is rendered at its native resolution, or close to that. This should improve output quality. The default is True, but you may opt out.",
     )
 
 
@@ -64,14 +75,15 @@ def main(args):
         n_idigits = len(str( len(images) ))
         
         for j, image in enumerate(images):
-            stem = "%s_%0*d_%0*d" % (args.input.stem, n_pdigits, i+1, n_idigits, j+1)
-            prefix = args.output_dir / stem
+            tag = "%0*d_%0*d" % (n_pdigits, i+1, n_idigits, j+1)
+            prefix = args.output_dir / f"{args.input.stem}_{tag}"
+            # logger.debug("\n"+tag)
             try:
                 if args.use_bitmap:
-                    pil_image = image.get_bitmap(render=args.render).to_pil()
+                    pil_image = image.get_bitmap(render=args.render, scale_to_original=args.scale_to_original).to_pil()
                     pil_image.save(f"{prefix}.{args.format}")
                 else:
-                    image.extract(prefix, fb_format=args.format, fb_render=args.render)
+                    image.extract(prefix, fb_format=args.format)
             except pdfium.PdfiumError:
                 traceback.print_exc()
             image.close()

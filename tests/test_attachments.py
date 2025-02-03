@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import re
@@ -7,12 +7,12 @@ import pytest
 import hashlib
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-from .conftest import TestResources, OutputDir
+from .conftest import TestFiles, OutputDir
 
 
 def test_attachment():
     
-    pdf = pdfium.PdfDocument(TestResources.attachments)
+    pdf = pdfium.PdfDocument(TestFiles.attachments)
     assert pdf.count_attachments() == 2
     
     attachment_a = pdf.get_attachment(0)
@@ -69,7 +69,7 @@ def test_attachment():
     with pytest.raises(pdfium.PdfiumError, match=re.escape("Failed to extract attachment (buffer length 0).")):
         attachment_c.get_data()
     
-    data_c = TestResources.mona_lisa.read_bytes()
+    data_c = TestFiles.mona_lisa.read_bytes()
     attachment_c.set_data(data_c)
     assert attachment_c.get_data().raw == data_c
     

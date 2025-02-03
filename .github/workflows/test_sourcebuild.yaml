@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Test Sourcebuild
@@ -19,11 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-        os: [ubuntu-latest, macos-13, macos-14, windows-latest]
+        # FIXME Google's toolchain doesn't seem to run on Linux arm64 natively
+        os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']  # 'ubuntu-24.04-arm'
         use_syslibs: [false]
         include:
-          - os: ubuntu-latest
+          - os: 'ubuntu-latest'
             use_syslibs: [true]
+          # - os: 'ubuntu-24.04-arm'
+          #   use_syslibs: [true]
     
     runs-on: ${{ matrix.os }}
     
@@ -45,13 +48,13 @@ jobs:
       
       - name: Build PDFium (default)
         if: ${{ !matrix.use_syslibs }}
-        run: python3 ./setupsrc/pypdfium2_setup/build_pdfium.py
+        run: python3 ./setupsrc/pypdfium2_setup/sourcebuild.py
       
       - name: Build PDFium (with syslibs)
         if: ${{ matrix.use_syslibs }}
         run: |
-          sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
-          python3 ./setupsrc/pypdfium2_setup/build_pdfium.py --use-syslibs
+          sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+          python3 ./setupsrc/pypdfium2_setup/sourcebuild.py --use-syslibs
       
       - name: Install
         run: PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .

@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
 import sys
-import argparse
 import logging
+import argparse
 from pathlib import Path
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
@@ -12,18 +12,18 @@ import pypdfium2.internal as pdfium_i
 
 def setup_logging():
     
-    pdfium_i.DEBUG_AUTOCLOSE.value = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    # could also pass through the log level by parameter, but using an env var seemed easiest for now
+    debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    loglevel = getattr(logging, os.environ.get("PYPDFIUM_LOGLEVEL", "debug").upper())
     
+    pdfium_i.DEBUG_AUTOCLOSE.value = debug_autoclose
     lib_logger = logging.getLogger("pypdfium2")
     lib_logger.addHandler(logging.StreamHandler())
-    lib_logger.setLevel(logging.DEBUG)
-    
+    lib_logger.setLevel(loglevel)
     pdfium.PdfUnspHandler().setup()
 
 
 def parse_numtext(numtext):
-    
-    # TODO enhancement: take count and verify page numbers
     
     if not numtext:
         return None
@@ -88,7 +88,22 @@ def get_input(args, init_forms=False, **kwargs):
         pdf.init_forms()
     if "pages" in args and not args.pages:
         args.pages = [i for i in range(len(pdf))]
+    # TODO else validate pages, as seen in ./render.py
     return pdf
+
+
+# dummy more_itertools.peekable().__bool__ alternative
+
+def _postpeek_generator(value, iterator):
+    yield value; yield from iterator
+
+def iterator_hasvalue(iterator):
+    try:
+        first_value = next(iterator)
+    except StopIteration:
+        return False, None
+    else:
+        return True, _postpeek_generator(first_value, iterator)
 
 
 if sys.version_info >= (3, 9):

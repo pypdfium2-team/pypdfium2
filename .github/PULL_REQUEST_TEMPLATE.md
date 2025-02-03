@@ -16,7 +16,7 @@
 
 - [ ] This PR changes helpers code.
 - [ ] The change comes with sufficient test cases to confirm correct functionality.
-- [ ] Any new test files are under a suitable license and have been registered in `reuse/dep5`.
+- [ ] Any new test files are under a suitable license and have been registered in `REUSE.toml`.
 
 </details>
 <details open><summary>Setup</summary>
@@ -24,8 +24,8 @@
 - [ ] This PR changes setup code (`setupsrc/`, `setup.py` etc.).
 - [ ] I have read through relevant doc sections [Installation -> From source][1] and [Setup Magic][2].
 - [ ] I have tested the change does not break internal callers.
-- [ ] I believe the change is maintainable and does not cause unreasonable complexity or code pollution.
-- [ ] The change does not try to shift a maintenance burden or upstream downstream tasks. *Keep handlers generic, avoid overly downstream-specific or (for us) effectively dead code passages.*
+- [ ] I believe the change is maintainable and does not cause unreasonable complexity or code fragmentation.
+- [ ] The change does not shift a maintenance burden or upstream downstream tasks. *Keep handlers generic, avoid overly downstream-specific or (for us) effectively dead code passages.*
 - [ ] I have assessed that the targeted use case cannot reasonably be satisfied by existing means, such as [Caller-provided data files][3], or the change forms a notable improvement over possible alternatives.
 - [ ] I believe the targeted use case is supported by pypdfium2-team. *Note that we may not want to support esoteric or artificially restricted setup envs.*
 

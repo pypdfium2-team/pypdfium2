@@ -1,8 +1,5 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
-
-# No external dependencies shall be imported in this file
-# TODO improve consistency of variable names; think about variables to move in/out
 
 import os
 import re
@@ -13,14 +10,12 @@ import tarfile
 import platform
 import functools
 import sysconfig
-import traceback
 import subprocess
 import contextlib
 from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
 
-# TODO(apibreak) consider renaming PDFIUM_PLATFORM to PDFIUM_BINARY ?
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
@@ -34,7 +29,6 @@ ModuleRaw          = "raw"
 ModuleHelpers      = "helpers"
 ModulesAll         = (ModuleRaw, ModuleHelpers)
 
-# NOTE if renaming BindingsFN, also rename `bindings/$FILE`
 BindingsFN = "bindings.py"
 VersionFN  = "version.json"
 
@@ -53,9 +47,6 @@ AR_RecordFile   = AutoreleaseDir / "record.json"
 AR_ConfigFile   = AutoreleaseDir / "config.json"
 RefBindingsFile = AutoreleaseDir / BindingsFN
 
-CondaDir = ProjectDir / "conda"
-CondaRaw_BuildNumF = CondaDir / "raw" / "build_num.txt"
-
 RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
 PdfiumURL      = "https://pdfium.googlesource.com/pdfium"
 DepotToolsURL  = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
@@ -63,30 +54,32 @@ ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
-
-# We endeavor to make the reference bindings as universal and robust as possible.
-# Thanks to symbol guards, we can define all standalone feature flags.
-# We don't currently define flags that depend on external headers, though it should be possible in principle by adding them to $CPATH (or equivalent).
-# Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
-REFBINDINGS_FLAGS = ["V8", "XFA", "SKIA"]
+REFBINDINGS_FLAGS = ("V8", "XFA", "SKIA")
 
 
-# TODO make SysNames/ExtPlats/PlatNames iterable, consider StrEnum or something
+# TODO consider StrEnum or something
 
 class SysNames:
-    linux   = "linux"
     darwin  = "darwin"
     windows = "windows"
+    linux   = "linux"
+    android = "android"
+    ios     = "ios"
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
-    system = "system"
-    sdist = "sdist"
+    system      = "system"
+    sdist       = "sdist"
 
-# TODO align with either python or google platform names?
 class PlatNames:
     # - Attribute names and values are expected to match
     # - Platform names are expected to start with the corresponding system name
+    darwin_x64       = SysNames.darwin  + "_x64"
+    darwin_arm64     = SysNames.darwin  + "_arm64"
+    darwin_universal = SysNames.darwin  + "_universal"
+    windows_x64      = SysNames.windows + "_x64"
+    windows_x86      = SysNames.windows + "_x86"
+    windows_arm64    = SysNames.windows + "_arm64"
     linux_x64        = SysNames.linux   + "_x64"
     linux_x86        = SysNames.linux   + "_x86"
     linux_arm64      = SysNames.linux   + "_arm64"
@@ -94,42 +87,70 @@ class PlatNames:
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
-    darwin_x64       = SysNames.darwin  + "_x64"
-    darwin_arm64     = SysNames.darwin  + "_arm64"
-    windows_x64      = SysNames.windows + "_x64"
-    windows_x86      = SysNames.windows + "_x86"
-    windows_arm64    = SysNames.windows + "_arm64"
+    android_arm64    = SysNames.android + "_arm64"       # device
+    android_arm32    = SysNames.android + "_arm32"       # device
+    android_x64      = SysNames.android + "_x64"         # emulator
+    android_x86      = SysNames.android + "_x86"         # emulator
+    ios_arm64_dev    = SysNames.ios     + "_arm64_dev"   # device
+    ios_arm64_simu   = SysNames.ios     + "_arm64_simu"  # simulator
+    ios_x64_simu     = SysNames.ios     + "_x64_simu"    # simulator
 
-
-ReleaseNames = {
-    PlatNames.darwin_x64       : "mac-x64",
-    PlatNames.darwin_arm64     : "mac-arm64",
-    PlatNames.linux_x64        : "linux-x64",
-    PlatNames.linux_x86        : "linux-x86",
-    PlatNames.linux_arm64      : "linux-arm64",
-    PlatNames.linux_arm32      : "linux-arm",
-    PlatNames.linux_musl_x64   : "linux-musl-x64",
-    PlatNames.linux_musl_x86   : "linux-musl-x86",
-    PlatNames.linux_musl_arm64 : "linux-musl-arm64",
-    PlatNames.windows_x64      : "win-x64",
-    PlatNames.windows_x86      : "win-x86",
-    PlatNames.windows_arm64    : "win-arm64",
+# Map platform names to the package names used by pdfium-binaries/google.
+PdfiumBinariesMap = {
+    PlatNames.darwin_x64:       "mac-x64",
+    PlatNames.darwin_arm64:     "mac-arm64",
+    PlatNames.windows_x64:      "win-x64",
+    PlatNames.windows_x86:      "win-x86",
+    PlatNames.windows_arm64:    "win-arm64",
+    PlatNames.linux_x64:        "linux-x64",
+    PlatNames.linux_x86:        "linux-x86",
+    PlatNames.linux_arm64:      "linux-arm64",
+    PlatNames.linux_arm32:      "linux-arm",
+    PlatNames.linux_musl_x64:   "linux-musl-x64",
+    PlatNames.linux_musl_x86:   "linux-musl-x86",
+    PlatNames.linux_musl_arm64: "linux-musl-arm64",
+    PlatNames.android_arm64:    "android-arm64",
 }
 
-LibnameForSystem = {
-    SysNames.linux:   "libpdfium.so",
-    SysNames.darwin:  "libpdfium.dylib",
-    SysNames.windows: "pdfium.dll",
-}
+# Capture the platforms we build wheels for
+WheelPlatforms = list(PdfiumBinariesMap.keys())
 
-BinaryPlatforms = list(ReleaseNames.keys())
-BinarySystems   = list(LibnameForSystem.keys())
+# Additional platforms we don't currently build wheels for in craft.py
+# To package these manually, you can do e.g. (in bash):
+# export PLATFORMS=(darwin_universal android_arm32 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
+# for PLAT in ${PLATFORMS[@]}; do echo $PLAT; ./run emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
+PdfiumBinariesMap.update({
+    PlatNames.darwin_universal: "mac-univ",
+    PlatNames.android_arm32:    "android-arm",
+    PlatNames.android_x64:      "android-x64",
+    PlatNames.android_x86:      "android-x86",
+    PlatNames.ios_arm64_dev:    "ios-device-arm64",
+    PlatNames.ios_arm64_simu:   "ios-simulator-arm64",
+    PlatNames.ios_x64_simu:     "ios-simulator-x64",
+})
 
 
-@functools.lru_cache(maxsize=2)
-def run_conda_search(package, channel):
-    output = run_cmd(["conda", "search", "--json", package, "--override-channels", "-c", channel], cwd=None, capture=True)
-    return json.loads(output)[package]
+# Map system to pdfium shared library name
+def libname_for_system(system):
+    if system == SysNames.windows:
+        return "pdfium.dll"
+    elif system in (SysNames.darwin, SysNames.ios):
+        return "libpdfium.dylib"
+    elif system in (SysNames.linux, SysNames.android):
+        return "libpdfium.so"
+    else:
+        # TODO fallback logic if system is None?
+        raise ValueError(f"Unhandled system {system!r}")
+
+AllLibnames = ["pdfium.dll", "libpdfium.dylib", "libpdfium.so"]
+
+
+if sys.version_info < (3, 8):
+    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
+    def cached_property(func):
+        return property( functools.lru_cache(maxsize=1)(func) )
+else:
+    cached_property = functools.cached_property
 
 
 class PdfiumVer:
@@ -143,25 +164,6 @@ class PdfiumVer:
         git_ls = run_cmd(["git", "ls-remote", f"{ReleaseRepo}.git"], cwd=None, capture=True)
         tag = git_ls.split("\t")[-1]
         return int( tag.split("/")[-1] )
-    
-    @staticmethod
-    @functools.lru_cache(maxsize=2)
-    def _get_latest_conda_for(package, channel, v_func):
-        search = run_conda_search(package, channel)
-        search = sorted(search, key=lambda d: v_func(d["version"]), reverse=True)
-        result = v_func(search[0]["version"])
-        print(f"Resolved latest {channel}::{package} to {result}", file=sys.stderr)
-        return result
-    
-    def get_latest_conda_pdfium():
-        return PdfiumVer._get_latest_conda_for(
-            "pdfium-binaries", "bblanchon", lambda v: int(v.split(".")[2])
-        )
-    
-    def get_latest_conda_bindings():
-        return PdfiumVer._get_latest_conda_for(
-            "pypdfium2_raw", "pypdfium2-team", lambda v: int(v)
-        )
     
     @classmethod
     def to_full(cls, v_short):
@@ -202,8 +204,8 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, build, origin, flags=[], n_commits=0, hash=None):
-    info = dict(**PdfiumVer.to_full(build)._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=flags)
+def write_pdfium_info(dir, build, origin, flags=(), n_commits=0, hash=None):
+    info = dict(**PdfiumVer.to_full(build)._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=list(flags))
     write_json(dir/VersionFN, info)
     return info
 
@@ -212,7 +214,7 @@ def parse_given_tag(full_tag):
     
     info = dict()
     
-    # NOTE `git describe --dirty` does not account for new unregistered files
+    # note, `git describe --dirty` ignores new unregistered files
     tag = full_tag
     dirty = tag.endswith("-dirty")
     if dirty:
@@ -242,7 +244,7 @@ def parse_git_tag():
 
 def merge_tag(info, mode):
     
-    # FIXME some duplication with src/pypdfium2/version.py
+    # some duplication with src/pypdfium2/version.py ...
     
     tag = ".".join([str(info[k]) for k in ("major", "minor", "patch")])
     if info['beta'] is not None:
@@ -267,15 +269,15 @@ def merge_tag(info, mode):
 
 def plat_to_system(pl_name):
     if pl_name == ExtPlats.sourcebuild:
-        # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downsteam with fallback value?
+        # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downstream with fallback value?
         return Host.system
-    # NOTE other ExtPlats not supported here
+    # other ExtPlats intentionally not handled here
     return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
 
 
 # platform.libc_ver() currently returns an empty string for musl, so use the packaging module to confirm.
 # See https://github.com/python/cpython/issues/87414 and https://github.com/pypa/packaging/blob/f13c298f0a623f3f7e01cc8395956b718d21503a/src/packaging/_musllinux.py#L32
-# NOTE could consider packaging.tags.sys_tags() as a possible public-API alternative - see https://packaging.pypa.io/en/stable/tags.html#packaging.tags.sys_tags or https://stackoverflow.com/a/75172415/15547292
+# (could consider packaging.tags.sys_tags() as a possible public-API alternative - see https://packaging.pypa.io/en/stable/tags.html#packaging.tags.sys_tags or https://stackoverflow.com/a/75172415/15547292)
 
 def _get_libc_info():
     
@@ -284,13 +286,20 @@ def _get_libc_info():
         # try to be future proof in case libc_ver() gets musl support but uses "muslc" rather than just "musl"
         name = "musl"
     elif name == "":
-        # TODO add test ensuring this continues to work
         import packaging._musllinux
         musl_ver = packaging._musllinux._get_musl_version(sys.executable)
         if musl_ver:
             name, ver = "musl", f"{musl_ver.major}.{musl_ver.minor}"
     
-    return name, ver
+    return name.lower(), ver
+
+
+def _android_api():
+    try:
+        # this is available since python 3.7 (i.e. earlier than PEP 738)
+        return sys.getandroidapilevel()
+    except AttributeError:
+        return None
 
 
 class _host_platform:
@@ -302,14 +311,24 @@ class _host_platform:
         self._system_name = platform.system().lower()
         self._machine_name = platform.machine().lower()
         
-        # If we are on Linux, check if we have glibc or musl
-        self._libc_name, self._libc_ver = _get_libc_info()
-        
-        # TODO consider cached property for platform and system
-        self.platform = self._get_platform()
-        self.system = None
+        # empty slots
+        self._libc_name, self._libc_ver = "", ""
+        self._exc = None
+    
+    @cached_property
+    def platform(self):
+        try:
+            return self._get_platform()
+        except Exception as e:
+            self._exc = e
+            return None
+    
+    @cached_property
+    def system(self):
         if self.platform is not None:
-            self.system = plat_to_system(self.platform)
+            return plat_to_system(self.platform)
+        else:
+            return None
     
     def __repr__(self):
         info = f"{self._system_name} {self._machine_name}"
@@ -317,31 +336,75 @@ class _host_platform:
             info += f", {self._libc_name} {self._libc_ver}"
         return f"<Host: {info}>"
     
-    def _is_plat(self, system, machine):
-        return self._system_name.startswith(system) and self._machine_name.startswith(machine)
+    def _handle_linux(self, archid):
+        if self._libc_name == "glibc":
+            return getattr(PlatNames, f"linux_{archid}")
+        elif self._libc_name == "musl":
+            return getattr(PlatNames, f"linux_musl_{archid}")
+        elif _android_api():  # seems to imply self._libc_name == "libc"
+            print("Android prior to PEP 738 (e.g. Termux)", file=sys.stderr)
+            return getattr(PlatNames, f"android_{archid}")
+        else:
+            raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
     
     def _get_platform(self):
-        # some machine names are merely "qualified guesses", mistakes can't be fully excluded for platforms we don't have access to
-        if self._is_plat("darwin", "x86_64"):
-            return PlatNames.darwin_x64
-        elif self._is_plat("darwin", "arm64"):
-            return PlatNames.darwin_arm64
-        elif self._is_plat("linux", "x86_64"):
-            return PlatNames.linux_x64 if self._libc_name != "musl" else PlatNames.linux_musl_x64
-        elif self._is_plat("linux", "i686"):
-            return PlatNames.linux_x86 if self._libc_name != "musl" else PlatNames.linux_musl_x86
-        elif self._is_plat("linux", "aarch64"):
-            return PlatNames.linux_arm64 if self._libc_name != "musl" else PlatNames.linux_musl_arm64
-        elif self._is_plat("linux", "armv7l"):
-            return PlatNames.linux_arm32
-        elif self._is_plat("windows", "amd64"):
-            return PlatNames.windows_x64
-        elif self._is_plat("windows", "arm64"):
-            return PlatNames.windows_arm64
-        elif self._is_plat("windows", "x86"):
-            return PlatNames.windows_x86
-        else:
-            return None
+        
+        # TODO 32-bit interpreters running on 64-bit machines?
+        
+        if self._system_name == "darwin":
+            # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
+            print(f"macOS {self._machine_name} {platform.mac_ver()}", file=sys.stderr)
+            if self._machine_name == "x86_64":
+                return PlatNames.darwin_x64
+            elif self._machine_name == "arm64":
+                return PlatNames.darwin_arm64
+        
+        elif self._system_name == "windows":
+            print(f"windows {self._machine_name} {platform.win32_ver()}", file=sys.stderr)
+            if self._machine_name == "amd64":
+                return PlatNames.windows_x64
+            elif self._machine_name == "x86":
+                return PlatNames.windows_x86
+            elif self._machine_name == "arm64":
+                return PlatNames.windows_arm64
+        
+        elif self._system_name == "linux":
+            self._libc_name, self._libc_ver = _get_libc_info()
+            print(f"linux {self._machine_name} {self._libc_name, self._libc_ver}", file=sys.stderr)
+            if self._machine_name == "x86_64":
+                return self._handle_linux("x64")
+            elif self._machine_name == "i686":
+                return self._handle_linux("x86")
+            elif self._machine_name == "aarch64":
+                return self._handle_linux("arm64")
+            elif self._machine_name == "armv7l":
+                if self._libc_name == "musl":
+                    raise RuntimeError(f"armv7l: musl not supported at this time.")
+                return self._handle_linux("arm32")
+        
+        elif self._system_name == "android":  # PEP 738
+            # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
+            print(f"android {self._machine_name} {sys.getandroidapilevel()} {platform.android_ver()}", file=sys.stderr)
+            if self._machine_name == "aarch64":
+                return PlatNames.android_arm64
+            elif self._machine_name == "armv7l":
+                return PlatNames.android_arm32
+            elif self._machine_name == "x86_64":
+                return PlatNames.android_x64
+            elif self._machine_name == "i686":
+                return PlatNames.android_x86
+        
+        elif self._system_name in ("ios", "ipados"):  # PEP 730
+            # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
+            ios_ver = platform.ios_ver()
+            print(f"{self._system_name} {self._machine_name} {ios_ver}", file=sys.stderr)
+            if self._machine_name == "arm64":
+                return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
+            elif self._machine_name == "x86_64":
+                assert ios_ver.is_simulator, "iOS x86_64 can only be simulator"
+                return PlatNames.ios_x64_simu
+        
+        raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
 
@@ -351,12 +414,25 @@ def _manylinux_tag(arch, glibc="2_17"):
     return f"manylinux_{glibc}_{arch}.manylinux2014_{arch}"
 
 def get_wheel_tag(pl_name):
+    
     if pl_name == PlatNames.darwin_x64:
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
+        # "intel" instead of "x86_64" might work too, but I think it's considered legacy
         return "macosx_10_13_x86_64"
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
+    elif pl_name == PlatNames.darwin_universal:
+        # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
+        return "macosx_10_13_universal2"
+    
+    elif pl_name == PlatNames.windows_x64:
+        return "win_amd64"
+    elif pl_name == PlatNames.windows_arm64:
+        return "win_arm64"
+    elif pl_name == PlatNames.windows_x86:
+        return "win32"
+    
     elif pl_name == PlatNames.linux_x64:
         return _manylinux_tag("x86_64")
     elif pl_name == PlatNames.linux_x86:
@@ -365,28 +441,46 @@ def get_wheel_tag(pl_name):
         return _manylinux_tag("aarch64")
     elif pl_name == PlatNames.linux_arm32:
         return _manylinux_tag("armv7l")
+    
     elif pl_name == PlatNames.linux_musl_x64:
         return "musllinux_1_1_x86_64"
     elif pl_name == PlatNames.linux_musl_x86:
         return "musllinux_1_1_i686"
     elif pl_name == PlatNames.linux_musl_arm64:
         return "musllinux_1_1_aarch64"
-    elif pl_name == PlatNames.windows_x64:
-        return "win_amd64"
-    elif pl_name == PlatNames.windows_arm64:
-        return "win_arm64"
-    elif pl_name == PlatNames.windows_x86:
-        return "win32"
+    
+    # Android - see PEP 738 # Packaging
+    # At this time, we only build wheels for android_arm64, but handle the others as well so the code is ready if we want to in the future (or in case callers want to build their own wheels)
+    elif pl_name == PlatNames.android_arm64:
+        return "android_21_arm64_v8a"
+    elif pl_name == PlatNames.android_arm32:
+        return "android_21_armeabi_v7a"
+    elif pl_name == PlatNames.android_x64:
+        return "android_21_x86_64"
+    elif pl_name == PlatNames.android_x86:
+        return "android_21_x86"
+    
+    # iOS - see PEP 730 # Packaging
+    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Bear in mind that the resulting iOS packages are currently completely untested. In particular, the PEP says
+    # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
+    # I take it this means you may need to change the library search path to that Frameworks location.
+    elif pl_name == PlatNames.ios_arm64_dev:
+        return "ios_12_0_arm64_iphoneos"
+    elif pl_name == PlatNames.ios_arm64_simu:
+        return "ios_12_0_arm64_iphonesimulator"
+    elif pl_name == PlatNames.ios_x64_simu:
+        return "ios_12_0_x86_64_iphonesimulator"
+    
+    # The sourcebuild clause is currently inactive; setup.py will simply forward the tag determined by bdist_wheel. Anyway, this should be roughly equivalent.
     elif pl_name == ExtPlats.sourcebuild:
-        # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
-        # The reason why we don't simply do `if Host.platform: return get_wheel_tag(Host.platform) else ...` is that version info for pdfium-binaries does not have to match the sourcebuild host.
-        # NOTE On Linux, this just returns f"linux_{arch}" (which is a valid wheel tag). Leave it as-is since we don't know the build's lowest compatible libc. The caller may re-tag using the wheel module's CLI.
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
+        # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         if tag.startswith("macosx") and tag.endswith("universal2"):
             tag = tag[:-len("universal2")] + Host._machine_name
         return tag
+    
     else:
-        raise ValueError(f"Unknown platform name {pl_name}")
+        raise ValueError(f"Unhandled platform name {pl_name}")
 
 
 def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
@@ -428,7 +522,7 @@ def tmp_cwd_context(tmp_cwd):
         os.chdir(orig_cwd)
 
 
-def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compile_lds=[], run_lds=["."], allow_system_despite_libdirs=False):
+def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False):
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
@@ -438,7 +532,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     args = ["-l", "pdfium"]
     if run_lds:
         args += ["--runtime-libdirs", *run_lds]
-        if not allow_system_despite_libdirs:
+        if not search_sys_despite_libdirs:
             args += ["--no-system-libsearch"]
     if compile_lds:
         args += ["--compile-libdirs", *compile_lds]
@@ -449,6 +543,8 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
     args += ["--no-macro-guards"]
     if not guard_symbols:
         args += ["--no-symbol-guards"]
+    if no_srcinfo:
+        args += ["--no-srcinfo"]
     
     # pre-processor - if not given, pypdfium2-ctypesgen will try to auto-select as available (gcc/clang)
     c_preproc = os.environ.get("CPP", None)
@@ -473,7 +569,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=[], guard_symbols=False, compil
 
 
 def build_pdfium_bindings(version, headers_dir=None, **kwargs):
-    defaults = dict(flags=[], run_lds=["."], guard_symbols=False)
+    defaults = dict(flags=(), run_lds=(".", ), guard_symbols=False)
     for k, v in defaults.items():
         kwargs.setdefault(k, v)
     
@@ -541,7 +637,7 @@ def clean_platfiles():
         ModuleDir_Raw / BindingsFN,
         ModuleDir_Raw / VersionFN,
     ]
-    deletables += [ModuleDir_Raw / fn for fn in LibnameForSystem.values()]
+    deletables += [ModuleDir_Raw / fn for fn in AllLibnames]
     
     for fp in deletables:
         if fp.is_file():
@@ -552,15 +648,15 @@ def clean_platfiles():
 
 def get_helpers_info():
     
-    # TODO consider adding some checks against record
+    # TODO add some checks against record?
     
     have_git_describe = False
     if HAVE_GIT_REPO:
         try:
             helpers_info = parse_git_tag()
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as e:
+            print(str(e), file=sys.stderr)
             print("Version uncertain: git describe failure - possibly a shallow checkout", file=sys.stderr)
-            traceback.print_exc()
         else:
             have_git_describe = True
             helpers_info["data_source"] = "git"
@@ -586,16 +682,16 @@ def build_pl_suffix(version, use_v8):
     return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
 
 
-def parse_pl_spec(pl_spec, with_prepare=True):
+def parse_pl_spec(pl_spec):
     
     # TODOs
     # - targets integration is inflexible, need to restructure
     # - add way to pass through package provider with system target?
-    # - variable name with_prepare is confusing
     
+    do_prepare = True
     if pl_spec.startswith("prepared!"):
-        _, pl_spec = pl_spec.split("!", maxsplit=1)
-        return parse_pl_spec(pl_spec, with_prepare=False)
+        pl_spec = pl_spec[len("prepared!"):]  # removeprefix
+        do_prepare = False
     
     req_ver = None
     use_v8 = False
@@ -608,7 +704,8 @@ def parse_pl_spec(pl_spec, with_prepare=True):
     if not pl_spec or pl_spec == "auto":
         pl_name = Host.platform
         if pl_name is None:
-            raise RuntimeError(f"No pre-built binaries available for {Host}. You may place custom binaries & bindings in data/sourcebuild and install with `{PlatSpec_EnvVar}=sourcebuild`.")
+            # delegate handling of unknown platforms to the caller (setup.py)
+            return None
     elif hasattr(ExtPlats, pl_spec):
         pl_name = getattr(ExtPlats, pl_spec)
     elif hasattr(PlatNames, pl_spec):
@@ -620,10 +717,10 @@ def parse_pl_spec(pl_spec, with_prepare=True):
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
     else:
-        assert pl_name != ExtPlats.system and with_prepare, "Version must be given explicitly for system or prepared!... targets"
+        assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
         req_ver = PdfiumVer.get_latest()
     
-    return with_prepare, pl_name, req_ver, use_v8
+    return do_prepare, pl_name, req_ver, use_v8
 
 
 def parse_modspec(modspec):
@@ -634,3 +731,18 @@ def parse_modspec(modspec):
     else:
         modnames = ModulesAll
     return modnames
+
+
+def get_next_changelog(flush=False):
+    
+    content = ChangelogStaging.read_text()
+    pos = content.index("\n", content.index("# Changelog")) + 1
+    header = content[:pos].strip() + "\n"
+    devel_msg = content[pos:].strip()
+    if devel_msg:
+        devel_msg += "\n"
+    
+    if flush:
+        ChangelogStaging.write_text(header)
+    
+    return devel_msg

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
 {% set pdfium_max = environ["PDFIUM_MAX"] %}
@@ -31,11 +31,12 @@ requirements:
     - wheel !=0.38.0,!=0.38.1
   run:
     # -- Reasons for pdfium version bounds --
-    # >6164 : API-breaking changes to ctypesgen
+    # >6635 (effectively >=6638) : new pdfium errchecks
+    # (before that: >6164 : API-breaking changes to ctypesgen)
     # !=6219 : Blacklisted due to https://crbug.com/pdfium/2112 (6205 is also affected, but not on conda due to monthly schedule)
     # <={{ pdfium_max }} : Prevents future versions for API safety reasons
     - python
-    - pypdfium2-team::pypdfium2_raw >6164,!=6219,<={{ pdfium_max }}
+    - pypdfium2-team::pypdfium2_raw >6635,!=6219,<={{ pdfium_max }}
 
 test:
   requires:

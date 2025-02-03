@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Main packaging
@@ -64,13 +64,14 @@ jobs:
       
       # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
       # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
+      # In the future, we might want to move away from using a git branch & tag at this stage, and instead transfer the changes as a patchfile.
       - name: Run autorelease script
         run: |
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
           git reset --hard HEAD
+          # autorelease.py --register automatically switches us onto the autorelease_tmp branch
           python3 setupsrc/pypdfium2_setup/autorelease.py --register
-          git checkout autorelease_tmp
       
       - name: Get new version
         id: get_version
@@ -110,11 +111,13 @@ jobs:
       fail-fast: false
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-        os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']
-        py: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-14', 'windows-latest']
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
         include:
           - os: ubuntu-latest
             wheel: dist/*manylinux_*_x86_64*.whl
+          - os: ubuntu-24.04-arm
+            wheel: dist/*manylinux_*_aarch64*.whl
           - os: macos-13
             wheel: dist/*macosx_*_x86_64*.whl
           - os: macos-14
@@ -145,8 +148,12 @@ jobs:
       
       - name: Install dependencies
         run: |
-          python3 -m pip install -U pip setuptools
-          python3 -m pip install -U pytest pillow numpy wheel
+          python3 -m pip install -U pip setuptools auditwheel
+          python3 -m pip install -U pytest pillow numpy
+      
+      - name: Run auditwheel (informational)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: python3 -m auditwheel show ${{ matrix.wheel }}
       
       - name: Install pypdfium2 from artifact
         run: python3 -m pip install ${{ matrix.wheel }}
@@ -222,6 +229,7 @@ jobs:
         with:
           packages-dir: dist/  # the default
       
+      # TODO make sure RELEASE.md is less than 125000 chars, otherwise attach it as an artifact and write a new body pointing out the attachment. We've been hit by this limit in v4.30.1, due to an excessively long pdfium commit log.
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
         with:
@@ -251,6 +259,7 @@ jobs:
             {
               "package": "helpers",
               "pdfium_ver": "latest",
+              "new_only": "false",
               "test": "true",
               "publish": "${{ inputs.publish }}",
               "py_version": "3.12"

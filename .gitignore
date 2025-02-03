@@ -1,11 +1,10 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
 build/
 dist/
 conda/*/out/
 tests/output/
-tests_old/output/
 
 data/
 !data/.gitkeep

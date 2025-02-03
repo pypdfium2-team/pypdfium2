@@ -1,4 +1,4 @@
-.. SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+.. SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 .. SPDX-License-Identifier: CC-BY-4.0
 
 Shell API
@@ -46,8 +46,8 @@ Image Converter
 .. command-output:: pypdfium2 imgtopdf --help
 
 
-Page Objects Info
-*****************
+Pageobjects Info
+****************
 .. command-output:: pypdfium2 pageobjects --help
 
 

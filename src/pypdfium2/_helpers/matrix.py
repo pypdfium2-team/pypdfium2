@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 __all__ = ("PdfMatrix", )
@@ -7,10 +7,8 @@ import math
 import ctypes
 import pypdfium2.raw as pdfium_c
 
-
-# TODO consider adding PdfRectangle support model to calculate size and corner points
-# NOTE the code below was written by a non-mathematician - might contain mistakes!
-
+# Note, the code below was written by a non-mathematician - might contain mistakes!
+# In the future, we may want to consider adding a PdfRectangle support model to calculate size and corner points.
 
 class PdfMatrix:
     """
@@ -21,7 +19,7 @@ class PdfMatrix:
     Note:
         * The PDF format uses row vectors.
         * Transformations operate from the origin of the coordinate system
-          (PDF coordinates: bottom left corner, Device coordinates: top left corner).
+          (PDF coordinates: commonly bottom left, but can be any corner in principle. Device coordinates: top left).
         * Matrix calculations are implemented independently in Python.
         * Matrix objects are immutable, so transforming methods return a new matrix.
         * Matrix objects implement ctypes auto-conversion to ``FS_MATRIX`` for easy use as C function parameter.
@@ -40,16 +38,13 @@ class PdfMatrix:
     def __init__(self, a=1, b=0, c=0, d=1, e=0, f=0):
         self.a, self.b, self.c, self.d, self.e, self.f = a, b, c, d, e, f
     
-    
     def __repr__(self):
         return f"PdfMatrix{self.get()}"
-    
     
     def __eq__(self, other):
         if type(self) is not type(other):
             return False
-        return (self.get() == other.get())
-    
+        return self.get() == other.get()
     
     @property
     def _as_parameter_(self):
@@ -91,6 +86,7 @@ class PdfMatrix:
             b = self.a*other.b + self.b*other.d,
             c = self.c*other.a + self.d*other.c,
             d = self.c*other.b + self.d*other.d,
+            # corresponds to: e, f = other.on_point(self.e, self.f) - transforms X/Y translation
             e = self.e*other.a + self.f*other.c + other.e,
             f = self.e*other.b + self.f*other.d + other.f,
         )
@@ -129,13 +125,15 @@ class PdfMatrix:
         return self.multiply( PdfMatrix(c, s, -s, c) if ccw else PdfMatrix(c, -s, s, c) )
     
     
-    def mirror(self, v, h):
+    def mirror(self, invert_x, invert_y):
         """
         Parameters:
-            v (bool): Whether to mirror vertically (at the Y axis).
-            h (bool): Whether to mirror horizontall (at the X axis).
+            invert_x (bool): If True, invert X coordinates (horizontal transform). Corresponds to flipping around the Y axis.
+            invert_y (bool): If True, invert Y coordinates (vertical transform). Corresponds to flipping around the X axis.
+        Note:
+            Flipping around a vertical axis leads to a horizontal transform, and vice versa.
         """
-        return self.scale(x=(-1 if v else 1), y=(-1 if h else 1))
+        return self.scale(x=(-1 if invert_x else 1), y=(-1 if invert_y else 1))
     
     
     def skew(self, x_angle, y_angle, rad=False):
@@ -174,7 +172,6 @@ class PdfMatrix:
             self.on_point(right, top),
             self.on_point(right, bottom),
         )
-        # NOTE maybe a single loop with min/max x/y vars and </> comparisons would be more efficient...
         return (  # new rect
             min(p[0] for p in points),  # left
             min(p[1] for p in points),  # bottom

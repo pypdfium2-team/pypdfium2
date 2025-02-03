@@ -1,9 +1,8 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
-# TODO? consider dotted access
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,

@@ -1,11 +1,10 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from enum import Enum
 from pathlib import Path
 import pypdfium2.raw as pdfium_c
 import pypdfium2._helpers as pdfium
-# TODO? consider dotted access
 from pypdfium2._cli._parsers import add_input, get_input
 
 
@@ -49,7 +48,7 @@ def attach(parser):
         required = True,
         help = "Number of columns (vertical tiles)",
     )
-    # NOTE no short aliases for width and height since -h would confilct with argparse help
+    # NOTE no short aliases for width and height since -h would conflict with argparse help
     parser.add_argument(
         "--width",
         type = float,

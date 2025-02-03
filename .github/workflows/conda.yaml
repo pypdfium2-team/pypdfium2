@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Conda packaging
@@ -14,6 +14,10 @@ on:
       pdfium_ver:
         default: 'latest'
         type: string
+      new_only:
+        # only with package == "raw", ignored otherwise (actually the default should be false in that case, but I don't know if GH supports dynamic defaults depending on other inputs)
+        default: true
+        type: boolean
       test:
         default: true
         type: boolean
@@ -62,8 +66,15 @@ jobs:
           git config --global user.name "geisserml"
           python -m pip install -U -r req/setup.txt
       
+      # TODO might be able to unify with ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }} or something
+      
       - name: Build package
-        run: ./run craft --pdfium-ver "${{ inputs.pdfium_ver }}" conda_${{ inputs.package }}
+        if: ${{ inputs.package == 'helpers' || !inputs.new_only }}
+        run: ./run craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }}
+      
+      - name: Build package (new only)
+        if: ${{ inputs.package == 'raw' && inputs.new_only }}
+        run: ./run craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }} --new-only
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -80,8 +91,8 @@ jobs:
       fail-fast: false
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-        os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']
-        py: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-14', 'windows-latest']
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
     
     runs-on: ${{ matrix.os }}
     
@@ -121,7 +132,7 @@ jobs:
         run: |
           conda install -y pytest pillow numpy
           conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c pypdfium2-team -c bblanchon -c defaults
-          pytest tests/ tests_old/
+          pytest tests/
   
   publish:
     

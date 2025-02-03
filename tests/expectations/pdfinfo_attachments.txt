@@ -1,3 +1,4 @@
+Unsupported PDF feature: Attachment (incomplete support)
 Page Count: 1
 PDF Version: 1.6
 ID (permanent): b'\xd8\x89\xebk\x9a\xdf\x88\xe5\xed\xa7\xdc\x08\xfe\x85\x97'

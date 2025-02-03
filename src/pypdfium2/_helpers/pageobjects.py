@@ -1,10 +1,11 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 __all__ = ("PdfObject", "PdfImage")
 
 import ctypes
 from ctypes import c_uint, c_float
+import logging
 from pathlib import Path
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
@@ -12,19 +13,20 @@ import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
+from pypdfium2._deferred import PIL_Image
 
-try:
-    import PIL.Image
-except ImportError:
-    PIL = None
+logger = logging.getLogger(__name__)
 
 
 class PdfObject (pdfium_i.AutoCloseable):
     """
-    Page object helper class.
+    Pageobject helper class.
     
-    When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead,
-    depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
+    When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead, depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
+    
+    Note:
+        :meth:`.PdfObject.close` only takes effect on loose pageobjects.
+        It is a no-op otherwise, because pageobjects that are part of a page are owned by pdfium, not the caller.
     
     Attributes:
         raw (FPDF_PAGEOBJECT):
@@ -32,7 +34,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         type (int):
             The object's type (:data:`FPDF_PAGEOBJ_*`).
         page (PdfPage):
-            Reference to the page this pageobject belongs to. May be None if it does not belong to a page yet.
+            Reference to the page this pageobject belongs to. May be None if not part of a page (e.g. new or detached object).
         pdf (PdfDocument):
             Reference to the document this pageobject belongs to. May be None if the object does not belong to a document yet.
             This attribute is always set if :attr:`.page` is set.
@@ -56,7 +58,10 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     def __init__(self, raw, page=None, pdf=None, level=0):
         
-        self.raw, self.page, self.pdf, self.level = raw, page, pdf, level
+        self.raw = raw
+        self.page = page
+        self.pdf = pdf
+        self.level = level
         
         if page is not None:
             if self.pdf is None:
@@ -73,15 +78,15 @@ class PdfObject (pdfium_i.AutoCloseable):
         return self.pdf if self.page is None else self.page
     
     
-    def get_pos(self):
+    def get_bounds(self):
         """
-        Get the position of the object on the page.
+        Get the bounds of the object on the page.
         
         Returns:
-            A tuple of four :class:`float` coordinates for left, bottom, right, and top.
+            tuple[float * 4]: Left, bottom, right and top, in PDF page coordinates.
         """
         if self.page is None:
-            raise RuntimeError("Must not call get_pos() on a loose pageobject.")
+            raise RuntimeError("Must not call get_bounds() on a loose pageobject.")
         
         l, b, r, t = c_float(), c_float(), c_float(), c_float()
         ok = pdfium_c.FPDFPageObj_GetBounds(self, l, b, r, t)
@@ -89,6 +94,30 @@ class PdfObject (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to locate pageobject.")
         
         return (l.value, b.value, r.value, t.value)
+    
+    
+    def get_quad_points(self):
+        """
+        Get the object's quadriliteral points (i.e. the positions of its corners).
+        For transformed objects, this may provide tighter bounds than a rectangle (e.g. rotation by a non-multiple of 90°, shear).
+        
+        Note:
+            This function only supports image and text objects.
+        
+        Returns:
+            tuple[tuple[float*2] * 4]: Corner positions as (x, y) tuples, counter-clockwise from origin, i.e. bottom-left, bottom-right, top-right, top-left, in PDF page coordinates.
+        """
+        
+        if self.type not in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
+            # as of pdfium 5921
+            raise RuntimeError("Quad points only supported for image and text objects.")
+        
+        q = pdfium_c.FS_QUADPOINTSF()
+        ok = pdfium_c.FPDFPageObj_GetRotatedBounds(self, q)
+        if not ok:
+            raise PdfiumError("Failed to get quad points.")
+        
+        return (q.x1, q.y1), (q.x2, q.y2), (q.x3, q.y3), (q.x4, q.y4)
     
     
     def get_matrix(self):
@@ -116,20 +145,20 @@ class PdfObject (pdfium_i.AutoCloseable):
     def transform(self, matrix):
         """
         Parameters:
-            matrix (PdfMatrix): Multiply the page object's current transform matrix by this matrix.
+            matrix (PdfMatrix): Multiply the pageobject's current transform matrix by this matrix.
         """
-        pdfium_c.FPDFPageObj_Transform(self, *matrix.get())
+        ok = pdfium_c.FPDFPageObj_TransformF(self, matrix)
+        if not ok:
+            raise PdfiumError("Failed to transform pageobject with matrix.")
 
-
-# In principle, we would like to move PdfImage to a separate file, but it's not that easy because of the two-fold connection with PdfObject, which would run us into a circular import. (However, what we could do is externalize the class under a different name and turn PdfImage into a wrapper which merely inherits from that class.)
 
 class PdfImage (PdfObject):
     """
-    Image object helper class (specific kind of page object).
+    Image object helper class (specific kind of pageobject).
     """
     
     # cf. https://crbug.com/pdfium/1203
-    #: Filters applied by :func:`FPDFImageObj_GetImageDataDecoded`. Hereafter referred to as "simple filters", while non-simple filters will be called "complex filters".
+    #: Filters applied by :func:`FPDFImageObj_GetImageDataDecoded`, referred to as "simple filters". Other filters are considered "complex filters".
     SIMPLE_FILTERS = ("ASCIIHexDecode", "ASCII85Decode", "RunLengthDecode", "FlateDecode", "LZWDecode")
     
     
@@ -141,7 +170,7 @@ class PdfImage (PdfObject):
         Returns:
             PdfImage: Handle to a new, empty image.
             Note that position and size of the image are defined by its matrix, which defaults to the identity matrix.
-            This means that new images will appear as a tiny square of 1x1 units on the bottom left corner of the page.
+            This means that new images will appear as a tiny square of 1x1 canvas units on the bottom left corner of the page.
             Use :class:`.PdfMatrix` and :meth:`.set_matrix` to adjust size and position.
         """
         raw_img = pdfium_c.FPDFPageObj_NewImageObj(pdf)
@@ -155,7 +184,7 @@ class PdfImage (PdfObject):
         
         Note:
             * The DPI values signify the resolution of the image on the PDF page, not the DPI metadata embedded in the image file.
-            * Due to issues in PDFium, this function can be slow. If you only need image size, prefer the faster :meth:`.get_size` instead.
+            * Due to issues in pdfium, this function might be slow on some kinds of images. If you only need size, prefer :meth:`.get_px_size` instead.
         
         Returns:
             FPDF_IMAGEOBJ_METADATA: Image metadata structure
@@ -168,10 +197,8 @@ class PdfImage (PdfObject):
         return metadata
     
     
-    def get_size(self):
+    def get_px_size(self):
         """
-        .. versionadded:: 4.8/5731
-        
         Returns:
             (int, int): Image dimensions as a tuple of (width, height).
         """
@@ -189,7 +216,7 @@ class PdfImage (PdfObject):
         
         Parameters:
             source (str | pathlib.Path | typing.BinaryIO):
-                Input JPEG, given as file path or readable byte buffer.
+                Input JPEG, given as file path or readable byte stream.
             pages (list[PdfPage] | None):
                 If replacing an image, pass in a list of loaded pages that might contain it, to update their cache.
                 (The same image may be shown multiple times in different transforms across a PDF.)
@@ -207,10 +234,11 @@ class PdfImage (PdfObject):
         elif pdfium_i.is_buffer(source, "r"):
             buffer = source
         else:
-            raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte buffer.")
+            raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte stream.")
         
         bufaccess, to_hold = pdfium_i.get_bufreader(buffer)
-        loader = pdfium_c.FPDFImageObj_LoadJpegFileInline if inline else pdfium_c.FPDFImageObj_LoadJpegFile
+        loader = pdfium_c.FPDFImageObj_LoadJpegFileInline if inline else \
+                 pdfium_c.FPDFImageObj_LoadJpegFile
         
         c_pages, page_count = pdfium_i.pages_c_array(pages)
         ok = loader(c_pages, page_count, self, bufaccess)
@@ -245,40 +273,77 @@ class PdfImage (PdfObject):
             raise PdfiumError("Failed to set image to bitmap.")
     
     
-    def get_bitmap(self, render=False):
+    def get_bitmap(self, render=False, scale_to_original=True):
         """
         Get a bitmap rasterization of the image.
         
         Parameters:
             render (bool):
                 Whether the image should be rendered, thereby applying possible transform matrices and alpha masks.
+            scale_to_original (bool):
+                If *render* is True, whether to temporarily scale the image to its native resolution, or close to that (defaults to True). This should improve output quality. Ignored if *render* is False.
         Returns:
             PdfBitmap: Image bitmap (with a buffer allocated by PDFium).
         """
         
         if render:
             if self.pdf is None:
-                raise RuntimeError("Cannot get rendered bitmap of loose page object.")
-            raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
+                raise RuntimeError("Cannot get rendered bitmap of loose pageobject.")
+            
+            if scale_to_original:
+                # Suggested by pdfium dev Lei Zhang in https://groups.google.com/g/pdfium/c/2czGFBcWHHQ/m/g0wzOJR-BAAJ
+                
+                px_w, px_h = self.get_px_size()
+                l, b, r, t = self.get_bounds()
+                content_w, content_h = r-l, t-b
+                
+                # align pixel and content width/height relation if swapped due to rotation (e.g. 90°, 270°)
+                swap = (px_w < px_h) != (content_w < content_h)
+                if swap:
+                    px_w, px_h = px_h, px_w
+                
+                # if the image is squashed/stretched, prefer partial upscaling over partial downscaling (not using separate x/y scaling, so the image will look as in the PDF)
+                scale_factor = max(px_w/content_w, px_h/content_h)
+                orig_mat = self.get_matrix()
+                scaled_mat = orig_mat.scale(scale_factor, scale_factor)
+                self.set_matrix(scaled_mat)
+                # logger.debug(
+                #     f"Pixel size: {px_w}, {px_h} (did swap? {swap})\n"
+                #     f"Size in page coords: {content_w}, {content_h}\n"
+                #     f"Scale: {scale_factor}\n"
+                #     f"Current matrix: {orig_mat}\n"
+                #     f"Scaled matrix: {scaled_mat}"
+                # )
+            
+            try:
+                raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
+            finally:
+                if scale_to_original:
+                    self.set_matrix(orig_mat)
         else:
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)
         
-        if raw_bitmap is None:
+        if not raw_bitmap:
             raise PdfiumError(f"Failed to get bitmap of image {self}.")
         
-        return PdfBitmap.from_raw(raw_bitmap)
+        bitmap = PdfBitmap.from_raw(raw_bitmap)
+        if render and scale_to_original:
+            logger.debug(f"Extracted size: {bitmap.width}, {bitmap.height}")
+        
+        return bitmap
     
     
     def get_data(self, decode_simple=False):
         """
         Parameters:
             decode_simple (bool):
-                If True, apply simple filters, resulting in semi-decoded data (see :attr:`.SIMPLE_FILTERS`).
-                Otherwise, the raw data will be returned.
+                If True, decode simple filters (see :attr:`.SIMPLE_FILTERS`), so only complex filters will remain, if any. If there are no complex filters, this provides the decoded pixel data.
+                If False, the raw stream data will be returned instead.
         Returns:
             ctypes.Array: The data of the image stream (as :class:`~ctypes.c_ubyte` array).
         """
-        func = pdfium_c.FPDFImageObj_GetImageDataDecoded if decode_simple else pdfium_c.FPDFImageObj_GetImageDataRaw
+        func = pdfium_c.FPDFImageObj_GetImageDataDecoded if decode_simple else \
+               pdfium_c.FPDFImageObj_GetImageDataRaw
         n_bytes = func(self, None, 0)
         buffer = (ctypes.c_ubyte * n_bytes)()
         func(self, buffer, n_bytes)
@@ -302,31 +367,33 @@ class PdfImage (PdfObject):
             buffer = ctypes.create_string_buffer(length)
             pdfium_c.FPDFImageObj_GetImageFilter(self, i, buffer, length)
             f = buffer.value.decode("utf-8")
-            if skip_simple and f in self.SIMPLE_FILTERS:
-                continue
             filters.append(f)
+        
+        if skip_simple:
+            filters = [f for f in filters if f not in self.SIMPLE_FILTERS]
         
         return filters
     
     
     def extract(self, dest, *args, **kwargs):
-        # TODO rewrite/simplify docstring
         """
-        Extract the image into an independently usable file or byte buffer.
-        Where possible within PDFium's limited public API, it will be attempted to transfer the image data directly,
-        avoiding an unnecessary layer of decoding and re-encoding.
-        Otherwise, the fully decoded data will be retrieved and (re-)encoded using :mod:`PIL`.
+        Extract the image into an independently usable file or byte stream, attempting to avoid re-encoding or quality loss, as far as pdfium's limited API permits.
         
-        As PDFium does not expose all required information, only DCTDecode (JPEG) and JPXDecode (JPEG 2000) images can be extracted directly.
-        For images with complex filters, the bitmap data is used. Otherwise, ``get_data(decode_simple=True)`` is used, which avoids lossy conversion for images whose bit depth or colour format is not supported by PDFium's bitmap implementation.
+        This method can only extract DCTDecode (JPEG) and JPXDecode (JPEG 2000) images directly.
+        Otherwise, the pixel data is decoded and re-encoded using :mod:`PIL`, which is slower and loses the original encoding.
+        For images with simple filters only, ``get_data(decode_simple=True)`` is used to preserve higher bit depth or special color formats not supported by ``FPDF_BITMAP``.
+        For images with complex filters other than those extracted directly, we have to resort to :meth:`.get_bitmap`.
+        
+        Note, this method is not able to account for alpha masks, and potentially other data stored separately of the main image stream, which might lead to incorrect representation of the image.
+        
+        Tip:
+            The ``pikepdf`` library is capable of preserving the original encoding in many cases where this method is not.
         
         Parameters:
-            dest (str | io.BytesIO):
-                File prefix or byte buffer to which the image shall be written.
+            dest (str | pathlib.Path | io.BytesIO):
+                File path prefix or byte stream to which the image shall be written.
             fb_format (str):
                 The image format to use in case it is necessary to (re-)encode the data.
-            fb_render (bool):
-                Whether the image should be rendered if falling back to bitmap-based extraction.
         """
         
         # https://crbug.com/pdfium/1930
@@ -350,36 +417,33 @@ class ImageNotExtractableError (Exception):
     pass
 
 
-def _get_pil_mode(colorspace, bpp):
-    # In theory, indexed (palettized) and ICC-based color spaces could be handled as well, but PDFium currently does not provide access to the palette or the ICC profile
-    if colorspace == pdfium_c.FPDF_COLORSPACE_DEVICEGRAY:
-        if bpp == 1:
-            return "1"
-        else:
-            return "L"
-    elif colorspace == pdfium_c.FPDF_COLORSPACE_DEVICERGB:
+def _get_pil_mode(cs, bpp):
+    # As of Jan 2025, pdfium does not provide access to the palette, so we cannot handle indexed (palettized) color space.
+    # TODO handle ICC-based color spaces (pdfium now provides access to the ICC profile via FPDFImageObj_GetIccProfileDataDecoded(), see commit edd7c5cf)
+    if cs == pdfium_c.FPDF_COLORSPACE_DEVICEGRAY:
+        return "1" if bpp == 1 else "L"
+    elif cs == pdfium_c.FPDF_COLORSPACE_DEVICERGB:
         return "RGB"
-    elif colorspace == pdfium_c.FPDF_COLORSPACE_DEVICECMYK:
+    elif cs == pdfium_c.FPDF_COLORSPACE_DEVICECMYK:
         return "CMYK"
     else:
         return None
 
 
-def _extract_smart(image_obj, fb_format=None, fb_render=False):
-    
-    # FIXME somewhat hard to read...
+def _extract_smart(image_obj, fb_format=None):
     
     try:
+        # TODO can we change PdfImage.get_data() to take an mmap, so the data could be written directly into a file rather than an in-memory array?
         data, info = _extract_direct(image_obj)
     except ImageNotExtractableError:
-        # TODO? log reason why the image cannot be extracted directly
-        pil_image = image_obj.get_bitmap(render=fb_render).to_pil()
+        # TODO log reason why the image cannot be extracted directly?
+        pil_image = image_obj.get_bitmap(render=False).to_pil()
     else:
         pil_image = None
         format = info.format
         if format == "raw":
             metadata = info.metadata
-            pil_image = PIL.Image.frombuffer(
+            pil_image = PIL_Image.frombuffer(
                 info.mode,
                 (metadata.width, metadata.height),
                 image_obj.get_data(decode_simple=True),
@@ -387,7 +451,9 @@ def _extract_smart(image_obj, fb_format=None, fb_render=False):
             )
     
     if pil_image:
-        format = fb_format if fb_format else "tiff" if pil_image.mode == "CMYK" else "png"
+        format = fb_format
+        if not format:
+            format = {"CMYK": "tiff"}.get(pil_image.mode, "png")
     
     buffer = yield format
     pil_image.save(buffer, format=format) if pil_image else buffer.write(data)

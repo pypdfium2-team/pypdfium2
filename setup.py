@@ -1,25 +1,24 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE Unfortunately, pip may run setup.py multiple times with different commands (dist_info, bdist_wheel).
-# However, guarding code depending on command is tricky. You'd need to be careful not to cause inconsistent data. Also, it's hard to tell which command runs first because other tools (e.g. build) may run just bdist_wheel.
+# See also https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it and https://github.com/innodatalabs/redstork/blob/master/setup.py
 
 import os
 import sys
 from pathlib import Path
 import setuptools
+from setuptools.command.build_py import build_py as build_py_orig
 try:
     from setuptools.command.bdist_wheel import bdist_wheel
 except ImportError:
     from wheel.bdist_wheel import bdist_wheel
-from setuptools.command.build_py import build_py as build_py_orig
 
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
+from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
-from pypdfium2_setup.packaging_base import *
 
 
-# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This also sets `Root-Is-Purelib: false` in the WHEEL file.
+# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
 
 class BinaryDistribution (setuptools.Distribution):
     
@@ -33,9 +32,17 @@ def bdist_factory(pl_name):
         
         def finalize_options(self, *args, **kws):
             bdist_wheel.finalize_options(self, *args, **kws)
+            # should be handled by the distclass already, but set it again to be on the safe side
+            self.root_is_pure = False
         
         def get_tag(self, *args, **kws):
-            return "py3", "none", get_wheel_tag(pl_name)
+            if pl_name == ExtPlats.sourcebuild:
+                # if using the sourcebuild target, forward the native tag
+                # alternatively, the sourcebuild clause in get_wheel_tag() should be roughly equivalent (it uses sysconfig.get_platform() directly)
+                _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
+            else:
+                plat_tag = get_wheel_tag(pl_name)
+            return "py3", "none", plat_tag
     
     return pypdfium_bdist
 
@@ -43,14 +50,12 @@ def bdist_factory(pl_name):
 class pypdfium_build_py (build_py_orig):
         
     def run(self, *args, **kwargs):
-        
         if hasattr(self, "editable_mode"):
             helpers_info = read_json(ModuleDir_Helpers/VersionFN)
             helpers_info["is_editable"] = bool(self.editable_mode)
             write_json(ModuleDir_Helpers/VersionFN, helpers_info)
         else:
-            print("!!! Warning: cmdclass does not provide `editable_mode` attribute. Please file a bug report.")
-        
+            print("!!! Warning: cmdclass does not provide `editable_mode` attribute.")
         build_py_orig.run(self, *args, **kwargs)
 
 
@@ -63,14 +68,14 @@ LICENSES_SHARED = (
 )
 LICENSES_WHEEL = (
     "LICENSES/LicenseRef-PdfiumThirdParty.txt",
-    ".reuse/dep5-wheel",
+    "REUSE-wheel.toml",
 )
 LICENSES_SDIST = (
     "LICENSES/LicenseRef-FairUse.txt",
-    ".reuse/dep5",
+    "REUSE.toml",
 )
 
-PLATFILES_GLOB = [BindingsFN, VersionFN, *LibnameForSystem.values()]
+PLATFILES_GLOB = [BindingsFN, VersionFN, *AllLibnames]
 
 
 def assert_exists(dir, data_files):
@@ -93,8 +98,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
         install_requires = [],
     )
     
-    if modnames == [ModuleHelpers] and pl_name != ExtPlats.sdist:
-        # do not do this for sdist (none)
+    if modnames == [ModuleHelpers]:
         kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
         kwargs["install_requires"] += ["pypdfium2_raw"]
@@ -107,7 +111,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
         helpers_info = get_helpers_info()
         if pl_name == ExtPlats.sdist:
             if helpers_info["dirty"]:
-                # ignore dirty state due to craft_packages::tmp_ctypesgen_pin()
+                # ignore dirty state due to craft.py::tmp_ctypesgen_pin()
                 if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
                     helpers_info["dirty"] = False
             else:
@@ -131,10 +135,10 @@ def run_setup(modnames, pl_name, pdfium_ver):
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
         sys_name = plat_to_system(pl_name)
-        libname = LibnameForSystem[sys_name]
+        libname = libname_for_system(sys_name)
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
-        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["distclass"] = BinaryDistribution
+        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["license_files"] += LICENSES_WHEEL
     
     if "pypdfium2" in kwargs["package_data"]:
@@ -150,12 +154,22 @@ def main():
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
     modspec = os.environ.get(ModulesSpec_EnvVar, "")
     
-    # NOTE in principle, it may be possible to achieve the same as `prepared!` by just filling the data/ cache manually, but this is more explicit, formally disabling the generating code paths
-    with_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(pl_spec)
-    modnames = parse_modspec(modspec)
+    parsed_spec = parse_pl_spec(pl_spec)
+    if parsed_spec is None:
+        # TODO if we're on a unixoid system, check if it provides libreoffice with pdfium
+        print(f"No pre-built binaries available for this host. You may place custom binaries & bindings in data/sourcebuild/ and install with `{PlatSpec_EnvVar}=sourcebuild`.", file=sys.stderr)
+        raise Host._exc
     
-    if ModuleRaw in modnames and with_prepare and pl_name != ExtPlats.sdist:
-        prepare_setup(pl_name, pdfium_ver, use_v8)
+    else:
+        
+        do_prepare, pl_name, pdfium_ver, use_v8 = parsed_spec
+        modnames = parse_modspec(modspec)
+        if pl_name == ExtPlats.sdist and modnames != ModulesAll:
+            raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
+        
+        if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
+            prepare_setup(pl_name, pdfium_ver, use_v8)
+    
     run_setup(modnames, pl_name, pdfium_ver)
 
 

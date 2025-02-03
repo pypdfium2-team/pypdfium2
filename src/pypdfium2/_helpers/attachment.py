@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 __all__ = ("PdfAttachment", )
@@ -36,7 +36,8 @@ class PdfAttachment (pdfium_i.AutoCastable):
     
     
     def __init__(self, raw, pdf):
-        self.raw, self.pdf = raw, pdf
+        self.raw = raw
+        self.pdf = pdf
     
     
     def get_name(self):

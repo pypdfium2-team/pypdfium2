@@ -1,8 +1,7 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2.internal as pdfium_i
-# TODO? consider dotted access
 from pypdfium2._cli._parsers import (
     add_input,
     add_n_digits,
@@ -25,18 +24,23 @@ def attach(parser):
 def main(args):
     
     pdf = get_input(args)
-    toc = pdf.get_toc(
-        max_depth = args.max_depth,
-    )
+    toc = pdf.get_toc(max_depth=args.max_depth)
     
-    for item in toc:
-        state = "*" if item.n_kids == 0 else "-" if item.is_closed else "+"
-        target = "?" if item.page_index is None else item.page_index+1
-        print(
-            "    " * item.level +
-            "[%s] %s -> %s  # %s %s" % (
-                state, item.title, target,
-                pdfium_i.ViewmodeToStr.get(item.view_mode),
-                round_list(item.view_pos, args.n_digits),
-            )
+    for bm in toc:
+        count, dest = bm.get_count(), bm.get_dest()
+        out = "    " * bm.level
+        out += "[%s] %s -> " % (
+            f"{count:+}" if count != 0 else "*",
+            bm.get_title(),
         )
+        # distinguish between "dest == None" and "dest with unknown mode" while keeping the output machine readable
+        if dest:
+            index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
+            out += "%s  # %s %s" % (
+                index+1 if index != None else "?",
+                pdfium_i.ViewmodeToStr.get(view_mode),
+                round_list(view_pos, args.n_digits),
+            )
+        else:
+            out += "_"
+        print(out)

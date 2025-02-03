@@ -1,8 +1,7 @@
-# SPDX-FileCopyrightText: 2024 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2._helpers as pdfium
-# TODO? consider dotted access
 from pypdfium2._cli._parsers import parse_numtext
 
 
@@ -41,11 +40,9 @@ def main(args):
         args.passwords.append(None)
     
     dest_pdf = pdfium.PdfDocument.new()
-    index = 0
     
     for in_path, pages, password in zip(args.inputs, args.pages, args.passwords):
-        src_pdf = pdfium.PdfDocument(in_path, password=password)
-        dest_pdf.import_pages(src_pdf, pages=pages)
-        index += len(src_pdf)
+        with pdfium.PdfDocument(in_path, password=password) as src_pdf:
+            dest_pdf.import_pages(src_pdf, pages=pages)
     
     dest_pdf.save(args.output)
