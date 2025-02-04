@@ -410,10 +410,10 @@ class PdfImage (PdfObject):
             raise ValueError(f"Cannot extract to '{dest}'")
 
 
-ImageInfo = namedtuple("ImageInfo", "format mode metadata all_filters complex_filters")
+_ImageInfo = namedtuple("_ImageInfo", "format mode metadata all_filters complex_filters")
 
 
-class ImageNotExtractableError (Exception):
+class _ImageExtractionError (Exception):
     pass
 
 
@@ -435,8 +435,8 @@ def _extract_smart(image_obj, fb_format=None):
     try:
         # TODO can we change PdfImage.get_data() to take an mmap, so the data could be written directly into a file rather than an in-memory array?
         data, info = _extract_direct(image_obj)
-    except ImageNotExtractableError:
-        # TODO log reason why the image cannot be extracted directly?
+    except _ImageExtractionError as e:
+        logger.debug(str(e))
         pil_image = image_obj.get_bitmap(render=False).to_pil()
     else:
         pil_image = None
@@ -453,10 +453,13 @@ def _extract_smart(image_obj, fb_format=None):
     if pil_image:
         format = fb_format
         if not format:
-            format = {"CMYK": "tiff"}.get(pil_image.mode, "png")
+            format = "tiff" if pil_image.mode == "CMYK" else "png"
     
     buffer = yield format
-    pil_image.save(buffer, format=format) if pil_image else buffer.write(data)
+    if pil_image:
+        pil_image.save(buffer, format=format)
+    else:
+        buffer.write(data)
     
     yield  # breakpoint preventing StopIteration on .send()
 
@@ -473,7 +476,7 @@ def _extract_direct(image_obj):
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "raw"
         else:
-            raise ImageNotExtractableError(f"Unhandled color space {pdfium_i.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data.")
+            raise _ImageExtractionError(f"Unhandled color space {pdfium_i.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data.")
     elif len(complex_filters) == 1:
         f = complex_filters[0]
         if f == "DCTDecode":
@@ -483,9 +486,9 @@ def _extract_direct(image_obj):
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "jp2"
         else:
-            raise ImageNotExtractableError(f"Unhandled complex filter {f}.")
+            raise _ImageExtractionError(f"Unhandled complex filter {f}.")
     else:
-        raise ImageNotExtractableError(f"Cannot handle multiple complex filters {complex_filters}.")
+        raise _ImageExtractionError(f"Cannot handle multiple complex filters {complex_filters}.")
     
-    info = ImageInfo(out_format, mode, metadata, all_filters, complex_filters)
+    info = _ImageInfo(out_format, mode, metadata, all_filters, complex_filters)
     return out_data, info
