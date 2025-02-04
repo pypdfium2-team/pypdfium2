@@ -53,8 +53,3 @@
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.
 - Bumped minimum pdfium requirement in conda recipe to `>6635` (effectively `>=6638`), due to new errchecks that are not version-guarded.
 - Cleanly split out conda packaging into an own file, and confined it to the `conda/` directory, to avoid polluting the main setup code.
-
-<!-- TODO
-See https://github.com/pypdfium2-team/pypdfium2/blob/devel_old/docs/devel/changelog_staging.md
-for how to proceed. Note that some things have already been backported, and some rejected.
--->
