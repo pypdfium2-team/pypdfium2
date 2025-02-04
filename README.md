@@ -377,7 +377,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   There are no defaults, so you always need to provide a value for each argument.
   ```python
   # arguments: filepath (bytes), password (bytes|None)
-  # null-terminate filepath and encode as UTF-8
+  # NUL-terminate filepath and encode as UTF-8
   pdf = pdfium_c.FPDF_LoadDocument((filepath+"\x00").encode("utf-8"), None)
   ```
   This is the underlying bindings declaration,[^bindings_decl] which loads the function from the binary and
@@ -389,7 +389,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       FPDF_LoadDocument.restype = FPDF_DOCUMENT
   ```
   Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion. This works because `FPDF_STRING` is actually an alias to `POINTER(c_char)` (i.e. `char*`), which is a primitive pointer type.
-  When passing a string to a C function, it must always be null-terminated, as the function merely receives a pointer to the first item and then continues to read memory until it finds a NUL terminator.
+  When passing a string to a C function, it must always be NUL-terminated, as the function merely receives a pointer to the first item and then continues to read memory until it finds a NUL terminator.
   
 [^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `autorelease/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
 
