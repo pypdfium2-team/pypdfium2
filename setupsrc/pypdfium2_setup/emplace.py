@@ -84,7 +84,7 @@ def main():
         "plat_spec",
         default = os.environ.get(PlatSpec_EnvVar, ""),
         nargs = "?",
-        help = f"The platform specifier. Same format as of ${PlatSpec_EnvVar} on setup. 'none' removes existing artifacts.",
+        help = f"The platform specifier. Same format as of ${PlatSpec_EnvVar} on setup. {ExtPlats.sdist!r} removes existing artifacts.",
     )
     args = parser.parse_args()
     
