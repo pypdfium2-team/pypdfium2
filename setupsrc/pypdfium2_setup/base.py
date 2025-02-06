@@ -76,7 +76,7 @@ class PlatNames:
     # - Platform names are expected to start with the corresponding system name
     darwin_x64       = SysNames.darwin  + "_x64"
     darwin_arm64     = SysNames.darwin  + "_arm64"
-    darwin_universal = SysNames.darwin  + "_universal"
+    darwin_univ2     = SysNames.darwin  + "_univ2"
     windows_x64      = SysNames.windows + "_x64"
     windows_x86      = SysNames.windows + "_x86"
     windows_arm64    = SysNames.windows + "_arm64"
@@ -116,17 +116,17 @@ WheelPlatforms = list(PdfiumBinariesMap.keys())
 
 # Additional platforms we don't currently build wheels for in craft.py
 # To package these manually, you can do e.g. (in bash):
-# export PLATFORMS=(darwin_universal android_arm64 android_arm32 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
+# export PLATFORMS=(darwin_univ2 android_arm64 android_arm32 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
 # for PLAT in ${PLATFORMS[@]}; do echo $PLAT; ./run emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
-    PlatNames.darwin_universal: "mac-univ",
-    PlatNames.android_arm64:    "android-arm64",
-    PlatNames.android_arm32:    "android-arm",
-    PlatNames.android_x64:      "android-x64",
-    PlatNames.android_x86:      "android-x86",
-    PlatNames.ios_arm64_dev:    "ios-device-arm64",
-    PlatNames.ios_arm64_simu:   "ios-simulator-arm64",
-    PlatNames.ios_x64_simu:     "ios-simulator-x64",
+    PlatNames.darwin_univ2:   "mac-univ",
+    PlatNames.android_arm64:  "android-arm64",
+    PlatNames.android_arm32:  "android-arm",
+    PlatNames.android_x64:    "android-x64",
+    PlatNames.android_x86:    "android-x86",
+    PlatNames.ios_arm64_dev:  "ios-device-arm64",
+    PlatNames.ios_arm64_simu: "ios-simulator-arm64",
+    PlatNames.ios_x64_simu:   "ios-simulator-x64",
 })
 
 
@@ -424,7 +424,7 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
-    elif pl_name == PlatNames.darwin_universal:
+    elif pl_name == PlatNames.darwin_univ2:
         # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
         return "macosx_10_13_universal2"
     
