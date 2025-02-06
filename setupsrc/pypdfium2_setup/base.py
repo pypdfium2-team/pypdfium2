@@ -417,7 +417,6 @@ def get_wheel_tag(pl_name):
     
     if pl_name == PlatNames.darwin_x64:
         # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
-        # "intel" instead of "x86_64" might work too, but I think it's considered legacy
         return "macosx_10_13_x86_64"
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
