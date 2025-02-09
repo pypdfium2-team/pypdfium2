@@ -366,6 +366,9 @@ class PdfPosConv:
         self.page = page
         self.pos_args = pos_args
     
+    def __repr__(self):
+        return f"{PdfPosConv.__name__}({self.page}, {self.pos_args})"
+    
     def to_page(self, bitmap_x, bitmap_y):
         """
         Translate coordinates from bitmap to page.
