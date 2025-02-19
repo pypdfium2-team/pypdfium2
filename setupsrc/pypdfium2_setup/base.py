@@ -452,7 +452,7 @@ def get_wheel_tag(pl_name):
         return "musllinux_1_1_aarch64"
     
     # Android - see PEP 738 # Packaging
-    # At this time, we only build wheels for android_arm64, but handle the others as well so the code is ready if we want to in the future (or in case callers want to build their own wheels)
+    # We don't currently publish wheels for Android, but handle it in case we want to in the future (or if callers want to build their own wheels)
     elif pl_name == PlatNames.android_arm64:
         return "android_21_arm64_v8a"
     elif pl_name == PlatNames.android_arm32:
