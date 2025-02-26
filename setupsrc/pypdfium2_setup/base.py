@@ -117,7 +117,7 @@ WheelPlatforms = list(PdfiumBinariesMap.keys())
 # Additional platforms we don't currently build wheels for in craft.py
 # To package these manually, you can do e.g. (in bash):
 # export PLATFORMS=(darwin_univ2 android_arm64 android_arm32 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
-# for PLAT in ${PLATFORMS[@]}; do echo $PLAT; ./run emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
+# for PLAT in ${PLATFORMS[@]}; do echo $PLAT; just emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
     PlatNames.darwin_univ2:   "mac-univ",
     PlatNames.android_arm64:  "android-arm64",

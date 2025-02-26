@@ -33,6 +33,8 @@ jobs:
     
     steps:
       
+      - uses: extractions/setup-just@v2
+      
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -50,7 +52,7 @@ jobs:
           python3 -m pip install .
       
       - name: Build documentation
-        run: ./run docs-build
+        run: just docs-build
       
       - name: Remove unnecessary files
         run: |

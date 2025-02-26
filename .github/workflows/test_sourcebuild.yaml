@@ -32,6 +32,8 @@ jobs:
     
     steps:
       
+      - uses: extractions/setup-just@v2
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -64,4 +66,4 @@ jobs:
         run: pypdfium2 -v
       
       - name: Run test suite
-        run: ./run test
+        run: just test
