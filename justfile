@@ -8,8 +8,8 @@ default:
 test *args:
 	python3 -m pytest tests/ {{args}}
 
-docs-build *args:
-	python3 -m sphinx -b html docs/source docs/build/html {{args}}
+docs-build:
+	python3 -m sphinx -b html docs/source docs/build/html
 docs-open:
 	xdg-open docs/build/html/index.html &>/dev/null
 
