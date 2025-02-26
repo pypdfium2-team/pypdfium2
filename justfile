@@ -29,10 +29,8 @@ check:
 	codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sourcebuild,./dist,./LICENSES/*,./RELEASE.md,./.git,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate"
 	reuse lint
 
-packaging_pypi: clean check
-	# calling update.py is not strictly necessary, but may improve performance because downloads are done in parallel, rather than linear with each package
-	python3 setupsrc/pypdfium2_setup/update.py
-	python3 setupsrc/pypdfium2_setup/craft.py
+packaging_pypi: clean check update craft
+	# calling update is not strictly necessary, but may improve performance because downloads are done in parallel, rather than linear with each package
 	twine check dist/*
 	# ignore W002: erroneous detection of __init__.py files as duplicates
 	check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw"
