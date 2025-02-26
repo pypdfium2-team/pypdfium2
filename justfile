@@ -11,10 +11,10 @@ test *args:
 _coverage_impl OMISSIONS *args:
 	python3 -m coverage run --omit "{{OMISSIONS}}" -m pytest tests/ {{args}}
 	python3 -m coverage report
-coverage:
-	just _coverage_impl "src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*"
-coverage-core:
-	just _coverage_impl "src/pypdfium2/__main__.py,src/pypdfium2/_cli/*,src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*"
+coverage *args:
+	just _coverage_impl "src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
+coverage-core *args:
+	just _coverage_impl "src/pypdfium2/__main__.py,src/pypdfium2/_cli/*,src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 
 docs-build:
 	python3 -m sphinx -b html docs/source docs/build/html
