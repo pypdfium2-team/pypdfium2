@@ -23,7 +23,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     steps:
-    
+      
+      - uses: extractions/setup-just@v2
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -46,4 +48,4 @@ jobs:
         run: python3 -m pip install -U -r req/converters.txt -r req/test.txt
       
       - name: Run tests
-        run: ./run test
+        run: just test

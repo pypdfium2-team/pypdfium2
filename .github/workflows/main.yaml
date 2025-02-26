@@ -48,6 +48,8 @@ jobs:
     
     steps:
       
+      - uses: extractions/setup-just@v2
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -81,10 +83,10 @@ jobs:
         run: python3 -m pip install --no-build-isolation -e .
       
       - name: Run test suite
-        run: ./run test
+        run: just test
       
       - name: Run PyPI packaging script
-        run: ./run packaging_pypi
+        run: just packaging_pypi
       
       - name: Upload release notes
         uses: actions/upload-artifact@v4
@@ -129,6 +131,8 @@ jobs:
     
     steps:
       
+      - uses: extractions/setup-just@v2
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -159,7 +163,7 @@ jobs:
         run: python3 -m pip install ${{ matrix.wheel }}
       
       - name: Run Test Suite
-        run: ./run test
+        run: just test
   
   
   publish:
