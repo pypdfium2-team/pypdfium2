@@ -39,7 +39,7 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-packaging_pypi: clean check update craft
+packaging-pypi: clean check update craft
 	# calling update is not strictly necessary, but may improve performance because downloads are done in parallel, rather than linear with each package
 	twine check dist/*
 	# ignore W002: erroneous detection of __init__.py files as duplicates
