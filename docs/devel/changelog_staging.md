@@ -46,7 +46,7 @@
 - If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results, e.g. on macOS.
 
 *Project*
-- Made the runfile fail fast and propagate errors via bash `-eu`. This is actually quite important to avoid potentially continuing on a broken state in CI.
+- Replaced the bash `./run` file with a [`justfile`](https://github.com/casey/just). Note that the runfile previously did not fail fast and propagate errors, which is potentially dangerous for a release workflow. This had been fixed on the runfile in v5.0.0b1 before introducing the justfile.
 - CI: Added Linux aarch64 (GH now provides free runners) and Python 3.13 to the test matrix.
 - Merged `tests_old/` back into `tests/`.
 - Migrated from deprecated `.reuse/dep5`/`.reuse/dep5-wheel` to more visible `REUSE.toml`/`REUSE-wheel.toml`.
