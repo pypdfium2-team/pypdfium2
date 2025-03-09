@@ -648,6 +648,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
   # Get the value of a pointer to the first item of the buffer
   buffer_ptrval = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
+  assert buffer_ptrval, "buffer pointer value must be non-null"
   # Cast the pointer value to an actual pointer object so we can access .contents
   buffer_ptr = ctypes.cast(buffer_ptrval, ctypes.POINTER(ctypes.c_ubyte))
   # Re-interpret as array
