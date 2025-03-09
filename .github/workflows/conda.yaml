@@ -44,6 +44,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       
+      - uses: extractions/setup-just@v2
+      
       - name: Check out repository
         uses: actions/checkout@v4
         with:
@@ -70,11 +72,11 @@ jobs:
       
       - name: Build package
         if: ${{ inputs.package == 'helpers' || !inputs.new_only }}
-        run: ./run craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }}
+        run: just craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }}
       
       - name: Build package (new only)
         if: ${{ inputs.package == 'raw' && inputs.new_only }}
-        run: ./run craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }} --new-only
+        run: just craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }} --new-only
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
