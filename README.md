@@ -371,6 +371,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 [^pdfium_docs]: Unfortunately, no recent HTML-rendered docs are available for PDFium at the moment.
 
 <!-- TODO write something about weakref.finalize(); add example on creating a C page array -->
+<!-- TODO doctests? -->
 
 * In general, PDFium functions can be called just like normal Python functions.
   However, parameters may only be passed positionally, i.e. it is not possible to use keyword arguments.
@@ -652,7 +653,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Cast the pointer value to an actual pointer object so we can access .contents
   buffer_ptr = ctypes.cast(buffer_ptrval, ctypes.POINTER(ctypes.c_ubyte))
   # Re-interpret as array
-  buffer = (ctypes.c_ubyte * (stride * height)).from_address(ctypes.addressof(buffer_ptr.contents))
+  buffer = (ctypes.c_ubyte * (width * height * 4)).from_address(ctypes.addressof(buffer_ptr.contents))
   
   # Create a PIL image from the buffer contents
   img = PIL.Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA", 0, 1)
