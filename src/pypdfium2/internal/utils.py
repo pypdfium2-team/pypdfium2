@@ -45,9 +45,9 @@ class _buffer_reader:
         self.buffer = buffer
     
     def __call__(self, _, position, p_buf_first, size):
-        p_buf = ctypes.cast(p_buf_first, ctypes.POINTER(ctypes.c_char * size))
+        buf = (ctypes.c_char * size).from_address( ctypes.addressof(p_buf_first.contents) )
         self.buffer.seek(position)
-        self.buffer.readinto(p_buf.contents)
+        self.buffer.readinto(buf)
         return 1
 
 
@@ -57,8 +57,10 @@ class _buffer_writer:
         self.buffer = buffer
     
     def __call__(self, _, p_data_first, size):
-        p_data = ctypes.cast(p_data_first, ctypes.POINTER(ctypes.c_ubyte * size))
-        self.buffer.write(p_data.contents)
+        # get an actual pointer object so we can access .contents
+        p_data_first = ctypes.cast(p_data_first, ctypes.POINTER(ctypes.c_ubyte))
+        buf = (ctypes.c_ubyte * size).from_address( ctypes.addressof(p_data_first.contents) )
+        self.buffer.write(buf)
         return 1
 
 
