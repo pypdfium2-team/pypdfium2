@@ -80,8 +80,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     # pypdfium2 extract-images "$DOCPATH" -o out/ --use-bitmap
     
     
-    @classmethod
-    def _get_buffer(cls, raw, stride, height):
+    @staticmethod
+    def _get_buffer(raw, stride, height):
         # This assumes the pypdfium2-team branch of ctypesgen. With mainline ctypesgen, this might fail.
         buffer_ptrval = pdfium_c.FPDFBitmap_GetBuffer(raw)
         if not buffer_ptrval:
