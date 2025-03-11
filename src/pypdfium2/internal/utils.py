@@ -29,7 +29,7 @@ def set_callback(struct, fname, callback):
     setattr(struct, fname, type( getattr(struct, fname) )(callback))
 
 
-def is_buffer(buf, spec="r"):
+def is_stream(buf, spec="r"):
     methods = []
     assert set(spec).issubset( set("rw") )
     if "r" in spec:
