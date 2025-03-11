@@ -221,7 +221,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     def to_numpy(self):
         """
-        Convert the bitmap to a :mod:`numpy` array.
+        Get a :mod:`numpy` array view of the bitmap.
         
         The array contains as many rows as the bitmap is high.
         Each row contains as many pixels as the bitmap is wide.
@@ -250,7 +250,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     def to_pil(self):
         """
-        Convert the bitmap to a :mod:`PIL` image, using :func:`PIL.Image.frombuffer`.
+        Get a :mod:`PIL` image of the bitmap, using :func:`PIL.Image.frombuffer`.
         
         For ``RGBA``, ``RGBX`` and ``L`` bitmaps, PIL is supposed to share memory with
         the original buffer, so changes to the buffer should be reflected in the image, and vice versa.
