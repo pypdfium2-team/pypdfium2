@@ -83,13 +83,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     @staticmethod
     def _get_buffer(raw, stride, height):
         # This assumes the pypdfium2-team branch of ctypesgen. With mainline ctypesgen, this might fail.
-        buffer_ptrval = pdfium_c.FPDFBitmap_GetBuffer(raw)
-        if not buffer_ptrval:
+        buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
+        if not buffer_ptr:
             raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
-        # get an actual pointer object so we can use .contents
-        buffer_ptr = ctypes.cast(buffer_ptrval, ctypes.POINTER(ctypes.c_ubyte))
-        buffer = (ctypes.c_ubyte * (stride * height)).from_address(ctypes.addressof(buffer_ptr.contents))
-        return buffer
+        buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte))
+        return pdfium_i.get_buffer(buffer_ptr, stride*height, ctypes.c_ubyte)
     
     
     @classmethod

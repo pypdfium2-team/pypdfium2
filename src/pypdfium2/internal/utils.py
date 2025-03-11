@@ -39,28 +39,31 @@ def is_buffer(buf, spec="r"):
     return all(callable(getattr(buf, a, None)) for a in methods)
 
 
+def get_buffer(ptr, size, dtype):
+    return (dtype * size).from_address( ctypes.addressof(ptr.contents) )
+
+
 class _buffer_reader:
     
-    def __init__(self, buffer):
-        self.buffer = buffer
+    def __init__(self, py_buffer):
+        self.py_buffer = py_buffer
     
     def __call__(self, _, position, p_buf_first, size):
-        buf = (ctypes.c_char * size).from_address( ctypes.addressof(p_buf_first.contents) )
-        self.buffer.seek(position)
-        self.buffer.readinto(buf)
+        c_buffer = get_buffer(p_buf_first, size, ctypes.c_char)
+        self.py_buffer.seek(position)
+        self.py_buffer.readinto(c_buffer)
         return 1
 
 
 class _buffer_writer:
     
-    def __init__(self, buffer):
-        self.buffer = buffer
+    def __init__(self, py_buffer):
+        self.py_buffer = py_buffer
     
     def __call__(self, _, p_data_first, size):
-        # get an actual pointer object so we can access .contents
         p_data_first = ctypes.cast(p_data_first, ctypes.POINTER(ctypes.c_ubyte))
-        buf = (ctypes.c_ubyte * size).from_address( ctypes.addressof(p_data_first.contents) )
-        self.buffer.write(buf)
+        c_buffer = get_buffer(p_data_first, size, ctypes.c_ubyte)
+        self.py_buffer.write(c_buffer)
         return 1
 
 
