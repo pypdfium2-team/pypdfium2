@@ -246,6 +246,7 @@ Here are some examples of using the support model API.
 * Import the library
   ```python
   import pypdfium2 as pdfium
+  import pypdfium2.raw as pdfium_c
   ```
 
 * Open a PDF using the helper class `PdfDocument` (supports file path strings, bytes, and byte buffers)
@@ -266,6 +267,10 @@ Here are some examples of using the support model API.
   pil_image = bitmap.to_pil()
   pil_image.show()
   ```
+  
+  Note, with the PIL adapter, it might be advantageous to use `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA, rev_byteorder=True` or maybe `prefer_bgrx=True, use_bgra_on_transparency=True, rev_byteorder=True`, to achieve a pixel format supported natively by PIL, and avoid rendering with transparency to a non-alpha bitmap, which can slow down pdfium.
+  
+  With `.to_numpy()`, all formats are zero-copy, but passing either `use_bgra_on_transparency=True` (if dynamic pixel format is acceptable) or `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA` is also recommended for the transparency problem.
 
 * Try some page methods
   ```python
