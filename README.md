@@ -492,7 +492,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Buffer as Python bytes (independent copy)
   py_buffer = bytes(c_buffer)
   ```
-  Note that you can achieve the same result with `ctypes.cast(ptr, POINTER(type * size)).contents`, but this is somewhat problematic as ctypes seems to cache pointer types eternally. As `size` may vary, this can lead to memory-leak like scenarios with long-running applications, so better avoid doing that.
+  Note that you can achieve the same result with `ctypes.cast(ptr, POINTER(type * size)).contents`, but this is somewhat problematic as ctypes seems to cache pointer types eternally. As `size` may vary, this can lead to memory leak like scenarios with long-running applications, so better avoid doing that.
 
 * Writing data from Python into a C buffer works in a similar fashion:
   ```python
