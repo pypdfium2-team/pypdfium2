@@ -36,7 +36,8 @@
 - Avoid creation of sized pointer types at runtime, to avoid blowing up Python's unbounded pointer type cache, which could effectively lead to a memory leak in a long-running application (i.e. do `(type * size).from_address(addressof(first_ptr.contents))` instead of `cast(first_ptr, POINTER(type * size)).contents`). In our opinion, the root issue is ctypes using an unbounded cache in the first place. Thanks to Richard Hundt for the bug report. See below for a list of APIs that were affected:
   * Anything using `_buffer_reader`/`_buffer_writer` under the hood (`PdfDocument` created from byte stream input, `PdfImage.load_jpeg()`, `PdfDocument.save()`).
   * `PdfBitmap.from_raw()` rsp. `PdfBitmap._get_buffer()` and their internal callers (`PdfBitmap` makers `new_foreign` and `new_foreign_simple`, `PdfImage.get_bitmap()`).
-  * Also, some Readme snippets were affected, including the raw API rendering example. The Readme has been updated to mention the problem and use the `.from_address(...)` approach instead.
+  * Also, some Readme snippets were affected, including the raw API rendering example. The Readme has been updated to mention the problem and use `.from_address(...)` instead.
+  * *With older versions, periodically calling `ctypes._reset_cache()` can work around this issue.*
 - Improved startup performance by deferring imports of optional dependencies to the point where they are actually needed, to avoid overhead if you do not use them.
 - Simplified version classes (no API change expected).
 
