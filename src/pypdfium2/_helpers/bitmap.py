@@ -87,7 +87,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         if not buffer_ptr:
             raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
         buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte))
-        return pdfium_i.get_buffer(buffer_ptr, stride*height, ctypes.c_ubyte)
+        return pdfium_i.get_buffer(buffer_ptr, stride*height)
     
     
     @classmethod
