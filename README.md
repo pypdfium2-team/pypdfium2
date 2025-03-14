@@ -246,6 +246,7 @@ Here are some examples of using the support model API.
 * Import the library
   ```python
   import pypdfium2 as pdfium
+  import pypdfium2.raw as pdfium_c
   ```
 
 * Open a PDF using the helper class `PdfDocument` (supports file path strings, bytes, and byte buffers)
@@ -266,6 +267,10 @@ Here are some examples of using the support model API.
   pil_image = bitmap.to_pil()
   pil_image.show()
   ```
+  
+  Note, with the PIL adapter, it might be advantageous to use `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA, rev_byteorder=True` or maybe `prefer_bgrx=True, use_bgra_on_transparency=True, rev_byteorder=True`, to achieve a pixel format supported natively by PIL, and avoid rendering with transparency to a non-alpha bitmap, which can slow down pdfium.
+  
+  With `.to_numpy()`, all formats are zero-copy, but passing either `use_bgra_on_transparency=True` (if dynamic pixel format is acceptable) or `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA` is also recommended for the transparency problem.
 
 * Try some page methods
   ```python
@@ -371,6 +376,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 [^pdfium_docs]: Unfortunately, no recent HTML-rendered docs are available for PDFium at the moment.
 
 <!-- TODO write something about weakref.finalize(); add example on creating a C page array -->
+<!-- TODO doctests? -->
 
 * In general, PDFium functions can be called just like normal Python functions.
   However, parameters may only be passed positionally, i.e. it is not possible to use keyword arguments.
@@ -478,25 +484,29 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * Leaving strings, let's suppose you have a C memory buffer allocated by PDFium and wish to read its data.
   PDFium will provide you with a pointer to the first item of the byte array.
-  To access the data, you'll want to re-interpret the pointer with `ctypes.cast()` to encompass the whole array:
+  To access the data, you'll want to re-interpret the pointer to an array view with `.from_address()`:
   ```python
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
-  buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
-  buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * size))
+  # FPDFBitmap_GetBuffer() has c_void_p as restype, which ctypes will auto-resolve to int or None
+  buffer_ptrval = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
+  assert buffer_ptrval  # make sure it's non-null
+  # Get an actual pointer object so we can access .contents
+  buffer_ptr = ctypes.cast(buffer_ptrval, ctypes.POINTER(ctypes.c_ubyte))
   # Buffer as ctypes array (referencing the original buffer, will be unavailable as soon as the bitmap is destroyed)
-  c_array = buffer_ptr.contents
+  c_buffer = (ctypes.c_ubyte * size).from_address( ctypes.addressof(buffer_ptr.contents) )
   # Buffer as Python bytes (independent copy)
-  data = bytes(c_array)
+  py_buffer = bytes(c_buffer)
   ```
+  Note that you can achieve the same result with `ctypes.cast(ptr, POINTER(type * size)).contents`, but this is somewhat problematic as ctypes seems to cache pointer types eternally. As `size` may vary, this can lead to memory leak like scenarios with long-running applications, so better avoid doing that.
 
 * Writing data from Python into a C buffer works in a similar fashion:
   ```python
   # (Assuming `buffer_ptr` is a pointer to the first item of a C buffer to write into,
   #  `size` the number of bytes it can store, and `py_buffer` a Python byte buffer)
-  buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_char * size))
+  buffer = (ctypes.c_char * size).from_address( ctypes.addressof(buffer_ptr.contents) )
   # Read from the Python buffer, starting at its current position, directly into the C buffer
   # (until the target is full or the end of the source is reached)
-  n_bytes = py_buffer.readinto(buffer_ptr.contents)  # returns the number of bytes read
+  n_bytes = py_buffer.readinto(buffer)  # returns the number of bytes read
   ```
 
 * If you wish to check whether two objects returned by PDFium are the same, the `is` operator won't help because `ctypes` does not have original object return (OOR), i.e. new, equivalent Python objects are created each time, although they might represent one and the same C object.[^ctypes_no_oor]
@@ -642,13 +652,16 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Render the page
   pdfium_c.FPDF_RenderPageBitmap(*render_args)
   
-  # Get a pointer to the first item of the buffer
-  buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
-  # Re-interpret the pointer to encompass the whole buffer
-  buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * (width * height * 4)))
+  # Get the value of a pointer to the first item of the buffer
+  buffer_ptrval = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
+  assert buffer_ptrval, "buffer pointer value must be non-null"
+  # Cast the pointer value to an actual pointer object so we can access .contents
+  buffer_ptr = ctypes.cast(buffer_ptrval, ctypes.POINTER(ctypes.c_ubyte))
+  # Re-interpret as array
+  buffer = (ctypes.c_ubyte * (width * height * 4)).from_address(ctypes.addressof(buffer_ptr.contents))
   
   # Create a PIL image from the buffer contents
-  img = PIL.Image.frombuffer("RGBA", (width, height), buffer_ptr.contents, "raw", "BGRA", 0, 1)
+  img = PIL.Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA", 0, 1)
   # Save it as file
   img.save("out.png")
   

@@ -231,7 +231,7 @@ class PdfImage (PdfObject):
         if isinstance(source, (str, Path)):
             buffer = open(source, "rb")
             autoclose = True
-        elif pdfium_i.is_buffer(source, "r"):
+        elif pdfium_i.is_stream(source, "r"):
             buffer = source
         else:
             raise ValueError(f"Cannot load JPEG from {source} - not a file path or byte stream.")
@@ -404,7 +404,7 @@ class PdfImage (PdfObject):
         if isinstance(dest, (str, Path)):
             with open(f"{dest}.{format}", "wb") as buf:
                 extraction_gen.send(buf)
-        elif pdfium_i.is_buffer(dest, "w"):
+        elif pdfium_i.is_stream(dest, "w"):
             extraction_gen.send(dest)
         else:
             raise ValueError(f"Cannot extract to '{dest}'")

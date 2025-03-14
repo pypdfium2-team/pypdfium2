@@ -80,13 +80,14 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     # pypdfium2 extract-images "$DOCPATH" -o out/ --use-bitmap
     
     
-    @classmethod
-    def _get_buffer(cls, raw, stride, height):
+    @staticmethod
+    def _get_buffer(raw, stride, height):
+        # This assumes the pypdfium2-team branch of ctypesgen. With mainline ctypesgen, this might fail.
         buffer_ptr = pdfium_c.FPDFBitmap_GetBuffer(raw)
         if not buffer_ptr:
             raise PdfiumError("Failed to get bitmap buffer (null pointer returned)")
-        buffer = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte * (stride * height))).contents
-        return buffer
+        buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_ubyte))
+        return pdfium_i.get_buffer(buffer_ptr, stride*height)
     
     
     @classmethod
@@ -220,7 +221,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     def to_numpy(self):
         """
-        Convert the bitmap to a :mod:`numpy` array.
+        Get a :mod:`numpy` array view of the bitmap.
         
         The array contains as many rows as the bitmap is high.
         Each row contains as many pixels as the bitmap is wide.
@@ -249,7 +250,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     def to_pil(self):
         """
-        Convert the bitmap to a :mod:`PIL` image, using :func:`PIL.Image.frombuffer`.
+        Get a :mod:`PIL` image of the bitmap, using :func:`PIL.Image.frombuffer`.
         
         For ``RGBA``, ``RGBX`` and ``L`` bitmaps, PIL is supposed to share memory with
         the original buffer, so changes to the buffer should be reflected in the image, and vice versa.

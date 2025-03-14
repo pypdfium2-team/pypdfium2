@@ -224,7 +224,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         if isinstance(dest, (str, Path)):
             buffer, need_close = open(dest, "wb"), True
-        elif pdfium_i.is_buffer(dest, "w"):
+        elif pdfium_i.is_stream(dest, "w"):
             buffer, need_close = dest, False
         else:
             raise ValueError(f"Cannot save to '{dest}'")
@@ -536,7 +536,7 @@ def _open_pdf(input_data, password, autoclose):
     elif isinstance(input_data, (bytes, ctypes.Array)):
         pdf = pdfium_c.FPDF_LoadMemDocument64(input_data, len(input_data), password)
         to_hold = (input_data, )
-    elif pdfium_i.is_buffer(input_data, "r"):
+    elif pdfium_i.is_stream(input_data, "r"):
         bufaccess, to_hold = pdfium_i.get_bufreader(input_data)
         if autoclose:
             to_close = (input_data, )

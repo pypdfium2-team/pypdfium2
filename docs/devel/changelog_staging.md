@@ -33,6 +33,11 @@
 - In `PdfBitmap.new_*()` methods, avoid use of `.from_raw()`, and instead call the constructor directly, as most parameters are already known on the caller side when creating a bitmap.
 - In the rendering CLI, added `--invert-lightness --exclude-images` post-processing options to render with selective lightness inversion. This may be useful to achieve a "dark theme" for light PDFs while preserving different colors, but goes at the cost of performance. (PDFium also provides a color scheme option, but this only allows you to set colors for certain object types, which are then forced on all instances of the type in question. This may flatten different colors into one, leading to a loss of visual information.)
 - Corrected some null pointer checks: we have to use `bool(ptr)` rather than `ptr is None`.
+- Avoid creation of sized pointer types at runtime, to avoid blowing up Python's unbounded pointer type cache, which could effectively lead to a memory leak in a long-running application (i.e. do `(type * size).from_address(addressof(first_ptr.contents))` instead of `cast(first_ptr, POINTER(type * size)).contents`). In our opinion, the root issue is ctypes using an unlimited cache in the first place. Upstream have already signalled willingness to address this in a future version of Python. Thanks to Richard Hundt for the bug report, {issue}`346`. See below for a list of APIs that were affected:
+  * Anything using `_buffer_reader`/`_buffer_writer` under the hood (`PdfDocument` created from byte stream input, `PdfImage.load_jpeg()`, `PdfDocument.save()`).
+  * `PdfBitmap.from_raw()` rsp. `PdfBitmap._get_buffer()` and their internal callers (`PdfBitmap` makers `new_foreign` and `new_foreign_simple`, `PdfImage.get_bitmap()`).
+  * Also, some Readme snippets were affected, including the raw API rendering example. The Readme has been updated to mention the problem and use `.from_address(...)` instead.
+  * *With older versions, periodically calling `ctypes._reset_cache()` can work around this issue.*
 - Improved startup performance by deferring imports of optional dependencies to the point where they are actually needed, to avoid overhead if you do not use them.
 - Simplified version classes (no API change expected).
 
