@@ -27,7 +27,7 @@ jobs:
     
     steps:
       
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@v3
       
       - name: Set up Python
         uses: actions/setup-python@v5

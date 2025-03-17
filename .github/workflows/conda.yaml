@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@v3
       
       - name: Check out repository
         uses: actions/checkout@v4
