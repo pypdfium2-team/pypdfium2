@@ -274,8 +274,7 @@ class PILEngine (SavingEngine):
         import PIL.ImageFilter
         import PIL.ImageDraw
     
-    def _to_pil_hook(self, bitmap):
-        return bitmap.to_pil()
+    _to_pil_hook = staticmethod(pdfium.PdfBitmap.to_pil)
     
     def _saving_hook(self, out_path, bitmap, page, postproc_kwargs):
         posconv = bitmap.get_posconv(page)
@@ -326,7 +325,8 @@ class NumpyPILEngine (PILEngine):
         import PIL.Image
         super().do_imports()
     
-    def _to_pil_hook(self, bitmap):
+    @staticmethod
+    def _to_pil_hook(bitmap):
         return PIL.Image.fromarray(bitmap.to_numpy(), bitmap.mode)
 
 
