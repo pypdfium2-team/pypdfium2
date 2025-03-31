@@ -60,7 +60,7 @@ def _close_template(close_func, raw, obj_repr, state, parent, *args, **kwargs):
         _safe_debug(f"Close ({state.value.name.lower()}) {obj_repr}")
     
     if not LIBRARY_AVAILABLE:  # pragma: no cover
-        _safe_debug(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak!")
+        _safe_debug(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
         return
     
     assert state.value != _STATE.INVALID
