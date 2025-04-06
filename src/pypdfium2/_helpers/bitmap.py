@@ -9,6 +9,7 @@ import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._deferred import PIL_Image, numpy
+from pypdfium2.version import PDFIUM_INFO
 
 logger = logging.getLogger(__name__)
 
@@ -201,8 +202,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         c_color = pdfium_i.color_tohex(color, self.rev_byteorder)
         ok = pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
-        # Assuming pdfium >= 6635 (first tag to include commit ae9dbb6). With lower pdfium versions, this would always return None and fail.
-        if not ok:
+        if not ok and PDFIUM_INFO.build >= 6635:
             raise PdfiumError("Failed to fill bitmap rectangle.")
     
     
