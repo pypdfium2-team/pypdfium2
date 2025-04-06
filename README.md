@@ -73,12 +73,6 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Symlink pdfium from a non-standard location (e.g. libreoffice libdir) to a directory that is on the search path, determine the version, and install with system pdfium [as described above](#install-source-system).
     
     Note, if elevated privileges are not available, you can target e.g. `~/.local/lib` and add it to [`LD_LIBRARY_PATH`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) in your `~/.bashrc` file.
-    
-    Background: At this time, Linux/BSD distributions do not usually provide pdfium as an own package. However, some may ship a pdfium shared library as part of Libreoffice.
-    This may be helpful to get pypdfium2 installed on platforms not covered by pdfium-binaries yet (e.g. `linux ppc64le/s390x`, `freebsd`).
-    
-    Libreoffice actually uses its own build system for pdfium, so your distributor may be able to do this even for platforms not supported by Google's toolchain.
-    At this time, Debian/Ubuntu and FreeBSD seem to build Libreoffice with pdfium; however, Red Hat do not.
   
   <!-- TODO version.json: reconsider origin - should we use a separate field for the packager? -->
   * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)
@@ -370,7 +364,7 @@ permission_flags = pdfium_c.FPDF_GetDocPermission(pdf)      # implicit
 ```
 
 For PDFium docs, please look at the comments in its [public header files](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/).[^pdfium_docs]
-A large variety of examples on how to interface with the raw API using [`ctypes`](https://docs.python.org/3/library/ctypes.html) is already provided with [support model source code](src/pypdfium2/_helpers).
+A variety of examples on how to interface with the raw API using [`ctypes`](https://docs.python.org/3/library/ctypes.html) is already provided with [support model source code](src/pypdfium2/_helpers).
 Nonetheless, the following guide may be helpful to get started with the raw API, if you are not familiar with `ctypes` yet.
 
 [^pdfium_docs]: Unfortunately, no recent HTML-rendered docs are available for PDFium at the moment.
