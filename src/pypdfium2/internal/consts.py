@@ -27,25 +27,32 @@ RotationToDegrees = {v: k for k, v in RotationToConst.items()}
 BitmapTypeToNChannels = {
     pdfium_c.FPDFBitmap_Gray: 1,
     pdfium_c.FPDFBitmap_BGR:  3,
-    pdfium_c.FPDFBitmap_BGRA: 4,
     pdfium_c.FPDFBitmap_BGRx: 4,
+    pdfium_c.FPDFBitmap_BGRA: 4,
 }
 
 #: Convert a PDFium bitmap format to string, assuming BGR byte order. (:attr:`FPDFBitmap_Unknown` is deliberately not handled.)
 BitmapTypeToStr = {
     pdfium_c.FPDFBitmap_Gray: "L",
     pdfium_c.FPDFBitmap_BGR:  "BGR",
-    pdfium_c.FPDFBitmap_BGRA: "BGRA",
     pdfium_c.FPDFBitmap_BGRx: "BGRX",
+    pdfium_c.FPDFBitmap_BGRA: "BGRA",
 }
 
 #: Convert a PDFium bitmap format to string, assuming RGB byte order. (:attr:`FPDFBitmap_Unknown` is deliberately not handled.)
 BitmapTypeToStrReverse = {
     pdfium_c.FPDFBitmap_Gray: "L",
     pdfium_c.FPDFBitmap_BGR:  "RGB",
-    pdfium_c.FPDFBitmap_BGRA: "RGBA",
     pdfium_c.FPDFBitmap_BGRx: "RGBX",
+    pdfium_c.FPDFBitmap_BGRA: "RGBA",
 }
+
+if PDFIUM_INFO.build >= 7098:
+    # New pixel format FPDFBitmap_BGRA_Premul
+    # Skia-only at the time of writing. Added for completeness and to satisfy the test suite.
+    BitmapTypeToNChannels[pdfium_c.FPDFBitmap_BGRA_Premul] = 4
+    BitmapTypeToStr[pdfium_c.FPDFBitmap_BGRA_Premul] = "BGRa"
+    BitmapTypeToStrReverse[pdfium_c.FPDFBitmap_BGRA_Premul] = "RGBa"
 
 #: Convert a string to PDFium bitmap format, assuming BGR byte order. Inversion of :data:`BitmapTypeToStr`.
 BitmapStrToConst = {v: k for k, v in BitmapTypeToStr.items()}
