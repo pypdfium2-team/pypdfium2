@@ -139,10 +139,6 @@ def _fetch_dep(name, target_dir):
     return _fetch_archive(DEPS_URLS[name].format(rev=_Deferred.deps[name]), target_dir)
 
 
-# def apply_patch(patch, cwd):
-#     # FIXME portability?
-#     pkgbase.git_apply_patch(patch, cwd, git_args=("--git-dir=/dev/null", "--work-tree=."))
-
 def autopatch(file, pattern, repl, is_regex):
     log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
     content = file.read_text()
@@ -159,8 +155,6 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
 
 
 def get_sources(version):
-    
-    # TODO consider cloning the main pdfium from git?
     
     version_str = ".".join(str(v) for v in version)
     SOURCES_DIR.mkdir(exist_ok=True)
