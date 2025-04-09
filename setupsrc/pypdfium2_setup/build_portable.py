@@ -4,6 +4,7 @@
 
 import re
 import sys
+import shutil
 from pathlib import Path
 from urllib.request import urlretrieve
 from functools import cached_property
@@ -24,6 +25,10 @@ SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/refs/tags/{full_ver}/to
 
 SOURCES_DIR = pkgbase.ProjectDir / "sourcebuild_lean"
 PDFIUM_DIR = SOURCES_DIR/"pdfium"
+PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
+
+def log(*args, **kwargs):
+    print(*args, **kwargs, file=sys.stderr)
 
 
 # tar unpacking template from https://gist.github.com/mara004/6fe0ac15d0cf303bed0aea2f22d8531f
@@ -58,10 +63,8 @@ def _fetch_archive(archive_url, dest_path):
     if not archive_path.exists():
         print(f"Fetching {archive_url!r} to {archive_path} ...")
         urlretrieve(archive_url, archive_path)
-    else:
-        print(f"Using existing {archive_path}")
     
-    print(f"Unpacking {archive_url!r} to {dest_path} ...")
+    print(f"Unpacking {archive_path} to {dest_path} ...")
     safer_tar_unpack(archive_path, dest_path)
     
     return True
@@ -82,7 +85,7 @@ class _DeferredClass:
             match = re.search(field_re, deps_content)
             assert match, f"Could not find {field!r} in DEPS file"
             result[field] = match.group(1)
-        print(f"Found DEPS revisions:\n{result}", file=sys.stderr)
+        log(f"Found DEPS revisions:\n{result}")
         return result
 
 _Deferred = _DeferredClass()
@@ -90,14 +93,28 @@ _Deferred = _DeferredClass()
 
 def _fetch_dep(name, target_dir):
     if target_dir.exists():
-        print(f"Using existing {target_dir}")
+        log(f"Using existing {target_dir}")
         return False
     # parse out DEPS revisions only if we actually need them
     return _fetch_archive(DEPS_URLS[name].format(rev=_Deferred.deps[name]), target_dir)
 
-def apply_patch(patch, cwd):
-    # FIXME portability?
-    pkgbase.git_apply_patch(patch, cwd, git_args=("--git-dir=/dev/null", "--work-tree=."))
+
+# def apply_patch(patch, cwd):
+#     # FIXME portability?
+#     pkgbase.git_apply_patch(patch, cwd, git_args=("--git-dir=/dev/null", "--work-tree=."))
+
+def autopatch(file, pattern, repl, is_regex):
+    log(f"Regex patch {pattern!r} -> {repl!r} on {file}")
+    content = file.read_text()
+    if is_regex:
+        content = re.sub(pattern, repl, content)
+    else:
+        content = content.replace(pattern, repl)
+    file.write_text(content)
+
+def autopatch_dir(dir, globexpr, pattern, repl):
+    for file in dir.glob(globexpr):
+        autopatch(file, pattern, repl)
 
 
 def get_sources(version):
@@ -108,21 +125,32 @@ def get_sources(version):
     SOURCES_DIR.mkdir(exist_ok=True)
     
     is_new = _fetch_archive(PDFIUM_URL.format(short_ver=version.build), PDFIUM_DIR)
+    if is_new or True:
+        autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
+    
+    is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     if is_new:
-        print("Applying pdfium patches ...")
-        apply_patch(pkgbase.PatchDir/"public_headers.patch", PDFIUM_DIR)
+        autopatch(PDFIUM_3RDPARTY/"abseil-cpp"/"BUILD.gn", 'component("absl")', 'static_library("absl")', is_regex=False)
     
     _fetch_dep("build", PDFIUM_DIR/"build")
-    _fetch_dep("abseil", PDFIUM_DIR/"third_party"/"abseil-cpp")
-    _fetch_dep("fast_float", PDFIUM_DIR/"third_party"/"fast_float"/"src")
-    _fetch_dep("gtest", PDFIUM_DIR/"third_party"/"googletest"/"src")
-    _fetch_dep("test_fonts", PDFIUM_DIR/"third_party"/"test_fonts")
+    _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
+    _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
+    _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     _fetch_archive(SHIMHEADERS_URL.format(full_ver=version_str), PDFIUM_DIR/"tools"/"generate_shim_headers")
+
+
+def prepare():
+    # Unbundle ICU
+    (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
+    shutil.copyfile(PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn", PDFIUM_3RDPARTY/"icu"/"BUILD.gn")
+    # Create an empty gclient config
+    (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch()
 
 
 def main():
     version = pkgbase.PdfiumVer.scheme(135, 0, 7049, 0)
     get_sources(version)
+    prepare()
 
 
 if __name__ == "__main__":
