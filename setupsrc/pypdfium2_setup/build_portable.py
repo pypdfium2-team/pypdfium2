@@ -104,17 +104,18 @@ def _fetch_dep(name, target_dir):
 #     pkgbase.git_apply_patch(patch, cwd, git_args=("--git-dir=/dev/null", "--work-tree=."))
 
 def autopatch(file, pattern, repl, is_regex):
-    log(f"Regex patch {pattern!r} -> {repl!r} on {file}")
+    log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
     content = file.read_text()
     if is_regex:
-        content = re.sub(pattern, repl, content)
+        content, n_subs = re.subn(pattern, repl, content)
+        assert n_subs > 0
     else:
         content = content.replace(pattern, repl)
     file.write_text(content)
 
-def autopatch_dir(dir, globexpr, pattern, repl):
+def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
     for file in dir.glob(globexpr):
-        autopatch(file, pattern, repl)
+        autopatch(file, pattern, repl, is_regex)
 
 
 def get_sources(version):
@@ -125,8 +126,9 @@ def get_sources(version):
     SOURCES_DIR.mkdir(exist_ok=True)
     
     is_new = _fetch_archive(PDFIUM_URL.format(short_ver=version.build), PDFIUM_DIR)
-    if is_new or True:
+    if is_new:
         autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
+        autopatch(PDFIUM_DIR/"testing"/"BUILD.gn", r'(\s*)("//third_party/test_fonts")', r"\1# \2", is_regex=True)
     
     is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     if is_new:
