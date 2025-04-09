@@ -1,8 +1,10 @@
 #! /usr/bin/env python3
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+# Inspired by https://github.com/tiran/libpdfium/
 
 import re
+import os
 import sys
 import shutil
 import argparse
@@ -162,6 +164,7 @@ def get_sources(version):
     is_new = _fetch_archive(PDFIUM_URL.format(short_ver=version.build), PDFIUM_DIR)
     if is_new:
         autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
+        # don't build the test fonts (needed for embedder tests only)
         autopatch(PDFIUM_DIR/"testing"/"BUILD.gn", r'(\s*)("//third_party/test_fonts")', r"\1# \2", is_regex=True)
     
     is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
@@ -198,8 +201,16 @@ def prepare(config_dict):
 
 def build():
     release_path = Path("out", "Release")
+    # https://issues.chromium.org/issues/402282789
+    os.environ["CPPFLAGS"] = (f"-ffp-contract=off " + os.environ.get("CPPFLAGS", "")).rstrip()
     pkgbase.run_cmd(["gn", "gen", str(release_path)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd(["ninja", "-C", str(release_path)], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd(["ninja", "-C", str(release_path), "pdfium", "pdfium_unittests"], cwd=PDFIUM_DIR)
+
+
+def test():
+    # FlateModule.Encode may fail with older zlib (generates different results)
+    os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
+    pkgbase.run_cmd([PDFIUM_DIR/"out/Release"/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
 def main(
@@ -208,6 +219,7 @@ def main(
     get_sources(version)
     prepare(DefaultConfig)
     build()
+    test()
 
 
 if __name__ == "__main__":
