@@ -78,21 +78,13 @@ def dl_depottools(do_update):
 
 def dl_pdfium(GClient, do_update, revision):
     
-    # FIXME I think only one of revert/sync is needed
-    
-    if PDFiumDir.exists():
-        if do_update:
-            print("PDFium: Revert / Sync  ...")
-            run_cmd([GClient, "revert"], cwd=SBDir)
-        else:
-            print("PDFium: Using existing repository as-is.")
-    else:
+    if not PDFiumDir.exists():
         print("PDFium: Download ...")
         do_update = True
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if do_update:
-        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
+        run_cmd([GClient, "sync", "-D", "--reset", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
         # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
         # FIXME want to avoid static number of commits, and instead check out exactly up to latest versioned commit
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
