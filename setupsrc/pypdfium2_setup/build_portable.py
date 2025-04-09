@@ -5,6 +5,7 @@
 import re
 import sys
 import shutil
+import argparse
 from pathlib import Path
 from urllib.request import urlretrieve
 from functools import cached_property
@@ -23,9 +24,43 @@ DEPS_URLS = dict(
 )
 SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/refs/tags/{full_ver}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{full_ver}.tar.gz"
 
-SOURCES_DIR = pkgbase.ProjectDir / "sourcebuild_lean"
+SOURCES_DIR = pkgbase.ProjectDir / "srcbuild" / "lean"
 PDFIUM_DIR = SOURCES_DIR/"pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
+
+CustomToolchainConfig = {
+    "is_clang": False,
+    "custom_toolchain": "//build/toolchain/linux/passflags:default",
+    "host_toolchain": "//build/toolchain/linux/passflags:default",
+}
+BaseConfig = {
+    "use_sysroot": False,
+    "clang_use_chrome_plugins": False,
+    "treat_warnings_as_errors": False,
+    "use_remoteexec": False,
+    "is_debug": False,
+    "is_component_build": True,
+    "pdf_is_standalone": True,
+    "pdf_enable_v8": False,
+    "pdf_enable_xfa": False,
+    "pdf_use_skia": False,
+    "pdf_use_partition_alloc": False,
+}
+SyslibsConfig = {
+    "use_system_freetype": True,
+    "pdf_bundle_freetype": False,
+    "use_system_lcms2": True,
+    "use_system_libjpeg": True,
+    "use_system_libopenjpeg2": True,
+    "use_system_libpng": True,
+    "use_system_libtiff": True,
+    "use_system_zlib": True,
+    "use_custom_libcxx": False,
+}
+if sys.platform.startswith("darwin"):
+    BaseConfig["mac_deployment_target"] = "10.13.0"
+    BaseConfig["use_system_xcode"] = True
+
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -142,15 +177,19 @@ def get_sources(version):
 
 
 def prepare():
+    # Create an empty gclient config
+    (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch()
     # Unbundle ICU
     (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
     shutil.copyfile(PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn", PDFIUM_3RDPARTY/"icu"/"BUILD.gn")
-    # Create an empty gclient config
-    (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch()
+    # Set up custom flavor of GCC toolchain
+    (PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags").mkdir(exist_ok=True, parents=True)
+    
 
 
-def main():
-    version = pkgbase.PdfiumVer.scheme(135, 0, 7049, 0)
+def main(
+        version = pkgbase.PdfiumVer.scheme(135, 0, 7049, 0),
+    ):
     get_sources(version)
     prepare()
 

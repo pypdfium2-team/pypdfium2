@@ -15,7 +15,7 @@ from pathlib import Path, WindowsPath
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
-SBDir = SourcebuildDir  # local alias for convenience
+SBDir = ProjectDir / "srcbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
@@ -185,23 +185,6 @@ def get_tool(name):
     return bin
 
 
-def serialise_config(config_dict):
-    
-    parts = []
-    
-    for key, value in config_dict.items():
-        p = f"{key} = "
-        if isinstance(value, bool):
-            p += str(value).lower()
-        elif isinstance(value, str):
-            p += f'"{value}"'
-        else:
-            raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
-        parts.append(p)
-    
-    return "\n".join(parts)
-
-
 def main(
         b_update = False,
         b_revision = None,
@@ -243,7 +226,7 @@ def main(
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)
     
-    config_str = serialise_config(config_dict)
+    config_str = serialise_gn_config(config_dict)
     print(f"\nBuild configuration:\n{config_str}\n")
     
     configure(GN, config_str)

@@ -35,8 +35,7 @@ VersionFN  = "version.json"
 ProjectDir        = Path(__file__).parents[2].resolve()
 DataDir           = ProjectDir / "data"
 DataDir_Bindings  = DataDir / "bindings"
-SourcebuildDir    = ProjectDir / "sourcebuild"
-PatchDir          = SourcebuildDir / "patches"
+PatchDir          = ProjectDir / "pdfium_patches"
 ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
 ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
 Changelog         = ProjectDir / "docs" / "devel" / "changelog.md"
@@ -753,3 +752,20 @@ def get_next_changelog(flush=False):
 
 def git_apply_patch(patch, cwd, git_args=()):
     run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
+
+
+def serialise_gn_config(config_dict):
+    
+    parts = []
+    
+    for key, value in config_dict.items():
+        p = f"{key} = "
+        if isinstance(value, bool):
+            p += str(value).lower()
+        elif isinstance(value, str):
+            p += f'"{value}"'
+        else:
+            raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
+        parts.append(p)
+    
+    return "\n".join(parts)
