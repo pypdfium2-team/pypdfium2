@@ -25,7 +25,7 @@ clean:
 	rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
 check:
 	autoflake src/ setupsrc/ tests/ setup.py docs/source/conf.py --recursive --remove-all-unused-imports --ignore-pass-statements --ignore-init-module-imports
-	codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./srcbuild,./dist,./LICENSES/*,./RELEASE.md,./.git,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate"
+	codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sbuild,./dist,./LICENSES/*,./RELEASE.md,./.git,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate"
 	reuse lint
 distcheck:
 	twine check dist/*
@@ -36,9 +36,9 @@ update *args:
 	python3 setupsrc/pypdfium2_setup/update.py {{args}}
 emplace *args:
 	python3 setupsrc/pypdfium2_setup/emplace.py {{args}}
-srcbuild-lean *args:
+build_lean *args:
 	python3 setupsrc/pypdfium2_setup/build_lean.py {{args}}
-srcbuild-toolchained *args:
+build_toolchained *args:
 	python3 setupsrc/pypdfium2_setup/build_toolchained.py {{args}}
 craft *args:
 	python3 setupsrc/pypdfium2_setup/craft.py {{args}}
