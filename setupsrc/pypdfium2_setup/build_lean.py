@@ -28,11 +28,6 @@ SOURCES_DIR = pkgbase.ProjectDir / "srcbuild" / "lean"
 PDFIUM_DIR = SOURCES_DIR/"pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
-CustomToolchainConfig = {
-    "is_clang": False,
-    "custom_toolchain": "//build/toolchain/linux/passflags:default",
-    "host_toolchain": "//build/toolchain/linux/passflags:default",
-}
 BaseConfig = {
     "use_sysroot": False,
     "clang_use_chrome_plugins": False,
@@ -57,9 +52,19 @@ SyslibsConfig = {
     "use_system_zlib": True,
     "use_custom_libcxx": False,
 }
+CustomToolchainConfig = {
+    "is_clang": False,
+    "custom_toolchain": "//build/toolchain/linux/passflags:default",
+    "host_toolchain": "//build/toolchain/linux/passflags:default",
+}
 if sys.platform.startswith("darwin"):
     BaseConfig["mac_deployment_target"] = "10.13.0"
     BaseConfig["use_system_xcode"] = True
+
+DefaultConfig = {}
+DefaultConfig.update(BaseConfig)
+DefaultConfig.update(SyslibsConfig)
+DefaultConfig.update(CustomToolchainConfig)
 
 
 def log(*args, **kwargs):
@@ -176,21 +181,42 @@ def get_sources(version):
     _fetch_archive(SHIMHEADERS_URL.format(full_ver=version_str), PDFIUM_DIR/"tools"/"generate_shim_headers")
 
 
-def prepare():
+def prepare(config_dict):
     # Create an empty gclient config
-    (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch()
+    (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch(exist_ok=True)
     # Unbundle ICU
     (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
-    shutil.copyfile(PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn", PDFIUM_3RDPARTY/"icu"/"BUILD.gn")
+    shutil.copyfile(
+        PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
+        PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
+    )
     # Set up custom flavor of GCC toolchain
     (PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags").mkdir(exist_ok=True, parents=True)
+    shutil.copyfile(
+        pkgbase.PatchDir/"passflags-BUILD.gn",
+        PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags"/"BUILD.gn"
+    )
+    # Create target dir and write build config
+    (PDFIUM_DIR/"out"/"Release").mkdir(exist_ok=True, parents=True)
+    config_str = pkgbase.serialise_gn_config(config_dict)
+    (PDFIUM_DIR/"out"/"Release"/"args.gn").write_text(config_str)
+
+
+def build():
+    gn = shutil.which("gn")
+    ninja = shutil.which("ninja")
+    assert gn and ninja
+    release_path = Path("out", "Release")
+    pkgbase.run_cmd([gn, "gen", str(release_path)], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd([ninja, "-C", str(release_path)], cwd=PDFIUM_DIR)
 
 
 def main(
         version = pkgbase.PdfiumVer.scheme(135, 0, 7049, 0),
     ):
     get_sources(version)
-    prepare()
+    prepare(DefaultConfig)
+    build()
 
 
 if __name__ == "__main__":
