@@ -184,7 +184,6 @@ def prepare():
     shutil.copyfile(PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn", PDFIUM_3RDPARTY/"icu"/"BUILD.gn")
     # Set up custom flavor of GCC toolchain
     (PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags").mkdir(exist_ok=True, parents=True)
-    
 
 
 def main(

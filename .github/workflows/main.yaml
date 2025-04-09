@@ -30,7 +30,7 @@ defaults:
 
 jobs:
   
-  # TODO sync sourcebuild patches & third-party licenses with pdfium-binaries on before release?
+  # TODO sync patches & third-party licenses with pdfium-binaries on before release?
   # TODO(201): schedule test_setup and test_sourcebuild separately
   
   test_setup:
