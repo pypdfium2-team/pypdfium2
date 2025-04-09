@@ -16,18 +16,9 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
 SBDir = SourcebuildDir  # local alias for convenience
-PatchDir       = SBDir / "patches"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
-
-PatchesMain = [
-    (PatchDir/"shared_library.patch", PDFiumDir),
-    (PatchDir/"public_headers.patch", PDFiumDir),
-]
-PatchesWindows = [
-    (PatchDir/"win"/"build.patch", PDFiumDir/"build"),
-]
 
 
 # run `gn args out/Default/ --list` for build config docs
@@ -155,15 +146,11 @@ def _create_resources_rc(pdfium_build):
     output_path.write_text(content)
 
 
-def _apply_patchset(patchset, check=True):
-    for patch, cwd in patchset:
-        run_cmd(["git", "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=check)
-
-
 def patch_pdfium(pdfium_build):
-    _apply_patchset(PatchesMain)
+    git_apply_patch(PatchDir/"shared_library.patch", PDFiumDir)
+    git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
     if sys.platform.startswith("win32"):
-        _apply_patchset(PatchesWindows)
+        git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
         _create_resources_rc(pdfium_build)
 
 

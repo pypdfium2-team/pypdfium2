@@ -36,6 +36,7 @@ ProjectDir        = Path(__file__).parents[2].resolve()
 DataDir           = ProjectDir / "data"
 DataDir_Bindings  = DataDir / "bindings"
 SourcebuildDir    = ProjectDir / "sourcebuild"
+PatchDir          = SourcebuildDir / "patches"
 ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
 ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
 Changelog         = ProjectDir / "docs" / "devel" / "changelog.md"
@@ -748,3 +749,7 @@ def get_next_changelog(flush=False):
         ChangelogStaging.write_text(header)
     
     return devel_msg
+
+
+def git_apply_patch(patch, cwd, git_args=()):
+    run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
