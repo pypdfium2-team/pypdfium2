@@ -197,12 +197,9 @@ def prepare(config_dict):
 
 
 def build():
-    gn = shutil.which("gn")
-    ninja = shutil.which("ninja")
-    assert gn and ninja
     release_path = Path("out", "Release")
-    pkgbase.run_cmd([gn, "gen", str(release_path)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd([ninja, "-C", str(release_path)], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd(["gn", "gen", str(release_path)], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd(["ninja", "-C", str(release_path)], cwd=PDFIUM_DIR)
 
 
 def main(
