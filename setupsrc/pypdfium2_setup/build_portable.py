@@ -6,6 +6,7 @@ import re
 import sys
 from pathlib import Path
 from urllib.request import urlretrieve
+from functools import cached_property
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 import pypdfium2_setup.base as pkgbase
@@ -22,6 +23,7 @@ DEPS_URLS = dict(
 SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/refs/tags/{full_ver}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{full_ver}.tar.gz"
 
 SOURCES_DIR = pkgbase.ProjectDir / "sourcebuild_lean"
+PDFIUM_DIR = SOURCES_DIR/"pdfium"
 
 
 # tar unpacking template from https://gist.github.com/mara004/6fe0ac15d0cf303bed0aea2f22d8531f
@@ -68,21 +70,33 @@ def _fetch_archive(archive_url, dest_path):
 DEPS_RE = r"\s*'{key}': '(\w+)'"
 DEPS_FIELDS = "build abseil fast_float gtest test_fonts".split(" ")
 
-def _get_deps_fields(content, fields=DEPS_FIELDS):
-    # TODO get a proper parser for the DEPS file format?
-    result = {}
-    for field in fields:
-        field_re = DEPS_RE.format(key=f"{field}_revision")
-        match = re.search(field_re, content)
-        assert match, f"Could not find {field!r} in DEPS file"
-        result[field] = match.group(1)
-    return result
+class _DeferredClass:
+    
+    @cached_property
+    def deps(self):
+        # TODO get a proper parser for the DEPS file format?
+        deps_content = (PDFIUM_DIR/"DEPS").read_text()
+        result = {}
+        for field in DEPS_FIELDS:
+            field_re = DEPS_RE.format(key=f"{field}_revision")
+            match = re.search(field_re, deps_content)
+            assert match, f"Could not find {field!r} in DEPS file"
+            result[field] = match.group(1)
+        print(f"Found DEPS revisions:\n{result}", file=sys.stderr)
+        return result
 
-def _fetch_dep(deps, name, target_dir):
-    _fetch_archive(DEPS_URLS[name].format(rev=deps[name]), target_dir)
+_Deferred = _DeferredClass()
+
+
+def _fetch_dep(name, target_dir):
+    if target_dir.exists():
+        print(f"Using existing {target_dir}")
+        return False
+    # parse out DEPS revisions only if we actually need them
+    return _fetch_archive(DEPS_URLS[name].format(rev=_Deferred.deps[name]), target_dir)
 
 def apply_patch(patch, cwd):
-    # TODO portability?
+    # FIXME portability?
     pkgbase.git_apply_patch(patch, cwd, git_args=("--git-dir=/dev/null", "--work-tree=."))
 
 
@@ -93,22 +107,17 @@ def get_sources(version):
     version_str = ".".join(str(v) for v in version)
     SOURCES_DIR.mkdir(exist_ok=True)
     
-    pdfium_dir = SOURCES_DIR/"pdfium"
-    is_new = _fetch_archive(PDFIUM_URL.format(short_ver=version.build), pdfium_dir)
+    is_new = _fetch_archive(PDFIUM_URL.format(short_ver=version.build), PDFIUM_DIR)
     if is_new:
         print("Applying pdfium patches ...")
-        apply_patch(pkgbase.PatchDir/"public_headers.patch", pdfium_dir)
+        apply_patch(pkgbase.PatchDir/"public_headers.patch", PDFIUM_DIR)
     
-    DEPS_PATH = pdfium_dir / "DEPS"
-    deps = _get_deps_fields(DEPS_PATH.read_text())
-    print(f"Found DEPS revisions:\n{deps}", file=sys.stderr)
-    
-    _fetch_dep(deps, "build", pdfium_dir/"build")
-    _fetch_dep(deps, "abseil", pdfium_dir/"third_party"/"abseil-cpp")
-    _fetch_dep(deps, "fast_float", pdfium_dir/"third_party"/"fast_float"/"src")
-    _fetch_dep(deps, "gtest", pdfium_dir/"third_party"/"googletest"/"src")
-    _fetch_dep(deps, "test_fonts", pdfium_dir/"third_party"/"test_fonts")
-    _fetch_archive(SHIMHEADERS_URL.format(full_ver=version_str), pdfium_dir/"tools"/"generate_shim_headers")
+    _fetch_dep("build", PDFIUM_DIR/"build")
+    _fetch_dep("abseil", PDFIUM_DIR/"third_party"/"abseil-cpp")
+    _fetch_dep("fast_float", PDFIUM_DIR/"third_party"/"fast_float"/"src")
+    _fetch_dep("gtest", PDFIUM_DIR/"third_party"/"googletest"/"src")
+    _fetch_dep("test_fonts", PDFIUM_DIR/"third_party"/"test_fonts")
+    _fetch_archive(SHIMHEADERS_URL.format(full_ver=version_str), PDFIUM_DIR/"tools"/"generate_shim_headers")
 
 
 def main():
