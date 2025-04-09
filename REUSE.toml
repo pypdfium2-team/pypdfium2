@@ -114,6 +114,13 @@ Unchanged/deleted code is owned by PDFium, added code by pdfium-binaries.
 '''
 
 [[annotations]]
+path = "pdfium_patches/passflags-BUILD.gn"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025 Christian Heimes <cheimes@redhat.com>"
+SPDX-License-Identifier = "LicenseRef-FairUse"
+SPDX-FileComment = "Obtained from https://github.com/tiran/libpdfium/"
+
+[[annotations]]
 path = "REUSE-wheel.toml"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 geisserml"
