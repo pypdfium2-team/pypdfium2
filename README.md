@@ -52,6 +52,9 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     * `build_toolchained.py` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means pre-compiled binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, `build_toolchained.py` will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries.
     * `build_lean.py` is an attempt to address the shortcomings of the toolchained build (mainly the bloated checkout process and lack of portability). It uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. As a drawback, this process is not officially supported or described upstream, so this may be somewhat hard to maintain.
     
+    When building with system libraries, the following libraries need to be installed: `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib`.
+    When building with system tools, `gn, ninja` and the `gcc` compiler are needed.
+    
     To do the toolchained build and install the resulting binary & bindings, you can do e.g.:
     ```bash
     # call build script with --help to list options
