@@ -44,13 +44,20 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     A binary is downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2.
   
   * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary 🔗</a>
+  
+    You can also install pypdfium2 with a pdfium shared library built from source locally,
+    by placing it in `data/sourcebuild/` with a matching `bindings.py` file created by ctypesgen, and setting `PDFIUM_PLATFORM="sourcebuild"` to use these files on setup.
+    
+    This project comes with two scripts to automate the build process: `build_toolchained.py` and `build_lean.py` (in `setupsrc/pypdfium2_setup/`).
+    * `build_toolchained.py` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means pre-compiled binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, `build_toolchained.py` will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries.
+    * `build_lean.py` is an attempt to address the shortcomings of the toolchained build (mainly the bloated checkout process and lack of portability). It uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. As a drawback, this process is not officially supported or described upstream, so this may be somewhat hard to maintain.
+    
+    To do the toolchained build and install the resulting binary & bindings, you can do e.g.:
     ```bash
     # call build script with --help to list options
     python setupsrc/pypdfium2_setup/build_toolchained.py
     PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
-    Building PDFium may take a long time, as it comes with its bundled toolchain and deps, rather than taking them from the system.[^pdfium_buildsystem]
-    However, we can at least provide the `--use-syslibs` option to build against system runtime libraries.
   
   * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-level binary 🔗</a>
     ```bash
