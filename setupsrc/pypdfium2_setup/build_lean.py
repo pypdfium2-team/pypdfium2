@@ -159,7 +159,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
 def get_sources(version):
     
     version_str = ".".join(str(v) for v in version)
-    SOURCES_DIR.mkdir(exist_ok=True)
+    SOURCES_DIR.mkdir(parents=True, exist_ok=True)
     
     is_new = _fetch_archive(PDFIUM_URL.format(short_ver=version.build), PDFIUM_DIR)
     if is_new:
