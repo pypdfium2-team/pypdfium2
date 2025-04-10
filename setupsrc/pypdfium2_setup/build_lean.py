@@ -10,7 +10,7 @@ import shutil
 import argparse
 from pathlib import Path
 from urllib.request import urlretrieve
-from functools import cached_property
+from functools import cached_property  # TODO add backport
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 import pypdfium2_setup.base as pkgbase
