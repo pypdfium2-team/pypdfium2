@@ -27,7 +27,7 @@ DEPS_URLS = dict(
 SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/refs/tags/{full_ver}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{full_ver}.tar.gz"
 
 SOURCES_DIR = pkgbase.ProjectDir / "sbuild" / "lean"
-PDFIUM_DIR = SOURCES_DIR/"pdfium"
+PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
 BaseConfig = {
@@ -131,7 +131,6 @@ class _DeferredClass:
         return result
 
 _Deferred = _DeferredClass()
-
 
 def _fetch_dep(name, target_dir):
     if target_dir.exists():
