@@ -202,7 +202,11 @@ def prepare(config_dict):
 def build():
     release_path = Path("out", "Release")
     # https://issues.chromium.org/issues/402282789
-    os.environ["CPPFLAGS"] = (f"-ffp-contract=off " + os.environ.get("CPPFLAGS", "")).rstrip()
+    cppflags = "-ffp-contract=off"
+    orig_cppflags = os.environ.get("CPPFLAGS", "")
+    if orig_cppflags:
+        cppflags += " " + orig_cppflags
+    os.environ["CPPFLAGS"] = cppflags
     pkgbase.run_cmd(["gn", "gen", str(release_path)], cwd=PDFIUM_DIR)
     pkgbase.run_cmd(["ninja", "-C", str(release_path), "pdfium", "pdfium_unittests"], cwd=PDFIUM_DIR)
 
