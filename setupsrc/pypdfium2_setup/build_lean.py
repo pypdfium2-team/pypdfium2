@@ -182,6 +182,7 @@ def prepare(config_dict):
     # Create an empty gclient config
     (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch(exist_ok=True)
     # Unbundle ICU
+    # alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu
     (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
     shutil.copyfile(
         PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",

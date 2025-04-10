@@ -95,8 +95,8 @@ def dl_pdfium(GClient, do_update, revision):
 
 def _dl_unbundler():
 
-    # Workaround: download missing tools for unbundle/replace_gn_files.py (to use ICU syslib)
-    # TODO get this fixed upstream
+    # Workaround: download missing tool to unbundle ICU
+    # TODO get this added to upstream pdfium, or use downloader code from build_lean.py ?
 
     tool_dir = PDFiumDir / "tools" / "generate_shim_headers"
     tool_file = tool_dir / "generate_shim_headers.py"
@@ -215,6 +215,7 @@ def main(
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
         _dl_unbundler()
+        # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)
     
