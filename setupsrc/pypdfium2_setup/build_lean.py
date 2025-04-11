@@ -23,7 +23,7 @@ DEPS_URLS = dict(
     gtest = _CHROMIUM_URL + "external/github.com/google/googletest.git/+archive/{rev}.tar.gz#/gtest-{rev}.tar.gz",
     test_fonts = _CHROMIUM_URL + "chromium/src/third_party/test_fonts.git/+archive/{rev}.tar.gz#/test_fonts-{rev}.tar.gz"
 )
-SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/refs/tags/{full_ver}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{full_ver}.tar.gz"
+SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/{refpath}/tools/generate_shim_headers.tar.gz#/generate_shim_headers.tar.gz"
 
 SOURCES_DIR = pkgbase.ProjectDir / "sbuild" / "lean"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
@@ -151,11 +151,8 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
         autopatch(file, pattern, repl, is_regex)
 
 
-def get_sources(version):
-    
-    version_str = ".".join(str(v) for v in version)
-    
-    is_new = _fetch_archive(PDFIUM_URL.format(short_ver=version.build), PDFIUM_DIR)
+def get_sources(full_ver):
+    is_new = _fetch_archive(PDFIUM_URL.format(short_ver=full_ver.build), PDFIUM_DIR)
     if is_new:
         autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
         # don't build the test fonts (needed for embedder tests only)
@@ -169,7 +166,9 @@ def get_sources(version):
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
     _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
-    _fetch_archive(SHIMHEADERS_URL.format(full_ver=version_str), PDFIUM_DIR/"tools"/"generate_shim_headers")
+    full_ver_str = ".".join(str(v) for v in full_ver)
+    # e.g. "refs/tags/{full_ver_str}", "refs/heads/main", or revision
+    _fetch_archive(SHIMHEADERS_URL.format(refpath=f"refs/tags/{full_ver_str}"), PDFIUM_DIR/"tools"/"generate_shim_headers")
 
 
 def prepare(config_dict):
