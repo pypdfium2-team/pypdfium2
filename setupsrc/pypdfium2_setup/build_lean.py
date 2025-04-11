@@ -73,17 +73,14 @@ def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
 
-# tar unpacking template from https://gist.github.com/mara004/6fe0ac15d0cf303bed0aea2f22d8531f
+# tar unpacking template adapted from https://gist.github.com/mara004/6fe0ac15d0cf303bed0aea2f22d8531f
 
-import sys
 if sys.version_info >= (3, 11, 4):  # PEP 706
-    import shutil
     def safer_tar_unpack(archive_path, dest_dir):
         shutil.unpack_archive(archive_path, dest_dir, format="tar", filter="data")
 
 else:  # workaround
     import tarfile
-    from pathlib import Path
     
     def safer_tar_unpack(archive_path, dest_dir):
         dest_dir = Path(dest_dir).resolve()
