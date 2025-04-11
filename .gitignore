@@ -10,8 +10,7 @@ data/
 !data/.gitkeep
 docs/build/
 !docs/build/.gitkeep
-sourcebuild/
-!sourcebuild/patches
+sbuild/
 src/pypdfium2/version.json
 src/pypdfium2_raw/
 !src/pypdfium2_raw/__init__.py

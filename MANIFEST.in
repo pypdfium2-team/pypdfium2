@@ -10,7 +10,7 @@
 # Include library and setup sources
 recursive-include src/pypdfium2 *.py
 recursive-include setupsrc *.py
-recursive-include sourcebuild/patches *
+recursive-include pdfium_patches *
 include autorelease/record.json
 include autorelease/bindings.py
 

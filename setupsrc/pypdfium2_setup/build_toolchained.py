@@ -15,19 +15,10 @@ from pathlib import Path, WindowsPath
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
-SBDir = SourcebuildDir  # local alias for convenience
-PatchDir       = SBDir / "patches"
+SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
-
-PatchesMain = [
-    (PatchDir/"shared_library.patch", PDFiumDir),
-    (PatchDir/"public_headers.patch", PDFiumDir),
-]
-PatchesWindows = [
-    (PatchDir/"win"/"build.patch", PDFiumDir/"build"),
-]
 
 
 # run `gn args out/Default/ --list` for build config docs
@@ -80,28 +71,20 @@ def dl_depottools(do_update):
         print("DepotTools: Download ...")
         run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SBDir)
     
-    os.environ["PATH"] += os.pathsep + str(DepotToolsDir)
+    os.environ["PATH"] = str(DepotToolsDir) + os.pathsep + os.environ["PATH"]
     
     return is_update
 
 
 def dl_pdfium(GClient, do_update, revision):
     
-    # FIXME I think only one of revert/sync is needed
-    
-    if PDFiumDir.exists():
-        if do_update:
-            print("PDFium: Revert / Sync  ...")
-            run_cmd([GClient, "revert"], cwd=SBDir)
-        else:
-            print("PDFium: Using existing repository as-is.")
-    else:
+    if not PDFiumDir.exists():
         print("PDFium: Download ...")
         do_update = True
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if do_update:
-        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
+        run_cmd([GClient, "sync", "-D", "--reset", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
         # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
         # FIXME want to avoid static number of commits, and instead check out exactly up to latest versioned commit
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
@@ -112,8 +95,8 @@ def dl_pdfium(GClient, do_update, revision):
 
 def _dl_unbundler():
 
-    # Workaround: download missing tools for unbundle/replace_gn_files.py (to use ICU syslib)
-    # TODO get this fixed upstream
+    # Workaround: download missing tool to unbundle ICU
+    # TODO get this added to upstream pdfium, or use downloader code from build_lean.py ?
 
     tool_dir = PDFiumDir / "tools" / "generate_shim_headers"
     tool_file = tool_dir / "generate_shim_headers.py"
@@ -155,15 +138,11 @@ def _create_resources_rc(pdfium_build):
     output_path.write_text(content)
 
 
-def _apply_patchset(patchset, check=True):
-    for patch, cwd in patchset:
-        run_cmd(["git", "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=check)
-
-
 def patch_pdfium(pdfium_build):
-    _apply_patchset(PatchesMain)
+    git_apply_patch(PatchDir/"shared_library.patch", PDFiumDir)
+    git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
     if sys.platform.startswith("win32"):
-        _apply_patchset(PatchesWindows)
+        git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
         _create_resources_rc(pdfium_build)
 
 
@@ -196,23 +175,6 @@ def get_tool(name):
     if sys.platform.startswith("win32"):
         bin = bin.with_suffix(".bat")
     return bin
-
-
-def serialise_config(config_dict):
-    
-    parts = []
-    
-    for key, value in config_dict.items():
-        p = f"{key} = "
-        if isinstance(value, bool):
-            p += str(value).lower()
-        elif isinstance(value, str):
-            p += f'"{value}"'
-        else:
-            raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
-        parts.append(p)
-    
-    return "\n".join(parts)
 
 
 def main(
@@ -253,10 +215,11 @@ def main(
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
         _dl_unbundler()
+        # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)
     
-    config_str = serialise_config(config_dict)
+    config_str = serialise_gn_config(config_dict)
     print(f"\nBuild configuration:\n{config_str}\n")
     
     configure(GN, config_str)
