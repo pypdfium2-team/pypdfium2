@@ -151,13 +151,17 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
         autopatch(file, pattern, repl, is_regex)
 
 
+def classic_patch(patchfile, cwd):
+    pkgbase.run_cmd(["patch", "-p1", "-i", str(patchfile)], cwd=cwd)
+
+
 def _format_url(url, id, prefix=""):
     return url.format(rev=prefix+str(id), id=id)
 
 def get_sources(full_ver):
-    short_ver = full_ver.build
-    full_ver_str = ".".join(str(v) for v in full_ver)
-    is_new = _fetch_archive(_format_url(PDFIUM_URL, id=short_ver, prefix="refs/heads/chromium/"), PDFIUM_DIR)
+    # short_ver = full_ver.build
+    # full_ver_str = ".".join(str(v) for v in full_ver)
+    is_new = _fetch_archive(_format_url(PDFIUM_URL, id="main", prefix="refs/heads/"), PDFIUM_DIR)
     if is_new:
         autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
         # don't build the test fonts (needed for embedder tests only)
@@ -167,11 +171,14 @@ def get_sources(full_ver):
     if is_new:
         autopatch(PDFIUM_3RDPARTY/"abseil-cpp"/"BUILD.gn", 'component("absl")', 'static_library("absl")', is_regex=False)
     
-    _fetch_dep("build", PDFIUM_DIR/"build")
+    is_new = _fetch_dep("build", PDFIUM_DIR/"build")
+    if is_new:
+        classic_patch(pkgbase.PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
+    
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
     _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
-    _fetch_archive(_format_url(SHIMHEADERS_URL, id=full_ver_str, prefix="refs/tags/"), PDFIUM_DIR/"tools"/"generate_shim_headers")
+    _fetch_archive(_format_url(SHIMHEADERS_URL, id="main", prefix="refs/heads/"), PDFIUM_DIR/"tools"/"generate_shim_headers")
 
 
 def prepare(config_dict):
@@ -204,8 +211,8 @@ def build():
     if orig_cppflags:
         cppflags += " " + orig_cppflags
     os.environ["CPPFLAGS"] = cppflags
-    pkgbase.run_cmd(["gn", "gen", str(release_path)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd(["ninja", "-C", str(release_path), "pdfium", "pdfium_unittests"], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("gn"), "gen", str(release_path)], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("ninja"), "-C", str(release_path), "pdfium", "pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
 def test():
