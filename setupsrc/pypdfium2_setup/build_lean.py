@@ -221,11 +221,10 @@ def test():
     pkgbase.run_cmd([PDFIUM_DIR/"out/Release"/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
-def main(
-        version = pkgbase.PdfiumVer.scheme(135, 0, 7049, 0),
-    ):
+def main(build_ver=7049):
+    full_ver = pkgbase.PdfiumVer.to_full(build_ver)
     SOURCES_DIR.mkdir(parents=True, exist_ok=True)
-    get_sources(version)
+    get_sources(full_ver)
     prepare(DefaultConfig)
     build()
     test()
