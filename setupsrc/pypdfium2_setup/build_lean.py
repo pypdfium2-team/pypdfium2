@@ -159,9 +159,9 @@ def _format_url(url, id, prefix=""):
     return url.format(rev=prefix+str(id), id=id)
 
 def get_sources(full_ver):
-    # short_ver = full_ver.build
-    # full_ver_str = ".".join(str(v) for v in full_ver)
-    is_new = _fetch_archive(_format_url(PDFIUM_URL, id="main", prefix="refs/heads/"), PDFIUM_DIR)
+    short_ver = full_ver.build
+    full_ver_str = ".".join(str(v) for v in full_ver)
+    is_new = _fetch_archive(_format_url(PDFIUM_URL, id=short_ver, prefix="refs/heads/chromium/"), PDFIUM_DIR)
     if is_new:
         autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
         # don't build the test fonts (needed for embedder tests only)
@@ -178,7 +178,7 @@ def get_sources(full_ver):
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
     _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
-    _fetch_archive(_format_url(SHIMHEADERS_URL, id="main", prefix="refs/heads/"), PDFIUM_DIR/"tools"/"generate_shim_headers")
+    _fetch_archive(_format_url(SHIMHEADERS_URL, id=full_ver_str, prefix="refs/tags/"), PDFIUM_DIR/"tools"/"generate_shim_headers")
 
 
 def prepare(config_dict):
@@ -221,7 +221,7 @@ def test():
     pkgbase.run_cmd([PDFIUM_DIR/"out/Release"/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
-def main(build_ver=7049):
+def main(build_ver=7122):
     full_ver = pkgbase.PdfiumVer.to_full(build_ver)
     SOURCES_DIR.mkdir(parents=True, exist_ok=True)
     get_sources(full_ver)
