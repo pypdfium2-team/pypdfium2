@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
-# Inspired by https://github.com/tiran/libpdfium/
+# Related work: https://github.com/tiran/libpdfium/ and https://aur.archlinux.org/packages/libpdfium-nojs
 
 import re
 import os
@@ -152,7 +152,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
 
 def classic_patch(patchfile, cwd):
     # FIXME managing patches without an actual git repository is nasty
-    pkgbase.run_cmd(["patch", "-p1", "-i", str(patchfile)], cwd=cwd)
+    pkgbase.run_cmd(["patch", "-p1", "--ignore-whitespace", "-i", str(patchfile)], cwd=cwd)
 
 
 def _format_url(url, id, prefix=""):
@@ -173,6 +173,7 @@ def get_sources(full_ver):
     
     is_new = _fetch_dep("build", PDFIUM_DIR/"build")
     if is_new:
+        # Work around error about path_exists() being undefined
         classic_patch(pkgbase.PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
     
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
@@ -221,7 +222,7 @@ def test():
     pkgbase.run_cmd([PDFIUM_DIR/"out/Release"/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
-def main(build_ver=7122):
+def main_api(build_ver=7122):
     full_ver = pkgbase.PdfiumVer.to_full(build_ver)
     SOURCES_DIR.mkdir(parents=True, exist_ok=True)
     get_sources(full_ver)
@@ -230,5 +231,9 @@ def main(build_ver=7122):
     test()
 
 
+def main_cli():
+    main_api()  # TODO
+
+
 if __name__ == "__main__":
-    main()
+    main_cli()
