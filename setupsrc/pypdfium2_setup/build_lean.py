@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 import pypdfium2_setup.base as pkgbase
 
 _CHROMIUM_URL = "https://chromium.googlesource.com/"
-PDFIUM_URL = "https://pdfium.googlesource.com/pdfium/+archive/{revpath}.tar.gz#/pdfium-{id}.tar.gz"
+PDFIUM_URL = "https://pdfium.googlesource.com/pdfium/+archive/{rev}.tar.gz#/pdfium-{id}.tar.gz"
 DEPS_URLS = dict(
     build = _CHROMIUM_URL + "chromium/src/build.git/+archive/{rev}.tar.gz#/build-{rev}.tar.gz",
     abseil = _CHROMIUM_URL + "chromium/src/third_party/abseil-cpp/+archive/{rev}.tar.gz#/abseil-cpp-{rev}.tar.gz",
@@ -23,7 +23,7 @@ DEPS_URLS = dict(
     gtest = _CHROMIUM_URL + "external/github.com/google/googletest.git/+archive/{rev}.tar.gz#/gtest-{rev}.tar.gz",
     test_fonts = _CHROMIUM_URL + "chromium/src/third_party/test_fonts.git/+archive/{rev}.tar.gz#/test_fonts-{rev}.tar.gz"
 )
-SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/{revpath}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{id}.tar.gz"
+SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/{rev}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{id}.tar.gz"
 
 SOURCES_DIR = pkgbase.ProjectDir / "sbuild" / "lean"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
@@ -151,10 +151,13 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
         autopatch(file, pattern, repl, is_regex)
 
 
+def _format_url(url, id, prefix=""):
+    return url.format(rev=prefix+str(id), id=id)
+
 def get_sources(full_ver):
     short_ver = full_ver.build
     full_ver_str = ".".join(str(v) for v in full_ver)
-    is_new = _fetch_archive(PDFIUM_URL.format(revpath=f"refs/heads/chromium/{short_ver}", id=short_ver), PDFIUM_DIR)
+    is_new = _fetch_archive(_format_url(PDFIUM_URL, id=short_ver, prefix="refs/heads/chromium/"), PDFIUM_DIR)
     if is_new:
         autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
         # don't build the test fonts (needed for embedder tests only)
@@ -168,8 +171,7 @@ def get_sources(full_ver):
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
     _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
-    # e.g. "refs/tags/{full_ver_str}", "refs/heads/main", or revision
-    _fetch_archive(SHIMHEADERS_URL.format(revpath=f"refs/tags/{full_ver_str}", id=full_ver_str), PDFIUM_DIR/"tools"/"generate_shim_headers")
+    _fetch_archive(_format_url(SHIMHEADERS_URL, id=full_ver_str, prefix="refs/tags/"), PDFIUM_DIR/"tools"/"generate_shim_headers")
 
 
 def prepare(config_dict):
