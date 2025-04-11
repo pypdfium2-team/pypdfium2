@@ -29,7 +29,7 @@ SOURCES_DIR = pkgbase.ProjectDir / "sbuild" / "lean"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
-BaseConfig = {
+DefaultConfig = {
     "use_sysroot": False,
     "clang_use_chrome_plugins": False,
     "treat_warnings_as_errors": False,
@@ -41,8 +41,6 @@ BaseConfig = {
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
     "pdf_use_partition_alloc": False,
-}
-SyslibsConfig = {
     "use_system_freetype": True,
     "pdf_bundle_freetype": False,
     "use_system_lcms2": True,
@@ -52,20 +50,13 @@ SyslibsConfig = {
     "use_system_libtiff": True,
     "use_system_zlib": True,
     "use_custom_libcxx": False,
-}
-CustomToolchainConfig = {
     "is_clang": False,
     "custom_toolchain": "//build/toolchain/linux/passflags:default",
     "host_toolchain": "//build/toolchain/linux/passflags:default",
 }
 if sys.platform.startswith("darwin"):
-    BaseConfig["mac_deployment_target"] = "10.13.0"
-    BaseConfig["use_system_xcode"] = True
-
-DefaultConfig = {}
-DefaultConfig.update(BaseConfig)
-DefaultConfig.update(SyslibsConfig)
-DefaultConfig.update(CustomToolchainConfig)
+    DefaultConfig["mac_deployment_target"] = "10.13.0"
+    DefaultConfig["use_system_xcode"] = True
 
 
 def log(*args, **kwargs):
