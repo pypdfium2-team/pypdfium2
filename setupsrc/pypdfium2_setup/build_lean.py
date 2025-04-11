@@ -10,7 +10,6 @@ import shutil
 import argparse
 from pathlib import Path
 from urllib.request import urlretrieve
-from functools import cached_property  # TODO add backport
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 import pypdfium2_setup.base as pkgbase
@@ -71,6 +70,15 @@ DefaultConfig.update(CustomToolchainConfig)
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
+
+
+if sys.version_info < (3, 8):
+    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
+    from functools import lru_cache
+    def cached_property(func):
+        return property( lru_cache(maxsize=1)(func) )
+else:
+    from functools import cached_property
 
 
 # tar unpacking template adapted from https://gist.github.com/mara004/6fe0ac15d0cf303bed0aea2f22d8531f
