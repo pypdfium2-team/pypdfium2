@@ -62,6 +62,9 @@ if sys.platform.startswith("darwin"):
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
+def mkdir(path, exist_ok=True, parents=True):
+    path.mkdir(exist_ok=exist_ok, parents=parents)
+
 
 if sys.version_info < (3, 8):
     # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
@@ -194,13 +197,13 @@ def prepare(config_dict):
         PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
     )
     # Set up custom flavor of GCC toolchain
-    (PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags").mkdir(exist_ok=True, parents=True)
+    mkdir(PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags")
     shutil.copyfile(
         pkgbase.PatchDir/"passflags-BUILD.gn",
         PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags"/"BUILD.gn"
     )
     # Create target dir and write build config
-    (PDFIUM_DIR/"out"/"Release").mkdir(exist_ok=True, parents=True)
+    mkdir(PDFIUM_DIR/"out"/"Release")
     config_str = pkgbase.serialise_gn_config(config_dict)
     (PDFIUM_DIR/"out"/"Release"/"args.gn").write_text(config_str)
 
@@ -225,7 +228,7 @@ def test():
 
 def main_api(build_ver=7122):
     full_ver = pkgbase.PdfiumVer.to_full(build_ver)
-    SOURCES_DIR.mkdir(parents=True, exist_ok=True)
+    mkdir(SOURCES_DIR)
     get_sources(full_ver)
     prepare(DefaultConfig)
     build()
