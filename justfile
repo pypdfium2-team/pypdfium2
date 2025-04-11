@@ -25,7 +25,7 @@ clean:
 	rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
 check:
 	autoflake src/ setupsrc/ tests/ setup.py docs/source/conf.py --recursive --remove-all-unused-imports --ignore-pass-statements --ignore-init-module-imports
-	codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sbuild,./dist,./LICENSES/*,./RELEASE.md,./.git,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate"
+	codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sbuild,./pdfium_patches,./dist,./LICENSES/*,./RELEASE.md,./.git,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate"
 	reuse lint
 distcheck:
 	twine check dist/*

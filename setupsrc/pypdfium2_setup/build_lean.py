@@ -150,7 +150,6 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
     for file in dir.glob(globexpr):
         autopatch(file, pattern, repl, is_regex)
 
-
 def classic_patch(patchfile, cwd):
     pkgbase.run_cmd(["patch", "-p1", "-i", str(patchfile)], cwd=cwd)
 

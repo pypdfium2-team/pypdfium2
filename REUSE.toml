@@ -121,6 +121,16 @@ SPDX-License-Identifier = "LicenseRef-FairUse"
 SPDX-FileComment = "Obtained from https://github.com/tiran/libpdfium/"
 
 [[annotations]]
+path = "pdfium_patches/siso.patch"
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2025 geisserml <geisserml@gmail.com>",
+    "2025 PDFium developers"
+]
+SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
+SPDX-FileComment = "Patch by geisserml. Code shown in the patch is from pdfium."
+
+[[annotations]]
 path = "REUSE-wheel.toml"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 geisserml"
@@ -131,7 +141,7 @@ This file is not actually copyrighted, but it mentions the data files that are.
 '''
 
 [[annotations]]
-path = ["RELEASE.md", "docs/build/.gitkeep"]
+path = ["RELEASE.md", "docs/build/.gitkeep", "sbuild/.gitkeep"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 geisserml"
 SPDX-License-Identifier = "CC-BY-4.0"
