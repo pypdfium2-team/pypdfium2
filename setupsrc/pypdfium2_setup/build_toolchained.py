@@ -71,7 +71,7 @@ def dl_depottools(do_update):
         print("DepotTools: Download ...")
         run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SBDir)
     
-    os.environ["PATH"] += os.pathsep + str(DepotToolsDir)
+    os.environ["PATH"] = str(DepotToolsDir) + os.pathsep + os.environ["PATH"]
     
     return is_update
 
