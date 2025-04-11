@@ -151,6 +151,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
         autopatch(file, pattern, repl, is_regex)
 
 def classic_patch(patchfile, cwd):
+    # FIXME managing patches without an actual git repository is nasty
     pkgbase.run_cmd(["patch", "-p1", "-i", str(patchfile)], cwd=cwd)
 
 
