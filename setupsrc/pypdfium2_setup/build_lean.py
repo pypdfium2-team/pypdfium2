@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 # Related work: https://github.com/tiran/libpdfium/ and https://aur.archlinux.org/packages/libpdfium-nojs
 
+# NOTE So far, we have only tested this script on Linux, but the general idea should work on any common OS, provided the necessary tools and libraries are available.
+# In other words, this script should be portable as far as pdfium's build system and code is.
+# On Windows, you might be better off with the toolchained build, though, due to lack of a Unix-like system library environment.
+
 import re
 import os
 import sys
