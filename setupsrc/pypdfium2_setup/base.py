@@ -619,7 +619,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         flags_diff = set(kwargs["flags"]).difference(REFBINDINGS_FLAGS)
         if flags_diff:  # == not set(...).issubset(...)
             log(f"Warning: The following requested flags are not available in the reference bindings and will be discarded: {flags_diff}")
-        DataDir_Bindings.mkdir(parents=True, exist_ok=True)
+        mkdir(DataDir_Bindings)
         shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
         write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."], source="reference"))
         return
@@ -644,7 +644,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         log("Using cached headers")
     else:
         log("Downloading headers...")
-        headers_dir.mkdir(parents=True, exist_ok=True)
+        mkdir(headers_dir)
         archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
         url_request.urlretrieve(archive_url, archive_path)

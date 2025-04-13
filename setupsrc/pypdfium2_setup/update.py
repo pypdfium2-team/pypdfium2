@@ -25,7 +25,7 @@ def clear_data(download_files):
 def _get_package(pl_name, version, robust, use_v8):
     
     pl_dir = DataDir / pl_name
-    pl_dir.mkdir(parents=True, exist_ok=True)
+    mkdir(pl_dir)
     
     prefix = "pdfium-"
     if use_v8:

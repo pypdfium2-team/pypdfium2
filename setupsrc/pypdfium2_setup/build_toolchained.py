@@ -56,7 +56,7 @@ if sys.platform.startswith("darwin"):
 
 def dl_depottools(do_update):
     
-    SBDir.mkdir(parents=True, exist_ok=True)
+    mkdir(SBDir)
     
     is_update = True
     if DepotToolsDir.exists():
@@ -103,7 +103,7 @@ def _dl_unbundler():
     tool_url = "https://raw.githubusercontent.com/chromium/chromium/main/tools/generate_shim_headers/generate_shim_headers.py"
 
     if not tool_file.exists():
-        tool_dir.mkdir(parents=True, exist_ok=True)
+        mkdir(tool_dir)
         url_request.urlretrieve(tool_url, tool_file)
 
 
@@ -147,7 +147,7 @@ def patch_pdfium(pdfium_build):
 
 
 def configure(GN, config):
-    PDFiumBuildDir.mkdir(parents=True, exist_ok=True)
+    mkdir(PDFiumBuildDir)
     (PDFiumBuildDir / "args.gn").write_text(config)
     run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
 
@@ -159,7 +159,7 @@ def build(Ninja, target):
 def pack(v_short, v_post):
     
     dest_dir = DataDir / ExtPlats.sourcebuild
-    dest_dir.mkdir(parents=True, exist_ok=True)
+    mkdir(dest_dir)
     
     libname = libname_for_system(Host.system)
     shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
