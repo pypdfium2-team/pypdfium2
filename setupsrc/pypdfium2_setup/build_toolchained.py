@@ -207,7 +207,7 @@ def main(
     
     did_pdfium_sync = dl_pdfium(GClient, b_update, b_revision)
     v_short, v_post = identify_pdfium()
-    print(f"Version {v_short} {v_post}", file=sys.stderr)
+    log(f"Version {v_short} {v_post}")
     
     if did_pdfium_sync:
         patch_pdfium(v_short)

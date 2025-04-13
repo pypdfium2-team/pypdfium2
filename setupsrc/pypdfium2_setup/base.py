@@ -130,6 +130,13 @@ PdfiumBinariesMap.update({
 })
 
 
+def log(*args, **kwargs):
+    print(*args, **kwargs, file=sys.stderr)
+
+def mkdir(path, exist_ok=True, parents=True):
+    path.mkdir(exist_ok=exist_ok, parents=parents)
+
+
 # Map system to pdfium shared library name
 def libname_for_system(system):
     if system == SysNames.windows:
@@ -172,7 +179,7 @@ class _PdfiumVerClass:
         # FIXME The ls-remote call is fairly expensive. While cached in memory for a process lifetime, it can cause a significant slowdown for consecutive process runs.
         # There may be multiple ways to improve this, like adding some disk cache to ensure it would only be called once for a whole session, or maybe adding a second strategy that would parse the pdfium-binaries VERSION file, and use the chromium refs only for sourcebuild.
         if self._vlines is None:
-            print(f"Fetching chromium refs ...", file=sys.stderr)
+            log(f"Fetching chromium refs ...")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
             self._vlines = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
         return self._vlines
@@ -200,7 +207,7 @@ class _PdfiumVerClass:
                     self._vlines = self._vlines[i+1:]
                     break
         full_ver = self._vdict[v_short]
-        print(f"Resolved {v_short} -> {full_ver}", file=sys.stderr)
+        log(f"Resolved {v_short} -> {full_ver}")
         return full_ver
 
 PdfiumVer = _PdfiumVerClass()
@@ -273,7 +280,7 @@ def merge_tag(info, mode):
         elif mode == "py":
             tag += "+" + ".".join(extra_info)
         else:
-            print("Warning: Ignored post-tag desc. This should not happen in autorelease CI.", file=sys.stderr)
+            log("Warning: Ignored post-tag desc. This should not happen in autorelease CI.")
     
     return tag
 
@@ -353,7 +360,7 @@ class _host_platform:
         elif self._libc_name == "musl":
             return getattr(PlatNames, f"linux_musl_{archid}")
         elif _android_api():  # seems to imply self._libc_name == "libc"
-            print("Android prior to PEP 738 (e.g. Termux)", file=sys.stderr)
+            log("Android prior to PEP 738 (e.g. Termux)")
             return getattr(PlatNames, f"android_{archid}")
         else:
             raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
@@ -364,7 +371,7 @@ class _host_platform:
         
         if self._system_name == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
-            print(f"macOS {self._machine_name} {platform.mac_ver()}", file=sys.stderr)
+            log(f"macOS {self._machine_name} {platform.mac_ver()}")
             if self._machine_name == "x86_64":
                 return PlatNames.darwin_x64
             elif self._machine_name == "arm64":
@@ -374,7 +381,7 @@ class _host_platform:
                 raise RuntimeError(f"Unsupported legacy mac architecture: {self._machine_name!r}")
         
         elif self._system_name == "windows":
-            print(f"windows {self._machine_name} {platform.win32_ver()}", file=sys.stderr)
+            log(f"windows {self._machine_name} {platform.win32_ver()}")
             if self._machine_name == "amd64":
                 return PlatNames.windows_x64
             elif self._machine_name == "x86":
@@ -384,7 +391,7 @@ class _host_platform:
         
         elif self._system_name == "linux":
             self._libc_name, self._libc_ver = _get_libc_info()
-            print(f"linux {self._machine_name} {self._libc_name, self._libc_ver}", file=sys.stderr)
+            log(f"linux {self._machine_name} {self._libc_name, self._libc_ver}")
             if self._machine_name == "x86_64":
                 return self._handle_linux("x64")
             elif self._machine_name == "i686":
@@ -398,7 +405,7 @@ class _host_platform:
         
         elif self._system_name == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
-            print(f"android {self._machine_name} {sys.getandroidapilevel()} {platform.android_ver()}", file=sys.stderr)
+            log(f"android {self._machine_name} {sys.getandroidapilevel()} {platform.android_ver()}")
             if self._machine_name == "aarch64":
                 return PlatNames.android_arm64
             elif self._machine_name == "armv7l":
@@ -411,7 +418,7 @@ class _host_platform:
         elif self._system_name in ("ios", "ipados"):  # PEP 730
             # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
             ios_ver = platform.ios_ver()
-            print(f"{self._system_name} {self._machine_name} {ios_ver}", file=sys.stderr)
+            log(f"{self._system_name} {self._machine_name} {ios_ver}")
             if self._machine_name == "arm64":
                 return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
             elif self._machine_name == "x86_64":
@@ -501,7 +508,7 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
     if str_cast:
         command = [str(c) for c in command]
     
-    print(f"{command} (cwd={cwd!r})", file=sys.stderr)
+    log(f"{command} (cwd={cwd!r})")
     if capture:
         kwargs.update( dict(stdout=subprocess.PIPE, stderr=subprocess.STDOUT) )
     
@@ -595,11 +602,11 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     # TODO move handler into run_ctypesgen on behalf of sourcebuild?
     # FIXME Bindings version file is ignored by upstream code, e.g. we don't handle the case of mismatched bindings/binary and only include the binary version in the end. Strictly speaking we might have to split the current PDFIUM_INFO in BINDINGS_INFO and BINARY_INFO ...
     if BindTarget == BindTarget_Ref:
-        print("Using reference bindings as requested by env var. This will bypass all bindings params.", file=sys.stderr)
+        log("Using reference bindings as requested by env var. This will bypass all bindings params.")
         record = read_json(AR_RecordFile)
         bindings_ver = record["pdfium"]
         if bindings_ver != version:
-            print(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!", file=sys.stderr)
+            log(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!")
         flags_diff = set(kwargs["flags"]).difference(REFBINDINGS_FLAGS)
         if flags_diff:  # == not set(...).issubset(...)
             print(f"Warning: The following requested flags are not available in the reference bindings and will be discarded: {flags_diff}")
@@ -620,14 +627,14 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         prev_info = read_json(ver_path)
         prev_ver = prev_info["version"]
         if prev_info == curr_info and bind_path.exists():
-            print(f"Using cached bindings", file=sys.stderr)
+            log(f"Using cached bindings")
             return
     
     # We try to reuse headers if only bindings params differ, not version. Note that headers don't currently have an own version file; we reuse the bindings version file for simplicity.
     if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
-        print("Using cached headers", file=sys.stderr)
+        log("Using cached headers")
     else:
-        print("Downloading headers...", file=sys.stderr)
+        log("Downloading headers...")
         headers_dir.mkdir(parents=True, exist_ok=True)
         archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
@@ -638,7 +645,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
                     tar_extract_file(tar, m, headers_dir/m.name)
         archive_path.unlink()
     
-    print(f"Building bindings ...", file=sys.stderr)
+    log(f"Building bindings ...")
     run_ctypesgen(DataDir_Bindings, headers_dir, **kwargs)
     write_json(ver_path, curr_info)
 
@@ -668,8 +675,8 @@ def get_helpers_info():
         try:
             helpers_info = parse_git_tag()
         except subprocess.CalledProcessError as e:
-            print(str(e), file=sys.stderr)
-            print("Version uncertain: git describe failure - possibly a shallow checkout", file=sys.stderr)
+            log(str(e))
+            log("Version uncertain: git describe failure - possibly a shallow checkout")
         else:
             have_git_describe = True
             helpers_info["data_source"] = "git"
@@ -679,11 +686,11 @@ def get_helpers_info():
     if not have_git_describe:
         ver_file = ModuleDir_Helpers / VersionFN
         if ver_file.exists():
-            print("Falling back to given version info (e.g. sdist).", file=sys.stderr)
+            log("Falling back to given version info (e.g. sdist).")
             helpers_info = read_json(ver_file)
             helpers_info["data_source"] = "given"
         else:
-            print("Falling back to autorelease record.", file=sys.stderr)
+            log("Falling back to autorelease record.")
             record = read_json(AR_RecordFile)
             helpers_info = parse_given_tag(record["tag"])
             helpers_info["data_source"] = "record"

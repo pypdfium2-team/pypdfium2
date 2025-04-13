@@ -31,7 +31,7 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     
     req_repr = _repr_info(req_ver, req_flags)
     if update_binary:
-        print(f"Downloading binary {req_repr} ...", file=sys.stderr)
+        log(f"Downloading binary {req_repr} ...")
         update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
     else:
         print(f"Using cached binary {req_repr}")
@@ -89,7 +89,7 @@ def main():
     args = parser.parse_args()
     
     if args.plat_spec == ExtPlats.sdist:
-        print("Remove existing in-tree platform files, if any.", file=sys.stderr)
+        log("Remove existing in-tree platform files, if any.")
         clean_platfiles()
         return
     

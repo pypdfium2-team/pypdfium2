@@ -40,7 +40,7 @@ def _get_package(pl_name, version, robust, use_v8):
         url_request.urlretrieve(fu, fp)
     except Exception as e:
         if robust:
-            print(str(e), file=sys.stderr)
+            log(str(e))
             return None, None
         else:
             raise
@@ -83,11 +83,11 @@ def postprocess_android(platforms):
     if Host.system == SysNames.android and Host.platform in platforms:
         elf_cleaner = shutil.which("termux-elf-cleaner")
         if elf_cleaner:
-            print("Invoking termux-elf-cleaner to clean up possible linker warnings...", file=sys.stderr)
+            log("Invoking termux-elf-cleaner to clean up possible linker warnings...")
             libpath = DataDir / Host.platform / libname_for_system(Host.system)
             run_cmd([elf_cleaner, str(libpath)], cwd=None)
         else:
-            print("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.", file=sys.stderr)
+            log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):

@@ -13,6 +13,7 @@ from urllib.request import urlretrieve
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 import pypdfium2_setup.base as pkgbase
+from pypdfium2_setup.base import log, mkdir
 
 _CHROMIUM_URL = "https://chromium.googlesource.com/"
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium/+archive/{rev}.tar.gz#/pdfium-{name}.tar.gz"
@@ -57,13 +58,6 @@ DefaultConfig = {
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     DefaultConfig["use_system_xcode"] = True
-
-
-def log(*args, **kwargs):
-    print(*args, **kwargs, file=sys.stderr)
-
-def mkdir(path, exist_ok=True, parents=True):
-    path.mkdir(exist_ok=exist_ok, parents=parents)
 
 
 if sys.version_info < (3, 8):

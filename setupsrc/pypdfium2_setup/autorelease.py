@@ -42,13 +42,13 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
     assert isinstance(record["pdfium"], int)
     assert not record["pdfium"] > new_pdfium
     if prev_helpers["dirty"]:
-        print("Warning: dirty state. This should not happen in CI.", file=sys.stderr)
+        log("Warning: dirty state. This should not happen in CI.")
     
     py_updates = prev_helpers["n_commits"] > 0
     c_updates = record["pdfium"] < new_pdfium
     
     if not c_updates and not py_updates:
-        print("Warning: Neither pypdfium2 code nor pdfium-binaries updated. New release pointless?", file=sys.stderr)
+        log("Warning: Neither pypdfium2 code nor pdfium-binaries updated. New release pointless?")
     
     # reset prev_helpers to release state
     prev_helpers["n_commits"] = 0
