@@ -170,6 +170,7 @@ class _PdfiumVerClass:
     @staticmethod
     @functools.lru_cache(maxsize=1)
     def get_latest():
+        """ Returns the latest release version of pdfium-binaries. """
         git_ls = run_cmd(["git", "ls-remote", f"{ReleaseRepo}.git"], cwd=None, capture=True)
         tag = git_ls.split("\t")[-1]
         return int( tag.split("/")[-1] )
@@ -191,12 +192,20 @@ class _PdfiumVerClass:
         return full_ver
     
     def get_latest_upstream(self):
+        """
+        Returns the latest version of upstream pdfium/chromium.
+        Note, the first call to this function in a session may be somewhat expensive.
+        """
         lines = self._get_chromium_refs()
         full_ver = self._parse_line( lines.pop(0) )
         self._vcursor = full_ver.build
         return full_ver
     
     def to_full(self, v_short):
+        """
+        Converts a build number to a full version.
+        Note, the first call to this function in a session may be somewhat expensive.
+        """
         v_short = int(v_short)
         self._get_chromium_refs()
         if self._vcursor is None or self._vcursor > v_short:
