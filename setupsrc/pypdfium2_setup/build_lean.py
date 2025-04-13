@@ -19,16 +19,16 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 import pypdfium2_setup.base as pkgbase
 from pypdfium2_setup.base import log, mkdir
 
-_CHROMIUM_URL = "https://chromium.googlesource.com/"
+_CR_PREFIX = "https://chromium.googlesource.com/"
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium/+archive/{rev}.tar.gz#/pdfium-{name}.tar.gz"
 DEPS_URLS = dict(
-    build = _CHROMIUM_URL + "chromium/src/build.git/+archive/{rev}.tar.gz#/build-{rev}.tar.gz",
-    abseil = _CHROMIUM_URL + "chromium/src/third_party/abseil-cpp/+archive/{rev}.tar.gz#/abseil-cpp-{rev}.tar.gz",
-    fast_float = _CHROMIUM_URL + "external/github.com/fastfloat/fast_float.git/+archive/{rev}.tar.gz#/fast_float-{rev}.tar.gz",
-    gtest = _CHROMIUM_URL + "external/github.com/google/googletest.git/+archive/{rev}.tar.gz#/gtest-{rev}.tar.gz",
-    test_fonts = _CHROMIUM_URL + "chromium/src/third_party/test_fonts.git/+archive/{rev}.tar.gz#/test_fonts-{rev}.tar.gz"
+    build = _CR_PREFIX + "chromium/src/build.git/+archive/{rev}.tar.gz#/build-{rev}.tar.gz",
+    abseil = _CR_PREFIX + "chromium/src/third_party/abseil-cpp/+archive/{rev}.tar.gz#/abseil-cpp-{rev}.tar.gz",
+    fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float.git/+archive/{rev}.tar.gz#/fast_float-{rev}.tar.gz",
+    gtest = _CR_PREFIX + "external/github.com/google/googletest.git/+archive/{rev}.tar.gz#/gtest-{rev}.tar.gz",
+    test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts.git/+archive/{rev}.tar.gz#/test_fonts-{rev}.tar.gz"
 )
-SHIMHEADERS_URL = _CHROMIUM_URL + "chromium/src/+archive/{rev}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{name}.tar.gz"
+SHIMHEADERS_URL = _CR_PREFIX + "chromium/src/+archive/{rev}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{name}.tar.gz"
 
 SOURCES_DIR = pkgbase.ProjectDir / "sbuild" / "lean"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
