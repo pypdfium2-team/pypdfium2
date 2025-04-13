@@ -232,15 +232,17 @@ def build(with_tests):
     if with_tests:
         targets.append("pdfium_unittests")
     
-    build_path = Path("out", "Release")
-    pkgbase.run_cmd([shutil.which("gn"), "gen", str(build_path)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd([shutil.which("ninja"), "-C", str(build_path), *targets], cwd=PDFIUM_DIR)
+    build_path_rel = Path("out", "Release")
+    pkgbase.run_cmd([shutil.which("gn"), "gen", build_path_rel], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("ninja"), "-C", build_path_rel, *targets], cwd=PDFIUM_DIR)
+    
+    return PDFIUM_DIR/build_path_rel
 
 
-def test():
+def test(build_path):
     # FlateModule.Encode may fail with older zlib (generates different results)
     os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
-    pkgbase.run_cmd([PDFIUM_DIR/"out/Release"/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
+    pkgbase.run_cmd([build_path/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
 DEFAULT_VER = 7122
@@ -251,8 +253,9 @@ def main_api(build_ver=None, with_tests=False):
     mkdir(SOURCES_DIR)
     get_sources(build_ver, with_tests)
     prepare(DefaultConfig)
-    build(with_tests)
-    if with_tests: test()
+    build_path = build(with_tests)
+    if with_tests:
+        test(build_path)
 
 
 def parse_args(argv):
