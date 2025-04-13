@@ -200,7 +200,7 @@ def main():
         register_changes(new_tag)
         parsed_helpers = parse_git_tag()
         if new_helpers != parsed_helpers:
-            print(
+            log(
                 "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )

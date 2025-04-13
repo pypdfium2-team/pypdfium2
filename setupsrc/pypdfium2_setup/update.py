@@ -34,7 +34,7 @@ def _get_package(pl_name, version, robust, use_v8):
     fn = prefix + f"{PdfiumBinariesMap[pl_name]}.tgz"
     fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
-    print(f"'{fu}' -> '{fp}'")
+    log(f"'{fu}' -> '{fp}'")
     
     try:
         url_request.urlretrieve(fu, fp)

@@ -61,14 +61,14 @@ def dl_depottools(do_update):
     is_update = True
     if DepotToolsDir.exists():
         if do_update:
-            print("DepotTools: Revert and update ...")
+            log("DepotTools: Revert and update ...")
             run_cmd(["git", "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
             run_cmd(["git", "pull", DepotToolsURL], cwd=DepotToolsDir)
         else:
-            print("DepotTools: Using existing repository as-is.")
+            log("DepotTools: Using existing repository as-is.")
             is_update = False
     else:
-        print("DepotTools: Download ...")
+        log("DepotTools: Download ...")
         run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SBDir)
     
     os.environ["PATH"] = str(DepotToolsDir) + os.pathsep + os.environ["PATH"]
@@ -79,7 +79,7 @@ def dl_depottools(do_update):
 def dl_pdfium(GClient, do_update, revision):
     
     if not PDFiumDir.exists():
-        print("PDFium: Download ...")
+        log("PDFium: Download ...")
         do_update = True
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
@@ -220,7 +220,7 @@ def main(
         config_dict.update(SyslibsConfig)
     
     config_str = serialise_gn_config(config_dict)
-    print(f"\nBuild configuration:\n{config_str}\n")
+    log(f"\nBuild configuration:\n{config_str}\n")
     
     configure(GN, config_str)
     build(Ninja, b_target)

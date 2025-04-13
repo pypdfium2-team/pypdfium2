@@ -90,16 +90,16 @@ else:  # workaround
 def _fetch_archive(archive_url, dest_path):
     
     if dest_path.exists():
-        print(f"Using existing {dest_path}")
+        log(f"Using existing {dest_path}")
         return False
     
     name = archive_url.rsplit("/")[-1]
     archive_path = SOURCES_DIR/name
     if not archive_path.exists():
-        print(f"Fetching {archive_url!r} to {archive_path} ...")
+        log(f"Fetching {archive_url!r} to {archive_path} ...")
         urlretrieve(archive_url, archive_path)
     
-    print(f"Unpacking {archive_path} to {dest_path} ...")
+    log(f"Unpacking {archive_path} to {dest_path} ...")
     safer_tar_unpack(archive_path, dest_path)
     
     return True

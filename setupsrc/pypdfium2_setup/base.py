@@ -609,7 +609,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
             log(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!")
         flags_diff = set(kwargs["flags"]).difference(REFBINDINGS_FLAGS)
         if flags_diff:  # == not set(...).issubset(...)
-            print(f"Warning: The following requested flags are not available in the reference bindings and will be discarded: {flags_diff}")
+            log(f"Warning: The following requested flags are not available in the reference bindings and will be discarded: {flags_diff}")
         DataDir_Bindings.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
         write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."], source="reference"))
@@ -681,7 +681,7 @@ def get_helpers_info():
             have_git_describe = True
             helpers_info["data_source"] = "git"
     else:
-        print("Version uncertain: git repo not available.")
+        log("Version uncertain: git repo not available.")
     
     if not have_git_describe:
         ver_file = ModuleDir_Helpers / VersionFN
