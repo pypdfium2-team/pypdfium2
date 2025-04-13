@@ -162,15 +162,24 @@ def classic_patch(patchfile, cwd):
 def _format_url(url, rev):
     return url.format(rev=rev, name=rev.rsplit("/")[-1])
 
-def get_sources(full_ver):
-    short_ver = full_ver.build
-    full_ver_str = ".".join(str(v) for v in full_ver)
-    is_new = _fetch_archive(_format_url(PDFIUM_URL, f"refs/heads/chromium/{short_ver}"), PDFIUM_DIR)
+def get_sources(short_ver, with_tests):
+    
+    if short_ver == "main":
+        pdfium_rev = "refs/heads/main"
+        chromium_rev = pdfium_rev
+        full_ver = pkgbase.PdfiumVer.get_latest_upstream()
+    else:
+        full_ver = pkgbase.PdfiumVer.to_full(short_ver)
+        full_ver_str = ".".join(str(v) for v in full_ver)
+        pdfium_rev = f"refs/heads/chromium/{short_ver}"
+        chromium_rev = f"refs/tags/{full_ver_str}"
+    
+    is_new = _fetch_archive(_format_url(PDFIUM_URL, pdfium_rev), PDFIUM_DIR)
     if is_new:
         autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
         # don't build the test fonts (needed for embedder tests only)
         autopatch(PDFIUM_DIR/"testing"/"BUILD.gn", r'(\s*)("//third_party/test_fonts")', r"\1# \2", is_regex=True)
-    
+
     is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     if is_new:
         autopatch(PDFIUM_3RDPARTY/"abseil-cpp"/"BUILD.gn", 'component("absl")', 'static_library("absl")', is_regex=False)
@@ -181,9 +190,11 @@ def get_sources(full_ver):
         classic_patch(pkgbase.PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
     
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
-    _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
-    _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
-    _fetch_archive(_format_url(SHIMHEADERS_URL, f"refs/tags/{full_ver_str}"), PDFIUM_DIR/"tools"/"generate_shim_headers")
+    _fetch_archive(_format_url(SHIMHEADERS_URL, chromium_rev), PDFIUM_DIR/"tools"/"generate_shim_headers")
+    
+    if with_tests:
+        _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
+        _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
 
 
 def prepare(config_dict):
@@ -208,16 +219,22 @@ def prepare(config_dict):
     (PDFIUM_DIR/"out"/"Release"/"args.gn").write_text(config_str)
 
 
-def build():
+def build(with_tests):
+    
     # https://issues.chromium.org/issues/402282789
     cppflags = "-ffp-contract=off"
     orig_cppflags = os.environ.get("CPPFLAGS", "")
     if orig_cppflags:
         cppflags += " " + orig_cppflags
     os.environ["CPPFLAGS"] = cppflags
+    
+    targets = ["pdfium"]
+    if with_tests:
+        targets.append("pdfium_unittests")
+    
     build_path = Path("out", "Release")
     pkgbase.run_cmd([shutil.which("gn"), "gen", str(build_path)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd([shutil.which("ninja"), "-C", str(build_path), "pdfium", "pdfium_unittests"], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("ninja"), "-C", str(build_path), *targets], cwd=PDFIUM_DIR)
 
 
 def test():
@@ -226,17 +243,39 @@ def test():
     pkgbase.run_cmd([PDFIUM_DIR/"out/Release"/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
-def main_api(build_ver=7122):
-    full_ver = pkgbase.PdfiumVer.to_full(build_ver)
+DEFAULT_VER = 7122
+
+def main_api(build_ver=None, with_tests=False):
+    if build_ver is None:
+        build_ver = DEFAULT_VER
     mkdir(SOURCES_DIR)
-    get_sources(full_ver)
+    get_sources(build_ver, with_tests)
     prepare(DefaultConfig)
-    build()
-    test()
+    build(with_tests)
+    if with_tests: test()
+
+
+def parse_args(argv):
+    parser = argparse.ArgumentParser(
+        description = "Build PDFium from source natively with system tools/libraries. This does not depend on Google's binary toolchain, so it should be portable across different Linux architectures.",
+    )
+    parser.add_argument(
+        "--version",
+        dest = "build_ver",
+        help = f"The pdfium version to use. Defaults to the version last tested by pypdfium2 maintainers (recommended, currently {DEFAULT_VER}). Otherwise, this can be a specific build number, or 'main' to try the latest upstream state.",
+    )
+    parser.add_argument(
+        "--test",
+        dest = "with_tests",
+        action = "store_true",
+        help = "Whether to build and run tests. Recommended, except on very slow hosts.",
+    )
+    return parser.parse_args(argv)
 
 
 def main_cli():
-    main_api()  # TODO
+    args = parse_args(sys.argv[1:])
+    main_api(**vars(args))
 
 
 if __name__ == "__main__":

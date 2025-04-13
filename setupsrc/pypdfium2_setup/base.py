@@ -153,10 +153,12 @@ else:
     cached_property = functools.cached_property
 
 
-class PdfiumVer:
+class _PdfiumVerClass:
     
     scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
-    _refs_cache = {"lines": None, "dict": {}, "cursor": None}
+    
+    def __init__(self):
+        self._vlines, self._vdict, self._vcursor = None, {}, None
     
     @staticmethod
     @functools.lru_cache(maxsize=1)
@@ -165,34 +167,43 @@ class PdfiumVer:
         tag = git_ls.split("\t")[-1]
         return int( tag.split("/")[-1] )
     
-    @classmethod
-    def to_full(cls, v_short):
-        
+    @functools.lru_cache(maxsize=1)
+    def _get_chromium_refs(self):
         # FIXME The ls-remote call is fairly expensive. While cached in memory for a process lifetime, it can cause a significant slowdown for consecutive process runs.
         # There may be multiple ways to improve this, like adding some disk cache to ensure it would only be called once for a whole session, or maybe adding a second strategy that would parse the pdfium-binaries VERSION file, and use the chromium refs only for sourcebuild.
-        
-        v_short = int(v_short)
-        rc = cls._refs_cache
-        
-        if rc["lines"] is None:
+        if self._vlines is None:
             print(f"Fetching chromium refs ...", file=sys.stderr)
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
-            rc["lines"] = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
-        
-        if rc["cursor"] is None or rc["cursor"] > v_short:
-            for i, line in enumerate(rc["lines"]):
-                ref = line.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
-                full_ver = cls.scheme(*[int(v) for v in ref.split(".")])
-                rc["dict"][full_ver.build] = full_ver
-                if full_ver.build == v_short:
-                    rc["cursor"] = full_ver.build
-                    rc["lines"] = rc["lines"][i+1:]
-                    break
-        
-        full_ver = rc["dict"][v_short]
-        print(f"Resolved {v_short} -> {full_ver}", file=sys.stderr)
-        
+            self._vlines = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
+        return self._vlines
+    
+    def _parse_line(self, line):
+        ref = line.split("\t")[-1].rsplit("/", maxsplit=1)[-1]
+        full_ver = self.scheme(*[int(v) for v in ref.split(".")])
+        self._vdict[full_ver.build] = full_ver
         return full_ver
+    
+    def get_latest_upstream(self):
+        lines = self._get_chromium_refs()
+        full_ver = self._parse_line( lines.pop(0) )
+        self._vcursor = full_ver.build
+        return full_ver
+    
+    def to_full(self, v_short):
+        v_short = int(v_short)
+        self._get_chromium_refs()
+        if self._vcursor is None or self._vcursor > v_short:
+            for i, line in enumerate(self._vlines):
+                full_ver = self._parse_line(line)
+                if full_ver.build == v_short:
+                    self._vcursor = full_ver.build
+                    self._vlines = self._vlines[i+1:]
+                    break
+        full_ver = self._vdict[v_short]
+        print(f"Resolved {v_short} -> {full_ver}", file=sys.stderr)
+        return full_ver
+
+PdfiumVer = _PdfiumVerClass()
 
 
 def read_json(fp):

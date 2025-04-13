@@ -228,9 +228,8 @@ def main(
 
 
 def parse_args(argv):
-    
     parser = argparse.ArgumentParser(
-        description = "A script to automate building PDFium from source and generating bindings with ctypesgen.",
+        description = "Build PDFium from source using Google's toolchain.",
     )
     parser.add_argument(
         "--update", "-u",
@@ -255,7 +254,6 @@ def parse_args(argv):
         type = WindowsPath,
         help = "Path to the Windows SDK (Windows only)",
     )
-    
     return parser.parse_args(argv)
 
 
