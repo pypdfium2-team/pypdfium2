@@ -191,7 +191,7 @@ def get_sources(short_ver, with_tests):
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
 
 
-def prepare(config_dict):
+def prepare(config_dict, build_path):
     # Create an empty gclient config
     (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch(exist_ok=True)
     # Unbundle ICU
@@ -208,12 +208,12 @@ def prepare(config_dict):
         PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags"/"BUILD.gn"
     )
     # Create target dir and write build config
-    mkdir(PDFIUM_DIR/"out"/"Release")
+    mkdir(build_path)
     config_str = pkgbase.serialise_gn_config(config_dict)
-    (PDFIUM_DIR/"out"/"Release"/"args.gn").write_text(config_str)
+    (build_path/"args.gn").write_text(config_str)
 
 
-def build(with_tests):
+def build(with_tests, build_path):
     
     # https://issues.chromium.org/issues/402282789
     cppflags = "-ffp-contract=off"
@@ -226,11 +226,9 @@ def build(with_tests):
     if with_tests:
         targets.append("pdfium_unittests")
     
-    build_path_rel = Path("out", "Release")
-    pkgbase.run_cmd([shutil.which("gn"), "gen", build_path_rel], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd([shutil.which("ninja"), "-C", build_path_rel, *targets], cwd=PDFIUM_DIR)
-    
-    return PDFIUM_DIR/build_path_rel
+    build_path_rel = build_path.relative_to(PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("gn"), "gen", str(build_path_rel)], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("ninja"), "-C", str(build_path_rel), *targets], cwd=PDFIUM_DIR)
 
 
 def test(build_path):
@@ -246,8 +244,9 @@ def main_api(build_ver=None, with_tests=False):
         build_ver = DEFAULT_VER
     mkdir(SOURCES_DIR)
     get_sources(build_ver, with_tests)
-    prepare(DefaultConfig)
-    build_path = build(with_tests)
+    build_path = PDFIUM_DIR / "out" / "Default"
+    prepare(DefaultConfig, build_path)
+    build(with_tests, build_path)
     if with_tests:
         test(build_path)
 
