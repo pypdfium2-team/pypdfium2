@@ -7,6 +7,8 @@
 # In other words, this script should be portable as far as pdfium's build system and code is.
 # On Windows, you might be better off with the toolchained build, though, due to lack of a Unix-like system library environment.
 
+# Known issues: This script does not currently handle rebuilds. You have to manually delete the pdfium/ directory if you want to rebuild with a different version. In the future, we might want to use git repositories rather than tarballs to make tasks like version switching or patching more straightforward.
+
 import re
 import os
 import sys
