@@ -329,7 +329,8 @@ def parse_args(argv):
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = "Path to clang release folder, without trailing slash. Passing --compiler clang is a pre-requisite. By default, we try /usr, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",
+        help = "Path to clang release folder, without trailing slash. Passing --compiler clang is a pre-requisite. By default, we try '/usr', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",
+        # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     )
     args = parser.parse_args(argv)
     if args.compiler:
