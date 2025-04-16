@@ -899,6 +899,7 @@ This results in pypdfium2 being part of a large dependency tree.
 * [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium in `redstork`, `redstork-ui` and `pdfbrain`.
 * [Tim Head](https://github.com/betatim): Original idea for Python bindings to PDFium with ctypesgen in `wowpng`.
 * [Benoît Blanchon](https://github.com/bblanchon): Author of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](https://github.com/bblanchon/pdfium-binaries/tree/master/patches).
+* [Christian Heimes](https://github.com/tiran): RPM packaging for pdfium. Showing how to build pdfium natively without Google's toolchain.
 * [Adam Huganir](https://github.com/adam-huganir): Help with maintenance and development decisions since the beginning of the project.
 * [kobaltcore](https://github.com/kobaltcore): Bug fix for `PdfDocument.save()`.
 * [Anderson Bravalheri](https://github.com/abravalheri): Help with PEP 517/518 compliance. Hint to use an environment variable rather than separate setup files.
