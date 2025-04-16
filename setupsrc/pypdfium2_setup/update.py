@@ -2,6 +2,8 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# NOTE: unless otherwise noted, "version" refers to the short version in this file
+
 import sys
 import shutil
 import tarfile
@@ -25,7 +27,7 @@ def clear_data(download_files):
 def _get_package(pl_name, version, robust, use_v8):
     
     pl_dir = DataDir / pl_name
-    pl_dir.mkdir(parents=True, exist_ok=True)
+    mkdir(pl_dir)
     
     prefix = "pdfium-"
     if use_v8:
@@ -34,13 +36,13 @@ def _get_package(pl_name, version, robust, use_v8):
     fn = prefix + f"{PdfiumBinariesMap[pl_name]}.tgz"
     fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
-    print(f"'{fu}' -> '{fp}'")
+    log(f"'{fu}' -> '{fp}'")
     
     try:
         url_request.urlretrieve(fu, fp)
     except Exception as e:
         if robust:
-            print(str(e), file=sys.stderr)
+            log(str(e))
             return None, None
         else:
             raise
@@ -83,11 +85,11 @@ def postprocess_android(platforms):
     if Host.system == SysNames.android and Host.platform in platforms:
         elf_cleaner = shutil.which("termux-elf-cleaner")
         if elf_cleaner:
-            print("Invoking termux-elf-cleaner to clean up possible linker warnings...", file=sys.stderr)
+            log("Invoking termux-elf-cleaner to clean up possible linker warnings...")
             libpath = DataDir / Host.platform / libname_for_system(Host.system)
             run_cmd([elf_cleaner, str(libpath)], cwd=None)
         else:
-            print("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.", file=sys.stderr)
+            log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):

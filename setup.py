@@ -55,7 +55,7 @@ class pypdfium_build_py (build_py_orig):
             helpers_info["is_editable"] = bool(self.editable_mode)
             write_json(ModuleDir_Helpers/VersionFN, helpers_info)
         else:
-            print("!!! Warning: cmdclass does not provide `editable_mode` attribute.")
+            log("!!! Warning: cmdclass does not provide `editable_mode` attribute.")
         build_py_orig.run(self, *args, **kwargs)
 
 
@@ -115,7 +115,7 @@ def run_setup(modnames, pl_name, pdfium_ver):
                 if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
                     helpers_info["dirty"] = False
             else:
-                print("!!! Warning: sdist built without ctypesgen pin?", file=sys.stderr)
+                log("!!! Warning: sdist built without ctypesgen pin?")
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         # is_editable = None: unknown/fallback in case the cmdclass is not reached
         helpers_info["is_editable"] = None
@@ -157,7 +157,7 @@ def main():
     parsed_spec = parse_pl_spec(pl_spec)
     if parsed_spec is None:
         # TODO if we're on a unixoid system, check if it provides libreoffice with pdfium
-        print(f"No pre-built binaries available for this host. You may place custom binaries & bindings in data/sourcebuild/ and install with `{PlatSpec_EnvVar}=sourcebuild`.", file=sys.stderr)
+        log(f"No pre-built binaries available for this host. You may place custom binaries & bindings in data/sourcebuild/ and install with `{PlatSpec_EnvVar}=sourcebuild`.")
         raise Host._exc
     
     else:

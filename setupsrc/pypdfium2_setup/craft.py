@@ -117,14 +117,14 @@ def tmp_ctypesgen_pin():
             content = rq.read().decode()
         content = json.loads(content)
         pin = content["object"]["sha"]
-        print(f"Resolved pypdfium2 ctypesgen HEAD to SHA {pin}", file=sys.stderr)
+        log(f"Resolved pypdfium2 ctypesgen HEAD to SHA {pin}")
     
     base_txt = "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@"
     ctx = tmp_replace_ctx(ProjectDir/"pyproject.toml", base_txt+"pypdfium2", base_txt+pin)
     with ctx:
-        print(f"Wrote temporary pyproject.toml with ctypesgen pin", file=sys.stderr)
+        log(f"Wrote temporary pyproject.toml with ctypesgen pin")
         yield
-    print(f"Reset pyproject.toml", file=sys.stderr)
+    log(f"Reset pyproject.toml")
 
 
 if __name__ == '__main__':

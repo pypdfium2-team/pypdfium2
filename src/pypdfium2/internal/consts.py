@@ -54,6 +54,7 @@ if PDFIUM_INFO.build >= 7098:
     BitmapTypeToStr[pdfium_c.FPDFBitmap_BGRA_Premul] = "BGRa"
     BitmapTypeToStrReverse[pdfium_c.FPDFBitmap_BGRA_Premul] = "RGBa"
 
+# TODO consider a bi-directional dict in the future?
 #: Convert a string to PDFium bitmap format, assuming BGR byte order. Inversion of :data:`BitmapTypeToStr`.
 BitmapStrToConst = {v: k for k, v in BitmapTypeToStr.items()}
 
@@ -80,7 +81,7 @@ ColorspaceToStr = _fallback_dict({
     pdfium_c.FPDF_COLORSPACE_ICCBASED:   "ICCBased",
     pdfium_c.FPDF_COLORSPACE_SEPARATION: "Separation",
     pdfium_c.FPDF_COLORSPACE_DEVICEN:    "DeviceN",
-    pdfium_c.FPDF_COLORSPACE_INDEXED:    "Indexed",  # i. e. palettized
+    pdfium_c.FPDF_COLORSPACE_INDEXED:    "Indexed",  # i.e. palettized
     pdfium_c.FPDF_COLORSPACE_PATTERN:    "Pattern",
 })
 
@@ -144,7 +145,8 @@ if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
 UnsupportedInfoToStr = _fallback_dict({
     pdfium_c.FPDF_UNSP_DOC_XFAFORM:               "XFA form",
     pdfium_c.FPDF_UNSP_DOC_PORTABLECOLLECTION:    "Portable collection",
-    pdfium_c.FPDF_UNSP_DOC_ATTACHMENT:            "Attachment (incomplete support)",  # https://crbug.com/pdfium/1945
+    # https://crbug.com/pdfium/1945
+    pdfium_c.FPDF_UNSP_DOC_ATTACHMENT:            "Attachment (incomplete support)",
     pdfium_c.FPDF_UNSP_DOC_SECURITY:              "Security",
     pdfium_c.FPDF_UNSP_DOC_SHAREDREVIEW:          "Shared review",
     pdfium_c.FPDF_UNSP_DOC_SHAREDFORM_ACROBAT:    "Shared form (acrobat)",

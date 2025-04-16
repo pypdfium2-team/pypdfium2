@@ -15,19 +15,10 @@ from pathlib import Path, WindowsPath
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
-SBDir = SourcebuildDir  # local alias for convenience
-PatchDir       = SBDir / "patches"
+SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
-
-PatchesMain = [
-    (PatchDir/"shared_library.patch", PDFiumDir),
-    (PatchDir/"public_headers.patch", PDFiumDir),
-]
-PatchesWindows = [
-    (PatchDir/"win"/"build.patch", PDFiumDir/"build"),
-]
 
 
 # run `gn args out/Default/ --list` for build config docs
@@ -65,43 +56,35 @@ if sys.platform.startswith("darwin"):
 
 def dl_depottools(do_update):
     
-    SBDir.mkdir(parents=True, exist_ok=True)
+    mkdir(SBDir)
     
     is_update = True
     if DepotToolsDir.exists():
         if do_update:
-            print("DepotTools: Revert and update ...")
+            log("DepotTools: Revert and update ...")
             run_cmd(["git", "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
             run_cmd(["git", "pull", DepotToolsURL], cwd=DepotToolsDir)
         else:
-            print("DepotTools: Using existing repository as-is.")
+            log("DepotTools: Using existing repository as-is.")
             is_update = False
     else:
-        print("DepotTools: Download ...")
+        log("DepotTools: Download ...")
         run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SBDir)
     
-    os.environ["PATH"] += os.pathsep + str(DepotToolsDir)
+    os.environ["PATH"] = str(DepotToolsDir) + os.pathsep + os.environ["PATH"]
     
     return is_update
 
 
 def dl_pdfium(GClient, do_update, revision):
     
-    # FIXME I think only one of revert/sync is needed
-    
-    if PDFiumDir.exists():
-        if do_update:
-            print("PDFium: Revert / Sync  ...")
-            run_cmd([GClient, "revert"], cwd=SBDir)
-        else:
-            print("PDFium: Using existing repository as-is.")
-    else:
-        print("PDFium: Download ...")
+    if not PDFiumDir.exists():
+        log("PDFium: Download ...")
         do_update = True
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if do_update:
-        run_cmd([GClient, "sync", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
+        run_cmd([GClient, "sync", "-D", "--reset", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
         # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
         # FIXME want to avoid static number of commits, and instead check out exactly up to latest versioned commit
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
@@ -112,15 +95,15 @@ def dl_pdfium(GClient, do_update, revision):
 
 def _dl_unbundler():
 
-    # Workaround: download missing tools for unbundle/replace_gn_files.py (to use ICU syslib)
-    # TODO get this fixed upstream
+    # Workaround: download missing tool to unbundle ICU
+    # TODO get this added to upstream pdfium, or use downloader code from build_lean.py ?
 
     tool_dir = PDFiumDir / "tools" / "generate_shim_headers"
     tool_file = tool_dir / "generate_shim_headers.py"
     tool_url = "https://raw.githubusercontent.com/chromium/chromium/main/tools/generate_shim_headers/generate_shim_headers.py"
 
     if not tool_file.exists():
-        tool_dir.mkdir(parents=True, exist_ok=True)
+        mkdir(tool_dir)
         url_request.urlretrieve(tool_url, tool_file)
 
 
@@ -155,20 +138,16 @@ def _create_resources_rc(pdfium_build):
     output_path.write_text(content)
 
 
-def _apply_patchset(patchset, check=True):
-    for patch, cwd in patchset:
-        run_cmd(["git", "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=check)
-
-
 def patch_pdfium(pdfium_build):
-    _apply_patchset(PatchesMain)
+    git_apply_patch(PatchDir/"shared_library.patch", PDFiumDir)
+    git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
     if sys.platform.startswith("win32"):
-        _apply_patchset(PatchesWindows)
+        git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
         _create_resources_rc(pdfium_build)
 
 
 def configure(GN, config):
-    PDFiumBuildDir.mkdir(parents=True, exist_ok=True)
+    mkdir(PDFiumBuildDir)
     (PDFiumBuildDir / "args.gn").write_text(config)
     run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
 
@@ -177,42 +156,11 @@ def build(Ninja, target):
     run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
-def pack(v_short, v_post):
-    
-    dest_dir = DataDir / ExtPlats.sourcebuild
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    
-    libname = libname_for_system(Host.system)
-    shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
-    write_pdfium_info(dest_dir, v_short, origin="sourcebuild", **v_post)
-    
-    # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    # FIXME PDFIUM_BINDINGS=reference not honored
-    run_ctypesgen(dest_dir, headers_dir=PDFiumDir/"public", compile_lds=[dest_dir])
-
-
 def get_tool(name):
     bin = DepotToolsDir / name
     if sys.platform.startswith("win32"):
         bin = bin.with_suffix(".bat")
     return bin
-
-
-def serialise_config(config_dict):
-    
-    parts = []
-    
-    for key, value in config_dict.items():
-        p = f"{key} = "
-        if isinstance(value, bool):
-            p += str(value).lower()
-        elif isinstance(value, str):
-            p += f'"{value}"'
-        else:
-            raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
-        parts.append(p)
-    
-    return "\n".join(parts)
 
 
 def main(
@@ -245,7 +193,7 @@ def main(
     
     did_pdfium_sync = dl_pdfium(GClient, b_update, b_revision)
     v_short, v_post = identify_pdfium()
-    print(f"Version {v_short} {v_post}", file=sys.stderr)
+    log(f"Version {v_short} {v_post}")
     
     if did_pdfium_sync:
         patch_pdfium(v_short)
@@ -253,21 +201,21 @@ def main(
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
         _dl_unbundler()
+        # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)
     
-    config_str = serialise_config(config_dict)
-    print(f"\nBuild configuration:\n{config_str}\n")
+    config_str = serialise_gn_config(config_dict)
+    log(f"\nBuild configuration:\n{config_str}\n")
     
     configure(GN, config_str)
     build(Ninja, b_target)
-    pack(v_short, v_post)
+    pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_short, **v_post, is_short_ver=True)
 
 
 def parse_args(argv):
-    
     parser = argparse.ArgumentParser(
-        description = "A script to automate building PDFium from source and generating bindings with ctypesgen.",
+        description = "Build PDFium from source using Google's toolchain.",
     )
     parser.add_argument(
         "--update", "-u",
@@ -292,7 +240,6 @@ def parse_args(argv):
         type = WindowsPath,
         help = "Path to the Windows SDK (Windows only)",
     )
-    
     return parser.parse_args(argv)
 
 
