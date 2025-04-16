@@ -791,6 +791,8 @@ def serialise_gn_config(config_dict):
             p += str(value).lower()
         elif isinstance(value, str):
             p += f'"{value}"'
+        elif isinstance(value, int):
+            p += str(value)
         else:
             raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
         parts.append(p)

@@ -9,13 +9,13 @@
 
 # Known issues:
 # - This script does not currently handle rebuilds. You have to manually delete the pdfium/ directory if you want to rebuild with a different version. In the future, we might want to use git repositories rather than tarballs to make tasks like version switching or patching more straightforward.
-# - This script needs GCC. It does not have built-in support for clang at this time, because I'm not sure how to use system clang with pdfium's build system. While this could be done manually with some patches and symlinks, pdfium seems to assume a too new version of clang (the one that comes with the toolchained build).
 
 import re
 import os
 import sys
 import shutil
 import argparse
+from enum import Enum
 from pathlib import Path
 from urllib.request import urlretrieve
 
@@ -59,13 +59,14 @@ DefaultConfig = {
     "use_system_libtiff": True,
     "use_system_zlib": True,
     "use_custom_libcxx": False,
-    "is_clang": False,
-    "custom_toolchain": "//build/toolchain/linux/passflags:default",
-    "host_toolchain": "//build/toolchain/linux/passflags:default",
+    "use_libcxx_modules": False,
 }
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     DefaultConfig["use_system_xcode"] = True
+
+
+Compiler = Enum("Compiler", "gcc clang")
 
 
 if sys.version_info < (3, 8):
@@ -164,7 +165,7 @@ def classic_patch(patchfile, cwd):
 def _format_url(url, rev):
     return url.format(rev=rev, name=rev.rsplit("/")[-1])
 
-def get_sources(short_ver, with_tests):
+def get_sources(short_ver, with_tests, compiler):
     
     if short_ver == "main":
         pdfium_rev = "refs/heads/main"
@@ -190,6 +191,8 @@ def get_sources(short_ver, with_tests):
     if is_new:
         # Work around error about path_exists() being undefined
         classic_patch(pkgbase.PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
+        if compiler is Compiler.clang:
+            classic_patch(pkgbase.PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR/"build")
     
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     _fetch_archive(_format_url(SHIMHEADERS_URL, chromium_rev), PDFIUM_DIR/"tools"/"generate_shim_headers")
@@ -209,26 +212,21 @@ def prepare(config_dict, build_path):
         PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
         PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
     )
-    # Set up custom flavor of GCC toolchain
-    mkdir(PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags")
-    shutil.copyfile(
-        pkgbase.PatchDir/"passflags-BUILD.gn",
-        PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags"/"BUILD.gn"
-    )
     # Create target dir and write build config
     mkdir(build_path)
     config_str = pkgbase.serialise_gn_config(config_dict)
     (build_path/"args.gn").write_text(config_str)
 
 
-def build(with_tests, build_path):
+def build(with_tests, build_path, compiler):
     
-    # https://issues.chromium.org/issues/402282789
-    cppflags = "-ffp-contract=off"
-    orig_cppflags = os.environ.get("CPPFLAGS", "")
-    if orig_cppflags:
-        cppflags += " " + orig_cppflags
-    os.environ["CPPFLAGS"] = cppflags
+    if compiler is Compiler.gcc:
+        # https://issues.chromium.org/issues/402282789
+        cppflags = "-ffp-contract=off"
+        orig_cppflags = os.environ.get("CPPFLAGS", "")
+        if orig_cppflags:
+            cppflags += " " + orig_cppflags
+        os.environ["CPPFLAGS"] = cppflags
     
     targets = ["pdfium"]
     if with_tests:
@@ -245,16 +243,64 @@ def test(build_path):
     pkgbase.run_cmd([build_path/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
+def _get_clang_ver(clang_path):
+    from packaging.version import Version
+    try_libpaths = [
+        clang_path/"lib"/"clang",
+        clang_path/"lib64"/"clang",
+    ]
+    libpath = next(p for p in try_libpaths if p.exists())
+    candidates = (Version(p.name) for p in libpath.iterdir() if re.fullmatch(r"[\d\.]+", p.name))
+    version = max(candidates)
+    return version.major
+
+
+def setup_compiler(config, compiler, clang_path):
+    if compiler is Compiler.gcc:
+        config.update({
+            "is_clang": False,
+            "custom_toolchain": "//build/toolchain/linux/passflags:default",
+            "host_toolchain": "//build/toolchain/linux/passflags:default",
+        })
+        # Set up custom flavor of GCC toolchain that supports passing flags
+        mkdir(PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags")
+        shutil.copyfile(
+            pkgbase.PatchDir/"passflags-BUILD.gn",
+            PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags"/"BUILD.gn"
+        )
+    elif compiler is Compiler.clang:
+        assert clang_path, "Clang path must be set"
+        clang_version = _get_clang_ver(clang_path)
+        config.update({
+            "is_clang": True,
+            "clang_base_path": str(clang_path),
+            "clang_version": clang_version,
+        })
+    else:
+        assert False, f"Unhandled compiler {compiler}"
+
+
 DEFAULT_VER = 7122
 
-def main_api(build_ver=None, with_tests=False):
+def main_api(build_ver=None, with_tests=False, compiler=None, clang_path=None):
+    
     if build_ver is None:
         build_ver = DEFAULT_VER
+    if compiler is None:
+        compiler = Compiler.gcc
+    if clang_path is None and os.name != "nt":
+        clang_path = Path("/usr")
+    
     mkdir(SOURCES_DIR)
-    get_sources(build_ver, with_tests)
-    build_path = PDFIUM_DIR / "out" / "Default"
-    prepare(DefaultConfig, build_path)
-    build(with_tests, build_path)
+    get_sources(build_ver, with_tests, compiler)
+    
+    build_path = PDFIUM_DIR/"out"/"Default"
+    config = DefaultConfig.copy()
+    setup_compiler(config, compiler, clang_path)
+    
+    prepare(config, build_path)
+    build(with_tests, build_path, compiler)
+    
     if with_tests:
         test(build_path)
 
@@ -274,7 +320,20 @@ def parse_args(argv):
         action = "store_true",
         help = "Whether to build and run tests. Recommended, except on very slow hosts.",
     )
-    return parser.parse_args(argv)
+    parser.add_argument(
+        "--compiler",
+        type = str.lower,
+        help = "The compiler to use (gcc or clang). Defaults to gcc.",
+    )
+    parser.add_argument(
+        "--clang-path",
+        type = Path,
+        help = "Path to clang release folder, without trailing slash. Passing --compiler clang is a pre-requisite. By default, we try /usr, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",
+    )
+    args = parser.parse_args(argv)
+    if args.compiler:
+        args.compiler = Compiler[args.compiler]
+    return args
 
 
 def main_cli():
