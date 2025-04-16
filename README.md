@@ -716,7 +716,7 @@ Roadmap:
   - [Issues panel](https://github.com/pypdfium2-team/pypdfium2/issues): Initial bug reports and feature requests. May need to be transferred to dependencies.
   - [Discussions page](https://github.com/pypdfium2-team/pypdfium2/discussions): General questions and suggestions.
 * PDFium
-  - [Bug tracker](https://bugs.chromium.org/p/pdfium/issues/list): Issues in PDFium.
+  - [Bug tracker](https://crbug.com/pdfium/): Issues in PDFium.
     Beware: The bridge between Python and C increases the probability of integration issues or API misuse. The symptoms can often make it look like a PDFium bug while it is not.
   - [Mailing list](https://groups.google.com/g/pdfium/): Questions regarding PDFium usage.
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
