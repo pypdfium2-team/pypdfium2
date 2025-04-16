@@ -7,7 +7,9 @@
 # In other words, this script should be portable as far as pdfium's build system and code is.
 # On Windows, you might be better off with the toolchained build, though, due to lack of a Unix-like system library environment.
 
-# Known issues: This script does not currently handle rebuilds. You have to manually delete the pdfium/ directory if you want to rebuild with a different version. In the future, we might want to use git repositories rather than tarballs to make tasks like version switching or patching more straightforward.
+# Known issues:
+# - This script does not currently handle rebuilds. You have to manually delete the pdfium/ directory if you want to rebuild with a different version. In the future, we might want to use git repositories rather than tarballs to make tasks like version switching or patching more straightforward.
+# - This script needs GCC. It does not have built-in support for clang at this time, because I'm not sure how to use system clang with pdfium's build system. While this could be done manually with some patches and symlinks, pdfium seems to assume a too new version of clang (the one that comes with the toolchained build).
 
 import re
 import os
