@@ -193,6 +193,7 @@ def get_sources(short_ver, with_tests, compiler):
         classic_patch(pkgbase.PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
         if compiler is Compiler.clang:
             classic_patch(pkgbase.PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR/"build")
+            classic_patch(pkgbase.PatchDir/"avoid_new_clang_flags.diff", cwd=PDFIUM_DIR/"build")
     
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     _fetch_archive(_format_url(SHIMHEADERS_URL, chromium_rev), PDFIUM_DIR/"tools"/"generate_shim_headers")
