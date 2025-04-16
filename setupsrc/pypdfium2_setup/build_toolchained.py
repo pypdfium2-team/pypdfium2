@@ -156,20 +156,6 @@ def build(Ninja, target):
     run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
-def pack(v_short, v_post):
-    
-    dest_dir = DataDir / ExtPlats.sourcebuild
-    mkdir(dest_dir)
-    
-    libname = libname_for_system(Host.system)
-    shutil.copy(PDFiumBuildDir/libname, dest_dir/libname)
-    write_pdfium_info(dest_dir, v_short, origin="sourcebuild", **v_post)
-    
-    # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    # FIXME PDFIUM_BINDINGS=reference not honored
-    run_ctypesgen(dest_dir, headers_dir=PDFiumDir/"public", compile_lds=[dest_dir])
-
-
 def get_tool(name):
     bin = DepotToolsDir / name
     if sys.platform.startswith("win32"):
@@ -224,7 +210,7 @@ def main(
     
     configure(GN, config_str)
     build(Ninja, b_target)
-    pack(v_short, v_post)
+    pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_short, **v_post, is_short_ver=True)
 
 
 def parse_args(argv):

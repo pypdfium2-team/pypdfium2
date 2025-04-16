@@ -201,9 +201,11 @@ def get_sources(short_ver, with_tests, compiler):
     if with_tests:
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
+    
+    return full_ver
 
 
-def prepare(config_dict, build_path):
+def prepare(config_dict, build_dir):
     # Create an empty gclient config
     (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch(exist_ok=True)
     # Unbundle ICU
@@ -214,12 +216,12 @@ def prepare(config_dict, build_path):
         PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
     )
     # Create target dir and write build config
-    mkdir(build_path)
+    mkdir(build_dir)
     config_str = pkgbase.serialise_gn_config(config_dict)
-    (build_path/"args.gn").write_text(config_str)
+    (build_dir/"args.gn").write_text(config_str)
 
 
-def build(with_tests, build_path, compiler):
+def build(with_tests, build_dir, compiler):
     
     if compiler is Compiler.gcc:
         # https://issues.chromium.org/issues/402282789
@@ -233,15 +235,15 @@ def build(with_tests, build_path, compiler):
     if with_tests:
         targets.append("pdfium_unittests")
     
-    build_path_rel = build_path.relative_to(PDFIUM_DIR)
-    pkgbase.run_cmd([shutil.which("gn"), "gen", str(build_path_rel)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd([shutil.which("ninja"), "-C", str(build_path_rel), *targets], cwd=PDFIUM_DIR)
+    build_dir_rel = build_dir.relative_to(PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("gn"), "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("ninja"), "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
 
 
-def test(build_path):
+def test(build_dir):
     # FlateModule.Encode may fail with older zlib (generates different results)
     os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
-    pkgbase.run_cmd([build_path/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
+    pkgbase.run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
 def _get_clang_ver(clang_path):
@@ -293,17 +295,19 @@ def main_api(build_ver=None, with_tests=False, compiler=None, clang_path=None):
         clang_path = Path("/usr")
     
     mkdir(SOURCES_DIR)
-    get_sources(build_ver, with_tests, compiler)
+    full_ver = get_sources(build_ver, with_tests, compiler)
     
-    build_path = PDFIUM_DIR/"out"/"Default"
+    build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
     setup_compiler(config, compiler, clang_path)
     
-    prepare(config, build_path)
-    build(with_tests, build_path, compiler)
+    prepare(config, build_dir)
+    build(with_tests, build_dir, compiler)
     
     if with_tests:
-        test(build_path)
+        test(build_dir)
+    
+    pkgbase.pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, is_short_ver=False)
 
 
 def parse_args(argv):

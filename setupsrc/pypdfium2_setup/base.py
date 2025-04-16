@@ -231,8 +231,10 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, build, origin, flags=(), n_commits=0, hash=None):
-    info = dict(**PdfiumVer.to_full(build)._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=list(flags))
+def write_pdfium_info(dir, version, origin, flags=(), n_commits=0, hash=None, is_short_ver=True):
+    if is_short_ver:
+        version = PdfiumVer.to_full(version)
+    info = dict(**version._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=list(flags))
     write_json(dir/VersionFN, info)
     return info
 
@@ -798,3 +800,18 @@ def serialise_gn_config(config_dict):
         parts.append(p)
     
     return "\n".join(parts)
+
+
+def pack_sourcebuild(pdfium_dir, build_dir, version, **v_kwargs):
+    log("Packing data files for sourcebuild...")
+    
+    dest_dir = DataDir / ExtPlats.sourcebuild
+    mkdir(dest_dir)
+    
+    libname = libname_for_system(Host.system)
+    shutil.copy(build_dir/libname, dest_dir/libname)
+    write_pdfium_info(dest_dir, version, origin="sourcebuild", **v_kwargs)
+    
+    # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
+    # FIXME PDFIUM_BINDINGS=reference not honored
+    run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir])
