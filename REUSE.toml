@@ -121,7 +121,11 @@ SPDX-License-Identifier = "LicenseRef-FairUse"
 SPDX-FileComment = "Obtained from https://github.com/tiran/libpdfium/"
 
 [[annotations]]
-path = "pdfium_patches/siso.patch"
+path = [
+    "pdfium_patches/siso.patch",
+    "pdfium_patches/avoid_new_clang_flags.patch",
+    "pdfium_patches/system_libcxx_with_clang.patch",
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
     "2025 geisserml <geisserml@gmail.com>",

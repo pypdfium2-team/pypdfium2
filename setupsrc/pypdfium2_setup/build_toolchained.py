@@ -7,7 +7,6 @@
 
 import os
 import sys
-import shutil
 import argparse
 import urllib.request as url_request
 from pathlib import Path, WindowsPath
