@@ -20,15 +20,15 @@ jobs:
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
         # NOTE Google's toolchain doesn't seem to run on Linux arm64 natively. The toolchain-free build should work, though.
-        # os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']  # 'ubuntu-24.04-arm'
-        # build_mode: ['toolchained']
+        os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']  # 'ubuntu-24.04-arm'
+        build_mode: ['toolchained']
         include:
-          # - os: 'ubuntu-latest'
-          #   build_mode: 'syslibs'
-          # - os: 'ubuntu-latest'
-          #   build_mode: 'native-gcc'
-          # - os: 'ubuntu-24.04-arm'
-          #   build_mode: 'native-gcc'
+          - os: 'ubuntu-latest'
+            build_mode: 'syslibs'
+          - os: 'ubuntu-latest'
+            build_mode: 'native-gcc'
+          - os: 'ubuntu-24.04-arm'
+            build_mode: 'native-gcc'
           - os: 'ubuntu-latest'
             build_mode: 'native-clang'
           - os: 'ubuntu-24.04-arm'
