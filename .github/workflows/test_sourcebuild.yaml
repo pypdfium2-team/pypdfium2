@@ -79,6 +79,7 @@ jobs:
       - name: Build PDFium (native, clang)
         if: ${{ matrix.build_mode == 'native-clang' }}
         run: |
+          # NOTE alternatively, --clang-path /usr/lib/llvm-18 might work on Ubuntu? Not sure.
           VERSION=18
           ARCH=$(uname -m)
           sudo apt-get install -y llvm-$VERSION lld-$VERSION
