@@ -85,6 +85,7 @@ jobs:
           sudo apt-get install -y llvm-$VERSION lld-$VERSION
           sudo ln -s /usr/bin/ld.lld-$VERSION /usr/bin/ld.lld
           sudo ln -s /usr/bin/llvm-ar-$VERSION /usr/bin/llvm-ar
+          sudo ln -s /usr/bin/llvm-readelf-$VERSION /usr/bin/llvm-readelf
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
           python3 ./setupsrc/pypdfium2_setup/build_lean.py --compiler clang
