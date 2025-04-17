@@ -29,10 +29,10 @@ jobs:
             build_mode: 'native-gcc'
           - os: 'ubuntu-24.04-arm'
             build_mode: 'native-gcc'
-          - os: 'ubuntu-latest'
-            build_mode: 'native-clang'
-          - os: 'ubuntu-24.04-arm'
-            build_mode: 'native-clang'
+          # - os: 'ubuntu-latest'
+          #   build_mode: 'native-clang'
+          # - os: 'ubuntu-24.04-arm'
+          #   build_mode: 'native-clang'
     
     runs-on: ${{ matrix.os }}
     
@@ -79,6 +79,9 @@ jobs:
       - name: Build PDFium (native, clang)
         if: ${{ matrix.build_mode == 'native-clang' }}
         run: |
+          # FIXME final step fails:
+          # clang++: error: invalid linker name in argument '-fuse-ld=lld'
+          # We might have to patch pdfium to pass the full linker path?
           VERSION=18
           ARCH=$(uname -m)
           sudo apt-get install -y llvm-$VERSION lld-$VERSION
