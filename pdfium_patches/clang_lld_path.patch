@@ -1,0 +1,12 @@
+--- a/config/compiler/BUILD.gn
++++ b/config/compiler/BUILD.gn
+@@ -50,7 +50,8 @@ if (!is_clang) {
+   }
+ } else {
+   # clang looks for lld next to it, no need for -B.
+-  lld_path = ""
++  # XXX(geisserml) need it anyway
++  lld_path = "/usr/bin"
+ }
+ 
+ declare_args() {
