@@ -223,7 +223,7 @@ def prepare(config_dict, build_dir):
     (build_dir/"args.gn").write_text(config_str)
 
 
-def build(with_tests, build_dir, compiler):
+def build(with_tests, build_dir, compiler, n_jobs):
     
     if compiler is Compiler.gcc:
         # https://issues.chromium.org/issues/402282789
@@ -233,13 +233,17 @@ def build(with_tests, build_dir, compiler):
             cppflags += " " + orig_cppflags
         os.environ["CPPFLAGS"] = cppflags
     
+    ninja_args = []
+    if n_jobs is not None:
+        ninja_args.extend(["-j", str(n_jobs)])
+    
     targets = ["pdfium"]
     if with_tests:
         targets.append("pdfium_unittests")
     
     build_dir_rel = build_dir.relative_to(PDFIUM_DIR)
     pkgbase.run_cmd([shutil.which("gn"), "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd([shutil.which("ninja"), "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd([shutil.which("ninja"), *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
 
 
 def test(build_dir):
@@ -287,7 +291,7 @@ def setup_compiler(config, compiler, clang_path):
 
 DEFAULT_VER = 7122
 
-def main_api(build_ver=None, with_tests=False, compiler=None, clang_path=None):
+def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None):
     
     if build_ver is None:
         build_ver = DEFAULT_VER
@@ -304,7 +308,7 @@ def main_api(build_ver=None, with_tests=False, compiler=None, clang_path=None):
     setup_compiler(config, compiler, clang_path)
     
     prepare(config, build_dir)
-    build(with_tests, build_dir, compiler)
+    build(with_tests, build_dir, compiler, n_jobs)
     
     if with_tests:
         test(build_dir)
@@ -328,20 +332,27 @@ def parse_args(argv):
         help = "Whether to build and run tests. Recommended, except on very slow hosts.",
     )
     parser.add_argument(
-        "--compiler",
+        "-j", "--jobs",
+        dest = "n_jobs",
+        type = int,
+        metavar = "N",
+        help = "The number of build jobs to use. If not given, ninja will choose this value. Pass -j $(nprocs) if you wanna make sure this matches the number of processor cores.",
+    )
+    parser.add_argument(
+        "-c", "--compiler",
         type = str.lower,
         help = "The compiler to use (gcc or clang). Defaults to gcc.",
     )
     parser.add_argument(
-        "--clang-path",
-        type = lambda p: Path(p).expanduser().resolve(),
-        help = "Path to clang release folder, without trailing slash. Passing --compiler clang is a pre-requisite. By default, we try '/usr', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",
         # Hints:
-        # - On Ubuntu/Fedora, the symlink commands are (set $VERSION and $ARCH accordingly):
+        # - On Ubuntu/Fedora, the symlink commands for clang are (set $VERSION and $ARCH accordingly):
         #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
         #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
         # - If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
-        # - Also, it seems that Google's Clang releases can be downloaded from https://storage.googleapis.com/chromium-browser-clang/ (append the object_name in question, as in pdfium's DEPS file). Alternatively, there is depot_tools/download_from_google_storage.py
+        # - Also, it seems that Google's Clang releases can be downloaded from https://storage.googleapis.com/chromium-browser-clang/ (append the object_name in question, as in pdfium's DEPS file). Alternatively, there is depot_tools/download_from_google_storage.py, or the upstream LLVM releases.
+        "--clang-path",
+        type = lambda p: Path(p).expanduser().resolve(),
+        help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",
     )
     args = parser.parse_args(argv)
     if args.compiler:
