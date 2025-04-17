@@ -10,7 +10,7 @@ from pathlib import Path
 import pypdfium2_raw
 
 
-class _version_interface:
+class _version_class:
     
     def __init__(self):
         with open(self._FILE, "r") as buf:
@@ -40,7 +40,7 @@ class _version_interface:
         return desc
 
 
-class _version_pypdfium2 (_version_interface):
+class _version_pypdfium2 (_version_class):
     
     _FILE = Path(__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "patch")
@@ -59,7 +59,7 @@ class _version_pypdfium2 (_version_interface):
             self.desc += "@editable"
 
 
-class _version_pdfium (_version_interface):
+class _version_pdfium (_version_class):
     
     _FILE = Path(pypdfium2_raw.__file__).parent / "version.json"
     _TAG_FIELDS = ("major", "minor", "build", "patch")
@@ -153,4 +153,4 @@ Parameters:
 # Freeze the base class after we have constructed the instance objects
 def _frozen_setattr(self, name, value):
     raise AttributeError(f"Version class is read-only - assignment '{name} = {value}' not allowed")
-_version_interface.__setattr__ = _frozen_setattr
+_version_class.__setattr__ = _frozen_setattr
