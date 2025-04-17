@@ -156,8 +156,14 @@ def main():
     
     parsed_spec = parse_pl_spec(pl_spec)
     if parsed_spec is None:
-        # TODO if we're on a unixoid system, check if it provides libreoffice with pdfium
-        log(f"No pre-built binaries available for this host. You may place custom binaries & bindings in data/sourcebuild/ and install with `{PlatSpec_EnvVar}=sourcebuild`.")
+        # TODO If we're on a unixoid system ...
+        # - Check if it provides a pdfium shared library on system level, or with libreoffice.
+        # - Consider triggering a sourcebuild implicitly (build_lean.py). However, this requires system dependencies that need to be installed by the caller beforehand. They are unlikely to be installed by chance.
+        log(
+            "No pre-built binaries available for this host. You may build pdfium from source, " +
+            f"place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. " +
+            "Use e.g. `python3 setupsrc/pypdfium2_setup/build_lean.py` to automate this process."
+        )
         raise Host._exc
     
     else:
