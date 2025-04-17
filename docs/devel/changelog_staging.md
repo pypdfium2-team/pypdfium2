@@ -46,7 +46,8 @@
 - *Note, we have no intent to provide wheels for the simulators (`android x86_64/x86`, `ios arm64_simu/x86_64`), as they are only relevant to developers, and installing from source with automatic binary deployment should be roughly equialvent.*
 
 *Setup*
-- We finally have a build script that works without Google's toolchain, instead using system tools and libraries (`build_lean.py`). The toolchained build script continues to be available as well (previously `sourcebuild.py`, now `build_toolchained.py`). Thanks to Christian Heimes for showing how to do this.
+- We finally have a build script that works without Google's toolchain, instead using system tools and libraries (`build_lean.py`). The toolchained build script continues to be available as well (previously `sourcebuild.py`, now `build_toolchained.py`). Thanks to Christian Heimes for showing how to do this. The build script uses `gcc` by default, but `clang` should also work if you set up some symlinks. As of this writing, both passes on our Ubuntu x84_64/arm64 CI.
+- With `build_toolchained.py --update`, avoid calling `gclient revert` and `sync`, because this seems to sync twice, which is slow. Instead, call only `sync` while passing `-D --reset`.
 - If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results, e.g. on macOS.
 - Avoid needlessly calling `_get_libc_ver()`. Instead, call it only on Linux. A negative side effect of calling this unconditionally is that, on non-Linux platforms, an empty string may be returned, in which case the musllinux handler would be reached, which uses non-public API and isn't meant to be called on other platforms (though it seems to have passed).
 
