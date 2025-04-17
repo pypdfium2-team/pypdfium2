@@ -195,7 +195,7 @@ def get_sources(short_ver, with_tests, compiler):
             clang_patches = ("system_libcxx_with_clang", "avoid_new_clang_flags")
             for patchname in clang_patches:
                 classic_patch(pkgbase.PatchDir/f"{patchname}.patch", cwd=PDFIUM_DIR/"build")
-            autopatch(PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn", 'ldflags += [ "-fuse-ld=lld" ]', 'ldflags += [ "-fuse-ld=/usr/bin/lld" ]', is_regex=False)
+            autopatch(PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn", 'ldflags += [ "-fuse-ld=lld" ]', 'ldflags += [ "-fuse-ld=/usr/bin/ld.lld" ]', is_regex=False)
     
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     _fetch_archive(_format_url(SHIMHEADERS_URL, chromium_rev), PDFIUM_DIR/"tools"/"generate_shim_headers")
