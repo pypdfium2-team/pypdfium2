@@ -247,8 +247,8 @@ def build(with_tests, build_dir, compiler, n_jobs):
         targets.append("pdfium_unittests")
     
     build_dir_rel = build_dir.relative_to(PDFIUM_DIR)
-    pkgbase.run_cmd([shutil.which("gn"), "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd([shutil.which("ninja"), *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd(["gn", "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
+    pkgbase.run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
 
 
 def test(build_dir):
