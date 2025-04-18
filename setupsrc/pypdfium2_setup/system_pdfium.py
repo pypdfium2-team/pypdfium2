@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE: this code is provided on a best effort basis and is largely untested, because the author's system did not provide pdfium as of this writing
+# NOTE: this code is provided on a best effort basis and largely untested, because the author's system did not provide pdfium as of this writing
 
 import sys
 import itertools
@@ -22,7 +22,7 @@ def _find_pdfium_lib():
     pdfium_lib = find_library("pdfium")
     
     # Look for pdfium bundled with libreoffice. (Assuming the unknown host has a unix-like file system)
-    # Not sure how complete or incomplete libreoffice's pdfium builds are; this is just a chance.
+    # Not sure how complete or incomplete libreoffice's pdfium builds are; this is just a chance
     if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
         lo_paths_iter = itertools.product(("/usr/lib", "/usr/local/lib"), ("", "64"))
         libname = libname_for_system(Host.system, name="pdfiumlo")
@@ -56,10 +56,10 @@ def find_pdfium():
     pdfium_headers = _find_pdfium_headers()
     if pdfium_lib:
         log(f"Found pdfium shared library at {pdfium_lib}")
-        if pdfium_headers:
-            log(f"Found pdfium headers at {pdfium_headers}")
-        else:
-            log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe. Set $PDFIUM_HEDERS and re-run if you know the headers.")
     else:
         log("pdfium not found")
+    if pdfium_headers:
+        log(f"Found pdfium headers at {pdfium_headers}")
+    else:
+        log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe. Set $PDFIUM_HEDERS and re-run if you know the headers directory.")
     return pdfium_lib, pdfium_headers

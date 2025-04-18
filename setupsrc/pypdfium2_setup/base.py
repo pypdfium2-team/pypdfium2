@@ -145,13 +145,14 @@ def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
 
 
-# Map system to pdfium shared library name
 def libname_for_system(system, name="pdfium"):
+    
+    # Map system to pdfium shared library name
     if system == SysNames.windows:
         return f"{name}.dll"
     elif system in (SysNames.darwin, SysNames.ios):
         return f"lib{name}.dylib"
-    elif system in (SysNames.linux, SysNames.android) or "bsd" in sys.platform:
+    elif system in (SysNames.linux, SysNames.android):
         return f"lib{name}.so"
     else:
         # let the caller pass through a fallback
@@ -159,8 +160,13 @@ def libname_for_system(system, name="pdfium"):
         if pattern:
             prefix, suffix = pattern.split(".", maxsplit=1)
             return f"{prefix}{name}.{suffix}"
-    # TODO downstream fallback: list the directory in question and pick the file that contains the library name
-    raise ValueError(f"Unhandled system {system!r}")
+        # if we are on BSD or any other POSIX-based system, try `lib{}.so`, unless set otherwise by the caller
+        if "bsd" in sys.platform or os.name == "posix":
+            return f"lib{name}.so"
+    
+    # TODO downstream fallback: list directory and pick the file that contains the library name?
+    raise ValueError(f"Unhandled system {system!r}, don't know library naming pattern. Set $LIBNAME_PATTERN=prefix.suffix (e.g. lib.so)")
+
 
 AllLibnames = ("pdfium.dll", "libpdfium.dylib", "libpdfium.so")
 
