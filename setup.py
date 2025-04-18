@@ -5,7 +5,9 @@
 
 import os
 import sys
+import itertools
 from pathlib import Path
+from ctypes.util import find_library
 import setuptools
 from setuptools.command.build_py import build_py as build_py_orig
 try:
@@ -149,6 +151,19 @@ def run_setup(modnames, pl_name, pdfium_ver):
     setuptools.setup(**kwargs)
 
 
+def try_system_pdfium():
+    # See if a pdfium shared library is in the default system search path
+    pdfium_lib = find_library("pdfium")
+    # Look for pdfium bundled with libreoffice. (Assuming the unknown host has a unix-like file system)
+    if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
+        lo_paths_iter = itertools.product([("/usr/lib", "/usr/local/lib"), ("", "64")])
+        libname = libname_for_system(Host.system, name="pdfiumlo")
+        candidates = (Path((prefix+bitness) / libname) for prefix, bitness in lo_paths_iter)
+        pdfium_lib = next((p for p in candidates if p.exists()), default=None)
+    if not pdfium_lib:
+        return False
+
+
 def main():
     
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
@@ -156,14 +171,11 @@ def main():
     
     parsed_spec = parse_pl_spec(pl_spec)
     if parsed_spec is None:
+        log("Unknown host, looking for system pdfium ...")
+        have_pdfium = try_system_pdfium()
         # TODO If we're on a unixoid system ...
-        # - Check if it provides a pdfium shared library on system level, or with libreoffice.
         # - Consider triggering a sourcebuild implicitly (build_lean.py). However, this requires system dependencies that need to be installed by the caller beforehand. They are unlikely to be installed by chance.
-        log(
-            "No pre-built binaries available for this host. You may build pdfium from source, " +
-            f"place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. " +
-            "Use e.g. `python3 setupsrc/pypdfium2_setup/build_lean.py` to automate this process."
-        )
+        log(f"No pre-built binaries found for this host. You may build pdfium from source, place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. Use e.g. `python3 setupsrc/pypdfium2_setup/build_lean.py` to automate this process.")
         raise Host._exc
     
     else:

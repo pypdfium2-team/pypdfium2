@@ -16,6 +16,14 @@ from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
 
+if sys.version_info < (3, 8):
+    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
+    def cached_property(func):
+        return property( functools.lru_cache(maxsize=1)(func) )
+else:
+    cached_property = functools.cached_property
+
+
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
@@ -137,27 +145,48 @@ def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
 
 
+class _DeferredClass:
+    
+    @cached_property
+    def guessed_libname_pattern(self):
+        
+        py_libname = sysconfig.get_config_var("PY3LIBRARY")
+        if not py_libname:
+            py_libname = sysconfig.get_config_var("LDLIBRARY")
+        if not py_libname:
+            return None
+        prefix = py_libname.split("python")[0]
+        
+        suffix = sysconfig.get_config_var("SHLIB_SUFFIX")
+        if suffix:
+            suffix = suffix.lstrip(".")
+        else:
+            suffix = next(p for p in reversed(py_libname.split(".")) if not p.isnumeric())
+        
+        return prefix, suffix
+
+
+_Deferred = _DeferredClass()
+
+
 # Map system to pdfium shared library name
-def libname_for_system(system):
+def libname_for_system(system, name="pdfium"):
     if system == SysNames.windows:
-        return "pdfium.dll"
+        return f"{name}.dll"
     elif system in (SysNames.darwin, SysNames.ios):
-        return "libpdfium.dylib"
+        return f"lib{name}.dylib"
     elif system in (SysNames.linux, SysNames.android):
-        return "libpdfium.so"
+        return f"lib{name}.so"
     else:
-        # TODO fallback logic if system is None?
-        raise ValueError(f"Unhandled system {system!r}")
+        log("Unhandled system, trying to guess library name")
+        pattern = _Deferred.guessed_libname_pattern
+        if pattern:
+            prefix, suffix = pattern
+            return f"{prefix}{name}.{suffix}"
+        else:
+            raise ValueError(f"Unable to determine library name for system {system!r}")
 
 AllLibnames = ["pdfium.dll", "libpdfium.dylib", "libpdfium.so"]
-
-
-if sys.version_info < (3, 8):
-    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-else:
-    cached_property = functools.cached_property
 
 
 class _PdfiumVerClass:
