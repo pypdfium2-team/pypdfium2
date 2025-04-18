@@ -165,7 +165,7 @@ def classic_patch(patchfile, cwd):
 def _format_url(url, rev):
     return url.format(rev=rev, name=rev.rsplit("/")[-1])
 
-def get_sources(short_ver, with_tests, compiler):
+def get_sources(short_ver, with_tests, compiler, clang_path):
     
     if short_ver == "main":
         pdfium_rev = "refs/heads/main"
@@ -195,7 +195,12 @@ def get_sources(short_ver, with_tests, compiler):
             clang_patches = ("system_libcxx_with_clang", "avoid_new_clang_flags")
             for patchname in clang_patches:
                 classic_patch(pkgbase.PatchDir/f"{patchname}.patch", cwd=PDFIUM_DIR/"build")
-            autopatch(PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn", 'ldflags += [ "-fuse-ld=lld" ]', 'ldflags += [ "-fuse-ld=/usr/bin/ld.lld" ]', is_regex=False)
+            lld_path = clang_path/"bin"/"ld.lld"
+            autopatch(
+                PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn",
+                'ldflags += [ "-fuse-ld=lld" ]',
+                f'ldflags += [ "-fuse-ld={lld_path}" ]', is_regex=False
+            )
     
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     _fetch_archive(_format_url(SHIMHEADERS_URL, chromium_rev), PDFIUM_DIR/"tools"/"generate_shim_headers")
@@ -301,7 +306,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         clang_path = Path("/usr")
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(build_ver, with_tests, compiler)
+    full_ver = get_sources(build_ver, with_tests, compiler, clang_path)
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
