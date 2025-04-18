@@ -34,7 +34,7 @@ DEPS_URLS = dict(
 )
 SHIMHEADERS_URL = _CR_PREFIX + "chromium/src/+archive/{rev}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{name}.tar.gz"
 
-SOURCES_DIR = pkgbase.ProjectDir / "sbuild" / "lean"
+SOURCES_DIR = pkgbase.ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
