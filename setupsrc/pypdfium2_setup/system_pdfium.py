@@ -13,7 +13,7 @@ from pypdfium2_setup.base import *
 
 
 def _get_existing(candidates):
-    return next((p for p in candidates if p.exists()), default=None)
+    return next((p for p in candidates if p.exists()), None)
 
 
 def _find_pdfium_lib():
@@ -23,9 +23,9 @@ def _find_pdfium_lib():
     
     # Look for pdfium bundled with libreoffice. (Assuming the unknown host has a unix-like file system)
     if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
-        lo_paths_iter = itertools.product([("/usr/lib", "/usr/local/lib"), ("", "64")])
+        lo_paths_iter = itertools.product(("/usr/lib", "/usr/local/lib"), ("", "64"))
         libname = libname_for_system(Host.system, name="pdfiumlo")
-        candidates = (Path((prefix+bitness) / libname) for prefix, bitness in lo_paths_iter)
+        candidates = (Path(prefix+bitness)/libname for prefix, bitness in lo_paths_iter)
         pdfium_lib = _get_existing(candidates)
     
     return pdfium_lib
@@ -37,7 +37,7 @@ def _find_pdfium_headers():
     
     if headers_path:
         headers_path = Path(headers_path)
-    elif not sys.platform.startswith("win", "darwin"):
+    elif not sys.platform.startswith(("win", "darwin")):
         include_dirs = (Path("/usr/include"), Path("/usr/local/include"))
         candidates = (prefix/"pdfium" for prefix in include_dirs)
         headers_path = _get_existing(candidates)
