@@ -617,7 +617,9 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
 
 
 def build_pdfium_bindings(version, headers_dir=None, **kwargs):
-    defaults = dict(flags=(), run_lds=(".", ), guard_symbols=False)
+    # Note, the bindings version file is currently discarded. We might want to add a BINDINGS_INFO to version.py in the future.
+    
+    defaults = dict(flags=(), run_lds=(".",), guard_symbols=False)
     for k, v in defaults.items():
         kwargs.setdefault(k, v)
     
@@ -627,17 +629,12 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         headers_dir = DataDir_Bindings / "headers"
     
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
-    # TODO move handler into run_ctypesgen on behalf of sourcebuild?
-    # FIXME Bindings version file is ignored by upstream code, e.g. we don't handle the case of mismatched bindings/binary and only include the binary version in the end. Strictly speaking we might have to split the current PDFIUM_INFO in BINDINGS_INFO and BINARY_INFO ...
     if BindTarget == BindTarget_Ref:
         log("Using reference bindings as requested by env var. This will bypass all bindings params.")
         record = read_json(AR_RecordFile)
         bindings_ver = record["pdfium"]
         if bindings_ver != version:
             log(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!")
-        flags_diff = set(kwargs["flags"]).difference(REFBINDINGS_FLAGS)
-        if flags_diff:  # == not set(...).issubset(...)
-            log(f"Warning: The following requested flags are not available in the reference bindings and will be discarded: {flags_diff}")
         mkdir(DataDir_Bindings)
         shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
         write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."], source="reference"))
@@ -658,7 +655,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
             log(f"Using cached bindings")
             return
     
-    # We try to reuse headers if only bindings params differ, not version. Note that headers don't currently have an own version file; we reuse the bindings version file for simplicity.
+    # We try to reuse headers if only bindings params differ, not version.
     if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
         log("Using cached headers")
     else:
