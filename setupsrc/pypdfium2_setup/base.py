@@ -145,51 +145,22 @@ def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
 
 
-class _DeferredClass:
-    
-    @cached_property
-    def guessed_libname_pattern(self):
-        
-        log("Trying to guess library name")
-        
-        if "bsd" in sys.platform:
-            return "lib", "so"
-        
-        py_libname = sysconfig.get_config_var("PY3LIBRARY")
-        if not py_libname:
-            py_libname = sysconfig.get_config_var("LDLIBRARY")
-        if not py_libname:
-            return None
-        prefix = py_libname.split("python")[0]
-        
-        suffix = sysconfig.get_config_var("SHLIB_SUFFIX")
-        if suffix:
-            suffix = suffix.lstrip(".")
-        else:
-            suffix = next(p for p in reversed(py_libname.split(".")) if not p.isnumeric())
-        
-        return prefix, suffix
-
-
-_Deferred = _DeferredClass()
-
-
 # Map system to pdfium shared library name
 def libname_for_system(system, name="pdfium"):
     if system == SysNames.windows:
         return f"{name}.dll"
     elif system in (SysNames.darwin, SysNames.ios):
         return f"lib{name}.dylib"
-    elif system in (SysNames.linux, SysNames.android):
+    elif system in (SysNames.linux, SysNames.android) or "bsd" in sys.platform:
         return f"lib{name}.so"
     else:
-        pattern = _Deferred.guessed_libname_pattern
+        # let the caller pass through a fallback
+        pattern = os.getenv("LIBNAME_PATTERN")
         if pattern:
-            prefix, suffix = pattern
-            log(f"Determined libname pattern {prefix, suffix}")
+            prefix, suffix = pattern.split(".", maxsplit=1)
             return f"{prefix}{name}.{suffix}"
-        else:
-            raise RuntimeError(f"Unable to determine library name for system {system!r}")
+    # TODO downstream fallback: list the directory in question and pick the file that contains the library name
+    raise ValueError(f"Unhandled system {system!r}")
 
 AllLibnames = ("pdfium.dll", "libpdfium.dylib", "libpdfium.so")
 
