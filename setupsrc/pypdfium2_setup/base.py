@@ -189,9 +189,9 @@ def libname_for_system(system, name="pdfium"):
             log(f"Determined libname pattern {prefix, suffix}")
             return f"{prefix}{name}.{suffix}"
         else:
-            raise ValueError(f"Unable to determine library name for system {system!r}")
+            raise RuntimeError(f"Unable to determine library name for system {system!r}")
 
-AllLibnames = ["pdfium.dll", "libpdfium.dylib", "libpdfium.so"]
+AllLibnames = ("pdfium.dll", "libpdfium.dylib", "libpdfium.so")
 
 
 class _PdfiumVerClass:
