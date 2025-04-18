@@ -346,14 +346,14 @@ class _host_platform:
     
     def __init__(self):
         
+        # set up empty slots
+        self._libc_name, self._libc_ver = "", ""
+        self._exc = None
+        
         # Get info about the host platform (OS and CPU)
         # For the machine name, the platform module just passes through info provided by the OS (e.g. the uname command on unix), so we can determine the relevant names from Python's source code, system specs or info available online (e.g. https://en.wikipedia.org/wiki/Uname)
         self._system_name = platform.system().lower()
         self._machine_name = platform.machine().lower()
-        
-        # empty slots
-        self._libc_name, self._libc_ver = "", ""
-        self._exc = None
     
     @cached_property
     def platform(self):
@@ -365,10 +365,8 @@ class _host_platform:
     
     @cached_property
     def system(self):
-        if self.platform is not None:
-            return plat_to_system(self.platform)
-        else:
-            return None
+        id(self.platform)  # compute the cached property
+        return self._system
     
     def __repr__(self):
         info = f"{self._system_name} {self._machine_name}"
@@ -385,7 +383,7 @@ class _host_platform:
             log("Android prior to PEP 738 (e.g. Termux)")
             return getattr(PlatNames, f"android_{archid}")
         else:
-            raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
+            raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}")
     
     def _get_platform(self):
         
@@ -393,6 +391,7 @@ class _host_platform:
         
         if self._system_name == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
+            self._system = SysNames.darwin
             log(f"macOS {self._machine_name} {platform.mac_ver()}")
             if self._machine_name == "x86_64":
                 return PlatNames.darwin_x64
@@ -403,6 +402,7 @@ class _host_platform:
                 raise RuntimeError(f"Unsupported legacy mac architecture: {self._machine_name!r}")
         
         elif self._system_name == "windows":
+            self._system = SysNames.windows
             log(f"windows {self._machine_name} {platform.win32_ver()}")
             if self._machine_name == "amd64":
                 return PlatNames.windows_x64
@@ -412,6 +412,7 @@ class _host_platform:
                 return PlatNames.windows_arm64
         
         elif self._system_name == "linux":
+            self._system = SysNames.linux
             self._libc_name, self._libc_ver = _get_libc_info()
             log(f"linux {self._machine_name} {self._libc_name, self._libc_ver}")
             if self._machine_name == "x86_64":
@@ -422,11 +423,12 @@ class _host_platform:
                 return self._handle_linux("arm64")
             elif self._machine_name == "armv7l":
                 if self._libc_name == "musl":
-                    raise RuntimeError(f"armv7l: musl not supported at this time.")
+                    raise RuntimeError(f"armv7l: musl not supported at this time")
                 return self._handle_linux("arm32")
         
         elif self._system_name == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
+            self._system = SysNames.android
             log(f"android {self._machine_name} {sys.getandroidapilevel()} {platform.android_ver()}")
             if self._machine_name == "aarch64":
                 return PlatNames.android_arm64
@@ -439,6 +441,7 @@ class _host_platform:
         
         elif self._system_name in ("ios", "ipados"):  # PEP 730
             # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
+            self._system = SysNames.ios
             ios_ver = platform.ios_ver()
             log(f"{self._system_name} {self._machine_name} {ios_ver}")
             if self._machine_name == "arm64":
@@ -446,6 +449,9 @@ class _host_platform:
             elif self._machine_name == "x86_64":
                 assert ios_ver.is_simulator, "iOS x86_64 can only be simulator"
                 return PlatNames.ios_x64_simu
+        
+        else:
+            self._system = None
         
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
