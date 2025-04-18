@@ -163,8 +163,8 @@ def main():
         # XXX ...
         
         # TODO If we're on a unixoid system ...
-        # - Consider triggering a sourcebuild implicitly (build_lean.py). However, this requires system dependencies that need to be installed by the caller beforehand. They are unlikely to be installed by chance.
-        log(f"No pre-built binaries found for this host. You may build pdfium from source, place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. Use e.g. `python3 setupsrc/pypdfium2_setup/build_lean.py` to automate this process.")
+        # - Consider triggering a sourcebuild implicitly (build_native.py). However, this requires system dependencies that need to be installed by the caller beforehand. They are unlikely to be installed by chance.
+        log(f"No pre-built binaries found for this host. You may build pdfium from source, place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. Use e.g. `python3 setupsrc/pypdfium2_setup/build_native.py` to automate this process.")
         raise Host._exc
     
     else:
