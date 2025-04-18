@@ -22,10 +22,11 @@ def _find_pdfium_lib():
     pdfium_lib = find_library("pdfium")
     
     # Look for pdfium bundled with libreoffice. (Assuming the unknown host has a unix-like file system)
+    # Not sure how complete or incomplete libreoffice's pdfium builds are; this is just a chance.
     if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
         lo_paths_iter = itertools.product(("/usr/lib", "/usr/local/lib"), ("", "64"))
         libname = libname_for_system(Host.system, name="pdfiumlo")
-        candidates = (Path(prefix+bitness)/libname for prefix, bitness in lo_paths_iter)
+        candidates = (Path(prefix+bitness)/"libreoffice"/"program"/libname for prefix, bitness in lo_paths_iter)
         pdfium_lib = _get_existing(candidates)
     
     return pdfium_lib
