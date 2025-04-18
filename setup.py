@@ -5,9 +5,7 @@
 
 import os
 import sys
-import itertools
 from pathlib import Path
-from ctypes.util import find_library
 import setuptools
 from setuptools.command.build_py import build_py as build_py_orig
 try:
@@ -18,6 +16,7 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
+from pypdfium2_setup.system_pdfium import find_pdfium
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
@@ -86,7 +85,7 @@ def assert_exists(dir, data_files):
         assert False, f"Missing data files: {missing}"
 
 
-def run_setup(modnames, pl_name, pdfium_ver):
+def run_setup(modnames, pdfium_ver, pl_name, libname=None):
     
     kwargs = dict(
         name = "pypdfium2",
@@ -136,8 +135,9 @@ def run_setup(modnames, pl_name, pdfium_ver):
     elif pl_name == ExtPlats.system:
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
-        sys_name = plat_to_system(pl_name)
-        libname = libname_for_system(sys_name)
+        if not libname:
+            sys_name = plat_to_system(pl_name)
+            libname = libname_for_system(sys_name)
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
@@ -151,19 +151,6 @@ def run_setup(modnames, pl_name, pdfium_ver):
     setuptools.setup(**kwargs)
 
 
-def try_system_pdfium():
-    # See if a pdfium shared library is in the default system search path
-    pdfium_lib = find_library("pdfium")
-    # Look for pdfium bundled with libreoffice. (Assuming the unknown host has a unix-like file system)
-    if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
-        lo_paths_iter = itertools.product([("/usr/lib", "/usr/local/lib"), ("", "64")])
-        libname = libname_for_system(Host.system, name="pdfiumlo")
-        candidates = (Path((prefix+bitness) / libname) for prefix, bitness in lo_paths_iter)
-        pdfium_lib = next((p for p in candidates if p.exists()), default=None)
-    if not pdfium_lib:
-        return False
-
-
 def main():
     
     pl_spec = os.environ.get(PlatSpec_EnvVar, "")
@@ -172,7 +159,9 @@ def main():
     parsed_spec = parse_pl_spec(pl_spec)
     if parsed_spec is None:
         log("Unknown host, looking for system pdfium ...")
-        have_pdfium = try_system_pdfium()
+        pdfium_lib, pdfium_headers = find_pdfium()
+        # XXX ...
+        
         # TODO If we're on a unixoid system ...
         # - Consider triggering a sourcebuild implicitly (build_lean.py). However, this requires system dependencies that need to be installed by the caller beforehand. They are unlikely to be installed by chance.
         log(f"No pre-built binaries found for this host. You may build pdfium from source, place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. Use e.g. `python3 setupsrc/pypdfium2_setup/build_lean.py` to automate this process.")
@@ -188,7 +177,7 @@ def main():
         if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
             prepare_setup(pl_name, pdfium_ver, use_v8)
     
-    run_setup(modnames, pl_name, pdfium_ver)
+    run_setup(modnames, pdfium_ver, pl_name)
 
 
 if __name__ == "__main__":

@@ -150,6 +150,8 @@ class _DeferredClass:
     @cached_property
     def guessed_libname_pattern(self):
         
+        log("Trying to guess library name")
+        
         py_libname = sysconfig.get_config_var("PY3LIBRARY")
         if not py_libname:
             py_libname = sysconfig.get_config_var("LDLIBRARY")
@@ -178,7 +180,6 @@ def libname_for_system(system, name="pdfium"):
     elif system in (SysNames.linux, SysNames.android):
         return f"lib{name}.so"
     else:
-        log("Unhandled system, trying to guess library name")
         pattern = _Deferred.guessed_libname_pattern
         if pattern:
             prefix, suffix = pattern
