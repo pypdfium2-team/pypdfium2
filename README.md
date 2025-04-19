@@ -407,8 +407,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   
 [^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `autorelease/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
 
-* While some functions are quite easy to use, things may soon get more special.
-  First of all, function parameters are not only used for input, but also for output:
+* First of all, function parameters are not only used for input, but also for output:
   ```python
   # Initialise an integer object (defaults to 0)
   c_version = ctypes.c_int()
@@ -492,7 +491,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * Leaving strings, let's suppose you have a C memory buffer allocated by PDFium and wish to read its data.
   PDFium will provide you with a pointer to the first item of the byte array.
-  To access the data, you'll want to re-interpret the pointer to an array view with `.from_address()`:
+  To access the data, you'll want to re-interpret the pointer as an array view with `.from_address()`:
   ```python
   # (Assuming `bitmap` is an FPDF_BITMAP and `size` is the expected number of bytes in the buffer)
   # FPDFBitmap_GetBuffer() has c_void_p as restype, which ctypes will auto-resolve to int or None
