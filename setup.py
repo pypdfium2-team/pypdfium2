@@ -16,6 +16,7 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
+from pypdfium2_setup.system_pdfium import find_pdfium
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
@@ -75,7 +76,7 @@ LICENSES_SDIST = (
     "REUSE.toml",
 )
 
-PLATFILES_GLOB = [BindingsFN, VersionFN, *AllLibnames]
+PLATFILES_GLOB = (BindingsFN, VersionFN, *AllLibnames)
 
 
 def assert_exists(dir, data_files):
@@ -84,7 +85,7 @@ def assert_exists(dir, data_files):
         assert False, f"Missing data files: {missing}"
 
 
-def run_setup(modnames, pl_name, pdfium_ver):
+def run_setup(modnames, pdfium_ver, pl_name, libname=None):
     
     kwargs = dict(
         name = "pypdfium2",
@@ -134,8 +135,9 @@ def run_setup(modnames, pl_name, pdfium_ver):
     elif pl_name == ExtPlats.system:
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
-        sys_name = plat_to_system(pl_name)
-        libname = libname_for_system(sys_name)
+        if not libname:
+            sys_name = plat_to_system(pl_name)
+            libname = libname_for_system(sys_name)
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
@@ -156,14 +158,13 @@ def main():
     
     parsed_spec = parse_pl_spec(pl_spec)
     if parsed_spec is None:
+        log("Unknown host, looking for system pdfium ...")
+        pdfium_lib, pdfium_headers = find_pdfium()
+        # XXX ...
+        
         # TODO If we're on a unixoid system ...
-        # - Check if it provides a pdfium shared library on system level, or with libreoffice.
         # - Consider triggering a sourcebuild implicitly (build_native.py). However, this requires system dependencies that need to be installed by the caller beforehand. They are unlikely to be installed by chance.
-        log(
-            "No pre-built binaries available for this host. You may build pdfium from source, " +
-            f"place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. " +
-            "Use e.g. `python3 setupsrc/pypdfium2_setup/build_native.py` to automate this process."
-        )
+        log(f"No pre-built binaries found for this host. You may build pdfium from source, place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. Use e.g. `python3 setupsrc/pypdfium2_setup/build_native.py` to automate this process.")
         raise Host._exc
     
     else:
@@ -176,7 +177,7 @@ def main():
         if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
             prepare_setup(pl_name, pdfium_ver, use_v8)
     
-    run_setup(modnames, pl_name, pdfium_ver)
+    run_setup(modnames, pdfium_ver, pl_name)
 
 
 if __name__ == "__main__":
