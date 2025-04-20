@@ -84,7 +84,7 @@ def _get_sys_pdfium_ver():
     return float("nan")
 
 
-def find_pdfium(given_ver=None):
+def try_system_pdfium(given_ver=None, dest_dir=ModuleDir_Raw):
     
     # See if a pdfium shared library is in the default system search path
     pdfium_lib = find_library("pdfium")
@@ -100,6 +100,7 @@ def find_pdfium(given_ver=None):
             lds = (pdfium_lib.parent, )
             # TODO(ctypesgen) handle pdfiumlo libname in refbindings
             build_pdfium_bindings(pdfium_ver, libname="pdfiumlo", compile_lds=lds, run_lds=lds, guard_symbols=True)
+            write_pdfium_info(dest_dir, pdfium_ver, origin="libreoffice")
             bindings = BindingsFile
         else:
             pdfium_headers = _find_pdfium_headers()
@@ -108,19 +109,20 @@ def find_pdfium(given_ver=None):
                 pdfium_ver = given_ver or _get_sys_pdfium_ver()
                 log(f"pdfium version: {pdfium_ver}")
                 build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=(), guard_symbols=True)
+                write_pdfium_info(dest_dir, pdfium_ver, origin="system")
                 bindings = BindingsFile
             else:
                 log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
                 bindings = RefBindingsFile
                 pdfium_ver = given_ver or float("nan")
+        shutil.copyfile(bindings, dest_dir/BindingsFN)
+        return pdfium_ver
     else:
         log("pdfium not found")
-        bindings, pdfium_ver = None, None
-    
-    return bindings, pdfium_ver
+        return None
 
 
 if __name__ == "__main__":
-    print(find_pdfium())
+    print(try_system_pdfium())
     print(_get_libreoffice_pdfium_ver())
     print(_get_sys_pdfium_ver())

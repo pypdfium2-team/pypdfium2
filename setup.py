@@ -16,8 +16,8 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
-from pypdfium2_setup.system_pdfium import find_pdfium
 from pypdfium2_setup import build_native
+from pypdfium2_setup.system_pdfium import try_system_pdfium
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
@@ -170,12 +170,10 @@ def main():
             # TODO extract setup targets?
             log(str(Host._exc))
             log("Looking for system pdfium ...")
-            bindings, pdfium_ver = find_pdfium(pdfium_ver)
-            if bindings:
-                shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
-                pdfium_ver = str(pdfium_ver)
+            sys_pdfium_ver = try_system_pdfium(pdfium_ver)
+            if sys_pdfium_ver:
+                pdfium_ver = str(sys_pdfium_ver)
                 pl_name = ExtPlats.system
-                ...  # TODO version file
             else:
                 log("Attempting to build pdfium from source. This is unlikely to work without manual preparation, or on non-unixoid hosts. See pypdfium2's README.md for more information.")
                 build_native.main_api()

@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import os.path
 import sys
 import argparse
 from pathlib import Path
