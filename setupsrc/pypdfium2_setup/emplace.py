@@ -42,11 +42,12 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
 
 def prepare_setup(pl_name, pdfium_ver, use_v8):
     
+    # TODO
+    # - consider taking a full version (on behalf of offline setup)
+    # - expose smart try_system_pdfium() / setup fallback as target
+    
     clean_platfiles()
     flags = ["V8", "XFA"] if use_v8 else []
-    
-    # TODO for PDFIUM_PLATFORM=system, add option for caller to pass in custom headers_dir, run_lds and flags? this might cause more fragmentation, though
-    # also want to consider accepting a full version for offline setup
     
     if pl_name == ExtPlats.system:
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
