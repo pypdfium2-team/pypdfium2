@@ -108,6 +108,9 @@ def run_setup(modnames, pdfium_ver, pl_name, libname=None):
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
         kwargs["version"] = str(pdfium_ver)
+    else:
+        assert any(m in modnames for m in (ModuleHelpers, ModuleRaw)), \
+               f"At least one core module is required. Check {ModulesSpec_EnvVar}."
     
     if ModuleHelpers in modnames:
         helpers_info = get_helpers_info()
