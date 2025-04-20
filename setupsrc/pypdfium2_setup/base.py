@@ -29,8 +29,7 @@ PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
-BindTarget_Ref  = "reference"
-BindTarget = os.environ.get(BindSpec_EnvVar, None)
+USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference"
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw          = "raw"
@@ -617,12 +616,8 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
         ctypesgen.__main__.main([str(a) for a in args])
 
 
-def build_pdfium_bindings(version, headers_dir=None, **kwargs):
+def build_pdfium_bindings(version, headers_dir=None, flags=(), run_lds=(".",), guard_symbols=False, libname="pdfium", **kwargs):
     # Note, the bindings version file is currently discarded. We might want to add a BINDINGS_INFO to version.py in the future.
-    
-    defaults = dict(flags=(), run_lds=(".",), guard_symbols=False)
-    for k, v in defaults.items():
-        kwargs.setdefault(k, v)
     
     ver_path = DataDir_Bindings/VersionFN
     bind_path = BindingsFile
@@ -630,8 +625,9 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         headers_dir = DataDir_Bindings / "headers"
     
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
-    if BindTarget == BindTarget_Ref:
-        log("Using reference bindings as requested by env var. This will bypass all bindings params.")
+    if USE_REFBINDINGS or not shutil.which("ctypesgen"):
+        log("Using reference bindings. This will bypass all bindings params.")
+        assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
         record = read_json(AR_RecordFile)
         bindings_ver = record["pdfium"]
         if bindings_ver != version:
@@ -643,9 +639,9 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     
     curr_info = dict(
         version = version,
-        flags = list(kwargs["flags"]),
-        run_lds = list(kwargs["run_lds"]),
-        guard_symbols = kwargs["guard_symbols"],
+        flags = list(flags),
+        run_lds = list(run_lds),
+        guard_symbols = guard_symbols,
         source = "generated",
     )
     prev_ver = None
@@ -672,7 +668,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         archive_path.unlink()
     
     log(f"Building bindings ...")
-    run_ctypesgen(DataDir_Bindings, headers_dir, **kwargs)
+    run_ctypesgen(DataDir_Bindings, headers_dir, flags=flags, run_lds=run_lds, guard_symbols=guard_symbols, libname=libname, **kwargs)
     write_json(ver_path, curr_info)
 
 
