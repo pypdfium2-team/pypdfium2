@@ -162,26 +162,26 @@ def main():
     modnames = parse_modspec(raw_modspec)
     do_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(raw_platspec)
     
-    if pl_name is None:
-        # TODO extract setup targets?
-        log(str(Host._exc))
-        log("Looking for system pdfium ...")
-        bindings, pdfium_ver = find_pdfium(pdfium_ver)
-        if bindings:
-            shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
-            pdfium_ver = str(pdfium_ver)
-            pl_name = ExtPlats.system
-            ...  # TODO version file
-        else:
-            log("Attempting to build pdfium from source. This is unlikely to work without manual preparation, or on non-unixoid hosts. See pypdfium2's README.md for more information.")
-            build_native.main_api()
-            pdfium_ver = build_native.DEFAULT_VER
-            pl_name = ExtPlats.sourcebuild
+    if pl_name == ExtPlats.sdist and modnames != ModulesAll:
+        raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
-    else:
-        if pl_name == ExtPlats.sdist and modnames != ModulesAll:
-            raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
-        if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
+    if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
+        if pl_name is None:
+            # TODO extract setup targets?
+            log(str(Host._exc))
+            log("Looking for system pdfium ...")
+            bindings, pdfium_ver = find_pdfium(pdfium_ver)
+            if bindings:
+                shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
+                pdfium_ver = str(pdfium_ver)
+                pl_name = ExtPlats.system
+                ...  # TODO version file
+            else:
+                log("Attempting to build pdfium from source. This is unlikely to work without manual preparation, or on non-unixoid hosts. See pypdfium2's README.md for more information.")
+                build_native.main_api()
+                pdfium_ver = build_native.DEFAULT_VER
+                pl_name = ExtPlats.sourcebuild
+        else:
             prepare_setup(pl_name, pdfium_ver, use_v8)
     
     run_setup(modnames, pdfium_ver, pl_name)
