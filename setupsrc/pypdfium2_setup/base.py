@@ -764,7 +764,7 @@ def parse_pl_spec(pl_spec):
     if req_ver:
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
-    else:
+    elif pl_name is not None:
         assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
         req_ver = PdfiumVer.get_latest()
     
