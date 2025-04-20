@@ -53,7 +53,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
         shutil.copyfile(BindingsFile, ModuleDir_Raw/BindingsFN)
         write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
-        return [BindingsFN, VersionFN]
+        return (BindingsFN, VersionFN)
     
     else:
         
@@ -72,7 +72,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
         for fp in platfiles:
             shutil.copyfile(fp, ModuleDir_Raw/fp.name)
         
-        return [fp.name for fp in platfiles]
+        return (fp.name for fp in platfiles)
 
 
 def main():
