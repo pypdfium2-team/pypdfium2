@@ -7,9 +7,11 @@ import importlib
 from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
 from pypdfium2._cli._parsers import setup_logging
 
-# Note, this requires the pypdfium2-team fork of ctypesgen. With oldschool ctypesgen (or even older versions of the fork), this will fail.
+# This requires the pypdfium2-team fork of ctypesgen. With oldschool ctypesgen (or even older versions of the fork), this will fail.
 from pypdfium2_raw.bindings import _libs_info
-pdfium_path = _libs_info["pdfium"]["path"]
+# NOTE the libname is commonly "pdfium", but it may differ in edge cases (e.g. "pdfiumlo"), so unpack rather than using a key
+pdfium_path, = list(_libs_info.values())
+pdfium_path = pdfium_path["path"]
 
 SubCommands = {
     "arrange":        "rearrange/merge documents",
