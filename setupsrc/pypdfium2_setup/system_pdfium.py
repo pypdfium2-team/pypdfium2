@@ -5,6 +5,7 @@
 
 import re
 import sys
+import shutil
 import itertools
 import subprocess
 from pathlib import Path
@@ -82,11 +83,12 @@ def _get_libreoffice_pdfium_ver():
 
 
 def _get_sys_pdfium_ver():
-    proc = subprocess.run(["pkg-config", "--modversion", "libpdfium"], cwd=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if proc.returncode == 0:
-        return proc.stdout.decode()
-    else:
-        return float("nan")  # placeholder
+    log("Trying to determine pdfium version (may be NaN if this fails) ...")
+    if shutil.which("pkg-config"):
+        proc = subprocess.run(["pkg-config", "--modversion", "libpdfium"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        if proc.returncode == 0:
+            return proc.stdout.decode()
+    return float("nan")
 
 
 def find_pdfium():
@@ -102,9 +104,10 @@ def find_pdfium():
             bindings = BindingsFile
         else:
             pdfium_headers = _find_pdfium_headers()
-            pdfium_ver = _get_sys_pdfium_ver()
             if pdfium_headers:
                 log(f"Found pdfium headers at {pdfium_headers}")
+                pdfium_ver = _get_sys_pdfium_ver()
+                log(f"pdfium version: {pdfium_ver}")
                 build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=())
                 bindings = BindingsFile
             else:
