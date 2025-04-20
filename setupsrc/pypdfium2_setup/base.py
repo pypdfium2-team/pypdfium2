@@ -593,7 +593,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
         args += ["--no-symbol-guards"]
     if no_srcinfo:
         args += ["--no-srcinfo"]
-    # 
+    
     # pre-processor - if not given, pypdfium2-ctypesgen will try to auto-select as available (gcc/clang)
     c_preproc = os.environ.get("CPP", None)
     if c_preproc:
@@ -616,7 +616,18 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
         ctypesgen.__main__.main([str(a) for a in args])
 
 
-def build_pdfium_bindings(version, headers_dir=None, flags=(), run_lds=(".",), guard_symbols=False, libname="pdfium", **kwargs):
+def _make_json_compat(obj):
+    if isinstance(obj, dict):
+        return {k: _make_json_compat(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [_make_json_compat(v) for v in obj]
+    elif isinstance(obj, Path):
+        return str(obj)
+    else:
+        return obj
+
+
+def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     # Note, the bindings version file is currently discarded. We might want to add a BINDINGS_INFO to version.py in the future.
     
     ver_path = DataDir_Bindings/VersionFN
@@ -627,6 +638,7 @@ def build_pdfium_bindings(version, headers_dir=None, flags=(), run_lds=(".",), g
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
     if USE_REFBINDINGS or not shutil.which("ctypesgen"):
         log("Using reference bindings. This will bypass all bindings params.")
+        libname = kwargs.get("libname", "pdfium")
         assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
         record = read_json(AR_RecordFile)
         bindings_ver = record["pdfium"]
@@ -634,25 +646,21 @@ def build_pdfium_bindings(version, headers_dir=None, flags=(), run_lds=(".",), g
             log(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!")
         mkdir(DataDir_Bindings)
         shutil.copyfile(RefBindingsFile, BindingsFile)
-        write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."], source="reference"))
+        write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."]))
         return
     
-    curr_info = dict(
-        version = version,
-        flags = list(flags),
-        run_lds = list(run_lds),
-        guard_symbols = guard_symbols,
-        source = "generated",
-    )
+    curr_info = _make_json_compat(kwargs)
+    curr_info.pop("compile_lds", None)
+    curr_info["version"] = version
     prev_ver = None
     if ver_path.exists():
         prev_info = read_json(ver_path)
         prev_ver = prev_info["version"]
-        if prev_info == curr_info and bind_path.exists():
+        if bind_path.exists() and prev_info == curr_info:
             log(f"Using cached bindings")
             return
     
-    # We try to reuse headers if only bindings params differ, not version.
+    # try to reuse headers if only bindings params differ, not version
     if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
         log("Using cached headers")
     else:
@@ -668,7 +676,7 @@ def build_pdfium_bindings(version, headers_dir=None, flags=(), run_lds=(".",), g
         archive_path.unlink()
     
     log(f"Building bindings ...")
-    run_ctypesgen(DataDir_Bindings, headers_dir, flags=flags, run_lds=run_lds, guard_symbols=guard_symbols, libname=libname, **kwargs)
+    run_ctypesgen(DataDir_Bindings, headers_dir, **kwargs)
     write_json(ver_path, curr_info)
 
 
