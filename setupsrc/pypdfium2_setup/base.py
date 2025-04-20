@@ -628,7 +628,6 @@ def _make_json_compat(obj):
 
 
 def build_pdfium_bindings(version, headers_dir=None, **kwargs):
-    # Note, the bindings version file is currently discarded. We might want to add a BINDINGS_INFO to version.py in the future.
     
     ver_path = DataDir_Bindings/VersionFN
     bind_path = BindingsFile
@@ -637,21 +636,24 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
     if USE_REFBINDINGS or not shutil.which("ctypesgen"):
-        log("Using reference bindings. This will bypass all bindings params.")
+        log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
         libname = kwargs.get("libname", "pdfium")
         assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
         record = read_json(AR_RecordFile)
         bindings_ver = record["pdfium"]
         if bindings_ver != version:
-            log(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!")
+            log(f"Warning: bindings/binary version mismatch ({bindings_ver} != {version}). This is ABI-unsafe!")
         mkdir(DataDir_Bindings)
         shutil.copyfile(RefBindingsFile, BindingsFile)
         write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."]))
         return
     
-    curr_info = _make_json_compat(kwargs)
-    curr_info.pop("compile_lds", None)
-    curr_info["version"] = version
+    # TODO register all defaults?
+    curr_info = dict(version=version)
+    curr_info.update(_make_json_compat(kwargs))
+    curr_info.pop("compile_lds", None)  # ignore
+    curr_info.setdefault("flags", ())
+    
     prev_ver = None
     if ver_path.exists():
         prev_info = read_json(ver_path)
