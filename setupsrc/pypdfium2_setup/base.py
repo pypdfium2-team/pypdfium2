@@ -737,9 +737,7 @@ def build_pl_suffix(version, use_v8):
 
 def parse_pl_spec(pl_spec):
     
-    # TODOs
-    # - targets integration is inflexible, need to restructure
-    # - add way to pass through package provider with system target?
+    # TODO this is inflexible - split up in individual env vars after all?
     
     do_prepare = True
     if pl_spec.startswith("prepared!"):
@@ -755,10 +753,8 @@ def parse_pl_spec(pl_spec):
         use_v8 = True
     
     if not pl_spec or pl_spec == "auto":
+        # may be None - handling this is delegated to the caller
         pl_name = Host.platform
-        if pl_name is None:
-            # delegate handling of unknown platforms to the caller (setup.py)
-            return None
     elif hasattr(ExtPlats, pl_spec):
         pl_name = getattr(ExtPlats, pl_spec)
     elif hasattr(PlatNames, pl_spec):

@@ -154,12 +154,12 @@ def run_setup(modnames, pdfium_ver, pl_name, libname=None):
 
 def main():
     
-    pl_spec = os.environ.get(PlatSpec_EnvVar, "")
-    modspec = os.environ.get(ModulesSpec_EnvVar, "")
-    modnames = parse_modspec(modspec)
-    parsed_spec = parse_pl_spec(pl_spec)
+    raw_modspec = os.environ.get(ModulesSpec_EnvVar, "")
+    raw_platspec = os.environ.get(PlatSpec_EnvVar, "")
+    modnames = parse_modspec(raw_modspec)
+    do_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(raw_platspec)
     
-    if parsed_spec is None:
+    if pl_name is None:
         # TODO extract setup targets?
         log(str(Host._exc))
         log("Looking for system pdfium ...")
@@ -176,7 +176,6 @@ def main():
             pl_name = ExtPlats.sourcebuild
     
     else:
-        do_prepare, pl_name, pdfium_ver, use_v8 = parsed_spec
         if pl_name == ExtPlats.sdist and modnames != ModulesAll:
             raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
         if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
