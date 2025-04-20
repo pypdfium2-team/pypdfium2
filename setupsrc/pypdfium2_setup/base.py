@@ -635,6 +635,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         headers_dir = DataDir_Bindings / "headers"
     
     # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
+    # TODO: in the future, we might want to use the RefBindingsFile directly instead of moving it into data/bindings/ ?
     if USE_REFBINDINGS or not shutil.which("ctypesgen"):
         log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
         libname = kwargs.get("libname", "pdfium")

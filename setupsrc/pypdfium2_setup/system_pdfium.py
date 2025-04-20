@@ -94,6 +94,7 @@ def _get_sys_pdfium_ver():
 def find_pdfium():
     
     pdfium_lib, from_lo = _find_pdfium_lib()
+    pdfium_ver = float("nan")
     if pdfium_lib:
         log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
         if from_lo:
@@ -117,7 +118,7 @@ def find_pdfium():
         log("pdfium not found")
         bindings = None
     
-    return bindings
+    return bindings, pdfium_ver
 
 
 if __name__ == "__main__":

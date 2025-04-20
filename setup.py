@@ -159,13 +159,16 @@ def main():
     
     parsed_spec = parse_pl_spec(pl_spec)
     if parsed_spec is None:
-        log(f"Unhandled host:\n{Host._exc}")
-        
+        # TODO extract setup targets?
+        log(str(Host._exc))
         log("Looking for system pdfium ...")
-        bindings = find_pdfium()
-        # XXX ...
-        
-        if not bindings:
+        bindings, pdfium_ver = find_pdfium()
+        if bindings:
+            shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
+            pdfium_ver = str(pdfium_ver)
+            pl_name = ExtPlats.system
+            ...  # TODO version file
+        else:
             log("Attempting to build pdfium from source. This is unlikely to work without manual preparation, or on non-unixoid hosts. See pypdfium2's README.md for more information.")
             build_native.main_api()
             pdfium_ver = build_native.DEFAULT_VER
