@@ -301,7 +301,13 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
     if build_ver is None:
         build_ver = DEFAULT_VER
     if compiler is None:
-        compiler = Compiler.gcc
+        if shutil.which("gcc"):
+            compiler = Compiler.gcc
+        elif shutil.which("clang"):
+            log("gcc not available, will try clang. Note, you may need to set up some symlinks to match the clang directory layout expected by pdfium. Also, make sure libclang_rt builtins are installed.")
+            compiler = Compiler.clang
+        else:
+            raise RuntimeError("Neither gcc nor clang installed.")
     if clang_path is None and os.name != "nt":
         clang_path = Path("/usr")
     
