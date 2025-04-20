@@ -173,10 +173,10 @@ AllLibnames = ("pdfium.dll", "libpdfium.dylib", "libpdfium.so")
 
 class _PdfiumVerClass:
     
-    scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
+    scheme = namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
     
     def __init__(self):
-        self._vlines, self._vdict, self._vcursor = None, {}, None
+        self._vlines, self._vdict = None, {}
     
     @staticmethod
     @functools.lru_cache(maxsize=1)
@@ -188,8 +188,9 @@ class _PdfiumVerClass:
     
     @functools.lru_cache(maxsize=1)
     def _get_chromium_refs(self):
-        # FIXME The ls-remote call is fairly expensive. While cached in memory for a process lifetime, it can cause a significant slowdown for consecutive process runs.
-        # There may be multiple ways to improve this, like adding some disk cache to ensure it would only be called once for a whole session, or maybe adding a second strategy that would parse the pdfium-binaries VERSION file, and use the chromium refs only for sourcebuild.
+        # FIXME The ls-remote call may take extremely long (~1min) with older versions of git!
+        # With newer git, it's a lot better, but still noticable (one or a few seconds).
+        # TODO See if we can do something to speed up the call. That said, we should perhaps add a second strategy parsing the pdfium-binaries VERSION file, and maybe a way for the caller to supply the full version. Also, adding a disk cache for the refs may be an option.
         if self._vlines is None:
             log(f"Fetching chromium refs ...")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
@@ -209,7 +210,6 @@ class _PdfiumVerClass:
         """
         lines = self._get_chromium_refs()
         full_ver = self._parse_line( lines.pop(0) )
-        self._vcursor = full_ver.build
         return full_ver
     
     def to_full(self, v_short):
@@ -218,12 +218,11 @@ class _PdfiumVerClass:
         Note, the first call to this function in a session may be somewhat expensive.
         """
         v_short = int(v_short)
-        self._get_chromium_refs()
-        if self._vcursor is None or self._vcursor > v_short:
+        if v_short not in self._vdict:
+            self._get_chromium_refs()
             for i, line in enumerate(self._vlines):
                 full_ver = self._parse_line(line)
                 if full_ver.build == v_short:
-                    self._vcursor = full_ver.build
                     self._vlines = self._vlines[i+1:]
                     break
         full_ver = self._vdict[v_short]
