@@ -99,7 +99,7 @@ def find_pdfium(given_ver=None):
             pdfium_ver = given_ver or _get_libreoffice_pdfium_ver()
             lds = (pdfium_lib.parent, )
             # TODO(ctypesgen) handle pdfiumlo libname in refbindings
-            build_pdfium_bindings(pdfium_ver, libname="pdfiumlo", compile_lds=lds, run_lds=lds)
+            build_pdfium_bindings(pdfium_ver, libname="pdfiumlo", compile_lds=lds, run_lds=lds, guard_symbols=True)
             bindings = BindingsFile
         else:
             pdfium_headers = _find_pdfium_headers()
@@ -107,7 +107,7 @@ def find_pdfium(given_ver=None):
                 log(f"Found pdfium headers at {pdfium_headers}")
                 pdfium_ver = given_ver or _get_sys_pdfium_ver()
                 log(f"pdfium version: {pdfium_ver}")
-                build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=())
+                build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=(), guard_symbols=True)
                 bindings = BindingsFile
             else:
                 log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
