@@ -162,10 +162,10 @@ def main():
         log(f"Unhandled host:\n{Host._exc}")
         
         log("Looking for system pdfium ...")
-        pdfium_lib, bindings = find_pdfium()
+        bindings = find_pdfium()
         # XXX ...
         
-        if not pdfium_lib:
+        if not bindings:
             log("Attempting to build pdfium from source. This is unlikely to work without manual preparation, or on non-unixoid hosts. See pypdfium2's README.md for more information.")
             build_native.main_api()
             pdfium_ver = build_native.DEFAULT_VER

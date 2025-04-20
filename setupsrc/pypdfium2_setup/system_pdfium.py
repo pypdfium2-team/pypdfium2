@@ -117,7 +117,7 @@ def find_pdfium():
         log("pdfium not found")
         bindings = None
     
-    return pdfium_lib, bindings
+    return bindings
 
 
 if __name__ == "__main__":
