@@ -20,23 +20,16 @@ def _get_existing(candidates, cb=Path.exists):
     return next((p for p in candidates if cb(p)), None)
 
 
-def _find_pdfium_lib():
-    
-    # See if a pdfium shared library is in the default system search path
-    pdfium_lib = find_library("pdfium")
-    from_lo = False
-    
-    # Look for pdfium bundled with libreoffice. (Assuming the unknown host has a unix-like file system)
-    # Not sure how complete or incomplete libreoffice's pdfium builds are; this is just a chance
+def _find_libreoffice_pdfium():
+    # Look for pdfium bundled with libreoffice. (Assuming the host has a unix-like file system.)
+    # Not sure how complete or incomplete libreoffice's pdfium builds may be; this is just a chance.
+    pdfium_lib = None
     if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
         lo_paths_iter = itertools.product(("/usr/lib", "/usr/local/lib"), ("", "64"))
         libname = libname_for_system(Host.system, name="pdfiumlo")
         candidates = (Path(prefix+bitness)/"libreoffice"/"program"/libname for prefix, bitness in lo_paths_iter)
         pdfium_lib = _get_existing(candidates)
-        if pdfium_lib:
-            from_lo = True
-    
-    return pdfium_lib, from_lo
+    return pdfium_lib
 
 
 def _find_pdfium_headers():
@@ -91,32 +84,38 @@ def _get_sys_pdfium_ver():
     return float("nan")
 
 
-def find_pdfium():
+def find_pdfium(given_ver=None):
     
-    pdfium_lib, from_lo = _find_pdfium_lib()
-    pdfium_ver = float("nan")
+    # See if a pdfium shared library is in the default system search path
+    pdfium_lib = find_library("pdfium")
+    from_lo = False
+    if not pdfium_lib:
+        pdfium_lib = _find_libreoffice_pdfium()
+        from_lo = True
+    
     if pdfium_lib:
         log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
         if from_lo:
-            pdfium_ver = _get_libreoffice_pdfium_ver()
+            pdfium_ver = given_ver or _get_libreoffice_pdfium_ver()
             lds = (pdfium_lib.parent, )
-            # XXX pdfiumlo name not handled in reference bindings
+            # TODO(ctypesgen) handle pdfiumlo libname in refbindings
             build_pdfium_bindings(pdfium_ver, libname="pdfiumlo", compile_lds=lds, run_lds=lds)
             bindings = BindingsFile
         else:
             pdfium_headers = _find_pdfium_headers()
             if pdfium_headers:
                 log(f"Found pdfium headers at {pdfium_headers}")
-                pdfium_ver = _get_sys_pdfium_ver()
+                pdfium_ver = given_ver or _get_sys_pdfium_ver()
                 log(f"pdfium version: {pdfium_ver}")
                 build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=())
                 bindings = BindingsFile
             else:
                 log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
                 bindings = RefBindingsFile
+                pdfium_ver = given_ver or float("nan")
     else:
         log("pdfium not found")
-        bindings = None
+        bindings, pdfium_ver = None, None
     
     return bindings, pdfium_ver
 

@@ -163,7 +163,7 @@ def main():
         # TODO extract setup targets?
         log(str(Host._exc))
         log("Looking for system pdfium ...")
-        bindings, pdfium_ver = find_pdfium()
+        bindings, pdfium_ver = find_pdfium(pdfium_ver)
         if bindings:
             shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
             pdfium_ver = str(pdfium_ver)
