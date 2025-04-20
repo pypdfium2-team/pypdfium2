@@ -108,7 +108,7 @@ def find_pdfium():
                 build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=())
                 bindings = BindingsFile
             else:
-                log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe. Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
+                log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
                 bindings = RefBindingsFile
     else:
         log("pdfium not found")

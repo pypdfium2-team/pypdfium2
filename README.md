@@ -21,8 +21,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   ```bash
   python -m pip install -U pypdfium2
   ```
-  This will use a pre-built wheel package, the easiest way of installing pypdfium2.
-
+  If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2.
+  Otherwise, an sdist package is installed and its `setup.py` will run. This will look for system pdfium, or attempt to build pdfium from source.
 
 * <a id="user-content-install-source" class="anchor" href="#install-source">From source 🔗</a>
   
@@ -124,8 +124,6 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     ```
   
   See [Setup Magic](#setup-magic) for details.
-  
-  Installing an `sdist` does not implicitly trigger a sourcebuild if no pre-built binary is available. We prefer to let callers decide consciously what to do, and run the build script without pip encapsulation.
   
   Relevant pip options:
   * `-v`: Verbose logging output. Useful for debugging.

@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
 from pypdfium2_setup.system_pdfium import find_pdfium
+from pypdfium2_setup import build_native
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
@@ -158,14 +159,17 @@ def main():
     
     parsed_spec = parse_pl_spec(pl_spec)
     if parsed_spec is None:
-        log("Unknown host, looking for system pdfium ...")
-        pdfium_lib, pdfium_headers = find_pdfium()
+        log(f"Unhandled host:\n{Host._exc}")
+        
+        log("Looking for system pdfium ...")
+        pdfium_lib, bindings = find_pdfium()
         # XXX ...
         
-        # TODO If we're on a unixoid system ...
-        # - Consider triggering a sourcebuild implicitly (build_native.py). However, this requires system dependencies that need to be installed by the caller beforehand. They are unlikely to be installed by chance.
-        log(f"No pre-built binaries found for this host. You may build pdfium from source, place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. Use e.g. `python3 setupsrc/pypdfium2_setup/build_native.py` to automate this process.")
-        raise Host._exc
+        if not pdfium_lib:
+            log("Attempting to build pdfium from source. This is unlikely to work without manual preparation, or on non-unixoid hosts. See pypdfium2's README.md for more information.")
+            build_native.main_api()
+            pdfium_ver = build_native.DEFAULT_VER
+            pl_name = ExtPlats.sourcebuild
     
     else:
         
