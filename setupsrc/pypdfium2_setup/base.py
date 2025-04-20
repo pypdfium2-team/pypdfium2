@@ -43,6 +43,7 @@ VersionFN  = "version.json"
 ProjectDir        = Path(__file__).parents[2].resolve()
 DataDir           = ProjectDir / "data"
 DataDir_Bindings  = DataDir / "bindings"
+BindingsFile      = DataDir_Bindings / BindingsFN
 PatchDir          = ProjectDir / "pdfium_patches"
 ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
 ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
@@ -570,14 +571,14 @@ def tmp_cwd_context(tmp_cwd):
         os.chdir(orig_cwd)
 
 
-def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False):
+def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium"):
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
     import ctypesgen.__main__
     
     # library loading
-    args = ["-l", "pdfium"]
+    args = ["-l", libname]
     if run_lds:
         args += ["--runtime-libdirs", *run_lds]
         if not search_sys_despite_libdirs:
@@ -593,7 +594,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
         args += ["--no-symbol-guards"]
     if no_srcinfo:
         args += ["--no-srcinfo"]
-    
+    # 
     # pre-processor - if not given, pypdfium2-ctypesgen will try to auto-select as available (gcc/clang)
     c_preproc = os.environ.get("CPP", None)
     if c_preproc:
@@ -624,7 +625,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         kwargs.setdefault(k, v)
     
     ver_path = DataDir_Bindings/VersionFN
-    bind_path = DataDir_Bindings/BindingsFN
+    bind_path = BindingsFile
     if not headers_dir:
         headers_dir = DataDir_Bindings / "headers"
     
@@ -636,7 +637,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         if bindings_ver != version:
             log(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!")
         mkdir(DataDir_Bindings)
-        shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
+        shutil.copyfile(RefBindingsFile, BindingsFile)
         write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."], source="reference"))
         return
     

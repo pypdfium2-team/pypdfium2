@@ -51,7 +51,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     
     if pl_name == ExtPlats.system:
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
-        shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
+        shutil.copyfile(BindingsFile, ModuleDir_Raw/BindingsFN)
         write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
         return [BindingsFN, VersionFN]
     
@@ -65,7 +65,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
             # sourcebuild bindings are kept in the platform directory
             platfiles += [pl_dir/BindingsFN]
         else:
-            platfiles += [DataDir_Bindings/BindingsFN]
+            platfiles += [BindingsFile]
             _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8)
         
         platfiles += [pl_dir/libname_for_system(system), pl_dir/VersionFN]

@@ -6,6 +6,7 @@
 import re
 import sys
 import itertools
+import subprocess
 from pathlib import Path
 from ctypes.util import find_library
 from urllib.request import urlopen
@@ -78,24 +79,45 @@ def _get_libreoffice_pdfium_ver():
     log(f"Libreoffice pdfium version: {pdfium_ver}")
     
     return pdfium_ver
-    
+
+
+def _get_sys_pdfium_ver():
+    proc = subprocess.run(["pkg-config", "--modversion", "libpdfium"], cwd=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if proc.returncode == 0:
+        return proc.stdout.decode()
+    else:
+        return float("nan")  # placeholder
+
 
 def find_pdfium():
+    
     pdfium_lib, from_lo = _find_pdfium_lib()
-    pdfium_headers = None
     if pdfium_lib:
         log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
-        if not from_lo:
+        if from_lo:
+            pdfium_ver = _get_libreoffice_pdfium_ver()
+            lds = (pdfium_lib.parent, )
+            # XXX pdfiumlo name not handled in reference bindings
+            build_pdfium_bindings(pdfium_ver, libname="pdfiumlo", compile_lds=lds, run_lds=lds)
+            bindings = BindingsFile
+        else:
             pdfium_headers = _find_pdfium_headers()
+            pdfium_ver = _get_sys_pdfium_ver()
             if pdfium_headers:
                 log(f"Found pdfium headers at {pdfium_headers}")
+                build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=())
+                bindings = BindingsFile
             else:
                 log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe. Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
+                bindings = RefBindingsFile
     else:
         log("pdfium not found")
-    return pdfium_lib, from_lo, pdfium_headers
+        bindings = None
+    
+    return pdfium_lib, bindings
 
 
 if __name__ == "__main__":
     print(find_pdfium())
     print(_get_libreoffice_pdfium_ver())
+    print(_get_sys_pdfium_ver())
