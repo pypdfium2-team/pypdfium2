@@ -5,7 +5,6 @@ import os
 import re
 import sys
 import json
-import math
 import shutil
 import tarfile
 import platform
@@ -234,6 +233,9 @@ PdfiumVer = _PdfiumVerClass()
 NaN = float("nan")
 PdfiumVerUnknown = PdfiumVer.scheme(NaN, NaN, NaN, NaN)
 
+def is_nan(value):
+    return isinstance(value, float) and value != value
+
 
 def read_json(fp):
     with open(fp, "r") as buf:
@@ -246,7 +248,7 @@ def write_json(fp, data, indent=2):
 
 def write_pdfium_info(dir, version, origin, flags=(), n_commits=0, hash=None, is_short_ver=True):
     if is_short_ver:
-        if math.isnan(version):
+        if is_nan(version):
             log("Warning: version unknown, will use NaN placeholders")
             version = PdfiumVerUnknown
         else:
