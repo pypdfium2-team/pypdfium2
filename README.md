@@ -22,9 +22,9 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   python -m pip install -U pypdfium2
   ```
   If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2.
-  Otherwise, an sdist package is installed and its `setup.py` will run. This will look for system pdfium, or attempt to build pdfium from source.
+  Otherwise, if no pre-compiled binaries are available, pypdfium2's `setup.py` will look for system pdfium, or attempt to build pdfium from source.
 
-* <a id="user-content-install-source" class="anchor" href="#install-source">From source 🔗</a>
+* <a id="user-content-install-source" class="anchor" href="#install-source">From the repository 🔗</a>
   
   * Dependencies:
     - System: git, C pre-processor (gcc/clang - alternatively, specify the command to invoke via `$CPP`)
@@ -138,6 +138,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 * <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda 🔗</a>
   
   _**Beware:** Any conda packages/recipes of pypdfium2 or pdfium-binaries that might be provided by other distributors, including `anaconda/main` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
+  
+  _**Wait a moment:** Do you really need this? pypdfium2 is best installed from `PyPI` (e.g. via `pip`), which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install pypdfium2 via pip instead._
   
   + To install
     
