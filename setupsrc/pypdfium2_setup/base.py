@@ -189,7 +189,7 @@ class _PdfiumVerClass:
     @functools.lru_cache(maxsize=1)
     def _get_chromium_refs(self):
         # FIXME The ls-remote call may take extremely long (~1min) with older versions of git!
-        # With newer git, it's a lot better, but still noticable (one or a few seconds).
+        # With newer git, it's a lot better, but still noticeable (one or a few seconds).
         # TODO See if we can do something to speed up the call. That said, we might want to add a way for the caller to supply the full version. Also, adding a disk cache for the refs might be an option.
         if self._vlines is None:
             log(f"Fetching chromium refs ...")
