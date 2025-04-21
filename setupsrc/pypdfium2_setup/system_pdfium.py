@@ -93,6 +93,8 @@ def try_system_pdfium(given_ver=None, dest_dir=ModuleDir_Raw):
         pdfium_lib = _find_libreoffice_pdfium()
         from_lo = True
     
+    # XXX writing version file will fail when pdfium_ver is NaN
+    
     if pdfium_lib:
         log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
         if from_lo:
@@ -115,6 +117,7 @@ def try_system_pdfium(given_ver=None, dest_dir=ModuleDir_Raw):
                 log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
                 bindings = RefBindingsFile
                 pdfium_ver = given_ver or float("nan")
+                ...  # TODO version file
         shutil.copyfile(bindings, dest_dir/BindingsFN)
         return pdfium_ver
     else:
