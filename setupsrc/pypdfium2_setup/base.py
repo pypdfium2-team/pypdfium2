@@ -29,7 +29,7 @@ PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
-USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference"
+USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not shutil.which("ctypesgen")
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw          = "raw"
@@ -48,7 +48,6 @@ ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
 ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
 Changelog         = ProjectDir / "docs" / "devel" / "changelog.md"
 ChangelogStaging  = ProjectDir / "docs" / "devel" / "changelog_staging.md"
-HAVE_GIT_REPO     = (ProjectDir / ".git").exists()
 
 AutoreleaseDir  = ProjectDir / "autorelease"
 AR_RecordFile   = AutoreleaseDir / "record.json"
@@ -246,14 +245,10 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, version, origin, flags=(), n_commits=0, hash=None, is_short_ver=True):
-    if is_short_ver:
-        if is_nan(version):
-            log("Warning: version unknown, will use NaN placeholders")
-            version = PdfiumVerUnknown
-        else:
-            version = PdfiumVer.to_full(version)
-    info = dict(**version._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=list(flags))
+def write_pdfium_info(dir, full_ver, origin, flags=(), n_commits=0, hash=None):
+    if full_ver is PdfiumVerUnknown:
+        log("Warning: pdfium version not known, will use NaN placeholders")
+    info = dict(**full_ver._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=list(flags))
     write_json(dir/VersionFN, info)
     return info
 
@@ -579,7 +574,18 @@ def tmp_cwd_context(tmp_cwd):
         os.chdir(orig_cwd)
 
 
-def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium"):
+def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium", version=None):
+    
+    # quick & dirty patch to allow using the pre-built bindings instead of calling ctypesgen
+    if USE_REFBINDINGS:
+        log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
+        assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
+        record = read_json(AR_RecordFile)
+        if version and version != record["pdfium"]:
+            log(f"Warning: binary/bindings version mismatch ({version} != {record['pdfium']}). This is ABI-unsafe!")
+        shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
+        return
+    
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
@@ -643,21 +649,6 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     if not headers_dir:
         headers_dir = DataDir_Bindings / "headers"
     
-    # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
-    # TODO: in the future, we might want to use the RefBindingsFile directly instead of moving it into data/bindings/ ?
-    if USE_REFBINDINGS or not shutil.which("ctypesgen"):
-        log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
-        libname = kwargs.get("libname", "pdfium")
-        assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
-        record = read_json(AR_RecordFile)
-        bindings_ver = record["pdfium"]
-        if bindings_ver != version:
-            log(f"Warning: bindings/binary version mismatch ({bindings_ver} != {version}). This is ABI-unsafe!")
-        mkdir(DataDir_Bindings)
-        shutil.copyfile(RefBindingsFile, BindingsFile)
-        write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."]))
-        return
-    
     # TODO register all defaults?
     curr_info = dict(version=version)
     curr_info.update(_make_json_compat(kwargs))
@@ -688,7 +679,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         archive_path.unlink()
     
     log(f"Building bindings ...")
-    run_ctypesgen(DataDir_Bindings, headers_dir, **kwargs)
+    run_ctypesgen(DataDir_Bindings, headers_dir, version=version, **kwargs)
     write_json(ver_path, curr_info)
 
 
@@ -713,7 +704,7 @@ def get_helpers_info():
     # TODO add some checks against record?
     
     have_git_describe = False
-    if HAVE_GIT_REPO:
+    if (ProjectDir/".git").exists():
         try:
             helpers_info = parse_git_tag()
         except subprocess.CalledProcessError as e:
@@ -829,7 +820,7 @@ def serialise_gn_config(config_dict):
     return "\n".join(parts)
 
 
-def pack_sourcebuild(pdfium_dir, build_dir, version, **v_kwargs):
+def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     log("Packing data files for sourcebuild...")
     
     dest_dir = DataDir / ExtPlats.sourcebuild
@@ -837,8 +828,7 @@ def pack_sourcebuild(pdfium_dir, build_dir, version, **v_kwargs):
     
     libname = libname_for_system(Host.system)
     shutil.copy(build_dir/libname, dest_dir/libname)
-    write_pdfium_info(dest_dir, version, origin="sourcebuild", **v_kwargs)
+    write_pdfium_info(dest_dir, full_ver, origin="sourcebuild", **v_kwargs)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    # FIXME PDFIUM_BINDINGS=reference not honored
-    run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir])
+    run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir], version=full_ver.build)

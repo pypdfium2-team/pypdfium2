@@ -170,9 +170,9 @@ def main():
             # TODO extract setup targets?
             log(str(Host._exc))
             log("Looking for system pdfium ...")
-            sys_pdfium_ver = try_system_pdfium(pdfium_ver)
+            sys_pdfium_ver = try_system_pdfium(pdfium_ver)  # full version
             if sys_pdfium_ver:
-                pdfium_ver = str(sys_pdfium_ver)
+                pdfium_ver = str(sys_pdfium_ver.build)
                 pl_name = ExtPlats.system
             else:
                 log("Attempting to build pdfium from source. This is unlikely to work without manual preparation, or on non-unixoid hosts. See pypdfium2's README.md for more information.")

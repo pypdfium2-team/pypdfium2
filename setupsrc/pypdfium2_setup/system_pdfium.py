@@ -69,10 +69,10 @@ def _get_libreoffice_pdfium_ver():
     deps_url = f"https://raw.githubusercontent.com/LibreOffice/core/refs/tags/libreoffice-{lo_version}/download.lst"
     deps_content = urlopen(deps_url).read().decode("utf-8")
     match = re.search(r"pdfium-(\d+)\.tar\.bz2", deps_content, flags=re.MULTILINE)
-    pdfium_ver = int(match.group(1))
-    log(f"Libreoffice pdfium version: {pdfium_ver}")
+    short_ver = int(match.group(1))
+    log(f"Libreoffice pdfium version: {short_ver}")
     
-    return pdfium_ver
+    return PdfiumVer.to_full(short_ver)
 
 
 def _get_sys_pdfium_ver():
@@ -80,11 +80,19 @@ def _get_sys_pdfium_ver():
     if shutil.which("pkg-config"):
         proc = subprocess.run(["pkg-config", "--modversion", "libpdfium"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         if proc.returncode == 0:
-            return proc.stdout.decode()
-    return float("nan")
+            version = proc.stdout.decode()
+            if "." in version:
+                version = PdfiumVer.scheme(*[int(v) for v in version.split(".")])
+            else:
+                version = PdfiumVer.to_full(int(version))
+            return version
+    return PdfiumVerUnknown
 
 
 def try_system_pdfium(given_ver=None):
+    
+    if given_ver:
+        given_ver = PdfiumVer.to_full(given_ver)
     
     # See if a pdfium shared library is in the default system search path
     pdfium_lib = find_library("pdfium")
@@ -97,29 +105,29 @@ def try_system_pdfium(given_ver=None):
         log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
         
         if from_lo:
-            pdfium_ver = given_ver or _get_libreoffice_pdfium_ver()
+            full_ver = given_ver or _get_libreoffice_pdfium_ver()
             lds = (pdfium_lib.parent, )
             # TODO(ctypesgen) handle pdfiumlo libname in refbindings
-            build_pdfium_bindings(pdfium_ver, libname="pdfiumlo", compile_lds=lds, run_lds=lds, guard_symbols=True)
-            write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="libreoffice")
+            build_pdfium_bindings(full_ver.build, libname="pdfiumlo", compile_lds=lds, run_lds=lds, guard_symbols=True)
+            write_pdfium_info(ModuleDir_Raw, full_ver, origin="libreoffice")
             bindings = BindingsFile
         
         else:
             pdfium_headers = _find_pdfium_headers()
             if pdfium_headers:
                 log(f"Found pdfium headers at {pdfium_headers}")
-                pdfium_ver = given_ver or _get_sys_pdfium_ver()
-                log(f"pdfium version: {pdfium_ver}")
-                build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=(), guard_symbols=True)
+                full_ver = given_ver or _get_sys_pdfium_ver()
+                log(f"pdfium version: {full_ver}")
+                build_pdfium_bindings(full_ver.build, pdfium_headers, run_lds=(), guard_symbols=True)
                 bindings = BindingsFile
             else:
                 log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
                 bindings = RefBindingsFile
-                pdfium_ver = given_ver or float("nan")
-            write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system")
+                full_ver = given_ver or PdfiumVerUnknown
+            write_pdfium_info(ModuleDir_Raw, full_ver, origin="system")
         
         shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
-        return pdfium_ver
+        return full_ver
     
     else:
         log("pdfium not found")

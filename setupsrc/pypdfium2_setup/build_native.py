@@ -329,7 +329,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         # we're not aware how to find out the post-tag info without an actual git repository, so set some placeholders indicating that this is a build from main
         n_commits, hash = float("inf"), ""
     
-    pkgbase.pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash, is_short_ver=False)
+    pkgbase.pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash)
 
 
 def parse_args(argv):

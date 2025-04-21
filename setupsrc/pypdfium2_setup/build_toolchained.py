@@ -209,7 +209,8 @@ def main(
     
     configure(GN, config_str)
     build(Ninja, b_target)
-    pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_short, **v_post, is_short_ver=True)
+    v_full = PdfiumVer.to_full(v_short)
+    pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_full, **v_post)
 
 
 def parse_args(argv):

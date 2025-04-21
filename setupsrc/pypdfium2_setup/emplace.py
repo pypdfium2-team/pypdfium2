@@ -52,7 +52,8 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     if pl_name == ExtPlats.system:
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
         shutil.copyfile(BindingsFile, ModuleDir_Raw/BindingsFN)
-        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
+        full_ver = PdfiumVer.to_full(pdfium_ver)
+        write_pdfium_info(ModuleDir_Raw, full_ver, origin="system", flags=flags)
         return (BindingsFN, VersionFN)
     
     else:
