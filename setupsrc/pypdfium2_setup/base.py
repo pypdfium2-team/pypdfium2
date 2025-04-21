@@ -355,8 +355,8 @@ class _host_platform:
         
         # Get info about the host platform (OS and CPU)
         # For the machine name, the platform module just passes through info provided by the OS (e.g. the uname command on unix), so we can determine the relevant names from Python's source code, system specs or info available online (e.g. https://en.wikipedia.org/wiki/Uname)
-        self._system_name = platform.system().lower()
-        self._machine_name = platform.machine().lower()
+        self._raw_system = platform.system().lower()
+        self._raw_machine = platform.machine().lower()
     
     @cached_property
     def platform(self):
@@ -368,12 +368,14 @@ class _host_platform:
     
     @cached_property
     def system(self):
-        id(self.platform)  # compute the cached property
+        have_platform = bool(self.platform)
+        if have_platform:
+            assert str(self.platform).startswith(f"{self._system}_")
         return self._system
     
     def __repr__(self):
-        info = f"{self._system_name} {self._machine_name}"
-        if self._system_name == "linux" and self._libc_name:
+        info = f"{self._raw_system} {self._raw_machine}"
+        if self._raw_system == "linux" and self._libc_name:
             info += f", {self._libc_name} {self._libc_ver}"
         return f"<Host: {info}>"
     
@@ -392,64 +394,64 @@ class _host_platform:
         
         # TODO 32-bit interpreters running on 64-bit machines?
         
-        if self._system_name == "darwin":
+        if self._raw_system == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
             self._system = SysNames.darwin
-            log(f"macOS {self._machine_name} {platform.mac_ver()}")
-            if self._machine_name == "x86_64":
+            log(f"macOS {self._raw_machine} {platform.mac_ver()}")
+            if self._raw_machine == "x86_64":
                 return PlatNames.darwin_x64
-            elif self._machine_name == "arm64":
+            elif self._raw_machine == "arm64":
                 return PlatNames.darwin_arm64
             # see e.g. the table in https://github.com/pypa/packaging.python.org/pull/1804
-            elif self._machine_name in ("i386", "ppc", "ppc64"):
-                raise RuntimeError(f"Unsupported legacy mac architecture: {self._machine_name!r}")
+            elif self._raw_machine in ("i386", "ppc", "ppc64"):
+                raise RuntimeError(f"Unsupported legacy mac architecture: {self._raw_machine!r}")
         
-        elif self._system_name == "windows":
+        elif self._raw_system == "windows":
             self._system = SysNames.windows
-            log(f"windows {self._machine_name} {platform.win32_ver()}")
-            if self._machine_name == "amd64":
+            log(f"windows {self._raw_machine} {platform.win32_ver()}")
+            if self._raw_machine == "amd64":
                 return PlatNames.windows_x64
-            elif self._machine_name == "x86":
+            elif self._raw_machine == "x86":
                 return PlatNames.windows_x86
-            elif self._machine_name == "arm64":
+            elif self._raw_machine == "arm64":
                 return PlatNames.windows_arm64
         
-        elif self._system_name == "linux":
+        elif self._raw_system == "linux":
             self._system = SysNames.linux
             self._libc_name, self._libc_ver = _get_libc_info()
-            log(f"linux {self._machine_name} {self._libc_name, self._libc_ver}")
-            if self._machine_name == "x86_64":
+            log(f"linux {self._raw_machine} {self._libc_name, self._libc_ver}")
+            if self._raw_machine == "x86_64":
                 return self._handle_linux("x64")
-            elif self._machine_name == "i686":
+            elif self._raw_machine == "i686":
                 return self._handle_linux("x86")
-            elif self._machine_name == "aarch64":
+            elif self._raw_machine == "aarch64":
                 return self._handle_linux("arm64")
-            elif self._machine_name == "armv7l":
+            elif self._raw_machine == "armv7l":
                 if self._libc_name == "musl":
                     raise RuntimeError(f"armv7l: musl not supported at this time")
                 return self._handle_linux("arm32")
         
-        elif self._system_name == "android":  # PEP 738
+        elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
             self._system = SysNames.android
-            log(f"android {self._machine_name} {sys.getandroidapilevel()} {platform.android_ver()}")
-            if self._machine_name == "aarch64":
+            log(f"android {self._raw_machine} {sys.getandroidapilevel()} {platform.android_ver()}")
+            if self._raw_machine == "aarch64":
                 return PlatNames.android_arm64
-            elif self._machine_name == "armv7l":
+            elif self._raw_machine == "armv7l":
                 return PlatNames.android_arm32
-            elif self._machine_name == "x86_64":
+            elif self._raw_machine == "x86_64":
                 return PlatNames.android_x64
-            elif self._machine_name == "i686":
+            elif self._raw_machine == "i686":
                 return PlatNames.android_x86
         
-        elif self._system_name in ("ios", "ipados"):  # PEP 730
+        elif self._raw_system in ("ios", "ipados"):  # PEP 730
             # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
             self._system = SysNames.ios
             ios_ver = platform.ios_ver()
-            log(f"{self._system_name} {self._machine_name} {ios_ver}")
-            if self._machine_name == "arm64":
+            log(f"{self._raw_system} {self._raw_machine} {ios_ver}")
+            if self._raw_machine == "arm64":
                 return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
-            elif self._machine_name == "x86_64":
+            elif self._raw_machine == "x86_64":
                 assert ios_ver.is_simulator, "iOS x86_64 can only be simulator"
                 return PlatNames.ios_x64_simu
         
@@ -527,7 +529,7 @@ def get_wheel_tag(pl_name):
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
         # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         if tag.startswith("macosx") and tag.endswith("universal2"):
-            tag = tag[:-len("universal2")] + Host._machine_name
+            tag = tag[:-len("universal2")] + Host._raw_machine
         return tag
     
     else:
