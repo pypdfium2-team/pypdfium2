@@ -23,6 +23,12 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 import pypdfium2_setup.base as pkgbase
 from pypdfium2_setup.base import log, mkdir
 
+# The pdfium version this has last been tested with. Ideally, this should be close to the release version in autorelease/record.json
+# To bump this version, first test locally and update any patches as needed. Then, make a branch and run "Test Sourcebuild" on CI to see if all targets continue to work. Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
+# Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
+DEFAULT_VER = 7122
+# assert DEFAULT_VER >= pkgbase.PDFIUM_MIN_REQ
+
 _CR_PREFIX = "https://chromium.googlesource.com/"
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium/+archive/{rev}.tar.gz#/pdfium-{name}.tar.gz"
 DEPS_URLS = dict(
@@ -293,8 +299,6 @@ def setup_compiler(config, compiler, clang_path):
     else:
         assert False, f"Unhandled compiler {compiler}"
 
-
-DEFAULT_VER = 7122
 
 def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None):
     
