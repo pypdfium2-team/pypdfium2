@@ -66,6 +66,9 @@ def main_conda_helpers(args):
     helpers_info = parse_git_tag()
     os.environ["M_HELPERS_VER"] = merge_tag(helpers_info, "py")
     
+    # Pass the minimum pdfium requirement by env variable.
+    # This is so we can share the value and need to change it only in one place.
+    os.environ["PDFIUM_MIN"] = PDFIUM_MIN_REQ
     # Set the current pdfium version as upper boundary, for inherent API safety.
     # pdfium does not do semantic versioning, so upward flexibility is difficult.
     os.environ["PDFIUM_MAX"] = str(args.pdfium_ver)
