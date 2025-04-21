@@ -234,8 +234,8 @@ PdfiumVer = _PdfiumVerClass()
 NaN = float("nan")
 PdfiumVerUnknown = PdfiumVer.scheme(NaN, NaN, NaN, NaN)
 
-def is_nan(value):
-    return isinstance(value, float) and value != value
+# def is_nan(value):
+#     return isinstance(value, float) and value != value
 
 
 def read_json(fp):
