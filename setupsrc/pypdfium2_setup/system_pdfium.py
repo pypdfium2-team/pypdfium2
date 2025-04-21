@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE: This code is provided on a best effort basis and largely untested, because the author's system did not provide pdfium as of this writing
+# NOTE: This code is provided on a best effort basis and not regularly tested, because the author's system does not provide pdfium as of this writing.
 
 import re
 import sys
