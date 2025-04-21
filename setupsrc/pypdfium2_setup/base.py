@@ -24,6 +24,8 @@ else:
     cached_property = functools.cached_property
 
 
+PDFIUM_MIN_REQ = 6635
+
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"

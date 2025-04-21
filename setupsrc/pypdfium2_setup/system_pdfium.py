@@ -88,8 +88,6 @@ def _get_sys_pdfium_ver():
     return PdfiumVerUnknown
 
 
-PDFIUM_MIN_REQ = 6635
-
 def try_system_pdfium(given_fullver=None):
     
     # See if a pdfium shared library is in the default system search path
