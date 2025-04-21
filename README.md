@@ -27,8 +27,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 * <a id="user-content-install-source" class="anchor" href="#install-source">From the repository 🔗</a>
   
   * Dependencies:
-    - System: git, C pre-processor (gcc/clang - alternatively, specify the command to invoke via `$CPP`)
-    - Python: ctypesgen (pypdfium2-team fork), and setuptools (historically also `wheel`). Should be installed automatically, except with `--no-build-isolation`.
+    - System: `git`, C pre-processor (`gcc`/`clang` - alternatively, specify the command to invoke via `$CPP`)
+    - Python: `ctypesgen` (pypdfium2-team fork), and `setuptools` (historically also `wheel`). Should be installed automatically, except with `--no-build-isolation`.
   
   * Get the code
     ```
@@ -79,14 +79,38 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     - For the default toolchained build, you probably don't need to install any system dependencies.
     - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib`.
     - You might also want to know that pdfium bundles `agg, abseil` and `fast_float`.
-    - When building with system tools, `gn, ninja` and the `gcc` compiler are needed.
+    - When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. GCC is preferred, but Clang may also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
     
-    To do the toolchained build and install the resulting binary & bindings, you can do e.g.:
+    For the toolchained build, you'd run something like:
     ```bash
     # call build script with --help to list options
     python setupsrc/pypdfium2_setup/build_toolchained.py
     PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
+    
+    Or to do the native build, on Ubuntu 24.04, you could do e.g.:
+    ```bash
+    # Install dependencies
+    sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+    ```
+    ```bash
+    # Build with GCC
+    python ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc
+    ```
+    ```bash
+    # Alternatively, build with Clang
+    sudo apt-get install llvm lld
+    VERSION=18
+    ARCH=$(uname -m)
+    sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
+    sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
+    python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
+    ```
+    ```bash
+    # Install
+    PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
+    ```
+    
   
   <!-- TODO version.json: reconsider origin - should we use a separate field for the packager? -->
   * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)
