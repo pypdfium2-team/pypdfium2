@@ -19,7 +19,7 @@
 - `PdfDocument.get_toc()`: Replaced `PdfOutlineItem` namedtuple with method-oriented wrapper classes `PdfBookmark` and `PdfDest`, so callers may retrieve only the properties they actually need. This is closer to pdfium's original API and exposes the underlying raw objects. Provides signed count as-is rather than splitting in `n_kids` and `is_closed`. Also distinguishes between `dest is None` and a dest with unknown mode.
 - Renamed misleading `PdfMatrix.mirror()` parameters `v, h` to `invert_x, invert_y`, as the terms horizontal/vertical flip commonly refer to the transformation applied, not the axis around which is being flipped (i.e. the previous `v` meant flipping around the Y axis, which is vertical, but the resulting transform is inverting the X coordinates and thus actually horizontal). No behavior change if you did not use keyword arguments.
 - `PdfTextPage.get_text_range()`: Removed implicit translation of default calls to `.get_text_bounded()`, as pdfium reverted `FPDFText_GetText()` to UCS-2, which resolves the allocation concern. However, callers are encouraged to explicitly use `.get_text_bounded()` for full Unicode support.
-- Removed legacy version flags.
+- Removed legacy version flags `V_PYPDFIUM2, V_LIBPDFIUM, V_BUILDNAME, V_PDFIUM_IS_V8, V_LIBPDFIUM_FULL` in favor of `PYPDFIUM_INFO, PDFIUM_INFO`.
 
 *Improvements and new features*
 - Added `PdfPosConv` and `PdfBitmap.get_posconv(page)` helper for bidirectional translation between page and bitmap coordinates.
@@ -47,9 +47,10 @@
 
 *Setup*
 - We finally have a build script that works without Google's toolchain, and instead uses system tools/libraries (`build_native.py`). The toolchained build script continues to be available as well (renamed from `sourcebuild.py` to `build_toolchained.py`). Thanks to Christian Heimes and Felix Kauselmann for showing how to do this. The GCC compiler is preferred, but Clang should also work if you set up some symlinks. As of this writing, both passes on our Ubuntu x84_64/arm64 CI.
-- On host platforms we don't provide pre-built binaries for, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered.
+- On host platforms not covered with `pdfium-binaries`, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered.
+- With `build_toolchained.py --update`, avoid calling `gclient revert` and `gclient sync`, because this seems to sync twice, which is slow. Instead, call only `gclient sync` with `-D --reset`.
+- With `pdfium-binaries`, read the full version from the `VERSION` file embedded in the tarballs. This avoids a potentially expensive `git ls-remote` call to get Chromium tags.
 - Take `PDFIUM_BINDINGS=reference` into account on sourcebuild as well. Automatically fall back to reference bindings if ctypesgen is not installed.
-- With `build_toolchained.py --update`, avoid calling `gclient revert` and `sync`, because this seems to sync twice, which is slow. Instead, call only `sync` while passing `-D --reset`.
 - If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results, e.g. on macOS.
 - Avoid needlessly calling `_get_libc_ver()`. Instead, call it only on Linux. A negative side effect of calling this unconditionally is that, on non-Linux platforms, an empty string may be returned, in which case the musllinux handler would be reached, which uses non-public API and isn't meant to be called on other platforms (though it seems to have passed).
 
