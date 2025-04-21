@@ -76,7 +76,7 @@ def _get_libreoffice_pdfium_ver():
 
 
 def _get_sys_pdfium_ver():
-    log("Trying to determine pdfium version (may be NaN if this fails) ...")
+    log("Trying to determine system pdfium version via pkg-config (may be NaN if this fails) ...")
     if shutil.which("pkg-config"):
         proc = subprocess.run(["pkg-config", "--modversion", "libpdfium"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         if proc.returncode == 0:

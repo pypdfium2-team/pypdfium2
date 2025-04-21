@@ -36,9 +36,9 @@ update *args:
 	python3 setupsrc/pypdfium2_setup/update.py {{args}}
 emplace *args:
 	python3 setupsrc/pypdfium2_setup/emplace.py {{args}}
-build_native *args:
+build-native *args:
 	python3 setupsrc/pypdfium2_setup/build_native.py {{args}}
-build_toolchained *args:
+build-toolchained *args:
 	python3 setupsrc/pypdfium2_setup/build_toolchained.py {{args}}
 craft *args:
 	python3 setupsrc/pypdfium2_setup/craft.py {{args}}
