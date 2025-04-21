@@ -43,6 +43,8 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     ```
     A binary is downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2.
   
+  <!-- TODO: rewrite once we have the smart try_system_pdfium() strategy exposed as target -->
+  
   * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-level binary 🔗</a>
     ```bash
     # Substitute $PDFIUM_VER with the system pdfium build's version.
