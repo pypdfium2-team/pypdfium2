@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE: this code is provided on a best effort basis and largely untested, because the author's system did not provide pdfium as of this writing
+# NOTE: This code is provided on a best effort basis and largely untested, because the author's system did not provide pdfium as of this writing
 
 import re
 import sys
@@ -84,7 +84,7 @@ def _get_sys_pdfium_ver():
     return float("nan")
 
 
-def try_system_pdfium(given_ver=None, dest_dir=ModuleDir_Raw):
+def try_system_pdfium(given_ver=None):
     
     # See if a pdfium shared library is in the default system search path
     pdfium_lib = find_library("pdfium")
@@ -92,18 +92,18 @@ def try_system_pdfium(given_ver=None, dest_dir=ModuleDir_Raw):
     if not pdfium_lib:
         pdfium_lib = _find_libreoffice_pdfium()
         from_lo = True
-    
-    # XXX writing version file will fail when pdfium_ver is NaN
-    
+        
     if pdfium_lib:
         log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
+        
         if from_lo:
             pdfium_ver = given_ver or _get_libreoffice_pdfium_ver()
             lds = (pdfium_lib.parent, )
             # TODO(ctypesgen) handle pdfiumlo libname in refbindings
             build_pdfium_bindings(pdfium_ver, libname="pdfiumlo", compile_lds=lds, run_lds=lds, guard_symbols=True)
-            write_pdfium_info(dest_dir, pdfium_ver, origin="libreoffice")
+            write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="libreoffice")
             bindings = BindingsFile
+        
         else:
             pdfium_headers = _find_pdfium_headers()
             if pdfium_headers:
@@ -111,15 +111,16 @@ def try_system_pdfium(given_ver=None, dest_dir=ModuleDir_Raw):
                 pdfium_ver = given_ver or _get_sys_pdfium_ver()
                 log(f"pdfium version: {pdfium_ver}")
                 build_pdfium_bindings(pdfium_ver, pdfium_headers, run_lds=(), guard_symbols=True)
-                write_pdfium_info(dest_dir, pdfium_ver, origin="system")
                 bindings = BindingsFile
             else:
                 log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
                 bindings = RefBindingsFile
                 pdfium_ver = given_ver or float("nan")
-                ...  # TODO version file
-        shutil.copyfile(bindings, dest_dir/BindingsFN)
+            write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system")
+        
+        shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
         return pdfium_ver
+    
     else:
         log("pdfium not found")
         return None
