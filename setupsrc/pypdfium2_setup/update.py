@@ -65,6 +65,13 @@ def download(platforms, version, use_v8, max_workers, robust):
     return archives
 
 
+def _parse_ver_file(content):
+    full_ver = [int(l.split("=")[-1].strip()) for l in content.split("\n")]
+    full_ver = PdfiumVer.scheme(*full_ver)
+    PdfiumVer._vdict[full_ver.build] = full_ver
+    return full_ver
+
+
 def extract(archives, version, flags):
     
     for pl_name, arc_path in archives.items():
@@ -75,7 +82,11 @@ def extract(archives, version, flags):
             libname = libname_for_system(system)
             tar_libdir = "lib" if system != SysNames.windows else "bin"
             tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
-            write_pdfium_info(pl_dir, version, origin="pdfium-binaries", flags=flags)
+            ver_content = tar.extractfile("VERSION").read().decode().strip()
+            full_ver = _parse_ver_file(ver_content)
+            assert full_ver.build == version
+            log(f"Resolved {version} to {full_ver} (by pdfium-binaries VERSION)")
+            write_pdfium_info(pl_dir, full_ver, origin="pdfium-binaries", flags=flags, is_short_ver=False)
         
         arc_path.unlink()
 

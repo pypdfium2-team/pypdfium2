@@ -190,7 +190,7 @@ class _PdfiumVerClass:
     def _get_chromium_refs(self):
         # FIXME The ls-remote call may take extremely long (~1min) with older versions of git!
         # With newer git, it's a lot better, but still noticable (one or a few seconds).
-        # TODO See if we can do something to speed up the call. That said, we should perhaps add a second strategy parsing the pdfium-binaries VERSION file, and maybe a way for the caller to supply the full version. Also, adding a disk cache for the refs may be an option.
+        # TODO See if we can do something to speed up the call. That said, we might want to add a way for the caller to supply the full version. Also, adding a disk cache for the refs might be an option.
         if self._vlines is None:
             log(f"Fetching chromium refs ...")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
@@ -546,8 +546,9 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
         return comp_process
 
 
-def tar_extract_file(tar, src, dst_path):
-    src_buf = tar.extractfile(src)  # src: path str or tar member object
+def tar_extract_file(tar, path, dst_path):
+    # path: str or tar member object
+    src_buf = tar.extractfile(path)
     with open(dst_path, "wb") as dst_buf:
         shutil.copyfileobj(src_buf, dst_buf)
 
