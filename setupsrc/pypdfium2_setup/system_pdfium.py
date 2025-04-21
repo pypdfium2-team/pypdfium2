@@ -88,6 +88,8 @@ def _get_sys_pdfium_ver():
     return PdfiumVerUnknown
 
 
+PDFIUM_MIN_REQ = 6635
+
 def try_system_pdfium(given_fullver=None):
     
     # See if a pdfium shared library is in the default system search path
@@ -121,6 +123,9 @@ def try_system_pdfium(given_fullver=None):
                 bindings = RefBindingsFile
                 full_ver = given_fullver or PdfiumVerUnknown
             write_pdfium_info(ModuleDir_Raw, full_ver, origin="system")
+        
+        if full_ver.build < PDFIUM_MIN_REQ:
+            log(f"Warning: pdfium version {full_ver.build} does not match minimum requirement {PDFIUM_MIN_REQ}. Some APIs may not work. Run pypdfium2's test suite to check.")
         
         shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
         return full_ver
