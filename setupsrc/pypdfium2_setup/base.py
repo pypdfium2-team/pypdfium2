@@ -654,10 +654,10 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         headers_dir = DataDir_Bindings / "headers"
     
     # TODO register all defaults?
-    curr_info = dict(version=version)
-    curr_info.update(_make_json_compat(kwargs))
+    curr_info = {"version": version, **kwargs}
     curr_info.pop("compile_lds", None)  # ignore
-    curr_info.setdefault("flags", ())
+    curr_info.setdefault("flags", [])
+    curr_info = _make_json_compat(curr_info)
     
     prev_ver = None
     if ver_path.exists():
@@ -666,6 +666,8 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         if bind_path.exists() and prev_info == curr_info:
             log(f"Using cached bindings")
             return
+        else:
+            log(f"Bindings cache state differs:", prev_info, curr_info, sep="\n")
     
     # try to reuse headers if only bindings params differ, not version
     if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
