@@ -363,13 +363,13 @@ def parse_args(argv):
         type = str.lower,
         help = "The compiler to use (gcc or clang). Defaults to gcc.",
     )
+    # Hints:
+    # - On Ubuntu/Fedora, the symlink commands for clang are (set $VERSION and $ARCH accordingly):
+    #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
+    #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
+    # - If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
+    # - Also, it seems that Google's Clang releases can be downloaded from https://storage.googleapis.com/chromium-browser-clang/ (append the object_name in question, as in pdfium's DEPS file). Alternatively, there is depot_tools/download_from_google_storage.py, or the upstream LLVM releases.
     parser.add_argument(
-        # Hints:
-        # - On Ubuntu/Fedora, the symlink commands for clang are (set $VERSION and $ARCH accordingly):
-        #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
-        #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
-        # - If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
-        # - Also, it seems that Google's Clang releases can be downloaded from https://storage.googleapis.com/chromium-browser-clang/ (append the object_name in question, as in pdfium's DEPS file). Alternatively, there is depot_tools/download_from_google_storage.py, or the upstream LLVM releases.
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
         help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",

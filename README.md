@@ -22,7 +22,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   python -m pip install -U pypdfium2
   ```
   If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2.
-  Otherwise, if no pre-compiled binaries are available, pypdfium2's `setup.py` will look for system pdfium, or attempt to build pdfium from source.
+  Otherwise, if the platform is not covered by pdfium-binaries, pypdfium2's `setup.py` will look for system pdfium, or attempt to build pdfium from source.
 
 * <a id="user-content-install-source" class="anchor" href="#install-source">From the repository 🔗</a>
   
