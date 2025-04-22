@@ -28,7 +28,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   
   * Dependencies:
     - System: `git`, C pre-processor (`gcc`/`clang` - alternatively, specify the command to invoke via `$CPP`)
-    - Python: `ctypesgen` (pypdfium2-team fork), and `setuptools` (historically also `wheel`). Should be installed automatically, except with `--no-build-isolation`.
+    - Python: `ctypesgen` (pypdfium2-team fork) and `setuptools >= v70.1.0`. Should be installed automatically, unless `--no-build-isolation` is passed to pip.
   
   * Get the code
     ```
@@ -54,7 +54,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Link against external pdfium instead of bundling it.
     Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case" for now.
     For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
-
+  
   * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system-level binary (non-standard location, e.g. LibreOffice) 🔗</a>
     ```bash
     # if root rights are available and targeting /usr/local/lib is OK

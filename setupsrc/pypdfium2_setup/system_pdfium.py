@@ -123,7 +123,7 @@ def try_system_pdfium(given_fullver=None):
             write_pdfium_info(ModuleDir_Raw, full_ver, origin="system")
         
         if full_ver.build < PDFIUM_MIN_REQ:
-            log(f"Warning: pdfium version {full_ver.build} does not match minimum requirement {PDFIUM_MIN_REQ}. Some APIs may not work. Run pypdfium2's test suite to check.")
+            log(f"Warning: pdfium version {full_ver.build} does not conform with minimum requirement {PDFIUM_MIN_REQ}. Some APIs may not work. Run pypdfium2's test suite for details.")
         
         shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
         return full_ver
