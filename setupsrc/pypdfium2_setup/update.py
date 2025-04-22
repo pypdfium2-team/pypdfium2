@@ -69,8 +69,8 @@ def _parse_ver_file(buffer, short_ver):
     content = buffer.read().decode().strip()
     full_ver = [int(l.split("=")[-1].strip()) for l in content.split("\n")]
     full_ver = PdfiumVer.scheme(*full_ver)
-    PdfiumVer._vdict[full_ver.build] = full_ver
     assert full_ver.build == short_ver
+    PdfiumVer._vdict[full_ver.build] = full_ver
     log(f"Resolved {short_ver} -> {full_ver} (by pdfium-binaries VERSION)")
     return full_ver
 
