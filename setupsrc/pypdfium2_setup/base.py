@@ -807,7 +807,7 @@ def git_apply_patch(patch, cwd, git_args=()):
     run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
 
 
-def serialise_gn_config(config_dict):
+def serialize_gn_config(config_dict):
     
     parts = []
     
@@ -820,7 +820,7 @@ def serialise_gn_config(config_dict):
         elif isinstance(value, int):
             p += str(value)
         else:
-            raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
+            raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
         parts.append(p)
     
     result = "\n".join(parts)

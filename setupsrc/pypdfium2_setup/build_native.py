@@ -230,7 +230,7 @@ def prepare(config_dict, build_dir):
     )
     # Create target dir and write build config
     mkdir(build_dir)
-    config_str = pkgbase.serialise_gn_config(config_dict)
+    config_str = pkgbase.serialize_gn_config(config_dict)
     (build_dir/"args.gn").write_text(config_str)
 
 
