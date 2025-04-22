@@ -79,7 +79,7 @@ def _get_sys_pdfium_ver():
     if shutil.which("pkg-config"):
         proc = subprocess.run(["pkg-config", "--modversion", "libpdfium"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         if proc.returncode == 0:
-            version = proc.stdout.decode()
+            version = proc.stdout.decode().strip()
             if "." in version:
                 version = PdfiumVer.scheme(*[int(v) for v in version.split(".")])
             else:
