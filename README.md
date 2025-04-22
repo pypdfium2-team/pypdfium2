@@ -251,7 +251,7 @@ As pypdfium2 requires a C extension and has custom setup code, there are some sp
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
     + If `system`, bind against system-provided pdfium instead of embedding a binary. Version must be given explicitly so matching bindings can be generated.
-    + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of `build_toolchained.py`.
+    + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of either `build_native.py` or `build_toolchained.py`.
     + If `sdist`, no platform-dependent files will be included, so as to create a source distribution.
     `sourcebuild` and `sdist` are standalone, they cannot be followed by additional specifiers.
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
