@@ -205,8 +205,6 @@ def main(
         config_dict.update(SyslibsConfig)
     
     config_str = serialise_gn_config(config_dict)
-    log(f"\nBuild configuration:\n{config_str}\n")
-    
     configure(GN, config_str)
     build(Ninja, b_target)
     v_full = PdfiumVer.to_full(v_short)

@@ -823,7 +823,9 @@ def serialise_gn_config(config_dict):
             raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
         parts.append(p)
     
-    return "\n".join(parts)
+    result = "\n".join(parts)
+    log(f"\nBuild config:\n{result}\n")
+    return result
 
 
 def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
