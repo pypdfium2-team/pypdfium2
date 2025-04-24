@@ -383,10 +383,8 @@ class _host_platform:
     
     def _handle_linux(self, archid):
         if self._libc_name == "glibc":
-            self._system = SysNames.linux
             return getattr(PlatNames, f"linux_{archid}")
         elif self._libc_name == "musl":
-            self._system = SysNames.linux
             return getattr(PlatNames, f"linux_musl_{archid}")
         elif _android_api():  # seems to imply self._libc_name == "libc"
             log("Android prior to PEP 738 (e.g. Termux)")
@@ -422,6 +420,7 @@ class _host_platform:
                 return PlatNames.windows_arm64
         
         elif self._raw_system == "linux":
+            self._system = SysNames.linux
             self._libc_name, self._libc_ver = _get_libc_info()
             log(f"linux {self._raw_machine} {self._libc_name, self._libc_ver}")
             if self._raw_machine == "x86_64":
