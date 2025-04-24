@@ -16,8 +16,8 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
-from pypdfium2_setup import build_native
 from pypdfium2_setup.system_pdfium import try_system_pdfium
+from pypdfium2_setup import build_native
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
@@ -40,7 +40,7 @@ def bdist_factory(pl_name):
         def get_tag(self, *args, **kws):
             if pl_name == ExtPlats.sourcebuild:
                 # if using the sourcebuild target, forward the native tag
-                # alternatively, the sourcebuild clause in get_wheel_tag() should be roughly equivalent (it uses sysconfig.get_platform() directly)
+                # alternatively, the sourcebuild clause in get_wheel_tag() using sysconfig.get_platform() should be roughly equivalent
                 _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
             else:
                 plat_tag = get_wheel_tag(pl_name)

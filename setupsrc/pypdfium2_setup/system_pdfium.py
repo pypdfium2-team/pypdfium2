@@ -16,6 +16,11 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
 
+PREFIX = ""
+if Host.system == SysNames.android:
+    PREFIX = os.getenv("PREFIX", "/data/data/com.termux/files")
+
+
 def _get_existing(candidates, cb=Path.exists):
     return next((p for p in candidates if cb(p)), None)
 
@@ -30,9 +35,9 @@ def _find_libreoffice_pdfium():
     # Not sure how complete or incomplete libreoffice's pdfium builds may be; this is just a chance.
     pdfium_lib = None
     if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
-        lo_paths_iter = itertools.product(("/usr/lib", "/usr/local/lib"), ("", "64"))
+        lo_paths_iter = itertools.product((PREFIX+"/usr/lib", PREFIX+"/usr/local/lib"), ("", "64"))
         libname = libname_for_system(Host.system, name="pdfiumlo")
-        candidates = (Path(prefix+bitness)/"libreoffice"/"program"/libname for prefix, bitness in lo_paths_iter)
+        candidates = (Path(path+bitness)/"libreoffice"/"program"/libname for path, bitness in lo_paths_iter)
         pdfium_lib = _get_existing(candidates)
     return pdfium_lib
 
@@ -62,11 +67,11 @@ def _find_pdfium_headers():
     if headers_path:
         headers_path = Path(headers_path)
     elif not sys.platform.startswith(("win", "darwin")):
-        include_dirs = (Path("/usr/include"), Path("/usr/local/include"))
-        candidates = (prefix/"pdfium" for prefix in include_dirs)
+        include_dirs = (Path(PREFIX+"/usr/include"), Path(PREFIX+"/usr/local/include"))
+        candidates = (path/"pdfium" for path in include_dirs)
         headers_path = _get_existing(candidates, cb=Path.is_dir)
         if not headers_path:
-            candidates = (prefix/"fpdf_edit.h" for prefix in include_dirs)
+            candidates = (path/"fpdf_edit.h" for path in include_dirs)
             sample_header = _get_existing(candidates, cb=Path.is_file)
             if sample_header:
                 headers_path = sample_header.parent
