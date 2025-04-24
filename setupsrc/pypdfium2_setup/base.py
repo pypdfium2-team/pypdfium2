@@ -466,9 +466,9 @@ class _host_platform:
 
 Host = _host_platform()
 
-RFS_PREFIX = ""
+USR_PREFIX = "/usr"
 if Host.system == SysNames.android:
-    RFS_PREFIX = os.getenv("PREFIX", "/data/data/com.termux/files")
+    USR_PREFIX = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
 
 
 def _manylinux_tag(arch, glibc="2_17"):
