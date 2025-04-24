@@ -313,7 +313,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         else:
             raise RuntimeError("Neither gcc nor clang installed.")
     if clang_path is None and os.name != "nt":
-        clang_path = Path("/usr")
+        clang_path = Path(pkgbase.RFS_PREFIX+"/usr")
     
     mkdir(SOURCES_DIR)
     full_ver = get_sources(build_ver, with_tests, compiler, clang_path)

@@ -466,6 +466,10 @@ class _host_platform:
 
 Host = _host_platform()
 
+RFS_PREFIX = ""
+if Host.system == SysNames.android:
+    RFS_PREFIX = os.getenv("PREFIX", "/data/data/com.termux/files")
+
 
 def _manylinux_tag(arch, glibc="2_17"):
     # see BUG(203) for discussion of glibc requirement
