@@ -204,12 +204,11 @@ def main(
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)
     
-    config_str = serialise_gn_config(config_dict)
-    log(f"\nBuild configuration:\n{config_str}\n")
-    
+    config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
     build(Ninja, b_target)
-    pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_short, **v_post, is_short_ver=True)
+    v_full = PdfiumVer.to_full(v_short)
+    pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_full, **v_post)
 
 
 def parse_args(argv):

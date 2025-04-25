@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
+{% set pdfium_min = environ["PDFIUM_MIN"] %}
 {% set pdfium_max = environ["PDFIUM_MAX"] %}
 {% set helpers_ver = environ["M_HELPERS_VER"] %}
 
@@ -32,10 +33,9 @@ requirements:
   run:
     # -- Reasons for pdfium version bounds --
     # >6635 (effectively >=6638) : new pdfium errchecks
-    # !=6219 : Blacklisted due to https://crbug.com/pdfium/2112 (6205 is also affected, but not on conda due to monthly schedule)
     # <={{ pdfium_max }} : Prevents future versions for API safety reasons
     - python
-    - pypdfium2-team::pypdfium2_raw >6635,!=6219,<={{ pdfium_max }}
+    - pypdfium2-team::pypdfium2_raw >{{ pdfium_min }},<={{ pdfium_max }}
 
 test:
   requires:

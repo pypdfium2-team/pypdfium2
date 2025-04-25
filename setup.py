@@ -16,6 +16,8 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
 from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
+from pypdfium2_setup.system_pdfium import try_system_pdfium
+from pypdfium2_setup import build_native
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
@@ -38,7 +40,7 @@ def bdist_factory(pl_name):
         def get_tag(self, *args, **kws):
             if pl_name == ExtPlats.sourcebuild:
                 # if using the sourcebuild target, forward the native tag
-                # alternatively, the sourcebuild clause in get_wheel_tag() should be roughly equivalent (it uses sysconfig.get_platform() directly)
+                # alternatively, the sourcebuild clause in get_wheel_tag() using sysconfig.get_platform() should be roughly equivalent
                 _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
             else:
                 plat_tag = get_wheel_tag(pl_name)
@@ -75,7 +77,7 @@ LICENSES_SDIST = (
     "REUSE.toml",
 )
 
-PLATFILES_GLOB = [BindingsFN, VersionFN, *AllLibnames]
+PLATFILES_GLOB = (BindingsFN, VersionFN, *AllLibnames)
 
 
 def assert_exists(dir, data_files):
@@ -84,7 +86,7 @@ def assert_exists(dir, data_files):
         assert False, f"Missing data files: {missing}"
 
 
-def run_setup(modnames, pl_name, pdfium_ver):
+def run_setup(modnames, pdfium_ver, pl_name, libname=None):
     
     kwargs = dict(
         name = "pypdfium2",
@@ -106,6 +108,9 @@ def run_setup(modnames, pl_name, pdfium_ver):
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
         kwargs["version"] = str(pdfium_ver)
+    else:
+        assert any(m in modnames for m in (ModuleHelpers, ModuleRaw)), \
+               f"At least one core module is required. Check {ModulesSpec_EnvVar}."
     
     if ModuleHelpers in modnames:
         helpers_info = get_helpers_info()
@@ -134,8 +139,9 @@ def run_setup(modnames, pl_name, pdfium_ver):
     elif pl_name == ExtPlats.system:
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
-        sys_name = plat_to_system(pl_name)
-        libname = libname_for_system(sys_name)
+        if not libname:
+            sys_name = plat_to_system(pl_name)
+            libname = libname_for_system(sys_name)
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
@@ -151,32 +157,33 @@ def run_setup(modnames, pl_name, pdfium_ver):
 
 def main():
     
-    pl_spec = os.environ.get(PlatSpec_EnvVar, "")
-    modspec = os.environ.get(ModulesSpec_EnvVar, "")
+    raw_modspec = os.environ.get(ModulesSpec_EnvVar, "")
+    raw_platspec = os.environ.get(PlatSpec_EnvVar, "")
+    modnames = parse_modspec(raw_modspec)
+    do_prepare, pl_name, pdfium_ver, use_v8 = parse_pl_spec(raw_platspec)
     
-    parsed_spec = parse_pl_spec(pl_spec)
-    if parsed_spec is None:
-        # TODO If we're on a unixoid system ...
-        # - Check if it provides a pdfium shared library on system level, or with libreoffice.
-        # - Consider triggering a sourcebuild implicitly (build_native.py). However, this requires system dependencies that need to be installed by the caller beforehand. They are unlikely to be installed by chance.
-        log(
-            "No pre-built binaries available for this host. You may build pdfium from source, " +
-            f"place binaries & bindings in data/sourcebuild/, and install with `{PlatSpec_EnvVar}=sourcebuild`. " +
-            "Use e.g. `python3 setupsrc/pypdfium2_setup/build_native.py` to automate this process."
-        )
-        raise Host._exc
+    if pl_name == ExtPlats.sdist and modnames != ModulesAll:
+        raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
-    else:
-        
-        do_prepare, pl_name, pdfium_ver, use_v8 = parsed_spec
-        modnames = parse_modspec(modspec)
-        if pl_name == ExtPlats.sdist and modnames != ModulesAll:
-            raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
-        
-        if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
+    if ModuleRaw in modnames and do_prepare and pl_name != ExtPlats.sdist:
+        if pl_name is None:
+            # TODO extract setup targets?
+            log(str(Host._exc))
+            log("Looking for system pdfium ...")
+            given_fullver = PdfiumVer.to_full(pdfium_ver) if pdfium_ver else None
+            sys_pdfium_fullver = try_system_pdfium(given_fullver)
+            if sys_pdfium_fullver:
+                pdfium_ver = str(sys_pdfium_fullver.build)
+                pl_name = ExtPlats.system
+            else:
+                log("Attempting to build pdfium from source. This is unlikely to work without manual preparation, or on non-unixoid hosts. See pypdfium2's README.md for more information.")
+                build_native.main_api()
+                pdfium_ver = build_native.DEFAULT_VER
+                pl_name = ExtPlats.sourcebuild
+        else:
             prepare_setup(pl_name, pdfium_ver, use_v8)
     
-    run_setup(modnames, pl_name, pdfium_ver)
+    run_setup(modnames, pdfium_ver, pl_name)
 
 
 if __name__ == "__main__":

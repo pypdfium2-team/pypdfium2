@@ -32,7 +32,7 @@ def update_refbindings(version):
     
     RefBindingsFile.unlink()
     build_pdfium_bindings(version, guard_symbols=True, flags=REFBINDINGS_FLAGS, search_sys_despite_libdirs=True, no_srcinfo=True)
-    shutil.copyfile(DataDir_Bindings/BindingsFN, RefBindingsFile)
+    shutil.copyfile(BindingsFile, RefBindingsFile)
     assert RefBindingsFile.exists()
 
 

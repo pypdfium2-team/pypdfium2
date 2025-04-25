@@ -23,6 +23,12 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 import pypdfium2_setup.base as pkgbase
 from pypdfium2_setup.base import log, mkdir
 
+# The pdfium version this has last been tested with. Ideally, this should be close to the release version in autorelease/record.json
+# To bump this version, first test locally and update any patches as needed. Then, make a branch and run "Test Sourcebuild" on CI to see if all targets continue to work. Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
+# Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
+DEFAULT_VER = 7122
+# assert DEFAULT_VER >= pkgbase.PDFIUM_MIN_REQ
+
 _CR_PREFIX = "https://chromium.googlesource.com/"
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium/+archive/{rev}.tar.gz#/pdfium-{name}.tar.gz"
 DEPS_URLS = dict(
@@ -224,7 +230,7 @@ def prepare(config_dict, build_dir):
     )
     # Create target dir and write build config
     mkdir(build_dir)
-    config_str = pkgbase.serialise_gn_config(config_dict)
+    config_str = pkgbase.serialize_gn_config(config_dict)
     (build_dir/"args.gn").write_text(config_str)
 
 
@@ -294,16 +300,20 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-DEFAULT_VER = 7122
-
 def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None):
     
     if build_ver is None:
         build_ver = DEFAULT_VER
     if compiler is None:
-        compiler = Compiler.gcc
+        if shutil.which("gcc"):
+            compiler = Compiler.gcc
+        elif shutil.which("clang"):
+            log("gcc not available, will try clang. Note, you may need to set up some symlinks to match the clang directory layout expected by pdfium. Also, make sure libclang_rt builtins are installed.")
+            compiler = Compiler.clang
+        else:
+            raise RuntimeError("Neither gcc nor clang installed.")
     if clang_path is None and os.name != "nt":
-        clang_path = Path("/usr")
+        clang_path = Path(pkgbase.USR_PREFIX)
     
     mkdir(SOURCES_DIR)
     full_ver = get_sources(build_ver, with_tests, compiler, clang_path)
@@ -323,7 +333,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         # we're not aware how to find out the post-tag info without an actual git repository, so set some placeholders indicating that this is a build from main
         n_commits, hash = float("inf"), ""
     
-    pkgbase.pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash, is_short_ver=False)
+    pkgbase.pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash)
 
 
 def parse_args(argv):
@@ -353,13 +363,13 @@ def parse_args(argv):
         type = str.lower,
         help = "The compiler to use (gcc or clang). Defaults to gcc.",
     )
+    # Hints:
+    # - On Ubuntu/Fedora, the symlink commands for clang are (set $VERSION and $ARCH accordingly):
+    #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
+    #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
+    # - If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
+    # - Also, it seems that Google's Clang releases can be downloaded from https://storage.googleapis.com/chromium-browser-clang/ (append the object_name in question, as in pdfium's DEPS file). Alternatively, there is depot_tools/download_from_google_storage.py, or the upstream LLVM releases.
     parser.add_argument(
-        # Hints:
-        # - On Ubuntu/Fedora, the symlink commands for clang are (set $VERSION and $ARCH accordingly):
-        #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
-        #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
-        # - If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
-        # - Also, it seems that Google's Clang releases can be downloaded from https://storage.googleapis.com/chromium-browser-clang/ (append the object_name in question, as in pdfium's DEPS file). Alternatively, there is depot_tools/download_from_google_storage.py, or the upstream LLVM releases.
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
         help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",

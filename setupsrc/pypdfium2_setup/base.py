@@ -16,13 +16,22 @@ from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
 
+if sys.version_info < (3, 8):
+    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
+    def cached_property(func):
+        return property( functools.lru_cache(maxsize=1)(func) )
+else:
+    cached_property = functools.cached_property
+
+
+PDFIUM_MIN_REQ = 6635
+
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
-BindTarget_Ref  = "reference"
-BindTarget = os.environ.get(BindSpec_EnvVar, None)
+USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not shutil.which("ctypesgen")
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw          = "raw"
@@ -35,12 +44,12 @@ VersionFN  = "version.json"
 ProjectDir        = Path(__file__).parents[2].resolve()
 DataDir           = ProjectDir / "data"
 DataDir_Bindings  = DataDir / "bindings"
+BindingsFile      = DataDir_Bindings / BindingsFN
 PatchDir          = ProjectDir / "pdfium_patches"
 ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
 ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
 Changelog         = ProjectDir / "docs" / "devel" / "changelog.md"
 ChangelogStaging  = ProjectDir / "docs" / "devel" / "changelog_staging.md"
-HAVE_GIT_REPO     = (ProjectDir / ".git").exists()
 
 AutoreleaseDir  = ProjectDir / "autorelease"
 AR_RecordFile   = AutoreleaseDir / "record.json"
@@ -137,35 +146,38 @@ def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
 
 
-# Map system to pdfium shared library name
-def libname_for_system(system):
+def libname_for_system(system, name="pdfium"):
+    
+    # Map system to pdfium shared library name
     if system == SysNames.windows:
-        return "pdfium.dll"
+        return f"{name}.dll"
     elif system in (SysNames.darwin, SysNames.ios):
-        return "libpdfium.dylib"
+        return f"lib{name}.dylib"
     elif system in (SysNames.linux, SysNames.android):
-        return "libpdfium.so"
+        return f"lib{name}.so"
     else:
-        # TODO fallback logic if system is None?
-        raise ValueError(f"Unhandled system {system!r}")
+        # let the caller pass through a fallback
+        pattern = os.getenv("LIBNAME_PATTERN")
+        if pattern:
+            prefix, suffix = pattern.split(".", maxsplit=1)
+            return f"{prefix}{name}.{suffix}"
+        # if we are on BSD or any other POSIX-based system, try `lib{}.so`, unless set otherwise by the caller
+        if "bsd" in sys.platform or os.name == "posix":
+            return f"lib{name}.so"
+    
+    # TODO downstream fallback: list directory and pick the file that contains the library name?
+    raise ValueError(f"Unhandled system {system!r}, don't know library naming pattern. Set $LIBNAME_PATTERN=prefix.suffix (e.g. lib.so)")
 
-AllLibnames = ["pdfium.dll", "libpdfium.dylib", "libpdfium.so"]
 
-
-if sys.version_info < (3, 8):
-    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-else:
-    cached_property = functools.cached_property
+AllLibnames = ("pdfium.dll", "libpdfium.dylib", "libpdfium.so")
 
 
 class _PdfiumVerClass:
     
-    scheme = namedtuple("PdfiumVer", ("major", "minor", "build", "patch"))
+    scheme = namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
     
     def __init__(self):
-        self._vlines, self._vdict, self._vcursor = None, {}, None
+        self._vlines, self._vdict = None, {}
     
     @staticmethod
     @functools.lru_cache(maxsize=1)
@@ -177,8 +189,9 @@ class _PdfiumVerClass:
     
     @functools.lru_cache(maxsize=1)
     def _get_chromium_refs(self):
-        # FIXME The ls-remote call is fairly expensive. While cached in memory for a process lifetime, it can cause a significant slowdown for consecutive process runs.
-        # There may be multiple ways to improve this, like adding some disk cache to ensure it would only be called once for a whole session, or maybe adding a second strategy that would parse the pdfium-binaries VERSION file, and use the chromium refs only for sourcebuild.
+        # FIXME The ls-remote call may take extremely long (~1min) with older versions of git!
+        # With newer git, it's a lot better, but still noticeable (one or a few seconds).
+        # TODO See if we can do something to speed up the call. That said, we might want to add a way for the caller to supply the full version. Also, adding a disk cache for the refs might be an option.
         if self._vlines is None:
             log(f"Fetching chromium refs ...")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
@@ -198,7 +211,6 @@ class _PdfiumVerClass:
         """
         lines = self._get_chromium_refs()
         full_ver = self._parse_line( lines.pop(0) )
-        self._vcursor = full_ver.build
         return full_ver
     
     def to_full(self, v_short):
@@ -207,12 +219,11 @@ class _PdfiumVerClass:
         Note, the first call to this function in a session may be somewhat expensive.
         """
         v_short = int(v_short)
-        self._get_chromium_refs()
-        if self._vcursor is None or self._vcursor > v_short:
+        if v_short not in self._vdict:
+            self._get_chromium_refs()
             for i, line in enumerate(self._vlines):
                 full_ver = self._parse_line(line)
                 if full_ver.build == v_short:
-                    self._vcursor = full_ver.build
                     self._vlines = self._vlines[i+1:]
                     break
         full_ver = self._vdict[v_short]
@@ -220,6 +231,11 @@ class _PdfiumVerClass:
         return full_ver
 
 PdfiumVer = _PdfiumVerClass()
+NaN = float("nan")
+PdfiumVerUnknown = PdfiumVer.scheme(NaN, NaN, NaN, NaN)
+
+# def is_nan(value):
+#     return isinstance(value, float) and value != value
 
 
 def read_json(fp):
@@ -231,10 +247,10 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def write_pdfium_info(dir, version, origin, flags=(), n_commits=0, hash=None, is_short_ver=True):
-    if is_short_ver:
-        version = PdfiumVer.to_full(version)
-    info = dict(**version._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=list(flags))
+def write_pdfium_info(dir, full_ver, origin, flags=(), n_commits=0, hash=None):
+    if full_ver is PdfiumVerUnknown:
+        log("Warning: pdfium version not known, will use NaN placeholders")
+    info = dict(**full_ver._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=list(flags))
     write_json(dir/VersionFN, info)
     return info
 
@@ -335,14 +351,14 @@ class _host_platform:
     
     def __init__(self):
         
-        # Get info about the host platform (OS and CPU)
-        # For the machine name, the platform module just passes through info provided by the OS (e.g. the uname command on unix), so we can determine the relevant names from Python's source code, system specs or info available online (e.g. https://en.wikipedia.org/wiki/Uname)
-        self._system_name = platform.system().lower()
-        self._machine_name = platform.machine().lower()
-        
-        # empty slots
+        # set up empty slots
         self._libc_name, self._libc_ver = "", ""
         self._exc = None
+        
+        # Get info about the host platform (OS and CPU)
+        # For the machine name, the platform module just passes through info provided by the OS (e.g. the uname command on unix), so we can determine the relevant names from Python's source code, system specs or info available online (e.g. https://en.wikipedia.org/wiki/Uname)
+        self._raw_system = platform.system().lower()
+        self._raw_machine = platform.machine().lower()
     
     @cached_property
     def platform(self):
@@ -354,14 +370,14 @@ class _host_platform:
     
     @cached_property
     def system(self):
-        if self.platform is not None:
-            return plat_to_system(self.platform)
-        else:
-            return None
+        have_platform = bool(self.platform)
+        if have_platform:
+            assert str(self.platform).startswith(f"{self._system}_"), f"'{self.platform}' does not start with '{self._system}_'"
+        return self._system
     
     def __repr__(self):
-        info = f"{self._system_name} {self._machine_name}"
-        if self._system_name == "linux" and self._libc_name:
+        info = f"{self._raw_system} {self._raw_machine}"
+        if self._raw_system == "linux" and self._libc_name:
             info += f", {self._libc_name} {self._libc_ver}"
         return f"<Host: {info}>"
     
@@ -372,73 +388,86 @@ class _host_platform:
             return getattr(PlatNames, f"linux_musl_{archid}")
         elif _android_api():  # seems to imply self._libc_name == "libc"
             log("Android prior to PEP 738 (e.g. Termux)")
+            self._system = SysNames.android
             return getattr(PlatNames, f"android_{archid}")
         else:
-            raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}.")
+            raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}")
     
     def _get_platform(self):
         
         # TODO 32-bit interpreters running on 64-bit machines?
         
-        if self._system_name == "darwin":
+        if self._raw_system == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
-            log(f"macOS {self._machine_name} {platform.mac_ver()}")
-            if self._machine_name == "x86_64":
+            self._system = SysNames.darwin
+            log(f"macOS {self._raw_machine} {platform.mac_ver()}")
+            if self._raw_machine == "x86_64":
                 return PlatNames.darwin_x64
-            elif self._machine_name == "arm64":
+            elif self._raw_machine == "arm64":
                 return PlatNames.darwin_arm64
             # see e.g. the table in https://github.com/pypa/packaging.python.org/pull/1804
-            elif self._machine_name in ("i386", "ppc", "ppc64"):
-                raise RuntimeError(f"Unsupported legacy mac architecture: {self._machine_name!r}")
+            elif self._raw_machine in ("i386", "ppc", "ppc64"):
+                raise RuntimeError(f"Unsupported legacy mac architecture: {self._raw_machine!r}")
         
-        elif self._system_name == "windows":
-            log(f"windows {self._machine_name} {platform.win32_ver()}")
-            if self._machine_name == "amd64":
+        elif self._raw_system == "windows":
+            self._system = SysNames.windows
+            log(f"windows {self._raw_machine} {platform.win32_ver()}")
+            if self._raw_machine == "amd64":
                 return PlatNames.windows_x64
-            elif self._machine_name == "x86":
+            elif self._raw_machine == "x86":
                 return PlatNames.windows_x86
-            elif self._machine_name == "arm64":
+            elif self._raw_machine == "arm64":
                 return PlatNames.windows_arm64
         
-        elif self._system_name == "linux":
+        elif self._raw_system == "linux":
+            self._system = SysNames.linux
             self._libc_name, self._libc_ver = _get_libc_info()
-            log(f"linux {self._machine_name} {self._libc_name, self._libc_ver}")
-            if self._machine_name == "x86_64":
+            log(f"linux {self._raw_machine} {self._libc_name, self._libc_ver}")
+            if self._raw_machine == "x86_64":
                 return self._handle_linux("x64")
-            elif self._machine_name == "i686":
+            elif self._raw_machine == "i686":
                 return self._handle_linux("x86")
-            elif self._machine_name == "aarch64":
+            elif self._raw_machine == "aarch64":
                 return self._handle_linux("arm64")
-            elif self._machine_name == "armv7l":
+            elif self._raw_machine == "armv7l":
                 if self._libc_name == "musl":
-                    raise RuntimeError(f"armv7l: musl not supported at this time.")
+                    raise RuntimeError(f"armv7l: musl not supported at this time")
                 return self._handle_linux("arm32")
         
-        elif self._system_name == "android":  # PEP 738
+        elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
-            log(f"android {self._machine_name} {sys.getandroidapilevel()} {platform.android_ver()}")
-            if self._machine_name == "aarch64":
+            self._system = SysNames.android
+            log(f"android {self._raw_machine} {sys.getandroidapilevel()} {platform.android_ver()}")
+            if self._raw_machine == "aarch64":
                 return PlatNames.android_arm64
-            elif self._machine_name == "armv7l":
+            elif self._raw_machine == "armv7l":
                 return PlatNames.android_arm32
-            elif self._machine_name == "x86_64":
+            elif self._raw_machine == "x86_64":
                 return PlatNames.android_x64
-            elif self._machine_name == "i686":
+            elif self._raw_machine == "i686":
                 return PlatNames.android_x86
         
-        elif self._system_name in ("ios", "ipados"):  # PEP 730
+        elif self._raw_system in ("ios", "ipados"):  # PEP 730
             # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
+            self._system = SysNames.ios
             ios_ver = platform.ios_ver()
-            log(f"{self._system_name} {self._machine_name} {ios_ver}")
-            if self._machine_name == "arm64":
+            log(f"{self._raw_system} {self._raw_machine} {ios_ver}")
+            if self._raw_machine == "arm64":
                 return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
-            elif self._machine_name == "x86_64":
+            elif self._raw_machine == "x86_64":
                 assert ios_ver.is_simulator, "iOS x86_64 can only be simulator"
                 return PlatNames.ios_x64_simu
+        
+        else:
+            self._system = None
         
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
+
+USR_PREFIX = "/usr"
+if Host.system == SysNames.android:
+    USR_PREFIX = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
 
 
 def _manylinux_tag(arch, glibc="2_17"):
@@ -507,7 +536,7 @@ def get_wheel_tag(pl_name):
         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
         # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
         if tag.startswith("macosx") and tag.endswith("universal2"):
-            tag = tag[:-len("universal2")] + Host._machine_name
+            tag = tag[:-len("universal2")] + Host._raw_machine
         return tag
     
     else:
@@ -530,8 +559,9 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
         return comp_process
 
 
-def tar_extract_file(tar, src, dst_path):
-    src_buf = tar.extractfile(src)  # src: path str or tar member object
+def tar_extract_file(tar, path, dst_path):
+    # path: str or tar member object
+    src_buf = tar.extractfile(path)
     with open(dst_path, "wb") as dst_buf:
         shutil.copyfileobj(src_buf, dst_buf)
 
@@ -553,14 +583,25 @@ def tmp_cwd_context(tmp_cwd):
         os.chdir(orig_cwd)
 
 
-def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False):
+def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium", version=None):
+    
+    # quick & dirty patch to allow using the pre-built bindings instead of calling ctypesgen
+    if USE_REFBINDINGS:
+        log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
+        assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
+        record = read_json(AR_RecordFile)
+        if version and version != record["pdfium"]:
+            log(f"Warning: binary/bindings version mismatch ({version} != {record['pdfium']}). This is ABI-unsafe!")
+        shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
+        return
+    
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
     assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
     import ctypesgen.__main__
     
     # library loading
-    args = ["-l", "pdfium"]
+    args = ["-l", libname]
     if run_lds:
         args += ["--runtime-libdirs", *run_lds]
         if not search_sys_despite_libdirs:
@@ -599,49 +640,41 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
         ctypesgen.__main__.main([str(a) for a in args])
 
 
+def _make_json_compat(obj):
+    if isinstance(obj, dict):
+        return {k: _make_json_compat(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [_make_json_compat(v) for v in obj]
+    elif isinstance(obj, Path):
+        return str(obj)
+    else:
+        return obj
+
+
 def build_pdfium_bindings(version, headers_dir=None, **kwargs):
-    defaults = dict(flags=(), run_lds=(".", ), guard_symbols=False)
-    for k, v in defaults.items():
-        kwargs.setdefault(k, v)
     
     ver_path = DataDir_Bindings/VersionFN
-    bind_path = DataDir_Bindings/BindingsFN
+    bind_path = BindingsFile
     if not headers_dir:
         headers_dir = DataDir_Bindings / "headers"
     
-    # quick and dirty patch to allow using the pre-built bindings instead of calling ctypesgen
-    # TODO move handler into run_ctypesgen on behalf of sourcebuild?
-    # FIXME Bindings version file is ignored by upstream code, e.g. we don't handle the case of mismatched bindings/binary and only include the binary version in the end. Strictly speaking we might have to split the current PDFIUM_INFO in BINDINGS_INFO and BINARY_INFO ...
-    if BindTarget == BindTarget_Ref:
-        log("Using reference bindings as requested by env var. This will bypass all bindings params.")
-        record = read_json(AR_RecordFile)
-        bindings_ver = record["pdfium"]
-        if bindings_ver != version:
-            log(f"Warning: ABI version mismatch (bindings {bindings_ver}, binary target {version}). This is potentially unsafe!")
-        flags_diff = set(kwargs["flags"]).difference(REFBINDINGS_FLAGS)
-        if flags_diff:  # == not set(...).issubset(...)
-            log(f"Warning: The following requested flags are not available in the reference bindings and will be discarded: {flags_diff}")
-        mkdir(DataDir_Bindings)
-        shutil.copyfile(RefBindingsFile, DataDir_Bindings/BindingsFN)
-        write_json(ver_path, dict(version=bindings_ver, flags=REFBINDINGS_FLAGS, run_lds=["."], source="reference"))
-        return
+    # TODO register all defaults?
+    curr_info = {"version": version, **kwargs}
+    curr_info.pop("compile_lds", None)  # ignore
+    curr_info.setdefault("flags", [])
+    curr_info = _make_json_compat(curr_info)
     
-    curr_info = dict(
-        version = version,
-        flags = list(kwargs["flags"]),
-        run_lds = list(kwargs["run_lds"]),
-        guard_symbols = kwargs["guard_symbols"],
-        source = "generated",
-    )
     prev_ver = None
     if ver_path.exists():
         prev_info = read_json(ver_path)
         prev_ver = prev_info["version"]
-        if prev_info == curr_info and bind_path.exists():
+        if bind_path.exists() and prev_info == curr_info:
             log(f"Using cached bindings")
             return
+        else:
+            log(f"Bindings cache state differs:", prev_info, curr_info, sep="\n")
     
-    # We try to reuse headers if only bindings params differ, not version. Note that headers don't currently have an own version file; we reuse the bindings version file for simplicity.
+    # try to reuse headers if only bindings params differ, not version
     if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
         log("Using cached headers")
     else:
@@ -657,7 +690,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         archive_path.unlink()
     
     log(f"Building bindings ...")
-    run_ctypesgen(DataDir_Bindings, headers_dir, **kwargs)
+    run_ctypesgen(DataDir_Bindings, headers_dir, version=version, **kwargs)
     write_json(ver_path, curr_info)
 
 
@@ -682,7 +715,7 @@ def get_helpers_info():
     # TODO add some checks against record?
     
     have_git_describe = False
-    if HAVE_GIT_REPO:
+    if (ProjectDir/".git").exists():
         try:
             helpers_info = parse_git_tag()
         except subprocess.CalledProcessError as e:
@@ -715,9 +748,7 @@ def build_pl_suffix(version, use_v8):
 
 def parse_pl_spec(pl_spec):
     
-    # TODOs
-    # - targets integration is inflexible, need to restructure
-    # - add way to pass through package provider with system target?
+    # TODO this is inflexible - split up in individual env vars after all?
     
     do_prepare = True
     if pl_spec.startswith("prepared!"):
@@ -733,10 +764,8 @@ def parse_pl_spec(pl_spec):
         use_v8 = True
     
     if not pl_spec or pl_spec == "auto":
+        # may be None - handling this is delegated to the caller
         pl_name = Host.platform
-        if pl_name is None:
-            # delegate handling of unknown platforms to the caller (setup.py)
-            return None
     elif hasattr(ExtPlats, pl_spec):
         pl_name = getattr(ExtPlats, pl_spec)
     elif hasattr(PlatNames, pl_spec):
@@ -747,7 +776,7 @@ def parse_pl_spec(pl_spec):
     if req_ver:
         assert req_ver.isnumeric()
         req_ver = int(req_ver)
-    else:
+    elif pl_name is not None:
         assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
         req_ver = PdfiumVer.get_latest()
     
@@ -783,7 +812,7 @@ def git_apply_patch(patch, cwd, git_args=()):
     run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
 
 
-def serialise_gn_config(config_dict):
+def serialize_gn_config(config_dict):
     
     parts = []
     
@@ -796,13 +825,15 @@ def serialise_gn_config(config_dict):
         elif isinstance(value, int):
             p += str(value)
         else:
-            raise TypeError(f"Not sure how to serialise type {type(value).__name__}")
+            raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
         parts.append(p)
     
-    return "\n".join(parts)
+    result = "\n".join(parts)
+    log(f"\nBuild config:\n{result}\n")
+    return result
 
 
-def pack_sourcebuild(pdfium_dir, build_dir, version, **v_kwargs):
+def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     log("Packing data files for sourcebuild...")
     
     dest_dir = DataDir / ExtPlats.sourcebuild
@@ -810,8 +841,7 @@ def pack_sourcebuild(pdfium_dir, build_dir, version, **v_kwargs):
     
     libname = libname_for_system(Host.system)
     shutil.copy(build_dir/libname, dest_dir/libname)
-    write_pdfium_info(dest_dir, version, origin="sourcebuild", **v_kwargs)
+    write_pdfium_info(dest_dir, full_ver, origin="sourcebuild", **v_kwargs)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    # FIXME PDFIUM_BINDINGS=reference not honored
-    run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir])
+    run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir], version=full_ver.build)

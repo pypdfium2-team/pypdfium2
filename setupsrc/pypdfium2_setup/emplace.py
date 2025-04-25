@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import os.path
 import sys
 import argparse
 from pathlib import Path
@@ -43,17 +42,19 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
 
 def prepare_setup(pl_name, pdfium_ver, use_v8):
     
+    # TODO
+    # - consider taking a full version (on behalf of offline setup)
+    # - expose smart try_system_pdfium() / setup fallback as target
+    
     clean_platfiles()
     flags = ["V8", "XFA"] if use_v8 else []
     
-    # TODO for PDFIUM_PLATFORM=system, add option for caller to pass in custom headers_dir, run_lds and flags? this might cause more fragmentation, though
-    # also want to consider accepting a full version for offline setup
-    
     if pl_name == ExtPlats.system:
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
-        shutil.copyfile(DataDir_Bindings/BindingsFN, ModuleDir_Raw/BindingsFN)
-        write_pdfium_info(ModuleDir_Raw, pdfium_ver, origin="system", flags=flags)
-        return [BindingsFN, VersionFN]
+        shutil.copyfile(BindingsFile, ModuleDir_Raw/BindingsFN)
+        full_ver = PdfiumVer.to_full(pdfium_ver)
+        write_pdfium_info(ModuleDir_Raw, full_ver, origin="system", flags=flags)
+        return (BindingsFN, VersionFN)
     
     else:
         
@@ -65,14 +66,14 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
             # sourcebuild bindings are kept in the platform directory
             platfiles += [pl_dir/BindingsFN]
         else:
-            platfiles += [DataDir_Bindings/BindingsFN]
+            platfiles += [BindingsFile]
             _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8)
         
         platfiles += [pl_dir/libname_for_system(system), pl_dir/VersionFN]
         for fp in platfiles:
             shutil.copyfile(fp, ModuleDir_Raw/fp.name)
         
-        return [fp.name for fp in platfiles]
+        return (fp.name for fp in platfiles)
 
 
 def main():
