@@ -180,14 +180,6 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
             is_regex = True,
         )
 
-    is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
-    if is_new:
-        autopatch(
-            PDFIUM_3RDPARTY/"abseil-cpp"/"BUILD.gn",
-            'component("absl")', 'static_library("absl")',
-            is_regex = False,
-        )
-    
     is_new = _fetch_dep("build", PDFIUM_DIR/"build")
     if is_new:
         # Work around error about path_exists() being undefined
@@ -203,8 +195,17 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
                 f'ldflags += [ "-fuse-ld={lld_path}" ]', is_regex=False
             )
     
-    _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
+    
+    is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
+    if is_new:
+        autopatch(
+            PDFIUM_3RDPARTY/"abseil-cpp"/"BUILD.gn",
+            'component("absl")', 'static_library("absl")',
+            is_regex = False,
+        )
+    
+    _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if with_tests:
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
