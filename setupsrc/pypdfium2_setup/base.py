@@ -833,6 +833,19 @@ def serialize_gn_config(config_dict):
     return result
 
 
+_SHIMHEADERS_URL = "https://chromium.googlesource.com/chromium/src/+/{rev}/tools/generate_shim_headers/generate_shim_headers.py?format=TEXT"
+
+def get_shimheaders_tool(pdfium_dir, rev="refs/heads/main"):
+
+    tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
+    shimheaders_file = tools_dir / "generate_shim_headers.py"
+    shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
+
+    if not shimheaders_file.exists():
+        mkdir(tools_dir)
+        url_request.urlretrieve(shimheaders_url, shimheaders_file)
+
+
 def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     log("Packing data files for sourcebuild...")
     
