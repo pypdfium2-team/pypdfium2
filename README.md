@@ -22,7 +22,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
   python -m pip install -U pypdfium2
   ```
   If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2.
-  Otherwise, if the platform is not covered by pdfium-binaries, pypdfium2's `setup.py` will look for system pdfium, or attempt to build pdfium from source.
+  Otherwise, if the platform is not covered with pdfium-binaries, pypdfium2's `setup.py` will look for system pdfium, or attempt to build pdfium from source.
 
 * <a id="user-content-install-source" class="anchor" href="#install-source">From the repository 🔗</a>
   
@@ -83,14 +83,14 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     - You might also want to know that pdfium bundles `agg, abseil` and `fast_float`.
     - When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. GCC is preferred, but Clang may also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
     
-    For the toolchained build, you'd run something like:
+    To do the toolchained build, you'd run something like:
     ```bash
     # call build script with --help to list options
     python setupsrc/pypdfium2_setup/build_toolchained.py
     PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
     
-    Or to do the native build, on Ubuntu 24.04, you could do e.g.:
+    Or for the native build, on Ubuntu 24.04, you could do e.g.:
     ```bash
     # Install dependencies
     sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
