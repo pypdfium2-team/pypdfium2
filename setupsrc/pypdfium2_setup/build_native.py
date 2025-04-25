@@ -361,7 +361,7 @@ def parse_args(argv):
     parser.add_argument(
         "-c", "--compiler",
         type = str.lower,
-        help = "The compiler to use (gcc or clang). Defaults to gcc.",
+        help = "The compiler to use (gcc or clang). By default, gcc is preferred.",
     )
     # Hints:
     # - On Ubuntu/Fedora, the symlink commands for clang are (set $VERSION and $ARCH accordingly):
