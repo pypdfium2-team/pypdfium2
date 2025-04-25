@@ -833,9 +833,9 @@ def serialize_gn_config(config_dict):
     return result
 
 
-_SHIMHEADERS_URL = "https://chromium.googlesource.com/chromium/src/+/{rev}/tools/generate_shim_headers/generate_shim_headers.py?format=TEXT"
+_SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
 
-def get_shimheaders_tool(pdfium_dir, rev="refs/heads/main"):
+def get_shimheaders_tool(pdfium_dir, rev="main"):
 
     tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
     shimheaders_file = tools_dir / "generate_shim_headers.py"
