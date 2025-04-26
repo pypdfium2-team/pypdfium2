@@ -842,6 +842,7 @@ def get_shimheaders_tool(pdfium_dir, rev="main"):
     shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
 
     if not shimheaders_file.exists():
+        log(f"Downloading {shimheaders_file.name} at revision {rev}")
         mkdir(tools_dir)
         url_request.urlretrieve(shimheaders_url, shimheaders_file)
 
