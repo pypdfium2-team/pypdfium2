@@ -152,7 +152,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex = True,
         )
-
+    
     is_new = _fetch_dep("build", PDFIUM_DIR/"build")
     if is_new:
         # Work around error about path_exists() being undefined

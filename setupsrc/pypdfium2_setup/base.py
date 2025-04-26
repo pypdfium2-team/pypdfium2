@@ -31,7 +31,8 @@ PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
-USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not shutil.which("ctypesgen")
+IS_CI = bool(os.getenv("GITHUB_ACTIONS"))
+USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not any((shutil.which("ctypesgen"), IS_CI))
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw          = "raw"
