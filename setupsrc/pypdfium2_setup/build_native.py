@@ -67,35 +67,7 @@ if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     DefaultConfig["use_system_xcode"] = True
 
-
 Compiler = Enum("Compiler", "gcc clang")
-
-
-if sys.version_info < (3, 8):
-    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
-    from functools import lru_cache
-    def cached_property(func):
-        return property( lru_cache(maxsize=1)(func) )
-else:
-    from functools import cached_property
-
-
-# tar unpacking template adapted from https://gist.github.com/mara004/6fe0ac15d0cf303bed0aea2f22d8531f
-
-if sys.version_info >= (3, 11, 4):  # PEP 706
-    def safer_tar_unpack(archive_path, dest_dir):
-        shutil.unpack_archive(archive_path, dest_dir, format="tar", filter="data")
-
-else:  # workaround
-    import tarfile
-    
-    def safer_tar_unpack(archive_path, dest_dir):
-        dest_dir = Path(dest_dir).resolve()
-        with tarfile.open(archive_path) as tar:
-            for m in tar.getmembers():
-                if not ((m.isfile() or m.isdir()) and dest_dir in (dest_dir/m.name).resolve().parents):
-                    raise RuntimeError("Path traversal, symlink or non-file member in tar archive (potentially malicious).")
-            tar.extractall(dest_dir)
 
 
 def _get_repo(url, target_dir, rev, depth=1):
@@ -116,7 +88,7 @@ DEPS_FIELDS = "build abseil fast_float gtest test_fonts".split(" ")
 
 class _DeferredClass:
     
-    @cached_property
+    @cached_property  # included from base.py
     def deps(self):
         # TODO get a proper parser for the DEPS file format?
         deps_content = (PDFIUM_DIR/"DEPS").read_text()
@@ -130,6 +102,7 @@ class _DeferredClass:
         return result
 
 _Deferred = _DeferredClass()
+
 
 def _fetch_dep(name, target_dir):
     if target_dir.exists():
@@ -358,16 +331,11 @@ def parse_args(argv):
         type = str.lower,
         help = "The compiler to use (gcc or clang). By default, gcc is preferred.",
     )
-    # Hints:
-    # - On Ubuntu/Fedora, the symlink commands for clang are (set $VERSION and $ARCH accordingly):
-    #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
-    #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
-    # - If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
-    # - Also, it seems that Google's Clang releases can be downloaded from https://storage.googleapis.com/chromium-browser-clang/ (append the object_name in question, as in pdfium's DEPS file). Alternatively, there is depot_tools/download_from_google_storage.py, or the upstream LLVM releases.
+    # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",
+        help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
     )
     args = parser.parse_args(argv)
     if args.compiler:
