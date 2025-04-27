@@ -545,14 +545,17 @@ def get_wheel_tag(pl_name):
         raise ValueError(f"Unhandled platform name {pl_name}")
 
 
-def run_cmd(command, cwd, capture=False, check=True, str_cast=True, **kwargs):
+def run_cmd(command, cwd, capture=False, check=True, str_cast=True, stderr=None, **kwargs):
     
     if str_cast:
         command = [str(c) for c in command]
     
     log(f"{command} (cwd={cwd!r})")
     if capture:
-        kwargs.update( dict(stdout=subprocess.PIPE, stderr=subprocess.STDOUT) )
+        kwargs["stdout"] = subprocess.PIPE
+        if stderr is not None:
+            # allow the caller to pass e.g. subprocess.STDOUT
+            kwargs["stderr"] = stderr
     
     comp_process = subprocess.run(command, cwd=cwd, check=check, **kwargs)
     if capture:
