@@ -114,17 +114,11 @@ Unchanged/deleted code is owned by PDFium, added code by pdfium-binaries.
 '''
 
 [[annotations]]
-path = "pdfium_patches/passflags-BUILD.gn"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "2025 Christian Heimes <cheimes@redhat.com>"
-SPDX-License-Identifier = "LicenseRef-FairUse"
-SPDX-FileComment = "Obtained from https://github.com/tiran/libpdfium/"
-
-[[annotations]]
 path = [
     "pdfium_patches/siso.patch",
     "pdfium_patches/avoid_new_clang_flags.patch",
     "pdfium_patches/system_libcxx_with_clang.patch",
+    "pdfium_patches/ffp_contract.patch"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [

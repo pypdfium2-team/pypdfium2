@@ -1,0 +1,33 @@
+diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
+index b0b194e..a14c263 100644
+--- a/config/compiler/BUILD.gn
++++ b/config/compiler/BUILD.gn
+@@ -608,13 +608,6 @@ config("compiler") {
+       }
+     }
+ 
+-    # TODO(crbug.com/40192287): Investigate why/if this should be needed.
+-    if (is_win) {
+-      cflags += [ "/clang:-ffp-contract=off" ]
+-    } else {
+-      cflags += [ "-ffp-contract=off" ]
+-    }
+-
+     # Enable ELF CREL (see crbug.com/357878242) for all platforms that use ELF
+     # (excluding toolchains that use an older version of LLVM).
+     if (is_linux && !llvm_android_mainline &&
+@@ -623,6 +616,14 @@ config("compiler") {
+     }
+   }
+ 
++  # TODO(crbug.com/40192287): Investigate why/if this should be needed.
++  # PATCH(crbug.com/402282789): Do this also for GCC
++  if (is_win && is_clang) {
++    cflags += [ "/clang:-ffp-contract=off" ]
++  } else {
++    cflags += [ "-ffp-contract=off" ]
++  }
++
+   # C11/C++11 compiler flags setup.
+   # ---------------------------
+   if (is_linux || is_chromeos || is_android || (is_nacl && is_clang) ||

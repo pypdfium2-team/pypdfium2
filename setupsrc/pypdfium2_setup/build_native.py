@@ -157,7 +157,11 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
     if is_new:
         # Work around error about path_exists() being undefined
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
-        if compiler is Compiler.clang:
+        if compiler is Compiler.gcc:
+            # https://crbug.com/402282789
+            git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
+        elif compiler is Compiler.clang:
+            # https://crbug.com/410883044
             clang_patches = ("system_libcxx_with_clang", "avoid_new_clang_flags")
             for patchname in clang_patches:
                 git_apply_patch(PatchDir/f"{patchname}.patch", cwd=PDFIUM_DIR/"build")
@@ -204,14 +208,6 @@ def prepare(config_dict, build_dir):
 
 def build(with_tests, build_dir, compiler, n_jobs):
     
-    if compiler is Compiler.gcc:
-        # https://issues.chromium.org/issues/402282789
-        cppflags = "-ffp-contract=off"
-        orig_cppflags = os.environ.get("CPPFLAGS", "")
-        if orig_cppflags:
-            cppflags += " " + orig_cppflags
-        os.environ["CPPFLAGS"] = cppflags
-    
     ninja_args = []
     if n_jobs is not None:
         ninja_args.extend(["-j", str(n_jobs)])
@@ -245,17 +241,7 @@ def _get_clang_ver(clang_path):
 
 def setup_compiler(config, compiler, clang_path):
     if compiler is Compiler.gcc:
-        config.update({
-            "is_clang": False,
-            "custom_toolchain": "//build/toolchain/linux/passflags:default",
-            "host_toolchain": "//build/toolchain/linux/passflags:default",
-        })
-        # Set up custom flavor of GCC toolchain that supports passing flags
-        mkdir(PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags")
-        shutil.copyfile(
-            PatchDir/"passflags-BUILD.gn",
-            PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags"/"BUILD.gn"
-        )
+        config["is_clang"] = False
     elif compiler is Compiler.clang:
         assert clang_path, "Clang path must be set"
         clang_version = _get_clang_ver(clang_path)
