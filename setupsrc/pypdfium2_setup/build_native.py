@@ -8,7 +8,7 @@
 # On Windows, you might be better off with the toolchained build, though, due to lack of a Unix-like system library environment.
 
 # Known issues:
-# - This script does not currently handle rebuilds. You have to manually delete the pdfium/ directory if you want to rebuild with a different version. In the future, we might want to use git repositories rather than tarballs to make tasks like version switching or patching more straightforward.
+# - This script does not currently handle rebuilds. You have to manually delete the pdfium/ directory if you want to rebuild with a different version.
 
 import re
 import os
@@ -17,30 +17,26 @@ import shutil
 import argparse
 from enum import Enum
 from pathlib import Path
-from urllib.request import urlretrieve
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
-import pypdfium2_setup.base as pkgbase
-from pypdfium2_setup.base import log, mkdir
+from pypdfium2_setup.base import *
 
 # The pdfium version this has last been tested with. Ideally, this should be close to the release version in autorelease/record.json
 # To bump this version, first test locally and update any patches as needed. Then, make a branch and run "Test Sourcebuild" on CI to see if all targets continue to work. Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
 # Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
 DEFAULT_VER = 7122
-# assert DEFAULT_VER >= pkgbase.PDFIUM_MIN_REQ
+# assert DEFAULT_VER >= PDFIUM_MIN_REQ
 
+PDFIUM_URL = "https://pdfium.googlesource.com/pdfium"
 _CR_PREFIX = "https://chromium.googlesource.com/"
-PDFIUM_URL = "https://pdfium.googlesource.com/pdfium/+archive/{rev}.tar.gz#/pdfium-{name}.tar.gz"
 DEPS_URLS = dict(
-    build = _CR_PREFIX + "chromium/src/build.git/+archive/{rev}.tar.gz#/build-{rev}.tar.gz",
-    abseil = _CR_PREFIX + "chromium/src/third_party/abseil-cpp/+archive/{rev}.tar.gz#/abseil-cpp-{rev}.tar.gz",
-    fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float.git/+archive/{rev}.tar.gz#/fast_float-{rev}.tar.gz",
-    gtest = _CR_PREFIX + "external/github.com/google/googletest.git/+archive/{rev}.tar.gz#/gtest-{rev}.tar.gz",
-    test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts.git/+archive/{rev}.tar.gz#/test_fonts-{rev}.tar.gz"
+    build      = _CR_PREFIX + "chromium/src/build",
+    abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
+    fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
+    gtest      = _CR_PREFIX + "external/github.com/google/googletest",
+    test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts"
 )
-SHIMHEADERS_URL = _CR_PREFIX + "chromium/src/+archive/{rev}/tools/generate_shim_headers.tar.gz#/generate_shim_headers-{name}.tar.gz"
-
-SOURCES_DIR = pkgbase.ProjectDir / "sbuild" / "native"
+SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
@@ -71,52 +67,19 @@ if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     DefaultConfig["use_system_xcode"] = True
 
-
 Compiler = Enum("Compiler", "gcc clang")
 
 
-if sys.version_info < (3, 8):
-    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
-    from functools import lru_cache
-    def cached_property(func):
-        return property( lru_cache(maxsize=1)(func) )
-else:
-    from functools import cached_property
-
-
-# tar unpacking template adapted from https://gist.github.com/mara004/6fe0ac15d0cf303bed0aea2f22d8531f
-
-if sys.version_info >= (3, 11, 4):  # PEP 706
-    def safer_tar_unpack(archive_path, dest_dir):
-        shutil.unpack_archive(archive_path, dest_dir, format="tar", filter="data")
-
-else:  # workaround
-    import tarfile
-    
-    def safer_tar_unpack(archive_path, dest_dir):
-        dest_dir = Path(dest_dir).resolve()
-        with tarfile.open(archive_path) as tar:
-            for m in tar.getmembers():
-                if not ((m.isfile() or m.isdir()) and dest_dir in (dest_dir/m.name).resolve().parents):
-                    raise RuntimeError("Path traversal, symlink or non-file member in tar archive (potentially malicious).")
-            tar.extractall(dest_dir)
-
-
-def _fetch_archive(archive_url, dest_path):
-    
-    if dest_path.exists():
-        log(f"Using existing {dest_path}")
+def _get_repo(url, target_dir, rev, depth=1):
+    if target_dir.exists():
         return False
-    
-    name = archive_url.rsplit("/")[-1]
-    archive_path = SOURCES_DIR/name
-    if not archive_path.exists():
-        log(f"Fetching {archive_url!r} to {archive_path} ...")
-        urlretrieve(archive_url, archive_path)
-    
-    log(f"Unpacking {archive_path} to {dest_path} ...")
-    safer_tar_unpack(archive_path, dest_path)
-    
+    # see https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
+    # TODO: on git >= 2.49, we can use `git clone --revision ...`
+    mkdir(target_dir)
+    run_cmd(["git", "init"], cwd=target_dir)
+    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
+    run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
+    run_cmd(["git", "checkout", rev], cwd=target_dir)
     return True
 
 
@@ -125,7 +88,7 @@ DEPS_FIELDS = "build abseil fast_float gtest test_fonts".split(" ")
 
 class _DeferredClass:
     
-    @cached_property
+    @cached_property  # included from base.py
     def deps(self):
         # TODO get a proper parser for the DEPS file format?
         deps_content = (PDFIUM_DIR/"DEPS").read_text()
@@ -140,12 +103,13 @@ class _DeferredClass:
 
 _Deferred = _DeferredClass()
 
+
 def _fetch_dep(name, target_dir):
     if target_dir.exists():
         log(f"Using existing {target_dir}")
         return False
     # parse out DEPS revisions only if we actually need them
-    return _fetch_archive(DEPS_URLS[name].format(rev=_Deferred.deps[name]), target_dir)
+    return _get_repo(DEPS_URLS[name], target_dir, rev=_Deferred.deps[name])
 
 
 def autopatch(file, pattern, repl, is_regex):
@@ -162,45 +126,45 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
     for file in dir.glob(globexpr):
         autopatch(file, pattern, repl, is_regex)
 
-def classic_patch(patchfile, cwd):
-    # alternatively, this might work: pkgbase.git_apply_patch(..., git_args=("--git-dir=/dev/null", "--work-tree=."))
-    # FIXME managing patches without an actual git repository is nasty either way
-    pkgbase.run_cmd(["patch", "-p1", "--ignore-whitespace", "-i", str(patchfile)], cwd=cwd)
-
-
-def _format_url(url, rev):
-    return url.format(rev=rev, name=rev.rsplit("/")[-1])
 
 def get_sources(short_ver, with_tests, compiler, clang_path):
     
     if short_ver == "main":
-        pdfium_rev = "refs/heads/main"
-        chromium_rev = pdfium_rev
-        full_ver = pkgbase.PdfiumVer.get_latest_upstream()
+        pdfium_rev = short_ver
+        chromium_rev = short_ver
+        full_ver = PdfiumVer.get_latest_upstream()
     else:
-        full_ver = pkgbase.PdfiumVer.to_full(short_ver)
+        full_ver = PdfiumVer.to_full(short_ver)
         full_ver_str = ".".join(str(v) for v in full_ver)
-        pdfium_rev = f"refs/heads/chromium/{short_ver}"
-        chromium_rev = f"refs/tags/{full_ver_str}"
+        pdfium_rev = f"chromium/{short_ver}"
+        chromium_rev = full_ver_str
     
-    is_new = _fetch_archive(_format_url(PDFIUM_URL, pdfium_rev), PDFIUM_DIR)
+    is_new = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
     if is_new:
-        autopatch_dir(PDFIUM_DIR/"public"/"cpp", "*.h", r'"public/(.+)"', r'"../\1"', is_regex=True)
+        autopatch_dir(
+            PDFIUM_DIR/"public"/"cpp", "*.h",
+            r'"public/(.+)"', r'"../\1"',
+            is_regex = True,
+        )
         # don't build the test fonts (needed for embedder tests only)
-        autopatch(PDFIUM_DIR/"testing"/"BUILD.gn", r'(\s*)("//third_party/test_fonts")', r"\1# \2", is_regex=True)
-
-    is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
-    if is_new:
-        autopatch(PDFIUM_3RDPARTY/"abseil-cpp"/"BUILD.gn", 'component("absl")', 'static_library("absl")', is_regex=False)
+        autopatch(
+            PDFIUM_DIR/"testing"/"BUILD.gn",
+            r'(\s*)("//third_party/test_fonts")', r"\1# \2",
+            is_regex = True,
+        )
     
     is_new = _fetch_dep("build", PDFIUM_DIR/"build")
     if is_new:
         # Work around error about path_exists() being undefined
-        classic_patch(pkgbase.PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
-        if compiler is Compiler.clang:
+        git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
+        if compiler is Compiler.gcc:
+            # https://crbug.com/402282789
+            git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
+        elif compiler is Compiler.clang:
+            # https://crbug.com/410883044
             clang_patches = ("system_libcxx_with_clang", "avoid_new_clang_flags")
             for patchname in clang_patches:
-                classic_patch(pkgbase.PatchDir/f"{patchname}.patch", cwd=PDFIUM_DIR/"build")
+                git_apply_patch(PatchDir/f"{patchname}.patch", cwd=PDFIUM_DIR/"build")
             lld_path = clang_path/"bin"/"ld.lld"
             autopatch(
                 PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn",
@@ -208,9 +172,17 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
                 f'ldflags += [ "-fuse-ld={lld_path}" ]', is_regex=False
             )
     
-    _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
-    _fetch_archive(_format_url(SHIMHEADERS_URL, chromium_rev), PDFIUM_DIR/"tools"/"generate_shim_headers")
+    get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
     
+    is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
+    if is_new:
+        autopatch(
+            PDFIUM_3RDPARTY/"abseil-cpp"/"BUILD.gn",
+            'component("absl")', 'static_library("absl")',
+            is_regex = False,
+        )
+    
+    _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if with_tests:
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
@@ -230,19 +202,11 @@ def prepare(config_dict, build_dir):
     )
     # Create target dir and write build config
     mkdir(build_dir)
-    config_str = pkgbase.serialize_gn_config(config_dict)
+    config_str = serialize_gn_config(config_dict)
     (build_dir/"args.gn").write_text(config_str)
 
 
 def build(with_tests, build_dir, compiler, n_jobs):
-    
-    if compiler is Compiler.gcc:
-        # https://issues.chromium.org/issues/402282789
-        cppflags = "-ffp-contract=off"
-        orig_cppflags = os.environ.get("CPPFLAGS", "")
-        if orig_cppflags:
-            cppflags += " " + orig_cppflags
-        os.environ["CPPFLAGS"] = cppflags
     
     ninja_args = []
     if n_jobs is not None:
@@ -253,14 +217,14 @@ def build(with_tests, build_dir, compiler, n_jobs):
         targets.append("pdfium_unittests")
     
     build_dir_rel = build_dir.relative_to(PDFIUM_DIR)
-    pkgbase.run_cmd(["gn", "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
-    pkgbase.run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
+    run_cmd(["gn", "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
+    run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
 
 
 def test(build_dir):
     # FlateModule.Encode may fail with older zlib (generates different results)
     os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
-    pkgbase.run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
+    run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
 def _get_clang_ver(clang_path):
@@ -277,17 +241,7 @@ def _get_clang_ver(clang_path):
 
 def setup_compiler(config, compiler, clang_path):
     if compiler is Compiler.gcc:
-        config.update({
-            "is_clang": False,
-            "custom_toolchain": "//build/toolchain/linux/passflags:default",
-            "host_toolchain": "//build/toolchain/linux/passflags:default",
-        })
-        # Set up custom flavor of GCC toolchain that supports passing flags
-        mkdir(PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags")
-        shutil.copyfile(
-            pkgbase.PatchDir/"passflags-BUILD.gn",
-            PDFIUM_DIR/"build"/"toolchain"/"linux"/"passflags"/"BUILD.gn"
-        )
+        config["is_clang"] = False
     elif compiler is Compiler.clang:
         assert clang_path, "Clang path must be set"
         clang_version = _get_clang_ver(clang_path)
@@ -313,7 +267,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         else:
             raise RuntimeError("Neither gcc nor clang installed.")
     if compiler is Compiler.clang and clang_path is None and os.name != "nt":
-        clang_path = Path(pkgbase.USR_PREFIX)
+        clang_path = Path(USR_PREFIX)
     
     mkdir(SOURCES_DIR)
     full_ver = get_sources(build_ver, with_tests, compiler, clang_path)
@@ -333,7 +287,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         # we're not aware how to find out the post-tag info without an actual git repository, so set some placeholders indicating that this is a build from main
         n_commits, hash = float("inf"), ""
     
-    pkgbase.pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash)
+    pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash)
 
 
 def parse_args(argv):
@@ -363,16 +317,11 @@ def parse_args(argv):
         type = str.lower,
         help = "The compiler to use (gcc or clang). By default, gcc is preferred.",
     )
-    # Hints:
-    # - On Ubuntu/Fedora, the symlink commands for clang are (set $VERSION and $ARCH accordingly):
-    #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
-    #   sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
-    # - If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
-    # - Also, it seems that Google's Clang releases can be downloaded from https://storage.googleapis.com/chromium-browser-clang/ (append the object_name in question, as in pdfium's DEPS file). Alternatively, there is depot_tools/download_from_google_storage.py, or the upstream LLVM releases.
+    # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks or downloading an LLVM release.",
+        help = f"Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '{USR_PREFIX}', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
     )
     args = parser.parse_args(argv)
     if args.compiler:

@@ -8,7 +8,6 @@
 import os
 import sys
 import argparse
-import urllib.request as url_request
 from pathlib import Path, WindowsPath
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
@@ -90,20 +89,6 @@ def dl_pdfium(GClient, do_update, revision):
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     
     return do_update
-
-
-def _dl_unbundler():
-
-    # Workaround: download missing tool to unbundle ICU
-    # TODO get this added to upstream pdfium, or use downloader code from build_native.py ?
-
-    tool_dir = PDFiumDir / "tools" / "generate_shim_headers"
-    tool_file = tool_dir / "generate_shim_headers.py"
-    tool_url = "https://raw.githubusercontent.com/chromium/chromium/main/tools/generate_shim_headers/generate_shim_headers.py"
-
-    if not tool_file.exists():
-        mkdir(tool_dir)
-        url_request.urlretrieve(tool_url, tool_file)
 
 
 def _walk_refs(log):
@@ -199,7 +184,7 @@ def main(
     
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
-        _dl_unbundler()
+        get_shimheaders_tool(PDFiumDir)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)

@@ -43,6 +43,7 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
     assert not record["pdfium"] > new_pdfium
     if prev_helpers["dirty"]:
         log("Warning: dirty state. This should not happen in CI.")
+        assert not IS_CI
     
     py_updates = prev_helpers["n_commits"] > 0
     c_updates = record["pdfium"] < new_pdfium
@@ -204,6 +205,7 @@ def main():
                 "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
+            assert not IS_CI
     make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, args.register)
 
 

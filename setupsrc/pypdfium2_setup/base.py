@@ -31,7 +31,8 @@ PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
-USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not shutil.which("ctypesgen")
+IS_CI = bool(os.getenv("GITHUB_ACTIONS"))
+USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not any((shutil.which("ctypesgen"), IS_CI))
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
 ModuleRaw          = "raw"
@@ -308,6 +309,7 @@ def merge_tag(info, mode):
             tag += "+" + ".".join(extra_info)
         else:
             log("Warning: Ignored post-tag desc. This should not happen in autorelease CI.")
+            assert not IS_CI
     
     return tag
 
@@ -812,25 +814,39 @@ def git_apply_patch(patch, cwd, git_args=()):
     run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
 
 
+def _to_gn(value):
+    if isinstance(value, bool):
+        return str(value).lower()
+    elif isinstance(value, str):
+        return f'"{value}"'
+    elif isinstance(value, int):
+        return str(value)
+    elif isinstance(value, list):
+        return f"[{','.join(_to_gn(v) for v in value)}]"
+    else:
+        raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
+
 def serialize_gn_config(config_dict):
-    
     parts = []
-    
     for key, value in config_dict.items():
-        p = f"{key} = "
-        if isinstance(value, bool):
-            p += str(value).lower()
-        elif isinstance(value, str):
-            p += f'"{value}"'
-        elif isinstance(value, int):
-            p += str(value)
-        else:
-            raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
-        parts.append(p)
-    
+        parts.append(f"{key} = {_to_gn(value)}")
     result = "\n".join(parts)
     log(f"\nBuild config:\n{result}\n")
     return result
+
+
+_SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
+
+def get_shimheaders_tool(pdfium_dir, rev="main"):
+
+    tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
+    shimheaders_file = tools_dir / "generate_shim_headers.py"
+    shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
+
+    if not shimheaders_file.exists():
+        log(f"Downloading {shimheaders_file.name} at revision {rev}")
+        mkdir(tools_dir)
+        url_request.urlretrieve(shimheaders_url, shimheaders_file)
 
 
 def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
