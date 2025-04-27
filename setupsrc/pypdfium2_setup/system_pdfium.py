@@ -7,7 +7,6 @@ import re
 import sys
 import shutil
 import itertools
-import subprocess
 from pathlib import Path
 from ctypes.util import find_library
 from urllib.request import urlopen
@@ -77,7 +76,7 @@ def _find_pdfium_headers():
 def _get_sys_pdfium_ver():
     log("Trying to determine system pdfium version via pkg-config (may be NaN if this fails) ...")
     if shutil.which("pkg-config"):
-        proc = subprocess.run(["pkg-config", "--modversion", "libpdfium"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        proc = run_cmd(["pkg-config", "--modversion", "libpdfium"], cwd=None, check=False)
         if proc.returncode == 0:
             version = proc.stdout.decode().strip()
             if "." in version:
