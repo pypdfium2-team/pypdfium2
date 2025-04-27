@@ -814,22 +814,22 @@ def git_apply_patch(patch, cwd, git_args=()):
     run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
 
 
+def _to_gn(value):
+    if isinstance(value, bool):
+        return str(value).lower()
+    elif isinstance(value, str):
+        return f'"{value}"'
+    elif isinstance(value, int):
+        return str(value)
+    elif isinstance(value, list):
+        return f"[{','.join(_to_gn(v) for v in value)}]"
+    else:
+        raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
+
 def serialize_gn_config(config_dict):
-    
     parts = []
-    
     for key, value in config_dict.items():
-        p = f"{key} = "
-        if isinstance(value, bool):
-            p += str(value).lower()
-        elif isinstance(value, str):
-            p += f'"{value}"'
-        elif isinstance(value, int):
-            p += str(value)
-        else:
-            raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
-        parts.append(p)
-    
+        parts.append(f"{key} = {_to_gn(value)}")
     result = "\n".join(parts)
     log(f"\nBuild config:\n{result}\n")
     return result
