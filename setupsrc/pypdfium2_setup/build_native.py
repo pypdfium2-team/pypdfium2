@@ -233,7 +233,7 @@ def _get_clang_ver(clang_path):
         clang_path/"lib"/"clang",
         clang_path/"lib64"/"clang",
     ]
-    libpath = next(p for p in try_libpaths if p.exists())
+    libpath = next(filter(Path.exists, try_libpaths))
     candidates = (Version(p.name) for p in libpath.iterdir() if re.fullmatch(r"[\d\.]+", p.name))
     version = max(candidates)
     return version.major
