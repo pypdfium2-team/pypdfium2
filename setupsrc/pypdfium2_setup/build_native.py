@@ -285,7 +285,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
     n_commits, hash = 0, None
     if build_ver == "main":
         # don't know how to determine the number of commits with a --depth 1 checkout, so set a placeholder
-        n_commits = float("inf")
+        n_commits = NaN
         hash = "g" + run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFIUM_DIR, capture=True)
     
     pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash)
