@@ -41,17 +41,18 @@ PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
 DefaultConfig = {
-    "use_sysroot": False,
-    "clang_use_chrome_plugins": False,
-    "treat_warnings_as_errors": False,
-    "use_remoteexec": False,
     "is_debug": False,
+    "use_glib": False,
+    "use_remoteexec": False,
+    "treat_warnings_as_errors": False,
+    "clang_use_chrome_plugins": False,
     "is_component_build": True,
     "pdf_is_standalone": True,
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
     "pdf_use_partition_alloc": False,
+    "use_sysroot": False,
     "use_system_freetype": True,
     "pdf_bundle_freetype": False,
     "use_system_lcms2": True,
@@ -62,7 +63,6 @@ DefaultConfig = {
     "use_system_zlib": True,
     "use_custom_libcxx": False,
     "use_libcxx_modules": False,
-    "use_glib": False,
 }
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
