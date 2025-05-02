@@ -58,7 +58,7 @@ jobs:
         if: ${{ matrix.build_mode == 'syslibs' || startsWith(matrix.build_mode, 'native') }}
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+          sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
       
       - name: Install system tools
         if: ${{ startsWith(matrix.build_mode, 'native') }}

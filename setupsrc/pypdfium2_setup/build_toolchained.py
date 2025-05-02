@@ -30,6 +30,7 @@ DefaultConfig = {
     "pdf_use_skia": False,
     # "use_allocator_shim": False,
     "pdf_use_partition_alloc": False,
+    "use_glib": False,
 }
 
 SyslibsConfig = {

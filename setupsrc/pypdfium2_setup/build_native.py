@@ -62,6 +62,7 @@ DefaultConfig = {
     "use_system_zlib": True,
     "use_custom_libcxx": False,
     "use_libcxx_modules": False,
+    "use_glib": False,
 }
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
