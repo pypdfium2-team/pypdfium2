@@ -196,7 +196,7 @@ class _PdfiumVerClass:
         if self._vlines is None:
             log(f"Fetching chromium refs ...")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
-            self._vlines = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
+            self._vlines = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", f"{ChromiumURL}.git", '*.*.*.0'], cwd=None, capture=True).split("\n")
         return self._vlines
     
     def _parse_line(self, line):
