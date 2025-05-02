@@ -106,10 +106,7 @@ def identify_pdfium():
     # FIXME want to avoid static number of commits - need a better way to determine latest version and commit count diff
     log = run_cmd(["git", "log", "-100", "--pretty=%D"], cwd=PDFiumDir, capture=True)
     v_short, n_commits = _walk_refs(log)
-    if n_commits:
-        hash = "g" + run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFiumDir, capture=True)
-    else:
-        hash = None
+    hash = git_get_hash(PDFiumDir) if n_commits else None
     v_info = dict(n_commits=n_commits, hash=hash)
     return v_short, v_info
 

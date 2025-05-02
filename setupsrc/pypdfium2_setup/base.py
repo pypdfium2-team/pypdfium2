@@ -864,3 +864,8 @@ def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir], version=full_ver.build)
+
+
+def git_get_hash(repo_dir, n_digits=None):
+    short = f"--short={n_digits}" if n_digits else "--short"
+    return "g" + run_cmd(["git", "rev-parse", short, "HEAD"], cwd=repo_dir, capture=True)
