@@ -19,22 +19,23 @@ PDFiumDir      = SBDir / "pdfium"
 PDFiumBuildDir = PDFiumDir / "out" / "Default"
 
 
-# run `gn args out/Default/ --list` for build config docs
+# run `gn args --list out/Default/` for build config docs
 
 DefaultConfig = {
     "is_debug": False,
     "treat_warnings_as_errors": False,
-    "pdf_is_standalone": True,
+    "use_glib": False,
     "is_component_build": True,
+    "pdf_is_standalone": True,
+    "pdf_use_partition_alloc": False,
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
-    # "use_allocator_shim": False,
-    "pdf_use_partition_alloc": False,
-    "use_glib": False,
 }
 
 SyslibsConfig = {
+    "use_sysroot": False,
+    "clang_use_chrome_plugins": False,
     "use_system_freetype": True,
     "use_system_lcms2": True,
     "use_system_libjpeg": True,
@@ -42,8 +43,6 @@ SyslibsConfig = {
     "use_system_libpng": True,
     "use_system_zlib": True,
     "use_system_libtiff": True,
-    "clang_use_chrome_plugins": False,
-    "use_sysroot": False,
 }
 
 
