@@ -96,21 +96,21 @@ SPDX-License-Identifier = "LicenseRef-FairUse"
 [[annotations]]
 path = [
     "pdfium_patches/public_headers.patch",
-    "pdfium_patches/shared_library.patch",
+    "pdfium_patches/win/use_resources_rc.patch",
     "pdfium_patches/win/build.patch",
-    "pdfium_patches/win/pdfium.patch",
-    "pdfium_patches/win/resources.rc"
+    "pdfium_patches/win/resources.rc",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
+    "2025 Benoît Blanchon and pdfium-binaries contributors",
+    "2025 geisserml",
     "2025 PDFium developers",
-    "2025 Benoît Blanchon and pdfium-binaries contributors"
 ]
 SPDX-License-Identifier = "LicenseRef-FairUse"
 SPDX-FileComment = '''
-Obtained from https://github.com/bblanchon/pdfium-binaries/tree/master/patches
+Derived from https://github.com/bblanchon/pdfium-binaries/tree/master/patches
 For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
-Unchanged/deleted code is owned by PDFium, added code by pdfium-binaries.
+Unchanged/deleted code is by PDFium, added code by pdfium-binaries.
 '''
 
 [[annotations]]
@@ -126,7 +126,6 @@ SPDX-FileCopyrightText = [
     "2025 PDFium developers"
 ]
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
-SPDX-FileComment = "Patch by geisserml. Code shown in the patch is from pdfium."
 
 [[annotations]]
 path = "REUSE-wheel.toml"
