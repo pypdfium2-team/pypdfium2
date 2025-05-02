@@ -25,6 +25,7 @@ DefaultConfig = {
     "is_debug": False,
     "treat_warnings_as_errors": False,
     "pdf_is_standalone": True,
+    "is_component_build": True,
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
@@ -124,9 +125,9 @@ def _create_resources_rc(pdfium_build):
 
 
 def patch_pdfium(pdfium_build):
-    git_apply_patch(PatchDir/"shared_library.patch", PDFiumDir)
     git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
     if sys.platform.startswith("win32"):
+        git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
         _create_resources_rc(pdfium_build)
 
