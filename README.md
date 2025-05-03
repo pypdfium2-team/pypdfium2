@@ -93,7 +93,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     Or for the native build, on Ubuntu 24.04, you could do e.g.:
     ```bash
     # Install dependencies
-    sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
+    sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
     ```
     ```bash
     # Build with GCC

@@ -54,15 +54,15 @@ jobs:
       - name: Install python deps
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
-      - name: Install system libraries
-        if: ${{ matrix.build_mode == 'syslibs' || startsWith(matrix.build_mode, 'native') }}
+      - name: Install deps for native/syslibs build
+        if: ${{ startsWith(matrix.build_mode, 'native') || matrix.build_mode == 'syslibs' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
       
-      - name: Install system tools
+      - name: Install deps for native build
         if: ${{ startsWith(matrix.build_mode, 'native') }}
-        run: sudo apt-get install -y generate-ninja ninja-build
+        run: sudo apt-get install -y generate-ninja ninja-build libglib2.0-dev
       
       - name: Build PDFium (toolchained)
         if: ${{ matrix.build_mode == 'toolchained' }}
