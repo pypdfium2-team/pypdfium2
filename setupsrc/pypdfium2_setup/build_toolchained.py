@@ -13,6 +13,8 @@ from pathlib import Path, WindowsPath
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
+DEFAULT_VER = 7157
+
 SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
@@ -75,7 +77,7 @@ def dl_depottools(do_update):
     return is_update
 
 
-def dl_pdfium(GClient, do_update, revision):
+def dl_pdfium(GClient, do_update, version):
     
     if not PDFiumDir.exists():
         log("PDFium: Download ...")
@@ -83,7 +85,7 @@ def dl_pdfium(GClient, do_update, revision):
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if do_update:
-        run_cmd([GClient, "sync", "-D", "--reset", "--revision", f"origin/{revision}", "--no-history", "--shallow"], cwd=SBDir)
+        run_cmd([GClient, "sync", "-D", "--reset", "--revision", f"origin/{version}", "--no-history", "--shallow"], cwd=SBDir)
         # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
         # FIXME want to avoid static number of commits, and instead check out exactly up to latest versioned commit
         run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
@@ -147,7 +149,7 @@ def get_tool(name):
 
 def main(
         b_update = False,
-        b_revision = None,
+        b_version = None,
         b_target = None,
         b_use_syslibs = False,
         b_win_sdk_dir = None,
@@ -155,8 +157,8 @@ def main(
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
     
-    if b_revision is None:
-        b_revision = "main"
+    if b_version is None:
+        b_version = f"chromium/{DEFAULT_VER}"
     if b_target is None:
         b_target = "pdfium"
     
@@ -173,7 +175,7 @@ def main(
     GN      = get_tool("gn")
     Ninja   = get_tool("ninja")
     
-    did_pdfium_sync = dl_pdfium(GClient, b_update, b_revision)
+    did_pdfium_sync = dl_pdfium(GClient, b_update, b_version)
     v_short, v_post = identify_pdfium()
     log(f"Version {v_short} {v_post}")
     
@@ -182,7 +184,7 @@ def main(
     
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
-        get_shimheaders_tool(PDFiumDir)
+        get_shimheaders_tool(PDFiumDir, rev=b_version)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)
@@ -204,8 +206,8 @@ def parse_args(argv):
         help = "Update existing PDFium/DepotTools repositories, removing local changes.",
     )
     parser.add_argument(
-        "--revision", "-r",
-        help = "PDFium revision to check out (defaults to main).",
+        "--version", "-v",
+        help = f"PDFium version (revision) to use. Defaults to 'chromium/{DEFAULT_VER}'. Use 'main' to try the latest state.",
     )
     parser.add_argument(
         "--target", "-t",
