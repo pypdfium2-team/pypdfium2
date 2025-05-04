@@ -77,8 +77,6 @@ LICENSES_SDIST = (
     "REUSE.toml",
 )
 
-PLATFILES_GLOB = (BindingsFN, VersionFN, *LIBNAME_GLOBS)
-
 
 def assert_exists(dir, data_files):
     missing = [f for f in data_files if not (dir/f).exists()]
@@ -132,19 +130,21 @@ def run_setup(modnames, pdfium_ver, pl_name):
     if ModuleRaw in modnames:
         kwargs["package_dir"]["pypdfium2_raw"] = "src/pypdfium2_raw"
     
+    if pl_name is None or hasattr(ExtPlats, pl_name):
+        lib_pattern = Host.libname_glob
+    else:
+        sys_name = plat_to_system(pl_name)
+        lib_pattern = libname_for_system(sys_name, name="*")
+    libnames = [p.name for p in ModuleDir_Raw.glob(lib_pattern)]
+    
     if ModuleRaw not in modnames or pl_name == ExtPlats.sdist:
-        kwargs["exclude_package_data"] = {"pypdfium2_raw": PLATFILES_GLOB}
+        kwargs["exclude_package_data"] = {"pypdfium2_raw": (VersionFN, BindingsFN, *libnames)}
         if pl_name == ExtPlats.sdist:
             kwargs["license_files"] += LICENSES_SDIST
     elif pl_name == ExtPlats.system:
+        kwargs["exclude_package_data"] = {"pypdfium2_raw": libnames}
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
-        if pl_name is None:
-            lib_pattern = Host.libname_glob
-        else:
-            sys_name = plat_to_system(pl_name)
-            lib_pattern = libname_for_system(sys_name, name="*")
-        libnames = [p.name for p in ModuleDir_Raw.glob(lib_pattern)]
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, *libnames]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
