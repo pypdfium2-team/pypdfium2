@@ -110,21 +110,21 @@ def identify_pdfium():
     return v_short, v_info
 
 
-def _create_resources_rc(pdfium_build):
+def _create_resources_rc(v_short):
     input_path = PatchDir / "win" / "resources.rc"
     output_path = PDFiumDir / "resources.rc"
     content = input_path.read_text()
-    content = content.replace("$VERSION_CSV", str(pdfium_build))
-    content = content.replace("$VERSION", str(pdfium_build))
+    content = content.replace("$VERSION_CSV", str(v_short))
+    content = content.replace("$VERSION", str(v_short))
     output_path.write_text(content)
 
 
-def patch_pdfium(pdfium_build):
+def patch_pdfium(v_short):
     git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
-        _create_resources_rc(pdfium_build)
+        _create_resources_rc(v_short)
 
 
 def configure(GN, config):
@@ -150,6 +150,7 @@ def main(
         b_target = None,
         b_use_syslibs = False,
         b_win_sdk_dir = None,
+        b_use_single_lib = False,
     ):
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
@@ -173,20 +174,26 @@ def main(
     Ninja   = get_tool("ninja")
     
     did_pdfium_sync = dl_pdfium(GClient, b_update, b_version)
-    if did_pdfium_sync:
-        patch_pdfium(v_short)
     
     v_short, v_post = identify_pdfium()
     log(f"Version {v_short} {v_post}")
     v_full = PdfiumVer.to_full(v_short)
     rev = b_version if b_version == "main" else str(v_full)
     
-    config_dict = DefaultConfig.copy()
+    if did_pdfium_sync:
+        patch_pdfium(v_short)
     if b_use_syslibs:
         get_shimheaders_tool(PDFiumDir, rev=rev)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
+    if b_use_single_lib:
+        git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
+    
+    config_dict = DefaultConfig.copy()
+    if b_use_syslibs:
         config_dict.update(SyslibsConfig)
+    if b_use_single_lib:
+        config_dict["is_component_build"] = False
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
@@ -220,6 +227,12 @@ def parse_args(argv):
         "--win-sdk-dir",
         type = WindowsPath,
         help = "Path to the Windows SDK (Windows only)",
+    )
+    parser.add_argument(
+        "--single-lib",
+        action = "store_true",
+        dest = "use_single_lib",
+        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used.",
     )
     return parser.parse_args(argv)
 
