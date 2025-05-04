@@ -170,9 +170,6 @@ def libname_for_system(system, name="pdfium"):
     raise ValueError(f"Unhandled system {system!r}, don't know library naming pattern. Set $LIBNAME_PATTERN=prefix.suffix (e.g. lib.so)")
 
 
-AllLibnames = ("pdfium.dll", "libpdfium.dylib", "libpdfium.so")
-
-
 class _PdfiumVerScheme (
     namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
 ):
@@ -473,6 +470,7 @@ class _host_platform:
 
 Host = _host_platform()
 HOST_LIBNAME_GLOB = libname_for_system(Host.system, name="*")
+LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
 
 USR_PREFIX = "/usr"
 if Host.system == SysNames.android:
@@ -713,7 +711,8 @@ def clean_platfiles():
         ModuleDir_Raw / BindingsFN,
         ModuleDir_Raw / VersionFN,
     ]
-    deletables += [ModuleDir_Raw / fn for fn in AllLibnames]
+    for pattern in LIBNAME_GLOBS:
+        deletables += ModuleDir_Raw.glob(pattern)
     
     for fp in deletables:
         if fp.is_file():

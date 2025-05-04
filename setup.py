@@ -77,7 +77,7 @@ LICENSES_SDIST = (
     "REUSE.toml",
 )
 
-PLATFILES_GLOB = (BindingsFN, VersionFN, *AllLibnames)
+PLATFILES_GLOB = (BindingsFN, VersionFN, *LIBNAME_GLOBS)
 
 
 def assert_exists(dir, data_files):
