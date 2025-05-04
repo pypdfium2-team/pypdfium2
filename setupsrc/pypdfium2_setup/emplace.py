@@ -58,18 +58,17 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     
     else:
         
-        platfiles = []
         pl_dir = DataDir/pl_name
-        system = plat_to_system(pl_name)
+        platfiles = [pl_dir/VersionFN]
         
         if pl_name == ExtPlats.sourcebuild:
             # sourcebuild bindings are kept in the platform directory
-            platfiles += [pl_dir/BindingsFN]
+            platfiles += [pl_dir/BindingsFN, *pl_dir.glob(HOST_LIBNAME_GLOB)]
         else:
-            platfiles += [BindingsFile]
+            system = plat_to_system(pl_name)
+            platfiles += [BindingsFile, pl_dir/libname_for_system(system)]
             _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8)
         
-        platfiles += [pl_dir/libname_for_system(system), pl_dir/VersionFN]
         for fp in platfiles:
             shutil.copyfile(fp, ModuleDir_Raw/fp.name)
         

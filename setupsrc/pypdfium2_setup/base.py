@@ -472,6 +472,7 @@ class _host_platform:
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
+HOST_LIBNAME_GLOB = libname_for_system(Host.system, name="*")
 
 USR_PREFIX = "/usr"
 if Host.system == SysNames.android:
@@ -864,8 +865,8 @@ def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     dest_dir = DataDir / ExtPlats.sourcebuild
     mkdir(dest_dir)
     
-    libname = libname_for_system(Host.system)
-    shutil.copy(build_dir/libname, dest_dir/libname)
+    for libpath in build_dir.glob(HOST_LIBNAME_GLOB):
+        shutil.copy(libpath, dest_dir/libpath.name)
     write_pdfium_info(dest_dir, full_ver, origin="sourcebuild", **v_kwargs)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
