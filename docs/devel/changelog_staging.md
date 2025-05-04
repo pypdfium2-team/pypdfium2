@@ -36,7 +36,7 @@
   * Anything using `_buffer_reader`/`_buffer_writer` under the hood (`PdfDocument` created from byte stream input, `PdfImage.load_jpeg()`, `PdfDocument.save()`).
   * `PdfBitmap.from_raw()` rsp. `PdfBitmap._get_buffer()` and their internal callers (`PdfBitmap` makers `new_foreign` and `new_foreign_simple`, `PdfImage.get_bitmap()`).
   * Also, some Readme snippets were affected, including the raw API rendering example. The Readme has been updated to mention the problem and use `.from_address(...)` instead.
-  * *With older versions of pypdfium2, periodically calling `ctypes._reset_cache()` (or better updating to Python >= 3.14 if feasible) can work around this issue.*
+  * *With older versions of pypdfium2/python, periodically calling `ctypes._reset_cache()` can work around this issue.*
 - Improved startup performance by deferring imports of optional dependencies to the point where they are actually needed, to avoid overhead if you do not use them.
 - Simplified version classes (no API change expected).
 
