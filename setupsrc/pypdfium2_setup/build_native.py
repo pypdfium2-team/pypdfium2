@@ -136,7 +136,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
         full_ver = PdfiumVer.get_latest_upstream()
     else:
         full_ver = PdfiumVer.to_full(short_ver)
-        full_ver_str = ".".join(str(v) for v in full_ver)
+        full_ver_str = str(full_ver)
         pdfium_rev = f"chromium/{short_ver}"
         chromium_rev = full_ver_str
     

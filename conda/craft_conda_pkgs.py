@@ -52,7 +52,8 @@ def main_conda_raw(args):
     
     _handle_ver(args, CondaPkgVer.get_latest_pdfium)
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
-    os.environ["PDFIUM_FULL"] = ".".join([str(v) for v in PdfiumVer.to_full(args.pdfium_ver)])
+    full_ver = PdfiumVer.to_full(args.pdfium_ver)
+    os.environ["PDFIUM_FULL"] = str(full_ver)
     os.environ["BUILD_NUM"] = str(_get_build_num(args))
     
     emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)

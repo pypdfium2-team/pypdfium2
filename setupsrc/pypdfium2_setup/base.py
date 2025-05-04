@@ -173,9 +173,15 @@ def libname_for_system(system, name="pdfium"):
 AllLibnames = ("pdfium.dll", "libpdfium.dylib", "libpdfium.so")
 
 
+class _PdfiumVerScheme (
+    namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
+):
+    def __str__(self):
+        return ".".join(str(n) for n in self)
+
 class _PdfiumVerClass:
     
-    scheme = namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
+    scheme = _PdfiumVerScheme
     
     def __init__(self):
         self._vlines, self._vdict = None, {}

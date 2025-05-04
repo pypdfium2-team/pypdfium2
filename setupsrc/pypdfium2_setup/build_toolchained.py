@@ -183,7 +183,7 @@ def main(
     v_short, v_post = identify_pdfium()
     log(f"Version {v_short} {v_post}")
     v_full = PdfiumVer.to_full(v_short)
-    rev = b_version if b_version == "main" else ".".join([str(n) for n in v_full])
+    rev = b_version if b_version == "main" else str(v_full)
     
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
