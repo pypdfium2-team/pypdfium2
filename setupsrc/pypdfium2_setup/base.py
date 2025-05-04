@@ -791,11 +791,14 @@ def parse_pl_spec(pl_spec):
         raise ValueError(f"Invalid binary spec '{pl_spec}'")
         
     if req_ver:
-        assert req_ver.isnumeric()
-        req_ver = int(req_ver)
+        if req_ver == "latest":
+            req_ver = PdfiumVer.get_latest()
+        else:
+            req_ver = int(req_ver)
     elif pl_name is not None:
         assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
-        req_ver = PdfiumVer.get_latest()
+        req_ver = PdfiumVer.release_pdfium_build
+        log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
     
     return do_prepare, pl_name, req_ver, use_v8
 
