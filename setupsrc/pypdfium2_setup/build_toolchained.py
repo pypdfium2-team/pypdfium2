@@ -76,17 +76,23 @@ def dl_depottools(do_update):
 
 def dl_pdfium(GClient, do_update, version):
     
-    if not PDFiumDir.exists():
+    had_pdfium = PDFiumDir.exists()
+    if not had_pdfium:
         log("PDFium: Download ...")
         do_update = True
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if do_update:
-        run_cmd([GClient, "sync", "-D", "--reset", "--revision", f"origin/{version}", "--no-history", "--shallow"], cwd=SBDir)
+        args = [GClient, "sync"]
+        if had_pdfium:
+            args += ["-D", "--reset"]
+        args += ["--revision", f"origin/{version}", "--no-history", "--shallow"]
+        run_cmd(args, cwd=SBDir)
         # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
         # FIXME want to avoid static number of commits, and instead check out exactly up to latest versioned commit
-        run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
-        run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
+        if not had_pdfium:
+            run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
+            run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     
     return do_update
 
