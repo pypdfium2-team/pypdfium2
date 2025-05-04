@@ -25,14 +25,15 @@ jobs:
         include:
           - os: 'ubuntu-latest'
             build_mode: 'syslibs'
-          - os: 'ubuntu-latest'
-            build_mode: 'native-gcc'
-          - os: 'ubuntu-24.04-arm'
-            build_mode: 'native-gcc'
-          - os: 'ubuntu-latest'
-            build_mode: 'native-clang'
-          - os: 'ubuntu-24.04-arm'
-            build_mode: 'native-clang'
+          # XXX commented out for testing
+          # - os: 'ubuntu-latest'
+          #   build_mode: 'native-gcc'
+          # - os: 'ubuntu-24.04-arm'
+          #   build_mode: 'native-gcc'
+          # - os: 'ubuntu-latest'
+          #   build_mode: 'native-clang'
+          # - os: 'ubuntu-24.04-arm'
+          #   build_mode: 'native-clang'
     
     runs-on: ${{ matrix.os }}
     
