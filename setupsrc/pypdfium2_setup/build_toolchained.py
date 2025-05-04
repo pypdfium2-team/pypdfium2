@@ -50,6 +50,7 @@ SyslibsConfig = {
 
 if sys.platform.startswith("linux"):
     SyslibsConfig["use_custom_libcxx"] = False
+    SyslibsConfig["use_libcxx_modules"] = False
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     SyslibsConfig["use_system_xcode"] = True
