@@ -76,7 +76,7 @@ jobs:
       
       - name: Build PDFium (native, gcc)
         if: ${{ matrix.build_mode == 'native-gcc' }}
-        run: python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc
+        run: python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc --test
       
       - name: Build PDFium (native, clang)
         if: ${{ matrix.build_mode == 'native-clang' }}
@@ -87,7 +87,7 @@ jobs:
           sudo apt-get install -y llvm lld
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
-          python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
+          python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler clang --test
       
       - name: Install
         run: PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
