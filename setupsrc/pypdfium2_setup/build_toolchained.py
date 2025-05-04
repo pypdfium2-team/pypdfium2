@@ -177,15 +177,17 @@ def main(
     Ninja   = get_tool("ninja")
     
     did_pdfium_sync = dl_pdfium(GClient, b_update, b_version)
-    v_short, v_post = identify_pdfium()
-    log(f"Version {v_short} {v_post}")
-    
     if did_pdfium_sync:
         patch_pdfium(v_short)
     
+    v_short, v_post = identify_pdfium()
+    log(f"Version {v_short} {v_post}")
+    v_full = PdfiumVer.to_full(v_short)
+    rev = b_version if b_version == "main" else ".".join([str(n) for n in v_full])
+    
     config_dict = DefaultConfig.copy()
     if b_use_syslibs:
-        get_shimheaders_tool(PDFiumDir, rev=b_version)
+        get_shimheaders_tool(PDFiumDir, rev=rev)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
         config_dict.update(SyslibsConfig)
@@ -193,7 +195,6 @@ def main(
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
     build(Ninja, b_target)
-    v_full = PdfiumVer.to_full(v_short)
     pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_full, **v_post)
 
 
