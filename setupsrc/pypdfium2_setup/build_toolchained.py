@@ -238,7 +238,7 @@ def parse_args(argv):
         "--single-lib",
         action = "store_true",
         dest = "use_single_lib",
-        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used.",
+        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-synced, else the existing state is used.",
     )
     return parser.parse_args(argv)
 
