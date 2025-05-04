@@ -188,18 +188,18 @@ def main(
     
     if did_pdfium_sync:
         patch_pdfium(v_short)
+        if b_use_single_lib:
+            git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
     if b_use_syslibs:
         get_shimheaders_tool(PDFiumDir, rev=rev)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
-    if b_use_single_lib:
-        git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
     
     config_dict = DefaultConfig.copy()
-    if b_use_syslibs:
-        config_dict.update(SyslibsConfig)
     if b_use_single_lib:
         config_dict["is_component_build"] = False
+    if b_use_syslibs:
+        config_dict.update(SyslibsConfig)
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
