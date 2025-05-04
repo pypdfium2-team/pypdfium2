@@ -25,15 +25,14 @@ jobs:
         include:
           - os: 'ubuntu-latest'
             build_mode: 'syslibs'
-          # XXX commented out for testing
-          # - os: 'ubuntu-latest'
-          #   build_mode: 'native-gcc'
-          # - os: 'ubuntu-24.04-arm'
-          #   build_mode: 'native-gcc'
-          # - os: 'ubuntu-latest'
-          #   build_mode: 'native-clang'
-          # - os: 'ubuntu-24.04-arm'
-          #   build_mode: 'native-clang'
+          - os: 'ubuntu-latest'
+            build_mode: 'native-gcc'
+          - os: 'ubuntu-24.04-arm'
+            build_mode: 'native-gcc'
+          - os: 'ubuntu-latest'
+            build_mode: 'native-clang'
+          - os: 'ubuntu-24.04-arm'
+            build_mode: 'native-clang'
     
     runs-on: ${{ matrix.os }}
     
@@ -64,6 +63,8 @@ jobs:
       - name: Install deps for native build
         if: ${{ startsWith(matrix.build_mode, 'native') }}
         run: sudo apt-get install -y generate-ninja ninja-build libglib2.0-dev
+      
+      # note, we could pass --single-lib to build_toolchained.py
       
       - name: Build PDFium (toolchained)
         if: ${{ matrix.build_mode == 'toolchained' }}
