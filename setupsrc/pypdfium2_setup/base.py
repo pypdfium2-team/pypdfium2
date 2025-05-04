@@ -146,6 +146,14 @@ def log(*args, **kwargs):
 def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
 
+def read_json(fp):
+    with open(fp, "r") as buf:
+        return json.load(buf)
+
+def write_json(fp, data, indent=2):
+    with open(fp, "w") as buf:
+        return json.dump(data, buf, indent=indent)
+
 
 def libname_for_system(system, name="pdfium"):
     
@@ -233,6 +241,10 @@ class _PdfiumVerClass:
         full_ver = self._vdict[v_short]
         log(f"Resolved {v_short} -> {full_ver}")
         return full_ver
+    
+    @cached_property
+    def release_pdfium_build(self):
+        return read_json(AR_RecordFile)["pdfium"]
 
 PdfiumVer = _PdfiumVerClass()
 NaN = float("nan")
@@ -240,15 +252,6 @@ PdfiumVerUnknown = PdfiumVer.scheme(NaN, NaN, NaN, NaN)
 
 # def is_nan(value):
 #     return isinstance(value, float) and value != value
-
-
-def read_json(fp):
-    with open(fp, "r") as buf:
-        return json.load(buf)
-
-def write_json(fp, data, indent=2):
-    with open(fp, "w") as buf:
-        return json.dump(data, buf, indent=indent)
 
 
 def write_pdfium_info(dir, full_ver, origin, flags=(), n_commits=0, hash=None):
@@ -602,9 +605,9 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
     if USE_REFBINDINGS:
         log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
         assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
-        record = read_json(AR_RecordFile)
-        if version and version != record["pdfium"]:
-            log(f"Warning: binary/bindings version mismatch ({version} != {record['pdfium']}). This is ABI-unsafe!")
+        record_ver = PdfiumVer.release_pdfium_build
+        if version and version != record_ver:
+            log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
         shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
         return
     
