@@ -63,7 +63,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
         
         if pl_name == ExtPlats.sourcebuild:
             # sourcebuild bindings are kept in the platform directory
-            platfiles += [pl_dir/BindingsFN, *pl_dir.glob(HOST_LIBNAME_GLOB)]
+            platfiles += [pl_dir/BindingsFN, *pl_dir.glob(Host.libname_glob)]
         else:
             system = plat_to_system(pl_name)
             platfiles += [BindingsFile, pl_dir/libname_for_system(system)]

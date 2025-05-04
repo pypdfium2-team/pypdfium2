@@ -380,6 +380,10 @@ class _host_platform:
             assert str(self.platform).startswith(f"{self._system}_"), f"'{self.platform}' does not start with '{self._system}_'"
         return self._system
     
+    @cached_property
+    def libname_glob(self):
+        return libname_for_system(Host.system, name="*")
+    
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
         if self._raw_system == "linux" and self._libc_name:
@@ -469,7 +473,6 @@ class _host_platform:
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
-HOST_LIBNAME_GLOB = libname_for_system(Host.system, name="*")
 LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
 
 USR_PREFIX = "/usr"
@@ -864,7 +867,7 @@ def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     dest_dir = DataDir / ExtPlats.sourcebuild
     mkdir(dest_dir)
     
-    for libpath in build_dir.glob(HOST_LIBNAME_GLOB):
+    for libpath in build_dir.glob(Host.libname_glob):
         shutil.copy(libpath, dest_dir/libpath.name)
     write_pdfium_info(dest_dir, full_ver, origin="sourcebuild", **v_kwargs)
     

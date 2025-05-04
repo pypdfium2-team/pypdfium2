@@ -86,7 +86,7 @@ def assert_exists(dir, data_files):
         assert False, f"Missing data files: {missing}"
 
 
-def run_setup(modnames, pdfium_ver, pl_name, libname=None):
+def run_setup(modnames, pdfium_ver, pl_name):
     
     kwargs = dict(
         name = "pypdfium2",
@@ -139,10 +139,13 @@ def run_setup(modnames, pdfium_ver, pl_name, libname=None):
     elif pl_name == ExtPlats.system:
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
-        if not libname:
+        if pl_name is None:
+            lib_pattern = Host.libname_glob
+        else:
             sys_name = plat_to_system(pl_name)
-            libname = libname_for_system(sys_name)
-        kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, libname]
+            lib_pattern = libname_for_system(sys_name, name="*")
+        libnames = [p.name for p in ModuleDir_Raw.glob(lib_pattern)]
+        kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, *libnames]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         kwargs["license_files"] += LICENSES_WHEEL
