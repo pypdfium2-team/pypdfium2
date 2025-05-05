@@ -51,6 +51,7 @@
 - On host platforms not covered with `pdfium-binaries`, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered.
 - The toolchained build script continues to be available as well, but has been renamed from `sourcebuild.py` to `build_toolchained.py`.
 - Both build scripts now pin pdfium to the version last tested by pypdfium2-team.
+- By default, `build_toolchained` now generate separate DLLs for dependency libraries, but you may pass `--single-lib` to restore the previous behavior of bundling dependencies into a single pdfium DLL. Setup has been changed accordingly to collect libraries with globbing patterns.
 - With `build_toolchained.py --update`, avoid calling `gclient revert` and `gclient sync`, because this seems to sync twice, which is slow. Instead, call only `gclient sync` with `-D --reset`.
 - With `pdfium-binaries`, we now read the full version from the `VERSION` file embedded in the tarballs. This avoids a potentially expensive `git ls-remote` call to get Chromium tags.
 - Take `PDFIUM_BINDINGS=reference` into account on sourcebuild as well. Automatically fall back to reference bindings if ctypesgen is not installed (except on CI).
