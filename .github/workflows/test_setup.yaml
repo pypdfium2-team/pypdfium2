@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
-          fetch-depth: 0  # quick fix for `git describe`
+          fetch-depth: 0  # for git describe in "Build docs" step
       
       # FIXME Should we run the test suite after each way of installing?
       
@@ -57,7 +57,7 @@ jobs:
       - name: Setup (editable, no isolation)
         run: python3 -m pip install --no-build-isolation -e .
       
-      - name: Build documentation
+      - name: Build docs
         run: just docs-build
       
       - name: Run test suite

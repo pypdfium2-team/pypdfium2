@@ -36,7 +36,7 @@
   * Anything using `_buffer_reader`/`_buffer_writer` under the hood (`PdfDocument` created from byte stream input, `PdfImage.load_jpeg()`, `PdfDocument.save()`).
   * `PdfBitmap.from_raw()` rsp. `PdfBitmap._get_buffer()` and their internal callers (`PdfBitmap` makers `new_foreign` and `new_foreign_simple`, `PdfImage.get_bitmap()`).
   * Also, some Readme snippets were affected, including the raw API rendering example. The Readme has been updated to mention the problem and use `.from_address(...)` instead.
-  * *With older versions of pypdfium2, periodically calling `ctypes._reset_cache()` (or better updating to Python >= 3.14 if feasible) can work around this issue.*
+  * *With older versions of pypdfium2/python, periodically calling `ctypes._reset_cache()` can work around this issue.*
 - Improved startup performance by deferring imports of optional dependencies to the point where they are actually needed, to avoid overhead if you do not use them.
 - Simplified version classes (no API change expected).
 
@@ -46,9 +46,11 @@
 - *Note, we have no intent to provide wheels for the simulators (`android x86_64/x86`, `ios arm64_simu/x86_64`), as they are only relevant to developers, and installing from source with automatic binary deployment should be roughly equialvent.*
 
 *Setup*
+- When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, by default, we now use the version included with the last pypdfium2 release. This is to prevent possible upstream changes breaking pypdfium2 installation. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
 - We finally have a build script that works without Google's toolchain, and instead uses system tools/libraries (`build_native.py`). This has been inspired by the `libpdfium` COPR / `libpdfium-nojs` AUR recipes. Thanks to the respective packagers for showing how to do this. The GCC compiler is preferred, but Clang should also work if you set up some symlinks. As of this writing, both passes on our Ubuntu x84_64/arm64 CI.
 - On host platforms not covered with `pdfium-binaries`, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered.
 - The toolchained build script continues to be available as well, but has been renamed from `sourcebuild.py` to `build_toolchained.py`.
+- Both build scripts now pin pdfium to the version last tested by pypdfium2-team.
 - With `build_toolchained.py --update`, avoid calling `gclient revert` and `gclient sync`, because this seems to sync twice, which is slow. Instead, call only `gclient sync` with `-D --reset`.
 - With `pdfium-binaries`, we now read the full version from the `VERSION` file embedded in the tarballs. This avoids a potentially expensive `git ls-remote` call to get Chromium tags.
 - Take `PDFIUM_BINDINGS=reference` into account on sourcebuild as well. Automatically fall back to reference bindings if ctypesgen is not installed (except on CI).
@@ -61,5 +63,5 @@
 - Merged `tests_old/` back into `tests/`.
 - Migrated from deprecated `.reuse/dep5`/`.reuse/dep5-wheel` to more visible `REUSE.toml`/`REUSE-wheel.toml`.
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.
-- Bumped minimum pdfium requirement in conda recipe to `>6635` (effectively `>=6638`), due to new errchecks that are not version-guarded.
+- Bumped minimum pdfium requirement in conda recipe to `>6635` (effectively `>=6638`), due to new errchecks.
 - Cleanly split out conda packaging into an own file, and confined it to the `conda/` directory, to avoid polluting the main setup code.

@@ -41,17 +41,18 @@ PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
 DefaultConfig = {
-    "use_sysroot": False,
-    "clang_use_chrome_plugins": False,
-    "treat_warnings_as_errors": False,
-    "use_remoteexec": False,
     "is_debug": False,
+    "use_glib": False,
+    "use_remoteexec": False,
+    "treat_warnings_as_errors": False,
+    "clang_use_chrome_plugins": False,
     "is_component_build": True,
     "pdf_is_standalone": True,
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
     "pdf_use_partition_alloc": False,
+    "use_sysroot": False,
     "use_system_freetype": True,
     "pdf_bundle_freetype": False,
     "use_system_lcms2": True,
@@ -135,7 +136,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
         full_ver = PdfiumVer.get_latest_upstream()
     else:
         full_ver = PdfiumVer.to_full(short_ver)
-        full_ver_str = ".".join(str(v) for v in full_ver)
+        full_ver_str = str(full_ver)
         pdfium_rev = f"chromium/{short_ver}"
         chromium_rev = full_ver_str
     
@@ -286,7 +287,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
     if build_ver == "main":
         # don't know how to determine the number of commits with a --depth 1 checkout, so set a placeholder
         n_commits = NaN
-        hash = "g" + run_cmd(["git", "rev-parse", "--short", "HEAD"], cwd=PDFIUM_DIR, capture=True)
+        hash = git_get_hash(PDFIUM_DIR, n_digits=11)
     
     pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash)
 

@@ -146,6 +146,14 @@ def log(*args, **kwargs):
 def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
 
+def read_json(fp):
+    with open(fp, "r") as buf:
+        return json.load(buf)
+
+def write_json(fp, data, indent=2):
+    with open(fp, "w") as buf:
+        return json.dump(data, buf, indent=indent)
+
 
 def libname_for_system(system, name="pdfium"):
     
@@ -170,12 +178,15 @@ def libname_for_system(system, name="pdfium"):
     raise ValueError(f"Unhandled system {system!r}, don't know library naming pattern. Set $LIBNAME_PATTERN=prefix.suffix (e.g. lib.so)")
 
 
-AllLibnames = ("pdfium.dll", "libpdfium.dylib", "libpdfium.so")
-
+class _PdfiumVerScheme (
+    namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
+):
+    def __str__(self):
+        return ".".join(str(n) for n in self)
 
 class _PdfiumVerClass:
     
-    scheme = namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
+    scheme = _PdfiumVerScheme
     
     def __init__(self):
         self._vlines, self._vdict = None, {}
@@ -196,7 +207,7 @@ class _PdfiumVerClass:
         if self._vlines is None:
             log(f"Fetching chromium refs ...")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
-            self._vlines = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", ChromiumURL, '*.*.*.0'], cwd=None, capture=True).split("\n")
+            self._vlines = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", f"{ChromiumURL}.git", '*.*.*.0'], cwd=None, capture=True).split("\n")
         return self._vlines
     
     def _parse_line(self, line):
@@ -230,6 +241,10 @@ class _PdfiumVerClass:
         full_ver = self._vdict[v_short]
         log(f"Resolved {v_short} -> {full_ver}")
         return full_ver
+    
+    @cached_property
+    def release_pdfium_build(self):
+        return read_json(AR_RecordFile)["pdfium"]
 
 PdfiumVer = _PdfiumVerClass()
 NaN = float("nan")
@@ -237,15 +252,6 @@ PdfiumVerUnknown = PdfiumVer.scheme(NaN, NaN, NaN, NaN)
 
 # def is_nan(value):
 #     return isinstance(value, float) and value != value
-
-
-def read_json(fp):
-    with open(fp, "r") as buf:
-        return json.load(buf)
-
-def write_json(fp, data, indent=2):
-    with open(fp, "w") as buf:
-        return json.dump(data, buf, indent=indent)
 
 
 def write_pdfium_info(dir, full_ver, origin, flags=(), n_commits=0, hash=None):
@@ -377,6 +383,10 @@ class _host_platform:
             assert str(self.platform).startswith(f"{self._system}_"), f"'{self.platform}' does not start with '{self._system}_'"
         return self._system
     
+    @cached_property
+    def libname_glob(self):
+        return libname_for_system(Host.system, name="*")
+    
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
         if self._raw_system == "linux" and self._libc_name:
@@ -466,6 +476,7 @@ class _host_platform:
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
+LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
 
 USR_PREFIX = "/usr"
 if Host.system == SysNames.android:
@@ -594,9 +605,9 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
     if USE_REFBINDINGS:
         log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
         assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
-        record = read_json(AR_RecordFile)
-        if version and version != record["pdfium"]:
-            log(f"Warning: binary/bindings version mismatch ({version} != {record['pdfium']}). This is ABI-unsafe!")
+        record_ver = PdfiumVer.release_pdfium_build
+        if version and version != record_ver:
+            log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
         shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
         return
     
@@ -706,7 +717,8 @@ def clean_platfiles():
         ModuleDir_Raw / BindingsFN,
         ModuleDir_Raw / VersionFN,
     ]
-    deletables += [ModuleDir_Raw / fn for fn in AllLibnames]
+    for pattern in LIBNAME_GLOBS:
+        deletables += ModuleDir_Raw.glob(pattern)
     
     for fp in deletables:
         if fp.is_file():
@@ -779,11 +791,14 @@ def parse_pl_spec(pl_spec):
         raise ValueError(f"Invalid binary spec '{pl_spec}'")
         
     if req_ver:
-        assert req_ver.isnumeric()
-        req_ver = int(req_ver)
+        if req_ver == "latest":
+            req_ver = PdfiumVer.get_latest()
+        else:
+            req_ver = int(req_ver)
     elif pl_name is not None:
         assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
-        req_ver = PdfiumVer.get_latest()
+        req_ver = PdfiumVer.release_pdfium_build
+        log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
     
     return do_prepare, pl_name, req_ver, use_v8
 
@@ -858,9 +873,14 @@ def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     dest_dir = DataDir / ExtPlats.sourcebuild
     mkdir(dest_dir)
     
-    libname = libname_for_system(Host.system)
-    shutil.copy(build_dir/libname, dest_dir/libname)
+    for libpath in build_dir.glob(Host.libname_glob):
+        shutil.copy(libpath, dest_dir/libpath.name)
     write_pdfium_info(dest_dir, full_ver, origin="sourcebuild", **v_kwargs)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir], version=full_ver.build)
+
+
+def git_get_hash(repo_dir, n_digits=None):
+    short = f"--short={n_digits}" if n_digits else "--short"
+    return "g" + run_cmd(["git", "rev-parse", short, "HEAD"], cwd=repo_dir, capture=True)

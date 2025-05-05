@@ -18,7 +18,7 @@ build:
     python: '3.12'
   jobs:
     post_checkout:
-      # quick fix for git describe
+      # for git describe in conf.py
       - git fetch --unshallow || true
 
 python:

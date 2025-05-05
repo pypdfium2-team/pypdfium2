@@ -20,55 +20,6 @@ except ImportError:
     build_module = None
 
 
-def main():
-    
-    parser = argparse.ArgumentParser(
-        description = "Craft PyPI packages for pypdfium2"
-    )
-    parser.add_argument("--pdfium-ver", default=None)
-    parser.add_argument("--use-v8", action="store_true")
-    parser.add_argument("--wheels", action="store_true")
-    parser.add_argument("--sdist", action="store_true")
-    
-    args = parser.parse_args()
-    if not (args.wheels or args.sdist):
-        args.wheels, args.sdist = True, True
-    if not args.pdfium_ver or args.pdfium_ver == "latest":
-        args.pdfium_ver = PdfiumVer.get_latest()
-    else:
-        args.pdfium_ver = int(args.pdfium_ver)
-    
-    with ArtifactStash():
-        main_pypi(args)
-
-
-def main_pypi(args):
-    
-    assert args.sdist or args.wheels
-    
-    if args.sdist:
-        os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
-        helpers_info = get_helpers_info()
-        with tmp_ctypesgen_pin():
-            if not helpers_info["dirty"]:
-                os.environ["SDIST_IGNORE_DIRTY"] = "1"
-            _run_pypi_build(["--sdist"])
-    
-    if args.wheels:
-        suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
-        for plat in WheelPlatforms:
-            os.environ[PlatSpec_EnvVar] = plat + suffix
-            _run_pypi_build(["--wheel"])
-            clean_platfiles()
-
-
-def _run_pypi_build(caller_args):
-    # -nx: --no-isolation --skip-dependency-check
-    assert build_module, "Module 'build' is not importable. Cannot craft PyPI packages."
-    with tmp_cwd_context(ProjectDir):
-        build_module.main([str(ProjectDir), "-nx", *caller_args])
-
-
 class ArtifactStash:
     
     # Preserve in-tree artifacts from editable install
@@ -125,6 +76,55 @@ def tmp_ctypesgen_pin():
         log(f"Wrote temporary pyproject.toml with ctypesgen pin")
         yield
     log(f"Reset pyproject.toml")
+
+
+def _run_pypi_build(caller_args):
+    # -nx: --no-isolation --skip-dependency-check
+    assert build_module, "Module 'build' is not importable. Cannot craft PyPI packages."
+    with tmp_cwd_context(ProjectDir):
+        build_module.main([str(ProjectDir), "-nx", *caller_args])
+
+
+def main_pypi(args):
+    
+    assert args.sdist or args.wheels
+    
+    if args.sdist:
+        os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
+        helpers_info = get_helpers_info()
+        with tmp_ctypesgen_pin():
+            if not helpers_info["dirty"]:
+                os.environ["SDIST_IGNORE_DIRTY"] = "1"
+            _run_pypi_build(["--sdist"])
+    
+    if args.wheels:
+        suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
+        for plat in WheelPlatforms:
+            os.environ[PlatSpec_EnvVar] = plat + suffix
+            _run_pypi_build(["--wheel"])
+            clean_platfiles()
+
+
+def main():
+    
+    parser = argparse.ArgumentParser(
+        description = "Craft PyPI packages for pypdfium2"
+    )
+    parser.add_argument("--pdfium-ver", default=None)
+    parser.add_argument("--use-v8", action="store_true")
+    parser.add_argument("--wheels", action="store_true")
+    parser.add_argument("--sdist", action="store_true")
+    
+    args = parser.parse_args()
+    if not (args.wheels or args.sdist):
+        args.wheels, args.sdist = True, True
+    if not args.pdfium_ver or args.pdfium_ver == "latest":
+        args.pdfium_ver = PdfiumVer.get_latest()
+    else:
+        args.pdfium_ver = int(args.pdfium_ver)
+    
+    with ArtifactStash():
+        main_pypi(args)
 
 
 if __name__ == '__main__':
