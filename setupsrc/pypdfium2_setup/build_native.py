@@ -175,14 +175,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
     
     get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
     
-    is_new = _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
-    if is_new:
-        autopatch(
-            PDFIUM_3RDPARTY/"abseil-cpp"/"BUILD.gn",
-            'component("absl")', 'static_library("absl")',
-            is_regex = False,
-        )
-    
+    _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if with_tests:
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
