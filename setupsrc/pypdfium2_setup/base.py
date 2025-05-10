@@ -156,7 +156,6 @@ def write_json(fp, data, indent=2):
 
 
 def libname_for_system(system, name="pdfium"):
-    
     # Map system to pdfium shared library name
     if system == SysNames.windows:
         return f"{name}.dll"
@@ -165,17 +164,15 @@ def libname_for_system(system, name="pdfium"):
     elif system in (SysNames.linux, SysNames.android):
         return f"lib{name}.so"
     else:
-        # let the caller pass through a fallback
+        # take libname pattern from caller
         pattern = os.getenv("LIBNAME_PATTERN")
         if pattern:
             prefix, suffix = pattern.split(".", maxsplit=1)
             return f"{prefix}{name}.{suffix}"
-        # if we are on BSD or any other POSIX-based system, try `lib{}.so`, unless set otherwise by the caller
-        if "bsd" in sys.platform or os.name == "posix":
-            return f"lib{name}.so"
-    
-    # TODO downstream fallback: list directory and pick the file that contains the library name?
-    raise ValueError(f"Unhandled system {system!r}, don't know library naming pattern. Set $LIBNAME_PATTERN=prefix.suffix (e.g. lib.so)")
+        # NOTE alternatively, we could do this only for BSD/POSIX
+        # as a downstream fallback, we could also list the dir in question and pick the file that contains the libname
+        log(f"Unhandled system {sys.platform!r} - assuming lib.so pattern. Set LIBNAME_PATTERN=prefix.suffix if this is not right.")
+        return f"lib{name}.so"
 
 
 class _PdfiumVerScheme (

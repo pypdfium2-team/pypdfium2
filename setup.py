@@ -61,16 +61,10 @@ class pypdfium_build_py (build_py_orig):
         build_py_orig.run(self, *args, **kwargs)
 
 
-# semi-static metadata
-PROJECT_DESC = "Python bindings to PDFium"
 LICENSES_SHARED = (
     "LICENSES/Apache-2.0.txt",
     "LICENSES/BSD-3-Clause.txt",
     "LICENSES/CC-BY-4.0.txt",
-)
-LICENSES_WHEEL = (
-    "LICENSES/LicenseRef-PdfiumThirdParty.txt",
-    "REUSE-wheel.toml",
 )
 LICENSES_SDIST = (
     "LICENSES/LicenseRef-FairUse.txt",
@@ -145,10 +139,14 @@ def run_setup(modnames, pdfium_ver, pl_name):
         kwargs["exclude_package_data"] = {"pypdfium2_raw": libnames}
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
+        if pl_name == ExtPlats.sourcebuild:
+            pdfium_license = "LICENSES/LicenseRef-PdfiumThirdParty.txt"  # XXX update
+        else:
+            pdfium_license = f"data/{pl_name}/LICENSE"
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, *libnames]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
-        kwargs["license_files"] += LICENSES_WHEEL
+        kwargs["license_files"] += (pdfium_license, "REUSE-wheel.toml")
     
     if "pypdfium2" in kwargs["package_data"]:
         assert_exists(ModuleDir_Helpers, kwargs["package_data"]["pypdfium2"])

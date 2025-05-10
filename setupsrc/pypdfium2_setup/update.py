@@ -88,6 +88,7 @@ def extract(archives, version, flags):
             libname = libname_for_system(system)
             tar_libdir = "lib" if system != SysNames.windows else "bin"
             tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
+            tar_extract_file(tar, "LICENSE", pl_dir/"LICENSE")
             full_ver = _parse_ver_file(tar.extractfile("VERSION"), version)
             write_pdfium_info(pl_dir, full_ver, origin="pdfium-binaries", flags=flags)
         
