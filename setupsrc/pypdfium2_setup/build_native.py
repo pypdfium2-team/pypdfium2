@@ -164,6 +164,8 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
             clang_patches = ("system_libcxx_with_clang", "avoid_new_clang_flags")
             for patchname in clang_patches:
                 git_apply_patch(PatchDir/f"{patchname}.patch", cwd=PDFIUM_DIR/"build")
+            # TODO should we handle other OSes here?
+            # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
             autopatch(
                 PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn",
