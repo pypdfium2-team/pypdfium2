@@ -188,7 +188,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--version", "-v",
-        help = f"PDFium version (revision) to use. Defaults to '{DEFAULT_VER}'. Use 'main' to try the latest state.",
+        help = f"PDFium version to use. Currently defaults to '{DEFAULT_VER}'. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--target", "-t",
