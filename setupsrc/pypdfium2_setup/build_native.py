@@ -3,12 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 # Related work: https://github.com/tiran/libpdfium/ and https://aur.archlinux.org/packages/libpdfium-nojs
 
-# NOTE So far, we have only tested this script on Linux, but the general idea should work on any common OS, provided the necessary tools and libraries are available.
-# In other words, this script should be portable as far as pdfium's build system and code is.
-# On Windows, you might be better off with the toolchained build, though, due to lack of a Unix-like system library environment.
-
-# Known issues:
-# - This script does not currently handle rebuilds. You have to manually delete the pdfium/ directory if you want to rebuild with a different version.
+# Known issue: This script does not currently handle rebuilds
 
 import re
 import os
@@ -273,7 +268,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(
-        description = "Build PDFium from source natively with system tools/libraries. This does not depend on Google's binary toolchain, so it should be portable across different Linux architectures.",
+        description = "Build PDFium from source natively with system tools/libraries. This does not use Google's binary toolchain, so it should be portable across different Linux architectures. Whether this might also work on other OSes depends on PDFium's build system and the availability of a linux-like system library environment.",
     )
     parser.add_argument(
         "--version",
