@@ -130,15 +130,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
 
 def get_sources(short_ver, with_tests, compiler, clang_path):
     
-    if short_ver == "main":
-        full_ver = PdfiumVer.get_latest_upstream()
-        pdfium_rev = short_ver
-        chromium_rev = short_ver
-    else:
-        full_ver = PdfiumVer.to_full(short_ver)
-        full_ver_str = str(full_ver)
-        pdfium_rev = f"chromium/{short_ver}"
-        chromium_rev = full_ver_str
+    full_ver, post_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver, PDFIUM_DIR)
     
     is_new = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
     if is_new:
@@ -181,7 +173,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     
-    return full_ver
+    return full_ver, post_ver
 
 
 def prepare(config_dict, build_dir):
@@ -264,7 +256,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         clang_path = Path(USR_PREFIX)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(build_ver, with_tests, compiler, clang_path)
+    full_ver, post_ver = get_sources(build_ver, with_tests, compiler, clang_path)
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
@@ -276,13 +268,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
     if with_tests:
         test(build_dir)
     
-    n_commits, hash = 0, None
-    if build_ver == "main":
-        # don't know how to determine the number of commits with a --depth 1 checkout, so set a placeholder
-        n_commits = NaN
-        hash = git_get_hash(PDFIUM_DIR, n_digits=11)
-    
-    pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash)
+    pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, **post_ver)
 
 
 def parse_args(argv):

@@ -74,7 +74,7 @@ def dl_depottools(do_update):
     return is_update
 
 
-def dl_pdfium(GClient, do_update, version):
+def dl_pdfium(GClient, do_update, revision):
     
     had_pdfium = PDFiumDir.exists()
     if not had_pdfium:
@@ -86,61 +86,26 @@ def dl_pdfium(GClient, do_update, version):
         args = [GClient, "sync"]
         if had_pdfium:
             args += ["-D", "--reset"]
-        args += ["--revision", f"origin/{version}", "--no-history", "--shallow"]
+        args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
         run_cmd(args, cwd=SBDir)
-        # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
-        # FIXME want to avoid static number of commits, and instead check out exactly up to latest versioned commit
-        if not had_pdfium:
-            run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
-            run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     
     return do_update
 
 
-def _walk_refs(log):
-    for i, line in enumerate(log.split("\n")):
-        for ref in line.split(", "):
-            match = re.fullmatch(r"origin/chromium/(\d+)", ref.strip())
-            if match:
-                return int(match.group(1)), i
-    assert False, "Failed to find versioned commit - log too small?"
-
-
-def identify_pdfium():
-    # we didn't manage to get git describe working reliably with chromium's branch heads and the awkward state the repo's in, so emulate git describe on our own
-    # FIXME want to avoid static number of commits - need a better way to determine latest version and commit count diff
-    log = run_cmd(["git", "log", "-100", "--pretty=%D"], cwd=PDFiumDir, capture=True)
-    v_short, n_commits = _walk_refs(log)
-    hash = git_get_hash(PDFiumDir) if n_commits else None
-    v_info = dict(n_commits=n_commits, hash=hash)
-    return v_short, v_info
-
-
-def _create_resources_rc(v_short):
+def _create_resources_rc(build_ver):
     input_path = PatchDir / "win" / "resources.rc"
     output_path = PDFiumDir / "resources.rc"
     content = input_path.read_text()
-    content = content.replace("$VERSION_CSV", str(v_short))
-    content = content.replace("$VERSION", str(v_short))
+    content = content.replace("$VERSION_CSV", str(build_ver))
+    content = content.replace("$VERSION", str(build_ver))
     output_path.write_text(content)
 
-
-def patch_pdfium(v_short):
+def patch_pdfium(build_ver):
     git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
-        _create_resources_rc(v_short)
-
-
-def configure(GN, config):
-    mkdir(PDFiumBuildDir)
-    (PDFiumBuildDir / "args.gn").write_text(config)
-    run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
-
-
-def build(Ninja, target):
-    run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
+        _create_resources_rc(build_ver)
 
 
 def get_tool(name):
@@ -148,6 +113,14 @@ def get_tool(name):
     if sys.platform.startswith("win32"):
         bin = bin.with_suffix(".bat")
     return bin
+
+def configure(GN, config):
+    mkdir(PDFiumBuildDir)
+    (PDFiumBuildDir / "args.gn").write_text(config)
+    run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
+
+def build(Ninja, target):
+    run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
 
 
 def main(
@@ -161,10 +134,12 @@ def main(
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
     
-    if b_version is None:
-        b_version = f"chromium/{DEFAULT_VER}"
     if b_target is None:
         b_target = "pdfium"
+    if b_version is None:
+        b_version = DEFAULT_VER
+    
+    v_full, v_post, pdfium_rev, chromium_rev = handle_sbuild_vers(b_version, PDFiumDir)
     
     if sys.platform.startswith("win32"):
         if b_win_sdk_dir is None:
@@ -179,19 +154,14 @@ def main(
     GN      = get_tool("gn")
     Ninja   = get_tool("ninja")
     
-    did_pdfium_sync = dl_pdfium(GClient, b_update, b_version)
-    
-    v_short, v_post = identify_pdfium()
-    log(f"Version {v_short} {v_post}")
-    v_full = PdfiumVer.to_full(v_short)
-    rev = b_version if b_version == "main" else str(v_full)
+    did_pdfium_sync = dl_pdfium(GClient, b_update, pdfium_rev)
     
     if did_pdfium_sync:
-        patch_pdfium(v_short)
+        patch_pdfium(b_version)
         if b_use_single_lib:
             git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
     if b_use_syslibs:
-        get_shimheaders_tool(PDFiumDir, rev=rev)
+        get_shimheaders_tool(PDFiumDir, rev=chromium_rev)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd([sys.executable, "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     
@@ -218,7 +188,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--version", "-v",
-        help = f"PDFium version (revision) to use. Defaults to 'chromium/{DEFAULT_VER}'. Use 'main' to try the latest state.",
+        help = f"PDFium version (revision) to use. Defaults to '{DEFAULT_VER}'. Use 'main' to try the latest state.",
     )
     parser.add_argument(
         "--target", "-t",
