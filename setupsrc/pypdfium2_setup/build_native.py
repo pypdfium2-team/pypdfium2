@@ -131,9 +131,9 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
 def get_sources(short_ver, with_tests, compiler, clang_path):
     
     if short_ver == "main":
+        full_ver = PdfiumVer.get_latest_upstream()
         pdfium_rev = short_ver
         chromium_rev = short_ver
-        full_ver = PdfiumVer.get_latest_upstream()
     else:
         full_ver = PdfiumVer.to_full(short_ver)
         full_ver_str = str(full_ver)
