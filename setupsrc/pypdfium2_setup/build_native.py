@@ -144,14 +144,12 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
     if is_new:
         autopatch_dir(
             PDFIUM_DIR/"public"/"cpp", "*.h",
-            r'"public/(.+)"', r'"../\1"',
-            is_regex = True,
+            r'"public/(.+)"', r'"../\1"', is_regex=True
         )
         # don't build the test fonts (needed for embedder tests only)
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
-            r'(\s*)("//third_party/test_fonts")', r"\1# \2",
-            is_regex = True,
+            r'(\s*)("//third_party/test_fonts")', r"\1# \2", is_regex=True
         )
     
     is_new = _fetch_dep("build", PDFIUM_DIR/"build")
