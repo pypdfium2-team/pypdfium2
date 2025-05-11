@@ -193,7 +193,7 @@ def main(
     if b_use_syslibs:
         get_shimheaders_tool(PDFiumDir, rev=rev)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
-        run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
+        run_cmd([sys.executable, "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     
     config_dict = DefaultConfig.copy()
     if b_use_single_lib:
