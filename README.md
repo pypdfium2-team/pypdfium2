@@ -718,14 +718,12 @@ Usage should be largely self-explanatory, assuming a minimum of familiarity with
 
 pypdfium2 itself is available by the terms and conditions of [`Apache-2.0`](LICENSES/Apache-2.0.txt) / [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt).
 Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSES/CC-BY-4.0.txt).
-
 pypdfium2 includes [SPDX](https://spdx.org/licenses/) headers in source files.
 License information for data files is provided in [`REUSE.toml`](REUSE.toml) as per the [`reuse` standard](https://reuse.software/spec/).
 
-PDFium is available under a "BSD-style license that can be found in its [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file".
+PDFium is available under "a BSD-style license that can be found in \[its\] [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file".
 
-Various other open-source licenses apply to dependencies included with PDFium, which also have to be shipped alongside binary redistributions. pdfium-binaries collects dependency licenses based on build logs. We extract these alongside the binaries, and include them in wheel packages / installations. Also, see the [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for an aggregated snapshot, which is used with sourcebuilds.
-
+Various other open-source licenses apply to dependencies included with PDFium, which also have to be shipped alongside binary redistributions. The pdfium-binaries project auto-collects dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. Also, see the [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for an aggregated snapshot, which is used with sourcebuilds.
 Note that pdfium's dependencies might change over time. Please notify us if you think a relevant license is missing.
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
