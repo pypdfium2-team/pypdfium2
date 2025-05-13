@@ -1,7 +1,7 @@
 # This file contains copyright info for data files included in our wheel packages.
 # See also REUSE.toml regarding copyright of data files in the project directory.
-
 # Note, this file has been auto-converted from .reuse/dep5-wheel by `reuse convert-dep5`
+# TODO(geisserml) convert to informal markdown
 
 version = 1
 SPDX-PackageName = "pypdfium2"
@@ -34,10 +34,10 @@ path = [
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
     "2025 PDFium developers",
-    "2025 Developers of projects mentioned in PdfiumThirdParty",
+    "2025 Developers of PDFium's dependencies (see BUILD_LICENSES/)",
     "2025 Benoît Blanchon and pdfium-binaries contributors"
 ]
-SPDX-License-Identifier = "BSD-3-Clause AND Apache-2.0 AND LicenseRef-PdfiumThirdParty"
+SPDX-License-Identifier = "BSD-3-Clause AND Apache-2.0 AND BUILD_LICENSES"
 SPDX-FileComment = '''
 pdfium's LICENSE file includes both BSD-3-Clause and Apache-2.0 texts
 We're not sure if this meant as SPDX "AND" or "OR", so use the conservative (safe) assumption "AND".

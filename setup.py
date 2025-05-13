@@ -84,7 +84,7 @@ def run_setup(modnames, pdfium_ver, pl_name):
     kwargs = dict(
         name = "pypdfium2",
         description = "Python bindings to PDFium",
-        license = "BSD-3-Clause, Apache-2.0, PdfiumThirdParty",
+        license = "BSD-3-Clause, Apache-2.0, dependency licenses",
         python_requires = ">= 3.6",
         cmdclass = {},
         package_dir = {},
@@ -140,7 +140,7 @@ def run_setup(modnames, pdfium_ver, pl_name):
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
         if pl_name == ExtPlats.sourcebuild:
-            license_files.append("LICENSES/LicenseRef-PdfiumThirdParty.txt")
+            license_files.append("BUILD_LICENSES/*")
         else:
             # FIXME This gives a deeply nested directory structure.
             # The author is not aware of a way to achieve a more flat structure with setuptools.
