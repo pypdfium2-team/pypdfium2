@@ -124,56 +124,56 @@ def build(Ninja, target):
 
 
 def main(
-        b_update = False,
-        b_version = None,
-        b_target = None,
-        b_use_syslibs = False,
-        b_win_sdk_dir = None,
-        b_use_single_lib = False,
+        do_update = False,
+        build_ver = None,
+        build_target = None,
+        use_syslibs = False,
+        single_lib = False,
+        win_sdk_dir = None,
     ):
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
     
-    if b_target is None:
-        b_target = "pdfium"
-    if b_version is None:
-        b_version = DEFAULT_VER
+    if build_target is None:
+        build_target = "pdfium"
+    if build_ver is None:
+        build_ver = DEFAULT_VER
     
-    v_full, v_post, pdfium_rev, chromium_rev = handle_sbuild_vers(b_version, PDFiumDir)
+    v_full, v_post, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver, PDFiumDir)
     
     if sys.platform.startswith("win32"):
-        if b_win_sdk_dir is None:
-            b_win_sdk_dir = WindowsPath(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64")
-        assert b_win_sdk_dir.exists()
-        os.environ["PATH"] += os.pathsep + str(b_win_sdk_dir)
+        if win_sdk_dir is None:
+            win_sdk_dir = WindowsPath(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64")
+        assert win_sdk_dir.exists()
+        os.environ["PATH"] += os.pathsep + str(win_sdk_dir)
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
     
-    dl_depottools(b_update)
+    dl_depottools(do_update)
     
     GClient = get_tool("gclient")
     GN      = get_tool("gn")
     Ninja   = get_tool("ninja")
     
-    did_pdfium_sync = dl_pdfium(GClient, b_update, pdfium_rev)
+    did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev)
     
     if did_pdfium_sync:
-        patch_pdfium(b_version)
-        if b_use_single_lib:
+        patch_pdfium(build_ver)
+        if single_lib:
             git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
-    if b_use_syslibs:
+    if use_syslibs:
         get_shimheaders_tool(PDFiumDir, rev=chromium_rev)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd([sys.executable, "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     
     config_dict = DefaultConfig.copy()
-    if b_use_single_lib:
+    if single_lib:
         config_dict["is_component_build"] = False
-    if b_use_syslibs:
+    if use_syslibs:
         config_dict.update(SyslibsConfig)
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
-    build(Ninja, b_target)
+    build(Ninja, build_target)
     pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_full, **v_post)
 
 
@@ -183,15 +183,18 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--update", "-u",
+        dest = "do_update",
         action = "store_true",
         help = "Update existing PDFium/DepotTools repositories, removing local changes.",
     )
     parser.add_argument(
         "--version", "-v",
+        dest = "build_ver",
         help = f"PDFium version to use. Currently defaults to '{DEFAULT_VER}'. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--target", "-t",
+        dest = "build_target",
         help = "PDFium build target (defaults to `pdfium`). Use `pdfium_all` to also build tests."
     )
     parser.add_argument(
@@ -200,21 +203,21 @@ def parse_args(argv):
         help = "Use system libraries instead of those bundled with PDFium. Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng, zlib and icuuc are installed, and that $PKG_CONFIG_PATH is set correctly.",
     )
     parser.add_argument(
+        "--single-lib",
+        action = "store_true",
+        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-synced, else the existing state is used.",
+    )
+    parser.add_argument(
         "--win-sdk-dir",
         type = WindowsPath,
         help = "Path to the Windows SDK (Windows only)",
-    )
-    parser.add_argument(
-        "--single-lib",
-        action = "store_true",
-        dest = "use_single_lib",
-        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-synced, else the existing state is used.",
     )
     return parser.parse_args(argv)
 
 
 def main_cli(argv=sys.argv[1:]):
-    return main( **{"b_"+k : v for k, v in vars( parse_args(argv) ).items()} )
+    args = parse_args(argv)
+    return main(**vars(args))
     
 
 if __name__ == "__main__":
