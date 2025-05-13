@@ -874,8 +874,10 @@ def get_shimheaders_tool(pdfium_dir, rev="main"):
 def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     log("Packing data files for sourcebuild...")
     
-    dest_dir = DataDir / ExtPlats.sourcebuild
-    mkdir(dest_dir)
+    dest_dir = DataDir/ExtPlats.sourcebuild
+    if dest_dir.exists():
+        shutil.rmtree(dest_dir)
+    dest_dir.mkdir()
     
     for libpath in build_dir.glob(Host.libname_glob):
         shutil.copy(libpath, dest_dir/libpath.name)
