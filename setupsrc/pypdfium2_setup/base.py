@@ -387,11 +387,13 @@ class _host_platform:
         return libname_for_system(Host.system, name="*")
     
     @cached_property
-    def usr_prefix(self):
-        usr_prefix = "/usr"
+    def usr(self):
+        if os.name != "posix":
+            return None
+        usr = "/usr"
         if self.system == SysNames.android:
-            usr_prefix = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
-        return usr_prefix
+            usr = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
+        return usr
     
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"

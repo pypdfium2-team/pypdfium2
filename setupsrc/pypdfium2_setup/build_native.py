@@ -248,7 +248,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         else:
             raise RuntimeError("Neither gcc nor clang installed.")
     if compiler is Compiler.clang and clang_path is None and os.name != "nt":
-        clang_path = Path(Host.usr_prefix)
+        clang_path = Path(Host.usr)
     
     mkdir(SOURCES_DIR)
     full_ver, post_ver = get_sources(build_ver, with_tests, compiler, clang_path)
@@ -297,7 +297,7 @@ def parse_args(argv):
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = f"Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '{Host.usr_prefix}', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
+        help = f"Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '{Host.usr}', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
     )
     args = parser.parse_args(argv)
     if args.compiler:
