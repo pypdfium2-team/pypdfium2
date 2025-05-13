@@ -92,6 +92,7 @@ SPDX-FileCopyrightText = [
     "2025 geisserml <geisserml@gmail.com>",
 ]
 SPDX-License-Identifier = "LicenseRef-FairUse"
+SPDX-FileComment = "Obtained from img2pdf, which is LGPL-licensed."
 
 [[annotations]]
 path = [
@@ -110,7 +111,7 @@ SPDX-FileCopyrightText = [
 SPDX-License-Identifier = "LicenseRef-FairUse"
 SPDX-FileComment = '''
 Derived from https://github.com/bblanchon/pdfium-binaries/tree/master/patches
-For reuse, see https://github.com/bblanchon/pdfium-binaries/issues/55
+pdfium-binaries is MIT-licensed.
 Unchanged/deleted code is by PDFium, added code by pdfium-binaries.
 '''
 
@@ -129,18 +130,20 @@ SPDX-FileCopyrightText = [
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
-path = "REUSE-wheel.toml"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "2025 geisserml"
-SPDX-License-Identifier = "LicenseRef-PdfiumThirdParty"
-SPDX-FileComment = '''
-Pointer to prevent reuse lint from reporting LicenseRef-PdfiumThirdParty as unused.
-This file is not actually copyrighted, but it mentions the data files that are.
-'''
-
-[[annotations]]
-path = ["RELEASE.md", "docs/build/.gitkeep", "sbuild/.gitkeep"]
+path = [
+    "REUSE-wheel.toml",
+    "docs/build/.gitkeep",
+    "sbuild/.gitkeep",
+    "RELEASE.md",
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 geisserml"
 SPDX-License-Identifier = "CC-BY-4.0"
-SPDX-FileComment = "Other files. Listed here to make reuse lint happy on CI."
+SPDX-FileComment = "Other files"
+
+[[annotations]]
+path = ["BUILD_LICENSES/*", "BUILD_LICENSES/android/*"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025 geisserml"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "Licenses for compiled binaries of pdfium."
