@@ -152,12 +152,16 @@ def run_setup(modnames, pdfium_ver, pl_name):
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
         license_files.append("REUSE-wheel.toml")
     
+    kwargs["license_files"] = license_files
+    
+    # check
     if "pypdfium2" in kwargs["package_data"]:
         assert_exists(ModuleDir_Helpers, kwargs["package_data"]["pypdfium2"])
     if "pypdfium2_raw" in kwargs["package_data"]:
         assert_exists(ModuleDir_Raw, kwargs["package_data"]["pypdfium2_raw"])
+    for str_path in kwargs["license_files"]:
+        assert Path(str_path).exists()
     
-    kwargs["license_files"] = license_files
     setuptools.setup(**kwargs)
 
 
