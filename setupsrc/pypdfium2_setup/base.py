@@ -167,11 +167,10 @@ def libname_for_system(system, name="pdfium"):
         # take libname pattern from caller
         pattern = os.getenv("LIBNAME_PATTERN")
         if pattern:
-            prefix, suffix = pattern.split(".", maxsplit=1)
-            return f"{prefix}{name}.{suffix}"
+            return pattern.format(name)
         # NOTE alternatively, we could do this only for BSD/POSIX
         # as a downstream fallback, we could also list the dir in question and pick the file that contains the libname
-        log(f"Unhandled system {sys.platform!r} - assuming lib.so pattern. Set LIBNAME_PATTERN=prefix.suffix if this is not right.")
+        log(f"Unhandled system {sys.platform!r} - assuming lib.so pattern. Set LIBNAME_PATTERN='prefix{}.suffix' if this is not right.")
         return f"lib{name}.so"
 
 
