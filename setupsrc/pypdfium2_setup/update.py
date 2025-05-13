@@ -83,9 +83,9 @@ def _extract_licenses(tar, pl_dir):
     mkdir(licenses_dir)
     all_paths = tar.getnames()
     if "licenses" in all_paths:
-        for path in all_paths:
-            if path.startswith("licenses/"):
-                tar_extract_file(tar, path, licenses_dir/Path(path).name)
+        license_paths = (p for p in all_paths if p.startswith("licenses/"))
+        for path in license_paths:
+            tar_extract_file(tar, path, licenses_dir/Path(path).name)
         tar_extract_file(tar, "LICENSE", licenses_dir/"pdfium-binaries.txt")
     else:
         # backwards compat with pdfium-binaries < 7175
