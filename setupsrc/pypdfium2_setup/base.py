@@ -293,6 +293,38 @@ def parse_git_tag():
     return parse_given_tag(desc)
 
 
+def get_helpers_info():
+    
+    # TODO add some checks against record?
+    
+    have_git_describe = False
+    if (ProjectDir/".git").exists():
+        try:
+            helpers_info = parse_git_tag()
+        except subprocess.CalledProcessError as e:
+            log(str(e))
+            log("Version uncertain: git describe failure - possibly a shallow checkout")
+        else:
+            have_git_describe = True
+            helpers_info["data_source"] = "git"
+    else:
+        log("Version uncertain: git repo not available.")
+    
+    if not have_git_describe:
+        ver_file = ModuleDir_Helpers / VersionFN
+        if ver_file.exists():
+            log("Falling back to given version info (e.g. sdist).")
+            helpers_info = read_json(ver_file)
+            helpers_info["data_source"] = "given"
+        else:
+            log("Falling back to autorelease record.")
+            record = read_json(AR_RecordFile)
+            helpers_info = parse_given_tag(record["tag"])
+            helpers_info["data_source"] = "record"
+    
+    return helpers_info
+
+
 def merge_tag(info, mode):
     
     # some duplication with src/pypdfium2/version.py ...
@@ -729,38 +761,6 @@ def clean_platfiles():
             fp.unlink()
         elif fp.is_dir():
             shutil.rmtree(fp)
-
-
-def get_helpers_info():
-    
-    # TODO add some checks against record?
-    
-    have_git_describe = False
-    if (ProjectDir/".git").exists():
-        try:
-            helpers_info = parse_git_tag()
-        except subprocess.CalledProcessError as e:
-            log(str(e))
-            log("Version uncertain: git describe failure - possibly a shallow checkout")
-        else:
-            have_git_describe = True
-            helpers_info["data_source"] = "git"
-    else:
-        log("Version uncertain: git repo not available.")
-    
-    if not have_git_describe:
-        ver_file = ModuleDir_Helpers / VersionFN
-        if ver_file.exists():
-            log("Falling back to given version info (e.g. sdist).")
-            helpers_info = read_json(ver_file)
-            helpers_info["data_source"] = "given"
-        else:
-            log("Falling back to autorelease record.")
-            record = read_json(AR_RecordFile)
-            helpers_info = parse_given_tag(record["tag"])
-            helpers_info["data_source"] = "record"
-    
-    return helpers_info
 
 
 def build_pl_suffix(version, use_v8):
