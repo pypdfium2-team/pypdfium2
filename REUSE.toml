@@ -111,7 +111,7 @@ SPDX-FileCopyrightText = [
 SPDX-License-Identifier = "LicenseRef-FairUse"
 SPDX-FileComment = '''
 Derived from https://github.com/bblanchon/pdfium-binaries/tree/master/patches
-pdfium-binaries is MIT-licensed.
+pdfium-binaries is MIT-licensed. See its license file at BUILD_LICENSES/pdfium-binaries.txt.
 Unchanged/deleted code is by PDFium, added code by pdfium-binaries.
 '''
 
