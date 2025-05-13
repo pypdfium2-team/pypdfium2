@@ -144,11 +144,7 @@ def run_setup(modnames, pdfium_ver, pl_name):
         else:
             # FIXME This gives a deeply nested directory structure.
             # The author is not aware of a way to achieve a more flat structure with setuptools.
-            licenses_dir = DataDir/pl_name/"BUILD_LICENSES"
-            license_paths = list(licenses_dir.iterdir())
-            assert len(license_paths) > 0, "Must have at least one build license"
-            for file in license_paths:
-                license_files.append(f"data/{pl_name}/BUILD_LICENSES/{file.name}")
+            license_files.append(f"data/{pl_name}/BUILD_LICENSES/*")
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, *libnames]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
@@ -161,8 +157,6 @@ def run_setup(modnames, pdfium_ver, pl_name):
         assert_exists(ModuleDir_Helpers, kwargs["package_data"]["pypdfium2"])
     if "pypdfium2_raw" in kwargs["package_data"]:
         assert_exists(ModuleDir_Raw, kwargs["package_data"]["pypdfium2_raw"])
-    for str_path in kwargs["license_files"]:
-        assert Path(str_path).exists()
     
     setuptools.setup(**kwargs)
 
