@@ -721,11 +721,12 @@ Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSE
 pypdfium2 includes [SPDX](https://spdx.org/licenses/) headers in source files.
 License information for data files is provided in [`REUSE.toml`](REUSE.toml) as per the [`reuse` standard](https://reuse.software/spec/).
 
-PDFium is available under "a BSD-style license that can be found in \[its\] [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file".
+PDFium is available under "a BSD-style license that can be found in \[its\] [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file" (see also [`BUILD_LICENSES/pdfium.txt`](BUILD_LICENSES/pdfium.txt) for a copy in this repository).<br>
 Various other open-source licenses apply to dependencies included with PDFium.
 PDFium's license as well as dependency licenses have to be shipped alongside binary distributions.
 
-The pdfium-binaries project auto-collects dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. See also the [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for an aggregated snapshot, which is used with sourcebuilds.
+pypdfium2 uses PDFium builds produced by the `pdfium-binaries` project, which is [`MIT`](BUILD_LICENSES/pdfium-binaries.txt)-licensed.
+`pdfium-binaries` auto-collect dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. See also the [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for an aggregated snapshot, which is used with sourcebuilds.<br>
 Note that pdfium's dependencies might change over time. Please notify us if you think a relevant license is missing.
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
