@@ -112,7 +112,7 @@ def run_setup(modnames, pdfium_ver, pl_name):
                 if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
                     helpers_info["dirty"] = False
             else:
-                log("!!! Warning: sdist built without ctypesgen pin?")
+                log("Warning: sdist without ctypesgen pin, or git describe not working?")
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         # is_editable = None: unknown/fallback in case the cmdclass is not reached
         helpers_info["is_editable"] = None
