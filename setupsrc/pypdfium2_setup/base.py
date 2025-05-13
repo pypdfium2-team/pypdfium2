@@ -318,7 +318,7 @@ def merge_tag(info, mode):
 
 def plat_to_system(pl_name):
     if pl_name == ExtPlats.sourcebuild:
-        # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downstream with fallback value?
+        # Note, this may be None if on an unknown host
         return Host.system
     # other ExtPlats intentionally not handled here
     return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
