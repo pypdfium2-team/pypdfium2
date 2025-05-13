@@ -41,7 +41,7 @@ def main():
         print()
     
     if args.copy:
-        dest_dir = ProjectDir/"BUILD_LICENSES"
+        dest_dir = ProjectDir/"BUILD_LICENSES_tmp"
         if dest_dir.exists():
             shutil.rmtree(dest_dir)
         dest_dir.mkdir()
