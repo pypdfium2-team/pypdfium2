@@ -384,6 +384,13 @@ class _host_platform:
     def libname_glob(self):
         return libname_for_system(Host.system, name="*")
     
+    @cached_property
+    def usr_prefix(self):
+        usr_prefix = "/usr"
+        if self.system == SysNames.android:
+            usr_prefix = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
+        return usr_prefix
+    
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
         if self._raw_system == "linux" and self._libc_name:
@@ -474,10 +481,6 @@ class _host_platform:
 
 Host = _host_platform()
 LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
-
-USR_PREFIX = "/usr"
-if Host.system == SysNames.android:
-    USR_PREFIX = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
 
 
 def _manylinux_tag(arch, glibc="2_17"):

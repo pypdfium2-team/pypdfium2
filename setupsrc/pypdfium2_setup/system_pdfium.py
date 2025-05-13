@@ -29,7 +29,7 @@ def _find_libreoffice_pdfium():
     # Not sure how complete or incomplete libreoffice's pdfium builds may be; this is just a chance.
     pdfium_lib = None
     if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
-        lo_paths_iter = itertools.product((USR_PREFIX+"/lib", USR_PREFIX+"/local/lib"), ("", "64"))
+        lo_paths_iter = itertools.product((Host.usr_prefix+"/lib", Host.usr_prefix+"/local/lib"), ("", "64"))
         libname = libname_for_system(Host.system, name="pdfiumlo")
         candidates = (Path(path+bitness)/"libreoffice"/"program"/libname for path, bitness in lo_paths_iter)
         pdfium_lib = _get_existing(candidates)
@@ -61,7 +61,7 @@ def _find_pdfium_headers():
     if headers_path:
         headers_path = Path(headers_path)
     elif not sys.platform.startswith(("win", "darwin")):
-        include_dirs = (Path(USR_PREFIX+"/include"), Path(USR_PREFIX+"/local/include"))
+        include_dirs = (Path(Host.usr_prefix+"/include"), Path(Host.usr_prefix+"/local/include"))
         candidates = (path/"pdfium" for path in include_dirs)
         headers_path = _get_existing(candidates, cb=Path.is_dir)
         if not headers_path:
