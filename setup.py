@@ -95,7 +95,7 @@ def run_setup(modnames, pdfium_ver, pl_name):
     if modnames == [ModuleHelpers]:
         kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
-        kwargs["install_requires"] += ["pypdfium2_raw"]
+        kwargs["install_requires"].append("pypdfium2_raw")
     elif modnames == [ModuleRaw]:
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
@@ -145,7 +145,9 @@ def run_setup(modnames, pdfium_ver, pl_name):
             # FIXME This gives a deeply nested directory structure.
             # The author is not aware of a way to achieve a more flat structure with setuptools.
             licenses_dir = DataDir/pl_name/"BUILD_LICENSES"
-            for file in licenses_dir.iterdir():
+            license_paths = list(licenses_dir.iterdir())
+            assert len(license_paths) > 0, "Must have at least one build license"
+            for file in license_paths:
                 license_files.append(f"data/{pl_name}/BUILD_LICENSES/{file.name}")
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, *libnames]
         kwargs["distclass"] = BinaryDistribution
