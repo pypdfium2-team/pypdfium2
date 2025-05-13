@@ -144,6 +144,6 @@ SPDX-FileComment = "Other files"
 [[annotations]]
 path = ["BUILD_LICENSES/*", "BUILD_LICENSES/android/*"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2025 geisserml"
-SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = "unknown"
+SPDX-License-Identifier = "LicenseRef-FairUse"
 SPDX-FileComment = "Licenses for compiled binaries of pdfium."
