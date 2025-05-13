@@ -20,7 +20,7 @@ def main():
     parser.add_argument(
         "--copy",
         action = "store_true",
-        help = "Collect licenses into //BUILD_LICENSES directory",
+        help = "Collect licenses into //BUILD_LICENSES_tmp directory",
     )
     args = parser.parse_args()
     
