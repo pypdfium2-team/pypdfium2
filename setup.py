@@ -67,7 +67,6 @@ LICENSES_SHARED = (
     "LICENSES/CC-BY-4.0.txt",
 )
 LICENSES_SDIST = (
-    "LICENSES/LicenseRef-FairUse.txt",
     "REUSE.toml",
 )
 
