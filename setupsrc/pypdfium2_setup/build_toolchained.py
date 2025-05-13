@@ -166,10 +166,10 @@ def main(
         run_cmd([sys.executable, "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     
     config_dict = DefaultConfig.copy()
-    if single_lib:
-        config_dict["is_component_build"] = False
     if use_syslibs:
         config_dict.update(SyslibsConfig)
+    if single_lib:
+        config_dict["is_component_build"] = False
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
