@@ -572,9 +572,9 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, stderr=None,
         return comp_process
 
 
-def tar_extract_file(tar, path, dst_path):
-    # path: str or tar member object
-    src_buf = tar.extractfile(path)
+def tar_extract_file(tar, path_or_member, dst_path):
+    src_buf = tar.extractfile(path_or_member)
+    assert src_buf is not None, f"Failed to extract {path_or_member}"
     with open(dst_path, "wb") as dst_buf:
         shutil.copyfileobj(src_buf, dst_buf)
 

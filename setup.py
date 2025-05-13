@@ -80,11 +80,11 @@ def assert_exists(dir, data_files):
 
 def run_setup(modnames, pdfium_ver, pl_name):
     
+    license_files = list(LICENSES_SHARED)
     kwargs = dict(
         name = "pypdfium2",
         description = "Python bindings to PDFium",
         license = "BSD-3-Clause, Apache-2.0, PdfiumThirdParty",
-        license_files = LICENSES_SHARED,
         python_requires = ">= 3.6",
         cmdclass = {},
         package_dir = {},
@@ -134,25 +134,30 @@ def run_setup(modnames, pdfium_ver, pl_name):
     if ModuleRaw not in modnames or pl_name == ExtPlats.sdist:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": (VersionFN, BindingsFN, *libnames)}
         if pl_name == ExtPlats.sdist:
-            kwargs["license_files"] += LICENSES_SDIST
+            license_files.extend(LICENSES_SDIST)
     elif pl_name == ExtPlats.system:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": libnames}
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
         if pl_name == ExtPlats.sourcebuild:
-            pdfium_license = "LICENSES/LicenseRef-PdfiumThirdParty.txt"  # XXX update
+            license_files.append("LICENSES/LicenseRef-PdfiumThirdParty.txt")
         else:
-            pdfium_license = f"data/{pl_name}/LICENSE"
+            # FIXME This gives a deeply nested directory structure.
+            # The author is not aware of a way to achieve a more flat structure with setuptools.
+            licenses_dir = DataDir/pl_name/"BUILD_LICENSES"
+            for file in licenses_dir.iterdir():
+                license_files.append(f"data/{pl_name}/BUILD_LICENSES/{file.name}")
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, *libnames]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
-        kwargs["license_files"] += (pdfium_license, "REUSE-wheel.toml")
+        license_files.append("REUSE-wheel.toml")
     
     if "pypdfium2" in kwargs["package_data"]:
         assert_exists(ModuleDir_Helpers, kwargs["package_data"]["pypdfium2"])
     if "pypdfium2_raw" in kwargs["package_data"]:
         assert_exists(ModuleDir_Raw, kwargs["package_data"]["pypdfium2_raw"])
     
+    kwargs["license_files"] = license_files
     setuptools.setup(**kwargs)
 
 
