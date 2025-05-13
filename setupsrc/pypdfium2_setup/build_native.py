@@ -187,7 +187,7 @@ def prepare(config_dict, build_dir):
     (build_dir/"args.gn").write_text(config_str)
 
 
-def build(with_tests, build_dir, compiler, n_jobs):
+def build(with_tests, build_dir, n_jobs):
     
     ninja_args = []
     if n_jobs is not None:
@@ -258,7 +258,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
     setup_compiler(config, compiler, clang_path)
     
     prepare(config, build_dir)
-    build(with_tests, build_dir, compiler, n_jobs)
+    build(with_tests, build_dir, n_jobs)
     
     if with_tests:
         test(build_dir)
@@ -268,7 +268,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(
-        description = "Build PDFium from source natively with system tools/libraries. This does not use Google's binary toolchain, so it should be portable across different Linux architectures. Whether this might also work on other OSes depends on PDFium's build system and the availability of a linux-like system library environment.",
+        description = "Build PDFium from source natively with system tools/libraries. This does not use Google's binary toolchain, so it should be portable across different Linux architectures. Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.",
     )
     parser.add_argument(
         "--version",
