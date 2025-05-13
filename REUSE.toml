@@ -136,7 +136,7 @@ path = [
     "REUSE-wheel.toml",
     "docs/build/.gitkeep",
     "sbuild/.gitkeep",
-    "RELEASE.md",
+    "RELEASE.md",  # TODO add to gitignore?
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 geisserml"
