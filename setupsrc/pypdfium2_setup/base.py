@@ -801,8 +801,11 @@ def parse_pl_spec(pl_spec):
             req_ver = int(req_ver)
     elif pl_name is not None:
         assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
-        req_ver = PdfiumVer.release_pdfium_build
-        log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
+        if pl_name == ExtPlats.sourcebuild:
+            req_ver = read_json(DataDir/"sourcebuild"/VersionFN)["build"]
+        else:
+            log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
+            req_ver = PdfiumVer.release_pdfium_build
     
     return do_prepare, pl_name, req_ver, use_v8
 
