@@ -65,6 +65,7 @@ ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 REFBINDINGS_FLAGS = ("V8", "XFA", "SKIA")
+LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
 
 
 # TODO consider StrEnum or something
@@ -202,7 +203,7 @@ class _PdfiumVerClass:
     def _get_chromium_refs(self):
         # FIXME The ls-remote call may take extremely long (~1min) with older versions of git!
         # With newer git, it's a lot better, but still noticeable (one or a few seconds).
-        # TODO See if we can do something to speed up the call. That said, we might want to add a way for the caller to supply the full version. Also, adding a disk cache for the refs might be an option.
+        # TODO add way for caller to pass in the full version?
         if self._vlines is None:
             log(f"Fetching chromium refs ...")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
@@ -516,7 +517,6 @@ class _host_platform:
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
-LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
 
 
 def _manylinux_tag(arch, glibc="2_17"):
@@ -637,12 +637,11 @@ def tmp_cwd_context(tmp_cwd):
 
 def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium", version=None):
     
-    # quick & dirty patch to allow using the pre-built bindings instead of calling ctypesgen
     if USE_REFBINDINGS:
         log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
         assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
         record_ver = PdfiumVer.release_pdfium_build
-        if version and version != record_ver:
+        if version != record_ver:
             log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
         shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
         return
