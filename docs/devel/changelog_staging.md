@@ -46,7 +46,7 @@
 - *Note, we have no intent to provide wheels for the simulators (`android x86_64/x86`, `ios arm64_simu/x86_64`), as they are only relevant to developers, and installing from source with automatic binary deployment should be roughly equialvent.*
 
 *Setup*
-- When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, by default, we now use the version included with the last pypdfium2 release. This is to prevent possible upstream changes breaking pypdfium2 installation. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
+- When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, by default, we now use the version included with the last pypdfium2 release. This is to prevent possible API breakage when pypdfium2 is installed from source. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
 - We finally have a build script that works without Google's toolchain, and instead uses system tools/libraries (`build_native.py`). This has been inspired by the `libpdfium` COPR / `libpdfium-nojs` AUR recipes. Thanks to the respective packagers for showing how to do this. The GCC compiler is preferred, but Clang should also work if you set up some symlinks. As of this writing, both passes on our Ubuntu x84_64/arm64 CI.
 - On host platforms not covered with `pdfium-binaries`, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered.
 - The toolchained build script continues to be available as well, but has been renamed from `sourcebuild.py` to `build_toolchained.py`.
