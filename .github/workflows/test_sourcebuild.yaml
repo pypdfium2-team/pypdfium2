@@ -90,7 +90,7 @@ jobs:
           python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler clang --test
       
       - name: Install
-        run: PDFIUM_PLATFORM="sourcebuild" python3 -m pip install .
+        run: PDFIUM_PLATFORM="sourcebuild" python3 -m pip install -v .
       
       # must show matching pdfium version with sourcebuild origin
       - name: Check version
