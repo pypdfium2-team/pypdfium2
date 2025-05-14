@@ -99,7 +99,6 @@ Obtained from img2pdf. No individual license stated for this data file.
 [[annotations]]
 path = [
     "pdfium_patches/public_headers.patch",
-    "pdfium_patches/single_lib.patch",
     "pdfium_patches/win/use_resources_rc.patch",
     "pdfium_patches/win/build.patch",
     "pdfium_patches/win/resources.rc",
@@ -119,10 +118,11 @@ Unchanged/deleted code is by PDFium, added code by pdfium-binaries.
 
 [[annotations]]
 path = [
-    "pdfium_patches/siso.patch",
+    "pdfium_patches/single_lib.patch",
+    "pdfium_patches/ffp_contract.patch",
     "pdfium_patches/avoid_new_clang_flags.patch",
     "pdfium_patches/system_libcxx_with_clang.patch",
-    "pdfium_patches/ffp_contract.patch",
+    "pdfium_patches/siso.patch",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [

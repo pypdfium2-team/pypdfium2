@@ -203,7 +203,6 @@ def parse_args(argv):
         help = "Use system libraries instead of those bundled with PDFium. Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng, zlib and icuuc are installed, and that $PKG_CONFIG_PATH is set correctly.",
     )
     parser.add_argument(
-        # FIXME broken, no shared library generated?
         "--single-lib",
         action = "store_true",
         help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-synced, else the existing state is used.",
