@@ -11,11 +11,11 @@ SPDX-PackageDownloadLocation = "https://github.com/pypdfium2-team/pypdfium2"
 
 [[annotations]]
 path = [
-    "req/**.txt",
+    "req/*.txt",
     "autorelease/record.json",
     "autorelease/config.json",
     ".github/PULL_REQUEST_TEMPLATE.md",
-    "tests/expectations/**",
+    "tests/expectations/*.txt",
     "tests/resources/render.pdf",
     "tests/resources/multipage.pdf",
     "tests/resources/encrypted.pdf",
@@ -113,7 +113,7 @@ SPDX-FileCopyrightText = [
 SPDX-License-Identifier = "MIT"
 SPDX-FileComment = '''
 Derived from https://github.com/bblanchon/pdfium-binaries/tree/master/patches
-See also //BUILD_LICENSES/pdfium-binaries.txt for upstream's copy of MIT with the placeholders filled.
+See also //BUILD_LICENSES/pdfium-binaries.txt for a copy of upstream's license file as embedded in the tarballs.
 Unchanged/deleted code is by PDFium, added code by pdfium-binaries.
 '''
 
@@ -144,7 +144,7 @@ SPDX-License-Identifier = "CC-BY-4.0"
 SPDX-FileComment = "Other files"
 
 [[annotations]]
-path = ["BUILD_LICENSES/*", "BUILD_LICENSES/android/*"]
+path = ["BUILD_LICENSES/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "unknown"
 SPDX-License-Identifier = "LicenseRef-Ignore"
