@@ -877,7 +877,7 @@ def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     dest_dir = DataDir/ExtPlats.sourcebuild
     if dest_dir.exists():
         shutil.rmtree(dest_dir)
-    dest_dir.mkdir()
+    dest_dir.mkdir(parents=True)
     
     for libpath in build_dir.glob(Host.libname_glob):
         shutil.copy(libpath, dest_dir/libpath.name)
