@@ -26,6 +26,7 @@ def main():
     
     data_dirs = [p for p in DataDir.iterdir() if p.is_dir()]
     data_dirs.remove(DataDir_Bindings)
+    data_dirs.remove(DataDir/"sourcebuild")
     
     licenses = {}
     for dir in data_dirs:
