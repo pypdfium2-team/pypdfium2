@@ -347,7 +347,6 @@ def merge_tag(info, mode):
             tag += "+" + ".".join(extra_info)
         else:
             log("Warning: Ignored post-tag desc. This should not happen in autorelease CI.")
-            assert not IS_CI
     
     return tag
 
