@@ -824,7 +824,7 @@ This provides us with full control over the build env and the used commands, whe
 
 pypdfium2 contains a small test suite to verify the library's functionality. It is written with [pytest](https://github.com/pytest-dev/pytest/):
 ```bash
-just test
+python -m pytest tests/  # or `just test`
 ```
 
 Note that ...
