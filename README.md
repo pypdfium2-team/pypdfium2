@@ -725,7 +725,7 @@ PDFium is available under "a BSD-style license that can be found in \[its\] [`LI
 Various other open-source licenses apply to dependencies included with PDFium.
 PDFium's license as well as dependency licenses have to be shipped with binary distributions.
 
-pypdfium2 uses PDFium builds from the `pdfium-binaries` project, which is MIT-licensed as of this writing. See the upstream [`LICENSE` file](https://github.com/bblanchon/pdfium-binaries/blob/master/LICENSE) or [`BUILD_LICENSES/pdfium-binaries.txt`](BUILD_LICENSES/pdfium-binaries.txt).
+pypdfium2 uses PDFium builds from the `pdfium-binaries` project (see its [`LICENSE` file](https://github.com/bblanchon/pdfium-binaries/blob/master/LICENSE) or [`BUILD_LICENSES/pdfium-binaries.txt`](BUILD_LICENSES/pdfium-binaries.txt) - MIT).
 `pdfium-binaries` auto-collect dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. See also the [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for an aggregated snapshot, which is used when installing with a PDFium DLL built from source by the caller.<br>
 Note that PDFium's dependencies might change over time. Please notify us if you think a relevant license is missing.
 
