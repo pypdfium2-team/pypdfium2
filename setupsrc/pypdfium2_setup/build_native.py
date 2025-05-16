@@ -3,12 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 # Related work: https://github.com/tiran/libpdfium/ and https://aur.archlinux.org/packages/libpdfium-nojs
 
-# NOTE So far, we have only tested this script on Linux, but the general idea should work on any common OS, provided the necessary tools and libraries are available.
-# In other words, this script should be portable as far as pdfium's build system and code is.
-# On Windows, you might be better off with the toolchained build, though, due to lack of a Unix-like system library environment.
-
-# Known issues:
-# - This script does not currently handle rebuilds. You have to manually delete the pdfium/ directory if you want to rebuild with a different version.
+# Known issue: This script does not currently handle rebuilds
 
 import re
 import os
@@ -130,28 +125,18 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
 
 def get_sources(short_ver, with_tests, compiler, clang_path):
     
-    if short_ver == "main":
-        pdfium_rev = short_ver
-        chromium_rev = short_ver
-        full_ver = PdfiumVer.get_latest_upstream()
-    else:
-        full_ver = PdfiumVer.to_full(short_ver)
-        full_ver_str = str(full_ver)
-        pdfium_rev = f"chromium/{short_ver}"
-        chromium_rev = full_ver_str
+    full_ver, post_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver, PDFIUM_DIR)
     
     is_new = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
     if is_new:
         autopatch_dir(
             PDFIUM_DIR/"public"/"cpp", "*.h",
-            r'"public/(.+)"', r'"../\1"',
-            is_regex = True,
+            r'"public/(.+)"', r'"../\1"', is_regex=True
         )
         # don't build the test fonts (needed for embedder tests only)
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
-            r'(\s*)("//third_party/test_fonts")', r"\1# \2",
-            is_regex = True,
+            r'(\s*)("//third_party/test_fonts")', r"\1# \2", is_regex=True
         )
     
     is_new = _fetch_dep("build", PDFIUM_DIR/"build")
@@ -166,6 +151,8 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
             clang_patches = ("system_libcxx_with_clang", "avoid_new_clang_flags")
             for patchname in clang_patches:
                 git_apply_patch(PatchDir/f"{patchname}.patch", cwd=PDFIUM_DIR/"build")
+            # TODO should we handle other OSes here?
+            # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
             autopatch(
                 PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn",
@@ -181,7 +168,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     
-    return full_ver
+    return full_ver, post_ver
 
 
 def prepare(config_dict, build_dir):
@@ -200,7 +187,7 @@ def prepare(config_dict, build_dir):
     (build_dir/"args.gn").write_text(config_str)
 
 
-def build(with_tests, build_dir, compiler, n_jobs):
+def build(with_tests, build_dir, n_jobs):
     
     ninja_args = []
     if n_jobs is not None:
@@ -261,38 +248,32 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         else:
             raise RuntimeError("Neither gcc nor clang installed.")
     if compiler is Compiler.clang and clang_path is None and os.name != "nt":
-        clang_path = Path(USR_PREFIX)
+        clang_path = Path(Host.usr)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(build_ver, with_tests, compiler, clang_path)
+    full_ver, post_ver = get_sources(build_ver, with_tests, compiler, clang_path)
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
     setup_compiler(config, compiler, clang_path)
     
     prepare(config, build_dir)
-    build(with_tests, build_dir, compiler, n_jobs)
+    build(with_tests, build_dir, n_jobs)
     
     if with_tests:
         test(build_dir)
     
-    n_commits, hash = 0, None
-    if build_ver == "main":
-        # don't know how to determine the number of commits with a --depth 1 checkout, so set a placeholder
-        n_commits = NaN
-        hash = git_get_hash(PDFIUM_DIR, n_digits=11)
-    
-    pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, n_commits=n_commits, hash=hash)
+    pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, **post_ver)
 
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(
-        description = "Build PDFium from source natively with system tools/libraries. This does not depend on Google's binary toolchain, so it should be portable across different Linux architectures.",
+        description = "Build PDFium from source natively with system tools/libraries. This does not use Google's binary toolchain, so it should be portable across different Linux architectures. Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.",
     )
     parser.add_argument(
         "--version",
         dest = "build_ver",
-        help = f"The pdfium version to use. Defaults to the version last tested by pypdfium2 maintainers (recommended, currently {DEFAULT_VER}). Otherwise, this can be a specific build number, or 'main' to try the latest upstream state.",
+        help = f"The pdfium version to use. Currently defaults to {DEFAULT_VER}. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--test",
@@ -316,7 +297,7 @@ def parse_args(argv):
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = f"Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '{USR_PREFIX}', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
+        help = f"Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '{Host.usr}', but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
     )
     args = parser.parse_args(argv)
     if args.compiler:

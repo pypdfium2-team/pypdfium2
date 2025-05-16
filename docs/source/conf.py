@@ -13,13 +13,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "setupsrc"))
 from pypdfium2_setup.base import (
-    parse_git_tag,
+    get_helpers_info,
+    get_next_changelog,
 )
 
 # RTD modifies conf.py, so we have to ignore dirty state if on RTD
 is_rtd = os.environ.get("READTHEDOCS", "").lower() == "true"
-tag_info = parse_git_tag()
-have_changes = tag_info["n_commits"] > 0 or (tag_info["dirty"] and not is_rtd)
+tag_info = get_helpers_info()
+next_changelog = get_next_changelog()
+have_changes = tag_info["n_commits"] != 0 or (tag_info["dirty"] and not is_rtd) or next_changelog
 
 project = "pypdfium2"
 author = "pypdfium2-team"
