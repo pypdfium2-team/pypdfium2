@@ -18,8 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-        # NOTE Google's toolchain doesn't seem to run on Linux arm64 natively. The toolchain-free build should work, though.
+        # On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
+        # Google's toolchain doesn't seem to run on Linux arm64 natively. The toolchain-free build (or cross-compilation from x86_64) should work, though.
         os: ['ubuntu-latest', 'macos-13', 'macos-14', 'windows-latest']  # 'ubuntu-24.04-arm'
         build_mode: ['toolchained']
         include:
@@ -81,8 +81,6 @@ jobs:
       - name: Build PDFium (native, clang)
         if: ${{ matrix.build_mode == 'native-clang' }}
         run: |
-          # NOTE alternatively, --clang-path /usr/lib/llvm-18 might work on Ubuntu? Not sure.
-          VERSION=18
           ARCH=$(uname -m)
           sudo apt-get install -y llvm lld
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
