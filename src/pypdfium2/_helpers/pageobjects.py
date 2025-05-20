@@ -38,6 +38,8 @@ class PdfObject (pdfium_i.AutoCloseable):
         pdf (PdfDocument):
             Reference to the document this pageobject belongs to. May be None if the object does not belong to a document yet.
             This attribute is always set if :attr:`.page` is set.
+        container (PdfObject | None):
+            PdfObject handle to parent Form XObject, if the pageobject is nested in a Form XObject, None otherwise.
         level (int):
             Nesting level signifying the number of parent Form XObjects, at the time of construction.
             Zero if the object is not nested in a Form XObject.
@@ -56,12 +58,13 @@ class PdfObject (pdfium_i.AutoCloseable):
         return instance
     
     
-    def __init__(self, raw, page=None, pdf=None, level=0):
+    def __init__(self, raw, page=None, pdf=None, container=None, level=0):
         
         self.raw = raw
         self.page = page
         self.pdf = pdf
         self.level = level
+        self.container = container
         
         if page is not None:
             if self.pdf is None:

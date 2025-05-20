@@ -240,7 +240,13 @@ class PdfPage (pdfium_i.AutoCloseable):
         if pageobj.page is not self:
             raise ValueError("The pageobject you attempted to remove is not part of this page.")
         
-        ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
+        if pageobj.level > 0:
+            assert pageobj.container is not None
+            ok = pdfium_c.FPDFFormObj_RemoveObject(pageobj.container, pageobj)
+        else:
+            assert pageobj.container is None
+            ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
+        
         if not ok:
             raise PdfiumError("Failed to remove pageobject.")
         pageobj.page = None
@@ -277,7 +283,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         if form:
             count_objects = pdfium_c.FPDFFormObj_CountObjects
             get_object = pdfium_c.FPDFFormObj_GetObject
-            parent = form
+            parent = form.raw
         else:
             count_objects = pdfium_c.FPDFPage_CountObjects
             get_object = pdfium_c.FPDFPage_GetObject
@@ -294,7 +300,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 raise PdfiumError("Failed to get pageobject.")
             
             # Don't register as child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The parent page should remain alive while a pageobject is used, but it seems unjustified to store countless of weakrefs just to lock pageobjects when the parent page is closed.
-            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, level=level)
+            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
             
@@ -302,7 +308,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 yield from self.get_objects(
                     filter = filter,
                     max_depth = max_depth,
-                    form = raw_obj,
+                    form = helper_obj,
                     level = level + 1,
                 )
     

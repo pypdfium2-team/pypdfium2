@@ -260,3 +260,22 @@ def test_remove_image():
     output_path = OutputDir / "test_remove_objects.pdf"
     pdf.save(output_path)
     assert output_path.exists()
+
+
+def test_remove_image_in_xobject():
+    pdf = pdfium.PdfDocument(TestFiles.form_object_with_image)
+    page = pdf.get_page(0)
+    images = list(page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_IMAGE]))
+    assert len(images) == 1
+    image, = images
+    
+    assert isinstance(image.container, pdfium.PdfObject)
+    assert image.container.type == pdfium_c.FPDF_PAGEOBJ_FORM
+    
+    page.remove_obj(image)
+    # page.remove_obj(image.container)
+    page.gen_content()
+    
+    output_path = OutputDir / "remove_image_in_xobject.pdf"
+    pdf.save(output_path)
+    assert output_path.exists()
