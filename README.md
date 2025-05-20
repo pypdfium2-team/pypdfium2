@@ -79,7 +79,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     
     Dependencies:
     - For the default toolchained build, you probably don't need to install any system dependencies.
-    - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib`.
+    - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib` (and maybe `glib` to satisfy the build system).
     - You might also want to know that pdfium bundles `agg, abseil` and `fast_float`.
     - When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. GCC is preferred, but Clang may also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
     
