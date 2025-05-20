@@ -124,12 +124,12 @@ def build(Ninja, target):
 
 
 def main(
-        do_update = False,
-        build_ver = None,
+        do_update    = False,
+        build_ver    = None,
         build_target = None,
-        use_syslibs = False,
-        single_lib = False,
-        win_sdk_dir = None,
+        use_syslibs  = False,
+        single_lib   = False,
+        win_sdk_dir  = None,
     ):
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
