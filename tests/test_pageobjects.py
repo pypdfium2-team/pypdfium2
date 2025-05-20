@@ -272,6 +272,7 @@ def test_remove_image_in_xobject():
     assert isinstance(image.container, pdfium.PdfObject)
     assert image.container.type == pdfium_c.FPDF_PAGEOBJ_FORM
     
+    # FIXME does not actually disappear yet when saving the page. This is probably a bug in the experimental API.
     page.remove_obj(image)
     # page.remove_obj(image.container)
     page.gen_content()

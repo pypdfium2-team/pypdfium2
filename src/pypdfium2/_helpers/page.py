@@ -243,6 +243,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         if pageobj.level > 0:
             assert pageobj.container is not None
             ok = pdfium_c.FPDFFormObj_RemoveObject(pageobj.container, pageobj)
+            pageobj.level, pageobj.container = 0, None
         else:
             assert pageobj.container is None
             ok = pdfium_c.FPDFPage_RemoveObject(self, pageobj)
