@@ -18,7 +18,7 @@ DEFAULT_VER = 7157
 SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
-PDFiumBuildDir = PDFiumDir / "out" / "Default"
+PDFiumOutDir = PDFiumDir / "out" / "Default"
 
 
 # run `gn args --list out/Default/` for build config docs
@@ -115,12 +115,12 @@ def get_tool(name):
     return bin
 
 def configure(GN, config):
-    mkdir(PDFiumBuildDir)
-    (PDFiumBuildDir / "args.gn").write_text(config)
-    run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
+    mkdir(PDFiumOutDir)
+    (PDFiumOutDir / "args.gn").write_text(config)
+    run_cmd([GN, "gen", PDFiumOutDir], cwd=PDFiumDir)
 
 def build(Ninja, target):
-    run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
+    run_cmd([Ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
 
 
 def main(
@@ -175,7 +175,7 @@ def main(
     configure(GN, config_str)
     build(Ninja, build_target)
     v_post = handle_sbuild_postver(build_ver, PDFiumDir)
-    pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_full, **v_post)
+    pack_sourcebuild(PDFiumDir, PDFiumOutDir, v_full, **v_post)
 
 
 def parse_args(argv):
