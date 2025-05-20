@@ -65,6 +65,7 @@ ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
 REFBINDINGS_FLAGS = ("V8", "XFA", "SKIA")
+LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
 
 
 # TODO consider StrEnum or something
@@ -156,7 +157,6 @@ def write_json(fp, data, indent=2):
 
 
 def libname_for_system(system, name="pdfium"):
-    
     # Map system to pdfium shared library name
     if system == SysNames.windows:
         return f"{name}.dll"
@@ -165,17 +165,17 @@ def libname_for_system(system, name="pdfium"):
     elif system in (SysNames.linux, SysNames.android):
         return f"lib{name}.so"
     else:
-        # let the caller pass through a fallback
+        # take libname pattern from caller
         pattern = os.getenv("LIBNAME_PATTERN")
         if pattern:
-            prefix, suffix = pattern.split(".", maxsplit=1)
-            return f"{prefix}{name}.{suffix}"
-        # if we are on BSD or any other POSIX-based system, try `lib{}.so`, unless set otherwise by the caller
-        if "bsd" in sys.platform or os.name == "posix":
-            return f"lib{name}.so"
-    
-    # TODO downstream fallback: list directory and pick the file that contains the library name?
-    raise ValueError(f"Unhandled system {system!r}, don't know library naming pattern. Set $LIBNAME_PATTERN=prefix.suffix (e.g. lib.so)")
+            return pattern.format(name)
+        # NOTE alternatively, we could do this only for BSD/POSIX
+        # as a downstream fallback, we could also list the dir in question and pick the file that contains the libname
+        log(
+            f"Unhandled system {sys.platform!r} - assuming lib.so pattern. "
+            "Set LIBNAME_PATTERN='prefix{}.suffix' if this is not right."
+        )
+        return f"lib{name}.so"
 
 
 class _PdfiumVerScheme (
@@ -203,7 +203,7 @@ class _PdfiumVerClass:
     def _get_chromium_refs(self):
         # FIXME The ls-remote call may take extremely long (~1min) with older versions of git!
         # With newer git, it's a lot better, but still noticeable (one or a few seconds).
-        # TODO See if we can do something to speed up the call. That said, we might want to add a way for the caller to supply the full version. Also, adding a disk cache for the refs might be an option.
+        # TODO add way for caller to pass in the full version?
         if self._vlines is None:
             log(f"Fetching chromium refs ...")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
@@ -294,6 +294,38 @@ def parse_git_tag():
     return parse_given_tag(desc)
 
 
+def get_helpers_info():
+    
+    # TODO add some checks against record?
+    
+    have_git_describe = False
+    if (ProjectDir/".git").exists():
+        try:
+            helpers_info = parse_git_tag()
+        except subprocess.CalledProcessError as e:
+            log(str(e))
+            log("Version uncertain: git describe failure - possibly a shallow checkout")
+        else:
+            have_git_describe = True
+            helpers_info["data_source"] = "git"
+    else:
+        log("Version uncertain: git repo not available.")
+    
+    if not have_git_describe:
+        ver_file = ModuleDir_Helpers / VersionFN
+        if ver_file.exists():
+            log("Falling back to given version info (e.g. sdist).")
+            helpers_info = read_json(ver_file)
+            helpers_info["data_source"] = "given"
+        else:
+            log("Falling back to autorelease record.")
+            record = read_json(AR_RecordFile)
+            helpers_info = parse_given_tag(record["tag"])
+            helpers_info["data_source"] = "record"
+    
+    return helpers_info
+
+
 def merge_tag(info, mode):
     
     # some duplication with src/pypdfium2/version.py ...
@@ -315,14 +347,13 @@ def merge_tag(info, mode):
             tag += "+" + ".".join(extra_info)
         else:
             log("Warning: Ignored post-tag desc. This should not happen in autorelease CI.")
-            assert not IS_CI
     
     return tag
 
 
 def plat_to_system(pl_name):
     if pl_name == ExtPlats.sourcebuild:
-        # FIXME If doing a sourcebuild on an unknown host system, this returns None, which will cause binary detection code to fail (we need to know the platform-specific binary name) - handle this downstream with fallback value?
+        # Note, this may be None if on an unknown host
         return Host.system
     # other ExtPlats intentionally not handled here
     return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
@@ -386,6 +417,15 @@ class _host_platform:
     @cached_property
     def libname_glob(self):
         return libname_for_system(Host.system, name="*")
+    
+    @cached_property
+    def usr(self):
+        if os.name != "posix":
+            return None
+        usr = "/usr"
+        if self.system == SysNames.android:
+            usr = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
+        return Path(usr)
     
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
@@ -476,11 +516,6 @@ class _host_platform:
         raise RuntimeError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
-LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
-
-USR_PREFIX = "/usr"
-if Host.system == SysNames.android:
-    USR_PREFIX = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
 
 
 def _manylinux_tag(arch, glibc="2_17"):
@@ -575,9 +610,9 @@ def run_cmd(command, cwd, capture=False, check=True, str_cast=True, stderr=None,
         return comp_process
 
 
-def tar_extract_file(tar, path, dst_path):
-    # path: str or tar member object
-    src_buf = tar.extractfile(path)
+def tar_extract_file(tar, path_or_member, dst_path):
+    src_buf = tar.extractfile(path_or_member)
+    assert src_buf is not None, f"Failed to extract {path_or_member}"
     with open(dst_path, "wb") as dst_buf:
         shutil.copyfileobj(src_buf, dst_buf)
 
@@ -601,12 +636,11 @@ def tmp_cwd_context(tmp_cwd):
 
 def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium", version=None):
     
-    # quick & dirty patch to allow using the pre-built bindings instead of calling ctypesgen
     if USE_REFBINDINGS:
         log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
         assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
         record_ver = PdfiumVer.release_pdfium_build
-        if version and version != record_ver:
+        if version != record_ver:
             log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
         shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
         return
@@ -727,38 +761,6 @@ def clean_platfiles():
             shutil.rmtree(fp)
 
 
-def get_helpers_info():
-    
-    # TODO add some checks against record?
-    
-    have_git_describe = False
-    if (ProjectDir/".git").exists():
-        try:
-            helpers_info = parse_git_tag()
-        except subprocess.CalledProcessError as e:
-            log(str(e))
-            log("Version uncertain: git describe failure - possibly a shallow checkout")
-        else:
-            have_git_describe = True
-            helpers_info["data_source"] = "git"
-    else:
-        log("Version uncertain: git repo not available.")
-    
-    if not have_git_describe:
-        ver_file = ModuleDir_Helpers / VersionFN
-        if ver_file.exists():
-            log("Falling back to given version info (e.g. sdist).")
-            helpers_info = read_json(ver_file)
-            helpers_info["data_source"] = "given"
-        else:
-            log("Falling back to autorelease record.")
-            record = read_json(AR_RecordFile)
-            helpers_info = parse_given_tag(record["tag"])
-            helpers_info["data_source"] = "record"
-    
-    return helpers_info
-
-
 def build_pl_suffix(version, use_v8):
     return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
 
@@ -797,8 +799,11 @@ def parse_pl_spec(pl_spec):
             req_ver = int(req_ver)
     elif pl_name is not None:
         assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
-        req_ver = PdfiumVer.release_pdfium_build
-        log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
+        if pl_name == ExtPlats.sourcebuild:
+            req_ver = read_json(DataDir/"sourcebuild"/VersionFN)["build"]
+        else:
+            log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
+            req_ver = PdfiumVer.release_pdfium_build
     
     return do_prepare, pl_name, req_ver, use_v8
 
@@ -870,8 +875,10 @@ def get_shimheaders_tool(pdfium_dir, rev="main"):
 def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
     log("Packing data files for sourcebuild...")
     
-    dest_dir = DataDir / ExtPlats.sourcebuild
-    mkdir(dest_dir)
+    dest_dir = DataDir/ExtPlats.sourcebuild
+    if dest_dir.exists():
+        shutil.rmtree(dest_dir)
+    dest_dir.mkdir(parents=True)
     
     for libpath in build_dir.glob(Host.libname_glob):
         shutil.copy(libpath, dest_dir/libpath.name)
@@ -884,3 +891,25 @@ def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
 def git_get_hash(repo_dir, n_digits=None):
     short = f"--short={n_digits}" if n_digits else "--short"
     return "g" + run_cmd(["git", "rev-parse", short, "HEAD"], cwd=repo_dir, capture=True)
+
+
+def handle_sbuild_vers(short_ver):
+    if short_ver == "main":
+        full_ver = PdfiumVer.get_latest_upstream()
+        pdfium_rev = short_ver
+        chromium_rev = short_ver
+    else:
+        assert str(short_ver).isnumeric()
+        full_ver = PdfiumVer.to_full(short_ver)
+        full_ver_str = str(full_ver)
+        pdfium_rev = f"chromium/{short_ver}"
+        chromium_rev = full_ver_str
+    return full_ver, pdfium_rev, chromium_rev
+
+
+def handle_sbuild_postver(short_ver, pdfium_dir):
+    if short_ver == "main":
+        log("Warning: Don't know how to get number of commits with shallow checkout. A NaN placeholder will be set.")
+        return dict(n_commits=NaN, hash=git_get_hash(pdfium_dir, n_digits=11))
+    else:
+        return dict(n_commits=0, hash=None)

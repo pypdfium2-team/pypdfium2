@@ -61,19 +61,12 @@ class pypdfium_build_py (build_py_orig):
         build_py_orig.run(self, *args, **kwargs)
 
 
-# semi-static metadata
-PROJECT_DESC = "Python bindings to PDFium"
 LICENSES_SHARED = (
     "LICENSES/Apache-2.0.txt",
     "LICENSES/BSD-3-Clause.txt",
     "LICENSES/CC-BY-4.0.txt",
 )
-LICENSES_WHEEL = (
-    "LICENSES/LicenseRef-PdfiumThirdParty.txt",
-    "REUSE-wheel.toml",
-)
 LICENSES_SDIST = (
-    "LICENSES/LicenseRef-FairUse.txt",
     "REUSE.toml",
 )
 
@@ -86,11 +79,11 @@ def assert_exists(dir, data_files):
 
 def run_setup(modnames, pdfium_ver, pl_name):
     
+    license_files = list(LICENSES_SHARED)
     kwargs = dict(
         name = "pypdfium2",
         description = "Python bindings to PDFium",
-        license = "BSD-3-Clause, Apache-2.0, PdfiumThirdParty",
-        license_files = LICENSES_SHARED,
+        license = "BSD-3-Clause, Apache-2.0, dependency licenses",
         python_requires = ">= 3.6",
         cmdclass = {},
         package_dir = {},
@@ -101,7 +94,7 @@ def run_setup(modnames, pdfium_ver, pl_name):
     if modnames == [ModuleHelpers]:
         kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
-        kwargs["install_requires"] += ["pypdfium2_raw"]
+        kwargs["install_requires"].append("pypdfium2_raw")
     elif modnames == [ModuleRaw]:
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
@@ -118,7 +111,7 @@ def run_setup(modnames, pdfium_ver, pl_name):
                 if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
                     helpers_info["dirty"] = False
             else:
-                log("!!! Warning: sdist built without ctypesgen pin?")
+                log("Warning: sdist without ctypesgen pin, or git describe not working?")
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         # is_editable = None: unknown/fallback in case the cmdclass is not reached
         helpers_info["is_editable"] = None
@@ -140,16 +133,25 @@ def run_setup(modnames, pdfium_ver, pl_name):
     if ModuleRaw not in modnames or pl_name == ExtPlats.sdist:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": (VersionFN, BindingsFN, *libnames)}
         if pl_name == ExtPlats.sdist:
-            kwargs["license_files"] += LICENSES_SDIST
+            license_files.extend(LICENSES_SDIST)
     elif pl_name == ExtPlats.system:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": libnames}
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN]
     else:
+        if pl_name == ExtPlats.sourcebuild:
+            license_files.append("BUILD_LICENSES/*")
+        else:
+            # FIXME This gives a deeply nested directory structure.
+            # The author is not aware of a way to achieve a more flat structure with setuptools.
+            license_files.append(f"data/{pl_name}/BUILD_LICENSES/*")
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, *libnames]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
-        kwargs["license_files"] += LICENSES_WHEEL
+        license_files.append("REUSE-wheel.toml")
     
+    kwargs["license_files"] = license_files
+    
+    # check
     if "pypdfium2" in kwargs["package_data"]:
         assert_exists(ModuleDir_Helpers, kwargs["package_data"]["pypdfium2"])
     if "pypdfium2_raw" in kwargs["package_data"]:

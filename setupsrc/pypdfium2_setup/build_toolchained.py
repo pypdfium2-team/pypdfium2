@@ -13,12 +13,12 @@ from pathlib import Path, WindowsPath
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
-DEFAULT_VER = 7157
+DEFAULT_VER = 7191
 
 SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
-PDFiumBuildDir = PDFiumDir / "out" / "Default"
+PDFiumOutDir = PDFiumDir / "out" / "Default"
 
 
 # run `gn args --list out/Default/` for build config docs
@@ -74,7 +74,7 @@ def dl_depottools(do_update):
     return is_update
 
 
-def dl_pdfium(GClient, do_update, version):
+def dl_pdfium(GClient, do_update, revision):
     
     had_pdfium = PDFiumDir.exists()
     if not had_pdfium:
@@ -86,61 +86,26 @@ def dl_pdfium(GClient, do_update, version):
         args = [GClient, "sync"]
         if had_pdfium:
             args += ["-D", "--reset"]
-        args += ["--revision", f"origin/{version}", "--no-history", "--shallow"]
+        args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
         run_cmd(args, cwd=SBDir)
-        # quick & dirty fix to make a versioned commit available (pdfium gets tagged frequently, so this should be more than enough in practice)
-        # FIXME want to avoid static number of commits, and instead check out exactly up to latest versioned commit
-        if not had_pdfium:
-            run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
-            run_cmd(["git", "fetch", "--depth=100"], cwd=PDFiumDir)
     
     return do_update
 
 
-def _walk_refs(log):
-    for i, line in enumerate(log.split("\n")):
-        for ref in line.split(", "):
-            match = re.fullmatch(r"origin/chromium/(\d+)", ref.strip())
-            if match:
-                return int(match.group(1)), i
-    assert False, "Failed to find versioned commit - log too small?"
-
-
-def identify_pdfium():
-    # we didn't manage to get git describe working reliably with chromium's branch heads and the awkward state the repo's in, so emulate git describe on our own
-    # FIXME want to avoid static number of commits - need a better way to determine latest version and commit count diff
-    log = run_cmd(["git", "log", "-100", "--pretty=%D"], cwd=PDFiumDir, capture=True)
-    v_short, n_commits = _walk_refs(log)
-    hash = git_get_hash(PDFiumDir) if n_commits else None
-    v_info = dict(n_commits=n_commits, hash=hash)
-    return v_short, v_info
-
-
-def _create_resources_rc(v_short):
+def _create_resources_rc(build_ver):
     input_path = PatchDir / "win" / "resources.rc"
     output_path = PDFiumDir / "resources.rc"
     content = input_path.read_text()
-    content = content.replace("$VERSION_CSV", str(v_short))
-    content = content.replace("$VERSION", str(v_short))
+    content = content.replace("$VERSION_CSV", str(build_ver))
+    content = content.replace("$VERSION", str(build_ver))
     output_path.write_text(content)
 
-
-def patch_pdfium(v_short):
+def patch_pdfium(build_ver):
     git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
-        _create_resources_rc(v_short)
-
-
-def configure(GN, config):
-    mkdir(PDFiumBuildDir)
-    (PDFiumBuildDir / "args.gn").write_text(config)
-    run_cmd([GN, "gen", PDFiumBuildDir], cwd=PDFiumDir)
-
-
-def build(Ninja, target):
-    run_cmd([Ninja, "-C", PDFiumBuildDir, target], cwd=PDFiumDir)
+        _create_resources_rc(build_ver)
 
 
 def get_tool(name):
@@ -149,62 +114,68 @@ def get_tool(name):
         bin = bin.with_suffix(".bat")
     return bin
 
+def configure(GN, config):
+    mkdir(PDFiumOutDir)
+    (PDFiumOutDir / "args.gn").write_text(config)
+    run_cmd([GN, "gen", PDFiumOutDir], cwd=PDFiumDir)
+
+def build(Ninja, target):
+    run_cmd([Ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
+
 
 def main(
-        b_update = False,
-        b_version = None,
-        b_target = None,
-        b_use_syslibs = False,
-        b_win_sdk_dir = None,
-        b_use_single_lib = False,
+        do_update = False,
+        build_ver = None,
+        build_target = None,
+        use_syslibs = False,
+        single_lib = False,
+        win_sdk_dir = None,
     ):
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
     
-    if b_version is None:
-        b_version = f"chromium/{DEFAULT_VER}"
-    if b_target is None:
-        b_target = "pdfium"
+    if build_target is None:
+        build_target = "pdfium"
+    if build_ver is None:
+        build_ver = DEFAULT_VER
+    
+    v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     
     if sys.platform.startswith("win32"):
-        if b_win_sdk_dir is None:
-            b_win_sdk_dir = WindowsPath(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64")
-        assert b_win_sdk_dir.exists()
-        os.environ["PATH"] += os.pathsep + str(b_win_sdk_dir)
+        if win_sdk_dir is None:
+            win_sdk_dir = WindowsPath(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64")
+        assert win_sdk_dir.exists()
+        os.environ["PATH"] += os.pathsep + str(win_sdk_dir)
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
     
-    dl_depottools(b_update)
+    dl_depottools(do_update)
     
     GClient = get_tool("gclient")
     GN      = get_tool("gn")
     Ninja   = get_tool("ninja")
     
-    did_pdfium_sync = dl_pdfium(GClient, b_update, b_version)
-    
-    v_short, v_post = identify_pdfium()
-    log(f"Version {v_short} {v_post}")
-    v_full = PdfiumVer.to_full(v_short)
-    rev = b_version if b_version == "main" else str(v_full)
+    did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev)
     
     if did_pdfium_sync:
-        patch_pdfium(v_short)
-        if b_use_single_lib:
+        patch_pdfium(build_ver)
+        if single_lib:
             git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
-    if b_use_syslibs:
-        get_shimheaders_tool(PDFiumDir, rev=rev)
+    if use_syslibs:
+        get_shimheaders_tool(PDFiumDir, rev=chromium_rev)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
-        run_cmd(["python3", "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
+        run_cmd([sys.executable, "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     
     config_dict = DefaultConfig.copy()
-    if b_use_single_lib:
-        config_dict["is_component_build"] = False
-    if b_use_syslibs:
+    if use_syslibs:
         config_dict.update(SyslibsConfig)
+    if single_lib:
+        config_dict["is_component_build"] = False
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
-    build(Ninja, b_target)
-    pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_full, **v_post)
+    build(Ninja, build_target)
+    v_post = handle_sbuild_postver(build_ver, PDFiumDir)
+    pack_sourcebuild(PDFiumDir, PDFiumOutDir, v_full, **v_post)
 
 
 def parse_args(argv):
@@ -213,15 +184,18 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--update", "-u",
+        dest = "do_update",
         action = "store_true",
         help = "Update existing PDFium/DepotTools repositories, removing local changes.",
     )
     parser.add_argument(
         "--version", "-v",
-        help = f"PDFium version (revision) to use. Defaults to 'chromium/{DEFAULT_VER}'. Use 'main' to try the latest state.",
+        dest = "build_ver",
+        help = f"PDFium version to use. Currently defaults to '{DEFAULT_VER}'. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--target", "-t",
+        dest = "build_target",
         help = "PDFium build target (defaults to `pdfium`). Use `pdfium_all` to also build tests."
     )
     parser.add_argument(
@@ -230,21 +204,21 @@ def parse_args(argv):
         help = "Use system libraries instead of those bundled with PDFium. Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng, zlib and icuuc are installed, and that $PKG_CONFIG_PATH is set correctly.",
     )
     parser.add_argument(
+        "--single-lib",
+        action = "store_true",
+        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-synced, else the existing state is used.",
+    )
+    parser.add_argument(
         "--win-sdk-dir",
         type = WindowsPath,
         help = "Path to the Windows SDK (Windows only)",
-    )
-    parser.add_argument(
-        "--single-lib",
-        action = "store_true",
-        dest = "use_single_lib",
-        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-synced, else the existing state is used.",
     )
     return parser.parse_args(argv)
 
 
 def main_cli(argv=sys.argv[1:]):
-    return main( **{"b_"+k : v for k, v in vars( parse_args(argv) ).items()} )
+    args = parse_args(argv)
+    return main(**vars(args))
     
 
 if __name__ == "__main__":

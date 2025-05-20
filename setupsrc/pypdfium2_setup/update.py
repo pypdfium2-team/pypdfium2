@@ -78,6 +78,20 @@ def _parse_ver_file(buffer, short_ver):
     return full_ver
 
 
+def _extract_licenses(tar, pl_dir):
+    licenses_dir = pl_dir/"BUILD_LICENSES"
+    mkdir(licenses_dir)
+    all_paths = tar.getnames()
+    if "licenses" in all_paths:
+        license_paths = (p for p in all_paths if p.startswith("licenses/"))
+        for path in license_paths:
+            tar_extract_file(tar, path, licenses_dir/Path(path).name)
+        tar_extract_file(tar, "LICENSE", licenses_dir/"pdfium-binaries.txt")
+    else:
+        # backwards compat with pdfium-binaries < 7175
+        tar_extract_file(tar, "LICENSE", licenses_dir/"aggregated-license.txt")
+
+
 def extract(archives, version, flags):
     
     for pl_name, arc_path in archives.items():
@@ -88,6 +102,7 @@ def extract(archives, version, flags):
             libname = libname_for_system(system)
             tar_libdir = "lib" if system != SysNames.windows else "bin"
             tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
+            _extract_licenses(tar, pl_dir)
             full_ver = _parse_ver_file(tar.extractfile("VERSION"), version)
             write_pdfium_info(pl_dir, full_ver, origin="pdfium-binaries", flags=flags)
         

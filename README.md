@@ -79,7 +79,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     
     Dependencies:
     - For the default toolchained build, you probably don't need to install any system dependencies.
-    - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib`.
+    - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib` (and maybe `glib` to satisfy the build system).
     - You might also want to know that pdfium bundles `agg, abseil` and `fast_float`.
     - When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. GCC is preferred, but Clang may also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
     
@@ -718,13 +718,16 @@ Usage should be largely self-explanatory, assuming a minimum of familiarity with
 
 pypdfium2 itself is available by the terms and conditions of [`Apache-2.0`](LICENSES/Apache-2.0.txt) / [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt).
 Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSES/CC-BY-4.0.txt).
-
-PDFium is available under a BSD-style license that can be found in its [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file.
-Various other open-source licenses apply to dependencies bundled with PDFium. These also have to be shipped alongside binary redistributions. Copies of identified licenses are provided in [`LicenseRef-PdfiumThirdParty.txt`](LICENSES/LicenseRef-PdfiumThirdParty.txt).
-Note that pdfium's dependencies might change over time. Although we try to keep an eye on the situation, there is no guarantee of completeness. Please notify us if you think this misses a relevant license.
-
 pypdfium2 includes [SPDX](https://spdx.org/licenses/) headers in source files.
 License information for data files is provided in [`REUSE.toml`](REUSE.toml) as per the [`reuse` standard](https://reuse.software/spec/).
+
+PDFium is available under "a BSD-style license that can be found in \[its\] [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file" (see also [`BUILD_LICENSES/pdfium.txt`](BUILD_LICENSES/pdfium.txt) for a copy in this repository).<br>
+Various other open-source licenses apply to dependencies included with PDFium.
+PDFium's license as well as dependency licenses have to be shipped with binary distributions.
+
+pypdfium2 uses PDFium builds from the `pdfium-binaries` project (see its [`LICENSE`](https://github.com/bblanchon/pdfium-binaries/blob/master/LICENSE) file or [`BUILD_LICENSES/pdfium-binaries.txt`](BUILD_LICENSES/pdfium-binaries.txt) - MIT).
+`pdfium-binaries` auto-collect dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. There is also an aggregated [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for display in this repository.<br>
+Note that PDFium's dependencies might change over time. Please notify us if you think a relevant license is missing.
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
 
@@ -821,7 +824,7 @@ This provides us with full control over the build env and the used commands, whe
 
 pypdfium2 contains a small test suite to verify the library's functionality. It is written with [pytest](https://github.com/pytest-dev/pytest/):
 ```bash
-just test
+python -m pytest tests/  # or `just test`
 ```
 
 Note that ...
