@@ -108,19 +108,21 @@ def _fetch_dep(name, target_dir):
     return _get_repo(DEPS_URLS[name], target_dir, rev=_Deferred.deps[name])
 
 
-def autopatch(file, pattern, repl, is_regex):
+def autopatch(file, pattern, repl, is_regex, exp_count=None):
     log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
     content = file.read_text()
     if is_regex:
         content, n_subs = re.subn(pattern, repl, content)
-        assert n_subs > 0
     else:
+        n_subs = content.count(pattern)
         content = content.replace(pattern, repl)
+    if exp_count is not None:
+        assert n_subs == exp_count
     file.write_text(content)
 
-def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
+def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
     for file in dir.glob(globexpr):
-        autopatch(file, pattern, repl, is_regex)
+        autopatch(file, pattern, repl, is_regex, exp_count)
 
 
 def get_sources(short_ver, with_tests, compiler, clang_path):
@@ -131,12 +133,14 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
     if is_new:
         autopatch_dir(
             PDFIUM_DIR/"public"/"cpp", "*.h",
-            r'"public/(.+)"', r'"../\1"', is_regex=True
+            r'"public/(.+)"', r'"../\1"',
+            is_regex=True, exp_count=None,
         )
         # don't build the test fonts (needed for embedder tests only)
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
-            r'(\s*)("//third_party/test_fonts")', r"\1# \2", is_regex=True
+            r'(\s*)("//third_party/test_fonts")', r"\1# \2",
+            is_regex=True, exp_count=1,
         )
     
     is_new = _fetch_dep("build", PDFIUM_DIR/"build")
@@ -157,7 +161,8 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
             autopatch(
                 PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn",
                 'ldflags += [ "-fuse-ld=lld" ]',
-                f'ldflags += [ "-fuse-ld={lld_path}" ]', is_regex=False
+                f'ldflags += [ "-fuse-ld={lld_path}" ]',
+                is_regex=False, exp_count=1,
             )
     
     get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
