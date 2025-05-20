@@ -63,8 +63,8 @@ class PdfObject (pdfium_i.AutoCloseable):
         self.raw = raw
         self.page = page
         self.pdf = pdf
-        self.level = level
         self.container = container
+        self.level = level
         
         if page is not None:
             if self.pdf is None:
