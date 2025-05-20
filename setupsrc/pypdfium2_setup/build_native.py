@@ -19,7 +19,7 @@ from pypdfium2_setup.base import *
 # The pdfium version this has last been tested with. Ideally, this should be close to the release version in autorelease/record.json
 # To bump this version, first test locally and update any patches as needed. Then, make a branch and run "Test Sourcebuild" on CI to see if all targets continue to work. Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
 # Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
-DEFAULT_VER = 7122
+DEFAULT_VER = 7191
 # assert DEFAULT_VER >= PDFIUM_MIN_REQ
 
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium"

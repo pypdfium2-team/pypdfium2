@@ -1,8 +1,8 @@
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index b0b194e..a14c263 100644
+index 94fc4b4c0..d368c46a6 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
-@@ -608,13 +608,6 @@ config("compiler") {
+@@ -612,13 +612,6 @@ config("compiler") {
        }
      }
  
@@ -15,8 +15,8 @@ index b0b194e..a14c263 100644
 -
      # Enable ELF CREL (see crbug.com/357878242) for all platforms that use ELF
      # (excluding toolchains that use an older version of LLVM).
-     if (is_linux && !llvm_android_mainline &&
-@@ -623,6 +616,14 @@ config("compiler") {
+     # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
+@@ -635,6 +628,14 @@ config("compiler") {
      }
    }
  
