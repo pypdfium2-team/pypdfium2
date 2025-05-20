@@ -139,7 +139,7 @@ def main(
     if build_ver is None:
         build_ver = DEFAULT_VER
     
-    v_full, v_post, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver, PDFiumDir)
+    v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     
     if sys.platform.startswith("win32"):
         if win_sdk_dir is None:
@@ -174,6 +174,7 @@ def main(
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
     build(Ninja, build_target)
+    v_post = handle_sbuild_postver(build_ver, PDFiumDir)
     pack_sourcebuild(PDFiumDir, PDFiumBuildDir, v_full, **v_post)
 
 

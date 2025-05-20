@@ -893,18 +893,23 @@ def git_get_hash(repo_dir, n_digits=None):
     return "g" + run_cmd(["git", "rev-parse", short, "HEAD"], cwd=repo_dir, capture=True)
 
 
-def handle_sbuild_vers(short_ver, pdfium_dir):
+def handle_sbuild_vers(short_ver):
     if short_ver == "main":
-        log("Warning: Don't know how to get number of commits with shallow checkout. A NaN placeholder will be set.")
         full_ver = PdfiumVer.get_latest_upstream()
-        post_ver = dict(n_commits=NaN, hash=git_get_hash(pdfium_dir, n_digits=11))
         pdfium_rev = short_ver
         chromium_rev = short_ver
     else:
         assert str(short_ver).isnumeric()
         full_ver = PdfiumVer.to_full(short_ver)
         full_ver_str = str(full_ver)
-        post_ver = dict(n_commits=0, hash=None)
         pdfium_rev = f"chromium/{short_ver}"
         chromium_rev = full_ver_str
-    return full_ver, post_ver, pdfium_rev, chromium_rev
+    return full_ver, pdfium_rev, chromium_rev
+
+
+def handle_sbuild_postver(short_ver, pdfium_dir):
+    if short_ver == "main":
+        log("Warning: Don't know how to get number of commits with shallow checkout. A NaN placeholder will be set.")
+        return dict(n_commits=NaN, hash=git_get_hash(pdfium_dir, n_digits=11))
+    else:
+        return dict(n_commits=0, hash=None)

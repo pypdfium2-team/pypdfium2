@@ -125,7 +125,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex):
 
 def get_sources(short_ver, with_tests, compiler, clang_path):
     
-    full_ver, post_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver, PDFIUM_DIR)
+    full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
     is_new = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
     if is_new:
@@ -168,7 +168,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     
-    return full_ver, post_ver
+    return full_ver
 
 
 def prepare(config_dict, build_dir):
@@ -251,7 +251,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         clang_path = Path(Host.usr)
     
     mkdir(SOURCES_DIR)
-    full_ver, post_ver = get_sources(build_ver, with_tests, compiler, clang_path)
+    full_ver = get_sources(build_ver, with_tests, compiler, clang_path)
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
@@ -263,6 +263,7 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
     if with_tests:
         test(build_dir)
     
+    post_ver = handle_sbuild_postver(build_ver, PDFIUM_DIR)
     pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, **post_ver)
 
 
