@@ -287,7 +287,7 @@ class PdfImage (PdfObject):
             
             px_w, px_h = self.get_px_size()
             l, b, r, t = self.get_bounds()
-            content_w, content_h = r-l, t-b
+            content_w, content_h = abs(r-l), abs(t-b)
             
             # align pixel and content width/height relation if swapped due to rotation (e.g. 90°, 270°)
             swap = (px_w < px_h) != (content_w < content_h)
