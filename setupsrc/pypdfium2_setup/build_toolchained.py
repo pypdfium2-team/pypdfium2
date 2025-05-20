@@ -13,7 +13,7 @@ from pathlib import Path, WindowsPath
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
-DEFAULT_VER = 7157
+DEFAULT_VER = 7191
 
 SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
