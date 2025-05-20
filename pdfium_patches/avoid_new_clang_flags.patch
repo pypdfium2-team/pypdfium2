@@ -1,9 +1,23 @@
+diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
+index 94fc4b4c0..5f0e525cd 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
-@@ -593,20 +593,20 @@ config("compiler") {
-     # TODO(crbug.com/40283598): This causes binary size growth and potentially
-     # other problems.
-     # TODO(crbug.com/40284925): This isn't supported by Cronet's mainline llvm version.
+@@ -391,7 +391,7 @@ config("compiler") {
+     }
+ 
+     if (use_lld) {
+-      ldflags += [ "-fuse-ld=lld" ]
++      ldflags += [ "-fuse-ld=/usr/bin/ld.lld" ]
+       if (lld_path != "") {
+         ldflags += [ "-B" + rebase_path(lld_path, root_build_dir) ]
+       }
+@@ -594,23 +594,7 @@ config("compiler") {
+       }
+     }
+ 
+-    # TODO(crbug.com/40283598): This causes binary size growth and potentially
+-    # other problems.
+-    # TODO(crbug.com/40284925): This isn't supported by Cronet's mainline llvm version.
 -    if (default_toolchain != "//build/toolchain/cros:target" &&
 -        !llvm_android_mainline) {
 -      cflags += [
@@ -18,41 +32,37 @@
 -        }
 -      }
 -    }
-+    # if (default_toolchain != "//build/toolchain/cros:target" &&
-+    #     !llvm_android_mainline) {
-+    #   cflags += [
-+    #     "-mllvm",
-+    #     "-split-threshold-for-reg-with-hint=0",
-+    #   ]
-+    #   if (use_thin_lto && is_a_target_toolchain) {
-+    #     if (is_win) {
-+    #       ldflags += [ "-mllvm:-split-threshold-for-reg-with-hint=0" ]
-+    #     } else {
-+    #       ldflags += [ "-Wl,-mllvm,-split-threshold-for-reg-with-hint=0" ]
-+    #     }
-+    #   }
-+    # }
++    # XXX(pypdfium2) patched away overly new flags
  
      # TODO(crbug.com/40192287): Investigate why/if this should be needed.
      if (is_win) {
-@@ -617,10 +617,10 @@ config("compiler") {
+@@ -619,20 +603,6 @@ config("compiler") {
+       cflags += [ "-ffp-contract=off" ]
+     }
  
-     # Enable ELF CREL (see crbug.com/357878242) for all platforms that use ELF
-     # (excluding toolchains that use an older version of LLVM).
--    if (is_linux && !llvm_android_mainline &&
+-    # Enable ELF CREL (see crbug.com/357878242) for all platforms that use ELF
+-    # (excluding toolchains that use an older version of LLVM).
+-    # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
+-    if (is_linux && use_lld && !llvm_android_mainline && current_cpu != "arm" &&
 -        default_toolchain != "//build/toolchain/cros:target") {
 -      cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
 -    }
-+    # if (is_linux && !llvm_android_mainline &&
-+    #     default_toolchain != "//build/toolchain/cros:target") {
-+    #   cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
-+    # }
+-
+-    # TODO(crbug.com/413427035): Remove once
+-    # https://github.com/llvm/llvm-project/pull/136867/ is landed.
+-    if (!is_win && !llvm_android_mainline &&
+-        default_toolchain != "//build/toolchain/cros:target") {
+-      cflags += [ "-fextend-variable-liveness=none" ]
+-    }
    }
  
    # C11/C++11 compiler flags setup.
-@@ -1984,10 +1984,10 @@ config("default_warnings") {
+@@ -2079,11 +2049,13 @@ config("default_warnings") {
+         # TODO(crbug.com/330524456): -Wcast-function-type is under -Wextra now.
          "-Wno-cast-function-type",
  
++        # XXX(pypdfium2 commented out)
++        
          # TODO(crbug.com/40284799): Fix and re-enable.
 -        "-Wno-thread-safety-reference-return",
 +        # "-Wno-thread-safety-reference-return",
