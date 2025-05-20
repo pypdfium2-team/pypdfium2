@@ -425,7 +425,7 @@ class _host_platform:
         usr = "/usr"
         if self.system == SysNames.android:
             usr = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
-        return usr
+        return Path(usr)
     
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
