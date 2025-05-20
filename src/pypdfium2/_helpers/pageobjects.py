@@ -276,6 +276,46 @@ class PdfImage (PdfObject):
             raise PdfiumError("Failed to set image to bitmap.")
     
     
+    def _get_rendered_bitmap(self, scale_to_original):
+        """ This is a private implementation function. Do not use externally. """
+        
+        if self.pdf is None:
+            raise RuntimeError("Cannot get rendered bitmap of loose pageobject.")
+            
+        if scale_to_original:
+            # Suggested by pdfium dev Lei Zhang in https://groups.google.com/g/pdfium/c/2czGFBcWHHQ/m/g0wzOJR-BAAJ
+            
+            px_w, px_h = self.get_px_size()
+            l, b, r, t = self.get_bounds()
+            content_w, content_h = r-l, t-b
+            
+            # align pixel and content width/height relation if swapped due to rotation (e.g. 90°, 270°)
+            swap = (px_w < px_h) != (content_w < content_h)
+            if swap:
+                px_w, px_h = px_h, px_w
+            
+            # if the image is squashed/stretched, prefer partial upscaling over partial downscaling (not using separate x/y scaling, so the image will look as in the PDF)
+            scale_factor = max(px_w/content_w, px_h/content_h)
+            orig_mat = self.get_matrix()
+            scaled_mat = orig_mat.scale(scale_factor, scale_factor)
+            self.set_matrix(scaled_mat)
+            # logger.debug(
+            #     f"Pixel size: {px_w}, {px_h} (did swap? {swap})\n"
+            #     f"Size in page coords: {content_w}, {content_h}\n"
+            #     f"Scale: {scale_factor}\n"
+            #     f"Current matrix: {orig_mat}\n"
+            #     f"Scaled matrix: {scaled_mat}"
+            # )
+        
+        try:
+            raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
+        finally:
+            if scale_to_original:
+                self.set_matrix(orig_mat)
+        
+        return raw_bitmap
+    
+    
     def get_bitmap(self, render=False, scale_to_original=True):
         """
         Get a bitmap rasterization of the image.
@@ -290,39 +330,7 @@ class PdfImage (PdfObject):
         """
         
         if render:
-            if self.pdf is None:
-                raise RuntimeError("Cannot get rendered bitmap of loose pageobject.")
-            
-            if scale_to_original:
-                # Suggested by pdfium dev Lei Zhang in https://groups.google.com/g/pdfium/c/2czGFBcWHHQ/m/g0wzOJR-BAAJ
-                
-                px_w, px_h = self.get_px_size()
-                l, b, r, t = self.get_bounds()
-                content_w, content_h = r-l, t-b
-                
-                # align pixel and content width/height relation if swapped due to rotation (e.g. 90°, 270°)
-                swap = (px_w < px_h) != (content_w < content_h)
-                if swap:
-                    px_w, px_h = px_h, px_w
-                
-                # if the image is squashed/stretched, prefer partial upscaling over partial downscaling (not using separate x/y scaling, so the image will look as in the PDF)
-                scale_factor = max(px_w/content_w, px_h/content_h)
-                orig_mat = self.get_matrix()
-                scaled_mat = orig_mat.scale(scale_factor, scale_factor)
-                self.set_matrix(scaled_mat)
-                # logger.debug(
-                #     f"Pixel size: {px_w}, {px_h} (did swap? {swap})\n"
-                #     f"Size in page coords: {content_w}, {content_h}\n"
-                #     f"Scale: {scale_factor}\n"
-                #     f"Current matrix: {orig_mat}\n"
-                #     f"Scaled matrix: {scaled_mat}"
-                # )
-            
-            try:
-                raw_bitmap = pdfium_c.FPDFImageObj_GetRenderedBitmap(self.pdf, self.page, self)
-            finally:
-                if scale_to_original:
-                    self.set_matrix(orig_mat)
+            raw_bitmap = self._get_rendered_bitmap(scale_to_original)
         else:
             raw_bitmap = pdfium_c.FPDFImageObj_GetBitmap(self)
         
