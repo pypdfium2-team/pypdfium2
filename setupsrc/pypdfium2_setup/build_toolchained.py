@@ -8,7 +8,7 @@
 import os
 import sys
 import argparse
-from pathlib import Path, WindowsPath
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
@@ -143,7 +143,7 @@ def main(
     
     if sys.platform.startswith("win32"):
         if win_sdk_dir is None:
-            win_sdk_dir = WindowsPath(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64")
+            win_sdk_dir = Path(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64")
         assert win_sdk_dir.exists()
         os.environ["PATH"] += os.pathsep + str(win_sdk_dir)
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
@@ -210,7 +210,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--win-sdk-dir",
-        type = WindowsPath,
+        type = lambda p: Path(p).resolve(),
         help = "Path to the Windows SDK (Windows only)",
     )
     return parser.parse_args(argv)
