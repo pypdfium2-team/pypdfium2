@@ -250,6 +250,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         if not ok:
             raise PdfiumError("Failed to remove pageobject.")
+        
         pageobj.page = None
         pageobj._attach_finalizer()
     
