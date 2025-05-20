@@ -1,16 +1,7 @@
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 94fc4b4c0..5f0e525cd 100644
+index 94fc4b4c0..ecb14f421 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
-@@ -391,7 +391,7 @@ config("compiler") {
-     }
- 
-     if (use_lld) {
--      ldflags += [ "-fuse-ld=lld" ]
-+      ldflags += [ "-fuse-ld=/usr/bin/ld.lld" ]
-       if (lld_path != "") {
-         ldflags += [ "-B" + rebase_path(lld_path, root_build_dir) ]
-       }
 @@ -594,23 +594,7 @@ config("compiler") {
        }
      }
