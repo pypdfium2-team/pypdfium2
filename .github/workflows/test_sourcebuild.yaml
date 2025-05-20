@@ -82,6 +82,7 @@ jobs:
         if: ${{ matrix.build_mode == 'native-clang' }}
         run: |
           ARCH=$(uname -m)
+          VERSION=18
           sudo apt-get install -y llvm lld
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
