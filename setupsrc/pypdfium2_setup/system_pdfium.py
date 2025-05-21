@@ -31,7 +31,7 @@ def _find_libreoffice_pdfium():
     if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
         lo_paths_iter = itertools.product((Host.usr/"lib", Host.usr/"local/lib"), ("", "64"))
         libname = libname_for_system(Host.system, name="pdfiumlo")
-        candidates = (Path(path+bitness)/"libreoffice"/"program"/libname for path, bitness in lo_paths_iter)
+        candidates = (Path(str(path)+bitness)/"libreoffice"/"program"/libname for path, bitness in lo_paths_iter)
         pdfium_lib = _get_existing(candidates)
     return pdfium_lib
 
