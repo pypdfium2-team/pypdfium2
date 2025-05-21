@@ -5,8 +5,10 @@
 # NOTE: unless otherwise noted, "version" refers to the short version in this file
 
 import sys
+import json
 import shutil
 import tarfile
+import hashlib
 import argparse
 import functools
 from pathlib import Path
@@ -17,11 +19,11 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
 
-def clear_data(download_files):
-    for pl_name in download_files:
-        pl_dir = DataDir / pl_name
-        if pl_dir.exists():
-            shutil.rmtree(pl_dir)
+# def clear_data(download_files):
+#     for pl_name in download_files:
+#         pl_dir = DataDir / pl_name
+#         if pl_dir.exists():
+#             shutil.rmtree(pl_dir)
 
 
 def _get_package(pl_name, version, robust, use_v8):
@@ -37,6 +39,10 @@ def _get_package(pl_name, version, robust, use_v8):
     fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
     log(f"'{fu}' -> '{fp}'")
+    
+    if fp.exists():  # XXX
+        log("Archive exists already, skipping...")
+        return pl_name, fp
     
     try:
         url_request.urlretrieve(fu, fp)
@@ -106,7 +112,7 @@ def extract(archives, version, flags):
             full_ver = _parse_ver_file(tar.extractfile("VERSION"), version)
             write_pdfium_info(pl_dir, full_ver, origin="pdfium-binaries", flags=flags)
         
-        arc_path.unlink()
+        # arc_path.unlink()
 
 
 def postprocess_android(platforms):
@@ -121,6 +127,41 @@ def postprocess_android(platforms):
             log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
+def _gh_web_api(path):
+    log(f"API Request {path}")
+    with url_request.urlopen("https://api.github.com"+path) as h:
+        return json.loads( h.read().decode() )
+
+def _get_sha256sum(path):
+    # TODO fallback for python < 3.11
+    with open(path, "rb") as fh:
+        return hashlib.file_digest(fh, "sha256").hexdigest()
+
+
+def verify(archives, version):
+    
+    log("Attempt to verify release checksum against workflow ...")
+    
+    repo = "/repos/bblanchon/pdfium-binaries"
+    date = _gh_web_api(f"{repo}/releases/tags/chromium%2F{version}")["published_at"][:10]
+    
+    # TODO also pass head_sha? (could be determined along tag in ls-remote call)
+    runs = _gh_web_api(f"{repo}/actions/workflows/build-all.yml/runs?created={date}")
+    assert runs["total_count"] == 1, runs["total_count"]
+    run, = runs["workflow_runs"]
+    
+    artifacts_raw = _gh_web_api(f"{repo}/actions/runs/{run['id']}/artifacts")["artifacts"]
+    artifacts_dict = {d["name"]: d for d in artifacts_raw}
+    
+    for path in archives.values():
+        exp_sum = artifacts_dict[path.stem]["digest"].split(":", maxsplit=1)[1]
+        file_sum = _get_sha256sum(path)
+        if exp_sum == file_sum:
+            log(f"SHA256 sums match: {file_sum}")
+        else:
+            raise SystemExit(f"Fatal: SHA256 sums don't match: {exp_sum} != {file_sum}")
+
+
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     if not version:
@@ -132,8 +173,10 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     flags = ["V8", "XFA"] if use_v8 else []
     
-    clear_data(platforms)
+    # clear_data(platforms)
     archives = download(platforms, version, use_v8, max_workers, robust)
+    verify(archives, version)
+    print(archives)
     extract(archives, version, flags)
     postprocess_android(platforms)
 
