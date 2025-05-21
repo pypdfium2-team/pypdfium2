@@ -176,7 +176,6 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     # clear_data(platforms)
     archives = download(platforms, version, use_v8, max_workers, robust)
     verify(archives, version)
-    print(archives)
     extract(archives, version, flags)
     postprocess_android(platforms)
 
