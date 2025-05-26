@@ -5,8 +5,10 @@
 # NOTE: unless otherwise noted, "version" refers to the short version in this file
 
 import sys
+import json
 import shutil
 import tarfile
+import hashlib
 import argparse
 import functools
 from pathlib import Path
@@ -109,6 +111,60 @@ def extract(archives, version, flags):
         arc_path.unlink()
 
 
+def _gh_web_api(path):
+    log(f"API Request {path}")
+    with url_request.urlopen("https://api.github.com"+path) as h:
+        return json.loads( h.read().decode() )
+
+def _get_sha256sum(path):
+    # https://stackoverflow.com/a/44873382/15547292
+    if sys.version_info >= (3, 11):
+        with open(path, "rb") as fh:
+            return hashlib.file_digest(fh, "sha256").hexdigest()
+    else:
+        chunksize = 128 * 1024  # 128 KiB
+        chunk = memoryview(bytearray(chunksize))
+        hash = hashlib.sha256()
+        
+        with open(path, "rb", buffering=0) as fh:
+            n = fh.readinto(chunk)
+            while n:
+                hash.update(chunk[:n])
+                n = fh.readinto(chunk)
+        
+        return hash.hexdigest()
+
+
+def verify(archives, version):
+    
+    log("Attempt to verify release checksum(s) against workflow ...")
+    
+    repo = "/repos/bblanchon/pdfium-binaries"
+    date = _gh_web_api(f"{repo}/releases/tags/chromium%2F{version}")["published_at"][:10]
+    
+    # FIXME this will fail if the workflow in question has been run more than once that day
+    runs = _gh_web_api(f"{repo}/actions/workflows/build-all.yml/runs?created={date}")
+    assert runs["total_count"] == 1, runs["total_count"]
+    run, = runs["workflow_runs"]
+    run_id = run["id"]
+    
+    run_cmd(["gh", "run", "download", str(run_id), "-n", "pdfium-checksums", "-D", str(DataDir), "-R", "bblanchon/pdfium-binaries"], cwd=ProjectDir)
+    
+    ChecksumsFile = DataDir/"pdfium-sha256sum.txt"
+    lines = ChecksumsFile.read_text().strip().split("\n")
+    lines = (l.strip().split("  ", maxsplit=1) for l in lines)
+    checksums_dict = {fn: fsum for fsum, fn in lines}
+    ChecksumsFile.unlink()
+    
+    for path in archives.values():
+        exp_sum = checksums_dict[path.name]
+        file_sum = _get_sha256sum(path)
+        if exp_sum == file_sum:
+            log(f"{path.name}: SHA256 sums match: {file_sum}")
+        else:
+            raise SystemExit(f"Fatal: {path.name}: SHA256 sums don't match: {exp_sum} != {file_sum}")
+
+
 def postprocess_android(platforms):
     # see https://wiki.termux.com/wiki/FAQ#Why_does_a_compiled_program_show_warnings
     if Host.system == SysNames.android and Host.platform in platforms:
@@ -121,7 +177,7 @@ def postprocess_android(platforms):
             log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
+def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, do_verify=False):
     
     if not version:
         version = PdfiumVer.get_latest()
@@ -134,6 +190,8 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     clear_data(platforms)
     archives = download(platforms, version, use_v8, max_workers, robust)
+    if do_verify:
+        verify(archives, version)
     extract(archives, version, flags)
     postprocess_android(platforms)
 
@@ -171,6 +229,12 @@ def parse_args(argv):
         "--robust",
         action = "store_true",
         help = "Skip missing binaries instead of raising an exception.",
+    )
+    parser.add_argument(
+        "--verify",
+        dest = "do_verify",
+        action = "store_true",
+        help = "Attempt to verify release artifacts against checksums file from workflow.",
     )
     return parser.parse_args(argv)
 
