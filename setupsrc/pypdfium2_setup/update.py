@@ -129,9 +129,23 @@ def _gh_web_api(path):
         return json.loads( h.read().decode() )
 
 def _get_sha256sum(path):
-    # TODO fallback for python < 3.11
-    with open(path, "rb") as fh:
-        return hashlib.file_digest(fh, "sha256").hexdigest()
+    # https://stackoverflow.com/a/44873382/15547292
+    if sys.version_info >= (3, 11):
+        with open(path, "rb") as fh:
+            return hashlib.file_digest(fh, "sha256").hexdigest()
+    else:
+        chunksize = 128 * 1024  # 128 KiB
+        hash = hashlib.sha256()
+        array = bytearray(chunksize)
+        chunk_view = memoryview(array)
+        
+        with open(path, "rb", buffering=0) as fh:
+            n = fh.readinto(chunk_view)
+            while n:
+                hash.update(chunk_view[:n])
+                n = fh.readinto(chunk_view)
+        
+        return hash.hexdigest()
 
 
 def verify(archives, version):
