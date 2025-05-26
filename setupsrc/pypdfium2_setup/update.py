@@ -95,7 +95,9 @@ def _extract_licenses(tar, pl_dir):
 
 
 def extract(archives, version, flags):
+    
     for pl_name, arc_path in archives.items():
+        
         with tarfile.open(arc_path) as tar:
             pl_dir = DataDir/pl_name
             system = plat_to_system(pl_name)
@@ -105,6 +107,8 @@ def extract(archives, version, flags):
             _extract_licenses(tar, pl_dir)
             full_ver = _parse_ver_file(tar.extractfile("VERSION"), version)
             write_pdfium_info(pl_dir, full_ver, origin="pdfium-binaries", flags=flags)
+        
+        arc_path.unlink()
 
 
 def _gh_web_api(path):
@@ -159,7 +163,6 @@ def verify(archives, version):
             log(f"{path.name}: SHA256 sums match: {file_sum}")
         else:
             raise SystemExit(f"Fatal: {path.name}: SHA256 sums don't match: {exp_sum} != {file_sum}")
-        path.unlink()
 
 
 def postprocess_android(platforms):
