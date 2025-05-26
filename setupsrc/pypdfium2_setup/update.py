@@ -153,9 +153,9 @@ def verify(archives, version):
     
     ChecksumsFile = DataDir/"pdfium-sha256sum.txt"
     ChecksumsFile.unlink(missing_ok=True)
-    comp_process = run_cmd(["gh", "run", "download", str(run_id), "-n", "pdfium-checksums", "-D", str(DataDir), "-R", "bblanchon/pdfium-binaries"], cwd=ProjectDir, check=False)
-    if comp_process.returncode != 0:
-        log("Unable to fetch checksums artifact (probably expired).")
+    rc = run_cmd(["gh", "run", "download", str(run_id), "-n", "pdfium-checksums", "-D", str(DataDir), "-R", "bblanchon/pdfium-binaries"], cwd=ProjectDir, check=False).returncode
+    if rc != 0:
+        log(f"Unable to fetch checksums artifact (got non-zero return code {rc}). Might have expired.")
         return
     
     lines = ChecksumsFile.read_text().strip().split("\n")
