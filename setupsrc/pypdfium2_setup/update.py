@@ -40,10 +40,6 @@ def _get_package(pl_name, version, robust, use_v8):
     fp = pl_dir / fn
     log(f"'{fu}' -> '{fp}'")
     
-    if fp.exists():  # XXX
-        log("Archive exists already, skipping...")
-        return pl_name, fp
-    
     try:
         url_request.urlretrieve(fu, fp)
     except Exception as e:
@@ -140,7 +136,11 @@ def _get_sha256sum(path):
 
 def verify(archives, version):
     
-    log("Attempt to verify release checksum against workflow ...")
+    log("Attempt to verify release checksum(s) against workflow ...")
+    if not shutil.which("gh"):
+        log("GitHub CLI (gh) is not installed, unable to verify.")
+        assert not IS_CI, "This should not happen on CI"
+        return
     
     repo = "/repos/bblanchon/pdfium-binaries"
     date = _gh_web_api(f"{repo}/releases/tags/chromium%2F{version}")["published_at"][:10]
@@ -149,12 +149,21 @@ def verify(archives, version):
     runs = _gh_web_api(f"{repo}/actions/workflows/build-all.yml/runs?created={date}")
     assert runs["total_count"] == 1, runs["total_count"]
     run, = runs["workflow_runs"]
+    run_id = run["id"]
     
-    artifacts_raw = _gh_web_api(f"{repo}/actions/runs/{run['id']}/artifacts")["artifacts"]
-    artifacts_dict = {d["name"]: d for d in artifacts_raw}
+    ChecksumsFile = DataDir/"pdfium-sha256sum.txt"
+    ChecksumsFile.unlink(missing_ok=True)
+    comp_process = run_cmd(["gh", "run", "download", str(run_id), "-n", "pdfium-checksums", "-D", str(DataDir), "-R", "bblanchon/pdfium-binaries"], cwd=ProjectDir, check=False)
+    if comp_process.returncode != 0:
+        log("Unable to fetch checksums artifact (probably expired).")
+        return
+    
+    lines = ChecksumsFile.read_text().strip().split("\n")
+    lines = (l.strip().split("  ", maxsplit=1) for l in lines)
+    checksums_dict = {fn: fsum for fsum, fn in lines}
     
     for path in archives.values():
-        exp_sum = artifacts_dict[path.stem]["digest"].split(":", maxsplit=1)[1]
+        exp_sum = checksums_dict[path.name]
         file_sum = _get_sha256sum(path)
         if exp_sum == file_sum:
             log(f"SHA256 sums match: {file_sum}")
@@ -162,7 +171,7 @@ def verify(archives, version):
             raise SystemExit(f"Fatal: SHA256 sums don't match: {exp_sum} != {file_sum}")
 
 
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
+def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, do_verify=False):
     
     if not version:
         version = PdfiumVer.get_latest()
@@ -175,7 +184,8 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
     
     # clear_data(platforms)
     archives = download(platforms, version, use_v8, max_workers, robust)
-    verify(archives, version)
+    if do_verify:
+        verify(archives, version)
     extract(archives, version, flags)
     postprocess_android(platforms)
 
@@ -213,6 +223,12 @@ def parse_args(argv):
         "--robust",
         action = "store_true",
         help = "Skip missing binaries instead of raising an exception.",
+    )
+    parser.add_argument(
+        "--verify",
+        dest = "do_verify",
+        action = "store_true",
+        help = "Attempt to verify release artifacts against checksums file from workflow.",
     )
     return parser.parse_args(argv)
 

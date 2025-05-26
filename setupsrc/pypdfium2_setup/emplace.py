@@ -31,7 +31,7 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     req_repr = _repr_info(req_ver, req_flags)
     if update_binary:
         log(f"Downloading binary {req_repr} ...")
-        update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
+        update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8, do_verify=True)
     else:
         log(f"Using cached binary {req_repr}")
     
