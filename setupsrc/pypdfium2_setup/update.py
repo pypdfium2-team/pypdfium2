@@ -19,11 +19,11 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
 
-# def clear_data(download_files):
-#     for pl_name in download_files:
-#         pl_dir = DataDir / pl_name
-#         if pl_dir.exists():
-#             shutil.rmtree(pl_dir)
+def clear_data(download_files):
+    for pl_name in download_files:
+        pl_dir = DataDir / pl_name
+        if pl_dir.exists():
+            shutil.rmtree(pl_dir)
 
 
 def _get_package(pl_name, version, robust, use_v8):
@@ -95,9 +95,7 @@ def _extract_licenses(tar, pl_dir):
 
 
 def extract(archives, version, flags):
-    
     for pl_name, arc_path in archives.items():
-        
         with tarfile.open(arc_path) as tar:
             pl_dir = DataDir/pl_name
             system = plat_to_system(pl_name)
@@ -107,20 +105,6 @@ def extract(archives, version, flags):
             _extract_licenses(tar, pl_dir)
             full_ver = _parse_ver_file(tar.extractfile("VERSION"), version)
             write_pdfium_info(pl_dir, full_ver, origin="pdfium-binaries", flags=flags)
-        
-        # arc_path.unlink()
-
-
-def postprocess_android(platforms):
-    # see https://wiki.termux.com/wiki/FAQ#Why_does_a_compiled_program_show_warnings
-    if Host.system == SysNames.android and Host.platform in platforms:
-        elf_cleaner = shutil.which("termux-elf-cleaner")
-        if elf_cleaner:
-            log("Invoking termux-elf-cleaner to clean up possible linker warnings...")
-            libpath = DataDir / Host.platform / libname_for_system(Host.system)
-            run_cmd([elf_cleaner, str(libpath)], cwd=None)
-        else:
-            log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
 def _gh_web_api(path):
@@ -175,6 +159,19 @@ def verify(archives, version):
             log(f"{path.name}: SHA256 sums match: {file_sum}")
         else:
             raise SystemExit(f"Fatal: {path.name}: SHA256 sums don't match: {exp_sum} != {file_sum}")
+        path.unlink()
+
+
+def postprocess_android(platforms):
+    # see https://wiki.termux.com/wiki/FAQ#Why_does_a_compiled_program_show_warnings
+    if Host.system == SysNames.android and Host.platform in platforms:
+        elf_cleaner = shutil.which("termux-elf-cleaner")
+        if elf_cleaner:
+            log("Invoking termux-elf-cleaner to clean up possible linker warnings...")
+            libpath = DataDir / Host.platform / libname_for_system(Host.system)
+            run_cmd([elf_cleaner, str(libpath)], cwd=None)
+        else:
+            log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, do_verify=False):
@@ -188,7 +185,7 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, 
     
     flags = ["V8", "XFA"] if use_v8 else []
     
-    # clear_data(platforms)
+    clear_data(platforms)
     archives = download(platforms, version, use_v8, max_workers, robust)
     if do_verify:
         verify(archives, version)
