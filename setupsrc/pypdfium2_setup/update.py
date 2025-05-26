@@ -166,9 +166,9 @@ def verify(archives, version):
         exp_sum = checksums_dict[path.name]
         file_sum = _get_sha256sum(path)
         if exp_sum == file_sum:
-            log(f"SHA256 sums match: {file_sum}")
+            log(f"{path.name}: SHA256 sums match: {file_sum}")
         else:
-            raise SystemExit(f"Fatal: SHA256 sums don't match: {exp_sum} != {file_sum}")
+            raise SystemExit(f"Fatal: {path.name}: SHA256 sums don't match: {exp_sum} != {file_sum}")
 
 
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, do_verify=False):
