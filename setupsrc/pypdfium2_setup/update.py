@@ -158,7 +158,7 @@ def verify(archives, version):
     repo = "/repos/bblanchon/pdfium-binaries"
     date = _gh_web_api(f"{repo}/releases/tags/chromium%2F{version}")["published_at"][:10]
     
-    # TODO also pass head_sha? (could be determined along tag in ls-remote call)
+    # FIXME this will fail if the workflow in question has been run more than once that day
     runs = _gh_web_api(f"{repo}/actions/workflows/build-all.yml/runs?created={date}")
     assert runs["total_count"] == 1, runs["total_count"]
     run, = runs["workflow_runs"]
