@@ -149,12 +149,12 @@ def verify(archives, version):
     run_id = run["id"]
     
     ChecksumsFile = DataDir/"pdfium-sha256sum.txt"
-    ChecksumsFile.unlink(missing_ok=True)
     run_cmd(["gh", "run", "download", str(run_id), "-n", "pdfium-checksums", "-D", str(DataDir), "-R", "bblanchon/pdfium-binaries"], cwd=ProjectDir)
     
     lines = ChecksumsFile.read_text().strip().split("\n")
     lines = (l.strip().split("  ", maxsplit=1) for l in lines)
     checksums_dict = {fn: fsum for fsum, fn in lines}
+    ChecksumsFile.unlink()
     
     for path in archives.values():
         exp_sum = checksums_dict[path.name]
