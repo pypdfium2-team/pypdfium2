@@ -150,10 +150,6 @@ def _get_sha256sum(path):
 def verify(archives, version):
     
     log("Attempt to verify release checksum(s) against workflow ...")
-    if not shutil.which("gh"):
-        log("GitHub CLI (gh) is not installed, unable to verify.")
-        assert not IS_CI, "This should not happen on CI"
-        return
     
     repo = "/repos/bblanchon/pdfium-binaries"
     date = _gh_web_api(f"{repo}/releases/tags/chromium%2F{version}")["published_at"][:10]
@@ -166,10 +162,7 @@ def verify(archives, version):
     
     ChecksumsFile = DataDir/"pdfium-sha256sum.txt"
     ChecksumsFile.unlink(missing_ok=True)
-    rc = run_cmd(["gh", "run", "download", str(run_id), "-n", "pdfium-checksums", "-D", str(DataDir), "-R", "bblanchon/pdfium-binaries"], cwd=ProjectDir, check=False).returncode
-    if rc != 0:
-        log(f"Unable to fetch checksums artifact (got non-zero return code {rc}). Might have expired.")
-        return
+    run_cmd(["gh", "run", "download", str(run_id), "-n", "pdfium-checksums", "-D", str(DataDir), "-R", "bblanchon/pdfium-binaries"], cwd=ProjectDir)
     
     lines = ChecksumsFile.read_text().strip().split("\n")
     lines = (l.strip().split("  ", maxsplit=1) for l in lines)
