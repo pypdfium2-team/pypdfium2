@@ -136,14 +136,13 @@ def _get_sha256sum(path):
     else:
         chunksize = 128 * 1024  # 128 KiB
         hash = hashlib.sha256()
-        array = bytearray(chunksize)
-        chunk_view = memoryview(array)
+        chunk = memoryview(bytearray(chunksize))
         
         with open(path, "rb", buffering=0) as fh:
-            n = fh.readinto(chunk_view)
+            n = fh.readinto(chunk)
             while n:
-                hash.update(chunk_view[:n])
-                n = fh.readinto(chunk_view)
+                hash.update(chunk[:n])
+                n = fh.readinto(chunk)
         
         return hash.hexdigest()
 
