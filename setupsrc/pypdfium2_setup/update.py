@@ -119,8 +119,8 @@ def _get_sha256sum(path):
             return hashlib.file_digest(fh, "sha256").hexdigest()
     else:
         chunksize = 128 * 1024  # 128 KiB
-        hash = hashlib.sha256()
         chunk = memoryview(bytearray(chunksize))
+        hash = hashlib.sha256()
         
         with open(path, "rb", buffering=0) as fh:
             n = fh.readinto(chunk)
