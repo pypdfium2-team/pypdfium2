@@ -34,8 +34,6 @@ distcheck:
 
 update *args:
 	python3 setupsrc/pypdfium2_setup/update.py {{args}}
-update-verify *args:
-	just update --verify {{args}}
 emplace *args:
 	python3 setupsrc/pypdfium2_setup/emplace.py {{args}}
 build-native *args:
@@ -47,4 +45,4 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-packaging-pypi: clean check update-verify craft distcheck
+packaging-pypi: clean check update craft distcheck
