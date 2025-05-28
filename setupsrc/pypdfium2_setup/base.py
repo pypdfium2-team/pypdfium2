@@ -64,8 +64,14 @@ ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
 ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
 ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
 
-REFBINDINGS_FLAGS = ("V8", "XFA", "SKIA")
 LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
+REFBINDINGS_FLAGS = ("V8", "XFA", "SKIA")
+
+PdfiumFlagsDict = {
+    "V8": "PDF_ENABLE_V8",
+    "XFA": "PDF_ENABLE_XFA",
+    "SKIA": "PDF_USE_SKIA",
+}
 
 
 # TODO consider StrEnum or something
@@ -615,13 +621,6 @@ def tar_extract_file(tar, path_or_member, dst_path):
     assert src_buf is not None, f"Failed to extract {path_or_member}"
     with open(dst_path, "wb") as dst_buf:
         shutil.copyfileobj(src_buf, dst_buf)
-
-
-PdfiumFlagsDict = {
-    "V8": "PDF_ENABLE_V8",
-    "XFA": "PDF_ENABLE_XFA",
-    "SKIA": "PDF_USE_SKIA",
-}
 
 
 @contextlib.contextmanager

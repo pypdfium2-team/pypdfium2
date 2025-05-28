@@ -112,7 +112,6 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     # Install
     PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
     ```
-    
   
   <!-- TODO version.json: reconsider origin - should we use a separate field for the packager? -->
   * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)
@@ -145,7 +144,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
     
     # Finally, install
-    # set $MY_PLATFORM to "system" if building against system pdfium (not bundled), "auto", "sourcebuild" or the platform name otherwise.
+    # set $MY_PLATFORM to "system" if building against system pdfium (not bundled), "sourcebuild", "auto" or the platform name otherwise.
     PDFIUM_PLATFORM='prepared!$MY_PLATFORM:$PDFIUM_BUILD' python -m pip install --no-build-isolation -v .
     ```
   
