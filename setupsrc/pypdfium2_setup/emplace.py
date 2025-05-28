@@ -47,7 +47,7 @@ def prepare_setup(pl_name, pdfium_ver, use_v8):
     # - expose smart try_system_pdfium() / setup fallback as target
     
     clean_platfiles()
-    flags = ["V8", "XFA"] if use_v8 else []
+    flags = ("V8", "XFA") if use_v8 else ()
     
     if pl_name == ExtPlats.system:
         build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
