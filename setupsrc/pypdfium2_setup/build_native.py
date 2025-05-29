@@ -292,7 +292,7 @@ def parse_args(argv):
         dest = "n_jobs",
         type = int,
         metavar = "N",
-        help = "The number of build jobs to use. If not given, ninja will choose this value. Pass -j $(nprocs) if you wanna make sure this matches the number of processor cores.",
+        help = "The number of build jobs to use. If not given, ninja will choose this value. Pass -j $(nproc) if you wanna make sure this matches the number of processor cores.",
     )
     parser.add_argument(
         "-c", "--compiler",
