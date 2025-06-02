@@ -10,7 +10,7 @@ import tarfile
 import argparse
 import functools
 from pathlib import Path
-import urllib.request as url_request
+from urllib.request import urlretrieve
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
@@ -39,7 +39,7 @@ def _get_package(pl_name, version, robust, use_v8):
     log(f"'{fu}' -> '{fp}'")
     
     try:
-        url_request.urlretrieve(fu, fp)
+        urlretrieve(fu, fp)
     except Exception as e:
         if robust:
             log(str(e))
@@ -113,7 +113,7 @@ def do_verify(archives, version):
     # TODO rename to pdfium-binaries.intoto.jsonl once upstream does
     ProvenanceFile = DataDir/"multiple.intoto.jsonl"
     ProvenanceFile.unlink(missing_ok=True)
-    url_request.urlretrieve(f"{ReleaseURL}{version}/{ProvenanceFile.name}", ProvenanceFile)
+    urlretrieve(f"{ReleaseURL}{version}/{ProvenanceFile.name}", ProvenanceFile)
     artifact_paths = [str(p) for p in archives.values()]
     cmd = [
         "slsa-verifier",
