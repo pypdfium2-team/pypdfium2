@@ -50,7 +50,7 @@ def _get_package(pl_name, version, robust, use_v8):
     return pl_name, fp
 
 
-def download(platforms, version, use_v8, max_workers, robust):
+def do_download(platforms, version, use_v8, max_workers, robust):
     
     if not max_workers:
         max_workers = len(platforms)
@@ -92,7 +92,7 @@ def _extract_licenses(tar, pl_dir):
         tar_extract_file(tar, "LICENSE", licenses_dir/"aggregated-license.txt")
 
 
-def extract(archives, version, flags):
+def do_extract(archives, version, flags):
     
     for pl_name, arc_path in archives.items():
         
@@ -109,36 +109,60 @@ def extract(archives, version, flags):
         arc_path.unlink()
 
 
+def do_verify(archives, version):
+    # TODO rename to pdfium-binaries.intoto.jsonl once upstream does
+    ProvenanceFile = DataDir/"multiple.intoto.jsonl"
+    ProvenanceFile.unlink(missing_ok=True)
+    url_request.urlretrieve(f"{ReleaseURL}{version}/{ProvenanceFile.name}", ProvenanceFile)
+    artifact_paths = [str(p) for p in archives.values()]
+    cmd = [
+        "slsa-verifier",
+        "verify-artifact", *artifact_paths,
+        "--provenance-path", str(ProvenanceFile),
+        "--source-uri", "github.com/bblanchon/pdfium-binaries",
+    ]
+    log("\n-- Start slsa-verify --")
+    run_cmd(cmd, cwd=DataDir, check=True)
+    log("-- End slsa-verify --\n")
+
+
 def postprocess_android(platforms):
     # see https://wiki.termux.com/wiki/FAQ#Why_does_a_compiled_program_show_warnings
-    if Host.system == SysNames.android and Host.platform in platforms:
-        elf_cleaner = shutil.which("termux-elf-cleaner")
-        if elf_cleaner:
-            log("Invoking termux-elf-cleaner to clean up possible linker warnings...")
-            libpath = DataDir / Host.platform / libname_for_system(Host.system)
-            run_cmd([elf_cleaner, str(libpath)], cwd=None)
-        else:
-            log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
+    if not (Host.system == SysNames.android and Host.platform in platforms):
+        return
+    elf_cleaner = shutil.which("termux-elf-cleaner")
+    if elf_cleaner:
+        log("Invoking termux-elf-cleaner to clean up possible linker warnings...")
+        libpath = DataDir / Host.platform / libname_for_system(Host.system)
+        run_cmd([elf_cleaner, str(libpath)], cwd=None)
+    else:
+        log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False):
+def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, verify=None):
     
     if not version:
         version = PdfiumVer.get_latest()
     if not platforms:
         platforms = WheelPlatforms
+    if verify is None:
+        verify = bool(shutil.which("slsa-verifier"))
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     
     flags = ("V8", "XFA") if use_v8 else ()
     
     clear_data(platforms)
-    archives = download(platforms, version, use_v8, max_workers, robust)
-    extract(archives, version, flags)
+    archives = do_download(platforms, version, use_v8, max_workers, robust)
+    if verify:
+        do_verify(archives, version)
+    else:
+        log("Warning: Verification is off - this is unsafe! If this is not intentional, make sure slsa-verifier is installed.")
+    do_extract(archives, version, flags)
     postprocess_android(platforms)
 
 
-# low-level CLI interface for testing - users should go with higher-level emplace.py or setup.py
+# low-level interface for internal use - end users should go with cached, higher-level emplace.py or setup.py instead
 
 def parse_args(argv):
     platform_choices = list(PdfiumBinariesMap.keys())
@@ -172,11 +196,18 @@ def parse_args(argv):
         action = "store_true",
         help = "Skip missing binaries instead of raising an exception.",
     )
+    parser.add_argument(
+        "--verify",
+        action = "store_true",
+        default = None,
+        help = "Verify release artifacts via SLSA provenance. This will be automatically enabled if slsa-verifier is installed.",
+    )
     return parser.parse_args(argv)
 
 
 def cli_main(argv=sys.argv[1:]):
-    main( **vars( parse_args(argv) ) )
+    args = parse_args(argv)
+    main(**vars(args))
 
 
 if __name__ == "__main__":

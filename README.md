@@ -27,8 +27,14 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 * <a id="user-content-install-source" class="anchor" href="#install-source">From the repository 🔗</a>
   
   * Dependencies:
-    - System: `git`, C pre-processor (`gcc`/`clang` - alternatively, specify the command to invoke via `$CPP`)
-    - Python: `ctypesgen` (pypdfium2-team fork) and `setuptools >= v70.1.0`. Should be installed automatically, unless `--no-build-isolation` is passed to pip.
+    - System:
+      + `git`,
+      + C pre-processor (`gcc`/`clang` - alternatively, specify the command to invoke via `$CPP`)
+      + `slsa-verifier` (if using pdfium-binaries; optional)
+    - Python:
+      + `ctypesgen` (pypdfium2-team fork)
+      + `setuptools >= v70.1.0`.
+      These should be installed automatically, unless `--no-build-isolation` is passed to pip.
   
   * Get the code
     ```
@@ -42,6 +48,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     python -m pip install -v .
     ```
     A binary is downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2.
+    `pdfium-binaries` offer SLSA provenance to verify authenticity, so it is highly recommended that you install the [`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier) in this case.
   
   <!-- TODO: rewrite once we have the smart try_system_pdfium() strategy exposed as target -->
   
