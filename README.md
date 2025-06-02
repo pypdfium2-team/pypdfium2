@@ -862,6 +862,9 @@ The autorelease script has some peculiarities maintainers should know about:
   Update types such as major or beta may be controlled via `autorelease/config.json`
 
 In case of necessity, you may also forego autorelease/CI and do the release manually, which will roughly work like this (though ideally it should never be needed):
+
+<!-- FIXME outdated. use autorelease.py? -->
+
 * Commit changes to the version file
   ```bash
   git add src/pypdfium2/version.py
@@ -876,20 +879,17 @@ In case of necessity, you may also forego autorelease/CI and do the release manu
   ```
 * Build the packages
   ```bash
-  python setupsrc/pypdfium2_setup/update.py
-  python setupsrc/pypdfium2_setup/craft.py
+  just packaging-pypi
   ```
 * Upload to PyPI
   ```bash
-  # make sure the packages are valid
-  twine check dist/*
   # upload to PyPI (this will interactively ask for your username/password)
   twine upload dist/*
   ```
 * Update the `stable` branch to trigger a documentation rebuild
   ```bash
   git checkout stable
-  git rebase origin/main  # alternatively: git reset --hard main
+  git rebase origin/main  # or: git reset --hard main
   git checkout main
   ```
 
