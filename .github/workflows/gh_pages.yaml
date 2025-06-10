@@ -35,7 +35,10 @@ jobs:
       
       - uses: extractions/setup-just@v3
       
-      - name: Setup Python
+      - name: slsa-verifier
+        uses: slsa-framework/slsa-verifier/actions/installer@v2
+      
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
