@@ -47,7 +47,7 @@ jobs:
       - uses: extractions/setup-just@v3
       
       - name: slsa-verifier
-        uses: slsa-framework/slsa-verifier/actions/installer@v2
+        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.0
       
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3

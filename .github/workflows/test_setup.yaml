@@ -30,7 +30,7 @@ jobs:
       - uses: extractions/setup-just@v3
       
       - name: slsa-verifier
-        uses: slsa-framework/slsa-verifier/actions/installer@v2
+        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.0
       
       - name: Set up Python
         uses: actions/setup-python@v5
