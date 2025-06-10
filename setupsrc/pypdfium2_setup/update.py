@@ -10,11 +10,16 @@ import tarfile
 import argparse
 import functools
 from pathlib import Path
-from urllib.request import urlretrieve
+import urllib.request as url_request
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
+
+
+def urlretrieve(url, fp, *args, **kwargs):
+    log(f"{url!r} -> {str(fp)!r}")
+    url_request.urlretrieve(url, fp, *args, **kwargs)
 
 
 def clear_data(download_files):
@@ -36,7 +41,6 @@ def _get_package(pl_name, version, robust, use_v8):
     fn = prefix + f"{PdfiumBinariesMap[pl_name]}.tgz"
     fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
-    log(f"'{fu}' -> '{fp}'")
     
     try:
         urlretrieve(fu, fp)
@@ -109,11 +113,14 @@ def do_extract(archives, version, flags):
         arc_path.unlink()
 
 
+MIN_PDFIUM_VER_FOR_VERIFY = 7228
+
 def do_verify(archives, version):
-    # TODO rename to pdfium-binaries.intoto.jsonl once upstream does
-    ProvenanceFile = DataDir/"multiple.intoto.jsonl"
-    ProvenanceFile.unlink(missing_ok=True)
-    urlretrieve(f"{ReleaseURL}{version}/{ProvenanceFile.name}", ProvenanceFile)
+    if version < MIN_PDFIUM_VER_FOR_VERIFY:
+        raise SystemExit(f"--verify was passed, but the requested version is below {MIN_PDFIUM_VER_FOR_VERIFY} - no provenance available.")
+    ProvenanceFile = DataDir/f"pdfium-binaries-{version}.intoto.jsonl"
+    if not ProvenanceFile.exists():
+        urlretrieve(f"{ReleaseURL}{version}/pdfium-binaries.intoto.jsonl", ProvenanceFile)
     artifact_paths = [str(p) for p in archives.values()]
     cmd = [
         "slsa-verifier",
@@ -146,7 +153,7 @@ def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, 
     if not platforms:
         platforms = WheelPlatforms
     if verify is None:
-        verify = bool(shutil.which("slsa-verifier"))
+        verify = bool(shutil.which("slsa-verifier")) and version >= MIN_PDFIUM_VER_FOR_VERIFY
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     
@@ -200,7 +207,7 @@ def parse_args(argv):
         "--verify",
         action = "store_true",
         default = None,
-        help = "Verify release artifacts via SLSA provenance. This will be automatically enabled if slsa-verifier is installed.",
+        help = "Verify release artifacts via SLSA provenance. This will be automatically enabled if slsa-verifier is installed and the requested version is recent enough.",
     )
     return parser.parse_args(argv)
 
