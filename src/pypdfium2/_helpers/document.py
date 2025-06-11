@@ -208,7 +208,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return bool( pdfium_c.FPDFCatalog_IsTagged(self) )
     
     
-    def save(self, dest, version=None, flags=pdfium_c.FPDF_NO_INCREMENTAL):
+    def save(self, dest, version=None, flags=0):
         """
         Save the document at its current state.
         
@@ -219,7 +219,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 The PDF version to use, given as an integer (14 for 1.4, 15 for 1.5, ...).
                 If None (the default), PDFium will set a version automatically.
             flags (int):
-                PDFium saving flags (defaults to :attr:`FPDF_NO_INCREMENTAL`).
+                PDFium saving flags (defaults to 0).
         """
         
         if isinstance(dest, (str, Path)):
