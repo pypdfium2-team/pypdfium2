@@ -26,7 +26,7 @@ API layers
 
 pypdfium2 provides multiple API layers:
 
-* The raw PDFium API, to be used with :mod:`ctypes` (``pypdfium2.raw`` or ``pypdfium2_raw`` [#raw_model]_).
+* The raw PDFium API, to be used with :mod:`ctypes` (``pypdfium2.raw`` or ``pypdfium2_raw`` [#raw_module]_).
 * The support model API, which is a set of Python helper classes around the raw API (``pypdfium2``).
 * Additionally, there is the internal API, which contains various utilities that aid with using the raw API and are accessed by helpers, but do not fit in the support model namespace itself (``pypdfium2.internal``).
 
@@ -38,7 +38,7 @@ The raw API is quite stable and provides a high level of backwards compatibility
 
 The support model API is still in beta stage. It only covers a subset of pdfium features. Backwards incompatible changes may be applied occasionally, although we try to contain them within major releases. On the other hand, it is supposed to be safer and easier to use ("pythonic"), abstracting the finnicky interaction with C functions.
 
-.. [#raw_model] The latter does not automatically initialize pdfium on import.
+.. [#raw_module] The latter does not automatically initialize pdfium on import.
 .. [#ctypes_param_hook] Implemented via ctypes hook `_as_parameter_ <https://docs.python.org/3/library/ctypes.html#calling-functions-with-your-own-custom-data-types>`_
 
 
