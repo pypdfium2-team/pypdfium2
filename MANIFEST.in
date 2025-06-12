@@ -22,7 +22,6 @@ include src/pypdfium2_raw/__init__.py
 recursive-include LICENSES/ *
 recursive-include BUILD_LICENSES/ *
 include REUSE.toml
-include REUSE-wheel.toml
 
 # PyPA eagerly includes tests - exclude because we don't use them
 recursive-exclude tests *

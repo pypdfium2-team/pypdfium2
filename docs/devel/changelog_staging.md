@@ -69,7 +69,7 @@
 - Replaced the bash `./run` file with a [`justfile`](https://github.com/casey/just). Note that the runfile previously did not fail fast and propagate errors, which is potentially dangerous for a release workflow. This had been fixed on the runfile in v5.0.0b1 before introducing the justfile.
 - CI: Added Linux aarch64 (GH now provides free runners) and Python 3.13 to the test matrix.
 - Merged `tests_old/` back into `tests/`.
-- Migrated from deprecated `.reuse/dep5`/`.reuse/dep5-wheel` to more visible `REUSE.toml`/`REUSE-wheel.toml`.
+- Migrated from deprecated `.reuse/dep5` to more visible `REUSE.toml`. Removed non-standard `.reuse/dep5-wheel`.
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.
 - Bumped minimum pdfium requirement in conda recipe to `>6635` (effectively `>=6638`), due to new errchecks.
 - Cleanly split out conda packaging into an own file, and confined it to the `conda/` directory, to avoid polluting the main setup code.

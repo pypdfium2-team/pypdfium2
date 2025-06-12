@@ -147,7 +147,6 @@ def run_setup(modnames, pdfium_ver, pl_name):
         kwargs["package_data"]["pypdfium2_raw"] = [VersionFN, BindingsFN, *libnames]
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
-        license_files.append("REUSE-wheel.toml")
     
     kwargs["license_files"] = license_files
     

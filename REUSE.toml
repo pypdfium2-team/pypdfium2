@@ -1,6 +1,5 @@
 # This file contains copyright info for data files in the project directory.
 # It is shipped with our sdist packages, although not all members are actually included.
-# See also REUSE-wheel.toml regarding copyright of data files in our wheel packages.
 
 # Note, this file has been auto-converted from .reuse/dep5 by `reuse convert-dep5`
 
@@ -136,7 +135,6 @@ SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
 path = [
-    "REUSE-wheel.toml",
     "docs/build/.gitkeep",
     "sbuild/.gitkeep",
     "RELEASE.md",  # TODO add to gitignore?
