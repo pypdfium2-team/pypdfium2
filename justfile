@@ -25,7 +25,7 @@ clean:
 	rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
 check:
 	autoflake src/ setupsrc/ tests/ setup.py docs/source/conf.py --recursive --remove-all-unused-imports --ignore-pass-statements --ignore-init-module-imports
-	codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sbuild,./pdfium_patches,./dist,./LICENSES/*,./BUILD_LICENSES/*,./RELEASE.md,./.git,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate"
+	codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sbuild,./pdfium_patches,./dist,./LICENSES/*,./BUILD_LICENSES/*,./RELEASE.md,./.git,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate,intoto"
 	reuse lint
 distcheck:
 	twine check dist/*
@@ -34,6 +34,8 @@ distcheck:
 
 update *args:
 	python3 setupsrc/pypdfium2_setup/update.py {{args}}
+update-verify *args:
+	just update --verify {{args}}
 emplace *args:
 	python3 setupsrc/pypdfium2_setup/emplace.py {{args}}
 build-native *args:
@@ -45,4 +47,4 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-packaging-pypi: clean check update craft distcheck
+packaging-pypi: clean check update-verify craft distcheck

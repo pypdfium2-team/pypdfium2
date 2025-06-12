@@ -42,12 +42,16 @@
 - Simplified version classes (no API change expected).
 
 *Platforms*
-- Experimental Android support added (cf. PEP 738). `arm64_v8a`, `armeabi_v7a`, `x86_64`, `x86` are now handled in setup and should implicitly download the right binaries. We do not publish any android wheels at this time. However, we might want to provide `arm64_v8a` (and maybe `armeabi_v7a`) wheels in the future. Note, android support is provided on a best effort basis, and largely untested (only arm64 Termux prior to PEP 738 has been tested on the author's phone). Please report success or failure.
-- Experimental iOS support added as well (cf. PEP 730). `arm64` device and simulator, and `x86_64` simulator are now handled and should implicitly download the right binaries. However, this is untested and may not be enough to get all the way through. In particular, the PEP hints that the binary needs to be moved to a Frameworks location, in which case you'd also need to change the library search path. No iOS wheels will be provided at this time. However, if there are testers and an actual demand, iOS arm64 wheels may be enabled in the future.
-- *Note, we have no intent to provide wheels for the simulators (`android x86_64/x86`, `ios arm64_simu/x86_64`), as they are only relevant to developers, and installing from source with automatic binary deployment should be roughly equialvent.*
+- __Experimental__ Android (PEP 738) and iOS (PEP 730) support added.
+  Android `arm64_v8a`, `armeabi_v7a`, `x86_64`, `x86` and iOS `arm64` device and `arm64`, `x86_64` simulators are now handled in setup and should implicitly download the right pdfium binaries.
+  Provided on a best effort basis, and largely untested. Testers/feedback welcome.
+  pypdfium2's setup is now also capable of producing wheels for these platforms, but they will not actually be included in releases at this time.
+  (Once Termux ships Python 3.13, we may want to publish Android `arm64_v8a` and maybe `armeabi_v7a` wheels, but we do not intend to provide wheels for simulators.)
+  iOS will not actually work yet, as the PEP indicates binaries ought to be moved to a special Frameworks location for permission reasons, in which case you'd also have to patch pypdfium2's library search. We cannot do anything about this yet for lack of clear instructions, access to a device, or user feedback.
 
 *Setup*
 - When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, by default, we now use the version included with the last pypdfium2 release. This is to prevent possible API breakage when pypdfium2 is installed from source. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
+- `update.py`: added `--verify` option to confirm authenticity of pdfium-binaries release via SLSA provenance. Requires `slsa-verifier`. Thanks to Benoit Blanchon for the upstream part.
 - We finally have a build script that works without Google's toolchain, and instead uses system tools/libraries (`build_native.py`). This has been inspired by the `libpdfium` COPR / `libpdfium-nojs` AUR recipes. Thanks to the respective packagers for showing how to do this. The GCC compiler is preferred, but Clang should also work if you set up some symlinks. As of this writing, both passes on our Ubuntu x84_64/arm64 CI.
 - On host platforms not covered with `pdfium-binaries`, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered.
 - The toolchained build script continues to be available as well, but has been renamed from `sourcebuild.py` to `build_toolchained.py`.

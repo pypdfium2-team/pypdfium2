@@ -46,19 +46,22 @@ jobs:
       
       - uses: extractions/setup-just@v3
       
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository }}
-          fetch-depth: 0
+      - name: slsa-verifier
+        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.0
       
-      - name: Miniconda setup
+      - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ inputs.py_version }}
           channels: pypdfium2-team,bblanchon
           channel-priority: strict
+      
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          fetch-depth: 0
       
       - name: Prepare
         run: |
