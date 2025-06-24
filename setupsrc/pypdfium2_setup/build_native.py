@@ -16,12 +16,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
-# The pdfium version this has last been tested with. Ideally, this should be close to the release version in autorelease/record.json
-# To bump this version, first test locally and update any patches as needed. Then, make a branch and run "Test Sourcebuild" on CI to see if all targets continue to work. Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
-# Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
-DEFAULT_VER = 7191
-# assert DEFAULT_VER >= PDFIUM_MIN_REQ
-
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium"
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
@@ -240,10 +234,10 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None):
     
     if build_ver is None:
-        build_ver = DEFAULT_VER
+        build_ver = SOURCEBUILD_NATIVE_PIN
     if compiler is None:
         if shutil.which("gcc"):
             compiler = Compiler.gcc
@@ -269,7 +263,9 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
         test(build_dir)
     
     post_ver = handle_sbuild_postver(build_ver, PDFIUM_DIR)
-    pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, **post_ver)
+    pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, **post_ver)
+    
+    return full_ver, post_ver
 
 
 def parse_args(argv):
@@ -279,7 +275,7 @@ def parse_args(argv):
     parser.add_argument(
         "--version",
         dest = "build_ver",
-        help = f"The pdfium version to use. Currently defaults to {DEFAULT_VER}. Pass 'main' to try the latest state.",
+        help = f"The pdfium version to use. Currently defaults to {SOURCEBUILD_NATIVE_PIN}. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--test",
@@ -313,7 +309,7 @@ def parse_args(argv):
 
 def main_cli():
     args = parse_args(sys.argv[1:])
-    main_api(**vars(args))
+    main(**vars(args))
 
 
 if __name__ == "__main__":

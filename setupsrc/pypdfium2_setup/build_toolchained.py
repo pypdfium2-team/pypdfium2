@@ -13,8 +13,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
-DEFAULT_VER = 7191
-
 SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
@@ -137,7 +135,7 @@ def main(
     if build_target is None:
         build_target = "pdfium"
     if build_ver is None:
-        build_ver = DEFAULT_VER
+        build_ver = SOURCEBUILD_TOOLCHAINED_PIN
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     
@@ -175,7 +173,9 @@ def main(
     configure(GN, config_str)
     build(Ninja, build_target)
     v_post = handle_sbuild_postver(build_ver, PDFiumDir)
-    pack_sourcebuild(PDFiumDir, PDFiumOutDir, v_full, **v_post)
+    pack_sourcebuild(PDFiumDir, PDFiumOutDir, "toolchained", v_full, **v_post)
+    
+    return v_full, v_post
 
 
 def parse_args(argv):
@@ -191,7 +191,7 @@ def parse_args(argv):
     parser.add_argument(
         "--version", "-v",
         dest = "build_ver",
-        help = f"PDFium version to use. Currently defaults to {DEFAULT_VER!r}. Pass 'main' to try the latest state.",
+        help = f"PDFium version to use. Currently defaults to {SOURCEBUILD_TOOLCHAINED_PIN!r}. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--target", "-t",

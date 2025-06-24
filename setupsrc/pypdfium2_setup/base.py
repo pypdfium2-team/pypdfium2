@@ -26,6 +26,12 @@ else:
 
 PDFIUM_MIN_REQ = 6635
 
+# The PDFium versions our build scripts have last been tested with. Ideally, they should be close to the release version in autorelease/record.json
+# To bump these versions, first test locally and update any patches as needed. Then, make a branch and run "Test Sourcebuild" on CI to see if all targets continue to work. Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
+# Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
+SOURCEBUILD_NATIVE_PIN = 7191
+SOURCEBUILD_TOOLCHAINED_PIN = 7191
+
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
@@ -86,6 +92,8 @@ class SysNames:
 class ExtPlats:
     sourcebuild = "sourcebuild"
     system      = "system"
+    # `fallback` will resolve to either system-find or sourcebuild-native
+    fallback    = "fallback"
     sdist       = "sdist"
 
 class PlatNames:
@@ -197,7 +205,7 @@ class _PdfiumVerClass:
     @staticmethod
     @functools.lru_cache(maxsize=1)
     def get_latest():
-        """ Returns the latest release version of pdfium-binaries. """
+        "Returns the latest release version of pdfium-binaries."
         git_ls = run_cmd(["git", "ls-remote", f"{ReleaseRepo}.git"], cwd=None, capture=True)
         tag = git_ls.split("\t")[-1]
         return int( tag.split("/")[-1] )
@@ -220,19 +228,13 @@ class _PdfiumVerClass:
         return full_ver
     
     def get_latest_upstream(self):
-        """
-        Returns the latest version of upstream pdfium/chromium.
-        Note, the first call to this function in a session may be somewhat expensive.
-        """
+        "Returns the latest version of upstream pdfium/chromium."
         lines = self._get_chromium_refs()
         full_ver = self._parse_line( lines.pop(0) )
         return full_ver
     
     def to_full(self, v_short):
-        """
-        Converts a build number to a full version.
-        Note, the first call to this function in a session may be somewhat expensive.
-        """
+        "Converts a build number to a full version."
         v_short = int(v_short)
         if v_short not in self._vdict:
             self._get_chromium_refs()
@@ -263,6 +265,13 @@ def write_pdfium_info(dir, full_ver, origin, flags=(), n_commits=0, hash=None):
     info = dict(**full_ver._asdict(), n_commits=n_commits, hash=hash, origin=origin, flags=list(flags))
     write_json(dir/VersionFN, info)
     return info
+
+def read_pdfium_info(dir):
+    info = read_json(dir/VersionFN)
+    full_ver = PdfiumVer.scheme(
+        *(info.pop(k) for k in ("major", "minor", "build", "patch"))
+    )
+    return full_ver, info
 
 
 def parse_given_tag(full_tag):
@@ -702,7 +711,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     ver_path = DataDir_Bindings/VersionFN
     bind_path = BindingsFile
     if not headers_dir:
-        headers_dir = DataDir_Bindings / "headers"
+        headers_dir = DataDir_Bindings/"headers"
     
     # TODO register all defaults?
     curr_info = {"version": version, **kwargs}
@@ -763,45 +772,42 @@ def build_pl_suffix(version, use_v8):
 
 def parse_pl_spec(pl_spec):
     
-    # TODO this is inflexible - split up in individual env vars after all?
+    # TODO split up in individual env vars after all?
     
-    do_prepare = True
-    if pl_spec.startswith("prepared!"):
-        pl_spec = pl_spec[len("prepared!"):]  # removeprefix
-        do_prepare = False
-    
-    req_ver = None
-    use_v8 = False
+    req_ver, flags = None, ()
     if PlatSpec_VerSep in pl_spec:
         pl_spec, req_ver = pl_spec.rsplit(PlatSpec_VerSep)
     if pl_spec.endswith(PlatSpec_V8Sym):
-        pl_spec = pl_spec[:-len(PlatSpec_V8Sym)]
-        use_v8 = True
+        pl_spec, flags = pl_spec[:-len(PlatSpec_V8Sym)], ("V8", "XFA")
     
+    subspec = None
     if not pl_spec or pl_spec == "auto":
-        # may be None - handling this is delegated to the caller
-        pl_name = Host.platform
-    elif hasattr(ExtPlats, pl_spec):
-        pl_name = getattr(ExtPlats, pl_spec)
-    elif hasattr(PlatNames, pl_spec):
-        pl_name = getattr(PlatNames, pl_spec)
+        if Host.platform is None:
+            log(str(Host._exc))
+            pl_name, uses_prebuilds = ExtPlats.fallback, False
+        else:
+            pl_name, uses_prebuilds = Host.platform, True
     else:
-        raise ValueError(f"Invalid binary spec '{pl_spec}'")
+        if "-" in pl_spec:
+            pl_spec, subspec = pl_spec.split("-", maxsplit=1)
+        if hasattr(ExtPlats, pl_spec):
+            pl_name = getattr(ExtPlats, pl_spec)
+            uses_prebuilds = False
+        elif hasattr(PlatNames, pl_spec):
+            pl_name = getattr(PlatNames, pl_spec)
+            uses_prebuilds = True
+        else:
+            raise ValueError(f"Invalid binary spec '{pl_spec}'")
         
     if req_ver:
-        if req_ver == "latest":
-            req_ver = PdfiumVer.get_latest()
-        else:
-            req_ver = int(req_ver)
-    elif pl_name is not None:
-        assert pl_name != ExtPlats.system and do_prepare, "Version must be given explicitly for system or prepared!... targets"
-        if pl_name == ExtPlats.sourcebuild:
-            req_ver = read_json(DataDir/"sourcebuild"/VersionFN)["build"]
-        else:
-            log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
-            req_ver = PdfiumVer.release_pdfium_build
+        req_ver = PdfiumVer.get_latest() if req_ver == "latest" else int(req_ver)
+    elif uses_prebuilds:
+        log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
+        req_ver = PdfiumVer.release_pdfium_build
     
-    return do_prepare, pl_name, req_ver, use_v8
+    # TODO(sourcebuild, system): handle req_ver being None on the caller side
+    
+    return pl_name, subspec, req_ver, flags
 
 
 def parse_modspec(modspec):
@@ -868,17 +874,21 @@ def get_shimheaders_tool(pdfium_dir, rev="main"):
         url_request.urlretrieve(shimheaders_url, shimheaders_file)
 
 
-def pack_sourcebuild(pdfium_dir, build_dir, full_ver, **v_kwargs):
+def purge_dir(dir):
+    if dir.exists():
+        shutil.rmtree(dir)
+    dir.mkdir(parents=True)
+
+
+def pack_sourcebuild(pdfium_dir, build_dir, sub_target, full_ver, **v_kwargs):
     log("Packing data files for sourcebuild...")
     
     dest_dir = DataDir/ExtPlats.sourcebuild
-    if dest_dir.exists():
-        shutil.rmtree(dest_dir)
-    dest_dir.mkdir(parents=True)
+    purge_dir(dest_dir)
     
     for libpath in build_dir.glob(Host.libname_glob):
         shutil.copy(libpath, dest_dir/libpath.name)
-    write_pdfium_info(dest_dir, full_ver, origin="sourcebuild", **v_kwargs)
+    write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **v_kwargs)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir], version=full_ver.build)

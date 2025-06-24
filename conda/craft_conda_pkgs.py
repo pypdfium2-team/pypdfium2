@@ -73,12 +73,8 @@ class TmpCommitCtx:
 
 class CondaExtPlatfiles:
     
-    def __init__(self, emplace_func):
-        self.emplace_func = emplace_func
-    
     def __enter__(self):
-        self.platfiles = self.emplace_func()
-        self.platfiles = [ModuleDir_Raw/f for f in self.platfiles]
+        self.platfiles = tuple(ModuleDir_Raw/fn for fn in (BindingsFN, VersionFN))
         run_cmd(["git", "add", "-f"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
     
     def __exit__(self, *_):
@@ -125,8 +121,8 @@ def main_conda_raw(args):
     os.environ["PDFIUM_FULL"] = str(full_ver)
     os.environ["BUILD_NUM"] = str(_get_build_num(args))
     
-    emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
-    with CondaExtPlatfiles(emplace_func):
+    prepare_setup(ExtPlats.system, "generate", args.pdfium_ver, flags=())
+    with CondaExtPlatfiles():
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon", "-c", "defaults"])
 
 

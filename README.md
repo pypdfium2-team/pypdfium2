@@ -15,7 +15,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 ## Installation
 
-<!-- FIXME is there a better/universal way to create linkable sub-sections without them being a heading? Note, the current solution is specific to GH and doesn't work on RTD. -->
+<!-- TODO convert to actual subsections? The hack for linkable bullet points only works on GH, not RTD or PyPI. -->
 
 * <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI 🔗</a> (recommended)
   ```bash
