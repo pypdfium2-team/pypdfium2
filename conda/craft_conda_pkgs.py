@@ -74,7 +74,7 @@ class TmpCommitCtx:
 class CondaExtPlatfiles:
     
     def __enter__(self):
-        self.platfiles = tuple(ModuleDir_Raw/fn for fn in (BindingsFN, VersionFN))
+        self.platfiles = tuple(DataDir/ExtPlats.system/fn for fn in (BindingsFN, VersionFN))
         run_cmd(["git", "add", "-f"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
     
     def __exit__(self, *_):
