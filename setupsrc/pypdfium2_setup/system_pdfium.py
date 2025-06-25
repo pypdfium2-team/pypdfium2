@@ -138,6 +138,6 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
 
 
 if __name__ == "__main__":
-    print(main())
     # print(_get_libreoffice_pdfium_ver())
     # print(_get_sys_pdfium_ver())
+    print(main())
