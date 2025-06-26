@@ -23,7 +23,7 @@ def _repr_info(version, flags):
 
 def _get_pdfium_with_cache(pl_name, req_ver, req_flags):
     
-    # TODO on the long term, it would be great to turn platform and system into proper objects, so the libname could be accessed like plat.system.libname, which is much cleaner than a chain of string function calls
+    # TODO turn platform and system into proper objects, so the libname could be accessed like plat.system.libname, which is much cleaner than a chain of string function calls
     
     pl_dir = DataDir/pl_name
     system = plat_to_system(pl_name)
@@ -47,11 +47,13 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags):
     compile_lds = (DataDir/Host.platform, ) if pl_name == Host.platform else ()
     build_pdfium_bindings(req_ver, flags=req_flags, compile_lds=compile_lds)
 
-def _end_subtargets(sub_target):
+def _end_subtargets(sub_target, pdfium_ver):
     if sub_target:
         assert False, sub_target
     else:
-        log("No sub-target set, will expect existing data files.")
+        log("No sub-target set, will use existing data files.")
+        if pdfium_ver:
+            log(f"Warning: Passing in a pdfium version does not make sense with caller-provided data files. Given version {pdfium_ver!r} will be ignored.")
 
 
 def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
@@ -70,7 +72,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
             full_ver = PdfiumVer.to_full(pdfium_ver)
             write_pdfium_info(pl_dir, full_ver, origin="system", flags=flags)
         else:
-            _end_subtargets(sub_target)
+            _end_subtargets(sub_target, pdfium_ver)
     
     elif pl_name == ExtPlats.sourcebuild:
         if flags:
@@ -80,7 +82,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
         elif sub_target == "toolchained":
             build_toolchained.main(build_ver=pdfium_ver)
         else:
-            _end_subtargets(sub_target)
+            _end_subtargets(sub_target, pdfium_ver)
     
     elif pl_name == ExtPlats.fallback:
         pl_name = ExtPlats.system
