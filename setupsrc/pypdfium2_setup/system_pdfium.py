@@ -57,9 +57,9 @@ def _get_libreoffice_pdfium_ver():
 def _find_pdfium_headers():
     
     headers_path = os.getenv("PDFIUM_HEADERS")
-    
     if headers_path:
         headers_path = Path(headers_path)
+    
     elif not sys.platform.startswith(("win", "darwin")):
         include_dirs = (Host.usr/"include", Host.usr/"local"/"include")
         candidates = (path/"pdfium" for path in include_dirs)
@@ -110,8 +110,8 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
             lds = (pdfium_lib.parent, )
             # TODO(ctypesgen) handle pdfiumlo libname in refbindings
             build_pdfium_bindings(full_ver.build, libname="pdfiumlo", compile_lds=lds, run_lds=lds, guard_symbols=True, flags=flags)
-            write_pdfium_info(target_dir, full_ver, origin="system-libreoffice", flags=flags)
             bindings = BindingsFile
+            write_pdfium_info(target_dir, full_ver, origin="system-libreoffice", flags=flags)
         
         else:
             pdfium_headers = _find_pdfium_headers()
@@ -122,6 +122,7 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
                 build_pdfium_bindings(full_ver.build, pdfium_headers, run_lds=(), guard_symbols=True, flags=flags)
                 bindings = BindingsFile
             else:
+                # TODO Do this only if the version isn't known either. Otherwise, use the above clause and download the headers.
                 log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
                 bindings = RefBindingsFile
                 full_ver = given_fullver or PdfiumVerUnknown
