@@ -4,11 +4,10 @@
 import sys
 import argparse
 from pathlib import Path
-from functools import partial
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from pypdfium2_setup.base import *
-from pypdfium2_setup.emplace import prepare_setup
+from pypdfium2_setup.emplace import stage_platfiles
 from pypdfium2_setup.craft import ArtifactStash
 
 CondaDir = ProjectDir / "conda"
@@ -121,7 +120,7 @@ def main_conda_raw(args):
     os.environ["PDFIUM_FULL"] = str(full_ver)
     os.environ["BUILD_NUM"] = str(_get_build_num(args))
     
-    prepare_setup(ExtPlats.system, "generate", args.pdfium_ver, flags=())
+    stage_platfiles(ExtPlats.system, "generate", args.pdfium_ver, flags=())
     with CondaExtPlatfiles():
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon", "-c", "defaults"])
 
