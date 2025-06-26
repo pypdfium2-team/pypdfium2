@@ -17,12 +17,11 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 <!-- TODO convert to actual subsections? The hack for linkable bullet points only works on GH, not RTD or PyPI. -->
 
-* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI 🔗</a> (recommended)
+* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI (recommended) 🔗</a>
   ```bash
   python -m pip install -U pypdfium2
   ```
-  If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2.
-  Otherwise, if the platform is not covered with pdfium-binaries, pypdfium2's `setup.py` will look for system pdfium, or attempt to build pdfium from source.
+  If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, pypdfium2's setup code will run (see below).
 
 * <a id="user-content-install-source" class="anchor" href="#install-source">From the repository 🔗</a>
   
@@ -45,37 +44,39 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     cd pypdfium2/
     ```
   
-  * <a id="user-content-install-source-default" class="anchor" href="#install-source-default">With pre-built binary 🔗</a>
+  * <a id="user-content-install-source-default" class="anchor" href="#install-source-default">Default setup 🔗</a>
     ```bash
     # In the pypdfium2/ directory
     python -m pip install -v .
     ```
-    A binary is downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2.<br>
+    This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2, and ctypesgen will be called on pdfium headers to produce the bindings interface.
+    
     `pdfium-binaries` offer SLSA provenance to verify authenticity, so it is highly recommended that you install the `slsa-verifier` in this case.
-  
-  <!-- TODO: rewrite once we have the smart try_system_pdfium() strategy exposed as target -->
-  
-  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system-level binary 🔗</a>
-    ```bash
-    # Substitute $PDFIUM_VER with the system pdfium build's version.
-    # For ABI safety reasons, you'll want to make sure `$PDFIUM_VER` is correct and the bindings are rebuilt whenever system pdfium is updated.
-    PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
-    ```
-    Link against external pdfium instead of bundling it.
-    Note, this is basically a high-level convenience entry point to internal bindings generation, and intended for end users. Therefore it is less flexible, supporting only the "simple case" for now.
-    For more sohpisticated use cases that need passing custom parameters to ctypesgen (e.g. runtime libdirs / headers / feature flags), consider [caller-provided data files](#install-source-caller).
-  
-  * <a id="user-content-install-source-libreoffice" class="anchor" href="#install-source-libreoffice">With system-level binary (non-standard location, e.g. LibreOffice) 🔗</a>
-    ```bash
-    # if root rights are available and targeting /usr/local/lib is OK
-    sudo ln -s /usr/lib/libreoffice/program/libpdfiumlo.so /usr/local/lib/libpdfium.so
-    # Substitute $PDFIUM_VER with the pdfium build's version.
-    PDFIUM_PLATFORM="system:$PDFIUM_VER" python -m pip install -v .
-    ```
     
-    Symlink pdfium from a non-standard location (e.g. libreoffice libdir) to a directory that is on the search path, determine the version, and install with system pdfium [as described above](#install-source-system).
+    If no pre-built binaries are available for your platform, setup will look for system pdfium, or attempt to build pdfium from source.
     
-    Note, if elevated privileges are not available, you can target e.g. `~/.local/lib` and add it to [`LD_LIBRARY_PATH`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) in your `~/.bashrc` file.
+    _Beware: pip's `--no-binary` option in fact only means "no wheels". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for your host. Or if you want to package a source distribution, set `PDFIUM_PLATFORM=sdist`._
+  
+  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system pdfium (smart search) 🔗</a>
+    ```bash
+    PDFIUM_PLATFORM="system-find" python -m pip install -v .
+    ```
+    Look for a system-provided pdfium shared library, and bind against it.
+    
+    Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.
+    
+    If this succeeds, we will look for pdfium headers to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
+    
+    Also, we try to determine the pdfium version using `pkg-config`.
+    If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-find:XXXX`, where `XXXX` is the pdfium build version.
+    If the version is not known in the end, `NaN` placeholders will be set.
+    
+    If the version is known but no headers are installed, they will be downloaded from upstream.
+    If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
+    
+    If `find_library()` failed, we *may* look in other locations, such as shared libraries bundled with LibreOffice.
+    
+    Our search heuristics currently expect a Linux-like filesystem hierarchy (i.e. `/usr`), but contributions for other systems are welcome.
   
   * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary 🔗</a>
   
@@ -158,9 +159,11 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     PDFIUM_PLATFORM='prepared!$MY_PLATFORM:$PDFIUM_BUILD' python -m pip install --no-build-isolation -v .
     ```
   
+  <!-- TODO move up? -->
+  
   See [Setup Magic](#setup-magic) for details.
   
-  Relevant pip options:
+  Useful pip options:
   * `-v`: Verbose logging output. Useful for debugging.
   * `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
   * `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
@@ -246,6 +249,8 @@ However, some optional support model features need additional packages:
 pypdfium2 tries to defer imports of optional dependencies until they are actually needed, so there should be no startup overhead if you don't use them.
 
 ### Setup Magic
+
+<!-- TODO update, and move up? -->
 
 As pypdfium2 requires a C extension and has custom setup code, there are some special features to consider. Note, the APIs below may change any time and are mostly of internal interest.
 
