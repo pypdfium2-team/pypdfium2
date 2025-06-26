@@ -53,7 +53,7 @@ def _end_subtargets(sub_target, pdfium_ver):
     else:
         log("No sub-target set, will use existing data files.")
         if pdfium_ver:
-            log(f"Warning: Passing in a pdfium version does not make sense with caller-provided data files. Given version {pdfium_ver!r} will be ignored.")
+            raise ValueError(f"Pdfium version {pdfium_ver} was passed, but this does not make sense with caller-provided data files.")
 
 
 def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
