@@ -639,7 +639,7 @@ def tmp_cwd_context(tmp_cwd):
         os.chdir(orig_cwd)
 
 
-def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium", version=None):
+def run_ctypesgen(target_path, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium", version=None):
     
     if USE_REFBINDINGS:
         log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
@@ -647,8 +647,8 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
         record_ver = PdfiumVer.release_pdfium_build
         if version != record_ver:
             log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
-        shutil.copyfile(RefBindingsFile, target_dir/BindingsFN)
-        return
+        shutil.copyfile(RefBindingsFile, target_path)
+        return target_path
     
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
@@ -689,7 +689,7 @@ def run_ctypesgen(target_dir, headers_dir, flags=(), compile_lds=(), run_lds=(".
     args += ["--symbol-rules", r"if_needed=\w+_$|\w+_t$|_\w+"]
     
     # input / output
-    args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", target_dir/BindingsFN]
+    args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", target_path]
     
     with tmp_cwd_context(headers_dir):
         ctypesgen.__main__.main([str(a) for a in args])
@@ -745,7 +745,8 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         archive_path.unlink()
     
     log(f"Building bindings ...")
-    run_ctypesgen(DataDir_Bindings, headers_dir, version=version, **kwargs)
+    bindings_path = DataDir_Bindings/BindingsFN
+    run_ctypesgen(bindings_path, headers_dir, version=version, **kwargs)
     write_json(ver_path, curr_info)
 
 
@@ -891,7 +892,7 @@ def pack_sourcebuild(pdfium_dir, build_dir, sub_target, full_ver, **v_kwargs):
     write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **v_kwargs)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    run_ctypesgen(dest_dir, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir], version=full_ver.build)
+    run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir], version=full_ver.build)
 
 
 def git_get_hash(repo_dir, n_digits=None):
