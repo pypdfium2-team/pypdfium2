@@ -92,7 +92,7 @@ class SysNames:
 class ExtPlats:
     sourcebuild = "sourcebuild"
     system      = "system"
-    # `fallback` will resolve to either system-find or sourcebuild-native
+    # `fallback` will resolve to either system-search or sourcebuild-native
     fallback    = "fallback"
     sdist       = "sdist"
 

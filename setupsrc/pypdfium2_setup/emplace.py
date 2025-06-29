@@ -62,7 +62,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
         pl_dir = DataDir/pl_name
         if sub_target:
             purge_dir(pl_dir)
-        if sub_target == "find":
+        if sub_target == "search":
             full_ver = PdfiumVer.to_full(pdfium_ver) if pdfium_ver else None
             full_ver = system_pdfium.main(full_ver, flags=flags)
         elif sub_target == "generate":
@@ -87,7 +87,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
     elif pl_name == ExtPlats.fallback:
         pl_name = ExtPlats.system
         try:
-            stage_platfiles(pl_name, "find", pdfium_ver, flags)
+            stage_platfiles(pl_name, "search", pdfium_ver, flags)
         except system_pdfium.PdfiumNotFoundError:
             log("Could not find system pdfium, will attempt native sourcebuild")
             pl_name = ExtPlats.sourcebuild

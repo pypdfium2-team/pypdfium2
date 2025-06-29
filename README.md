@@ -17,11 +17,11 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 <!-- TODO convert to actual subsections? The hack for linkable bullet points only works on GH, not RTD or PyPI. -->
 
-* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI (recommended) 🔗</a>
+* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI 🔗</a> (recommended)
   ```bash
   python -m pip install -U pypdfium2
   ```
-  If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, pypdfium2's setup code will run (see below).
+  If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run (see below).
 
 * <a id="user-content-install-source" class="anchor" href="#install-source">From the repository 🔗</a>
   
@@ -49,17 +49,17 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     # In the pypdfium2/ directory
     python -m pip install -v .
     ```
-    This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be downloaded implicitly from `pdfium-binaries` and bundled into pypdfium2, and ctypesgen will be called on pdfium headers to produce the bindings interface.
+    This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be downloaded from `pdfium-binaries` and bundled into pypdfium2, and ctypesgen will be called on pdfium headers to produce the bindings interface.
     
     `pdfium-binaries` offer SLSA provenance to verify authenticity, so it is highly recommended that you install the `slsa-verifier` in this case.
     
     If no pre-built binaries are available for your platform, setup will look for system pdfium, or attempt to build pdfium from source.
     
-    _Beware: pip's `--no-binary` option in fact only means "no wheels". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for your host. Or if you want to package a source distribution, set `PDFIUM_PLATFORM=sdist`._
+    _Beware: pip's `--no-binary` option in fact only means "no wheels". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you want to package a source distribution, set `PDFIUM_PLATFORM=sdist`._
   
-  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system pdfium (smart search) 🔗</a>
+  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system pdfium (host search) 🔗</a>
     ```bash
-    PDFIUM_PLATFORM="system-find" python -m pip install -v .
+    PDFIUM_PLATFORM="system-search" python -m pip install -v .
     ```
     Look for a system-provided pdfium shared library, and bind against it.
     
@@ -68,15 +68,19 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
     If this succeeds, we will look for pdfium headers to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
     
     Also, we try to determine the pdfium version using `pkg-config`.
-    If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-find:XXXX`, where `XXXX` is the pdfium build version.
+    If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
     If the version is not known in the end, `NaN` placeholders will be set.
     
     If the version is known but no headers are installed, they will be downloaded from upstream.
     If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
     
-    If `find_library()` failed, we *may* look in other locations, such as shared libraries bundled with LibreOffice.
+    If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and - if available - determining its version.
+    
+    Important: When pypdfium2 is installed with system pdfium, the bindings ought to be re-built whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
     
     Our search heuristics currently expect a Linux-like filesystem hierarchy (i.e. `/usr`), but contributions for other systems are welcome.
+    
+    [^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still advisable to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
   
   * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary 🔗</a>
   

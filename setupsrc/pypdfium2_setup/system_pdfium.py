@@ -96,8 +96,10 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     log("Looking for system pdfium ...")
     
     # See if a pdfium shared library is in the default system search path
+    # TODO possible optimization: make find_library() comptime only and hardcode result into bindings?
     pdfium_lib = find_library("pdfium")
     from_lo = False
+    
     if not pdfium_lib:
         pdfium_lib = _find_libreoffice_pdfium()
         from_lo = True
@@ -128,7 +130,7 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
                     build_pdfium_bindings(full_ver.build, **kwargs)
                     bindings_path = BindingsFile
             else:
-                log(f"Warning: Neither pdfium headers nor version found - will use reference bindings. This is ABI-unsafe! Set $PDFIUM_HEADERS to the directory in question, or pass the version via $PDFIUM_PLATFORM=system-find:$VERSION.")
+                log(f"Warning: Neither pdfium headers nor version found - will use reference bindings. This is ABI-unsafe! Set $PDFIUM_HEADERS to the directory in question, or pass the version via $PDFIUM_PLATFORM=system-search:$VERSION.")
                 bindings_path = RefBindingsFile
                 full_ver = given_fullver or PdfiumVerUnknown
             write_pdfium_info(target_dir, full_ver, origin="system", flags=flags)
