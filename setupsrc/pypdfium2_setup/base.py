@@ -430,12 +430,14 @@ class _host_platform:
     def libname_glob(self):
         return libname_for_system(Host.system, name="*")
     
+    # TODO convert to sysroot?
     @cached_property
     def usr(self):
         if os.name != "posix":
             return None
         usr = "/usr"
-        if self.system == SysNames.android:
+        if self.system == SysNames.android and os.getenv("TERMUX_VERSION"):
+            # see https://github.com/termux/termux-packages/wiki/Termux-file-system-layout
             usr = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
         return Path(usr)
     
