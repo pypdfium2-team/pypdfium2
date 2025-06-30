@@ -15,233 +15,13 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 
 ## Installation
 
-<!-- TODO convert to actual subsections? The hack for linkable bullet points only works on GH, not RTD or PyPI. -->
+### From PyPI (recommended)
+```bash
+python -m pip install -U pypdfium2
+```
+If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run (see below).
 
-* <a id="user-content-install-pypi" class="anchor" href="#install-pypi">From PyPI 🔗</a> (recommended)
-  ```bash
-  python -m pip install -U pypdfium2
-  ```
-  If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run (see below).
-
-* <a id="user-content-install-source" class="anchor" href="#install-source">From the repository 🔗</a>
-  
-  * Dependencies:
-    
-    *System*
-    + `git`
-    + C pre-processor (`gcc`/`clang` - alternatively, specify the command to invoke via `$CPP`)
-    + [`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier) (if using pdfium-binaries; optional)
-    
-    *Python*
-    + [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen)
-    + `setuptools >= v70.1.0`
-    
-    Python dependencies should be installed automatically, unless `--no-build-isolation` is passed to pip.
-  
-  * Get the code
-    ```
-    git clone "https://github.com/pypdfium2-team/pypdfium2.git"
-    cd pypdfium2/
-    ```
-  
-  * <a id="user-content-install-source-default" class="anchor" href="#install-source-default">Default setup 🔗</a>
-    ```bash
-    # In the pypdfium2/ directory
-    python -m pip install -v .
-    ```
-    This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be downloaded from `pdfium-binaries` and bundled into pypdfium2, and ctypesgen will be called on pdfium headers to produce the bindings interface.
-    
-    `pdfium-binaries` offer SLSA provenance to verify authenticity, so it is highly recommended that you install the `slsa-verifier` in this case.
-    
-    If no pre-built binaries are available for your platform, setup will look for system pdfium, or attempt to build pdfium from source.
-    
-    _Beware: pip's `--no-binary` option in fact only means "no wheels". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you want to package a source distribution, set `PDFIUM_PLATFORM=sdist`._
-  
-  * <a id="user-content-install-source-system" class="anchor" href="#install-source-system">With system pdfium (host search) 🔗</a>
-    ```bash
-    PDFIUM_PLATFORM="system-search" python -m pip install -v .
-    ```
-    Look for a system-provided pdfium shared library, and bind against it.
-    
-    Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.
-    
-    If this succeeds, we will look for pdfium headers to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
-    
-    Also, we try to determine the pdfium version using `pkg-config`.
-    If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
-    If the version is not known in the end, `NaN` placeholders will be set.
-    
-    If the version is known but no headers are installed, they will be downloaded from upstream.
-    If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
-    
-    If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and - if available - determining its version.
-    
-    Important: When pypdfium2 is installed with system pdfium, the bindings ought to be re-built whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
-    
-    Our search heuristics currently expect a Linux-like filesystem hierarchy (i.e. `/usr`), but contributions for other systems are welcome.
-    
-    [^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still advisable to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
-  
-  * <a id="user-content-install-source-selfbuilt" class="anchor" href="#install-source-selfbuilt">With self-built binary 🔗</a>
-  
-    You can also install pypdfium2 with a self-compiled pdfium shared library, by placing it in `data/sourcebuild/` along with a matching `bindings.py` file created via ctypesgen, and setting the `PDFIUM_PLATFORM="sourcebuild"` directive to use these files on setup.
-    
-    This project comes with two scripts to automate the build process: `build_toolchained.py` and `build_native.py` (in `setupsrc/pypdfium2_setup/`).
-    - `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, this script will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
-    - `build_native` is an attempt to address some shortcomings of the toolchained build (mainly a bloated checkout process, and lack of portability). It is tailored towards native compilation, and uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
-    
-    For simplicity, both scripts share `sourcebuild` as staging directory and install directive.
-    
-    Dependencies:
-    - For the default toolchained build, you probably don't need to install any system dependencies.
-    - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib` (and maybe `glib` to satisfy the build system).
-    - You might also want to know that pdfium bundles `agg, abseil` and `fast_float`.
-    - When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. GCC is preferred, but Clang may also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
-    
-    To do the toolchained build, you'd run something like:
-    ```bash
-    # call build script with --help to list options
-    python setupsrc/pypdfium2_setup/build_toolchained.py
-    PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
-    ```
-    
-    Or for the native build, on Ubuntu 24.04, you could do e.g.:
-    ```bash
-    # Install dependencies
-    sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
-    ```
-    ```bash
-    # Build with GCC
-    python ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc
-    ```
-    ```bash
-    # Alternatively, build with Clang
-    sudo apt-get install llvm lld
-    VERSION=18
-    ARCH=$(uname -m)
-    sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
-    sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
-    python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
-    ```
-    ```bash
-    # Install
-    PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
-    ```
-  
-  <!-- TODO version.json: reconsider origin - should we use a separate field for the packager? -->
-  * <a id="user-content-install-source-caller" class="anchor" href="#install-source-caller">With caller-provided data files 🔗</a> (this is expected to work offline)
-    ```bash
-    # Call ctypesgen (see --help or base.py::run_ctypesgen() for further options)
-    # Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
-    ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py [-D $MY_FLAGS]
-    
-    # Write the version file (fill the placeholders).
-    # See https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO for field documentation
-    # Note, this is not a mature interface yet and might change any time!
-    # major/minor/build/patch: integers forming the pdfium version being packaged
-    # n_commits/hash: git describe like post-tag info (0/null for release commit)
-    # origin: a string to identify the build, in the form `$BUILDER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
-    # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
-    cat > "src/pypdfium2_raw/version.json" <<END
-    {
-      "major": $PDFIUM_MAJOR,
-      "minor": $PDFIUM_MINOR,
-      "build": $PDFIUM_BUILD,
-      "patch": $PDFIUM_PATCH,
-      "n_commits": $POST_TAG_COMMIT_COUNT,
-      "hash": $POST_TAG_HASH,
-      "origin": "$ORIGIN",
-      "flags": [$MY_FLAGS]
-    }
-    END
-    
-    # optional: copy in a binary if bundling
-    cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
-    
-    # Finally, install
-    # set $MY_PLATFORM to "system" if building against system pdfium (not bundled), "sourcebuild", "auto" or the platform name otherwise.
-    PDFIUM_PLATFORM='prepared!$MY_PLATFORM:$PDFIUM_BUILD' python -m pip install --no-build-isolation -v .
-    ```
-  
-  <!-- TODO move up? -->
-  
-  See [Setup Magic](#setup-magic) for details.
-  
-  Useful pip options:
-  * `-v`: Verbose logging output. Useful for debugging.
-  * `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
-  * `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
-  
-  That said, do not expect us to provide much guidance with source installs, or to support the result, as this may be a crafty process, and we can't be sure whether it was done correctly (e.g. ABI safety, ctypesgen version used, etc.).
-
-
-* <a id="user-content-install-conda" class="anchor" href="#install-conda">From Conda 🔗</a>
-  
-  _**Beware:** Any conda packages/recipes of pypdfium2 or pdfium-binaries that might be provided by other distributors, including `anaconda/main` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
-  
-  _**Wait a moment:** Do you really need this? pypdfium2 is best installed from `PyPI` (e.g. via `pip`), which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install pypdfium2 via pip instead._
-  
-  + To install
-    
-    With permanent channel config (encouraged):
-    ```bash
-    conda config --add channels bblanchon
-    conda config --add channels pypdfium2-team
-    conda config --set channel_priority strict
-    conda install pypdfium2-team::pypdfium2_helpers
-    ```
-    
-    Alternatively, with temporary channel config:
-    ```bash
-    conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon -c defaults
-    ```
-    
-    If desired, you may limit the channel config to the current environment by adding `--env`.
-    Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel.
-    Otherwise, you should be cautious when making changes to the environment.
-  
-  + To depend on pypdfium2 in a `conda-build` recipe
-    ```yaml
-    requirements:
-      run:
-        - pypdfium2-team::pypdfium2_helpers
-    ```
-    You'll want to have downstream callers handle the custom channels as shown above, otherwise conda will not be able to satisfy requirements.
-  
-  + To set up channels in a GH workflow
-    ```yaml
-    - name: ...
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        # ... your options
-        channels: pypdfium2-team,bblanchon
-        channel-priority: strict
-    ```
-    This is just a suggestion, you can also call `conda config` manually, or pass channels on command basis using `-c`, as discussed above.
-  
-  + To verify the sources
-    ```bash
-    conda list --show-channel-urls "pypdfium2|pdfium-binaries"
-    conda config --show-sources
-    ```
-    The table should show `pypdfium2-team` and `bblanchon` in the channels column.
-    If added permanently, the config should also include these channels, ideally with top priority.
-    Please check this before reporting any issue with a conda install of pypdfium2.
-  
-  _**Note:** Conda packages are normally managed using recipe feedstocks driven by third parties, in a Linux repository like fashion. However, with some quirks it is also possible to do conda packaging within the original project and publish to a custom channel, which is what pypdfium2-team does, and the above instructions are referring to._
-
-
-* <a id="user-content-install-unofficial" class="anchor" href="#install-unofficial">Unofficial packages 🔗</a>
-  
-  The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages where possible.
-  If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
-  
-  Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed without further notice if we don't see fit for upstream.
-  
-  If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
-
-
-### Runtime Dependencies
+#### Optional runtime dependencies
 
 As of this writing, pypdfium2 does not require any mandatory runtime dependencies apart from Python itself.
 
@@ -252,9 +32,163 @@ However, some optional support model features need additional packages:
 
 pypdfium2 tries to defer imports of optional dependencies until they are actually needed, so there should be no startup overhead if you don't use them.
 
-### Setup Magic
 
-<!-- TODO update, and move up? -->
+### From the repository
+
+#### Setup Dependencies
+
+*System*
++ `git`
++ C pre-processor (`gcc`/`clang` - alternatively, specify the command to invoke via `$CPP`)
++ [`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier) (if using pdfium-binaries; optional)
+
+*Python*
++ [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen)
++ `setuptools >= v70.1.0`
+
+Python dependencies should be installed automatically, unless `--no-build-isolation` is passed to pip.
+
+#### Get the code
+
+```bash
+git clone "https://github.com/pypdfium2-team/pypdfium2.git"
+cd pypdfium2/
+```
+
+#### Default setup
+
+```bash
+# In the pypdfium2/ directory
+python -m pip install -v .
+```
+This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be downloaded from `pdfium-binaries` and bundled into pypdfium2, and ctypesgen will be called on pdfium headers to produce the bindings interface.
+
+`pdfium-binaries` offer SLSA provenance to verify authenticity, so it is highly recommended that you install the `slsa-verifier` in this case.
+
+If no pre-built binaries are available for your platform, setup will look for system pdfium, or attempt to build pdfium from source.
+
+##### `pip` options of interest
+
+- `-v`: Verbose logging output. Useful for debugging.
+- `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
+- `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
+
+_Beware: pip's `--no-binary` option in fact only means "no wheels". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you want to package a source distribution, set `PDFIUM_PLATFORM=sdist`._
+
+
+#### With system pdfium
+
+```bash
+PDFIUM_PLATFORM="system-search" python -m pip install -v .
+```
+Look for a system-provided pdfium shared library, and bind against it.
+
+Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.
+
+If this succeeds, we will look for pdfium headers to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
+
+Also, we try to determine the pdfium version using `pkg-config`.
+If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
+If the version is not known in the end, `NaN` placeholders will be set.
+
+If the version is known but no headers are installed, they will be downloaded from upstream.
+If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
+
+If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and - if available - determining its version.
+
+Important: When pypdfium2 is installed with system pdfium, the bindings ought to be re-built whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
+
+Our search heuristics currently expect a Linux-like filesystem hierarchy (i.e. `/usr`), but contributions for other systems are welcome.
+
+[^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still advisable to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
+
+
+#### With self-built pdfium
+
+You can also install pypdfium2 with a self-compiled pdfium shared library, by placing it in `data/sourcebuild/` along with a matching `bindings.py` file created via ctypesgen, and setting the `PDFIUM_PLATFORM="sourcebuild"` directive to use these files on setup.
+
+This project comes with two scripts to automate the build process: `build_toolchained.py` and `build_native.py` (in `setupsrc/pypdfium2_setup/`).
+- `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, this script will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
+- `build_native` is an attempt to address some shortcomings of the toolchained build (mainly a bloated checkout process, and lack of portability). It is tailored towards native compilation, and uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
+
+For simplicity, both scripts share `sourcebuild` as staging directory and install directive.
+
+Dependencies:
+- When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib` (and maybe `glib` to satisfy the build system).
+- You might also want to know that pdfium bundles `agg, abseil, fast_float`.
+- When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. GCC is preferred, but Clang may also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
+
+To do the toolchained build, you'd run something like:
+```bash
+# call build script with --help to list options
+python setupsrc/pypdfium2_setup/build_toolchained.py
+PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
+```
+
+Or for the native build, on Ubuntu 24.04, you could do e.g.:
+```bash
+# Install dependencies
+sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+```
+```bash
+# Build with GCC
+python ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc
+```
+```bash
+# Alternatively, build with Clang
+sudo apt-get install llvm lld
+VERSION=18
+ARCH=$(uname -m)
+sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
+sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
+python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
+```
+```bash
+# Install
+PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
+```
+
+
+#### With caller-provided data files (this is expected to work offline)
+
+<!-- TODO version.json: reconsider origin - should we use a separate field for the packager? -->
+```bash
+# Call ctypesgen (see --help or base.py::run_ctypesgen() for further options)
+# Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
+ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py [-D $MY_FLAGS]
+
+# Write the version file (fill the placeholders).
+# See https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO for field documentation
+# Note, this is not a mature interface yet and might change any time!
+# major/minor/build/patch: integers forming the pdfium version being packaged
+# n_commits/hash: git describe like post-tag info (0/null for release commit)
+# origin: a string to identify the build, in the form `$BUILDER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
+# flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
+cat > "src/pypdfium2_raw/version.json" <<END
+{
+  "major": $PDFIUM_MAJOR,
+  "minor": $PDFIUM_MINOR,
+  "build": $PDFIUM_BUILD,
+  "patch": $PDFIUM_PATCH,
+  "n_commits": $POST_TAG_COMMIT_COUNT,
+  "hash": $POST_TAG_HASH,
+  "origin": "$ORIGIN",
+  "flags": [$MY_FLAGS]
+}
+END
+
+# optional: copy in a binary if bundling
+cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
+
+# Finally, install
+# set $MY_PLATFORM to "system" if building against system pdfium (not bundled), "sourcebuild", "auto" or the platform name otherwise.
+PDFIUM_PLATFORM='prepared!$MY_PLATFORM:$PDFIUM_BUILD' python -m pip install --no-build-isolation -v .
+```
+
+
+#### Setup Magic (formal description)
+
+<!-- TODO update -->
 
 As pypdfium2 requires a C extension and has custom setup code, there are some special features to consider. Note, the APIs below may change any time and are mostly of internal interest.
 
@@ -283,6 +217,72 @@ As pypdfium2 requires a C extension and has custom setup code, there are some sp
   - Warning: This may not be ABI-safe. Please make sure binary/bindings build headers match to avoid ABI issues.
 
 [^platform_ids]: Intended for packaging, so that wheels can be crafted for any platform without access to a native host.
+
+
+### From Conda
+  
+_**Beware:** Any conda packages/recipes of pypdfium2 or pdfium-binaries that might be provided by other distributors, including `anaconda/main` or `conda-forge` default channels, are [unofficial](#install-unofficial)._
+
+_**Wait a moment:** Do you really need this? pypdfium2 is best installed from `PyPI` (e.g. via `pip`), which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install pypdfium2 via pip instead._
+
++ To install
+  
+  With permanent channel config (encouraged):
+  ```bash
+  conda config --add channels bblanchon
+  conda config --add channels pypdfium2-team
+  conda config --set channel_priority strict
+  conda install pypdfium2-team::pypdfium2_helpers
+  ```
+  
+  Alternatively, with temporary channel config:
+  ```bash
+  conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon -c defaults
+  ```
+  
+  If desired, you may limit the channel config to the current environment by adding `--env`.
+  Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel.
+  Otherwise, you should be cautious when making changes to the environment.
+
++ To depend on pypdfium2 in a `conda-build` recipe
+  ```yaml
+  requirements:
+    run:
+      - pypdfium2-team::pypdfium2_helpers
+  ```
+  You'll want to have downstream callers handle the custom channels as shown above, otherwise conda will not be able to satisfy requirements.
+
++ To set up channels in a GH workflow
+  ```yaml
+  - name: ...
+    uses: conda-incubator/setup-miniconda@v3
+    with:
+      # ... your options
+      channels: pypdfium2-team,bblanchon
+      channel-priority: strict
+  ```
+  This is just a suggestion, you can also call `conda config` manually, or pass channels on command basis using `-c`, as discussed above.
+
++ To verify the sources
+  ```bash
+  conda list --show-channel-urls "pypdfium2|pdfium-binaries"
+  conda config --show-sources
+  ```
+  The table should show `pypdfium2-team` and `bblanchon` in the channels column.
+  If added permanently, the config should also include these channels, ideally with top priority.
+  Please check this before reporting any issue with a conda install of pypdfium2.
+
+_**Note:** Conda packages are normally managed using recipe feedstocks driven by third parties, in a Linux repository like fashion. However, with some quirks it is also possible to do conda packaging within the original project and publish to a custom channel, which is what pypdfium2-team does, and the above instructions are referring to._
+
+
+### Unofficial packages
+  
+The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages where possible.
+If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
+
+Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed without further notice if we don't see fit for upstream.
+
+If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
 
 
 ## Usage
