@@ -119,7 +119,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
 
-def get_sources(short_ver, with_tests, compiler, clang_path):
+def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
@@ -136,6 +136,19 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
+        if single_lib:
+            autopatch(
+                PDFIUM_DIR/"BUILD.gn",
+                'component("pdfium")',
+                'shared_library("pdfium")',
+                is_regex=False, exp_count=1,
+            )
+            autopatch(
+                PDFIUM_DIR/"public"/"fpdfview.h",
+                "#if defined(COMPONENT_BUILD)",
+                "#if 1  // defined(COMPONENT_BUILD)",
+                is_regex=False, exp_count=1,
+            )
     
     is_new = _fetch_dep("build", PDFIUM_DIR/"build")
     if is_new:
@@ -234,7 +247,7 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False):
     
     if build_ver is None:
         build_ver = SOURCEBUILD_NATIVE_PIN
@@ -250,10 +263,12 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         clang_path = Host.usr
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(build_ver, with_tests, compiler, clang_path)
+    full_ver = get_sources(build_ver, with_tests, compiler, clang_path, single_lib)
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
+    if single_lib:
+        config["is_component_build"] = False
     setup_compiler(config, compiler, clang_path)
     
     prepare(config, build_dir)
@@ -300,6 +315,12 @@ def parse_args(argv):
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
         help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr' or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
+    )
+    # TODO reset and re-apply patches?
+    parser.add_argument(
+        "--single-lib",
+        action = "store_true",
+        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-downloaded, else the existing state is used.",
     )
     args = parser.parse_args(argv)
     if args.compiler:
