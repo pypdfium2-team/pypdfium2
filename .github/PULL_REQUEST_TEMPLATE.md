@@ -31,7 +31,7 @@
 
 [1]: https://github.com/pypdfium2-team/pypdfium2?tab=readme-ov-file#install-source
 [2]: https://github.com/pypdfium2-team/pypdfium2?tab=readme-ov-file#setup-magic
-[3]: https://github.com/pypdfium2-team/pypdfium2?tab=readme-ov-file#install-source-caller
+[3]: https://github.com/pypdfium2-team/pypdfium2/tree/setup_work?tab=readme-ov-file#with-caller-provided-data-files
 
 </details>
 <details open><summary>Other</summary>
