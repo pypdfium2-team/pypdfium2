@@ -73,7 +73,8 @@ If no pre-built binaries are available for your platform, setup will look for sy
 - `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
 - `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
 
-_Beware: pip's `--no-binary` option in fact only means "no wheels". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`._
+> [!NOTE]
+> Beware: pip's `--no-binary` option in fact only means "no binary _wheels_". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
 
 
 #### With system pdfium
