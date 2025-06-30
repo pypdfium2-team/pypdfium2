@@ -73,7 +73,7 @@ If no pre-built binaries are available for your platform, setup will look for sy
 - `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
 - `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
 
-_Beware: pip's `--no-binary` option in fact only means "no wheels". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you want to package a source distribution, set `PDFIUM_PLATFORM=sdist`._
+_Beware: pip's `--no-binary` option in fact only means "no wheels". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`._
 
 
 #### With system pdfium
@@ -100,7 +100,7 @@ Important: When pypdfium2 is installed with system pdfium, the bindings ought to
 
 Our search heuristics currently expect a Linux-like filesystem hierarchy (i.e. `/usr`), but contributions for other systems are welcome.
 
-[^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still advisable to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
+[^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still prudent to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
 
 
 #### With self-built pdfium
@@ -153,21 +153,23 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 
 pypdfium2 is like any other Python project in essentials, except that it needs some data files: a pdfium DLL (either bundled or out-of-tree), a bindings interface (generated via ctypesgen), and pdfium version info (JSON).
 
-The quintessence of pypdfium2's custom setup infrastructure is to automate procuring/managing these files, in a way that is convenient for end users as well as our PyPI packaging.
+The quintessence of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
 
-However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below.
-The idea is basically that you put your files in `data/system` or `data/sourcebuild`, depending on whether you want to bundle or use system pdfium, and set the matching `$PDFIUM_PLATFORM` directive to include these on setup.
+However, if you want to (or have to) forego this automation, e.g. to avoid web requests at setup time, you can also *just supply these files yourself*, as shown below.
+The idea is basically to put your files in `data/system` or `data/sourcebuild`, depending on whether you want to bundle or use system pdfium, and set the matching `$PDFIUM_PLATFORM` directive to use these on setup.
 
-This may be our only setup strategy that is inherently free of web requests, wheels notwithstanding.
+This setup strategy should be inherently free of web requests, and is recommended for distribution packagers.
+Mind though, we don't support the result. If you bring your own files it's your own responsibility to get things right.
 
 <!-- TODO version.json: reconsider origin? should we use a separate field for the packager? -->
 
 ```bash
-# First, ask yourself: do you want to bundle pdfium (in-tree), or use system pdfium (out-of-tree)? In the first case, the target is "sourcebuild", otherwise it is "system".
+# First, ask yourself: do you want to bundle pdfium (in-tree), or use system pdfium (out-of-tree)?
+# For bundling, set "sourcebuild", otherwise "system".
 TARGET="sourcebuild"  # or "system"
 STAGING_DIR=data/$TARGET
 
-# If you have decided for bundling, copy over the pdfium DLL in question
+# If you have decided for bundling, copy over the pdfium DLL in question.
 # Otherwise, skip this step.
 cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
 
@@ -178,12 +180,11 @@ ctypesgen --library pdfium --runtime-libdirs $MY_RT_LIBDIRS --compile-libdirs $M
 
 # Then write the version file (fill the placeholders).
 # Note, this is not a mature interface yet and might change any time!
+# See also https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO
 # major/minor/build/patch: integers forming the pdfium version being packaged
 # n_commits/hash: git describe like post-tag info (0/null for release commit)
 # origin: a string to identify the build, in the form `$BUILDER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
 # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
-# See also https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO
-# (You can also use the `envsubst` tool if desired)
 cat > "$STAGING_DIR/version.json" <<END
 {
   "major": $PDFIUM_MAJOR,
@@ -198,7 +199,7 @@ cat > "$STAGING_DIR/version.json" <<END
 END
 
 # Finally, run setup (through pip, pyproject-build or whatever).
-# The PDFIUM_PLATFORM env variable's vluae will instruct pypdfium2's setup to use the files we supplied, rather than to generate its own.
+# The PDFIUM_PLATFORM value will instruct pypdfium2's setup to use the files we supplied, rather than to generate its own.
 PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 ```
 
@@ -297,7 +298,10 @@ _**Note:** Conda packages are normally managed using recipe feedstocks driven by
 The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages where possible.
 If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
 
-Do not expect us to help with the creation of unofficial builds or add/change code for downstream setup tasks. Related issues or PRs may be closed without further notice if we don't see fit for upstream.
+Do not expect us to add/change code for downstream-specific setup tasks, or to actively support downstream packaging.
+Related issues or PRs may be closed without further notice if we don't see fit for upstream.
+Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
+In case of doubt, open a discussion ticket and ask, but please don't expect much more than a "yes" or a "no".
 
 If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
 
