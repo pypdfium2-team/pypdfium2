@@ -103,6 +103,12 @@ Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `
 
 [^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still prudent to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
 
+##### Related targets
+
+There is also a `system-generate:$VERSION` target, to produce bindings that will attempt to load pdfium from the system at runtime, in a host-independent fashion. This may be useful for packaging.
+
+Further, you can set just `system` to consume pre-generated files from the `data/system` staging directory. See the section on [caller-provided data files](#with-caller-provided-data-files) for more info.
+
 
 #### With self-built pdfium
 
@@ -120,7 +126,7 @@ For simplicity, both scripts share `sourcebuild` as staging directory and instal
 Dependencies:
 - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib` (and maybe `glib` to satisfy the build system).
 - You might also want to know that pdfium bundles `agg, abseil, fast_float`.
-- When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. GCC is preferred, but Clang may also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
+- When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. If available, the compiler defaults to GCC, but Clang should also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
 
 To do the toolchained build, you'd run something like:
 ```bash

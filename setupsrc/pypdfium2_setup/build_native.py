@@ -308,7 +308,7 @@ def parse_args(argv):
     parser.add_argument(
         "-c", "--compiler",
         type = str.lower,
-        help = "The compiler to use (gcc or clang). By default, gcc is preferred.",
+        help = "The compiler to use (gcc or clang). Defaults to gcc if available.",
     )
     # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
