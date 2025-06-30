@@ -181,7 +181,7 @@ STAGING_DIR=data/$TARGET
 
 # If you have decided for bundling, copy over the pdfium DLL in question.
 # Otherwise, skip this step.
-cp "$MY_BINARY_PATH" src/pypdfium2_raw/libpdfium.so
+cp "$MY_BINARY_PATH" $STAGING_DIR/libpdfium.so
 
 # Now, we will call ctypesgen to generate the bindings interface.
 # Reminder: use the pypdfium2-team fork of ctypesgen.
@@ -193,7 +193,7 @@ ctypesgen --library pdfium --runtime-libdirs $MY_RT_LIBDIRS --compile-libdirs $M
 # See also https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO
 # major/minor/build/patch: integers forming the pdfium version being packaged
 # n_commits/hash: git describe like post-tag info (0/null for release commit)
-# origin: a string to identify the build, in the form `$BUILDER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
+# origin: a string to identify the build
 # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
 cat > "$STAGING_DIR/version.json" <<END
 {
@@ -203,7 +203,7 @@ cat > "$STAGING_DIR/version.json" <<END
   "patch": $PDFIUM_PATCH,
   "n_commits": $POST_TAG_COMMIT_COUNT,
   "hash": $POST_TAG_HASH,f
-  "origin": "$ORIGIN",
+  "origin": "$TARGET-$ORIGIN",
   "flags": [$MY_FLAGS]
 }
 END
