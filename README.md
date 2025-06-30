@@ -105,7 +105,7 @@ Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `
 
 ##### Related targets
 
-There is also a `system-generate:$VERSION` target, to produce bindings that will attempt to load pdfium from the system at runtime, in a host-independent fashion. This may be useful for packaging.
+There is also a `system-generate:$VERSION` target, to produce bindings (for a given pdfium version) that will attempt to load pdfium from the system at runtime, in a host-independent fashion. This may be useful for packaging.
 
 Further, you can set just `system` to consume pre-generated files from the `data/system` staging directory. See the section on [caller-provided data files](#with-caller-provided-data-files) for more info.
 
@@ -163,13 +163,13 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 
 pypdfium2 is like any other Python project in essentials, except that it needs some data files: a pdfium DLL (either bundled or out-of-tree), a bindings interface (generated via ctypesgen), and pdfium version info (JSON).
 
-The quintessence of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
+The key point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
 
 However, if you want to (or have to) forego this automation, e.g. to avoid web requests at setup time, you can also *just supply these files yourself*, as shown below.
-The idea is basically to put your files in `data/system` or `data/sourcebuild`, depending on whether you want to bundle or use system pdfium, and set the matching `$PDFIUM_PLATFORM` directive to use these on setup.
+The idea is basically to put your stuff in a staging directory, `data/system` or `data/sourcebuild` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume data files from that directory on setup.
 
 This setup strategy should be inherently free of web requests, and is recommended for distribution packagers.
-Mind though, we don't support the result. If you bring your own files it's your own responsibility to get things right.
+Mind though, we don't support the result. If you bring your own files, it's your own responsibility to get things right.
 
 <!-- TODO version.json: reconsider origin? should we use a separate field for the packager? -->
 
@@ -181,7 +181,7 @@ STAGING_DIR=data/$TARGET
 
 # If you have decided for bundling, copy over the pdfium DLL in question.
 # Otherwise, skip this step.
-cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
+cp "$MY_BINARY_PATH" src/pypdfium2_raw/libpdfium.so
 
 # Now, we will call ctypesgen to generate the bindings interface.
 # Reminder: use the pypdfium2-team fork of ctypesgen.
@@ -202,7 +202,7 @@ cat > "$STAGING_DIR/version.json" <<END
   "build": $PDFIUM_BUILD,
   "patch": $PDFIUM_PATCH,
   "n_commits": $POST_TAG_COMMIT_COUNT,
-  "hash": $POST_TAG_HASH,
+  "hash": $POST_TAG_HASH,f
   "origin": "$ORIGIN",
   "flags": [$MY_FLAGS]
 }
