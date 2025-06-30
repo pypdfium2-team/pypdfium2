@@ -149,22 +149,42 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
 
-#### With caller-provided data files (this is expected to work offline)
+#### With caller-provided data files
 
-<!-- TODO version.json: reconsider origin - should we use a separate field for the packager? -->
+pypdfium2 is like any other Python project in essentials, except that it needs some data files: a pdfium DLL (either bundled or out-of-tree), a bindings interface (generated via ctypesgen), and pdfium version info (JSON).
+
+The quintessence of pypdfium2's custom setup infrastructure is to automate procuring/managing these files, in a way that is convenient for end users as well as our PyPI packaging.
+
+However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below.
+The idea is basically that you put your files in `data/system` or `data/sourcebuild`, depending on whether you want to bundle or use system pdfium, and set the matching `$PDFIUM_PLATFORM` directive to include these on setup.
+
+This may be our only setup strategy that is inherently free of web requests, wheels notwithstanding.
+
+<!-- TODO version.json: reconsider origin? should we use a separate field for the packager? -->
+
 ```bash
-# Call ctypesgen (see --help or base.py::run_ctypesgen() for further options)
-# Reminder: you'll want to use the pypdfium2-team fork of ctypesgen
-ctypesgen --library pdfium --runtime-libdirs $MY_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o src/pypdfium2_raw/bindings.py [-D $MY_FLAGS]
+# First, ask yourself: do you want to bundle pdfium (in-tree), or use system pdfium (out-of-tree)? In the first case, the target is "sourcebuild", otherwise it is "system".
+TARGET="sourcebuild"  # or "system"
+STAGING_DIR=data/$TARGET
 
-# Write the version file (fill the placeholders).
-# See https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO for field documentation
+# If you have decided for bundling, copy over the pdfium DLL in question
+# Otherwise, skip this step.
+cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
+
+# Now, we will call ctypesgen to generate the bindings interface.
+# Reminder: use the pypdfium2-team fork of ctypesgen.
+# How exactly you do this is down to you. See ctypesgen --help or base.py::run_ctypesgen() for further options.
+ctypesgen --library pdfium --runtime-libdirs $MY_RT_LIBDIRS --compile-libdirs $MY_COMP_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o $STAGING_DIR/bindings.py [-D $MY_FLAGS]
+
+# Then write the version file (fill the placeholders).
 # Note, this is not a mature interface yet and might change any time!
 # major/minor/build/patch: integers forming the pdfium version being packaged
 # n_commits/hash: git describe like post-tag info (0/null for release commit)
 # origin: a string to identify the build, in the form `$BUILDER`, `$DISTNAME/$BUILDER`, `system/$BUILDER` or `system/$DISTNAME/$BUILDER`. (Use the `$DISTNAME/$BUILDER` form if you are a distribution maintainer re-packaging another builder's binaries. Add the `system` prefix if the binary is loaded from a system path rather than bundled with pypdfium2.)
 # flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
-cat > "src/pypdfium2_raw/version.json" <<END
+# See also https://pypdfium2.readthedocs.io/en/stable/python_api.html#pypdfium2.version.PDFIUM_INFO
+# (You can also use the `envsubst` tool if desired)
+cat > "$STAGING_DIR/version.json" <<END
 {
   "major": $PDFIUM_MAJOR,
   "minor": $PDFIUM_MINOR,
@@ -177,12 +197,9 @@ cat > "src/pypdfium2_raw/version.json" <<END
 }
 END
 
-# optional: copy in a binary if bundling
-cp "$BINARY_PATH" src/pypdfium2_raw/libpdfium.so
-
-# Finally, install
-# set $MY_PLATFORM to "system" if building against system pdfium (not bundled), "sourcebuild", "auto" or the platform name otherwise.
-PDFIUM_PLATFORM='prepared!$MY_PLATFORM:$PDFIUM_BUILD' python -m pip install --no-build-isolation -v .
+# Finally, run setup (through pip, pyproject-build or whatever).
+# The PDFIUM_PLATFORM env variable's vluae will instruct pypdfium2's setup to use the files we supplied, rather than to generate its own.
+PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 ```
 
 
