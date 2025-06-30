@@ -83,6 +83,9 @@ PDFIUM_PLATFORM="system-search" python -m pip install -v .
 ```
 Look for a system-provided pdfium shared library, and bind against it.
 
+> [!IMPORTANT]
+> When pypdfium2 is installed with system pdfium, the bindings ought to be re-built whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
+
 Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.
 
 If this succeeds, we will look for pdfium headers to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
@@ -96,22 +99,23 @@ If neither headers nor version are known (or ctypesgen is not installed), the re
 
 If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and - if available - determining its version.
 
-Important: When pypdfium2 is installed with system pdfium, the bindings ought to be re-built whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
-
-Our search heuristics currently expect a Linux-like filesystem hierarchy (i.e. `/usr`), but contributions for other systems are welcome.
+Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `/usr`), but contributions for other systems are welcome.
 
 [^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still prudent to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
 
 
 #### With self-built pdfium
 
-You can also install pypdfium2 with a self-compiled pdfium shared library, by placing it in `data/sourcebuild/` along with a matching `bindings.py` file created via ctypesgen, and setting the `PDFIUM_PLATFORM="sourcebuild"` directive to use these files on setup.
+You can also install pypdfium2 with a self-compiled pdfium shared library, by placing it in `data/sourcebuild/` along with a bindings interface and version info, and setting the `PDFIUM_PLATFORM="sourcebuild"` directive to use these files on setup.
 
 This project comes with two scripts to automate the build process: `build_toolchained.py` and `build_native.py` (in `setupsrc/pypdfium2_setup/`).
 - `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, this script will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
 - `build_native` is an attempt to address some shortcomings of the toolchained build (mainly a bloated checkout process, and lack of portability). It is tailored towards native compilation, and uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
 
 For simplicity, both scripts share `sourcebuild` as staging directory and install directive.
+
+> [!TIP]
+> You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup.
 
 Dependencies:
 - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib` (and maybe `glib` to satisfy the build system).
@@ -208,7 +212,10 @@ PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 
 <!-- TODO update -->
 
-As pypdfium2 requires a C extension and has custom setup code, there are some special features to consider. Note, the APIs below may change any time and are mostly of internal interest.
+As pypdfium2 requires a C extension and has custom setup code, there are some special features to consider.
+
+> [!NOTE]
+> The APIs below may change any time, and are mostly of internal interest.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
 
