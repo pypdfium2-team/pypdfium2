@@ -159,6 +159,7 @@ def main(
         if single_lib:
             git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
     if use_syslibs:
+        assert not IGNORE_FULLVERS
         get_shimheaders_tool(PDFiumDir, rev=chromium_rev)
         # alternatively, we could just copy build/linux/unbundle/icu.gn manually
         run_cmd([sys.executable, "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)

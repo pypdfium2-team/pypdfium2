@@ -189,6 +189,9 @@ def libname_for_system(system, name="pdfium"):
         return f"lib{name}.so"
 
 
+IGNORE_FULLVERS = bool(int(os.environ.get("IGNORE_FULLVERS", 0)))
+GIVEN_FULLVERS = os.environ.get("GIVEN_FULLVERS")
+
 class _PdfiumVerScheme (
     namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
 ):
@@ -200,7 +203,17 @@ class _PdfiumVerClass:
     scheme = _PdfiumVerScheme
     
     def __init__(self):
-        self._vlines, self._vdict = None, {}
+        self._vlines = None
+    
+    @cached_property
+    def _vdict(self):
+        if GIVEN_FULLVERS:
+            log("Warning: taking full versions from caller via $GIVEN_FULLVERS (could be incorrect)")
+            version_strs = GIVEN_FULLVERS.split(":")
+            versions = (self.scheme(*(int(n) for n in ver.split("."))) for ver in version_strs)
+            return {v.build: v for v in versions}
+        else:
+            return {}
     
     @staticmethod
     @functools.lru_cache(maxsize=1)
@@ -233,19 +246,26 @@ class _PdfiumVerClass:
         full_ver = self._parse_line( lines.pop(0) )
         return full_ver
     
-    def to_full(self, v_short):
-        "Converts a build number to a full version."
-        v_short = int(v_short)
-        if v_short not in self._vdict:
-            self._get_chromium_refs()
-            for i, line in enumerate(self._vlines):
-                full_ver = self._parse_line(line)
-                if full_ver.build == v_short:
-                    self._vlines = self._vlines[i+1:]
-                    break
-        full_ver = self._vdict[v_short]
-        log(f"Resolved {v_short} -> {full_ver}")
-        return full_ver
+    if IGNORE_FULLVERS:
+        assert not IS_CI and not GIVEN_FULLVERS
+        def to_full(self, v_short):
+            log(f"Warning: Full version ignored as per $IGNORE_FULLVERS setting, will use NaN placeholders for {v_short}.")
+            return self.scheme(NaN, NaN, v_short, NaN)
+        
+    else:
+        def to_full(self, v_short):
+            "Converts a build number to a full version."
+            v_short = int(v_short)
+            if v_short not in self._vdict:
+                self._get_chromium_refs()
+                for i, line in enumerate(self._vlines):
+                    full_ver = self._parse_line(line)
+                    if full_ver.build == v_short:
+                        self._vlines = self._vlines[i+1:]
+                        break
+            full_ver = self._vdict[v_short]
+            log(f"Resolved {v_short} -> {full_ver}")
+            return full_ver
     
     @cached_property
     def release_pdfium_build(self):
