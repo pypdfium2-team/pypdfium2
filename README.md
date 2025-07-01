@@ -102,6 +102,10 @@ If `find_library()` failed to find pdfium, we *may* do additional, custom search
 
 Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `/usr`), but contributions for other systems are welcome.
 
+> [!TIP]
+> If you mind pypdfium2's setup making a web request to resolve the full version, you may use `IGNORE_FULLVERS=1`, or pass the versions explicitly via `GIVEN_FULLVERS=$major.$minor.$build.$patch` (colon-separated if there are multiple versions).
+> This applies to other setup targets as well.
+
 [^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still prudent to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
 
 ##### Related targets
