@@ -168,8 +168,8 @@ pypdfium2 is like any other Python project in essentials, except that it needs s
 
 The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
 
-However, if you want to (or have to) forego this automation for some reason, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's custom setup code.
-The idea is basically to put your stuff in a staging directory, `data/system` or `data/sourcebuild` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume data files from that directory on setup.
+However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's custom setup code.<br>
+The idea is basically to put your data files in a staging directory, `data/system` or `data/sourcebuild` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume from that directory on setup.
 
 This setup strategy should be inherently free of web requests, and is recommended for distribution packagers.
 Mind though, we don't support the result. If you bring your own files, it's your own responsibility.
@@ -309,7 +309,7 @@ _**Note:** Conda packages are normally managed using recipe feedstocks driven by
 
 ### Unofficial packages
   
-The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use the official packages where possible.
+The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use our official packages where possible.
 If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
 
 Do not expect us to add/change code for downstream-specific setup tasks, or to actively support downstream packaging.
@@ -474,9 +474,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   This is the underlying bindings declaration,[^bindings_decl] which loads the function from the binary and
   contains the information required to convert Python types to their C equivalents.
   ```python
-  if _libs["pdfium"].has("FPDF_LoadDocument", "cdecl"):
-      FPDF_LoadDocument = _libs["pdfium"].get("FPDF_LoadDocument", "cdecl")
-      FPDF_LoadDocument.argtypes = [FPDF_STRING, FPDF_BYTESTRING]
+  if hasattr(_libs['pdfium'], 'FPDF_LoadDocument'):
+      FPDF_LoadDocument = _libs['pdfium']['FPDF_LoadDocument']
+      FPDF_LoadDocument.argtypes = (FPDF_STRING, FPDF_BYTESTRING)
       FPDF_LoadDocument.restype = FPDF_DOCUMENT
   ```
   Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion. This works because `FPDF_STRING` is actually an alias to `POINTER(c_char)` (i.e. `char*`), which is a primitive pointer type.
