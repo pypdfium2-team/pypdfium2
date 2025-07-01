@@ -170,13 +170,11 @@ pypdfium2 is like any other Python project in essentials, except that it needs s
 
 The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
 
-However, if you want to (or have to) forego this automation, e.g. to avoid web requests at setup time, you can also *just supply these files yourself*, as shown below.
+However, if you want to (or have to) forego this automation for some reason, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's custom setup code.
 The idea is basically to put your stuff in a staging directory, `data/system` or `data/sourcebuild` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume data files from that directory on setup.
 
 This setup strategy should be inherently free of web requests, and is recommended for distribution packagers.
 Mind though, we don't support the result. If you bring your own files, it's your own responsibility.
-
-<!-- TODO version.json: reconsider origin? should we use a separate field for the packager? -->
 
 ```bash
 # First, ask yourself: do you want to bundle pdfium (in-tree), or use system pdfium (out-of-tree)?
@@ -207,7 +205,7 @@ cat > "$STAGING_DIR/version.json" <<END
   "build": $PDFIUM_BUILD,
   "patch": $PDFIUM_PATCH,
   "n_commits": $POST_TAG_COMMIT_COUNT,
-  "hash": $POST_TAG_HASH,f
+  "hash": $POST_TAG_HASH,
   "origin": "$TARGET-$ORIGIN",
   "flags": [$MY_FLAGS]
 }
