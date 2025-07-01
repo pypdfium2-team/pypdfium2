@@ -136,7 +136,7 @@ def prepare_setup(pl_name, sub_target, pdfium_ver, flags):
     # Write platform files into a data staging directory
     pl_name = stage_platfiles(pl_name, sub_target, pdfium_ver, flags)
     # Copy platform files into actual source tree
-    return copy_platfiles(pl_name)
+    return copy_platfiles(pl_name), pl_name
 
 
 def main():

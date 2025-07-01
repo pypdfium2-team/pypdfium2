@@ -227,9 +227,8 @@ class _PdfiumVerClass:
     def _get_chromium_refs(self):
         # FIXME The ls-remote call may take extremely long (~1min) with older versions of git!
         # With newer git, it's a lot better, but still noticeable (one or a few seconds).
-        # TODO add way for caller to pass in the full version?
         if self._vlines is None:
-            log(f"Fetching chromium refs ...")
+            log(f"Attempting to fetch chromium refs. If this causes setup to halt, set e.g. IGNORE_FULLVERS=1")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
             self._vlines = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", f"{ChromiumURL}.git", '*.*.*.0'], cwd=None, capture=True).split("\n")
         return self._vlines

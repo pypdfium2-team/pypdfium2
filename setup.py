@@ -167,7 +167,7 @@ def main():
         raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
     if ModuleRaw in modnames and pl_name != ExtPlats.sdist:
-        platfiles = prepare_setup(pl_name, sub_target, requested_ver, flags)
+        platfiles, pl_name = prepare_setup(pl_name, sub_target, requested_ver, flags)
     else:
         platfiles = ()
     
