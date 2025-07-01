@@ -86,7 +86,7 @@ PDFIUM_PLATFORM="system-search" python -m pip install -v .
 Look for a system-provided pdfium shared library, and bind against it.
 
 Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.<br>
-If this succeeds, we will look for pdfium headers to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
+If this succeeds, we will look for pdfium headers from which to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
 
 Also, we try to determine the pdfium version using `pkg-config`.
 If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
@@ -652,6 +652,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```
 
 <!-- TODO mention pdfium_i.get_bufreader() as a shortcut to set up an FPDF_FILEACCESS interface -->
+<!-- FIXME The data holder strategy shown below is wonky. Should use Py_IncRef() / Py_DecRef() C APIs instead. -->
 
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
   
@@ -776,7 +777,7 @@ PDFium is available under "a BSD-style license that can be found in \[its\] [`LI
 Various other open-source licenses apply to dependencies included with PDFium.
 PDFium's license as well as dependency licenses have to be shipped with binary distributions.
 
-pypdfium2 uses PDFium builds from the `pdfium-binaries` project (see its [`LICENSE`](https://github.com/bblanchon/pdfium-binaries/blob/master/LICENSE) file or [`BUILD_LICENSES/pdfium-binaries.txt`](BUILD_LICENSES/pdfium-binaries.txt) - MIT).
+pypdfium2 uses PDFium builds from the `pdfium-binaries` project, which is [MIT-licensed](BUILD_LICENSES/pdfium-binaries.txt) as of this writing.
 `pdfium-binaries` auto-collect dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. There is also an aggregated [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for display in this repository.<br>
 Note that PDFium's dependencies might change over time. Please notify us if you think a relevant license is missing.
 
