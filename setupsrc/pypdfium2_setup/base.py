@@ -820,14 +820,18 @@ def parse_pl_spec(pl_spec):
             uses_prebuilds = True
         else:
             raise ValueError(f"Invalid binary spec '{pl_spec}'")
-        
-    if req_ver:
-        req_ver = PdfiumVer.get_latest() if req_ver == "latest" else int(req_ver)
-    elif uses_prebuilds:
-        log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
-        req_ver = PdfiumVer.release_pdfium_build
     
-    # TODO(sourcebuild, system): handle req_ver being None on the caller side
+    # TODO move uses_prebuilds stuff to update.py to align with the idea of downstream defaults
+    if req_ver:
+        if uses_prebuilds and req_ver == "latest":
+            req_ver = PdfiumVer.get_latest()
+        else:
+            req_ver = int(req_ver)
+    elif uses_prebuilds:
+        req_ver = PdfiumVer.release_pdfium_build
+        log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
+    else:
+        log("No requested version, will pass None and use downstream defaults")
     
     return pl_name, subspec, req_ver, flags
 
