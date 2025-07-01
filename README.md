@@ -84,19 +84,17 @@ PDFIUM_PLATFORM="system-search" python -m pip install -v .
 ```
 
 Look for a system-provided pdfium shared library, and bind against it.
-Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.
 
+Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.<br>
 If this succeeds, we will look for pdfium headers to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
 
 Also, we try to determine the pdfium version using `pkg-config`.
 If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
-If the version is not known in the end, `NaN` placeholders will be set.
-
-If the version is known but no headers are installed, they will be downloaded from upstream.
+If the version is not known in the end, `NaN` placeholders will be set.<br>
+If the version is known but no headers were found, they will be downloaded from upstream.
 If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
 
-If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and - if available - determining its version.
-
+If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and - if available - determining its version.<br>
 Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `/usr`), but contributions for other systems are welcome.
 
 > [!IMPORTANT]
