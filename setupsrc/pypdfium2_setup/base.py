@@ -189,8 +189,8 @@ def libname_for_system(system, name="pdfium"):
         return f"lib{name}.so"
 
 
-IGNORE_FULLVERS = bool(int(os.environ.get("IGNORE_FULLVERS", 0)))
-GIVEN_FULLVERS = os.environ.get("GIVEN_FULLVERS")
+IGNORE_FULLVER = bool(int(os.environ.get("IGNORE_FULLVER", 0)))
+GIVEN_FULLVER = os.environ.get("GIVEN_FULLVER")
 
 class _PdfiumVerScheme (
     namedtuple("PdfiumVerScheme", ("major", "minor", "build", "patch"))
@@ -207,9 +207,9 @@ class _PdfiumVerClass:
     
     @cached_property
     def _vdict(self):
-        if GIVEN_FULLVERS:
-            log("Warning: taking full versions from caller via $GIVEN_FULLVERS (could be incorrect)")
-            version_strs = GIVEN_FULLVERS.split(":")
+        if GIVEN_FULLVER:
+            log("Warning: taking full versions from caller via $GIVEN_FULLVER (could be incorrect)")
+            version_strs = GIVEN_FULLVER.split(":")
             versions = (self.scheme(*(int(n) for n in ver.split("."))) for ver in version_strs)
             return {v.build: v for v in versions}
         else:
@@ -228,7 +228,7 @@ class _PdfiumVerClass:
         # FIXME The ls-remote call may take extremely long (~1min) with older versions of git!
         # With newer git, it's a lot better, but still noticeable (one or a few seconds).
         if self._vlines is None:
-            log(f"Attempting to fetch chromium refs. If this causes setup to halt, set e.g. IGNORE_FULLVERS=1")
+            log(f"Attempting to fetch chromium refs. If this causes setup to halt, set e.g. IGNORE_FULLVER=1")
             ChromiumURL = "https://chromium.googlesource.com/chromium/src"
             self._vlines = run_cmd(["git", "ls-remote", "--sort", "-version:refname", "--tags", f"{ChromiumURL}.git", '*.*.*.0'], cwd=None, capture=True).split("\n")
         return self._vlines
@@ -245,10 +245,10 @@ class _PdfiumVerClass:
         full_ver = self._parse_line( lines.pop(0) )
         return full_ver
     
-    if IGNORE_FULLVERS:
-        assert not IS_CI and not GIVEN_FULLVERS
+    if IGNORE_FULLVER:
+        assert not IS_CI and not GIVEN_FULLVER
         def to_full(self, v_short):
-            log(f"Warning: Full version ignored as per $IGNORE_FULLVERS setting, will use NaN placeholders for {v_short}.")
+            log(f"Warning: Full version ignored as per $IGNORE_FULLVER setting, will use NaN placeholders for {v_short}.")
             return self.scheme(NaN, NaN, v_short, NaN)
         
     else:

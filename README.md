@@ -101,7 +101,7 @@ Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `
 > When pypdfium2 is installed with system pdfium, the bindings ought to be re-generated with the new headers whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
 
 > [!TIP]
-> If you mind pypdfium2's setup making a web request to resolve the full version, you may pass it in manually via `GIVEN_FULLVERS=$major.$minor.$build.$patch` (colon-separated if there are multiple versions), or less ideally, set `IGNORE_FULLVERS=1` to use `NaN` placeholders.
+> If you mind pypdfium2's setup making a web request to resolve the full version, you may pass it in manually via `GIVEN_FULLVER=$major.$minor.$build.$patch` (colon-separated if there are multiple versions), or less ideally, set `IGNORE_FULLVER=1` to use `NaN` placeholders.
 > This applies to other setup targets as well.
 
 [^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still prudent to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).

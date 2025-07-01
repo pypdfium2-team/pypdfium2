@@ -116,7 +116,7 @@ def main_conda_raw(args):
     
     _handle_ver(args, CondaPkgVer.get_latest_pdfium)
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
-    assert not (IGNORE_FULLVERS or GIVEN_FULLVERS)
+    assert not (IGNORE_FULLVER or GIVEN_FULLVER)
     full_ver = PdfiumVer.to_full(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = str(full_ver)
     os.environ["BUILD_NUM"] = str(_get_build_num(args))

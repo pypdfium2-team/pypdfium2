@@ -121,7 +121,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
 
 def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     
-    assert not IGNORE_FULLVERS
+    assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
     is_new = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
