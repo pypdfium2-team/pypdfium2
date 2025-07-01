@@ -5,7 +5,7 @@
 
 [![Downloads](https://pepy.tech/badge/pypdfium2/month)](https://pepy.tech/project/pypdfium2)
 
-[pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is an [ABI-level](#drawbacks-of-abi-level-bindings) Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
+[pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is an ABI-level Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
 
 It is built with [ctypesgen](https://github.com/pypdfium2-team/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
 The custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms is supported with pre-built packages.
@@ -19,7 +19,7 @@ pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ct
 ```bash
 python -m pip install -U pypdfium2
 ```
-If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run (see below).
+If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run ([see below](#default-setup)).
 
 #### Optional runtime dependencies
 
@@ -85,7 +85,7 @@ PDFIUM_PLATFORM="system-search" python -m pip install -v .
 Look for a system-provided pdfium shared library, and bind against it.
 
 > [!IMPORTANT]
-> When pypdfium2 is installed with system pdfium, the bindings ought to be re-built whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
+> When pypdfium2 is installed with system pdfium, the bindings ought to be re-generated with the new headers whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
 
 Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.
 
@@ -164,13 +164,13 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 
 pypdfium2 is like any other Python project in essentials, except that it needs some data files: a pdfium DLL (either bundled or out-of-tree), a bindings interface (generated via ctypesgen), and pdfium version info (JSON).
 
-The key point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
+The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
 
 However, if you want to (or have to) forego this automation, e.g. to avoid web requests at setup time, you can also *just supply these files yourself*, as shown below.
 The idea is basically to put your stuff in a staging directory, `data/system` or `data/sourcebuild` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume data files from that directory on setup.
 
 This setup strategy should be inherently free of web requests, and is recommended for distribution packagers.
-Mind though, we don't support the result. If you bring your own files, it's your own responsibility to get things right.
+Mind though, we don't support the result. If you bring your own files, it's your own responsibility.
 
 <!-- TODO version.json: reconsider origin? should we use a separate field for the packager? -->
 
@@ -868,7 +868,7 @@ New builds are automatically triggered by a webhook whenever you push to a linke
 
 Additionally, one doc build can also be hosted on [GitHub Pages](https://pypdfium2-team.github.io/pypdfium2/index.html).
 It is implemented with a CI workflow, which is supposed to be triggered automatically on release.
-This provides us with full control over the build env and the used commands, whereas RTD may be less liberal in this regard.
+This provides us with full control over build env and used commands, whereas RTD may be less liberal in this regard.
 
 
 ### Testing
@@ -974,7 +974,7 @@ This results in pypdfium2 being part of a large dependency tree.
 
 ## Thanks to[^thanks_to]
 
-* [Benoît Blanchon](https://github.com/bblanchon): Author of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](https://github.com/bblanchon/pdfium-binaries/tree/master/patches).
+* [Benoît Blanchon](https://github.com/bblanchon): Author/Maintainer of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](https://github.com/bblanchon/pdfium-binaries/tree/master/patches).
 * [Yinlin Hu](https://github.com/YinlinHu): `pypdfium` prototype and `kuafu` PDF viewer.
 * [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium in `redstork`, `redstork-ui` and `pdfbrain`.
 * [Tim Head](https://github.com/betatim): Original idea for Python bindings to PDFium with ctypesgen in `wowpng`.
@@ -988,7 +988,7 @@ This results in pypdfium2 being part of a large dependency tree.
 
 *If you have contributed to this project but are not mentioned here yet, please let us know.*
 
-[^thanks_to]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Some have rather helped with ideas, or contributions to dependencies of pypdfium2.
+[^thanks_to]: People listed in this section may not necessarily have contributed any copyrightable code to the repository. Many have rather helped with ideas, or contributions to dependencies of pypdfium2.
 
 
 ## History
