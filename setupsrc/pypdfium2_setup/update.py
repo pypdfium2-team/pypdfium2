@@ -146,14 +146,7 @@ def postprocess_android(platforms):
         log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, verify=None):
-    
-    if not version or version == "latest":
-        version = PdfiumVer.get_latest()
-        log(f"Using latest pdfium-binaries {version!r}. This should not be default with emplace.py or setup.py. Set the version to 'pinned' to use the same version as the last pypdfium2 release.")
-    elif version == "pinned":
-        version = PdfiumVer.release_pdfium_build
-        log(f"Using pdfium version {version!r} of last pypdfium2 release as requested explicitly by 'pinned'.")
+def main(platforms, version, robust=False, max_workers=None, use_v8=False, verify=None):
     
     if not platforms:
         platforms = WheelPlatforms
@@ -195,7 +188,6 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--version", "-v",
-        type = int,
         help = "The binaries release to use (defaults to latest). Must be a valid tag integer."
     )
     parser.add_argument(
@@ -219,6 +211,12 @@ def parse_args(argv):
 
 def cli_main(argv=sys.argv[1:]):
     args = parse_args(argv)
+    if not args.version or args.version == "latest":
+        args.version = PdfiumVer.get_latest()
+    elif args.version == "pinned":
+        args.version = PdfiumVer.release_pdfium_build
+    else:
+        args.version = int(args.version)
     main(**vars(args))
 
 

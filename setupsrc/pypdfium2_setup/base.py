@@ -248,7 +248,7 @@ class _PdfiumVerClass:
     if IGNORE_FULLVER:
         assert not IS_CI and not GIVEN_FULLVER
         def to_full(self, v_short):
-            log(f"Warning: Full version ignored as per $IGNORE_FULLVER setting, will use NaN placeholders for {v_short}.")
+            log(f"Warning: Full version ignored as per $IGNORE_FULLVER setting - will use NaN placeholders for {v_short}.")
             return self.scheme(NaN, NaN, v_short, NaN)
         
     else:
