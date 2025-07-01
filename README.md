@@ -84,9 +84,6 @@ PDFIUM_PLATFORM="system-search" python -m pip install -v .
 ```
 Look for a system-provided pdfium shared library, and bind against it.
 
-> [!IMPORTANT]
-> When pypdfium2 is installed with system pdfium, the bindings ought to be re-generated with the new headers whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
-
 Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.
 
 If this succeeds, we will look for pdfium headers to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
@@ -101,6 +98,9 @@ If neither headers nor version are known (or ctypesgen is not installed), the re
 If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and - if available - determining its version.
 
 Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `/usr`), but contributions for other systems are welcome.
+
+> [!IMPORTANT]
+> When pypdfium2 is installed with system pdfium, the bindings ought to be re-generated with the new headers whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]
 
 > [!TIP]
 > If you mind pypdfium2's setup making a web request to resolve the full version, you may use `IGNORE_FULLVERS=1`, or pass the versions explicitly via `GIVEN_FULLVERS=$major.$minor.$build.$patch` (colon-separated if there are multiple versions).
