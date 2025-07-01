@@ -48,7 +48,7 @@
   Provided on a best effort basis, and largely untested. Testers/feedback welcome.
   pypdfium2's setup is now also capable of producing wheels for these platforms, but they will not actually be included in releases at this time.
   (Once Termux ships Python 3.13, we may want to publish Android `arm64_v8a` and maybe `armeabi_v7a` wheels, but we do not intend to provide wheels for simulators.)
-  iOS will not actually work yet, as the PEP indicates binaries ought to be moved to a special Frameworks location for permission reasons, in which case you'd also have to patch pypdfium2's library search. We cannot do anything about this yet without access to a device or clearer instructions. Help from an iOS users would be appreciated here.
+  iOS will not actually work yet, as the PEP indicates binaries ought to be moved to a special Frameworks location for permission reasons, in which case you'd also have to patch pypdfium2's library search. We cannot do anything about this yet without access to a device or clearer instructions. Community help would be appreciated here.
 
 *Setup*
 - When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, by default, we now use the version included with the last pypdfium2 release. This is to prevent possible API breakage when pypdfium2 is installed from source. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
