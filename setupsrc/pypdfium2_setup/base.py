@@ -806,32 +806,21 @@ def parse_pl_spec(pl_spec):
     if not pl_spec or pl_spec == "auto":
         if Host.platform is None:
             log(str(Host._exc))
-            pl_name, uses_prebuilds = ExtPlats.fallback, False
+            pl_name = ExtPlats.fallback
         else:
-            pl_name, uses_prebuilds = Host.platform, True
+            pl_name = Host.platform
     else:
         if "-" in pl_spec:
             pl_spec, subspec = pl_spec.split("-", maxsplit=1)
         if hasattr(ExtPlats, pl_spec):
             pl_name = getattr(ExtPlats, pl_spec)
-            uses_prebuilds = False
         elif hasattr(PlatNames, pl_spec):
             pl_name = getattr(PlatNames, pl_spec)
-            uses_prebuilds = True
         else:
             raise ValueError(f"Invalid binary spec '{pl_spec}'")
     
-    # TODO move uses_prebuilds stuff to update.py to align with the idea of downstream defaults
-    if req_ver:
-        if uses_prebuilds and req_ver == "latest":
-            req_ver = PdfiumVer.get_latest()
-        else:
-            req_ver = int(req_ver)
-    elif uses_prebuilds:
-        req_ver = PdfiumVer.release_pdfium_build
-        log(f"PDFium version not given, using {req_ver} from last pypdfium2 release. If this is not right, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
-    else:
-        log("No requested version, will pass None and use downstream defaults")
+    if req_ver and req_ver.isnumeric():
+        req_ver = int(req_ver)
     
     return pl_name, subspec, req_ver, flags
 

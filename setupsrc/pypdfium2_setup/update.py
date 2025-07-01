@@ -148,8 +148,13 @@ def postprocess_android(platforms):
 
 def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, verify=None):
     
-    if not version:
+    if not version or version == "latest":
         version = PdfiumVer.get_latest()
+        log(f"Using latest pdfium-binaries {version!r}. This should not be default with emplace.py or setup.py. Set the version to 'pinned' to use the same version as the last pypdfium2 release.")
+    elif version == "pinned":
+        version = PdfiumVer.release_pdfium_build
+        log(f"Using pdfium version {version!r} of last pypdfium2 release as requested explicitly by 'pinned'.")
+    
     if not platforms:
         platforms = WheelPlatforms
     if verify is None:
