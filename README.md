@@ -108,7 +108,7 @@ Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `
 
 ##### Related targets
 
-There is also a `system-generate:$VERSION` target, to produce bindings (for a given pdfium version) that will attempt to load pdfium from the system at runtime, in a host-independent fashion. This may be useful for packaging.
+There is also a `system-generate:$VERSION` target, to produce system pdfium bindings in a host-independent fashion. This may be useful for packaging.
 
 Further, you can set just `system` to consume pre-generated files from the `data/system` staging directory. See the section on [caller-provided data files](#with-caller-provided-data-files) for more info.
 
@@ -168,11 +168,11 @@ pypdfium2 is like any other Python project in essentials, except that it needs s
 
 The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
 
-However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's custom setup code.<br>
+However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's own setup code.<br>
 The idea is basically to put your data files in a staging directory, `data/system` or `data/sourcebuild` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume from that directory on setup.
 
 This setup strategy should be inherently free of web requests, and is recommended for distribution packagers.
-Mind though, we don't support the result. If you bring your own files, it's your own responsibility.
+Mind though, we don't support the result. If you bring your own files, it's your own responsibility, and it's quite possible your pypdfium2 might turn out subtly different from ours.
 
 ```bash
 # First, ask yourself: do you want to bundle pdfium (in-tree), or use system pdfium (out-of-tree)?
@@ -185,7 +185,7 @@ STAGING_DIR=data/$TARGET
 cp "$MY_BINARY_PATH" $STAGING_DIR/libpdfium.so
 
 # Now, we will call ctypesgen to generate the bindings interface.
-# Reminder: use the pypdfium2-team fork of ctypesgen.
+# Reminder: You'll want to use the pypdfium2-team fork of ctypesgen. It generates much cleaner bindings, and it's what our source expects (there are subtle API differences in terms of output).
 # How exactly you do this is down to you. See ctypesgen --help or base.py::run_ctypesgen() for further options.
 ctypesgen --library pdfium --runtime-libdirs $MY_RT_LIBDIRS --compile-libdirs $MY_COMP_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o $STAGING_DIR/bindings.py [-D $MY_FLAGS]
 
@@ -204,7 +204,7 @@ cat > "$STAGING_DIR/version.json" <<END
   "patch": $PDFIUM_PATCH,
   "n_commits": $POST_TAG_COMMIT_COUNT,
   "hash": $POST_TAG_HASH,
-  "origin": "$TARGET-$ORIGIN",
+  "origin": "$TARGET-$MY_ORIGIN",
   "flags": [$MY_FLAGS]
 }
 END
