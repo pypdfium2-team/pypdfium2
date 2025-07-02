@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 # Related work: https://github.com/tiran/libpdfium/ and https://aur.archlinux.org/packages/libpdfium-nojs
 
-# Known issue: This script does not currently handle rebuilds
-
 import re
 import os
 import sys
@@ -59,12 +57,21 @@ if sys.platform.startswith("darwin"):
 
 Compiler = Enum("Compiler", "gcc clang")
 
+RESET_REPOS = False
+
 
 def _get_repo(url, target_dir, rev, depth=1):
     if target_dir.exists():
-        return False
+        if RESET_REPOS:
+            log(f"Resetting {target_dir.name} as per --reset option.")
+            run_cmd(["git", "reset", "--hard"], cwd=target_dir)
+            return True
+        else:
+            return False
     # see https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
     # TODO: on git >= 2.49, we can use `git clone --revision ...`
+    if callable(rev):
+        rev = rev()  # resolve deferred
     mkdir(target_dir)
     run_cmd(["git", "init"], cwd=target_dir)
     run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
@@ -95,11 +102,8 @@ _Deferred = _DeferredClass()
 
 
 def _fetch_dep(name, target_dir):
-    if target_dir.exists():
-        log(f"Using existing {target_dir}")
-        return False
-    # parse out DEPS revisions only if we actually need them
-    return _get_repo(DEPS_URLS[name], target_dir, rev=_Deferred.deps[name])
+    # parse out DEPS revisions only when we actually need them
+    return _get_repo(DEPS_URLS[name], target_dir, rev=lambda: _Deferred.deps[name])
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
@@ -124,8 +128,8 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
-    is_new = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
-    if is_new:
+    do_patches = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
+    if do_patches:
         autopatch_dir(
             PDFIUM_DIR/"public"/"cpp", "*.h",
             r'"public/(.+)"', r'"../\1"',
@@ -151,8 +155,8 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
                 is_regex=False, exp_count=1,
             )
     
-    is_new = _fetch_dep("build", PDFIUM_DIR/"build")
-    if is_new:
+    do_patches = _fetch_dep("build", PDFIUM_DIR/"build")
+    if do_patches:
         # Work around error about path_exists() being undefined
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
         if compiler is Compiler.gcc:
@@ -194,8 +198,12 @@ def prepare(config_dict, build_dir):
         PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
         PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
     )
-    # Create target dir and write build config
+    # Create target dir (or reuse existing) and write build config
     mkdir(build_dir)
+    # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single_lib build is done after a component build. This also ensures we really built a new DLL in the end.
+    # Leave the object files in place to reuse as much as possible, though.
+    for lib in build_dir.glob(Host.libname_glob):
+        lib.unlink()
     config_str = serialize_gn_config(config_dict)
     (build_dir/"args.gn").write_text(config_str)
 
@@ -248,7 +256,11 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False):
+    
+    # q&d: use a global to expose this setting to _get_repo(), easier than handing it down through a lot of functions
+    global RESET_REPOS
+    RESET_REPOS = reset
     
     if build_ver is None:
         build_ver = SOURCEBUILD_NATIVE_PIN
@@ -310,6 +322,11 @@ def parse_args(argv):
         "-c", "--compiler",
         type = str.lower,
         help = "The compiler to use (gcc or clang). Defaults to gcc if available.",
+    )
+    parser.add_argument(
+        "--reset",
+        action = "store_true",
+        help = "Reset git repos and re-apply patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang or single lib <-> component build mode). This is not enabled by default to avoid unintentional loss of manual changes.",
     )
     # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
