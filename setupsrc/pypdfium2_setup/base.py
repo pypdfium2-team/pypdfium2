@@ -660,11 +660,18 @@ def tmp_cwd_context(tmp_cwd):
         os.chdir(orig_cwd)
 
 
-def run_ctypesgen(target_path, headers_dir, flags=(), compile_lds=(), run_lds=(".", ), search_sys_despite_libdirs=False, guard_symbols=False, no_srcinfo=False, libname="pdfium", version=None):
+CTG_LIBPATTERN = "{prefix}{name}.{suffix}"
+
+# TODO make version mandatory
+def run_ctypesgen(
+        target_path, headers_dir, flags=(),
+        rt_paths=(f"./{CTG_LIBPATTERN}", ), ct_paths=(), univ_paths=(),
+        search_sys_despite_libdirs=False,
+        guard_symbols=False, no_srcinfo=False, version=None
+    ):
     
     if USE_REFBINDINGS:
         log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
-        assert libname == "pdfium", f"Non-default libname {libname!r} not supported with reference bindings"
         record_ver = PdfiumVer.release_pdfium_build
         if version != record_ver:
             log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
@@ -677,13 +684,15 @@ def run_ctypesgen(target_path, headers_dir, flags=(), compile_lds=(), run_lds=("
     import ctypesgen.__main__
     
     # library loading
-    args = ["-l", libname]
-    if run_lds:
-        args += ["--runtime-libdirs", *run_lds]
-        if not search_sys_despite_libdirs:
-            args += ["--no-system-libsearch"]
-    if compile_lds:
-        args += ["--compile-libdirs", *compile_lds]
+    args = ["-l", "pdfium"]
+    if rt_paths:
+        args += ["--rt-libpaths", *rt_paths]
+    if univ_paths:
+        args += ["--univ-libpaths", *univ_paths]
+    if (rt_paths or univ_paths) and not search_sys_despite_libdirs:
+        args += ["--no-system-libsearch"]
+    if ct_paths:
+        args += ["--ct-libpaths", *ct_paths]
     else:
         args += ["--no-load-library"]
     
@@ -736,7 +745,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     
     # TODO register all defaults?
     curr_info = {"version": version, **kwargs}
-    curr_info.pop("compile_lds", None)  # ignore
+    curr_info.pop("ct_paths", None)  # ignore
     curr_info.setdefault("flags", [])
     curr_info = _make_json_compat(curr_info)
     
@@ -906,7 +915,7 @@ def pack_sourcebuild(pdfium_dir, build_dir, sub_target, full_ver, **v_kwargs):
     write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **v_kwargs)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", compile_lds=[dest_dir], version=full_ver.build)
+    run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=(dest_dir/CTG_LIBPATTERN, ), version=full_ver.build)
 
 
 def git_get_hash(repo_dir, n_digits=None):

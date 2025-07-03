@@ -44,8 +44,8 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags):
         log(f"Using cached binary {req_repr}")
     
     # build_pdfium_bindings() has its own cache logic, so always call to ensure bindings match
-    compile_lds = (DataDir/Host.platform, ) if pl_name == Host.platform else ()
-    build_pdfium_bindings(req_ver, flags=req_flags, compile_lds=compile_lds)
+    ct_paths = (DataDir/Host.platform/CTG_LIBPATTERN, ) if pl_name == Host.platform else ()
+    build_pdfium_bindings(req_ver, flags=req_flags, ct_paths=ct_paths)
 
 def _end_subtargets(sub_target, pdfium_ver):
     if sub_target:
@@ -67,10 +67,10 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
             full_ver = system_pdfium.main(full_ver, flags=flags)
         elif sub_target == "generate":
             assert pdfium_ver, "system-generate target requires pdfium build version from caller"
-            build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
+            build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, rt_paths=())
             shutil.copyfile(BindingsFile, pl_dir/BindingsFN)
             full_ver = PdfiumVer.to_full(pdfium_ver)
-            write_pdfium_info(pl_dir, full_ver, origin="system", flags=flags)
+            write_pdfium_info(pl_dir, full_ver, origin="system-generate", flags=flags)
         else:
             _end_subtargets(sub_target, pdfium_ver)
     

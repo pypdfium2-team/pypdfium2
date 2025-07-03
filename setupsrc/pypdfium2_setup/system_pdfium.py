@@ -24,14 +24,23 @@ def _removeprefix(string, prefix):
     return string
 
 
+def _yield_lo_candidates(system=SysNames.linux):
+    lo_paths_iter = itertools.product(
+        (Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64")
+    )
+    libname = libname_for_system(system, name="pdfiumlo")
+    yield from (
+        Path(str(path)+bitness)/"libreoffice"/"program"/libname
+        for path, bitness in lo_paths_iter
+    )
+
+
 def _find_libreoffice_pdfium():
     # Look for pdfium bundled with libreoffice. (Assuming the host has a unix-like file system.)
     # Not sure how complete or incomplete libreoffice's pdfium builds may be; this is just a chance.
     pdfium_lib = None
     if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
-        lo_paths_iter = itertools.product((Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64"))
-        libname = libname_for_system(Host.system, name="pdfiumlo")
-        candidates = (Path(str(path)+bitness)/"libreoffice"/"program"/libname for path, bitness in lo_paths_iter)
+        candidates = _yield_lo_candidates()
         pdfium_lib = _get_existing(candidates)
     return pdfium_lib
 
@@ -93,10 +102,11 @@ class PdfiumNotFoundError (RuntimeError):
 
 def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     
+    # TODO handle version included in library filename
+    
     log("Looking for system pdfium ...")
     
     # See if a pdfium shared library is in the default system search path
-    # TODO possible optimization: make find_library() comptime only and hardcode result into bindings?
     pdfium_lib = find_library("pdfium")
     from_lo = False
     
@@ -107,12 +117,11 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     if pdfium_lib:
         log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
         target_path = target_dir/BindingsFN
+        kwargs = dict(univ_paths=(pdfium_lib, ), guard_symbols=True, flags=flags)
         
         if from_lo:
             full_ver = given_fullver or _get_libreoffice_pdfium_ver()
-            lds = (pdfium_lib.parent, )
-            # TODO(ctypesgen) handle pdfiumlo libname in refbindings
-            build_pdfium_bindings(full_ver.build, libname="pdfiumlo", compile_lds=lds, run_lds=lds, guard_symbols=True, flags=flags)
+            build_pdfium_bindings(full_ver.build, **kwargs)
             bindings_path = BindingsFile
             write_pdfium_info(target_dir, full_ver, origin="system-libreoffice", flags=flags)
         
@@ -120,7 +129,6 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
             pdfium_headers = _find_pdfium_headers()
             full_ver = given_fullver or _get_sys_pdfium_ver()
             if pdfium_headers or full_ver is not PdfiumVerUnknown:
-                kwargs = dict(run_lds=(), guard_symbols=True, flags=flags)
                 if pdfium_headers:
                     log(f"Found pdfium headers at {pdfium_headers}")
                     run_ctypesgen(target_path, pdfium_headers, version=full_ver.build, **kwargs)
@@ -133,7 +141,7 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
                 log(f"Warning: Neither pdfium headers nor version found - will use reference bindings. This is ABI-unsafe! Set $PDFIUM_HEADERS to the directory in question, or pass the version via $PDFIUM_PLATFORM=system-search:$VERSION.")
                 bindings_path = RefBindingsFile
                 full_ver = given_fullver or PdfiumVerUnknown
-            write_pdfium_info(target_dir, full_ver, origin="system", flags=flags)
+            write_pdfium_info(target_dir, full_ver, origin="system-search", flags=flags)
         
         if bindings_path != target_path:
             shutil.copyfile(bindings_path, target_path)

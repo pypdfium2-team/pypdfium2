@@ -61,6 +61,7 @@ cd pypdfium2/
 # In the pypdfium2/ directory
 python -m pip install -v .
 ```
+
 This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be downloaded from `pdfium-binaries` and bundled into pypdfium2, and ctypesgen will be called on pdfium headers to produce the bindings interface.
 
 `pdfium-binaries` offer SLSA provenance to verify authenticity, so it is highly recommended that you install the `slsa-verifier` in this case.
@@ -74,7 +75,7 @@ If no pre-built binaries are available for your platform, setup will look for sy
 - `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
 
 > [!NOTE]
-> Beware: pip's `--no-binary` option in fact only means "no binary _wheels_". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
+> pip's `--no-binary` option is improperly named, and in fact only means "no binary _wheels_". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
 
 
 #### With system pdfium
@@ -85,12 +86,13 @@ PDFIUM_PLATFORM="system-search" python -m pip install -v .
 
 Look for a system-provided pdfium shared library, and bind against it.
 
-Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium.<br>
+Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium at setup time, and the result will be hardcoded into the bindings.<br>
 If this succeeds, we will look for pdfium headers from which to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
 
 Also, we try to determine the pdfium version using `pkg-config`.
 If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
-If the version is not known in the end, `NaN` placeholders will be set.<br>
+If the version is not known in the end, `NaN` placeholders will be set.
+
 If the version is known but no headers were found, they will be downloaded from upstream.
 If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
 
@@ -108,7 +110,7 @@ Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `
 
 ##### Related targets
 
-There is also a `system-generate:$VERSION` target, to produce system pdfium bindings in a host-independent fashion. This may be useful for packaging.
+There is also a `system-generate:$VERSION` target, to produce system pdfium bindings in a host-independent fashion. This will call `find_library()` at runtime, and may be useful for packaging.
 
 Further, you can set just `system` to consume pre-generated files from the `data/system` staging directory. See the section on [caller-provided data files](#with-caller-provided-data-files) for more info.
 
@@ -187,7 +189,7 @@ cp "$MY_BINARY_PATH" $STAGING_DIR/libpdfium.so
 # Now, we will call ctypesgen to generate the bindings interface.
 # Reminder: You'll want to use the pypdfium2-team fork of ctypesgen. It generates much cleaner bindings, and it's what our source expects (there are subtle API differences in terms of output).
 # How exactly you do this is down to you. See ctypesgen --help or base.py::run_ctypesgen() for further options.
-ctypesgen --library pdfium --runtime-libdirs $MY_RT_LIBDIRS --compile-libdirs $MY_COMP_LIBDIRS --headers $MY_INCLUDE_DIR/fpdf*.h -o $STAGING_DIR/bindings.py [-D $MY_FLAGS]
+ctypesgen --library pdfium --rt-libpaths $MY_RT_LIBPATHS --ct-libpaths $MY_CT_LIBPATHS --headers $MY_INCLUDE_DIR/fpdf*.h -o $STAGING_DIR/bindings.py [-D $MY_FLAGS]
 
 # Then write the version file (fill the placeholders).
 # Note, this is not a mature interface yet and might change any time!

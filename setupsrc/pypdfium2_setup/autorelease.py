@@ -12,6 +12,7 @@ from copy import deepcopy
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
+from pypdfium2_setup import system_pdfium
 
 
 PlacesToRegister = (AutoreleaseDir, Changelog, ChangelogStaging, RefBindingsFile)
@@ -31,7 +32,12 @@ def update_refbindings(version):
     # Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
     
     RefBindingsFile.unlink()
-    build_pdfium_bindings(version, guard_symbols=True, flags=REFBINDINGS_FLAGS, search_sys_despite_libdirs=True, no_srcinfo=True)
+    build_pdfium_bindings(
+        version, flags=REFBINDINGS_FLAGS,
+        rt_paths=(f"./{CTG_LIBPATTERN}", *system_pdfium._yield_lo_candidates()),
+        search_sys_despite_libdirs=True,
+        guard_symbols=True, no_srcinfo=True,
+    )
     shutil.copyfile(BindingsFile, RefBindingsFile)
     assert RefBindingsFile.exists()
 
