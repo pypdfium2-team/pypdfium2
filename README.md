@@ -89,7 +89,7 @@ Look for a system-provided pdfium shared library, and bind against it.
 Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium at setup time, and the result will be hardcoded into the bindings.<br>
 If this succeeds, we will look for pdfium headers from which to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
 
-Also, we try to determine the pdfium version using `pkg-config`.
+Also, we try to determine the pdfium version, either from the library filename itself, or via `pkg-config`.
 If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
 If the version is not known in the end, `NaN` placeholders will be set.
 

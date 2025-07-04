@@ -82,17 +82,27 @@ def _find_pdfium_headers():
     return headers_path
 
 
-def _get_sys_pdfium_ver():
-    log("Trying to determine system pdfium version via pkg-config (may be NaN if this fails) ...")
+def _parse_version(version):
+    if "." in version:
+        version = PdfiumVer.scheme(*[int(v) for v in version.split(".")])
+    else:
+        version = PdfiumVer.to_full(int(version))
+    assert version.build > 1000, "expected at least 4 digits for pdfium build version"
+    return version
+
+
+def _get_sys_pdfium_ver(pdfium_lib):
+    
+    libname_parts = Path(pdfium_lib).name.split(".", maxsplit=2)
+    if len(libname_parts) == 3:
+        return _parse_version(libname_parts[2])
+    
     if shutil.which("pkg-config"):
         proc = run_cmd(["pkg-config", "--modversion", "libpdfium"], cwd=None, check=False)
         if proc.returncode == 0:
             version = proc.stdout.decode().strip()
-            if "." in version:
-                version = PdfiumVer.scheme(*[int(v) for v in version.split(".")])
-            else:
-                version = PdfiumVer.to_full(int(version))
-            return version
+            return _parse_version(version)
+    
     return PdfiumVerUnknown
 
 
@@ -101,8 +111,6 @@ class PdfiumNotFoundError (RuntimeError):
 
 
 def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
-    
-    # TODO handle version included in library filename
     
     log("Looking for system pdfium ...")
     
@@ -127,7 +135,7 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
         
         else:
             pdfium_headers = _find_pdfium_headers()
-            full_ver = given_fullver or _get_sys_pdfium_ver()
+            full_ver = given_fullver or _get_sys_pdfium_ver(pdfium_lib)
             if pdfium_headers or full_ver is not PdfiumVerUnknown:
                 if pdfium_headers:
                     log(f"Found pdfium headers at {pdfium_headers}")
@@ -157,5 +165,5 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
 
 if __name__ == "__main__":
     # print(_get_libreoffice_pdfium_ver())
-    # print(_get_sys_pdfium_ver())
+    # print(_get_sys_pdfium_ver("libpdfium.so.7269"))
     print(main())
