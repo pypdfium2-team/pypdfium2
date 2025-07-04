@@ -93,6 +93,8 @@ def _parse_version(version):
 
 def _get_sys_pdfium_ver(pdfium_lib):
     
+    log("Trying to determine system pdfium version ...")
+    
     libname_parts = Path(pdfium_lib).name.split(".", maxsplit=2)
     if len(libname_parts) == 3:
         return _parse_version(libname_parts[2])
@@ -102,6 +104,8 @@ def _get_sys_pdfium_ver(pdfium_lib):
         if proc.returncode == 0:
             version = proc.stdout.decode().strip()
             return _parse_version(version)
+    
+    log("Unable to identify version, will set NaN placeholders.")
     
     return PdfiumVerUnknown
 
