@@ -114,53 +114,55 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     
     log("Looking for system pdfium ...")
     
-    # See if a pdfium shared library is in the default system search path
-    pdfium_lib = find_library("pdfium")
+    # give the caller an opportunity to set the pdfium path
+    pdfium_lib = os.getenv("PDFIUM_BINARY")
     from_lo = False
-    
+    # see if a pdfium shared library is in the default system search path
+    if not pdfium_lib:
+        pdfium_lib = find_library("pdfium")
+    # see if libreoffice provides pdfium
     if not pdfium_lib:
         pdfium_lib = _find_libreoffice_pdfium()
-        from_lo = True
+        from_lo = bool(pdfium_lib)
+    # abort if none of this yielded a result
+    if not pdfium_lib:
+        raise PdfiumNotFoundError("Could not find system pdfium.")
     
-    if pdfium_lib:
-        log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
-        target_path = target_dir/BindingsFN
-        kwargs = dict(univ_paths=(pdfium_lib, ), guard_symbols=True, flags=flags)
-        
-        if from_lo:
-            full_ver = given_fullver or _get_libreoffice_pdfium_ver()
-            build_pdfium_bindings(full_ver.build, **kwargs)
-            bindings_path = BindingsFile
-            write_pdfium_info(target_dir, full_ver, origin="system-libreoffice", flags=flags)
-        
-        else:
-            pdfium_headers = _find_pdfium_headers()
-            full_ver = given_fullver or _get_sys_pdfium_ver(pdfium_lib)
-            if pdfium_headers or full_ver is not PdfiumVerUnknown:
-                if pdfium_headers:
-                    log(f"Found pdfium headers at {pdfium_headers}")
-                    run_ctypesgen(target_path, pdfium_headers, version=full_ver.build, **kwargs)
-                    bindings_path = target_path
-                else:
-                    log(f"Could not find headers, but know the version: {full_ver}")
-                    build_pdfium_bindings(full_ver.build, **kwargs)
-                    bindings_path = BindingsFile
-            else:
-                log(f"Warning: Neither pdfium headers nor version found - will use reference bindings. This is ABI-unsafe! Set $PDFIUM_HEADERS to the directory in question, or pass the version via $PDFIUM_PLATFORM=system-search:$VERSION.")
-                bindings_path = RefBindingsFile
-                full_ver = given_fullver or PdfiumVerUnknown
-            write_pdfium_info(target_dir, full_ver, origin="system-search", flags=flags)
-        
-        if bindings_path != target_path:
-            shutil.copyfile(bindings_path, target_path)
-        
-        if full_ver.build < PDFIUM_MIN_REQ:
-            log(f"Warning: pdfium version {full_ver.build} does not conform with minimum requirement {PDFIUM_MIN_REQ}. Some APIs may not work. Run pypdfium2's test suite for details.")
-        
-        return full_ver
+    log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
+    target_path = target_dir/BindingsFN
+    kwargs = dict(univ_paths=(pdfium_lib, ), guard_symbols=True, flags=flags)
+    
+    if from_lo:
+        full_ver = given_fullver or _get_libreoffice_pdfium_ver()
+        build_pdfium_bindings(full_ver.build, **kwargs)
+        bindings_path = BindingsFile
+        write_pdfium_info(target_dir, full_ver, origin="system-libreoffice", flags=flags)
     
     else:
-        raise PdfiumNotFoundError("Could not find system pdfium.")
+        pdfium_headers = _find_pdfium_headers()
+        full_ver = given_fullver or _get_sys_pdfium_ver(pdfium_lib)
+        if pdfium_headers or full_ver is not PdfiumVerUnknown:
+            if pdfium_headers:
+                log(f"Found pdfium headers at {pdfium_headers}")
+                run_ctypesgen(target_path, pdfium_headers, version=full_ver.build, **kwargs)
+                bindings_path = target_path
+            else:
+                log(f"Could not find headers, but know the version: {full_ver}")
+                build_pdfium_bindings(full_ver.build, **kwargs)
+                bindings_path = BindingsFile
+        else:
+            log(f"Warning: Neither pdfium headers nor version found - will use reference bindings. This is ABI-unsafe! Set $PDFIUM_HEADERS to the directory in question, or pass the version via $PDFIUM_PLATFORM=system-search:$VERSION.")
+            bindings_path = RefBindingsFile
+            full_ver = given_fullver or PdfiumVerUnknown
+        write_pdfium_info(target_dir, full_ver, origin="system-search", flags=flags)
+    
+    if bindings_path != target_path:
+        shutil.copyfile(bindings_path, target_path)
+    
+    if full_ver.build < PDFIUM_MIN_REQ:
+        log(f"Warning: pdfium version {full_ver.build} does not conform with minimum requirement {PDFIUM_MIN_REQ}. Some APIs may not work. Run pypdfium2's test suite for details.")
+    
+    return full_ver
 
 
 if __name__ == "__main__":
