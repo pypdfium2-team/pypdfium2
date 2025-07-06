@@ -344,7 +344,7 @@ def parse_args(argv):
     parser.add_argument(
         "--reset",
         action = "store_true",
-        help = "Reset git repos and re-apply patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang or single lib <-> component build mode). This is not enabled by default to avoid unintentional loss of manual changes.",
+        help = "Reset git repos and re-apply patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang or single lib <-> component build mode), but is not enabled by default to avoid unintentional loss of manual changes.",
     )
     # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
@@ -356,7 +356,7 @@ def parse_args(argv):
     parser.add_argument(
         "--single-lib",
         action = "store_true",
-        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-downloaded, else the existing state is used.",
+        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is downloaded anew or reset, else the existing state is used.",
     )
     args = parser.parse_args(argv)
     if args.compiler:

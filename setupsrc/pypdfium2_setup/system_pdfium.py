@@ -24,45 +24,6 @@ def _removeprefix(string, prefix):
     return string
 
 
-def _yield_lo_candidates(system=SysNames.linux):
-    lo_paths_iter = itertools.product(
-        (Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64")
-    )
-    libname = libname_for_system(system, name="pdfiumlo")
-    yield from (
-        Path(str(path)+bitness)/"libreoffice"/"program"/libname
-        for path, bitness in lo_paths_iter
-    )
-
-
-def _find_libreoffice_pdfium():
-    # Look for pdfium bundled with libreoffice. (Assuming the host has a unix-like file system.)
-    # Not sure how complete or incomplete libreoffice's pdfium builds may be; this is just a chance.
-    pdfium_lib = None
-    if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
-        candidates = _yield_lo_candidates()
-        pdfium_lib = _get_existing(candidates)
-    return pdfium_lib
-
-
-def _get_libreoffice_pdfium_ver():
-    log("Trying to determine libreoffice pdfium version ...")
-    
-    output = run_cmd(["libreoffice", "--version"], cwd=None, capture=True)
-    # alternatively, we could do e.g.: re.search(r"([\d\.]+)", output)
-    output = _removeprefix(output.lower(), "libreoffice").lstrip()
-    lo_version = output.split(" ")[0]
-    log(f"Libreoffice version: {lo_version!r}")
-    
-    deps_url = f"https://raw.githubusercontent.com/LibreOffice/core/refs/tags/libreoffice-{lo_version}/download.lst"
-    deps_content = urlopen(deps_url).read().decode("utf-8")
-    match = re.search(r"pdfium-(\d+)\.tar\.bz2", deps_content, flags=re.MULTILINE)
-    short_ver = int(match.group(1))
-    log(f"Libreoffice pdfium version: {short_ver}")
-    
-    return PdfiumVer.to_full(short_ver)
-
-
 def _find_pdfium_headers():
     
     headers_path = os.getenv("PDFIUM_HEADERS", None)
@@ -81,7 +42,6 @@ def _find_pdfium_headers():
     
     return headers_path
 
-
 def _parse_version(version):
     if "." in version:
         version = PdfiumVer.scheme(*[int(v) for v in version.split(".")])
@@ -89,7 +49,6 @@ def _parse_version(version):
         version = PdfiumVer.to_full(int(version))
     assert version.build > 1000, "expected at least 4 digits for pdfium build version"
     return version
-
 
 def _get_sys_pdfium_ver(pdfium_lib):
     
@@ -108,6 +67,43 @@ def _get_sys_pdfium_ver(pdfium_lib):
     log("Unable to identify version, will set NaN placeholders.")
     
     return PdfiumVerUnknown
+
+
+def _yield_lo_candidates(system=SysNames.linux):
+    lo_paths_iter = itertools.product(
+        (Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64")
+    )
+    libname = libname_for_system(system, name="pdfiumlo")
+    yield from (
+        Path(str(path)+bitness)/"libreoffice"/"program"/libname
+        for path, bitness in lo_paths_iter
+    )
+
+def _find_libreoffice_pdfium():
+    # Look for pdfium bundled with libreoffice. (Assuming the host has a unix-like file system.)
+    # Not sure how complete or incomplete libreoffice's pdfium builds may be; this is just a chance.
+    pdfium_lib = None
+    if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
+        candidates = _yield_lo_candidates()
+        pdfium_lib = _get_existing(candidates)
+    return pdfium_lib
+
+def _get_libreoffice_pdfium_ver():
+    log("Trying to determine libreoffice pdfium version ...")
+    
+    output = run_cmd(["libreoffice", "--version"], cwd=None, capture=True)
+    # alternatively, we could do e.g.: re.search(r"([\d\.]+)", output)
+    output = _removeprefix(output.lower(), "libreoffice").lstrip()
+    lo_version = output.split(" ")[0]
+    log(f"Libreoffice version: {lo_version!r}")
+    
+    deps_url = f"https://raw.githubusercontent.com/LibreOffice/core/refs/tags/libreoffice-{lo_version}/download.lst"
+    deps_content = urlopen(deps_url).read().decode("utf-8")
+    match = re.search(r"pdfium-(\d+)\.tar\.bz2", deps_content, flags=re.MULTILINE)
+    short_ver = int(match.group(1))
+    log(f"Libreoffice pdfium version: {short_ver}")
+    
+    return PdfiumVer.to_full(short_ver)
 
 
 class PdfiumNotFoundError (RuntimeError):

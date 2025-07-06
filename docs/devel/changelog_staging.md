@@ -44,7 +44,7 @@
 
 *Platforms*
 - __Experimental__ Android (PEP 738) and iOS (PEP 730) support added.
-  Android `arm64_v8a`, `armeabi_v7a`, `x86_64`, `x86` and iOS `arm64` device and `arm64`, `x86_64` simulators are now handled in setup and should implicitly download the right pdfium binaries.
+  Android `arm64_v8a`, `armeabi_v7a`, `x86_64`, `x86` and iOS `arm64` device and `arm64`, `x86_64` simulators are now handled in setup and should implicitly download the right pdfium-binaries.
   Provided on a best effort basis, and largely untested. Testers/feedback welcome.
   pypdfium2's setup is now also capable of producing wheels for these platforms, but they will not actually be included in releases at this time.
   (Once Termux ships Python 3.13, we may want to publish Android `arm64_v8a` and maybe `armeabi_v7a` wheels, but we do not intend to provide wheels for simulators.)
@@ -52,7 +52,7 @@
 
 *Setup*
 - When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, by default, we now use the version included with the last pypdfium2 release. This is to prevent possible API breakage when pypdfium2 is installed from source. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
-- `update.py`: added `--verify` option to confirm authenticity of pdfium-binaries release via SLSA provenance. Requires `slsa-verifier`. Thanks to Benoit Blanchon for the upstream part.
+- `update.py`: added `--verify` option to confirm authenticity of pdfium-binaries release via SLSA provenance. Requires `slsa-verifier`. Thanks to Benoit Blanchon for the upstream part. Also thanks to ArcticLampyrid for the pointer.
 - We finally have a build script that works without Google's toolchain, and instead uses system tools/libraries (`build_native.py`). This has been inspired by the `libpdfium` COPR / `libpdfium-nojs` AUR recipes. Thanks to the respective packagers for showing how to do this. By default, this will use the GCC compiler, but Clang should also work if you set up some symlinks. As of this writing, both passes on our Ubuntu x84_64/arm64 CI.
 - On host platforms not covered with `pdfium-binaries`, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered.
 - The toolchained build script continues to be available as well, but has been renamed from `sourcebuild.py` to `build_toolchained.py`.
