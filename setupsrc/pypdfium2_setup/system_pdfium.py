@@ -117,16 +117,18 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     # give the caller an opportunity to set the pdfium path
     pdfium_lib = os.getenv("PDFIUM_BINARY")
     from_lo = False
-    # see if a pdfium shared library is in the default system search path
+    
     if not pdfium_lib:
+        # see if a pdfium shared library is in the default system search path
         pdfium_lib = find_library("pdfium")
-    # see if libreoffice provides pdfium
-    if not pdfium_lib:
-        pdfium_lib = _find_libreoffice_pdfium()
-        from_lo = bool(pdfium_lib)
-    # abort if none of this yielded a result
-    if not pdfium_lib:
-        raise PdfiumNotFoundError("Could not find system pdfium.")
+        if not pdfium_lib:
+            # see if libreoffice provides pdfium
+            pdfium_lib = _find_libreoffice_pdfium()
+            if pdfium_lib:
+                from_lo = True
+            else:
+                # abort if none of this yielded a result
+                raise PdfiumNotFoundError("Could not find system pdfium.")
     
     log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
     target_path = target_dir/BindingsFN
