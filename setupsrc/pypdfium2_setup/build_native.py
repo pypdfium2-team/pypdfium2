@@ -86,7 +86,7 @@ def _get_repo(url, target_dir, rev, depth=1):
     
     # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
     if EXPECT_MODERN_GIT:  # git >= 2.49
-        run_cmd(["git", "clone", "--depth", str(depth), "--revision", rev], cwd=target_dir.parent)
+        run_cmd(["git", "clone", "--depth", str(depth), "--revision", rev, url], cwd=target_dir.parent)
     else:
         mkdir(target_dir)
         run_cmd(["git", "init"], cwd=target_dir)
