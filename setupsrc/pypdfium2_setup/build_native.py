@@ -68,7 +68,7 @@ if Host.system == SysNames.android:
 Compiler = Enum("Compiler", "gcc clang")
 
 RESET_REPOS = False
-EXPECT_MODERN_GIT = Host.system == SysNames.android
+EXPECT_MODERN_GIT = False  # Host.system == SysNames.android
 
 
 def _get_repo(url, target_dir, rev, depth=1):
@@ -86,6 +86,7 @@ def _get_repo(url, target_dir, rev, depth=1):
     
     # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
     if EXPECT_MODERN_GIT:  # git >= 2.49
+        # XXX fails at fast_float?
         run_cmd(["git", "clone", "--depth", str(depth), "--revision", rev, url], cwd=target_dir.parent)
     else:
         mkdir(target_dir)
@@ -93,6 +94,7 @@ def _get_repo(url, target_dir, rev, depth=1):
         run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
         run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
         run_cmd(["git", "checkout", "FETCH_HEAD"], cwd=target_dir)
+    
     return True
 
 
