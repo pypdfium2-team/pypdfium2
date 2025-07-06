@@ -39,6 +39,7 @@ DefaultConfig = {
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
     "pdf_use_partition_alloc": False,
+    # "sysroot": "/" might also work if you manually set the right PKG_CONFIG_PATH, e.g. /usr/lib64/pkgconfig
     "use_sysroot": False,
     "use_system_freetype": True,
     "pdf_bundle_freetype": False,
@@ -54,13 +55,24 @@ DefaultConfig = {
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     DefaultConfig["use_system_xcode"] = True
+if Host.system == SysNames.android:
+    DefaultConfig.update({
+        "current_os": "android",
+        "target_os": "android",
+        "current_cpu": "arm64",
+        "target_cpu": "arm64",
+        "sysroot": str(Host.usr.parent),
+    })
+    del DefaultConfig["use_sysroot"]
 
 Compiler = Enum("Compiler", "gcc clang")
 
 RESET_REPOS = False
+EXPECT_MODERN_GIT = Host.system == SysNames.android
 
 
 def _get_repo(url, target_dir, rev, depth=1):
+    
     if target_dir.exists():
         if RESET_REPOS:
             log(f"Resetting {target_dir.name} as per --reset option.")
@@ -68,15 +80,19 @@ def _get_repo(url, target_dir, rev, depth=1):
             return True
         else:
             return False
-    # see https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
-    # TODO: on git >= 2.49, we can use `git clone --revision ...`
+    
     if callable(rev):
         rev = rev()  # resolve deferred
-    mkdir(target_dir)
-    run_cmd(["git", "init"], cwd=target_dir)
-    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
-    run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
-    run_cmd(["git", "checkout", rev], cwd=target_dir)
+    
+    # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
+    if EXPECT_MODERN_GIT:  # git >= 2.49
+        run_cmd(["git", "clone", "--depth", str(depth), "--revision", rev], cwd=target_dir.parent)
+    else:
+        mkdir(target_dir)
+        run_cmd(["git", "init"], cwd=target_dir)
+        run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
+        run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
+        run_cmd(["git", "checkout", "FETCH_HEAD"], cwd=target_dir)
     return True
 
 
