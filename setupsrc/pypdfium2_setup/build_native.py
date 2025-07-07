@@ -97,7 +97,7 @@ def _get_repo(url, target_dir, rev, depth=1):
 
 
 DEPS_RE = r"\s*'{key}': '(\w+)'"
-DEPS_FIELDS = "build abseil fast_float gtest test_fonts".split(" ")
+DEPS_FIELDS = ("build", "abseil", "fast_float")
 
 class _DeferredClass:
     
@@ -274,9 +274,11 @@ def setup_compiler(config, compiler, clang_path):
 
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False):
     
-    # q&d: use a global to expose this setting to _get_repo(), easier than handing it down through a lot of functions
-    global RESET_REPOS
+    # q&d: use a global to expose the `reset` setting to _get_repo(), easier than handing it down through a lot of functions
+    global RESET_REPOS, DEPS_FIELDS
     RESET_REPOS = reset
+    if with_tests:
+        DEPS_FIELDS += ("gtest", "test_fonts")
     
     if build_ver is None:
         build_ver = SOURCEBUILD_NATIVE_PIN
