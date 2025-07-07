@@ -59,8 +59,6 @@ if Host.system == SysNames.android:
     DefaultConfig.update({
         "current_os": "android",
         "target_os": "android",
-        "current_cpu": "arm64",
-        "target_cpu": "arm64",
         "sysroot": str(Host.usr.parent),
     })
     del DefaultConfig["use_sysroot"]
