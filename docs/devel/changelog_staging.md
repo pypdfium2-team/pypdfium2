@@ -61,6 +61,7 @@
 - By default, the build scripts now generate separate DLLs for dependency libraries, but you may pass `--single-lib` to restore the previous behavior of bundling dependencies into a single pdfium DLL. Setup has been changed accordingly to collect libraries with globbing patterns.
 - With `build_toolchained.py --update`, avoid calling `gclient revert` and `gclient sync`, because this seems to sync twice, which is slow. Instead, call only `gclient sync` with `-D --reset`.
 - With `pdfium-binaries`, read the full version from the `VERSION` file embedded in the tarballs. This avoids a potentially expensive `git ls-remote` call to get Chromium tags.
+- Added `GIVEN_FULLVER` and `IGNORE_FULLVER` env vars to manually set or skip the full version for other targets, also to avoid said web call.
 - Use build-specific license files collected by pdfium-binaries. Replaced outdated `LicenseRef-PdfiumThirdParty` with `BUILD_LICENSES/` directory.
 - Take `PDFIUM_BINDINGS=reference` into account on sourcebuild as well. Automatically fall back to reference bindings if ctypesgen is not installed (except on CI).
 - If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results, e.g. on macOS.
