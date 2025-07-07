@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libdirs)
+# TODO(future) add bindings info (e.g. ctypesgen version, reference/generated, runtime libpaths)
 
 __all__ = ("PYPDFIUM_INFO", "PDFIUM_INFO")
 
