@@ -666,7 +666,7 @@ CTG_LIBPATTERN = "{prefix}{name}.{suffix}"
 def run_ctypesgen(
         target_path, headers_dir, flags=(),
         rt_paths=(f"./{CTG_LIBPATTERN}", ), ct_paths=(), univ_paths=(),
-        search_sys_despite_libdirs=False,
+        search_sys_despite_libpaths=False,
         guard_symbols=False, no_srcinfo=False, version=None
     ):
     
@@ -689,7 +689,7 @@ def run_ctypesgen(
         args += ["--rt-libpaths", *rt_paths]
     if univ_paths:
         args += ["--univ-libpaths", *univ_paths]
-    if (rt_paths or univ_paths) and not search_sys_despite_libdirs:
+    if (rt_paths or univ_paths) and not search_sys_despite_libpaths:
         args += ["--no-system-libsearch"]
     if ct_paths:
         args += ["--ct-libpaths", *ct_paths]

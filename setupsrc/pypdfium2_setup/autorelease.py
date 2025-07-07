@@ -35,7 +35,7 @@ def update_refbindings(version):
     build_pdfium_bindings(
         version, flags=REFBINDINGS_FLAGS,
         rt_paths=(f"./{CTG_LIBPATTERN}", *system_pdfium._yield_lo_candidates()),
-        search_sys_despite_libdirs=True,
+        search_sys_despite_libpaths=True,
         guard_symbols=True, no_srcinfo=True,
     )
     shutil.copyfile(BindingsFile, RefBindingsFile)
