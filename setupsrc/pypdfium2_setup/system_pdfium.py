@@ -143,19 +143,17 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     else:
         pdfium_headers = _find_pdfium_headers()
         full_ver = given_fullver or _get_sys_pdfium_ver(pdfium_lib)
-        if pdfium_headers or full_ver is not PdfiumVerUnknown:
-            if pdfium_headers:
-                log(f"Found pdfium headers at {pdfium_headers}")
-                run_ctypesgen(target_path, pdfium_headers, version=full_ver.build, **kwargs)
-                bindings_path = target_path
-            else:
-                log(f"Could not find headers, but know the version: {full_ver}")
-                build_pdfium_bindings(full_ver.build, **kwargs)
-                bindings_path = BindingsFile
+        if pdfium_headers:
+            log(f"Found pdfium headers at {pdfium_headers}")
+            run_ctypesgen(target_path, pdfium_headers, version=full_ver.build, **kwargs)
+            bindings_path = target_path
+        elif full_ver is not PdfiumVerUnknown:
+            log(f"Could not find headers, but know the version: {full_ver}")
+            build_pdfium_bindings(full_ver.build, **kwargs)
+            bindings_path = BindingsFile
         else:
             log(f"Warning: Neither pdfium headers nor version found - will use reference bindings. This is ABI-unsafe! Set $PDFIUM_HEADERS to the directory in question, or pass the version via $PDFIUM_PLATFORM=system-search:$VERSION.")
             bindings_path = RefBindingsFile
-            full_ver = given_fullver or PdfiumVerUnknown
         write_pdfium_info(target_dir, full_ver, origin="system-search", flags=flags)
     
     if bindings_path != target_path:
