@@ -62,9 +62,11 @@ def tmp_replace_ctx(fp, orig, tmp):
 @contextlib.contextmanager
 def tmp_ctypesgen_pin():
     
+    # XXX(testing)
+    
     pin = os.environ.get("CTYPESGEN_PIN", None)
     if not pin:
-        head_url = "https://api.github.com/repos/pypdfium2-team/ctypesgen/git/refs/heads/pypdfium2"
+        head_url = "https://api.github.com/repos/pypdfium2-team/ctypesgen/git/refs/heads/refactor_libload"
         with url_request.urlopen(head_url) as rq:
             content = rq.read().decode()
         content = json.loads(content)
@@ -72,7 +74,7 @@ def tmp_ctypesgen_pin():
         log(f"Resolved pypdfium2 ctypesgen HEAD to SHA {pin}")
     
     base_txt = "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@"
-    ctx = tmp_replace_ctx(ProjectDir/"pyproject.toml", base_txt+"pypdfium2", base_txt+pin)
+    ctx = tmp_replace_ctx(ProjectDir/"pyproject.toml", base_txt+"refactor_libload", base_txt+pin)
     with ctx:
         log(f"Wrote temporary pyproject.toml with ctypesgen pin")
         yield
