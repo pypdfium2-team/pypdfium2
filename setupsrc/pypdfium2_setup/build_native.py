@@ -60,6 +60,9 @@ if Host.system == SysNames.android:
     DefaultConfig.update({
         "current_os": "android",
         "target_os": "android",
+        # pdfium's Readme says: 'If you specify Android build, the default CPU architecture will be "arm".' However, for us, arm64 is the better default. -> TODO adapt to host
+        "current_cpu": "arm64",
+        "target_cpu": "arm64",
         "sysroot": str(Host.usr.parent),
     })
     del DefaultConfig["use_sysroot"]
