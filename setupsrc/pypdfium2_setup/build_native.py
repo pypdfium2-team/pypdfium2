@@ -21,7 +21,8 @@ DEPS_URLS = dict(
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
-    test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts"
+    test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
+    catapult   = _CR_PREFIX + "catapult",
 )
 SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
@@ -201,6 +202,9 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     
+    if Host.system == SysNames.android:
+        _fetch_dep("catapult", PDFIUM_3RDPARTY/"catapult")
+    
     return full_ver
 
 
@@ -279,6 +283,8 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     RESET_REPOS = reset
     if with_tests:
         DEPS_FIELDS += ("gtest", "test_fonts")
+    if Host.system == SysNames.android:
+        DEPS_FIELDS += ("catapult", )
     
     if build_ver is None:
         build_ver = SOURCEBUILD_NATIVE_PIN
