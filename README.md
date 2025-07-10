@@ -23,9 +23,9 @@ If available for your platform, this will use a pre-built wheel package, which i
 
 #### Optional runtime dependencies
 
-As of this writing, pypdfium2 does not require any mandatory runtime dependencies apart from Python itself.
+As of this writing, pypdfium2 does not require any mandatory runtime dependencies, apart from Python and PDFium itself (which is commonly bundled).
 
-However, some optional support model features need additional packages:
+However, some optional support model / CLI features need additional packages:
 * [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a pouplar imaging library for Python. pypdfium2 provides convenience adapters to translate between raw bitmap buffers and PIL images. It also uses PIL for some command-line functionality (e.g. image saving).
 * [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. As with `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
 * [`opencv-python`](https://github.com/opencv/opencv-python) (module `cv2`) is an imaging library built around numpy arrays. It can be used in the rendering CLI to save with pypdfium2's numpy adapter.
@@ -47,6 +47,11 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 + `setuptools >= v70.1.0`
 
 Python dependencies should be installed automatically, unless `--no-build-isolation` is passed to pip.
+
+> [!IMPORTANT]
+> pypdfium2 and its ctypesgen fork are developed in sync, i.e. each pypdfium2 commit ought to be coupled with the then `HEAD` of pypdfium2-ctypesgen.<br>
+> Our release sdists, and latest pypdfium2 from git, will automatically use matching ctypesgen.<br>
+> However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own, and then install pypdfium2 without build isolation.
 
 #### Get the code
 
