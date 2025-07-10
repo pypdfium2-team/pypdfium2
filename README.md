@@ -36,7 +36,7 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 ### From the repository
 
 > [!NOTE]
-> Unlike helpers, pypdfium2's setup is not covered by API stability endeavors, so it may change any time.
+> Unlike helpers, pypdfium2's setup is not covered by API stability efforts, so it may change any time.
 
 #### Setup Dependencies
 
@@ -54,7 +54,7 @@ Python dependencies should be installed automatically, unless `--no-build-isolat
 > [!IMPORTANT]
 > pypdfium2 and its ctypesgen fork are developed in sync, i.e. each pypdfium2 commit ought to be coupled with the then `HEAD` of pypdfium2-ctypesgen.<br>
 > Our release sdists, and latest pypdfium2 from git, will automatically use matching ctypesgen.<br>
-> However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own, and then install pypdfium2 without build isolation.
+> However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own, and install pypdfium2 without build isolation.
 
 #### Get the code
 
