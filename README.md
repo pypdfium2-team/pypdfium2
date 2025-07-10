@@ -933,35 +933,34 @@ The autorelease script has some peculiarities maintainers should know about:
 * pypdfium2 versioning uses the pattern `major.minor.patch`, optionally with an appended beta mark (e. g. `2.7.1`, `2.11.0`, `3.0.0b1`, ...).
   Update types such as major or beta may be controlled via `autorelease/config.json`
 
-In case of necessity, you may also forego autorelease/CI and do the release manually, which will roughly work like this (though ideally it should never be needed):
-* Commit changes to the version file
+In case of necessity, you may also forego CI and do the release locally, which would roughly work like this (though ideally it should never be needed):
+* Run the autorelease script (this will implicitly switch onto the `autorelease_tmp` branch, make a release commit, and create the tag):
   ```bash
-  git add src/pypdfium2/version.py
-  git commit -m "increment version"
-  git push
+  python3 setupsrc/pypdfium2_setup/autorelease.py --register
   ```
-* Create a new tag that matches the version file
+* Merge the `autorelease_tmp` branch:
   ```bash
-  # substitute $VERSION accordingly
-  git tag -a $VERSION
-  git push --tags
+  git checkout main
+  git merge autorelease_tmp
   ```
 * Build the packages
   ```bash
-  python setupsrc/pypdfium2_setup/update.py
-  python setupsrc/pypdfium2_setup/craft.py
+  just packaging-pypi
+  ```
+* Push release commit/tag to the repository:
+  ```bash
+  git push
+  git push --tags
   ```
 * Upload to PyPI
   ```bash
-  # make sure the packages are valid
-  twine check dist/*
-  # upload to PyPI (this will interactively ask for your username/password)
+  # this will interactively ask for your username/password
   twine upload dist/*
   ```
 * Update the `stable` branch to trigger a documentation rebuild
   ```bash
   git checkout stable
-  git rebase origin/main  # alternatively: git reset --hard main
+  git rebase origin/main  # or: git reset --hard main
   git checkout main
   ```
 
