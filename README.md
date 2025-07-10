@@ -36,7 +36,7 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 ### From the repository
 
 > [!NOTE]
-> Unlike helpers, pypdfium2's setup is not covered by API stability promises, so it may change any time.
+> Unlike helpers, pypdfium2's setup is not covered by API stability endeavors, so it may change any time.
 
 #### Setup Dependencies
 
@@ -94,7 +94,7 @@ PDFIUM_PLATFORM="system-search" python -m pip install -v .
 
 Look for a system-provided pdfium shared library, and bind against it.
 
-Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium at setup time, and the result will be hardcoded into the bindings. Alternatively, you can manually set `$PDFIUM_BINARY` to the path of the out-of-tree DLL to use (if given, this takes precedence over `find_library()`).
+Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium at setup time, and the result will be hardcoded into the bindings. Alternatively, set `$PDFIUM_BINARY` to the path of the out-of-tree DLL to use.
 
 If system pdfium was found, we will look for pdfium headers from which to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
 
