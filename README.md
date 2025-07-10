@@ -36,8 +36,7 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 ### From the repository
 
 > [!NOTE]
-> We endeavor to maintain a stable API for pypdfium2's helpers within major versions.
-> However, pypdfium2's setup is not covered by API stability promises, so it may change any time.
+> Unlike helpers, pypdfium2's setup is not covered by API stability promises, so it may change any time.
 
 #### Setup Dependencies
 
