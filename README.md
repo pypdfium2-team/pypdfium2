@@ -266,7 +266,14 @@ Note, these APIs are mostly of internal interest.
 > **Beware:** Any conda packages/recipes of pypdfium2 or pdfium-binaries that might be provided by other distributors, including `anaconda/main` or `conda-forge` default channels, are [unofficial](#unofficial-packages).
 
 > [!NOTE]
-> **Wait a moment:** Do you really need this? pypdfium2 is best installed from `PyPI` (e.g. via `pip`), which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install pypdfium2 via pip instead.
+> **Wait a moment:** Do you really need this?
+> pypdfium2 is best installed from `PyPI` (e.g. via `pip`), which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install pypdfium2 via pip instead.
+>
+> To name some reasons:
+> + pypdfium2 from PyPI covers platforms that it cannot cover on conda.
+> + pypdfium2 from PyPI has extensive fallback setup, while conda does not provide an opportunity to run custom setup code.
+> + Publishing from the original project / custom channels are second class with conda.
+> + The packaging side is uncomfortable. It seems there is no way to create platform-specific but python-independent packages, so we cannot bundle pdfium. Instead, we have to use external pdfium, which has some pitfalls.
 
 + To install
   
