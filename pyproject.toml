@@ -8,5 +8,5 @@ requires = [
     "packaging",
     # XXX dependence on wheel is historical, with setuptools >= v70.1.0 this is not needed anymore
     "wheel !=0.38.0, !=0.38.1",
-    "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@refactor_libload",  # XXX(testing)
+    "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
 ]
