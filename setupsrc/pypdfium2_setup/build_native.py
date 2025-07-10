@@ -73,7 +73,7 @@ EXPECT_MODERN_GIT = False  # Host.system == SysNames.android
 def _get_repo(url, target_dir, rev, depth=1):
     
     if target_dir.exists():
-        if RESET_REPOS:
+        if RESET_REPOS and target_dir.name in ("pdfium", "build"):
             log(f"Resetting {target_dir.name} as per --reset option.")
             run_cmd(["git", "reset", "--hard"], cwd=target_dir)
             return True
@@ -350,7 +350,7 @@ def parse_args(argv):
     parser.add_argument(
         "--reset",
         action = "store_true",
-        help = "Reset git repos and re-apply patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang or single lib <-> component build mode), but is not enabled by default to avoid unintentional loss of manual changes.",
+        help = "Reset those git repos that we patch, and re-apply the patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang or single lib <-> component build mode), but is not enabled by default to avoid unintentional loss of manual changes.",
     )
     # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
