@@ -35,6 +35,10 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 
 ### From the repository
 
+> [!NOTE]
+> We endeavor to maintain a stable API for pypdfium2's helpers within major versions.
+> However, pypdfium2's setup is not covered by API stability promises, so it may change any time.
+
 #### Setup Dependencies
 
 *System*
@@ -227,8 +231,7 @@ PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 
 As pypdfium2 requires a C extension and has custom setup code, there are some special features to consider.
 
-> [!NOTE]
-> The APIs below may change any time, and are mostly of internal interest.
+Note, these APIs are mostly of internal interest.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
 
