@@ -160,9 +160,9 @@ python ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc
 # Alternatively, build with Clang
 sudo apt-get install llvm lld
 VERSION=18
-ARCH=$(uname -m)  # on android, add the "-android" suffix
-sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
-sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
+ARCH=$(uname -m)
+sudo ln -s "/usr/lib/clang/$VERSION/lib/linux" "/usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu"
+sudo ln -s "/usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a" "/usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a"
 python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
 ```
 ```bash
@@ -175,22 +175,35 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 The native build may also work on Android with Termux in principle.
 
 <details>
-<summary>Click to expand for Android-specific instructions.</summary>
+<summary>Click to expand for Android/Termux-specific instructions.</summary>
 
-Last time we tried building PDFium on Android natively, there were some bugs with freetype/openjpeg includes.
-A *quick & dirty* workaround with symlinks is:
+First, make sure git can work in your checkout of pypdfium2:
 ```bash
-# $PREFIX should be something like "/data/data/com.termux/files/usr"
+# set $PROJECTS_FOLDER accordingly
+git config --global --add safe.directory '$PROJECTS_FOLDER/*'
+```
 
+To install the dependencies, you'll need something like
+```bash
+pkg install ninja gn freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff glib
+```
+
+Then apply the clang symlinks as described above, but use `ARCH=$(uname -m)-android`
+and substitute `/usr` with `$PREFIX` (`/data/data/com.termux/files/usr`).
+
+Last time we tested `build_native` on Android, there were some bugs with freetype/openjpeg includes. A *quick & dirty* workaround with symlinks is:
+```bash
 # freetype
 ln -s "$PREFIX/include/freetype2/ft2build.h" "$PREFIX/include/ft2build.h"
 ln -s "$PREFIX/include/freetype2/freetype" "$PREFIX/include/freetype"
 
-# openjpeg
+# openjpeg (adapt $OPJ_VER to your installation)
 OPJ_VER="2.5"
 ln -s "$PREFIX/include/openjpeg-$OPJ_VER/openjpeg.h" "$PREFIX/include/openjpeg.h"
 ln -s "$PREFIX/include/openjpeg-$OPJ_VER/opj_config.h" "$PREFIX/include/opj_config.h"
 ```
+
+Now, you should be ready to run the build.
 
 On Android, PDFium's build system outputs `libpdfium.cr.so` by default, thus you'll want to rename the binary so pypdfium2's library search can find it:
 ```bash
@@ -198,7 +211,7 @@ mv data/sourcebuild/libpdfium.cr.so data/sourcebuild/libpdfium.so
 ```
 Then install with `PDFIUM_PLATFORM=sourcebuild`.
 
-If you did not build with `--single-lib`, you'll also need to set the runtime library path, e.g.:
+If you did not build with `--single-lib`, you'll also need to set the OS library search path, e.g.:
 ```bash
 LD_LIBRARY_PATH="$PREFIX/lib/python3.12/site-packages/pypdfium2_raw"
 ```
