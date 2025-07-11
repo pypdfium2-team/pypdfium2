@@ -28,6 +28,10 @@ author = "pypdfium2-team"
 copyright = "%s %s" % (time.strftime("%Y"), author)
 
 html_theme = "sphinx_rtd_theme"
+html_static_path = ['_static']
+html_css_files = [
+    'custom.css',
+]
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
@@ -127,6 +131,7 @@ def convert_gh_admonitions(app, relative_path, parent_docname, lines):
 
 
 def setup(app):
+    app.add_css_file("custom.css")
     # app.connect('autodoc-skip-member', remove_namedtuple_aliases)
     app.connect("include-read", convert_gh_admonitions)
     app.add_config_value("have_changes", True, "env")
