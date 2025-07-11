@@ -179,6 +179,8 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     if do_patches:
         # Work around error about path_exists() being undefined
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
+        if Host.system == SysNames.android:
+            git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR/"build")
         if compiler is Compiler.gcc:
             # https://crbug.com/402282789
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")

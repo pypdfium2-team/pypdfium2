@@ -1,0 +1,15 @@
+diff --git a/config/android/BUILD.gn b/config/android/BUILD.gn
+index 8c77eb2..ea91c2e 100644
+--- a/config/android/BUILD.gn
++++ b/config/android/BUILD.gn
+@@ -128,7 +128,9 @@ config("lld_branch_target_hardening") {
+       # in their .gnu.note section implicitly results in the final
+       # binary losing Branch Target Identification (BTI) support.
+       # Issue a warning if this happens.
+-      ldflags = [ "-Wl,-z,force-bti" ]
++      # ldflags = [ "-Wl,-z,force-bti" ]
++      # XXX(pypdfium2) patched away
++      ldflags = []
+     }
+   }
+ }
