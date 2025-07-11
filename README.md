@@ -160,7 +160,7 @@ python ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc
 # Alternatively, build with Clang
 sudo apt-get install llvm lld
 VERSION=18
-ARCH=$(uname -m)
+ARCH=$(uname -m)  # on android, add the "-android" suffix
 sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
 sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
 python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
@@ -168,6 +168,31 @@ python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
 ```bash
 # Install
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
+```
+
+The native build *may* also work on Android with Termux in principle.
+However, last time we tried this, there were some bugs with freetype/openjpeg includes.
+A *quick & dirty* workaround with symlinks is:
+```bash
+# freetype
+ln -s "$PREFIX/include/freetype2/ft2build.h" "$PREFIX/include/ft2build.h"
+ln -s "$PREFIX/include/freetype2/freetype" "$PREFIX/include/freetype"
+
+# openjpeg
+OPJ_VER="2.5"
+ln -s "$PREFIX/include/openjpeg-$OPJ_VER/openjpeg.h" "$PREFIX/include/openjpeg.h"
+ln -s "$PREFIX/include/openjpeg-$OPJ_VER/opj_config.h" "$PREFIX/include/opj_config.h"
+```
+
+On Android, PDFium's build system outputs `libpdfium.cr.so` by default, so you'll need
+```bash
+mv data/sourcebuild/libpdfium.cr.so data/sourcebuild/libpdfium.so
+```
+Then install with `PDFIUM_PLATFORM=sourcebuild`.
+
+If you did not build with `--single-lib`, you'll also need to set the runtime library path, e.g.:
+```bash
+LD_LIBRARY_PATH="$PREFIX/lib/python3.12/site-packages/pypdfium2_raw"
 ```
 
 
