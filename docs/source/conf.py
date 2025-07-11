@@ -78,6 +78,55 @@ rst_prolog = f"""
 #         return True
 #     return skip
 
+
+# Issue https://github.com/executablebooks/MyST-Parser/issues/845
+# GitHub admonitions with Sphinx/MyST
+# Workaround template adapted from:
+# https://github.com/python-project-templates/yardang/blob/f77348d45dcf0eb130af304f79c0bfb92ab90e0c/yardang/conf.py.j2#L156-L188
+
+# https://spdx.github.io/spdx-spec/v2.3/file-tags/#h3-snippet-tags-format
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-SnippetCopyrightText: Tim Paine / the yardang authors <t.paine154@gmail.com">
+
+_GITHUB_ADMONITIONS = {
+    "> [!NOTE]": "note",
+    "> [!TIP]": "tip",
+    "> [!IMPORTANT]": "important",
+    "> [!WARNING]": "warning",
+    "> [!CAUTION]": "caution",
+}
+
+def convert_gh_admonitions(app, relative_path, parent_docname, lines):
+    # loop through lines, replace github admonitions
+    for i, orig_line in enumerate(lines):
+        orig_line_splits = orig_line.split("\n")
+        replacing = False
+        for j, line in enumerate(orig_line_splits):
+            # look for admonition key
+            for admonition_key in _GITHUB_ADMONITIONS:
+                if admonition_key in line:
+                    line = line.replace(admonition_key, "```{" + _GITHUB_ADMONITIONS[admonition_key] + "}\n")
+                    # start replacing quotes in subsequent lines
+                    replacing = True
+                    break
+            else:
+                # replace indent to match directive
+                if replacing and "> " in line:
+                    line = line.replace("> ", "  ")
+                elif replacing:
+                    # missing "> ", so stop replacing and terminate directive
+                    line = f"\n```\n{line}"
+                    replacing = False
+            # swap line back in splits
+            orig_line_splits[j] = line
+        # swap line back in original
+        lines[i] = "\n".join(orig_line_splits)
+
+# SPDX-SnippetEnd
+
+
 def setup(app):
     # app.connect('autodoc-skip-member', remove_namedtuple_aliases)
+    app.connect("include-read", convert_gh_admonitions)
     app.add_config_value("have_changes", True, "env")
