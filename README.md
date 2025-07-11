@@ -170,10 +170,18 @@ python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
-The native build *may* also work on Android with Termux in principle.
-However, last time we tried this, there were some bugs with freetype/openjpeg includes.
+##### Android (Termux)
+
+The native build may also work on Android with Termux in principle.
+
+<details>
+<summary>Click to expand for Android-specific instructions.</summary>
+
+Last time we tried building PDFium on Android natively, there were some bugs with freetype/openjpeg includes.
 A *quick & dirty* workaround with symlinks is:
 ```bash
+# $PREFIX should be something like "/data/data/com.termux/files/usr"
+
 # freetype
 ln -s "$PREFIX/include/freetype2/ft2build.h" "$PREFIX/include/ft2build.h"
 ln -s "$PREFIX/include/freetype2/freetype" "$PREFIX/include/freetype"
@@ -184,7 +192,7 @@ ln -s "$PREFIX/include/openjpeg-$OPJ_VER/openjpeg.h" "$PREFIX/include/openjpeg.h
 ln -s "$PREFIX/include/openjpeg-$OPJ_VER/opj_config.h" "$PREFIX/include/opj_config.h"
 ```
 
-On Android, PDFium's build system outputs `libpdfium.cr.so` by default, so you'll need
+On Android, PDFium's build system outputs `libpdfium.cr.so` by default, thus you'll want to rename the binary so pypdfium2's library search can find it:
 ```bash
 mv data/sourcebuild/libpdfium.cr.so data/sourcebuild/libpdfium.so
 ```
@@ -194,6 +202,8 @@ If you did not build with `--single-lib`, you'll also need to set the runtime li
 ```bash
 LD_LIBRARY_PATH="$PREFIX/lib/python3.12/site-packages/pypdfium2_raw"
 ```
+
+</details>
 
 
 #### With caller-provided data files
