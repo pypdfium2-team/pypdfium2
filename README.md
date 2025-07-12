@@ -175,7 +175,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 The native build may also work on Android with Termux in principle.
 
 <details>
-<summary>Click to expand for instructions.</summary>
+<summary>Click to expand for instructions</summary>
 
 First, make sure git can work in your checkout of pypdfium2:
 ```bash
@@ -213,7 +213,8 @@ Then install with `PDFIUM_PLATFORM=sourcebuild`.
 
 If you did not build with `--single-lib`, you'll also need to set the OS library search path, e.g.:
 ```bash
-LD_LIBRARY_PATH="$PREFIX/lib/python3.12/site-packages/pypdfium2_raw"
+PY_VERSION="3.12"  # adapt this to your installation
+LD_LIBRARY_PATH="$PREFIX/lib/python$PY_VERSION/site-packages/pypdfium2_raw"
 ```
 
 </details>
