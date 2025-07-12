@@ -28,6 +28,8 @@ SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
+IS_ANDROID = Host.system == SysNames.android
+
 DefaultConfig = {
     "is_debug": False,
     "use_glib": False,
@@ -56,7 +58,7 @@ DefaultConfig = {
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     DefaultConfig["use_system_xcode"] = True
-if Host.system == SysNames.android:
+if IS_ANDROID:
     DefaultConfig.update({
         "current_os": "android",
         "target_os": "android",
@@ -70,7 +72,7 @@ if Host.system == SysNames.android:
 Compiler = Enum("Compiler", "gcc clang")
 
 RESET_REPOS = False
-EXPECT_MODERN_GIT = False  # Host.system == SysNames.android
+EXPECT_MODERN_GIT = False
 
 
 def _get_repo(url, target_dir, rev, depth=1):
@@ -179,7 +181,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     if do_patches:
         # Work around error about path_exists() being undefined
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
-        if Host.system == SysNames.android:
+        if IS_ANDROID:
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR/"build")
         if compiler is Compiler.gcc:
             # https://crbug.com/402282789
@@ -203,12 +205,11 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     
     _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
+    if IS_ANDROID:
+        _fetch_dep("catapult", PDFIUM_3RDPARTY/"catapult")
     if with_tests:
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
-    
-    if Host.system == SysNames.android:
-        _fetch_dep("catapult", PDFIUM_3RDPARTY/"catapult")
     
     return full_ver
 
@@ -286,10 +287,10 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     # q&d: use a global to expose the `reset` setting to _get_repo(), easier than handing it down through a lot of functions
     global RESET_REPOS, DEPS_FIELDS
     RESET_REPOS = reset
+    if IS_ANDROID:
+        DEPS_FIELDS += ("catapult", )
     if with_tests:
         DEPS_FIELDS += ("gtest", "test_fonts")
-    if Host.system == SysNames.android:
-        DEPS_FIELDS += ("catapult", )
     
     if build_ver is None:
         build_ver = SOURCEBUILD_NATIVE_PIN
