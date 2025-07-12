@@ -85,7 +85,7 @@ rst_prolog = f"""
 
 # Issue https://github.com/executablebooks/MyST-Parser/issues/845
 # GitHub admonitions with Sphinx/MyST
-# Workaround template adapted from:
+# Workaround template adapted from (with some changes):
 # https://github.com/python-project-templates/yardang/blob/f77348d45dcf0eb130af304f79c0bfb92ab90e0c/yardang/conf.py.j2#L156-L188
 
 # https://spdx.github.io/spdx-spec/v2.3/file-tags/#h3-snippet-tags-format
@@ -101,23 +101,24 @@ _GITHUB_ADMONITIONS = {
     "> [!CAUTION]": "caution",
 }
 
-def convert_gh_admonitions(app, relative_path, parent_docname, lines):
-    # loop through lines, replace github admonitions
-    for i, orig_line in enumerate(lines):
-        orig_line_splits = orig_line.split("\n")
+def convert_gh_admonitions(app, relative_path, parent_docname, contents):
+    # loop through content lines, replace github admonitions
+    for i, orig_content in enumerate(contents):
+        orig_line_splits = orig_content.split("\n")
         replacing = False
         for j, line in enumerate(orig_line_splits):
             # look for admonition key
+            line_roi = line.lstrip()
             for admonition_key in _GITHUB_ADMONITIONS:
-                if admonition_key in line:
+                if line_roi.startswith(admonition_key):
                     line = line.replace(admonition_key, "```{" + _GITHUB_ADMONITIONS[admonition_key] + "}\n")
                     # start replacing quotes in subsequent lines
                     replacing = True
                     break
             else:
                 # replace indent to match directive
-                if replacing and "> " in line:
-                    line = line.replace("> ", "  ")
+                if replacing and line_roi.startswith("> ") or line_roi == ">":
+                    line = line.replace(">", " ", 1)
                 elif replacing:
                     # missing "> ", so stop replacing and terminate directive
                     line = f"\n```\n{line}"
@@ -125,7 +126,7 @@ def convert_gh_admonitions(app, relative_path, parent_docname, lines):
             # swap line back in splits
             orig_line_splits[j] = line
         # swap line back in original
-        lines[i] = "\n".join(orig_line_splits)
+        contents[i] = "\n".join(orig_line_splits)
 
 # SPDX-SnippetEnd
 
