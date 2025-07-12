@@ -377,7 +377,7 @@ _**Note:** Conda packages are normally managed using recipe feedstocks driven by
 The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use our official packages where possible.
 If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
 
-Do not expect us to add/change code for downstream-specific setup tasks, or to actively support downstream packaging.
+Do not expect us to add/change code for downstream-specific setup tasks, or to actively care about downstream packaging.
 Related issues or PRs may be closed without further notice if we don't see fit for upstream.
 Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
 In case of doubt, open a discussion ticket and ask, but please don't expect much more than a "yes" or a "no".

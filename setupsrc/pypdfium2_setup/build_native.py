@@ -363,7 +363,6 @@ def parse_args(argv):
         type = lambda p: Path(p).expanduser().resolve(),
         help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr' or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
     )
-    # TODO reset and re-apply patches?
     parser.add_argument(
         "--single-lib",
         action = "store_true",
