@@ -28,7 +28,8 @@ SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
-IS_ANDROID = Host.system == SysNames.android
+Compiler = Enum("Compiler", "gcc clang")
+RESET_REPOS = False
 
 DefaultConfig = {
     "is_debug": False,
@@ -55,9 +56,12 @@ DefaultConfig = {
     "use_custom_libcxx": False,
     "use_libcxx_modules": False,
 }
+
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     DefaultConfig["use_system_xcode"] = True
+
+IS_ANDROID = Host.system == SysNames.android
 if IS_ANDROID:
     DefaultConfig.update({
         "current_os": "android",
@@ -68,11 +72,6 @@ if IS_ANDROID:
         "sysroot": str(Host.usr.parent),
     })
     del DefaultConfig["use_sysroot"]
-
-Compiler = Enum("Compiler", "gcc clang")
-
-RESET_REPOS = False
-EXPECT_MODERN_GIT = False
 
 
 def _get_repo(url, target_dir, rev, depth=1):
@@ -89,15 +88,11 @@ def _get_repo(url, target_dir, rev, depth=1):
         rev = rev()  # resolve deferred
     
     # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
-    if EXPECT_MODERN_GIT:  # git >= 2.49
-        # XXX fails at fast_float?
-        run_cmd(["git", "clone", "--depth", str(depth), "--revision", rev, url], cwd=target_dir.parent)
-    else:
-        mkdir(target_dir)
-        run_cmd(["git", "init"], cwd=target_dir)
-        run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
-        run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
-        run_cmd(["git", "checkout", "FETCH_HEAD"], cwd=target_dir)
+    mkdir(target_dir)
+    run_cmd(["git", "init"], cwd=target_dir)
+    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
+    run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
+    run_cmd(["git", "checkout", "FETCH_HEAD"], cwd=target_dir)
     
     return True
 
