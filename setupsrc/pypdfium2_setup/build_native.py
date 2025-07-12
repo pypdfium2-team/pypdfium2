@@ -64,13 +64,18 @@ if sys.platform.startswith("darwin"):
 IS_ANDROID = Host.system == SysNames.android
 if IS_ANDROID:
     DefaultConfig.update({
+        "sysroot": str(Host.usr.parent),
         "current_os": "android",
         "target_os": "android",
-        # pdfium's Readme says: 'If you specify Android build, the default CPU architecture will be "arm".' However, for us, arm64 is the better default. -> TODO adapt to host
-        "current_cpu": "arm64",
-        "target_cpu": "arm64",
-        "sysroot": str(Host.usr.parent),
     })
+    # On Android, it seems that the build system's CPU type statically defaults to "arm", but we want this script to be host-adaptive (and "arm64" is the more likely candidate).
+    # q&d: resolve Google CPU name for host via pdfium-binaries names, which align with upstream.
+    if Host.platform in PdfiumBinariesMap:
+        cpu = PdfiumBinariesMap[Host.platform].rsplit("-", maxsplit=1)[-1]
+        DefaultConfig.update({
+            "current_cpu": cpu,
+            "target_cpu": cpu,
+        })
     del DefaultConfig["use_sysroot"]
 
 
