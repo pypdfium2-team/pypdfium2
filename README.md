@@ -74,7 +74,7 @@ This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be 
 
 `pdfium-binaries` offer SLSA provenance to verify authenticity, so it is highly recommended that you install the `slsa-verifier` in this case.
 
-If no pre-built binaries are available for your platform, setup will look for system pdfium, or attempt to build pdfium from source.
+If no pre-built binaries are available for your platform, setup will [look for system pdfium](#with-system-pdfium), or attempt to [build pdfium from source](#with-self-built-pdfium).
 
 ##### `pip` options of interest
 
@@ -175,7 +175,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 The native build may also work on Android with Termux in principle.
 
 <details>
-<summary>Click to expand for Android/Termux-specific instructions.</summary>
+<summary>Click to expand for instructions.</summary>
 
 First, make sure git can work in your checkout of pypdfium2:
 ```bash
