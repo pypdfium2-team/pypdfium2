@@ -315,7 +315,7 @@ Note, these APIs are mostly of internal interest.
 > [!NOTE]
 > **Wait a moment:** Do you really need this?
 > pypdfium2 is best installed from `PyPI` (e.g. via `pip`), which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install pypdfium2 via pip instead.
->
+> 
 > To name some reasons:
 > + pypdfium2 from PyPI covers platforms that we cannot cover on conda.
 > + pypdfium2 from PyPI has extensive fallback setup, while conda does not provide an opportunity to run custom setup code.
