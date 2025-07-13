@@ -115,11 +115,13 @@ def convert_gh_admonitions(app, relative_path, parent_docname, contents):
                     # start replacing quotes in subsequent lines
                     replacing = True
                     break
-            else:
+            else:  # no break
+                if not replacing:
+                    continue
                 # replace indent to match directive
-                if replacing and (line_roi.startswith("> ") or line_roi == ">"):
+                if line_roi.startswith("> ") or line_roi == ">":
                     line = line.replace(">", " ", 1)
-                elif replacing:
+                else:
                     # missing "> ", so stop replacing and terminate directive
                     line = f"\n```\n{line}"
                     replacing = False
