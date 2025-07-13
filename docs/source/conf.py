@@ -102,6 +102,7 @@ _GITHUB_ADMONITIONS = {
 }
 
 def convert_gh_admonitions(app, relative_path, parent_docname, contents):
+    # TODO  handle nested directives -> recursion
     # loop through content lines, replace github admonitions
     for i, orig_content in enumerate(contents):
         orig_line_splits = orig_content.split("\n")
@@ -111,19 +112,22 @@ def convert_gh_admonitions(app, relative_path, parent_docname, contents):
             line_roi = line.lstrip()
             for admonition_key in _GITHUB_ADMONITIONS:
                 if line_roi.startswith(admonition_key):
-                    line = line.replace(admonition_key, "```{" + _GITHUB_ADMONITIONS[admonition_key] + "}\n")
+                    line = line.replace(admonition_key, "```{" + _GITHUB_ADMONITIONS[admonition_key] + "}")
                     # start replacing quotes in subsequent lines
                     replacing = True
                     break
             else:  # no break
                 if not replacing:
                     continue
-                # replace indent to match directive
-                if line_roi.startswith("> ") or line_roi == ">":
-                    line = line.replace(">", " ", 1)
+                # remove GH directive to match MyST directive
+                # since we are replacing on the original line, this will preserve the right indent, if any
+                if line_roi.startswith("> "):
+                    line = line.replace("> ", "", 1)
+                elif line_roi.rstrip() == ">":
+                    line = line.replace(">", "", 1)
                 else:
                     # missing "> ", so stop replacing and terminate directive
-                    line = f"\n```\n{line}"
+                    line = f"```\n{line}"
                     replacing = False
             # swap line back in splits
             orig_line_splits[j] = line
