@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
-name: Other project issue (NOT core library)
+name: Other project issue (DO NOT USE for core library!)
 description: Generic issue template (e.g. for docs, setup). DO NOT USE for issues with the core library!!!
 
 body:
@@ -16,6 +16,8 @@ body:
           required: true
         - label: I confirm this is **not about an unofficial build of pypdfium2**. *We do not support third-party builds, and they are not eligible for a bug report.*
           required: true
+        - label: I confirm that I did **not read carefully**, but just checked everything, or else did **not answer truthfully**. *If you check this, maintainers may ignore you, or ask you to re-file your issue.*
+          required: false
   
   - type: input
     attributes:

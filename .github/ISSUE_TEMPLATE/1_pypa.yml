@@ -4,7 +4,7 @@
 # TODO add separate template for source install issues?
 
 # NOTE: GitHub seems to impose a length limit on the description (undocumented?, feels like 200 chars or something)
-name: Installed from PyPI
+name: Installed from PyPI (DEFAULT template)
 description: If you installed via pip (or similar), and encountered an issue while using the library. Use even if you believe it is not a package problem.
 
 body:
