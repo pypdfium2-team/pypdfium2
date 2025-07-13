@@ -117,7 +117,7 @@ def convert_gh_admonitions(app, relative_path, parent_docname, contents):
                     break
             else:
                 # replace indent to match directive
-                if replacing and line_roi.startswith("> ") or line_roi == ">":
+                if replacing and (line_roi.startswith("> ") or line_roi == ">"):
                     line = line.replace(">", " ", 1)
                 elif replacing:
                     # missing "> ", so stop replacing and terminate directive
