@@ -3,9 +3,9 @@
 
 # TODO add separate template for source install issues?
 
-# NOTE we'd like a slightly longer description, but GH seems to impose some length limit (undocumented?, feels like 200 chars or something)
-name: PyPA install
-description: If you installed via pip (or other PyPA format tool), and encountered an issue with the library. Use even if you believe it is not a package problem. Default template.
+# NOTE: GitHub seems to impose a length limit on the description (undocumented?, feels like 200 chars or something)
+name: Installed from PyPI (DEFAULT template)
+description: If you installed via pip (or similar), and encountered an issue while using the library. Use even if you believe it is not a package problem.
 
 body:
   
