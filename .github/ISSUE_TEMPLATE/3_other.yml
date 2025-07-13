@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
-name: Other issue
-description: Generic issue template (e.g. for docs, setup). Do not use for issues with the core library.
+name: Other project issue (NOT core library)
+description: Generic issue template (e.g. for docs, setup). DO NOT USE for issues with the core library!!!
 
 body:
   

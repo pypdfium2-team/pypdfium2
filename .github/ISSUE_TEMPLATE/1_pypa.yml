@@ -5,7 +5,7 @@
 
 # NOTE: GitHub seems to impose a length limit on the description (undocumented?, feels like 200 chars or something)
 name: Installed from PyPI
-description: If you installed via pip (or other PyPA format tool), and encountered an issue with the library. Use even if you believe it is not a package problem. Default template.
+description: If you installed via pip (or similar), and encountered an issue while using the library. Use even if you believe it is not a package problem.
 
 body:
   
