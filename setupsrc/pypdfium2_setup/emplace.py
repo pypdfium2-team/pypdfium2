@@ -100,7 +100,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
     else:
         if not pdfium_ver or pdfium_ver == "pinned":
             pdfium_ver = PdfiumVer.release_pdfium_build
-            log(f"Using pdfium version {pdfium_ver!r} from last pypdfium2 release. If this is not intentional, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
+            log(f"Using pdfium version {pdfium_ver!r} from current pypdfium2 release. If this is not intentional, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
         elif pdfium_ver == "latest":
             pdfium_ver = PdfiumVer.get_latest()
             log(f"Using latest pdfium-binaries version {pdfium_ver!r}.")

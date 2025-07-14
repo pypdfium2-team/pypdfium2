@@ -19,7 +19,7 @@ pypdfium2 includes [helpers](#support-model) to simplify common use cases, while
 ```bash
 python -m pip install -U pypdfium2
 ```
-If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run ([see below](#default-setup)).
+If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run - [see below](#from-the-repository--with-setup).
 
 #### JavaScript/XFA enabled builds
 
@@ -45,7 +45,7 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 
 ### From the repository / With setup
 
-_**Note:** Unlike helpers, pypdfium2's setup is not bound by API stability promises, so it may change any time._
+_Note, unlike helpers, pypdfium2's setup is not bound by API stability promises, so it may change any time._
 
 #### Setup Dependencies
 
@@ -90,7 +90,7 @@ If no pre-built binaries are available for your platform, setup will [look for s
 - `-v`: Verbose logging output. Useful for debugging.
 - `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
 - `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
-- `--no-binary pypdfium2`: Do not use binary *wheels*, and run setup instead. Note, this option is improperly named, as pypdfium2's setup will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
+- `--no-binary pypdfium2`: Do not use binary *wheels* when installing from PyPI - instead, use the sdist and run setup. Note, this option is improperly named, as pypdfium2's setup will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
 
 
 #### With system pdfium
@@ -178,6 +178,9 @@ python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
 # Install
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
+
+> [!TIP]
+> By default, the build scripts will create separate DLLs for vendored dependency libraries (such as `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib` to the build script.
 
 ##### Android (Termux)
 
@@ -295,12 +298,12 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
   - Format spec: `[$PLATFORM][-v8][:$VERSION]` (`[]` = segments, `$CAPS` = variables).
   - Examples: `auto`, `auto:7269` `auto-v8:7269` (`auto` may be substituted by an explicit platform name, e.g. `linux_x64`).
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
-  - Version: If given, use the specified pdfium-binaries release. Otherwise, use the one used in the last pypdfium2 release.
+  - Version: If given, use the specified pdfium-binaries release. Otherwise, use the same version as the current pypdfium2 release. Set `pinned` to request that behavior explicitly. Or set `latest` to use the newest pdfium-binaries release instead.
   - Platform:
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
-    + If `system-search`, look for and bind against system-provided pdfium instead of embedding a binary.
-    + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of either `build_native.py` or `build_toolchained.py`.
+    + If `system-search`, look for and bind against system-provided pdfium instead of embedding a binary. If just `system`, consume existing bindings from `data/system/`.
+    + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup. However, triggering on the caller side is preferred as this allows to pass custom options.
     + If `sdist`, no platform-dependent files will be included, so as to create a source distribution.
 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
