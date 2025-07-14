@@ -285,36 +285,33 @@ PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 ```
 
 
-#### Setup Magic (formal description)
+#### Further setup info (formal summary)
 
-<!-- TODO update -->
+This is a *somewhat* formal description of pypdfium2's setup capabilities.
+It is meant to sum up and complement the above documentation on specific sub-targets.
 
-As pypdfium2 requires a C extension and has custom setup code, there are some special features to consider.
-
-Note, these APIs are mostly of internal interest.
+Disclaimer: As it is hard to keep up with constantly evolving setup code, it is possible this documentation may be outdated/incomplete. Also keep in mind that these APIs could change any time, and may be mainly of internal interest.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
 
 * `$PDFIUM_PLATFORM` defines which binary to include on setup.
   - Format spec: `[$PLATFORM][-v8][:$VERSION]` (`[]` = segments, `$CAPS` = variables).
-  - Examples: `auto`, `auto:5975` `auto-v8:5975` (`auto` may be substituted by an explicit platform name, e.g. `linux_x64`).
+  - Examples: `auto`, `auto:7269` `auto-v8:7269` (`auto` may be substituted by an explicit platform name, e.g. `linux_x64`).
+  - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
+  - Version: If given, use the specified pdfium-binaries release. Otherwise, use the one used in the last pypdfium2 release.
   - Platform:
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
-    + If `system`, bind against system-provided pdfium instead of embedding a binary. Version must be given explicitly so matching bindings can be generated.
+    + If `system-search`, look for and bind against system-provided pdfium instead of embedding a binary.
     + If `sourcebuild`, binaries will be taken from `data/sourcebuild/`, assuming a prior run of either `build_native.py` or `build_toolchained.py`.
     + If `sdist`, no platform-dependent files will be included, so as to create a source distribution.
-    `sourcebuild` and `sdist` are standalone, they cannot be followed by additional specifiers.
-  - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
-  - Version: If given, use the specified pdfium-binaries release. Otherwise, use the latest one.
-  - It is possible to prepend `prepared!` to install with existing platform files instead of generating on the fly; the value will be used for metadata / file inclusion. This can be helpful when installing in an isolated env where ctypesgen is not available, but it is not desirable to use the reference bindings (e.g. conda).
 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
   - May be used by packagers to decouple raw bindings and helpers, which may be relevant if packaging against system pdfium.
   - Would also allow to install only the raw module without helpers, or only helpers with a custom raw module.
 
 * `$PDFIUM_BINDINGS=reference` allows to override ctypesgen and use the reference bindings file `autorelease/bindings.py` instead.
-  - This is a convenience option to get pypdfium2 installed from source even if a working ctypesgen is not available in the install env.
+  - This is a convenience option to get pypdfium2 installed from source even if a working ctypesgen / C pre-processor is not available in the install env. *May be automatically enabled under given circumstances.*
   - Warning: This may not be ABI-safe. Please make sure binary/bindings build headers match to avoid ABI issues.
 
 [^platform_ids]: Intended for packaging, so that wheels can be crafted for any platform without access to a native host.
