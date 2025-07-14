@@ -27,10 +27,11 @@ class ArtifactStash:
     def __enter__(self):
         
         self.tmpdir = None
-        
-        # XXX match libraries by globbing pattern
-        file_names = [VersionFN, BindingsFN, libname_for_system(Host.system)]
-        self.files = [fp for fp in [ModuleDir_Raw / fn for fn in file_names] if fp.exists()]
+        self.files = tuple(filter(Path.exists, (
+            ModuleDir_Raw/VersionFN,
+            ModuleDir_Raw/BindingsFN,
+            *ModuleDir_Raw.glob(Host.libname_glob)
+        )))
         if len(self.files) == 0:
             return
         
@@ -43,7 +44,7 @@ class ArtifactStash:
         if self.tmpdir is None:
             return
         for fp in self.files:
-            shutil.move(self.tmpdir_path / fp.name, ModuleDir_Raw)
+            shutil.move(self.tmpdir_path/fp.name, ModuleDir_Raw)
         self.tmpdir.cleanup()
 
 
