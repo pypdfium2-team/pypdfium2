@@ -10,7 +10,7 @@
 It is built with [ctypesgen](https://github.com/pypdfium2-team/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
 The custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms is supported with pre-built packages.
 
-pypdfium2 includes helpers to simplify common use cases, while the raw PDFium/ctypes API remains accessible as well.
+pypdfium2 includes [helpers](#support-model) to simplify common use cases, while the [raw PDFium API](#raw-pdfium-api) (ctypes) remains accessible as well.
 
 
 ## Installation
