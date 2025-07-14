@@ -102,7 +102,7 @@ _GITHUB_ADMONITIONS = {
 }
 
 def convert_gh_admonitions(app, relative_path, parent_docname, contents):
-    # TODO  handle nested directives -> recursion
+    # TODO handle nested directives -> recursion
     # loop through content lines, replace github admonitions
     for i, orig_content in enumerate(contents):
         orig_line_splits = orig_content.split("\n")
