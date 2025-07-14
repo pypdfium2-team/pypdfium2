@@ -21,6 +21,16 @@ python -m pip install -U pypdfium2
 ```
 If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run ([see below](#default-setup)).
 
+#### JavaScript/XFA enabled builds
+
+pdfium-binaries also offer V8 (JavaScript) / XFA enabled builds.
+If you need these, you may do e.g.:
+```bash
+PDFIUM_PLATFORM=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2
+```
+This will bypass wheels and run setup, while requesting use of V8 builds through the `PDFIUM_PLATFORM=auto-v8` environment setting.
+Again, [see below](#from-the-repository--with-setup) for more info.
+
 #### Optional runtime dependencies
 
 As of this writing, pypdfium2 does not require any mandatory runtime dependencies, apart from Python and PDFium itself (which is commonly bundled).
@@ -33,7 +43,7 @@ However, some optional support model / CLI features need additional packages:
 pypdfium2 tries to defer imports of optional dependencies until they are actually needed, so there should be no startup overhead if you don't use them.
 
 
-### From the repository
+### From the repository / With setup
 
 > [!NOTE]
 > Unlike helpers, pypdfium2's setup is not bound by API stability promises, so it may change any time.
@@ -41,8 +51,8 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 #### Setup Dependencies
 
 *System*
-+ `git`
 + C pre-processor (`gcc`/`clang` - alternatively, specify the command to invoke via `$CPP`)
++ `git` (Used e.g. to determine the latest pdfium-binaries version, to get `git describe` info, or to check out pdfium on sourcebuild. *Might* be optional on default setup.)
 + [`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier) (if using pdfium-binaries; optional)
 
 *Python*
