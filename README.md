@@ -45,8 +45,7 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 
 ### From the repository / With setup
 
-> [!NOTE]
-> Unlike helpers, pypdfium2's setup is not bound by API stability promises, so it may change any time.
+_**Note:** Unlike helpers, pypdfium2's setup is not bound by API stability promises, so it may change any time._
 
 #### Setup Dependencies
 
@@ -61,7 +60,7 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 
 Python dependencies should be installed automatically, unless `--no-build-isolation` is passed to pip.
 
-> [!IMPORTANT]
+> [!NOTE]
 > pypdfium2 and its ctypesgen fork are developed in sync, i.e. each pypdfium2 commit ought to be coupled with the then `HEAD` of pypdfium2-ctypesgen.<br>
 > Our release sdists, and latest pypdfium2 from git, will automatically use matching ctypesgen.<br>
 > However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own, and install pypdfium2 without build isolation.
@@ -91,9 +90,7 @@ If no pre-built binaries are available for your platform, setup will [look for s
 - `-v`: Verbose logging output. Useful for debugging.
 - `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
 - `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
-
-> [!NOTE]
-> pip's `--no-binary` option is improperly named, and in fact only means "no binary _wheels_". It does not affect pypdfium2's setup, which will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
+- `--no-binary pypdfium2`: Do not use binary *wheels*, and run setup instead. Note, this option is improperly named, as pypdfium2's setup will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
 
 
 #### With system pdfium
