@@ -856,7 +856,7 @@ pypdfium2 uses PDFium builds from the `pdfium-binaries` project, which is [MIT-l
 `pdfium-binaries` auto-collect dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. There is also an aggregated [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for display in this repository.<br>
 Note that PDFium's dependencies might change over time. Please notify us if you think a relevant license is missing.
 
-To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
+To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by strong-copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
 
 [^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java), but python bindings packages don't exist yet or are unsatisfactory. However, we wrote some gists that show it'd be possible in principle: [pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc) (+ [setup](https://gist.github.com/mara004/881d0c5a99b8444fd5d1d21a333b70f8)), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7).
 
