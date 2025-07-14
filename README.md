@@ -304,7 +304,7 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
     + If `system-search`, look for and bind against system-provided pdfium instead of embedding a binary. If just `system`, consume existing bindings from `data/system/`.
     + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup. However, triggering on the caller side is preferred as this allows to pass custom options.
-    + If `sdist`, no platform-dependent files will be included, so as to create a source distribution.
+    + If `sdist`, no platform-specific files will be included, so as to create a source distribution.
 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
   - May be used by packagers to decouple raw bindings and helpers, which may be relevant if packaging against system pdfium.
