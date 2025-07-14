@@ -19,7 +19,7 @@ pypdfium2 includes [helpers](#support-model) to simplify common use cases, while
 ```bash
 python -m pip install -U pypdfium2
 ```
-If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run - [see below](#from-the-repository--with-setup).
+If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run – [see below](#from-the-repository--with-setup).
 
 #### JavaScript/XFA enabled builds
 
@@ -50,7 +50,7 @@ _Note, unlike helpers, pypdfium2's setup is not bound by API stability promises,
 #### Setup Dependencies
 
 *System*
-+ C pre-processor (`gcc`/`clang` - alternatively, specify the command to invoke via `$CPP`)
++ C pre-processor (`gcc`/`clang` – alternatively, specify the command to invoke via `$CPP`)
 + `git` (Used e.g. to determine the latest pdfium-binaries version, to get `git describe` info, or to check out pdfium on sourcebuild. *Might* be optional on default setup.)
 + [`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier) (if using pdfium-binaries; optional)
 
@@ -90,7 +90,7 @@ If no pre-built binaries are available for your platform, setup will [look for s
 - `-v`: Verbose logging output. Useful for debugging.
 - `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
 - `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
-- `--no-binary pypdfium2`: Do not use binary *wheels* when installing from PyPI - instead, use the sdist and run setup. Note, this option is improperly named, as pypdfium2's setup will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
+- `--no-binary pypdfium2`: Do not use binary *wheels* when installing from PyPI – instead, use the sdist and run setup. Note, this option is improperly named, as pypdfium2's setup will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
 
 
 #### With system pdfium
@@ -112,7 +112,7 @@ If the version is not known in the end, `NaN` placeholders will be set.
 If the version is known but no headers were found, they will be downloaded from upstream.
 If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
 
-If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and - if available - determining its version.<br>
+If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and – if available – determining its version.<br>
 Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `/usr`), but contributions for other systems are welcome.
 
 > [!IMPORTANT]
