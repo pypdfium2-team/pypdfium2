@@ -68,6 +68,7 @@ if IS_ANDROID:
         "current_os": "android",
         "target_os": "android",
     })
+    del DefaultConfig["use_sysroot"]
     # On Android, it seems that the build system's CPU type statically defaults to "arm", but we want this script to be host-adaptive (and "arm64" is the more likely candidate).
     # q&d: resolve Google CPU name for host via pdfium-binaries names, which align with upstream.
     if Host.platform in PdfiumBinariesMap:
@@ -76,7 +77,6 @@ if IS_ANDROID:
             "current_cpu": cpu,
             "target_cpu": cpu,
         })
-    del DefaultConfig["use_sysroot"]
 
 
 def _get_repo(url, target_dir, rev, depth=1):
