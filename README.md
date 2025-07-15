@@ -197,7 +197,7 @@ git config --global --add safe.directory '$PROJECTS_FOLDER/*'
 
 To install the dependencies, you'll need something like
 ```bash
-pkg install ninja gn freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff glib
+pkg install gn ninja freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff glib
 ```
 
 Then apply the clang symlinks as described above, but use `ARCH=$(uname -m)-android`
@@ -209,8 +209,8 @@ Last time we tested `build_native` on Android, there were some bugs with freetyp
 ln -s "$PREFIX/include/freetype2/ft2build.h" "$PREFIX/include/ft2build.h"
 ln -s "$PREFIX/include/freetype2/freetype" "$PREFIX/include/freetype"
 
-# openjpeg (adapt $OPJ_VER to your installation)
-OPJ_VER="2.5"
+# openjpeg
+OPJ_VER="2.5"  # adapt this to your setup
 ln -s "$PREFIX/include/openjpeg-$OPJ_VER/openjpeg.h" "$PREFIX/include/openjpeg.h"
 ln -s "$PREFIX/include/openjpeg-$OPJ_VER/opj_config.h" "$PREFIX/include/opj_config.h"
 ```
@@ -225,7 +225,7 @@ Then install with `PDFIUM_PLATFORM=sourcebuild`.
 
 If you did not build with `--single-lib`, you'll also need to set the OS library search path, e.g.:
 ```bash
-PY_VERSION="3.12"  # adapt this to your installation
+PY_VERSION="3.12"  # adapt this to your setup
 LD_LIBRARY_PATH="$PREFIX/lib/python$PY_VERSION/site-packages/pypdfium2_raw"
 ```
 
@@ -383,7 +383,7 @@ _**Note:** Conda packages are normally managed using recipe feedstocks driven by
 
 
 ### Unofficial packages
-  
+
 The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use our official packages where possible.
 If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
 
