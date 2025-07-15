@@ -26,21 +26,23 @@ def _removeprefix(string, prefix):
 
 def _find_pdfium_headers():
     
-    headers_path = os.getenv("PDFIUM_HEADERS", None)
+    headers_path = os.getenv("PDFIUM_HEADERS")
     if headers_path:
-        headers_path = Path(headers_path)
+        return Path(headers_path)
     
-    elif not sys.platform.startswith(("win", "darwin")):
+    if not sys.platform.startswith(("win", "darwin")):
         include_dirs = (Host.usr/"include", Host.usr/"local"/"include")
         candidates = (path/"pdfium" for path in include_dirs)
         headers_path = _get_existing(candidates, cb=Path.is_dir)
-        if not headers_path:
-            candidates = (path/"fpdf_edit.h" for path in include_dirs)
-            sample_header = _get_existing(candidates, cb=Path.is_file)
-            if sample_header:
-                headers_path = sample_header.parent
+        if headers_path:
+            return headers_path
+        
+        candidates = (path/"fpdf_edit.h" for path in include_dirs)
+        sample_header = _get_existing(candidates, cb=Path.is_file)
+        if sample_header:
+            return sample_header.parent
     
-    return headers_path
+    return None
 
 def _parse_version(version):
     if "." in version:
@@ -170,5 +172,6 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
 
 if __name__ == "__main__":
     # print(_get_libreoffice_pdfium_ver())
+    # print(_find_pdfium_headers())
     # print(_get_sys_pdfium_ver("libpdfium.so.140.0.7295.0"))
     print(main())
