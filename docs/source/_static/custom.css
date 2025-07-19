@@ -1,0 +1,7 @@
+.admonition.important {
+   background-color: #ede6fa;
+}
+
+.admonition.important > .admonition-title {
+   background-color: #8957e5;
+}

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 name: Other project issue (DO NOT USE for core library!)
-description: Generic issue template (e.g. for docs, setup). DO NOT USE for issues with the core library!!!
+description: Generic issue template (e.g. for docs, setup). DO NOT USE for issues with the core library!
 
 body:
   

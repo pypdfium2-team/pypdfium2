@@ -16,10 +16,12 @@ coverage *args:
 coverage-core *args:
 	just _coverage_impl "src/pypdfium2/__main__.py,src/pypdfium2/_cli/*,src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 
-docs-build:
-	python3 -m sphinx -b html docs/source docs/build/html
+docs-build *args:
+	python3 -m sphinx -b html docs/source docs/build/html {{args}}
 docs-open:
-	xdg-open docs/build/html/index.html &>/dev/null
+	google-chrome docs/build/html/index.html &>/dev/null
+docs-clean:
+	rm -rf docs/build/html
 
 clean:
 	rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/

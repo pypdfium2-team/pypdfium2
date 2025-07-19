@@ -4,11 +4,10 @@
 import sys
 import argparse
 from pathlib import Path
-from functools import partial
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from pypdfium2_setup.base import *
-from pypdfium2_setup.emplace import prepare_setup
+from pypdfium2_setup.emplace import stage_platfiles
 from pypdfium2_setup.craft import ArtifactStash
 
 CondaDir = ProjectDir / "conda"
@@ -73,12 +72,8 @@ class TmpCommitCtx:
 
 class CondaExtPlatfiles:
     
-    def __init__(self, emplace_func):
-        self.emplace_func = emplace_func
-    
     def __enter__(self):
-        self.platfiles = self.emplace_func()
-        self.platfiles = [ModuleDir_Raw/f for f in self.platfiles]
+        self.platfiles = tuple(DataDir/ExtPlats.system/fn for fn in (BindingsFN, VersionFN))
         run_cmd(["git", "add", "-f"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
     
     def __exit__(self, *_):
@@ -121,12 +116,13 @@ def main_conda_raw(args):
     
     _handle_ver(args, CondaPkgVer.get_latest_pdfium)
     os.environ["PDFIUM_SHORT"] = str(args.pdfium_ver)
+    assert not (IGNORE_FULLVER or GIVEN_FULLVER)
     full_ver = PdfiumVer.to_full(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = str(full_ver)
     os.environ["BUILD_NUM"] = str(_get_build_num(args))
     
-    emplace_func = partial(prepare_setup, ExtPlats.system, args.pdfium_ver, use_v8=None)
-    with CondaExtPlatfiles(emplace_func):
+    stage_platfiles(ExtPlats.system, "generate", args.pdfium_ver, flags=())
+    with CondaExtPlatfiles():
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon", "-c", "defaults"])
 
 
