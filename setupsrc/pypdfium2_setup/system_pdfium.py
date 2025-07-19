@@ -112,23 +112,19 @@ class PdfiumNotFoundError (RuntimeError):
     pass
 
 
-def _get_pdfium():
-    
+def _yield_pdfium_candidates():
     # give the caller an opportunity to set the pdfium path
-    pdfium_lib = os.getenv("PDFIUM_BINARY")
-    if pdfium_lib:
-        return pdfium_lib, "caller"
-    
+    yield os.getenv("PDFIUM_BINARY"), "caller"
     # see if a pdfium shared library is in the default system search path
-    pdfium_lib = find_library("pdfium")
-    if pdfium_lib:
-        return pdfium_lib, "search"
-    
+    yield find_library("pdfium"), "ctypes"
     # see if libreoffice provides pdfium
-    pdfium_lib = _find_libreoffice_pdfium()
-    if pdfium_lib:
-        return pdfium_lib, "libreoffice"
-    
+    yield _find_libreoffice_pdfium(), "libreoffice"
+
+def _get_pdfium():
+    candidates = _yield_pdfium_candidates()
+    for pdfium_lib, finder in candidates:
+        if pdfium_lib:
+            return pdfium_lib, finder
     # abort if none of this worked
     raise PdfiumNotFoundError("Could not find system pdfium.")
 
