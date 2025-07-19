@@ -135,7 +135,7 @@ def main(
     if build_target is None:
         build_target = "pdfium"
     if build_ver is None:
-        build_ver = SOURCEBUILD_TOOLCHAINED_PIN
+        build_ver = SBUILD_TOOLCHAINED_PIN
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     
@@ -192,7 +192,7 @@ def parse_args(argv):
     parser.add_argument(
         "--version", "-v",
         dest = "build_ver",
-        help = f"PDFium version to use. Currently defaults to {SOURCEBUILD_TOOLCHAINED_PIN!r}. Pass 'main' to try the latest state.",
+        help = f"PDFium version to use. Currently defaults to {SBUILD_TOOLCHAINED_PIN!r}. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--target", "-t",

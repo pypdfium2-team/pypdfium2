@@ -12,7 +12,7 @@ from copy import deepcopy
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
-from pypdfium2_setup import system_pdfium
+from pypdfium2_setup.system_pdfium import _yield_lo_candidates
 
 
 PlacesToRegister = (AutoreleaseDir, Changelog, ChangelogStaging, RefBindingsFile)
@@ -34,7 +34,7 @@ def update_refbindings(version):
     RefBindingsFile.unlink()
     build_pdfium_bindings(
         version, flags=REFBINDINGS_FLAGS,
-        rt_paths=(f"./{CTG_LIBPATTERN}", *system_pdfium._yield_lo_candidates()),
+        rt_paths=(f"./{CTG_LIBPATTERN}", *_yield_lo_candidates(SysNames.linux)),
         search_sys_despite_libpaths=True,
         guard_symbols=True, no_srcinfo=True,
     )

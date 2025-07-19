@@ -293,7 +293,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         DEPS_FIELDS += ("gtest", "test_fonts")
     
     if build_ver is None:
-        build_ver = SOURCEBUILD_NATIVE_PIN
+        build_ver = SBUILD_NATIVE_PIN
     if compiler is None:
         if shutil.which("gcc"):
             compiler = Compiler.gcc
@@ -333,7 +333,7 @@ def parse_args(argv):
     parser.add_argument(
         "--version",
         dest = "build_ver",
-        help = f"The pdfium version to use. Currently defaults to {SOURCEBUILD_NATIVE_PIN}. Pass 'main' to try the latest state.",
+        help = f"The pdfium version to use. Currently defaults to {SBUILD_NATIVE_PIN}. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--test",

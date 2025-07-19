@@ -5,7 +5,7 @@
 
 [![Downloads](https://pepy.tech/badge/pypdfium2/month)](https://pepy.tech/project/pypdfium2)
 
-[pypdfium2](https://github.com/pypdfium2-team/pypdfium2) is an ABI-level Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
+pypdfium2 is an ABI-level Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
 
 It is built with [ctypesgen](https://github.com/pypdfium2-team/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
 The custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms is supported with pre-built packages.
@@ -24,7 +24,7 @@ If available for your platform, this will use a pre-built wheel package, which i
 #### JavaScript/XFA enabled builds
 
 pdfium-binaries also offer V8 (JavaScript) / XFA enabled builds.
-If you need these, you may do e.g.:
+If you need them, do e.g.:
 ```bash
 PDFIUM_PLATFORM=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2
 ```
@@ -324,13 +324,14 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
 
 > [!NOTE]
 > **Wait a moment:** Do you really need this?
-> pypdfium2 is best installed from `PyPI` (e.g. via `pip`), which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install pypdfium2 via pip instead.
-> 
-> To name some reasons:
-> + pypdfium2 from PyPI covers platforms that we cannot cover on conda.
-> + pypdfium2 from PyPI has extensive fallback setup, while conda does not provide an opportunity to run custom setup code.
-> + With conda, in-project publishing / custom channels are second class.
-> + With conda, it seems there is no way to create platform-specific but interpreter-independent python packages, so we cannot reasonably bundle pdfium. Thus, we have to use external pdfium, which is more complex and has some pitfalls.
+> pypdfium2 is best installed from `PyPI` (e.g. via `pip`),[^pypi_reasons] which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install it via pip instead.<br>
+> This project has no hard dependencies, so you don't need to worry about breaking the conda env.
+
+[^pypi_reasons]: To name some reasons:
+    + pypdfium2 from PyPI covers platforms that we cannot cover on conda.
+    + pypdfium2 from PyPI has extensive fallback setup, while conda does not provide an opportunity to run custom setup code.
+    + With conda, in-project publishing / custom channels are second class.
+    + With conda, it seems there is no way to create platform-specific but interpreter-independent python packages, so we cannot reasonably bundle pdfium. Thus, we have to use external pdfium, which is more complex and has some pitfalls.
 
 + To install
   
@@ -856,7 +857,7 @@ pypdfium2 uses PDFium builds from the `pdfium-binaries` project, which is [MIT-l
 `pdfium-binaries` auto-collect dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. There is also an aggregated [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for display in this repository.<br>
 Note that PDFium's dependencies might change over time. Please notify us if you think a relevant license is missing.
 
-To the author's knowledge, pypdfium2 is one of the rare Python libraries that are capable of PDF rendering while not being covered by strong-copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
+To the author's knowledge, pypdfium2 is one of the rare Python libraries capable of PDF rendering while not being covered by strong-copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
 
 [^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java), but python bindings packages don't exist yet or are unsatisfactory. However, we wrote some gists that show it'd be possible in principle: [pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc) (+ [setup](https://gist.github.com/mara004/881d0c5a99b8444fd5d1d21a333b70f8)), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7).
 

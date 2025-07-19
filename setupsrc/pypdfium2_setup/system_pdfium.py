@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE: This code is provided on a best effort basis and not regularly tested, because the author's system does not provide pdfium as of this writing.
+# NOTE: This code is provided on a best effort basis. It is relatively hard for us to test.
 
 import re
 import sys
@@ -49,7 +49,7 @@ def _parse_version(version):
         version = PdfiumVer.scheme(*[int(v) for v in version.split(".")])
     else:
         version = PdfiumVer.to_full(int(version))
-    assert version.build > 1000, "expected at least 4 digits for pdfium build version"
+    assert version.build > 1000, "unexpected versioning scheme, or grossly outdated"
     return version
 
 def _get_sys_pdfium_ver(pdfium_lib):
@@ -67,11 +67,10 @@ def _get_sys_pdfium_ver(pdfium_lib):
             return _parse_version(version)
     
     log("Unable to identify version, will set NaN placeholders.")
-    
     return PdfiumVerUnknown
 
 
-def _yield_lo_candidates(system=SysNames.linux):
+def _yield_lo_candidates(system):
     lo_paths_iter = itertools.product(
         (Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64")
     )
@@ -81,16 +80,15 @@ def _yield_lo_candidates(system=SysNames.linux):
         for path, bitness in lo_paths_iter
     )
 
-def _find_libreoffice_pdfium():
-    # Look for pdfium bundled with libreoffice. (Assuming the host has a unix-like file system.)
-    # Not sure how complete or incomplete libreoffice's pdfium builds may be; this is just a chance.
+def _find_lo_pdfium():
+    # Look for pdfium bundled with libreoffice, assuming a unix-like filesystem hierarchy.
     pdfium_lib = None
     if not sys.platform.startswith(("win", "darwin")):
-        candidates = _yield_lo_candidates()
+        candidates = _yield_lo_candidates(Host.system)
         pdfium_lib = _get_existing(candidates)
     return pdfium_lib
 
-def _get_libreoffice_pdfium_ver():
+def _get_lo_pdfium_ver():
     log("Trying to determine libreoffice pdfium version ...")
     
     output = run_cmd(["libreoffice", "--version"], cwd=None, capture=True)
@@ -118,7 +116,7 @@ def _yield_pdfium_candidates():
     # see if a pdfium shared library is in the default system search path
     yield find_library("pdfium"), "ctypes"
     # see if libreoffice provides pdfium
-    yield _find_libreoffice_pdfium(), "libreoffice"
+    yield _find_lo_pdfium(), "libreoffice"
 
 def _get_pdfium():
     candidates = _yield_pdfium_candidates()
@@ -139,7 +137,8 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     kwargs = dict(univ_paths=(pdfium_lib,), guard_symbols=True, flags=flags)
     
     if finder == "libreoffice":
-        full_ver = given_fullver or _get_libreoffice_pdfium_ver()
+        full_ver = given_fullver or _get_lo_pdfium_ver()
+        # assuming libreoffice does not change the original pdfium ABI
         build_pdfium_bindings(full_ver.build, **kwargs)
         bindings_path = BindingsFile
     else:
@@ -167,7 +166,7 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
 
 
 if __name__ == "__main__":
-    # print(_get_libreoffice_pdfium_ver())
+    # print(_get_lo_pdfium_ver())
     # print(_find_pdfium_headers())
     # print(_get_sys_pdfium_ver("libpdfium.so.140.0.7295.0"))
     print(main())
