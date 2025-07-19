@@ -19,7 +19,9 @@ pypdfium2 includes [helpers](#support-model) to simplify common use cases, while
 ```bash
 python -m pip install -U pypdfium2
 ```
-If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2. Otherwise, setup code will run – [see below](#from-the-repository--with-setup).
+If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2.
+Otherwise, [setup code](#from-the-repository--with-setup) will run.
+If your plaform is not covered with pre-built binaries, this will look for system pdfium, or attempt to build pdfium from source.
 
 #### JavaScript/XFA enabled builds
 
@@ -28,8 +30,7 @@ If you need them, do e.g.:
 ```bash
 PDFIUM_PLATFORM=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2
 ```
-This will bypass wheels and run setup, while requesting use of V8 builds through the `PDFIUM_PLATFORM=auto-v8` environment setting.
-Again, [see below](#from-the-repository--with-setup) for more info.
+This will bypass wheels and run setup, while requesting use of V8 builds through the `PDFIUM_PLATFORM=auto-v8` environment setting. See below for more info.
 
 #### Optional runtime dependencies
 
