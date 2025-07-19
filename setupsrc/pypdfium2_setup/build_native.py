@@ -305,18 +305,16 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     if compiler is Compiler.clang and clang_path is None:
         clang_path = Host.usr
     
-    mkdir(SOURCES_DIR)
-    full_ver = get_sources(build_ver, with_tests, compiler, clang_path, single_lib)
-    
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
     if single_lib:
         config["is_component_build"] = False
-    setup_compiler(config, compiler, clang_path)
     
+    mkdir(SOURCES_DIR)
+    full_ver = get_sources(build_ver, with_tests, compiler, clang_path, single_lib)
+    setup_compiler(config, compiler, clang_path)
     prepare(config, build_dir)
     build(with_tests, build_dir, n_jobs)
-    
     if with_tests:
         test(build_dir)
     
