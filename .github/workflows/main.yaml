@@ -53,7 +53,7 @@ jobs:
       # AOTW, the slsa-verifier GH action does not support anything but Ubuntu x86_64.
       # However, for this workflow, it is essential. We don't plan to change the build runner anyway.
       - name: slsa-verifier
-        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.0
+        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.1
       
       - name: Set up Python
         uses: actions/setup-python@v5
