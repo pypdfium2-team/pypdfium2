@@ -246,19 +246,23 @@ This setup strategy should be inherently free of web requests.
 Mind though, we don't support the result. If you bring your own files, it's your own responsibility, and it's quite possible your pypdfium2 might turn out subtly different from ours.
 
 ```bash
-# First, ask yourself: do you want to bundle pdfium (in-tree), or use system pdfium (out-of-tree)?
-# For bundling, set "sourcebuild", otherwise "system".
+# First, ask yourself: Do you want to bundle pdfium (in-tree), or use system
+# pdfium (out-of-tree)? For bundling, set "sourcebuild", else set "system".
 TARGET="sourcebuild"  # or "system"
-STAGING_DIR=data/$TARGET
+STAGING_DIR="data/$TARGET"
 
 # If you have decided for bundling, copy over the pdfium DLL in question.
 # Otherwise, skip this step.
-cp "$MY_BINARY_PATH" $STAGING_DIR/libpdfium.so
+cp "$MY_BINARY_PATH" "$STAGING_DIR/libpdfium.so"
 
 # Now, we will call ctypesgen to generate the bindings interface.
-# Reminder: You'll want to use the pypdfium2-team fork of ctypesgen. It generates much cleaner bindings, and it's what our source expects (there are subtle API differences in terms of output).
-# How exactly you do this is down to you. See ctypesgen --help or base.py::run_ctypesgen() for further options.
-ctypesgen --library pdfium --rt-libpaths $MY_RT_LIBPATHS --ct-libpaths $MY_CT_LIBPATHS --headers $MY_INCLUDE_DIR/fpdf*.h -o $STAGING_DIR/bindings.py [-D $MY_FLAGS]
+# Reminder: You'll want to use the pypdfium2-team fork of ctypesgen.
+# It generates much cleaner bindings, and it's what our source expects
+# (there are subtle API differences in terms of output).
+# How exactly you do this is down to you.
+# See ctypesgen --help or base.py::run_ctypesgen() for further options.
+ctypesgen --library pdfium --rt-libpaths $MY_RT_LIBPATHS --ct-libpaths $MY_CT_LIBPATHS \
+--headers $MY_INCLUDE_DIR/fpdf*.h -o $STAGING_DIR/bindings.py [-D $MY_FLAGS]
 
 # Then write the version file (fill the placeholders).
 # Note, this is not a mature interface yet and might change any time!
@@ -266,7 +270,8 @@ ctypesgen --library pdfium --rt-libpaths $MY_RT_LIBPATHS --ct-libpaths $MY_CT_LI
 # major/minor/build/patch: integers forming the pdfium version being packaged
 # n_commits/hash: git describe like post-tag info (0/null for release commit)
 # origin: a string to identify the build
-# flags: a comma-delimited list of pdfium feature flag strings (e.g. "V8", "XFA") - may be empty for default build
+# flags: a comma-delimited list of pdfium feature flag strings
+#        (e.g. "V8", "XFA") - may be empty for default build
 cat > "$STAGING_DIR/version.json" <<END
 {
   "major": $PDFIUM_MAJOR,
@@ -281,7 +286,8 @@ cat > "$STAGING_DIR/version.json" <<END
 END
 
 # Finally, run setup (through pip, pyproject-build or whatever).
-# The PDFIUM_PLATFORM value will instruct pypdfium2's setup to use the files we supplied, rather than to generate its own.
+# The PDFIUM_PLATFORM value will instruct pypdfium2's setup to use the files
+# we supplied, rather than to generate its own.
 PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 ```
 
