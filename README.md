@@ -21,7 +21,7 @@ python -m pip install -U pypdfium2
 ```
 If available for your platform, this will use a pre-built wheel package, which is the easiest way of installing pypdfium2.
 Otherwise, [setup code](#from-the-repository--with-setup) will run.
-If your plaform is not covered with pre-built binaries, this will look for system pdfium, or attempt to build pdfium from source.
+If your platform is not covered with pre-built binaries, this will look for system pdfium, or attempt to build pdfium from source.
 
 #### JavaScript/XFA enabled builds
 
