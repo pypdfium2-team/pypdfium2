@@ -125,6 +125,7 @@ path = [
     "pdfium_patches/avoid_new_clang_flags.patch",
     "pdfium_patches/system_libcxx_with_clang.patch",
     "pdfium_patches/siso.patch",
+    "pdfium_patches/android_build.patch"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [

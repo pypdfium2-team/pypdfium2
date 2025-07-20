@@ -321,7 +321,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         
         Attention:
             * :meth:`~.PdfDocument.init_forms` must have been called on the parent pdf, before the page was retrieved, for this method to work. In other words, :attr:`.PdfPage.formenv` must be non-null.
-            * Flattening may invalidate existing handles to the page, so you may want to re-initialize these afterwards.
+            * Flattening may invalidate existing handles to the page, so you'll want to re-initialize these afterwards.
         
         Parameters:
             flag (int): PDFium flattening target (:attr:`FLAT_*`)

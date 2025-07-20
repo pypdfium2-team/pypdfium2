@@ -146,10 +146,8 @@ def postprocess_android(platforms):
         log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
-def main(platforms, version=None, robust=False, max_workers=None, use_v8=False, verify=None):
+def main(platforms, version, robust=False, max_workers=None, use_v8=False, verify=None):
     
-    if not version:
-        version = PdfiumVer.get_latest()
     if not platforms:
         platforms = WheelPlatforms
     if verify is None:
@@ -190,8 +188,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--version", "-v",
-        type = int,
-        help = "The binaries release to use (defaults to latest). Must be a valid tag integer."
+        help = "The binaries release to use. Either 'latest' (the default), 'pinned', or a pdfium-binaries tag integer."
     )
     parser.add_argument(
         "--max-workers",
@@ -214,6 +211,12 @@ def parse_args(argv):
 
 def cli_main(argv=sys.argv[1:]):
     args = parse_args(argv)
+    if not args.version or args.version == "latest":
+        args.version = PdfiumVer.get_latest()
+    elif args.version == "pinned":
+        args.version = PdfiumVer.release_pdfium_build
+    else:
+        args.version = int(args.version)
     main(**vars(args))
 
 

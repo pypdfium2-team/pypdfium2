@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# NOTE: This code is provided on a best effort basis and not regularly tested, because the author's system does not provide pdfium as of this writing.
+# NOTE: This code is provided on a best effort basis. It is relatively hard for us to test.
 
 import re
 import sys
@@ -24,19 +24,71 @@ def _removeprefix(string, prefix):
     return string
 
 
-def _find_libreoffice_pdfium():
-    # Look for pdfium bundled with libreoffice. (Assuming the host has a unix-like file system.)
-    # Not sure how complete or incomplete libreoffice's pdfium builds may be; this is just a chance.
+def _find_pdfium_headers():
+    
+    headers_path = os.getenv("PDFIUM_HEADERS")
+    if headers_path:
+        return Path(headers_path)
+    
+    if not sys.platform.startswith(("win", "darwin")):
+        include_dirs = (Host.usr/"include", Host.usr/"local"/"include")
+        candidates = (path/"pdfium" for path in include_dirs)
+        headers_path = _get_existing(candidates, cb=Path.is_dir)
+        if headers_path:
+            return headers_path
+        
+        candidates = (path/"fpdf_edit.h" for path in include_dirs)
+        sample_header = _get_existing(candidates, cb=Path.is_file)
+        if sample_header:
+            return sample_header.parent
+    
+    return None
+
+def _parse_version(version):
+    if "." in version:
+        version = PdfiumVer.scheme(*[int(v) for v in version.split(".")])
+    else:
+        version = PdfiumVer.to_full(int(version))
+    assert version.build > 1000, "unexpected versioning scheme, or grossly outdated"
+    return version
+
+def _get_sys_pdfium_ver(pdfium_lib):
+    
+    log("Trying to determine system pdfium version ...")
+    
+    libname_parts = Path(pdfium_lib).name.split(".", maxsplit=2)
+    if len(libname_parts) == 3:
+        return _parse_version(libname_parts[2])
+    
+    if shutil.which("pkg-config"):
+        proc = run_cmd(["pkg-config", "--modversion", "libpdfium"], cwd=None, check=False)
+        if proc.returncode == 0:
+            version = proc.stdout.decode().strip()
+            return _parse_version(version)
+    
+    log("Unable to identify version, will set NaN placeholders.")
+    return PdfiumVerUnknown
+
+
+def _yield_lo_candidates(system):
+    lo_paths_iter = itertools.product(
+        (Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64")
+    )
+    libname = libname_for_system(system, name="pdfiumlo")
+    yield from (
+        Path(str(path)+bitness)/"libreoffice"/"program"/libname
+        for path, bitness in lo_paths_iter
+    )
+
+def _find_lo_pdfium():
+    # Look for pdfium bundled with libreoffice, assuming a unix-like filesystem hierarchy.
     pdfium_lib = None
-    if not pdfium_lib and not sys.platform.startswith(("win", "darwin")):
-        lo_paths_iter = itertools.product((Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64"))
-        libname = libname_for_system(Host.system, name="pdfiumlo")
-        candidates = (Path(str(path)+bitness)/"libreoffice"/"program"/libname for path, bitness in lo_paths_iter)
+    if not sys.platform.startswith(("win", "darwin")):
+        candidates = _yield_lo_candidates(Host.system)
         pdfium_lib = _get_existing(candidates)
     return pdfium_lib
 
-
-def _get_libreoffice_pdfium_ver():
+def _get_lo_pdfium_ver():
     log("Trying to determine libreoffice pdfium version ...")
     
     output = run_cmd(["libreoffice", "--version"], cwd=None, capture=True)
@@ -54,85 +106,67 @@ def _get_libreoffice_pdfium_ver():
     return PdfiumVer.to_full(short_ver)
 
 
-def _find_pdfium_headers():
-    
-    headers_path = os.getenv("PDFIUM_HEADERS")
-    
-    if headers_path:
-        headers_path = Path(headers_path)
-    elif not sys.platform.startswith(("win", "darwin")):
-        include_dirs = (Host.usr/"include", Host.usr/"local"/"include")
-        candidates = (path/"pdfium" for path in include_dirs)
-        headers_path = _get_existing(candidates, cb=Path.is_dir)
-        if not headers_path:
-            candidates = (path/"fpdf_edit.h" for path in include_dirs)
-            sample_header = _get_existing(candidates, cb=Path.is_file)
-            if sample_header:
-                headers_path = sample_header.parent
-    
-    return headers_path
+class PdfiumNotFoundError (RuntimeError):
+    pass
 
 
-def _get_sys_pdfium_ver():
-    log("Trying to determine system pdfium version via pkg-config (may be NaN if this fails) ...")
-    if shutil.which("pkg-config"):
-        proc = run_cmd(["pkg-config", "--modversion", "libpdfium"], cwd=None, check=False)
-        if proc.returncode == 0:
-            version = proc.stdout.decode().strip()
-            if "." in version:
-                version = PdfiumVer.scheme(*[int(v) for v in version.split(".")])
-            else:
-                version = PdfiumVer.to_full(int(version))
-            return version
-    return PdfiumVerUnknown
+def _yield_pdfium_candidates():
+    # give the caller an opportunity to set the pdfium path
+    yield os.getenv("PDFIUM_BINARY"), "caller"
+    # see if a pdfium shared library is in the default system search path
+    yield find_library("pdfium"), "ctypes"
+    # see if libreoffice provides pdfium
+    yield _find_lo_pdfium(), "libreoffice"
+
+def _get_pdfium():
+    candidates = _yield_pdfium_candidates()
+    for pdfium_lib, finder in candidates:
+        if pdfium_lib:
+            return pdfium_lib, finder
+    # abort if none of this worked
+    raise PdfiumNotFoundError("Could not find system pdfium.")
 
 
-def try_system_pdfium(given_fullver=None):
+def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     
-    # See if a pdfium shared library is in the default system search path
-    pdfium_lib = find_library("pdfium")
-    from_lo = False
-    if not pdfium_lib:
-        pdfium_lib = _find_libreoffice_pdfium()
-        from_lo = True
-        
-    if pdfium_lib:
-        log(f"Found pdfium shared library at {pdfium_lib} (from_lo={from_lo})")
-        
-        if from_lo:
-            full_ver = given_fullver or _get_libreoffice_pdfium_ver()
-            lds = (pdfium_lib.parent, )
-            # TODO(ctypesgen) handle pdfiumlo libname in refbindings
-            build_pdfium_bindings(full_ver.build, libname="pdfiumlo", compile_lds=lds, run_lds=lds, guard_symbols=True)
-            write_pdfium_info(ModuleDir_Raw, full_ver, origin="libreoffice")
-            bindings = BindingsFile
-        
-        else:
-            pdfium_headers = _find_pdfium_headers()
-            if pdfium_headers:
-                log(f"Found pdfium headers at {pdfium_headers}")
-                full_ver = given_fullver or _get_sys_pdfium_ver()
-                log(f"pdfium version: {full_ver}")
-                build_pdfium_bindings(full_ver.build, pdfium_headers, run_lds=(), guard_symbols=True)
-                bindings = BindingsFile
-            else:
-                log(f"pdfium headers not found - will use reference bindings. Warning: This is ABI-unsafe! Install the headers and/or set $PDFIUM_HEADERS to the directory in question.")
-                bindings = RefBindingsFile
-                full_ver = given_fullver or PdfiumVerUnknown
-            write_pdfium_info(ModuleDir_Raw, full_ver, origin="system")
-        
-        if full_ver.build < PDFIUM_MIN_REQ:
-            log(f"Warning: pdfium version {full_ver.build} does not conform with minimum requirement {PDFIUM_MIN_REQ}. Some APIs may not work. Run pypdfium2's test suite for details.")
-        
-        shutil.copyfile(bindings, ModuleDir_Raw/BindingsFN)
-        return full_ver
+    log("Looking for system pdfium ...")
+    pdfium_lib, finder = _get_pdfium()
     
+    log(f"Found pdfium shared library at {pdfium_lib} ({finder})")
+    target_path = target_dir/BindingsFN
+    kwargs = dict(univ_paths=(pdfium_lib,), guard_symbols=True, flags=flags)
+    
+    if finder == "libreoffice":
+        full_ver = given_fullver or _get_lo_pdfium_ver()
+        # assuming libreoffice does not change the original pdfium ABI
+        build_pdfium_bindings(full_ver.build, **kwargs)
+        bindings_path = BindingsFile
     else:
-        log("pdfium not found")
-        return None
+        pdfium_headers = _find_pdfium_headers()
+        full_ver = given_fullver or _get_sys_pdfium_ver(pdfium_lib)
+        if pdfium_headers:
+            log(f"Found pdfium headers at {pdfium_headers}")
+            run_ctypesgen(target_path, pdfium_headers, version=full_ver.build, **kwargs)
+            bindings_path = target_path
+        elif full_ver is not PdfiumVerUnknown:
+            log(f"Could not find headers, but know the version: {full_ver}")
+            build_pdfium_bindings(full_ver.build, **kwargs)
+            bindings_path = BindingsFile
+        else:
+            log(f"Warning: Neither pdfium headers nor version found - will use reference bindings. This is ABI-unsafe! Set $PDFIUM_HEADERS to the directory in question, or pass the version via $PDFIUM_PLATFORM=system-search:$VERSION.")
+            bindings_path = RefBindingsFile
+    
+    write_pdfium_info(target_dir, full_ver, origin=f"system-{finder}", flags=flags)
+    if bindings_path != target_path:
+        shutil.copyfile(bindings_path, target_path)
+    if full_ver.build < PDFIUM_MIN_REQ:
+        log(f"Warning: pdfium version {full_ver.build} does not conform with minimum requirement {PDFIUM_MIN_REQ}. Some APIs may not work. Run pypdfium2's test suite for details.")
+    
+    return full_ver
 
 
 if __name__ == "__main__":
-    print(try_system_pdfium())
-    print(_get_libreoffice_pdfium_ver())
-    print(_get_sys_pdfium_ver())
+    # print(_get_lo_pdfium_ver())
+    # print(_find_pdfium_headers())
+    # print(_get_sys_pdfium_ver("libpdfium.so.140.0.7295.0"))
+    print(main())

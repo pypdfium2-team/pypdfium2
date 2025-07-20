@@ -17,7 +17,7 @@ build:
   noarch: python
   script_env:
     - PYPDFIUM_MODULES=raw
-    - PDFIUM_PLATFORM=prepared!system:{{ pdfium_short }}
+    - PDFIUM_PLATFORM=system
   script:
     - {{ PYTHON }} conda/prepare_script.py
     - {{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation

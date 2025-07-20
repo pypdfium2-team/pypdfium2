@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 # Related work: https://github.com/tiran/libpdfium/ and https://aur.archlinux.org/packages/libpdfium-nojs
 
-# Known issue: This script does not currently handle rebuilds
-
 import re
 import os
 import sys
@@ -16,12 +14,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
-# The pdfium version this has last been tested with. Ideally, this should be close to the release version in autorelease/record.json
-# To bump this version, first test locally and update any patches as needed. Then, make a branch and run "Test Sourcebuild" on CI to see if all targets continue to work. Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
-# Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
-DEFAULT_VER = 7191
-# assert DEFAULT_VER >= PDFIUM_MIN_REQ
-
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium"
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
@@ -29,11 +21,15 @@ DEPS_URLS = dict(
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
-    test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts"
+    test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
+    catapult   = _CR_PREFIX + "catapult",
 )
 SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
+
+Compiler = Enum("Compiler", "gcc clang")
+RESET_REPOS = False
 
 DefaultConfig = {
     "is_debug": False,
@@ -47,6 +43,7 @@ DefaultConfig = {
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
     "pdf_use_partition_alloc": False,
+    # "sysroot": "/" might also work if you manually set the right PKG_CONFIG_PATH, e.g. /usr/lib64/pkgconfig
     "use_sysroot": False,
     "use_system_freetype": True,
     "pdf_bundle_freetype": False,
@@ -59,28 +56,54 @@ DefaultConfig = {
     "use_custom_libcxx": False,
     "use_libcxx_modules": False,
 }
+
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "10.13.0"
     DefaultConfig["use_system_xcode"] = True
 
-Compiler = Enum("Compiler", "gcc clang")
+IS_ANDROID = Host.system == SysNames.android
+if IS_ANDROID:
+    DefaultConfig.update({
+        "sysroot": str(Host.usr.parent),
+        "current_os": "android",
+        "target_os": "android",
+    })
+    del DefaultConfig["use_sysroot"]
+    # On Android, it seems that the build system's CPU type statically defaults to "arm", but we want this script to be host-adaptive (and "arm64" is the more likely candidate).
+    # q&d: resolve Google CPU name for host via pdfium-binaries names, which align with upstream.
+    if Host.platform in PdfiumBinariesMap:
+        cpu = PdfiumBinariesMap[Host.platform].rsplit("-", maxsplit=1)[-1]
+        DefaultConfig.update({
+            "current_cpu": cpu,
+            "target_cpu": cpu,
+        })
 
 
 def _get_repo(url, target_dir, rev, depth=1):
+    
     if target_dir.exists():
-        return False
-    # see https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
-    # TODO: on git >= 2.49, we can use `git clone --revision ...`
+        if RESET_REPOS and target_dir.name in ("pdfium", "build"):
+            log(f"Resetting {target_dir.name} as per --reset option.")
+            run_cmd(["git", "reset", "--hard"], cwd=target_dir)
+            return True
+        else:
+            return False
+    
+    if callable(rev):
+        rev = rev()  # resolve deferred
+    
+    # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
     mkdir(target_dir)
     run_cmd(["git", "init"], cwd=target_dir)
     run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
     run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
-    run_cmd(["git", "checkout", rev], cwd=target_dir)
+    run_cmd(["git", "checkout", "FETCH_HEAD"], cwd=target_dir)
+    
     return True
 
 
 DEPS_RE = r"\s*'{key}': '(\w+)'"
-DEPS_FIELDS = "build abseil fast_float gtest test_fonts".split(" ")
+DEPS_FIELDS = ("build", "abseil", "fast_float")
 
 class _DeferredClass:
     
@@ -101,11 +124,8 @@ _Deferred = _DeferredClass()
 
 
 def _fetch_dep(name, target_dir):
-    if target_dir.exists():
-        log(f"Using existing {target_dir}")
-        return False
-    # parse out DEPS revisions only if we actually need them
-    return _get_repo(DEPS_URLS[name], target_dir, rev=_Deferred.deps[name])
+    # parse out DEPS revisions only when we actually need them
+    return _get_repo(DEPS_URLS[name], target_dir, rev=lambda: _Deferred.deps[name])
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
@@ -125,12 +145,13 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
 
-def get_sources(short_ver, with_tests, compiler, clang_path):
+def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     
+    assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
-    is_new = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
-    if is_new:
+    do_patches = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
+    if do_patches:
         autopatch_dir(
             PDFIUM_DIR/"public"/"cpp", "*.h",
             r'"public/(.+)"', r'"../\1"',
@@ -142,11 +163,26 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
+        if single_lib:
+            autopatch(
+                PDFIUM_DIR/"BUILD.gn",
+                'component("pdfium")',
+                'shared_library("pdfium")',
+                is_regex=False, exp_count=1,
+            )
+            autopatch(
+                PDFIUM_DIR/"public"/"fpdfview.h",
+                "#if defined(COMPONENT_BUILD)",
+                "#if 1  // defined(COMPONENT_BUILD)",
+                is_regex=False, exp_count=1,
+            )
     
-    is_new = _fetch_dep("build", PDFIUM_DIR/"build")
-    if is_new:
+    do_patches = _fetch_dep("build", PDFIUM_DIR/"build")
+    if do_patches:
         # Work around error about path_exists() being undefined
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
+        if IS_ANDROID:
+            git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR/"build")
         if compiler is Compiler.gcc:
             # https://crbug.com/402282789
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
@@ -169,6 +205,8 @@ def get_sources(short_ver, with_tests, compiler, clang_path):
     
     _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
+    if IS_ANDROID:
+        _fetch_dep("catapult", PDFIUM_3RDPARTY/"catapult")
     if with_tests:
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
@@ -186,8 +224,12 @@ def prepare(config_dict, build_dir):
         PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
         PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
     )
-    # Create target dir and write build config
+    # Create target dir (or reuse existing) and write build config
     mkdir(build_dir)
+    # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single_lib build is done after a component build. This also ensures we really built a new DLL in the end.
+    # Leave the object files in place to reuse as much as possible, though.
+    for lib in build_dir.glob(Host.libname_glob):
+        lib.unlink()
     config_str = serialize_gn_config(config_dict)
     (build_dir/"args.gn").write_text(config_str)
 
@@ -240,10 +282,18 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False):
+    
+    # q&d: use a global to expose the `reset` setting to _get_repo(), easier than handing it down through a lot of functions
+    global RESET_REPOS, DEPS_FIELDS
+    RESET_REPOS = reset
+    if IS_ANDROID:
+        DEPS_FIELDS += ("catapult", )
+    if with_tests:
+        DEPS_FIELDS += ("gtest", "test_fonts")
     
     if build_ver is None:
-        build_ver = DEFAULT_VER
+        build_ver = SBUILD_NATIVE_PIN
     if compiler is None:
         if shutil.which("gcc"):
             compiler = Compiler.gcc
@@ -255,21 +305,23 @@ def main_api(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang
     if compiler is Compiler.clang and clang_path is None:
         clang_path = Host.usr
     
-    mkdir(SOURCES_DIR)
-    full_ver = get_sources(build_ver, with_tests, compiler, clang_path)
-    
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
-    setup_compiler(config, compiler, clang_path)
+    if single_lib:
+        config["is_component_build"] = False
     
+    mkdir(SOURCES_DIR)
+    full_ver = get_sources(build_ver, with_tests, compiler, clang_path, single_lib)
+    setup_compiler(config, compiler, clang_path)
     prepare(config, build_dir)
     build(with_tests, build_dir, n_jobs)
-    
     if with_tests:
         test(build_dir)
     
     post_ver = handle_sbuild_postver(build_ver, PDFIUM_DIR)
-    pack_sourcebuild(PDFIUM_DIR, build_dir, full_ver, **post_ver)
+    pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, **post_ver)
+    
+    return full_ver, post_ver
 
 
 def parse_args(argv):
@@ -279,7 +331,7 @@ def parse_args(argv):
     parser.add_argument(
         "--version",
         dest = "build_ver",
-        help = f"The pdfium version to use. Currently defaults to {DEFAULT_VER}. Pass 'main' to try the latest state.",
+        help = f"The pdfium version to use. Currently defaults to {SBUILD_NATIVE_PIN}. Pass 'main' to try the latest state.",
     )
     parser.add_argument(
         "--test",
@@ -297,13 +349,23 @@ def parse_args(argv):
     parser.add_argument(
         "-c", "--compiler",
         type = str.lower,
-        help = "The compiler to use (gcc or clang). By default, gcc is preferred.",
+        help = "The compiler to use (gcc or clang). Defaults to gcc if available.",
+    )
+    parser.add_argument(
+        "--reset",
+        action = "store_true",
+        help = "Reset those git repos that we patch, and re-apply the patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang or single lib <-> component build mode), but is not enabled by default to avoid unintentional loss of manual changes.",
     )
     # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
         help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr' or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
+    )
+    parser.add_argument(
+        "--single-lib",
+        action = "store_true",
+        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is downloaded anew or reset, else the existing state is used.",
     )
     args = parser.parse_args(argv)
     if args.compiler:
@@ -313,7 +375,7 @@ def parse_args(argv):
 
 def main_cli():
     args = parse_args(sys.argv[1:])
-    main_api(**vars(args))
+    main(**vars(args))
 
 
 if __name__ == "__main__":

@@ -44,22 +44,22 @@
 
 *Platforms*
 - __Experimental__ Android (PEP 738) and iOS (PEP 730) support added.
-  Android `arm64_v8a`, `armeabi_v7a`, `x86_64`, `x86` and iOS `arm64` device and `arm64`, `x86_64` simulators are now handled in setup and should implicitly download the right pdfium binaries.
-  Provided on a best effort basis, and largely untested. Testers/feedback welcome.
-  pypdfium2's setup is now also capable of producing wheels for these platforms, but they will not actually be included in releases at this time.
-  (Once Termux ships Python 3.13, we may want to publish Android `arm64_v8a` and maybe `armeabi_v7a` wheels, but we do not intend to provide wheels for simulators.)
-  iOS will not actually work yet, as the PEP indicates binaries ought to be moved to a special Frameworks location for permission reasons, in which case you'd also have to patch pypdfium2's library search. We cannot do anything about this yet for lack of clear instructions, access to a device, or user feedback.
+  Android `arm64_v8a`, `armeabi_v7a`, `x86_64`, `x86` and iOS `arm64` device and `arm64`, `x86_64` simulators are now handled in setup and should implicitly download the right pdfium-binaries. Provided on a best effort basis, and largely untested. Testers/feedback welcome.
+- pypdfium2's setup is now also capable of producing wheels for these platforms, but they will not actually be included in releases at this time. (Once Termux ships Python 3.13, we may want to publish Android `arm64_v8a` and maybe `armeabi_v7a` wheels, but we do not intend to provide wheels for simulators.)
+- iOS will not actually work yet, as the PEP indicates binaries ought to be moved to a special Frameworks location for permission reasons, in which case you'd also have to patch pypdfium2's library search. We cannot do anything about this yet without access to a device or clearer instructions. Community help would be appreciated here.
 
 *Setup*
-- When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, by default, we now use the version included with the last pypdfium2 release. This is to prevent possible API breakage when pypdfium2 is installed from source. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
-- `update.py`: added `--verify` option to confirm authenticity of pdfium-binaries release via SLSA provenance. Requires `slsa-verifier`. Thanks to Benoit Blanchon for the upstream part.
-- We finally have a build script that works without Google's toolchain, and instead uses system tools/libraries (`build_native.py`). This has been inspired by the `libpdfium` COPR / `libpdfium-nojs` AUR recipes. Thanks to the respective packagers for showing how to do this. The GCC compiler is preferred, but Clang should also work if you set up some symlinks. As of this writing, both passes on our Ubuntu x84_64/arm64 CI.
-- On host platforms not covered with `pdfium-binaries`, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered.
+- When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, by default, we now use the version included with the current pypdfium2 release. This is to prevent possible API breakage when pypdfium2 is installed from source. It should also make the `git` dependency optional on default setup. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
+- `update.py`: added `--verify` option to confirm authenticity of pdfium-binaries release via SLSA provenance. Requires `slsa-verifier`. Thanks to Benoit Blanchon for the upstream part. Also thanks to ArcticLampyrid for the pointer.
+- We finally have a build script that works without Google's toolchain, and instead uses system tools/libraries (`build_native.py`). This has been inspired by the `libpdfium` COPR / `libpdfium-nojs` AUR recipes. Thanks to the respective packagers for showing how to do this. By default, this will use the GCC compiler, but Clang should also work if you set up some symlinks. As of this writing, both passes on our Ubuntu x84_64/arm64 CI.
+- On host platforms not covered with `pdfium-binaries`, setup now looks for system/libreoffice pdfium. If this is not available either, `build_native.py` will be triggered. This can also be requested explicitly by setting `PDFIUM_PLATFORM` to `fallback`, `system-search` or `build-native`.
+- Reworked setup to expose all targets through `PDFIUM_PLATFORM`. Added proper `system` staging directory. Refactored integration of caller-provided data files to avoid ambiguity. See the updated Readme for details.
 - The toolchained build script continues to be available as well, but has been renamed from `sourcebuild.py` to `build_toolchained.py`.
 - Both build scripts now pin pdfium to the version last tested by pypdfium2-team.
-- By default, `build_toolchained` now generate separate DLLs for dependency libraries, but you may pass `--single-lib` to restore the previous behavior of bundling dependencies into a single pdfium DLL. Setup has been changed accordingly to collect libraries with globbing patterns.
+- By default, the build scripts now generate separate DLLs for dependency libraries, but you may pass `--single-lib` to restore the previous behavior of bundling dependencies into a single pdfium DLL. Setup has been changed accordingly to collect libraries with globbing patterns.
 - With `build_toolchained.py --update`, avoid calling `gclient revert` and `gclient sync`, because this seems to sync twice, which is slow. Instead, call only `gclient sync` with `-D --reset`.
 - With `pdfium-binaries`, read the full version from the `VERSION` file embedded in the tarballs. This avoids a potentially expensive `git ls-remote` call to get Chromium tags.
+- Also added `GIVEN_FULLVER` and `IGNORE_FULLVER` env vars to manually set or skip the full version for other targets.
 - Use build-specific license files collected by pdfium-binaries. Replaced outdated `LicenseRef-PdfiumThirdParty` with `BUILD_LICENSES/` directory.
 - Take `PDFIUM_BINDINGS=reference` into account on sourcebuild as well. Automatically fall back to reference bindings if ctypesgen is not installed (except on CI).
 - If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results, e.g. on macOS.

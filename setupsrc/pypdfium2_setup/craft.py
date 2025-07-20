@@ -21,28 +21,33 @@ except ImportError:
 
 
 class ArtifactStash:
-    
-    # Preserve in-tree artifacts from editable install
+    "Preserve in-tree artifacts from editable install"
     
     def __enter__(self):
         
-        self.tmpdir = None
-        
-        file_names = [VersionFN, BindingsFN, libname_for_system(Host.system)]
-        self.files = [fp for fp in [ModuleDir_Raw / fn for fn in file_names] if fp.exists()]
-        if len(self.files) == 0:
+        self.files = tuple(filter(Path.exists, (
+            ModuleDir_Raw/VersionFN,
+            ModuleDir_Raw/BindingsFN,
+            *ModuleDir_Raw.glob(Host.libname_glob)
+        )))
+        if not self.files:
             return
         
+        log(
+            f"Stashing artifacts from editable install:\n"
+            f"{tuple(fp.name for fp in self.files)}"
+        )
         self.tmpdir = tempfile.TemporaryDirectory(prefix="pypdfium2_artifact_stash_")
         self.tmpdir_path = Path(self.tmpdir.name)
         for fp in self.files:
             shutil.move(fp, self.tmpdir_path)
     
     def __exit__(self, *_):
-        if self.tmpdir is None:
+        if not self.files:
             return
+        log("Restoring artifacts from editable install.")
         for fp in self.files:
-            shutil.move(self.tmpdir_path / fp.name, ModuleDir_Raw)
+            shutil.move(self.tmpdir_path/fp.name, ModuleDir_Raw)
         self.tmpdir.cleanup()
 
 

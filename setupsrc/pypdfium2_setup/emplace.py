@@ -5,22 +5,30 @@
 import os
 import sys
 import argparse
+import traceback
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 from pypdfium2_setup.base import *
-from pypdfium2_setup import update as update_pdfium
+from pypdfium2_setup import (
+    update as update_pdfium,
+    build_native,
+    build_toolchained,
+    system_pdfium,
+)
 
 
 def _repr_info(version, flags):
     return str(version) + (f":{','.join(flags)}" if flags else "")
 
-def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
+def _get_pdfium_with_cache(pl_name, req_ver, req_flags):
     
+    # TODO turn platform and system into proper objects, so the libname could be accessed like plat.system.libname, which is much cleaner than a chain of string function calls
+    
+    pl_dir = DataDir/pl_name
     system = plat_to_system(pl_name)
-    pl_dir = DataDir / pl_name
-    binary = pl_dir / libname_for_system(system)
-    binary_ver = pl_dir / VersionFN
+    binary = pl_dir/libname_for_system(system)
+    binary_ver = pl_dir/VersionFN
     
     if all(f.exists() for f in (binary, binary_ver)):
         prev_info = read_json(binary_ver)
@@ -31,48 +39,111 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags, use_v8):
     req_repr = _repr_info(req_ver, req_flags)
     if update_binary:
         log(f"Downloading binary {req_repr} ...")
-        update_pdfium.main([pl_name], version=req_ver, use_v8=use_v8)
+        update_pdfium.main([pl_name], version=req_ver, use_v8=("V8" in req_flags))
     else:
         log(f"Using cached binary {req_repr}")
     
     # build_pdfium_bindings() has its own cache logic, so always call to ensure bindings match
-    compile_lds = [DataDir/Host.platform] if pl_name == Host.platform else []
-    build_pdfium_bindings(req_ver, flags=req_flags, compile_lds=compile_lds)
+    ct_paths = (DataDir/Host.platform/CTG_LIBPATTERN, ) if pl_name == Host.platform else ()
+    build_pdfium_bindings(req_ver, flags=req_flags, ct_paths=ct_paths)
+
+def _end_subtargets(sub_target, pdfium_ver):
+    if sub_target:
+        assert False, sub_target
+    else:
+        log("No sub-target set, will use existing data files.")
+        if pdfium_ver:
+            raise ValueError(f"Pdfium version {pdfium_ver} was passed, but this does not make sense with caller-provided data files.")
 
 
-def prepare_setup(pl_name, pdfium_ver, use_v8):
-    
-    # TODO
-    # - consider taking a full version (on behalf of offline setup)
-    # - expose smart try_system_pdfium() / setup fallback as target
-    
-    clean_platfiles()
-    flags = ("V8", "XFA") if use_v8 else ()
-    
+def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
+        
     if pl_name == ExtPlats.system:
-        build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, run_lds=())
-        shutil.copyfile(BindingsFile, ModuleDir_Raw/BindingsFN)
-        full_ver = PdfiumVer.to_full(pdfium_ver)
-        write_pdfium_info(ModuleDir_Raw, full_ver, origin="system", flags=flags)
-        return (BindingsFN, VersionFN)
+        pl_dir = DataDir/pl_name
+        if sub_target:
+            purge_dir(pl_dir)
+        if sub_target == "search":
+            full_ver = PdfiumVer.to_full(pdfium_ver) if pdfium_ver else None
+            full_ver = system_pdfium.main(full_ver, flags=flags)
+        elif sub_target == "generate":
+            assert pdfium_ver, "system-generate target requires pdfium build version from caller"
+            build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, rt_paths=())
+            shutil.copyfile(BindingsFile, pl_dir/BindingsFN)
+            full_ver = PdfiumVer.to_full(pdfium_ver)
+            write_pdfium_info(pl_dir, full_ver, origin="system-generate", flags=flags)
+        else:
+            _end_subtargets(sub_target, pdfium_ver)
+    
+    elif pl_name == ExtPlats.sourcebuild:
+        if flags:
+            log(f"sourcebuild: flags {flags!r} are not handled (will be discarded).")
+        if sub_target == "native":
+            build_native.main(build_ver=pdfium_ver)
+        elif sub_target == "toolchained":
+            build_toolchained.main(build_ver=pdfium_ver)
+        else:
+            _end_subtargets(sub_target, pdfium_ver)
+    
+    elif pl_name == ExtPlats.fallback:
+        pl_name = ExtPlats.system
+        try:
+            stage_platfiles(pl_name, "search", pdfium_ver, flags)
+        except system_pdfium.PdfiumNotFoundError:
+            log("Could not find system pdfium, will attempt native sourcebuild")
+            pl_name = ExtPlats.sourcebuild
+            try:
+                stage_platfiles(pl_name, "native", pdfium_ver, flags)
+            except Exception:
+                traceback.print_exc()
+                raise RuntimeError("sourcebuild-native failed. Manual action may be needed, such as installing system dependencies, or possibly patching the sources. See pypdfium2's README.md for more information.")
     
     else:
-        
-        pl_dir = DataDir/pl_name
-        platfiles = [pl_dir/VersionFN]
-        
-        if pl_name == ExtPlats.sourcebuild:
-            # sourcebuild bindings are kept in the platform directory
-            platfiles += [pl_dir/BindingsFN, *pl_dir.glob(Host.libname_glob)]
-        else:
-            system = plat_to_system(pl_name)
-            platfiles += [BindingsFile, pl_dir/libname_for_system(system)]
-            _get_pdfium_with_cache(pl_name, pdfium_ver, flags, use_v8)
-        
-        for fp in platfiles:
-            shutil.copyfile(fp, ModuleDir_Raw/fp.name)
-        
-        return (fp.name for fp in platfiles)
+        if not pdfium_ver or pdfium_ver == "pinned":
+            pdfium_ver = PdfiumVer.release_pdfium_build
+            log(f"Using pdfium version {pdfium_ver!r} from current pypdfium2 release. If this is not intentional, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
+        elif pdfium_ver == "latest":
+            pdfium_ver = PdfiumVer.get_latest()
+            log(f"Using latest pdfium-binaries version {pdfium_ver!r}.")
+        assert pl_name and hasattr(PlatNames, pl_name)
+        _get_pdfium_with_cache(pl_name, pdfium_ver, flags)
+    
+    return pl_name
+
+
+def copy_platfiles(pl_name):
+    
+    # remove existing in-tree platform files, if any
+    clean_platfiles()
+    
+    # the version file is in the platform directory for all targets
+    pl_dir = DataDir/pl_name
+    platfiles = [pl_dir/VersionFN]
+    
+    # For system and sourcebuild, the bindings file is in the platform directory.
+    # For the pdfium-binaries targets, the bindings are shared in data/bindings/
+    if pl_name == ExtPlats.system:
+        platfiles.append(pl_dir/BindingsFN)
+    elif pl_name == ExtPlats.sourcebuild:
+        platfiles.append(pl_dir/BindingsFN)
+        platfiles.extend(p for p in pl_dir.glob(Host.libname_glob))
+    else:
+        platfiles.append(BindingsFile)
+        system = plat_to_system(pl_name)
+        platfiles.append(pl_dir/libname_for_system(system))
+    
+    assert all(fp.exists() for fp in platfiles), "Some platform files are missing"
+    for fp in platfiles:
+        shutil.copy(fp, ModuleDir_Raw/fp.name)
+    
+    return tuple(fp.name for fp in platfiles)
+
+
+def prepare_setup(pl_name, sub_target, pdfium_ver, flags):
+    # Write platform files into a data staging directory
+    pl_name = stage_platfiles(pl_name, sub_target, pdfium_ver, flags)
+    # Copy platform files into actual source tree
+    platfiles = copy_platfiles(pl_name)
+    return platfiles, pl_name
 
 
 def main():
@@ -93,12 +164,8 @@ def main():
         clean_platfiles()
         return
     
-    parsed_spec = parse_pl_spec(args.plat_spec)
-    if parsed_spec is None:
-        raise Host._exc
-    do_prepare, *pl_info = parsed_spec
-    assert do_prepare, "Can't use already-prepared target with emplace, would be no-op."
-    prepare_setup(*pl_info)
+    pl_name, *pl_info = parse_pl_spec(args.plat_spec)
+    prepare_setup(pl_name, *pl_info)
 
 
 if __name__ == "__main__":
