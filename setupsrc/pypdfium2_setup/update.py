@@ -188,7 +188,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--version", "-v",
-        help = "The binaries release to use (defaults to latest). Must be a valid tag integer."
+        help = "The binaries release to use. Either 'latest' (the default), 'pinned', or a pdfium-binaries tag integer."
     )
     parser.add_argument(
         "--max-workers",
