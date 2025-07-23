@@ -318,10 +318,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     if with_tests:
         test(build_dir)
     
-    post_ver = handle_sbuild_postver(build_ver, PDFIUM_DIR)
-    pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, **post_ver)
-    
-    return full_ver, post_ver
+    return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver)
 
 
 def parse_args(argv):

@@ -904,20 +904,6 @@ def purge_dir(dir):
     dir.mkdir(parents=True)
 
 
-def pack_sourcebuild(pdfium_dir, build_dir, sub_target, full_ver, **v_kwargs):
-    log("Packing data files for sourcebuild...")
-    
-    dest_dir = DataDir/ExtPlats.sourcebuild
-    purge_dir(dest_dir)
-    
-    for libpath in build_dir.glob(Host.libname_glob):
-        shutil.copy(libpath, dest_dir/libpath.name)
-    write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **v_kwargs)
-    
-    # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=(dest_dir/CTG_LIBPATTERN, ), version=full_ver.build)
-
-
 def git_get_hash(repo_dir, n_digits=None):
     short = f"--short={n_digits}" if n_digits else "--short"
     return "g" + run_cmd(["git", "rev-parse", short, "HEAD"], cwd=repo_dir, capture=True)
@@ -937,9 +923,25 @@ def handle_sbuild_vers(short_ver):
     return full_ver, pdfium_rev, chromium_rev
 
 
-def handle_sbuild_postver(short_ver, pdfium_dir):
-    if short_ver == "main":
-        log("Warning: Don't know how to get number of commits with shallow checkout. A NaN placeholder will be set.")
-        return dict(n_commits=NaN, hash=git_get_hash(pdfium_dir, n_digits=11))
-    else:
-        return dict(n_commits=0, hash=None)
+def pack_sourcebuild(pdfium_dir, build_dir, sub_target, full_ver, build_ver=None, post_ver=None):
+    log("Packing data files for sourcebuild...")
+    
+    if not post_ver:
+        assert build_ver
+        if build_ver == "main":
+            log("Warning: Don't know how to get number of commits with shallow checkout. A NaN placeholder will be set.")
+            post_ver = dict(n_commits=NaN, hash=git_get_hash(pdfium_dir, n_digits=11))
+        else:
+            post_ver = dict(n_commits=0, hash=None)
+    
+    dest_dir = DataDir/ExtPlats.sourcebuild
+    purge_dir(dest_dir)
+    
+    for libpath in build_dir.glob(Host.libname_glob):
+        shutil.copy(libpath, dest_dir/libpath.name)
+    write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **post_ver)
+    
+    # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
+    run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=(dest_dir/CTG_LIBPATTERN, ), version=full_ver.build)
+    
+    return full_ver, post_ver

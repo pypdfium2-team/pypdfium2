@@ -173,10 +173,8 @@ def main(
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
     build(Ninja, build_target)
-    v_post = handle_sbuild_postver(build_ver, PDFiumDir)
-    pack_sourcebuild(PDFiumDir, PDFiumOutDir, "toolchained", v_full, **v_post)
     
-    return v_full, v_post
+    return pack_sourcebuild(PDFiumDir, PDFiumOutDir, "toolchained", v_full, build_ver)
 
 
 def parse_args(argv):
