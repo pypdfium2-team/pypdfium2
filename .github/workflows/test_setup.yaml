@@ -43,22 +43,22 @@ jobs:
           repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in "Build docs" step
       
-      # FIXME Should we run the test suite after each way of installing?
+      # TODO(consider) run test suite after each way of installing?
       
       - name: Setup (default)
-        run: python3 -m pip install .
+        run: python3 -m pip install -v .
       
       - name: Setup (editable)
-        run: python3 -m pip install -e .
+        run: python3 -m pip install -v -e .
       
       - name: Install/update deps for non-isolated setup
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/docs.txt
       
       - name: Setup (default, no isolation)
-        run: python3 -m pip install --no-build-isolation .
+        run: python3 -m pip install -v --no-build-isolation .
       
       - name: Setup (editable, no isolation)
-        run: python3 -m pip install --no-build-isolation -e .
+        run: python3 -m pip install -v --no-build-isolation -e .
       
       - name: Build docs
         run: just docs-build
