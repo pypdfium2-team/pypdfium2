@@ -23,7 +23,7 @@ def run_local(*args, **kws):
 
 def update_refbindings(version):
     
-    # We endeavor to make the reference bindings as universal and robust as possible, thus the symbol guards, flags, runtime libdir ["."] + system search.
+    # We endeavor to make the reference bindings as universal and robust as possible, thus the symbol guards, flags, relative runtime libpath + system search.
     # Also, skip symbol source info for cleaner diffs, so one can see pdfium API changes at a glance.
     
     # REFBINDINGS_FLAGS:
@@ -45,7 +45,6 @@ def update_refbindings(version):
 def do_versioning(config, record, prev_helpers, new_pdfium):
     
     # make sure we have a valid state
-    assert isinstance(record["pdfium"], int)
     assert not record["pdfium"] > new_pdfium
     if prev_helpers["dirty"]:
         log("Warning: dirty state. This should not happen in CI.")
@@ -60,7 +59,8 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
     # reset prev_helpers to release state
     prev_helpers["n_commits"] = 0
     prev_helpers["hash"] = None
-    new_config, new_helpers = [deepcopy(d) for d in (config, prev_helpers)]
+    new_config = deepcopy(config)
+    new_helpers = deepcopy(prev_helpers)
     
     if config["major"]:
         new_helpers["major"] += 1
@@ -184,8 +184,6 @@ def main():
         help = "Save changes in autorelease_tmp branch."
     )
     args = parser.parse_args()
-    
-    # TODO dump input/output data for debugging
     
     latest_pdfium = PdfiumVer.get_latest()
     config = read_json(AR_ConfigFile)

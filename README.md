@@ -181,7 +181,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
 > [!TIP]
-> By default, the build scripts will create separate DLLs for vendored dependency libraries (such as `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib` to the build script.
+> By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib` to the build.
 
 ##### Android (Termux)
 
@@ -258,7 +258,7 @@ cp "$MY_BINARY_PATH" "$STAGING_DIR/libpdfium.so"
 # Now, we will call ctypesgen to generate the bindings interface.
 # Reminder: You'll want to use the pypdfium2-team fork of ctypesgen.
 # It generates much cleaner bindings, and it's what our source expects
-# (there are subtle API differences in terms of output).
+# (there may be subtle API differences in terms of output).
 # How exactly you do this is down to you.
 # See ctypesgen --help or base.py::run_ctypesgen() for further options.
 ctypesgen --library pdfium --rt-libpaths $MY_RT_LIBPATHS --ct-libpaths $MY_CT_LIBPATHS \
@@ -395,7 +395,7 @@ _**Note:** Conda packages are normally managed using recipe feedstocks driven by
 The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use our official packages where possible.
 If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
 
-Do not expect us to add/change code for downstream-specific setup tasks, or to actively care about downstream packaging.
+Do not expect us to add/change code for downstream-specific setup tasks.
 Related issues or PRs may be closed without further notice if we don't see fit for upstream.
 Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
 In case of doubt, open a discussion ticket and ask, but please don't expect much more than a "yes" or a "no".
