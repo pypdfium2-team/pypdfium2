@@ -15,6 +15,11 @@
 
 ## 4.30.1 (2024-12-19)
 
+**NOTE:** This release has been yanked on PyPI due to a text extraction regression introduced in pdfium `6756`. These problems are fixed as of pdfium-binaries `7019`.<br>
+If you need any pypdfium2 improvements from this release, you can do e.g.
+`PDFIUM_PLATFORM="auto:6462" pip install -v pypdfium2==4.30.1 --no-binary pypdfium2`
+to install from the sdist with the previous pdfium version. Ideally, you'll want to migrate to v5.
+
 - Updated PDFium from `6462` to `6899`.
 - `PdfPage.get_objects()`: Don't register pageobjects as children, because they don't need to be closed by the caller when part of a page. This avoids excessive caching of weakrefs that are not cleaned up with the object they refer to.
 - Fixed another dotted filepath blunder in the `extract-images` CLI. (The `PdfImage.extract()` API is not affected this time.)
