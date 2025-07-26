@@ -14,11 +14,6 @@ jobs:
   
   test_setup:
     
-    # Use latest pdfium instead of the version from the last pypdfium2 release (causes breakage when we integrate a new pdfium API, or else adapt to API changes).
-    # This points at a larger flaw that also impacts end users installing from pypdfium2's current main. -> FIXME
-    env:
-      PDFIUM_PLATFORM: 'auto:latest'
-    
     strategy:
       fail-fast: false
       matrix:

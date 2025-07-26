@@ -305,7 +305,7 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
   - Format spec: `[$PLATFORM][-v8][:$VERSION]` (`[]` = segments, `$CAPS` = variables).
   - Examples: `auto`, `auto:7269` `auto-v8:7269` (`auto` may be substituted by an explicit platform name, e.g. `linux_x64`).
   - V8: If given, use the V8 (JavaScript) and XFA enabled pdfium binaries. Otherwise, use the regular (non-V8) binaries.
-  - Version: If given, use the specified pdfium-binaries release. Otherwise, use the same version as the current pypdfium2 release. Set `pinned` to request that behavior explicitly. Or set `latest` to use the newest pdfium-binaries release instead.
+  - Version: If given, use the specified pdfium-binaries release. Otherwise, use the default version currently set in the codebase. Set `pinned` to request that behavior explicitly. Or set `latest` to use the newest pdfium-binaries release instead.
   - Platform:
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]

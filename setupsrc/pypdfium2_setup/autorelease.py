@@ -197,7 +197,7 @@ def main():
     prev_tag = merge_tag(prev_helpers, mode=None)
     assert prev_tag == record["tag"]
     new_tag = merge_tag(new_helpers, mode=None)
-    write_json(AR_RecordFile, dict(pdfium=new_pdfium, tag=new_tag))
+    write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
     
     update_refbindings(latest_pdfium)
     is_beta = new_helpers["beta"] is not None

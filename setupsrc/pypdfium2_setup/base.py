@@ -267,8 +267,11 @@ class _PdfiumVerClass:
             return full_ver
     
     @cached_property
-    def release_pdfium_build(self):
-        return read_json(AR_RecordFile)["pdfium"]
+    def pinned(self):
+        # comments are not permitted in JSON, so the reason for the post_pdfium pin (if set) goes here:
+        # 7309 is the latest tested version. 6996 is too old because we use FPDFFormObj_RemoveObject() which first arrived in 7191.
+        record = read_json(AR_RecordFile)
+        return record["post_pdfium"] or record["pdfium"]
 
 PdfiumVer = _PdfiumVerClass()
 NaN = float("nan")
@@ -672,7 +675,7 @@ def run_ctypesgen(
     
     if USE_REFBINDINGS:
         log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
-        record_ver = PdfiumVer.release_pdfium_build
+        record_ver = PdfiumVer.pinned
         if version != record_ver:
             log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
         shutil.copyfile(RefBindingsFile, target_path)

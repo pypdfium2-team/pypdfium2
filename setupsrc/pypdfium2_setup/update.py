@@ -214,7 +214,7 @@ def cli_main(argv=sys.argv[1:]):
     if not args.version or args.version == "latest":
         args.version = PdfiumVer.get_latest()
     elif args.version == "pinned":
-        args.version = PdfiumVer.release_pdfium_build
+        args.version = PdfiumVer.pinned
     else:
         args.version = int(args.version)
     main(**vars(args))
