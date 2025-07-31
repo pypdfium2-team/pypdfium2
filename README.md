@@ -23,7 +23,7 @@ If available for your platform, this will use a pre-built wheel package, which i
 Otherwise, [setup code](#from-the-repository--with-setup) will run.
 If your platform is not covered with pre-built binaries, this will look for system pdfium, or attempt to build pdfium from source.
 
-#### JavaScript/XFA enabled builds
+#### JavaScript/XFA builds
 
 pdfium-binaries also offer V8 (JavaScript) / XFA enabled builds.
 If you need them, do e.g.:
@@ -181,7 +181,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
 > [!TIP]
-> By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib` to the build.
+> By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib`.
 
 ##### Android (Termux)
 
@@ -240,7 +240,7 @@ pypdfium2 is like any other Python project in essentials, except that it needs s
 The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
 
 However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's own setup code.<br>
-The idea is basically to put your data files in a staging directory, `data/system` or `data/sourcebuild` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume from that directory on setup.
+The idea is basically to put your data files in a staging directory, `data/sourcebuild` or `data/system` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume from that directory on setup.
 
 This setup strategy should be inherently free of web requests.
 Mind though, we don't support the result. If you bring your own files, it's your own responsibility, and it's quite possible your pypdfium2 might turn out subtly different from ours.
@@ -262,7 +262,7 @@ cp "$MY_BINARY_PATH" "$STAGING_DIR/libpdfium.so"
 # How exactly you do this is down to you.
 # See ctypesgen --help or base.py::run_ctypesgen() for further options.
 ctypesgen --library pdfium --rt-libpaths $MY_RT_LIBPATHS --ct-libpaths $MY_CT_LIBPATHS \
---headers $MY_INCLUDE_DIR/fpdf*.h -o $STAGING_DIR/bindings.py [-D $MY_FLAGS]
+--headers $MY_INCLUDE_DIR/fpdf*.h -o $STAGING_DIR/bindings.py [-D $MY_RAW_FLAGS]
 
 # Then write the version file (fill the placeholders).
 # Note, this is not a mature interface yet and might change any time!
@@ -281,7 +281,7 @@ cat > "$STAGING_DIR/version.json" <<END
   "n_commits": $POST_TAG_COMMIT_COUNT,
   "hash": $POST_TAG_HASH,
   "origin": "$TARGET-$MY_ORIGIN",
-  "flags": [$MY_FLAGS]
+  "flags": [$MY_SHORT_FLAGS]
 }
 END
 
@@ -393,14 +393,14 @@ _**Note:** Conda packages are normally managed using recipe feedstocks driven by
 ### Unofficial packages
 
 The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use our official packages where possible.
-If you have an issue with a third-party build, either contact your distributor, or try to reproduce with an official build.
+If you have an issue with a third-party build, either contact your distributor, or try to reproduce with our official builds.
 
 Do not expect us to add/change code for downstream-specific setup tasks.
 Related issues or PRs may be closed without further notice if we don't see fit for upstream.
 Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
 In case of doubt, open a discussion ticket and ask, but please don't expect much more than a "yes" or a "no".
 
-If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by pypdfium2 team.
+If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.
 
 
 ## Usage
@@ -883,7 +883,7 @@ Roadmap:
     Beware: The bridge between Python and C increases the probability of integration issues or API misuse. The symptoms can often make it look like a PDFium bug while it is not.
   - [Mailing list](https://groups.google.com/g/pdfium/): Questions regarding PDFium usage.
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
-* [ctypesgen](https://github.com/ctypesgen/ctypesgen/issues): Bindings generator.
+* [ctypesgen](https://github.com/pypdfium2-team/ctypesgen/issues): Bindings generator (fork). See also [upstream](https://github.com/ctypesgen/ctypesgen/issues).
 
 ### Response policy
 <!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
@@ -1047,6 +1047,7 @@ Faulty PyPI releases may be yanked using the web interface.
 
 pypdfium2 is used by popular packages such as
 [langchain](https://github.com/langchain-ai/langchain),
+[dify](https://github.com/langgenius/dify),
 [docling](https://github.com/DS4SD/docling),
 [nougat](https://github.com/facebookresearch/nougat),
 [pdfplumber](https://github.com/jsvine/pdfplumber),
