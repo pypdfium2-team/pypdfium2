@@ -21,7 +21,7 @@ from pypdfium2_setup.base import (
 is_rtd = os.environ.get("READTHEDOCS", "").lower() == "true"
 tag_info = get_helpers_info()
 next_changelog = get_next_changelog()
-have_changes = tag_info["n_commits"] != 0 or (tag_info["dirty"] and not is_rtd) or next_changelog
+have_changes = tag_info["n_commits"] != 0 or (tag_info["dirty"] and not is_rtd) or bool(next_changelog)
 
 project = "pypdfium2"
 author = "pypdfium2-team"
@@ -73,6 +73,7 @@ intersphinx_mapping = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-rst_prolog
 # .. |br| raw:: html
 #    <br/>
+assert type(have_changes) is bool
 rst_prolog = f"""
 .. |have_changes| replace:: {have_changes}
 """
