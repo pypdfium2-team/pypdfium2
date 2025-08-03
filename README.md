@@ -1027,6 +1027,7 @@ In case of necessity, you may also forego CI and do the release locally, which w
   ```bash
   git checkout stable
   git rebase origin/main  # or: git reset --hard main
+  git push
   git checkout main
   ```
 
