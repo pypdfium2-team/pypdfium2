@@ -1052,7 +1052,8 @@ pypdfium2 is used by popular packages such as
 [docling](https://github.com/DS4SD/docling),
 [nougat](https://github.com/facebookresearch/nougat),
 [pdfplumber](https://github.com/jsvine/pdfplumber),
-and [doctr](https://github.com/mindee/doctr/).
+[doctr](https://github.com/mindee/doctr/),
+and [nv-ingest](https://github.com/NVIDIA/nv-ingest).
 
 This results in pypdfium2 being part of a large dependency tree.
 
