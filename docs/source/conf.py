@@ -20,8 +20,7 @@ from pypdfium2_setup.base import (
 # RTD modifies conf.py, so we have to ignore dirty state if on RTD
 is_rtd = os.environ.get("READTHEDOCS", "").lower() == "true"
 tag_info = get_helpers_info()
-next_changelog = get_next_changelog()
-have_changes = tag_info["n_commits"] != 0 or (tag_info["dirty"] and not is_rtd) or bool(next_changelog)
+have_changes = tag_info["n_commits"] != 0 or (tag_info["dirty"] and not is_rtd) or (not tag_info["beta"] and bool(get_next_changelog()))
 
 project = "pypdfium2"
 author = "pypdfium2-team"
