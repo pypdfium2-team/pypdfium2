@@ -69,13 +69,13 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
 
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-rst_prolog
-# .. |br| raw:: html
-#    <br/>
-assert type(have_changes) is bool
-rst_prolog = f"""
-.. |have_changes| replace:: {have_changes}
-"""
+# # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-rst_prolog
+# # .. |br| raw:: html
+# #    <br/>
+# assert type(have_changes) is bool
+# rst_prolog = f"""
+# .. |have_changes| replace:: {have_changes}
+# """
 
 # def remove_namedtuple_aliases(app, what, name, obj, skip, options):
 #     if type(obj) is collections._tuplegetter:
