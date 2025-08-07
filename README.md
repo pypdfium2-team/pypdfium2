@@ -436,9 +436,9 @@ Here are some examples of using the support model API.
   pil_image.show()
   ```
   
-  Note, with the PIL adapter, it might be advantageous to use `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA, rev_byteorder=True` or maybe `prefer_bgrx=True, use_bgra_on_transparency=True, rev_byteorder=True`, to achieve a pixel format supported natively by PIL, and avoid rendering with transparency to a non-alpha bitmap, which can slow down pdfium.
+  Note, with the PIL adapter, it might be advantageous to use `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA, rev_byteorder=True` or perhaps `prefer_bgrx=True, maybe_alpha=True, rev_byteorder=True`, to achieve a pixel format supported natively by PIL, and avoid rendering with transparency to a non-alpha bitmap, which can slow down pdfium.
   
-  With `.to_numpy()`, all formats are zero-copy, but passing either `use_bgra_on_transparency=True` (if dynamic pixel format is acceptable) or `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA` is also recommended for the transparency problem.
+  With `.to_numpy()`, all formats are zero-copy, but passing either `maybe_alpha=True` (if dynamic pixel format is acceptable) or `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA` is also recommended for the transparency problem.
 
 * Try some page methods
   ```python
@@ -970,6 +970,8 @@ To get code coverage statistics, you may call
 ```bash
 just coverage
 ```
+
+<!-- TODO any chance to avoid `bash -c` ? -->
 
 Sometimes, it can also be helpful to test code on many PDFs.[^testing_corpora]
 In this case, the command-line interface and `find` come in handy:

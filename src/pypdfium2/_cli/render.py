@@ -161,10 +161,9 @@ def attach(parser):
         help = "Whether to prefer BGRx/RGBx over BGR/RGB (default: conditional).",
     )
     bitmap.add_argument(
-        "--bgra-on-transparency",
-        dest="use_bgra_on_transparency",
+        "--maybe-alpha",
         action = BooleanOptionalAction,
-        help = "Whether to use BGRA if there is page content that has transparency. Note, this makes format selection page-dependent. As this behavior can be confusing, it is not currently the default, but recommended for performance in these cases.",
+        help = "Whether to use BGRA if page content has transparency. Note, this makes format selection page-dependent. As this behavior can be confusing, it is not currently the default, but recommended for performance in these cases.",
     )
     # TODO expose force_bitmap_format
     
@@ -251,7 +250,7 @@ class SavingEngine:
         return args.output_dir / f"{args.prefix}{i+1:0{args.n_digits}d}.{ext}"
     
     def __call__(self, i, bitmap, page):
-        if self.args.use_bgra_on_transparency and self.args.format in ("jpg", "jpeg") and pdfium_c.FPDFPage_HasTransparency(page):
+        if self.args.maybe_alpha and self.args.format in ("jpg", "jpeg") and pdfium_c.FPDFPage_HasTransparency(page):
             # alternatively, we could perhaps convert to RGB
             logger.info("Page has transparency - overriding output format to PNG.")
             ext = "png"
@@ -454,7 +453,7 @@ def main(args):
         force_halftone = args.force_halftone,
         rev_byteorder = args.rev_byteorder,
         prefer_bgrx = args.prefer_bgrx,
-        use_bgra_on_transparency = args.use_bgra_on_transparency,
+        maybe_alpha = args.maybe_alpha,
         bitmap_maker = BitmapMakers[args.bitmap_maker],
         color_scheme = color_scheme,
         fill_to_stroke = args.fill_to_stroke,
@@ -467,7 +466,7 @@ def main(args):
         prefix = args.prefix,
         n_digits = len(str(pdf_len)),
         format = args.format,
-        use_bgra_on_transparency = args.use_bgra_on_transparency,
+        maybe_alpha = args.maybe_alpha,
     )
     postproc_kwargs = dict(
         invert_lightness = args.invert_lightness,

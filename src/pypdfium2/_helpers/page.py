@@ -409,9 +409,9 @@ class PdfPage (pdfium_i.AutoCloseable):
                 If True, use 4-byte ``{BGR/RGB}x`` rather than 3-byte ``{BGR/RGB}`` (i.e. add an unused byte).
                 Other pixel formats are not affected.
             
-            use_bgra_on_transparency (bool):
+            maybe_alpha (bool):
                 If True, use a pixel format with alpha channel (i.e. ``{BGR/RGB}A``) if page content has transparency.
-                This is recommended for performance in these cases, but as page-dependent format selection is somewhat unexpected, it is not enabled by default.
+                This is recommended for performance in these cases, but as page-dependent format selection can be unexpected, it is not enabled by default.
             
             force_bitmap_format (int | None):
                 If given, override automatic pixel format selection and enforce use of the given format (one of the :attr:`FPDFBitmap_*` constants). In this case, you should not pass any other format selection options, except potentially *rev_byteorder*.
@@ -482,10 +482,10 @@ class PdfPage (pdfium_i.AutoCloseable):
         return bitmap
 
 
-def _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, use_bgra_on_transparency):
-    # regarding use_bgra_on_transparency, see
+def _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, maybe_alpha):
+    # regarding maybe_alpha, see
     # https://chromium.googlesource.com/chromium/src/+/21e456b92bfadc625c947c718a6c4c5bf0c4c61b
-    if fill_color[3] < 255 or (use_bgra_on_transparency and pdfium_c.FPDFPage_HasTransparency(page)):
+    if fill_color[3] < 255 or (maybe_alpha and pdfium_c.FPDFPage_HasTransparency(page)):
         return pdfium_c.FPDFBitmap_BGRA
     elif grayscale:
         return pdfium_c.FPDFBitmap_Gray
@@ -508,13 +508,13 @@ def _parse_renderopts(
         limit_image_cache = False,
         rev_byteorder = False,
         prefer_bgrx = False,
-        use_bgra_on_transparency = False,
+        maybe_alpha = False,
         force_bitmap_format = None,
         extra_flags = 0,
     ):
     
     if force_bitmap_format is None:
-        cl_format = _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, use_bgra_on_transparency)
+        cl_format = _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, maybe_alpha)
     else:
         cl_format = force_bitmap_format
     
