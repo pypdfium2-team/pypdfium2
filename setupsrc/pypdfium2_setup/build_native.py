@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
-# Related work: https://github.com/tiran/libpdfium/ and https://aur.archlinux.org/packages/libpdfium-nojs
+# Related work: https://github.com/tiran/libpdfium and https://aur.archlinux.org/packages/libpdfium-nojs
 
 import re
 import os
@@ -69,14 +69,23 @@ if IS_ANDROID:
         "target_os": "android",
     })
     del DefaultConfig["use_sysroot"]
-    # On Android, it seems that the build system's CPU type statically defaults to "arm", but we want this script to be host-adaptive (and "arm64" is the more likely candidate).
-    # q&d: resolve Google CPU name for host via pdfium-binaries names, which align with upstream.
-    if Host.platform in PdfiumBinariesMap:
-        cpu = PdfiumBinariesMap[Host.platform].rsplit("-", maxsplit=1)[-1]
+    # On Android, it seems that the build system's CPU type statically defaults to "arm", but we want this script to be host-adaptive (plus, "arm64" is the more likely candidate).
+    # TODO(future) refactor platform constants from base.py so we can access abstracted OS/CPU separately through sub-attributes
+    AndroidCPUMap = {
+        "aarch64": "arm64",
+        "armv7l":  "arm",
+        "x86_64":  "x64",
+        "i686":    "x86",
+    }
+    raw_cpu = Host._raw_machine
+    if raw_cpu in AndroidCPUMap:
+        cpu = AndroidCPUMap[raw_cpu]
         DefaultConfig.update({
             "current_cpu": cpu,
             "target_cpu": cpu,
         })
+    else:
+        log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
 def _get_repo(url, target_dir, rev, depth=1):
