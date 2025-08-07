@@ -13,7 +13,7 @@ import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
-from pypdfium2._deferred import PIL_Image
+from pypdfium2._lazy import Lazy
 
 logger = logging.getLogger(__name__)
 
@@ -454,7 +454,7 @@ def _extract_smart(image_obj, fb_format=None):
         format = info.format
         if format == "raw":
             metadata = info.metadata
-            pil_image = PIL_Image.frombuffer(
+            pil_image = Lazy.PIL_Image.frombuffer(
                 info.mode,
                 (metadata.width, metadata.height),
                 image_obj.get_data(decode_simple=True),

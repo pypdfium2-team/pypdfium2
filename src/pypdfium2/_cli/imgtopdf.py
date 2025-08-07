@@ -5,7 +5,7 @@
 
 from pathlib import Path
 import pypdfium2._helpers as pdfium
-from pypdfium2._deferred import PIL_Image
+from pypdfium2._lazy import Lazy
 
 def attach(parser):
     parser.add_argument(
@@ -43,7 +43,7 @@ def main(args):
         if fp.suffix.lower() in (".jpg", ".jpeg"):
             image_obj.load_jpeg(fp, inline=args.inline)
         else:
-            pil_image = PIL_Image.open(fp)
+            pil_image = Lazy.PIL_Image.open(fp)
             bitmap = pdfium.PdfBitmap.from_pil(pil_image)
             pil_image.close()
             image_obj.set_bitmap(bitmap)
