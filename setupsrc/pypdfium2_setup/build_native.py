@@ -14,15 +14,18 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
+IS_CIBUILDWHEEL = bool(int( os.environ.get("CIBUILDWHEEL", 0) ))
+
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium"
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
     build      = _CR_PREFIX + "chromium/src/build",
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
+    catapult   = _CR_PREFIX + "catapult",  # android
+    icu        = _CR_PREFIX + "chromium/deps/icu",  # cibuildwheel
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
-    catapult   = _CR_PREFIX + "catapult",
 )
 SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
@@ -188,10 +191,14 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     
     do_patches = _fetch_dep("build", PDFIUM_DIR/"build")
     if do_patches:
-        # Work around error about path_exists() being undefined
+        # siso.patch: work around error about path_exists() being undefined
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
         if IS_ANDROID:
+            # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR/"build")
+        if IS_CIBUILDWHEEL:
+            # compatibility patch for older system libraries from container
+            git_apply_patch(PatchDir/"cibuildwheel.patch", cwd=PDFIUM_DIR)
         if compiler is Compiler.gcc:
             # https://crbug.com/402282789
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
@@ -216,6 +223,8 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if IS_ANDROID:
         _fetch_dep("catapult", PDFIUM_3RDPARTY/"catapult")
+    if IS_CIBUILDWHEEL:
+        _fetch_dep("icu", PDFIUM_3RDPARTY/"icu")
     if with_tests:
         _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
@@ -226,13 +235,15 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
 def prepare(config_dict, build_dir):
     # Create an empty gclient config
     (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch(exist_ok=True)
-    # Unbundle ICU
-    # alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu
-    (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
-    shutil.copyfile(
-        PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
-        PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
-    )
+    if not IS_CIBUILDWHEEL:
+        # Unbundle ICU
+        # alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu
+        # Don't do this with cibuildwheel, the libicu pulled in via auditwheel is quite big.
+        (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
+        shutil.copyfile(
+            PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
+            PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
+        )
     # Create target dir (or reuse existing) and write build config
     mkdir(build_dir)
     # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single_lib build is done after a component build. This also ensures we really built a new DLL in the end.
@@ -298,6 +309,8 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     RESET_REPOS = reset
     if IS_ANDROID:
         DEPS_FIELDS += ("catapult", )
+    if IS_CIBUILDWHEEL:
+        DEPS_FIELDS += ("icu", )
     if with_tests:
         DEPS_FIELDS += ("gtest", "test_fonts")
     

@@ -135,6 +135,15 @@ SPDX-FileCopyrightText = [
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
+path = "pdfium_patches/cibuildwheel.patch"
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2025 wojiushixiaobai 吴小白 <296015668@qq.com>",
+    "2025 geisserml <geisserml@gmail.com>",
+]
+SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
+
+[[annotations]]
 path = [
     "docs/build/.gitkeep",
     "sbuild/.gitkeep",
