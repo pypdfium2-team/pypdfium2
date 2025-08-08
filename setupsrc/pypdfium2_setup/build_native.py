@@ -188,6 +188,10 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_l
                 "#if 1  // defined(COMPONENT_BUILD)",
                 is_regex=False, exp_count=1,
             )
+        if sys.byteorder == "big":
+            git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
+            if with_tests:
+                git_apply_patch(PatchDir/"bigendian_test.patch", cwd=PDFIUM_DIR)
     
     do_patches = _fetch_dep(deps_info, "build", PDFIUM_DIR/"build", reset=reset)
     if do_patches:
