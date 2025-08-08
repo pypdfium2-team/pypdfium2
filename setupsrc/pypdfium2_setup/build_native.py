@@ -307,14 +307,10 @@ def setup_compiler(config, compiler, clang_path):
 
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False, vendor_deps=None):
     
-    if vendor_deps is None:
-        vendor_deps = set()
-        # Vendor ICU in cibuildwheel by default, the libicudata pulled in from the system is quite big. This reduces wheel size by about 10 MB.
-        if IS_CIBUILDWHEEL:
-            vendor_deps.add("icu")
-    
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
+    if vendor_deps is None:
+        vendor_deps = set()
     if compiler is None:
         if shutil.which("gcc"):
             compiler = Compiler.gcc
@@ -400,9 +396,9 @@ def parse_args(argv):
     parser.add_argument(
         "--vendor",
         dest = "vendor_deps",
-        nargs = "*",
+        nargs = "+",
         action = "extend",
-        help = "Dependencies to vendor. Note, this only supports libraries where there is a specific reason to vendor despite the native build. Currently this means 'icu' only ('libc++' may be added in the future). For an exhaustive vendored build, use build_toolchained.py. Pass --vendor without arguments to drop default vendorings, if any."
+        help = "Dependencies to vendor. Note, this only supports libraries where there is a specific reason to vendor despite the native build. Currently this means 'icu' only ('libc++' may be added in the future). For an exhaustive vendored build, use build_toolchained.py"
     )
     args = parser.parse_args(argv)
     if args.compiler:
