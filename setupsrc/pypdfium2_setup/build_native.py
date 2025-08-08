@@ -393,6 +393,9 @@ def parse_args(argv):
         action = "store_true",
         help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is downloaded anew or reset, else the existing state is used.",
     )
+    # The --vendor option is provided for cibuildwheel clients:
+    # - libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
+    # - libc++ is used but not pulled in by auditwheel. This appears to be ABI-unsafe (although the wheels seem to work accross different hosts according to downstream feedback), so we may want to add that in the future. Actually, options to use system libc++ are deprecated upstream anyway.
     parser.add_argument(
         "--vendor",
         dest = "vendor_deps",
