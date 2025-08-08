@@ -32,7 +32,6 @@ PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
 Compiler = Enum("Compiler", "gcc clang")
-RESET_REPOS = False
 
 DefaultConfig = {
     "is_debug": False,
@@ -91,10 +90,10 @@ if IS_ANDROID:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
-def _get_repo(url, target_dir, rev, depth=1):
+def _get_repo(url, target_dir, rev, reset=False, depth=1):
     
     if target_dir.exists():
-        if RESET_REPOS and target_dir.name in ("pdfium", "build"):
+        if reset:
             log(f"Resetting {target_dir.name} as per --reset option.")
             run_cmd(["git", "reset", "--hard"], cwd=target_dir)
             return True
@@ -115,16 +114,18 @@ def _get_repo(url, target_dir, rev, depth=1):
 
 
 DEPS_RE = r"\s*'{key}': '(\w+)'"
-DEPS_FIELDS = ("build", "abseil", "fast_float")
 
-class _DeferredClass:
+class _DeferredInfo:
+    
+    def __init__(self, deps_fields):
+        self.deps_fields = deps_fields
     
     @cached_property  # included from base.py
     def deps(self):
         # TODO get a proper parser for the DEPS file format?
         deps_content = (PDFIUM_DIR/"DEPS").read_text()
         result = {}
-        for field in DEPS_FIELDS:
+        for field in self.deps_fields:
             field_re = DEPS_RE.format(key=f"{field}_revision")
             match = re.search(field_re, deps_content)
             assert match, f"Could not find {field!r} in DEPS file"
@@ -132,12 +133,10 @@ class _DeferredClass:
         log(f"Found DEPS revisions:\n{result}")
         return result
 
-_Deferred = _DeferredClass()
 
-
-def _fetch_dep(name, target_dir):
+def _fetch_dep(info, name, target_dir, reset=False):
     # parse out DEPS revisions only when we actually need them
-    return _get_repo(DEPS_URLS[name], target_dir, rev=lambda: _Deferred.deps[name])
+    return _get_repo(DEPS_URLS[name], target_dir, rev=lambda: info.deps[name], reset=reset)
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
@@ -157,12 +156,13 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
 
-def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_lib, reset):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
-    do_patches = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
+    # pass through reset only for the repositories we actually patch
+    do_patches = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev, reset=reset)
     if do_patches:
         autopatch_dir(
             PDFIUM_DIR/"public"/"cpp", "*.h",
@@ -189,7 +189,7 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
                 is_regex=False, exp_count=1,
             )
     
-    do_patches = _fetch_dep("build", PDFIUM_DIR/"build")
+    do_patches = _fetch_dep(deps_info, "build", PDFIUM_DIR/"build", reset=reset)
     if do_patches:
         # siso.patch: work around error about path_exists() being undefined
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
@@ -219,15 +219,15 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     
     get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
     
-    _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
-    _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
+    _fetch_dep(deps_info, "abseil", PDFIUM_3RDPARTY/"abseil-cpp")
+    _fetch_dep(deps_info, "fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if IS_ANDROID:
-        _fetch_dep("catapult", PDFIUM_3RDPARTY/"catapult")
+        _fetch_dep(deps_info, "catapult", PDFIUM_3RDPARTY/"catapult")
     if IS_CIBUILDWHEEL:
-        _fetch_dep("icu", PDFIUM_3RDPARTY/"icu")
+        _fetch_dep(deps_info, "icu", PDFIUM_3RDPARTY/"icu")
     if with_tests:
-        _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
-        _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
+        _fetch_dep(deps_info, "gtest", PDFIUM_3RDPARTY/"googletest"/"src")
+        _fetch_dep(deps_info, "test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     
     return full_ver
 
@@ -304,16 +304,6 @@ def setup_compiler(config, compiler, clang_path):
 
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False):
     
-    # q&d: use a global to expose the `reset` setting to _get_repo(), easier than handing it down through a lot of functions
-    global RESET_REPOS, DEPS_FIELDS
-    RESET_REPOS = reset
-    if IS_ANDROID:
-        DEPS_FIELDS += ("catapult", )
-    if IS_CIBUILDWHEEL:
-        DEPS_FIELDS += ("icu", )
-    if with_tests:
-        DEPS_FIELDS += ("gtest", "test_fonts")
-    
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
     if compiler is None:
@@ -332,8 +322,20 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     if single_lib:
         config["is_component_build"] = False
     
+    deps_fields = ["build", "abseil", "fast_float"]
+    if IS_ANDROID:
+        deps_fields.append("catapult")
+    if IS_CIBUILDWHEEL:
+        deps_fields.append("icu")
+    if with_tests:
+        deps_fields += ("gtest", "test_fonts")
+    
+    deps_info = _DeferredInfo(deps_fields)
+    
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(build_ver, with_tests, compiler, clang_path, single_lib)
+    full_ver = get_sources(
+        deps_info, build_ver, with_tests, compiler, clang_path, single_lib, reset
+    )
     setup_compiler(config, compiler, clang_path)
     prepare(config, build_dir)
     build(with_tests, build_dir, n_jobs)
