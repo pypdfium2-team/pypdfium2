@@ -23,7 +23,7 @@ DEPS_URLS = dict(
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
     catapult   = _CR_PREFIX + "catapult",  # android
-    icu        = _CR_PREFIX + "chromium/deps/icu",  # cibuildwheel
+    icu        = _CR_PREFIX + "chromium/deps/icu",  # for cibuildwheel
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
 )
@@ -156,7 +156,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_lib, reset):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_lib, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -227,7 +227,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_l
     _fetch_dep(deps_info, "fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if IS_ANDROID:
         _fetch_dep(deps_info, "catapult", PDFIUM_3RDPARTY/"catapult")
-    if IS_CIBUILDWHEEL:
+    if "icu" in vendor_deps:
         _fetch_dep(deps_info, "icu", PDFIUM_3RDPARTY/"icu")
     if with_tests:
         _fetch_dep(deps_info, "gtest", PDFIUM_3RDPARTY/"googletest"/"src")
@@ -236,13 +236,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_l
     return full_ver
 
 
-def prepare(config_dict, build_dir):
+def prepare(config_dict, build_dir, vendor_deps):
     # Create an empty gclient config
     (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch(exist_ok=True)
-    if not IS_CIBUILDWHEEL:
+    if "icu" not in vendor_deps:
         # Unbundle ICU
         # alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu
-        # Don't do this with cibuildwheel, the libicu pulled in via auditwheel is quite big.
         (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
         shutil.copyfile(
             PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
@@ -306,7 +305,13 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False, vendor_deps=None):
+    
+    if vendor_deps is None:
+        vendor_deps = set()
+        # Vendor ICU in cibuildwheel by default, the libicudata pulled in from the system is quite big. This reduces wheel size by about 10 MB.
+        if IS_CIBUILDWHEEL:
+            vendor_deps.add("icu")
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -329,7 +334,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_fields = ["build", "abseil", "fast_float"]
     if IS_ANDROID:
         deps_fields.append("catapult")
-    if IS_CIBUILDWHEEL:
+    if "icu" in vendor_deps:
         deps_fields.append("icu")
     if with_tests:
         deps_fields += ("gtest", "test_fonts")
@@ -338,10 +343,10 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     
     mkdir(SOURCES_DIR)
     full_ver = get_sources(
-        deps_info, build_ver, with_tests, compiler, clang_path, single_lib, reset
+        deps_info, build_ver, with_tests, compiler, clang_path, single_lib, reset, vendor_deps
     )
     setup_compiler(config, compiler, clang_path)
-    prepare(config, build_dir)
+    prepare(config, build_dir, vendor_deps)
     build(with_tests, build_dir, n_jobs)
     if with_tests:
         test(build_dir)
@@ -392,9 +397,18 @@ def parse_args(argv):
         action = "store_true",
         help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is downloaded anew or reset, else the existing state is used.",
     )
+    parser.add_argument(
+        "--vendor",
+        dest = "vendor_deps",
+        nargs = "*",
+        action = "extend",
+        help = "Dependencies to vendor. Note, this only supports libraries where there is a specific reason to vendor despite the native build. Currently this means 'icu' only ('libc++' may be added in the future). For an exhaustive vendored build, use build_toolchained.py. Pass --vendor without arguments to drop default vendorings, if any."
+    )
     args = parser.parse_args(argv)
     if args.compiler:
         args.compiler = Compiler[args.compiler]
+    if args.vendor_deps:
+        args.vendor_deps = set(args.vendor_deps)
     return args
 
 
