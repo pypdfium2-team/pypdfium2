@@ -1,0 +1,29 @@
+diff --git a/core/fxcodec/jpx/cjpx_decoder.cpp b/core/fxcodec/jpx/cjpx_decoder.cpp
+index 4650609..1eadfd5 100644
+--- a/core/fxcodec/jpx/cjpx_decoder.cpp
++++ b/core/fxcodec/jpx/cjpx_decoder.cpp
+@@ -493,9 +493,11 @@ bool CJPX_Decoder::Init(pdfium::span<const uint8_t> src_data,
+   }
+ 
+   // For https://crbug.com/42270564
++  /* OpenJPEG 2.5 API
+   if (!strict_mode) {
+     CHECK(opj_decoder_set_strict_mode(codec_.get(), false));
+   }
++  */
+ 
+   opj_image_t* pTempImage = nullptr;
+   if (!opj_read_header(stream_.get(), codec_.get(), &pTempImage)) {
+diff --git a/core/fxge/cfx_face.cpp b/core/fxge/cfx_face.cpp
+index fa02d5b..bfa21d3 100644
+--- a/core/fxge/cfx_face.cpp
++++ b/core/fxge/cfx_face.cpp
+@@ -659,7 +659,7 @@ int CFX_Face::GetCharIndex(uint32_t code) {
+ }
+ 
+ int CFX_Face::GetNameIndex(const char* name) {
+-  return FT_Get_Name_Index(GetRec(), name);
++  return FT_Get_Name_Index(GetRec(), const_cast<char*>(name));
+ }
+ 
+ FX_RECT CFX_Face::GetCharBBox(uint32_t code, int glyph_index) {
