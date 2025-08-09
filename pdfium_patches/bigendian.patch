@@ -1,5 +1,5 @@
 diff --git a/core/fxcrt/cfx_seekablestreamproxy.cpp b/core/fxcrt/cfx_seekablestreamproxy.cpp
-index 33cc528..5fa42bf 100644
+index 33cc528..95dc752 100644
 --- a/core/fxcrt/cfx_seekablestreamproxy.cpp
 +++ b/core/fxcrt/cfx_seekablestreamproxy.cpp
 @@ -89,11 +89,19 @@ void SwapByteOrder(pdfium::span<uint16_t> str) {
@@ -31,7 +31,7 @@ index 33cc528..5fa42bf 100644
        SwapByteOrder(fxcrt::reinterpret_span<uint16_t>(buffer).first(elements));
      }
 +#else
-+    if (m_wCodePage == FX_CodePage::kUTF16LE) {
++    if (code_page_ == FX_CodePage::kUTF16LE) {
 +      SwapByteOrder(fxcrt::reinterpret_span<uint16_t>(buffer).first(elements));
 +    }
 +#endif
