@@ -73,21 +73,12 @@ jobs:
           git config --global user.name "geisserml"
           python -m pip install -U -r req/setup.txt
       
-      # TODO might be able to unify with ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }} or something
-      
       - name: Build package
-        if: ${{ inputs.package == 'helpers' || !inputs.new_only }}
-        run: just craft-conda "$PACKAGE" --pdfium-ver "$PDFIUM_VER"
+        run: just craft-conda "$PACKAGE" --pdfium-ver "$PDFIUM_VER" $MAYBE_NEW_ONLY
         env:
           PACKAGE: ${{ inputs.package }}
           PDFIUM_VER: ${{ inputs.pdfium_ver }}
-      
-      - name: Build package (new only)
-        if: ${{ inputs.package == 'raw' && inputs.new_only }}
-        run: just craft-conda "$PACKAGE" --pdfium-ver "$PDFIUM_VER" --new-only
-        env:
-          PACKAGE: ${{ inputs.package }}
-          PDFIUM_VER: ${{ inputs.pdfium_ver }}
+          MAYBE_NEW_ONLY: ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }}
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -157,7 +148,7 @@ jobs:
     
     steps:
       
-      # FIXME custom channels probably not necessary here
+      # NOTE custom channels may not be actually necessary here
       - name: Miniconda setup
         uses: conda-incubator/setup-miniconda@v3
         with:
