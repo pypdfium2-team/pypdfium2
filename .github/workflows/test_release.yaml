@@ -9,6 +9,10 @@ on:
         default: 'https://pypi.org/simple'
         type: string
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   test-release:
@@ -32,7 +36,9 @@ jobs:
           python-version: ${{ matrix.py }}
       
       - name: Install pypdfium2 from package index
-        run: python3 -m pip install -U --pre pypdfium2 --index-url ${{ inputs.index_url }}
+        run: python3 -m pip install -U --pre pypdfium2 --index-url "$INDEX_URL"
+        env:
+          INDEX_URL: ${{ inputs.index_url }}
       
       - name: Get pypdfium2 version
         id: version

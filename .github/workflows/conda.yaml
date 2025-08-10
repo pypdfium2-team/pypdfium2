@@ -73,15 +73,12 @@ jobs:
           git config --global user.name "geisserml"
           python -m pip install -U -r req/setup.txt
       
-      # TODO might be able to unify with ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }} or something
-      
       - name: Build package
-        if: ${{ inputs.package == 'helpers' || !inputs.new_only }}
-        run: just craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }}
-      
-      - name: Build package (new only)
-        if: ${{ inputs.package == 'raw' && inputs.new_only }}
-        run: just craft-conda ${{ inputs.package }} --pdfium-ver ${{ inputs.pdfium_ver }} --new-only
+        run: just craft-conda "$PACKAGE" --pdfium-ver "$PDFIUM_VER" $MAYBE_NEW_ONLY
+        env:
+          PACKAGE: ${{ inputs.package }}
+          PDFIUM_VER: ${{ inputs.pdfium_ver }}
+          MAYBE_NEW_ONLY: ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }}
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -131,14 +128,14 @@ jobs:
       - name: Install/Test raw package
         if: inputs.package == 'raw'
         run: |
-          conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c bblanchon -c defaults
+          conda install -y pypdfium2_raw --override-channels -c ./conda_dist/ -c bblanchon -c defaults
           python conda/raw/minitest.py
       
       - name: Install/Test helpers package
         if: inputs.package == 'helpers'
         run: |
           conda install -y pytest pillow numpy
-          conda install -y pypdfium2_${{ inputs.package }} --override-channels -c ./conda_dist/ -c pypdfium2-team -c bblanchon -c defaults
+          conda install -y pypdfium2_helpers --override-channels -c ./conda_dist/ -c pypdfium2-team -c bblanchon -c defaults
           pytest tests/
   
   publish:
@@ -151,7 +148,7 @@ jobs:
     
     steps:
       
-      # FIXME custom channels probably not necessary here
+      # NOTE custom channels may not be actually necessary here
       - name: Miniconda setup
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -171,8 +168,8 @@ jobs:
       
       - name: Upload to Anaconda
         env:
+          PACKAGE: ${{ inputs.package }}
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${{ inputs.package }}-*.conda
-          file $ARTIFACT_PATH
+          ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${PACKAGE}-*.conda
           anaconda upload $ARTIFACT_PATH

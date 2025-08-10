@@ -162,10 +162,14 @@ jobs:
       
       - name: Run auditwheel (informational)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: python3 -m auditwheel show ${{ matrix.wheel }}
+        run: python3 -m auditwheel show $WHEEL
+        env:
+          WHEEL: ${{ matrix.wheel }}
       
       - name: Install pypdfium2 from artifact
-        run: python3 -m pip install ${{ matrix.wheel }}
+        run: python3 -m pip install $WHEEL
+        env:
+          WHEEL: ${{ matrix.wheel }}
       
       - name: Run Test Suite
         run: just test
@@ -213,13 +217,15 @@ jobs:
           git config user.name "geisserml"
           git checkout main
           git merge origin/autorelease_tmp
-          git tag -a ${{ needs.build.outputs.new_version }} -m "Autorelease"
+          git tag -a "$NEW_VERSION" -m "Autorelease"
           git push
           git push --tags
           git checkout stable
           git reset --hard main
           git push --force
           git checkout main
+        env:
+          NEW_VERSION: ${{ needs.build.outputs.new_version }}
       
       # Upload to TestPyPI / PyPI via "trusted publishing".
       # https://docs.pypi.org/trusted-publishers/adding-a-publisher/
