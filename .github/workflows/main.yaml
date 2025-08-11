@@ -150,7 +150,7 @@ jobs:
           ref: autorelease_tmp
       
       - name: Download packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages
           path: dist/
@@ -201,13 +201,13 @@ jobs:
           python-version: ${{ inputs.py_version }}
       
       - name: Download packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages
           path: dist/
       
       - name: Download release notes
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: release_notes
       
