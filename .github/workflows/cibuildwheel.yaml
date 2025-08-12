@@ -15,14 +15,9 @@ on:
       ibm:
         default: true
         type: boolean
-      # XXX riscv64 container does not have gn dependency, failing. TODO see if we can procure a pre-build somewhere else.
-      risc:
-        default: false
-        type: boolean
-      # XXX loongarch64 needs patched fork of cibuildwheel, but GH Actions don't support conditional `uses:` expressions. Could use the fork for all, but would prefer not to do that. Could duplicate the cibuildwheel step, or the entire workflow, but neither is nice.
-      loongson:
-        default: false
-        type: boolean
+      # emulated:
+      #   default: false
+      #   type: boolean
 
 permissions: {}
 
@@ -59,16 +54,18 @@ jobs:
             image: manylinux
             enabled: ${{ inputs.ibm }}
             needs_emulator: true  # false
-          - os: ubuntu-24.04
-            arch: riscv64
-            image: manylinux
-            enabled: ${{ inputs.risc }}
-            needs_emulator: true
-          - os: ubuntu-24.04
-            arch: loongarch64
-            image: manylinux
-            enabled: ${{ inputs.loongson }}
-            needs_emulator: true
+          # XXX riscv64 container does not have gn dependency, failing. TODO see if we can procure a pre-build somewhere else.
+          # - os: ubuntu-24.04
+          #   arch: riscv64
+          #   image: manylinux
+          #   enabled: ${{ inputs.emulated }}
+          #   needs_emulator: true
+          # XXX loongarch64 needs patched fork of cibuildwheel, but GH Actions don't support conditional `uses:` expressions. Could use the fork for all, but would prefer not to do that. Could duplicate the cibuildwheel step, or the entire workflow, but neither is nice.
+          # - os: ubuntu-24.04
+          #   arch: loongarch64
+          #   image: manylinux
+          #   enabled: ${{ inputs.emulated }}
+          #   needs_emulator: true
     
     steps:
       
