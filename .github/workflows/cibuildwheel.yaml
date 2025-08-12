@@ -6,12 +6,6 @@ name: Build with cibuildwheel
 on:
   workflow_dispatch:
     inputs:
-      cibuildwheel_variant:
-        type: choice
-        default: 'pypa/cibuildwheel@v3.1.3'
-        options:
-          - 'pypa/cibuildwheel@v3.1.3'
-          - 'loong64/cibuildwheel@v2.23.2'
       cibw_py_ver:
         default: 'cp312'
         type: string
@@ -24,6 +18,7 @@ on:
       emulated:
         default: true
         type: boolean
+      # XXX loongarch64 needs patched fork of cibuildwheel, but GH Actions don't support conditional `uses:` expressions. Could use the fork for all, but would prefer not to do that. Could duplicate the cibuildwheel step, or the entire workflow, but neither is nice.
       emulated_loongson:
         default: false
         type: boolean
@@ -88,7 +83,7 @@ jobs:
       
       - name: Build wheels
         if: ${{ matrix.enabled }}
-        uses: ${{ inputs.cibuildwheel_variant }}
+        uses: pypa/cibuildwheel@v3.1.3  # loong64/cibuildwheel@v2.23.2
         env:
           CIBW_ARCHS: ${{ matrix.arch }}
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time. Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
