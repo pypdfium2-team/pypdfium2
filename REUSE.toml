@@ -138,7 +138,7 @@ SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 path = "pdfium_patches/cibuildwheel.patch"
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
-    "2025 wojiushixiaobai 吴小白 <296015668@qq.com>",
+    "2025 wojiushixiaobai <296015668@qq.com>",
     "2025 geisserml <geisserml@gmail.com>",
 ]
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"

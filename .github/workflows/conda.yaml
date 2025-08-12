@@ -15,7 +15,7 @@ on:
         default: 'latest'
         type: string
       new_only:
-        # only with package == "raw", ignored otherwise (actually the default should be false in that case, but I don't know if GH supports dynamic defaults depending on other inputs)
+        # only with package == "raw", ignored otherwise (actually the default should be false in that case, but don't know if GH supports dynamic defaults depending on other inputs)
         default: true
         type: boolean
       test:
