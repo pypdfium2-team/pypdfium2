@@ -78,8 +78,6 @@ jobs:
                   "needs_emulator": True
               })
           if emulated:
-            # XXX loongarch64 needs patched fork of cibuildwheel, but GH Actions don't support conditional `uses:` expressions. Could use the fork for all, but would prefer not to do that. Could duplicate the cibuildwheel step, or the entire workflow, but neither is nice.
-            # NOTE the loongarch64 container won't have gn either, but we can pull it from https://github.com/loong64/gn/releases/latest/download/gn-linux-loong64.tar.gz
               matrix.append({
                   "os": "ubuntu-24.04",
                   "arch": "loongarch64",
@@ -122,12 +120,13 @@ jobs:
         uses: docker/setup-qemu-action@v3
       
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.1.3  # loong64/cibuildwheel@v3.1.3
+        uses: pypdfium2-team/cibuildwheel@v3.1.3
         env:
           CIBW_ARCHS: ${{ matrix.arch }}
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time. Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
           CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ matrix.image }}_${{ matrix.arch }}"
           # the symlinks are required on aarch64 and loongarch64
+          # TODO use https://github.com/loong64/gn/releases/latest/download/gn-linux-loong64.tar.gz for loongarch64
           CIBW_BEFORE_ALL_LINUX: >
             dnf -y install gn ninja-build freetype-devel glib2-devel lcms2-devel libjpeg-devel libpng-devel libtiff-devel openjpeg2-devel zlib-devel &&
             ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-gcc &&
@@ -135,8 +134,12 @@ jobs:
             ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-readelf &&
             ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-nm
           CIBW_ENVIRONMENT: PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="vendor_deps=['icu']"
-          # TODO would like to run the test suite too, but not sure how to get the dependencies: CIBW_TEST_REQUIRES assumably takes them from PyPI, which won't work with the exotic architectures. And if we take them from the system with CIBW_BEFORE_TEST, they're not recognized because cibuildwheel sets up a venv or something.
-          CIBW_TEST_COMMAND: python -m pypdfium2 --version
+          # Install test dependencies from container, rather than from PyPI via CIBW_TEST_REQUIRES, on behalf of exotic architectures. We need to manually set the PYTHONPATH to get access to system packages in the test venv.
+          CIBW_BEFORE_TEST_LINUX: dnf -y install python3-pytest python3-pillow python3-numpy
+          CIBW_TEST_COMMAND: >
+            python -m pypdfium2 --version
+            export PYTHONPATH="${PYTHONPATH}:/usr/lib64/python3.6/site-packages"
+            python -m pytest tests/
         with:
           output-dir: wheelhouse
       

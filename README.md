@@ -183,6 +183,30 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 > [!TIP]
 > By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib`.
 
+##### cibuildwheel
+
+The native sourcebuild can be run in cibuildwheel, at least for the Linux platform. A basic example is:
+```bash
+export CIBW_BUILD="cp311-manylinux_x86_64"  # p.ex.
+export CIBW_ENVIRONMENT="PDFIUM_PLATFORM=sourcebuild-native BUILD_PARAMS=\"vendor_deps=['icu']\""
+export CIBW_BEFORE_ALL_LINUX="dnf -y install gn ninja-build freetype-devel glib2-devel lcms2-devel libjpeg-devel libpng-devel libtiff-devel openjpeg2-devel zlib-devel"
+cibuildwheel . --output-dir wheelhouse
+```
+
+For more sophisticated configuration, see our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml) and the [options documentation](https://cibuildwheel.pypa.io/en/stable/options).
+
+Note, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
+```bash
+sudo dnf in moby-engine  # this provides the docker command
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+# then reboot (re-login might also suffice)
+```
+
+> [!WARNING]
+> cibuildwheel copies the project directory into a container, not taking into account `.gitignore` rules. Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel. In particular, a toolchained checkout of pdfium within pypdfium2 should be avoided, as that will cause a halt on the `Copying project into container...` step. For development, make sure the fresh checkout is in sync with the working copy.
+
 ##### Android (Termux)
 
 The native build may also work on Android with Termux in principle.
