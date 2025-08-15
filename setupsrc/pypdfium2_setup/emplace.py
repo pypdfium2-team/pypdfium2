@@ -7,6 +7,7 @@ import sys
 import argparse
 import traceback
 from pathlib import Path
+from ast import literal_eval
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 from pypdfium2_setup.base import *
@@ -75,12 +76,18 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
             _end_subtargets(sub_target, pdfium_ver)
     
     elif pl_name == ExtPlats.sourcebuild:
+        
+        # TODO update docs
+        build_params = os.getenv("BUILD_PARAMS", {})
+        if build_params:
+            build_params = {k: literal_eval(v) for k, v in (p.split("=") for p in build_params.split(","))}
         if flags:
             log(f"sourcebuild: flags {flags!r} are not handled (will be discarded).")
+        
         if sub_target == "native":
-            build_native.main(build_ver=pdfium_ver)
+            build_native.main(build_ver=pdfium_ver, **build_params)
         elif sub_target == "toolchained":
-            build_toolchained.main(build_ver=pdfium_ver)
+            build_toolchained.main(build_ver=pdfium_ver, **build_params)
         else:
             _end_subtargets(sub_target, pdfium_ver)
     

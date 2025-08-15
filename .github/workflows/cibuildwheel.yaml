@@ -134,8 +134,7 @@ jobs:
             ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-g++ &&
             ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-readelf &&
             ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-nm
-          CIBW_BEFORE_BUILD: python setupsrc/pypdfium2_setup/build_native.py --vendor icu
-          CIBW_ENVIRONMENT: PDFIUM_PLATFORM=sourcebuild
+          CIBW_ENVIRONMENT: PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="vendor_deps=['icu']"
           # TODO would like to run the test suite too, but not sure how to get the dependencies: CIBW_TEST_REQUIRES assumably takes them from PyPI, which won't work with the exotic architectures. And if we take them from the system with CIBW_BEFORE_TEST, they're not recognized because cibuildwheel sets up a venv or something.
           CIBW_TEST_COMMAND: python -m pypdfium2 --version
         with:
