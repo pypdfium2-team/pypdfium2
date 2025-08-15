@@ -140,7 +140,7 @@ jobs:
           CIBW_TEST_COMMAND: >
             python -m pypdfium2 --version &&
             export PYTHONPATH="${PYTHONPATH}:/usr/lib64/python3.6/site-packages" &&
-            python -m pytest tests/
+            python -m pytest "{project}/tests/"
         with:
           output-dir: wheelhouse
       
