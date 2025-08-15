@@ -206,7 +206,10 @@ sudo usermod -aG docker $USER
 For other ways of installing Docker, see cibuildwheel docs on [Setup](https://cibuildwheel.pypa.io/en/stable/setup/) and [Platforms](https://cibuildwheel.pypa.io/en/stable/platforms/).
 
 > [!WARNING]
-> cibuildwheel copies the project directory into a container, not taking into account `.gitignore` rules. Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel. In particular, a toolchained checkout of pdfium within pypdfium2 should be avoided, as that will cause a halt on the `Copying project into container...` step. For development, make sure the fresh checkout is in sync with the working copy.
+> cibuildwheel copies the project directory into a container, not taking into account `.gitignore` rules.
+> Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel.
+> In particular, a toolchained checkout of pdfium within pypdfium2 should be avoided, as that will cause a halt on the `Copying project into container...` step.
+> For development, make sure the fresh checkout is in sync with the working copy.
 
 ##### Android (Termux)
 
@@ -335,7 +338,7 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
     + If `system-search`, look for and bind against system-provided pdfium instead of embedding a binary. If just `system`, consume existing bindings from `data/system/`.
-    + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup.
+    + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup (use `$BUILD_PARAMS` to pass custom options).
     + If `sdist`, no platform-specific files will be included, so as to create a source distribution.
 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
