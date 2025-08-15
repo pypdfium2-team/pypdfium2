@@ -134,8 +134,9 @@ jobs:
             ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-readelf &&
             ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-nm
           CIBW_ENVIRONMENT: PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="vendor_deps=['icu']"
-          # Install test dependencies from container, rather than from PyPI via CIBW_TEST_REQUIRES, on behalf of exotic architectures. We need to manually set the PYTHONPATH to get access to system packages in the test venv.
-          CIBW_BEFORE_TEST_LINUX: dnf -y install python3-pytest python3-pillow python3-numpy
+          # Install C-extension test dependencies from container rather than PyPI, on behalf of exotic architectures. We need to manually set the PYTHONPATH to get access to system packages in the test venv.
+          CIBW_BEFORE_TEST_LINUX: dnf -y install python3-pillow python3-numpy
+          CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: >
             python -m pypdfium2 --version &&
             export PYTHONPATH="${PYTHONPATH}:/usr/lib64/python3.6/site-packages" &&
