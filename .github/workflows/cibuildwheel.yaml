@@ -42,10 +42,6 @@ jobs:
           BUILD_IBM: ${{ inputs.ibm && 1 || 0 }}
           BUILD_EMULATED: ${{ inputs.emulated && 1 || 0 }}
         run: |
-          # SPDX-SnippetBegin
-          # SPDX-SnippetCopyrightText: 2025 geisserml <geisserml@gmail.com>
-          # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
-          
           import os
           import sys
           import json
@@ -77,8 +73,6 @@ jobs:
           print(matrix_json, file=sys.stderr)
           with open(os.environ["GITHUB_OUTPUT"], 'a') as output_fh:
               print(f"matrix={matrix_json}", file=output_fh)
-          
-          # SPDX-SnippetEnd
   
   build_wheels:
     name: Build ${{ matrix.arch }} ${{ matrix.image }} on ${{ matrix.os }}
