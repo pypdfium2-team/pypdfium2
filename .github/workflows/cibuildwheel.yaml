@@ -137,8 +137,8 @@ jobs:
           # Install test dependencies from container, rather than from PyPI via CIBW_TEST_REQUIRES, on behalf of exotic architectures. We need to manually set the PYTHONPATH to get access to system packages in the test venv.
           CIBW_BEFORE_TEST_LINUX: dnf -y install python3-pytest python3-pillow python3-numpy
           CIBW_TEST_COMMAND: >
-            python -m pypdfium2 --version
-            export PYTHONPATH="${PYTHONPATH}:/usr/lib64/python3.6/site-packages"
+            python -m pypdfium2 --version &&
+            export PYTHONPATH="${PYTHONPATH}:/usr/lib64/python3.6/site-packages" &&
             python -m pytest tests/
         with:
           output-dir: wheelhouse
