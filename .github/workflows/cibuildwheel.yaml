@@ -28,7 +28,7 @@ permissions: {}
 jobs:
   
   prepare_matrix:
-    name: Determine build matrix according to inputs
+    name: Determine build matrix
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -101,7 +101,7 @@ jobs:
               print(f"matrix={matrix_json}", file=output_fh)
   
   build_wheels:
-    name: Build wheel for ${{ matrix.arch }} ${{ matrix.image }} (runs on ${{ matrix.os }})
+    name: Build ${{ matrix.arch }} ${{ matrix.image }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: prepare_matrix
     
