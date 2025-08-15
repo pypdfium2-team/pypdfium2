@@ -1023,7 +1023,7 @@ If inputs are needed, JSON can be used
 ```bash
 echo '{"my_json_info":1, "my_var":"hello"}' | gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH --json
 # real-world example
-echo '{"cibw_py_ver":"cp312", "existing":"true", "ibm":"false", "emulated":"false"}' | gh workflow run cibuildwheel.yaml --ref cibuildwheel --json
+echo '{"cibw_py_ver":"cp38", "existing":"true", "ibm":"false", "emulated":"false"}' | gh workflow run cibuildwheel.yaml --ref cibuildwheel --json
 ```
 You should pass the complete set of fields here, defaults might not be recognized with this form of dispatch.
 
