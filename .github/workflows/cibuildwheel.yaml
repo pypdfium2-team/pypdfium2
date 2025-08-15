@@ -43,6 +43,7 @@ jobs:
           BUILD_EMULATED: ${{ inputs.emulated && 1 || 0 }}
         run: |
           import os
+          import sys
           import json
           
           existing = bool(int( os.environ["BUILD_EXISTING"] ))
@@ -93,15 +94,16 @@ jobs:
                   "needs_emulator": True,
               })
           
-          import sys
-          print(matrix, file=sys.stderr)
+          matrix_json = json.dumps(matrix)
+          print(matrix_json, file=sys.stderr)
           
           with open(os.environ["GITHUB_OUTPUT"], 'a') as output_fh:
-              print(f"matrix={json.dumps(matrix)}", file=output_fh)
+              print(f"matrix={matrix_json}", file=output_fh)
   
   build_wheels:
     name: Build wheel for ${{ matrix.arch }} ${{ matrix.image }} (runs on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    needs: prepare_matrix
     
     strategy:
       fail-fast: false
