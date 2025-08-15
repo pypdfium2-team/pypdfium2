@@ -203,6 +203,7 @@ sudo systemctl enable docker
 sudo usermod -aG docker $USER
 # then reboot (re-login might also suffice)
 ```
+For other ways of installing Docker, see cibuildwheel docs on [Setup](https://cibuildwheel.pypa.io/en/stable/setup/) and [Platforms](https://cibuildwheel.pypa.io/en/stable/platforms/).
 
 > [!WARNING]
 > cibuildwheel copies the project directory into a container, not taking into account `.gitignore` rules. Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel. In particular, a toolchained checkout of pdfium within pypdfium2 should be avoided, as that will cause a halt on the `Copying project into container...` step. For development, make sure the fresh checkout is in sync with the working copy.
@@ -978,7 +979,6 @@ Additionally, one doc build can also be hosted on [GitHub Pages](https://pypdfiu
 It is implemented with a CI workflow, which is supposed to be triggered automatically on release.
 This provides us with full control over build env and used commands, whereas RTD may be less liberal in this regard.
 
-
 ### Testing
 
 pypdfium2 contains a small test suite to verify the library's functionality. It is written with [pytest](https://github.com/pytest-dev/pytest/):
@@ -1008,10 +1008,24 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 
 [^testing_corpora]: For instance, one could use the testing corpora of open-source PDF libraries (pdfium, pikepdf/ocrmypdf, mupdf/ghostscript, tika/pdfbox, pdfjs, ...)
 
+### Adding a new workflow
+
+When creating a new workflow, it is usually desirable to test in a branch first before merging into main.
+However, new workflows in branches cannot be dispatched from the GitHub Actions panel yet.
+That's why you'll want to use the [`gh`](https://cli.github.com/) command-line tool, as follows:
+```bash
+gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH
+```
+If inputs are needed, JSON can be used
+```bash
+echo '{"my_json_info":1, "my_var":"hello"}' | gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH --json
+```
+You should pass the complete set of fields here, defaults might not be recognized with this form of dispatch.
+
 ### Release workflow
 
 The release process is fully automated using Python scripts and scheduled release workflows.
-You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
+You may also trigger the workflow manually from the GitHub Actions panel or similar.
 
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
 * `update.py` downloads binaries.
@@ -1062,10 +1076,10 @@ If something went wrong with commit or tag, you can still revert the changes:
 # perform an interactive rebase to change history (substitute $N_COMMITS with the number of commits to drop or modify)
 git rebase -i HEAD~$N_COMMITS
 git push --force
-# delete local tag (substitute $TAGNAME accordingly)
-git tag -d $TAGNAME
-# delete remote tag
+# delete remote tag (substitute $TAGNAME accordingly)
 git push --delete origin $TAGNAME
+# delete local tag
+git tag -d $TAGNAME
 ```
 Faulty PyPI releases may be yanked using the web interface.
 
