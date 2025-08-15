@@ -142,7 +142,7 @@ This project comes with two scripts to automate the build process: `build_toolch
 - `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, this script will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
 - `build_native` is an attempt to address some shortcomings of the toolchained build (mainly a bloated checkout process, and lack of portability). It is tailored towards native compilation, and uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
 
-You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup.
+You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup, and pass options with `$BUILD_PARAMS` in python keyword argument syntax.
 However, for simplicity, both scripts/subtargets share just `sourcebuild` as staging directory.
 
 Dependencies:
@@ -185,7 +185,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 
 ##### cibuildwheel
 
-The native sourcebuild can be run in cibuildwheel, at least for the Linux platform. A basic example is:
+The native sourcebuild can be run in cibuildwheel. A basic example is:
 ```bash
 export CIBW_BUILD="cp311-manylinux_x86_64"  # p.ex.
 export CIBW_ENVIRONMENT="PDFIUM_PLATFORM=sourcebuild-native BUILD_PARAMS=\"vendor_deps=['icu']\""
@@ -335,7 +335,7 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
     + If `system-search`, look for and bind against system-provided pdfium instead of embedding a binary. If just `system`, consume existing bindings from `data/system/`.
-    + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup. However, triggering on the caller side is preferred as this allows to pass custom options.
+    + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup.
     + If `sdist`, no platform-specific files will be included, so as to create a source distribution.
 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.

@@ -77,10 +77,9 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
     
     elif pl_name == ExtPlats.sourcebuild:
         
-        # TODO update docs
         build_params = os.getenv("BUILD_PARAMS", {})
         if build_params:
-            build_params = {k: literal_eval(v) for k, v in (p.split("=") for p in build_params.split(","))}
+            build_params = {k.strip(): literal_eval(v.strip()) for k, v in (p.split("=") for p in build_params.split(","))}
         if flags:
             log(f"sourcebuild: flags {flags!r} are not handled (will be discarded).")
         
