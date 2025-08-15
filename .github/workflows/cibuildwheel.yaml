@@ -50,53 +50,31 @@ jobs:
           ibm      = bool(int( os.environ["BUILD_IBM"] ))
           emulated = bool(int( os.environ["BUILD_EMULATED"] ))
           
+          # TODO add musllinux once our cibuildwheel config can wangle it
           matrix = []
+          def add_job(os, arch, needs_emulator=False, images=("manylinux",)):
+              for image in images:
+                  matrix.append(dict(
+                      os=os, arch=arch, image=image, needs_emulator=needs_emulator
+                  ))
+          
           if existing:
-              matrix.append({
-                  "os": "ubuntu-24.04",
-                  "arch": "x86_64",
-                  "image": "manylinux",
-                  "needs_emulator": False
-              })
-              matrix.append({
-                  "os": "ubuntu-24.04-arm",
-                  "arch": "aarch64",
-                  "image": "manylinux",
-                  "needs_emulator": False
-              })
+              add_job("ubuntu-24.04", "x86_64")
+              add_job("ubuntu-24.04-arm", "aarch64")
           if ibm:
-              matrix.append({
-                  "os": "ubuntu-24.04",
-                  "arch": "ppc64le",
-                  "image": "manylinux",
-                  "needs_emulator": True
-              })
-              matrix.append({
-                  "os": "ubuntu-24.04",
-                  "arch": "s390x",
-                  "image": "manylinux",
-                  "needs_emulator": True
-              })
+              add_job("ubuntu-24.04", "ppc64le", True)  # False
+              add_job("ubuntu-24.04", "s390x", True)  # False
           if emulated:
-              matrix.append({
-                  "os": "ubuntu-24.04",
-                  "arch": "loongarch64",
-                  "image": "manylinux",
-                  "needs_emulator": True,
-              })
+              add_job("ubuntu-24.04", "loongarch64", True)
               # XXX riscv64 container does not have gn dependency, failing. TODO see if we can procure a pre-build somewhere else.
-              matrix.append({
-                  "os": "ubuntu-24.04",
-                  "arch": "riscv64",
-                  "image": "manylinux",
-                  "needs_emulator": True,
-              })
+              add_job("ubuntu-24.04", "riscv64", True)
           
           matrix_json = json.dumps(matrix)
           print(matrix_json, file=sys.stderr)
           
           with open(os.environ["GITHUB_OUTPUT"], 'a') as output_fh:
               print(f"matrix={matrix_json}", file=output_fh)
+
   
   build_wheels:
     name: Build ${{ matrix.arch }} ${{ matrix.image }} on ${{ matrix.os }}
