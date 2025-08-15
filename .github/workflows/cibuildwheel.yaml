@@ -42,9 +42,7 @@ jobs:
           BUILD_IBM: ${{ inputs.ibm && 1 || 0 }}
           BUILD_EMULATED: ${{ inputs.emulated && 1 || 0 }}
         run: |
-          import os
-          import sys
-          import json
+          import os, sys, json
           
           existing = bool(int( os.environ["BUILD_EXISTING"] ))
           ibm      = bool(int( os.environ["BUILD_IBM"] ))
