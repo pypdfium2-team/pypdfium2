@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: 2025 wojiushixiaobai <296015668@qq.com>
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 wojiushixiaobai <296015668@qq.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Build with cibuildwheel
@@ -127,19 +127,19 @@ jobs:
           CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ matrix.image }}_${{ matrix.arch }}"
           # the symlinks are required on aarch64 and loongarch64
           # TODO use https://github.com/loong64/gn/releases/latest/download/gn-linux-loong64.tar.gz for loongarch64
-          CIBW_BEFORE_ALL_LINUX: >
-            dnf -y install gn ninja-build freetype-devel glib2-devel lcms2-devel libjpeg-devel libpng-devel libtiff-devel openjpeg2-devel zlib-devel &&
-            ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-gcc &&
-            ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-g++ &&
-            ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-readelf &&
+          CIBW_BEFORE_ALL_LINUX: |
+            dnf -y install gn ninja-build freetype-devel glib2-devel lcms2-devel libjpeg-devel libpng-devel libtiff-devel openjpeg2-devel zlib-devel && \
+            ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-gcc && \
+            ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-g++ && \
+            ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-readelf && \
             ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-nm
           CIBW_ENVIRONMENT: PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="vendor_deps=['icu']"
           # Install C-extension test dependencies from container rather than PyPI, on behalf of exotic architectures. We need to manually set the PYTHONPATH to get access to system packages in the test venv.
           CIBW_BEFORE_TEST_LINUX: dnf -y install python3-pillow python3-numpy
           CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: >
-            python -m pypdfium2 --version &&
-            export PYTHONPATH="${PYTHONPATH}:/usr/lib64/python3.6/site-packages" &&
+          CIBW_TEST_COMMAND: |
+            python -m pypdfium2 --version && \
+            export PYTHONPATH="${PYTHONPATH}:/usr/lib64/python3.6/site-packages" && \
             python -m pytest "{project}/tests/"
         with:
           output-dir: wheelhouse
