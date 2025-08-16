@@ -73,8 +73,9 @@ jobs:
               add_job("ubuntu-24.04", "s390x", True)  # False
           if emulated:
               add_job("ubuntu-24.04", "loongarch64", True)
-              # XXX riscv64 container does not have gn dependency, failing. TODO see if we can procure a pre-build somewhere else.
-              # add_job("ubuntu-24.04", "riscv64", True)
+              # XXX riscv64 manylinux container does not have gn dependency, failing. TODO see if we can procure a pre-build somewhere else.
+              if musl:
+                  add_job("ubuntu-24.04", "riscv64", True, images=("musllinux", ))
           
           matrix_json = json.dumps(matrix)
           print(matrix_json, file=sys.stderr)
