@@ -21,10 +21,9 @@ on:
       emulated:
         default: false
         type: boolean
-      # TODO
-      # musl:
-      #   default: false
-      #   type: boolean
+      musl:
+        default: false
+        type: boolean
 
 permissions: {}
 
@@ -44,16 +43,22 @@ jobs:
           BUILD_EXISTING: ${{ inputs.existing && 1 || 0 }}
           BUILD_IBM: ${{ inputs.ibm && 1 || 0 }}
           BUILD_EMULATED: ${{ inputs.emulated && 1 || 0 }}
+          BUILD_MUSL: ${{ inputs.musl && 1 || 0 }}
         run: |
           import os, sys, json
           
           existing = bool(int( os.environ["BUILD_EXISTING"] ))
           ibm      = bool(int( os.environ["BUILD_IBM"] ))
           emulated = bool(int( os.environ["BUILD_EMULATED"] ))
+          musl     = bool(int( os.environ["BUILD_MUSL"] ))
           
           # NOTE musllinux is experimental in our cibuildwheel config
           matrix = []
-          def add_job(os, arch, needs_emulator=False, images=("manylinux", "musllinux")):
+          images = ["manylinux"]
+          if musl:
+              images.append("musllinux")
+          
+          def add_job(os, arch, needs_emulator=False, images=images):
               for image in images:
                   matrix.append(dict(
                       os=os, arch=arch, image=image, needs_emulator=needs_emulator
