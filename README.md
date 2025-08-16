@@ -185,17 +185,17 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 
 ##### cibuildwheel
 
-The native sourcebuild can be run in cibuildwheel. A basic example is:
+The native sourcebuild can be run in cibuildwheel. The basic invocation is as simple as
 ```bash
 export CIBW_BUILD="cp311-manylinux_x86_64"  # p.ex.
-export CIBW_ENVIRONMENT="PDFIUM_PLATFORM=sourcebuild-native BUILD_PARAMS=\"vendor_deps=['icu']\""
-export CIBW_BEFORE_ALL_LINUX="dnf -y install gn ninja-build freetype-devel glib2-devel lcms2-devel libjpeg-devel libpng-devel libtiff-devel openjpeg2-devel zlib-devel"
 cibuildwheel . --output-dir wheelhouse
 ```
+since pypdfium2 has cibuildwheel configuration in its [`pyproject.toml`](./pyproject.toml) file, leastways for Linux.
 
-For more sophisticated configuration, see our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml) and the [options documentation](https://cibuildwheel.pypa.io/en/stable/options).
+See also our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml).
+For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
 
-Note, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
+Note, on Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
 ```bash
 sudo dnf in moby-engine  # this provides the docker command
 sudo systemctl start docker
