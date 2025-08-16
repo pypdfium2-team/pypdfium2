@@ -51,9 +51,9 @@ jobs:
           ibm      = bool(int( os.environ["BUILD_IBM"] ))
           emulated = bool(int( os.environ["BUILD_EMULATED"] ))
           
-          # TODO add musllinux once our cibuildwheel config can wangle it
+          # NOTE musllinux is experimental in our cibuildwheel config
           matrix = []
-          def add_job(os, arch, needs_emulator=False, images=("manylinux",)):
+          def add_job(os, arch, needs_emulator=False, images=("manylinux", "musllinux")):
               for image in images:
                   matrix.append(dict(
                       os=os, arch=arch, image=image, needs_emulator=needs_emulator
@@ -96,14 +96,14 @@ jobs:
         if: ${{ matrix.needs_emulator }}
         uses: docker/setup-qemu-action@v3
       
-      # Reminder: most configuration is in pyproject.toml as that allows for overrides.
+      # Reminder: most configuration is in pyproject.toml as this allows for overrides
       - name: Build wheels
         uses: pypdfium2-team/cibuildwheel@v3.1.3
         env:
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time. Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
           CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ matrix.image }}_${{ matrix.arch }}"
           CIBW_ARCHS: ${{ matrix.arch }}
-          ARCH: ${{ matrix.arch }}
+          ARCH: ${{ matrix.arch }}  # passthrough, needed for symlinks
         with:
           output-dir: wheelhouse
       
