@@ -30,10 +30,11 @@ before-all = [
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux*"
 before-all = [
-  "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
+    "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
 ]
 
 [[tool.cibuildwheel.overrides]]
+# TODO figure out symlinks for musllinux container
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
