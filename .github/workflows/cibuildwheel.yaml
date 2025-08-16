@@ -68,6 +68,7 @@ jobs:
               add_job("ubuntu-24.04", "x86_64")
               add_job("ubuntu-24.04-arm", "aarch64")
           if ibm:
+              # XXX will become native as soon as we get access to IBM's self-hosted runners
               add_job("ubuntu-24.04", "ppc64le", True)  # False
               add_job("ubuntu-24.04", "s390x", True)  # False
           if emulated:
