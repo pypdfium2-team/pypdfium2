@@ -160,7 +160,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 Or for the native build, on Ubuntu 24.04, you could do e.g.:
 ```bash
 # Install dependencies
-sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libicu-dev libglib2.0-dev
 ```
 ```bash
 # Build with GCC
@@ -1014,8 +1014,7 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 ### Adding a new workflow
 
 When creating a new workflow, it is usually desirable to test in a branch first before merging into main.
-However, new workflows in branches cannot be dispatched from the GitHub Actions panel yet.
-That's why you'll want to use the [`gh`](https://cli.github.com/) command-line tool, as follows:
+However, new workflows from branches cannot be dispatched from the GitHub Actions panel yet. That's why you'll want to use the [`gh`](https://cli.github.com/) command-line tool, as follows:
 ```bash
 gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH
 ```

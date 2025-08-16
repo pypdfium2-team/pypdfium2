@@ -2,6 +2,9 @@
 # SPDX-FileCopyrightText: 2025 wojiushixiaobai <296015668@qq.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# NOTE: This workflow is currently written with a dynamic matrix.
+# Another option would be to extract a reusable "build one" workflow and declare an individual job for each target here.
+
 name: Build with cibuildwheel
 on:
   workflow_dispatch:
@@ -93,23 +96,14 @@ jobs:
         if: ${{ matrix.needs_emulator }}
         uses: docker/setup-qemu-action@v3
       
+      # Reminder: most configuration is in pyproject.toml as that allows for overrides.
       - name: Build wheels
         uses: pypdfium2-team/cibuildwheel@v3.1.3
         env:
-          CIBW_ARCHS: ${{ matrix.arch }}
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time. Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
           CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ matrix.image }}_${{ matrix.arch }}"
-          # the symlinks are required on aarch64 and loongarch64
-          # TODO use https://github.com/loong64/gn/releases/latest/download/gn-linux-loong64.tar.gz for loongarch64
-          CIBW_BEFORE_ALL_LINUX: |
-            dnf -y install gn ninja-build freetype-devel glib2-devel lcms2-devel libjpeg-devel libpng-devel libtiff-devel openjpeg2-devel zlib-devel && \
-            ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-gcc && \
-            ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-g++ && \
-            ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-readelf && \
-            ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/${{ matrix.arch }}-linux-gnu-nm
-          CIBW_ENVIRONMENT: PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="vendor_deps=['icu']"
-          # TODO run test suite on platforms that have pillow and numpy prebuilds
-          CIBW_TEST_COMMAND: python -m pypdfium2 --version
+          CIBW_ARCHS: ${{ matrix.arch }}
+          ARCH: ${{ matrix.arch }}
         with:
           output-dir: wheelhouse
       

@@ -10,3 +10,42 @@ requires = [
     "wheel !=0.38.0, !=0.38.1",
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
 ]
+
+[tool.cibuildwheel]
+build-frontend = "build"
+# TODO run actual test suite on platforms that have pillow and numpy wheels
+test-command = "python -m pypdfium2 --version"
+environment-pass = ["ARCH"]
+
+[tool.cibuildwheel.environment]
+PDFIUM_PLATFORM = "sourcebuild-native"
+BUILD_PARAMS = "vendor_deps=['icu']"
+
+[tool.cibuildwheel.linux]
+before-all = [
+    "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
+    "sh -c 'dnf -y install gn || true'",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+before-all = [
+  "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*_{aarch64,loongarch64}"
+inherit.before-all = "append"
+before-all = [
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-gcc",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-g++",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-nm",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-readelf",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_loongarch64"
+inherit.before-all = "append"
+before-all = [
+    "curl -L 'https://github.com/loong64/gn/releases/download/2024.12/gn-linux-loong64.tar.gz' | tar xz -C /usr/local/bin",
+]
