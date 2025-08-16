@@ -37,7 +37,7 @@ PlatSpec_VerSep = ":"
 PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
-IS_CI = bool(os.getenv("GITHUB_ACTIONS"))
+IS_CI = bool(os.getenv("GITHUB_ACTIONS")) or bool(int(os.getenv("CIBUILDWHEEL", 0)))
 USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not any((shutil.which("ctypesgen"), IS_CI))
 
 ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
@@ -268,8 +268,7 @@ class _PdfiumVerClass:
     
     @cached_property
     def pinned(self):
-        # comments are not permitted in JSON, so the reason for the post_pdfium pin (if set) goes here:
-        # 7309 is the latest tested version. 6996 is too old because we use FPDFFormObj_RemoveObject() which first arrived in 7191.
+        # comments are not permitted in JSON, so the reason for the post_pdfium pin (if set) goes here: (currently no post_pdfium pin)
         record = read_json(AR_RecordFile)
         return record["post_pdfium"] or record["pdfium"]
 

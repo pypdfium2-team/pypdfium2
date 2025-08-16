@@ -1,0 +1,29 @@
+--- a/core/fxcrt/binary_buffer_unittest.cpp
++++ b/core/fxcrt/binary_buffer_unittest.cpp
+@@ -3,6 +3,7 @@
+ // found in the LICENSE file.
+ 
+ #include "core/fxcrt/binary_buffer.h"
++#include "core/fxcrt/byteorder.h"
+ 
+ #include <utility>
+ #include <vector>
+@@ -122,7 +123,7 @@
+ // Assumes little endian.
+ TEST(BinaryBuffer, AppendUint16) {
+   BinaryBuffer buffer;
+-  buffer.AppendUint16(0x4321);
++  buffer.AppendUint16(FromLE16(0x4321));
+   EXPECT_EQ(2u, buffer.GetSize());
+   EXPECT_EQ(2u, buffer.GetLength());
+   EXPECT_EQ(0x21u, buffer.GetSpan()[0]);
+@@ -132,7 +133,7 @@
+ // Assumes little endian.
+ TEST(BinaryBuffer, AppendUint32) {
+   BinaryBuffer buffer;
+-  buffer.AppendUint32(0x87654321);
++  buffer.AppendUint32(FromLE32(0x87654321));
+   EXPECT_EQ(4u, buffer.GetSize());
+   EXPECT_EQ(4u, buffer.GetLength());
+   EXPECT_EQ(0x21u, buffer.GetSpan()[0]);
+
