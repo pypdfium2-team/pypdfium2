@@ -15,7 +15,6 @@ requires = [
 build-frontend = "build"
 # TODO run actual test suite on platforms that have pillow and numpy wheels
 test-command = "python -m pypdfium2 --version"
-environment-pass = ["ARCH"]
 
 [tool.cibuildwheel.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
@@ -38,6 +37,7 @@ before-all = [
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
+    "export ARCH=$(uname -m)",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-gcc",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-g++",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-nm",

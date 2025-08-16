@@ -108,7 +108,6 @@ jobs:
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time. Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
           CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ matrix.image }}_${{ matrix.arch }}"
           CIBW_ARCHS: ${{ matrix.arch }}
-          ARCH: ${{ matrix.arch }}  # passthrough, needed for symlinks
         with:
           output-dir: wheelhouse
       
