@@ -34,7 +34,7 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
-select = "*_{aarch64,loongarch64}"
+select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
     "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-gcc",
