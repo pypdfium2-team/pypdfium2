@@ -54,15 +54,8 @@ before-all = [
     "ln -s /usr/bin/readelf /usr/bin/$ARCH-linux-gnu-readelf",
 ]
 
-# loongarch64 needs -unknown suffix but is otherwise identical
+# loongarch64 symlinks need -unknown suffix but are otherwise identical
 # TODO see if we can avoid the duplication
-
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_loongarch64"
-inherit.before-all = "append"
-before-all = [
-    "curl -L 'https://github.com/loong64/gn/releases/download/2024.12/gn-linux-loong64.tar.gz' | tar xz -C /usr/local/bin",
-]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_loongarch64"
@@ -84,4 +77,11 @@ before-all = [
     "ln -s /usr/bin/g++ /usr/bin/$ARCH-linux-gnu-g++",
     "ln -s /usr/bin/nm /usr/bin/$ARCH-linux-gnu-nm",
     "ln -s /usr/bin/readelf /usr/bin/$ARCH-linux-gnu-readelf",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_loongarch64"
+inherit.before-all = "append"
+before-all = [
+    "curl -L 'https://github.com/loong64/gn/releases/download/2024.12/gn-linux-loong64.tar.gz' | tar xz -C /usr/local/bin",
 ]
