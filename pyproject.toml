@@ -33,7 +33,6 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
-# TODO figure out symlinks for musllinux container
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
@@ -42,6 +41,17 @@ before-all = [
     "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-g++",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-nm",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-readelf",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux_{aarch64,loongarch64}"
+inherit.before-all = "append"
+before-all = [
+    "export ARCH=$(uname -m)",
+    "ln -s /usr/bin/gcc /usr/bin/$ARCH-linux-gnu-gcc",
+    "ln -s /usr/bin/g++ /usr/bin/$ARCH-linux-gnu-g++",
+    "ln -s /usr/bin/nm /usr/bin/$ARCH-linux-gnu-nm",
+    "ln -s /usr/bin/readelf /usr/bin/$ARCH-linux-gnu-readelf",
 ]
 
 [[tool.cibuildwheel.overrides]]
