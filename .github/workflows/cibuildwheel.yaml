@@ -115,4 +115,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
-          name: pypdfium2-wheel-${{ matrix.arch }}
+          name: pypdfium2-wheel-${{ matrix.image }}-${{ matrix.arch }}
