@@ -72,7 +72,8 @@ jobs:
               add_job("ubuntu-24.04", "ppc64le", True)  # False
               add_job("ubuntu-24.04", "s390x", True)  # False
           if emulated:
-              add_job("ubuntu-24.04", "loongarch64", True)
+              # XXX loongarch64 temporarily commented out for testing
+              # add_job("ubuntu-24.04", "loongarch64", True)
               # XXX riscv64 manylinux container does not have gn dependency, failing. TODO see if we can procure a pre-build somewhere else.
               if musl:
                   add_job("ubuntu-24.04", "riscv64", True, images=("musllinux", ))
