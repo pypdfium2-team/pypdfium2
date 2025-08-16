@@ -33,11 +33,10 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
-select = "*-manylinux_{aarch64,riscv64,loongarch64}"
+select = "*-manylinux_{aarch64,riscv64}"
 inherit.before-all = "append"
 before-all = [
     "export ARCH=$(uname -m)",
-    "[[ $ARCH == \"loongarch64\" ]] && export ARCH=\"${ARCH}-unknown\"",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-gcc",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-g++",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-nm",
@@ -45,20 +44,28 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
-select = "*-musllinux_{aarch64,riscv64,loongarch64}"
+select = "*-musllinux_{aarch64,riscv64}"
 inherit.before-all = "append"
 before-all = [
-    "echo determine arch",
     "export ARCH=$(uname -m)",
-    "[[ $ARCH == \"loongarch64\" ]] && export ARCH=\"${ARCH}-unknown\"",
-    "echo symlink gcc",
     "ln -s /usr/bin/gcc /usr/bin/$ARCH-linux-gnu-gcc",
-    "echo symlink g++",
     "ln -s /usr/bin/g++ /usr/bin/$ARCH-linux-gnu-g++",
-    "echo symlink nm",
     "ln -s /usr/bin/nm /usr/bin/$ARCH-linux-gnu-nm",
-    "echo symlink readelf",
     "ln -s /usr/bin/readelf /usr/bin/$ARCH-linux-gnu-readelf",
+]
+
+# loongarch64 needs -unknown suffix but is otherwise identical
+# TODO see if we can avoid the duplication
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_loongarch64"
+inherit.before-all = "append"
+before-all = [
+    "export ARCH=$(uname -m)-unknown",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-gcc",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-g++",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-nm",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-readelf",
 ]
 
 [[tool.cibuildwheel.overrides]]
@@ -66,4 +73,15 @@ select = "*-manylinux_loongarch64"
 inherit.before-all = "append"
 before-all = [
     "curl -L 'https://github.com/loong64/gn/releases/download/2024.12/gn-linux-loong64.tar.gz' | tar xz -C /usr/local/bin",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux_loongarch64"
+inherit.before-all = "append"
+before-all = [
+    "export ARCH=$(uname -m)-unknown",
+    "ln -s /usr/bin/gcc /usr/bin/$ARCH-linux-gnu-gcc",
+    "ln -s /usr/bin/g++ /usr/bin/$ARCH-linux-gnu-g++",
+    "ln -s /usr/bin/nm /usr/bin/$ARCH-linux-gnu-nm",
+    "ln -s /usr/bin/readelf /usr/bin/$ARCH-linux-gnu-readelf",
 ]
