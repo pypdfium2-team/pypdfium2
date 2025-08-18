@@ -13,8 +13,19 @@ requires = [
 
 [tool.cibuildwheel]
 build-frontend = "build"
-# TODO run actual test suite on platforms that have pillow and numpy wheels
-test-command = "python -m pypdfium2 --version"
+test-command = [
+    "python -m pypdfium2 --version",
+    "python {project}/conda/raw/minitest.py",
+]
+
+[[tool.cibuildwheel.overrides]]
+# run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
+select = "*linux_{x86_64,aarch64}"
+test-requires = ["pytest", "pillow", "numpy"]
+inherit.test-command = "append"
+test-command = [
+    "python -m pytest {project}/tests",
+]
 
 [tool.cibuildwheel.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
@@ -23,7 +34,7 @@ BUILD_PARAMS = "vendor_deps=['icu']"
 [tool.cibuildwheel.linux]
 before-all = [
     "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
-    "sh -c 'dnf -y install gn || true'",
+    "sh -c 'dnf -y install gn || true'",  # not manylinux_{riscv64,loongarch64}
 ]
 
 [[tool.cibuildwheel.overrides]]
@@ -33,10 +44,10 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
-select = "*-manylinux_{aarch64,riscv64}"
+select = "*-manylinux_{aarch64,riscv64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
-    "export ARCH=$(uname -m)",
+    "export ARCH=$(python {package}/utils/getarch.py)",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-gcc",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-g++",
     "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-nm",
@@ -44,35 +55,10 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
-select = "*-musllinux_{aarch64,riscv64}"
+select = "*-musllinux_{aarch64,riscv64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
-    "export ARCH=$(uname -m)",
-    "ln -s /usr/bin/gcc /usr/bin/$ARCH-linux-gnu-gcc",
-    "ln -s /usr/bin/g++ /usr/bin/$ARCH-linux-gnu-g++",
-    "ln -s /usr/bin/nm /usr/bin/$ARCH-linux-gnu-nm",
-    "ln -s /usr/bin/readelf /usr/bin/$ARCH-linux-gnu-readelf",
-]
-
-# loongarch64 symlinks need -unknown suffix but are otherwise identical
-# TODO see if we can avoid the duplication
-
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_loongarch64"
-inherit.before-all = "append"
-before-all = [
-    "export ARCH=$(uname -m)-unknown",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-gcc",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-g++",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-nm",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-readelf",
-]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux_loongarch64"
-inherit.before-all = "append"
-before-all = [
-    "export ARCH=$(uname -m)-unknown",
+    "export ARCH=$(python {package}/utils/getarch.py)",
     "ln -s /usr/bin/gcc /usr/bin/$ARCH-linux-gnu-gcc",
     "ln -s /usr/bin/g++ /usr/bin/$ARCH-linux-gnu-g++",
     "ln -s /usr/bin/nm /usr/bin/$ARCH-linux-gnu-nm",
