@@ -20,7 +20,7 @@ test-command = [
 
 [[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
-select = "*linux_{x86_64,aarch64}"
+select = "manylinux_{x86_64,aarch64}"
 test-requires = ["pytest", "pillow", "numpy"]
 inherit.test-command = "append"
 test-command = [
