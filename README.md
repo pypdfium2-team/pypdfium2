@@ -185,17 +185,15 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 
 ##### cibuildwheel
 
-The native sourcebuild can be run in cibuildwheel. The basic invocation is as simple as
+The native sourcebuild can be run through cibuildwheel. For platforms configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
 ```bash
-export CIBW_BUILD="cp311-manylinux_x86_64"  # p.ex.
-cibuildwheel . --output-dir wheelhouse
+CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
 ```
-since pypdfium2 has cibuildwheel configuration in its [`pyproject.toml`](./pyproject.toml) file, leastways for Linux.
 
 See also our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml).
 For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
 
-Note, on Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
+For Linux, note that cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
 ```bash
 sudo dnf in moby-engine  # this provides the docker command
 sudo systemctl start docker
@@ -203,12 +201,12 @@ sudo systemctl enable docker
 sudo usermod -aG docker $USER
 # then reboot (re-login might also suffice)
 ```
-For other ways of installing Docker, see cibuildwheel docs on [Setup](https://cibuildwheel.pypa.io/en/stable/setup/) and [Platforms](https://cibuildwheel.pypa.io/en/stable/platforms/).
+For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](https://cibuildwheel.pypa.io/en/stable/setup/), [Platforms](https://cibuildwheel.pypa.io/en/stable/platforms/)) and the links therein.
 
 > [!WARNING]
-> cibuildwheel copies the project directory into a container, not taking into account `.gitignore` rules.
+> cibuildwheel copies the project directory into a container, not taking `.gitignore` rules into account.
 > Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel.
-> In particular, a toolchained checkout of pdfium within pypdfium2 should be avoided, as that will cause a halt on the `Copying project into container...` step.
+> In particular, a toolchained checkout of pdfium within pypdfium2 is problematic, and will cause a halt on the `Copying project into container...` step.
 > For development, make sure the fresh checkout is in sync with the working copy.
 
 ##### Android (Termux)
