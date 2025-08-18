@@ -45,7 +45,7 @@ jobs:
         run: python3 -c "from pypdfium2.version import *; print(f'version={PYPDFIUM_INFO.tag}')" >> $GITHUB_OUTPUT
       
       - name: Check out pypdfium2 ${{ steps.version.outputs.version }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ github.repository }}
           ref: ${{ steps.version.outputs.version }}

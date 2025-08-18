@@ -46,7 +46,7 @@ jobs:
           python-version: '3.12'
       
       - name: Check out pypdfium2 repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ github.repository }}
           # fetch-depth: 0  # for git describe
