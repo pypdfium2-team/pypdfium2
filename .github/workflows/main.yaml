@@ -118,7 +118,7 @@ jobs:
       fail-fast: false
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-latest', 'windows-latest', 'windows-11-arm']
         py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
         include:
           - os: ubuntu-latest
@@ -131,6 +131,8 @@ jobs:
             wheel: dist/*macosx_*_arm64*.whl
           - os: windows-latest
             wheel: dist/*win_amd64.whl
+          - os: windows-11-arm
+            wheel: dist/*win_arm64.whl
     
     runs-on: ${{ matrix.os }}
     
