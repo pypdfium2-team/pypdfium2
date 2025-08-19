@@ -47,22 +47,22 @@ before-all = [
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
-    "export ARCH=$(python {package}/utils/getarch.py)",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-gcc",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-g++",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-nm",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/$ARCH-linux-gnu-readelf",
+    "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$PREFIX-gcc",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$PREFIX-g++",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$PREFIX-nm",
+    "ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/$PREFIX-readelf",
 ]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux_{aarch64,armv7l,riscv64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
-    "export ARCH=$(python {package}/utils/getarch.py)",
-    "ln -s /usr/bin/gcc /usr/bin/$ARCH-linux-gnu-gcc",
-    "ln -s /usr/bin/g++ /usr/bin/$ARCH-linux-gnu-g++",
-    "ln -s /usr/bin/nm /usr/bin/$ARCH-linux-gnu-nm",
-    "ln -s /usr/bin/readelf /usr/bin/$ARCH-linux-gnu-readelf",
+    "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
+    "ln -s /usr/bin/gcc /usr/bin/$PREFIX-gcc",
+    "ln -s /usr/bin/g++ /usr/bin/$PREFIX-g++",
+    "ln -s /usr/bin/nm /usr/bin/$PREFIX-nm",
+    "ln -s /usr/bin/readelf /usr/bin/$PREFIX-readelf",
 ]
 
 [[tool.cibuildwheel.overrides]]
