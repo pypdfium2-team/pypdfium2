@@ -71,3 +71,46 @@ inherit.before-all = "append"
 before-all = [
     "curl -L 'https://github.com/loong64/gn/releases/download/2024.12/gn-linux-loong64.tar.gz' | tar xz -C /usr/local/bin",
 ]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_riscv64"
+inherit.before-all = "append"
+before-all = [
+    "export GN_ARCHIVE='./gn-linux-riscv64.zip'",
+    "wget 'https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-riscv64/+/latest'",
+    "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
+    "unlink '$GN_ARCHIVE'",
+]
+
+# TODO
+
+# [tool.cibuildwheel.macos]
+# before-all = [
+#     "sh -c 'brew update || true'",
+#     "sh -c 'brew install ... || true'",
+# ]
+
+# [[tool.cibuildwheel.overrides]]
+# select = "*-macosx_x86_64"
+# inherit.before-all = "append"
+# before-all = [
+#     "export GN_ARCHIVE='./gn-mac-amd64.zip'",
+#     "wget 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-amd64/+/latest'",
+#     "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
+#     "unlink '$GN_ARCHIVE'",
+# ]
+# inherit.environment = "append"
+# environment.MACOSX_DEPLOYMENT_TARGET = "13.0"
+# environment.SYSTEM_VERSION_COMPAT = 0
+
+# [[tool.cibuildwheel.overrides]]
+# select = "*-macosx_arm64"
+# inherit.before-all = "append"
+# before-all = [
+#     "export GN_ARCHIVE='./gn-mac-arm64.zip'",
+#     "wget 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-arm64/+/latest'",
+#     "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
+#     "unlink '$GN_ARCHIVE'",
+# ]
+# inherit.environment = "append"
+# environment.MACOSX_DEPLOYMENT_TARGET = "14.0"
