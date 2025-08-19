@@ -44,7 +44,7 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
-select = "*-manylinux_{aarch64,riscv64,loongarch64}"
+select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
     "export ARCH=$(python {package}/utils/getarch.py)",
@@ -55,7 +55,7 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
-select = "*-musllinux_{aarch64,riscv64,loongarch64}"
+select = "*-musllinux_{aarch64,armv7l,riscv64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
     "export ARCH=$(python {package}/utils/getarch.py)",

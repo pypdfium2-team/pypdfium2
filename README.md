@@ -1024,6 +1024,9 @@ echo '{"cibw_py_ver":"cp38", "existing":"true", "ibm":"false", "emulated":"false
 ```
 You should pass the complete set of fields here, defaults might not be recognized with this form of dispatch.
 
+> [!IMPORTANT]
+> You need to be in the pypdfium2 directory for this to work. Otherwise, the request will be silently ignored.
+
 ### Release workflow
 
 The release process is fully automated using Python scripts and scheduled release workflows.
