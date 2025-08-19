@@ -77,7 +77,7 @@ select = "*-manylinux_riscv64"
 inherit.before-all = "append"
 before-all = [
     "export GN_ARCHIVE='./gn-linux-riscv64.zip'",
-    "curl -L -O 'https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-riscv64/+/latest'",
+    "curl -L -o '$GN_ARCHIVE' 'https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-riscv64/+/latest'",
     "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
     "unlink '$GN_ARCHIVE'",
 ]
@@ -95,7 +95,7 @@ before-all = [
 # inherit.before-all = "append"
 # before-all = [
 #     "export GN_ARCHIVE='./gn-mac-amd64.zip'",
-#     "curl -L -O 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-amd64/+/latest'",
+#     "curl -L -o '$GN_ARCHIVE' 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-amd64/+/latest'",
 #     "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
 #     "unlink '$GN_ARCHIVE'",
 # ]
@@ -108,7 +108,7 @@ before-all = [
 # inherit.before-all = "append"
 # before-all = [
 #     "export GN_ARCHIVE='./gn-mac-arm64.zip'",
-#     "curl -L -O 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-arm64/+/latest'",
+#     "curl -L -o '$GN_ARCHIVE' 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-arm64/+/latest'",
 #     "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
 #     "unlink '$GN_ARCHIVE'",
 # ]
