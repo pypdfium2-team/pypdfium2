@@ -55,6 +55,17 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
+select = "*-manylinux_riscv64"
+inherit.before-all = "append"
+before-all = [
+    "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
+    "ln -s /usr/bin/gcc /usr/bin/$PREFIX-gcc",
+    "ln -s /usr/bin/g++ /usr/bin/$PREFIX-g++",
+    "ln -s /usr/bin/nm /usr/bin/$PREFIX-nm",
+    "ln -s /usr/bin/readelf /usr/bin/$PREFIX-readelf",
+]
+
+[[tool.cibuildwheel.overrides]]
 select = "*-musllinux_{aarch64,armv7l,riscv64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
