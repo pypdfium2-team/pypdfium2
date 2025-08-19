@@ -52,7 +52,6 @@ jobs:
           emulated = bool(int( os.environ["BUILD_EMULATED"] ))
           musl     = bool(int( os.environ["BUILD_MUSL"] ))
           
-          # NOTE musllinux is experimental in our cibuildwheel config
           matrix = []
           images = ["manylinux"]
           if musl:
