@@ -85,8 +85,8 @@ jobs:
                   # pdfium-binaries don't currently build armv7l for musl (but they do for glibc)
                   linux_job("ubuntu-24.04", "armv7l", True, images=("musllinux", ))
           if MACOS:
-              job("macos", "macos-13", "x86_64")
-              job("macos", "macos-latest", "arm64")
+              job("macosx", "macos-13", "x86_64")
+              job("macosx", "macos-latest", "arm64")
           
           matrix_json = json.dumps(matrix)
           print(matrix_json, file=sys.stderr)
