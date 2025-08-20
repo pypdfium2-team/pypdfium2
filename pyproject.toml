@@ -111,7 +111,7 @@ before-all = [
     "unlink '$GN_ARCHIVE'",
 ]
 inherit.environment = "append"
-environment = {MACOSX_DEPLOYMENT_TARGET="13.0", SYSTEM_VERSION_COMPAT=0, PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps={'icu'}, compiler='clang', clang_path='/Applications/Xcode_15.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr'"}
+environment = {MACOSX_DEPLOYMENT_TARGET="13.0", SYSTEM_VERSION_COMPAT=0, PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps={'icu'}, compiler='clang', clang_path='/usr'"}
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
@@ -123,4 +123,4 @@ before-all = [
     "unlink '$GN_ARCHIVE'",
 ]
 inherit.environment = "append"
-environment = {MACOSX_DEPLOYMENT_TARGET="14.0", PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps={'icu'}, compiler='clang', clang_path='/Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr'"}
+environment = {MACOSX_DEPLOYMENT_TARGET="14.0", PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps={'icu'}, compiler='clang', clang_path='/usr'"}
