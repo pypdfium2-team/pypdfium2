@@ -12,17 +12,20 @@ on:
       cibw_py_ver:
         default: 'cp38'
         type: string
-      existing:
+      linux_main:
         default: true
         type: boolean
-      ibm:
+      linux_ibm:
         default: true
         type: boolean
-      emulated:
+      linux_emulated:
         default: false
         type: boolean
-      musl:
-        default: false
+      linux_musl:
+        default: true
+        type: boolean
+      macos:
+        default: true
         type: boolean
 
 permissions: {}
@@ -40,42 +43,50 @@ jobs:
         id: set-matrix
         shell: python
         env:
-          BUILD_EXISTING: ${{ inputs.existing && 1 || 0 }}
-          BUILD_IBM: ${{ inputs.ibm && 1 || 0 }}
-          BUILD_EMULATED: ${{ inputs.emulated && 1 || 0 }}
-          BUILD_MUSL: ${{ inputs.musl && 1 || 0 }}
+          LINUX_MAIN:     ${{ inputs.linux_main     && 1 || 0 }}
+          LINUX_IBM:      ${{ inputs.linux_ibm      && 1 || 0 }}
+          LINUX_EMULATED: ${{ inputs.linux_emulated && 1 || 0 }}
+          LINUX_MUSL:     ${{ inputs.linux_musl     && 1 || 0 }}
+          MACOS:          ${{ inputs.macos          && 1 || 0 }}
         run: |
           import os, sys, json
           
-          existing = bool(int( os.environ["BUILD_EXISTING"] ))
-          ibm      = bool(int( os.environ["BUILD_IBM"] ))
-          emulated = bool(int( os.environ["BUILD_EMULATED"] ))
-          musl     = bool(int( os.environ["BUILD_MUSL"] ))
+          LINUX_MAIN     = bool(int( os.environ["LINUX_MAIN"] ))
+          LINUX_IBM      = bool(int( os.environ["LINUX_IBM"] ))
+          LINUX_EMULATED = bool(int( os.environ["LINUX_EMULATED"] ))
+          LINUX_MUSL     = bool(int( os.environ["LINUX_MUSL"] ))
+          MACOS          = bool(int( os.environ["MACOS"] ))
           
           matrix = []
           images = ["manylinux"]
-          if musl:
+          if LINUX_MUSL:
               images.append("musllinux")
           
-          def add_job(os, arch, needs_emulator=False, images=images):
-              for image in images:
-                  matrix.append(dict(
-                      os=os, arch=arch, image=image, needs_emulator=needs_emulator
-                  ))
+          def job(image, os, arch, emulated=False):
+              matrix.append(dict(
+                  image=image, os=os, arch=arch, needs_emulator=emulated
+              ))
           
-          if existing:
-              add_job("ubuntu-24.04", "x86_64")
-              add_job("ubuntu-24.04-arm", "aarch64")
-          if ibm:
+          def linux_job(os, arch, emulated=False, images=images):
+              for image in images:
+                  job(os, arch, image, emulated)
+          
+          if LINUX_MAIN:
+              linux_job("ubuntu-24.04", "x86_64")
+              linux_job("ubuntu-24.04-arm", "aarch64")
+          if LINUX_IBM:
               # XXX will become native as soon as we get access to IBM's self-hosted runners
-              add_job("ubuntu-24.04", "ppc64le", True)  # False
-              add_job("ubuntu-24.04", "s390x", True)  # False
-          if emulated:
-              add_job("ubuntu-24.04", "loongarch64", True)
-              add_job("ubuntu-24.04", "riscv64", True)
-              if musl:
+              linux_job("ubuntu-24.04", "ppc64le", True)  # False
+              linux_job("ubuntu-24.04", "s390x", True)  # False
+          if LINUX_EMULATED:
+              linux_job("ubuntu-24.04", "loongarch64", True)
+              linux_job("ubuntu-24.04", "riscv64", True)
+              if LINUX_MUSL:
                   # pdfium-binaries don't currently build armv7l for musl (but they do for glibc)
-                  add_job("ubuntu-24.04", "armv7l", True, images=("musllinux", ))
+                  linux_job("ubuntu-24.04", "armv7l", True, images=("musllinux", ))
+          if MACOS:
+              job("macos", "macos-13", "x86_64")
+              job("macos", "macos-latest", "arm64")
           
           matrix_json = json.dumps(matrix)
           print(matrix_json, file=sys.stderr)
@@ -103,7 +114,7 @@ jobs:
         if: ${{ matrix.needs_emulator }}
         uses: docker/setup-qemu-action@v3
       
-      # Reminder: most configuration is in pyproject.toml as this allows for overrides
+      # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
       - name: Build wheels
         uses: pypdfium2-team/cibuildwheel@v3.1.3
         env:
@@ -113,7 +124,8 @@ jobs:
         with:
           output-dir: wheelhouse
       
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
-          name: pypdfium2-wheel-${{ matrix.image }}-${{ matrix.arch }}
+          name: cibw-${{ matrix.image }}-${{ matrix.arch }}
