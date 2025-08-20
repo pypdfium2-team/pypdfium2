@@ -60,7 +60,7 @@ DefaultConfig = {
 }
 
 if sys.platform.startswith("darwin"):
-    DefaultConfig["mac_deployment_target"] = "10.13.0"
+    DefaultConfig["mac_deployment_target"] = os.environ["MACOSX_DEPLOYMENT_TARGET"]
     DefaultConfig["use_system_xcode"] = True
 
 IS_ANDROID = Host.system == SysNames.android
