@@ -29,7 +29,7 @@ test-command = [
 
 [tool.cibuildwheel.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
-BUILD_PARAMS = "vendor_deps=['icu']"
+BUILD_PARAMS = "vendor_deps={'icu'}"
 
 [tool.cibuildwheel.linux]
 before-all = [
@@ -103,7 +103,7 @@ before-all = [
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_*"
-environment = {PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps=['icu'], compiler='clang', clang_path='/usr'"}
+environment = {PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps={'icu'}, compiler='clang', clang_path='/usr'"}
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_x86_64"
