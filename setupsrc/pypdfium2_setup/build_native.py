@@ -281,11 +281,8 @@ def test(build_dir):
 def _get_clang_ver(clang_path):
     from packaging.version import Version
     output = run_cmd([str(clang_path/"bin"/"clang"), "--version"], capture=True, cwd=None)
-    if sys.platform.startswith("darwin"):
-        preamble = "Apple LLVM version"
-    else:
-        preamble = "clang version"
-    version = re.match(rf"{preamble} ([\d\.]+)", output).group(1)
+    log(output)  # XXX debug
+    version = re.search(r"version ([\d\.]+)", output).group(1)
     version = Version(version).major
     log(f"Determined clang version {version!r}")
     return version
