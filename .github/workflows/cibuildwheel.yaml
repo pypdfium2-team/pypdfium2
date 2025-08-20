@@ -24,8 +24,9 @@ on:
       linux_musl:
         default: true
         type: boolean
+      # FIXME macos does not actually work yet: ninja promptly fails with non-zero exit code after invocation, but there doesn't seem to be an error message in the logs. So not sure what to do about this.
       macos:
-        default: true
+        default: false
         type: boolean
 
 permissions: {}
