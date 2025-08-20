@@ -280,15 +280,11 @@ def test(build_dir):
 
 def _get_clang_ver(clang_path):
     from packaging.version import Version
-    try_libpaths = [
-        clang_path/"lib"/"clang",
-        clang_path/"lib64"/"clang",
-    ]
-    libpath = next(filter(Path.exists, try_libpaths))
-    candidates = (Version(p.name) for p in libpath.iterdir() if re.fullmatch(r"[\d\.]+", p.name))
-    version = max(candidates)
-    return version.major
-
+    output = run_cmd([str(clang_path/"bin"/"clang"), "--version"], capture=True, cwd=None)
+    version = re.match(r"clang version ([\d\.]+)", output).group(1)
+    version = Version(version).major
+    log(f"Determined clang version {version!r}")
+    return version
 
 def setup_compiler(config, compiler, clang_path):
     if compiler is Compiler.gcc:
