@@ -102,6 +102,10 @@ before-all = [
 ]
 
 [[tool.cibuildwheel.overrides]]
+select = "*-macosx_*"
+environment = {PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps=['icu'], compiler='clang', clang_path='/usr'"}
+
+[[tool.cibuildwheel.overrides]]
 select = "*-macosx_x86_64"
 inherit.before-all = "append"
 before-all = [
@@ -111,8 +115,7 @@ before-all = [
     "unlink '$GN_ARCHIVE'",
 ]
 inherit.environment = "append"
-environment.MACOSX_DEPLOYMENT_TARGET = "13.0"
-environment.SYSTEM_VERSION_COMPAT = 0
+environment = {MACOSX_DEPLOYMENT_TARGET="13.0", SYSTEM_VERSION_COMPAT=0}
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
@@ -124,4 +127,4 @@ before-all = [
     "unlink '$GN_ARCHIVE'",
 ]
 inherit.environment = "append"
-environment.MACOSX_DEPLOYMENT_TARGET = "14.0"
+environment = {MACOSX_DEPLOYMENT_TARGET="14.0"}
