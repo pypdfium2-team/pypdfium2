@@ -321,8 +321,11 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             raise RuntimeError("Neither gcc nor clang installed.")
     elif isinstance(compiler, str):
         compiler = Compiler[compiler]
-    if compiler is Compiler.clang and clang_path is None:
-        clang_path = Host.usr
+    if compiler is Compiler.clang:
+        if clang_path is None:
+            clang_path = Host.usr
+        elif isinstance(clang_path, str):
+            clang_path = Path(clang_path)
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
