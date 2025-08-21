@@ -184,10 +184,9 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 > By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib`.
 
 > [!NOTE]
-> The native sourcebuild currently supports Linux, or Linux-like platforms.
-> macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible.
-> You need to use the toolchained build on these platforms for now.
-> Community help / pull requests to extend platform support would be appreciated.
+> The native sourcebuild currently supports Linux (or similar).
+> macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible – use the toolchain-based build for now.
+> Community help / pull requests to extend platform support would be welcome.
 
 ##### cibuildwheel
 
@@ -199,7 +198,7 @@ CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
 See also our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml).
 For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
 
-For Linux, note that cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
+Note that, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
 ```bash
 sudo dnf in moby-engine  # this provides the docker command
 sudo systemctl start docker
