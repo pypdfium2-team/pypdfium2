@@ -46,7 +46,7 @@ jobs:
           python-version: '3.12'
       
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in conf.py
