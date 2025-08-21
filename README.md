@@ -180,6 +180,16 @@ python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
+Note, on *some* platforms, you might also need symlinks for GCC, e.g.:
+```bash
+PREFIX=$(python ./utils/get_gcc_prefix.py)  # in pypdfium2 dir
+GCC_DIR="/usr"  # or e.g. /opt/rh/gcc-toolset-14/root
+sudo ln -s $GCC_DIR/bin/gcc $GCC_DIR/bin/$PREFIX-gcc
+sudo ln -s $GCC_DIR/bin/g++ $GCC_DIR/bin/$PREFIX-g++
+sudo ln -s $GCC_DIR/bin/nm $GCC_DIR/bin/$PREFIX-nm
+sudo ln -s $GCC_DIR/bin/readelf $GCC_DIR/bin/$PREFIX-readelf
+```
+
 > [!TIP]
 > By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib`.
 
