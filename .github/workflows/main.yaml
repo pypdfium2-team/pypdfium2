@@ -138,8 +138,6 @@ jobs:
     
     steps:
       
-      - uses: extractions/setup-just@v3
-      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -174,7 +172,7 @@ jobs:
           WHEEL: ${{ matrix.wheel }}
       
       - name: Run Test Suite
-        run: just test
+        run: python3 -m pytest tests/
   
   
   publish:

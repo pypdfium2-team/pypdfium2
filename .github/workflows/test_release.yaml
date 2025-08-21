@@ -28,8 +28,6 @@ jobs:
     
     steps:
       
-      - uses: extractions/setup-just@v3
-      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -54,4 +52,4 @@ jobs:
         run: python3 -m pip install -U -r req/converters.txt -r req/test.txt
       
       - name: Run tests
-        run: just test
+        run: python3 -m pytest tests/
