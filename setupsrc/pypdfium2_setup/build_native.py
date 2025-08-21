@@ -59,10 +59,6 @@ DefaultConfig = {
     "use_libcxx_modules": False,
 }
 
-if sys.platform.startswith("darwin"):
-    DefaultConfig["mac_deployment_target"] = os.environ["MACOSX_DEPLOYMENT_TARGET"]
-    DefaultConfig["use_system_xcode"] = True
-
 IS_ANDROID = Host.system == SysNames.android
 if IS_ANDROID:
     DefaultConfig.update({
@@ -316,13 +312,8 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             compiler = Compiler.clang
         else:
             raise RuntimeError("Neither gcc nor clang installed.")
-    elif isinstance(compiler, str):
-        compiler = Compiler[compiler]
-    if compiler is Compiler.clang:
-        if clang_path is None:
-            clang_path = Host.usr
-        elif isinstance(clang_path, str):
-            clang_path = Path(clang_path)
+    if compiler is Compiler.clang and clang_path is None:
+        clang_path = Host.usr
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
@@ -406,6 +397,8 @@ def parse_args(argv):
         help = "Dependencies to vendor. Note, this only supports libraries where there is a specific reason to vendor despite the native build. Currently this means 'icu' only ('libc++' may be added in the future). For an exhaustive vendored build, use build_toolchained.py"
     )
     args = parser.parse_args(argv)
+    if args.compiler:
+        args.compiler = Compiler[args.compiler]
     if args.vendor_deps:
         args.vendor_deps = set(args.vendor_deps)
     return args

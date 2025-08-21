@@ -4,6 +4,7 @@
 
 import os
 import sys
+import shlex
 import argparse
 import traceback
 from pathlib import Path
@@ -76,17 +77,16 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
             _end_subtargets(sub_target, pdfium_ver)
     
     elif pl_name == ExtPlats.sourcebuild:
-        
-        build_params = os.getenv("BUILD_PARAMS", {})
-        if build_params:
-            build_params = {k.strip(): literal_eval(v.strip()) for k, v in (p.split("=") for p in build_params.split(","))}
         if flags:
             log(f"sourcebuild: flags {flags!r} are not handled (will be discarded).")
         
-        if sub_target == "native":
-            build_native.main(build_ver=pdfium_ver, **build_params)
-        elif sub_target == "toolchained":
-            build_toolchained.main(build_ver=pdfium_ver, **build_params)
+        build_params = shlex.split( os.getenv("BUILD_PARAMS", "") )
+        builder = dict(native=build_native, toolchained=build_toolchained).get(sub_target)
+        if builder:
+            build_params = vars(builder.parse_args(build_params))
+            build_params.update(dict(build_ver=pdfium_ver))
+            log(build_params)
+            builder.main(**build_params)
         else:
             _end_subtargets(sub_target, pdfium_ver)
     

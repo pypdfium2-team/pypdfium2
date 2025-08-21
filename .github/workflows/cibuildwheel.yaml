@@ -24,10 +24,6 @@ on:
       linux_musl:
         default: true
         type: boolean
-      # FIXME macos does not actually work yet: ninja promptly fails with non-zero exit code after invocation, but there doesn't seem to be an error message in the logs. So not sure what to do about this.
-      macos:
-        default: false
-        type: boolean
 
 permissions: {}
 
@@ -48,7 +44,6 @@ jobs:
           LINUX_IBM:      ${{ inputs.linux_ibm      && 1 || 0 }}
           LINUX_EMULATED: ${{ inputs.linux_emulated && 1 || 0 }}
           LINUX_MUSL:     ${{ inputs.linux_musl     && 1 || 0 }}
-          MACOS:          ${{ inputs.macos          && 1 || 0 }}
         run: |
           import os, sys, json
           
@@ -56,7 +51,6 @@ jobs:
           LINUX_IBM      = bool(int( os.environ["LINUX_IBM"] ))
           LINUX_EMULATED = bool(int( os.environ["LINUX_EMULATED"] ))
           LINUX_MUSL     = bool(int( os.environ["LINUX_MUSL"] ))
-          MACOS          = bool(int( os.environ["MACOS"] ))
           
           matrix = []
           images = ["manylinux"]
@@ -85,9 +79,6 @@ jobs:
               if LINUX_MUSL:
                   # pdfium-binaries don't currently build armv7l for musl (but they do for glibc)
                   linux_job("ubuntu-24.04", "armv7l", True, images=("musllinux", ))
-          if MACOS:
-              job("macosx", "macos-13", "x86_64")
-              job("macosx", "macos-latest", "arm64")
           
           matrix_json = json.dumps(matrix)
           print(matrix_json, file=sys.stderr)

@@ -29,7 +29,7 @@ test-command = [
 
 [tool.cibuildwheel.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
-BUILD_PARAMS = "vendor_deps={'icu'}"
+BUILD_PARAMS = "--vendor icu"
 
 [tool.cibuildwheel.linux]
 before-all = [
@@ -92,35 +92,3 @@ before-all = [
     "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
     "unlink '$GN_ARCHIVE'",
 ]
-
-# macOS is work in progress
-
-[tool.cibuildwheel.macos]
-before-all = [
-    "sh -c 'brew update || true'",
-    "sh -c 'brew install ninja freetype lcms2 jpeg-turbo openjpeg libpng libtiff zlib glib || true'",
-]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-macosx_x86_64"
-inherit.before-all = "append"
-before-all = [
-    "export GN_ARCHIVE='./gn-mac-amd64.zip'",
-    "curl -L -o '$GN_ARCHIVE' 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-amd64/+/latest'",
-    "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
-    "unlink '$GN_ARCHIVE'",
-]
-inherit.environment = "append"
-environment = {MACOSX_DEPLOYMENT_TARGET="13.0", SYSTEM_VERSION_COMPAT=0, PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps={'icu'}, compiler='clang', clang_path='/usr'"}
-
-[[tool.cibuildwheel.overrides]]
-select = "*-macosx_arm64"
-inherit.before-all = "append"
-before-all = [
-    "export GN_ARCHIVE='./gn-mac-arm64.zip'",
-    "curl -L -o '$GN_ARCHIVE' 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-arm64/+/latest'",
-    "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
-    "unlink '$GN_ARCHIVE'",
-]
-inherit.environment = "append"
-environment = {MACOSX_DEPLOYMENT_TARGET="14.0", PDFIUM_PLATFORM="sourcebuild-native", BUILD_PARAMS="vendor_deps={'icu'}, compiler='clang', clang_path='/usr'"}

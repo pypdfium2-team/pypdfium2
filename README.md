@@ -142,7 +142,7 @@ This project comes with two scripts to automate the build process: `build_toolch
 - `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, this script will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
 - `build_native` is an attempt to address some shortcomings of the toolchained build (mainly a bloated checkout process, and lack of portability). It is tailored towards native compilation, and uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
 
-You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup, and pass options with `$BUILD_PARAMS` in python keyword argument syntax.
+You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup, and pass command-line flags with `$BUILD_PARAMS`.
 However, for simplicity, both scripts/subtargets share just `sourcebuild` as staging directory.
 
 Dependencies:
