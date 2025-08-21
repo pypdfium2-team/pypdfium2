@@ -59,7 +59,7 @@ jobs:
           
           def job(image, os, arch, emulated=False):
               matrix.append(dict(
-                  image=image, os=os, arch=arch, needs_emulator=emulated
+                  image=image, os=os, arch=arch, emulated=emulated
               ))
           
           def linux_job(os, arch, emulated=False, images=images):
@@ -103,7 +103,7 @@ jobs:
           fetch-depth: 0
       
       - name: Set up QEMU
-        if: ${{ matrix.needs_emulator }}
+        if: ${{ matrix.emulated }}
         uses: docker/setup-qemu-action@v3
       
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
