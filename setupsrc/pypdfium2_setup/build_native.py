@@ -277,7 +277,7 @@ def test(build_dir):
 def _get_clang_ver(clang_path):
     from packaging.version import Version
     output = run_cmd([str(clang_path/"bin"/"clang"), "--version"], capture=True, cwd=None)
-    log(output)  # XXX debug
+    log(output)
     version = re.search(r"version ([\d\.]+)", output).group(1)
     version = Version(version).major
     log(f"Determined clang version {version!r}")

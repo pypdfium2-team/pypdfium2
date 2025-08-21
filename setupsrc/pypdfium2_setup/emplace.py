@@ -8,7 +8,6 @@ import shlex
 import argparse
 import traceback
 from pathlib import Path
-from ast import literal_eval
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 from pypdfium2_setup.base import *

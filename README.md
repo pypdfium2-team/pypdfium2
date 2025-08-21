@@ -183,9 +183,15 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 > [!TIP]
 > By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib`.
 
+> [!NOTE]
+> The native sourcebuild currently supports Linux, or Linux-like platforms.
+> macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible.
+> You need to use the toolchained build on these platforms for now.
+> Community help / pull requests to extend platform support would be appreciated.
+
 ##### cibuildwheel
 
-The native sourcebuild can be run through cibuildwheel. For platforms configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
+The native sourcebuild can be run through cibuildwheel. For targets configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
 ```bash
 CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
 ```
@@ -1011,7 +1017,7 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 
 ### Adding a new workflow
 
-When creating a new workflow, it is usually desirable to test in a branch first before merging into main.
+When writing a new workflow, it is usually desirable to test in a branch first before merging into main.
 However, new workflows from branches cannot be dispatched from the GitHub Actions panel yet. That's why you'll want to use the [`gh`](https://cli.github.com/) command-line tool, as follows:
 ```bash
 gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH
@@ -1020,7 +1026,7 @@ If inputs are needed, JSON can be used
 ```bash
 echo '{"my_json_info":1, "my_var":"hello"}' | gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH --json
 # real-world example
-echo '{"cibw_py_ver":"cp38", "linux_main":"true", "linux_ibm":"false", "linux_emulated":"false", "linux_musl":"true", "macos":"false"}' | gh workflow run cibuildwheel.yaml --ref cibuildwheel --json
+echo '{"cibw_py_ver":"cp38", "linux_main":"true", "linux_ibm":"false", "linux_emulated":"false", "linux_musl":"true"}' | gh workflow run cibuildwheel.yaml --ref cibuildwheel --json
 ```
 You should pass the complete set of fields here, defaults might not be recognized with this form of dispatch.
 
