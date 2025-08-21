@@ -1,0 +1,40 @@
+diff --git a/core/fxcrt/cfx_seekablestreamproxy.cpp b/core/fxcrt/cfx_seekablestreamproxy.cpp
+index 33cc528..95dc752 100644
+--- a/core/fxcrt/cfx_seekablestreamproxy.cpp
++++ b/core/fxcrt/cfx_seekablestreamproxy.cpp
+@@ -89,11 +89,19 @@ void SwapByteOrder(pdfium::span<uint16_t> str) {
+ 
+ }  // namespace
+ 
++#if defined(ARCH_CPU_LITTLE_ENDIAN)
+ #define BOM_UTF8_MASK 0x00FFFFFF
+ #define BOM_UTF8 0x00BFBBEF
+ #define BOM_UTF16_MASK 0x0000FFFF
+ #define BOM_UTF16_BE 0x0000FFFE
+ #define BOM_UTF16_LE 0x0000FEFF
++#else
++#define BOM_UTF8_MASK 0xFFFFFF00
++#define BOM_UTF8 0xEFBBBF00
++#define BOM_UTF16_MASK 0xFFFF0000
++#define BOM_UTF16_BE 0xFEFF0000
++#define BOM_UTF16_LE 0xFFFE0000
++#endif
+ 
+ CFX_SeekableStreamProxy::CFX_SeekableStreamProxy(
+     const RetainPtr<IFX_SeekableReadStream>& stream)
+@@ -188,9 +196,15 @@ size_t CFX_SeekableStreamProxy::ReadBlock(pdfium::span<wchar_t> buffer) {
+     size_t bytes_read =
+         ReadData(pdfium::as_writable_bytes(buffer).first(bytes_to_read));
+     size_t elements = bytes_read / sizeof(uint16_t);
++#if defined(ARCH_CPU_LITTLE_ENDIAN)
+     if (code_page_ == FX_CodePage::kUTF16BE) {
+       SwapByteOrder(fxcrt::reinterpret_span<uint16_t>(buffer).first(elements));
+     }
++#else
++    if (code_page_ == FX_CodePage::kUTF16LE) {
++      SwapByteOrder(fxcrt::reinterpret_span<uint16_t>(buffer).first(elements));
++    }
++#endif
+     UTF16ToWChar(buffer.first(elements));
+     return elements;
+   }

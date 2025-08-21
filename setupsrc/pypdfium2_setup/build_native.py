@@ -14,22 +14,24 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
 
+IS_CIBUILDWHEEL = bool(int( os.environ.get("CIBUILDWHEEL", 0) ))
+
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium"
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
     build      = _CR_PREFIX + "chromium/src/build",
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
+    catapult   = _CR_PREFIX + "catapult",  # android
+    icu        = _CR_PREFIX + "chromium/deps/icu",  # for cibuildwheel
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
-    catapult   = _CR_PREFIX + "catapult",
 )
 SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
 Compiler = Enum("Compiler", "gcc clang")
-RESET_REPOS = False
 
 DefaultConfig = {
     "is_debug": False,
@@ -56,10 +58,6 @@ DefaultConfig = {
     "use_custom_libcxx": False,
     "use_libcxx_modules": False,
 }
-
-if sys.platform.startswith("darwin"):
-    DefaultConfig["mac_deployment_target"] = "10.13.0"
-    DefaultConfig["use_system_xcode"] = True
 
 IS_ANDROID = Host.system == SysNames.android
 if IS_ANDROID:
@@ -88,10 +86,10 @@ if IS_ANDROID:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
-def _get_repo(url, target_dir, rev, depth=1):
+def _get_repo(url, target_dir, rev, reset=False, depth=1):
     
     if target_dir.exists():
-        if RESET_REPOS and target_dir.name in ("pdfium", "build"):
+        if reset:
             log(f"Resetting {target_dir.name} as per --reset option.")
             run_cmd(["git", "reset", "--hard"], cwd=target_dir)
             return True
@@ -112,16 +110,18 @@ def _get_repo(url, target_dir, rev, depth=1):
 
 
 DEPS_RE = r"\s*'{key}': '(\w+)'"
-DEPS_FIELDS = ("build", "abseil", "fast_float")
 
-class _DeferredClass:
+class _DeferredInfo:
+    
+    def __init__(self, deps_fields):
+        self.deps_fields = deps_fields
     
     @cached_property  # included from base.py
     def deps(self):
         # TODO get a proper parser for the DEPS file format?
         deps_content = (PDFIUM_DIR/"DEPS").read_text()
         result = {}
-        for field in DEPS_FIELDS:
+        for field in self.deps_fields:
             field_re = DEPS_RE.format(key=f"{field}_revision")
             match = re.search(field_re, deps_content)
             assert match, f"Could not find {field!r} in DEPS file"
@@ -129,12 +129,10 @@ class _DeferredClass:
         log(f"Found DEPS revisions:\n{result}")
         return result
 
-_Deferred = _DeferredClass()
 
-
-def _fetch_dep(name, target_dir):
+def _fetch_dep(info, name, target_dir, reset=False):
     # parse out DEPS revisions only when we actually need them
-    return _get_repo(DEPS_URLS[name], target_dir, rev=lambda: _Deferred.deps[name])
+    return _get_repo(DEPS_URLS[name], target_dir, rev=lambda: info.deps[name], reset=reset)
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
@@ -154,12 +152,13 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
 
-def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_lib, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
-    do_patches = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev)
+    # pass through reset only for the repositories we actually patch
+    do_patches = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev, reset=reset)
     if do_patches:
         autopatch_dir(
             PDFIUM_DIR/"public"/"cpp", "*.h",
@@ -185,13 +184,21 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
                 "#if 1  // defined(COMPONENT_BUILD)",
                 is_regex=False, exp_count=1,
             )
+        if sys.byteorder == "big":
+            git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
+            if with_tests:
+                git_apply_patch(PatchDir/"bigendian_test.patch", cwd=PDFIUM_DIR)
     
-    do_patches = _fetch_dep("build", PDFIUM_DIR/"build")
+    do_patches = _fetch_dep(deps_info, "build", PDFIUM_DIR/"build", reset=reset)
     if do_patches:
-        # Work around error about path_exists() being undefined
+        # siso.patch: work around error about path_exists() being undefined
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
         if IS_ANDROID:
+            # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR/"build")
+        if IS_CIBUILDWHEEL:
+            # compatibility patch for older system libraries from container
+            git_apply_patch(PatchDir/"cibuildwheel.patch", cwd=PDFIUM_DIR)
         if compiler is Compiler.gcc:
             # https://crbug.com/402282789
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
@@ -212,27 +219,30 @@ def get_sources(short_ver, with_tests, compiler, clang_path, single_lib):
     
     get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
     
-    _fetch_dep("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
-    _fetch_dep("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
+    _fetch_dep(deps_info, "abseil", PDFIUM_3RDPARTY/"abseil-cpp")
+    _fetch_dep(deps_info, "fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if IS_ANDROID:
-        _fetch_dep("catapult", PDFIUM_3RDPARTY/"catapult")
+        _fetch_dep(deps_info, "catapult", PDFIUM_3RDPARTY/"catapult")
+    if "icu" in vendor_deps:
+        _fetch_dep(deps_info, "icu", PDFIUM_3RDPARTY/"icu")
     if with_tests:
-        _fetch_dep("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
-        _fetch_dep("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
+        _fetch_dep(deps_info, "gtest", PDFIUM_3RDPARTY/"googletest"/"src")
+        _fetch_dep(deps_info, "test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     
     return full_ver
 
 
-def prepare(config_dict, build_dir):
+def prepare(config_dict, build_dir, vendor_deps):
     # Create an empty gclient config
     (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch(exist_ok=True)
-    # Unbundle ICU
-    # alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu
-    (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
-    shutil.copyfile(
-        PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
-        PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
-    )
+    if "icu" not in vendor_deps:
+        # Unbundle ICU
+        # alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu
+        (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
+        shutil.copyfile(
+            PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
+            PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
+        )
     # Create target dir (or reuse existing) and write build config
     mkdir(build_dir)
     # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single_lib build is done after a component build. This also ensures we really built a new DLL in the end.
@@ -266,15 +276,12 @@ def test(build_dir):
 
 def _get_clang_ver(clang_path):
     from packaging.version import Version
-    try_libpaths = [
-        clang_path/"lib"/"clang",
-        clang_path/"lib64"/"clang",
-    ]
-    libpath = next(filter(Path.exists, try_libpaths))
-    candidates = (Version(p.name) for p in libpath.iterdir() if re.fullmatch(r"[\d\.]+", p.name))
-    version = max(candidates)
-    return version.major
-
+    output = run_cmd([str(clang_path/"bin"/"clang"), "--version"], capture=True, cwd=None)
+    log(output)
+    version = re.search(r"version ([\d\.]+)", output).group(1)
+    version = Version(version).major
+    log(f"Determined clang version {version!r}")
+    return version
 
 def setup_compiler(config, compiler, clang_path):
     if compiler is Compiler.gcc:
@@ -291,18 +298,12 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False):
-    
-    # q&d: use a global to expose the `reset` setting to _get_repo(), easier than handing it down through a lot of functions
-    global RESET_REPOS, DEPS_FIELDS
-    RESET_REPOS = reset
-    if IS_ANDROID:
-        DEPS_FIELDS += ("catapult", )
-    if with_tests:
-        DEPS_FIELDS += ("gtest", "test_fonts")
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False, vendor_deps=None):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
+    if vendor_deps is None:
+        vendor_deps = set()
     if compiler is None:
         if shutil.which("gcc"):
             compiler = Compiler.gcc
@@ -319,10 +320,22 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     if single_lib:
         config["is_component_build"] = False
     
+    deps_fields = ["build", "abseil", "fast_float"]
+    if IS_ANDROID:
+        deps_fields.append("catapult")
+    if "icu" in vendor_deps:
+        deps_fields.append("icu")
+    if with_tests:
+        deps_fields += ("gtest", "test_fonts")
+    
+    deps_info = _DeferredInfo(deps_fields)
+    
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(build_ver, with_tests, compiler, clang_path, single_lib)
+    full_ver = get_sources(
+        deps_info, build_ver, with_tests, compiler, clang_path, single_lib, reset, vendor_deps
+    )
     setup_compiler(config, compiler, clang_path)
-    prepare(config, build_dir)
+    prepare(config, build_dir, vendor_deps)
     build(with_tests, build_dir, n_jobs)
     if with_tests:
         test(build_dir)
@@ -373,9 +386,21 @@ def parse_args(argv):
         action = "store_true",
         help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is downloaded anew or reset, else the existing state is used.",
     )
+    # The --vendor option is provided for cibuildwheel clients:
+    # - libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
+    # - libc++ is used but not pulled in by auditwheel. This appears to be ABI-unsafe (although the wheels seem to work across different hosts according to downstream feedback), so we may want to add that in the future. Actually, options to use system libc++ are deprecated upstream anyway.
+    parser.add_argument(
+        "--vendor",
+        dest = "vendor_deps",
+        nargs = "+",
+        action = "extend",
+        help = "Dependencies to vendor. Note, this only supports libraries where there is a specific reason to vendor despite the native build. Currently this means 'icu' only ('libc++' may be added in the future). For an exhaustive vendored build, use build_toolchained.py"
+    )
     args = parser.parse_args(argv)
     if args.compiler:
         args.compiler = Compiler[args.compiler]
+    if args.vendor_deps:
+        args.vendor_deps = set(args.vendor_deps)
     return args
 
 

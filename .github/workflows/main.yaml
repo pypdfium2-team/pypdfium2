@@ -118,8 +118,16 @@ jobs:
       fail-fast: false
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-latest', 'windows-latest', 'windows-11-arm']
         py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        exclude:
+          # not supported by setup-python action
+          - os: windows-11-arm
+            py: '3.8'
+          - os: windows-11-arm
+            py: '3.9'
+          - os: windows-11-arm
+            py: '3.10'
         include:
           - os: ubuntu-latest
             wheel: dist/*manylinux_*_x86_64*.whl
@@ -131,12 +139,12 @@ jobs:
             wheel: dist/*macosx_*_arm64*.whl
           - os: windows-latest
             wheel: dist/*win_amd64.whl
+          - os: windows-11-arm
+            wheel: dist/*win_arm64.whl
     
     runs-on: ${{ matrix.os }}
     
     steps:
-      
-      - uses: extractions/setup-just@v3
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -172,7 +180,7 @@ jobs:
           WHEEL: ${{ matrix.wheel }}
       
       - name: Run Test Suite
-        run: just test
+        run: python3 -m pytest tests/
   
   
   publish:

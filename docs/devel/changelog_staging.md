@@ -47,6 +47,7 @@
   Android `arm64_v8a`, `armeabi_v7a`, `x86_64`, `x86` and iOS `arm64` device and `arm64`, `x86_64` simulators are now handled in setup and should implicitly download the right pdfium-binaries. Provided on a best effort basis, and largely untested. Testers/feedback welcome.
 - pypdfium2's setup is now also capable of producing wheels for these platforms, but they will not actually be included in releases at this time. (Once Termux ships Python 3.13, we may want to publish Android `arm64_v8a` and maybe `armeabi_v7a` wheels, but we do not intend to provide wheels for simulators.)
 - iOS will not actually work yet, as the PEP indicates binaries ought to be moved to a special Frameworks location for permission reasons, in which case you'd also have to patch pypdfium2's library search. We cannot do anything about this yet without access to a device or clearer instructions. Community help would be appreciated here.
+- Added draft cibuildwheel workflow and configuration, as a second footing for the project (based on the native sourcebuild, see below). In the future, this may allow to stuff some Linux architecture gaps the *quick & dirty* way with emulation, or maybe new native runners. Many thanks to `wojiushixiaobai` for providing the initial workflow and helpful pointers.
 
 *Setup*
 - When pdfium binaries are downloaded implicitly on setup or `emplace.py` is run, we now pin the pdfium version by default. This is to prevent possible API breakage when pypdfium2 is installed from source. It should also make the `git` dependency optional on default setup. `update.py` and `craft.py` continue to default to the latest pdfium-binaries version.
@@ -67,7 +68,7 @@
 
 *Project*
 - Replaced the bash `./run` file with a [`justfile`](https://github.com/casey/just). Note that the runfile previously did not fail fast and propagate errors, which is potentially dangerous for a release workflow. This had been fixed on the runfile in v5.0.0b1 before introducing the justfile.
-- CI: Added Linux aarch64 (GH now provides free runners) and Python 3.13 to the test matrix.
+- CI: Extended test matrices by Linux and Windows ARM64 (GH now provides free runners) and new Python versions.
 - Merged `tests_old/` back into `tests/`.
 - Migrated from deprecated `.reuse/dep5` to more visible `REUSE.toml`. Removed non-standard `.reuse/dep5-wheel`.
 - Docs: Improved logic when to include the unreleased version warning and upcoming changelog.

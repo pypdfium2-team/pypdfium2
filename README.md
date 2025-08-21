@@ -142,7 +142,7 @@ This project comes with two scripts to automate the build process: `build_toolch
 - `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, this script will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
 - `build_native` is an attempt to address some shortcomings of the toolchained build (mainly a bloated checkout process, and lack of portability). It is tailored towards native compilation, and uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
 
-You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup.
+You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup, and pass command-line flags with `$BUILD_PARAMS`.
 However, for simplicity, both scripts/subtargets share just `sourcebuild` as staging directory.
 
 Dependencies:
@@ -160,7 +160,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 Or for the native build, on Ubuntu 24.04, you could do e.g.:
 ```bash
 # Install dependencies
-sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libicu-dev libglib2.0-dev
 ```
 ```bash
 # Build with GCC
@@ -180,8 +180,49 @@ python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
+Note, on *some* platforms, you might also need symlinks for GCC, e.g.:
+```bash
+PREFIX=$(python ./utils/get_gcc_prefix.py)  # in pypdfium2 dir
+GCC_DIR="/usr"  # or e.g. /opt/rh/gcc-toolset-14/root
+sudo ln -s $GCC_DIR/bin/gcc $GCC_DIR/bin/$PREFIX-gcc
+sudo ln -s $GCC_DIR/bin/g++ $GCC_DIR/bin/$PREFIX-g++
+sudo ln -s $GCC_DIR/bin/nm $GCC_DIR/bin/$PREFIX-nm
+sudo ln -s $GCC_DIR/bin/readelf $GCC_DIR/bin/$PREFIX-readelf
+```
+
 > [!TIP]
 > By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib`.
+
+> [!NOTE]
+> The native sourcebuild currently supports Linux (or similar).
+> macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible – use the toolchain-based build for now.
+> Community help / pull requests to extend platform support would be welcome.
+
+##### cibuildwheel
+
+The native sourcebuild can be run through cibuildwheel. For targets configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
+```bash
+CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
+```
+
+See also our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml).
+For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
+
+Note that, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
+```bash
+sudo dnf in moby-engine  # this provides the docker command
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+# then reboot (re-login might also suffice)
+```
+For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](https://cibuildwheel.pypa.io/en/stable/setup/), [Platforms](https://cibuildwheel.pypa.io/en/stable/platforms/)) and the links therein.
+
+> [!WARNING]
+> cibuildwheel copies the project directory into a container, not taking `.gitignore` rules into account.
+> Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel.
+> In particular, a toolchained checkout of pdfium within pypdfium2 is problematic, and will cause a halt on the `Copying project into container...` step.
+> For development, make sure the fresh checkout is in sync with the working copy.
 
 ##### Android (Termux)
 
@@ -310,7 +351,7 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
     + If unset or `auto`, the host platform is detected and a corresponding binary will be selected.
     + If an explicit platform identifier (e.g. `linux_x64`, `darwin_arm64`, ...), binaries for the requested platform will be used.[^platform_ids]
     + If `system-search`, look for and bind against system-provided pdfium instead of embedding a binary. If just `system`, consume existing bindings from `data/system/`.
-    + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup. However, triggering on the caller side is preferred as this allows to pass custom options.
+    + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup (use `$BUILD_PARAMS` to pass custom options).
     + If `sdist`, no platform-specific files will be included, so as to create a source distribution.
 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
@@ -954,7 +995,6 @@ Additionally, one doc build can also be hosted on [GitHub Pages](https://pypdfiu
 It is implemented with a CI workflow, which is supposed to be triggered automatically on release.
 This provides us with full control over build env and used commands, whereas RTD may be less liberal in this regard.
 
-
 ### Testing
 
 pypdfium2 contains a small test suite to verify the library's functionality. It is written with [pytest](https://github.com/pytest-dev/pytest/):
@@ -984,10 +1024,28 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 
 [^testing_corpora]: For instance, one could use the testing corpora of open-source PDF libraries (pdfium, pikepdf/ocrmypdf, mupdf/ghostscript, tika/pdfbox, pdfjs, ...)
 
+### Adding a new workflow
+
+When writing a new workflow, it is usually desirable to test in a branch first before merging into main.
+However, new workflows from branches cannot be dispatched from the GitHub Actions panel yet. That's why you'll want to use the [`gh`](https://cli.github.com/) command-line tool, as follows:
+```bash
+gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH
+```
+If inputs are needed, JSON can be used
+```bash
+echo '{"my_json_info":1, "my_var":"hello"}' | gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH --json
+# real-world example
+echo '{"cibw_py_ver":"cp38", "linux_main":"true", "linux_ibm":"false", "linux_emulated":"false", "linux_musl":"true"}' | gh workflow run cibuildwheel.yaml --ref cibuildwheel --json
+```
+You should pass the complete set of fields here, defaults might not be recognized with this form of dispatch.
+
+> [!IMPORTANT]
+> You need to be in the pypdfium2 directory for this to work. Otherwise, the request will be silently ignored.
+
 ### Release workflow
 
 The release process is fully automated using Python scripts and scheduled release workflows.
-You may also trigger the workflow manually using the GitHub Actions panel or the [`gh`](https://cli.github.com/) command-line tool.
+You may also trigger the workflow manually from the GitHub Actions panel or similar.
 
 Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
 * `update.py` downloads binaries.
@@ -1038,10 +1096,10 @@ If something went wrong with commit or tag, you can still revert the changes:
 # perform an interactive rebase to change history (substitute $N_COMMITS with the number of commits to drop or modify)
 git rebase -i HEAD~$N_COMMITS
 git push --force
-# delete local tag (substitute $TAGNAME accordingly)
-git tag -d $TAGNAME
-# delete remote tag
+# delete remote tag (substitute $TAGNAME accordingly)
 git push --delete origin $TAGNAME
+# delete local tag
+git tag -d $TAGNAME
 ```
 Faulty PyPI releases may be yanked using the web interface.
 

@@ -15,7 +15,7 @@ on:
         default: 'latest'
         type: string
       new_only:
-        # only with package == "raw", ignored otherwise (actually the default should be false in that case, but I don't know if GH supports dynamic defaults depending on other inputs)
+        # only with package == "raw", ignored otherwise (actually the default should be false in that case, but don't know if GH supports dynamic defaults depending on other inputs)
         default: true
         type: boolean
       test:
@@ -95,6 +95,7 @@ jobs:
       fail-fast: false
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
+        # Can't test 'windows-11-arm' because setup-miniconda doesn't support it AOTW
         os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-latest', 'windows-latest']
         py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
     
