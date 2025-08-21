@@ -95,16 +95,9 @@ jobs:
       fail-fast: false
       matrix:
         # NOTE On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-latest', 'windows-latest', 'windows-11-arm']
+        # Can't test 'windows-11-arm' because setup-miniconda doesn't support it AOTW
+        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'macos-latest', 'windows-latest']
         py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
-        exclude:
-          # not supported by setup-python action
-          - os: windows-11-arm
-            py: '3.8'
-          - os: windows-11-arm
-            py: '3.9'
-          - os: windows-11-arm
-            py: '3.10'
     
     runs-on: ${{ matrix.os }}
     
