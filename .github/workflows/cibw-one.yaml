@@ -18,6 +18,22 @@ on:
       emulated:
         type: boolean
         default: false
+  workflow_dispatch:
+    cibw_py_ver:
+      default: 'cp38'
+      type: string
+    os:
+      type: string
+      default: ubuntu-24.04
+    arch:
+      type: string
+      default: x86_64
+    image:
+      type: string
+      default: manylinux
+    emulated:
+      type: boolean
+      default: false
 
 jobs:
   
