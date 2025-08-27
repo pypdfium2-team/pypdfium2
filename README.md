@@ -1024,24 +1024,6 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 
 [^testing_corpora]: For instance, one could use the testing corpora of open-source PDF libraries (pdfium, pikepdf/ocrmypdf, mupdf/ghostscript, tika/pdfbox, pdfjs, ...)
 
-### Adding a new workflow
-
-When writing a new workflow, it is usually desirable to test in a branch first before merging into main.
-However, new workflows from branches cannot be dispatched from the GitHub Actions panel yet. That's why you'll want to use the [`gh`](https://cli.github.com/) command-line tool, as follows:
-```bash
-gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH
-```
-If inputs are needed, JSON can be used
-```bash
-echo '{"my_json_info":1, "my_var":"hello"}' | gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH --json
-# real-world example
-echo '{"cibw_py_ver":"cp38", "linux_main":"true", "linux_ibm":"false", "linux_emulated":"false", "linux_glibc":"true", "linux_musl":"true"}' | gh workflow run cibw.yaml --ref cibw-continued --json
-```
-You should pass the complete set of fields here, defaults might not be recognized with this form of dispatch.
-
-> [!IMPORTANT]
-> You need to be in the pypdfium2 directory for this to work. Otherwise, the request will be silently ignored.
-
 ### Release workflow
 
 The release process is fully automated using Python scripts and scheduled release workflows.
