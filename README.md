@@ -198,32 +198,6 @@ sudo ln -s $GCC_DIR/bin/readelf $GCC_DIR/bin/$PREFIX-readelf
 > macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible – use the toolchain-based build for now.
 > Community help / pull requests to extend platform support would be welcome.
 
-##### cibuildwheel
-
-The native sourcebuild can be run through cibuildwheel. For targets configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
-```bash
-CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
-```
-
-See also our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml).
-For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
-
-Note that, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
-```bash
-sudo dnf in moby-engine  # this provides the docker command
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -aG docker $USER
-# then reboot (re-login might also suffice)
-```
-For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](https://cibuildwheel.pypa.io/en/stable/setup/), [Platforms](https://cibuildwheel.pypa.io/en/stable/platforms/)) and the links therein.
-
-> [!WARNING]
-> cibuildwheel copies the project directory into a container, not taking `.gitignore` rules into account.
-> Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel.
-> In particular, a toolchained checkout of pdfium within pypdfium2 is problematic, and will cause a halt on the `Copying project into container...` step.
-> For development, make sure the fresh checkout is in sync with the working copy.
-
 ##### Android (Termux)
 
 The native build may also work on Android with Termux in principle.
@@ -272,6 +246,32 @@ LD_LIBRARY_PATH="$PREFIX/lib/python$PY_VERSION/site-packages/pypdfium2_raw"
 ```
 
 </details>
+
+##### cibuildwheel
+
+The sourcebuild can be run through cibuildwheel. For targets configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
+```bash
+CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
+```
+
+See also our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml).
+For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
+
+Note that, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
+```bash
+sudo dnf in moby-engine  # this provides the docker command
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+# then reboot (re-login might also suffice)
+```
+For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](https://cibuildwheel.pypa.io/en/stable/setup/), [Platforms](https://cibuildwheel.pypa.io/en/stable/platforms/)) and the links therein.
+
+> [!WARNING]
+> cibuildwheel copies the project directory into a container, not taking `.gitignore` rules into account.
+> Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel.
+> In particular, a toolchained checkout of pdfium within pypdfium2 is problematic, and will cause a halt on the `Copying project into container...` step.
+> For development, make sure the fresh checkout is in sync with the working copy.
 
 
 #### With caller-provided data files
@@ -1035,7 +1035,7 @@ If inputs are needed, JSON can be used
 ```bash
 echo '{"my_json_info":1, "my_var":"hello"}' | gh workflow run $WORKFLOW_NAME.yaml --ref $MY_BRANCH --json
 # real-world example
-echo '{"cibw_py_ver":"cp38", "linux_main":"true", "linux_ibm":"false", "linux_emulated":"false", "linux_musl":"true"}' | gh workflow run cibuildwheel.yaml --ref cibuildwheel --json
+echo '{"cibw_py_ver":"cp38", "linux_main":"true", "linux_ibm":"false", "linux_emulated":"false", "linux_glibc":"true", "linux_musl":"true"}' | gh workflow run cibw.yaml --ref cibw-continued --json
 ```
 You should pass the complete set of fields here, defaults might not be recognized with this form of dispatch.
 
