@@ -1,0 +1,152 @@
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 wojiushixiaobai <296015668@qq.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: CIBW
+on:
+  workflow_dispatch:
+    inputs:
+      cibw_py_ver:
+        default: 'cp38'
+        type: string
+      linux_main:
+        default: true
+        type: boolean
+      linux_ibm:
+        # XXX will change to true if and when we have access to IBM's native runners
+        default: false
+        type: boolean
+      linux_emulated:
+        default: false
+        type: boolean
+      linux_glibc:
+        default: true
+        type: boolean
+      linux_musl:
+        default: true
+        type: boolean
+
+jobs:
+  
+  linux_x64:
+    if: ${{ inputs.linux_main && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04
+      arch: x86_64
+      image: manylinux
+  
+  linux_arm64:
+    if: ${{ inputs.linux_main && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04-arm
+      arch: aarch64
+      image: manylinux
+  
+  musllinux_x64:
+    if: ${{ inputs.linux_main && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04
+      arch: x86_64
+      image: musllinux
+  
+  musllinux_arm64:
+    if: ${{ inputs.linux_main && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04-arm
+      arch: aarch64
+      image: musllinux
+  
+  linux_ppc64le:
+    if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04  # XXX
+      arch: ppc64le
+      image: manylinux
+  
+  linux_s390x:
+    if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04  # XXX
+      arch: s390x
+      image: manylinux
+  
+  musllinux_ppc64le:
+    if: ${{ inputs.linux_ibm && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04  # XXX
+      arch: ppc64le
+      image: musllinux
+  
+  musllinux_s390x:
+    if: ${{ inputs.linux_ibm && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04  # XXX
+      arch: s390x
+      image: musllinux
+  
+  # pdfium-binaries don't currently build armv7l for musl
+  musllinux_armv7l:
+    if: ${{ inputs.linux_emulated && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04
+      arch: armv7l
+      image: musllinux
+      emulated: true
+  
+  linux_riscv64:
+    if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04
+      arch: riscv64
+      image: manylinux
+      emulated: true
+  
+  linux_loongarch64:
+    if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04
+      arch: loongarch64
+      image: manylinux
+      emulated: true
+  
+  musllinux_riscv64:
+    if: ${{ inputs.linux_emulated && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04
+      arch: riscv64
+      image: musllinux
+      emulated: true
+  
+  musllinux_loongarch64:
+    if: ${{ inputs.linux_emulated && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: ubuntu-24.04
+      arch: loongarch64
+      image: musllinux
+      emulated: true
