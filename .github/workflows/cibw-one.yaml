@@ -39,7 +39,7 @@ on:
 jobs:
   
   build:
-    name: Build ${{ inputs.arch }} ${{ inputs.image }} on ${{ inputs.os }}
+    name: ${{ inputs.image }} ${{ inputs.arch }} on ${{ inputs.os }}
     runs-on: ${{ inputs.os }}
     
     steps:
