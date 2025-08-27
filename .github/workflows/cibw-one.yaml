@@ -1,0 +1,69 @@
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2025 wojiushixiaobai <296015668@qq.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: CIBW build one
+on:
+  workflow_call:
+    inputs:
+      cibw_py_ver:
+        default: 'cp38'
+        type: string
+      os:
+        type: string
+      arch:
+        type: string
+      image:
+        type: string
+      emulated:
+        type: boolean
+        default: false
+  workflow_dispatch:
+    cibw_py_ver:
+      default: 'cp38'
+      type: string
+    os:
+      type: string
+      default: ubuntu-24.04
+    arch:
+      type: string
+      default: x86_64
+    image:
+      type: string
+      default: manylinux
+    emulated:
+      type: boolean
+      default: false
+
+jobs:
+  
+  build:
+    name: Build ${{ inputs.arch }} ${{ inputs.image }} on ${{ inputs.os }}
+    runs-on: ${{ inputs.os }}
+    
+    steps:
+      
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up QEMU
+        if: ${{ inputs.emulated }}
+        uses: docker/setup-qemu-action@v3
+      
+      # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
+      - name: Build wheels
+        uses: pypdfium2-team/cibuildwheel@v3.1.3
+        env:
+          # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time. Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
+          CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ inputs.image }}_${{ inputs.arch }}"
+          CIBW_ARCHS: ${{ inputs.arch }}
+        with:
+          output-dir: wheelhouse
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./wheelhouse/*.whl
+          name: cibw-${{ inputs.image }}-${{ inputs.arch }}
