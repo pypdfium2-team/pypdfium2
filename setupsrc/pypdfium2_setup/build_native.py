@@ -217,9 +217,10 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_l
                 is_regex=False, exp_count=1,
             )
     
-    get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
+    do_patches = _fetch_dep(deps_info, "abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
+    if do_patches and (Host._raw_machine, Host._libc_name) == ("ppc64le", "musl"):
+        git_apply_patch(PatchDir/"abseil_ppc64le_musl.patch", cwd=PDFIUM_3RDPARTY/"abseil-cpp")
     
-    _fetch_dep(deps_info, "abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     _fetch_dep(deps_info, "fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if IS_ANDROID:
         _fetch_dep(deps_info, "catapult", PDFIUM_3RDPARTY/"catapult")
@@ -228,6 +229,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_l
     if with_tests:
         _fetch_dep(deps_info, "gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep(deps_info, "test_fonts", PDFIUM_3RDPARTY/"test_fonts")
+    
+    get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
     
     return full_ver
 

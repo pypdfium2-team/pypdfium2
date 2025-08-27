@@ -160,6 +160,15 @@ Repo does not have an own license file, but assumably the patches are being made
 '''
 
 [[annotations]]
+path = "pdfium_patches/abseil_ppc64le_musl.patch"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025 The abseil authors"
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileComment = '''
+Cherry-pick https://github.com/abseil/abseil-cpp/commit/8e7767542cfde43f16c142f05dce06cadb7f7f84
+'''
+
+[[annotations]]
 path = [
     "docs/build/.gitkeep",
     "sbuild/.gitkeep",

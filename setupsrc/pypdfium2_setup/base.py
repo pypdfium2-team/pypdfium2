@@ -423,14 +423,17 @@ class _host_platform:
     
     def __init__(self):
         
-        # set up empty slots
-        self._libc_name, self._libc_ver = "", ""
-        self._exc = None
-        
         # Get info about the host platform (OS and CPU)
         # For the machine name, the platform module just passes through info provided by the OS (e.g. the uname command on unix), so we can determine the relevant names from Python's source code, system specs or info available online (e.g. https://en.wikipedia.org/wiki/Uname)
         self._raw_system = platform.system().lower()
         self._raw_machine = platform.machine().lower()
+        
+        if self._raw_system == "linux":
+            self._libc_name, self._libc_ver = _get_libc_info()
+        else:
+            self._libc_name, self._libc_ver = "", ""
+        
+        self._exc = None
     
     @cached_property
     def platform(self):
@@ -508,7 +511,6 @@ class _host_platform:
         
         elif self._raw_system == "linux":
             self._system = SysNames.linux
-            self._libc_name, self._libc_ver = _get_libc_info()
             log(f"linux {self._raw_machine} {self._libc_name, self._libc_ver}")
             if self._raw_machine == "x86_64":
                 return self._handle_linux("x64")
