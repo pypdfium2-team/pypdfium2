@@ -13,7 +13,7 @@ on:
         default: true
         type: boolean
       linux_ibm:
-        # XXX will change to true if and when we have access to IBM's native runners
+        # XXX will change to true if and when we get access to IBM's native runners
         default: false
         type: boolean
       linux_emulated:
@@ -72,6 +72,7 @@ jobs:
       os: ubuntu-24.04  # XXX
       arch: ppc64le
       image: manylinux
+      emulated: true  # XXX
   
   linux_s390x:
     if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
@@ -81,6 +82,7 @@ jobs:
       os: ubuntu-24.04  # XXX
       arch: s390x
       image: manylinux
+      emulated: true  # XXX
   
   musllinux_ppc64le:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
@@ -90,6 +92,7 @@ jobs:
       os: ubuntu-24.04  # XXX
       arch: ppc64le
       image: musllinux
+      emulated: true  # XXX
   
   musllinux_s390x:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
@@ -99,6 +102,7 @@ jobs:
       os: ubuntu-24.04  # XXX
       arch: s390x
       image: musllinux
+      emulated: true  # XXX
   
   # pdfium-binaries don't currently build armv7l for musl
   musllinux_armv7l:
