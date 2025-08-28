@@ -177,7 +177,7 @@ def main(
     configure(GN, config_str)
     build(Ninja, build_target)
     
-    return pack_sourcebuild(PDFiumDir, PDFiumOutDir, "toolchained", v_full, build_ver)
+    return pack_sourcebuild(PDFiumDir, PDFiumOutDir, single_lib, "toolchained", v_full, build_ver)
 
 
 def parse_args(argv):

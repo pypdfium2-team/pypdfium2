@@ -170,14 +170,16 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-def libname_for_system(system, name="pdfium"):
+_LIB_PREFIX = "" if sys.platform.startswith("win32") else "lib"
+
+def libname_for_system(system, name="pdfium", prefix=_LIB_PREFIX):
     # Map system to pdfium shared library name
     if system == SysNames.windows:
-        return f"{name}.dll"
+        return f"{prefix}{name}.dll"
     elif system in (SysNames.darwin, SysNames.ios):
-        return f"lib{name}.dylib"
+        return f"{prefix}{name}.dylib"
     elif system in (SysNames.linux, SysNames.android):
-        return f"lib{name}.so"
+        return f"{prefix}{name}.so"
     else:
         # take libname pattern from caller
         pattern = os.getenv("LIBNAME_PATTERN")
@@ -927,7 +929,10 @@ def handle_sbuild_vers(short_ver):
     return full_ver, pdfium_rev, chromium_rev
 
 
-def pack_sourcebuild(pdfium_dir, build_dir, sub_target, full_ver, build_ver=None, post_ver=None):
+def pack_sourcebuild(
+        pdfium_dir, build_dir, single_lib, sub_target,
+        full_ver, build_ver=None, post_ver=None
+    ):
     log("Packing data files for sourcebuild...")
     
     if not post_ver:
@@ -941,11 +946,27 @@ def pack_sourcebuild(pdfium_dir, build_dir, sub_target, full_ver, build_ver=None
     dest_dir = DataDir/ExtPlats.sourcebuild
     purge_dir(dest_dir)
     
-    for libpath in build_dir.glob(Host.libname_glob):
-        shutil.copy(libpath, dest_dir/libpath.name)
-    write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **post_ver)
+    if single_lib:
+        libname = libname_for_system(Host.system)
+        shutil.copy(build_dir/libname, dest_dir/libname)
+    else:
+        for libpath in build_dir.glob(Host.libname_glob):
+            shutil.copy(libpath, dest_dir/libpath.name)
+        # drop auxiliary DLLs (not needed at runtime)
+        # in the future, using a whitelist might be preferable, but not sure how to do that in a portable manner, given varying libnames and build configurations
+        if Host.system == SysNames.windows:
+            blacklist = (
+                "dbgcore.dll", "dbghelp.dll",
+                "msdia140.dll", "msvcp140.dll", "vccorlib140.dll",
+                "vcruntime140.dll", "vcruntime140_1.dll",
+            )
+            for libname in blacklist:
+                libpath = dest_dir/libname
+                if libpath.exists(): libpath.unlink()
+    
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=(dest_dir/CTG_LIBPATTERN, ), version=full_ver.build)
+    write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **post_ver)
     
     return full_ver, post_ver
