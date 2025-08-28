@@ -11,9 +11,9 @@ on:
         type: string
       os:
         type: string
-      arch:
-        type: string
       image:
+        type: string
+      arch:
         type: string
       emulated:
         type: boolean
@@ -26,12 +26,12 @@ on:
       os:
         type: string
         default: ubuntu-24.04
-      arch:
-        type: string
-        default: x86_64
       image:
         type: string
         default: manylinux
+      arch:
+        type: string
+        default: x86_64
       emulated:
         type: boolean
         default: false

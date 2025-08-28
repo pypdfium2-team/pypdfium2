@@ -128,6 +128,7 @@ def main(
         use_syslibs  = False,
         single_lib   = False,
         win_sdk_dir  = None,
+        target_cpu   = None,
     ):
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
@@ -169,6 +170,8 @@ def main(
         config_dict.update(SyslibsConfig)
     if single_lib:
         config_dict["is_component_build"] = False
+    if target_cpu:
+        config_dict["target_cpu"] = target_cpu
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
@@ -211,6 +214,10 @@ def parse_args(argv):
         "--win-sdk-dir",
         type = lambda p: Path(p).resolve(),
         help = "Path to the Windows SDK (Windows only)",
+    )
+    parser.add_argument(
+        "--target-cpu",
+        help = "The CPU architecture to target. This sets the corresponding GN config var. Platform specific pre-requisites may apply, such as GCC multilib on Linux.",
     )
     return parser.parse_args(argv)
 

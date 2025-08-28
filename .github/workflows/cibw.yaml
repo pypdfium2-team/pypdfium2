@@ -25,6 +25,13 @@ on:
       linux_musl:
         default: true
         type: boolean
+      # we're using the toolchained build for macOS and Windows for now
+      macos:
+        default: true
+        type: boolean
+      windows:
+        default: true
+        type: boolean
 
 jobs:
   
@@ -34,8 +41,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04
-      arch: x86_64
       image: manylinux
+      arch: x86_64
   
   linux_arm64:
     if: ${{ inputs.linux_main && inputs.linux_glibc }}
@@ -43,8 +50,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04-arm
-      arch: aarch64
       image: manylinux
+      arch: aarch64
   
   musllinux_x64:
     if: ${{ inputs.linux_main && inputs.linux_musl }}
@@ -52,8 +59,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04
-      arch: x86_64
       image: musllinux
+      arch: x86_64
   
   musllinux_arm64:
     if: ${{ inputs.linux_main && inputs.linux_musl }}
@@ -61,8 +68,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04-arm
-      arch: aarch64
       image: musllinux
+      arch: aarch64
   
   linux_ppc64le:
     if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
@@ -70,8 +77,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04  # XXX
-      arch: ppc64le
       image: manylinux
+      arch: ppc64le
       emulated: true  # XXX
   
   linux_s390x:
@@ -80,8 +87,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04  # XXX
-      arch: s390x
       image: manylinux
+      arch: s390x
       emulated: true  # XXX
   
   musllinux_ppc64le:
@@ -90,8 +97,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04  # XXX
-      arch: ppc64le
       image: musllinux
+      arch: ppc64le
       emulated: true  # XXX
   
   musllinux_s390x:
@@ -100,8 +107,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04  # XXX
-      arch: s390x
       image: musllinux
+      arch: s390x
       emulated: true  # XXX
   
   # pdfium-binaries don't currently build armv7l for musl
@@ -111,8 +118,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04
-      arch: armv7l
       image: musllinux
+      arch: armv7l
       emulated: true
   
   linux_riscv64:
@@ -121,8 +128,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04
-      arch: riscv64
       image: manylinux
+      arch: riscv64
       emulated: true
   
   linux_loongarch64:
@@ -131,8 +138,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04
-      arch: loongarch64
       image: manylinux
+      arch: loongarch64
       emulated: true
   
   musllinux_riscv64:
@@ -141,8 +148,8 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04
-      arch: riscv64
       image: musllinux
+      arch: riscv64
       emulated: true
   
   musllinux_loongarch64:
@@ -151,6 +158,45 @@ jobs:
     with:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       os: ubuntu-24.04
-      arch: loongarch64
       image: musllinux
+      arch: loongarch64
       emulated: true
+  
+  macos_x64:
+    if: ${{ inputs.macos }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: macos-13
+      image: macosx
+      arch: x86_64
+  
+  macos_arm64:
+    if: ${{ inputs.macos }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: macos-latest
+      image: macosx
+      arch: arm64
+  
+  windows_x64:
+    if: ${{ inputs.windows }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: windows-latest
+      image: win
+      arch: amd64
+  
+  # Google's toolchain doesn't support native windows ARM hosts yet, but it supports cross-compilation from amd64.
+  # https://cibuildwheel.pypa.io/en/stable/platforms/#windows-arm64
+  # Note: build system probably ignores cibuildwheel's cross-compilation env vars, so setting target_cpu in GN config (through pyproject.toml) is key here.
+  windows_arm64:
+    if: ${{ inputs.windows }}
+    uses: ./.github/workflows/cibw-one.yaml
+    with:
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      os: windows-latest
+      image: win
+      arch: arm64
