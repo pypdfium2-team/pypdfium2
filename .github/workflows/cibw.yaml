@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       cibw_py_ver:
-        default: 'cp38'
+        default: 'cp310'
         type: string
       linux_main:
         default: true
