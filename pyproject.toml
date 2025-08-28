@@ -85,6 +85,7 @@ before-all = [
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
+# BUILD_PARAMS = "--single-lib"
 
 # set mac deployment target again for auditwheel
 [[tool.cibuildwheel.overrides]]
@@ -102,11 +103,16 @@ environment.MACOSX_DEPLOYMENT_TARGET = "14.0.0"
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
 
 [[tool.cibuildwheel.overrides]]
+select = "*-win_amd64"
+inherit.environment = "append"
+environment.BUILD_PARAMS = "--single-lib"
+
+[[tool.cibuildwheel.overrides]]
 select = "*-win_arm64"
 inherit.environment = "append"
-environment.BUILD_PARAMS = "--target-cpu arm64"
+environment.BUILD_PARAMS = "--single-lib --target-cpu arm64"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-win32"
 inherit.environment = "append"
-environment.BUILD_PARAMS = "--target-cpu x86"
+environment.BUILD_PARAMS = "--single-lib --target-cpu x86"
