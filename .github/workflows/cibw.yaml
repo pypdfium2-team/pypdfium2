@@ -171,7 +171,7 @@ jobs:
       cibw_arch: x86_64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  # It looks like the toolchain may support macOS arm64 natively
+  # The toolchain supports macOS arm64 natively
   macos_arm64:
     if: ${{ inputs.macos }}
     uses: ./.github/workflows/cibw-one.yaml
