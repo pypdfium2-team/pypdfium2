@@ -46,8 +46,8 @@ SyslibsConfig = {
 }
 
 if sys.platform.startswith("darwin"):
-    DefaultConfig["mac_deployment_target"] = "10.13.0"
-    SyslibsConfig["use_system_xcode"] = True
+    DefaultConfig["mac_deployment_target"] = "11.0.0"
+    # SyslibsConfig["use_system_xcode"] = True
 
 
 def dl_depottools(do_update):
