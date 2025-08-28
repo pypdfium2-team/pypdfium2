@@ -6,32 +6,32 @@ name: CIBW build one
 on:
   workflow_call:
     inputs:
-      cibw_py_ver:
-        default: 'cp310'
-        type: string
       os:
         type: string
-      image:
+      cibw_target:
         type: string
-      arch:
+      cibw_arch:
+        type: string
+      cibw_py_ver:
+        default: 'cp310'
         type: string
       emulated:
         type: boolean
         default: false
   workflow_dispatch:
     inputs:
-      cibw_py_ver:
-        default: 'cp310'
-        type: string
       os:
         type: string
         default: ubuntu-24.04
-      image:
+      cibw_target:
         type: string
-        default: manylinux
-      arch:
+        default: manylinux_x86_64
+      cibw_arch:
         type: string
         default: x86_64
+      cibw_py_ver:
+        default: 'cp310'
+        type: string
       emulated:
         type: boolean
         default: false
@@ -39,7 +39,7 @@ on:
 jobs:
   
   build:
-    name: ${{ inputs.image }} ${{ inputs.arch }} on ${{ inputs.os }}
+    name: ${{ inputs.cibw_target }} on ${{ inputs.os }}
     runs-on: ${{ inputs.os }}
     
     steps:
@@ -58,8 +58,8 @@ jobs:
         uses: pypdfium2-team/cibuildwheel@v3.1.4
         env:
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time. Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
-          CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ inputs.image }}_${{ inputs.arch }}"
-          CIBW_ARCHS: ${{ inputs.emulated && inputs.arch || '' }}
+          CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ inputs.cibw_target }}"
+          CIBW_ARCHS: ${{ inputs.cibw_arch }}
         with:
           output-dir: wheelhouse
       
@@ -67,4 +67,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
-          name: cibw-${{ inputs.image }}-${{ inputs.arch }}
+          name: cibw-${{ inputs.cibw_target }}
