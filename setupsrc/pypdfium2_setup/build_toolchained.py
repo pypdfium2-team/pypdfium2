@@ -46,7 +46,7 @@ SyslibsConfig = {
 }
 
 if sys.platform.startswith("darwin"):
-    DefaultConfig["mac_deployment_target"] = "11.0.0"
+    DefaultConfig["mac_deployment_target"] = "14.0.0" if Host._raw_machine == "arm64" else "11.0.0"
     # SyslibsConfig["use_system_xcode"] = True
 
 

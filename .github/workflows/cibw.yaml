@@ -171,6 +171,7 @@ jobs:
       image: macosx
       arch: x86_64
   
+  # It looks like the toolchain may support macOS arm64 natively
   macos_arm64:
     if: ${{ inputs.macos }}
     uses: ./.github/workflows/cibw-one.yaml
