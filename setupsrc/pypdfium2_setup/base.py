@@ -964,7 +964,6 @@ def pack_sourcebuild(
                 libpath = dest_dir/libname
                 if libpath.exists(): libpath.unlink()
     
-    
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=(dest_dir/CTG_LIBPATTERN, ), version=full_ver.build)
     write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **post_ver)
