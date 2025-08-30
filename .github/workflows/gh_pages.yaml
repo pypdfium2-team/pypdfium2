@@ -59,10 +59,11 @@ jobs:
       - name: Build documentation
         run: just docs-build
       
-      - name: Remove unnecessary files
-        run: |
-          cd docs/build/html
-          rm -rf .doctrees/
+      # upload-pages-artifact v4 specifies to ignore dotfiles
+      # - name: Remove unnecessary files
+      #   run: |
+      #     cd docs/build/html
+      #     rm -rf .doctrees/
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
