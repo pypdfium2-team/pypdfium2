@@ -247,12 +247,17 @@ By default, our build script currently bundles everything into a single DLL, tho
 
 ##### cibuildwheel
 
-The sourcebuild can be run through cibuildwheel. For targets configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
+Sourcebuild can be run through cibuildwheel. For targets configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
 ```bash
 CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
 ```
+On Linux, this will use the native sourcebuild, and pull in dependencies from the container via `auditwheel repair`.
+On Windows and macOS, the toolchained sourcebuild is used.
 
-See also our [cibuildwheel workflow](.github/workflows/cibuildwheel.yaml).
+On Linux, non-native architectures can theoretically be built under emulation, which seems to be cibuildwheel's standard (albeit really unfortunate) approach to this problem.
+Windows `arm64` and `x86`, on the other hand, are supported with cross-compilation.
+
+See also our [cibuildwheel](.github/workflows/cibw.yaml) [workflow](.github/workflows/cibw-one.yaml).
 For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
 
 Note that, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
