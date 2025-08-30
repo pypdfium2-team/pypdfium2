@@ -190,9 +190,6 @@ sudo ln -s $GCC_DIR/bin/nm $GCC_DIR/bin/$PREFIX-nm
 sudo ln -s $GCC_DIR/bin/readelf $GCC_DIR/bin/$PREFIX-readelf
 ```
 
-> [!TIP]
-> By default, the build scripts will create separate DLLs for vendored dependency libraries (e.g. `abseil`). However, if you want to bundle everything into a single DLL, pass `--single-lib`.
-
 > [!NOTE]
 > The native sourcebuild currently supports Linux (or similar).
 > macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible – use the toolchain-based build for now.
@@ -239,11 +236,12 @@ mv data/sourcebuild/libpdfium.cr.so data/sourcebuild/libpdfium.so
 ```
 Then install with `PDFIUM_PLATFORM=sourcebuild`.
 
-If you did not build with `--single-lib`, you'll also need to set the OS library search path, e.g.:
+In case dependency libraries were built separately, you may also need to set the OS library search path, e.g.:
 ```bash
 PY_VERSION="3.12"  # adapt this to your setup
 LD_LIBRARY_PATH="$PREFIX/lib/python$PY_VERSION/site-packages/pypdfium2_raw"
 ```
+By default, our build script currently bundles everything into a single DLL, though.
 
 </details>
 

@@ -39,7 +39,7 @@ DefaultConfig = {
     "use_remoteexec": False,
     "treat_warnings_as_errors": False,
     "clang_use_chrome_plugins": False,
-    "is_component_build": True,
+    "is_component_build": False,
     "pdf_is_standalone": True,
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
@@ -152,7 +152,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_lib, reset, vendor_deps):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -171,19 +171,20 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, single_l
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
-        if single_lib:
-            autopatch(
-                PDFIUM_DIR/"BUILD.gn",
-                'component("pdfium")',
-                'shared_library("pdfium")',
-                is_regex=False, exp_count=1,
-            )
-            autopatch(
-                PDFIUM_DIR/"public"/"fpdfview.h",
-                "#if defined(COMPONENT_BUILD)",
-                "#if 1  // defined(COMPONENT_BUILD)",
-                is_regex=False, exp_count=1,
-            )
+        # bundle dependencies (e.g. abseil) into the pdfium DLL
+        # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
+        autopatch(
+            PDFIUM_DIR/"BUILD.gn",
+            'component("pdfium")',
+            'shared_library("pdfium")',
+            is_regex=False, exp_count=1,
+        )
+        autopatch(
+            PDFIUM_DIR/"public"/"fpdfview.h",
+            "#if defined(COMPONENT_BUILD)",
+            "#if 1  // defined(COMPONENT_BUILD)",
+            is_regex=False, exp_count=1,
+        )
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
             if with_tests:
@@ -248,7 +249,7 @@ def prepare(config_dict, build_dir, vendor_deps):
         )
     # Create target dir (or reuse existing) and write build config
     mkdir(build_dir)
-    # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single_lib build is done after a component build. This also ensures we really built a new DLL in the end.
+    # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single-lib build is done after a separate-libs build. This also ensures we really built a new DLL in the end.
     # Leave the object files in place to reuse as much as possible, though.
     for lib in build_dir.glob(Host.libname_glob):
         lib.unlink()
@@ -301,7 +302,7 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, single_lib=False, reset=False, vendor_deps=None):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, reset=False, vendor_deps=None):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -320,8 +321,6 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
-    if single_lib:
-        config["is_component_build"] = False
     
     deps_fields = ["build", "abseil", "fast_float"]
     if IS_ANDROID:
@@ -334,16 +333,14 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = _DeferredInfo(deps_fields)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(
-        deps_info, build_ver, with_tests, compiler, clang_path, single_lib, reset, vendor_deps
-    )
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_path, reset, vendor_deps)
     setup_compiler(config, compiler, clang_path)
     prepare(config, build_dir, vendor_deps)
     build(with_tests, build_dir, n_jobs)
     if with_tests:
         test(build_dir)
     
-    return pack_sourcebuild(PDFIUM_DIR, build_dir, single_lib, "native", full_ver, build_ver)
+    return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver)
 
 
 def parse_args(argv):
@@ -376,18 +373,13 @@ def parse_args(argv):
     parser.add_argument(
         "--reset",
         action = "store_true",
-        help = "Reset those git repos that we patch, and re-apply the patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang or single lib <-> component build mode), but is not enabled by default to avoid unintentional loss of manual changes.",
+        help = "Reset those git repos that we patch, and re-apply the patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang), but is not enabled by default to avoid unintentional loss of manual changes.",
     )
     # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
         help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr' or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
-    )
-    parser.add_argument(
-        "--single-lib",
-        action = "store_true",
-        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is downloaded anew or reset, else the existing state is used.",
     )
     # The --vendor option is provided for cibuildwheel clients:
     # - libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).

@@ -57,7 +57,6 @@
 - Reworked setup to expose all targets through `PDFIUM_PLATFORM`. Added proper `system` staging directory. Refactored integration of caller-provided data files to avoid ambiguity. See the updated Readme for details.
 - The toolchained build script continues to be available as well, but has been renamed from `sourcebuild.py` to `build_toolchained.py`.
 - Both build scripts now pin pdfium to the version last tested by pypdfium2-team.
-- By default, the build scripts now generate separate DLLs for dependency libraries, but you may pass `--single-lib` to restore the previous behavior of bundling dependencies into a single pdfium DLL. Setup has been changed accordingly to collect libraries with globbing patterns.
 - With `build_toolchained.py --update`, avoid calling `gclient revert` and `gclient sync`, because this seems to sync twice, which is slow. Instead, call only `gclient sync` with `-D --reset`.
 - With `pdfium-binaries`, read the full version from the `VERSION` file embedded in the tarballs. This avoids a potentially expensive `git ls-remote` call to get Chromium tags.
 - Also added `GIVEN_FULLVER` and `IGNORE_FULLVER` env vars to manually set or skip the full version for other targets.
@@ -65,6 +64,7 @@
 - Take `PDFIUM_BINDINGS=reference` into account on sourcebuild as well. Automatically fall back to reference bindings if ctypesgen is not installed (except on CI).
 - If packaging with `PDFIUM_PLATFORM=sourcebuild`, forward the platform tag determined by `bdist_wheel`'s wrapper, rather than using the underlying `sysconfig.get_platform()` directly. This may provide more accurate results, e.g. on macOS.
 - Avoid needlessly calling `_get_libc_ver()`. Instead, call it only on Linux. A negative side effect of calling this unconditionally is that, on non-Linux platforms, an empty string may be returned, in which case the musllinux handler would be reached, which uses non-public API and isn't meant to be called on other platforms (though it seems to have passed).
+- Collect libraries with globbing patterns in later setup pipeline. This is a prerequisite in case we want to split off separate DLLs for some dependency libraries in the future (e.g. libjpeg).
 
 *Project*
 - Replaced the bash `./run` file with a [`justfile`](https://github.com/casey/just). Note that the runfile previously did not fail fast and propagate errors, which is potentially dangerous for a release workflow. This had been fixed on the runfile in v5.0.0b1 before introducing the justfile.

@@ -930,8 +930,7 @@ def handle_sbuild_vers(short_ver):
 
 
 def pack_sourcebuild(
-        pdfium_dir, build_dir, single_lib, sub_target,
-        full_ver, build_ver=None, post_ver=None
+        pdfium_dir, build_dir, sub_target, full_ver, build_ver=None, post_ver=None
     ):
     log("Packing data files for sourcebuild...")
     
@@ -946,23 +945,8 @@ def pack_sourcebuild(
     dest_dir = DataDir/ExtPlats.sourcebuild
     purge_dir(dest_dir)
     
-    if single_lib:
-        libname = libname_for_system(Host.system)
-        shutil.copy(build_dir/libname, dest_dir/libname)
-    else:
-        for libpath in build_dir.glob(Host.libname_glob):
-            shutil.copy(libpath, dest_dir/libpath.name)
-        # drop auxiliary DLLs (not needed at runtime)
-        # in the future, using a whitelist might be preferable, but not sure how to do that in a portable manner, given varying libnames and build configurations
-        if Host.system == SysNames.windows:
-            blacklist = (
-                "dbgcore.dll", "dbghelp.dll",
-                "msdia140.dll", "msvcp140.dll", "vccorlib140.dll",
-                "vcruntime140.dll", "vcruntime140_1.dll",
-            )
-            for libname in blacklist:
-                libpath = dest_dir/libname
-                if libpath.exists(): libpath.unlink()
+    libname = libname_for_system(Host.system)
+    shutil.copy(build_dir/libname, dest_dir/libname)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
     run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=(dest_dir/CTG_LIBPATTERN, ), version=full_ver.build)
