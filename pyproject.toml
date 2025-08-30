@@ -49,10 +49,12 @@ select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
     "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/gcc /opt/rh/gcc-toolset-14/root/bin/$PREFIX-gcc",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/g++ /opt/rh/gcc-toolset-14/root/bin/$PREFIX-g++",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/nm /opt/rh/gcc-toolset-14/root/bin/$PREFIX-nm",
-    "ln -s /opt/rh/gcc-toolset-14/root/bin/readelf /opt/rh/gcc-toolset-14/root/bin/$PREFIX-readelf",
+    "export GCC_ROOT='/opt/rh/gcc-toolset-14/root'",
+    "ln -s $GCC_ROOT/bin/gcc $GCC_ROOT/bin/$PREFIX-gcc",
+    "ln -s $GCC_ROOT/bin/g++ $GCC_ROOT/bin/$PREFIX-g++",
+    "ln -s $GCC_ROOT/bin/nm $GCC_ROOT/bin/$PREFIX-nm",
+    "ln -s $GCC_ROOT/bin/readelf $GCC_ROOT/bin/$PREFIX-readelf",
+    "ln -s $GCC_ROOT/bin/ar $GCC_ROOT/bin/$PREFIX-ar",
 ]
 
 [[tool.cibuildwheel.overrides]]
@@ -64,6 +66,7 @@ before-all = [
     "ln -s /usr/bin/g++ /usr/bin/$PREFIX-g++",
     "ln -s /usr/bin/nm /usr/bin/$PREFIX-nm",
     "ln -s /usr/bin/readelf /usr/bin/$PREFIX-readelf",
+    "ln -s /usr/bin/ar /usr/bin/$PREFIX-ar",
 ]
 
 [[tool.cibuildwheel.overrides]]
