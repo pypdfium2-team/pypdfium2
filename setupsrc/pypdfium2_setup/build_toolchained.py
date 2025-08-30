@@ -25,7 +25,7 @@ DefaultConfig = {
     "is_debug": False,
     "treat_warnings_as_errors": False,
     "use_glib": False,
-    "is_component_build": True,
+    "is_component_build": False,
     "pdf_is_standalone": True,
     "pdf_use_partition_alloc": False,
     "pdf_enable_v8": False,
@@ -46,7 +46,7 @@ SyslibsConfig = {
 }
 
 if sys.platform.startswith("darwin"):
-    DefaultConfig["mac_deployment_target"] = "11.0.0"
+    DefaultConfig["mac_deployment_target"] = "14.0.0" if Host._raw_machine == "arm64" else "11.0.0"
     # SyslibsConfig["use_system_xcode"] = True
 
 
@@ -126,8 +126,8 @@ def main(
         build_ver    = None,
         build_target = None,
         use_syslibs  = False,
-        single_lib   = False,
         win_sdk_dir  = None,
+        target_cpu   = None,
     ):
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
@@ -156,8 +156,8 @@ def main(
     
     if did_pdfium_sync:
         patch_pdfium(build_ver)
-        if single_lib:
-            git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
+        # TODO use autopatch from build_native
+        git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
     if use_syslibs:
         assert not IGNORE_FULLVER
         get_shimheaders_tool(PDFiumDir, rev=chromium_rev)
@@ -167,8 +167,8 @@ def main(
     config_dict = DefaultConfig.copy()
     if use_syslibs:
         config_dict.update(SyslibsConfig)
-    if single_lib:
-        config_dict["is_component_build"] = False
+    if target_cpu:
+        config_dict["target_cpu"] = target_cpu
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
@@ -203,14 +203,13 @@ def parse_args(argv):
         help = "Use system libraries instead of those bundled with PDFium. Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng, zlib and icuuc are installed, and that $PKG_CONFIG_PATH is set correctly.",
     )
     parser.add_argument(
-        "--single-lib",
-        action = "store_true",
-        help = "Whether to create a single DLL that bundles the dependency libraries. Otherwise, separate DLLs will be used. Note, the corresponding patch will only be applied if pdfium is re-synced, else the existing state is used.",
-    )
-    parser.add_argument(
         "--win-sdk-dir",
         type = lambda p: Path(p).resolve(),
         help = "Path to the Windows SDK (Windows only)",
+    )
+    parser.add_argument(
+        "--target-cpu",
+        help = "The CPU architecture to target. This sets the corresponding GN config var. Platform specific pre-requisites may apply, such as GCC multilib on Linux.",
     )
     return parser.parse_args(argv)
 

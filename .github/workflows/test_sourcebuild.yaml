@@ -65,8 +65,6 @@ jobs:
         if: ${{ startsWith(matrix.build_mode, 'native') }}
         run: sudo apt-get install -y generate-ninja ninja-build libglib2.0-dev
       
-      # note, we could pass --single-lib to build_toolchained.py
-      
       - name: Build PDFium (toolchained)
         if: ${{ matrix.build_mode == 'toolchained' }}
         run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py
