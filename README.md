@@ -188,6 +188,7 @@ sudo ln -s $GCC_DIR/bin/gcc $GCC_DIR/bin/$PREFIX-gcc
 sudo ln -s $GCC_DIR/bin/g++ $GCC_DIR/bin/$PREFIX-g++
 sudo ln -s $GCC_DIR/bin/nm $GCC_DIR/bin/$PREFIX-nm
 sudo ln -s $GCC_DIR/bin/readelf $GCC_DIR/bin/$PREFIX-readelf
+sudo ln -s $GCC_DIR/bin/ar $GCC_DIR/bin/$PREFIX-ar
 ```
 
 > [!NOTE]
