@@ -564,14 +564,14 @@ def _manylinux_tag(arch, glibc="2_17"):
 def get_wheel_tag(pl_name):
     
     if pl_name == PlatNames.darwin_x64:
-        # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "10.13.0"`
-        return "macosx_10_13_x86_64"
+        # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "11.0.0"`
+        return "macosx_11_0_x86_64"
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
         return "macosx_11_0_arm64"
     elif pl_name == PlatNames.darwin_univ2:
         # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
-        return "macosx_10_13_universal2"
+        return "macosx_11_0_universal2"
     
     elif pl_name == PlatNames.windows_x64:
         return "win_amd64"

@@ -88,18 +88,11 @@ before-all = [
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
-
-# set mac deployment target again for auditwheel
-[[tool.cibuildwheel.overrides]]
-select = "*-macosx_x86_64"
-inherit.environment = "append"
-environment.MACOSX_DEPLOYMENT_TARGET = "11.0.0"
-environment.SYSTEM_VERSION_COMPAT = 0
-
-[[tool.cibuildwheel.overrides]]
-select = "*-macosx_arm64"
-inherit.environment = "append"
-environment.MACOSX_DEPLOYMENT_TARGET = "14.0.0"
+# The deployment target is actually defined in the build script's GN config
+# But need to set it again here for auditwheel
+MACOSX_DEPLOYMENT_TARGET = "11.0.0"
+# Make sure the OS yields its real version
+SYSTEM_VERSION_COMPAT = 0
 
 [tool.cibuildwheel.windows.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
