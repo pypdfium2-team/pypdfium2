@@ -263,10 +263,10 @@ On the other hand, for Windows `arm64` and `x86`, cibuildwheel supports cross-co
 
 > [!TIP]
 > pdfium itself has first-class cross-compilation support.
-> In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to cross-package pypdfium2 instead of using cibuildwheel.
+> In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to forego cibuildwheel and cross-package pypdfium2 instead (just make a sourcebuild with cross-compilation options, pack the wheel as usual, and use `python -m wheel tags` to re-tag).<br>
 > However, cibuildwheel emulation may be a *quick & dirty* way to build for those architectures not handled upstream yet.
 
-Note that, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
+Note, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
 ```bash
 sudo dnf in moby-engine  # this provides the docker command
 sudo systemctl start docker
@@ -451,8 +451,8 @@ Enhancements of general value that are maintainable and align well with the idea
 In case of doubt, open a discussion ticket and ask, but please don't expect much more than a "yes" or a "no".
 
 > [!IMPORTANT]
-> If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.
-> Also, if you feel you need patches to package pypdfium2, please submit them on pypdfium2's discussions page so we can figure out if there isn't a better way.
+> If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.<br>
+> Also, if you feel you need patches to package pypdfium2, please submit them on pypdfium2's discussions page so we can figure out if there isn't a better way (there usually is).
 
 
 ## Usage
