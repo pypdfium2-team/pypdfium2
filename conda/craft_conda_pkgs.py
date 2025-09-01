@@ -17,6 +17,12 @@ T_RAW = "raw"
 T_HELPERS = "helpers"
 
 
+@functools.lru_cache(maxsize=2)
+def run_conda_search(package, channel):
+    output = run_cmd(["conda", "search", "--json", package, "--override-channels", "-c", channel], cwd=None, capture=True)
+    return json.loads(output)[package]
+
+
 class CondaPkgVer:
 
     @staticmethod
@@ -70,18 +76,6 @@ class TmpCommitCtx:
             self.undo()
 
 
-class CondaExtPlatfiles:
-    
-    def __enter__(self):
-        self.platfiles = tuple(DataDir/ExtPlats.system/fn for fn in (BindingsFN, VersionFN))
-        run_cmd(["git", "add", "-f"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
-    
-    def __exit__(self, *_):
-        run_cmd(["git", "reset"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
-        for fp in self.platfiles:
-            fp.unlink()
-
-
 def run_conda_build(recipe_dir, out_dir, args=()):
     with TmpCommitCtx():
         run_cmd(["conda", "build", recipe_dir, "--output-folder", out_dir, *args], cwd=ProjectDir, env=os.environ)
@@ -110,6 +104,18 @@ def _get_build_num(args):
     build_num = 0 if build_num is None else build_num+1
     
     return build_num
+
+
+class CondaExtPlatfiles:
+    
+    def __enter__(self):
+        self.platfiles = tuple(DataDir/ExtPlats.system/fn for fn in (BindingsFN, VersionFN))
+        run_cmd(["git", "add", "-f"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
+    
+    def __exit__(self, *_):
+        run_cmd(["git", "reset"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
+        for fp in self.platfiles:
+            fp.unlink()
 
 
 def main_conda_raw(args):
@@ -142,12 +148,6 @@ def main_conda_helpers(args):
     # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
     # args=["-c", CondaDir/"raw"/"out"]
     run_conda_build(CondaDir/"helpers", CondaDir/"helpers"/"out", args=["--override-channels", "-c", "pypdfium2-team", "-c", "bblanchon", "-c", "defaults"])
-
-
-@functools.lru_cache(maxsize=2)
-def run_conda_search(package, channel):
-    output = run_cmd(["conda", "search", "--json", package, "--override-channels", "-c", channel], cwd=None, capture=True)
-    return json.loads(output)[package]
 
 
 def main():

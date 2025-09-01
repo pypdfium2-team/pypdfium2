@@ -252,14 +252,19 @@ Sourcebuild can be run through cibuildwheel. For targets configured in our [`pyp
 ```bash
 CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
 ```
+See also our [cibuildwheel](.github/workflows/cibw.yaml) [workflow](.github/workflows/cibw-one.yaml).
+For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
+
 On Linux, this will use the native sourcebuild, and pull in dependencies from the container via `auditwheel repair`.
 On Windows and macOS, the toolchained sourcebuild is used.
 
 On Linux, non-native architectures can theoretically be built under emulation, which seems to be cibuildwheel's standard (albeit really unfortunate) approach to this problem.
-Windows `arm64` and `x86`, on the other hand, are supported with cross-compilation.
+On the other hand, for Windows `arm64` and `x86`, cibuildwheel supports cross-compilation.
 
-See also our [cibuildwheel](.github/workflows/cibw.yaml) [workflow](.github/workflows/cibw-one.yaml).
-For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
+> [!TIP]
+> pdfium itself has first-class cross-compilation support.
+> In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to cross-package pypdfium2 instead of using cibuildwheel.
+> However, cibuildwheel emulation may be a *quick & dirty* way to build for those architectures not handled upstream yet.
 
 Note that, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
 ```bash
@@ -445,7 +450,9 @@ Related issues or PRs may be closed without further notice if we don't see fit f
 Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
 In case of doubt, open a discussion ticket and ask, but please don't expect much more than a "yes" or a "no".
 
-If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.
+> [!IMPORTANT]
+> If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.
+> Also, if you feel you need patches to package pypdfium2, please submit them on pypdfium2's discussions page so we can figure out if there isn't a better way.
 
 
 ## Usage
@@ -889,7 +896,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 pypdfium2 also ships with a simple command-line interface, providing access to key features of the support model in a shell environment (e. g. rendering, content extraction, document inspection, page rearranging, ...).
 
 The primary motivation behind this is to have a nice testing interface, but it may be helpful in a variety of other situations as well.
-Usage should be largely self-explanatory, assuming a minimum of familiarity with the command-line.
+Usage should be largely self-explanatory, assuming some familiarity with the command-line.
+See `pypdfium2 --help` or `pypdfium2 $SUBCOMMAND --help` for available commands and options.
 
 
 ## Licensing
@@ -992,8 +1000,8 @@ just docs-build  # short alias
 
 Built docs are primarily hosted on [`readthedocs.org`](https://readthedocs.org/projects/pypdfium2/).
 It may be configured using a [`.readthedocs.yaml`](.readthedocs.yaml) file (see [instructions](https://docs.readthedocs.io/en/stable/config-file/v2.html)), and the administration page on the web interface.
-RTD supports hosting multiple versions, so we currently have one linked to the `main` branch and another to `stable`.
-New builds are automatically triggered by a webhook whenever you push to a linked branch.
+RTD theoretically supports hosting multiple versions, but currently, we only host one build for the latest release through the `stable` branch.
+New builds are automatically triggered by a webhook whenever a linked branch is pushed.
 
 Additionally, one doc build can also be hosted on [GitHub Pages](https://pypdfium2-team.github.io/pypdfium2/index.html).
 It is implemented with a CI workflow, which is supposed to be triggered automatically on release.

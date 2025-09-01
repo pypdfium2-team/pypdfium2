@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 {% set pdfium_min = environ["PDFIUM_MIN"] %}
 {% set pdfium_max = environ["PDFIUM_MAX"] %}
@@ -50,7 +50,7 @@ about:
   summary: Python bindings to PDFium (helpers, external bindings)
   description: |
     This package provides python helpers around pdfium.
-    Dependents are suggested to pin to a major version, but any tighter pinning is discouraged since it increases the risk for conflicts, and would lock you out from future fixes.
+    Dependents are suggested to pin to a major version.
   license: BSD-3-Clause, Apache-2.0
   license_file:
     - LICENSES/BSD-3-Clause.txt

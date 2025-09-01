@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: CC-BY-4.0
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 {% set pdfium_short = environ["PDFIUM_SHORT"] %}
 {% set pdfium_full = environ["PDFIUM_FULL"] %}
@@ -52,7 +52,7 @@ about:
   description: |
     This package provides raw ctypes bindings to pdfium.
     Note, dependents should not pin this package to an exact version, as pypdfium2\_raw itself pins pdfium-binaries for ABI safety reasons.
-    In general, pypdfium2\_helpers is the canonical package (i.e. roughly equivalent to pypdfium2 on PyPI), so it is recommended to depend on that rather than on pypdfium2_raw directly.
+    In general, pypdfium2\_helpers is the canonical package (i.e. roughly equivalent to pypdfium2 on PyPI), so it is recommended to depend on that rather than on pypdfium2\_raw directly.
   license: BSD-3-Clause, Apache-2.0
   license_file:
     - LICENSES/BSD-3-Clause.txt

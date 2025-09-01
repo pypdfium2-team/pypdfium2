@@ -22,15 +22,12 @@
 <details open><summary>Setup</summary>
 
 - [ ] This PR changes setup code (`setupsrc/`, `setup.py` etc.).
-- [ ] I have at least skimmed through [Installation -> From the repository][1] and subsections.
+- [ ] I have at least skimmed through [Installation -> With setup][1] and subsections.
 - [ ] I have tested the change does not break internal callers.
 - [ ] I believe the change is maintainable and does not cause unreasonable complexity or code fragmentation.
 - [ ] The change does not shift a maintenance burden or upstream downstream tasks. *Keep handlers generic, avoid overly downstream-specific or (for us) effectively dead code passages.*
 - [ ] I have assessed that the targeted use case cannot reasonably be satisfied by existing means, such as [Caller-provided data files][2], or the change forms a notable improvement over possible alternatives.
 - [ ] I believe the targeted use case is supported by pypdfium2-team. *Note that we may not want to support esoteric or artificially restricted setup envs.*
-
-[1]: https://github.com/pypdfium2-team/pypdfium2/tree/setup_work?tab=readme-ov-file#from-the-repository
-[2]: https://github.com/pypdfium2-team/pypdfium2/tree/setup_work?tab=readme-ov-file#with-caller-provided-data-files
 
 </details>
 <details open><summary>Other</summary>
@@ -38,3 +35,6 @@
 - [ ] This PR changes other things, namely: ... <!-- sum up change (keyword/topic) -->
 
 </details>
+
+[1]: https://github.com/pypdfium2-team/pypdfium2?tab=readme-ov-file#from-the-repository--with-setup
+[2]: https://github.com/pypdfium2-team/pypdfium2?tab=readme-ov-file#with-caller-provided-data-files
