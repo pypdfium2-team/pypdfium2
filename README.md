@@ -448,11 +448,10 @@ If you have an issue with a third-party build, either contact your distributor, 
 Do not expect us to add/change code for downstream-specific setup tasks.
 Related issues or PRs may be closed without further notice if we don't see fit for upstream.
 Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
-In case of doubt, open a discussion ticket and ask, but please don't expect much more than a "yes" or a "no".
 
 > [!IMPORTANT]
 > If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.<br>
-> Also, if you feel you need patches to package pypdfium2, please submit them on pypdfium2's discussions page so we can figure out if there isn't a better way (there usually is).
+> In particular, if you feel like you need patches to package pypdfium2, please submit them on the Discussions page so we can figure out if there isn't a better way (there usually is).
 
 
 ## Usage
