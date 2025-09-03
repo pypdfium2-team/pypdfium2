@@ -47,6 +47,7 @@ extensions = [
     "sphinx_issues",
 ]
 
+myst_enable_extensions = ["colon_fence"]
 issues_github_path = "pypdfium2-team/pypdfium2"
 
 suppress_warnings = [
@@ -112,7 +113,7 @@ def convert_gh_admonitions(app, relative_path, parent_docname, contents):
             line_roi = line.lstrip()
             for admonition_key in _GITHUB_ADMONITIONS:
                 if line_roi.startswith(admonition_key):
-                    line = line.replace(admonition_key, "```{" + _GITHUB_ADMONITIONS[admonition_key] + "}")
+                    line = line.replace(admonition_key, ":::{" + _GITHUB_ADMONITIONS[admonition_key] + "}")
                     # start replacing quotes in subsequent lines
                     replacing = True
                     break
@@ -127,7 +128,7 @@ def convert_gh_admonitions(app, relative_path, parent_docname, contents):
                     line = line.replace(">", "", 1)
                 else:
                     # missing "> ", so stop replacing and terminate directive
-                    line = f"```\n{line}"
+                    line = f":::\n{line}"
                     replacing = False
             # swap line back in splits
             orig_line_splits[j] = line
