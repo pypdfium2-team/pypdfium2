@@ -166,14 +166,19 @@ def main(
     config_dict = DefaultConfig.copy()
     if use_syslibs:
         config_dict.update(SyslibsConfig)
+    
+    is_cross = False
     if target_cpu:
         config_dict["target_cpu"] = target_cpu
+        is_cross = True  # assumably
+        if Host.system == SysNames.linux:
+            run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", target_cpu], cwd=PDFiumDir)
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
     build(Ninja, build_target)
     
-    return pack_sourcebuild(PDFiumDir, PDFiumOutDir, "toolchained", v_full, build_ver)
+    return pack_sourcebuild(PDFiumDir, PDFiumOutDir, "toolchained", v_full, build_ver, load_lib=(not is_cross))
 
 
 def parse_args(argv):

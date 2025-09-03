@@ -258,13 +258,8 @@ For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/
 On Linux, this will use the native sourcebuild, and pull in dependencies from the container via `auditwheel repair`.
 On Windows and macOS, the toolchained sourcebuild is used.
 
-On Linux, non-native architectures can theoretically be built under emulation, which seems to be cibuildwheel's standard (albeit really unfortunate) approach to this problem.
+On Linux, non-native architectures can theoretically be built under emulation, which seems to be cibuildwheel's standard albeit really unfortunate approach to this problem (however, see the note below on cross-compiling without cibuildwheel).
 On the other hand, for Windows `arm64` and `x86`, cibuildwheel supports cross-compilation.
-
-> [!TIP]
-> pdfium itself has first-class cross-compilation support.
-> In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to forego cibuildwheel and cross-package pypdfium2 instead (just make a sourcebuild with cross-compilation options, pack the wheel as usual, and use `python -m wheel tags` to re-tag).<br>
-> However, cibuildwheel emulation may be a *quick & dirty* way to build for those architectures not handled upstream yet.
 
 Note, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
 ```bash
@@ -281,6 +276,16 @@ For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](htt
 > Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel.
 > In particular, a toolchained checkout of pdfium within pypdfium2 is problematic, and will cause a halt on the `Copying project into container...` step.
 > For development, make sure the fresh checkout is in sync with the working copy.
+
+> [!TIP]
+> pdfium itself has first-class cross-compilation support.
+> In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to forego cibuildwheel and cross-package pypdfium2 instead, e.g.:
+> ```bash
+> # assuming gcc cross-compilation packages are installed
+> python setupsrc/pypdfium2_setup/build_toolchained.py --target-cpu arm
+> PDFIUM_PLATFORM=sourcebuild CROSS_TAG="manylinux_2_17_armv7l" python -m build -wxn
+> ```
+> However, cibuildwheel emulation may be a *quick & dirty* way to build for those architectures not handled upstream yet.
 
 
 #### With caller-provided data files

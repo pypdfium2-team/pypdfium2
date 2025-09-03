@@ -930,7 +930,9 @@ def handle_sbuild_vers(short_ver):
 
 
 def pack_sourcebuild(
-        pdfium_dir, build_dir, sub_target, full_ver, build_ver=None, post_ver=None
+        pdfium_dir, build_dir, sub_target,
+        full_ver, build_ver=None, post_ver=None,
+        load_lib=True,
     ):
     log("Packing data files for sourcebuild...")
     
@@ -949,7 +951,8 @@ def pack_sourcebuild(
     shutil.copy(build_dir/libname, dest_dir/libname)
     
     # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=(dest_dir/CTG_LIBPATTERN, ), version=full_ver.build)
+    ct_paths = (dest_dir/CTG_LIBPATTERN, ) if load_lib else ()
+    run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=ct_paths, version=full_ver.build)
     write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **post_ver)
     
     return full_ver, post_ver

@@ -37,9 +37,13 @@ def bdist_factory(pl_name):
         
         def get_tag(self, *args, **kws):
             if pl_name == ExtPlats.sourcebuild:
-                # if using the sourcebuild target, forward the native tag
-                # alternatively, the sourcebuild clause in get_wheel_tag() using sysconfig.get_platform() should be roughly equivalent
-                _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
+                # In case of cross-compilation, the caller needs to set the tag.
+                plat_tag = os.environ.get("CROSS_TAG")
+                # Otherwise, forward the host's tag as given by bdist_wheel.
+                # Alternatively, the sourcebuild clause in base.py::get_wheel_tag() should be roughly equivalent.
+                # The underlying API being wrapped is sysconfig.get_platform().
+                if not plat_tag:
+                    _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
             else:
                 plat_tag = get_wheel_tag(pl_name)
             return "py3", "none", plat_tag
