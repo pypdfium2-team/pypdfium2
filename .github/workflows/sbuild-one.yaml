@@ -30,9 +30,9 @@ on:
       params:
         type: string
         default: ''
-      # cross_deps:
-      #   type: string
-      #   default: ''
+      cross_deps:
+        type: string
+        default: ''
       cross_tag:
         type: string
         default: ''
@@ -65,6 +65,7 @@ jobs:
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Install System deps
+        if: ${{ inputs.cross_deps }}
         run: sudo apt-get install -y $CROSS_DEPS
         env:
           CROSS_DEPS: ${{ inputs.cross_deps }}
