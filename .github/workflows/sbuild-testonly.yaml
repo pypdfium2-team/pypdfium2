@@ -4,6 +4,7 @@
 name: Sourcebuild (Test-only)
 
 on:
+  pull_request:  # XXXX
   workflow_dispatch:
     inputs:
       linux_native_gcc:
@@ -37,7 +38,7 @@ jobs:
       os: macos-13  # Intel host
       py_version: ${{ inputs.py_version }}
   
-  macos_x64:
+  macos_arm64:
     if: ${{ inputs.macos }}
     uses: ./.github/workflows/sbuild-one.yaml
     with:
