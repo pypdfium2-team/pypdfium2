@@ -50,6 +50,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in conf.py
+          persist-credentials: false
       
       - name: Install deps & pypdfium2
         run: |
