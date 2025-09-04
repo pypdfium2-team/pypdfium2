@@ -1,0 +1,83 @@
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Sourcebuild One
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        type: string
+      py_version:
+        type: string
+      params:
+        type: string
+        default: ''
+      cross_tag:
+        type: string
+        default: ''
+  workflow_dispatch:
+    os:
+      type: string
+      default: ubuntu-latest
+    py_version:
+      type: string
+      default: '3.12'
+    params:
+      type: string
+      default: ''
+    cross_tag:
+      type: string
+      default: ''
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  
+  build:
+    runs-on: ${{ inputs.os }}
+    
+    steps:
+      
+      - uses: extractions/setup-just@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.py_version }}
+      
+      - name: Check out pypdfium2 repository
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository }}
+          fetch-depth: 0  # for git describe
+      
+      - name: Install Python deps
+        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
+      
+      # TODO install cross dependencies
+      
+      - name: Build PDFium (toolchained)
+        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py $BUILD_PARAMS
+        env:
+          BUILD_PARAMS: ${{ inputs.params }}
+      
+      - name: Build wheel
+        run: python3 -m build -wxn
+        env:
+          PDFIUM_PLATFORM: sourcebuild
+          CROSS_TAG: ${{ inputs.cross_tag }}
+      
+      - name: Upload wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./dist/*.whl
+          name: sbuild-${{ inputs.os }}
+      
+      - name: Install and test wheel
+        run: |
+          python3 -m pip install ./dist/*.whl
+          pypdfium2 -v
+          just test

@@ -1,11 +1,18 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Test Sourcebuild
+name: Sourcebuild One Native
 
 on:
-  workflow_dispatch:
   workflow_call:
+    inputs:
+      os:
+        type: string
+      build_mode:
+        type: string
+      py_version:
+        type: string
+        default: '3.12'
 
 defaults:
   run:
@@ -13,29 +20,8 @@ defaults:
 
 jobs:
   
-  test_sourcebuild:
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        # On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-        # Google's toolchain doesn't seem to run on Linux/Windows arm64 natively. The toolchain-free build (or cross-compilation from x86_64) should work, though.
-        # 'ubuntu-24.04-arm', 'windows-11-arm'
-        os: ['ubuntu-latest', 'macos-13', 'macos-latest', 'windows-latest']
-        build_mode: ['toolchained']
-        include:
-          - os: 'ubuntu-latest'
-            build_mode: 'syslibs'
-          - os: 'ubuntu-latest'
-            build_mode: 'native-gcc'
-          - os: 'ubuntu-24.04-arm'
-            build_mode: 'native-gcc'
-          - os: 'ubuntu-latest'
-            build_mode: 'native-clang'
-          - os: 'ubuntu-24.04-arm'
-            build_mode: 'native-clang'
-    
-    runs-on: ${{ matrix.os }}
+  build:
+    runs-on: ${{ inputs.os }}
     
     steps:
       
@@ -44,7 +30,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ inputs.py_version }}
       
       - name: Check out pypdfium2 repository
         uses: actions/checkout@v5
@@ -56,29 +42,25 @@ jobs:
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Install deps for native/syslibs build
-        if: ${{ startsWith(matrix.build_mode, 'native') || matrix.build_mode == 'syslibs' }}
+        if: ${{ startsWith(inputs.build_mode, 'native') || inputs.build_mode == 'syslibs' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
       
       - name: Install deps for native build
-        if: ${{ startsWith(matrix.build_mode, 'native') }}
+        if: ${{ startsWith(inputs.build_mode, 'native') }}
         run: sudo apt-get install -y generate-ninja ninja-build libglib2.0-dev
       
-      - name: Build PDFium (toolchained)
-        if: ${{ matrix.build_mode == 'toolchained' }}
-        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py
-      
       - name: Build PDFium (toolchained, with syslibs)
-        if: ${{ matrix.build_mode == 'syslibs' }}
+        if: ${{ inputs.build_mode == 'syslibs' }}
         run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py --use-syslibs
       
       - name: Build PDFium (native, gcc)
-        if: ${{ matrix.build_mode == 'native-gcc' }}
+        if: ${{ inputs.build_mode == 'native-gcc' }}
         run: python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc --test
       
       - name: Build PDFium (native, clang)
-        if: ${{ matrix.build_mode == 'native-clang' }}
+        if: ${{ inputs.build_mode == 'native-clang' }}
         run: |
           VERSION=18
           ARCH=$(uname -m)
@@ -87,12 +69,14 @@ jobs:
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
           python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler clang --test
       
+      # no point packing/uploading a wheel, as native/syslibs builds are host-specific
+      
       - name: Install
-        run: PDFIUM_PLATFORM="sourcebuild" python3 -m pip install -v .
+        run: python3 -m pip install .
+        env:
+          PDFIUM_PLATFORM: sourcebuild
       
-      # must show matching pdfium version with sourcebuild origin
-      - name: Check version
-        run: pypdfium2 -v
-      
-      - name: Run test suite
-        run: just test
+      - name: Test
+        run: |
+          pypdfium2 -v
+          just test
