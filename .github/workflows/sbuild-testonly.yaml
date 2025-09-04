@@ -4,7 +4,6 @@
 name: Sourcebuild (Test-only)
 
 on:
-  pull_request:  # XXXX
   workflow_dispatch:
     inputs:
       linux_native_gcc:
