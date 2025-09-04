@@ -3,22 +3,85 @@
 
 name: Sourcebuild (Test-only)
 
-# TODO ...
+on:
+  workflow_dispatch:
+    inputs:
+      linux_native_gcc:
+        type: boolean
+        default: true
+      linux_native_clang:
+        type: boolean
+        default: true
+      linux_tc_syslibs:
+        type: boolean
+        default: true
+      macos:
+        type: boolean
+        default: true
+      py_version:
+        type: string
+        default: '3.12'
 
-# matrix:
-#   # On GH actions, macOS <=13 is Intel, whereas macOS >=14 will be ARM64
-#   # Google's toolchain doesn't seem to run on Linux/Windows arm64 natively. The toolchain-free build (or cross-compilation from x86_64) should work, though.
-#   # 'ubuntu-24.04-arm', 'windows-11-arm'
-#   os: ['ubuntu-latest', 'macos-13', 'macos-latest', 'windows-latest']
-#   build_mode: ['toolchained']
-#   include:
-#     - os: 'ubuntu-latest'
-#       build_mode: 'syslibs'
-#     - os: 'ubuntu-latest'
-#       build_mode: 'native-gcc'
-#     - os: 'ubuntu-24.04-arm'
-#       build_mode: 'native-gcc'
-#     - os: 'ubuntu-latest'
-#       build_mode: 'native-clang'
-#     - os: 'ubuntu-24.04-arm'
-#       build_mode: 'native-clang'
+# TODO
+# - Windows/macOS native?
+# - Linux/Windows ARM64 toolchained (not supported upstream yet)
+
+jobs:
+  
+  # test macOS the other way round while we still can
+  
+  macos_x64:
+    if: ${{ inputs.macos }}
+    uses: ./.github/workflows/sbuild-one.yaml
+    with:
+      os: macos-13  # Intel host
+      py_version: ${{ inputs.py_version }}
+  
+  macos_x64:
+    if: ${{ inputs.macos }}
+    uses: ./.github/workflows/sbuild-one.yaml
+    with:
+      os: macos-13  # Intel host
+      params: '--target-cpu arm64'
+      cross_tag: macosx_11_0_arm64
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_tc_syslibs:
+    if: ${{ inputs.linux_tc_syslibs }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-latest
+      build_mode: syslibs  # build_toolchained.py --use-syslibs
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_native_gcc:
+    if: ${{ inputs.linux_native_gcc }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-latest
+      build_mode: native-gcc
+      py_version: ${{ inputs.py_version }}
+  
+  linux_arm64_native_gcc:
+    if: ${{ inputs.linux_native_gcc }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-24.04-arm
+      build_mode: native-gcc
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_native_clang:
+    if: ${{ inputs.linux_native_clang }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-latest
+      build_mode: native-clang
+      py_version: ${{ inputs.py_version }}
+  
+  linux_arm64_native_clang:
+    if: ${{ inputs.linux_native_clang }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-24.04-arm
+      build_mode: native-clang
+      py_version: ${{ inputs.py_version }}

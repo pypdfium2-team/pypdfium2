@@ -22,10 +22,6 @@ on:
         type: string
         default: 'manylinux_2_17'
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   
   linux_x64:
@@ -43,6 +39,7 @@ jobs:
     with:
       os: ubuntu-latest
       params: '--target-cpu x86'
+      cross_deps: 'g++-multilib'
       cross_tag: ${{ inputs.glibc_tag }}_i686
       py_version: ${{ inputs.py_version }}
   
@@ -52,6 +49,7 @@ jobs:
     with:
       os: ubuntu-latest
       params: '--target-cpu arm64'
+      cross_deps: 'libc6-i386 gcc-10-multilib g++-10-aarch64-linux-gnu gcc-10-aarch64-linux-gnu'
       cross_tag: ${{ inputs.glibc_tag }}_aarch64
       py_version: ${{ inputs.py_version }}
   
@@ -61,6 +59,7 @@ jobs:
     with:
       os: ubuntu-latest
       params: '--target-cpu arm'
+      cross_deps: 'libc6-i386 gcc-10-multilib g++-10-arm-linux-gnueabihf gcc-10-arm-linux-gnueabihf'
       cross_tag: ${{ inputs.glibc_tag }}_armv7l
       py_version: ${{ inputs.py_version }}
     

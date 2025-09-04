@@ -13,22 +13,29 @@ on:
       params:
         type: string
         default: ''
+      cross_deps:
+        type: string
+        default: ''
       cross_tag:
         type: string
         default: ''
   workflow_dispatch:
-    os:
-      type: string
-      default: ubuntu-latest
-    py_version:
-      type: string
-      default: '3.12'
-    params:
-      type: string
-      default: ''
-    cross_tag:
-      type: string
-      default: ''
+    inputs:
+      os:
+        type: string
+        default: ubuntu-latest
+      py_version:
+        type: string
+        default: '3.12'
+      params:
+        type: string
+        default: ''
+      # cross_deps:
+      #   type: string
+      #   default: ''
+      cross_tag:
+        type: string
+        default: ''
 
 defaults:
   run:
@@ -57,7 +64,10 @@ jobs:
       - name: Install Python deps
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
-      # TODO install cross dependencies
+      - name: Install System deps
+        run: sudo apt-get install -y $CROSS_DEPS
+        env:
+          CROSS_DEPS: ${{ inputs.cross_deps }}
       
       - name: Build PDFium (toolchained)
         run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py $BUILD_PARAMS

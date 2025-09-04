@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# TODO macOS/Windows ?
-
 name: Sourcebuild One Native
 
 on:
@@ -12,6 +10,17 @@ on:
         type: string
       build_mode:
         type: string
+      py_version:
+        type: string
+        default: '3.12'
+  workflow_dispatch:
+    inputs:
+      os:
+        type: string
+        default: ubuntu-latest
+      build_mode:
+        type: string
+        default: native-gcc
       py_version:
         type: string
         default: '3.12'
