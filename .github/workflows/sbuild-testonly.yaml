@@ -35,6 +35,8 @@ jobs:
     uses: ./.github/workflows/sbuild-one.yaml
     with:
       os: macos-13  # Intel host
+      is_cross: false
+      artifact_name: macos_x64
       py_version: ${{ inputs.py_version }}
   
   macos_arm64:
@@ -44,6 +46,8 @@ jobs:
       os: macos-13  # Intel host
       params: '--target-cpu arm64'
       cross_tag: macosx_11_0_arm64
+      is_cross: true
+      artifact_name: macos-cross_arm64
       py_version: ${{ inputs.py_version }}
   
   linux_x64_tc_syslibs:
