@@ -4,6 +4,7 @@
 name: Sourcebuild
 
 on:
+  pull_request:  # XXXX
   workflow_dispatch:
     inputs:
       linux:
