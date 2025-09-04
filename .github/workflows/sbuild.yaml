@@ -106,3 +106,5 @@ jobs:
       params: '--target-cpu x86'
       cross_tag: win32
       py_version: ${{ inputs.py_version }}
+  
+  # TODO android?

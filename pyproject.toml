@@ -106,3 +106,5 @@ environment.BUILD_PARAMS = "--target-cpu arm64"
 select = "*-win32"
 inherit.environment = "append"
 environment.BUILD_PARAMS = "--target-cpu x86"
+
+# TODO android
