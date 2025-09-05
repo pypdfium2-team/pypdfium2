@@ -5,9 +5,6 @@ name: Main packaging
 on:
   workflow_dispatch:
     inputs:
-      pre_test:
-        default: false
-        type: boolean
       test:
         default: true
         type: boolean
