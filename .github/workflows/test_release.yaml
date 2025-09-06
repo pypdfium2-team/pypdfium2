@@ -6,8 +6,11 @@ on:
   workflow_dispatch:
     inputs:
       index_url:
+        type: choice
         default: 'https://pypi.org/simple'
-        type: string
+        options:
+          - 'https://pypi.org/simple'
+          - 'https://test.pypi.org/simple'
 
 defaults:
   run:
