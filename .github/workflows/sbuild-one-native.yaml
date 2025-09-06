@@ -81,14 +81,21 @@ jobs:
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
           python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler clang --test
       
-      # no point packing/uploading a wheel, as native/syslibs builds are host-specific
+      # This wheel is specific to the distribution it was built on, but doesn't harm to upload it for inspection.
       
-      - name: Install
-        run: python3 -m pip install .
+      - name: Build wheel
+        run: python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: sourcebuild
       
-      - name: Test
+      - name: Upload wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./dist/*.whl
+          name: ${{ inputs.artifact_name }}
+      
+      - name: Install and test wheel
         run: |
+          python3 -m pip install ./dist/*.whl
           pypdfium2 -v
           just test
