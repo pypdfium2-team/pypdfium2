@@ -98,6 +98,10 @@ def _create_resources_rc(build_ver):
     output_path.write_text(content)
 
 def patch_pdfium(build_ver):
+    # TODO
+    # - use autopatch from build_native?
+    # - in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
+    git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
     git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
@@ -155,8 +159,6 @@ def main(
     
     if did_pdfium_sync:
         patch_pdfium(build_ver)
-        # TODO use autopatch from build_native
-        git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
     if use_syslibs:
         assert not IGNORE_FULLVER
         get_shimheaders_tool(PDFiumDir, rev=chromium_rev)

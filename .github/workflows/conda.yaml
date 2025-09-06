@@ -64,6 +64,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0
+          persist-credentials: false
       
       - name: Prepare
         run: |
@@ -107,6 +108,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: ${{ github.repository }}
+          persist-credentials: false
       
       - name: Miniconda setup
         uses: conda-incubator/setup-miniconda@v3

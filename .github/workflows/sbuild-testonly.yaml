@@ -1,0 +1,91 @@
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Sourcebuild (Test-only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      linux_native_gcc:
+        type: boolean
+        default: true
+      linux_native_clang:
+        type: boolean
+        default: true
+      linux_tc_syslibs:
+        type: boolean
+        default: true
+      macos:
+        type: boolean
+        default: true
+      py_version:
+        type: string
+        default: '3.12'
+
+# TODO
+# - Windows/macOS native?
+# - Linux/Windows ARM64 toolchained (not supported upstream yet)
+
+jobs:
+  
+  # test macOS the other way round while we still can
+  
+  macos_x64:
+    if: ${{ inputs.macos }}
+    uses: ./.github/workflows/sbuild-one.yaml
+    with:
+      os: macos-13  # Intel host
+      is_cross: false
+      artifact_name: macos_x64
+      py_version: ${{ inputs.py_version }}
+  
+  macos_arm64:
+    if: ${{ inputs.macos }}
+    uses: ./.github/workflows/sbuild-one.yaml
+    with:
+      os: macos-13  # Intel host
+      params: '--target-cpu arm64'
+      cross_tag: macosx_11_0_arm64
+      is_cross: true
+      artifact_name: macos-cross_arm64
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_tc_syslibs:
+    if: ${{ inputs.linux_tc_syslibs }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-latest
+      build_mode: syslibs  # build_toolchained.py --use-syslibs
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_native_gcc:
+    if: ${{ inputs.linux_native_gcc }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-latest
+      build_mode: native-gcc
+      py_version: ${{ inputs.py_version }}
+  
+  linux_arm64_native_gcc:
+    if: ${{ inputs.linux_native_gcc }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-24.04-arm
+      build_mode: native-gcc
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_native_clang:
+    if: ${{ inputs.linux_native_clang }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-latest
+      build_mode: native-clang
+      py_version: ${{ inputs.py_version }}
+  
+  linux_arm64_native_clang:
+    if: ${{ inputs.linux_native_clang }}
+    uses: ./.github/workflows/sbuild-one-native.yaml
+    with:
+      os: ubuntu-24.04-arm
+      build_mode: native-clang
+      py_version: ${{ inputs.py_version }}

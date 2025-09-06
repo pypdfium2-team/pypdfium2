@@ -6,7 +6,7 @@ import shutil
 import argparse
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[1]))
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from pypdfium2_setup.base import (
     ProjectDir, DataDir, DataDir_Bindings
 )
