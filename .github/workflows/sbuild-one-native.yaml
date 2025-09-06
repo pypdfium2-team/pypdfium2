@@ -83,6 +83,9 @@ jobs:
       
       # This wheel is specific to the distribution it was built on, but doesn't harm to upload it for inspection.
       
+      - name: Show binary info
+        run: file ./data/sourcebuild/*.{so,dylib,dll}
+      
       - name: Build wheel
         run: python3 -m build -wxn
         env:

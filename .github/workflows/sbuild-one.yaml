@@ -87,6 +87,9 @@ jobs:
         env:
           BUILD_PARAMS: ${{ inputs.params }}
       
+      - name: Show binary info
+        run: file ./data/sourcebuild/*.{so,dylib,dll}
+      
       - name: Build wheel
         run: python3 -m build -wxn
         env:
