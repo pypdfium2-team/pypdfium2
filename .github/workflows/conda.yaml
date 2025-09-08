@@ -124,13 +124,13 @@ jobs:
       
       # according to the docs, --override-channels disables searching config file channels, and -c options priority decreases from left to right
       - name: Install/Test raw package
-        if: inputs.package == 'raw'
+        if: ${{ inputs.package == 'raw' }}
         run: |
           conda install -y pypdfium2_raw --override-channels -c ./conda_dist/ -c bblanchon -c defaults
           python conda/raw/minitest.py
       
       - name: Install/Test helpers package
-        if: inputs.package == 'helpers'
+        if: ${{ inputs.package == 'helpers' }}
         run: |
           conda install -y pytest pillow numpy
           conda install -y pypdfium2_helpers --override-channels -c ./conda_dist/ -c pypdfium2-team -c bblanchon -c defaults
