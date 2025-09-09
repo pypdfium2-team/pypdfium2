@@ -4,6 +4,7 @@
 name: Sourcebuild One Native
 
 on:
+  pull_request:
   workflow_call:
     inputs:
       os:
