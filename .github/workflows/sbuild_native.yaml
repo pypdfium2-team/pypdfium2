@@ -4,6 +4,7 @@
 name: Sourcebuild Native
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       linux_native_gcc:
