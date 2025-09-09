@@ -12,6 +12,9 @@ on:
       macos:
         type: boolean
         default: true
+      macos_test:
+        type: boolean
+        default: false
       windows:
         type: boolean
         default: true
@@ -70,7 +73,7 @@ jobs:
       artifact_name: linux-cross_armv7l
       py_version: ${{ inputs.py_version }}
     
-  macos_x64:
+  macos_cross_x64:
     if: ${{ inputs.macos }}
     uses: ./.github/workflows/sbuild_one.yaml
     with:
@@ -81,14 +84,36 @@ jobs:
       artifact_name: macos-cross_x64
       py_version: ${{ inputs.py_version }}
   
-  macos_arm64:
+  macos_native_arm64:
     if: ${{ inputs.macos }}
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-latest
       cross_tag: macosx_11_0_arm64
       is_cross: false
-      artifact_name: macos_arm64
+      artifact_name: macos-native_arm64
+      py_version: ${{ inputs.py_version }}
+  
+  # test macOS the other way round while we still can
+  
+  macos_native_x64:
+    if: ${{ inputs.macos_test }}
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: macos-13  # Intel host
+      is_cross: false
+      artifact_name: macos-native_x64
+      py_version: ${{ inputs.py_version }}
+  
+  macos_cross_arm64:
+    if: ${{ inputs.macos_test }}
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: macos-13  # Intel host
+      params: '--target-cpu arm64'
+      cross_tag: macosx_11_0_arm64
+      is_cross: true
+      artifact_name: macos-cross_arm64
       py_version: ${{ inputs.py_version }}
   
   windows_x64:
