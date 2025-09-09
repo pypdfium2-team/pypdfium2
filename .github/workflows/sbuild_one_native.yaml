@@ -87,9 +87,8 @@ jobs:
       - name: Set up symlinks for clang
         if: ${{ inputs.build_mode == 'native' && inputs.compiler == 'clang' }}
         run: |
-          VERSION=18
-          ARCH=$(uname -m)
           sudo apt-get install -y llvm lld
+          VERSION=18 ARCH=$(uname -m)
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
       
