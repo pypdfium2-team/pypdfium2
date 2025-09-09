@@ -9,7 +9,18 @@ on:
       os:
         type: string
       build_mode:
-        type: string
+        type: choice
+        default: native
+        options:
+          - native
+          - tc-syslibs
+      compiler:
+        type: choice
+        default: gcc
+        options:
+          - gcc
+          - clang
+          - ''
       py_version:
         type: string
         default: '3.12'
@@ -22,8 +33,18 @@ on:
         type: string
         default: ubuntu-latest
       build_mode:
-        type: string
-        default: native-gcc
+        type: choice
+        default: native
+        options:
+          - native
+          - tc-syslibs
+      compiler:
+        type: choice
+        default: gcc
+        options:
+          - gcc
+          - clang
+          - ''
       py_version:
         type: string
         default: '3.12'
@@ -61,39 +82,34 @@ jobs:
           python3 -m pip install -U -r req/setup.txt -r req/test.txt
           python3 -m pip install -U auditwheel
       
-      - name: Install deps for native/syslibs build
-        if: ${{ startsWith(inputs.build_mode, 'native') || inputs.build_mode == 'syslibs' }}
+      - name: Install common build deps
         run: |
           sudo apt-get update
           sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
       
       - name: Install deps for native build
-        if: ${{ startsWith(inputs.build_mode, 'native') }}
+        if: ${{ inputs.build_mode == 'native' }}
         run: sudo apt-get install -y generate-ninja ninja-build libglib2.0-dev
       
-      - name: Build PDFium (toolchained, with syslibs)
-        if: ${{ inputs.build_mode == 'syslibs' }}
-        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py --use-syslibs
-      
-      # TODO unify...
-      
-      - name: Build PDFium (native, gcc)
-        if: ${{ inputs.build_mode == 'native-gcc' }}
-        run: python3 ./setupsrc/pypdfium2_setup/build_native.py --test $VENDOR_PARAM --compiler gcc
-        env:
-          VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
-      
-      - name: Build PDFium (native, clang)
-        if: ${{ inputs.build_mode == 'native-clang' }}
+      - name: Set up symlinks for clang
+        if: ${{ inputs.build_mode == 'native' && inputs.compiler == 'clang' }}
         run: |
           VERSION=18
           ARCH=$(uname -m)
           sudo apt-get install -y llvm lld
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
-          python3 ./setupsrc/pypdfium2_setup/build_native.py --test $VENDOR_PARAM --compiler clang
+      
+      - name: Build PDFium (native, ${{ inputs.compiler }})
+        if: ${{ inputs.build_mode == 'native' }}
+        run: python3 ./setupsrc/pypdfium2_setup/build_native.py --test --compiler "$COMPILER" $VENDOR_PARAM
         env:
+          COMPILER: ${{ inputs.compiler }}
           VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
+      
+      - name: Build PDFium (toolchained, with syslibs)
+        if: ${{ inputs.build_mode == 'tc-syslibs' }}
+        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py --use-syslibs
       
       - name: Show binary info
         run: file ./data/sourcebuild/*.{so,dylib,dll}
@@ -102,8 +118,6 @@ jobs:
         run: python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: sourcebuild
-      
-      # Assuming we are on Linux
       
       - name: Post-process with auditwheel
         run: python3 -m auditwheel repair ./dist/*.whl -w wheelhouse

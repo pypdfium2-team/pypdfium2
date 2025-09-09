@@ -30,7 +30,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-latest
-      build_mode: syslibs  # build_toolchained.py --use-syslibs
+      build_mode: tc-syslibs
+      compiler: ''
       py_version: ${{ inputs.py_version }}
   
   linux_x64_native_gcc:
@@ -38,7 +39,7 @@ jobs:
     uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-latest
-      build_mode: native-gcc
+      compiler: gcc
       py_version: ${{ inputs.py_version }}
   
   linux_arm64_native_gcc:
@@ -46,7 +47,7 @@ jobs:
     uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-24.04-arm
-      build_mode: native-gcc
+      compiler: gcc
       py_version: ${{ inputs.py_version }}
   
   linux_x64_native_clang:
@@ -54,7 +55,7 @@ jobs:
     uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-latest
-      build_mode: native-clang
+      compiler: clang
       py_version: ${{ inputs.py_version }}
   
   linux_arm64_native_clang:
@@ -62,5 +63,5 @@ jobs:
     uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-24.04-arm
-      build_mode: native-clang
+      compiler: clang
       py_version: ${{ inputs.py_version }}
