@@ -10,20 +10,12 @@ on:
         type: string
       py_version:
         type: string
-      params:
+      target_cpu:
         type: string
         default: ''
-      cross_deps:
+      tag:
         type: string
         default: ''
-      cross_tag:
-        type: string
-        default: ''
-      is_cross:
-        type: boolean
-        default: false
-      artifact_name:
-        type: string
   workflow_dispatch:
     inputs:
       os:
@@ -32,21 +24,12 @@ on:
       py_version:
         type: string
         default: '3.12'
-      params:
+      target_cpu:
         type: string
         default: ''
-      cross_deps:
+      tag:
         type: string
         default: ''
-      cross_tag:
-        type: string
-        default: ''
-      is_cross:
-        type: boolean
-        default: false
-      artifact_name:
-        type: string
-        default: artifact
 
 defaults:
   run:
@@ -74,18 +57,22 @@ jobs:
           fetch-depth: 0  # for git describe
       
       - name: Install Python deps
-        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
+        run: |
+          python3 -m pip install -U -r req/setup.txt -r req/test.txt
+          python3 -m pip install -U auditwheel
       
-      - name: Install System deps
-        if: ${{ inputs.cross_deps }}
-        run: sudo apt-get install -y $CROSS_DEPS
+      - name: Install Linux cross deps
+        if: ${{ inputs.target_cpu }}
+        run: |
+          PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU)
+          echo $PACKAGES; sudo apt-get install -y $PACKAGES
         env:
-          CROSS_DEPS: ${{ inputs.cross_deps }}
+          TARGET_CPU: ${{ inputs.target_cpu }}
       
       - name: Build PDFium (toolchained)
-        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py $BUILD_PARAMS
+        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py $CPU_PARAM
         env:
-          BUILD_PARAMS: ${{ inputs.params }}
+          CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
       
       - name: Show binary info
         run: file ./data/sourcebuild/*.{so,dylib,dll}
@@ -94,16 +81,19 @@ jobs:
         run: python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: sourcebuild
-          CROSS_TAG: ${{ inputs.cross_tag }}
+          CROSS_TAG: ${{ inputs.tag }}  # optional
+      
+      - name: Run auditwheel (informational)
+        run: python3 -m auditwheel show dist/*.whl
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v4
         with:
           path: ./dist/*.whl
-          name: ${{ inputs.artifact_name }}
+          name: sbuild-${{ inputs.os }}-${{ inputs.target_cpu }}
       
       - name: Install and test wheel
-        if: ${{ !inputs.is_cross }}
+        if: ${{ !inputs.target_cpu }}
         run: |
           python3 -m pip install ./dist/*.whl
           pypdfium2 -v

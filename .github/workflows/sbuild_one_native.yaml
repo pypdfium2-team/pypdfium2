@@ -86,18 +86,19 @@ jobs:
       - name: Show binary info
         run: file ./data/sourcebuild/*.{so,dylib,dll}
       
-      - name: Build and post-process wheel
-        run: |
-          python3 -m build -wxn
-          python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
+      - name: Build wheel
+        run: python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: sourcebuild
+      
+      - name: Post-process with auditwheel
+        run: python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
-          name: ${{ inputs.artifact_name }}
+          name: sbuild_n-${{ inputs.os }}-${{ inputs.build_mode }}
       
       - name: Install and test wheel
         run: |

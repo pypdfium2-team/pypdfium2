@@ -32,9 +32,7 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
-      cross_tag: ${{ inputs.glibc_tag }}_x86_64
-      is_cross: false
-      artifact_name: linux_x64
+      tag: ${{ inputs.glibc_tag }}_x86_64
       py_version: ${{ inputs.py_version }}
   
   linux_x86:
@@ -42,11 +40,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
-      params: '--target-cpu x86'
-      cross_deps: 'g++-multilib'
-      cross_tag: ${{ inputs.glibc_tag }}_i686
-      is_cross: true
-      artifact_name: linux-cross_x86
+      target_cpu: x86
+      tag: ${{ inputs.glibc_tag }}_i686
       py_version: ${{ inputs.py_version }}
   
   linux_arm64:
@@ -54,11 +49,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
-      params: '--target-cpu arm64'
-      cross_deps: 'libc6-i386 gcc-10-multilib g++-10-aarch64-linux-gnu gcc-10-aarch64-linux-gnu'
-      cross_tag: ${{ inputs.glibc_tag }}_aarch64
-      is_cross: true
-      artifact_name: linux-cross_arm64
+      target_cpu: arm64
+      tag: ${{ inputs.glibc_tag }}_aarch64
       py_version: ${{ inputs.py_version }}
   
   linux_armv7l:
@@ -66,11 +58,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
-      params: '--target-cpu arm'
-      cross_deps: 'libc6-i386 gcc-10-multilib g++-10-arm-linux-gnueabihf gcc-10-arm-linux-gnueabihf'
-      cross_tag: ${{ inputs.glibc_tag }}_armv7l
-      is_cross: true
-      artifact_name: linux-cross_armv7l
+      target_cpu: arm
+      tag: ${{ inputs.glibc_tag }}_armv7l
       py_version: ${{ inputs.py_version }}
     
   macos_cross_x64:
@@ -78,10 +67,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-latest  # arm64 host
-      params: '--target-cpu x64'
-      cross_tag: macosx_11_0_x86_64
-      is_cross: true
-      artifact_name: macos-cross_x64
+      target_cpu: x64
+      tag: macosx_11_0_x86_64
       py_version: ${{ inputs.py_version }}
   
   macos_native_arm64:
@@ -89,9 +76,7 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-latest
-      cross_tag: macosx_11_0_arm64
-      is_cross: false
-      artifact_name: macos-native_arm64
+      tag: macosx_11_0_arm64
       py_version: ${{ inputs.py_version }}
   
   # test macOS the other way round while we still can
@@ -101,8 +86,6 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-13  # Intel host
-      is_cross: false
-      artifact_name: macos-native_x64
       py_version: ${{ inputs.py_version }}
   
   macos_cross_arm64:
@@ -110,10 +93,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-13  # Intel host
-      params: '--target-cpu arm64'
-      cross_tag: macosx_11_0_arm64
-      is_cross: true
-      artifact_name: macos-cross_arm64
+      target_cpu: arm64
+      tag: macosx_11_0_arm64
       py_version: ${{ inputs.py_version }}
   
   windows_x64:
@@ -121,8 +102,6 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: windows-latest
-      is_cross: false
-      artifact_name: windows_x64
       py_version: ${{ inputs.py_version }}
   
   windows_arm64:
@@ -130,10 +109,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: windows-latest
-      params: '--target-cpu arm64'
-      cross_tag: win_arm64
-      is_cross: true
-      artifact_name: windows-cross_arm64
+      target_cpu: arm64
+      tag: win_arm64
       py_version: ${{ inputs.py_version }}
   
   windows_x86:
@@ -141,10 +118,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: windows-latest
-      params: '--target-cpu x86'
-      cross_tag: win32
-      is_cross: true
-      artifact_name: windows-cross_x86
+      target_cpu: x86
+      tag: win32
       py_version: ${{ inputs.py_version }}
   
   # TODO android?
