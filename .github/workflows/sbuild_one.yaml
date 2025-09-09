@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ./dist/*.whl
-          name: sbuild-${{ inputs.os }}-${{ inputs.target_cpu }}
+          name: sbuild-${{ inputs.os }}${{ format('-{0}', inputs.target_cpu) }}
       
       - name: Install and test wheel
         if: ${{ !inputs.target_cpu }}
