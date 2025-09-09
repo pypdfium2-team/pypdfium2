@@ -3,8 +3,7 @@
 
 # Simple shim for use within cibuildwheel and sbuild_one.yaml
 
-import sys
-import subprocess
+import sys, subprocess
 
 def main(arch=None):
     
