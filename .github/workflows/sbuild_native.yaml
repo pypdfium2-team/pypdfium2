@@ -25,15 +25,6 @@ on:
 
 jobs:
   
-  linux_x64_tc_syslibs:
-    if: ${{ inputs.linux_tc_syslibs }}
-    uses: ./.github/workflows/sbuild_one_native.yaml
-    with:
-      os: ubuntu-latest
-      build_mode: tc-syslibs
-      compiler: clang  # ignored
-      py_version: ${{ inputs.py_version }}
-  
   linux_x64_native_gcc:
     if: ${{ inputs.linux_native_gcc }}
     uses: ./.github/workflows/sbuild_one_native.yaml
@@ -64,4 +55,13 @@ jobs:
     with:
       os: ubuntu-24.04-arm
       compiler: clang
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_tc_syslibs:
+    if: ${{ inputs.linux_tc_syslibs }}
+    uses: ./.github/workflows/sbuild_one_native.yaml
+    with:
+      os: ubuntu-latest
+      build_mode: tc-syslibs
+      compiler: clang  # ignored
       py_version: ${{ inputs.py_version }}
