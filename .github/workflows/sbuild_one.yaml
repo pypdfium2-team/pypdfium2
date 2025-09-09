@@ -62,7 +62,7 @@ jobs:
           python3 -m pip install -U auditwheel
       
       - name: Install Linux cross deps
-        if: ${{ inputs.target_cpu }}
+        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
         run: |
           PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU)
           echo $PACKAGES; sudo apt-get install -y $PACKAGES
