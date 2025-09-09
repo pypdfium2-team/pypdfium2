@@ -13,6 +13,9 @@ on:
       py_version:
         type: string
         default: '3.12'
+      may_vendor:
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs:
       os:
@@ -24,6 +27,9 @@ on:
       py_version:
         type: string
         default: '3.12'
+      may_vendor:
+        type: boolean
+        default: true
 
 defaults:
   run:
@@ -69,9 +75,13 @@ jobs:
         if: ${{ inputs.build_mode == 'syslibs' }}
         run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py --use-syslibs
       
+      # TODO unify...
+      
       - name: Build PDFium (native, gcc)
         if: ${{ inputs.build_mode == 'native-gcc' }}
-        run: python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc --test
+        run: python3 ./setupsrc/pypdfium2_setup/build_native.py --test $VENDOR_PARAM --compiler gcc
+        env:
+          VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
       
       - name: Build PDFium (native, clang)
         if: ${{ inputs.build_mode == 'native-clang' }}
@@ -81,7 +91,9 @@ jobs:
           sudo apt-get install -y llvm lld
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
-          python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler clang --test
+          python3 ./setupsrc/pypdfium2_setup/build_native.py --test $VENDOR_PARAM --compiler clang
+        env:
+          VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
       
       - name: Show binary info
         run: file ./data/sourcebuild/*.{so,dylib,dll}
