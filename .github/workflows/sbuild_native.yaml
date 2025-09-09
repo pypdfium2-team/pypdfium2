@@ -32,7 +32,7 @@ jobs:
   
   macos_x64:
     if: ${{ inputs.macos }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-13  # Intel host
       is_cross: false
@@ -41,7 +41,7 @@ jobs:
   
   macos_arm64:
     if: ${{ inputs.macos }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-13  # Intel host
       params: '--target-cpu arm64'
@@ -52,7 +52,7 @@ jobs:
   
   linux_x64_tc_syslibs:
     if: ${{ inputs.linux_tc_syslibs }}
-    uses: ./.github/workflows/sbuild-one-native.yaml
+    uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-latest
       build_mode: syslibs  # build_toolchained.py --use-syslibs
@@ -60,7 +60,7 @@ jobs:
   
   linux_x64_native_gcc:
     if: ${{ inputs.linux_native_gcc }}
-    uses: ./.github/workflows/sbuild-one-native.yaml
+    uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-latest
       build_mode: native-gcc
@@ -68,7 +68,7 @@ jobs:
   
   linux_arm64_native_gcc:
     if: ${{ inputs.linux_native_gcc }}
-    uses: ./.github/workflows/sbuild-one-native.yaml
+    uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-24.04-arm
       build_mode: native-gcc
@@ -76,7 +76,7 @@ jobs:
   
   linux_x64_native_clang:
     if: ${{ inputs.linux_native_clang }}
-    uses: ./.github/workflows/sbuild-one-native.yaml
+    uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-latest
       build_mode: native-clang
@@ -84,7 +84,7 @@ jobs:
   
   linux_arm64_native_clang:
     if: ${{ inputs.linux_native_clang }}
-    uses: ./.github/workflows/sbuild-one-native.yaml
+    uses: ./.github/workflows/sbuild_one_native.yaml
     with:
       os: ubuntu-24.04-arm
       build_mode: native-clang

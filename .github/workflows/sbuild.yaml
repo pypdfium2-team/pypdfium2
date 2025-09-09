@@ -26,7 +26,7 @@ jobs:
   
   linux_x64:
     if: ${{ inputs.linux }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
       cross_tag: ${{ inputs.glibc_tag }}_x86_64
@@ -36,7 +36,7 @@ jobs:
   
   linux_x86:
     if: ${{ inputs.linux }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
       params: '--target-cpu x86'
@@ -48,7 +48,7 @@ jobs:
   
   linux_arm64:
     if: ${{ inputs.linux }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
       params: '--target-cpu arm64'
@@ -60,7 +60,7 @@ jobs:
   
   linux_armv7l:
     if: ${{ inputs.linux }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
       params: '--target-cpu arm'
@@ -72,7 +72,7 @@ jobs:
     
   macos_x64:
     if: ${{ inputs.macos }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-latest  # arm64 host
       params: '--target-cpu x64'
@@ -83,7 +83,7 @@ jobs:
   
   macos_arm64:
     if: ${{ inputs.macos }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-latest
       cross_tag: macosx_11_0_arm64
@@ -93,7 +93,7 @@ jobs:
   
   windows_x64:
     if: ${{ inputs.windows }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: windows-latest
       is_cross: false
@@ -102,7 +102,7 @@ jobs:
   
   windows_arm64:
     if: ${{ inputs.windows }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: windows-latest
       params: '--target-cpu arm64'
@@ -113,7 +113,7 @@ jobs:
   
   windows_x86:
     if: ${{ inputs.windows }}
-    uses: ./.github/workflows/sbuild-one.yaml
+    uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: windows-latest
       params: '--target-cpu x86'
