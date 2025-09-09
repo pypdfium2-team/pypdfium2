@@ -84,6 +84,7 @@ jobs:
           CROSS_TAG: ${{ inputs.tag }}  # optional
       
       - name: Run auditwheel (informational)
+        if: ${{ startsWith(inputs.os, 'ubuntu') }}
         run: python3 -m auditwheel show dist/*.whl
       
       - name: Upload wheel as artifact

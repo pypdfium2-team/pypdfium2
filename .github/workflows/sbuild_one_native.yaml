@@ -103,6 +103,8 @@ jobs:
         env:
           PDFIUM_PLATFORM: sourcebuild
       
+      # Assuming we are on Linux
+      
       - name: Post-process with auditwheel
         run: python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
       
