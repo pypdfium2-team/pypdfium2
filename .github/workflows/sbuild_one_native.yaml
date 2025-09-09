@@ -9,18 +9,11 @@ on:
       os:
         type: string
       build_mode:
-        type: choice
+        type: string
         default: native
-        options:
-          - native
-          - tc-syslibs
       compiler:
-        type: choice
+        type: string
         default: gcc
-        options:
-          - gcc
-          - clang
-          - ''
       py_version:
         type: string
         default: '3.12'
