@@ -51,7 +51,9 @@ jobs:
           # fetch-depth: 0  # for git describe
       
       - name: Install python deps
-        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
+        run: |
+          python3 -m pip install -U -r req/setup.txt -r req/test.txt
+          python3 -m pip install -U auditwheel
       
       - name: Install deps for native/syslibs build
         if: ${{ startsWith(inputs.build_mode, 'native') || inputs.build_mode == 'syslibs' }}
@@ -81,24 +83,24 @@ jobs:
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
           python3 ./setupsrc/pypdfium2_setup/build_native.py --compiler clang --test
       
-      # This wheel is specific to the distribution it was built on, but doesn't harm to upload it for inspection.
-      
       - name: Show binary info
         run: file ./data/sourcebuild/*.{so,dylib,dll}
       
-      - name: Build wheel
-        run: python3 -m build -wxn
+      - name: Build and post-process wheel
+        run: |
+          python3 -m build -wxn
+          python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
         env:
           PDFIUM_PLATFORM: sourcebuild
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./dist/*.whl
+          path: ./wheelhouse/*.whl
           name: ${{ inputs.artifact_name }}
       
       - name: Install and test wheel
         run: |
-          python3 -m pip install ./dist/*.whl
+          python3 -m pip install ./wheelhouse/*.whl
           pypdfium2 -v
           just test
