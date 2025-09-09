@@ -169,10 +169,12 @@ def main(
     if use_syslibs:
         config_dict.update(SyslibsConfig)
     
+    # TODO compare target_cpu against host to determine whether it's actually cross
+    # this is a bit difficult currently as we don't have a direct mapping between google and python-style CPU names
     is_cross = False
     if target_cpu:
         config_dict["target_cpu"] = target_cpu
-        is_cross = True  # assumably
+        is_cross = True  # assumed
         if Host.system == SysNames.linux:
             run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", target_cpu], cwd=PDFiumDir)
     
