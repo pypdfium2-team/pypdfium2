@@ -31,7 +31,7 @@ jobs:
     with:
       os: ubuntu-latest
       build_mode: tc-syslibs
-      compiler: ''
+      compiler: clang  # ignored
       py_version: ${{ inputs.py_version }}
   
   linux_x64_native_gcc:
