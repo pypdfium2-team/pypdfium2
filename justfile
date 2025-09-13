@@ -49,4 +49,5 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-packaging-pypi: clean check update-verify craft distcheck
+# XXX using update (rather than update-verify) for now until the attestations story is figured out
+packaging-pypi: clean check update craft distcheck
