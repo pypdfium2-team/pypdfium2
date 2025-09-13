@@ -103,7 +103,9 @@ jobs:
         run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py --use-syslibs
       
       - name: Show binary info
-        run: file ./data/sourcebuild/*.{so,dylib,dll}
+        run: |
+          shopt -s nullglob
+          file ./data/sourcebuild/*.{so,dylib,dll}
       
       - name: Build wheel
         run: python3 -m build -wxn
