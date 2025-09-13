@@ -71,20 +71,29 @@ def dl_depottools(do_update):
     return is_update
 
 
-def dl_pdfium(GClient, do_update, revision):
+def dl_pdfium(GClient, do_update, revision, target_os):
     
     had_pdfium = PDFiumDir.exists()
-    if not had_pdfium:
-        log("PDFium: Download ...")
+    if not had_pdfium or target_os:
+        log("PDFium: Conifgure checkout ...")
         do_update = True
-        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", "--unmanaged", PdfiumURL], cwd=SBDir)
+        extra_vars = []
+        if target_os == "android":
+            # PDFium DEPS file says:
+            # > By default, don't check out android. Will be overridden by gclient variables.
+            # > TODO(crbug.com/875037): Remove this once the bug in gclient is fixed.
+            extra_vars += ["--custom-var", "checkout_android=True"]
+        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if do_update:
+        log("PDFium: Download ...")
         args = [GClient, "sync"]
         if had_pdfium:
             args += ["-D", "--reset"]
         args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
         run_cmd(args, cwd=SBDir)
+        if target_os == "android":
+            run_cmd(["gclient", "runhooks"], cwd=PDFiumDir)
     
     return do_update
 
@@ -131,6 +140,7 @@ def main(
         use_syslibs  = False,
         win_sdk_dir  = None,
         target_cpu   = None,
+        target_os    = None,
     ):
     
     # NOTE defaults handled internally to avoid duplication with parse_args()
@@ -155,7 +165,7 @@ def main(
     GN      = get_tool("gn")
     Ninja   = get_tool("ninja")
     
-    did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev)
+    did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev, target_os)
     
     if did_pdfium_sync:
         patch_pdfium(build_ver)
@@ -175,8 +185,10 @@ def main(
     if target_cpu:
         config_dict["target_cpu"] = target_cpu
         is_cross = True  # assumed
-        if Host.system == SysNames.linux:
+        if is_cross and Host.system == SysNames.linux and not target_os:
             run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", target_cpu], cwd=PDFiumDir)
+    if target_os:
+        config_dict["target_os"] = target_os
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
@@ -217,7 +229,11 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--target-cpu",
-        help = "The CPU architecture to target. This sets the corresponding GN config var. Platform specific pre-requisites may apply, such as GCC multilib on Linux.",
+        help = "The target CPU architecture. This sets the corresponding GN config var. Platform specific pre-requisites may apply, such as GCC multilib on Linux.",
+    )
+    parser.add_argument(
+        "--target-os",
+        help = "The target operating system, similar to --target-cpu. This is intended for compiling the mobile platforms (e.g. Android) from a desktop device."
     )
     return parser.parse_args(argv)
 
