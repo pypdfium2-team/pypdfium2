@@ -75,7 +75,7 @@ def dl_pdfium(GClient, do_update, revision, target_os):
     
     had_pdfium = PDFiumDir.exists()
     if not had_pdfium or target_os:
-        log("PDFium: Conifgure checkout ...")
+        log("PDFium: configure ...")
         do_update = True
         extra_vars = []
         if target_os == "android":
@@ -86,15 +86,15 @@ def dl_pdfium(GClient, do_update, revision, target_os):
         run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if do_update:
-        log("PDFium: Download ...")
+        log("PDFium: download/sync ...")
         args = [GClient, "sync"]
         if had_pdfium:
             args += ["-D", "--reset"]
         args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
         run_cmd(args, cwd=SBDir)
-        # XXX not sure if this is actually necessary
-        if target_os == "android":
-            run_cmd(["gclient", "runhooks"], cwd=PDFiumDir)
+        # # XXX not sure if this is actually necessary
+        # if target_os == "android":
+        #     run_cmd(["gclient", "runhooks"], cwd=PDFiumDir)
     
     return do_update
 
