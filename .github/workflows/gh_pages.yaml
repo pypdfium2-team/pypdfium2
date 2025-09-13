@@ -35,11 +35,6 @@ jobs:
       
       - uses: extractions/setup-just@v3
       
-      # AOTW, the slsa-verifier GH action does not support anything but Ubuntu x86_64.
-      # If you want to use another runner, comment this out.
-      - name: slsa-verifier
-        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.1
-      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

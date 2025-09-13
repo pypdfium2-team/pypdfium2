@@ -116,6 +116,7 @@ def do_extract(archives, version, flags):
 MIN_PDFIUM_VER_FOR_VERIFY = 7228
 
 def do_verify(archives, version):
+    # TODO switch to `gh attestation`
     if version < MIN_PDFIUM_VER_FOR_VERIFY:
         raise SystemExit(f"--verify was passed, but the requested version is below {MIN_PDFIUM_VER_FOR_VERIFY} - no provenance available.")
     ProvenanceFile = DataDir/f"pdfium-binaries-{version}.intoto.jsonl"
