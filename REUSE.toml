@@ -104,6 +104,7 @@ path = [
     "pdfium_patches/win/use_resources_rc.patch",
     "pdfium_patches/win/build.patch",
     "pdfium_patches/win/resources.rc",
+    "pdfium_patches/android_crossbuild.patch"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
