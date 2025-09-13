@@ -236,7 +236,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--target-os",
-        help = "The target operating system, similar to --target-cpu. This is intended for compiling the mobile platforms (e.g. Android) from a desktop device."
+        help = "The target operating system, similar to --target-cpu. This is intended for compiling the mobile platforms (e.g. Android) from a desktop device. Note, this script has some issues with rebuilds - you may need to pass --update so that new patches can be applied."
     )
     return parser.parse_args(argv)
 
