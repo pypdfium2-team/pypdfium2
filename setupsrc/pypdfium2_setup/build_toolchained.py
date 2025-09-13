@@ -74,7 +74,7 @@ def dl_depottools(do_update):
 def dl_pdfium(GClient, do_update, revision, target_os):
     
     had_pdfium = PDFiumDir.exists()
-    if not had_pdfium or target_os:
+    if not had_pdfium or (target_os and do_update):
         log("PDFium: configure ...")
         do_update = True
         extra_vars = []
