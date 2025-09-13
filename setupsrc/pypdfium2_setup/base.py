@@ -170,10 +170,10 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-_LIB_PREFIX = "" if sys.platform.startswith("win32") else "lib"
-
-def libname_for_system(system, name="pdfium", prefix=_LIB_PREFIX):
+def libname_for_system(system, name="pdfium", prefix=None):
     # Map system to pdfium shared library name
+    if prefix is None:
+        prefix = "" if system == SysNames.windows else "lib"
     if system == SysNames.windows:
         return f"{prefix}{name}.dll"
     elif system in (SysNames.darwin, SysNames.ios):
