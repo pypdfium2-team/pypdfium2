@@ -78,8 +78,8 @@ jobs:
       os: ubuntu-24.04  # XXX
       cibw_target: manylinux_ppc64le
       cibw_arch: ppc64le
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_s390x:
     if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
@@ -88,8 +88,8 @@ jobs:
       os: ubuntu-24.04  # XXX
       cibw_target: manylinux_s390x
       cibw_arch: s390x
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_ppc64le:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
@@ -98,8 +98,8 @@ jobs:
       os: ubuntu-24.04  # XXX
       cibw_target: musllinux_ppc64le
       cibw_arch: ppc64le
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_s390x:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
@@ -108,8 +108,8 @@ jobs:
       os: ubuntu-24.04  # XXX
       cibw_target: musllinux_s390x
       cibw_arch: s390x
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   # pdfium-binaries don't currently build armv7l for musl
   musllinux_armv7l:
@@ -119,8 +119,8 @@ jobs:
       os: ubuntu-24.04
       cibw_target: musllinux_armv7l
       cibw_arch: armv7l
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_riscv64:
     if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
@@ -129,8 +129,8 @@ jobs:
       os: ubuntu-24.04
       cibw_target: manylinux_riscv64
       cibw_arch: riscv64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_loongarch64:
     if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
@@ -139,8 +139,8 @@ jobs:
       os: ubuntu-24.04
       cibw_target: manylinux_loongarch64
       cibw_arch: loongarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_riscv64:
     if: ${{ inputs.linux_emulated && inputs.linux_musl }}
@@ -149,8 +149,8 @@ jobs:
       os: ubuntu-24.04
       cibw_target: musllinux_riscv64
       cibw_arch: riscv64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_loongarch64:
     if: ${{ inputs.linux_emulated && inputs.linux_musl }}
@@ -159,8 +159,8 @@ jobs:
       os: ubuntu-24.04
       cibw_target: musllinux_loongarch64
       cibw_arch: loongarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   macos_x64:
     if: ${{ inputs.macos }}

@@ -12,12 +12,12 @@ on:
         type: string
       cibw_arch:
         type: string
-      cibw_py_ver:
-        default: 'cp310'
-        type: string
       emulated:
         type: boolean
         default: false
+      cibw_py_ver:
+        default: 'cp310'
+        type: string
   workflow_dispatch:
     inputs:
       os:
@@ -29,12 +29,12 @@ on:
       cibw_arch:
         type: string
         default: x86_64
-      cibw_py_ver:
-        default: 'cp310'
-        type: string
       emulated:
         type: boolean
         default: false
+      cibw_py_ver:
+        default: 'cp310'
+        type: string
 
 jobs:
   
