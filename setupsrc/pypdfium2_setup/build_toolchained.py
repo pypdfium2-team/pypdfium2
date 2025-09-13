@@ -189,6 +189,8 @@ def main(
             run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", target_cpu], cwd=PDFiumDir)
     if target_os:
         config_dict["target_os"] = target_os
+        if target_os == "android":
+            config_dict["default_min_sdk_version"] = 21
     
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
