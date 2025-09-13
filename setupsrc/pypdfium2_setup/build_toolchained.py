@@ -92,6 +92,7 @@ def dl_pdfium(GClient, do_update, revision, target_os):
             args += ["-D", "--reset"]
         args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
         run_cmd(args, cwd=SBDir)
+        # XXX not sure if this is actually necessary
         if target_os == "android":
             run_cmd(["gclient", "runhooks"], cwd=PDFiumDir)
     
