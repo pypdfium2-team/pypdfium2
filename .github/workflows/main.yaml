@@ -5,9 +5,6 @@ name: Main packaging
 on:
   workflow_dispatch:
     inputs:
-      pre_test:
-        default: false
-        type: boolean
       test:
         default: true
         type: boolean
@@ -30,17 +27,6 @@ defaults:
 
 jobs:
   
-  # TODO sync patches & third-party licenses with pdfium-binaries on before release?
-  # TODO(201): schedule test_setup and test_sourcebuild separately
-  
-  test_setup:
-    if: ${{ inputs.pre_test }}
-    uses: ./.github/workflows/test_setup.yaml
-  
-  test_sourcebuild:
-    if: ${{ inputs.pre_test }}
-    uses: ./.github/workflows/test_sourcebuild.yaml
-  
   build:
     runs-on: ${{ inputs.runner }}
     outputs:
@@ -49,11 +35,6 @@ jobs:
     steps:
       
       - uses: extractions/setup-just@v3
-      
-      # AOTW, the slsa-verifier GH action does not support anything but Ubuntu x86_64.
-      # However, for this workflow, it is essential. We don't plan to change the build runner anyway.
-      - name: slsa-verifier
-        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.1
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -65,6 +46,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in "Get new version" step
+          persist-credentials: true  # needed for push
       
       - name: Install/update dependencies
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/utilities.txt
@@ -156,6 +138,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: autorelease_tmp
+          persist-credentials: false
       
       - name: Download packages
         uses: actions/download-artifact@v5
@@ -185,7 +168,7 @@ jobs:
   
   publish:
     
-    needs: [test_setup, test_sourcebuild, build, test]
+    needs: [build, test]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
     
@@ -202,6 +185,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0
+          persist-credentials: true  # needed for push
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -300,6 +284,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: ${{ github.repository }}
+          persist-credentials: true  # needed for push
     
       - name: Remove temporary branch
         run: git push origin --delete autorelease_tmp

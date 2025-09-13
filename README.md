@@ -252,7 +252,7 @@ Sourcebuild can be run through cibuildwheel. For targets configured in our [`pyp
 ```bash
 CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
 ```
-See also our [cibuildwheel](.github/workflows/cibw.yaml) [workflow](.github/workflows/cibw-one.yaml).
+See also our [cibuildwheel](.github/workflows/cibw.yaml) [workflow](.github/workflows/cibw_one.yaml).
 For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
 
 On Linux, this will use the native sourcebuild, and pull in dependencies from the container via `auditwheel repair`.

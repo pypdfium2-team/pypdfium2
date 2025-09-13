@@ -76,6 +76,7 @@ before-all = [
     "curl -L 'https://github.com/loong64/gn/releases/download/2024.12/gn-linux-loong64.tar.gz' | tar xz -C /usr/local/bin",
 ]
 
+# We're in luck, Google actually serves GN binaries for riscv64
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_riscv64"
 inherit.before-all = "append"
@@ -106,3 +107,5 @@ environment.BUILD_PARAMS = "--target-cpu arm64"
 select = "*-win32"
 inherit.environment = "append"
 environment.BUILD_PARAMS = "--target-cpu x86"
+
+# TODO android

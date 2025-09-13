@@ -6,8 +6,11 @@ on:
   workflow_dispatch:
     inputs:
       index_url:
+        type: choice
         default: 'https://pypi.org/simple'
-        type: string
+        options:
+          - 'https://pypi.org/simple'
+          - 'https://test.pypi.org/simple'
 
 defaults:
   run:
@@ -55,6 +58,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ steps.version.outputs.version }}
+          persist-credentials: false
       
       - name: Install/update deps
         run: python3 -m pip install -U -r req/converters.txt -r req/test.txt

@@ -170,10 +170,10 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 
-_LIB_PREFIX = "" if sys.platform.startswith("win32") else "lib"
-
-def libname_for_system(system, name="pdfium", prefix=_LIB_PREFIX):
+def libname_for_system(system, name="pdfium", prefix=None):
     # Map system to pdfium shared library name
+    if prefix is None:
+        prefix = "" if system == SysNames.windows else "lib"
     if system == SysNames.windows:
         return f"{prefix}{name}.dll"
     elif system in (SysNames.darwin, SysNames.ios):
@@ -590,11 +590,11 @@ def get_wheel_tag(pl_name):
         return _manylinux_tag("armv7l")
     
     elif pl_name == PlatNames.linux_musl_x64:
-        return "musllinux_1_1_x86_64"
+        return "musllinux_1_2_x86_64"
     elif pl_name == PlatNames.linux_musl_x86:
-        return "musllinux_1_1_i686"
+        return "musllinux_1_2_i686"
     elif pl_name == PlatNames.linux_musl_arm64:
-        return "musllinux_1_1_aarch64"
+        return "musllinux_1_2_aarch64"
     
     # Android - see PEP 738 # Packaging
     # We don't currently publish wheels for Android, but handle it in case we want to in the future (or if callers want to build their own wheels)

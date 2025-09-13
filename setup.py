@@ -18,7 +18,8 @@ from pypdfium2_setup.base import *
 from pypdfium2_setup.emplace import prepare_setup
 
 
-# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels. This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
+# Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels.
+# This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
 
 class BinaryDistribution (setuptools.Distribution):
     
@@ -37,7 +38,7 @@ def bdist_factory(pl_name):
         
         def get_tag(self, *args, **kws):
             if pl_name == ExtPlats.sourcebuild:
-                # In case of cross-compilation, the caller needs to set the tag.
+                # In case of cross-compilation (or even just proper packaging), the caller needs to set the tag.
                 plat_tag = os.environ.get("CROSS_TAG")
                 # Otherwise, forward the host's tag as given by bdist_wheel.
                 # Alternatively, the sourcebuild clause in base.py::get_wheel_tag() should be roughly equivalent.

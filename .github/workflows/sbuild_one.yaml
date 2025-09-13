@@ -1,0 +1,101 @@
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Sourcebuild One
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        type: string
+      py_version:
+        type: string
+      target_cpu:
+        type: string
+        default: ''
+      tag:
+        type: string
+        default: ''
+  workflow_dispatch:
+    inputs:
+      os:
+        type: string
+        default: ubuntu-latest
+      py_version:
+        type: string
+        default: '3.12'
+      target_cpu:
+        type: string
+        default: ''
+      tag:
+        type: string
+        default: ''
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  
+  build:
+    runs-on: ${{ inputs.os }}
+    
+    steps:
+      
+      - uses: extractions/setup-just@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.py_version }}
+      
+      - name: Check out pypdfium2 repository
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository }}
+          persist-credentials: false
+          fetch-depth: 0  # for git describe
+      
+      - name: Install Python deps
+        run: |
+          python3 -m pip install -U -r req/setup.txt -r req/test.txt
+          python3 -m pip install -U auditwheel
+      
+      - name: Install Linux cross deps
+        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
+        run: |
+          PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU)
+          echo $PACKAGES; sudo apt-get install -y $PACKAGES
+        env:
+          TARGET_CPU: ${{ inputs.target_cpu }}
+      
+      - name: Build PDFium (toolchained)
+        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py $CPU_PARAM
+        env:
+          CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
+      
+      - name: Show binary info
+        run: file ./data/sourcebuild/*.{so,dylib,dll}
+      
+      - name: Build wheel
+        run: python3 -m build -wxn
+        env:
+          PDFIUM_PLATFORM: sourcebuild
+          CROSS_TAG: ${{ inputs.tag }}  # optional
+      
+      - name: Run auditwheel (informational)
+        if: ${{ startsWith(inputs.os, 'ubuntu') }}
+        run: python3 -m auditwheel show dist/*.whl
+      
+      - name: Upload wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./dist/*.whl
+          name: sbuild_${{ inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
+      
+      - name: Install and test wheel
+        if: ${{ !inputs.target_cpu }}
+        run: |
+          python3 -m pip install ./dist/*.whl
+          pypdfium2 -v
+          just test

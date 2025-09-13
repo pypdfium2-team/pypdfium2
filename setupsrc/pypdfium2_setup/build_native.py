@@ -172,7 +172,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, reset, v
             is_regex=True, exp_count=1,
         )
         # bundle dependencies (e.g. abseil) into the pdfium DLL
-        # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
         autopatch(
             PDFIUM_DIR/"BUILD.gn",
             'component("pdfium")',

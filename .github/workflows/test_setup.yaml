@@ -31,11 +31,6 @@ jobs:
     
     steps:
       
-      # AOTW, the slsa-verifier GH action does not support anything but Ubuntu x86_64.
-      - name: slsa-verifier
-        if: ${{ startsWith(matrix.os, 'ubuntu') && !endsWith(matrix.os, '-arm') }}
-        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.1
-      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -46,6 +41,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in "Build docs" step
+          persist-credentials: false
       
       # TODO(consider) run test suite after each way of installing?
       

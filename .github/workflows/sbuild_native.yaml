@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Sourcebuild Native
+
+on:
+  workflow_dispatch:
+    inputs:
+      linux_native_gcc:
+        type: boolean
+        default: true
+      linux_native_clang:
+        type: boolean
+        default: true
+      linux_tc_syslibs:
+        type: boolean
+        default: true
+      py_version:
+        type: string
+        default: '3.12'
+
+# TODO
+# - Windows/macOS native?
+# - Linux/Windows ARM64 toolchained (not supported upstream yet)
+
+jobs:
+  
+  linux_x64_native_gcc:
+    if: ${{ inputs.linux_native_gcc }}
+    uses: ./.github/workflows/sbuild_one_native.yaml
+    with:
+      os: ubuntu-latest
+      compiler: gcc
+      py_version: ${{ inputs.py_version }}
+  
+  linux_arm64_native_gcc:
+    if: ${{ inputs.linux_native_gcc }}
+    uses: ./.github/workflows/sbuild_one_native.yaml
+    with:
+      os: ubuntu-24.04-arm
+      compiler: gcc
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_native_clang:
+    if: ${{ inputs.linux_native_clang }}
+    uses: ./.github/workflows/sbuild_one_native.yaml
+    with:
+      os: ubuntu-latest
+      compiler: clang
+      py_version: ${{ inputs.py_version }}
+  
+  linux_arm64_native_clang:
+    if: ${{ inputs.linux_native_clang }}
+    uses: ./.github/workflows/sbuild_one_native.yaml
+    with:
+      os: ubuntu-24.04-arm
+      compiler: clang
+      py_version: ${{ inputs.py_version }}
+  
+  linux_x64_tc_syslibs:
+    if: ${{ inputs.linux_tc_syslibs }}
+    uses: ./.github/workflows/sbuild_one_native.yaml
+    with:
+      os: ubuntu-latest
+      build_mode: tc-syslibs
+      compiler: clang  # ignored
+      py_version: ${{ inputs.py_version }}

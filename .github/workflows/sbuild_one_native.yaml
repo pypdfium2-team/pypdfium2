@@ -1,0 +1,128 @@
+# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Sourcebuild One Native
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        type: string
+      build_mode:
+        type: string
+        default: native
+      compiler:
+        type: string
+        default: gcc
+      py_version:
+        type: string
+        default: '3.12'
+      may_vendor:
+        type: boolean
+        default: true
+  workflow_dispatch:
+    inputs:
+      os:
+        type: string
+        default: ubuntu-latest
+      build_mode:
+        type: choice
+        default: native
+        options:
+          - native
+          - tc-syslibs
+      compiler:
+        type: choice
+        default: gcc
+        options:
+          - gcc
+          - clang
+      py_version:
+        type: string
+        default: '3.12'
+      may_vendor:
+        type: boolean
+        default: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  
+  build:
+    runs-on: ${{ inputs.os }}
+    
+    steps:
+      
+      - uses: extractions/setup-just@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.py_version }}
+      
+      - name: Check out pypdfium2 repository
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository }}
+          persist-credentials: false
+          fetch-depth: 0  # for git describe
+      
+      - name: Install python deps
+        run: |
+          python3 -m pip install -U -r req/setup.txt -r req/test.txt
+          python3 -m pip install -U auditwheel
+      
+      - name: Install common build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
+      
+      - name: Install deps for native build
+        if: ${{ inputs.build_mode == 'native' }}
+        run: sudo apt-get install -y generate-ninja ninja-build libglib2.0-dev
+      
+      - name: Set up symlinks for clang
+        if: ${{ inputs.build_mode == 'native' && inputs.compiler == 'clang' }}
+        run: |
+          sudo apt-get install -y llvm lld
+          VERSION=18 ARCH=$(uname -m)
+          sudo ln -s /usr/lib/clang/$VERSION/lib/linux /usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu
+          sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
+      
+      - name: Build PDFium (native, ${{ inputs.compiler }})
+        if: ${{ inputs.build_mode == 'native' }}
+        run: python3 ./setupsrc/pypdfium2_setup/build_native.py --test --compiler "$COMPILER" $VENDOR_PARAM
+        env:
+          COMPILER: ${{ inputs.compiler }}
+          VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
+      
+      - name: Build PDFium (toolchained, with syslibs)
+        if: ${{ inputs.build_mode == 'tc-syslibs' }}
+        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py --use-syslibs
+      
+      - name: Show binary info
+        run: |
+          shopt -s nullglob
+          file ./data/sourcebuild/*.{so,dylib,dll}
+      
+      - name: Build wheel
+        run: python3 -m build -wxn
+        env:
+          PDFIUM_PLATFORM: sourcebuild
+      
+      - name: Post-process with auditwheel
+        run: python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
+      
+      - name: Upload wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./wheelhouse/*.whl
+          name: sbuild-${{ inputs.build_mode }}-${{ inputs.compiler }}_${{ inputs.os }}
+      
+      - name: Install and test wheel
+        run: |
+          python3 -m pip install ./wheelhouse/*.whl
+          pypdfium2 -v
+          just test

@@ -12,12 +12,12 @@ on:
         type: string
       cibw_arch:
         type: string
-      cibw_py_ver:
-        default: 'cp310'
-        type: string
       emulated:
         type: boolean
         default: false
+      cibw_py_ver:
+        default: 'cp310'
+        type: string
   workflow_dispatch:
     inputs:
       os:
@@ -29,12 +29,12 @@ on:
       cibw_arch:
         type: string
         default: x86_64
-      cibw_py_ver:
-        default: 'cp310'
-        type: string
       emulated:
         type: boolean
         default: false
+      cibw_py_ver:
+        default: 'cp310'
+        type: string
 
 jobs:
   
@@ -48,6 +48,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          persist-credentials: false
       
       - name: Set up QEMU
         if: ${{ inputs.emulated }}
@@ -57,7 +58,8 @@ jobs:
       - name: Build wheels
         uses: pypdfium2-team/cibuildwheel@v3.1.4
         env:
-          # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time. Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
+          # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time.
+          # Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
           CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ inputs.cibw_target }}"
           CIBW_ARCHS: ${{ inputs.cibw_arch }}
         with:

@@ -37,7 +37,7 @@ jobs:
   
   linux_x64:
     if: ${{ inputs.linux_main && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04
       cibw_target: manylinux_x86_64
@@ -46,7 +46,7 @@ jobs:
   
   linux_arm64:
     if: ${{ inputs.linux_main && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04-arm
       cibw_target: manylinux_aarch64
@@ -55,7 +55,7 @@ jobs:
   
   musllinux_x64:
     if: ${{ inputs.linux_main && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04
       cibw_target: musllinux_x86_64
@@ -64,7 +64,7 @@ jobs:
   
   musllinux_arm64:
     if: ${{ inputs.linux_main && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04-arm
       cibw_target: musllinux_aarch64
@@ -73,98 +73,98 @@ jobs:
   
   linux_ppc64le:
     if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04  # XXX
       cibw_target: manylinux_ppc64le
       cibw_arch: ppc64le
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_s390x:
     if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04  # XXX
       cibw_target: manylinux_s390x
       cibw_arch: s390x
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_ppc64le:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04  # XXX
       cibw_target: musllinux_ppc64le
       cibw_arch: ppc64le
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_s390x:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04  # XXX
       cibw_target: musllinux_s390x
       cibw_arch: s390x
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   # pdfium-binaries don't currently build armv7l for musl
   musllinux_armv7l:
     if: ${{ inputs.linux_emulated && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04
       cibw_target: musllinux_armv7l
       cibw_arch: armv7l
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_riscv64:
     if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04
       cibw_target: manylinux_riscv64
       cibw_arch: riscv64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_loongarch64:
     if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04
       cibw_target: manylinux_loongarch64
       cibw_arch: loongarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_riscv64:
     if: ${{ inputs.linux_emulated && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04
       cibw_target: musllinux_riscv64
       cibw_arch: riscv64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_loongarch64:
     if: ${{ inputs.linux_emulated && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04
       cibw_target: musllinux_loongarch64
       cibw_arch: loongarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   macos_x64:
     if: ${{ inputs.macos }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: macos-13
       cibw_target: macosx_x86_64
@@ -174,7 +174,7 @@ jobs:
   # The toolchain supports macOS arm64 natively
   macos_arm64:
     if: ${{ inputs.macos }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: macos-latest
       cibw_target: macosx_arm64
@@ -183,7 +183,7 @@ jobs:
   
   windows_x64:
     if: ${{ inputs.windows }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: windows-latest
       cibw_target: win_amd64
@@ -195,7 +195,7 @@ jobs:
   # Note: build system probably ignores cibuildwheel's cross-compilation env vars, so setting target_cpu in GN config (through pyproject.toml) is key here.
   windows_arm64:
     if: ${{ inputs.windows }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: windows-latest
       cibw_target: win_arm64
@@ -205,7 +205,7 @@ jobs:
   # Attempt the same for Windows 32-bit
   windows_32:
     if: ${{ inputs.windows }}
-    uses: ./.github/workflows/cibw-one.yaml
+    uses: ./.github/workflows/cibw_one.yaml
     with:
       os: windows-latest
       cibw_target: win32
