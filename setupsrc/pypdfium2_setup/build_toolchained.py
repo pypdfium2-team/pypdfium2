@@ -106,7 +106,7 @@ def _create_resources_rc(build_ver):
     content = content.replace("$VERSION", str(build_ver))
     output_path.write_text(content)
 
-def patch_pdfium(build_ver):
+def patch_pdfium(build_ver, target_os):
     # TODO
     # - use autopatch from build_native?
     # - in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
@@ -116,6 +116,9 @@ def patch_pdfium(build_ver):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
         _create_resources_rc(build_ver)
+    if target_os == "android":
+        # without this patch, we end up with a tiny binary that has no symbols
+        git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir/"build")
 
 
 def get_tool(name):
@@ -168,7 +171,7 @@ def main(
     did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev, target_os)
     
     if did_pdfium_sync:
-        patch_pdfium(build_ver)
+        patch_pdfium(build_ver, target_os)
     if use_syslibs:
         assert not IGNORE_FULLVER
         get_shimheaders_tool(PDFiumDir, rev=chromium_rev)
