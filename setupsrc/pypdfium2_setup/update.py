@@ -151,8 +151,8 @@ def main(platforms, version, robust=False, max_workers=None, use_v8=False, verif
     
     if not platforms:
         platforms = WheelPlatforms
-    if verify is None:
-        verify = bool(shutil.which("slsa-verifier")) and version >= MIN_PDFIUM_VER_FOR_VERIFY
+    # if verify is None:
+    #     verify = bool(shutil.which("slsa-verifier")) and version >= MIN_PDFIUM_VER_FOR_VERIFY
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     
