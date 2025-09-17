@@ -29,6 +29,12 @@ jobs:
     
     runs-on: ${{ matrix.os }}
     
+    env:
+      # `gh attestation verify` insists on seeing a token :(
+      GH_TOKEN: ${{ github.token }}
+    
+    permissions: {}
+    
     steps:
       
       - name: Set up Python

@@ -14,13 +14,6 @@ on:
   #     - src/**
   #     - README.md
 
-# Set permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  actions: read
-  contents: read
-  pages: write
-  id-token: write
-
 # Allow one concurrent deployment
 concurrency:
   group: "pages"
@@ -50,7 +43,10 @@ jobs:
       - name: Install deps & pypdfium2
         run: |
           python3 -m pip install -r req/docs.txt
-          python3 -m pip install .
+          python3 -m pip install -v .
+        env:
+          # `gh attestation verify` insists on seeing a token :(
+          GH_TOKEN: ${{ github.token }}
       
       - name: Build documentation
         run: just docs-build
@@ -69,6 +65,13 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
+    
+    # Set permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    permissions:
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
     
     environment:
       name: github-pages

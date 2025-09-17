@@ -53,7 +53,7 @@ _Note, unlike helpers, pypdfium2's setup is not bound by API stability promises,
 *System*
 + C pre-processor (`gcc`/`clang` – alternatively, specify the command to invoke via `$CPP`)
 + `git` (Used e.g. to determine the latest pdfium-binaries version, to get `git describe` info, or to check out pdfium on sourcebuild. *Might* be optional on default setup.)
-+ [`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier) (if using pdfium-binaries; optional)
++ [`gh`](https://github.com/cli/cli/) (optional; used to verify pdfium-binaries build attestations)
 
 *Python*
 + [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen)
@@ -82,7 +82,7 @@ python -m pip install -v .
 
 This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be downloaded from `pdfium-binaries` and bundled into pypdfium2, and ctypesgen will be called on pdfium headers to produce the bindings interface.
 
-`pdfium-binaries` offer SLSA provenance to verify authenticity, so it is highly recommended that you install the `slsa-verifier` in this case.
+`pdfium-binaries` offer GitHub build provenance attestations, so it is highly recommended that you install the `gh` CLI for our setup to verify authenticity of the binaries.
 
 If no pre-built binaries are available for your platform, setup will [look for system pdfium](#with-system-pdfium), or attempt to [build pdfium from source](#with-self-built-pdfium).
 

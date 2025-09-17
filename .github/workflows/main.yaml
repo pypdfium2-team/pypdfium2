@@ -67,13 +67,18 @@ jobs:
         run: echo "new_version=$(git describe --abbrev=0)" >> $GITHUB_OUTPUT
       
       - name: Install pypdfium2
-        run: python3 -m pip install --no-build-isolation -e .
+        run: python3 -m pip install -v --no-build-isolation -e .
+        env:
+          GH_TOKEN: ${{ github.token }}
       
       - name: Run test suite
         run: just test
       
       - name: Run PyPI packaging script
         run: just packaging-pypi
+        env:
+          # `gh attestation verify` insists on seeing a token :(
+          GH_TOKEN: ${{ github.token }}
       
       - name: Upload release notes
         uses: actions/upload-artifact@v4
@@ -229,7 +234,8 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist/  # the default
-          attestations: false  # https://github.com/pypa/gh-action-pypi-publish/issues/283#issuecomment-2499296440
+          # https://github.com/pypa/gh-action-pypi-publish/issues/283#issuecomment-2499296440
+          attestations: false
           verbose: true
       
       - name: Publish to PyPI

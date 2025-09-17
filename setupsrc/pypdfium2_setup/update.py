@@ -113,25 +113,43 @@ def do_extract(archives, version, flags):
         arc_path.unlink()
 
 
-MIN_PDFIUM_VER_FOR_VERIFY = 7228
+MIN_PDFIUM_FOR_VERIFY = 7415
+MIN_GH_FOR_VERIFY = "2.47.0"
 
-def do_verify(archives, version):
-    # TODO switch to `gh attestation`
-    if version < MIN_PDFIUM_VER_FOR_VERIFY:
-        raise SystemExit(f"--verify was passed, but the requested version is below {MIN_PDFIUM_VER_FOR_VERIFY} - no provenance available.")
-    ProvenanceFile = DataDir/f"pdfium-binaries-{version}.intoto.jsonl"
-    if not ProvenanceFile.exists():
-        urlretrieve(f"{ReleaseURL}{version}/pdfium-binaries.intoto.jsonl", ProvenanceFile)
-    artifact_paths = [str(p) for p in archives.values()]
-    cmd = [
-        "slsa-verifier",
-        "verify-artifact", *artifact_paths,
-        "--provenance-path", str(ProvenanceFile),
-        "--source-uri", "github.com/bblanchon/pdfium-binaries",
-    ]
-    log("\n-- Start slsa-verify --")
-    run_cmd(cmd, cwd=DataDir, check=True)
-    log("-- End slsa-verify --\n")
+def _have_recent_gh():
+    
+    if not shutil.which("gh"):
+        log("gh CLI is not installed")
+        return False
+    
+    proc = run_cmd(["gh", "auth", "status"], cwd=None, check=False)
+    if proc.returncode != 0:
+        log("gh auth returned non-zero exist status (not authenticated)")
+        return False
+    
+    from packaging.version import Version
+    gh_version = run_cmd(["gh", "--version"], cwd=None, capture=True)
+    gh_version = Version( re.match(r"gh version ([\d.]+)", gh_version).group(1) )
+    
+    if gh_version >= Version(MIN_GH_FOR_VERIFY):
+        return True
+    else:
+        log("gh CLI version is too old for verification")
+        return False
+
+
+def do_verify(archives, pdfium_version, have_recent_gh):
+    
+    if not have_recent_gh:
+        raise SystemExit(f"--verify requires gh CLI >= {MIN_GH_FOR_VERIFY} (authenticated)")
+    if pdfium_version < MIN_PDFIUM_FOR_VERIFY:
+        raise SystemExit(f"--verify was passed, but the requested pdfium version is too low: {MIN_PDFIUM_FOR_VERIFY}")
+    
+    # see https://github.com/bblanchon/pdfium-binaries/attestations
+    # AOTW, gh doesn't support verifying multiple files in one command, so we need a loop. Unfortunately, this causes quite some overhead.
+    artifact_paths = tuple(str(p) for p in archives.values())
+    for artifact in artifact_paths:
+        run_cmd(["gh", "attestation", "verify", "--owner", "bblanchon", artifact], cwd=DataDir, check=True)
 
 
 def postprocess_android(platforms):
@@ -151,19 +169,19 @@ def main(platforms, version, robust=False, max_workers=None, use_v8=False, verif
     
     if not platforms:
         platforms = WheelPlatforms
-    # if verify is None:
-    #     verify = bool(shutil.which("slsa-verifier")) and version >= MIN_PDFIUM_VER_FOR_VERIFY
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
-    
     flags = ("V8", "XFA") if use_v8 else ()
+    have_recent_gh = _have_recent_gh()
+    if verify is None:
+        verify = have_recent_gh and version >= MIN_PDFIUM_FOR_VERIFY
     
     clear_data(platforms)
     archives = do_download(platforms, version, use_v8, max_workers, robust)
     if verify:
-        do_verify(archives, version)
+        do_verify(archives, version, have_recent_gh)
     else:
-        log("Warning: Verification is off - this is unsafe! If this is not intentional, make sure slsa-verifier is installed.")
+        log("Warning: Verification is off - this is unsafe! If this is not intentional, make sure `gh` (GitHub CLI) is installed.")
     do_extract(archives, version, flags)
     postprocess_android(platforms)
 
@@ -205,7 +223,7 @@ def parse_args(argv):
         "--verify",
         action = "store_true",
         default = None,
-        help = "Verify release artifacts via SLSA provenance. This will be automatically enabled if slsa-verifier is installed and the requested version is recent enough.",
+        help = "Verify release artifacts through GitHub build provenance attestations. This will be automatically enabled if `gh` is installed and the requested pdfium version is recent enough.",
     )
     return parser.parse_args(argv)
 
