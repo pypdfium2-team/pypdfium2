@@ -52,8 +52,8 @@ _Note, unlike helpers, pypdfium2's setup is not bound by API stability promises,
 
 *System*
 + C pre-processor (`gcc`/`clang` – alternatively, specify the command to invoke via `$CPP`)
-+ `git` (Used e.g. to determine the latest pdfium-binaries version, to get `git describe` info, or to check out pdfium on sourcebuild. *Might* be optional on default setup.)
-+ [`gh`](https://github.com/cli/cli/) (optional; used to verify pdfium-binaries build attestations)
++ `git` (Used e.g. to determine the latest pdfium-binaries version, to get `git describe` info, or to check out pdfium on sourcebuild. Might be optional on default setup.)
++ [`gh >= 2.47.0`](https://github.com/cli/cli/) (optional; used to verify pdfium-binaries build attestations)
 
 *Python*
 + [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen)
