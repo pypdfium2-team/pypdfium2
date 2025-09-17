@@ -270,7 +270,8 @@ class _PdfiumVerClass:
     
     @cached_property
     def pinned(self):
-        # comments are not permitted in JSON, so the reason for the post_pdfium pin (if set) goes here: (currently no post_pdfium pin)
+        # comments are not permitted in JSON, so the reason for the post_pdfium pin (if set) goes here:
+        # verification requires pdfium-binaries >= 7415
         record = read_json(AR_RecordFile)
         return record["post_pdfium"] or record["pdfium"]
 
