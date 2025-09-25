@@ -7,6 +7,7 @@
 import sys
 import shutil
 import tarfile
+import hashlib
 import argparse
 import functools
 from pathlib import Path
@@ -122,11 +123,6 @@ def _have_recent_gh():
         log("gh CLI is not installed")
         return False
     
-    proc = run_cmd(["gh", "auth", "status"], cwd=None, check=False)
-    if proc.returncode != 0:
-        log("gh auth returned non-zero exist status (not authenticated)")
-        return False
-    
     from packaging.version import Version
     gh_version = run_cmd(["gh", "--version"], cwd=None, capture=True)
     gh_version = Version( re.match(r"gh version ([\d.]+)", gh_version).group(1) )
@@ -137,6 +133,28 @@ def _have_recent_gh():
         log("gh CLI version is too old for verification")
         return False
 
+def _gh_web_api(path):
+    log(f"API Request {path}")
+    with url_request.urlopen("https://api.github.com"+path) as h:
+        return json.loads( h.read().decode() )
+
+def _get_sha256sum(path):
+    # https://stackoverflow.com/a/44873382/15547292
+    if sys.version_info >= (3, 11):
+        with open(path, "rb") as fh:
+            return hashlib.file_digest(fh, "sha256").hexdigest()
+    else:
+        chunksize = 128 * 1024  # 128 KiB
+        chunk = memoryview(bytearray(chunksize))
+        hash = hashlib.sha256()
+        
+        with open(path, "rb", buffering=0) as fh:
+            n = fh.readinto(chunk)
+            while n:
+                hash.update(chunk[:n])
+                n = fh.readinto(chunk)
+        
+        return hash.hexdigest()
 
 def do_verify(archives, pdfium_version, have_recent_gh):
     
@@ -145,17 +163,26 @@ def do_verify(archives, pdfium_version, have_recent_gh):
     if pdfium_version < MIN_PDFIUM_FOR_VERIFY:
         raise SystemExit(f"--verify was passed, but the requested pdfium version is too low: {MIN_PDFIUM_FOR_VERIFY}")
     
-    # see https://github.com/bblanchon/pdfium-binaries/attestations
-    # AOTW, gh doesn't support verifying multiple files in one command, so we need a loop. Unfortunately, this causes quite some overhead.
+    # https://github.com/bblanchon/pdfium-binaries/attestations
+    # https://github.com/cli/cli/issues/11803#issuecomment-3334820737
+    
+    attest_path = DataDir/f"pdfium-binaries-{pdfium_version}-attestation.json"
     artifact_paths = tuple(str(p) for p in archives.values())
+    if not attest_path.exists():
+        one_archive = artifact_paths[0]
+        file_sum = _get_sha256sum(one_archive)
+        attest_json = _gh_web_api(f"/repos/bblanchon/pdfium-binaries/attestations/sha256:{file_sum}")
+        attest_json = attest_json["attestations"][0]["bundle"]
+        with attest_path.open("w") as fh:
+            json.dump(attest_json, fh)
+    
+    # AOTW, gh doesn't support verifying multiple files in one command, so we need a loop.
     for artifact in artifact_paths:
-        run_cmd(["gh", "attestation", "verify", "--owner", "bblanchon", artifact], cwd=DataDir, check=True)
+        run_cmd(["gh", "attestation", "verify", "-R", "bblanchon/pdfium-binaries", artifact, "-b", str(attest_path)], cwd=DataDir, check=True)
 
 
-def postprocess_android(platforms):
+def postprocess_android():
     # see https://wiki.termux.com/wiki/FAQ#Why_does_a_compiled_program_show_warnings
-    if not (Host.system == SysNames.android and Host.platform in platforms):
-        return
     elf_cleaner = shutil.which("termux-elf-cleaner")
     if elf_cleaner:
         log("Invoking termux-elf-cleaner to clean up possible linker warnings...")
@@ -181,9 +208,11 @@ def main(platforms, version, robust=False, max_workers=None, use_v8=False, verif
     if verify:
         do_verify(archives, version, have_recent_gh)
     else:
-        log("Warning: Verification is off - this is unsafe! If this is not intentional, make sure `gh` (GitHub CLI) is installed.")
+        log("Warning: Verification is off. If this is not intentional, make sure `gh` (GitHub CLI) is installed.")
+    
     do_extract(archives, version, flags)
-    postprocess_android(platforms)
+    if Host.system == SysNames.android and Host.platform in platforms:
+        postprocess_android()
 
 
 # low-level interface for internal use - end users should go with cached, higher-level emplace.py or setup.py instead

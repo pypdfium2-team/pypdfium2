@@ -68,17 +68,12 @@ jobs:
       
       - name: Install pypdfium2
         run: python3 -m pip install -v --no-build-isolation -e .
-        env:
-          GH_TOKEN: ${{ github.token }}
       
       - name: Run test suite
         run: just test
       
       - name: Run PyPI packaging script
         run: just packaging-pypi
-        env:
-          # `gh attestation verify` insists on seeing a token :(
-          GH_TOKEN: ${{ github.token }}
       
       - name: Upload release notes
         uses: actions/upload-artifact@v4
