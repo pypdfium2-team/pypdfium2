@@ -5,6 +5,7 @@
 # NOTE: unless otherwise noted, "version" refers to the short version in this file
 
 import sys
+import json
 import shutil
 import tarfile
 import hashlib
@@ -163,7 +164,6 @@ def do_verify(archives, pdfium_version, have_recent_gh):
     if pdfium_version < MIN_PDFIUM_FOR_VERIFY:
         raise SystemExit(f"--verify was passed, but the requested pdfium version is too low: {MIN_PDFIUM_FOR_VERIFY}")
     
-    # https://github.com/bblanchon/pdfium-binaries/attestations
     # https://github.com/cli/cli/issues/11803#issuecomment-3334820737
     
     attest_path = DataDir/f"pdfium-binaries-{pdfium_version}-attestation.json"
