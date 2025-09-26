@@ -167,18 +167,32 @@ def do_verify(archives, pdfium_version, have_recent_gh):
     # https://github.com/cli/cli/issues/11803#issuecomment-3334820737
     
     attest_path = DataDir/f"pdfium-binaries-{pdfium_version}-attestation.json"
-    artifact_paths = tuple(str(p) for p in archives.values())
+    artifact_paths = tuple(archives.values())
+    one_artifact = artifact_paths[0]
     if not attest_path.exists():
-        one_archive = artifact_paths[0]
-        file_sum = _get_sha256sum(one_archive)
+        file_sum = _get_sha256sum(one_artifact)
         attest_json = _gh_web_api(f"/repos/bblanchon/pdfium-binaries/attestations/sha256:{file_sum}")
         attest_json = attest_json["attestations"][0]["bundle"]
         with attest_path.open("w") as fh:
             json.dump(attest_json, fh)
     
-    # AOTW, gh doesn't support verifying multiple files in one command, so we need a loop.
+    verify_result = run_cmd(
+        ["gh", "attestation", "verify", "-R", "bblanchon/pdfium-binaries", str(one_artifact), "-b", str(attest_path), "--format=json"],
+        cwd=DataDir, check=True, capture=True
+    )
+    log(f"{one_artifact.name}: verified by gh")
+    
+    verify_result = json.loads(verify_result)
+    attested_artifacts = verify_result[0]["verificationResult"]["statement"]["subject"]
+    attested_artifacts = {d["name"]: d["digest"]["sha256"] for d in attested_artifacts}
+    
     for artifact in artifact_paths:
-        run_cmd(["gh", "attestation", "verify", "-R", "bblanchon/pdfium-binaries", artifact, "-b", str(attest_path)], cwd=DataDir, check=True)
+        exp_checksum = attested_artifacts[artifact.name]
+        actual_checksum = _get_sha256sum(artifact)
+        if exp_checksum == actual_checksum:
+            log(f"{artifact.name}: verified by result checksum: {exp_checksum}")
+        else:
+            raise SystemExit(f"{artifact.name}: checksum mismatch: expected {exp_checksum} != actual {actual_checksum}")
 
 
 def postprocess_android():
