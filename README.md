@@ -82,7 +82,7 @@ python -m pip install -v .
 
 This will invoke pypdfium2's `setup.py`. Typically, this means a binary will be downloaded from `pdfium-binaries` and bundled into pypdfium2, and ctypesgen will be called on pdfium headers to produce the bindings interface.
 
-`pdfium-binaries` offer [GitHub build provenance attestations](https://github.com/bblanchon/pdfium-binaries/attestations), so it is highly recommended that you install the `gh` CLI for our setup to verify authenticity of the binaries.
+`pdfium-binaries` offer GitHub build provenance [attestations](https://github.com/bblanchon/pdfium-binaries/attestations), so it is highly recommended that you install the `gh` CLI for our setup to verify authenticity of the binaries.
 
 If no pre-built binaries are available for your platform, setup will [look for system pdfium](#with-system-pdfium), or attempt to [build pdfium from source](#with-self-built-pdfium).
 
