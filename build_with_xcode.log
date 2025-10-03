@@ -1,0 +1,57 @@
+macOS arm64 ('15.7', ('', '', ''), 'arm64')
+Attempting to fetch chromium refs. If this causes setup to halt, set e.g. IGNORE_FULLVER=1
+['git', 'ls-remote', '--sort', '-version:refname', '--tags', 'https://chromium.googlesource.com/chromium/src.git', '*.*.*.0'] (cwd=None)
+Resolved 7191 -> 138.0.7191.0
+['/usr/bin/clang', '--version'] (cwd=None)
+Apple clang version 17.0.0 (clang-1700.3.19.1)
+Target: arm64-apple-darwin24.6.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+Determined clang version 17
+
+Build config:
+is_debug = false
+use_glib = false
+use_remoteexec = false
+treat_warnings_as_errors = false
+clang_use_chrome_plugins = false
+is_component_build = false
+pdf_is_standalone = true
+pdf_enable_v8 = false
+pdf_enable_xfa = false
+pdf_use_skia = false
+pdf_use_partition_alloc = false
+use_sysroot = false
+use_system_freetype = true
+pdf_bundle_freetype = false
+use_system_lcms2 = true
+use_system_libjpeg = true
+use_system_libopenjpeg2 = true
+use_system_libpng = true
+use_system_libtiff = true
+use_system_zlib = true
+use_custom_libcxx = false
+use_libcxx_modules = false
+is_clang = true
+clang_base_path = "/usr"
+clang_version = 17
+
+['gn', 'gen', 'out/Default'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium'))
+Traceback (most recent call last):
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 407, in <module>
+    main_cli()
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 403, in main_cli
+    main(**vars(args))
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 338, in main
+    build(with_tests, build_dir, n_jobs)
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 270, in build
+    run_cmd(["gn", "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/base.py", line 646, in run_cmd
+    comp_process = subprocess.run(command, cwd=cwd, check=check, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 505, in run
+    with Popen(*popenargs, **kwargs) as process:
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 951, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 1821, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'gn'

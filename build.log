@@ -1,0 +1,141 @@
+macOS arm64 ('15.7', ('', '', ''), 'arm64')
+Attempting to fetch chromium refs. If this causes setup to halt, set e.g. IGNORE_FULLVER=1
+['git', 'ls-remote', '--sort', '-version:refname', '--tags', 'https://chromium.googlesource.com/chromium/src.git', '*.*.*.0'] (cwd=None)
+Resolved 7191 -> 138.0.7191.0
+['git', 'init'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium'))
+Initialized empty Git repository in /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/.git/
+['git', 'remote', 'add', 'origin', 'https://pdfium.googlesource.com/pdfium'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium'))
+['git', 'fetch', '--depth', '1', 'origin', 'chromium/7191'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium'))
+From https://pdfium.googlesource.com/pdfium
+ * branch            chromium/7191 -> FETCH_HEAD
+ * [new branch]      chromium/7191 -> origin/chromium/7191
+['git', 'checkout', 'FETCH_HEAD'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium'))
+Note: switching to 'FETCH_HEAD'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 9d59dcd Use ByteStringView in more methods
+Patch '"public/(.+)"' -> '"../\\1"' (is_regex=True) on /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/public/cpp/fpdf_scopers.h
+Patch '"public/(.+)"' -> '"../\\1"' (is_regex=True) on /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/public/cpp/fpdf_deleters.h
+Patch '(\\s*)("//third_party/test_fonts")' -> '\\1# \\2' (is_regex=True) on /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/testing/BUILD.gn
+Patch 'component("pdfium")' -> 'shared_library("pdfium")' (is_regex=False) on /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/BUILD.gn
+Patch '#if defined(COMPONENT_BUILD)' -> '#if 1  // defined(COMPONENT_BUILD)' (is_regex=False) on /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/public/fpdfview.h
+Found DEPS revisions:
+{'build': '97b6962bb46447def07002b4aeba06001ea86ecb', 'abseil': '91f1a3775e4c509c3eadd4870fc9929c0021e6e3', 'fast_float': 'cb1d42aaa1e14b09e1452cfdef373d051b8c02a4'}
+['git', 'init'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build'))
+Initialized empty Git repository in /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build/.git/
+['git', 'remote', 'add', 'origin', 'https://chromium.googlesource.com/chromium/src/build'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build'))
+['git', 'fetch', '--depth', '1', 'origin', '97b6962bb46447def07002b4aeba06001ea86ecb'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build'))
+From https://chromium.googlesource.com/chromium/src/build
+ * branch            97b6962bb46447def07002b4aeba06001ea86ecb -> FETCH_HEAD
+['git', 'checkout', 'FETCH_HEAD'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build'))
+Note: switching to 'FETCH_HEAD'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 97b6962 Run exec_script() for //build/compute_build_timestamp.py only once
+['git', 'apply', '--ignore-space-change', '--ignore-whitespace', '-v', '/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/pdfium_patches/siso.patch'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build'))
+Checking patch toolchain/siso.gni...
+Applied patch toolchain/siso.gni cleanly.
+['git', 'apply', '--ignore-space-change', '--ignore-whitespace', '-v', '/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/pdfium_patches/system_libcxx_with_clang.patch'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build'))
+Checking patch config/BUILDCONFIG.gn...
+Hunk #1 succeeded at 561 (offset 4 lines).
+Hunk #2 succeeded at 664 (offset 4 lines).
+Applied patch config/BUILDCONFIG.gn cleanly.
+['git', 'apply', '--ignore-space-change', '--ignore-whitespace', '-v', '/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/pdfium_patches/avoid_new_clang_flags.patch'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build'))
+/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/pdfium_patches/avoid_new_clang_flags.patch:56: trailing whitespace.
+        
+Checking patch config/compiler/BUILD.gn...
+Applied patch config/compiler/BUILD.gn cleanly.
+warning: 1 line adds whitespace errors.
+Patch 'ldflags += [ "-fuse-ld=lld" ]' -> 'ldflags += [ "-fuse-ld=/usr/bin/ld.lld" ]' (is_regex=False) on /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/build/config/compiler/BUILD.gn
+['git', 'init'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/abseil-cpp'))
+Initialized empty Git repository in /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/abseil-cpp/.git/
+['git', 'remote', 'add', 'origin', 'https://chromium.googlesource.com/chromium/src/third_party/abseil-cpp'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/abseil-cpp'))
+['git', 'fetch', '--depth', '1', 'origin', '91f1a3775e4c509c3eadd4870fc9929c0021e6e3'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/abseil-cpp'))
+From https://chromium.googlesource.com/chromium/src/third_party/abseil-cpp
+ * branch            91f1a3775e4c509c3eadd4870fc9929c0021e6e3 -> FETCH_HEAD
+['git', 'checkout', 'FETCH_HEAD'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/abseil-cpp'))
+Note: switching to 'FETCH_HEAD'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 91f1a37 Roll abseil_revision 300fafa291..e5e2a9de56
+['git', 'init'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/fast_float/src'))
+Initialized empty Git repository in /Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/fast_float/src/.git/
+['git', 'remote', 'add', 'origin', 'https://chromium.googlesource.com/external/github.com/fastfloat/fast_float'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/fast_float/src'))
+['git', 'fetch', '--depth', '1', 'origin', 'cb1d42aaa1e14b09e1452cfdef373d051b8c02a4'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/fast_float/src'))
+From https://chromium.googlesource.com/external/github.com/fastfloat/fast_float
+ * branch            cb1d42aaa1e14b09e1452cfdef373d051b8c02a4 -> FETCH_HEAD
+['git', 'checkout', 'FETCH_HEAD'] (cwd=PosixPath('/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/sbuild/native/pdfium/third_party/fast_float/src'))
+Note: switching to 'FETCH_HEAD'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at cb1d42a version 7
+Downloading generate_shim_headers.py at revision 138.0.7191.0
+Traceback (most recent call last):
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 407, in <module>
+    main_cli()
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 403, in main_cli
+    main(**vars(args))
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 336, in main
+    setup_compiler(config, compiler, clang_path)
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 294, in setup_compiler
+    clang_version = _get_clang_ver(clang_path)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/karlchow/Desktop/code/pypdfium2-test/pypdfium2/setupsrc/pypdfium2_setup/build_native.py", line 281, in _get_clang_ver
+    from packaging.version import Version
+ModuleNotFoundError: No module named 'packaging'
