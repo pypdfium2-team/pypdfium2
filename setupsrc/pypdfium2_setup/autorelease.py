@@ -10,7 +10,9 @@ import tempfile
 from pathlib import Path
 from copy import deepcopy
 
-sys.path.insert(0, str(Path(__file__).parents[1]))
+_modpath = str(Path(__file__).parents[1])
+if _modpath not in sys.path:
+    sys.path.insert(0, _modpath)
 from pypdfium2_setup.base import *
 from pypdfium2_setup.system_pdfium import _yield_lo_candidates
 

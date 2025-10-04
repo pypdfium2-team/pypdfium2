@@ -10,7 +10,9 @@ from pathlib import Path
 import urllib.request as url_request
 from urllib.error import HTTPError
 
-sys.path.insert(0, str(Path(__file__).parents[1]))
+_modpath = str(Path(__file__).parents[1])
+if _modpath not in sys.path:
+    sys.path.insert(0, _modpath)
 from pypdfium2_setup.base import *
 
 
