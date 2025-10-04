@@ -13,6 +13,7 @@ import argparse
 import functools
 from pathlib import Path
 import urllib.request as url_request
+from urllib.error import HTTPError
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
@@ -157,7 +158,7 @@ def _get_sha256sum(path):
         
         return hash.hexdigest()
 
-def do_verify(archives, pdfium_version, have_recent_gh):
+def do_verify(archives, pdfium_version, have_recent_gh, auto_enabled):
     
     if not have_recent_gh:
         raise SystemExit(f"--verify requires gh CLI >= {MIN_GH_FOR_VERIFY} (authenticated)")
@@ -171,7 +172,14 @@ def do_verify(archives, pdfium_version, have_recent_gh):
     one_artifact = artifact_paths[0]
     if not attest_path.exists():
         file_sum = _get_sha256sum(one_artifact)
-        attest_json = _gh_web_api(f"/repos/bblanchon/pdfium-binaries/attestations/sha256:{file_sum}")
+        try:
+            attest_json = _gh_web_api(f"/repos/bblanchon/pdfium-binaries/attestations/sha256:{file_sum}")
+        except HTTPError as e:
+            if auto_enabled and "rate limit exceeded" in str(e):
+                log("Warning: Unable to auto-verify due to rate limit.")
+                return
+            else:
+                raise e
         attest_json = attest_json["attestations"][0]["bundle"]
         with attest_path.open("w") as fh:
             json.dump(attest_json, fh)
@@ -181,6 +189,10 @@ def do_verify(archives, pdfium_version, have_recent_gh):
         cwd=DataDir, check=True, capture=True
     )
     log(f"{one_artifact.name}: verified by gh")
+    
+    # short circuit if there are no more archives - the typical setup caller downloads only one archive at a time
+    if not len(archives) > 1:
+        return
     
     verify_result = json.loads(verify_result)
     attested_artifacts = verify_result[0]["verificationResult"]["statement"]["subject"]
@@ -214,13 +226,16 @@ def main(platforms, version, robust=False, max_workers=None, use_v8=False, verif
         raise ValueError("Duplicate platforms not allowed.")
     flags = ("V8", "XFA") if use_v8 else ()
     have_recent_gh = _have_recent_gh()
+    
+    auto_verify = False
     if verify is None:
         verify = have_recent_gh and version >= MIN_PDFIUM_FOR_VERIFY
+        auto_verify = verify
     
     clear_data(platforms)
     archives = do_download(platforms, version, use_v8, max_workers, robust)
     if verify:
-        do_verify(archives, version, have_recent_gh)
+        do_verify(archives, version, have_recent_gh, auto_verify)
     else:
         log("Warning: Verification is off. If this is not intentional, make sure `gh` (GitHub CLI) is installed.")
     
