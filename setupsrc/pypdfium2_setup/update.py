@@ -13,11 +13,9 @@ from pathlib import Path
 import urllib.request as url_request
 from concurrent.futures import ThreadPoolExecutor
 
-_modpath = str(Path(__file__).parents[1])
-if _modpath not in sys.path:
-    sys.path.insert(0, _modpath)
-from pypdfium2_setup.base import *
-from pypdfium2_setup._verify import *
+# local
+from base import *
+from _verify import *
 
 
 def urlretrieve(url, fp, *args, **kwargs):

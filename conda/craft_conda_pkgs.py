@@ -5,10 +5,10 @@ import sys
 import argparse
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from pypdfium2_setup.base import *
-from pypdfium2_setup.emplace import stage_platfiles
-from pypdfium2_setup.craft import ArtifactStash
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"/"pypdfium2_setup"))
+from base import *
+from emplace import stage_platfiles
+from craft import ArtifactStash
 
 CondaDir = ProjectDir / "conda"
 CondaRaw_BuildNumF = CondaDir / "raw" / "build_num.txt"

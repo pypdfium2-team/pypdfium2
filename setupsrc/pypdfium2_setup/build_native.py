@@ -11,10 +11,7 @@ import argparse
 from enum import Enum
 from pathlib import Path
 
-_modpath = str(Path(__file__).parents[1])
-if _modpath not in sys.path:
-    sys.path.insert(0, _modpath)
-from pypdfium2_setup.base import *
+from base import *  # local
 
 IS_CIBUILDWHEEL = bool(int( os.environ.get("CIBUILDWHEEL", 0) ))
 

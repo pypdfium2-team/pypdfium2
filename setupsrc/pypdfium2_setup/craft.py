@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import sys
 import json
 import shutil
 import argparse
@@ -11,10 +10,7 @@ import contextlib
 import urllib.request as url_request
 from pathlib import Path
 
-_modpath = str(Path(__file__).parents[1])
-if _modpath not in sys.path:
-    sys.path.insert(0, _modpath)
-from pypdfium2_setup.base import *
+from base import *  # local
 
 try:
     import build.__main__ as build_module

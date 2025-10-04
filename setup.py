@@ -13,9 +13,9 @@ try:
 except ImportError:
     from wheel.bdist_wheel import bdist_wheel
 
-sys.path.insert(0, str(Path(__file__).parent / "setupsrc"))
-from pypdfium2_setup.base import *
-from pypdfium2_setup.emplace import prepare_setup
+sys.path.insert(0, str(Path(__file__).parent/"setupsrc"/"pypdfium2_setup"))
+from base import *
+from emplace import prepare_setup
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels.

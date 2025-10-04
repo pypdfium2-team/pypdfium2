@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import sys
 import time
 import shutil
 import argparse
@@ -10,11 +9,9 @@ import tempfile
 from pathlib import Path
 from copy import deepcopy
 
-_modpath = str(Path(__file__).parents[1])
-if _modpath not in sys.path:
-    sys.path.insert(0, _modpath)
-from pypdfium2_setup.base import *
-from pypdfium2_setup.system_pdfium import _yield_lo_candidates
+# local
+from base import *
+from system_pdfium import _yield_lo_candidates
 
 
 PlacesToRegister = (AutoreleaseDir, Changelog, ChangelogStaging, RefBindingsFile)

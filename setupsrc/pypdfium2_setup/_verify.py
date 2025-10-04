@@ -6,14 +6,10 @@ import sys
 import json
 import shutil
 import hashlib
-from pathlib import Path
 import urllib.request as url_request
 from urllib.error import HTTPError
 
-_modpath = str(Path(__file__).parents[1])
-if _modpath not in sys.path:
-    sys.path.insert(0, _modpath)
-from pypdfium2_setup.base import *
+from base import *  # local
 
 
 MIN_PDFIUM_FOR_VERIFY = 7415
