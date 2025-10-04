@@ -8,6 +8,7 @@ import shutil
 import hashlib
 from pathlib import Path
 import urllib.request as url_request
+from urllib.error import HTTPError
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
@@ -16,7 +17,7 @@ from pypdfium2_setup.base import *
 MIN_PDFIUM_FOR_VERIFY = 7415
 MIN_GH_FOR_VERIFY = "2.47.0"
 
-def get_gh_avail():
+def _have_recent_gh():
     
     if not shutil.which("gh"):
         log("gh CLI is not installed")
@@ -59,7 +60,7 @@ def _get_sha256sum(path):
         return hash.hexdigest()
 
 
-def do_verify(archives, pdfium_version, have_recent_gh):
+def _verify_impl(archives, pdfium_version, have_recent_gh):
     
     # https://github.com/cli/cli/issues/11803#issuecomment-3334820737
     
@@ -107,3 +108,24 @@ def do_verify(archives, pdfium_version, have_recent_gh):
             log(f"{artifact.name}: verified by result checksum: {exp_checksum}")
         else:
             raise SystemExit(f"{artifact.name}: checksum mismatch: expected {exp_checksum} != actual {actual_checksum}")
+
+
+def do_verify(verify, archives, version):
+    
+    have_recent_gh = _have_recent_gh()
+    auto_verify = False
+    if verify is None:
+        verify = have_recent_gh and version >= MIN_PDFIUM_FOR_VERIFY
+        auto_verify = verify
+    
+    if verify:
+        try:
+            _verify_impl(archives, version, have_recent_gh)
+        except HTTPError as e:
+            if auto_verify:
+                log(f"Warning: Verification failed: {e}")
+                log("Proceeding because it was auto-enabled")
+            else:
+                raise e
+    else:
+        log("Warning: Verification is off. If this is not intentional, make sure `gh` (GitHub CLI) is installed.")

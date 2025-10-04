@@ -11,7 +11,6 @@ import argparse
 import functools
 from pathlib import Path
 import urllib.request as url_request
-from urllib.error import HTTPError
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
@@ -133,26 +132,10 @@ def main(platforms, version, robust=False, max_workers=None, use_v8=False, verif
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     flags = ("V8", "XFA") if use_v8 else ()
-    have_recent_gh = get_gh_avail()
-    
-    auto_verify = False
-    if verify is None:
-        verify = have_recent_gh and version >= MIN_PDFIUM_FOR_VERIFY
-        auto_verify = verify
     
     clear_data(platforms)
     archives = do_download(platforms, version, use_v8, max_workers, robust)
-    if verify:
-        try:
-            do_verify(archives, version, have_recent_gh)
-        except HTTPError as e:
-            if auto_verify:
-                log(f"Warning: Verification failed: {e}")
-                log("Proceeding because it was auto-enabled")
-            else:
-                raise e
-    else:
-        log("Warning: Verification is off. If this is not intentional, make sure `gh` (GitHub CLI) is installed.")
+    do_verify(verify, archives, version)
     
     do_extract(archives, version, flags)
     if Host.system == SysNames.android and Host.platform in platforms:
