@@ -138,7 +138,7 @@ Further, you can set just `system` to consume pre-generated files from the `data
 
 You can also install pypdfium2 with a self-compiled pdfium shared library, by placing it in `data/sourcebuild/` along with a bindings interface and version info, and setting the `PDFIUM_PLATFORM="sourcebuild"` directive to use these files on setup.
 
-This project comes with two scripts to automate the build process: `build_toolchained.py` and `build_native.py` (in `setupsrc/pypdfium2_setup/`).
+This project comes with two scripts to automate the build process: `build_toolchained.py` and `build_native.py` (in `setupsrc/`).
 - `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, this script will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
 - `build_native` is an attempt to address some shortcomings of the toolchained build (mainly a bloated checkout process, and lack of portability). It is tailored towards native compilation, and uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
 
@@ -153,7 +153,7 @@ Dependencies:
 To do the toolchained build, you'd run something like:
 ```bash
 # call build script with --help to list options
-python setupsrc/pypdfium2_setup/build_toolchained.py
+python setupsrc/build_toolchained.py
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
@@ -164,7 +164,7 @@ sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev lib
 ```
 ```bash
 # Build with GCC
-python ./setupsrc/pypdfium2_setup/build_native.py --compiler gcc
+python ./setupsrc/build_native.py --compiler gcc
 ```
 ```bash
 # Alternatively, build with Clang
@@ -173,7 +173,7 @@ VERSION=18
 ARCH=$(uname -m)
 sudo ln -s "/usr/lib/clang/$VERSION/lib/linux" "/usr/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu"
 sudo ln -s "/usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a" "/usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a"
-python ./setupsrc/pypdfium2_setup/build_native.py --compiler clang
+python ./setupsrc/build_native.py --compiler clang
 ```
 ```bash
 # Install
@@ -282,7 +282,7 @@ For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](htt
 > In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to forego cibuildwheel and cross-package pypdfium2 instead, e.g.:
 > ```bash
 > # assuming gcc cross-compilation packages are installed
-> python setupsrc/pypdfium2_setup/build_toolchained.py --target-cpu arm
+> python setupsrc/build_toolchained.py --target-cpu arm
 > PDFIUM_PLATFORM=sourcebuild CROSS_TAG="manylinux_2_17_armv7l" python -m build -wxn
 > ```
 > However, cibuildwheel emulation may be a *quick & dirty* way to build for those architectures not handled upstream yet.
@@ -1045,7 +1045,7 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 The release process is fully automated using Python scripts and scheduled release workflows.
 You may also trigger the workflow manually from the GitHub Actions panel or similar.
 
-Python release scripts are located in the folder `setupsrc/pypdfium2_setup`, along with custom setup code:
+Python release scripts are located in the folder `setupsrc`, along with custom setup code:
 * `update.py` downloads binaries.
 * `craft.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
 * `autorelease.py` takes care of versioning, changelog, release note generation and VCS check-in.
@@ -1060,7 +1060,7 @@ The autorelease script has some peculiarities maintainers should know about:
 In case of necessity, you may also forego CI and do the release locally, which would roughly work like this (though ideally it should never be needed):
 * Run the autorelease script (this will implicitly switch onto the `autorelease_tmp` branch, make a release commit, and create the tag):
   ```bash
-  python3 setupsrc/pypdfium2_setup/autorelease.py --register
+  python3 setupsrc/autorelease.py --register
   ```
 * Merge the `autorelease_tmp` branch:
   ```bash

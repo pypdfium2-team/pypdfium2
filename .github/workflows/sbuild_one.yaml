@@ -70,7 +70,7 @@ jobs:
           TARGET_CPU: ${{ inputs.target_cpu }}
       
       - name: Build PDFium (toolchained)
-        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py $CPU_PARAM
+        run: python3 ./setupsrc/build_toolchained.py $CPU_PARAM
         env:
           CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
       

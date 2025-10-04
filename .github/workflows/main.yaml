@@ -60,7 +60,7 @@ jobs:
           git config user.name "geisserml"
           git reset --hard HEAD
           # autorelease.py --register automatically switches us onto the autorelease_tmp branch
-          python3 setupsrc/pypdfium2_setup/autorelease.py --register
+          python3 setupsrc/autorelease.py --register
       
       - name: Get new version
         id: get_version

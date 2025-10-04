@@ -19,7 +19,7 @@ OutputDir       = TestDir / "output"
 ExpectationsDir = TestDir / "expectations"
 
 # Add setup helper module so we can import it in the test suite
-sys.path.insert(0, str(ProjectDir/"setupsrc"/"pypdfium2_setup"))
+sys.path.insert(0, str(ProjectDir/"setupsrc"))
 
 
 def _gather_resources(dir, skip_exts=[".in"]):

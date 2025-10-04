@@ -35,17 +35,17 @@ distcheck:
 	check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw"
 
 update *args:
-	python3 setupsrc/pypdfium2_setup/update.py {{args}}
+	python3 setupsrc/update.py {{args}}
 update-verify *args:
 	just update --verify {{args}}
 emplace *args:
-	python3 setupsrc/pypdfium2_setup/emplace.py {{args}}
+	python3 setupsrc/emplace.py {{args}}
 build-native *args:
-	python3 setupsrc/pypdfium2_setup/build_native.py {{args}}
+	python3 setupsrc/build_native.py {{args}}
 build-toolchained *args:
-	python3 setupsrc/pypdfium2_setup/build_toolchained.py {{args}}
+	python3 setupsrc/build_toolchained.py {{args}}
 craft *args:
-	python3 setupsrc/pypdfium2_setup/craft.py {{args}}
+	python3 setupsrc/craft.py {{args}}
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 

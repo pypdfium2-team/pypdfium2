@@ -93,14 +93,14 @@ jobs:
       
       - name: Build PDFium (native, ${{ inputs.compiler }})
         if: ${{ inputs.build_mode == 'native' }}
-        run: python3 ./setupsrc/pypdfium2_setup/build_native.py --test --compiler "$COMPILER" $VENDOR_PARAM
+        run: python3 ./setupsrc/build_native.py --test --compiler "$COMPILER" $VENDOR_PARAM
         env:
           COMPILER: ${{ inputs.compiler }}
           VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
       
       - name: Build PDFium (toolchained, with syslibs)
         if: ${{ inputs.build_mode == 'tc-syslibs' }}
-        run: python3 ./setupsrc/pypdfium2_setup/build_toolchained.py --use-syslibs
+        run: python3 ./setupsrc/build_toolchained.py --use-syslibs
       
       - name: Show binary info
         run: |

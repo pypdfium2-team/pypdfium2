@@ -5,7 +5,7 @@ import sys
 import argparse
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"/"pypdfium2_setup"))
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import *
 from emplace import stage_platfiles
 from craft import ArtifactStash

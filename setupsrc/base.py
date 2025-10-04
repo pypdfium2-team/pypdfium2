@@ -48,7 +48,7 @@ ModulesAll         = (ModuleRaw, ModuleHelpers)
 BindingsFN = "bindings.py"
 VersionFN  = "version.json"
 
-ProjectDir        = Path(__file__).parents[2].resolve()
+ProjectDir        = Path(__file__).parents[1].resolve()
 DataDir           = ProjectDir / "data"
 DataDir_Bindings  = DataDir / "bindings"
 BindingsFile      = DataDir_Bindings / BindingsFN

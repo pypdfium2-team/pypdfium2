@@ -11,7 +11,7 @@ import time
 # import collections
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[2]/"setupsrc"/"pypdfium2_setup"))
+sys.path.insert(0, str(Path(__file__).parents[2]/"setupsrc"))
 from base import (
     get_helpers_info,
     get_next_changelog,

@@ -13,7 +13,7 @@ try:
 except ImportError:
     from wheel.bdist_wheel import bdist_wheel
 
-sys.path.insert(0, str(Path(__file__).parent/"setupsrc"/"pypdfium2_setup"))
+sys.path.insert(0, str(Path(__file__).parent/"setupsrc"))
 from base import *
 from emplace import prepare_setup
 
