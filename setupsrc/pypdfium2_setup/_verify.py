@@ -8,7 +8,6 @@ import shutil
 import hashlib
 from pathlib import Path
 import urllib.request as url_request
-from urllib.error import HTTPError
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from pypdfium2_setup.base import *
@@ -60,7 +59,7 @@ def _get_sha256sum(path):
         return hash.hexdigest()
 
 
-def do_verify(archives, pdfium_version, have_recent_gh, auto_enabled):
+def do_verify(archives, pdfium_version, have_recent_gh):
     
     # https://github.com/cli/cli/issues/11803#issuecomment-3334820737
     
@@ -81,14 +80,7 @@ def do_verify(archives, pdfium_version, have_recent_gh, auto_enabled):
         attest_path = DataDir/f"pdfium-binaries-{pdfium_version}-attestation.json"
         if not attest_path.exists():
             file_sum = _get_sha256sum(one_artifact)
-            try:
-                attest_json = _gh_web_api(f"/repos/bblanchon/pdfium-binaries/attestations/sha256:{file_sum}")
-            except HTTPError as e:
-                if auto_enabled and "rate limit exceeded" in str(e):
-                    log("Warning: Unable to auto-verify due to rate limit.")
-                    return
-                else:
-                    raise e
+            attest_json = _gh_web_api(f"/repos/bblanchon/pdfium-binaries/attestations/sha256:{file_sum}")
             attest_json = attest_json["attestations"][0]["bundle"]
             with attest_path.open("w") as fh:
                 json.dump(attest_json, fh)
