@@ -6,6 +6,12 @@ from pypdfium2._cli._parsers import add_input, get_input
 EXTRACT_RANGE   = "range"
 EXTRACT_BOUNDED = "bounded"
 
+# __main__.py hook
+PARSER_DESC = """\
+Note that PDFium outputs CRLF (\\r\\n) style line breaks.
+This may be undesirable or confusing in some situations, e.g. when processing the output with an (unaware) parser on the command line.
+If this is an issue, run e.g. `dos2unix` on the output, or use the Python API.\
+"""
 
 def attach(parser):
     add_input(parser, pages=True)

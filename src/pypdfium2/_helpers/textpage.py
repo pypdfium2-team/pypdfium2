@@ -47,6 +47,11 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
         Returns:
             str: The text on the page area in question, or an empty string if no text was found.
+        
+        Note:
+            PDFium outputs CRLF (``\\r\\n``) style line breaks.
+            This may be undesirable or confusing in some situations, e.g. when processing the output with an (unaware) parser on the command line.
+            If this is an issue, replace ``\\r\\n`` with just ``\\n``.
         """
         
         bbox = self.page.get_bbox()
@@ -90,9 +95,6 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         """
         Extract text from a given range.
         
-        Warning:
-            This method is limited to UCS-2, whereas :meth:`.get_text_bounded` provides full Unicode support.
-        
         Parameters:
             index (int): Index of the first char to include.
             count (int): Number of chars to cover, relative to the internal char list. Defaults to -1 for all remaining chars after *index*.
@@ -100,7 +102,11 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         Returns:
             str: The text in the range in question, or an empty string if no text was found.
         
+        Warning:
+            This method is limited to UCS-2, whereas :meth:`.get_text_bounded` provides full Unicode support.
+        
         Note:
+            * Like :meth:`.get_text_bounded`, this API also outputs CRLF style line breaks. See the note above.
             * The returned text's length does not have to match *count*, even if it will for most PDFs.
               This is because the underlying API may exclude/insert chars compared to the internal list, although rare in practice.
               This means, if the char at ``i`` is excluded, ``get_text_range(i, 2)[1]`` will raise an index error.
