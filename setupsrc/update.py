@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # local
 from base import *
-from _verify import *
+from _verify import do_verify
 
 
 def urlretrieve(url, fp, *args, **kwargs):
