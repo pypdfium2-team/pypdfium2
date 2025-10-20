@@ -1124,7 +1124,8 @@ This results in pypdfium2 being part of a large dependency tree.
 * [Tim Head](https://github.com/betatim): Original idea for Python bindings to PDFium with ctypesgen in `wowpng`.
 * [Adam Huganir](https://github.com/adam-huganir): Help with maintenance and development decisions since the beginning of the project.
 * [Christian Heimes](https://github.com/tiran): RPM packaging for pdfium. Showing how to build pdfium natively without Google's toolchain.
-* [wojiushixiaobai](https://github.com/wojiushixiaobai): Helpful pointers and draft workflow for cibuildwheel. Supporting exotic architectures via emulation.
+* [Marvin Gießing](https://github.com/mgiessing): Investigation on building PDFium for an unhandled Linux architecture (ppc64le).
+* [wojiushixiaobai](https://github.com/wojiushixiaobai): Helpful pointers and draft workflow for cibuildwheel. Supporting exotic architectures via emulation (pulling in dependencies with auditwheel).
 * [kobaltcore](https://github.com/kobaltcore): Bug fix for `PdfDocument.save()`.
 * [Anderson Bravalheri](https://github.com/abravalheri): Help with PEP 517/518 compliance. Hint to use an environment variable rather than separate setup files.
 * [Bastian Germann](https://github.com/bgermann): Help with inclusion of licenses for third-party components of PDFium.
