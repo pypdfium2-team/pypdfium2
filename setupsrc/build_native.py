@@ -190,27 +190,10 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, reset, v
     
     do_patches = _fetch_dep(deps_info, "build", PDFIUM_DIR/"build", reset=reset)
     if do_patches:
-        # siso.patch: work around error about path_exists() being undefined
+        # siso.patch: Work around error about path_exists() being undefined.
         # This happens with older versions of GN.
-        # 
-        # To test with the toolchained version of GN, note that running just
-        #   ../../toolchained/depot_tools/gn gen out/Default/
-        # is NOT sufficient with the "native" checkout.
-        # 
-        # depot_tools itself do not vendor GN. Instead, the target project does, and depot_tools `gn` is only a wrapper script that looks for it there. If it is not vendored, system GN would be used.
-        # 
-        # So to actually use toolchained GN in the native build, you could do e.g.
-        #   cd $PYPDFIUM2_ROOT/sbuild/native/pdfium
-        #   OS=linux64  # p.ex.
-        #   mkdir -p buildtools/$OS
-        #   ln -s $PYPDFIUM2_ROOT/sbuild/toolchained/pdfium/buildtools/$OS/gn buildtools/$OS/gn
-        # And now
-        #   ../../toolchained/depot_tools/gn gen out/Default/
-        # should work, provided you have the out/Default/args.gn, e.g. from a previous run of this script. Otherwise, default arguments would be used, leading to failure.
-        # 
-        # Though this is merely background understanding for depot_tools, and why just using its GN shim does not yet change the position. You might as well invoke $PYPDFIUM2_ROOT/sbuild/toolchained/pdfium/buildtools/$OS/gn in the first place ;)
-        # You can also obtain GN builds directly from https://chrome-infra-packages.appspot.com/p/gn/gn
-        # However you do it, it should work cleanly without this patch as long as a recent enough version of GN is used.
+        # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
+        # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
         git_apply_patch(PatchDir/"siso.patch", cwd=PDFIUM_DIR/"build")
         if IS_ANDROID:
             # fix linkage step
