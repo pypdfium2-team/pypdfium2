@@ -16,7 +16,7 @@ body:
         There might be unofficial PyPA packages of pypdfium2 in the wild.
         **We do not support third-party builds, and they are not eligible for a bug report.** Please make sure to use our official packages.
       options:
-        - label: I confirm to be using an **official package** of `pypdfium2` from `PyPI` or `GitHub/pypdfium2-team`.
+        - label: I confirm to be using an **official package** of `pypdfium2` from `PyPI` or `GitHub/pypdfium2-team` (unmodified sources).
           required: true
   
   - type: textarea
@@ -32,12 +32,12 @@ body:
       render: shell
       description: |
         To provide information about your install, please run the following commands and paste the output into the field below.
-        If the install failed, the last 2 commands may be skipped.
+        (If installation failed, the last 2 commands may be skipped.)
         ```shell
         python -VV
         python -c "import platform as p; print(p.platform())"
-        python -m pypdfium2 -v
         python -m pip show pypdfium2
+        python -m pypdfium2 -v
         ```
     validations:
       required: true
