@@ -154,7 +154,8 @@ def main(
     
     if sys.platform.startswith("win32"):
         if win_sdk_dir is None:
-            win_sdk_dir = Path(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64")
+            # Current GH Actions windows-latest
+            win_sdk_dir = Path(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64")
         assert win_sdk_dir.exists()
         os.environ["PATH"] += os.pathsep + str(win_sdk_dir)
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
