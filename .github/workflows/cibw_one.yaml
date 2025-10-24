@@ -54,6 +54,13 @@ jobs:
         if: ${{ inputs.emulated }}
         uses: docker/setup-qemu-action@v3
       
+      - name: Install Windows cross deps
+        if: ${{ startsWith(inputs.os, 'windows') && inputs.cibw_arch != 'AMD64' }}
+        uses: ChristopheLav/windows-sdk-install@v1
+        with:
+          version-sdk: 26100
+          features: 'OptionId.WindowsDesktopDebuggers'
+      
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
       - name: Build wheels
         uses: pypdfium2-team/cibuildwheel@v3.1.4
