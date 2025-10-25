@@ -435,7 +435,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             * default: ``BGR``
             * ``prefer_bgrx=True``: ``BGRx``
             * ``grayscale=True``: ``L``
-            * ``prefer_bgra_on_transparency=True``: ``BGRA`` if the page has transparency, else the format selected otherwise
+            * ``maybe_alpha=True``: ``BGRA`` if the page has transparency, else the format selected otherwise
             * ``fill_color[3] < 255``: ``BGRA`` (background color with transparency)
             * ``force_bitmap_format=...`` -> any supported by pdfium
             
