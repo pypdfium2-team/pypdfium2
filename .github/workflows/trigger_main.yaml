@@ -26,7 +26,6 @@ jobs:
           workflow: main.yaml
           inputs: |
             {
-              "pre_test": "false",
               "test": "true",
               "publish": "true",
               "conda": "true",
