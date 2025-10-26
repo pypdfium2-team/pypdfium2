@@ -148,12 +148,14 @@ jobs:
       
       - name: Install dependencies
         run: |
-          python3 -m pip install -U pip setuptools auditwheel
+          python3 -m pip install -U pip setuptools
           python3 -m pip install -U pytest pillow numpy
       
-      - name: Run auditwheel (informational)
+      - name: Install and run auditwheel (informational)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: python3 -m auditwheel show $WHEEL
+        run: |
+          python3 -m pip install -U auditwheel
+          python3 -m auditwheel show $WHEEL
         env:
           WHEEL: ${{ matrix.wheel }}
       
