@@ -4,3 +4,5 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+
+- Setup: Fixed inclusion of `BUILD_LICENSES/` sub-directories. This concerns sourcebuilds only. The wheels on PyPI are unaffected.

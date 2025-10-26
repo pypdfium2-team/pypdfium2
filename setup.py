@@ -141,11 +141,11 @@ def run_setup(modnames, pl_name, platfiles):
         kwargs["exclude_package_data"] = {"pypdfium2_raw": LIBNAME_GLOBS}
     else:
         if pl_name == ExtPlats.sourcebuild:
-            license_files.append("BUILD_LICENSES/*")
+            license_files.append("BUILD_LICENSES/**")
         else:
             # FIXME This gives a deeply nested directory structure.
             # The author is not aware of a way to achieve a more flat structure with setuptools.
-            license_files.append(f"data/{pl_name}/BUILD_LICENSES/*")
+            license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
     
