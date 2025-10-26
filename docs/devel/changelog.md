@@ -10,6 +10,7 @@
 ## 5.0.0 (2025-10-26)
 
 - Updated PDFium from `7323` to `7483`.
+
 *API changes*
 - Rendering / Bitmap
   * Removed `PdfDocument.render()` (see deprecation rationale in v4.25 changelog). Instead, use `PdfPage.render()` with a loop or process pool.
