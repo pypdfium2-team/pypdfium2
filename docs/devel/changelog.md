@@ -9,8 +9,6 @@
 
 ## 5.0.0 (2025-10-26)
 
-- Updated PDFium from `7323` to `7483`.
-
 *API changes*
 - Rendering / Bitmap
   * Removed `PdfDocument.render()` (see deprecation rationale in v4.25 changelog). Instead, use `PdfPage.render()` with a loop or process pool.
@@ -28,6 +26,7 @@
 - Removed legacy version flags `V_PYPDFIUM2, V_LIBPDFIUM, V_BUILDNAME, V_PDFIUM_IS_V8, V_LIBPDFIUM_FULL` in favor of `PYPDFIUM_INFO, PDFIUM_INFO`.
 
 *Improvements and new features*
+- Updated PDFium from `6462` (v4.30.0) rsp. `7323` (v5.0.0b2) to `7483`.
 - Added `PdfPosConv` and `PdfBitmap.get_posconv(page)` helper for bidirectional translation between page and bitmap coordinates.
 - Added `PdfObject.get_quad_points()` to get the corner points of an image or text object.
 - Exposed `PdfPage.flatten()` (previously semi-private `_flatten()`), after having found out how to correctly use it. Added check and updated docs accordingly.
