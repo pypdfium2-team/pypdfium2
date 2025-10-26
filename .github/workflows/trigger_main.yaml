@@ -5,13 +5,11 @@
 
 name: Trigger main release
 on:
-  # NOTE temporarily commented out during the beta phase
-  # The beta field in autorelease/config.json is automatically unset after a beta release, but we probably don't want the real release to be auto-triggered - instead it should be triggered intentionally and be supervised by the maintainer.
-  # # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
-  # # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-  # # https://crontab.guru/
-  # schedule:
-  #   - cron: '0 4 10 * *'  # monthly, 10th day
+  # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+  # https://crontab.guru/
+  schedule:
+    - cron: '0 4 10 * *'  # monthly, 10th day
   workflow_dispatch:
 
 jobs:
