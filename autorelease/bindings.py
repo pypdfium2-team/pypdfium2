@@ -1815,6 +1815,11 @@ if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetParamIntValue'):
     FPDFPageObjMark_GetParamIntValue.argtypes = (FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(c_int))
     FPDFPageObjMark_GetParamIntValue.restype = FPDF_BOOL
 
+if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetParamFloatValue'):
+    FPDFPageObjMark_GetParamFloatValue = _libs['pdfium']['FPDFPageObjMark_GetParamFloatValue']
+    FPDFPageObjMark_GetParamFloatValue.argtypes = (FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(c_float))
+    FPDFPageObjMark_GetParamFloatValue.restype = FPDF_BOOL
+
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_GetParamStringValue'):
     FPDFPageObjMark_GetParamStringValue = _libs['pdfium']['FPDFPageObjMark_GetParamStringValue']
     FPDFPageObjMark_GetParamStringValue.argtypes = (FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, POINTER(FPDF_WCHAR), c_ulong, POINTER(c_ulong))
@@ -1829,6 +1834,11 @@ if hasattr(_libs['pdfium'], 'FPDFPageObjMark_SetIntParam'):
     FPDFPageObjMark_SetIntParam = _libs['pdfium']['FPDFPageObjMark_SetIntParam']
     FPDFPageObjMark_SetIntParam.argtypes = (FPDF_DOCUMENT, FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, c_int)
     FPDFPageObjMark_SetIntParam.restype = FPDF_BOOL
+
+if hasattr(_libs['pdfium'], 'FPDFPageObjMark_SetFloatParam'):
+    FPDFPageObjMark_SetFloatParam = _libs['pdfium']['FPDFPageObjMark_SetFloatParam']
+    FPDFPageObjMark_SetFloatParam.argtypes = (FPDF_DOCUMENT, FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK, FPDF_BYTESTRING, c_float)
+    FPDFPageObjMark_SetFloatParam.restype = FPDF_BOOL
 
 if hasattr(_libs['pdfium'], 'FPDFPageObjMark_SetStringParam'):
     FPDFPageObjMark_SetStringParam = _libs['pdfium']['FPDFPageObjMark_SetStringParam']
