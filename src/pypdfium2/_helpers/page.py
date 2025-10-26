@@ -285,7 +285,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         if form:
             count_objects = pdfium_c.FPDFFormObj_CountObjects
             get_object = pdfium_c.FPDFFormObj_GetObject
-            parent = form.raw
+            parent = form
         else:
             count_objects = pdfium_c.FPDFPage_CountObjects
             get_object = pdfium_c.FPDFPage_GetObject
