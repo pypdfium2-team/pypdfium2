@@ -96,7 +96,7 @@ jobs:
         run: python3 -m auditwheel show dist/*.whl
       
       - name: Upload wheel as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: ./dist/*.whl
           name: sbuild_${{ inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
