@@ -112,7 +112,7 @@ jobs:
           python-version: ${{ matrix.py }}
       
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: conda_package
           path: conda_dist/
@@ -159,7 +159,7 @@ jobs:
         run: conda install -y anaconda-client
       
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: conda_package
           path: conda_dist/
