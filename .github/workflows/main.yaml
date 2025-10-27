@@ -141,7 +141,7 @@ jobs:
           persist-credentials: false
       
       - name: Download packages
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: packages
           path: dist/
@@ -195,13 +195,13 @@ jobs:
           python-version: ${{ inputs.py_version }}
       
       - name: Download packages
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: packages
           path: dist/
       
       - name: Download release notes
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: release_notes
       
