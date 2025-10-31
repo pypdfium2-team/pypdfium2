@@ -8,6 +8,7 @@ import json
 import shutil
 import tarfile
 import platform
+import argparse
 import functools
 import sysconfig
 import subprocess
@@ -957,3 +958,13 @@ def pack_sourcebuild(
     write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **post_ver)
     
     return full_ver, post_ver
+
+
+if sys.version_info < (3, 8):
+    class ExtendAction (argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            items = getattr(namespace, self.dest) or []
+            items.extend(values)
+            setattr(namespace, self.dest, items)
+else:
+    ExtendAction = None

@@ -348,6 +348,8 @@ def parse_args(argv):
     parser = argparse.ArgumentParser(
         description = "Build PDFium from source natively with system tools/libraries. This does not use Google's binary toolchain, so it should be portable across different Linux architectures. Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.",
     )
+    if ExtendAction is not None:  # from base.py
+        parser.register("action", "extend", ExtendAction)
     parser.add_argument(
         "--version",
         dest = "build_ver",
