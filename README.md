@@ -57,7 +57,8 @@ _Note, unlike helpers, pypdfium2's setup is not bound by API stability promises,
 
 *Python*
 + [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen)
-+ `setuptools >= v70.1.0`
++ `setuptools`
++ `wheel`, if setuptools is `< v70.1.0`
 
 Python dependencies should be installed automatically, unless `--no-build-isolation` is passed to pip.
 
