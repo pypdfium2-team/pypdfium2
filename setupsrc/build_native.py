@@ -44,7 +44,6 @@ DefaultConfig = {
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
     "pdf_use_partition_alloc": False,
-    # "sysroot": "/" might also work if you manually set the right PKG_CONFIG_PATH, e.g. /usr/lib64/pkgconfig
     "use_sysroot": False,
     "use_system_freetype": True,
     "pdf_bundle_freetype": False,

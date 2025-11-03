@@ -71,9 +71,6 @@ Due to limitations in :mod:`weakref`, finalizers can only be attached to wrapper
 
 Version
 *******
-.. note::
-   Version info can be fooled. See it as orientation rather than inherently reliable data.
-
 .. automodule:: pypdfium2.version
 
 Document
