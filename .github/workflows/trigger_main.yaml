@@ -11,7 +11,7 @@ on:
   # # https://crontab.guru/
   # schedule:
   #   - cron: '0 4 10 * *'  # monthly, 10th day
-  # workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   
