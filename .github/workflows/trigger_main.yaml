@@ -5,12 +5,13 @@
 
 name: Trigger main release
 on:
-  # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
-  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-  # https://crontab.guru/
-  schedule:
-    - cron: '0 4 10 * *'  # monthly, 10th day
-  workflow_dispatch:
+  # NOTE Schedule currently suspended, to preserve PyPI disk space. Manually dispatch releases as needed.
+  # # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
+  # # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+  # # https://crontab.guru/
+  # schedule:
+  #   - cron: '0 4 10 * *'  # monthly, 10th day
+  # workflow_dispatch:
 
 jobs:
   
