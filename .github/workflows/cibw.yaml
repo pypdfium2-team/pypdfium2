@@ -162,11 +162,12 @@ jobs:
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
+  # TODO May need to leverage cross-compilation from arm64 in the future, similar to sbuild.yaml. Not sure whether cibuildwheel supports it yet, though.
   macos_x64:
     if: ${{ inputs.macos }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: macos-13
+      os: macos-15-intel
       cibw_target: macosx_x86_64
       cibw_arch: x86_64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}

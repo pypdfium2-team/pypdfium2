@@ -85,14 +85,14 @@ jobs:
     if: ${{ inputs.macos_test }}
     uses: ./.github/workflows/sbuild_one.yaml
     with:
-      os: macos-13  # Intel host
+      os: macos-15-intel
       py_version: ${{ inputs.py_version }}
   
   macos_cross_arm64:
     if: ${{ inputs.macos_test }}
     uses: ./.github/workflows/sbuild_one.yaml
     with:
-      os: macos-13
+      os: macos-15-intel
       target_cpu: arm64
       tag: macosx_11_0_arm64
       py_version: ${{ inputs.py_version }}
