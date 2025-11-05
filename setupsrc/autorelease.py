@@ -123,51 +123,61 @@ def register_changes(new_tag):
 
 
 def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag, target_known):
-    log = ""
-    log += "\n<details>\n"
-    log += f"  <summary>{name} commit log</summary>\n\n"
-    log += f"Commits between [`{ver_a}`]({url+prefix_ver+ver_a}) and [`{ver_b}`]({url+prefix_ver+ver_b})"
-    log += " (latest commit first):\n\n"
+    clog = "\n<details>\n"
+    clog += f"  <summary>{name} commit log</summary>\n\n"
+    clog += f"Commits between [`{ver_a}`]({url+prefix_ver+ver_a}) and [`{ver_b}`]({url+prefix_ver+ver_b})"
+    clog += " (latest commit first):\n\n"
     ref_a = prefix_tag+ver_a
     ref_b = prefix_tag+ver_b if target_known else "HEAD"
-    log += run_cmd(
+    clog += run_cmd(
         ["git", "log", f"{ref_a}..{ref_b}", f"--pretty=format:* [`%h`]({url+prefix_commit}%H) %s"],
         capture=True, check=True, cwd=cwd,
     )
-    log += "\n\n</details>\n"
-    return log
+    clog += "\n\n</details>\n"
+    return clog
 
 
 def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register):
-    
-    # TODO specifically show changes to public/ ?
     
     relnotes = ""
     relnotes += f"## Changes (Release {new_tag})\n\n"
     relnotes += "### Summary (pypdfium2)\n\n"
     if summary:
-        relnotes += summary + "\n"
+        relnotes += summary
     
+    clog = ""
     # even if python code was not updated, there will be a release commit
-    relnotes += _get_log(
+    clog += _get_log(
         "pypdfium2", RepositoryURL, ProjectDir,
         prev_tag, new_tag,
         "/tree/", "/commit/", "",
         target_known=register
     )
-    relnotes += "\n"
     
+    # FIXME seems to take rather long - possibility to limit history size?
+    # TODO specifically show changes to public/ ?
     if c_updates:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
-            # FIXME seems to take rather long - possibility to limit history size?
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
-            relnotes += _get_log(
+            clog += "\n" + _get_log(
                 "PDFium", PdfiumURL, tmpdir/"pdfium_history",
                 str(prev_pdfium), str(new_pdfium),
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
                 target_known=True
             )
+    
+    # https://github.com/ncipollo/release-action/issues/493
+    # GH appears to impose an (undocumented) limit of 125000 characters on release note.
+    # We've been hit by this in v4.30.1, due to an excessively long pdfium commit log.
+    # To be on the safe side, we stay below 125000 *bytes*, not just python chars.
+    intended_relnotes = relnotes + "\n" + clog
+    if len(intended_relnotes.encode()) < 125000:
+        relnotes = intended_relnotes
+    else:
+        log("Warning: commit logs are too long for GH release, will be skipped")
+        relnotes += "\n" + "*Commit logs skipped (too big).*"
+    relnotes += "\n"
     
     (ProjectDir/"RELEASE.md").write_text(relnotes)
 

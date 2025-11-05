@@ -239,7 +239,6 @@ jobs:
         with:
           packages-dir: dist/  # the default
       
-      # TODO make sure RELEASE.md is less than 125000 chars, otherwise attach it as an artifact and write a new body pointing out the attachment. We've been hit by this limit in v4.30.1, due to an excessively long pdfium commit log.
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
         with:
