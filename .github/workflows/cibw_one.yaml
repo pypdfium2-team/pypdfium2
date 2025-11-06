@@ -22,7 +22,7 @@ on:
     inputs:
       os:
         type: string
-        default: ubuntu-24.04
+        default: ubuntu-latest
       cibw_target:
         type: string
         default: manylinux_x86_64

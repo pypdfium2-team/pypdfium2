@@ -39,7 +39,7 @@ jobs:
     if: ${{ inputs.linux_main && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04
+      os: ubuntu-latest
       cibw_target: manylinux_x86_64
       cibw_arch: x86_64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
@@ -57,7 +57,7 @@ jobs:
     if: ${{ inputs.linux_main && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04
+      os: ubuntu-latest
       cibw_target: musllinux_x86_64
       cibw_arch: x86_64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
@@ -75,7 +75,7 @@ jobs:
     if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04  # XXX
+      os: ubuntu-latest  # XXX
       cibw_target: manylinux_ppc64le
       cibw_arch: ppc64le
       emulated: true  # XXX
@@ -85,7 +85,7 @@ jobs:
     if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04  # XXX
+      os: ubuntu-latest  # XXX
       cibw_target: manylinux_s390x
       cibw_arch: s390x
       emulated: true  # XXX
@@ -95,7 +95,7 @@ jobs:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04  # XXX
+      os: ubuntu-latest  # XXX
       cibw_target: musllinux_ppc64le
       cibw_arch: ppc64le
       emulated: true  # XXX
@@ -105,7 +105,7 @@ jobs:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04  # XXX
+      os: ubuntu-latest  # XXX
       cibw_target: musllinux_s390x
       cibw_arch: s390x
       emulated: true  # XXX
@@ -116,7 +116,8 @@ jobs:
     if: ${{ inputs.linux_emulated && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04
+      # Let's guess that an arm64 host might be better at emulating armv7l than an x86_64 host.
+      os: ubuntu-24.04-arm
       cibw_target: musllinux_armv7l
       cibw_arch: armv7l
       emulated: true
@@ -126,7 +127,7 @@ jobs:
     if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04
+      os: ubuntu-latest
       cibw_target: manylinux_riscv64
       cibw_arch: riscv64
       emulated: true
@@ -136,7 +137,7 @@ jobs:
     if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04
+      os: ubuntu-latest
       cibw_target: manylinux_loongarch64
       cibw_arch: loongarch64
       emulated: true
@@ -146,7 +147,7 @@ jobs:
     if: ${{ inputs.linux_emulated && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04
+      os: ubuntu-latest
       cibw_target: musllinux_riscv64
       cibw_arch: riscv64
       emulated: true
@@ -156,7 +157,7 @@ jobs:
     if: ${{ inputs.linux_emulated && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-24.04
+      os: ubuntu-latest
       cibw_target: musllinux_loongarch64
       cibw_arch: loongarch64
       emulated: true
