@@ -28,24 +28,16 @@ test-command = [
     "python -m pytest {project}/tests",
 ]
 
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_*"
-before-all = ["dnf -y install gn"]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_{i686,riscv64,loongarch64}"
-before-all = []  # gn not available
-
-# [[tool.cibuildwheel.overrides]]
-# select = "*-*linux_*"
-# inherit.before-all = "append"
-# before-all = ...
+# [tool.cibuildwheel.linux]
+# before-all = [...]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
 inherit.before-all = "append"
 before-all = [
     "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
+    # alternatively, this could be handled with override blocks (longer) ...
+    "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64,loongarch64}
 ]
 
 [[tool.cibuildwheel.overrides]]
