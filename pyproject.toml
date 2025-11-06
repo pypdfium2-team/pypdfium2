@@ -88,7 +88,7 @@ before-all = [
 select = "*-manylinux_riscv64 *-musllinux_{aarch64,armv7l,riscv64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
-    "export GCC_ROOT=/usr/bin",
+    "export GCC_ROOT=/usr",
 ]
 
 [[tool.cibuildwheel.overrides]]
