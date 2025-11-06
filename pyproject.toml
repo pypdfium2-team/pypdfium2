@@ -67,10 +67,6 @@ before-all = [
     "cd ..",
 ]
 
-[tool.cibuildwheel.linux.environment]
-PDFIUM_PLATFORM = "sourcebuild-native"
-BUILD_PARAMS = "--vendor icu"
-
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
@@ -116,6 +112,10 @@ before-all = [
     "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
     "unlink '$GN_ARCHIVE'",
 ]
+
+[tool.cibuildwheel.linux.environment]
+PDFIUM_PLATFORM = "sourcebuild-native"
+BUILD_PARAMS = "--vendor icu"
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
