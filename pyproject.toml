@@ -74,25 +74,27 @@ BUILD_PARAMS = "--vendor icu"
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
+    "export GCC_ROOT=/opt/rh/gcc-toolset-14/root",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_riscv64 *-musllinux_{aarch64,armv7l,riscv64,loongarch64}"
+inherit.before-all = "append"
+before-all = [
+    "export GCC_ROOT=/usr/bin",
+]
+
+[[tool.cibuildwheel.overrides]]
+# this select must be a union of the above two selects
+select = "*-*linux_{aarch64,riscv64,loongarch64} *-musllinux_armv7l"
+inherit.before-all = "append"
+before-all = [
     "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
-    "export GCC_ROOT='/opt/rh/gcc-toolset-14/root'",
     "ln -s $GCC_ROOT/bin/gcc $GCC_ROOT/bin/$PREFIX-gcc",
     "ln -s $GCC_ROOT/bin/g++ $GCC_ROOT/bin/$PREFIX-g++",
     "ln -s $GCC_ROOT/bin/nm $GCC_ROOT/bin/$PREFIX-nm",
     "ln -s $GCC_ROOT/bin/readelf $GCC_ROOT/bin/$PREFIX-readelf",
     "ln -s $GCC_ROOT/bin/ar $GCC_ROOT/bin/$PREFIX-ar",
-]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux_{aarch64,armv7l,riscv64,loongarch64} *-manylinux_riscv64"
-inherit.before-all = "append"
-before-all = [
-    "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
-    "ln -s /usr/bin/gcc /usr/bin/$PREFIX-gcc",
-    "ln -s /usr/bin/g++ /usr/bin/$PREFIX-g++",
-    "ln -s /usr/bin/nm /usr/bin/$PREFIX-nm",
-    "ln -s /usr/bin/readelf /usr/bin/$PREFIX-readelf",
-    "ln -s /usr/bin/ar /usr/bin/$PREFIX-ar",
 ]
 
 [[tool.cibuildwheel.overrides]]
