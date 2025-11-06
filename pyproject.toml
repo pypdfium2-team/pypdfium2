@@ -34,7 +34,7 @@ before-all = ["dnf -y install gn"]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_{i686,riscv64,loongarch64}"
-before-all = []  # gn not available
+before-all = []  # gn not available from repo
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
@@ -80,16 +80,12 @@ before-all = [
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
-before-all = [
-    "export GCC_ROOT=/opt/rh/gcc-toolset-14/root",
-]
+before-all = ["export GCC_ROOT=/opt/rh/gcc-toolset-14/root"]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_riscv64 *-musllinux_{aarch64,armv7l,riscv64,loongarch64}"
 inherit.before-all = "append"
-before-all = [
-    "export GCC_ROOT=/usr",
-]
+before-all = ["export GCC_ROOT=/usr"]
 
 [[tool.cibuildwheel.overrides]]
 # this select must be a union of the above two selects
