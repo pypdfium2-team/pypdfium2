@@ -34,6 +34,12 @@ before-all = [
     "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64,loongarch64}
 ]
 
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+before-all = [
+    "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
+]
+
 # manylinux_armv7l uses a Ubuntu-based image, for lack of an RHEL-based one
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_armv7l"
@@ -58,12 +64,7 @@ before-all = [
     "CXX=g++ python3 build/gen.py --no-static-libstdc++ --allow-warnings",
     "ninja -C out",
     "cp ./out/gn /usr/local/bin/gn",
-]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux*"
-before-all = [
-    "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
+    "cd ..",
 ]
 
 [tool.cibuildwheel.linux.environment]
@@ -95,6 +96,7 @@ before-all = [
     "ln -s $GCC_ROOT/bin/nm $GCC_ROOT/bin/$PREFIX-nm",
     "ln -s $GCC_ROOT/bin/readelf $GCC_ROOT/bin/$PREFIX-readelf",
     "ln -s $GCC_ROOT/bin/ar $GCC_ROOT/bin/$PREFIX-ar",
+    "unset PREFIX GCC_ROOT",
 ]
 
 [[tool.cibuildwheel.overrides]]
