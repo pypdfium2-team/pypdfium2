@@ -31,7 +31,30 @@ test-command = [
 [tool.cibuildwheel.linux]
 before-all = [
     "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
-    "sh -c 'dnf -y install gn || true'",  # not manylinux_{riscv64,loongarch64}
+    "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64,loongarch64}
+]
+
+# manylinux_armv7l uses a Ubuntu-based image, for lack of an RHEL-based one
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_armv7l"
+before-all = [
+    "apt-get update",
+    "apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev ninja-build generate-ninja",
+]
+
+# no i686 prebuild of GN seems to be available at the usual places
+# i686 emulation is reasonably fast, so let's try to bootstrap it, doesn't seem too hard
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_i686"
+inherit.before-all = "append"
+before-all = [
+    # check python version, informational
+    "python3 --version",
+    "git clone https://gn.googlesource.com/gn/",
+    "cd gn/",
+    "CXX=g++ python3 build/gen.py --no-static-libstdc++ --allow-warnings",
+    "ninja -C out",
+    "cp ./out/gn /usr/local/bin/gn",
 ]
 
 [[tool.cibuildwheel.overrides]]
