@@ -28,23 +28,19 @@ test-command = [
     "python -m pytest {project}/tests",
 ]
 
-# [tool.cibuildwheel.linux]
-# before-all = [...]
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_*"
+before-all = ["dnf -y install gn"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_{i686,riscv64,loongarch64}"
+before-all = []  # gn not available
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
 inherit.before-all = "append"
 before-all = [
     "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
-    # alternatively, this could be handled with override blocks (longer) ...
-    "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64,loongarch64}
-]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux_*"
-inherit.before-all = "append"
-before-all = [
-    "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
 ]
 
 # manylinux_armv7l uses a Ubuntu-based image, for lack of an RHEL-based one
@@ -56,6 +52,13 @@ before-all = [
 ]
 # FIXME not available in cibuildwheel yet, but manylinux_2_31 is too old
 # manylinux-armv7l-image = "manylinux_2_35"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux_*"
+inherit.before-all = "append"
+before-all = [
+    "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
+]
 
 # For i686, no GN prebuilds seems to be available at the usual places.
 # Emulation is reasonably fast for this target, so let's try to bootstrap it.
