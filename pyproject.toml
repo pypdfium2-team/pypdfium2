@@ -37,6 +37,15 @@ select = "*-manylinux_{i686,riscv64,loongarch64}"
 before-all = []  # gn not available
 
 [[tool.cibuildwheel.overrides]]
+select = "*-*linux_*"
+inherit.before-all = "append"
+# cosmetics
+before-all = [
+    "git config --global advice.detachedHead false",
+    "git config --global advice.defaultBranchName false",
+]
+
+[[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
 inherit.before-all = "append"
 before-all = [
@@ -45,6 +54,7 @@ before-all = [
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux_*"
+inherit.before-all = "append"
 before-all = [
     "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
 ]
