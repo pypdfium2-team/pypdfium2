@@ -10,14 +10,14 @@ def main(arch=None):
     if not arch:
         proc = subprocess.run(["uname", "-m"], stdout=subprocess.PIPE)
         arch = proc.stdout.decode().strip()
-
+    
     if arch == "loongarch64":
         prefix = f"{arch}-unknown-linux-gnu"
-    elif arch == "armv7l":
+    elif arch in ("armv7l", "armv8l"):
         prefix = f"arm-linux-gnueabihf"
     else:
         prefix = f"{arch}-linux-gnu"
-
+    
     return prefix
 
 def main_cli(argv=sys.argv[1:]):
