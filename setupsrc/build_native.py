@@ -99,10 +99,10 @@ def _get_repo(url, target_dir, rev, reset=False, depth=1):
     
     # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
     mkdir(target_dir)
-    run_cmd(["git", "init"], cwd=target_dir)
+    run_cmd(["git", "-c", "advice.defaultBranchName=false", "init"], cwd=target_dir)
     run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
     run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
-    run_cmd(["git", "checkout", "FETCH_HEAD"], cwd=target_dir)
+    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
     
     return True
 

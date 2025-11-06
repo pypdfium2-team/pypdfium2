@@ -28,10 +28,19 @@ test-command = [
     "python -m pytest {project}/tests",
 ]
 
-[tool.cibuildwheel.linux]
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_*"
+before-all = ["dnf -y install gn"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_{i686,riscv64,loongarch64}"
+before-all = []  # gn not available
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_*"
+inherit.before-all = "append"
 before-all = [
     "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
-    "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64,loongarch64}
 ]
 
 # manylinux_armv7l uses a Ubuntu-based image, for lack of an RHEL-based one
@@ -43,6 +52,13 @@ before-all = [
 ]
 # FIXME not available in cibuildwheel yet, but manylinux_2_31 is too old
 # manylinux-armv7l-image = "manylinux_2_35"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux_*"
+inherit.before-all = "append"
+before-all = [
+    "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
+]
 
 # For i686, no GN prebuilds seems to be available at the usual places.
 # Emulation is reasonably fast for this target, so let's try to bootstrap it.
@@ -58,41 +74,35 @@ before-all = [
     "CXX=g++ python3 build/gen.py --no-static-libstdc++ --allow-warnings",
     "ninja -C out",
     "cp ./out/gn /usr/local/bin/gn",
+    "cd ..",
 ]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux*"
-before-all = [
-    "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
-]
-
-[tool.cibuildwheel.linux.environment]
-PDFIUM_PLATFORM = "sourcebuild-native"
-BUILD_PARAMS = "--vendor icu"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
 before-all = [
+    "export GCC_ROOT=/opt/rh/gcc-toolset-14/root",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_riscv64 *-musllinux_{aarch64,armv7l,riscv64,loongarch64}"
+inherit.before-all = "append"
+before-all = [
+    "export GCC_ROOT=/usr",
+]
+
+[[tool.cibuildwheel.overrides]]
+# this select must be a union of the above two selects
+select = "*-*linux_{aarch64,riscv64,loongarch64} *-musllinux_armv7l"
+inherit.before-all = "append"
+before-all = [
     "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
-    "export GCC_ROOT='/opt/rh/gcc-toolset-14/root'",
     "ln -s $GCC_ROOT/bin/gcc $GCC_ROOT/bin/$PREFIX-gcc",
     "ln -s $GCC_ROOT/bin/g++ $GCC_ROOT/bin/$PREFIX-g++",
     "ln -s $GCC_ROOT/bin/nm $GCC_ROOT/bin/$PREFIX-nm",
     "ln -s $GCC_ROOT/bin/readelf $GCC_ROOT/bin/$PREFIX-readelf",
     "ln -s $GCC_ROOT/bin/ar $GCC_ROOT/bin/$PREFIX-ar",
-]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux_{aarch64,armv7l,riscv64,loongarch64} *-manylinux_riscv64"
-inherit.before-all = "append"
-before-all = [
-    "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
-    "ln -s /usr/bin/gcc /usr/bin/$PREFIX-gcc",
-    "ln -s /usr/bin/g++ /usr/bin/$PREFIX-g++",
-    "ln -s /usr/bin/nm /usr/bin/$PREFIX-nm",
-    "ln -s /usr/bin/readelf /usr/bin/$PREFIX-readelf",
-    "ln -s /usr/bin/ar /usr/bin/$PREFIX-ar",
+    "unset PREFIX GCC_ROOT",
 ]
 
 [[tool.cibuildwheel.overrides]]
@@ -112,6 +122,10 @@ before-all = [
     "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
     "unlink '$GN_ARCHIVE'",
 ]
+
+[tool.cibuildwheel.linux.environment]
+PDFIUM_PLATFORM = "sourcebuild-native"
+BUILD_PARAMS = "--vendor icu"
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
