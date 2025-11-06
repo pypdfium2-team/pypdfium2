@@ -12,11 +12,14 @@ on:
       linux_main:
         default: true
         type: boolean
+      linux_fastemu:
+        default: true
+        type: boolean
       linux_ibm:
         # XXX will change to true if and when we get access to IBM's native runners
         default: false
         type: boolean
-      linux_emulated:
+      linux_emu:
         default: false
         type: boolean
       linux_glibc:
@@ -44,15 +47,6 @@ jobs:
       cibw_arch: x86_64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  linux_arm64:
-    if: ${{ inputs.linux_main && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      cibw_target: manylinux_aarch64
-      cibw_arch: aarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
   musllinux_x64:
     if: ${{ inputs.linux_main && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
@@ -60,6 +54,15 @@ jobs:
       os: ubuntu-latest
       cibw_target: musllinux_x86_64
       cibw_arch: x86_64
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
+  linux_arm64:
+    if: ${{ inputs.linux_main && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-24.04-arm
+      cibw_target: manylinux_aarch64
+      cibw_arch: aarch64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_arm64:
@@ -71,12 +74,67 @@ jobs:
       cibw_arch: aarch64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
+  # i686 emulation is fair enough with an x86_64 host
+  
+  linux_i686:
+    if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: manylinux_i686
+      cibw_arch: i686
+      emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
+  musllinux_i686:
+    if: ${{ inputs.linux_fastemu && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: musllinux_i686
+      cibw_arch: i686
+      emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
+  # ARM 32-bit emulation seems as fast as native when using an ARM64 host
+  # Beware: uname -m reports the containers as armv8l, not sure of the implications.
+  
+  linux_arm32:
+    if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-24.04-arm
+      cibw_target: manylinux_armv7l
+      cibw_arch: armv7l
+      emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
+  musllinux_arm32:
+    if: ${{ inputs.linux_fastemu && !inputs.linux_emu && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-24.04-arm
+      cibw_target: musllinux_armv7l
+      cibw_arch: armv7l
+      emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
   linux_ppc64le:
     if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest  # XXX
       cibw_target: manylinux_ppc64le
+      cibw_arch: ppc64le
+      emulated: true  # XXX
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
+  musllinux_ppc64le:
+    if: ${{ inputs.linux_ibm && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest  # XXX
+      cibw_target: musllinux_ppc64le
       cibw_arch: ppc64le
       emulated: true  # XXX
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
@@ -91,16 +149,6 @@ jobs:
       emulated: true  # XXX
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  musllinux_ppc64le:
-    if: ${{ inputs.linux_ibm && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest  # XXX
-      cibw_target: musllinux_ppc64le
-      cibw_arch: ppc64le
-      emulated: true  # XXX
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
   musllinux_s390x:
     if: ${{ inputs.linux_ibm && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
@@ -112,19 +160,19 @@ jobs:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   # pdfium-binaries don't currently build armv7l for musl
+  # Note, building on an arm64 host is much faster, but uname -m then reports the containers as armv8l. See the arm32 section above.
   musllinux_armv7l:
-    if: ${{ inputs.linux_emulated && inputs.linux_musl }}
+    if: ${{ inputs.linux_emu && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      # Let's guess that an arm64 host might be better at emulating armv7l than an x86_64 host.
-      os: ubuntu-24.04-arm
+      os: ubuntu-latest
       cibw_target: musllinux_armv7l
       cibw_arch: armv7l
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_riscv64:
-    if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
+    if: ${{ inputs.linux_emu && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
@@ -133,18 +181,8 @@ jobs:
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  linux_loongarch64:
-    if: ${{ inputs.linux_emulated && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: manylinux_loongarch64
-      cibw_arch: loongarch64
-      emulated: true
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
   musllinux_riscv64:
-    if: ${{ inputs.linux_emulated && inputs.linux_musl }}
+    if: ${{ inputs.linux_emu && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
@@ -153,8 +191,18 @@ jobs:
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
+  linux_loongarch64:
+    if: ${{ inputs.linux_emu && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: manylinux_loongarch64
+      cibw_arch: loongarch64
+      emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
   musllinux_loongarch64:
-    if: ${{ inputs.linux_emulated && inputs.linux_musl }}
+    if: ${{ inputs.linux_emu && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
