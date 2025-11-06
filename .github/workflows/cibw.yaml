@@ -99,15 +99,17 @@ jobs:
   # ARM 32-bit emulation seems as fast as native when using an ARM64 host
   # Beware: uname -m reports the containers as armv8l, not sure of the implications.
   
-  linux_arm32:
-    if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      cibw_target: manylinux_armv7l
-      cibw_arch: armv7l
-      emulated: true
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  # XXX unable to get a recent enough compiler on this target
+  #     manylinux_2_31 container is too old :(
+  # linux_arm32:
+  #   if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
+  #   uses: ./.github/workflows/cibw_one.yaml
+  #   with:
+  #     os: ubuntu-24.04-arm
+  #     cibw_target: manylinux_armv7l
+  #     cibw_arch: armv7l
+  #     emulated: true
+  #     cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_arm32:
     if: ${{ inputs.linux_fastemu && !inputs.linux_emu && inputs.linux_musl }}
