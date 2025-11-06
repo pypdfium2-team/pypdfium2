@@ -145,9 +145,8 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
     if summary:
         relnotes += summary
     
-    clog = ""
     # even if python code was not updated, there will be a release commit
-    clog += _get_log(
+    clog = _get_log(
         "pypdfium2", RepositoryURL, ProjectDir,
         prev_tag, new_tag,
         "/tree/", "/commit/", "",
