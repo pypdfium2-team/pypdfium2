@@ -65,12 +65,11 @@ before-all = [
 select = "*-manylinux_i686"
 inherit.before-all = "append"
 before-all = [
-    # check python version, informational
-    "python3 --version",
     "git clone https://gn.googlesource.com/gn/",
     "cd gn/",
-    # TODO skip building the unittests
-    "CXX=g++ python3 build/gen.py --no-static-libstdc++ --allow-warnings",
+    "git checkout a0c5124a50608595a9aadebc4297e854ebd32c53",
+    "git apply -v --ignore-whitespace {project}/patches/gn.patch",
+    "CXX=g++ python3 build/gen.py --no-last-commit-position --no-static-libstdc++ --allow-warnings",
     "ninja -C out",
     "cp ./out/gn /usr/local/bin/gn",
     "cd ..",
