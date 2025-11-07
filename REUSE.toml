@@ -100,11 +100,11 @@ Obtained from img2pdf. No individual license stated for this data file.
 
 [[annotations]]
 path = [
-    "pdfium_patches/public_headers.patch",
-    "pdfium_patches/win/use_resources_rc.patch",
-    "pdfium_patches/win/build.patch",
-    "pdfium_patches/win/resources.rc",
-    "pdfium_patches/android_crossbuild.patch"
+    "patches/public_headers.patch",
+    "patches/win/use_resources_rc.patch",
+    "patches/win/build.patch",
+    "patches/win/resources.rc",
+    "patches/android_crossbuild.patch"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
@@ -121,12 +121,12 @@ Unchanged/deleted code is by PDFium, added code by pdfium-binaries.
 
 [[annotations]]
 path = [
-    "pdfium_patches/single_lib.patch",
-    "pdfium_patches/ffp_contract.patch",
-    "pdfium_patches/avoid_new_clang_flags.patch",
-    "pdfium_patches/system_libcxx_with_clang.patch",
-    "pdfium_patches/siso.patch",
-    "pdfium_patches/android_build.patch"
+    "patches/single_lib.patch",
+    "patches/ffp_contract.patch",
+    "patches/avoid_new_clang_flags.patch",
+    "patches/system_libcxx_with_clang.patch",
+    "patches/siso.patch",
+    "patches/android_build.patch"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
@@ -136,7 +136,7 @@ SPDX-FileCopyrightText = [
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
-path = "pdfium_patches/cibuildwheel.patch"
+path = "patches/cibuildwheel.patch"
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
     "2025 wojiushixiaobai <296015668@qq.com>",
@@ -146,8 +146,8 @@ SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
 path = [
-    "pdfium_patches/bigendian.patch",
-    "pdfium_patches/bigendian_test.patch",
+    "patches/bigendian.patch",
+    "patches/bigendian_test.patch",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
@@ -161,7 +161,7 @@ Repo does not have an own license file, but assumably the patches are being made
 '''
 
 [[annotations]]
-path = "pdfium_patches/abseil_ppc64le_musl.patch"
+path = "patches/abseil_ppc64le_musl.patch"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 The abseil authors"
 SPDX-License-Identifier = "Apache-2.0"
