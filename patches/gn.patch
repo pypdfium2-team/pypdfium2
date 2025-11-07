@@ -1,5 +1,5 @@
 diff --git a/build/gen.py b/build/gen.py
-index 5d161e4e..7798dbdc 100755
+index 5d161e4..5422e5d 100755
 --- a/build/gen.py
 +++ b/build/gen.py
 @@ -239,8 +239,9 @@ def is_gcc(cxx):
@@ -14,19 +14,9 @@ index 5d161e4e..7798dbdc 100755
  
    return ret.returncode == 0 and "#define __GNUC__" in ret.stdout and not "#define __clang__" in ret.stdout
  
-@@ -969,7 +970,8 @@ def WriteGNNinja(path, platform, host, options, args_list):
- 
-   # we just build static libraries that GN needs
-   executables['gn']['libs'].extend(static_libraries.keys())
--  executables['gn_unittests']['libs'].extend(static_libraries.keys())
-+  # XXX(pypdfium2) do not build unittests
-+  del executables['gn_unittests']
- 
-   WriteGenericNinja(path, static_libraries, executables, cxx, ar, ld,
-                     platform, host, options, args_list,
 diff --git a/out/last_commit_position.h b/out/last_commit_position.h
 new file mode 100644
-index 00000000..5e6b8e48
+index 0000000..5e6b8e4
 --- /dev/null
 +++ b/out/last_commit_position.h
 @@ -0,0 +1,7 @@

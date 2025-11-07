@@ -68,7 +68,7 @@ before-all = [
     "python3 {project}/utils/shallow_clone_rev.py https://gn.googlesource.com/gn/ a0c5124a50608595a9aadebc4297e854ebd32c53 gn && cd gn/",
     "git apply -v --ignore-whitespace {project}/patches/gn.patch",
     "CXX=g++ python3 build/gen.py --no-last-commit-position --no-static-libstdc++ --allow-warnings",
-    "ninja -C out",
+    "ninja -C out gn",
     "cp ./out/gn /usr/local/bin/gn",
     "cd ..",
 ]
