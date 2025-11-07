@@ -70,7 +70,7 @@ before-all = [
     "git clone https://gn.googlesource.com/gn/",
     "cd gn/",
     # TODO skip building the unittests
-    "CXX=g++-10 python3 build/gen.py --no-static-libstdc++ --allow-warnings",
+    "CXX=g++ python3 build/gen.py --no-static-libstdc++ --allow-warnings",
     "ninja -C out",
     "cp ./out/gn /usr/local/bin/gn",
     "cd ..",
