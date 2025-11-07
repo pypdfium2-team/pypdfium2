@@ -74,7 +74,31 @@ jobs:
       cibw_arch: aarch64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  # i686 emulation is fair enough with an x86_64 host
+  # ARM 32-bit emulation seems about as fast as native when using an ARM64 host
+  # `uname -m` reports the containers as armv8l for some reason, but the author tested a manylinux wheel produced here on Raspberry Pi 2B (armv7l) locally, and it does seem to work.
+  
+  linux_arm32:
+    if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-24.04-arm
+      cibw_target: manylinux_armv7l
+      cibw_arch: armv7l
+      emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
+  # pdfium-binaries don't currently build armv7l for musl, so this may be an actual win for the project
+  musllinux_arm32:
+    if: ${{ inputs.linux_fastemu && inputs.linux_musl }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-24.04-arm
+      cibw_target: musllinux_armv7l
+      cibw_arch: armv7l
+      emulated: true
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+  
+  # x86_64 to i686 emulation is fair enough
   
   linux_i686:
     if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
@@ -93,29 +117,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: musllinux_i686
       cibw_arch: i686
-      emulated: true
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
-  # ARM 32-bit emulation seems as fast as native when using an ARM64 host
-  # Beware: uname -m reports the containers as armv8l, not sure of the implications.
-  
-  linux_arm32:
-    if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      cibw_target: manylinux_armv7l
-      cibw_arch: armv7l
-      emulated: true
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
-  musllinux_arm32:
-    if: ${{ inputs.linux_fastemu && !inputs.linux_emu && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      cibw_target: musllinux_armv7l
-      cibw_arch: armv7l
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
@@ -157,18 +158,6 @@ jobs:
       cibw_target: musllinux_s390x
       cibw_arch: s390x
       emulated: true  # XXX
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
-  # pdfium-binaries don't currently build armv7l for musl
-  # Note, building on an arm64 host is much faster, but uname -m then reports the containers as armv8l. See the arm32 section above.
-  musllinux_armv7l:
-    if: ${{ inputs.linux_emu && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: musllinux_armv7l
-      cibw_arch: armv7l
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_riscv64:
