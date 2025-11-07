@@ -48,7 +48,7 @@ before-all = [
 select = "*-manylinux_armv7l"
 before-all = [
     "apt-get update",
-    "apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev ninja-build",  # generate-ninja
+    "apt-get install -y g++-10 ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev",  # generate-ninja
 ]
 # FIXME not available in cibuildwheel yet, but manylinux_2_31 is too old
 # manylinux-armv7l-image = "manylinux_2_35"
@@ -63,7 +63,7 @@ before-all = [
 # For i686, no GN prebuilds seems to be available at the usual places.
 # Emulation is reasonably fast for this target, so let's try to bootstrap it.
 [[tool.cibuildwheel.overrides]]
-select = "*-manylinux_i686"  # {i686,armv7l}
+select = "*-manylinux_{i686,armv7l}"
 inherit.before-all = "append"
 before-all = [
     # check python version, informational
@@ -71,7 +71,7 @@ before-all = [
     "git clone https://gn.googlesource.com/gn/",
     "cd gn/",
     # TODO skip building the unittests
-    "CXX=g++ python3 build/gen.py --no-static-libstdc++ --allow-warnings",
+    "CXX=g++-10 python3 build/gen.py --no-static-libstdc++ --allow-warnings",
     "ninja -C out",
     "cp ./out/gn /usr/local/bin/gn",
     "cd ..",
