@@ -84,7 +84,7 @@ if IS_ANDROID:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
-def _get_repo(url, target_dir, rev, reset=False, depth=1):
+def _get_repo(url, rev, target_dir, reset=False, depth=1):
     
     if target_dir.exists():
         if reset:
@@ -97,12 +97,7 @@ def _get_repo(url, target_dir, rev, reset=False, depth=1):
     if callable(rev):
         rev = rev()  # resolve deferred
     
-    # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
-    mkdir(target_dir)
-    run_cmd(["git", "-c", "advice.defaultBranchName=false", "init"], cwd=target_dir)
-    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
-    run_cmd(["git", "fetch", "--depth", str(depth), "origin", rev], cwd=target_dir)
-    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
+    git_clone_rev(url, rev, target_dir)
     
     return True
 
@@ -130,7 +125,7 @@ class _DeferredInfo:
 
 def _fetch_dep(info, name, target_dir, reset=False):
     # parse out DEPS revisions only when we actually need them
-    return _get_repo(DEPS_URLS[name], target_dir, rev=lambda: info.deps[name], reset=reset)
+    return _get_repo(DEPS_URLS[name], lambda: info.deps[name], target_dir, reset=reset)
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
@@ -156,7 +151,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, reset, v
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
     # pass through reset only for the repositories we actually patch
-    do_patches = _get_repo(PDFIUM_URL, PDFIUM_DIR, rev=pdfium_rev, reset=reset)
+    do_patches = _get_repo(PDFIUM_URL, pdfium_rev, PDFIUM_DIR, reset=reset)
     if do_patches:
         autopatch_dir(
             PDFIUM_DIR/"public"/"cpp", "*.h",

@@ -871,6 +871,16 @@ def git_apply_patch(patch, cwd, git_args=()):
     run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
 
 
+def git_clone_rev(url, rev, target_dir, depth=1):
+    # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
+    mkdir(target_dir)
+    depth_param = ["--depth", str(depth)] if depth else []
+    run_cmd(["git", "-c", "advice.defaultBranchName=false", "init"], cwd=target_dir)
+    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
+    run_cmd(["git", "fetch", *depth_param, "origin", rev], cwd=target_dir)
+    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
+
+
 def _to_gn(value):
     if isinstance(value, bool):
         return str(value).lower()
