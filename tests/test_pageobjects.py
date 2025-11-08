@@ -48,7 +48,10 @@ def test_misc_objects():
     assert page.pdf is pdf
     
     for obj in page.get_objects():
-        assert type(obj) is pdfium.PdfObject
+        if obj.type == pdfium_c.FPDF_PAGEOBJ_TEXT:
+            assert type(obj) is pdfium.PdfTextObj
+        else:
+            assert type(obj) is pdfium.PdfObject
         assert isinstance(obj.raw, pdfium_c.FPDF_PAGEOBJECT)
         assert obj.type in (pdfium_c.FPDF_PAGEOBJ_TEXT, pdfium_c.FPDF_PAGEOBJ_PATH)
         assert obj.level == 0
@@ -278,3 +281,12 @@ def test_remove_image_in_xobject():
     output_path = OutputDir / "remove_image_in_xobject.pdf"
     pdf.save(output_path)
     assert output_path.exists()
+
+
+def test_loose_pageobject():
+    src_pdf = pdfium.PdfDocument(TestFiles.multipage)
+    dest_pdf = pdfium.PdfDocument.new()
+    xobject = src_pdf.page_as_xobject(0, dest_pdf)
+    po = xobject.as_pageobject()
+    assert po._finalizer.alive
+    po.close()

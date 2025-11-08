@@ -151,3 +151,23 @@ def test_get_text_bounded_defaults_with_rotation():
     
     text = textpage.get_text_bounded()
     assert len(text) == 438
+
+
+def test_font_helpers():
+    pdf = pdfium.PdfDocument(TestFiles.text)
+    page = pdf[0]
+    textpage = page.get_textpage()
+    
+    textobj = textpage.get_textobj(0)
+    text = textobj.extract()
+    font_size = textobj.get_font_size()
+    assert text == "Lorem ipsum dolor sit amet,"
+    assert font_size == 16
+    
+    fontobj = textobj.get_font()
+    base_name = fontobj.get_name("base")
+    family_name = fontobj.get_name("family")
+    weight = fontobj.get_weight()
+    assert base_name == "Ubuntu"
+    assert family_name == "Ubuntu"
+    assert weight == 400

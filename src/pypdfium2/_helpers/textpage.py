@@ -8,6 +8,7 @@ import logging
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
+from pypdfium2._helpers.pageobjects import PdfTextObj
 
 c_double = ctypes.c_double
 logger = logging.getLogger(__name__)
@@ -71,7 +72,9 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         
         buffer = ctypes.create_string_buffer(n_chars * 2)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
-        pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
+        n_out_chars = pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
+        assert n_chars == n_out_chars
+        
         return buffer.raw.decode("utf-16-le", errors=errors)
     
     
@@ -227,6 +230,20 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if not ok:
             raise PdfiumError("Failed to get rectangle. (Make sure count_rects() was called with default params once before subsequent get_rect() calls.)")
         return (l.value, b.value, r.value, t.value)
+    
+    
+    def get_textobj(self, index):
+        """
+        Returns:
+            PdfTextObj: A handle to the textobject that includes the char at *index*.
+        Tip:
+            Textobjects can also be obtained through :meth:`.PdfPage.get_objects`.
+        """
+        raw_obj = pdfium_c.FPDFText_GetTextObject(self, index)
+        if raw_obj is None:
+            raise PdfiumError(f"Failed to get textobject for char at index {index}.")
+        # The raw_obj is _not_ owned by the caller, and the textpage must remain alive while the textobject lives.
+        return PdfTextObj(raw_obj, textpage=self)
     
     
     def search(self, text, index=0, match_case=False, match_whole_word=False, consecutive=False, flags=0):
