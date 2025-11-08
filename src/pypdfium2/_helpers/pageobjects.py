@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfObject", "PdfImage")
+__all__ = ("PdfObject", "PdfImage", "PdfTextObj", "PdfFont")
 
 import ctypes
 from ctypes import c_uint, c_float
@@ -22,7 +22,7 @@ class PdfObject (pdfium_i.AutoCloseable):
     """
     Pageobject helper class.
     
-    When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead, depending on the object's :attr:`.type` (e. g. :class:`.PdfImage`).
+    When constructing a :class:`.PdfObject`, an instance of a more specific subclass may be returned instead, depending on the object's :attr:`.type` (e.g. :class:`.PdfImage`, :class:`.PdfTextObj`).
     
     Note:
         :meth:`.PdfObject.close` only takes effect on loose pageobjects.
@@ -45,12 +45,13 @@ class PdfObject (pdfium_i.AutoCloseable):
             Zero if the object is not nested in a Form XObject.
     """
     
-    
     def __new__(cls, raw, *args, **kwargs):
         
         type = pdfium_c.FPDFPageObj_GetType(raw)
         if type == pdfium_c.FPDF_PAGEOBJ_IMAGE:
             instance = super().__new__(PdfImage)
+        elif type == pdfium_c.FPDF_PAGEOBJ_TEXT:
+            instance = super().__new__(PdfTextObj)
         else:
             instance = super().__new__(PdfObject)
         
@@ -72,6 +73,7 @@ class PdfObject (pdfium_i.AutoCloseable):
             elif self.pdf is not page.pdf:
                 raise ValueError("*page* must belong to *pdf* when constructing a pageobject.")
         
+        # TODO if page is not None, hold it in the finalizer, unless the pageobject is detached from the page
         super().__init__(pdfium_c.FPDFPageObj_Destroy, needs_free=(page is None))
     
     
@@ -153,6 +155,102 @@ class PdfObject (pdfium_i.AutoCloseable):
         ok = pdfium_c.FPDFPageObj_TransformF(self, matrix)
         if not ok:
             raise PdfiumError("Failed to transform pageobject with matrix.")
+
+
+class PdfTextObj (PdfObject):
+    """
+    Textobject helper class.
+    
+    You may want to call :meth:`.PdfPage.get_objects` or :meth:`.PdfTextPage.get_textobj` to obtain an instance of this class.
+    """
+    
+    # TODO hold parent object in finalizer
+    def __init__(self, *args, textpage=None, **kwargs):
+        if textpage is not None:
+            kwargs.update(page=textpage.page, pdf=textpage.page.pdf)
+        super().__init__(*args, **kwargs)
+        self.textpage = textpage
+    
+    def extract(self):
+        """
+        Returns:
+            str: The objects's text content.
+        """
+        bufsize = pdfium_c.FPDFTextObj_GetText(self, self.textpage, None, 0)
+        if bufsize == 0:
+            raise PdfiumError("Failed to get text from textobject.")
+        
+        buffer = ctypes.create_string_buffer(bufsize)
+        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
+        pdfium_c.FPDFTextObj_GetText(self, self.textpage, buffer_ptr, bufsize)
+        
+        return buffer.raw[:bufsize-2].decode("utf-16-le")
+    
+    def get_font(self):
+        """
+        Returns:
+            PdfFont: Handle to the object's font. Provides name and weight info.
+        """
+        # The font object is _not_ owned by the caller, and the PdfTextObj must remain alive while the font object lives.
+        raw_font = pdfium_c.FPDFTextObj_GetFont(self)
+        return PdfFont(raw_font, self)
+    
+    def get_font_size(self):
+        """
+        Returns:
+            float: Font size used by the object's text, in PDF canvas units (typically 1/72in).
+        """
+        r_size = ctypes.c_float()
+        ok = pdfium_c.FPDFTextObj_GetFontSize(self, r_size)
+        if not ok:
+            raise PdfiumError("Failed to get font size.")
+        return r_size.value
+
+
+class PdfFont (pdfium_i.AutoCastable):
+    """
+    Font helper class.
+    """
+    
+    # TODO hold parent in finalizer
+    def __init__(self, raw, parent=None):
+        self.raw = raw
+        self.parent = parent
+    
+    def _get_name_impl(self, api, which):
+        
+        bufsize = api(self, None, 0)
+        if bufsize == 0:
+            raise PdfiumError(f"Failed to get font {which} name.")
+        
+        buffer = ctypes.create_string_buffer(bufsize)
+        api(self, buffer, bufsize)
+        
+        return buffer.value.decode("utf-8")
+    
+    def get_base_name(self):
+        """
+        Returns:
+            str: The base font name.
+        """
+        return self._get_name_impl(pdfium_c.FPDFFont_GetBaseFontName, "base")
+    
+    def get_family_name(self):
+        """
+        Returns:
+            str: The font family name.
+        """
+        return self._get_name_impl(pdfium_c.FPDFFont_GetFamilyName, "family")
+    
+    def get_weight(self):
+        """
+        Returns:
+            int: The font's weight. Typical values are 400 (normal) and 700 (bold).
+        """
+        weight = pdfium_c.FPDFFont_GetWeight(self)
+        if weight == -1:
+            raise PdfiumError("Failed to get font weight.")
+        return weight
 
 
 class PdfImage (PdfObject):
