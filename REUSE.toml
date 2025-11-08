@@ -126,7 +126,8 @@ path = [
     "patches/avoid_new_clang_flags.patch",
     "patches/system_libcxx_with_clang.patch",
     "patches/siso.patch",
-    "patches/android_build.patch"
+    "patches/android_build.patch",
+    "patches/gn.patch",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [

@@ -59,7 +59,7 @@ before-all = [
     "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
 ]
 
-# For i686, no GN prebuilds seems to be available at the usual places.
+# For i686, no GN prebuilds seem to be available at the usual places.
 # Emulation is reasonably fast for this target, so let's try to bootstrap it.
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_i686"
