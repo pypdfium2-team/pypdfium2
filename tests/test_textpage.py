@@ -151,3 +151,22 @@ def test_get_text_bounded_defaults_with_rotation():
     
     text = textpage.get_text_bounded()
     assert len(text) == 438
+
+@pytest.mark.parametrize(
+    "index,character,font_size,font_name,font_weight",
+    [
+        (0, "L", 16.0, "Ubuntu", 400),
+        (5, " ", 16.0, "Ubuntu", 400),
+        (27, "\r", 1.0, None, None),
+        (28, "\n", 1.0, None, None),
+        (43, "i", 16.0, "Ubuntu", 400),
+    ],
+)
+def test_get_font(index, character, font_size, font_name, font_weight):
+    pdf = pdfium.PdfDocument(TestFiles.text)
+    page = pdf[0]
+    textpage = page.get_textpage()
+    assert textpage.get_text_range(index, 1) == character
+    assert textpage.get_font_size(index) == font_size
+    assert textpage.get_font_name(index) == font_name
+    assert textpage.get_font_weight(index) == font_weight
