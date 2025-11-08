@@ -160,8 +160,57 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if n_rects == -1:
             raise PdfiumError("Failed to count rectangles.")
         return n_rects
-    
-    
+
+    def get_font_size(self, index=0):
+        """
+        Get the font size of a particular character.
+
+        Parameters:
+            index (int): Index of the character of interest.
+        Returns:
+            float: The font size of the particular character in points. Note
+                that PDFium outputs 1.0 when the font size is unknown.
+        """
+        font_size = pdfium_c.FPDFText_GetFontSize(self, index)
+        return font_size
+
+    def get_font_name(self, index=0):
+        """
+        Get the font name of a particular character.
+
+        Parameters:
+            index (int): Index of the character of interest.
+        Returns:
+            str | None : The font name of the particular character, or None
+                if the font name cannot be obtained.
+        """
+        flags = ctypes.c_int()
+        n_bytes = pdfium_c.FPDFText_GetFontInfo(self, index, None, 0, flags)
+        if n_bytes == 0:
+            # Gracefully handle errors since escape characters trigger these
+            return None
+        buffer = ctypes.create_string_buffer(n_bytes)
+        pdfium_c.FPDFText_GetFontInfo(self, index, buffer, n_bytes, flags)
+        # The NUL terminator is chopped off automatically
+        font_name = buffer.value.decode("utf-8")
+        return font_name
+
+    def get_font_weight(self, index=0):
+        """
+        Get the font weight of a particular character.
+
+        Parameters:
+            index (int): Index of the character of interest.
+        Returns:
+            int | None : The font weight of the particular character, or None
+                if the font weight cannot be obtained.
+        """
+        font_weight = pdfium_c.FPDFText_GetFontWeight(self, index)
+        if font_weight == -1:
+            # Gracefully handle errors since escape characters trigger these
+            return None
+        return font_weight
+
     def get_index(self, x, y, x_tol, y_tol):
         """
         Get the index of a character by position.
