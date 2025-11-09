@@ -58,6 +58,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         instance.type = type
         return instance
     
+    
     def __init__(self, raw, page=None, pdf=None, container=None, level=0):
         
         self.raw = raw
@@ -74,6 +75,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         
         # TODO if page is not None, hold it in the finalizer, unless the pageobject is detached from the page
         super().__init__(pdfium_c.FPDFPageObj_Destroy, needs_free=(page is None))
+    
     
     @property
     def parent(self):  # AutoCloseable hook
@@ -134,6 +136,7 @@ class PdfObject (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to get matrix of pageobject.")
         return PdfMatrix.from_raw(fs_matrix)
     
+    
     def set_matrix(self, matrix):
         """
         Parameters:
@@ -142,6 +145,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         ok = pdfium_c.FPDFPageObj_SetMatrix(self, matrix)
         if not ok:
             raise PdfiumError("Failed to set matrix of pageobject.")
+    
     
     def transform(self, matrix):
         """
