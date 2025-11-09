@@ -157,6 +157,8 @@ def test_font_helpers():
     pdf = pdfium.PdfDocument(TestFiles.text)
     page = pdf[0]
     textpage = page.get_textpage()
+    n_chars = textpage.count_chars()
+    print(n_chars)
     
     textobj = textpage.get_textobj(0)
     text = textobj.extract()
@@ -171,3 +173,6 @@ def test_font_helpers():
     assert base_name == "Ubuntu"
     assert family_name == "Ubuntu"
     assert weight == 400
+    
+    no_textobj = textpage.get_textobj(27)
+    assert no_textobj is None

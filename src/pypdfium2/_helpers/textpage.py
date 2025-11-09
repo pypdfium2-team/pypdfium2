@@ -235,13 +235,13 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     def get_textobj(self, index):
         """
         Returns:
-            PdfTextObj: A handle to the textobject that includes the char at *index*.
+            PdfTextObj | None: A handle to the textobject that includes the char at *index*, or None if it could not be resolved (e.g. escape character).
         Tip:
             Textobjects can also be obtained through :meth:`.PdfPage.get_objects`.
         """
         raw_obj = pdfium_c.FPDFText_GetTextObject(self, index)
         if not raw_obj:
-            raise PdfiumError(f"Failed to get textobject for char at index {index}.")
+            return None
         # The raw_obj is _not_ owned by the caller, and the textpage must remain alive while the textobject lives.
         return PdfTextObj(raw_obj, textpage=self)
     
