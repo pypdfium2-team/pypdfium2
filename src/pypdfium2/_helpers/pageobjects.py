@@ -218,20 +218,7 @@ class PdfFont (pdfium_i.AutoCastable):
         self.raw = raw
         self.parent = parent
     
-    def get_name(self, which="base"):
-        """
-        Parameters:
-            which (str):
-                Whether to retrieve the font's "base" or "family" name. Default is "base".
-        Returns:
-            str: The font name.
-        """
-        if which == "base":
-            api = pdfium_c.FPDFFont_GetBaseFontName
-        elif which == "family":
-            api = pdfium_c.FPDFFont_GetFamilyName
-        else:
-            raise ValueError(f"{which!r}")
+    def _get_name_impl(self, api, which):
         
         bufsize = api(self, None, 0)
         if bufsize == 0:
@@ -242,6 +229,20 @@ class PdfFont (pdfium_i.AutoCastable):
         assert out_bufsize == bufsize
         
         return buffer.value.decode("utf-8")
+    
+    def get_base_name(self):
+        """
+        Returns:
+            str: The base font name.
+        """
+        return self._get_name_impl(pdfium_c.FPDFFont_GetBaseFontName, "base")
+    
+    def get_family_name(self):
+        """
+        Returns:
+            str: The font family name.
+        """
+        return self._get_name_impl(pdfium_c.FPDFFont_GetFamilyName, "family")
     
     def get_weight(self):
         """

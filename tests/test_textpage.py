@@ -167,8 +167,8 @@ def test_font_helpers():
     assert font_size == 16
     
     fontobj = textobj.get_font()
-    base_name = fontobj.get_name("base")
-    family_name = fontobj.get_name("family")
+    base_name = fontobj.get_base_name()
+    family_name = fontobj.get_family_name()
     weight = fontobj.get_weight()
     assert base_name == "Ubuntu"
     assert family_name == "Ubuntu"
