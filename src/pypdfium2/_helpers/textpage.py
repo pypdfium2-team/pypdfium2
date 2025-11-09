@@ -240,7 +240,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             Textobjects can also be obtained through :meth:`.PdfPage.get_objects`.
         """
         raw_obj = pdfium_c.FPDFText_GetTextObject(self, index)
-        if raw_obj is None:
+        if not raw_obj:
             raise PdfiumError(f"Failed to get textobject for char at index {index}.")
         # The raw_obj is _not_ owned by the caller, and the textpage must remain alive while the textobject lives.
         return PdfTextObj(raw_obj, textpage=self)
