@@ -204,7 +204,7 @@ class PdfTextObj (PdfObject):
         return r_size.value
 
 
-class PdfFont (pdfium_i.AutoCloseable):
+class PdfFont (pdfium_i.AutoCastable):
     """
     Font helper class.
     """
