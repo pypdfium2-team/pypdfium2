@@ -4,6 +4,7 @@
 import re
 import pytest
 import pypdfium2 as pdfium
+import pypdfium2.raw as pdfium_c
 from .conftest import TestFiles
 
 
@@ -172,7 +173,7 @@ def test_font_helpers(
     n_chars = textpage.count_chars()
     print(n_chars)
 
-    assert textpage.get_text_range(index, 1) == character
+    assert chr(pdfium_c.FPDFText_GetUnicode(textpage.raw, index)) == character
     textobj = textpage.get_textobj(index)
     if text is None:
         assert textobj is None
