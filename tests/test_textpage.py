@@ -4,6 +4,7 @@
 import re
 import pytest
 import pypdfium2 as pdfium
+import pypdfium2.raw as pdfium_c
 from .conftest import TestFiles
 
 
@@ -153,26 +154,34 @@ def test_get_text_bounded_defaults_with_rotation():
     assert len(text) == 438
 
 
-def test_font_helpers():
+@pytest.mark.parametrize(
+    "index,character,text,font_size,base_name,family_name,weight",
+    [
+        (0, "L", "Lorem ipsum dolor sit amet,", 16.0, "Ubuntu", "Ubuntu", 400),
+        (5, " ", "Lorem ipsum dolor sit amet,", 16.0, "Ubuntu", "Ubuntu", 400),
+        (27, "\r", None, None, None, None, None),
+        (28, "\n", None, None, None, None, None),
+        (43, "i", "consectetur adipisici elit,", 16.0, "Ubuntu", "Ubuntu", 400),
+    ],
+)
+def test_font_helpers(
+    index, character, text, font_size, base_name, family_name, weight
+):
     pdf = pdfium.PdfDocument(TestFiles.text)
     page = pdf[0]
     textpage = page.get_textpage()
     n_chars = textpage.count_chars()
     print(n_chars)
-    
-    textobj = textpage.get_textobj(0)
-    text = textobj.extract()
-    font_size = textobj.get_font_size()
-    assert text == "Lorem ipsum dolor sit amet,"
-    assert font_size == 16
-    
-    fontobj = textobj.get_font()
-    base_name = fontobj.get_base_name()
-    family_name = fontobj.get_family_name()
-    weight = fontobj.get_weight()
-    assert base_name == "Ubuntu"
-    assert family_name == "Ubuntu"
-    assert weight == 400
-    
-    no_textobj = textpage.get_textobj(27)
-    assert no_textobj is None
+
+    assert chr(pdfium_c.FPDFText_GetUnicode(textpage.raw, index)) == character
+    textobj = textpage.get_textobj(index)
+    if text is None:
+        assert textobj is None
+    else:
+        assert textobj.extract() == text
+        assert textobj.get_font_size() == font_size
+
+        fontobj = textobj.get_font()
+        assert fontobj.get_base_name() == base_name
+        assert fontobj.get_family_name() == family_name
+        assert fontobj.get_weight() == weight
