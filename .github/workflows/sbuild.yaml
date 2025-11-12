@@ -12,12 +12,12 @@ on:
       macos:
         type: boolean
         default: true
-      macos_test:
-        type: boolean
-        default: false
       windows:
         type: boolean
         default: true
+      testtargets:
+        type: boolean
+        default: false
       py_version:
         type: string
         default: '3.12'
@@ -50,6 +50,14 @@ jobs:
     with:
       os: ubuntu-latest
       target_cpu: arm64
+      tag: ${{ inputs.glibc_tag }}_aarch64
+      py_version: ${{ inputs.py_version }}
+  
+  linux_native_arm64:
+    if: ${{ inputs.linux && inputs.testtargets }}
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: ubuntu-24.04-arm
       tag: ${{ inputs.glibc_tag }}_aarch64
       py_version: ${{ inputs.py_version }}
   
@@ -91,14 +99,14 @@ jobs:
   # test macOS the other way round while we still can
   
   macos_native_x64:
-    if: ${{ inputs.macos_test }}
+    if: ${{ inputs.macos && inputs.testtargets }}
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-15-intel
       py_version: ${{ inputs.py_version }}
   
   macos_cross_arm64:
-    if: ${{ inputs.macos_test }}
+    if: ${{ inputs.macos && inputs.testtargets }}
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-15-intel
