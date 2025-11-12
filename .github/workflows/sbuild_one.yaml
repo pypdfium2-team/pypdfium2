@@ -69,6 +69,10 @@ jobs:
         env:
           TARGET_CPU: ${{ inputs.target_cpu }}
       
+      - name: Install Linux native deps  # fallback
+        if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}
+        run: sudo apt-get install -y generate-ninja ninja-build
+      
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.
       - name: Install Windows cross deps
         if: ${{ startsWith(inputs.os, 'windows') && inputs.target_cpu }}

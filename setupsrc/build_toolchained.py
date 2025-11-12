@@ -20,6 +20,7 @@ PORTABLE_MODE = (Host._raw_system, Host._raw_machine) not in (
     ("darwin", "arm64"),
     ("windows", "amd64"),
 )
+CHECK = not PORTABLE_MODE
 
 # run `gn args --list out/Default/` for build config docs
 
@@ -36,15 +37,16 @@ DefaultConfig = {
 }
 if PORTABLE_MODE:
     DefaultConfig.update({
+        "use_sysroot": False,
         "clang_use_chrome_plugins": False,
         # clang may or may not be available for the host in question, so let's just use GCC
         "is_clang": False,
         "use_custom_libcxx": False,
         "use_libcxx_modules": False,
     })
-    # For targets that we know have sysroots, use them. Otherwise, set use_sysroots = False.
-    if Host.system == SysNames.linux and Host._raw_machine in ("aarch64", "ppc64le"):
-        DefaultConfig["use_sysroot"] = False
+    # Some targets that need PORTABLE_MODE do have a sysroot, and using it would result in lower glibc requirement. However, sysroot.gni needs newer GN than we can expect, so this is commented out.
+    # if Host.system == SysNames.linux and Host._raw_machine in ("aarch64", "ppc64le"):
+    #     del DefaultConfig["use_sysroot"]
 
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "11.0.0"
@@ -67,8 +69,6 @@ def dl_depottools(do_update):
         log("DepotTools: Download ...")
         run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SBDir)
     
-    os.environ["PATH"] = str(DepotToolsDir) + os.pathsep + os.environ["PATH"]
-    
     return is_update
 
 
@@ -86,7 +86,7 @@ def dl_pdfium(GClient, do_update, revision, target_os):
             # > By default, don't check out android. Will be overridden by gclient variables.
             # > TODO(crbug.com/875037): Remove this once the bug in gclient is fixed.
             extra_vars += ["--custom-var", "checkout_android=True"]
-        run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir)
+        run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=CHECK)
     
     if do_update:
         log("PDFium: download/sync ...")
@@ -94,7 +94,7 @@ def dl_pdfium(GClient, do_update, revision, target_os):
         if had_pdfium:
             args += ["-D", "--reset"]
         args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
-        run_cmd(args, cwd=SBDir)
+        run_cmd(args, cwd=SBDir, check=CHECK)
     
     return do_update
 
@@ -120,6 +120,9 @@ def patch_pdfium(build_ver, target_os):
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
         git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir/"build")
+    if PORTABLE_MODE:
+        # apply patch for older GN
+        git_apply_patch(PatchDir/"siso.patch", PDFiumDir/"build")
 
 
 def get_tool(name):
@@ -175,12 +178,14 @@ def main(
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
     
     dl_depottools(do_update)
+    orig_path = os.environ["PATH"]
+    os.environ["PATH"] = str(DepotToolsDir) + os.pathsep + os.environ["PATH"]
     
     GClient = get_tool("gclient")
-    GN = get_tool("gn")
-    Ninja = get_tool("ninja")
-    
     did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev, target_os)
+    if PORTABLE_MODE:
+        # remove depot_tools from PATH after checkout phase, gn/ninja wrappers don't work on unhandled platforms.
+        os.environ["PATH"] = orig_path
     
     if did_pdfium_sync:
         patch_pdfium(build_ver, target_os)
@@ -211,6 +216,8 @@ def main(
         if target_os == "android":
             config_dict["default_min_sdk_version"] = 21
     
+    GN = get_tool("gn")
+    Ninja = get_tool("ninja")
     config_str = serialize_gn_config(config_dict)
     configure(GN, config_str)
     build(Ninja, build_target)

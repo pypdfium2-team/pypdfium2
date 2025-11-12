@@ -19,9 +19,7 @@ on:
         type: string
         default: '3.12'
 
-# TODO
-# - Windows/macOS native?
-# - Linux/Windows ARM64 toolchained (not supported upstream yet)
+# TODO Windows/macOS native?
 
 jobs:
   

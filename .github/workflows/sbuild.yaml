@@ -25,6 +25,8 @@ on:
         type: string
         default: 'manylinux_2_17'
 
+# TODO Windows ARM64 toolchained?
+
 jobs:
   
   linux_x64:
@@ -58,7 +60,8 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-24.04-arm
-      tag: ${{ inputs.glibc_tag }}_aarch64
+      # if we don't use the sysroot or an older container, the glibc requirement is high
+      tag: manylinux_2_39_aarch64
       py_version: ${{ inputs.py_version }}
   
   linux_armv7l:
