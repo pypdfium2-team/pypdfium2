@@ -2,9 +2,6 @@
 # SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# This script has been tested on Linux/macOS/Windows x86_64 on GH Actions CI
-# However, it does not currently work on Linux aarch64 natively, since Google's toolchain doesn't seem to support that. Cross-compilation (by setting target_cpu in config) should work, though.
-
 import os
 import sys
 import argparse
@@ -39,12 +36,15 @@ DefaultConfig = {
 }
 if PORTABLE_MODE:
     DefaultConfig.update({
-        "use_sysroot": False,
         "clang_use_chrome_plugins": False,
+        # clang may or may not be available for the host in question, so let's just use GCC
         "is_clang": False,
         "use_custom_libcxx": False,
         "use_libcxx_modules": False,
     })
+    # For targets that we know have sysroots, use them. Otherwise, set use_sysroots = False.
+    if Host.system == SysNames.linux and Host._raw_machine in ("aarch64", "ppc64le"):
+        DefaultConfig["use_sysroot"] = False
 
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "11.0.0"
