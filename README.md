@@ -907,22 +907,28 @@ See `pypdfium2 --help` or `pypdfium2 $SUBCOMMAND --help` for available commands 
 
 ## Licensing
 
-*Disclaimer: This project is provided on an "as-is" basis. This is not legal advice, and there is ABSOLUTELY NO WARRANTY for any information provided in this document or elsewhere in the pypdfium2 project, including earlier revisions. We disclaim liability for any possible damages resulting from using this license information. It is the embedder's responsibility to check on licensing. See also [GitHub's disclaimer](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository#disclaimer).*
+> [!NOTE]
+> *Disclaimer: This project is provided on an "as-is" basis. This is not legal advice, and there is ABSOLUTELY NO WARRANTY for any information provided in this document or elsewhere in the pypdfium2 project, including earlier revisions.*
+> *We disclaim liability for any possible damages resulting from using this license information. It is the embedder's responsibility to check on licensing.*
+> *See also [GitHub's disclaimer](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository#disclaimer).*
 
 pypdfium2 itself is available by the terms and conditions of [`Apache-2.0`](LICENSES/Apache-2.0.txt) / [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt).
 Documentation and examples of pypdfium2 are licensed under [`CC-BY-4.0`](LICENSES/CC-BY-4.0.txt).
 pypdfium2 includes [SPDX](https://spdx.org/licenses/) headers in source files.
 License information for data files is provided in [`REUSE.toml`](REUSE.toml) as per the [`reuse` standard](https://reuse.software/spec/).
 
-PDFium is available under "a BSD-style license that can be found in \[its\] [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file" (see also [`BUILD_LICENSES/pdfium.txt`](BUILD_LICENSES/pdfium.txt) for a copy in this repository).<br>
+PDFium is available under "a BSD-style license that can be found in \[its\] [`LICENSE`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE) file".<br>
 Various other open-source licenses apply to dependencies included with PDFium.
-PDFium's license as well as dependency licenses have to be shipped with binary distributions.
+PDFium's license as well as dependency licenses have to be shipped with binary distributions.<br>
+See the [`BUILD_LICENSES/`](BUILD_LICENSES/) directory, or the licenses shipped with our wheel builds.
 
-pypdfium2 uses PDFium builds from the `pdfium-binaries` project, which is [MIT-licensed](BUILD_LICENSES/pdfium-binaries.txt) as of this writing.
-`pdfium-binaries` auto-collect dependency licenses in a build-specific way. We extract these alongside the binaries, and include them in wheel packages / installations. There is also an aggregated [`BUILD_LICENSES/`](BUILD_LICENSES/) directory for display in this repository.<br>
-Note that PDFium's dependencies might change over time. Please notify us if you think a relevant license is missing.
+PDFium's dependencies might change over time. Please notify us if you think a relevant license is missing.
 
-To the author's knowledge, pypdfium2 is one of the rare Python libraries capable of PDF rendering while not being covered by strong-copyleft licenses (such as the `GPL`).[^liberal_pdf_renderlibs]
+To the author's knowledge, pypdfium2 is one of the rare Python libraries capable of PDF rendering while not being covered by strong-copyleft licenses.[^liberal_pdf_renderlibs]
+
+> [!IMPORTANT]
+> The exact licensing situation depends on how the builds were made.<br>
+> Note that a subset of pypdfium2 builds might link with the `libgcc` runtime library. Check the builds you use and, if affected, libgcc's license to see if that's OK for your use.
 
 [^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java), but python bindings packages don't exist yet or are unsatisfactory. However, we wrote some gists that show it'd be possible in principle: [pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc) (+ [setup](https://gist.github.com/mara004/881d0c5a99b8444fd5d1d21a333b70f8)), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7).
 
