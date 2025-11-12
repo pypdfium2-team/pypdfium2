@@ -8,9 +8,6 @@ on:
     inputs:
       os:
         type: string
-      build_mode:
-        type: string
-        default: native
       compiler:
         type: string
         default: gcc
@@ -25,12 +22,6 @@ on:
       os:
         type: string
         default: ubuntu-latest
-      build_mode:
-        type: choice
-        default: native
-        options:
-          - native
-          - tc-syslibs
       compiler:
         type: choice
         default: gcc
@@ -80,11 +71,10 @@ jobs:
           sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
       
       - name: Install deps for native build
-        if: ${{ inputs.build_mode == 'native' }}
         run: sudo apt-get install -y generate-ninja ninja-build libglib2.0-dev
       
       - name: Set up symlinks for clang
-        if: ${{ inputs.build_mode == 'native' && inputs.compiler == 'clang' }}
+        if: ${{ inputs.compiler == 'clang' }}
         run: |
           sudo apt-get install -y llvm lld
           VERSION=18 ARCH=$(uname -m)
@@ -92,15 +82,10 @@ jobs:
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
       
       - name: Build PDFium (native, ${{ inputs.compiler }})
-        if: ${{ inputs.build_mode == 'native' }}
         run: python3 ./setupsrc/build_native.py --test --compiler "$COMPILER" $VENDOR_PARAM
         env:
           COMPILER: ${{ inputs.compiler }}
           VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
-      
-      - name: Build PDFium (toolchained, with syslibs)
-        if: ${{ inputs.build_mode == 'tc-syslibs' }}
-        run: python3 ./setupsrc/build_toolchained.py --use-syslibs
       
       - name: Show binary info
         run: |
@@ -119,7 +104,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           path: ./wheelhouse/*.whl
-          name: sbuild-${{ inputs.build_mode }}-${{ inputs.compiler }}_${{ inputs.os }}
+          name: sbuild-native-${{ inputs.compiler }}_${{ inputs.os }}
       
       - name: Install and test wheel
         run: |
