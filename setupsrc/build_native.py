@@ -145,7 +145,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, reset, vendor_deps):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, no_libclang_rt, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -212,6 +212,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, reset, v
                 f'ldflags += [ "-fuse-ld={lld_path}" ]',
                 is_regex=False, exp_count=1,
             )
+            if no_libclang_rt:
+                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR/"build")
     
     do_patches = _fetch_dep(deps_info, "abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
     if do_patches and (Host._raw_machine, Host._libc_name) == ("ppc64le", "musl"):
@@ -297,7 +299,7 @@ def setup_compiler(config, compiler, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, reset=False, vendor_deps=None):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, reset=False, vendor_deps=None):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -307,7 +309,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         if shutil.which("gcc"):
             compiler = Compiler.gcc
         elif shutil.which("clang"):
-            log("gcc not available, will try clang. Note, you may need to set up some symlinks to match the clang directory layout expected by pdfium. Also, make sure libclang_rt builtins are installed.")
+            log("gcc not available, will try clang. Note, you may need to set up some symlinks to match the clang directory layout expected by pdfium. Also, make sure libclang_rt builtins are installed, or pass --no-libclang-rt.")
             compiler = Compiler.clang
         else:
             raise RuntimeError("Neither gcc nor clang installed.")
@@ -328,7 +330,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = _DeferredInfo(deps_fields)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_path, reset, vendor_deps)
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_path, no_libclang_rt, reset, vendor_deps)
     setup_compiler(config, compiler, clang_path)
     prepare(config, build_dir, vendor_deps)
     build(with_tests, build_dir, n_jobs)
@@ -377,6 +379,11 @@ def parse_args(argv):
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
         help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr' or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
+    )
+    parser.add_argument(
+        "--no-libclang-rt",
+        action = "store_true",
+        help = "If using clang, whether to patch pdfium so that it does not insist on libclang_rt.builtins.a, and will use the compiler's default instead (commonly libgcc).",
     )
     # The --vendor option is provided for cibuildwheel clients:
     # - libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
