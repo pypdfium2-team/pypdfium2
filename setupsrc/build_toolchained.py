@@ -17,6 +17,12 @@ DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumOutDir = PDFiumDir / "out" / "Default"
 
+PORTABLE_MODE = (Host._raw_system, Host._raw_machine) not in (
+    ("linux", "x86_64"),
+    ("darwin", "x86_64"),
+    ("darwin", "arm64"),
+    ("windows", "amd64"),
+)
 
 # run `gn args --list out/Default/` for build config docs
 
@@ -31,18 +37,14 @@ DefaultConfig = {
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
 }
-
-SyslibsConfig = {
-    "use_sysroot": False,
-    "clang_use_chrome_plugins": False,
-    "use_system_freetype": True,
-    "use_system_lcms2": True,
-    "use_system_libjpeg": True,
-    "use_system_libopenjpeg2": True,
-    "use_system_libpng": True,
-    "use_system_zlib": True,
-    "use_system_libtiff": True,
-}
+if PORTABLE_MODE:
+    DefaultConfig.update({
+        "use_sysroot": False,
+        "clang_use_chrome_plugins": False,
+        "is_clang": False,
+        "use_custom_libcxx": False,
+        "use_libcxx_modules": False,
+    })
 
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "11.0.0"
@@ -74,6 +76,8 @@ def dl_pdfium(GClient, do_update, revision, target_os):
     
     had_pdfium = PDFiumDir.exists()
     if not had_pdfium or (target_os and do_update):
+        if PORTABLE_MODE:
+            run_cmd([sys.executable, "-m", "pip", "install", "httplib2==0.22.0"], cwd=None)
         log("PDFium: configure ...")
         do_update = True
         extra_vars = []
@@ -82,11 +86,11 @@ def dl_pdfium(GClient, do_update, revision, target_os):
             # > By default, don't check out android. Will be overridden by gclient variables.
             # > TODO(crbug.com/875037): Remove this once the bug in gclient is fixed.
             extra_vars += ["--custom-var", "checkout_android=True"]
-        run_cmd([GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir)
+        run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir)
     
     if do_update:
         log("PDFium: download/sync ...")
-        args = [GClient, "sync"]
+        args = [*GClient, "sync"]
         if had_pdfium:
             args += ["-D", "--reset"]
         args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
@@ -119,18 +123,25 @@ def patch_pdfium(build_ver, target_os):
 
 
 def get_tool(name):
-    bin = DepotToolsDir / name
-    if sys.platform.startswith("win32"):
-        bin = bin.with_suffix(".bat")
-    return bin
+    if PORTABLE_MODE:
+        if name == "gclient":
+            args = (sys.executable, DepotToolsDir/f"{name}.py")
+        else:
+            args = (name, )
+    else:
+        bin = DepotToolsDir/name
+        if sys.platform.startswith("win32"):
+            bin = bin.with_suffix(".bat")
+        args = (bin, )
+    return args
 
 def configure(GN, config):
     mkdir(PDFiumOutDir)
     (PDFiumOutDir / "args.gn").write_text(config)
-    run_cmd([GN, "gen", PDFiumOutDir], cwd=PDFiumDir)
+    run_cmd([*GN, "gen", PDFiumOutDir], cwd=PDFiumDir)
 
 def build(Ninja, target):
-    run_cmd([Ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
+    run_cmd([*Ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
 
 
 def main(
@@ -143,8 +154,11 @@ def main(
         target_os    = None,
     ):
     
-    # NOTE defaults handled internally to avoid duplication with parse_args()
+    if PORTABLE_MODE:
+        # cf. https://pkg.go.dev/go.chromium.org/luci/vpython#readme-configuration
+        os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
     
+    # defaults handled internally to avoid duplication with parse_args()
     if build_target is None:
         build_target = "pdfium"
     if build_ver is None:
@@ -163,8 +177,8 @@ def main(
     dl_depottools(do_update)
     
     GClient = get_tool("gclient")
-    GN      = get_tool("gn")
-    Ninja   = get_tool("ninja")
+    GN = get_tool("gn")
+    Ninja = get_tool("ninja")
     
     did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev, target_os)
     
@@ -177,8 +191,6 @@ def main(
         run_cmd([sys.executable, "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     
     config_dict = DefaultConfig.copy()
-    if use_syslibs:
-        config_dict.update(SyslibsConfig)
     
     # TODO compare target_cpu against host to determine whether it's actually cross
     # this is a bit difficult currently as we don't have a direct mapping between google and python-style CPU names
@@ -188,6 +200,7 @@ def main(
         is_cross = True  # assumed
         if is_cross and Host.system == SysNames.linux and not target_os:
             run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", target_cpu], cwd=PDFiumDir)
+    
     if target_os:
         config_dict["target_os"] = target_os
         if target_os == "android":
@@ -219,11 +232,6 @@ def parse_args(argv):
         "--target", "-t",
         dest = "build_target",
         help = "PDFium build target (defaults to `pdfium`). Use `pdfium_all` to also build tests."
-    )
-    parser.add_argument(
-        "--use-syslibs", "-l",
-        action = "store_true",
-        help = "Use system libraries instead of those bundled with PDFium. Make sure that freetype, lcms2, libjpeg, libopenjpeg2, libpng, zlib and icuuc are installed, and that $PKG_CONFIG_PATH is set correctly.",
     )
     parser.add_argument(
         "--win-sdk-dir",
