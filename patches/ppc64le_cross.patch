@@ -1,0 +1,69 @@
+diff --git a/config/clang/BUILD.gn b/config/clang/BUILD.gn
+index 8c03235..46b5d31 100644
+--- a/config/clang/BUILD.gn
++++ b/config/clang/BUILD.gn
+@@ -218,6 +218,8 @@ template("clang_lib") {
+           _dir = "aarch64-unknown-linux-gnu"
+         } else if (current_cpu == "loong64") {
+           _dir = "loongarch64-unknown-linux-gnu"
++        } else if (current_cpu == "ppc64le") {
++          _dir = "powerpc64le-unknown-linux-gnu"
+         } else {
+           assert(false)  # Unhandled cpu type
+         }
+diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
+index 94fc4b4..d3a52d5 100644
+--- a/config/compiler/BUILD.gn
++++ b/config/compiler/BUILD.gn
+@@ -1258,6 +1258,12 @@ config("compiler_cpu_abi") {
+         cflags += [ "--target=aarch64-linux-gnu" ]
+         ldflags += [ "--target=aarch64-linux-gnu" ]
+       }
++    } else if (current_cpu == "ppc64le") {
++      if (is_clang && !is_android && !is_nacl && !is_fuchsia &&
++          !is_chromeos_device) {
++        cflags += [ "--target=powerpc64le-linux-gnu" ]
++        ldflags += [ "--target=powerpc64le-linux-gnu" ]
++      }
+     } else if (current_cpu == "mipsel" && !is_nacl) {
+       ldflags += [ "-Wl,--hash-style=sysv" ]
+       if (custom_toolchain == "") {
+diff --git a/toolchain/linux/BUILD.gn b/toolchain/linux/BUILD.gn
+index a6e20a0..bc7254f 100644
+--- a/toolchain/linux/BUILD.gn
++++ b/toolchain/linux/BUILD.gn
+@@ -72,6 +72,34 @@ gcc_toolchain("arm") {
+   }
+ }
+ 
++clang_toolchain("clang_ppc64le") {
++  toolchain_args = {
++    current_cpu = "ppc64le"
++    current_os = "linux"
++  }
++}
++
++gcc_toolchain("ppc64le") {
++  toolprefix = "powerpc64le-linux-gnu-"
++
++  cc = "${toolprefix}gcc"
++  cxx = "${toolprefix}g++"
++
++  ar = "${toolprefix}ar"
++  ld = cxx
++  readelf = "${toolprefix}readelf"
++  nm = "${toolprefix}nm"
++
++  toolchain_args = {
++    current_cpu = "ppc64le"
++    current_os = "linux"
++
++    # remote execution does not support gcc.
++    use_remoteexec = false
++    is_clang = false
++  }
++}
++
+ clang_toolchain("clang_x86") {
+   # Output linker map files for binary size analysis.
+   enable_linker_map = true

@@ -61,7 +61,16 @@ jobs:
       target_cpu: arm
       tag: ${{ inputs.glibc_tag }}_armv7l
       py_version: ${{ inputs.py_version }}
-    
+  
+  linux_ppc64le:
+    if: ${{ inputs.linux }}
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: ubuntu-latest
+      target_cpu: ppc64le
+      tag: ${{ inputs.glibc_tag }}_ppc64le
+      py_version: ${{ inputs.py_version }}
+  
   macos_cross_x64:
     if: ${{ inputs.macos }}
     uses: ./.github/workflows/sbuild_one.yaml

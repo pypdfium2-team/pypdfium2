@@ -15,6 +15,8 @@ def main(arch=None):
         prefix = f"{arch}-unknown-linux-gnu"
     elif arch in ("armv7l", "armv8l"):
         prefix = f"arm-linux-gnueabihf"
+    elif arch == "ppc64le":
+        prefix = "powerpc64le-linux-gnu"
     else:
         prefix = f"{arch}-linux-gnu"
     

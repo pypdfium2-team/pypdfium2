@@ -198,8 +198,13 @@ def main(
     if target_cpu:
         config_dict["target_cpu"] = target_cpu
         is_cross = True  # assumed
-        if is_cross and Host.system == SysNames.linux and not target_os:
-            run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", target_cpu], cwd=PDFiumDir)
+        if Host.system == SysNames.linux:
+            if not target_os:
+                run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", target_cpu], cwd=PDFiumDir)
+            if did_pdfium_sync and target_cpu == "ppc64le":
+                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFiumDir/"build")
+                git_apply_patch(PatchDir/"ppc64le_cross.patch", cwd=PDFiumDir/"build")
+                config_dict["sysroot"] = "//build/linux/debian_bullseye_ppc64el-sysroot"
     
     if target_os:
         config_dict["target_os"] = target_os
