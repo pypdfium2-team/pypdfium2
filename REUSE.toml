@@ -110,13 +110,11 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = [
     "2025 Benoît Blanchon and pdfium-binaries contributors",
     "2025 geisserml",
-    "2025 PDFium developers",
 ]
 SPDX-License-Identifier = "MIT"
 SPDX-FileComment = '''
 Derived from https://github.com/bblanchon/pdfium-binaries/tree/master/patches
 See also //BUILD_LICENSES/pdfium-binaries.txt for a copy of upstream's license file as embedded in the tarballs.
-Unchanged/deleted code is by PDFium, added code by pdfium-binaries.
 '''
 
 [[annotations]]
@@ -125,15 +123,13 @@ path = [
     "patches/ffp_contract.patch",
     "patches/avoid_new_clang_flags.patch",
     "patches/system_libcxx_with_clang.patch",
-    "patches/siso.patch",
+    "patches/legacy_gn.patch",
     "patches/android_build.patch",
-    "patches/gn.patch",
+    "patches/gn_build.patch",
+    "patches/no_libclang_rt.patch",
 ]
 precedence = "aggregate"
-SPDX-FileCopyrightText = [
-    "2025 geisserml <geisserml@gmail.com>",
-    "2025 PDFium developers",
-]
+SPDX-FileCopyrightText = "2025 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
@@ -169,6 +165,15 @@ SPDX-License-Identifier = "Apache-2.0"
 SPDX-FileComment = '''
 Cherry-pick https://github.com/abseil/abseil-cpp/commit/8e7767542cfde43f16c142f05dce06cadb7f7f84
 '''
+
+[[annotations]]
+path = "patches/ppc64le_cross.patch"
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2025 Marvin Gießing <marvin.giessing@gmail.com>",
+    "2025 geisserml <geisserml@gmail.com>",
+]
+SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
 path = [

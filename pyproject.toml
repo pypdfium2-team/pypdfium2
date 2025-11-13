@@ -66,7 +66,7 @@ select = "*-manylinux_i686"
 inherit.before-all = "append"
 before-all = [
     "python3 {project}/utils/shallow_clone_rev.py https://gn.googlesource.com/gn/ a0c5124a50608595a9aadebc4297e854ebd32c53 gn && cd gn/",
-    "git apply -v --ignore-whitespace {project}/patches/gn.patch",
+    "git apply -v --ignore-whitespace {project}/patches/gn_build.patch",
     "CXX=g++ python3 build/gen.py --no-last-commit-position --no-static-libstdc++ --allow-warnings",
     "ninja -C out gn",
     "cp ./out/gn /usr/local/bin/gn",

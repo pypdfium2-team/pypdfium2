@@ -122,7 +122,7 @@ def patch_pdfium(build_ver, target_os):
         git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir/"build")
     if PORTABLE_MODE:
         # apply patch for older GN
-        git_apply_patch(PatchDir/"siso.patch", PDFiumDir/"build")
+        git_apply_patch(PatchDir/"legacy_gn.patch", PDFiumDir/"build")
 
 
 def get_tool(name):
