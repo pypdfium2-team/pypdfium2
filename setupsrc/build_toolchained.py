@@ -21,6 +21,7 @@ PORTABLE_MODE = (Host._raw_system, Host._raw_machine) not in (
     ("windows", "amd64"),
 )
 CHECK = not PORTABLE_MODE
+PORTABLE_MODE = PORTABLE_MODE and Host.system == SysNames.linux
 
 # run `gn args --list out/Default/` for build config docs
 
@@ -45,7 +46,7 @@ if PORTABLE_MODE:
         "use_libcxx_modules": False,
     })
     # Some targets that need PORTABLE_MODE do have a sysroot, and using it would result in lower glibc requirement. However, sysroot.gni needs newer GN than we can expect, so this is commented out.
-    # if Host.system == SysNames.linux and Host._raw_machine in ("aarch64", "ppc64le"):
+    # if Host._raw_machine in ("aarch64", "ppc64le"):
     #     del DefaultConfig["use_sysroot"]
 
 if sys.platform.startswith("darwin"):
