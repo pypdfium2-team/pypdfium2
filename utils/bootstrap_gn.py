@@ -3,10 +3,12 @@
 
 import sys
 from pathlib import Path
+from copy import copy
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from base import git_clone_rev
+from base import bootstrap_gn
 
-url, rev, target_dir = sys.argv[1:4]
-target_dir = Path(target_dir)
-git_clone_rev(url, rev, target_dir, depth=1)
+argv = copy(sys.argv[1:])
+if len(argv) > 0:
+    argv[0] = Path(argv[0])
+bootstrap_gn(*argv, skip_if_present=False)

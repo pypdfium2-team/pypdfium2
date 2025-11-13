@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import json
+import stat
 import shutil
 import tarfile
 import platform
@@ -24,6 +25,14 @@ if sys.version_info < (3, 8):
 else:
     cached_property = functools.cached_property
 
+if sys.version_info < (3, 8):
+    class ExtendAction (argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            items = getattr(namespace, self.dest) or []
+            items.extend(values)
+            setattr(namespace, self.dest, items)
+else:
+    ExtendAction = None
 
 PDFIUM_MIN_REQ = 6635
 
@@ -970,11 +979,36 @@ def pack_sourcebuild(
     return full_ver, post_ver
 
 
-if sys.version_info < (3, 8):
-    class ExtendAction (argparse.Action):
-        def __call__(self, parser, namespace, values, option_string=None):
-            items = getattr(namespace, self.dest) or []
-            items.extend(values)
-            setattr(namespace, self.dest, items)
-else:
-    ExtendAction = None
+HOME_LOCAL_BIN = Path.home()/".local"/"bin"
+
+def bootstrap_ninja(skip_if_present=True):
+    if skip_if_present and shutil.which("ninja"):
+        return
+    # https://github.com/scikit-build/ninja-python-distributions
+    run_cmd([sys.executable, "-m", "pip", "install", "ninja"])
+
+def make_executable(path):
+    path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+def bootstrap_gn(target_dir=HOME_LOCAL_BIN, skip_if_present=True):
+    if skip_if_present and shutil.which("gn"):
+        return
+    
+    gn_dir = ProjectDir/"sbuild"/"gn"
+    url = "https://gn.googlesource.com/gn/"
+    rev = "a0c5124a50608595a9aadebc4297e854ebd32c53"
+    if not gn_dir.exists():
+        git_clone_rev(url, rev, gn_dir, depth=1)
+        git_apply_patch(PatchDir/"gn_build.patch", cwd=gn_dir)
+    
+    os.environ["CXX"] = "g++"
+    run_cmd(["python3", "build/gen.py", "--no-last-commit-position", "--no-static-libstdc++", "--allow-warnings"], cwd=gn_dir)
+    run_cmd(["ninja", "-C", "out", "gn"], cwd=gn_dir)
+    del os.environ["CXX"]
+    
+    shutil.copyfile(gn_dir/"out"/"gn", target_dir/"gn")
+    make_executable(target_dir/"gn")
+
+def bootstrap():
+    bootstrap_ninja()
+    bootstrap_gn()
