@@ -979,7 +979,19 @@ def pack_sourcebuild(
     return full_ver, post_ver
 
 
-HOME_LOCAL_BIN = Path.home()/".local"/"bin"
+def _get_local_bin():
+    # Path.home()/".local"/"bin"
+    if sys.version_info >= (3, 10):
+        user_scheme = sysconfig.get_preferred_scheme("user")
+    elif os.name == "nt":
+        user_scheme = "nt_user"
+    elif sys.platform.startswith("darwin") and getattr(sys, "_framework", None):
+        user_scheme = "osx_framework_user"
+    else:
+        user_scheme = "posix_user"
+    return Path( sysconfig.get_path("scripts", scheme=user_scheme) )
+
+LOCAL_BIN = _get_local_bin()
 
 def bootstrap_ninja(skip_if_present=True):
     if skip_if_present and shutil.which("ninja"):
@@ -988,9 +1000,11 @@ def bootstrap_ninja(skip_if_present=True):
     run_cmd([sys.executable, "-m", "pip", "install", "ninja"])
 
 def make_executable(path):
+    if sys.platform.startswith("win32"):
+        return
     path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-def bootstrap_gn(target_dir=HOME_LOCAL_BIN, skip_if_present=True):
+def bootstrap_gn(target_dir=LOCAL_BIN, skip_if_present=True):
     if skip_if_present and shutil.which("gn"):
         return
     
@@ -1009,6 +1023,6 @@ def bootstrap_gn(target_dir=HOME_LOCAL_BIN, skip_if_present=True):
     shutil.copyfile(gn_dir/"out"/"gn", target_dir/"gn")
     make_executable(target_dir/"gn")
 
-def bootstrap():
+def bootstrap_buildtools():
     bootstrap_ninja()
     bootstrap_gn()
