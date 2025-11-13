@@ -152,7 +152,6 @@ def main(
         do_update    = False,
         build_ver    = None,
         build_target = None,
-        use_syslibs  = False,
         win_sdk_dir  = None,
         target_cpu   = None,
         target_os    = None,
@@ -170,7 +169,7 @@ def main(
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     
-    if sys.platform.startswith("win32"):
+    if Host.system == SysNames.windows:
         if win_sdk_dir is None:
             # Current GH Actions windows-latest
             win_sdk_dir = Path(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64")
@@ -187,14 +186,8 @@ def main(
     if PORTABLE_MODE:
         # remove depot_tools from PATH after checkout phase, gn/ninja wrappers don't work on unhandled platforms.
         os.environ["PATH"] = orig_path
-    
     if did_pdfium_sync:
         patch_pdfium(build_ver, target_os)
-    if use_syslibs:
-        assert not IGNORE_FULLVER
-        get_shimheaders_tool(PDFiumDir, rev=chromium_rev)
-        # alternatively, we could just copy build/linux/unbundle/icu.gn manually
-        run_cmd([sys.executable, "build/linux/unbundle/replace_gn_files.py", "--system-libraries", "icu"], cwd=PDFiumDir)
     
     config_dict = DefaultConfig.copy()
     
