@@ -13,7 +13,8 @@
 - `build_toolchained`: Significant portability enhancements. May now work on Linux CPUs that are unhandled/incomplete upstream (e.g. `aarch64`). Removed `--use-syslibs` option (use `build_native` instead).
 - `build_native`: Fixed Python 3.6/3.7 compatibility. Added `--no-libclang-rt` option.
 - Setup: Fixed inclusion of `BUILD_LICENSES/` sub-directories. Added extra licenses for DLLs pulled in by auditwheel. This concerns sourcebuilds/cibuildwheel only. The wheels on PyPI are unaffected.
-- CI: Migrated from `macos-13` to `macos-15-intel`.
-- CI: Added i686 (manylinux and musllinux) to cibuildwheel workflow.
+- Added android targets to `sbuild.yaml` workflow. This does not impact releases, which still use the pdfium-binaries.
+- Added i686 (manylinux and musllinux) to cibuildwheel workflow.
   Use an arm64 host (GHA `ubuntu-24.04-arm`) for armv7l builds, which is much faster than with an `x86_64` host. Added armv7l manylinux target (previously just musllinux).
   This does not impact releases yet, but it may in the future.
+- CI: Migrated from `macos-13` to `macos-15-intel`.
