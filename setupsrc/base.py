@@ -601,13 +601,13 @@ def get_wheel_tag(pl_name):
     # Android - see PEP 738 # Packaging
     # We don't currently publish wheels for Android, but handle it in case we want to in the future (or if callers want to build their own wheels)
     elif pl_name == PlatNames.android_arm64:
-        return "android_21_arm64_v8a"
+        return "android_23_arm64_v8a"
     elif pl_name == PlatNames.android_arm32:
-        return "android_21_armeabi_v7a"
+        return "android_23_armeabi_v7a"
     elif pl_name == PlatNames.android_x64:
-        return "android_21_x86_64"
+        return "android_23_x86_64"
     elif pl_name == PlatNames.android_x86:
-        return "android_21_x86"
+        return "android_23_x86"
     
     # iOS - see PEP 730 # Packaging
     # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Bear in mind that the resulting iOS packages are currently completely untested. In particular, the PEP says
