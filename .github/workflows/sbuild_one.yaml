@@ -13,6 +13,9 @@ on:
       target_cpu:
         type: string
         default: ''
+      target_os:
+        type: string
+        default: ''
       tag:
         type: string
         default: ''
@@ -25,6 +28,9 @@ on:
         type: string
         default: '3.12'
       target_cpu:
+        type: string
+        default: ''
+      target_os:
         type: string
         default: ''
       tag:
@@ -59,7 +65,7 @@ jobs:
           python3 -m pip install -U -r req/setup.txt -r req/test.txt
           python3 -m pip install -U auditwheel
       
-      - name: Install Linux cross deps
+      - name: Install Linux/Android cross deps
         if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
         run: |
           PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU)
@@ -80,9 +86,10 @@ jobs:
           features: 'OptionId.WindowsDesktopDebuggers'
       
       - name: Build PDFium (toolchained)
-        run: python3 ./setupsrc/build_toolchained.py $CPU_PARAM
+        run: python3 ./setupsrc/build_toolchained.py $CPU_PARAM $OS_PARAM
         env:
           CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
+          OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
       
       - name: Show binary info
         run: file ./data/sourcebuild/*.{so,dylib,dll}
@@ -94,7 +101,7 @@ jobs:
           CROSS_TAG: ${{ inputs.tag }}  # optional
       
       - name: Run auditwheel (informational)
-        if: ${{ startsWith(inputs.os, 'ubuntu') }}
+        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os }}
         run: python3 -m auditwheel show dist/*.whl
       
       - name: Upload wheel as artifact
@@ -104,7 +111,7 @@ jobs:
           name: sbuild_${{ inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
       
       - name: Install and test wheel
-        if: ${{ !inputs.target_cpu }}
+        if: ${{ !inputs.target_cpu && !inputs.target_os }}
         run: |
           python3 -m pip install ./dist/*.whl
           pypdfium2 -v

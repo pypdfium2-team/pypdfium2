@@ -15,6 +15,9 @@ on:
       windows:
         type: boolean
         default: true
+      android:
+        type: boolean
+        default: true
       testtargets:
         type: boolean
         default: false
@@ -142,4 +145,22 @@ jobs:
       tag: win32
       py_version: ${{ inputs.py_version }}
   
-  # TODO android?
+  android_arm64:
+    if: ${{ inputs.android }}
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: ubuntu-latest
+      target_cpu: arm64
+      target_os: android
+      tag: android_21_arm64_v8a
+      py_version: ${{ inputs.py_version }}
+  
+  android_arm32:
+    if: ${{ inputs.android }}
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: ubuntu-latest
+      target_cpu: arm
+      target_os: android
+      tag: android_21_armeabi_v7a
+      py_version: ${{ inputs.py_version }}
