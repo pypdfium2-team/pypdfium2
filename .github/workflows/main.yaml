@@ -70,7 +70,7 @@ jobs:
         run: python3 -m pip install -v --no-build-isolation -e .
       
       - name: Run test suite
-        run: just test
+        run: python3 -m pytest tests/
       
       - name: Run PyPI packaging script
         run: just packaging-pypi

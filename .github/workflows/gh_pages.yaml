@@ -26,8 +26,6 @@ jobs:
     
     steps:
       
-      - uses: extractions/setup-just@v3
-      
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -46,7 +44,7 @@ jobs:
           python3 -m pip install -v .
       
       - name: Build documentation
-        run: just docs-build
+        run: python3 -m sphinx -b html docs/source docs/build/html
       
       # upload-pages-artifact v4 specifies to ignore dotfiles
       # - name: Remove unnecessary files

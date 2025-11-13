@@ -44,8 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       
-      - uses: extractions/setup-just@v3
-      
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -70,7 +68,7 @@ jobs:
           python -m pip install -U -r req/setup.txt
       
       - name: Build package
-        run: just craft-conda "$PACKAGE" --pdfium-ver "$PDFIUM_VER" $MAYBE_NEW_ONLY
+        run: python3 conda/craft_conda_pkgs.py "$PACKAGE" --pdfium-ver "$PDFIUM_VER" $MAYBE_NEW_ONLY
         env:
           PACKAGE: ${{ inputs.package }}
           PDFIUM_VER: ${{ inputs.pdfium_ver }}
