@@ -79,6 +79,7 @@ def dl_pdfium(GClient, do_update, revision, target_os):
     if not had_pdfium or (target_os and do_update):
         if PORTABLE_MODE:
             run_cmd([sys.executable, "-m", "pip", "install", "httplib2==0.22.0"], cwd=None)
+            bootstrap_buildtools()
         log("PDFium: configure ...")
         do_update = True
         extra_vars = []
