@@ -42,8 +42,6 @@ jobs:
     
     steps:
       
-      - uses: extractions/setup-just@v3
-      
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -110,4 +108,4 @@ jobs:
         run: |
           python3 -m pip install ./dist/*.whl
           pypdfium2 -v
-          just test
+          python3 -m pytest tests/
