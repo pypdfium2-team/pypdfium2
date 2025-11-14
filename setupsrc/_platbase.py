@@ -50,8 +50,8 @@ class PlatNames:
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
     android_arm64    = SysNames.android + "_arm64"       # device
     android_arm32    = SysNames.android + "_arm32"       # device
-    android_x64      = SysNames.android + "_x64"         # emulator
-    android_x86      = SysNames.android + "_x86"         # emulator
+    android_x64      = SysNames.android + "_x64"         # simulator
+    android_x86      = SysNames.android + "_x86"         # simulator
     ios_arm64_dev    = SysNames.ios     + "_arm64_dev"   # device
     ios_arm64_simu   = SysNames.ios     + "_arm64_simu"  # simulator
     ios_x64_simu     = SysNames.ios     + "_x64_simu"    # simulator
@@ -133,7 +133,6 @@ def _get_libc_info():
     
     name, ver = platform.libc_ver()
     if name.startswith("musl"):
-        # try to be future proof in case libc_ver() gets musl support but uses "muslc" rather than just "musl"
         name = "musl"
     elif name == "":
         import packaging._musllinux
