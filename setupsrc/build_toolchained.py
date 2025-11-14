@@ -16,14 +16,8 @@ DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumOutDir = PDFiumDir / "out" / "Default"
 
-PORTABLE_MODE = (Host._raw_system, Host._raw_machine) not in (
-    ("linux", "x86_64"),
-    ("darwin", "x86_64"),
-    ("darwin", "arm64"),
-    ("windows", "amd64"),
-)
+PORTABLE_MODE = Host.system == SysNames.linux and Host._raw_machine != "x86_64"
 CHECK = not PORTABLE_MODE
-PORTABLE_MODE = PORTABLE_MODE and Host.system == SysNames.linux
 
 # run `gn args --list out/Default/` for build config docs
 
