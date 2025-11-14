@@ -6,8 +6,7 @@ import sys
 import stat
 import shutil
 
-from _platbase import *
-from base import *
+from base import *  # local
 
 # The PDFium versions our build scripts have last been tested with. Ideally, they should be close to the release version in autorelease/record.json
 # To bump these versions, first test locally and update any patches as needed. Then, make a branch and run "Test Sourcebuild" on CI to see if all targets continue to work. Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.

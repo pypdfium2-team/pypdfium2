@@ -3,10 +3,15 @@
 
 import os
 import sys
+import json
+import shutil
 import platform
+import argparse
 import functools
 import sysconfig
+import subprocess
 from pathlib import Path
+
 
 if sys.version_info < (3, 8):
     # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
@@ -14,6 +19,65 @@ if sys.version_info < (3, 8):
         return property( functools.lru_cache(maxsize=1)(func) )
 else:
     cached_property = functools.cached_property
+
+if sys.version_info < (3, 8):
+    class ExtendAction (argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            items = getattr(namespace, self.dest) or []
+            items.extend(values)
+            setattr(namespace, self.dest, items)
+else:
+    ExtendAction = None
+
+
+PDFIUM_MIN_REQ = 6635
+
+PlatSpec_EnvVar = "PDFIUM_PLATFORM"
+PlatSpec_VerSep = ":"
+PlatSpec_V8Sym  = "-v8"
+
+BindSpec_EnvVar = "PDFIUM_BINDINGS"
+IS_CI = bool(os.getenv("GITHUB_ACTIONS")) or bool(int(os.getenv("CIBUILDWHEEL", 0)))
+USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not any((shutil.which("ctypesgen"), IS_CI))
+
+ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
+ModuleRaw          = "raw"
+ModuleHelpers      = "helpers"
+ModulesAll         = (ModuleRaw, ModuleHelpers)
+
+BindingsFN = "bindings.py"
+VersionFN  = "version.json"
+
+ProjectDir        = Path(__file__).parents[1].resolve()
+DataDir           = ProjectDir / "data"
+DataDir_Bindings  = DataDir / "bindings"
+BindingsFile      = DataDir_Bindings / BindingsFN
+PatchDir          = ProjectDir / "patches"
+ModuleDir_Raw     = ProjectDir / "src" / "pypdfium2_raw"
+ModuleDir_Helpers = ProjectDir / "src" / "pypdfium2"
+Changelog         = ProjectDir / "docs" / "devel" / "changelog.md"
+ChangelogStaging  = ProjectDir / "docs" / "devel" / "changelog_staging.md"
+
+AutoreleaseDir  = ProjectDir / "autorelease"
+AR_RecordFile   = AutoreleaseDir / "record.json"
+AR_ConfigFile   = AutoreleaseDir / "config.json"
+RefBindingsFile = AutoreleaseDir / BindingsFN
+
+RepositoryURL  = "https://github.com/pypdfium2-team/pypdfium2"
+PdfiumURL      = "https://pdfium.googlesource.com/pdfium"
+DepotToolsURL  = "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+ReleaseRepo    = "https://github.com/bblanchon/pdfium-binaries"
+ReleaseURL     = ReleaseRepo + "/releases/download/chromium%2F"
+ReleaseInfoURL = ReleaseURL.replace("github.com/", "api.github.com/repos/").replace("download/", "tags/")
+
+LIBNAME_GLOBS = ("lib*.so", "lib*.dylib", "*.dll")
+REFBINDINGS_FLAGS = ("V8", "XFA", "SKIA")
+
+PdfiumFlagsDict = {
+    "V8": "PDF_ENABLE_V8",
+    "XFA": "PDF_ENABLE_XFA",
+    "SKIA": "PDF_USE_SKIA",
+}
 
 
 # TODO consider StrEnum or something
@@ -94,6 +158,36 @@ PdfiumBinariesMap.update({
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
+
+def mkdir(path, exist_ok=True, parents=True):
+    path.mkdir(exist_ok=exist_ok, parents=parents)
+
+def read_json(fp):
+    with open(fp, "r") as buf:
+        return json.load(buf)
+
+def write_json(fp, data, indent=2):
+    with open(fp, "w") as buf:
+        return json.dump(data, buf, indent=indent)
+
+
+def run_cmd(command, cwd, capture=False, check=True, str_cast=True, stderr=None, **kwargs):
+    
+    if str_cast:
+        command = [str(c) for c in command]
+    
+    log(f"{command} (cwd={cwd!r})")
+    if capture:
+        kwargs["stdout"] = subprocess.PIPE
+        if stderr is not None:
+            # allow the caller to pass e.g. subprocess.STDOUT
+            kwargs["stderr"] = stderr
+    
+    comp_process = subprocess.run(command, cwd=cwd, check=check, **kwargs)
+    if capture:
+        return comp_process.stdout.decode("utf-8").strip()
+    else:
+        return comp_process
 
 
 def libname_for_system(system, name="pdfium", prefix=None):
