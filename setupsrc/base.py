@@ -124,8 +124,8 @@ class PlatNames:
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
     android_arm64    = SysNames.android + "_arm64"       # device
     android_arm32    = SysNames.android + "_arm32"       # device
-    android_x64      = SysNames.android + "_x64"         # emulator
-    android_x86      = SysNames.android + "_x86"         # emulator
+    android_x64      = SysNames.android + "_x64"         # simulator
+    android_x86      = SysNames.android + "_x86"         # simulator
     ios_arm64_dev    = SysNames.ios     + "_arm64_dev"   # device
     ios_arm64_simu   = SysNames.ios     + "_arm64_simu"  # simulator
     ios_x64_simu     = SysNames.ios     + "_x64_simu"    # simulator
@@ -413,7 +413,6 @@ def _get_libc_info():
     
     name, ver = platform.libc_ver()
     if name.startswith("musl"):
-        # try to be future proof in case libc_ver() gets musl support but uses "muslc" rather than just "musl"
         name = "musl"
     elif name == "":
         import packaging._musllinux
@@ -521,9 +520,6 @@ class _host_platform:
                 return PlatNames.darwin_x64
             elif self._raw_machine == "arm64":
                 return PlatNames.darwin_arm64
-            # see e.g. the table in https://github.com/pypa/packaging.python.org/pull/1804
-            elif self._raw_machine in ("i386", "ppc", "ppc64"):
-                raise RuntimeError(f"Unsupported legacy mac architecture: {self._raw_machine!r}")
         
         elif self._raw_system == "windows":
             self._system = SysNames.windows
@@ -588,7 +584,7 @@ def _manylinux_tag(arch, glibc="2_17"):
 def get_wheel_tag(pl_name):
     
     if pl_name == PlatNames.darwin_x64:
-        # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "11.0.0"`
+        # AOTW, pdfium-binaries/steps/05-configure.sh defines mac_deployment_target = "11.0.0"
         return "macosx_11_0_x86_64"
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
@@ -613,15 +609,18 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatNames.linux_arm32:
         return _manylinux_tag("armv7l")
     
+    # pdfium-binaries statically link musl, so we can declare the lowest possible requirement.
+    # The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
     elif pl_name == PlatNames.linux_musl_x64:
-        return "musllinux_1_2_x86_64"
+        return "musllinux_1_1_x86_64"
     elif pl_name == PlatNames.linux_musl_x86:
-        return "musllinux_1_2_i686"
+        return "musllinux_1_1_i686"
     elif pl_name == PlatNames.linux_musl_arm64:
-        return "musllinux_1_2_aarch64"
+        return "musllinux_1_1_aarch64"
     
     # Android - see PEP 738 # Packaging
     # We don't currently publish wheels for Android, but handle it in case we want to in the future (or if callers want to build their own wheels)
+    # AOTW, pdfium-binaries/steps/05-configure.sh defines default_min_sdk_version = 23
     elif pl_name == PlatNames.android_arm64:
         return "android_23_arm64_v8a"
     elif pl_name == PlatNames.android_arm32:

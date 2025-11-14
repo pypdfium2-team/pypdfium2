@@ -19,6 +19,9 @@ on:
       tag:
         type: string
         default: ''
+      test:
+        type: boolean
+        default: null
   workflow_dispatch:
     inputs:
       os:
@@ -36,6 +39,9 @@ on:
       tag:
         type: string
         default: ''
+      test:
+        type: boolean
+        default: null
 
 defaults:
   run:
@@ -61,9 +67,7 @@ jobs:
           fetch-depth: 0  # for git describe
       
       - name: Install Python deps
-        run: |
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt
-          python3 -m pip install -U auditwheel
+        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Install Linux/Android cross deps
         if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
@@ -79,7 +83,7 @@ jobs:
       
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.
       - name: Install Windows cross deps
-        if: ${{ startsWith(inputs.os, 'windows') && inputs.target_cpu }}
+        if: ${{ startsWith(inputs.os, 'windows') && !endsWith(inputs.os, '-arm') && inputs.target_cpu }}
         uses: ChristopheLav/windows-sdk-install@v1
         with:
           version-sdk: 26100
@@ -102,7 +106,9 @@ jobs:
       
       - name: Run auditwheel (informational)
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os }}
-        run: python3 -m auditwheel show dist/*.whl
+        run: |
+          python3 -m pip install -U auditwheel
+          python3 -m auditwheel show dist/*.whl
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v5
@@ -111,7 +117,7 @@ jobs:
           name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
       
       - name: Install and test wheel
-        if: ${{ !inputs.target_cpu && !inputs.target_os }}
+        if: ${{ inputs.test || (!inputs.target_cpu && !inputs.target_os) }}
         run: |
           python3 -m pip install ./dist/*.whl
           pypdfium2 -v

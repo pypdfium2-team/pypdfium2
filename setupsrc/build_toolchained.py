@@ -14,14 +14,8 @@ DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumOutDir = PDFiumDir / "out" / "Default"
 
-PORTABLE_MODE = (Host._raw_system, Host._raw_machine) not in (
-    ("linux", "x86_64"),
-    ("darwin", "x86_64"),
-    ("darwin", "arm64"),
-    ("windows", "amd64"),
-)
+PORTABLE_MODE = Host.system == SysNames.linux and Host._raw_machine != "x86_64"
 CHECK = not PORTABLE_MODE
-PORTABLE_MODE = PORTABLE_MODE and Host.system == SysNames.linux
 
 # run `gn args --list out/Default/` for build config docs
 
@@ -119,6 +113,8 @@ def patch_pdfium(build_ver, target_os):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
         _create_resources_rc(build_ver)
+        if Host._raw_machine == "arm64":
+            git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir/"build")
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
         git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir/"build")
@@ -173,7 +169,8 @@ def main(
     if Host.system == SysNames.windows:
         if win_sdk_dir is None:
             # Current GH Actions windows-latest
-            win_sdk_dir = Path(R"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64")
+            sdk_cpu = "arm64" if Host._raw_machine == "arm64" else "x64"
+            win_sdk_dir = Path(fR"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\{sdk_cpu}")
         assert win_sdk_dir.exists()
         os.environ["PATH"] += os.pathsep + str(win_sdk_dir)
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
