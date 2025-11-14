@@ -81,7 +81,7 @@ jobs:
         uses: ChristopheLav/windows-sdk-install@v1
         with:
           version-sdk: 26100
-          features: 'OptionId.WindowsDesktopDebuggers,OptionId.DesktopCPPx64,OptionId.DesktopCPParm64'
+          features: 'OptionId.DesktopCPPx64,OptionId.WindowsDesktopDebuggers'
       
       - name: Build PDFium (toolchained)
         run: python3 ./setupsrc/build_toolchained.py $CPU_PARAM $OS_PARAM
