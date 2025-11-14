@@ -308,7 +308,7 @@ def _manylinux_tag(arch, glibc="2_17"):
 def get_wheel_tag(pl_name):
     
     if pl_name == PlatNames.darwin_x64:
-        # pdfium-binaries/steps/05-configure.sh defines `mac_deployment_target = "11.0.0"`
+        # AOTW, pdfium-binaries/steps/05-configure.sh defines mac_deployment_target = "11.0.0"
         return "macosx_11_0_x86_64"
     elif pl_name == PlatNames.darwin_arm64:
         # macOS 11 is the first version available on arm64
@@ -333,6 +333,8 @@ def get_wheel_tag(pl_name):
     elif pl_name == PlatNames.linux_arm32:
         return _manylinux_tag("armv7l")
     
+    # pdfium-binaries statically link musl, so we can declare the lowest possible requirement.
+    # The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
     elif pl_name == PlatNames.linux_musl_x64:
         return "musllinux_1_1_x86_64"
     elif pl_name == PlatNames.linux_musl_x86:
@@ -342,6 +344,7 @@ def get_wheel_tag(pl_name):
     
     # Android - see PEP 738 # Packaging
     # We don't currently publish wheels for Android, but handle it in case we want to in the future (or if callers want to build their own wheels)
+    # AOTW, pdfium-binaries/steps/05-configure.sh defines default_min_sdk_version = 23
     elif pl_name == PlatNames.android_arm64:
         return "android_23_arm64_v8a"
     elif pl_name == PlatNames.android_arm32:
