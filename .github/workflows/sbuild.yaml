@@ -28,8 +28,6 @@ on:
         type: string
         default: 'manylinux_2_17'
 
-# TODO Windows ARM64 toolchained?
-
 jobs:
   
   linux_x64:
@@ -127,7 +125,7 @@ jobs:
       os: windows-latest
       py_version: ${{ inputs.py_version }}
   
-  windows_arm64:
+  windows_cross_arm64:
     if: ${{ inputs.windows }}
     uses: ./.github/workflows/sbuild_one.yaml
     with:
@@ -135,6 +133,15 @@ jobs:
       target_cpu: arm64
       tag: win_arm64
       py_version: ${{ inputs.py_version }}
+  
+  windows_native_arm64:
+    if: ${{ inputs.windows && inputs.testtargets }}
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: windows-11-arm
+      target_cpu: arm64  # needed, even if native
+      py_version: ${{ inputs.py_version }}
+      test: true  # explicit, because of target_cpu
   
   windows_x86:
     if: ${{ inputs.windows }}

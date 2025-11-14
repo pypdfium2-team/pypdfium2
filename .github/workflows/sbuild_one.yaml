@@ -19,6 +19,9 @@ on:
       tag:
         type: string
         default: ''
+      test:
+        type: boolean
+        default: null
   workflow_dispatch:
     inputs:
       os:
@@ -36,6 +39,9 @@ on:
       tag:
         type: string
         default: ''
+      test:
+        type: boolean
+        default: null
 
 defaults:
   run:
@@ -77,7 +83,7 @@ jobs:
       
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.
       - name: Install Windows cross deps
-        if: ${{ startsWith(inputs.os, 'windows') && inputs.target_cpu }}
+        if: ${{ startsWith(inputs.os, 'windows') && !endsWith(inputs.os, '-arm') && inputs.target_cpu }}
         uses: ChristopheLav/windows-sdk-install@v1
         with:
           version-sdk: 26100
@@ -111,7 +117,7 @@ jobs:
           name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
       
       - name: Install and test wheel
-        if: ${{ !inputs.target_cpu && !inputs.target_os }}
+        if: ${{ inputs.test || (!inputs.target_cpu && !inputs.target_os) }}
         run: |
           python3 -m pip install ./dist/*.whl
           pypdfium2 -v
