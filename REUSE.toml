@@ -127,6 +127,7 @@ path = [
     "patches/android_build.patch",
     "patches/gn_build.patch",
     "patches/no_libclang_rt.patch",
+    "patches/win/arm64_native.patch",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 geisserml <geisserml@gmail.com>"
