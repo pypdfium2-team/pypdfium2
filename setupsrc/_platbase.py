@@ -241,9 +241,6 @@ class _host_platform:
                 return PlatNames.darwin_x64
             elif self._raw_machine == "arm64":
                 return PlatNames.darwin_arm64
-            # see e.g. the table in https://github.com/pypa/packaging.python.org/pull/1804
-            elif self._raw_machine in ("i386", "ppc", "ppc64"):
-                raise RuntimeError(f"Unsupported legacy mac architecture: {self._raw_machine!r}")
         
         elif self._raw_system == "windows":
             self._system = SysNames.windows
