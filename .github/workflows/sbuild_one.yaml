@@ -61,9 +61,7 @@ jobs:
           fetch-depth: 0  # for git describe
       
       - name: Install Python deps
-        run: |
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt
-          python3 -m pip install -U auditwheel
+        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Install Linux/Android cross deps
         if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
@@ -102,7 +100,9 @@ jobs:
       
       - name: Run auditwheel (informational)
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os }}
-        run: python3 -m auditwheel show dist/*.whl
+        run: |
+          python3 -m pip install -U auditwheel
+          python3 -m auditwheel show dist/*.whl
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v5

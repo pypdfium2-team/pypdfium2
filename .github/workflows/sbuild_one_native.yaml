@@ -59,9 +59,7 @@ jobs:
           fetch-depth: 0  # for git describe
       
       - name: Install python deps
-        run: |
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt
-          python3 -m pip install -U auditwheel
+        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Install common build deps
         run: |
@@ -96,7 +94,9 @@ jobs:
           PDFIUM_PLATFORM: sourcebuild
       
       - name: Post-process with auditwheel
-        run: python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
+        run: |
+          python3 -m pip install -U auditwheel
+          python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v5
