@@ -1,0 +1,13 @@
+diff --git a/vs_toolchain.py b/vs_toolchain.py
+index 61b3229..6066363 100755
+--- a/vs_toolchain.py
++++ b/vs_toolchain.py
+@@ -420,7 +420,7 @@ def CopyDlls(target_dir, configuration, target_cpu):
+   if configuration == 'Debug':
+     _CopyRuntime(target_dir, runtime_dir, target_cpu, debug=True)
+   _CopyDebugger(target_dir, target_cpu)
+-  if target_cpu == 'arm64':
++  if platform.machine().lower() != "arm64" and target_cpu == 'arm64':
+     target_dir = os.path.join(target_dir, 'win_clang_x64')
+     target_cpu = 'x64'
+     runtime_dir = x64_runtime

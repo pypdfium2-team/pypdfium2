@@ -121,6 +121,8 @@ def patch_pdfium(build_ver, target_os):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
         _create_resources_rc(build_ver)
+        if Host._raw_machine == "arm64":
+            git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir/"build")
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
         git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir/"build")
