@@ -102,38 +102,60 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-arm']
+        id: ['ubuntu_x64', 'ubuntu_arm64', 'mac_x64', 'mac_arm64', 'win_x64', 'win_arm64']
         py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
         exclude:
           # not supported by setup-python action
-          - os: windows-11-arm
+          - id: win_arm64
             py: '3.8'
-          - os: windows-11-arm
+          - id: win_arm64
             py: '3.9'
-          - os: windows-11-arm
+          - id: win_arm64
             py: '3.10'
         include:
-          - os: ubuntu-latest
+          - id: ubuntu_x64
+            os: ubuntu-latest
             wheel: dist/*manylinux_*_x86_64*.whl
-          - os: ubuntu-24.04-arm
+          - id: ubuntu_arm64
+            os: ubuntu-24.04-arm
             wheel: dist/*manylinux_*_aarch64*.whl
-          - os: macos-15-intel
+          - id: mac_x64
+            os: macos-15-intel
             wheel: dist/*macosx_*_x86_64*.whl
-          - os: macos-latest
+          - id: mac_arm64
+            os: macos-latest
             wheel: dist/*macosx_*_arm64*.whl
-          - os: windows-latest
+          - id: win_x64
+            os: windows-latest
             wheel: dist/*win_amd64.whl
-          - os: windows-11-arm
+          - id: win_arm64
+            os: windows-11-arm
             wheel: dist/*win_arm64.whl
+          # setup-python action does not work in musllinux container, so we can only test with one python version, the container's default python
+          - id: alpine_x64
+            os: ubuntu-latest
+            container: 'quay.io/pypa/musllinux_1_2_x86_64:latest'
+            wheel: dist/*musllinux_*_x86_64*.whl
+          - id: alpine_arm64
+            os: ubuntu-24.04-arm
+            container: 'quay.io/pypa/musllinux_1_2_aarch64:latest'
+            wheel: dist/*musllinux_*_aarch64*.whl
     
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     
     steps:
       
       - name: Set up Python
         uses: actions/setup-python@v6
+        if: ${{ !matrix.container }}
         with:
           python-version: ${{ matrix.py }}
+      
+      - name: Container preparation
+        if: ${{ matrix.container }}
+        # there are also the PyPA-supplied python builds in /opt/python/* that ship with pip out of the box, but they are not in PATH by default and not sure how to add them
+        run: apk add --update python3 py3-pip
       
       - name: Check out repository
         uses: actions/checkout@v5
