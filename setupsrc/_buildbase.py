@@ -122,7 +122,7 @@ def bootstrap_ninja(skip_if_present=True):
     if skip_if_present and shutil.which("ninja"):
         return
     # https://github.com/scikit-build/ninja-python-distributions
-    run_cmd([sys.executable, "-m", "pip", "install", "ninja"])
+    run_cmd([sys.executable, "-m", "pip", "install", "ninja"], cwd=None)
 
 def bootstrap_gn(target_dir=None, skip_if_present=True):
     if skip_if_present and shutil.which("gn"):

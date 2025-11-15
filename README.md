@@ -140,8 +140,8 @@ Further, you can set just `system` to consume pre-generated files from the `data
 You can also install pypdfium2 with a self-compiled pdfium shared library, by placing it in `data/sourcebuild/` along with a bindings interface and version info, and setting the `PDFIUM_PLATFORM="sourcebuild"` directive to use these files on setup.
 
 This project comes with two scripts to automate the build process: `build_toolchained.py` and `build_native.py` (in `setupsrc/`).
-- `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. By default, this script will use vendored libraries, but you can also pass `--use-syslibs` to try to use system libraries. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
-- `build_native` is an attempt to address some shortcomings of the toolchained build (mainly a bloated checkout process, and lack of portability). It is tailored towards native compilation, and uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
+- `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. Dependency libraries are vendored. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
+- `build_native` is an attempt to address some shortcomings of the toolchained build. It performs a lean, self-managed checkout, and is tailored towards native compilation. It uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
 
 You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup, and pass command-line flags with `$BUILD_PARAMS`.
 However, for simplicity, both scripts/subtargets share just `sourcebuild` as staging directory.
@@ -149,7 +149,7 @@ However, for simplicity, both scripts/subtargets share just `sourcebuild` as sta
 Dependencies:
 - When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib` (and maybe `glib` to satisfy the build system).
 - You might also want to know that pdfium bundles `agg, abseil, fast_float`.
-- When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. If available, the compiler defaults to GCC, but Clang should also work if you set up some symlinks and make sure you have the `libclang_rt` builtins installed.
+- When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. If available, the compiler defaults to GCC, but Clang should also work if you set up some symlinks, and make sure you have the `libclang_rt` builtins or pass `--no-libclang-rt`.
 
 To do the toolchained build, you'd run something like:
 ```bash
