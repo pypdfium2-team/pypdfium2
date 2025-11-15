@@ -264,7 +264,6 @@ jobs:
       - name: Trigger conda pypdfium2_helpers build
         uses: benc-uk/workflow-dispatch@v1
         with:
-          # FIXME input not respected for py_version here
           workflow: conda.yaml
           inputs: |
             {
@@ -273,7 +272,7 @@ jobs:
               "new_only": "false",
               "test": "true",
               "publish": "${{ inputs.publish }}",
-              "py_version": "3.12"
+              "py_version": "${{ inputs.py_version }}"
             }
   
   cleanup:
