@@ -11,7 +11,9 @@ import argparse
 from enum import Enum
 from pathlib import Path
 
-from base import *  # local
+# local
+from base import *
+from _buildbase import *
 
 IS_CIBUILDWHEEL = bool(int( os.environ.get("CIBUILDWHEEL", 0) ))
 
@@ -184,8 +186,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, no_libcl
     
     do_patches = _fetch_dep(deps_info, "build", PDFIUM_DIR/"build", reset=reset)
     if do_patches:
-        # legacy_gn.patch: Work around error about path_exists() being undefined.
-        # This happens with older versions of GN.
+        # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
         # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
         git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR/"build")
