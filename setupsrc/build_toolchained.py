@@ -14,8 +14,8 @@ DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
 PDFiumOutDir = PDFiumDir / "out" / "Default"
 
-PORTABLE_MODE = Host.system == SysNames.linux and Host._raw_machine != "x86_64"
-CHECK = not PORTABLE_MODE
+DEFAULT_MODE = Host.platform == PlatNames.linux_x64 or Host.system in (SysNames.windows, SysNames.darwin)
+PORTABLE_MODE = not DEFAULT_MODE
 
 # run `gn args --list out/Default/` for build config docs
 
@@ -82,7 +82,7 @@ def dl_pdfium(GClient, do_update, revision, target_os):
             # > By default, don't check out android. Will be overridden by gclient variables.
             # > TODO(crbug.com/875037): Remove this once the bug in gclient is fixed.
             extra_vars += ["--custom-var", "checkout_android=True"]
-        run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=CHECK)
+        run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=DEFAULT_MODE)
     
     if do_update:
         log("PDFium: download/sync ...")
@@ -90,7 +90,7 @@ def dl_pdfium(GClient, do_update, revision, target_os):
         if had_pdfium:
             args += ["-D", "--reset"]
         args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
-        run_cmd(args, cwd=SBDir, check=CHECK)
+        run_cmd(args, cwd=SBDir, check=DEFAULT_MODE)
     
     return do_update
 
