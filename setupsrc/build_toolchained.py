@@ -31,6 +31,7 @@ DefaultConfig = {
     "pdf_use_skia": False,
 }
 if PORTABLE_MODE:
+    # TODO Would be great if we could enable the sysroot where available, to lower glibc requirement. However, this seems to conflict with the gcc/system libcxx options.
     DefaultConfig.update({
         "use_sysroot": False,
         "clang_use_chrome_plugins": False,
@@ -39,9 +40,6 @@ if PORTABLE_MODE:
         "use_custom_libcxx": False,
         "use_libcxx_modules": False,
     })
-    # Some targets that need PORTABLE_MODE do have a sysroot, and using it would result in lower glibc requirement. However, sysroot.gni needs newer GN than we can expect, so this is commented out.
-    # if Host._raw_machine in ("aarch64", "ppc64le"):
-    #     del DefaultConfig["use_sysroot"]
 
 if sys.platform.startswith("darwin"):
     DefaultConfig["mac_deployment_target"] = "11.0.0"
