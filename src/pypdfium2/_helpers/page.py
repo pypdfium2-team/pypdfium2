@@ -12,7 +12,7 @@ import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.bitmap import PdfBitmap
 from pypdfium2._helpers.textpage import PdfTextPage
-from pypdfium2._helpers.pageobjects import PdfObject
+from pypdfium2._helpers.pageobjects import PdfObject, PdfTextObj
 
 c_float = ctypes.c_float
 logger = logging.getLogger(__name__)
@@ -459,6 +459,32 @@ class PdfPage (pdfium_i.AutoCloseable):
         if (color_scheme is not None) and fill_to_stroke:
             flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
+        # Check for non-embedded fonts and warn if found
+        missing_fonts = _check_missing_fonts(self)
+        if missing_fonts:
+            warnings = []
+            for font_name in sorted(missing_fonts.keys()):
+                text_samples = missing_fonts[font_name]
+                if text_samples:
+                    # Limit number of text samples per font to keep warning readable
+                    max_samples = 3
+                    if len(text_samples) > max_samples:
+                        shown = text_samples[:max_samples]
+                        remaining = len(text_samples) - max_samples
+                        text_display = ", ".join(f'"{t}"' for t in shown) + f" (and {remaining} more)"
+                    else:
+                        text_display = ", ".join(f'"{t}"' for t in text_samples)
+                    warnings.append(f"{font_name} (used in: {text_display})")
+                else:
+                    # Fallback if we couldn't extract any text samples
+                    warnings.append(f"{font_name} (text content unavailable)")
+            
+            font_list = "; ".join(warnings)
+            logger.warning(
+                f"Page contains non-embedded fonts that may not render correctly if not available on the system: {font_list}. "
+                f"Text using these fonts may be missing from the rendered image."
+            )
+        
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(fill_color, 0, 0, width, height)
         
@@ -493,6 +519,64 @@ def _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, maybe_alpha):
         return pdfium_c.FPDFBitmap_BGRx
     else:
         return pdfium_c.FPDFBitmap_BGR
+
+
+def _check_missing_fonts(page):
+    """
+    Check for non-embedded fonts on the page that may not render correctly.
+    
+    Returns:
+        dict[str, list[str]]: Dictionary mapping font names (base names) to lists of text content that uses them.
+    """
+    missing_fonts = {}
+    textpage = None
+    try:
+        # Create a textpage to extract text content from text objects
+        textpage = page.get_textpage()
+        
+        for obj in page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT]):
+            try:
+                font = obj.get_font()
+                if not font.is_embedded():
+                    font_name = font.get_base_name()
+                    
+                    # Try to extract text content
+                    text_content = None
+                    try:
+                        # Create a PdfTextObj with textpage to extract text
+                        # We create a new wrapper with textpage since the original obj doesn't have one
+                        text_obj_with_textpage = PdfTextObj(obj.raw, textpage=textpage)
+                        extracted = text_obj_with_textpage.extract()
+                        # Only add non-empty text content
+                        if extracted and extracted.strip():
+                            # Truncate very long text to keep warning readable
+                            if len(extracted) > 100:
+                                text_content = extracted[:97] + "..."
+                            else:
+                                text_content = extracted
+                    except (PdfiumError, Exception):
+                        # If we can't extract text (e.g., empty text object), skip adding text content for this object
+                        pass
+                    
+                    if font_name not in missing_fonts:
+                        missing_fonts[font_name] = []
+                    if text_content:
+                        missing_fonts[font_name].append(text_content)
+            except (PdfiumError, AttributeError):
+                # If we can't get font info, skip it
+                continue
+    except Exception:
+        # If we can't iterate objects or create textpage, return empty dict
+        pass
+    finally:
+        # Clean up textpage if we created it
+        if textpage is not None:
+            try:
+                textpage.close()
+            except Exception:
+                pass
+    
+    return missing_fonts
 
 
 def _parse_renderopts(
