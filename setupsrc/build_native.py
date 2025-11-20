@@ -11,7 +11,9 @@ import argparse
 from enum import Enum
 from pathlib import Path
 
-from base import *  # local
+# local
+from base import *
+from _buildbase import *
 
 IS_CIBUILDWHEEL = bool(int( os.environ.get("CIBUILDWHEEL", 0) ))
 
