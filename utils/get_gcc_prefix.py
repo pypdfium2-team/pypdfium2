@@ -14,7 +14,7 @@ def main(arch=None):
     if arch == "loongarch64":
         prefix = f"{arch}-unknown-linux-gnu"
     elif arch in ("armv7l", "armv8l"):
-        prefix = f"arm-linux-gnueabihf"
+        prefix = "arm-linux-gnueabihf"
     elif arch == "ppc64le":
         prefix = "powerpc64le-linux-gnu"
     else:
