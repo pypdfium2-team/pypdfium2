@@ -252,7 +252,7 @@ class PdfFont (pdfium_i.AutoCastable):
             raise PdfiumError("Failed to get font weight.")
         return weight
     
-    def is_embedded(self):
+    def get_is_embedded(self):
         """
         Returns:
             bool: True if the font is embedded in the PDF, False if it needs to be loaded from the system.

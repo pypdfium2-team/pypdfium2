@@ -266,7 +266,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to generate page content.")
     
     
-    def get_objects(self, filter=None, max_depth=15, form=None, level=0):
+    def get_objects(self, filter=None, max_depth=15, form=None, level=0, textpage=None):
         """
         Iterate through the pageobjects on this page.
         
@@ -277,6 +277,9 @@ class PdfPage (pdfium_i.AutoCloseable):
                 If None or empty, all objects will be provided, regardless of their type.
             max_depth (int):
                 Maximum recursion depth to consider when descending into Form XObjects.
+            textpage (PdfTextPage | None):
+                Optional textpage handle to attach to :class:`.PdfTextObj` instances.
+                This allows text extraction without re-instantiating text objects.
         
         Yields:
             :class:`.PdfObject`: A pageobject.
@@ -302,7 +305,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 raise PdfiumError("Failed to get pageobject.")
             
             # Don't register as child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The parent page should remain alive while a pageobject is used, but it seems unjustified to store countless of weakrefs just to lock pageobjects when the parent page is closed.
-            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level)
+            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level, textpage=textpage)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
             
@@ -312,6 +315,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                     max_depth = max_depth,
                     form = helper_obj,
                     level = level + 1,
+                    textpage = textpage,
                 )
     
     
@@ -334,6 +338,88 @@ class PdfPage (pdfium_i.AutoCloseable):
         if rc == pdfium_c.FLATTEN_FAIL:
             raise PdfiumError("Failed to flatten annotations / form fields.")
         return rc
+    
+    
+    def get_missing_fonts(self, textpage=None):
+        """
+        Check for non-embedded fonts on the page that may not render correctly.
+        
+        This method iterates through all text objects on the page and identifies fonts that are not embedded.
+        Since this involves multiple API calls, it may be expensive for pages with many text objects.
+        
+        Parameters:
+            textpage (PdfTextPage | None):
+                Optional textpage handle. If provided, it will be reused instead of creating a new one.
+                This can improve performance if you already have a textpage for other operations.
+        
+        Returns:
+            dict[str, list[str]]: Dictionary mapping font names (base names) to lists of text content samples that use them.
+                The dictionary will be empty if all fonts are embedded or if no text objects are found.
+        
+        Example:
+            >>> missing = page.get_missing_fonts()
+            >>> if missing:
+            ...     print(f"Found {len(missing)} non-embedded fonts")
+            
+            >>> # Reuse an existing textpage
+            >>> textpage = page.get_textpage()
+            >>> missing = page.get_missing_fonts(textpage=textpage)
+            >>> textpage.close()
+        """
+        return _check_missing_fonts(self, textpage=textpage)
+    
+    
+    def warn_about_missing_fonts(self, textpage=None):
+        """
+        Check for non-embedded fonts and log a warning if any are found.
+        
+        This is a convenience method that calls :meth:`.get_missing_fonts` and logs a warning
+        if non-embedded fonts are detected. Useful to call before rendering to be informed
+        about potential rendering issues.
+        
+        Parameters:
+            textpage (PdfTextPage | None):
+                Optional textpage handle. If provided, it will be reused instead of creating a new one.
+                This can improve performance if you already have a textpage for other operations.
+        
+        Returns:
+            dict[str, list[str]]: The same dictionary returned by :meth:`.get_missing_fonts`.
+        
+        Example:
+            >>> page.warn_about_missing_fonts()  # Logs warning if fonts are missing
+            >>> bitmap = page.render()
+            
+            >>> # Reuse an existing textpage
+            >>> textpage = page.get_textpage()
+            >>> page.warn_about_missing_fonts(textpage=textpage)
+            >>> textpage.close()
+        """
+        missing_fonts = self.get_missing_fonts(textpage=textpage)
+        if missing_fonts:
+            warnings = []
+            for font_name in sorted(missing_fonts.keys()):
+                text_samples = missing_fonts[font_name]
+                if text_samples:
+                    # Limit number of text samples per font to keep warning readable
+                    max_samples = 3
+                    if len(text_samples) > max_samples:
+                        shown = text_samples[:max_samples]
+                        remaining = len(text_samples) - max_samples
+                        text_display = ", ".join(f'"{t}"' for t in shown) + f" (and {remaining} more)"
+                    else:
+                        text_display = ", ".join(f'"{t}"' for t in text_samples)
+                    warnings.append(f"{font_name} (used in: {text_display})")
+                else:
+                    # Fallback if we couldn't extract any text samples
+                    warnings.append(f"{font_name} (text content unavailable)")
+            
+            font_list = "; ".join(warnings)
+            logger.warning(
+                f"Page contains non-embedded fonts that may not render correctly if not available on the system: {font_list}. "
+                f"Text using these fonts may be missing from the rendered image."
+            )
+        
+        return missing_fonts
     
     
     # TODO
@@ -459,32 +545,6 @@ class PdfPage (pdfium_i.AutoCloseable):
         if (color_scheme is not None) and fill_to_stroke:
             flags |= pdfium_c.FPDF_CONVERT_FILL_TO_STROKE
         
-        # Check for non-embedded fonts and warn if found
-        missing_fonts = _check_missing_fonts(self)
-        if missing_fonts:
-            warnings = []
-            for font_name in sorted(missing_fonts.keys()):
-                text_samples = missing_fonts[font_name]
-                if text_samples:
-                    # Limit number of text samples per font to keep warning readable
-                    max_samples = 3
-                    if len(text_samples) > max_samples:
-                        shown = text_samples[:max_samples]
-                        remaining = len(text_samples) - max_samples
-                        text_display = ", ".join(f'"{t}"' for t in shown) + f" (and {remaining} more)"
-                    else:
-                        text_display = ", ".join(f'"{t}"' for t in text_samples)
-                    warnings.append(f"{font_name} (used in: {text_display})")
-                else:
-                    # Fallback if we couldn't extract any text samples
-                    warnings.append(f"{font_name} (text content unavailable)")
-            
-            font_list = "; ".join(warnings)
-            logger.warning(
-                f"Page contains non-embedded fonts that may not render correctly if not available on the system: {font_list}. "
-                f"Text using these fonts may be missing from the rendered image."
-            )
-        
         bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)
         bitmap.fill_rect(fill_color, 0, 0, width, height)
         
@@ -521,20 +581,27 @@ def _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, maybe_alpha):
         return pdfium_c.FPDFBitmap_BGR
 
 
-def _check_missing_fonts(page):
+def _check_missing_fonts(page, textpage=None):
     """
     Check for non-embedded fonts on the page that may not render correctly.
+    
+    Parameters:
+        page (PdfPage): The page to check.
+        textpage (PdfTextPage | None): Optional textpage handle. If not provided, one will be created.
     
     Returns:
         dict[str, list[str]]: Dictionary mapping font names (base names) to lists of text content that uses them.
     """
     missing_fonts = {}
-    textpage = None
+    textpage_created = False
     try:
-        # Create a textpage to extract text content from text objects
-        textpage = page.get_textpage()
+        # Create a textpage if one wasn't provided
+        if textpage is None:
+            textpage = page.get_textpage()
+            textpage_created = True
         
-        for obj in page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT]):
+        # Pass textpage to get_objects so PdfTextObj instances are created with it attached
+        for obj in page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT], textpage=textpage):
             try:
                 font = obj.get_font()
                 if not font.is_embedded():
@@ -543,10 +610,8 @@ def _check_missing_fonts(page):
                     # Try to extract text content
                     text_content = None
                     try:
-                        # Create a PdfTextObj with textpage to extract text
-                        # We create a new wrapper with textpage since the original obj doesn't have one
-                        text_obj_with_textpage = PdfTextObj(obj.raw, textpage=textpage)
-                        extracted = text_obj_with_textpage.extract()
+                        # obj is already a PdfTextObj with textpage attached
+                        extracted = obj.extract()
                         # Only add non-empty text content
                         if extracted and extracted.strip():
                             # Truncate very long text to keep warning readable
@@ -569,8 +634,8 @@ def _check_missing_fonts(page):
         # If we can't iterate objects or create textpage, return empty dict
         pass
     finally:
-        # Clean up textpage if we created it
-        if textpage is not None:
+        # Clean up textpage only if we created it
+        if textpage_created and textpage is not None:
             try:
                 textpage.close()
             except Exception:
