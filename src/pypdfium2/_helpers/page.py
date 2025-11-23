@@ -530,6 +530,9 @@ class PdfPage (pdfium_i.AutoCloseable):
         .. [#user_unit] Since PDF 1.6, pages may define an additional user unit factor. In this case, 1 canvas unit is equivalent to ``user_unit * (1/72)`` inches. PDFium does not currently provide an API to get the user unit, so this is not taken into account.
         """
         
+        # Check for non-embedded fonts and warn if found
+        self.warn_about_missing_fonts()
+        
         src_width  = math.ceil(self.get_width()  * scale)
         src_height = math.ceil(self.get_height() * scale)
         if rotation in (90, 270):
@@ -604,7 +607,7 @@ def _check_missing_fonts(page, textpage=None):
         for obj in page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT], textpage=textpage):
             try:
                 font = obj.get_font()
-                if not font.is_embedded():
+                if not font.get_is_embedded():
                     font_name = font.get_base_name()
                     
                     # Try to extract text content
