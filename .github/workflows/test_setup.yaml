@@ -37,7 +37,7 @@ jobs:
           python-version: ${{ matrix.py }}
       
       - name: Check out pypdfium2 repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in "Build docs" step
