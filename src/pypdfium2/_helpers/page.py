@@ -366,7 +366,46 @@ class PdfPage (pdfium_i.AutoCloseable):
             >>> missing = page.get_missing_fonts(textpage=textpage)
             >>> textpage.close()
         """
-        return _check_missing_fonts(self, textpage=textpage)
+        missing_fonts = {}
+        textpage_created = False
+        try:
+            if textpage is None:
+                textpage = self.get_textpage()
+                textpage_created = True
+            
+            for obj in self.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT], textpage=textpage):
+                try:
+                    font = obj.get_font()
+                    if not font.get_is_embedded():
+                        font_name = font.get_base_name()
+                        
+                        text_content = None
+                        try:
+                            extracted = obj.extract()
+                            if extracted and extracted.strip():
+                                if len(extracted) > 100:
+                                    text_content = extracted[:97] + "..."
+                                else:
+                                    text_content = extracted
+                        except (PdfiumError, Exception):
+                            pass
+                        
+                        if font_name not in missing_fonts:
+                            missing_fonts[font_name] = []
+                        if text_content:
+                            missing_fonts[font_name].append(text_content)
+                except (PdfiumError, AttributeError):
+                    continue
+        except Exception:
+            pass
+        finally:
+            if textpage_created and textpage is not None:
+                try:
+                    textpage.close()
+                except Exception:
+                    pass
+        
+        return missing_fonts
     
     
     def warn_about_missing_fonts(self, textpage=None):
@@ -582,69 +621,6 @@ def _auto_bitmap_format(page, fill_color, grayscale, prefer_bgrx, maybe_alpha):
         return pdfium_c.FPDFBitmap_BGRx
     else:
         return pdfium_c.FPDFBitmap_BGR
-
-
-def _check_missing_fonts(page, textpage=None):
-    """
-    Check for non-embedded fonts on the page that may not render correctly.
-    
-    Parameters:
-        page (PdfPage): The page to check.
-        textpage (PdfTextPage | None): Optional textpage handle. If not provided, one will be created.
-    
-    Returns:
-        dict[str, list[str]]: Dictionary mapping font names (base names) to lists of text content that uses them.
-    """
-    missing_fonts = {}
-    textpage_created = False
-    try:
-        # Create a textpage if one wasn't provided
-        if textpage is None:
-            textpage = page.get_textpage()
-            textpage_created = True
-        
-        # Pass textpage to get_objects so PdfTextObj instances are created with it attached
-        for obj in page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT], textpage=textpage):
-            try:
-                font = obj.get_font()
-                if not font.get_is_embedded():
-                    font_name = font.get_base_name()
-                    
-                    # Try to extract text content
-                    text_content = None
-                    try:
-                        # obj is already a PdfTextObj with textpage attached
-                        extracted = obj.extract()
-                        # Only add non-empty text content
-                        if extracted and extracted.strip():
-                            # Truncate very long text to keep warning readable
-                            if len(extracted) > 100:
-                                text_content = extracted[:97] + "..."
-                            else:
-                                text_content = extracted
-                    except (PdfiumError, Exception):
-                        # If we can't extract text (e.g., empty text object), skip adding text content for this object
-                        pass
-                    
-                    if font_name not in missing_fonts:
-                        missing_fonts[font_name] = []
-                    if text_content:
-                        missing_fonts[font_name].append(text_content)
-            except (PdfiumError, AttributeError):
-                # If we can't get font info, skip it
-                continue
-    except Exception:
-        # If we can't iterate objects or create textpage, return empty dict
-        pass
-    finally:
-        # Clean up textpage only if we created it
-        if textpage_created and textpage is not None:
-            try:
-                textpage.close()
-            except Exception:
-                pass
-    
-    return missing_fonts
 
 
 def _parse_renderopts(
