@@ -340,6 +340,9 @@ class PdfPage (pdfium_i.AutoCloseable):
         return rc
     
     
+    # SPDX-SnippetBegin
+    # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+    # SPDX-SnippetCopyrightText: 2025 Yizhan Huang <yizhanhuang2002@gmail.com>
     def get_missing_fonts(self, textpage=None):
         """
         Check for non-embedded fonts on the page that may not render correctly.
@@ -459,6 +462,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             )
         
         return missing_fonts
+    # SPDX-SnippetEnd
     
     
     # TODO
