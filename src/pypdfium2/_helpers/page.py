@@ -338,10 +338,8 @@ class PdfPage (pdfium_i.AutoCloseable):
         if rc == pdfium_c.FLATTEN_FAIL:
             raise PdfiumError("Failed to flatten annotations / form fields.")
         return rc
-    
-    
-    
-    
+
+
     # TODO
     # - add helpers for matrix-based and interruptible rendering
     # - add lower-level renderer that takes a caller-provided bitmap
