@@ -439,11 +439,11 @@ class PdfPage (pdfium_i.AutoCloseable):
         missing_fonts = self.get_missing_fonts(textpage=textpage)
         if missing_fonts:
             warnings = []
+            max_samples = 3
             for font_name in sorted(missing_fonts.keys()):
                 text_samples = missing_fonts[font_name]
                 if text_samples:
                     # Limit number of text samples per font to keep warning readable
-                    max_samples = 3
                     if len(text_samples) > max_samples:
                         shown = text_samples[:max_samples]
                         remaining = len(text_samples) - max_samples
