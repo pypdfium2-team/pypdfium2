@@ -283,6 +283,95 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         searcher = PdfTextSearcher(raw_searcher, self)
         self._add_kid(searcher)
         return searcher
+    
+    
+    # SPDX-SnippetBegin
+    # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+    # SPDX-SnippetCopyrightText: 2025 Yizhan Huang <yizhanhuang2002@gmail.com>
+    def get_missing_fonts(self):
+        """
+        Check for non-embedded fonts on the page that may not render correctly.
+        
+        This method iterates through all text objects on the page and identifies fonts that are not embedded.
+        Since this involves multiple API calls, it may be expensive for pages with many text objects.
+        
+        Returns:
+            dict[str, list[str]]: Dictionary mapping font names (base names) to lists of text content samples that use them.
+                The dictionary will be empty if all fonts are embedded or if no text objects are found.
+        
+        Example:
+            >>> textpage = page.get_textpage()
+            >>> missing = textpage.get_missing_fonts()
+            >>> if missing:
+            ...     print(f"Found {len(missing)} non-embedded fonts")
+            >>> textpage.close()
+        """
+        missing_fonts = {}
+        for obj in self.page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT], textpage=self):
+            font = obj.get_font()
+            if not font.get_is_embedded():
+                font_name = font.get_base_name()
+                
+                text_content = None
+                extracted = obj.extract()
+                if extracted and extracted.strip():
+                    if len(extracted) > 100:
+                        text_content = extracted[:97] + "..."
+                    else:
+                        text_content = extracted
+                
+                if font_name not in missing_fonts:
+                    missing_fonts[font_name] = []
+                if text_content:
+                    missing_fonts[font_name].append(text_content)
+        
+        return missing_fonts
+    
+    
+    def warn_about_missing_fonts(self):
+        """
+        Check for non-embedded fonts and log a warning if any are found.
+        
+        This is a convenience method that calls :meth:`.get_missing_fonts` and logs a warning
+        if non-embedded fonts are detected. Useful to call before rendering to be informed
+        about potential rendering issues.
+        
+        Returns:
+            dict[str, list[str]]: The same dictionary returned by :meth:`.get_missing_fonts`.
+        
+        Example:
+            >>> textpage = page.get_textpage()
+            >>> textpage.warn_about_missing_fonts()  # Logs warning if fonts are missing
+            >>> bitmap = page.render()
+            >>> textpage.close()
+        """
+        missing_fonts = self.get_missing_fonts()
+        if missing_fonts:
+            warnings = []
+            max_samples = 3
+            for font_name in sorted(missing_fonts.keys()):
+                text_samples = missing_fonts[font_name]
+                if text_samples:
+                    # Limit number of text samples per font to keep warning readable
+                    if len(text_samples) > max_samples:
+                        shown = text_samples[:max_samples]
+                        remaining = len(text_samples) - max_samples
+                        text_display = ", ".join(f'"{t}"' for t in shown) + f" (and {remaining} more)"
+                    else:
+                        text_display = ", ".join(f'"{t}"' for t in text_samples)
+                    warnings.append(f"{font_name} (used in: {text_display})")
+                else:
+                    # Fallback if we couldn't extract any text samples
+                    warnings.append(f"{font_name} (text content unavailable)")
+            
+            font_list = "; ".join(warnings)
+            logger.warning(
+                f"Page contains non-embedded fonts that may not render correctly if not available on the system: {font_list}. "
+                f"Text using these fonts may be missing from the rendered image."
+            )
+        
+        return missing_fonts
+    # SPDX-SnippetEnd
 
 
 class PdfTextSearcher (pdfium_i.AutoCloseable):
