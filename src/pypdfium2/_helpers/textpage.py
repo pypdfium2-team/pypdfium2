@@ -309,7 +309,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         missing_fonts = {}
         for obj in self.page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT], textpage=self):
             font = obj.get_font()
-            if not font.get_is_embedded():
+            if not font.is_embedded():
                 font_name = font.get_base_name()
                 
                 text_content = None
