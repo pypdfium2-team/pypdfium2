@@ -727,7 +727,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```python
   # (Assuming `buffer_ptr` is a pointer to the first item of a C buffer to write into,
   #  `size` the number of bytes it can store, and `py_buffer` a Python byte buffer)
-  buffer = (ctypes.c_char * size).from_address( ctypes.addressof(buffer_ptr.contents) )
+  buffer = (ctypes.c_ubyte * size).from_address( ctypes.addressof(buffer_ptr.contents) )
   # Read from the Python buffer, starting at its current position, directly into the C buffer
   # (until the target is full or the end of the source is reached)
   n_bytes = py_buffer.readinto(buffer)  # returns the number of bytes read
@@ -769,9 +769,9 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
     
     def __call__(self, _, position, buffer_ptr, size):
         # Write data from Python buffer into C buffer, as explained before
-        buffer_ptr = ctypes.cast(buffer_ptr, ctypes.POINTER(ctypes.c_char * size))
+        c_buffer = (ctypes.c_ubyte * size).from_address( ctypes.addressof(buffer_ptr.contents) )
         self.py_buffer.seek(position)
-        self.py_buffer.readinto(buffer_ptr.contents)
+        self.py_buffer.readinto(c_buffer)
         return 1  # non-zero return code for success
   
   # (Assuming py_buffer is a Python file buffer, e. g. io.BufferedReader)
