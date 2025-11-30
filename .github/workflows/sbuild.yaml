@@ -107,6 +107,7 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: macos-15-intel
+      tag: macosx_11_0_x86_64
       py_version: ${{ inputs.py_version }}
   
   macos_cross_arm64:
