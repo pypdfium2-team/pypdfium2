@@ -16,7 +16,7 @@ on:
         default: true
         type: boolean
       linux_clangcross:
-        default: false
+        default: true
         type: boolean
       linux_glibc:
         default: true
