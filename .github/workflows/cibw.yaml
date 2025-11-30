@@ -15,11 +15,7 @@ on:
       linux_fastemu:
         default: true
         type: boolean
-      linux_ibm:
-        # XXX will change to true if and when we get access to IBM's native runners
-        default: false
-        type: boolean
-      linux_emu:
+      linux_clangcross:
         default: false
         type: boolean
       linux_glibc:
@@ -121,47 +117,47 @@ jobs:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_ppc64le:
-    if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-latest  # XXX
+      os: ubuntu-latest
       cibw_target: manylinux_ppc64le
       cibw_arch: ppc64le
-      emulated: true  # XXX
+      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_ppc64le:
-    if: ${{ inputs.linux_ibm && inputs.linux_musl }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-latest  # XXX
+      os: ubuntu-latest
       cibw_target: musllinux_ppc64le
       cibw_arch: ppc64le
-      emulated: true  # XXX
+      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_s390x:
-    if: ${{ inputs.linux_ibm && inputs.linux_glibc }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-latest  # XXX
+      os: ubuntu-latest
       cibw_target: manylinux_s390x
       cibw_arch: s390x
-      emulated: true  # XXX
+      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_s390x:
-    if: ${{ inputs.linux_ibm && inputs.linux_musl }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-latest  # XXX
+      os: ubuntu-latest
       cibw_target: musllinux_s390x
       cibw_arch: s390x
-      emulated: true  # XXX
+      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_riscv64:
-    if: ${{ inputs.linux_emu && inputs.linux_glibc }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
@@ -171,7 +167,7 @@ jobs:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_riscv64:
-    if: ${{ inputs.linux_emu && inputs.linux_musl }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
@@ -181,7 +177,7 @@ jobs:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   linux_loongarch64:
-    if: ${{ inputs.linux_emu && inputs.linux_glibc }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
@@ -191,7 +187,7 @@ jobs:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
   musllinux_loongarch64:
-    if: ${{ inputs.linux_emu && inputs.linux_musl }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
