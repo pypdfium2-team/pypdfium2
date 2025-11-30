@@ -22,7 +22,7 @@ DEPS_URLS = dict(
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
     catapult   = _CR_PREFIX + "catapult",  # android
-    # venodrable dependencies
+    # vendorable dependencies
     icu        = _CR_PREFIX + "chromium/deps/icu",  # cibuildwheel
     buildtools = _CR_PREFIX + "chromium/src/buildtools",
     libcxx     = _CR_PREFIX + "external/github.com/llvm/llvm-project/libcxx",
