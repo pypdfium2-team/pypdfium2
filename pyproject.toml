@@ -68,6 +68,8 @@ before-all = [
     "python3 {project}/utils/bootstrap_gn.py /usr/local/bin",
 ]
 
+# NOTE: gcc is not actually used for ppc64le,s390x,riscv64,loongarch64 anymore (see the clang block below)
+
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_{aarch64,loongarch64}"
 inherit.before-all = "append"
@@ -113,6 +115,18 @@ before-all = [
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
 BUILD_PARAMS = "--vendor icu"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-*linux_{ppc64le,s390x,riscv64,loongarch64}"
+environment-pass = ["RUNNER_ARCH"]
+inherit.before-all = "prepend"
+before-all = [
+    "bash ./utils/install-static-clang.sh",
+    "export CLANG_PREFIX=/opt/clang",
+    "ln -s $CLANG_PREFIX/bin/readelf $CLANG_PREFIX/bin/llvm-readelf",
+]
+inherit.environment = "append"
+environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu libc++"
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"

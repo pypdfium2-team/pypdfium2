@@ -22,7 +22,13 @@ DEPS_URLS = dict(
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
     catapult   = _CR_PREFIX + "catapult",  # android
-    icu        = _CR_PREFIX + "chromium/deps/icu",  # for cibuildwheel
+    # venodrable dependencies
+    icu        = _CR_PREFIX + "chromium/deps/icu",  # cibuildwheel
+    buildtools = _CR_PREFIX + "chromium/src/buildtools",
+    libcxx     = _CR_PREFIX + "external/github.com/llvm/llvm-project/libcxx",
+    libcxxabi  = _CR_PREFIX + "external/github.com/llvm/llvm-project/libcxxabi",
+    llvm_libc  = _CR_PREFIX + "external/github.com/llvm/llvm-project/libc",
+    # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
 )
@@ -53,8 +59,6 @@ DefaultConfig = {
     "use_system_libpng": True,
     "use_system_libtiff": True,
     "use_system_zlib": True,
-    "use_custom_libcxx": False,
-    "use_libcxx_modules": False,
 }
 
 IS_ANDROID = Host.system == SysNames.android
@@ -223,6 +227,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, no_libcl
         _fetch_dep(deps_info, "catapult", PDFIUM_3RDPARTY/"catapult")
     if "icu" in vendor_deps:
         _fetch_dep(deps_info, "icu", PDFIUM_3RDPARTY/"icu")
+    if "libc++" in vendor_deps:
+        # just grab anything libc++ related (not sure whether all of this is necessary)
+        _fetch_dep(deps_info, "buildtools", PDFIUM_DIR/"buildtools")
+        _fetch_dep(deps_info, "libcxx", PDFIUM_3RDPARTY/"libc++"/"src")
+        _fetch_dep(deps_info, "libcxxabi", PDFIUM_3RDPARTY/"libc++abi"/"src")
+        _fetch_dep(deps_info, "llvm_libc", PDFIUM_3RDPARTY/"llvm-libc"/"src")
     if with_tests:
         _fetch_dep(deps_info, "gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         _fetch_dep(deps_info, "test_fonts", PDFIUM_3RDPARTY/"test_fonts")
@@ -323,6 +333,13 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         deps_fields.append("catapult")
     if "icu" in vendor_deps:
         deps_fields.append("icu")
+    if "libc++" in vendor_deps:
+        deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
+    else:
+        config.update({
+            "use_custom_libcxx": False,
+            "use_libcxx_modules": False,
+        })
     if with_tests:
         deps_fields += ("gtest", "test_fonts")
     
@@ -392,7 +409,7 @@ def parse_args(argv):
         dest = "vendor_deps",
         nargs = "+",
         action = "extend",
-        help = "Dependencies to vendor. Note, this only supports libraries where there is a specific reason to vendor despite the native build. Currently this means 'icu' only ('libc++' may be added in the future). For an exhaustive vendored build, use build_toolchained.py"
+        help = "Dependencies to vendor. Note, this only supports libraries where there is a specific reason to vendor despite the native build. Currently, 'icu' and 'libc++' are supported. For an exhaustive vendored build, use build_toolchained.py"
     )
     args = parser.parse_args(argv)
     if args.compiler:
