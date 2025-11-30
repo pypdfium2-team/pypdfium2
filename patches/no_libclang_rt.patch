@@ -16,3 +16,45 @@ index 5f0e525..eff69c8 100644
  
    # TODO(crbug.com/40570904): Come up with a better name for is POSIX + Fuchsia
    # configuration.
+diff --git a/config/clang/BUILD.gn b/config/clang/BUILD.gn
+index 8c03235..606bd0f 100644
+--- a/config/clang/BUILD.gn
++++ b/config/clang/BUILD.gn
+@@ -261,37 +261,6 @@ template("clang_lib") {
+   }
+ }
+ 
+-# Adds a dependency on the Clang runtime library clang_rt.builtins.
+-clang_lib("compiler_builtins") {
+-  if (is_mac) {
+-    libname = "osx"
+-  } else if (is_ios) {
+-    if (target_platform == "iphoneos") {
+-      if (target_environment == "simulator") {
+-        libname = "iossim"
+-      } else if (target_environment == "device") {
+-        libname = "ios"
+-      } else if (target_environment == "catalyst") {
+-        libname = "osx"
+-      } else {
+-        assert(false, "unsupported target_environment=$target_environment")
+-      }
+-    } else if (target_platform == "tvos") {
+-      if (target_environment == "simulator") {
+-        libname = "tvossim"
+-      } else if (target_environment == "device") {
+-        libname = "tvos"
+-      } else {
+-        assert(false, "unsupported target_environment=$target_environment")
+-      }
+-    } else {
+-      assert(false, "unsupported target_platform=$target_platform")
+-    }
+-  } else {
+-    libname = "builtins"
+-  }
+-}
+-
+ # Adds a dependency on the Clang runtime library clang_rt.profile.
+ clang_lib("compiler_profile") {
+   if (!toolchain_has_rust) {
