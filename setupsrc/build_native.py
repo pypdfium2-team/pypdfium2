@@ -404,9 +404,8 @@ def parse_args(argv):
         action = "store_true",
         help = "If using clang, whether to patch pdfium so that it does not insist on libclang_rt.builtins.a, and will use the compiler's default instead (commonly libgcc).",
     )
-    # The --vendor option is provided for cibuildwheel clients:
     # - libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
-    # - libc++ is used but not pulled in by auditwheel. This appears to be ABI-unsafe (although the wheels seem to work across different hosts according to downstream feedback), so we may want to add that in the future. Actually, options to use system libc++ are deprecated upstream anyway.
+    # - With clang, using the vendored libc++ may be desirable. Also, there is some uncertainty whether using system libc++ might be ABI-unsafe. Actually, options to use system libc++ appear to be deprecated upstream.
     parser.add_argument(
         "--vendor",
         dest = "vendor_deps",
