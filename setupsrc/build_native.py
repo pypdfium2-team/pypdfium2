@@ -229,7 +229,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     if "icu" in vendor_deps:
         _fetch_dep(deps_info, "icu", PDFIUM_3RDPARTY/"icu")
     if "libc++" in vendor_deps:
-        # just grab anything libc++ related (not sure whether all of this is necessary)
         _fetch_dep(deps_info, "buildtools", PDFIUM_DIR/"buildtools")
         _fetch_dep(deps_info, "libcxx", PDFIUM_3RDPARTY/"libc++"/"src")
         _fetch_dep(deps_info, "libcxxabi", PDFIUM_3RDPARTY/"libc++abi"/"src")
