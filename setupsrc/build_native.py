@@ -149,7 +149,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, no_libclang_rt, reset, vendor_deps):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -203,9 +203,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_path, no_libcl
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
         elif compiler is Compiler.clang:
             # https://crbug.com/410883044
-            clang_patches = ("system_libcxx_with_clang", "avoid_new_clang_flags")
-            for patchname in clang_patches:
-                git_apply_patch(PatchDir/f"{patchname}.patch", cwd=PDFIUM_DIR/"build")
+            git_apply_patch(PatchDir/f"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR/"build")
+            if clang_ver < 21:  # guessed
+                git_apply_patch(PatchDir/f"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR/"build")
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
@@ -293,16 +293,15 @@ def _get_clang_ver(clang_path):
     log(f"Determined clang version {version!r}")
     return version
 
-def setup_compiler(config, compiler, clang_path):
+def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
         config["is_clang"] = False
     elif compiler is Compiler.clang:
         assert clang_path, "Clang path must be set"
-        clang_version = _get_clang_ver(clang_path)
         config.update({
             "is_clang": True,
             "clang_base_path": str(clang_path),
-            "clang_version": clang_version,
+            "clang_version": clang_ver,
         })
     else:
         assert False, f"Unhandled compiler {compiler}"
@@ -322,8 +321,12 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             compiler = Compiler.clang
         else:
             raise RuntimeError("Neither gcc nor clang installed.")
-    if compiler is Compiler.clang and clang_path is None:
-        clang_path = Host.usr
+    if compiler is Compiler.clang:
+        if clang_path is None:
+            clang_path = Host.usr
+        clang_ver = _get_clang_ver(clang_path)
+    else:
+        clang_ver = None
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
@@ -346,8 +349,8 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = _DeferredInfo(deps_fields)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_path, no_libclang_rt, reset, vendor_deps)
-    setup_compiler(config, compiler, clang_path)
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps)
+    setup_compiler(config, compiler, clang_ver, clang_path)
     prepare(config, build_dir, vendor_deps)
     build(with_tests, build_dir, n_jobs)
     if with_tests:
