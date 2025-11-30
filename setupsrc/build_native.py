@@ -300,7 +300,7 @@ def setup_compiler(config, compiler, clang_ver, clang_path):
         assert clang_path, "Clang path must be set"
         config.update({
             "is_clang": True,
-            "clang_base_path": str(clang_path),
+            "clang_base_path": str(clang_path),  # without trailing slash
             "clang_version": clang_ver,
         })
     else:
@@ -397,7 +397,7 @@ def parse_args(argv):
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = "Path to clang release folder, without trailing slash. Passing `--compiler clang` is a pre-requisite. By default, we try '/usr' or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
+        help = "Path to clang release folder, if `--compiler clang` is used. By default, we try '/usr' or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
     )
     parser.add_argument(
         "--no-libclang-rt",
