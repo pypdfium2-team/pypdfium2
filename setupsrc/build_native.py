@@ -203,7 +203,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
         elif compiler is Compiler.clang:
             # https://crbug.com/410883044
-            git_apply_patch(PatchDir/f"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR/"build")
+            if "libc++" not in vendor_deps:
+                git_apply_patch(PatchDir/f"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR/"build")
             if clang_ver < 21:  # guessed
                 git_apply_patch(PatchDir/f"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR/"build")
             # TODO should we handle other OSes here?
