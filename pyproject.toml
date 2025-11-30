@@ -128,6 +128,12 @@ before-all = [
 inherit.environment = "append"
 environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu libc++"
 
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux_{ppc64le,s390x,riscv64,loongarch64}"
+inherit.environment = "append"
+# don't try to vendor the libc++ on musllinux, causes issues
+environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu"
+
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
 # The deployment target is actually defined in the build script's GN config
