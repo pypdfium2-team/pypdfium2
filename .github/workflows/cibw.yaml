@@ -70,8 +70,8 @@ jobs:
       cibw_arch: aarch64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  # ARM 32-bit emulation seems about as fast as native when using an ARM64 host
-  # `uname -m` reports the containers as armv8l for some reason, but the author tested a manylinux wheel produced here on Raspberry Pi 2B (armv7l) locally, and it does seem to work.
+  # ARM 32-bit emulation seems about as fast as native when using an ARM64 host. Same goes for x86_64 to i686.
+  # For some reason, `uname -m` reports the armv7l container as armv8l when using an ARM64 host, but the author tested a manylinux wheel produced here on Raspberry Pi 2B (armv7l) locally, and it does seem to work.
   
   linux_arm32:
     if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
@@ -83,7 +83,6 @@ jobs:
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  # pdfium-binaries don't currently build armv7l for musl, so this may be an actual win for the project
   musllinux_arm32:
     if: ${{ inputs.linux_fastemu && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
@@ -93,8 +92,6 @@ jobs:
       cibw_arch: armv7l
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
-  # x86_64 to i686 emulation is fair enough
   
   linux_i686:
     if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
@@ -196,7 +193,7 @@ jobs:
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  # TODO May need to leverage cross-compilation from arm64 in the future, similar to sbuild.yaml. Not sure whether cibuildwheel supports it yet, though.
+  # may need to leverage cross-compilation from arm64 in the future, similar to sbuild.yaml
   macos_x64:
     if: ${{ inputs.macos }}
     uses: ./.github/workflows/cibw_one.yaml

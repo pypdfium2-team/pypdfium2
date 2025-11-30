@@ -63,6 +63,7 @@ class _buffer_writer:
         self.py_buffer = py_buffer
     
     def __call__(self, _, p_data_first, size):
+        # c_void_p has no .contents, need to cast
         p_data_first = ctypes.cast(p_data_first, ctypes.POINTER(ctypes.c_ubyte))
         c_buffer = get_buffer(p_data_first, size)
         self.py_buffer.write(c_buffer)
