@@ -117,7 +117,8 @@ PDFIUM_PLATFORM = "sourcebuild-native"
 BUILD_PARAMS = "--vendor icu"
 
 [[tool.cibuildwheel.overrides]]
-select = "*-*linux_{ppc64le,riscv64,loongarch64,s390x}"
+# musllinux s390x is broken with clang-cross, perpetually freezes during test phase
+select = "*-*linux_{ppc64le,riscv64,loongarch64} *-manylinux_s390x"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
@@ -126,17 +127,6 @@ before-all = [
     "ln -s $CLANG_PREFIX/bin/readelf $CLANG_PREFIX/bin/llvm-readelf",
 ]
 inherit.environment = "append"
-environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu libc++"
-
-[[tool.cibuildwheel.overrides]]
-select = "*-*linux_{ppc64le,riscv64,loongarch64,s390x}"
-inherit.environment = "append"
-environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu"
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux_{ppc64le,riscv64,loongarch64}"  # ,s390x
-inherit.environment = "append"
-# don't try to vendor the libc++ on musllinux, causes issues
 environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu"
 
 [tool.cibuildwheel.macos.environment]
