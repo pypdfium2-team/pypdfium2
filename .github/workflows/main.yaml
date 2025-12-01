@@ -252,6 +252,7 @@ jobs:
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
         with:
+          immutableCreate: true
           artifacts: 'dist/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
