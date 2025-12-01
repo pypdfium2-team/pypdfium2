@@ -178,9 +178,10 @@ jobs:
     
     environment: release  # PyPI upload via "trusted publishing"
     permissions:
-      id-token: write  # PyPI upload via "trusted publishing"
-      contents: write  # autorelease repository changes
-      actions: write   # GH pages workflow-dispatch
+      id-token: write      # PyPI upload via "trusted publishing", and GH attestation
+      attestations: write  # GH attestation
+      contents: write      # autorelease repository changes
+      actions: write       # GH pages workflow-dispatch
     
     steps:
       
@@ -237,19 +238,30 @@ jobs:
           attestations: false
           verbose: true
       
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Attest build provenance
+        id: provenance
+        uses: actions/attest-build-provenance@v3
         with:
-          packages-dir: dist/  # the default
+          subject-path: dist/*
+      
+      - name: Rename provenance file
+        run: mv "$SRC_PATH" pypdfium2-attestation.json
+        env:
+          SRC_PATH: ${{ steps.provenance.outputs.bundle-path }}
       
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
         with:
-          artifacts: 'dist/*.whl,dist/*.tar.gz'
+          artifacts: 'dist/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.build.outputs.new_version }}
           prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
+      
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/  # the default
       
       - name: Trigger GH Pages rebuild
         uses: benc-uk/workflow-dispatch@v1
