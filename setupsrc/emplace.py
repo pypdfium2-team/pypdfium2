@@ -53,7 +53,7 @@ def _end_subtargets(sub_target, pdfium_ver):
             raise ValueError(f"Pdfium version {pdfium_ver} was passed, but this does not make sense with caller-provided data files.")
 
 
-def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
+def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params=""):
         
     if pl_name == ExtPlats.system:
         pl_dir = DataDir/pl_name
@@ -75,10 +75,10 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
         if flags:
             log(f"sourcebuild: flags {flags!r} are not handled (will be discarded).")
         
-        build_params = shlex.split( os.getenv("BUILD_PARAMS", "") )
-        builder = dict(native=build_native, toolchained=build_toolchained).get(sub_target)
-        if builder:
-            build_params = vars(builder.parse_args(build_params))
+        if sub_target:
+            builder = dict(native=build_native, toolchained=build_toolchained)[sub_target]
+            build_params_env = shlex.split( os.getenv("BUILD_PARAMS", default_build_params) )
+            build_params = vars(builder.parse_args(build_params_env))
             build_params.update(dict(build_ver=pdfium_ver))
             log(build_params)
             builder.main(**build_params)
@@ -93,7 +93,8 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags):
             log("Could not find system pdfium, will attempt native sourcebuild")
             pl_name = ExtPlats.sourcebuild
             try:
-                stage_platfiles(pl_name, "native", pdfium_ver, flags)
+                bootstrap_buildtools()
+                stage_platfiles(pl_name, "native", pdfium_ver, flags, "--vendor all --no-vendor libc++")
             except Exception:
                 traceback.print_exc()
                 raise RuntimeError("sourcebuild-native failed. Manual action may be needed, such as installing system dependencies, or possibly patching the sources. See pypdfium2's README.md for more information.")
