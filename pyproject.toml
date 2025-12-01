@@ -117,8 +117,7 @@ PDFIUM_PLATFORM = "sourcebuild-native"
 BUILD_PARAMS = "--vendor icu"
 
 [[tool.cibuildwheel.overrides]]
-# FIXME s390x clang-cross targets are broken (manylinux crashes on library load, musllinux freezes during test phase). Builds produced by emulated gcc work though.
-select = "*-*linux_{ppc64le,riscv64,loongarch64}"  # ,s390x
+select = "*-*linux_{ppc64le,riscv64,loongarch64,s390x}"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
@@ -128,6 +127,11 @@ before-all = [
 ]
 inherit.environment = "append"
 environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu libc++"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-*linux_{ppc64le,riscv64,loongarch64,s390x}"
+inherit.environment = "append"
+environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux_{ppc64le,riscv64,loongarch64}"  # ,s390x
