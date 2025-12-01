@@ -515,7 +515,7 @@ class _host_platform:
         if self._raw_system == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
             self._system = SysNames.darwin
-            log(f"macOS {self._raw_machine} {platform.mac_ver()}")
+            log(f"macOS {self._raw_machine}")  # platform.mac_ver()
             if self._raw_machine == "x86_64":
                 return PlatNames.darwin_x64
             elif self._raw_machine == "arm64":
@@ -523,7 +523,7 @@ class _host_platform:
         
         elif self._raw_system == "windows":
             self._system = SysNames.windows
-            log(f"windows {self._raw_machine} {platform.win32_ver()}")
+            log(f"windows {self._raw_machine}")  # platform.win32_ver()
             if self._raw_machine == "amd64":
                 return PlatNames.windows_x64
             elif self._raw_machine == "x86":
@@ -548,7 +548,7 @@ class _host_platform:
         elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
             self._system = SysNames.android
-            log(f"android {self._raw_machine} {sys.getandroidapilevel()} {platform.android_ver()}")
+            log(f"android {self._raw_machine}")  # sys.getandroidapilevel() platform.android_ver()
             if self._raw_machine == "aarch64":
                 return PlatNames.android_arm64
             elif self._raw_machine == "armv7l":
