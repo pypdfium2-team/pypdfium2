@@ -68,7 +68,7 @@ before-all = [
     "python3 {project}/utils/bootstrap_gn.py /usr/local/bin",
 ]
 
-# NOTE: gcc is not actually used for ppc64le,s390x,riscv64,loongarch64 anymore (see the clang block below)
+# NOTE: gcc is not actually used for ppc64le,riscv64,loongarch64 anymore (see the clang block below)
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_{aarch64,loongarch64}"
@@ -117,7 +117,8 @@ PDFIUM_PLATFORM = "sourcebuild-native"
 BUILD_PARAMS = "--vendor icu"
 
 [[tool.cibuildwheel.overrides]]
-select = "*-*linux_{ppc64le,s390x,riscv64,loongarch64}"
+# FIXME s390x clang-cross targets are broken (manylinux crashes on library load, musllinux freezes during test phase). Builds produced by emulated gcc work though.
+select = "*-*linux_{ppc64le,riscv64,loongarch64}"  # ,s390x
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
@@ -129,7 +130,7 @@ inherit.environment = "append"
 environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu libc++"
 
 [[tool.cibuildwheel.overrides]]
-select = "*-musllinux_{ppc64le,s390x,riscv64,loongarch64}"
+select = "*-musllinux_{ppc64le,riscv64,loongarch64}"  # ,s390x
 inherit.environment = "append"
 # don't try to vendor the libc++ on musllinux, causes issues
 environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor icu"
