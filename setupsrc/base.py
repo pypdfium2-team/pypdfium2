@@ -993,8 +993,10 @@ def pack_sourcebuild(
 
 def bootstrap_ninja(skip_if_present=True):
     if skip_if_present and shutil.which("ninja"):
+        log("+ ninja found.")
         return
     # https://github.com/scikit-build/ninja-python-distributions
+    log("- ninja not found, installing...")
     run_cmd([sys.executable, "-m", "pip", "install", "ninja"], cwd=None)
 
 def make_executable(path):
@@ -1004,8 +1006,10 @@ def make_executable(path):
 
 def bootstrap_gn(target_dir=None, skip_if_present=True):
     if skip_if_present and shutil.which("gn"):
+        log("+ gn found.")
         return
     
+    log("- gn not found, attempt to build from scratch...")
     if target_dir is None:
         target_dir = Host.local_bin
     
@@ -1025,5 +1029,6 @@ def bootstrap_gn(target_dir=None, skip_if_present=True):
     make_executable(target_dir/"gn")
 
 def bootstrap_buildtools():
+    log("Bootstrapping build tools...")
     bootstrap_ninja()
     bootstrap_gn()
