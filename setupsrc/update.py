@@ -15,13 +15,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 # local
 from base import *
-from _verify import do_verify
 
 
 def urlretrieve(url, fp, *args, **kwargs):
     log(f"{url!r} -> {str(fp)!r}")
     url_request.urlretrieve(url, fp, *args, **kwargs)
-
 
 def clear_data(download_files):
     for pl_name in download_files:
@@ -112,6 +110,39 @@ def do_extract(archives, version, flags):
             write_pdfium_info(pl_dir, full_ver, origin="pdfium-binaries", flags=flags)
         
         arc_path.unlink()
+
+
+def _have_recent_gh():
+    
+    if not shutil.which("gh"):
+        log("gh CLI is not installed")
+        return False
+    
+    from packaging.version import Version
+    gh_version = run_cmd(["gh", "--version"], cwd=None, capture=True)
+    gh_version = Version( re.match(r"gh version ([\d.]+)", gh_version).group(1) )
+    
+    if gh_version >= Version("2.47.0"):
+        return True
+    else:
+        log("gh CLI version is too old for verification")
+        return False
+
+
+def do_verify(verify, archives, version):
+    
+    if verify is None:
+        verify = version >= 7557 and _have_recent_gh()
+    if not verify:
+        log("Warning: Verification is off. If this is not intentional, make sure `gh` (GitHub CLI) is installed.")
+        return
+    
+    attest_path = DataDir/f"pdfium-{version}-attestation.json"
+    if not attest_path.exists():
+        urlretrieve(f"{ReleaseURL}{version}/pdfium-attestation.json", attest_path)
+    
+    for artifact_path in archives.values():
+        run_cmd(["gh", "attestation", "verify", "-R", "bblanchon/pdfium-binaries", str(artifact_path), "-b", str(attest_path)], cwd=DataDir, check=True)
 
 
 def postprocess_android():
