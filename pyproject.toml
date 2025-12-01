@@ -117,8 +117,9 @@ PDFIUM_PLATFORM = "sourcebuild-native"
 BUILD_PARAMS = "--vendor icu"
 
 [[tool.cibuildwheel.overrides]]
-# musllinux s390x is broken with clang-cross, perpetually freezes during test phase
-select = "*-*linux_{ppc64le,riscv64,loongarch64} *-manylinux_s390x"
+# s390x (manylinux and musllinux) is broken with clang-cross, perpetually freezes during test phase.
+# It works when built using emulated gcc, however.
+select = "*-*linux_{ppc64le,riscv64,loongarch64}"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
