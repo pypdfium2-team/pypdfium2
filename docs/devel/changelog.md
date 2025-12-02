@@ -6,8 +6,6 @@
 
 # Changelog
 
-*There were no 5.2.0 and 5.3.0 releases, both failed during TestPyPI upload due to oversights. pypdfium2 uses GitHub's immutable releases which come with tag protection, so this cannot be fixed.*
-
 ## 5.1.0 (2025-11-23)
 
 - Updated PDFium from `7483` to `7529`.
