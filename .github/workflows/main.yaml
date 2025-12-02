@@ -385,7 +385,7 @@ jobs:
       # https://docs.pypi.org/trusted-publishers/using-a-publisher/
       # https://github.com/pypa/gh-action-pypi-publish
       
-      # XXX temporarily commented out
+      # XXX This will temporarily remain commented out until 5.2.0 and 5.3.0 have been released, because there were two failed attempts caught by TestPyPI. (They don't show up on pypdfium2's TestPyPI page, but still not sure re-uploading would work.)
       # - name: Publish to TestPyPI
       #   uses: pypa/gh-action-pypi-publish@release/v1
       #   with:
