@@ -174,7 +174,8 @@ jobs:
   
   
   # augment
-    
+  # FIXME XXX version update / release commit not included!
+  
   linux_ppc64le:
     if: ${{ inputs.augment }}
     uses: ./.github/workflows/sbuild_one.yaml
