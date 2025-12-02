@@ -174,6 +174,7 @@ jobs:
   
   
   # augment
+  # TODO consider using matrix for cibw targets?
   
   linux_ppc64le:
     if: ${{ inputs.augment }}
@@ -293,6 +294,32 @@ jobs:
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
   
+  # s390x builds produced by static clang are defunct, need to use emulated gcc. Very slow.
+  
+  # linux_s390x:
+  #   if: ${{ inputs.augment }}
+  #   needs: build
+  #   uses: ./.github/workflows/cibw_one.yaml
+  #   with:
+  #     os: ubuntu-latest
+  #     cibw_target: manylinux_s390x
+  #     cibw_arch: s390x
+  #     emulated: true
+  #     repo_tag: ${{ needs.build.outputs.new_version }}
+  #     branch: autorelease_tmp
+  
+  # musllinux_s390x:
+  #   if: ${{ inputs.augment }}
+  #   needs: build
+  #   uses: ./.github/workflows/cibw_one.yaml
+  #   with:
+  #     os: ubuntu-latest
+  #     cibw_target: musllinux_s390x
+  #     cibw_arch: s390x
+  #     emulated: true
+  #     repo_tag: ${{ needs.build.outputs.new_version }}
+  #     branch: autorelease_tmp
+  
   
   publish:
     
@@ -302,6 +329,7 @@ jobs:
       - linux_ppc64le
       - linux_riscv64
       - linux_loongarch64
+      # - linux_s390x
       - musllinux_x64
       - musllinux_i686
       - musllinux_arm64
@@ -309,6 +337,7 @@ jobs:
       - musllinux_ppc64le
       - musllinux_riscv64
       - musllinux_loongarch64
+      # - musllinux_s390x
     
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
