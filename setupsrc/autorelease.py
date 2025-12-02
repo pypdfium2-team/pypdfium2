@@ -97,9 +97,15 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     
     pdfium_msg = f"## {new_tag} ({time.strftime('%Y-%m-%d')})\n\n"
     if prev_pdfium != new_pdfium:
-        pdfium_msg += f"- Updated PDFium from `{prev_pdfium}` to `{new_pdfium}`."
+        pdfium_msg += f"- Updated pdfium-binaries from `{prev_pdfium}` to `{new_pdfium}`."
     else:
-        pdfium_msg += "- No PDFium update."
+        pdfium_msg += f"- No pdfium-binaries update, still at `{new_pdfium}`."
+    
+    pdfium_msg += f" Native and toolchained sourcebuild use pdfium "
+    if SBUILD_NATIVE_PIN == SBUILD_TOOLCHAINED_PIN:
+        pdfium_msg += f"`{SBUILD_NATIVE_PIN}`."
+    else:
+        pdfium_msg += f"`{SBUILD_NATIVE_PIN}` and `{SBUILD_TOOLCHAINED_PIN}`, respectively."
     
     content = Changelog.read_text()
     pos = content.index("\n", content.index("# Changelog")) + 1
