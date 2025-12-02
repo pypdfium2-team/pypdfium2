@@ -174,7 +174,6 @@ jobs:
   
   
   # augment
-  # FIXME XXX version update / release commit not included!
   
   linux_ppc64le:
     if: ${{ inputs.augment }}
@@ -183,7 +182,7 @@ jobs:
     with:
       os: ubuntu-latest
       target_cpu: ppc64le
-      tag: manylinux_2_17_ppc64le
+      tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
       py_version: ${{ inputs.py_version }}
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp

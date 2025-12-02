@@ -30,6 +30,8 @@ on:
 
 jobs:
   
+  # TODO consider adding legacy manylinux2014 tags while glibc req is 2_17
+  
   linux_x64:
     if: ${{ inputs.linux }}
     uses: ./.github/workflows/sbuild_one.yaml
