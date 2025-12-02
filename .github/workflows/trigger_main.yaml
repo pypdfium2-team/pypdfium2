@@ -26,6 +26,7 @@ jobs:
           inputs: |
             {
               "test": "true",
+              "augment": "true",
               "publish": "true",
               "conda": "true",
               "py_version": "3.12",
