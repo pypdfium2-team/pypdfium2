@@ -3,6 +3,7 @@
 
 build/
 dist/
+gh_only/
 conda/*/out/
 tests/output/
 
