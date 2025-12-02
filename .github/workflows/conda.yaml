@@ -49,8 +49,11 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ inputs.py_version }}
-          channels: pypdfium2-team,bblanchon
+          # priority: highest to lowest
+          # https://github.com/conda-incubator/setup-miniconda/blob/3afdf12ae89a97ee81acc85f1490189fba144938/README.md#example-4-conda-options
+          channels: pypdfium2-team,bblanchon,defaults
           channel-priority: strict
+          show-channel-urls: true
       
       - name: Check out repository
         uses: actions/checkout@v6
@@ -149,7 +152,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
-          channels: pypdfium2-team,bblanchon
+          channels: pypdfium2-team,bblanchon,defaults
           channel-priority: strict
       
       - name: Install deps
