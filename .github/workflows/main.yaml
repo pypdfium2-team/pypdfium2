@@ -304,21 +304,35 @@ jobs:
         with:
           python-version: ${{ inputs.py_version }}
       
-      - name: Download packages
+      - name: Download release notes
+        uses: actions/download-artifact@v6
+        with:
+          name: release_notes
+      
+      - name: Download main packages
+        uses: actions/download-artifact@v6
+        with:
+          path: dist/
+          name: packages
+      
+      - name: Download extra packages (cibw)
         uses: actions/download-artifact@v6
         with:
           path: dist/
           merge-multiple: true
+          pattern: cibw-*
+      
+      - name: Download extra packages (sbuild)
+        uses: actions/download-artifact@v6
+        with:
+          path: dist/
+          merge-multiple: true
+          pattern: sbuild_*
       
       - name: Isolate non-PyPI builds
         run: |
           mkdir gh_only
           mv dist/*linux_*_loongarch64*.whl gh_only/
-      
-      - name: Download release notes
-        uses: actions/download-artifact@v6
-        with:
-          name: release_notes
       
       - name: Apply and push repository changes
         run: |
