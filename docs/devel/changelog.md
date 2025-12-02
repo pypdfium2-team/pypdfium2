@@ -6,6 +6,13 @@
 
 # Changelog
 
+
+## 5.2.0b1 (2025-12-02)
+
+- No PDFium update.
+- See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/5.2.0b1)
+
+
 ## 5.1.0 (2025-11-23)
 
 - Updated PDFium from `7483` to `7529`.
