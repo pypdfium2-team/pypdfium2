@@ -21,7 +21,7 @@ on:
         default: ''
       test:
         type: boolean
-        default: null
+        default: false
   workflow_dispatch:
     inputs:
       os:
@@ -41,7 +41,7 @@ on:
         default: ''
       test:
         type: boolean
-        default: null
+        default: false
 
 defaults:
   run:

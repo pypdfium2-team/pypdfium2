@@ -10,6 +10,9 @@ on:
       test:
         default: true
         type: boolean
+      augment:
+        default: false
+        type: boolean
       publish:
         default: false
         type: boolean
@@ -170,9 +173,113 @@ jobs:
         run: python3 -m pytest tests/
   
   
+  # augment
+    
+  linux_ppc64le:
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: ubuntu-latest
+      target_cpu: ppc64le
+      tag: manylinux_2_17_ppc64le
+      py_version: ${{ inputs.py_version }}
+  
+  linux_riscv64:
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: manylinux_riscv64
+      cibw_arch: riscv64
+      emulated: true
+  
+  linux_loongarch64:  # not PyPI
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: manylinux_loongarch64
+      cibw_arch: loongarch64
+      emulated: true
+  
+  musllinux_x64:
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: musllinux_x86_64
+      cibw_arch: x86_64
+  
+  musllinux_i686:
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: musllinux_i686
+      cibw_arch: i686
+      emulated: true
+  
+  musllinux_arm64:
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-24.04-arm
+      cibw_target: musllinux_aarch64
+      cibw_arch: aarch64
+  
+  musllinux_arm32:
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-24.04-arm
+      cibw_target: musllinux_armv7l
+      cibw_arch: armv7l
+      emulated: true
+
+  musllinux_ppc64le:
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: musllinux_ppc64le
+      cibw_arch: ppc64le
+      emulated: true
+  
+  musllinux_riscv64:
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: musllinux_riscv64
+      cibw_arch: riscv64
+      emulated: true
+  
+  musllinux_loongarch64:  # not PyPI
+    if: ${{ inputs.augment }}
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      os: ubuntu-latest
+      cibw_target: musllinux_loongarch64
+      cibw_arch: loongarch64
+      emulated: true
+  
+  
   publish:
     
-    needs: [build, test]
+    needs:
+      - build
+      - test
+      - linux_ppc64le
+      - linux_riscv64
+      - linux_loongarch64
+      - musllinux_x64
+      - musllinux_i686
+      - musllinux_arm64
+      - musllinux_arm32
+      - musllinux_ppc64le
+      - musllinux_riscv64
+      - musllinux_loongarch64
+    
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
     
@@ -200,8 +307,13 @@ jobs:
       - name: Download packages
         uses: actions/download-artifact@v6
         with:
-          name: packages
           path: dist/
+          merge-multiple: true
+      
+      - name: Isolate non-PyPI builds
+        run: |
+          mkdir gh_only
+          mv dist/*linux_*_loongarch64*.whl gh_only/
       
       - name: Download release notes
         uses: actions/download-artifact@v6
@@ -253,7 +365,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           immutableCreate: true
-          artifacts: 'dist/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
+          artifacts: 'dist/*.whl,gh_only/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.build.outputs.new_version }}

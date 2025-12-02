@@ -132,36 +132,36 @@ class PlatNames:
 
 # Map platform names to the package names used by pdfium-binaries/google.
 PdfiumBinariesMap = {
-    PlatNames.darwin_x64:       "mac-x64",
-    PlatNames.darwin_arm64:     "mac-arm64",
-    PlatNames.windows_x64:      "win-x64",
-    PlatNames.windows_x86:      "win-x86",
-    PlatNames.windows_arm64:    "win-arm64",
-    PlatNames.linux_x64:        "linux-x64",
-    PlatNames.linux_x86:        "linux-x86",
-    PlatNames.linux_arm64:      "linux-arm64",
-    PlatNames.linux_arm32:      "linux-arm",
-    PlatNames.linux_musl_x64:   "linux-musl-x64",
-    PlatNames.linux_musl_x86:   "linux-musl-x86",
-    PlatNames.linux_musl_arm64: "linux-musl-arm64",
+    PlatNames.darwin_x64:    "mac-x64",
+    PlatNames.darwin_arm64:  "mac-arm64",
+    PlatNames.windows_x64:   "win-x64",
+    PlatNames.windows_x86:   "win-x86",
+    PlatNames.windows_arm64: "win-arm64",
+    PlatNames.linux_x64:     "linux-x64",
+    PlatNames.linux_x86:     "linux-x86",
+    PlatNames.linux_arm64:   "linux-arm64",
+    PlatNames.linux_arm32:   "linux-arm",
+    PlatNames.android_arm64: "android-arm64",
+    PlatNames.android_arm32: "android-arm",
 }
 
 # Capture the platforms we build wheels for
 WheelPlatforms = list(PdfiumBinariesMap.keys())
 
-# Additional platforms we don't currently build wheels for in craft.py
+# Additional platforms we don't currently build wheels for this way in craft.py
 # To package these manually, you can do e.g. (in bash):
-# export PLATFORMS=(darwin_univ2 android_arm64 android_arm32 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
+# export PLATFORMS=(linux_musl_x64 linux_musl_x86 linux_musl_arm64 darwin_univ2 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
 # for PLAT in ${PLATFORMS[@]}; do echo $PLAT; just emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
-    PlatNames.darwin_univ2:   "mac-univ",
-    PlatNames.android_arm64:  "android-arm64",
-    PlatNames.android_arm32:  "android-arm",
-    PlatNames.android_x64:    "android-x64",
-    PlatNames.android_x86:    "android-x86",
-    PlatNames.ios_arm64_dev:  "ios-device-arm64",
-    PlatNames.ios_arm64_simu: "ios-simulator-arm64",
-    PlatNames.ios_x64_simu:   "ios-simulator-x64",
+    PlatNames.linux_musl_x64:   "linux-musl-x64",
+    PlatNames.linux_musl_x86:   "linux-musl-x86",
+    PlatNames.linux_musl_arm64: "linux-musl-arm64",
+    PlatNames.darwin_univ2:     "mac-univ",
+    PlatNames.android_x64:      "android-x64",
+    PlatNames.android_x86:      "android-x86",
+    PlatNames.ios_arm64_dev:    "ios-device-arm64",
+    PlatNames.ios_arm64_simu:   "ios-simulator-arm64",
+    PlatNames.ios_x64_simu:     "ios-simulator-x64",
 })
 
 
@@ -619,7 +619,6 @@ def get_wheel_tag(pl_name):
         return "musllinux_1_1_aarch64"
     
     # Android - see PEP 738 # Packaging
-    # We don't currently publish wheels for Android, but handle it in case we want to in the future (or if callers want to build their own wheels)
     # AOTW, pdfium-binaries/steps/05-configure.sh defines default_min_sdk_version = 23
     elif pl_name == PlatNames.android_arm64:
         return "android_23_arm64_v8a"
