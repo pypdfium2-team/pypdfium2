@@ -36,6 +36,8 @@ before-all = ["dnf -y install gn"]
 select = "*-manylinux_{i686,riscv64,loongarch64}"
 before-all = []  # gn not available from repo
 
+# NOTE For most targets, dependency libs are now vendored, so the install blocks below may be shortened in the future.
+
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
 inherit.before-all = "append"
