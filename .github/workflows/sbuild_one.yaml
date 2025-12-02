@@ -22,6 +22,12 @@ on:
       test:
         type: boolean
         default: false
+      branch:
+        type: string
+        default: main
+      repo_tag:
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       os:
@@ -42,6 +48,12 @@ on:
       test:
         type: boolean
         default: false
+      branch:
+        type: string
+        default: main
+      repo_tag:
+        type: string
+        default: ''
 
 defaults:
   run:
@@ -65,6 +77,16 @@ jobs:
           repository: ${{ github.repository }}
           persist-credentials: false
           fetch-depth: 0  # for git describe
+          ref: ${{ inputs.branch }}
+      
+      - name: Create pypdfium2 tag (optional)
+        if: ${{ inputs.repo_tag }}
+        run: |
+          git config user.email "geisserml@gmail.com"
+          git config user.name "geisserml"
+          git tag -a "$REPO_TAG" -m "Autorelease"
+        env:
+          REPO_TAG: ${{ inputs.repo_tag }}
       
       - name: Install Python deps
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt

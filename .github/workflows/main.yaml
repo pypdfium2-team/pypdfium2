@@ -178,91 +178,121 @@ jobs:
   
   linux_ppc64le:
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
       target_cpu: ppc64le
       tag: manylinux_2_17_ppc64le
       py_version: ${{ inputs.py_version }}
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   linux_riscv64:
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
       cibw_target: manylinux_riscv64
       cibw_arch: riscv64
       emulated: true
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   linux_loongarch64:  # not PyPI
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
       cibw_target: manylinux_loongarch64
       cibw_arch: loongarch64
       emulated: true
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   musllinux_x64:
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
       cibw_target: musllinux_x86_64
       cibw_arch: x86_64
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   musllinux_i686:
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
       cibw_target: musllinux_i686
       cibw_arch: i686
       emulated: true
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   musllinux_arm64:
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04-arm
       cibw_target: musllinux_aarch64
       cibw_arch: aarch64
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   musllinux_arm32:
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-24.04-arm
       cibw_target: musllinux_armv7l
       cibw_arch: armv7l
       emulated: true
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
 
   musllinux_ppc64le:
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
       cibw_target: musllinux_ppc64le
       cibw_arch: ppc64le
       emulated: true
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   musllinux_riscv64:
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
       cibw_target: musllinux_riscv64
       cibw_arch: riscv64
       emulated: true
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   musllinux_loongarch64:  # not PyPI
     if: ${{ inputs.augment }}
+    needs: build
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
       cibw_target: musllinux_loongarch64
       cibw_arch: loongarch64
       emulated: true
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   
   publish:
