@@ -20,7 +20,7 @@ on:
         type: string
       branch:
         type: string
-        default: main
+        default: ''
       repo_tag:
         type: string
         default: ''
@@ -43,7 +43,7 @@ on:
         type: string
       branch:
         type: string
-        default: main
+        default: ''
       repo_tag:
         type: string
         default: ''
@@ -61,7 +61,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          ref: ${{ inputs.branch }}
+          ref: ${{ inputs.branch || github.ref_name }}
       
       - name: Create pypdfium2 tag (optional)
         if: ${{ inputs.repo_tag }}

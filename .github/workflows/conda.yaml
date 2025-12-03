@@ -28,7 +28,7 @@ on:
         default: '3.12'
         type: string
       ref:
-        default: main
+        default: ''
         type: string
 
 # This is required for setup-miniconda / conda init
@@ -64,7 +64,7 @@ jobs:
           repository: ${{ github.repository }}
           fetch-depth: 0
           persist-credentials: false
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Prepare
         run: |
@@ -108,7 +108,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           persist-credentials: false
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Miniconda setup
         uses: conda-incubator/setup-miniconda@v3
