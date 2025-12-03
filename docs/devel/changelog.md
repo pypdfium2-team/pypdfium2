@@ -9,6 +9,8 @@
 
 ## 5.2.0b1 (2025-12-02)
 
+*There was no conda release for this version (workflow failed due to a deprecation).*
+
 - Updated PDFium from `7529` to `7557`.
 - See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/5.2.0b1)
 
