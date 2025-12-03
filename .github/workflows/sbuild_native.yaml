@@ -12,9 +12,6 @@ on:
       linux_native_clang:
         type: boolean
         default: true
-      linux_tc_syslibs:
-        type: boolean
-        default: true
       py_version:
         type: string
         default: '3.12'
