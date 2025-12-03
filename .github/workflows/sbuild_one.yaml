@@ -91,6 +91,10 @@ jobs:
       - name: Install Python deps
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
+      - name: Update package list
+        if: ${{ startsWith(inputs.os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.os, '-arm')) }}
+        run: sudo apt-get update
+      
       - name: Install Linux/Android cross deps
         if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
         run: |
