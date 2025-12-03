@@ -173,8 +173,6 @@ jobs:
         run: python3 -m pytest tests/
   
   
-  # augment
-  
   augment_cibw:
     
     if: ${{ inputs.augment }}
@@ -376,6 +374,7 @@ jobs:
         with:
           workflow: gh_pages.yaml  # takes no inputs
   
+  
   conda_trigger:
     needs: [build, test, publish]
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
@@ -395,6 +394,7 @@ jobs:
               "publish": "${{ inputs.publish }}",
               "py_version": "${{ inputs.py_version }}"
             }
+  
   
   cleanup:
     needs: [build, test, publish, conda_trigger]
