@@ -27,6 +27,9 @@ on:
       py_version:
         default: '3.12'
         type: string
+      ref:
+        default: main
+        type: string
 
 # This is required for setup-miniconda / conda init
 # see https://github.com/conda-incubator/setup-miniconda#important
@@ -61,6 +64,7 @@ jobs:
           repository: ${{ github.repository }}
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ inputs.ref }}
       
       - name: Prepare
         run: |
@@ -104,12 +108,14 @@ jobs:
         with:
           repository: ${{ github.repository }}
           persist-credentials: false
+          ref: ${{ inputs.ref }}
       
       - name: Miniconda setup
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
+          channels: defaults
       
       - name: Download artifact
         uses: actions/download-artifact@v6
