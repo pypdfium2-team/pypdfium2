@@ -184,15 +184,6 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            cibw_class: manylinux
-            cibw_arch: riscv64
-          - os: ubuntu-latest
-            cibw_class: manylinux
-            cibw_arch: loongarch64
-          # - os: ubuntu-latest
-          #   cibw_class: manylinux
-          #   cibw_arch: s390x
-          - os: ubuntu-latest
             cibw_class: musllinux
             cibw_arch: x86_64
             emulated: false
@@ -210,11 +201,21 @@ jobs:
             cibw_class: musllinux
             cibw_arch: ppc64le
           - os: ubuntu-latest
-            cibw_class: musllinux
+            cibw_class: manylinux
             cibw_arch: riscv64
           - os: ubuntu-latest
             cibw_class: musllinux
+            cibw_arch: riscv64
+          - os: ubuntu-latest
+            cibw_class: manylinux
             cibw_arch: loongarch64
+          - os: ubuntu-latest
+            cibw_class: musllinux
+            cibw_arch: loongarch64
+          # s390x builds produced by static clang are defunct, would need to use emulated gcc (very slow)
+          # - os: ubuntu-latest
+          #   cibw_class: manylinux
+          #   cibw_arch: s390x
           # - os: ubuntu-latest
           #   cibw_class: musllinux
           #   cibw_arch: s390x
