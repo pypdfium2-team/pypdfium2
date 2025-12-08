@@ -54,7 +54,7 @@ def _end_subtargets(sub_target, pdfium_ver):
 
 
 def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params=""):
-        
+    
     if pl_name == ExtPlats.system:
         pl_dir = DataDir/pl_name
         if sub_target:
