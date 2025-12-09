@@ -77,6 +77,7 @@ jobs:
       - name: Run test suite
         run: python3 -m pytest tests/
       
+      # TODO make controllable whether musllinux packages are built through pdfium-binaries or cibw augmentation, consider enabling them here if inputs.augment is false
       - name: Run PyPI packaging script
         run: just packaging-pypi
       
@@ -319,6 +320,7 @@ jobs:
           pattern: sbuild_*
       
       - name: Isolate non-PyPI builds
+        if: ${{ inputs.augment }}
         run: |
           mkdir gh_only
           mv dist/*linux_*_loongarch64*.whl gh_only/
@@ -365,6 +367,7 @@ jobs:
         env:
           SRC_PATH: ${{ steps.provenance.outputs.bundle-path }}
       
+      # FIXME skip gh_only/*.whl if !inputs.augment
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1
         with:
@@ -387,7 +390,7 @@ jobs:
   
   
   conda_trigger:
-    needs: [build, test, publish]
+    needs: publish  # i.e. goes after, regardless if publish is active or not
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
     
@@ -408,7 +411,7 @@ jobs:
   
   
   cleanup:
-    needs: [build, test, publish, conda_trigger]
+    needs: [publish, conda_trigger]
     if: ${{ !cancelled() }}
     runs-on: ${{ inputs.runner }}
     
