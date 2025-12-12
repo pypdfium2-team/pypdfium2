@@ -220,14 +220,15 @@ jobs:
             cibw_arch: loongarch64
             emulated: true
           # s390x builds produced by static clang are defunct, would need to use emulated gcc (very slow)
-          # - os: ubuntu-latest
-          #   cibw_class: manylinux
-          #   cibw_arch: s390x
-          #   emulated: true
-          # - os: ubuntu-latest
-          #   cibw_class: musllinux
-          #   cibw_arch: s390x
-          #   emulated: true
+          # temporarily commented in for 5.2.0 release
+          - os: ubuntu-latest
+            cibw_class: manylinux
+            cibw_arch: s390x
+            emulated: true
+          - os: ubuntu-latest
+            cibw_class: musllinux
+            cibw_arch: s390x
+            emulated: true
     
     uses: ./.github/workflows/cibw_one.yaml
     with:
