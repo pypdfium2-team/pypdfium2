@@ -42,6 +42,7 @@ before-all = []  # gn not available from repo
 select = "*-manylinux_*"
 inherit.before-all = "append"
 before-all = [
+    "dnf clean all && dnf makecache --refresh",
     "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
 ]
 
