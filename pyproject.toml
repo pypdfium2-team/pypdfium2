@@ -28,14 +28,6 @@ test-command = [
     "python -m pytest {project}/tests",
 ]
 
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_*"
-before-all = ["dnf -y install gn"]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_{i686,riscv64,loongarch64}"
-before-all = []  # gn not available from repo
-
 # NOTE For most targets, dependency libs are now vendored, so the install blocks below may be shortened in the future.
 
 [[tool.cibuildwheel.overrides]]
@@ -44,6 +36,7 @@ inherit.before-all = "append"
 before-all = [
     "dnf clean all && dnf makecache --refresh",
     "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
+    "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64,loongarch64}
 ]
 
 # manylinux_armv7l uses a Ubuntu-based image, for lack of an RHEL-based one
