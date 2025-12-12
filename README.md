@@ -93,6 +93,7 @@ If no pre-built binaries are available for your platform, setup will [look for s
 - `-e`: Install in editable mode, so the installation points to the source tree. This way, changes directly take effect without needing to re-install. Recommended for development.
 - `--no-build-isolation`: Do not isolate setup in a virtual env; use the main env instead. This renders `pyproject.toml [build-system]` inactive, so setup deps must be prepared by caller. Useful to install custom versions of setup deps, or as speedup when installing repeatedly.
 - `--no-binary pypdfium2`: Do not use binary *wheels* when installing from PyPI – instead, use the sdist and run setup. Note, this option is improperly named, as pypdfium2's setup will attempt to use binaries all the same. If you want to prevent that, set e.g. `PDFIUM_PLATFORM=fallback` to achieve the same behavior as if there were no pdfium-binaries for the host. Or if you just want to package a source distribution, set `PDFIUM_PLATFORM=sdist`.
+- `--pre` to install a beta release, if available.
 
 
 #### With system pdfium
@@ -141,7 +142,12 @@ You can also install pypdfium2 with a self-compiled pdfium shared library, by pl
 
 This project comes with two scripts to automate the build process: `build_toolchained.py` and `build_native.py` (in `setupsrc/`).
 - `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. Dependency libraries are vendored. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
-- `build_native` is an attempt to address some shortcomings of the toolchained build. It performs a lean, self-managed checkout, and is tailored towards native compilation. It uses system tools and libraries (including the system's GCC compiler), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
+- `build_native` is an attempt to address some shortcomings of the toolchained build. It performs a lean, self-managed checkout, and is tailored towards native compilation. It uses system dependencies (compiler/gn/ninja), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
+
+> [!TIP]
+> The native sourcebuild can either use system libraries, or pdfium's vendored libraries.
+> When invoked directly, by default, system libraries need to be installed. However, when invoked through fallback setup (`PDFIUM_PLATFORM=fallback`), vendored libraries will be used.<br>
+> Use the `--vendor ...` and `--no-vendor ...` options to control vendoring on a per-library basis. See `build_native.py --help` for details.
 
 You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup, and pass command-line flags with `$BUILD_PARAMS`.
 However, for simplicity, both scripts/subtargets share just `sourcebuild` as staging directory.
@@ -256,11 +262,8 @@ CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
 See also our [cibuildwheel](.github/workflows/cibw.yaml) [workflow](.github/workflows/cibw_one.yaml).
 For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
 
-On Linux, this will use the native sourcebuild, and pull in dependencies from the container via `auditwheel repair`.
+On Linux, this will use the native sourcebuild with vendored dependency libraries.
 On Windows and macOS, the toolchained sourcebuild is used.
-
-On Linux, non-native architectures can theoretically be built under emulation, which seems to be cibuildwheel's standard albeit really unfortunate approach to this problem (however, see the note below on cross-compiling without cibuildwheel).
-On the other hand, for Windows `arm64` and `x86`, cibuildwheel supports cross-compilation.
 
 Note, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
 ```bash
@@ -280,13 +283,13 @@ For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](htt
 
 > [!TIP]
 > pdfium itself has first-class cross-compilation support.
-> In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to forego cibuildwheel and cross-package pypdfium2 instead, e.g.:
+> In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to forego cibuildwheel, and instead cross-build pdfium using its own toolchain, e.g.:
 > ```bash
 > # assuming gcc cross-compilation packages are installed
 > python setupsrc/build_toolchained.py --target-cpu arm
 > PDFIUM_PLATFORM=sourcebuild CROSS_TAG="manylinux_2_17_armv7l" python -m build -wxn
 > ```
-> However, cibuildwheel emulation may be a *quick & dirty* way to build for those architectures not handled upstream yet.
+> This typically achieves a lower glibc requirement than we can with cibuildwheel.
 
 
 #### With caller-provided data files
