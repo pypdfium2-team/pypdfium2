@@ -285,7 +285,7 @@ For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](htt
 > pdfium itself has first-class cross-compilation support.
 > In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to forego cibuildwheel, and instead cross-build pdfium using its own toolchain, e.g.:
 > ```bash
-> # assuming gcc cross-compilation packages are installed
+> # assuming cross-compilation dependencies are installed
 > python setupsrc/build_toolchained.py --target-cpu arm
 > PDFIUM_PLATFORM=sourcebuild CROSS_TAG="manylinux_2_17_armv7l" python -m build -wxn
 > ```
