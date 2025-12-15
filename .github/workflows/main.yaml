@@ -82,14 +82,14 @@ jobs:
         run: just packaging-pypi
       
       - name: Upload release notes
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: release_notes
           path: RELEASE.md
       
       # https://github.com/actions/upload-artifact/issues/331 ...
       - name: Upload packages
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: packages
           path: dist/*
