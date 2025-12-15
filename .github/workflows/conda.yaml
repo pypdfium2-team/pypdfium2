@@ -82,7 +82,7 @@ jobs:
           MAYBE_NEW_ONLY: ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }}
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: conda_package
           path: conda/${{ inputs.package }}/out/

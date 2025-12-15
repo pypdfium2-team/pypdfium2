@@ -95,7 +95,7 @@ jobs:
           output-dir: wheelhouse
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           path: ./wheelhouse/*.whl
           name: cibw-${{ inputs.cibw_target }}
