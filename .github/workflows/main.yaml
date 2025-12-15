@@ -361,7 +361,7 @@ jobs:
         id: provenance
         uses: actions/attest-build-provenance@v3
         with:
-          subject-path: dist/*
+          subject-path: 'dist/*, gh_only/*'
       
       - name: Rename provenance file
         run: mv "$SRC_PATH" pypdfium2-attestation.json

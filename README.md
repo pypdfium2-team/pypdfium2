@@ -147,7 +147,7 @@ This project comes with two scripts to automate the build process: `build_toolch
 > [!TIP]
 > The native sourcebuild can either use system libraries, or pdfium's vendored libraries.
 > When invoked directly, by default, system libraries need to be installed. However, when invoked through fallback setup (`PDFIUM_PLATFORM=fallback`), vendored libraries will be used.<br>
-> Use the `--vendor ...` and `--no-vendor ...` options to control vendoring on a per-library basis. See `build_native.py --help` for details.
+> The `--vendor ...` and `--no-vendor ...` options can be used to control vendoring on a per-library basis. See `build_native.py --help` for details.
 
 You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup, and pass command-line flags with `$BUILD_PARAMS`.
 However, for simplicity, both scripts/subtargets share just `sourcebuild` as staging directory.

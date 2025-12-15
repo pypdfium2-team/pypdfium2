@@ -4,3 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Fixed inclusion of `loongarch64` build in GH attestation. This was an oversight in the workflow.
