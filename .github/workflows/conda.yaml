@@ -118,7 +118,7 @@ jobs:
           channels: defaults
       
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: conda_package
           path: conda_dist/
@@ -165,7 +165,7 @@ jobs:
         run: conda install -y anaconda-client
       
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: conda_package
           path: conda_dist/
