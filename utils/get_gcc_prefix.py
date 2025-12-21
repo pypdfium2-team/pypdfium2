@@ -3,24 +3,19 @@
 
 # Simple shim for use within cibuildwheel and sbuild_one.yaml
 
-import sys, subprocess
+import os, sys
 
 def main(arch=None):
-    
     if not arch:
-        proc = subprocess.run(["uname", "-m"], stdout=subprocess.PIPE)
-        arch = proc.stdout.decode().strip()
-    
+        arch = os.uname().machine
     if arch == "loongarch64":
-        prefix = f"{arch}-unknown-linux-gnu"
+        return f"{arch}-unknown-linux-gnu"
     elif arch in ("armv7l", "armv8l"):
-        prefix = "arm-linux-gnueabihf"
+        return "arm-linux-gnueabihf"
     elif arch == "ppc64le":
-        prefix = "powerpc64le-linux-gnu"
+        return "powerpc64le-linux-gnu"
     else:
-        prefix = f"{arch}-linux-gnu"
-    
-    return prefix
+        return f"{arch}-linux-gnu"
 
 def main_cli(argv=sys.argv[1:]):
     arch = argv[0] if len(argv) > 0 else None
