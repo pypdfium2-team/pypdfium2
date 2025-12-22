@@ -119,6 +119,7 @@ class PlatNames:
     linux_x86        = SysNames.linux   + "_x86"
     linux_arm64      = SysNames.linux   + "_arm64"
     linux_arm32      = SysNames.linux   + "_arm32"
+    linux_ppc64le    = SysNames.linux   + "_ppc64le"
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
@@ -141,6 +142,7 @@ PdfiumBinariesMap = {
     PlatNames.linux_x86:     "linux-x86",
     PlatNames.linux_arm64:   "linux-arm64",
     PlatNames.linux_arm32:   "linux-arm",
+    PlatNames.linux_ppc64le: "linux-ppc64",
     PlatNames.android_arm64: "android-arm64",
     PlatNames.android_arm32: "android-arm",
 }
@@ -496,10 +498,12 @@ class _host_platform:
             info += f", {self._libc_name} {self._libc_ver}"
         return f"<Host: {info}>"
     
-    def _handle_linux(self, archid):
+    def _handle_linux(self, archid, musl_ok):
         if self._libc_name == "glibc":
             return getattr(PlatNames, f"linux_{archid}")
         elif self._libc_name == "musl":
+            if not musl_ok:
+                raise RuntimeError(f"{archid} musl not supported with pdfium-binaries on setup. Please check PyPI for wheels.")
             return getattr(PlatNames, f"linux_musl_{archid}")
         elif _android_api():  # seems to imply self._libc_name == "libc"
             log("Android prior to PEP 738 (e.g. Termux)")
@@ -541,9 +545,9 @@ class _host_platform:
             elif self._raw_machine == "aarch64":
                 return self._handle_linux("arm64")
             elif self._raw_machine == "armv7l":
-                if self._libc_name == "musl":
-                    raise RuntimeError(f"armv7l: musl not supported at this time")
-                return self._handle_linux("arm32")
+                return self._handle_linux("arm32", musl_ok=False)
+            elif self._raw_machine == "ppc64le":
+                return self._handle_linux("ppc64le", musl_ok=False)
         
         elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
@@ -608,6 +612,8 @@ def get_wheel_tag(pl_name):
         return _manylinux_tag("aarch64")
     elif pl_name == PlatNames.linux_arm32:
         return _manylinux_tag("armv7l")
+    elif pl_name == PlatNames.linux_ppc64le:
+        return _manylinux_tag("ppc64le")
     
     # pdfium-binaries statically link musl, so we can declare the lowest possible requirement.
     # The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.

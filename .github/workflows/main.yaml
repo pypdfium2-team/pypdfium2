@@ -240,27 +240,28 @@ jobs:
       branch: autorelease_tmp
   
   
-  augment_sbuild:
-    
-    if: ${{ inputs.augment }}
-    needs: build
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target_cpu: ppc64le
-            tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
-    
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ${{ matrix.os }}
-      target_cpu: ${{ matrix.target_cpu }}
-      tag: ${{ matrix.tag }}
-      py_version: ${{ inputs.py_version }}
-      repo_tag: ${{ needs.build.outputs.new_version }}
-      branch: autorelease_tmp
+  # # NOTE ppc64le is now supported with pdfium-binaries, commented out. However, this strategy might be useful for other platforms in the future.
+  # augment_sbuild:
+  #   
+  #   if: ${{ inputs.augment }}
+  #   needs: build
+  #   
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: ubuntu-latest
+  #           target_cpu: ppc64le
+  #           tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
+  #   
+  #   uses: ./.github/workflows/sbuild_one.yaml
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     target_cpu: ${{ matrix.target_cpu }}
+  #     tag: ${{ matrix.tag }}
+  #     py_version: ${{ inputs.py_version }}
+  #     repo_tag: ${{ needs.build.outputs.new_version }}
+  #     branch: autorelease_tmp
   
   
   publish:
@@ -269,7 +270,7 @@ jobs:
       - build
       - test
       - augment_cibw
-      - augment_sbuild
+      # - augment_sbuild
     
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
@@ -313,12 +314,12 @@ jobs:
           merge-multiple: true
           pattern: cibw-*
       
-      - name: Download extra packages (sbuild)
-        uses: actions/download-artifact@v7
-        with:
-          path: dist/
-          merge-multiple: true
-          pattern: sbuild_*
+      # - name: Download extra packages (sbuild)
+      #   uses: actions/download-artifact@v7
+      #   with:
+      #     path: dist/
+      #     merge-multiple: true
+      #     pattern: sbuild_*
       
       - name: Isolate non-PyPI builds
         if: ${{ inputs.augment }}
