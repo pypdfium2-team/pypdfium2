@@ -433,6 +433,10 @@ def _android_api():
         return None
 
 
+class UnhandledPlatformError (RuntimeError):
+    pass
+
+
 class _host_platform:
     
     def __init__(self):
@@ -453,7 +457,7 @@ class _host_platform:
     def platform(self):
         try:
             return self._get_platform()
-        except Exception as e:
+        except (UnhandledPlatformError, AttributeError) as e:
             self._exc = e
             return None
     
@@ -498,19 +502,19 @@ class _host_platform:
             info += f", {self._libc_name} {self._libc_ver}"
         return f"<Host: {info}>"
     
-    def _handle_linux(self, archid, musl_ok):
+    def _handle_linux(self, archid, musl_ok=True):
         if self._libc_name == "glibc":
             return getattr(PlatNames, f"linux_{archid}")
         elif self._libc_name == "musl":
             if not musl_ok:
-                raise RuntimeError(f"{archid} musl not supported with pdfium-binaries on setup. Please check PyPI for wheels.")
+                raise UnhandledPlatformError(f"{archid} musl not supported with pdfium-binaries on setup. Please check PyPI for wheels.")
             return getattr(PlatNames, f"linux_musl_{archid}")
         elif _android_api():  # seems to imply self._libc_name == "libc"
             log("Android prior to PEP 738 (e.g. Termux)")
             self._system = SysNames.android
             return getattr(PlatNames, f"android_{archid}")
         else:
-            raise RuntimeError(f"Linux with unhandled libc {self._libc_name!r}")
+            raise UnhandledPlatformError(f"Linux with unhandled libc {self._libc_name!r}")
     
     def _get_platform(self):
         
@@ -576,7 +580,7 @@ class _host_platform:
         else:
             self._system = None
         
-        raise RuntimeError(f"Unhandled platform: {self!r}")
+        raise UnhandledPlatformError(f"Unhandled platform: {self!r}")
 
 Host = _host_platform()
 
