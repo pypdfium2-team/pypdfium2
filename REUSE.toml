@@ -100,7 +100,6 @@ Obtained from img2pdf. No individual license stated for this data file.
 
 [[annotations]]
 path = [
-    "patches/public_headers.patch",
     "patches/win/use_resources_rc.patch",
     "patches/win/build.patch",
     "patches/win/resources.rc",
@@ -119,7 +118,6 @@ See also //BUILD_LICENSES/pdfium-binaries.txt for a copy of upstream's license f
 
 [[annotations]]
 path = [
-    "patches/single_lib.patch",
     "patches/ffp_contract.patch",
     "patches/avoid_new_clang_flags.patch",
     "patches/system_libcxx_with_clang.patch",
