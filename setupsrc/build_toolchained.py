@@ -102,11 +102,8 @@ def _create_resources_rc(build_ver):
     output_path.write_text(content)
 
 def patch_pdfium(build_ver, target_os):
-    # TODO
-    # - use autopatch from build_native?
-    # - in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
-    git_apply_patch(PatchDir/"single_lib.patch", PDFiumDir)
-    git_apply_patch(PatchDir/"public_headers.patch", PDFiumDir)
+    # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
+    shared_autopatches(PDFiumDir)
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
@@ -161,6 +158,9 @@ def main(
         build_target = "pdfium"
     if build_ver is None:
         build_ver = SBUILD_TOOLCHAINED_PIN
+        # our current ppc64(le) build strategy needs more recent pdfium
+        if target_cpu == "ppc64":
+            build_ver = 7592
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     
@@ -195,12 +195,13 @@ def main(
         is_cross = True  # assumed
         if Host.system == SysNames.linux:
             if not target_os:
-                run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", target_cpu], cwd=PDFiumDir)
-            if target_cpu == "ppc64le":
-                if did_pdfium_sync:
-                    git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFiumDir/"build")
-                    git_apply_patch(PatchDir/"ppc64le_cross.patch", cwd=PDFiumDir/"build")
+                sysroot_cpu = target_cpu
+                if target_cpu == "ppc64":
+                    sysroot_cpu = "ppc64le"
+                run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", sysroot_cpu], cwd=PDFiumDir)
+            if target_cpu == "ppc64":
                 config_dict["sysroot"] = "//build/linux/debian_bullseye_ppc64el-sysroot"
+                config_dict["use_sysroot"] = True
     
     if target_os:
         config_dict["target_os"] = target_os

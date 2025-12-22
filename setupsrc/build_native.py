@@ -129,23 +129,6 @@ def _fetch_dep(info, name, target_dir, reset=False):
     return _get_repo(DEPS_URLS[name], lambda: info.deps[name], target_dir, reset=reset)
 
 
-def autopatch(file, pattern, repl, is_regex, exp_count=None):
-    log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
-    content = file.read_text()
-    if is_regex:
-        content, n_subs = re.subn(pattern, repl, content)
-    else:
-        n_subs = content.count(pattern)
-        content = content.replace(pattern, repl)
-    if exp_count is not None:
-        assert n_subs == exp_count
-    file.write_text(content)
-
-def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
-    for file in dir.glob(globexpr):
-        autopatch(file, pattern, repl, is_regex, exp_count)
-
-
 def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
@@ -154,29 +137,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     # pass through reset only for the repositories we actually patch
     do_patches = _get_repo(PDFIUM_URL, pdfium_rev, PDFIUM_DIR, reset=reset)
     if do_patches:
-        autopatch_dir(
-            PDFIUM_DIR/"public"/"cpp", "*.h",
-            r'"public/(.+)"', r'"../\1"',
-            is_regex=True, exp_count=None,
-        )
+        shared_autopatches(PDFIUM_DIR)
         # don't build the test fonts (needed for embedder tests only)
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
-        )
-        # bundle dependencies (e.g. abseil) into the pdfium DLL
-        autopatch(
-            PDFIUM_DIR/"BUILD.gn",
-            'component("pdfium")',
-            'shared_library("pdfium")',
-            is_regex=False, exp_count=1,
-        )
-        autopatch(
-            PDFIUM_DIR/"public"/"fpdfview.h",
-            "#if defined(COMPONENT_BUILD)",
-            "#if 1  // defined(COMPONENT_BUILD)",
-            is_regex=False, exp_count=1,
         )
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)

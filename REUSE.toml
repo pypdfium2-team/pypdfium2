@@ -168,15 +168,6 @@ Cherry-pick https://github.com/abseil/abseil-cpp/commit/8e7767542cfde43f16c142f0
 '''
 
 [[annotations]]
-path = "patches/ppc64le_cross.patch"
-precedence = "aggregate"
-SPDX-FileCopyrightText = [
-    "2025 Marvin Gießing <marvin.giessing@gmail.com>",
-    "2025 geisserml <geisserml@gmail.com>",
-]
-SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
-
-[[annotations]]
 path = [
     "docs/build/.gitkeep",
     "sbuild/.gitkeep",

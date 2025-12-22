@@ -1041,3 +1041,40 @@ def bootstrap_buildtools():
     log("Bootstrapping build tools...")
     bootstrap_ninja()
     bootstrap_gn()
+
+
+def autopatch(file, pattern, repl, is_regex, exp_count=None):
+    log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
+    content = file.read_text()
+    if is_regex:
+        content, n_subs = re.subn(pattern, repl, content)
+    else:
+        n_subs = content.count(pattern)
+        content = content.replace(pattern, repl)
+    if exp_count is not None:
+        assert n_subs == exp_count
+    file.write_text(content)
+
+def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
+    for file in dir.glob(globexpr):
+        autopatch(file, pattern, repl, is_regex, exp_count)
+
+def shared_autopatches(pdfium_dir):
+    autopatch_dir(
+        pdfium_dir/"public"/"cpp", "*.h",
+        r'"public/(.+)"', r'"../\1"',
+        is_regex=True, exp_count=None,
+    )
+    # bundle dependencies (e.g. abseil) into the pdfium DLL
+    autopatch(
+        pdfium_dir/"BUILD.gn",
+        'component("pdfium")',
+        'shared_library("pdfium")',
+        is_regex=False, exp_count=1,
+    )
+    autopatch(
+        pdfium_dir/"public"/"fpdfview.h",
+        "#if defined(COMPONENT_BUILD)",
+        "#if 1  // defined(COMPONENT_BUILD)",
+        is_regex=False, exp_count=1,
+    )

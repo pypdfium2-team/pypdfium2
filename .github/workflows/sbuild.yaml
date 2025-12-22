@@ -76,7 +76,7 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ubuntu-latest
-      target_cpu: ppc64le
+      target_cpu: ppc64
       tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
       py_version: ${{ inputs.py_version }}
   
