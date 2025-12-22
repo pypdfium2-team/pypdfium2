@@ -10,7 +10,11 @@ deps = []
 if target_cpu == "x86":
     deps += ["g++-multilib"]
 else:
-    uname_cpu = {"arm": "armv7l", "arm64": "aarch64"}.get(target_cpu, target_cpu)
+    uname_cpu = {
+        "arm": "armv7l",
+        "arm64": "aarch64",
+        "ppc64": "ppc64le",
+    }.get(target_cpu, target_cpu)
     gcc_id = get_gcc_prefix.main(uname_cpu)
     deps += ["libc6-i386", "gcc-10-multilib", f"g++-10-{gcc_id}", f"gcc-10-{gcc_id}"]
 
