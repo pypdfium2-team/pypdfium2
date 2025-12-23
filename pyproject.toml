@@ -129,7 +129,7 @@ environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libcla
 # Vendoring all dependencies is too costly with an emulated compiler, so vendor only ICU for smaller wheel size.
 select = "*-*linux_s390x"
 inherit.environment = "append"
-environment.BUILD_PARAMS = "--vendor icu"
+environment.BUILD_PARAMS = "--vendor icu --compat"
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"

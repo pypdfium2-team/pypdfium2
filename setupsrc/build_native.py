@@ -13,8 +13,6 @@ from pathlib import Path
 
 from base import *  # local
 
-IS_CIBUILDWHEEL = bool(int( os.environ.get("CIBUILDWHEEL", 0) ))
-
 PDFIUM_URL = "https://pdfium.googlesource.com/pdfium"
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
@@ -129,7 +127,7 @@ def _fetch_dep(info, name, target_dir, reset=False):
     return _get_repo(DEPS_URLS[name], lambda: info.deps[name], target_dir, reset=reset)
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -138,7 +136,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     do_patches = _get_repo(PDFIUM_URL, pdfium_rev, PDFIUM_DIR, reset=reset)
     if do_patches:
         shared_autopatches(PDFIUM_DIR)
-        # don't build the test fonts (needed for embedder tests only)
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
@@ -158,9 +155,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR/"build")
-        if IS_CIBUILDWHEEL:
+        if compat and not vendor_deps.issuperset(("openjpeg", "freetype")):
             # compatibility patch for older system libraries from container
-            git_apply_patch(PatchDir/"cibuildwheel.patch", cwd=PDFIUM_DIR)
+            git_apply_patch(PatchDir/"legacy_libs_compat.patch", cwd=PDFIUM_DIR)
         if compiler is Compiler.gcc:
             # https://crbug.com/402282789
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
@@ -332,7 +329,7 @@ def handle_deps(config, vendor_deps, with_tests):
 VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff")
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, reset=False, vendor_deps=None):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, reset=False, vendor_deps=None, compat=False):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -359,7 +356,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = handle_deps(config, vendor_deps, with_tests)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps)
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat)
     setup_compiler(config, compiler, clang_ver, clang_path)
     prepare(config, build_dir, vendor_deps)
     build(with_tests, build_dir, n_jobs)
@@ -429,9 +426,17 @@ def parse_args(argv):
         action = "extend",
         help = "Dependencies not to vendor. Overrides --vendor.",
     )
+    parser.add_argument(
+        "--compat",
+        action = "store_true",
+        help = "Whether to apply a compatibility patch for older system libraries (openjpeg/freetype).",
+    )
+    
     args = parser.parse_args(argv)
+    
     if args.compiler:
         args.compiler = Compiler[args.compiler]
+    
     if args.vendor_deps:
         if args.vendor_deps == ["all"]:
             args.vendor_deps = VendorableDeps
@@ -439,6 +444,7 @@ def parse_args(argv):
         if args.no_vendor:
             args.vendor_deps -= set(args.no_vendor)
     del args.no_vendor
+    
     return args
 
 

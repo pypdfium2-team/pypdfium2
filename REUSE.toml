@@ -132,7 +132,7 @@ SPDX-FileCopyrightText = "2025 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
-path = "patches/cibuildwheel.patch"
+path = "patches/legacy_libs_compat.patch"
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
     "2025 wojiushixiaobai <296015668@qq.com>",
