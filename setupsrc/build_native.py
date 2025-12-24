@@ -179,6 +179,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             )
             if no_libclang_rt:
                 git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
+        # Create an empty gclient config
+        (PDFIUM_DIR_build/"config"/"gclient_args.gni").touch(exist_ok=True)
     
     do_patches = _fetch_dep(deps_info, "abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
     if do_patches and (Host._raw_machine, Host._libc_name) == ("ppc64le", "musl"):
@@ -193,8 +195,17 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         _fetch_dep(deps_info, "libcxx", PDFIUM_3RDPARTY/"libc++"/"src")
         _fetch_dep(deps_info, "libcxxabi", PDFIUM_3RDPARTY/"libc++abi"/"src")
         _fetch_dep(deps_info, "llvm_libc", PDFIUM_3RDPARTY/"llvm-libc"/"src")
+    
     if "icu" in vendor_deps:
         _fetch_dep(deps_info, "icu", PDFIUM_3RDPARTY/"icu")
+    else:
+        # unbundle (alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu)
+        (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
+        shutil.copyfile(
+            PDFIUM_DIR_build/"linux"/"unbundle"/"icu.gn",
+            PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
+        )
+    
     if "freetype" in vendor_deps:
         _fetch_dep(deps_info, "freetype", PDFIUM_3RDPARTY/"freetype"/"src")
     if "libjpeg" in vendor_deps:
@@ -214,17 +225,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     return full_ver
 
 
-def prepare(config_dict, build_dir, vendor_deps):
-    # Create an empty gclient config
-    (PDFIUM_DIR_build/"config"/"gclient_args.gni").touch(exist_ok=True)
-    if "icu" not in vendor_deps:
-        # Unbundle ICU
-        # alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu
-        (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
-        shutil.copyfile(
-            PDFIUM_DIR_build/"linux"/"unbundle"/"icu.gn",
-            PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
-        )
+def build(build_dir, config_dict, with_tests, n_jobs):
+    
     # Create target dir (or reuse existing) and write build config
     mkdir(build_dir)
     # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single-lib build is done after a separate-libs build. This also ensures we really built a new DLL in the end.
@@ -233,9 +235,6 @@ def prepare(config_dict, build_dir, vendor_deps):
         lib.unlink()
     config_str = serialize_gn_config(config_dict)
     (build_dir/"args.gn").write_text(config_str)
-
-
-def build(with_tests, build_dir, n_jobs):
     
     ninja_args = []
     if n_jobs is not None:
@@ -359,8 +358,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     mkdir(SOURCES_DIR)
     full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat)
     setup_compiler(config, compiler, clang_ver, clang_path)
-    prepare(config, build_dir, vendor_deps)
-    build(with_tests, build_dir, n_jobs)
+    build(build_dir, config, with_tests, n_jobs)
     if with_tests:
         test(build_dir)
     
