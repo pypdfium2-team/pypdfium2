@@ -37,6 +37,7 @@ DEPS_URLS = dict(
 )
 SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
+PDFIUM_DIR_build = PDFIUM_DIR / "build"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 
 Compiler = Enum("Compiler", "gcc clang")
@@ -141,43 +142,43 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
+        if compat and not vendor_deps.issuperset(("openjpeg", "freetype")):
+            # compatibility patch for older system libraries from container
+            git_apply_patch(PatchDir/"legacy_libs_compat.patch", cwd=PDFIUM_DIR)
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
             if with_tests:
                 git_apply_patch(PatchDir/"bigendian_test.patch", cwd=PDFIUM_DIR)
     
-    do_patches = _fetch_dep(deps_info, "build", PDFIUM_DIR/"build", reset=reset)
+    do_patches = _fetch_dep(deps_info, "build", PDFIUM_DIR_build, reset=reset)
     if do_patches:
         # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
         # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
-        git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR/"build")
+        git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:
             # fix linkage step
-            git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR/"build")
-        if compat and not vendor_deps.issuperset(("openjpeg", "freetype")):
-            # compatibility patch for older system libraries from container
-            git_apply_patch(PatchDir/"legacy_libs_compat.patch", cwd=PDFIUM_DIR)
+            git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
         if compiler is Compiler.gcc:
             # https://crbug.com/402282789
-            git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR/"build")
+            git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
         elif compiler is Compiler.clang:
             # https://crbug.com/410883044
             if "libc++" not in vendor_deps:
-                git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR/"build")
+                git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
             if clang_ver < 21:  # guessed
-                git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR/"build")
+                git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
             autopatch(
-                PDFIUM_DIR/"build"/"config"/"compiler"/"BUILD.gn",
+                PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
                 'ldflags += [ "-fuse-ld=lld" ]',
                 f'ldflags += [ "-fuse-ld={lld_path}" ]',
                 is_regex=False, exp_count=1,
             )
             if no_libclang_rt:
-                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR/"build")
+                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
     
     do_patches = _fetch_dep(deps_info, "abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
     if do_patches and (Host._raw_machine, Host._libc_name) == ("ppc64le", "musl"):
@@ -215,13 +216,13 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
 
 def prepare(config_dict, build_dir, vendor_deps):
     # Create an empty gclient config
-    (PDFIUM_DIR/"build"/"config"/"gclient_args.gni").touch(exist_ok=True)
+    (PDFIUM_DIR_build/"config"/"gclient_args.gni").touch(exist_ok=True)
     if "icu" not in vendor_deps:
         # Unbundle ICU
         # alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu
         (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
         shutil.copyfile(
-            PDFIUM_DIR/"build"/"linux"/"unbundle"/"icu.gn",
+            PDFIUM_DIR_build/"linux"/"unbundle"/"icu.gn",
             PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
         )
     # Create target dir (or reuse existing) and write build config
