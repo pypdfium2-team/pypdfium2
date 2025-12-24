@@ -123,6 +123,57 @@ class _DeferredInfo:
         return result
 
 
+def handle_deps(config, vendor_deps, with_tests):
+    
+    deps_fields = ["build", "abseil", "fast_float"]
+    if IS_ANDROID:
+        deps_fields.append("catapult")
+    
+    if "libc++" in vendor_deps:
+        deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
+    else:
+        config["use_custom_libcxx"] = False
+        config["use_libcxx_modules"] = False
+    
+    if "icu" in vendor_deps:
+        deps_fields.append("icu")
+    
+    if "freetype" in vendor_deps:
+        deps_fields.append("freetype")
+    else:
+        config["use_system_freetype"] = True
+        config["pdf_bundle_freetype"] = False
+    
+    if "libjpeg" in vendor_deps:
+        deps_fields += ("jpeg_turbo", "nasm_source")
+    else:
+        config["use_system_libjpeg"] = True
+    
+    if "libpng" in vendor_deps:
+        deps_fields.append("libpng")
+    else:
+        config["use_system_libpng"] = True
+    
+    if "zlib" in vendor_deps:
+        deps_fields.append("zlib")
+    else:
+        config["use_system_zlib"] = True
+    
+    if "lcms2" not in vendor_deps:
+        config["use_system_lcms2"] = True
+    if "openjpeg" not in vendor_deps:
+        config["use_system_libopenjpeg2"] = True
+    if "libtiff" not in vendor_deps:
+        config["use_system_libtiff"] = True
+    
+    if with_tests:
+        deps_fields += ("gtest", "test_fonts")
+    
+    return _DeferredInfo(deps_fields)
+
+VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff")
+
+
 def _fetch_dep(info, name, target_dir, reset=False):
     # parse out DEPS revisions only when we actually need them
     return _get_repo(DEPS_URLS[name], lambda: info.deps[name], target_dir, reset=reset)
@@ -225,36 +276,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     return full_ver
 
 
-def build(build_dir, config_dict, with_tests, n_jobs):
-    
-    # Create target dir (or reuse existing) and write build config
-    mkdir(build_dir)
-    # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single-lib build is done after a separate-libs build. This also ensures we really built a new DLL in the end.
-    # Leave the object files in place to reuse as much as possible, though.
-    for lib in build_dir.glob(Host.libname_glob):
-        lib.unlink()
-    config_str = serialize_gn_config(config_dict)
-    (build_dir/"args.gn").write_text(config_str)
-    
-    ninja_args = []
-    if n_jobs is not None:
-        ninja_args.extend(["-j", str(n_jobs)])
-    
-    targets = ["pdfium"]
-    if with_tests:
-        targets.append("pdfium_unittests")
-    
-    build_dir_rel = build_dir.relative_to(PDFIUM_DIR)
-    run_cmd(["gn", "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
-    run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
-
-
-def test(build_dir):
-    # FlateModule.Encode may fail with older zlib (generates different results)
-    os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
-    run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
-
-
 def _get_clang_ver(clang_path):
     from packaging.version import Version
     output = run_cmd([str(clang_path/"bin"/"clang"), "--version"], capture=True, cwd=None)
@@ -278,55 +299,37 @@ def setup_compiler(config, compiler, clang_ver, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
-def handle_deps(config, vendor_deps, with_tests):
+def build(build_dir, config_dict, with_tests, n_jobs):
     
-    deps_fields = ["build", "abseil", "fast_float"]
-    if IS_ANDROID:
-        deps_fields.append("catapult")
+    # Create target dir (or reuse existing) and write build config
+    mkdir(build_dir)
     
-    if "libc++" in vendor_deps:
-        deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
-    else:
-        config["use_custom_libcxx"] = False
-        config["use_libcxx_modules"] = False
+    # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single-lib build is done after a separate-libs build. This also ensures we really built a new DLL in the end.
+    # Leave the object files in place to reuse as much as possible, though.
+    for lib in build_dir.glob(Host.libname_glob):
+        lib.unlink()
     
-    if "icu" in vendor_deps:
-        deps_fields.append("icu")
+    # Write GN config
+    config_str = serialize_gn_config(config_dict)
+    (build_dir/"args.gn").write_text(config_str)
     
-    if "freetype" in vendor_deps:
-        deps_fields.append("freetype")
-    else:
-        config["use_system_freetype"] = True
-        config["pdf_bundle_freetype"] = False
+    ninja_args = []
+    if n_jobs is not None:
+        ninja_args.extend(["-j", str(n_jobs)])
     
-    if "libjpeg" in vendor_deps:
-        deps_fields += ("jpeg_turbo", "nasm_source")
-    else:
-        config["use_system_libjpeg"] = True
-    
-    if "libpng" in vendor_deps:
-        deps_fields.append("libpng")
-    else:
-        config["use_system_libpng"] = True
-    
-    if "zlib" in vendor_deps:
-        deps_fields.append("zlib")
-    else:
-        config["use_system_zlib"] = True
-    
-    if "lcms2" not in vendor_deps:
-        config["use_system_lcms2"] = True
-    if "openjpeg" not in vendor_deps:
-        config["use_system_libopenjpeg2"] = True
-    if "libtiff" not in vendor_deps:
-        config["use_system_libtiff"] = True
-    
+    targets = ["pdfium"]
     if with_tests:
-        deps_fields += ("gtest", "test_fonts")
+        targets.append("pdfium_unittests")
     
-    return _DeferredInfo(deps_fields)
+    build_dir_rel = build_dir.relative_to(PDFIUM_DIR)
+    run_cmd(["gn", "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
+    run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
 
-VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff")
+
+def test(build_dir):
+    # FlateModule.Encode may fail with older zlib (generates different results)
+    os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
+    run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, reset=False, vendor_deps=None, compat=False):
@@ -366,11 +369,13 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
 
 
 def parse_args(argv):
+    
     parser = argparse.ArgumentParser(
         description = "Build PDFium from source natively with system tools/libraries. This does not use Google's binary toolchain, so it should be portable across different Linux architectures. Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.",
     )
     if ExtendAction is not None:  # from base.py
         parser.register("action", "extend", ExtendAction)
+    
     parser.add_argument(
         "--version",
         dest = "build_ver",
