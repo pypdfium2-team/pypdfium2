@@ -13,7 +13,7 @@ BEGIN
             VALUE "OriginalFilename", "pdfium.dll"
             VALUE "ProductName",      "pdfium"
             VALUE "ProductVersion",   "$VERSION"
-            VALUE "LegalCopyright",   "Copyright 2026-present PDFium Authors."
+            VALUE "LegalCopyright",   "Copyright 2026 PDFium Authors."
         END
     END
 
