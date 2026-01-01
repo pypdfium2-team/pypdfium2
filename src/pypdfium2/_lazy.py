@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # see https://gist.github.com/mara004/6915e904797916b961e9c53b4fc874ec for alternative approaches to deferred imports

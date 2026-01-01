@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import time

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 geisserml <geisserml@gmail.com>
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # Maintainer's note: This workflow is registered for trusted publishing on pypdfium2's PyPI page, by filename. So if this file shall be renamed, remember to update the filename in PyPI settings as well.
