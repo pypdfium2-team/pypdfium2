@@ -7,6 +7,15 @@
 # Changelog
 
 
+## 5.3.0 (2026-01-05)
+
+- Updated pdfium-binaries from `7568` to `7616`. Native and toolchained sourcebuild use pdfium `7191`.
+- Fixed inclusion of `loongarch64` build in GH attestation. This was an oversight in the workflow.
+- `ppc64le (glibc)` is now built at pdfium-binaries using upstream's tooling.
+  This means pypdfium2's conda builds now also support this platform.
+  Updated pypdfium2's setup/workflow accordingly to use the pdfium-binaries.
+
+
 ## 5.2.0 (2025-12-12)
 
 - Updated pdfium-binaries from `7557` to `7568`. Native and toolchained sourcebuild use pdfium `7191`.
