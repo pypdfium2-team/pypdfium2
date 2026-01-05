@@ -301,7 +301,7 @@ def setup_compiler(config, compiler, clang_ver, clang_path):
 
 def build(build_dir, config_dict, with_tests, n_jobs):
     
-    # Create target dir (or reuse existing) and write build config
+    # Create target dir, or reuse existing
     mkdir(build_dir)
     
     # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single-lib build is done after a separate-libs build. This also ensures we really built a new DLL in the end.
@@ -371,7 +371,13 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
 def parse_args(argv):
     
     parser = argparse.ArgumentParser(
-        description = "Build PDFium from source natively with system tools/libraries. This does not use Google's binary toolchain, so it should be portable across different Linux architectures. Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.",
+        formatter_class = argparse.RawTextHelpFormatter,
+        description = """\
+Build PDFium from source natively with a self-managed checkout and system tools/libraries (depending on config).
+This does not use Google's binary toolchain, so it should be portable across different Linux architectures.
+Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
+For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.\
+""",
     )
     if ExtendAction is not None:  # from base.py
         parser.register("action", "extend", ExtendAction)
@@ -408,7 +414,7 @@ def parse_args(argv):
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = "Path to clang release folder, if `--compiler clang` is used. By default, we try '/usr' or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
+        help = "Path to clang release folder, if `--compiler clang` is used. By default, we try `/usr` or similar, but your system's folder structure might not match the layout expected by pdfium. Consider creating symlinks as described in pypdfium2's README.md.",
     )
     parser.add_argument(
         "--no-libclang-rt",
