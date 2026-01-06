@@ -252,10 +252,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     else:
         # unbundle (alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu)
         (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
-        shutil.copyfile(
-            PDFIUM_DIR_build/"linux"/"unbundle"/"icu.gn",
-            PDFIUM_3RDPARTY/"icu"/"BUILD.gn"
-        )
+        shutil.copyfile(PDFIUM_DIR_build/"linux"/"unbundle"/"icu.gn", PDFIUM_3RDPARTY/"icu"/"BUILD.gn")
     
     if "freetype" in vendor_deps:
         _fetch_dep(deps_info, "freetype", PDFIUM_3RDPARTY/"freetype"/"src")
