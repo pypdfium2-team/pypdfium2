@@ -1000,7 +1000,7 @@ def pack_sourcebuild(
     return full_ver, post_ver
 
 
-def bootstrap_ninja(skip_if_present=True):
+def install_ninja(skip_if_present=True):
     if skip_if_present and shutil.which("ninja"):
         log("+ ninja found.")
         return
@@ -1013,10 +1013,14 @@ def make_executable(path):
         return
     path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-def bootstrap_gn(target_dir=None, skip_if_present=True):
+def install_gn(target_dir=None, skip_if_present=True):
     if skip_if_present and shutil.which("gn"):
         log("+ gn found.")
         return
+    
+    # TODO fetch binaries?
+    # https://chrome-infra-packages.appspot.com/p/gn/gn or
+    # https://github.com/loong64/gn/releases/latest
     
     log("- gn not found, attempt to build from scratch...")
     if target_dir is None:
@@ -1037,10 +1041,10 @@ def bootstrap_gn(target_dir=None, skip_if_present=True):
     shutil.copyfile(gn_dir/"out"/"gn", target_dir/"gn")
     make_executable(target_dir/"gn")
 
-def bootstrap_buildtools():
+def install_buildtools():
     log("Bootstrapping build tools...")
-    bootstrap_ninja()
-    bootstrap_gn()
+    install_ninja()
+    install_gn()
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):

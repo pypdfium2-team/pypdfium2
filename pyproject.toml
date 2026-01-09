@@ -60,7 +60,7 @@ before-all = [
 select = "*-manylinux_i686"
 inherit.before-all = "append"
 before-all = [
-    "python3 {project}/utils/bootstrap_gn.py /usr/local/bin",
+    "python3 {project}/utils/build_gn.py /usr/local/bin",
 ]
 
 # NOTE: gcc is not actually used for ppc64le,riscv64,loongarch64 anymore (see the clang block below)

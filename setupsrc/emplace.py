@@ -93,7 +93,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
             log("Could not find system pdfium, will attempt native sourcebuild")
             pl_name = ExtPlats.sourcebuild
             try:
-                bootstrap_buildtools()
+                install_buildtools()
                 stage_platfiles(pl_name, "native", pdfium_ver, flags, "--vendor all --no-vendor libc++")
             except Exception:
                 traceback.print_exc()
