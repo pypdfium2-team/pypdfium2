@@ -323,9 +323,10 @@ def build(build_dir, config_dict, with_tests, n_jobs):
     run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
 
 
-def test(build_dir):
+def test(build_dir, vendor_deps):
     # FlateModule.Encode may fail with older zlib (generates different results)
-    os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
+    if "zlib" not in vendor_deps:
+        os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
 
 
@@ -360,7 +361,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     setup_compiler(config, compiler, clang_ver, clang_path)
     build(build_dir, config, with_tests, n_jobs)
     if with_tests:
-        test(build_dir)
+        test(build_dir, vendor_deps)
     
     return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver)
 
