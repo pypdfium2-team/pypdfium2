@@ -17,6 +17,9 @@ on:
       may_vendor:
         type: boolean
         default: true
+      test_pdfium:
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs:
       os:
@@ -32,6 +35,9 @@ on:
         type: string
         default: '3.12'
       may_vendor:
+        type: boolean
+        default: true
+      test_pdfium:
         type: boolean
         default: true
 
@@ -78,10 +84,11 @@ jobs:
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
       
       - name: Build PDFium (native, ${{ inputs.compiler }})
-        run: python3 ./setupsrc/build_native.py --test --compiler "$COMPILER" $VENDOR_PARAM
+        run: python3 ./setupsrc/build_native.py --compiler "$COMPILER" $VENDOR_PARAM $TEST_PARAM
         env:
           COMPILER: ${{ inputs.compiler }}
           VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
+          TEST_PARAM: ${{ inputs.test_pdfium && '--test' || '' }}
       
       - name: Show binary info
         run: |

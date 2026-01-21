@@ -24,6 +24,9 @@ on:
       repo_tag:
         type: string
         default: ''
+      test_pdfium:
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       os:
@@ -47,6 +50,9 @@ on:
       repo_tag:
         type: string
         default: ''
+      test_pdfium:
+        type: boolean
+        default: false
 
 jobs:
   
@@ -90,7 +96,8 @@ jobs:
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time.
           # Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
           CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ inputs.cibw_target }}"
-          CIBW_ARCHS: ${{ inputs.cibw_arch }}
+          CIBW_ARCHS: "${{ inputs.cibw_arch }}"
+          TEST_PDFIUM: "${{ inputs.test_pdfium && 1 || 0 }}"
         with:
           output-dir: wheelhouse
       

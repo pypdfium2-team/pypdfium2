@@ -107,6 +107,9 @@ before-all = [
     "unlink '$GN_ARCHIVE'",
 ]
 
+[tool.cibuildwheel.linux]
+environment-pass = ["TEST_PDFIUM"]
+
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
 BUILD_PARAMS = "--vendor all --no-vendor libc++"

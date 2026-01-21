@@ -27,6 +27,9 @@ on:
       linux_musl:
         default: true
         type: boolean
+      test_pdfium:
+        default: false
+        type: boolean
       # we're using the toolchained build for macOS and Windows for now
       macos:
         default: true
@@ -45,6 +48,7 @@ jobs:
       cibw_target: manylinux_x86_64
       cibw_arch: x86_64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_x64:
     if: ${{ inputs.linux_main && inputs.linux_musl }}
@@ -54,6 +58,7 @@ jobs:
       cibw_target: musllinux_x86_64
       cibw_arch: x86_64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_arm64:
     if: ${{ inputs.linux_main && inputs.linux_glibc }}
@@ -63,6 +68,7 @@ jobs:
       cibw_target: manylinux_aarch64
       cibw_arch: aarch64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_arm64:
     if: ${{ inputs.linux_main && inputs.linux_musl }}
@@ -72,6 +78,7 @@ jobs:
       cibw_target: musllinux_aarch64
       cibw_arch: aarch64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   # ARM 32-bit emulation seems about as fast as native when using an ARM64 host. Same goes for x86_64 to i686.
   # For some reason, `uname -m` reports the armv7l container as armv8l when using an ARM64 host, but the author tested a manylinux wheel produced here on Raspberry Pi 2B (armv7l) locally, and it does seem to work.
@@ -85,6 +92,7 @@ jobs:
       cibw_arch: armv7l
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_arm32:
     if: ${{ inputs.linux_fastemu && inputs.linux_musl }}
@@ -95,6 +103,7 @@ jobs:
       cibw_arch: armv7l
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_i686:
     if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
@@ -105,6 +114,7 @@ jobs:
       cibw_arch: i686
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_i686:
     if: ${{ inputs.linux_fastemu && inputs.linux_musl }}
@@ -115,6 +125,7 @@ jobs:
       cibw_arch: i686
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_ppc64le:
     if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
@@ -125,6 +136,7 @@ jobs:
       cibw_arch: ppc64le
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_ppc64le:
     if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
@@ -135,6 +147,9 @@ jobs:
       cibw_arch: ppc64le
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
+  
+  # s390x is built using an emulated compiler, so we never build tests there even if global test_pdfium is true. If this is ever desired, use cibw_one instead of this wrapper.
   
   linux_s390x:
     if: ${{ inputs.linux_s390x && inputs.linux_glibc }}
@@ -145,6 +160,7 @@ jobs:
       cibw_arch: s390x
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: false  # ${{ inputs.test_pdfium }}
   
   musllinux_s390x:
     if: ${{ inputs.linux_s390x && inputs.linux_musl }}
@@ -155,6 +171,7 @@ jobs:
       cibw_arch: s390x
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: false  # ${{ inputs.test_pdfium }}
   
   linux_riscv64:
     if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
@@ -165,6 +182,7 @@ jobs:
       cibw_arch: riscv64
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_riscv64:
     if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
@@ -175,6 +193,7 @@ jobs:
       cibw_arch: riscv64
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_loongarch64:
     if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
@@ -185,6 +204,7 @@ jobs:
       cibw_arch: loongarch64
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_loongarch64:
     if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
@@ -195,6 +215,7 @@ jobs:
       cibw_arch: loongarch64
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   # may need to leverage cross-compilation from arm64 in the future, similar to sbuild.yaml
   macos_x64:

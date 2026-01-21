@@ -389,7 +389,8 @@ For instance, it should also work on Android (Termux) natively. See the notes in
         "--test",
         dest = "with_tests",
         action = "store_true",
-        help = "Whether to build and run tests. Recommended, except on very slow hosts.",
+        default = bool(int( os.environ.get("TEST_PDFIUM", 0) )),
+        help = "Whether to build and run tests. Recommended, except on very slow hosts. (Defaults to the value of $TEST_PDFIUM, for passthrough with cibuildwheel.)",
     )
     parser.add_argument(
         "-j", "--jobs",
