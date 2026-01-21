@@ -118,6 +118,7 @@ BUILD_PARAMS = "--vendor all --no-vendor libc++"
 # s390x (manylinux and musllinux) is broken with clang-cross, perpetually freezes during test phase.
 # It works when built using emulated gcc, however.
 select = "*-*linux_{ppc64le,riscv64,loongarch64}"
+inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
