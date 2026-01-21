@@ -28,7 +28,7 @@ on:
         default: true
         type: boolean
       test_pdfium:
-        default: false
+        default: true
         type: boolean
       # we're using the toolchained build for macOS and Windows for now
       macos:
