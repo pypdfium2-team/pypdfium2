@@ -477,7 +477,7 @@ Here are some examples of using the support model API.
   import pypdfium2.raw as pdfium_c
   ```
 
-* Open a PDF using the helper class `PdfDocument` (supports file path strings, bytes, and byte streams)
+* Open a PDF using the helper class `PdfDocument` (supports file paths as string or `pathlib.Path`, or file content as bytes or byte stream)
   ```python
   pdf = pdfium.PdfDocument("./path/to/document.pdf")
   version = pdf.get_version()  # get the PDF standard version
