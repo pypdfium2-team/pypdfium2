@@ -7,6 +7,11 @@
 # Changelog
 
 
+## 5.4.0 (2026-02-08)
+
+- Updated pdfium-binaries from `7616` to `7665`. Native and toolchained sourcebuild use pdfium `7191`.
+
+
 ## 5.3.0 (2026-01-05)
 
 - Updated pdfium-binaries from `7568` to `7616`. Native and toolchained sourcebuild use pdfium `7191`.
