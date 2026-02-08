@@ -747,10 +747,10 @@ def run_ctypesgen(
         args += ["--cpp", c_preproc]
     if flags:
         args += ["-D"] + [PdfiumFlagsDict[f] for f in flags]
-    if Host.system == SysNames.windows:
-        # If we are on a Windows host, add the relevant define to expose Windows-only members.
-        # Note, this is not currently active for our wheels, since we're packaging everything on Linux. It might be possible to divide packaging in native OS hosts in the future, or specify external headers for symbol spoofing.
-        args += ["-D", "_WIN32"]
+    
+    # TODO expose windows-only members, e.g. FPDF_RenderPage()
+    # this is a bit complicated as we're cross-packaging everything from Linux
+    # -D _WIN32 and header spoofing might work, or perhaps move to a native host after all
     
     # symbols - try to exclude some garbage aliases that get pulled in from struct tags
     # (this captures anything that ends with _, _t, or begins with _, and is not needed by other symbols)
