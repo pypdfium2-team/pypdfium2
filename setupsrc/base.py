@@ -751,7 +751,6 @@ def run_ctypesgen(
     
     # include windows-only members (e.g. refbindings)
     # see the comments in utils/spoof/windows.h for more info on this approach
-    # TODO enable in relevant call sites
     if windows:
         args += ["-D", "_WIN32", "-I", ProjectDir/"utils"/"spoof"]
     
