@@ -147,7 +147,7 @@ def test_bitmap_makers_to_images(mode_str, rev_byteorder):
     # pdf.save(OutputDir / f"bitmap_makers_imgs_{mode_str}_{rev_byteorder}.pdf")
 
 
-@pytest.mark.skipif(not sys.platform.startswith("win32"))
+@pytest.mark.skipif(not sys.platform.startswith("win32"), reason="Windows-only API")
 def test_windows_only_pdfium_api_available():
     assert hasattr(pdfium_c, "FPDF_RenderPage")
     assert hasattr(pdfium_c, "FPDF_SetPrintMode")
