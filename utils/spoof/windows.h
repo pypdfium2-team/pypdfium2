@@ -7,4 +7,16 @@
 
 // https://learn.microsoft.com/en-us/windows/win32/winprog/windows-data-types
 // typedef HANDLE HDC; <- typedef PVOID HANDLE; <- typedef void *PVOID;
+// ^ Note: docs imply that it's just a nullpointer type, but in practice, on a native host, ctypesgen actually outputs this:
+// # C:/mingw64/x86_64-w64-mingw32/include/windef.h: 47
+// class struct_HDC__ (Structure):
+//     __slots__ = ('unused',)
+//
+// struct_HDC__._fields_ = (
+//     ('unused', c_int),
+// )
+//
+// # C:/mingw64/x86_64-w64-mingw32/include/windef.h: 47
+// HDC = POINTER(struct_HDC__)
+
 typedef void* HDC;
