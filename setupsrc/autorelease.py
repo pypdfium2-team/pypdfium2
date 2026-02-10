@@ -36,6 +36,7 @@ def update_refbindings(version):
         rt_paths=(f"./{CTG_LIBPATTERN}", *_yield_lo_candidates(SysNames.linux)),
         search_sys_despite_libpaths=True,
         guard_symbols=True, no_srcinfo=True,
+        windows=True,
     )
     shutil.copyfile(BindingsFile, RefBindingsFile)
     assert RefBindingsFile.exists()

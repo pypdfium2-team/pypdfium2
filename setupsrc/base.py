@@ -705,7 +705,8 @@ def run_ctypesgen(
         target_path, headers_dir, flags=(),
         rt_paths=(f"./{CTG_LIBPATTERN}", ), ct_paths=(), univ_paths=(),
         search_sys_despite_libpaths=False,
-        guard_symbols=False, no_srcinfo=False, version=None
+        guard_symbols=False, no_srcinfo=False,
+        windows=False, version=None,
     ):
     
     if USE_REFBINDINGS:
@@ -748,9 +749,11 @@ def run_ctypesgen(
     if flags:
         args += ["-D"] + [PdfiumFlagsDict[f] for f in flags]
     
-    # TODO expose windows-only members, e.g. FPDF_RenderPage()
-    # this is a bit complicated as we're cross-packaging everything from Linux
-    # -D _WIN32 and header spoofing might work, or perhaps move to a native host after all
+    # include windows-only members (e.g. refbindings)
+    # see the comments in utils/spoof/windows.h for more info on this approach
+    # TODO enable in relevant call sites
+    if windows:
+        args += ["-D", "_WIN32", "-I", ProjectDir/"utils"/"spoof"]
     
     # symbols - try to exclude some garbage aliases that get pulled in from struct tags
     # (this captures anything that ends with _, _t, or begins with _, and is not needed by other symbols)
