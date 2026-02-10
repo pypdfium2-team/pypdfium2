@@ -706,7 +706,7 @@ def run_ctypesgen(
         rt_paths=(f"./{CTG_LIBPATTERN}", ), ct_paths=(), univ_paths=(),
         search_sys_despite_libpaths=False,
         guard_symbols=False, no_srcinfo=False,
-        windows=False, version=None,
+        windows_cross=False, version=None,
     ):
     
     if USE_REFBINDINGS:
@@ -749,9 +749,10 @@ def run_ctypesgen(
     if flags:
         args += ["-D"] + [PdfiumFlagsDict[f] for f in flags]
     
-    # include windows-only members (e.g. refbindings)
+    # include windows-only members (e.g. refbindings, cross-packaging)
     # see the comments in utils/spoof/windows.h for more info on this approach
-    if windows:
+    # this is not needed on a native host, the pre-processor will define _WIN32 and have the real windows.h on its standard search path
+    if windows_cross and not sys.platform.startswith("win32"):
         args += ["-D", "_WIN32", "-I", ProjectDir/"utils"/"spoof"]
     
     # symbols - try to exclude some garbage aliases that get pulled in from struct tags
