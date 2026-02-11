@@ -42,7 +42,7 @@ def _get_pdfium_with_cache(pl_name, req_ver, req_flags):
     
     # build_pdfium_bindings() has its own cache logic, so always call to ensure bindings match
     ct_paths = (DataDir/Host.platform/CTG_LIBPATTERN, ) if pl_name == Host.platform else ()
-    windows_cross = bool(int( os.environ.get("WITH_WINDOWS_MEMBERS", 0) ))
+    windows_cross = pl_name.startswith(SysNames.windows+"_") and bool(int( os.environ.get("WITH_WINDOWS_MEMBERS", 0) ))
     build_pdfium_bindings(req_ver, flags=req_flags, ct_paths=ct_paths, windows_cross=windows_cross)
 
 def _end_subtargets(sub_target, pdfium_ver):
