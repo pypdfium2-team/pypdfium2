@@ -87,11 +87,6 @@ def _run_pypi_build(caller_args):
     with tmp_cwd_context(ProjectDir):
         build_module.main([str(ProjectDir), "-nx", *caller_args])
 
-def _build_wheel(plat, suffix):
-    os.environ[PlatSpec_EnvVar] = plat + suffix
-    _run_pypi_build(["--wheel"])
-    clean_platfiles()
-
 
 def main_pypi(args):
     
@@ -107,18 +102,10 @@ def main_pypi(args):
     
     if args.wheels:
         suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
-        
-        MainPlats = (p for p in WheelPlatforms if not p.startswith(SysNames.windows+"_"))
-        for plat in MainPlats:
-            _build_wheel(plat, suffix)
-        
-        WindowsPlats = (p for p in WheelPlatforms if p.startswith(SysNames.windows+"_"))
-        os.environ["WITH_WINDOWS_MEMBERS"] = "1"
-        try:
-            for plat in WindowsPlats:
-                _build_wheel(plat, suffix)
-        finally:
-            del os.environ["WITH_WINDOWS_MEMBERS"]
+        for plat in WheelPlatforms:
+            os.environ[PlatSpec_EnvVar] = plat + suffix
+            _run_pypi_build(["--wheel"])
+            clean_platfiles()
 
 
 def main():
