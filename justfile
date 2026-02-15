@@ -16,10 +16,13 @@ coverage *args:
 coverage-core *args:
 	just _coverage_impl "src/pypdfium2/__main__.py,src/pypdfium2/_cli/*,src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 
+# TODO use just env() once we can require just >=1.15.0
+BROWSER := env_var_or_default('BROWSER', 'google-chrome')
+
 docs-build:  # *args
 	python3 -m sphinx -b html docs/source docs/build/html
 docs-open:
-	google-chrome docs/build/html/index.html &>/dev/null
+	{{BROWSER}} docs/build/html/index.html &>/dev/null
 docs-clean:
 	rm -rf docs/build/html
 
