@@ -102,7 +102,7 @@ Parameters:
     n_commits (int):
         Number of commits after tag at install time. 0 for release.
     hash (str | None):
-        Hash of head commit if n_commits > 0, None otherwise.
+        Hash of head commit (prefixed with 'g') if n_commits > 0, None otherwise.
     dirty (bool):
         True if there were uncommitted changes at install time, False otherwise.
     data_source (str):
@@ -143,7 +143,7 @@ Parameters:
     n_commits (int):
         Number of commits after tag at install time. 0 for tagged build commit.
     hash (str | None):
-        Hash of head commit if n_commits > 0, None otherwise.
+        Hash of head commit (prefixed with 'g') if n_commits > 0, None otherwise.
     origin (str):
         The pdfium binary's origin.
     flags (tuple[str]):
