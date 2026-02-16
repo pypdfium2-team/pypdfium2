@@ -167,7 +167,9 @@ PdfiumBinariesMap.update({
 })
 
 
-_ManylinuxTmpl = "manylinux_{1}_{0}.manylinux2014_{0}"  # 0: arch, 1: glibc
+def _manylinux_tag(arch, glibc="2_17"):
+    return f"manylinux_{glibc}_{arch}.manylinux2014_{arch}"
+
 PlatToWheeltag = {
     # AOTW, pdfium-binaries/steps/05-configure.sh defines mac_deployment_target = "11.0.0"
     PlatNames.darwin_x64:       "macosx_11_0_x86_64",
@@ -180,11 +182,11 @@ PlatToWheeltag = {
     PlatNames.windows_arm64:    "win_arm64",
     PlatNames.windows_x86:      "win32",
     
-    PlatNames.linux_x64:        _ManylinuxTmpl.format("x86_64",  "2_17"),
-    PlatNames.linux_x86:        _ManylinuxTmpl.format("i686",    "2_17"),
-    PlatNames.linux_arm64:      _ManylinuxTmpl.format("aarch64", "2_17"),
-    PlatNames.linux_arm32:      _ManylinuxTmpl.format("armv7l",  "2_17"),
-    PlatNames.linux_ppc64le:    _ManylinuxTmpl.format("ppc64le", "2_17"),
+    PlatNames.linux_x64:        _manylinux_tag("x86_64"),
+    PlatNames.linux_x86:        _manylinux_tag("i686"),
+    PlatNames.linux_arm64:      _manylinux_tag("aarch64"),
+    PlatNames.linux_arm32:      _manylinux_tag("armv7l"),
+    PlatNames.linux_ppc64le:    _manylinux_tag("ppc64le"),
     
     # pdfium-binaries statically link musl, so we can declare the lowest possible requirement.
     # The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
