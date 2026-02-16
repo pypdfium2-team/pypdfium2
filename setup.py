@@ -40,13 +40,11 @@ def bdist_factory(pl_name):
             if pl_name == ExtPlats.sourcebuild:
                 # In case of cross-compilation (or even just proper packaging), the caller needs to set the tag.
                 plat_tag = os.environ.get("CROSS_TAG")
-                # Otherwise, forward the host's tag as given by bdist_wheel.
-                # Alternatively, the sourcebuild clause in base.py::get_wheel_tag() should be roughly equivalent.
-                # The underlying API being wrapped is sysconfig.get_platform().
+                # Otherwise, forward the host's tag as provided by bdist_wheel (wraps sysconfig.get_platform())
                 if not plat_tag:
                     _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
             else:
-                plat_tag = get_wheel_tag(pl_name)
+                plat_tag = PlatToWheeltag[pl_name]
             return "py3", "none", plat_tag
     
     return pypdfium_bdist
