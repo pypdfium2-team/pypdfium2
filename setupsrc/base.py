@@ -208,20 +208,6 @@ PlatToWheeltag = {
     PlatNames.ios_x64_simu:     "ios_12_0_x86_64_iphonesimulator",
 }
 
-# def get_wheel_tag(pl_name):
-#     tag = PlatToWheeltag.get(pl_name)
-#     if tag:
-#         return tag
-#     elif pl_name == ExtPlats.sourcebuild:
-#         # The sourcebuild clause is currently inactive; setup.py will simply forward the tag determined by bdist_wheel. Anyway, this should be roughly equivalent.
-#         tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
-#         # sysconfig.get_platform() may return universal2 on macOS. However, the binaries built here should be considered architecture-specific.
-#         if tag.startswith("macosx") and tag.endswith("universal2"):
-#             tag = tag[:-len("universal2")] + Host._raw_machine
-#         return tag
-#     else:  # tag is None and pl_name not handled
-#         raise ValueError(f"Unhandled platform name {pl_name}")
-
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
