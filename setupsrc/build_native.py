@@ -289,6 +289,29 @@ def _get_clang_ver(clang_path):
     log(f"Determined clang version {version!r}")
     return version
 
+def _clang_as_gcc(clang_path):
+    symlinks_dir = SOURCES_DIR / "clang_as_gcc"
+    mkdir(symlinks_dir)
+    nmap = (
+        ("clang", "gcc"),
+        ("clang", "cc"),
+        ("clang++", "g++"),
+        ("llvm-ar", "ar"),
+        ("llvm-nm", "nm"),
+        ("llvm-objcopy", "objcopy"),
+        ("llvm-objdump", "objdump"),
+        ("llvm-readelf", "readelf"),
+        ("lld", "ld"),
+    )
+    for src_name, dst_name in nmap:
+        src = clang_path/"bin"/src_name
+        dst = symlinks_dir/dst_name
+        if dst.is_symlink():
+            dst.unlink()
+        dst.symlink_to(src)
+    os.environ["PATH"] = f"{symlinks_dir}:" + os.environ["PATH"]
+
+
 def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
         config["is_clang"] = False
@@ -342,7 +365,7 @@ def test(build_dir, vendor_deps):
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, reset=False, vendor_deps=None, compat=False):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, compat=False):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -356,12 +379,16 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             compiler = Compiler.clang
         else:
             raise RuntimeError("Neither gcc nor clang installed.")
+    
+    clang_ver = None
     if compiler is Compiler.clang:
         if clang_path is None:
             clang_path = Host.usr
-        clang_ver = _get_clang_ver(clang_path)
-    else:
-        clang_ver = None
+        if clang_as_gcc:
+            _clang_as_gcc(clang_path)
+            compiler = Compiler.gcc
+        else:
+            clang_ver = _get_clang_ver(clang_path)
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
@@ -431,6 +458,11 @@ For instance, it should also work on Android (Termux) natively. See the notes in
         "--no-libclang-rt",
         action = "store_true",
         help = "If using clang, whether to patch pdfium so that it does not insist on libclang_rt.builtins.a, and will use the compiler's default instead (commonly libgcc).",
+    )
+    parser.add_argument(
+        "--clang-as-gcc",
+        action = "store_true",
+        help = "Use clang, but pretend to pdfium's build system that it were gcc. Passing --compiler clang is a prerequisite. This is implemented by creating symlinks and prepending them to $PATH.",
     )
     # - libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
     # - With clang, using the vendored libc++ may be desirable. Also, there is some uncertainty whether using system libc++ might be ABI-unsafe. Actually, options to use system libc++ appear to be deprecated upstream.
