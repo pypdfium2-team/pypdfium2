@@ -89,13 +89,6 @@ before-all = [
     "unset PREFIX GCC_ROOT",
 ]
 
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_loongarch64"
-inherit.before-all = "append"
-before-all = [
-    "curl -L 'https://github.com/loong64/gn/releases/download/2024.12/gn-linux-loong64.tar.gz' | tar xz -C /usr/local/bin",
-]
-
 # We're in luck, Google actually serves GN binaries for riscv64
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_riscv64"
