@@ -132,10 +132,13 @@ SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
-path = "patches/legacy_libs_compat.patch"
+path = [
+    "patches/legacy_libs_compat.patch",
+    "patches/clang_on_musl.patch",
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
-    "2025 wojiushixiaobai <296015668@qq.com>",
+    "2026 wojiushixiaobai <296015668@qq.com>",
     "2026 geisserml <geisserml@gmail.com>",
 ]
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
