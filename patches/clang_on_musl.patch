@@ -1,0 +1,114 @@
+diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
+index 94fc4b4..ca2fff5 100644
+--- a/config/compiler/BUILD.gn
++++ b/config/compiler/BUILD.gn
+@@ -1214,8 +1214,11 @@ config("compiler_cpu_abi") {
+   if ((is_posix && !is_apple) || is_fuchsia) {
+     # CPU architecture. We may or may not be doing a cross compile now, so for
+     # simplicity we always explicitly set the architecture.
++    # XXX(pypdfium2): Nope, don't do this for the native build, at least not on musl, as the targets here appear to assume glibc.
++    # PyPA static clang is pre-configured with the correct target triple via its clang.cfg file.
++    # For some reason, just the pdfium builds seem to work, but it causes issues when we want to run pdfium_unittest.
+     if (current_cpu == "x64") {
+-      if (is_clang && !is_android && !is_nacl && !is_fuchsia &&
++      if (is_clang && false && !is_android && !is_nacl && !is_fuchsia &&
+           !is_chromeos_device) {
+         cflags += [ "--target=x86_64-unknown-linux-gnu" ]
+         ldflags += [ "--target=x86_64-unknown-linux-gnu" ]
+@@ -1225,7 +1228,7 @@ config("compiler_cpu_abi") {
+       }
+       cflags += [ "-msse3" ]
+     } else if (current_cpu == "x86") {
+-      if (is_clang && !is_android && !is_nacl && !is_chromeos_device) {
++      if (is_clang && false && !is_android && !is_nacl && !is_chromeos_device) {
+         cflags += [ "--target=i386-unknown-linux-gnu" ]
+         ldflags += [ "--target=i386-unknown-linux-gnu" ]
+       } else {
+@@ -1239,7 +1242,7 @@ config("compiler_cpu_abi") {
+         ]
+       }
+     } else if (current_cpu == "arm") {
+-      if (is_clang && !is_android && !is_nacl && !is_chromeos_device) {
++      if (is_clang && false && !is_android && !is_nacl && !is_chromeos_device) {
+         cflags += [ "--target=arm-linux-gnueabihf" ]
+         ldflags += [ "--target=arm-linux-gnueabihf" ]
+       }
+@@ -1253,7 +1256,7 @@ config("compiler_cpu_abi") {
+         cflags += [ "-mtune=$arm_tune" ]
+       }
+     } else if (current_cpu == "arm64") {
+-      if (is_clang && !is_android && !is_nacl && !is_fuchsia &&
++      if (is_clang && false && !is_android && !is_nacl && !is_fuchsia &&
+           !is_chromeos_device) {
+         cflags += [ "--target=aarch64-linux-gnu" ]
+         ldflags += [ "--target=aarch64-linux-gnu" ]
+@@ -1261,7 +1264,7 @@ config("compiler_cpu_abi") {
+     } else if (current_cpu == "mipsel" && !is_nacl) {
+       ldflags += [ "-Wl,--hash-style=sysv" ]
+       if (custom_toolchain == "") {
+-        if (is_clang) {
++        if (is_clang && false) {
+           if (is_android) {
+             cflags += [ "--target=mipsel-linux-android" ]
+             ldflags += [ "--target=mipsel-linux-android" ]
+@@ -1346,7 +1349,7 @@ config("compiler_cpu_abi") {
+     } else if (current_cpu == "mips" && !is_nacl) {
+       ldflags += [ "-Wl,--hash-style=sysv" ]
+       if (custom_toolchain == "") {
+-        if (is_clang) {
++        if (is_clang && false) {
+           cflags += [ "--target=mips-linux-gnu" ]
+           ldflags += [ "--target=mips-linux-gnu" ]
+         } else {
+@@ -1392,7 +1395,7 @@ config("compiler_cpu_abi") {
+       cflags += [ "-D__SANE_USERSPACE_TYPES__" ]
+       ldflags += [ "-Wl,--hash-style=sysv" ]
+       if (custom_toolchain == "") {
+-        if (is_clang) {
++        if (is_clang && false) {
+           if (is_android) {
+             cflags += [ "--target=mips64el-linux-android" ]
+             ldflags += [ "--target=mips64el-linux-android" ]
+@@ -1455,7 +1458,7 @@ config("compiler_cpu_abi") {
+     } else if (current_cpu == "mips64") {
+       ldflags += [ "-Wl,--hash-style=sysv" ]
+       if (custom_toolchain == "") {
+-        if (is_clang) {
++        if (is_clang && false) {
+           cflags += [ "--target=mips64-linux-gnuabi64" ]
+           ldflags += [ "--target=mips64-linux-gnuabi64" ]
+         } else {
+@@ -1499,7 +1502,7 @@ config("compiler_cpu_abi") {
+           cflags += [ "-maix64" ]
+           ldflags += [ "-maix64" ]
+         }
+-      } else if (is_clang) {
++      } else if (is_clang && false) {
+         cflags += [ "--target=powerpc64le-unknown-linux-gnu" ]
+         ldflags += [ "--target=powerpc64le-unknown-linux-gnu" ]
+       } else {
+@@ -1507,13 +1510,13 @@ config("compiler_cpu_abi") {
+         ldflags += [ "-m64" ]
+       }
+     } else if (current_cpu == "riscv64") {
+-      if (is_clang && !is_android) {
++      if (is_clang && false && !is_android) {
+         cflags += [ "--target=riscv64-linux-gnu" ]
+         ldflags += [ "--target=riscv64-linux-gnu" ]
+       }
+       cflags += [ "-mabi=lp64d" ]
+     } else if (current_cpu == "loong64") {
+-      if (is_clang) {
++      if (is_clang && false) {
+         cflags += [ "--target=loongarch64-linux-gnu" ]
+         ldflags += [ "--target=loongarch64-linux-gnu" ]
+       }
+@@ -1522,7 +1525,7 @@ config("compiler_cpu_abi") {
+         "-mcmodel=medium",
+       ]
+     } else if (current_cpu == "s390x") {
+-      if (is_clang) {
++      if (is_clang && false) {
+         cflags += [ "--target=s390x-unknown-linux-gnu" ]
+         ldflags += [ "--target=s390x-unknown-linux-gnu" ]
+       }
