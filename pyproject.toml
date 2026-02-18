@@ -35,7 +35,7 @@ select = "*-manylinux_*"
 before-all = [
     "dnf clean all && dnf makecache --refresh",
     "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
-    "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64,loongarch64}
+    "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64}
 ]
 
 # manylinux_armv7l uses a Ubuntu-based image, for lack of an RHEL-based one
