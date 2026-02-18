@@ -18,6 +18,7 @@ case "${STATIC_CLANG_ARCH}" in
 	ARM|armv7l|armv8l|arm|arm/v7) GO_ARCH=arm;;  # assume arm/v7 for arm
 	X64|x86_64|amd64|amd64/*) GO_ARCH=amd64;;
 	X86|i686|386) GO_ARCH=386;;
+	loongarch64) GO_ARCH=loong64;;
 	ppc64le) GO_ARCH=ppc64le;;
 	riscv64) GO_ARCH=riscv64;;
 	s390x) GO_ARCH=s390x;;
