@@ -91,14 +91,17 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
         try:
             stage_platfiles(pl_name, "search", pdfium_ver, flags)
         except system_pdfium.PdfiumNotFoundError:
-            log("Could not find system pdfium, will attempt native sourcebuild")
+            log("Could not find system pdfium, will attempt sourcebuild")
             pl_name = ExtPlats.sourcebuild
             try:
-                install_buildtools()
-                stage_platfiles(pl_name, "native", pdfium_ver, flags, "--vendor all --no-vendor libc++")
+                if sys.platform.startswith(("win32", "darwin")):
+                    stage_platfiles(pl_name, "toolchained", pdfium_ver, flags)
+                else:
+                    install_buildtools()
+                    stage_platfiles(pl_name, "native", pdfium_ver, flags, "--vendor all --no-vendor libc++ --no-libclang-rt")
             except Exception:
                 traceback.print_exc()
-                raise RuntimeError("sourcebuild-native failed. Manual action may be needed, such as installing system dependencies, or possibly patching the sources. See pypdfium2's README.md for more information.")
+                raise RuntimeError("sourcebuild failed. Manual action may be needed, such as installing system dependencies, or possibly patching the sources. See pypdfium2's README.md for more information.")
     
     else:
         if not pdfium_ver or pdfium_ver == "pinned":
