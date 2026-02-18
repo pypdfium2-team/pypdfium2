@@ -230,6 +230,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             )
             if no_libclang_rt:
                 git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
+            if Host._libc_name == "musl":
+                git_apply_patch(PatchDir/"clang_on_musl.patch", cwd=PDFIUM_DIR_build)
         # Create an empty gclient config
         (PDFIUM_DIR_build/"config"/"gclient_args.gni").touch(exist_ok=True)
     
@@ -327,7 +329,7 @@ def test(build_dir, vendor_deps):
     # FlateModule.Encode may fail with older zlib (generates different results)
     if "zlib" not in vendor_deps:
         os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
-    run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR, check=False)
+    run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, reset=False, vendor_deps=None, compat=False):
