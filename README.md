@@ -259,6 +259,10 @@ Sourcebuild can be run through cibuildwheel. For targets configured in our [`pyp
 ```bash
 CIBW_BUILD="cp311-manylinux_x86_64" cibuildwheel
 ```
+A more involved use case could look like this:
+```bash
+CIBW_BUILD="cp310-musllinux_s390x" CIBW_ARCHS=s390x CIBW_CONTAINER_ENGINE=podman TEST_PDFIUM=1 cibuildwheel
+```
 See also our [cibuildwheel](.github/workflows/cibw.yaml) [workflow](.github/workflows/cibw_one.yaml).
 For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
 

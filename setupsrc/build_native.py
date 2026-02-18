@@ -354,8 +354,8 @@ def build(build_dir, config_dict, with_tests, n_jobs):
 
 
 def test(build_dir, vendor_deps):
-    # FlateModule.Encode may fail with older zlib (generates different results)
     gtest_filter = []
+    # FlateModule.Encode may fail with older zlib (generates different results)
     if "zlib" not in vendor_deps:
         gtest_filter.append("FlateModule.Encode")
     if Host._libc_name == "musl":
