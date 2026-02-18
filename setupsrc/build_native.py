@@ -13,9 +13,9 @@ from pathlib import Path
 
 from base import *  # local
 
-PDFIUM_URL = "https://pdfium.googlesource.com/pdfium"
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
+    pdfium     = "https://pdfium.googlesource.com/pdfium",
     build      = _CR_PREFIX + "chromium/src/build",
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
@@ -84,27 +84,30 @@ if IS_ANDROID:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
-def _get_repo(url, rev, target_dir, reset=False, depth=1):
+class DepsFetcher:
     
-    if target_dir.exists():
-        if reset:
-            log(f"Discarding unstaged changes on {target_dir.name!r} as per --reset option.")
-            run_cmd(["git", "restore", "."], cwd=target_dir)
-            return True
-        else:
-            return False
-    
-    if callable(rev):
-        rev = rev()  # resolve deferred
-    
-    git_clone_rev(url, rev, target_dir)
-    
-    return True
+    def __init__(self, deps_info):
+        self.deps_info = deps_info
+
+    def fetch(self, name, target_dir, reset=False, depth=1):
+        
+        if target_dir.exists():
+            if reset:
+                log(f"Discarding unstaged changes on {target_dir.name!r} as per --reset option.")
+                run_cmd(["git", "restore", "."], cwd=target_dir)
+                return True
+            else:
+                return False
+        
+        rev = self.deps_info[name]
+        git_clone_rev(DEPS_URLS[name], rev, target_dir, depth)
+        
+        return True
 
 
 DEPS_RE = r"\s*'{key}': '(\w+)'"
 
-class _DeferredInfo:
+class _DeferredDeps:
     
     def __init__(self, deps_fields):
         self.deps_fields = deps_fields
@@ -121,6 +124,9 @@ class _DeferredInfo:
             result[field] = match.group(1)
         log(f"Found DEPS revisions:\n{result}")
         return result
+    
+    def __getitem__(self, key):
+        return self.deps[key]
 
 
 def handle_deps(config, vendor_deps, with_tests):
@@ -169,14 +175,9 @@ def handle_deps(config, vendor_deps, with_tests):
     if with_tests:
         deps_fields += ("gtest", "test_fonts")
     
-    return _DeferredInfo(deps_fields)
+    return _DeferredDeps(deps_fields)
 
 VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff")
-
-
-def _fetch_dep(info, name, target_dir, reset=False):
-    # parse out DEPS revisions only when we actually need them
-    return _get_repo(DEPS_URLS[name], lambda: info.deps[name], target_dir, reset=reset)
 
 
 def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat):
@@ -185,7 +186,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
     
     # pass through reset only for the repositories we actually patch
-    do_patches = _get_repo(PDFIUM_URL, pdfium_rev, PDFIUM_DIR, reset=reset)
+    df = DepsFetcher({"pdfium": pdfium_rev})
+    do_patches = df.fetch("pdfium", PDFIUM_DIR, reset=reset)
     if do_patches:
         shared_autopatches(PDFIUM_DIR)
         autopatch(
@@ -201,7 +203,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             if with_tests:
                 git_apply_patch(PatchDir/"bigendian_test.patch", cwd=PDFIUM_DIR)
     
-    do_patches = _fetch_dep(deps_info, "build", PDFIUM_DIR_build, reset=reset)
+    df = DepsFetcher(deps_info)
+    do_patches = df.fetch("build", PDFIUM_DIR_build, reset=reset)
     if do_patches:
         # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
@@ -237,40 +240,40 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # Create an empty gclient config
         (PDFIUM_DIR_build/"config"/"gclient_args.gni").touch(exist_ok=True)
     
-    do_patches = _fetch_dep(deps_info, "abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
+    do_patches = df.fetch("abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
     if do_patches and (Host._raw_machine, Host._libc_name) == ("ppc64le", "musl"):
         git_apply_patch(PatchDir/"abseil_ppc64le_musl.patch", cwd=PDFIUM_3RDPARTY/"abseil-cpp")
     
-    _fetch_dep(deps_info, "fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
+    df.fetch("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     if IS_ANDROID:
-        _fetch_dep(deps_info, "catapult", PDFIUM_3RDPARTY/"catapult")
+        df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
     
     if "libc++" in vendor_deps:
-        _fetch_dep(deps_info, "buildtools", PDFIUM_DIR/"buildtools")
-        _fetch_dep(deps_info, "libcxx", PDFIUM_3RDPARTY/"libc++"/"src")
-        _fetch_dep(deps_info, "libcxxabi", PDFIUM_3RDPARTY/"libc++abi"/"src")
-        _fetch_dep(deps_info, "llvm_libc", PDFIUM_3RDPARTY/"llvm-libc"/"src")
+        df.fetch("buildtools", PDFIUM_DIR/"buildtools")
+        df.fetch("libcxx", PDFIUM_3RDPARTY/"libc++"/"src")
+        df.fetch("libcxxabi", PDFIUM_3RDPARTY/"libc++abi"/"src")
+        df.fetch("llvm_libc", PDFIUM_3RDPARTY/"llvm-libc"/"src")
     
     if "icu" in vendor_deps:
-        _fetch_dep(deps_info, "icu", PDFIUM_3RDPARTY/"icu")
+        df.fetch("icu", PDFIUM_3RDPARTY/"icu")
     else:
         # unbundle (alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu)
         (PDFIUM_3RDPARTY/"icu").mkdir(exist_ok=True)
         shutil.copyfile(PDFIUM_DIR_build/"linux"/"unbundle"/"icu.gn", PDFIUM_3RDPARTY/"icu"/"BUILD.gn")
     
     if "freetype" in vendor_deps:
-        _fetch_dep(deps_info, "freetype", PDFIUM_3RDPARTY/"freetype"/"src")
+        df.fetch("freetype", PDFIUM_3RDPARTY/"freetype"/"src")
     if "libjpeg" in vendor_deps:
-        _fetch_dep(deps_info, "jpeg_turbo", PDFIUM_3RDPARTY/"libjpeg_turbo")
-        _fetch_dep(deps_info, "nasm_source", PDFIUM_3RDPARTY/"nasm")
+        df.fetch("jpeg_turbo", PDFIUM_3RDPARTY/"libjpeg_turbo")
+        df.fetch("nasm_source", PDFIUM_3RDPARTY/"nasm")
     if "libpng" in vendor_deps:
-        _fetch_dep(deps_info, "libpng", PDFIUM_3RDPARTY/"libpng")
+        df.fetch("libpng", PDFIUM_3RDPARTY/"libpng")
     if "zlib" in vendor_deps:
-        _fetch_dep(deps_info, "zlib", PDFIUM_3RDPARTY/"zlib")
+        df.fetch("zlib", PDFIUM_3RDPARTY/"zlib")
     
     if with_tests:
-        _fetch_dep(deps_info, "gtest", PDFIUM_3RDPARTY/"googletest"/"src")
-        _fetch_dep(deps_info, "test_fonts", PDFIUM_3RDPARTY/"test_fonts")
+        df.fetch("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
+        df.fetch("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     
     get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
     
