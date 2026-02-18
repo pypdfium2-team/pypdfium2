@@ -88,8 +88,8 @@ def _get_repo(url, rev, target_dir, reset=False, depth=1):
     
     if target_dir.exists():
         if reset:
-            log(f"Resetting {target_dir.name} as per --reset option.")
-            run_cmd(["git", "reset", "--hard"], cwd=target_dir)
+            log(f"Discarding unstaged changes on {target_dir.name!r} as per --reset option.")
+            run_cmd(["git", "restore", "."], cwd=target_dir)
             return True
         else:
             return False
@@ -407,7 +407,7 @@ For instance, it should also work on Android (Termux) natively. See the notes in
     parser.add_argument(
         "--reset",
         action = "store_true",
-        help = "Reset those git repos that we patch, and re-apply the patches. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang), but is not enabled by default to avoid unintentional loss of manual changes.",
+        help = "Discard unstaged changes on those git repos that we patch, and re-apply the patches. Uses `git restore` under the hood. This is necessary when making a rebuild with different patch configuration (e.g. when switching between gcc <-> clang), but is not enabled by default to avoid unintentional loss of manual changes.",
     )
     # Hint: If you have a simultaneous toolchained checkout, you could use e.g. './sbuild/toolchained/pdfium/third_party/llvm-build/Release+Asserts'
     parser.add_argument(
