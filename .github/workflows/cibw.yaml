@@ -149,8 +149,6 @@ jobs:
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
-  # s390x is built using an emulated compiler, so we never build tests there even if global test_pdfium is true. If this is ever desired, use cibw_one instead of this wrapper.
-  
   linux_s390x:
     if: ${{ inputs.linux_s390x && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
@@ -160,7 +158,7 @@ jobs:
       cibw_arch: s390x
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: false  # ${{ inputs.test_pdfium }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_s390x:
     if: ${{ inputs.linux_s390x && inputs.linux_musl }}
@@ -171,7 +169,7 @@ jobs:
       cibw_arch: s390x
       emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: false  # ${{ inputs.test_pdfium }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_riscv64:
     if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}

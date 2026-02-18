@@ -108,9 +108,7 @@ PDFIUM_PLATFORM = "sourcebuild-native"
 BUILD_PARAMS = "--vendor all --no-vendor libc++"
 
 [[tool.cibuildwheel.overrides]]
-# s390x (manylinux and musllinux) is broken with clang-cross, perpetually freezes during test phase.
-# It works when built using emulated gcc, however.
-select = "*-*linux_{ppc64le,riscv64,loongarch64}"
+select = "*-*linux_{ppc64le,riscv64,loongarch64,s390x}"
 inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
@@ -123,10 +121,9 @@ inherit.environment = "append"
 environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor all --no-vendor libc++"
 
 [[tool.cibuildwheel.overrides]]
-# Vendoring all dependencies is too costly with an emulated compiler, so vendor only ICU for smaller wheel size.
 select = "*-*linux_s390x"
 inherit.environment = "append"
-environment.BUILD_PARAMS = "--vendor icu --compat"
+environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --clang-as-gcc --vendor all --no-vendor libc++"
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"

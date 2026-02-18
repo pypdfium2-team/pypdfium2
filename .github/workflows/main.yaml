@@ -219,8 +219,6 @@ jobs:
             cibw_class: musllinux
             cibw_arch: loongarch64
             emulated: true
-          # s390x builds produced by static clang are defunct, would need to use emulated gcc (very slow)
-          # temporarily commented in for 5.2.0 release
           - os: ubuntu-latest
             cibw_class: manylinux
             cibw_arch: s390x
@@ -238,7 +236,7 @@ jobs:
       emulated: ${{ matrix.emulated }}
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
-      test_pdfium: ${{ matrix.cibw_arch != 's390x' }}
+      test_pdfium: true
   
   
   # # NOTE ppc64le is now supported with pdfium-binaries, commented out. However, this strategy might be useful for other platforms in the future.
