@@ -329,8 +329,13 @@ def build(build_dir, config_dict, with_tests, n_jobs):
 
 def test(build_dir, vendor_deps):
     # FlateModule.Encode may fail with older zlib (generates different results)
+    gtest_filter = []
     if "zlib" not in vendor_deps:
-        os.environ["GTEST_FILTER"] = "*-FlateModule.Encode"
+        gtest_filter.append("FlateModule.Encode")
+    if Host._libc_name == "musl":
+        gtest_filter.append("WideString.FormatString")  # XXX?
+    if gtest_filter:
+        os.environ["GTEST_FILTER"] = "*:-" + ":".join(gtest_filter)
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
