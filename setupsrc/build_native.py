@@ -292,7 +292,17 @@ def _get_clang_ver(clang_path):
 def _clang_as_gcc(clang_path):
     symlinks_dir = SOURCES_DIR / "clang_as_gcc"
     mkdir(symlinks_dir)
-    # TODO IIRC, pdfium tends to call the arch-prefixed variants of gcc tools. Need to add these.
+    # pdfium is inconsistent as to where it uses a toolprefix and where it doesn't
+    # this map is based on //build/toolchain/linux/BUILD.gn
+    # TODO use complete map (merge with utils/get_gcc_prefix.py) and create both sets of symlinks (with and without prefix)
+    toolprefix = {
+        "aarch64": "aarch64-linux-gnu-",
+        "riscv64": "riscv64-linux-gnu-",
+        "armv7l": "arm-linux-gnueabihf-",
+        "armv8l": "arm-linux-gnueabihf-",
+        "loong64": "loongarch64-unknown-linux-gnu-",
+        "loongarch64": "loongarch64-unknown-linux-gnu-",
+    }.get(Host._raw_machine, "")
     nmap = (
         ("clang", "gcc"),
         ("clang", "cc"),
@@ -304,7 +314,7 @@ def _clang_as_gcc(clang_path):
     )
     for src_name, dst_name in nmap:
         src = clang_path/"bin"/src_name
-        dst = symlinks_dir/dst_name
+        dst = symlinks_dir/(toolprefix+dst_name)
         if dst.is_symlink():
             dst.unlink()
         dst.symlink_to(src)
