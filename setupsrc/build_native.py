@@ -292,14 +292,13 @@ def _get_clang_ver(clang_path):
 def _clang_as_gcc(clang_path):
     symlinks_dir = SOURCES_DIR / "clang_as_gcc"
     mkdir(symlinks_dir)
+    # TODO IIRC, pdfium tends to call the arch-prefixed variants of gcc tools. Need to add these.
     nmap = (
         ("clang", "gcc"),
         ("clang", "cc"),
         ("clang++", "g++"),
         ("llvm-ar", "ar"),
         ("llvm-nm", "nm"),
-        ("llvm-objcopy", "objcopy"),
-        ("llvm-objdump", "objdump"),
         ("llvm-readelf", "readelf"),
         ("lld", "ld"),
     )
