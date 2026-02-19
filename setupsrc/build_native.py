@@ -305,7 +305,6 @@ def _clang_as_gcc(clang_path):
     }.get(Host._raw_machine, "")
     nmap = (
         ("clang", "gcc"),
-        ("clang", "cc"),
         ("clang++", "g++"),
         ("llvm-ar", "ar"),
         ("llvm-nm", "nm"),
