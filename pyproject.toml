@@ -116,12 +116,12 @@ before-all = [
     "ln -s $CLANG_PREFIX/bin/readelf $CLANG_PREFIX/bin/llvm-readelf",
 ]
 inherit.environment = "append"
-environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --no-libclang-rt --vendor all --no-vendor libc++"
+environment.BUILD_PARAMS = "$BUILD_PARAMS --compiler clang --clang-path /opt/clang --no-libclang-rt"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-*linux_s390x"
 inherit.environment = "append"
-environment.BUILD_PARAMS = "--compiler clang --clang-path /opt/clang --clang-as-gcc --vendor all --no-vendor libc++"
+environment.BUILD_PARAMS = "$BUILD_PARAMS --clang-as-gcc"
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
