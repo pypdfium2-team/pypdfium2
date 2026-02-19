@@ -28,13 +28,11 @@ test-command = [
     "python -m pytest {project}/tests",
 ]
 
-# NOTE For most targets, dependency libs are now vendored, so the install blocks below may be shortened in the future.
-
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
 before-all = [
     "dnf clean all && dnf makecache --refresh",
-    "dnf -y install ninja-build freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel",
+    "dnf -y install ninja-build",  # freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel
     "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64}
 ]
 
@@ -43,7 +41,7 @@ before-all = [
 select = "*-manylinux_armv7l"
 before-all = [
     "apt-get update",
-    "apt-get install -y generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev",
+    "apt-get install -y generate-ninja ninja-build",  # libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
 ]
 manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:2025.11.03-1"
 
@@ -51,7 +49,7 @@ manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:2025.11.03-1"
 select = "*-musllinux_*"
 inherit.before-all = "append"
 before-all = [
-    "apk add gn ninja-build freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev",
+    "apk add gn ninja-build",  # freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev
 ]
 
 # For i686, no GN prebuilds seem to be available at the usual places.
@@ -63,21 +61,21 @@ before-all = [
     "python3 {project}/utils/build_gn.py /usr/local/bin",
 ]
 
-# NOTE: gcc is not actually used for ppc64le,riscv64,loongarch64 anymore (see the clang block below)
+# NOTE ppc64le,riscv64,loongarch64,s390x use clang, so they are commented out from gcc sections
 
 [[tool.cibuildwheel.overrides]]
-select = "*-manylinux_{aarch64,loongarch64}"
+select = "*-manylinux_aarch64"  # loongarch64
 inherit.before-all = "append"
 before-all = ["export GCC_ROOT=/opt/rh/gcc-toolset-14/root"]
 
 [[tool.cibuildwheel.overrides]]
-select = "*-manylinux_riscv64 *-musllinux_{aarch64,armv7l,riscv64,loongarch64}"
+select = "*-musllinux_{aarch64,armv7l}"  # *-manylinux_riscv64, *-musllinux_{riscv64,loongarch64}
 inherit.before-all = "append"
 before-all = ["export GCC_ROOT=/usr"]
 
 [[tool.cibuildwheel.overrides]]
 # this select must be a union of the above two selects
-select = "*-*linux_{aarch64,riscv64,loongarch64} *-musllinux_armv7l"
+select = "*-*linux_aarch64 *-musllinux_armv7l"  # *-*linux_{riscv64,loongarch64}
 inherit.before-all = "append"
 before-all = [
     "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
