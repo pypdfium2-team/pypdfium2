@@ -12,7 +12,7 @@ import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.bitmap import PdfBitmap
 from pypdfium2._helpers.textpage import PdfTextPage
-from pypdfium2._helpers.pageobjects import PdfObject
+from pypdfium2._helpers.pageobjects import PdfObject, PdfTextObj
 
 c_float = ctypes.c_float
 logger = logging.getLogger(__name__)
@@ -266,7 +266,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to generate page content.")
     
     
-    def get_objects(self, filter=None, max_depth=15, form=None, level=0):
+    def get_objects(self, filter=None, max_depth=15, form=None, level=0, textpage=None):
         """
         Iterate through the pageobjects on this page.
         
@@ -277,6 +277,9 @@ class PdfPage (pdfium_i.AutoCloseable):
                 If None or empty, all objects will be provided, regardless of their type.
             max_depth (int):
                 Maximum recursion depth to consider when descending into Form XObjects.
+            textpage (PdfTextPage | None):
+                Optional textpage handle to attach to :class:`.PdfTextObj` instances.
+                This allows text extraction without re-instantiating text objects.
         
         Yields:
             :class:`.PdfObject`: A pageobject.
@@ -302,7 +305,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 raise PdfiumError("Failed to get pageobject.")
             
             # Don't register as child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The parent page should remain alive while a pageobject is used, but it seems unjustified to store countless of weakrefs just to lock pageobjects when the parent page is closed.
-            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level)
+            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level, textpage=textpage)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
             
@@ -312,6 +315,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                     max_depth = max_depth,
                     form = helper_obj,
                     level = level + 1,
+                    textpage = textpage,
                 )
     
     
@@ -334,8 +338,8 @@ class PdfPage (pdfium_i.AutoCloseable):
         if rc == pdfium_c.FLATTEN_FAIL:
             raise PdfiumError("Failed to flatten annotations / form fields.")
         return rc
-    
-    
+
+
     # TODO
     # - add helpers for matrix-based and interruptible rendering
     # - add lower-level renderer that takes a caller-provided bitmap

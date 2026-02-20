@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import re
+import logging
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
@@ -186,3 +187,47 @@ def test_font_helpers(
         assert fontobj.get_base_name() == base_name
         assert fontobj.get_family_name() == family_name
         assert fontobj.get_weight() == weight
+
+
+def test_get_missing_fonts(textpage):
+    """Test get_missing_fonts() method."""
+    missing_fonts = textpage.get_missing_fonts()
+    
+    # Should return a dict
+    assert isinstance(missing_fonts, dict)
+    
+    # For the test PDF with embedded fonts, should be empty
+    # (or contain font names if fonts are not embedded)
+    for font_name, text_samples in missing_fonts.items():
+        assert isinstance(font_name, str)
+        assert isinstance(text_samples, list)
+        for sample in text_samples:
+            assert isinstance(sample, str)
+            # Text samples should be truncated if > 100 chars
+            assert len(sample) <= 100
+
+
+def test_get_missing_fonts_empty_page():
+    """Test get_missing_fonts() on a page with no text."""
+    pdf = pdfium.PdfDocument(TestFiles.empty)
+    page = pdf[0]
+    textpage = page.get_textpage()
+    
+    missing_fonts = textpage.get_missing_fonts()
+    assert isinstance(missing_fonts, dict)
+    assert len(missing_fonts) == 0
+
+
+def test_warn_about_missing_fonts(textpage, caplog):
+    """Test warn_about_missing_fonts() method."""
+    with caplog.at_level(logging.WARNING):
+        missing_fonts = textpage.warn_about_missing_fonts()
+    
+    # If fonts are embedded (as in test PDF), no warning should be logged
+    # If fonts are missing, a warning should be logged
+    if missing_fonts:
+        assert len(caplog.records) > 0
+        assert any("non-embedded fonts" in record.message for record in caplog.records)
+    else:
+        # No warning when all fonts are embedded
+        assert len([r for r in caplog.records if "non-embedded fonts" in r.message]) == 0
