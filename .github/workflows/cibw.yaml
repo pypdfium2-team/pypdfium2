@@ -90,7 +90,6 @@ jobs:
       os: ubuntu-24.04-arm
       cibw_target: manylinux_armv7l
       cibw_arch: armv7l
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -101,7 +100,6 @@ jobs:
       os: ubuntu-24.04-arm
       cibw_target: musllinux_armv7l
       cibw_arch: armv7l
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -112,7 +110,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: manylinux_i686
       cibw_arch: i686
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -123,7 +120,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: musllinux_i686
       cibw_arch: i686
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -134,7 +130,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: manylinux_ppc64le
       cibw_arch: ppc64le
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -145,7 +140,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: musllinux_ppc64le
       cibw_arch: ppc64le
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -156,7 +150,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: manylinux_s390x
       cibw_arch: s390x
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -167,7 +160,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: musllinux_s390x
       cibw_arch: s390x
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -178,7 +170,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: manylinux_riscv64
       cibw_arch: riscv64
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -189,7 +180,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: musllinux_riscv64
       cibw_arch: riscv64
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -200,7 +190,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: manylinux_loongarch64
       cibw_arch: loongarch64
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
@@ -211,7 +200,6 @@ jobs:
       os: ubuntu-latest
       cibw_target: musllinux_loongarch64
       cibw_arch: loongarch64
-      emulated: true
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}
   

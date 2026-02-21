@@ -186,54 +186,42 @@ jobs:
           - os: ubuntu-latest
             cibw_class: musllinux
             cibw_arch: x86_64
-            emulated: false
           - os: ubuntu-latest
             cibw_class: musllinux
             cibw_arch: i686
-            emulated: true
           - os: ubuntu-24.04-arm
             cibw_class: musllinux
             cibw_arch: aarch64
-            emulated: false
           - os: ubuntu-24.04-arm
             cibw_class: musllinux
             cibw_arch: armv7l
-            emulated: true
           - os: ubuntu-latest
             cibw_class: musllinux
             cibw_arch: ppc64le
-            emulated: true
           - os: ubuntu-latest
             cibw_class: manylinux
             cibw_arch: riscv64
-            emulated: true
           - os: ubuntu-latest
             cibw_class: musllinux
             cibw_arch: riscv64
-            emulated: true
           - os: ubuntu-latest
             cibw_class: manylinux
             cibw_arch: loongarch64
-            emulated: true
           - os: ubuntu-latest
             cibw_class: musllinux
             cibw_arch: loongarch64
-            emulated: true
           - os: ubuntu-latest
             cibw_class: manylinux
             cibw_arch: s390x
-            emulated: true
           - os: ubuntu-latest
             cibw_class: musllinux
             cibw_arch: s390x
-            emulated: true
     
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ${{ matrix.os }}
       cibw_target: ${{ matrix.cibw_class }}_${{ matrix.cibw_arch }}
       cibw_arch: ${{ matrix.cibw_arch }}
-      emulated: ${{ matrix.emulated }}
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
       test_pdfium: true

@@ -12,9 +12,6 @@ on:
         type: string
       cibw_arch:
         type: string
-      emulated:
-        type: boolean
-        default: false
       cibw_py_ver:
         default: 'cp310'
         type: string
@@ -38,9 +35,6 @@ on:
       cibw_arch:
         type: string
         default: x86_64
-      emulated:
-        type: boolean
-        default: false
       cibw_py_ver:
         default: 'cp310'
         type: string
@@ -79,7 +73,7 @@ jobs:
           REPO_TAG: ${{ inputs.repo_tag }}
       
       - name: Set up QEMU
-        if: ${{ inputs.emulated }}
+        if: ${{ endsWith(inputs.cibw_target, 'linux') && (inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
         uses: docker/setup-qemu-action@v3
       
       - name: Install Windows cross deps
