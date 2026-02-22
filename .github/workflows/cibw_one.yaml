@@ -73,7 +73,7 @@ jobs:
           REPO_TAG: ${{ inputs.repo_tag }}
       
       - name: Set up QEMU
-        if: ${{ endsWith(inputs.cibw_target, 'linux') && (inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
+        if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
         uses: docker/setup-qemu-action@v3
       
       - name: Install Windows cross deps
@@ -100,3 +100,26 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
           name: cibw-${{ inputs.cibw_target }}
+      
+      # For the rarer Linux architectures, Pillow and Numpy don't currently provide wheels on PyPI. However, Linux distributions do provide packages.
+      # Sadly, cibuildwheel isn't really suited for working with system python (cf. https://github.com/pypa/cibuildwheel/discussions/2553)
+      # Also, the need to use an older distribution for build (to achieve low glibc requirement) contradicts the desire for a more recent python software stack for testing.
+      # So our best bet is to do it by hand:
+      
+      - name: Post-test
+        # x86_64 and aarch64 (manylinux and musllinux) are handled within cibuildwheel.
+        if: ${{ contains(inputs.cibw_target, 'linux') }}
+        run: |
+          # get_container.py outputs the env vars CONTAINER and INSTALL_DEPS
+          # This will use the newest available manylinux/musllinux containers per arch. However, we could switch to any other kind of container provided we get the architectures we need.
+          eval "$(python3 ./utils/get_container.py \"$TARGET\")"
+          # Just sharing the pypdfium2 dir among host and container is easier (and faster) than copying.
+          PYPDFIUM2_DIR="$PWD"
+          docker run -i --rm --security-opt label=disable -v "$PYPDFIUM2_DIR:/pypdfium2" -e INSTALL_DEPS "$CONTAINER" bash <<END
+          $INSTALL_DEPS
+          cd /pypdfium2
+          python3 -m pip install ./wheelhouse/*.whl
+          python3 -m pytest tests/
+          END
+        env:
+          TARGET: ${{ inputs.cibw_target }}
