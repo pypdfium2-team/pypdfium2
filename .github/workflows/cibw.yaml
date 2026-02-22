@@ -18,9 +18,6 @@ on:
       linux_clangcross:
         default: true
         type: boolean
-      linux_s390x:
-        default: false
-        type: boolean
       linux_glibc:
         default: true
         type: boolean
@@ -144,7 +141,7 @@ jobs:
       test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_s390x:
-    if: ${{ inputs.linux_s390x && inputs.linux_glibc }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
@@ -154,7 +151,7 @@ jobs:
       test_pdfium: ${{ inputs.test_pdfium }}
   
   musllinux_s390x:
-    if: ${{ inputs.linux_s390x && inputs.linux_musl }}
+    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ubuntu-latest
