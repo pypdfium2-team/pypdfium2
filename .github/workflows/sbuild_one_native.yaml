@@ -67,13 +67,10 @@ jobs:
       - name: Install python deps
         run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
-      - name: Install common build deps
+      - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev
-      
-      - name: Install deps for native build
-        run: sudo apt-get install -y generate-ninja ninja-build libglib2.0-dev
+          sudo apt-get install -y generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
       
       - name: Set up symlinks for clang
         if: ${{ inputs.compiler == 'clang' }}
