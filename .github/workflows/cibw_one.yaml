@@ -73,7 +73,7 @@ jobs:
           REPO_TAG: ${{ inputs.repo_tag }}
       
       - name: Set up QEMU
-        if: ${{ endsWith(inputs.cibw_target, 'linux') && (inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
+        if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
         uses: docker/setup-qemu-action@v3
       
       - name: Install Windows cross deps
