@@ -107,19 +107,21 @@ jobs:
       # So our best bet is to do it by hand:
       
       - name: Post-test
-        # x86_64 and aarch64 (manylinux and musllinux) are handled within cibuildwheel.
+        # x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test them again in a different container
         if: ${{ contains(inputs.cibw_target, 'linux') }}
         run: |
-          # get_container.py outputs the env vars CONTAINER and INSTALL_DEPS
-          # This will use the newest available manylinux/musllinux containers per arch. However, we could switch to any other kind of container provided we get the architectures we need.
-          eval "$(python3 ./utils/get_container.py \"$TARGET\")"
+          # get_container.py outputs the env vars CONTAINER and PREPARE_CMD
+          eval "$(python3 ./utils/get_container.py $TARGET)"
           # Just sharing the pypdfium2 dir among host and container is easier (and faster) than copying.
           PYPDFIUM2_DIR="$PWD"
-          docker run -i --rm --security-opt label=disable -v "$PYPDFIUM2_DIR:/pypdfium2" -e INSTALL_DEPS "$CONTAINER" bash <<END
-          $INSTALL_DEPS
+          docker run -i --rm --security-opt label=disable -v "$PYPDFIUM2_DIR:/pypdfium2" -e PREPARE_CMD "$CONTAINER" bash <<END
+          eval "\$PREPARE_CMD"
+          # alternatively: python3 -m pip config set global.break-system-packages true
+          python3 -m venv --system-site-packages testenv
+          VENV_PY=/testenv/bin/python3
           cd /pypdfium2
-          python3 -m pip install ./wheelhouse/*.whl
-          python3 -m pytest tests/
+          \$VENV_PY -m pip install ./wheelhouse/*.whl
+          \$VENV_PY -m pytest tests/
           END
         env:
           TARGET: ${{ inputs.cibw_target }}

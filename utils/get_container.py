@@ -3,31 +3,29 @@
 
 import sys
 
-_UBUNTU_INST = "apt install -y python3 python3-pillow python3-numpy"
-_RHEL_INST   = "dnf in -y python3 python3-pillow python3-numpy"
-_ALPINE_INST = "pkg add --update python3 py3-pip py3-pillow py3-numpy"
+_DEBIAN_CMD = "apt update; apt install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
+_ALPINE_CMD = "pkg add --update python3 py3-pip py3-pillow py3-numpy py3-pytest"
+
+DOCKER_CPU_MAP = {
+    "x86_64": "amd64",
+    "aarch64": "arm64v8",
+    "armv7l": "arm32v7",
+    "i686": "i386",
+    "loongarch64": "loong64",
+}  # ppc64le, riscv64, s390x equal
 
 def _get_container(os_class, cpu):
+    prefix = DOCKER_CPU_MAP.get(cpu, cpu)
+    if cpu == "loongarch64":
+        prefix = f"ghcr.io/{prefix}"
     if os_class == "manylinux":
-        # https://github.com/pypa/manylinux
-        if cpu == "riscv64":
-            return "quay.io/pypa/manylinux_2_39", _UBUNTU_INST
-        elif cpu == "armv7l":
-            return "quay.io/pypa/manylinux_2_35", _UBUNTU_INST
-        elif cpu == "loongarch64":
-            return "ghcr.io/loong64/manylinux_2_38", _RHEL_INST
-        else:
-            return "quay.io/pypa/manylinux_2_34", _RHEL_INST
+        return f"{prefix}/debian:trixie-slim", _DEBIAN_CMD
     elif os_class == "musllinux":
-        if cpu == "loongarch64":
-            return "ghcr.io/loong64/musllinux_1_2", _ALPINE_INST
-        else:
-            return "quay.io/pypa/musllinux_1_2", _ALPINE_INST
+        return f"{prefix}/alpine:3", _ALPINE_CMD
     else:
         assert False, os_class
 
 os_class, cpu = sys.argv[1].split("_", maxsplit=1)
-container_prefix, deps = _get_container(os_class, cpu)
-container = f"{container_prefix}_{cpu}"
+container, deps = _get_container(os_class, cpu)
 print(f'export CONTAINER={container!r}')
-print(f'export INSTALL_DEPS={deps!r}')
+print(f'export PREPARE_CMD={deps!r}')
