@@ -4,7 +4,7 @@
 import sys
 
 _DEBIAN_CMD = "apt update; apt install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
-_ALPINE_CMD = "pkg add --update python3 py3-pip py3-pillow py3-numpy py3-pytest"
+_ALPINE_CMD = "apk add python3 py3-pip py3-pillow py3-numpy py3-pytest"
 
 DOCKER_CPU_MAP = {
     "x86_64": "amd64",
