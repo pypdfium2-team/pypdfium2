@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+import sys
+
+_DEBIAN_CMD = "apt update && apt install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
+_ALPINE_CMD = "apk add python3 py3-pip py3-pillow py3-numpy py3-pytest"
+
+DOCKER_CPU_MAP = {
+    "x86_64": "amd64",
+    "aarch64": "arm64v8",
+    "armv7l": "arm32v7",
+    "i686": "i386",
+    "loongarch64": "loong64",
+}  # ppc64le, riscv64, s390x equal
+
+# cf. https://github.com/pypa/cibuildwheel/blob/bb153041f0defc85849ef2d519c39c9218d889d0/cibuildwheel/oci_container.py#L30-L59
+PLATFORM_CPU_MAP = {
+    "x86_64": "amd64",
+    "aarch64": "arm64",
+    "armv7l": "arm/v7",
+    "i686": "386",
+    "loongarch64": "loong64",
+}  # dto.
+
+def _get_container(os_class, cpu):
+    docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
+    platform_cpu = PLATFORM_CPU_MAP.get(cpu, cpu)
+    docker_flags = f"--platform linux/{platform_cpu}"
+    if docker_cpu == "loong64":
+        prefix = f"ghcr.io/"
+    else:
+        prefix = ""
+    if os_class == "manylinux":
+        return f"{prefix}{docker_cpu}/debian:trixie-slim", docker_flags, _DEBIAN_CMD, "bash"
+    elif os_class == "musllinux":
+        return f"{prefix}{docker_cpu}/alpine:3", docker_flags, _ALPINE_CMD, "sh"
+    else:
+        assert False, os_class
+
+os_class, cpu = sys.argv[1].split("_", maxsplit=1)
+container, docker_flags, prepare_cmd, shell = _get_container(os_class, cpu)
+print(f'export CONTAINER="{container}"')
+print(f'export PREPARE_CMD="{prepare_cmd}"')
+print(f'export INIT_SHELL="{shell}"')
+print(f'export DOCKER_FLAGS="{docker_flags}"')
