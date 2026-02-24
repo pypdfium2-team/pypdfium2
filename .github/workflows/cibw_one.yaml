@@ -110,11 +110,11 @@ jobs:
         # x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test them again in a different container
         if: ${{ contains(inputs.cibw_target, 'linux') }}
         run: |
-          # get_container.py outputs the env vars CONTAINER and PREPARE_CMD
+          # get_container.py outputs the env vars CONTAINER, PREPARE_CMD and INIT_SHELL
           eval "$(python3 ./utils/get_container.py $TARGET)"
           # Just sharing the pypdfium2 dir among host and container is easier (and faster) than copying.
           PYPDFIUM2_DIR="$PWD"
-          docker run -i --rm --security-opt label=disable -v "$PYPDFIUM2_DIR:/pypdfium2" -e PREPARE_CMD "$CONTAINER" bash <<END
+          docker run -i --rm --security-opt label=disable -v "$PYPDFIUM2_DIR:/pypdfium2" -e PREPARE_CMD "$CONTAINER" $INIT_SHELL <<END
           eval "\$PREPARE_CMD"
           # alternatively: python3 -m pip config set global.break-system-packages true
           python3 -m venv --system-site-packages testenv
