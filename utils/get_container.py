@@ -14,19 +14,21 @@ DOCKER_CPU_MAP = {
     "loongarch64": "loong64",
 }  # ppc64le, riscv64, s390x equal
 
-def _get_container(os_class, cpu):
-    prefix = DOCKER_CPU_MAP.get(cpu, cpu)
-    if cpu == "loongarch64":
-        prefix = f"ghcr.io/{prefix}"
+def _get_container(os_class, docker_cpu):
+    prefix = ""
+    if docker_cpu == "loong64":
+        prefix = f"ghcr.io/"
     if os_class == "manylinux":
-        return f"{prefix}/debian:trixie-slim", _DEBIAN_CMD, "bash"
+        return f"{prefix}{docker_cpu}/debian:trixie-slim", _DEBIAN_CMD, "bash"
     elif os_class == "musllinux":
-        return f"{prefix}/alpine:3", _ALPINE_CMD, "sh"
+        return f"{prefix}{docker_cpu}/alpine:3", _ALPINE_CMD, "sh"
     else:
         assert False, os_class
 
 os_class, cpu = sys.argv[1].split("_", maxsplit=1)
-container, prepare_cmd, shell = _get_container(os_class, cpu)
+docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
+container, prepare_cmd, shell = _get_container(os_class, docker_cpu)
 print(f'export CONTAINER="{container}"')
 print(f'export PREPARE_CMD="{prepare_cmd}"')
 print(f'export INIT_SHELL="{shell}"')
+print(f'export DOCKER_CPU="{docker_cpu}"')
