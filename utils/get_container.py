@@ -14,13 +14,19 @@ DOCKER_CPU_MAP = {
     "loongarch64": "loong64",
 }  # ppc64le, riscv64, s390x equal
 
+# cf. https://github.com/pypa/cibuildwheel/blob/bb153041f0defc85849ef2d519c39c9218d889d0/cibuildwheel/oci_container.py#L30-L59
+PLATFORM_CPU_MAP = {
+    "x86_64": "amd64",
+    "aarch64": "arm64",
+    "armv7l": "arm/v7",
+    "i686": "386",
+    "loongarch64": "loong64",
+}  # dto.
+
 def _get_container(os_class, cpu):
     docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
-    # XXX platform option needs its own CPU map, cf. https://github.com/BretFisher/multi-platform-docker-build/
-    if cpu in ("aarch64", "armv7l"):
-        docker_flags = ""
-    else:
-        docker_flags = f"--platform linux/{docker_cpu}"
+    platform_cpu = PLATFORM_CPU_MAP.get(cpu, cpu)
+    docker_flags = f"--platform linux/{platform_cpu}"
     if docker_cpu == "loong64":
         prefix = f"ghcr.io/"
     else:
