@@ -16,6 +16,7 @@ DOCKER_CPU_MAP = {
 
 def _get_container(os_class, cpu):
     docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
+    # XXX platform option needs its own CPU map, cf. https://github.com/BretFisher/multi-platform-docker-build/
     if cpu in ("aarch64", "armv7l"):
         docker_flags = ""
     else:
