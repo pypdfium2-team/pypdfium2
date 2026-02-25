@@ -110,7 +110,7 @@ jobs:
         # x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test them again in a different container
         if: ${{ contains(inputs.cibw_target, 'linux') }}
         # q&d: suppress known test suite failures on s390x and musllinux_armv7l
-        continue-on-error: ${{ inputs.cibw_arch == 's390x' || (startsWith(inputs.cibw_target, 'musl') && inputs.cibw_arch == 'armv7l') }}
+        continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
         run: |
           # get_container.py outputs the env vars CONTAINER, PREPARE_CMD, INIT_SHELL and DOCKER_FLAGS
           eval "$(python3 ./utils/get_container.py $TARGET)"
