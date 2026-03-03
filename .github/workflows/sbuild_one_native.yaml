@@ -103,7 +103,7 @@ jobs:
           python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
       
       - name: Upload wheel as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
           name: sbuild-native-${{ inputs.compiler }}_${{ inputs.os }}
