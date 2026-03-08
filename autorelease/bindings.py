@@ -373,8 +373,16 @@ FPDF_RENDERERTYPE_SKIA = 1
 
 FPDF_RENDERER_TYPE = enum_anon_3
 
+enum_anon_4 = c_int
+
+FPDF_FONTBACKENDTYPE_FREETYPE = 0
+
+FPDF_FONTBACKENDTYPE_FONTATIONS = 1
+
+FPDF_FONT_BACKEND_TYPE = enum_anon_4
+
 class struct_FPDF_LIBRARY_CONFIG_ (Structure):
-    __slots__ = ('version', 'm_pUserFontPaths', 'm_pIsolate', 'm_v8EmbedderSlot', 'm_pPlatform', 'm_RendererType')
+    __slots__ = ('version', 'm_pUserFontPaths', 'm_pIsolate', 'm_v8EmbedderSlot', 'm_pPlatform', 'm_RendererType', 'm_FontLibraryType')
 
 struct_FPDF_LIBRARY_CONFIG_._fields_ = (
     ('version', c_int),
@@ -383,6 +391,7 @@ struct_FPDF_LIBRARY_CONFIG_._fields_ = (
     ('m_v8EmbedderSlot', c_uint),
     ('m_pPlatform', POINTER(None)),
     ('m_RendererType', FPDF_RENDERER_TYPE),
+    ('m_FontLibraryType', FPDF_FONT_BACKEND_TYPE),
 )
 
 FPDF_LIBRARY_CONFIG = struct_FPDF_LIBRARY_CONFIG_
@@ -427,16 +436,16 @@ if hasattr(_libs['pdfium'], 'FPDF_LoadMemDocument64'):
     FPDF_LoadMemDocument64.argtypes = (POINTER(None), c_size_t, FPDF_BYTESTRING)
     FPDF_LoadMemDocument64.restype = FPDF_DOCUMENT
 
-class struct_anon_4 (Structure):
+class struct_anon_5 (Structure):
     __slots__ = ('m_FileLen', 'm_GetBlock', 'm_Param')
 
-struct_anon_4._fields_ = (
+struct_anon_5._fields_ = (
     ('m_FileLen', c_ulong),
     ('m_GetBlock', CFUNCTYPE(UNCHECKED(c_int), POINTER(None), c_ulong, POINTER(c_ubyte), c_ulong)),
     ('m_Param', POINTER(None)),
 )
 
-FPDF_FILEACCESS = struct_anon_4
+FPDF_FILEACCESS = struct_anon_5
 
 class struct_FPDF_FILEHANDLER_ (Structure):
     __slots__ = ('clientData', 'Release', 'GetSize', 'ReadBlock', 'WriteBlock', 'Flush', 'Truncate')
@@ -1490,13 +1499,13 @@ if hasattr(_libs['pdfium'], 'FPDFAvail_IsLinearized'):
     FPDFAvail_IsLinearized.argtypes = (FPDF_AVAIL, )
     FPDFAvail_IsLinearized.restype = c_int
 
-enum_anon_5 = c_int
+enum_anon_6 = c_int
 
 FILEIDTYPE_PERMANENT = 0
 
 FILEIDTYPE_CHANGING = 1
 
-FPDF_FILEIDTYPE = enum_anon_5
+FPDF_FILEIDTYPE = enum_anon_6
 
 if hasattr(_libs['pdfium'], 'FPDFBookmark_GetFirstChild'):
     FPDFBookmark_GetFirstChild = _libs['pdfium']['FPDFBookmark_GetFirstChild']
@@ -2296,7 +2305,7 @@ if hasattr(_libs['pdfium'], 'FPDFPage_Flatten'):
     FPDFPage_Flatten.argtypes = (FPDF_PAGE, c_int)
     FPDFPage_Flatten.restype = c_int
 
-enum_anon_7 = c_int
+enum_anon_8 = c_int
 
 FWL_EVENTFLAG_ShiftKey = (1 << 0)
 
@@ -2316,9 +2325,9 @@ FWL_EVENTFLAG_MiddleButtonDown = (1 << 7)
 
 FWL_EVENTFLAG_RightButtonDown = (1 << 8)
 
-FWL_EVENTFLAG = enum_anon_7
+FWL_EVENTFLAG = enum_anon_8
 
-enum_anon_8 = c_int
+enum_anon_9 = c_int
 
 FWL_VKEY_Back = 0x08
 
@@ -2658,7 +2667,7 @@ FWL_VKEY_OEM_Clear = 0xFE
 
 FWL_VKEY_Unknown = 0
 
-FWL_VKEYCODE = enum_anon_8
+FWL_VKEYCODE = enum_anon_9
 
 if hasattr(_libs['pdfium'], 'FPDFDoc_GetJavaScriptActionCount'):
     FPDFDoc_GetJavaScriptActionCount = _libs['pdfium']['FPDFDoc_GetJavaScriptActionCount']
@@ -2850,6 +2859,11 @@ if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetActualText'):
     FPDF_StructElement_GetActualText = _libs['pdfium']['FPDF_StructElement_GetActualText']
     FPDF_StructElement_GetActualText.argtypes = (FPDF_STRUCTELEMENT, POINTER(None), c_ulong)
     FPDF_StructElement_GetActualText.restype = c_ulong
+
+if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetExpansion'):
+    FPDF_StructElement_GetExpansion = _libs['pdfium']['FPDF_StructElement_GetExpansion']
+    FPDF_StructElement_GetExpansion.argtypes = (FPDF_STRUCTELEMENT, POINTER(None), c_ulong)
+    FPDF_StructElement_GetExpansion.restype = c_ulong
 
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetID'):
     FPDF_StructElement_GetID = _libs['pdfium']['FPDF_StructElement_GetID']
