@@ -74,7 +74,7 @@ jobs:
       
       - name: Set up QEMU
         if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       
       - name: Install Windows cross deps
         if: ${{ startsWith(inputs.os, 'windows') && inputs.cibw_arch != 'AMD64' }}
