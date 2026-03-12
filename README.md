@@ -187,17 +187,6 @@ python ./setupsrc/build_native.py --compiler clang
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
-Note, on *some* platforms, you might also need symlinks for GCC, e.g.:
-```bash
-PREFIX=$(python ./utils/get_gcc_prefix.py)  # in pypdfium2 dir
-GCC_DIR="/usr"  # or e.g. /opt/rh/gcc-toolset-14/root
-sudo ln -s $GCC_DIR/bin/gcc $GCC_DIR/bin/$PREFIX-gcc
-sudo ln -s $GCC_DIR/bin/g++ $GCC_DIR/bin/$PREFIX-g++
-sudo ln -s $GCC_DIR/bin/nm $GCC_DIR/bin/$PREFIX-nm
-sudo ln -s $GCC_DIR/bin/readelf $GCC_DIR/bin/$PREFIX-readelf
-sudo ln -s $GCC_DIR/bin/ar $GCC_DIR/bin/$PREFIX-ar
-```
-
 > [!NOTE]
 > The native sourcebuild currently supports Linux (or similar).
 > macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible – use the toolchain-based build for now.

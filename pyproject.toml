@@ -61,32 +61,6 @@ before-all = [
     "python3 {project}/utils/build_gn.py /usr/local/bin",
 ]
 
-# NOTE ppc64le,riscv64,loongarch64,s390x use clang, so they are commented out from gcc sections
-
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_aarch64"  # loongarch64
-inherit.before-all = "append"
-before-all = ["export GCC_ROOT=/opt/rh/gcc-toolset-14/root"]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux_{aarch64,armv7l}"  # *-manylinux_riscv64, *-musllinux_{riscv64,loongarch64}
-inherit.before-all = "append"
-before-all = ["export GCC_ROOT=/usr"]
-
-[[tool.cibuildwheel.overrides]]
-# this select must be a union of the above two selects
-select = "*-*linux_aarch64 *-musllinux_armv7l"  # *-*linux_{riscv64,loongarch64}
-inherit.before-all = "append"
-before-all = [
-    "export PREFIX=$(python {package}/utils/get_gcc_prefix.py)",
-    "ln -s $GCC_ROOT/bin/gcc $GCC_ROOT/bin/$PREFIX-gcc",
-    "ln -s $GCC_ROOT/bin/g++ $GCC_ROOT/bin/$PREFIX-g++",
-    "ln -s $GCC_ROOT/bin/nm $GCC_ROOT/bin/$PREFIX-nm",
-    "ln -s $GCC_ROOT/bin/readelf $GCC_ROOT/bin/$PREFIX-readelf",
-    "ln -s $GCC_ROOT/bin/ar $GCC_ROOT/bin/$PREFIX-ar",
-    "unset PREFIX GCC_ROOT",
-]
-
 # We're in luck, Google actually serves GN binaries for riscv64
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_riscv64"
