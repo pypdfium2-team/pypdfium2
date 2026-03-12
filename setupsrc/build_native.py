@@ -298,7 +298,8 @@ def _get_clang_ver(clang_path):
     return version
 
 def _clang_as_gcc(clang_path):
-    os.environ["PATH"] = f"{clang_path}:" + os.environ["PATH"]
+    clang_binaries = clang_path/"bin"
+    os.environ["PATH"] = f"{clang_binaries}:" + os.environ["PATH"]
     os.environ["CC"] = "clang"
     os.environ["CXX"] = "clang++"
     os.environ["TOOLPREFIX"] = "llvm-"
