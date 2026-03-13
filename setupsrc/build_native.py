@@ -39,6 +39,7 @@ SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_DIR_build = PDFIUM_DIR / "build"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
+CUSTOM_TOOLCHAIN_DIR = PDFIUM_DIR_build/"toolchain"/"linux"/"custom"
 
 Compiler = Enum("Compiler", "gcc clang")
 
@@ -214,8 +215,15 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
         if compiler is Compiler.gcc:
+            # declare custom GCC toolchain
+            mkdir(CUSTOM_TOOLCHAIN_DIR)
+            shutil.copyfile(PatchDir/"custom-BUILD.gn", CUSTOM_TOOLCHAIN_DIR/"BUILD.gn")
             # https://crbug.com/402282789
-            git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
+            # git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
+            orig_cppflags = os.environ.get("CPPFLAGS", "")
+            os.environ["CPPFLAGS"] = "-ffp-contract=off"
+            if orig_cppflags:
+                os.environ["CPPFLAGS"] += " " + orig_cppflags
         elif compiler is Compiler.clang:
             # https://crbug.com/410883044
             if "libc++" not in vendor_deps:
@@ -290,39 +298,18 @@ def _get_clang_ver(clang_path):
     return version
 
 def _clang_as_gcc(clang_path):
-    symlinks_dir = SOURCES_DIR / "clang_as_gcc"
-    mkdir(symlinks_dir)
-    # pdfium is inconsistent as to where it uses a toolprefix and where it doesn't
-    # this map is based on //build/toolchain/linux/BUILD.gn
-    # TODO use complete map (merge with utils/get_gcc_prefix.py) and create both sets of symlinks (with and without prefix)
-    toolprefix = {
-        "aarch64": "aarch64-linux-gnu-",
-        "riscv64": "riscv64-linux-gnu-",
-        "armv7l": "arm-linux-gnueabihf-",
-        "armv8l": "arm-linux-gnueabihf-",
-        "loong64": "loongarch64-unknown-linux-gnu-",
-        "loongarch64": "loongarch64-unknown-linux-gnu-",
-    }.get(Host._raw_machine, "")
-    nmap = (
-        ("clang", "gcc"),
-        ("clang++", "g++"),
-        ("llvm-ar", "ar"),
-        ("llvm-nm", "nm"),
-        ("llvm-readelf", "readelf"),
-        ("lld", "ld"),
-    )
-    for src_name, dst_name in nmap:
-        src = clang_path/"bin"/src_name
-        dst = symlinks_dir/(toolprefix+dst_name)
-        if dst.is_symlink():
-            dst.unlink()
-        dst.symlink_to(src)
-    os.environ["PATH"] = f"{symlinks_dir}:" + os.environ["PATH"]
-
+    clang_binaries = clang_path/"bin"
+    os.environ["PATH"] = f"{clang_binaries}:" + os.environ["PATH"]
+    os.environ["CC"] = "clang"
+    os.environ["CXX"] = "clang++"
+    os.environ["TOOLPREFIX"] = "llvm-"
 
 def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
         config["is_clang"] = False
+        # this ought to match CUSTOM_TOOLCHAIN_DIR
+        config["custom_toolchain"] = "//build/toolchain/linux/custom:default"
+        config["host_toolchain"] = "//build/toolchain/linux/custom:default"
     elif compiler is Compiler.clang:
         assert clang_path, "Clang path must be set"
         config.update({
@@ -422,9 +409,12 @@ def parse_args(argv):
         formatter_class = argparse.RawTextHelpFormatter,
         description = """\
 Build PDFium from source natively with a self-managed checkout and system tools/libraries (depending on config).
+
 This does not use Google's binary toolchain, so it should be portable across different Linux architectures.
 Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
-For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.\
+For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.
+
+In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf (with trailing dash).\
 """,
     )
     if ExtendAction is not None:  # from base.py
@@ -475,8 +465,7 @@ For instance, it should also work on Android (Termux) natively. See the notes in
         action = "store_true",
         help = "Use clang, but pretend to pdfium's build system that it were gcc. Passing --compiler clang is a prerequisite. This is implemented by creating symlinks and prepending them to $PATH.",
     )
-    # - libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
-    # - With clang, using the vendored libc++ may be desirable. Also, there is some uncertainty whether using system libc++ might be ABI-unsafe. Actually, options to use system libc++ appear to be deprecated upstream.
+    # nb: libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
     parser.add_argument(
         "--vendor",
         dest = "vendor_deps",
