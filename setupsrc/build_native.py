@@ -219,11 +219,11 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             mkdir(CUSTOM_TOOLCHAIN_DIR)
             shutil.copyfile(PatchDir/"custom-BUILD.gn", CUSTOM_TOOLCHAIN_DIR/"BUILD.gn")
             # https://crbug.com/402282789
-            # git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
-            orig_cppflags = os.environ.get("CPPFLAGS", "")
-            os.environ["CPPFLAGS"] = "-ffp-contract=off"
-            if orig_cppflags:
-                os.environ["CPPFLAGS"] += " " + orig_cppflags
+            git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
+            # orig_cppflags = os.environ.get("CPPFLAGS", "")
+            # os.environ["CPPFLAGS"] = "-ffp-contract=off"
+            # if orig_cppflags:
+            #     os.environ["CPPFLAGS"] += " " + orig_cppflags
         elif compiler is Compiler.clang:
             # https://crbug.com/410883044
             if "libc++" not in vendor_deps:
@@ -298,11 +298,29 @@ def _get_clang_ver(clang_path):
     return version
 
 def _clang_as_gcc(clang_path):
-    clang_binaries = clang_path/"bin"
-    os.environ["PATH"] = f"{clang_binaries}:" + os.environ["PATH"]
-    os.environ["CC"] = "clang"
-    os.environ["CXX"] = "clang++"
-    os.environ["TOOLPREFIX"] = "llvm-"
+    # FIXME When compiler is set using env vars, pdfium's build system fails to re-use the output on a second run. Thus the symlinks.
+    # clang_binaries = clang_path/"bin"
+    # os.environ["PATH"] = f"{clang_binaries}:" + os.environ["PATH"]
+    # os.environ["CC"] = "clang"
+    # os.environ["CXX"] = "clang++"
+    # os.environ["TOOLPREFIX"] = "llvm-"
+    symlinks_dir = SOURCES_DIR / "clang_as_gcc"
+    mkdir(symlinks_dir)
+    nmap = (
+        ("clang", "gcc"),
+        ("clang++", "g++"),
+        ("llvm-ar", "ar"),
+        ("llvm-nm", "nm"),
+        ("llvm-readelf", "readelf"),
+        ("lld", "ld"),
+    )
+    for src_name, dst_name in nmap:
+        src = clang_path/"bin"/src_name
+        dst = symlinks_dir/dst_name
+        if dst.is_symlink():
+            dst.unlink()
+        dst.symlink_to(src)
+    os.environ["PATH"] = f"{symlinks_dir}:" + os.environ["PATH"]
 
 def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
