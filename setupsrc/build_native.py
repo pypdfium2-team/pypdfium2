@@ -40,6 +40,44 @@ PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_DIR_build = PDFIUM_DIR / "build"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 CUSTOM_TOOLCHAIN_DIR = PDFIUM_DIR_build/"toolchain"/"linux"/"custom"
+CUSTOM_TOOLCHAIN_TEMPL = """\
+import("//build/toolchain/gcc_toolchain.gni")
+
+gcc_toolchain("default") {
+  # for docs / available options, see the comments in //build/toolchain/gcc_toolchain.gni - they're really helpful
+  
+  cc = "%(CC)s"
+  cxx = "%(CXX)s"
+  ld = cxx
+  
+  toolprefix = "%(TOOLPREFIX)s"
+  readelf = toolprefix + "readelf"
+  nm = toolprefix + "nm"
+  ar = toolprefix + "ar"
+  
+  #enable_linker_map = true
+  
+  # gcc_toolchain.gni says on extra_cppflags:
+  # > Extra flags to be appended when compiling both C and C++ files. "CPP"
+  # > stands for "C PreProcessor" in this context, although it can be
+  # > used for non-preprocessor flags as well. Not to be confused with
+  # > "CXX" (which follows).
+  extra_cflags = getenv("CFLAGS")
+  extra_cppflags = getenv("CPPFLAGS")
+  extra_cxxflags = getenv("CXXFLAGS")
+  extra_ldflags = getenv("LDFLAGS")
+  #extra_asmflags = ...
+  
+  #shlib_extension = ...
+  
+  toolchain_args = {
+    current_cpu = current_cpu
+    current_os = current_os
+    is_clang = false
+    use_remoteexec = false
+  }
+}
+"""
 
 Compiler = Enum("Compiler", "gcc clang")
 
@@ -206,12 +244,20 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     
     df = DepsFetcher(deps_info)
     do_patches = df.fetch("build", PDFIUM_DIR_build, reset=reset)
-    # NOTE possible replacement for ffp_contract patch (needs to be set regardless of do_patches):
-    # if compiler is Compiler.gcc:
-    #     orig_cppflags = os.environ.get("CPPFLAGS", "")
-    #     os.environ["CPPFLAGS"] = "-ffp-contract=off"
-    #     if orig_cppflags:
-    #         os.environ["CPPFLAGS"] += " " + orig_cppflags
+    if compiler is Compiler.gcc:  # regardless of do_patches
+        # declare custom GCC toolchain
+        mkdir(CUSTOM_TOOLCHAIN_DIR)
+        custom_toolchain_content = CUSTOM_TOOLCHAIN_TEMPL % dict(
+            CC = os.environ.get("CC", "gcc"),
+            CXX = os.environ.get("CXX", "g++"),
+            TOOLPREFIX = os.environ.get("TOOLPREFIX", ""),
+        )
+        (CUSTOM_TOOLCHAIN_DIR/"BUILD.gn").write_text(custom_toolchain_content)
+        # NOTE possible replacement for ffp_contract patch
+        # orig_cppflags = os.environ.get("CPPFLAGS", "")
+        # os.environ["CPPFLAGS"] = "-ffp-contract=off"
+        # if orig_cppflags:
+        #     os.environ["CPPFLAGS"] += " " + orig_cppflags
     if do_patches:
         # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
@@ -221,9 +267,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
         if compiler is Compiler.gcc:
-            # declare custom GCC toolchain
-            mkdir(CUSTOM_TOOLCHAIN_DIR)
-            shutil.copyfile(PatchDir/"custom-BUILD.gn", CUSTOM_TOOLCHAIN_DIR/"BUILD.gn")
             # https://crbug.com/402282789
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
         elif compiler is Compiler.clang:
@@ -300,29 +343,28 @@ def _get_clang_ver(clang_path):
     return version
 
 def _clang_as_gcc(clang_path):
-    # FIXME When compiler is set using env vars, pdfium's build system fails to re-use the output on a second run. Thus the symlinks.
-    # clang_binaries = clang_path/"bin"
-    # os.environ["PATH"] = f"{clang_binaries}:" + os.environ["PATH"]
-    # os.environ["CC"] = "clang"
-    # os.environ["CXX"] = "clang++"
-    # os.environ["TOOLPREFIX"] = "llvm-"
-    symlinks_dir = SOURCES_DIR / "clang_as_gcc"
-    mkdir(symlinks_dir)
-    nmap = (
-        ("clang", "gcc"),
-        ("clang++", "g++"),
-        ("llvm-ar", "ar"),
-        ("llvm-nm", "nm"),
-        ("llvm-readelf", "readelf"),
-        ("lld", "ld"),
-    )
-    for src_name, dst_name in nmap:
-        src = clang_path/"bin"/src_name
-        dst = symlinks_dir/dst_name
-        if dst.is_symlink():
-            dst.unlink()
-        dst.symlink_to(src)
-    os.environ["PATH"] = f"{symlinks_dir}:" + os.environ["PATH"]
+    clang_binaries = clang_path/"bin"
+    os.environ["PATH"] = f"{clang_binaries}:" + os.environ["PATH"]
+    os.environ["CC"] = "clang"
+    os.environ["CXX"] = "clang++"
+    os.environ["TOOLPREFIX"] = "llvm-"
+    # symlinks_dir = SOURCES_DIR / "clang_as_gcc"
+    # mkdir(symlinks_dir)
+    # nmap = (
+    #     ("clang", "gcc"),
+    #     ("clang++", "g++"),
+    #     ("llvm-ar", "ar"),
+    #     ("llvm-nm", "nm"),
+    #     ("llvm-readelf", "readelf"),
+    #     # ("lld", "ld"),
+    # )
+    # for src_name, dst_name in nmap:
+    #     src = clang_path/"bin"/src_name
+    #     dst = symlinks_dir/dst_name
+    #     if dst.is_symlink():
+    #         dst.unlink()
+    #     dst.symlink_to(src)
+    # os.environ["PATH"] = f"{symlinks_dir}:" + os.environ["PATH"]
 
 def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
