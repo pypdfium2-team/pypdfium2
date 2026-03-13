@@ -410,11 +410,11 @@ def parse_args(argv):
         description = """\
 Build PDFium from source natively with a self-managed checkout and system tools/libraries (depending on config).
 
-In GCC build mode, the usual environment variables are respected: CC, CXX, TOOLPREFIX (for ar/nm/readelf), CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS.
-
 This does not use Google's binary toolchain, so it should be portable across different Linux architectures.
 Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
-For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.\
+For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.
+
+In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf (with trailing dash).\
 """,
     )
     if ExtendAction is not None:  # from base.py

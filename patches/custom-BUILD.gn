@@ -2,8 +2,10 @@ import("//build/toolchain/gcc_toolchain.gni")
 
 gcc_toolchain("default") {
   # for docs / available options, see the comments in //build/toolchain/gcc_toolchain.gni - they're really helpful
+  
   cc = getenv("CC")
   cxx = getenv("CXX")
+  # GN getenv is dumb enough not to have built-in default handling
   if (cc == "") {
     cc = "gcc"
   }
