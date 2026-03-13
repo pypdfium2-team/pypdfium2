@@ -258,7 +258,8 @@ For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/
 On Linux, this will use the native sourcebuild with vendored dependency libraries.
 On Windows and macOS, the toolchained sourcebuild is used.
 
-Note, for Linux, cibuildwheel requires Docker. On the author's version of Fedora, it can be installed as follows:
+Note, for Linux, cibuildwheel requires Docker, or Podman.
+On the author's version of Fedora, Docker can be installed as follows:
 ```bash
 sudo dnf in moby-engine  # this provides the docker command
 sudo systemctl start docker
