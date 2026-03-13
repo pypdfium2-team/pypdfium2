@@ -206,6 +206,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     
     df = DepsFetcher(deps_info)
     do_patches = df.fetch("build", PDFIUM_DIR_build, reset=reset)
+    # NOTE possible replacement for ffp_contract patch (needs to be set regardless of do_patches):
+    # if compiler is Compiler.gcc:
+    #     orig_cppflags = os.environ.get("CPPFLAGS", "")
+    #     os.environ["CPPFLAGS"] = "-ffp-contract=off"
+    #     if orig_cppflags:
+    #         os.environ["CPPFLAGS"] += " " + orig_cppflags
     if do_patches:
         # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
@@ -220,10 +226,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             shutil.copyfile(PatchDir/"custom-BUILD.gn", CUSTOM_TOOLCHAIN_DIR/"BUILD.gn")
             # https://crbug.com/402282789
             git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
-            # orig_cppflags = os.environ.get("CPPFLAGS", "")
-            # os.environ["CPPFLAGS"] = "-ffp-contract=off"
-            # if orig_cppflags:
-            #     os.environ["CPPFLAGS"] += " " + orig_cppflags
         elif compiler is Compiler.clang:
             # https://crbug.com/410883044
             if "libc++" not in vendor_deps:
