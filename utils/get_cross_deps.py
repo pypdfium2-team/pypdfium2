@@ -4,13 +4,13 @@
 import sys, shlex
 
 def get_gcc_id(arch):
-    if arch in ("loong64", "loongarch64"):
-        return "loongarch64-unknown-linux-gnu"
-    elif arch in ("armv7l", "armv8l"):
+    if arch in ("armv7l", "armv8l"):
         return "arm-linux-gnueabihf"
     elif arch == "ppc64le":
         return "powerpc64le-linux-gnu"
-    else:  # aarch64, riscv64
+    # elif arch in ("loong64", "loongarch64"):
+    #     return "loongarch64-unknown-linux-gnu"
+    else:  # aarch64, (riscv64)
         return f"{arch}-linux-gnu"
 
 target_cpu = sys.argv[1]
