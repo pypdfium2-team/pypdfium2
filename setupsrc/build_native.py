@@ -253,7 +253,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             TOOLPREFIX = os.environ.get("TOOLPREFIX", ""),
         )
         (CUSTOM_TOOLCHAIN_DIR/"BUILD.gn").write_text(custom_toolchain_content)
-        # https://crbug.com/402282789 - alternatively, apply ffp_contract.patch (see below, commented out)
+        # https://crbug.com/402282789
         env_append("CPPFLAGS", "-ffp-contract=off", " ")
     if do_patches:
         # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
@@ -263,9 +263,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
-        # if compiler is Compiler.gcc:
-        #     git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
-        if compiler is Compiler.clang:  # elif
+        if compiler is Compiler.clang:
             # https://crbug.com/410883044
             if "libc++" not in vendor_deps:
                 git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
