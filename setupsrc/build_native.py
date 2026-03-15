@@ -253,11 +253,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             TOOLPREFIX = os.environ.get("TOOLPREFIX", ""),
         )
         (CUSTOM_TOOLCHAIN_DIR/"BUILD.gn").write_text(custom_toolchain_content)
-        # NOTE possible replacement for ffp_contract patch
-        # orig_cppflags = os.environ.get("CPPFLAGS", "")
-        # os.environ["CPPFLAGS"] = "-ffp-contract=off"
-        # if orig_cppflags:
-        #     os.environ["CPPFLAGS"] += " " + orig_cppflags
+        # https://crbug.com/402282789 - alternatively, apply ffp_contract.patch (see below, commented out)
+        env_append("CPPFLAGS", "-ffp-contract=off", " ")
     if do_patches:
         # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
@@ -266,10 +263,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
-        if compiler is Compiler.gcc:
-            # https://crbug.com/402282789
-            git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
-        elif compiler is Compiler.clang:
+        # if compiler is Compiler.gcc:
+        #     git_apply_patch(PatchDir/"ffp_contract.patch", cwd=PDFIUM_DIR_build)
+        if compiler is Compiler.clang:  # elif
             # https://crbug.com/410883044
             if "libc++" not in vendor_deps:
                 git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
@@ -344,27 +340,10 @@ def _get_clang_ver(clang_path):
 
 def _clang_as_gcc(clang_path):
     clang_binaries = clang_path/"bin"
-    os.environ["PATH"] = f"{clang_binaries}:" + os.environ["PATH"]
+    env_prepend("PATH", str(clang_binaries), ":")
     os.environ["CC"] = "clang"
     os.environ["CXX"] = "clang++"
     os.environ["TOOLPREFIX"] = "llvm-"
-    # symlinks_dir = SOURCES_DIR / "clang_as_gcc"
-    # mkdir(symlinks_dir)
-    # nmap = (
-    #     ("clang", "gcc"),
-    #     ("clang++", "g++"),
-    #     ("llvm-ar", "ar"),
-    #     ("llvm-nm", "nm"),
-    #     ("llvm-readelf", "readelf"),
-    #     # ("lld", "ld"),
-    # )
-    # for src_name, dst_name in nmap:
-    #     src = clang_path/"bin"/src_name
-    #     dst = symlinks_dir/dst_name
-    #     if dst.is_symlink():
-    #         dst.unlink()
-    #     dst.symlink_to(src)
-    # os.environ["PATH"] = f"{symlinks_dir}:" + os.environ["PATH"]
 
 def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:

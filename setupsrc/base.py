@@ -225,6 +225,18 @@ def write_json(fp, data, indent=2):
     with open(fp, "w") as buf:
         return json.dump(data, buf, indent=indent)
 
+def env_prepend(key, value, sep):
+    orig = os.environ.get(key, "")
+    if orig:
+        orig = sep + orig
+    os.environ[key] = value + orig
+
+def env_append(key, value, sep):
+    orig = os.environ.get(key, "")
+    if orig:
+        orig += sep
+    os.environ[key] = orig + value
+
 
 def libname_for_system(system, name="pdfium", prefix=None):
     # Map system to pdfium shared library name
