@@ -63,8 +63,6 @@ gcc_toolchain("default") {
   toolchain_args = {
     current_cpu = current_cpu
     current_os = current_os
-    is_clang = false
-    use_remoteexec = false
   }
 }
 """
