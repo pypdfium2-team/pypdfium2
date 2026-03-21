@@ -394,7 +394,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         if clang_path is None:
             clang_path = Host.usr
         if clang_as_gcc:
-            env_prepend("PATH", str(clang_path/"bin"), ":")
+            env_prepend("PATH", str(clang_path/"bin"), os.pathsep)
             set_envs(CC="clang", CXX="clang++", TOOLPREFIX="llvm-")
             compiler = Compiler.gcc
         else:
