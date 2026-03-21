@@ -237,6 +237,13 @@ def env_append(key, value, sep):
         orig += sep
     os.environ[key] = orig + value
 
+def set_envs(**kwargs):
+    for key, value in kwargs.items():
+        os.environ[key] = value
+
+def query_envs(**kwargs):
+    return {k: os.environ.get(k, d) for k, d in kwargs.items()}
+
 
 def libname_for_system(system, name="pdfium", prefix=None):
     # Map system to pdfium shared library name

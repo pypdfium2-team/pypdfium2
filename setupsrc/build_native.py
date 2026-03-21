@@ -235,12 +235,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     if compiler is Compiler.gcc:  # regardless of do_patches
         # declare custom GCC toolchain
         mkdir(CUSTOM_TOOLCHAIN_DIR)
-        custom_toolchain_content = CUSTOM_TOOLCHAIN_TEMPL % dict(
-            CC = os.environ.get("CC", "gcc"),
-            CXX = os.environ.get("CXX", "g++"),
-            TOOLPREFIX = os.environ.get("TOOLPREFIX", ""),
+        (CUSTOM_TOOLCHAIN_DIR/"BUILD.gn").write_text(
+            CUSTOM_TOOLCHAIN_TEMPL % query_envs(CC="gcc", CXX="g++", TOOLPREFIX="")
         )
-        (CUSTOM_TOOLCHAIN_DIR/"BUILD.gn").write_text(custom_toolchain_content)
         # https://crbug.com/402282789
         # gcc_toolchain.gni says on extra_cppflags:
         # > Extra flags to be appended when compiling both C and C++ files. "CPP" stands for "C PreProcessor" in this context, although it can be used for non-preprocessor flags as well. Not to be confused with "CXX" (which follows).
@@ -328,9 +325,7 @@ def _get_clang_ver(clang_path):
 
 def _clang_as_gcc(clang_path):
     env_prepend("PATH", str(clang_path/"bin"), ":")
-    os.environ["CC"] = "clang"
-    os.environ["CXX"] = "clang++"
-    os.environ["TOOLPREFIX"] = "llvm-"
+    set_envs(CC="clang", CXX="clang++", TOOLPREFIX="llvm-")
 
 def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
