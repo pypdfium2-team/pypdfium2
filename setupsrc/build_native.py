@@ -315,10 +315,6 @@ def _get_clang_ver(clang_path):
     log(f"Determined clang version {version!r}")
     return version
 
-def _clang_as_gcc(clang_path):
-    env_prepend("PATH", str(clang_path/"bin"), ":")
-    set_envs(CC="clang", CXX="clang++", TOOLPREFIX="llvm-")
-
 def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
         config["is_clang"] = False
@@ -398,7 +394,8 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         if clang_path is None:
             clang_path = Host.usr
         if clang_as_gcc:
-            _clang_as_gcc(clang_path)
+            env_prepend("PATH", str(clang_path/"bin"), ":")
+            set_envs(CC="clang", CXX="clang++", TOOLPREFIX="llvm-")
             compiler = Compiler.gcc
         else:
             clang_ver = _get_clang_ver(clang_path)
@@ -478,7 +475,7 @@ In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAG
     parser.add_argument(
         "--clang-as-gcc",
         action = "store_true",
-        help = "Use clang, but pretend to pdfium's build system that it were gcc. Passing --compiler clang is a prerequisite. This is implemented by creating symlinks and prepending them to $PATH.",
+        help = "Use clang, but pretend to pdfium's build system that it were gcc. Passing `--compiler clang` is a prerequisite.",
     )
     # nb: libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
     parser.add_argument(
