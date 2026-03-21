@@ -170,12 +170,12 @@ def main(
             sdk_cpu = "arm64" if Host._raw_machine == "arm64" else "x64"
             win_sdk_dir = Path(fR"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\{sdk_cpu}")
         assert win_sdk_dir.exists()
-        os.environ["PATH"] += os.pathsep + str(win_sdk_dir)
+        env_append("PATH", str(win_sdk_dir), os.pathsep)  # ... prepend?
         os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
     
     dl_depottools(do_update)
     orig_path = os.environ["PATH"]
-    os.environ["PATH"] = str(DepotToolsDir) + os.pathsep + os.environ["PATH"]
+    env_prepend("PATH", str(DepotToolsDir), os.pathsep)
     
     GClient = get_tool("gclient")
     did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev, target_os)
