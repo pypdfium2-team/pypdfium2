@@ -91,22 +91,14 @@ if IS_ANDROID:
         "current_os": "android",
         "target_os": "android",
     })
-    del DefaultConfig["use_sysroot"]
+    del DefaultConfig["use_sysroot"]  # implies use_sysroot = true
     # On Android, it seems that the build system's CPU type statically defaults to "arm", but we want this script to be host-adaptive (plus, "arm64" is the more likely candidate).
     # TODO(future) refactor platform constants from base.py so we can access abstracted OS/CPU separately through sub-attributes
-    AndroidCPUMap = {
-        "aarch64": "arm64",
-        "armv7l":  "arm",
-        "x86_64":  "x64",
-        "i686":    "x86",
-    }
+    AndroidCPUMap = {"aarch64": "arm64", "armv7l": "arm", "x86_64": "x64", "i686": "x86"}
     raw_cpu = Host._raw_machine
     if raw_cpu in AndroidCPUMap:
         cpu = AndroidCPUMap[raw_cpu]
-        DefaultConfig.update({
-            "current_cpu": cpu,
-            "target_cpu": cpu,
-        })
+        DefaultConfig.update(current_cpu=cpu, target_cpu=cpu)
     else:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
 
