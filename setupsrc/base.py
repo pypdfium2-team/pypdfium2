@@ -892,6 +892,7 @@ def git_apply_patch(patch, cwd, git_args=()):
 
 def git_clone_rev(url, rev, target_dir, depth=1):
     # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
+    # NOTE Once we can require git >= 2.49.0, `git clone --depth <n> --revision <sha>` will do. (The author currently uses git 2.42.0.)
     mkdir(target_dir)
     depth_param = ["--depth", str(depth)] if depth else []
     run_cmd(["git", "-c", "advice.defaultBranchName=false", "init"], cwd=target_dir)
