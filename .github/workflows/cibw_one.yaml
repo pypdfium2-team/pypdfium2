@@ -115,8 +115,8 @@ jobs:
           # get_container.py outputs the env vars CONTAINER, PREPARE_CMD, INIT_SHELL and DOCKER_FLAGS
           eval "$(python3 ./utils/get_container.py $TARGET)"
           # Just sharing the pypdfium2 dir among host and container is easier (and faster) than copying.
-          PYPDFIUM2_DIR="$PWD"
-          docker run -i --rm --security-opt label=disable -v "$PYPDFIUM2_DIR:/pypdfium2" -e PREPARE_CMD $DOCKER_FLAGS "$CONTAINER" $INIT_SHELL <<END
+          # Note, on RHEL/Fedora (rsp. hosts that use SELinux), you'll need to add --security-opt label=disable
+          docker run -i --rm -v "$PWD:/pypdfium2" -e PREPARE_CMD $DOCKER_FLAGS "$CONTAINER" $INIT_SHELL <<END
           eval "\$PREPARE_CMD"
           # alternatively: python3 -m pip config set global.break-system-packages true
           python3 -m venv --system-site-packages testenv
