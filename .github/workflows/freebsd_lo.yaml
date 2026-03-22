@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: FreeBSD libreoffice pdfium
+on:
+  workflow_dispatch:
+
+jobs:
+  
+  install:
+    name: Install on FreeBSD with libreoffice pdfium
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Check out pypdfium2
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      
+      - name: Test in FreeBSD VM
+        uses: cross-platform-actions/action@v0.32.0
+        with:
+          operating_system: freebsd
+          version: '15.0'
+          architecture: 'x86-64'
+          cpu_count: 4
+          shell: bash
+          sync_files: true
+          run: |
+            set -x
+            sudo pkg update -f && sudo pkg upgrade -y
+            sudo pkg install -y git libreoffice python3 devel/py-pip devel/py-setuptools  # graphics/py-pillow math/py-numpy
+            python3 -m pip config set global.break-system-packages true
+            python3 -m pip install -v .  # implies PDFIUM_PLATFORM=fallback -> system-search
+            python3 -m pypdfium2 --version
+            python3 ./conda/raw/minitest.py

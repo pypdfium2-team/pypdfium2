@@ -72,7 +72,7 @@ def _get_sys_pdfium_ver(pdfium_lib):
 
 def _yield_lo_candidates(system):
     lo_paths_iter = itertools.product(
-        (Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64")
+        (Host.usr/"lib", Host.usr/"local"/"lib"), ("64", "")
     )
     libname = libname_for_system(system, name="pdfiumlo")
     yield from (
