@@ -26,14 +26,15 @@ jobs:
           architecture: 'x86-64'
           cpu_count: 4
           shell: bash
-          sync_files: true
+          sync_files: 'runner-to-vm'  # or true for bi-directional sync
           run: |
             set -x
             # sudo pkg update && sudo pkg upgrade -y
-            sudo pkg install -y git libreoffice python3 devel/py-pip devel/py-setuptools graphics/py-pillow math/py-numpy
+            sudo pkg install -y git libreoffice python3 devel/py-pip devel/py-setuptools graphics/py-pillow math/py-numpy devel/py-pytest
             # ldd /usr/local/lib/libreoffice/program/libpdfiumlo.so
             # ldd /usr/local/lib/libopenjp2.so /usr/local/lib/libabsl_strings.so
             python3 -m pip config set global.break-system-packages true
             python3 -m pip install -v .  # implies PDFIUM_PLATFORM=fallback -> system-search
             python3 -m pypdfium2 --version
             python3 ./conda/raw/minitest.py
+            python3 -m pytest tests/
