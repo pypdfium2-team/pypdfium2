@@ -34,7 +34,10 @@ jobs:
             # ldd /usr/local/lib/libreoffice/program/libpdfiumlo.so
             # ldd /usr/local/lib/libopenjp2.so /usr/local/lib/libabsl_strings.so
             python3 -m pip config set global.break-system-packages true
+            # facultative: set LD_PRELOAD just on bindings compile time so library loading will work. at runtime, workaround code in pypdfium2_raw's __init__.py takes over.
+            export LD_PRELOAD="/usr/local/lib/libabsl_strings.so:/usr/local/lib/libopenjp2.so"
             python3 -m pip install -v .  # implies PDFIUM_PLATFORM=fallback -> system-search
+            unset LD_PRELOAD
             python3 -m pypdfium2 --version
             python3 ./conda/raw/minitest.py
             # Some APIs are missing from libreoffice-pdfium, suppress known failure
