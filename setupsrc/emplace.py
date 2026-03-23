@@ -54,7 +54,7 @@ def _end_subtargets(sub_target, pdfium_ver):
             raise ValueError(f"Pdfium version {pdfium_ver} was passed, but this does not make sense with caller-provided data files.")
 
 
-def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params="", block_bad=False):
+def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params=""):
     
     if pl_name == ExtPlats.system:
         pl_dir = DataDir/pl_name
@@ -62,7 +62,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
             purge_dir(pl_dir)
         if sub_target == "search":
             full_ver = PdfiumVer.to_full(pdfium_ver) if pdfium_ver else None
-            full_ver = system_pdfium.main(full_ver, flags=flags, block_bad=block_bad)
+            full_ver = system_pdfium.main(full_ver, flags=flags)
         elif sub_target == "generate":
             assert pdfium_ver, "system-generate target requires pdfium build version from caller"
             build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, windows_cross=True, rt_paths=())
@@ -89,9 +89,9 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
     elif pl_name == ExtPlats.fallback:
         pl_name = ExtPlats.system
         try:
-            stage_platfiles(pl_name, "search", pdfium_ver, flags, block_bad=True)
-        except system_pdfium.PdfiumNotFoundError:
-            traceback.print_exc(chain=False)
+            stage_platfiles(pl_name, "search", pdfium_ver, flags)
+        except system_pdfium.PdfiumNotFoundError as e:
+            log(f"{type(e).__name__}: {e}")
             log("-> Could not find system pdfium, will attempt sourcebuild")
             pl_name = ExtPlats.sourcebuild
             try:
@@ -100,9 +100,9 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
                 else:
                     install_buildtools()
                     stage_platfiles(pl_name, "native", pdfium_ver, flags, "--vendor all --no-vendor libc++ --no-libclang-rt")
-            except Exception:
-                traceback.print_exc(chain=False)
-                raise RuntimeError("sourcebuild failed. Manual action may be needed, such as installing system dependencies, or possibly patching the sources. See pypdfium2's README.md for more information.")
+            except Exception as e:
+                log(f"{type(e).__name__}: {e}")
+                raise RuntimeError("-> sourcebuild failed. Manual action may be needed, such as installing system dependencies, or possibly patching the sources. See pypdfium2's README.md for more information.")
     
     else:
         if not pdfium_ver or pdfium_ver == "pinned":
