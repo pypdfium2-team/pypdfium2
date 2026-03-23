@@ -1,13 +1,14 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: FreeBSD libreoffice pdfium
+name: BSD testing
 on:
   workflow_dispatch:
+  pull_request:  # XXX
 
 jobs:
   
-  install:
+  freebsd_lo:
     name: Install on FreeBSD with libreoffice pdfium
     runs-on: ubuntu-latest
     steps:
@@ -22,15 +23,16 @@ jobs:
         uses: cross-platform-actions/action@v0.32.0
         with:
           operating_system: freebsd
-          version: '15.0'
+          version: '13.5'
           architecture: 'x86-64'
           cpu_count: 4
           shell: bash
           sync_files: true
           run: |
             set -x
-            sudo pkg update -f && sudo pkg upgrade -y
+            # sudo pkg update -f && sudo pkg upgrade -y
             sudo pkg install -y git libreoffice python3 devel/py-pip devel/py-setuptools  # graphics/py-pillow math/py-numpy
+            ldd /usr/local/lib/libreoffice/program/libpdfiumlo.so  # inspect
             python3 -m pip config set global.break-system-packages true
             python3 -m pip install -v .  # implies PDFIUM_PLATFORM=fallback -> system-search
             python3 -m pypdfium2 --version
