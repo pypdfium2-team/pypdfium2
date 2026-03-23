@@ -90,8 +90,8 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
         pl_name = ExtPlats.system
         try:
             stage_platfiles(pl_name, "search", pdfium_ver, flags, block_bad=True)
-        except system_pdfium.PdfiumNotFoundError as e:
-            log(e)
+        except system_pdfium.PdfiumNotFoundError:
+            traceback.print_exc(chain=False)
             log("-> Could not find system pdfium, will attempt sourcebuild")
             pl_name = ExtPlats.sourcebuild
             try:
@@ -101,7 +101,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
                     install_buildtools()
                     stage_platfiles(pl_name, "native", pdfium_ver, flags, "--vendor all --no-vendor libc++ --no-libclang-rt")
             except Exception:
-                traceback.print_exc()
+                traceback.print_exc(chain=False)
                 raise RuntimeError("sourcebuild failed. Manual action may be needed, such as installing system dependencies, or possibly patching the sources. See pypdfium2's README.md for more information.")
     
     else:

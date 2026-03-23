@@ -34,6 +34,6 @@ jobs:
             ldd /usr/local/lib/libreoffice/program/libpdfiumlo.so  # inspect
             python3 -m pip config set global.break-system-packages true
             # export PDFIUM_BINDINGS=reference
-            python3 -m pip install -v .  # implies PDFIUM_PLATFORM=fallback -> system-search
+            python3 -m pip install -v .  # implies PDFIUM_PLATFORM=fallback
             python3 -m pypdfium2 --version
             python3 ./conda/raw/minitest.py
