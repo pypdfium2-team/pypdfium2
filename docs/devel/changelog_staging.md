@@ -9,3 +9,6 @@
    * Second, this allows you to use a different version of GCC, or in fact any other compatible compiler, including clang, by setting `CC`, `CXX` and `TOOLPREFIX`.
      This makes `--clang-as-gcc` more straightforward to implement.
    * Also, extra `CFLAGS`, `CPPFLAGS`, `CXXFLAGS` and `LDFLAGS` are now honored in this build mode.
+- Basic FreeBSD CI added, powered by `cross-platform-actions`.
+- On (Free)BSD with libreoffice-pdfium, pre-load implicit dependency libraries with `mode=RTLD_GLOBAL` to fix library loading.
+- Split off `pypdfium2_raw/version.py` from `pypdfium2/version.py`, so that `PDFIUM_INFO` is now available from within `pypdfium2_raw`. This was a pre-requisite to implement the above FreeBSD workaround.
