@@ -1,13 +1,13 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import re, platform  #, sys
+import platform  #, sys
 
 # (Free)BSD libreoffice-pdfium workaround
 # NOTE: alternatively, caller could manually do
 #   export LD_PRELOAD="/usr/local/lib/libabsl_strings.so:/usr/local/lib/libopenjp2.so"
 # on before using pypdfium2, and unset afterwards.
-if re.match(r"(\w+)bsd(\d*)", platform.system().lower()):
+if platform.system().lower().endswith("bsd"):
     # print("BSD detected", file=sys.stderr)
     from pypdfium2_raw.version import PDFIUM_INFO
     if PDFIUM_INFO.origin == "system-libreoffice":

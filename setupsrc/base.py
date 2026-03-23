@@ -262,7 +262,7 @@ def libname_for_system(system, name="pdfium", prefix=None):
             return pattern.format(name)
         # NOTE alternatively, we could do this only for BSD/POSIX
         # as a downstream fallback, we could also list the dir in question and pick the file that contains the libname
-        log(f"Unhandled system {sys.platform!r}" + " - assuming 'lib{}.so' pattern. Set $LIBNAME_PATTERN if this is not right.")
+        log(f"Unhandled system {Host._raw_system!r} ({sys.platform!r})" + " - assuming 'lib{}.so' pattern. Set $LIBNAME_PATTERN if this is not right.")
         return f"lib{name}.so"
 
 
