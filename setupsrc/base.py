@@ -712,14 +712,14 @@ def run_ctypesgen(
     args = ["-l", "pdfium"]
     if rt_paths:
         args += ["--rt-libpaths", *rt_paths]
-    if univ_paths:
-        args += ["--univ-libpaths", *univ_paths]
-    if (rt_paths or univ_paths) and not search_sys_despite_libpaths:
-        args += ["--no-system-libsearch"]
     if ct_paths:
         args += ["--ct-libpaths", *ct_paths]
-    else:
+    if univ_paths:
+        args += ["--univ-libpaths", *univ_paths]
+    if not (ct_paths or univ_paths):
         args += ["--no-load-library"]
+    if (rt_paths or univ_paths) and not search_sys_despite_libpaths:
+        args += ["--no-system-libsearch"]
     
     # style
     args += ["--no-macro-guards"]
