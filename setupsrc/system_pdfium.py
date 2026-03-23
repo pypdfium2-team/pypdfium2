@@ -72,7 +72,7 @@ def _get_sys_pdfium_ver(pdfium_lib):
 
 def _yield_lo_candidates(system):
     lo_paths_iter = itertools.product(
-        (Host.usr/"lib", Host.usr/"local"/"lib"), ("", "64")
+        (Host.usr/"lib", Host.usr/"local"/"lib"), ("64", "")
     )
     libname = libname_for_system(system, name="pdfiumlo")
     yield from (
@@ -137,6 +137,15 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     kwargs = dict(univ_paths=(pdfium_lib,), guard_symbols=True, flags=flags)
     
     if finder == "libreoffice":
+        if re.match(r"(\w+)bsd(\d*)", Host._raw_system):
+            # for want of a better solution that does not involve carrying around an LD_PRELOAD on the caller side...
+            log("""\
+!!! ----------------------------------------------------------- !!!
+IMPORTANT: To use libreoffice-pdfium on (Free)BSD, you need to
+  export LD_PRELOAD="/usr/local/lib/libabsl_strings.so:/usr/local/lib/libopenjp2.so"
+or similar while using pypdfium2.
+!!! ----------------------------------------------------------- !!!\
+""")
         full_ver = given_fullver or _get_lo_pdfium_ver()
         # assuming libreoffice does not change the original pdfium ABI
         build_pdfium_bindings(full_ver.build, **kwargs)
