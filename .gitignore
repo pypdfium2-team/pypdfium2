@@ -13,8 +13,8 @@ docs/build/
 !docs/build/.gitkeep
 sbuild/
 src/pypdfium2/version.json
-src/pypdfium2_raw/
-!src/pypdfium2_raw/__init__.py
+src/pypdfium2_raw/version.json
+src/pypdfium2_raw/bindings.py
 
 *.so
 *.dll
