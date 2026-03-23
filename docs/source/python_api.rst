@@ -71,8 +71,8 @@ Due to limitations in :mod:`weakref`, finalizers can only be attached to wrapper
 
 Version
 *******
-.. automodule:: pypdfium2_raw.version
 .. automodule:: pypdfium2.version
+.. automodule:: pypdfium2_raw.version
 
 Document
 ********
