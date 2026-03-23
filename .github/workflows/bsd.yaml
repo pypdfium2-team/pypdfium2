@@ -4,7 +4,6 @@
 name: BSD testing
 on:
   workflow_dispatch:
-  pull_request:  # XXX
 
 jobs:
   
