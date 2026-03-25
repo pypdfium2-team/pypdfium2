@@ -141,6 +141,7 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
         # assuming libreoffice does not change the original pdfium ABI
         build_pdfium_bindings(full_ver.build, **kwargs)
         bindings_path = BindingsFile
+        log("!!! Warning: Libreoffice pdfium may be incomplete. XObject and ImportPages APIs (among others) may be missing. If this is an issue, re-install with PDFIUM_PLATFORM=sourcebuild-native or use pre-compiled binaries if available.")
     else:
         pdfium_headers = _find_pdfium_headers()
         full_ver = given_fullver or _get_sys_pdfium_ver(pdfium_lib)
