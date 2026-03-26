@@ -4,6 +4,7 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- `PdfDocument`: When encoding input filepath to `UTF-8`, use the `surrogateescape` error handler (except on Windows). This fixes loading some garbled filenames, where a default `.encode("utf-8")` call would raise `UnicodeEncodeError`. Thanks to Filipe Litaiff for the report.
 - `build_native.py`: When GCC is used, we now declare a `custom_toolchain`, with environment passthrough.
    * First, this avoids inconsistency across different platforms in pdfium's build config, with some expecting just `gcc` and others an arch-prefixed variant. This makes `build_native.py` more likely to work out of the box, relieving callers from the necessity to create symlinks, including our internal cibuildwheel callers.
    * Second, this allows you to use a different version of GCC, or in fact any other compatible compiler, including clang, by setting `CC`, `CXX` and `TOOLPREFIX`.

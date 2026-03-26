@@ -3,6 +3,7 @@
 
 __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 
+import sys
 import ctypes
 import logging
 from pathlib import Path
@@ -525,6 +526,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
             bm_ptr = pdfium_c.FPDFBookmark_GetNextSibling(self, bm_ptr)
 
 
+_ENC_ERRHANDLER = ("surrogateescape", ) if not sys.platform.startswith("win32") else ()
+
 def _open_pdf(input_data, password, autoclose):
     
     to_hold, to_close = (), ()
@@ -532,7 +535,7 @@ def _open_pdf(input_data, password, autoclose):
         password = (password+"\x00").encode("utf-8")
     
     if isinstance(input_data, Path):
-        pdf = pdfium_c.FPDF_LoadDocument((str(input_data)+"\x00").encode("utf-8"), password)
+        pdf = pdfium_c.FPDF_LoadDocument((str(input_data)+"\x00").encode("utf-8", *_ENC_ERRHANDLER), password)
     elif isinstance(input_data, (bytes, ctypes.Array)):
         pdf = pdfium_c.FPDF_LoadMemDocument64(input_data, len(input_data), password)
         to_hold = (input_data, )
