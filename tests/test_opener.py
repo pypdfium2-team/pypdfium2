@@ -3,7 +3,9 @@
 
 # FIXME merge with test_document and deduplicate
 
+import os
 import re
+import sys
 import shutil
 import tempfile
 import traceback
@@ -12,7 +14,7 @@ import PIL.Image
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pytest
-from .conftest import TestFiles, ExpRenderPixels
+from .conftest import TestFiles, ExpRenderPixels, OutputDir
 
 
 def _check_general(pdf, n_pages=1):
@@ -137,6 +139,24 @@ def test_open_nonascii():
         tempdir.cleanup()
     except Exception:
         traceback.print_exc()
+
+
+@pytest.mark.skipif(sys.platform.startswith("win32"), reason="Specific to non-Windows OSes")
+def test_open_garbled_filename():
+    
+    garbled_name = "CONTRATO DE LOCA\udcc7\udcc3O.pdf"
+    garbled_name_b = os.fsencode(garbled_name)
+    assert garbled_name_b == b"CONTRATO DE LOCA\xc7\xc3O.pdf"
+    assert garbled_name_b == garbled_name.encode("utf-8", "surrogateescape")
+    
+    garbled_path = OutputDir/garbled_name
+    garbled_path_b = os.fsencode(str(garbled_path))
+    with open(garbled_path_b, "wb") as f:
+        f.write(TestFiles.render.read_bytes())
+    
+    pdf = pdfium.PdfDocument(garbled_path)
+    page = pdf[0]
+    assert isinstance(pdf, pdfium.PdfDocument) and isinstance(page, pdfium.PdfPage)
 
 
 def test_open_new():
