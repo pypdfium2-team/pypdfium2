@@ -245,6 +245,28 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         return PdfTextObj(raw_obj, textpage=self)
     
     
+    def get_font_substitutions(self):
+        """
+        Get a mapping of non-embedded font substitutions on this page.
+
+        Iterates text objects on the page and, for each non-embedded font,
+        records what the PDF requested (base name) vs. what PDFium resolved (family name).
+
+        Returns:
+            dict[str, set[str]]:
+                Maps each non-embedded base font name to the set of family names
+                PDFium resolved it to. Empty dict if all fonts are embedded.
+        """
+        substitutions = {}
+        for obj in self.page.get_objects(filter=[pdfium_c.FPDF_PAGEOBJ_TEXT]):
+            font = obj.get_font()
+            if font.is_embedded():
+                continue
+            base_name = font.get_base_name()
+            family_name = font.get_family_name()
+            substitutions.setdefault(base_name, set()).add(family_name)
+        return substitutions
+
     def search(self, text, index=0, match_case=False, match_whole_word=False, consecutive=False, flags=0):
         """
         Locate text on the page.
