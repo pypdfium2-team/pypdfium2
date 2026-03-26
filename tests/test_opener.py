@@ -150,9 +150,10 @@ def test_open_garbled_filename():
     assert garbled_name_b == garbled_name.encode("utf-8", "surrogateescape")
     
     garbled_path = OutputDir/garbled_name
-    garbled_path_b = os.fsencode(str(garbled_path))
-    with open(garbled_path_b, "wb") as f:
-        f.write(TestFiles.render.read_bytes())
+    new_pdf = pdfium.PdfDocument.new()
+    new_pdf.new_page(100, 100)
+    with open(os.fsencode(garbled_path), "wb") as f:
+        new_pdf.save(f)
     
     pdf = pdfium.PdfDocument(garbled_path)
     page = pdf[0]
