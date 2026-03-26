@@ -5,7 +5,6 @@
 import os
 import shlex
 import argparse
-import traceback
 
 # local
 from base import *
