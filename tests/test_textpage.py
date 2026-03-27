@@ -5,7 +5,29 @@ import re
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
+from unittest.mock import patch
+from pypdfium2._helpers.misc import PdfiumError
 from .conftest import TestFiles
+
+
+# Minimal PDF with a non-embedded reference to a non-existent font ("FakeTestFont").
+FAKE_FONT_PDF = (
+    b"%PDF-1.0\n"
+    b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+    b"2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
+    b"3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]"
+    b"/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n"
+    b"4 0 obj<</Length 23>>\nstream\nBT /F1 12 Tf (X) Tj ET\nendstream\nendobj\n"
+    b"5 0 obj<</Type/Font/Subtype/Type1/BaseFont/FakeTestFont>>endobj\n"
+    b"xref\n0 6\n"
+    b"0000000000 65535 f \n"
+    b"0000000009 00000 n \n"
+    b"0000000052 00000 n \n"
+    b"0000000101 00000 n \n"
+    b"0000000211 00000 n \n"
+    b"0000000280 00000 n \n"
+    b"trailer<</Size 6/Root 1 0 R>>\nstartxref\n344\n%%EOF\n"
+)
 
 
 @pytest.fixture
@@ -185,3 +207,45 @@ def test_font_helpers(
         assert fontobj.get_base_name() == base_name
         assert fontobj.get_family_name() == family_name
         assert fontobj.get_weight() == weight
+
+
+def test_font_is_embedded():
+    pdf = pdfium.PdfDocument(TestFiles.text)
+    page = pdf[0]
+    textpage = page.get_textpage()
+    textobj = textpage.get_textobj(0)
+    font = textobj.get_font()
+    assert font.is_embedded() is True
+
+
+def test_font_is_embedded_failure():
+    pdf = pdfium.PdfDocument(TestFiles.text)
+    page = pdf[0]
+    textpage = page.get_textpage()
+    font = textpage.get_textobj(0).get_font()
+    with patch.object(pdfium_c, "FPDFFont_GetIsEmbedded", return_value=-1):
+        with pytest.raises(PdfiumError, match="Failed to determine font embedding status"):
+            font.is_embedded()
+
+
+def test_get_font_substitutions_embedded(textpage):
+    subs = textpage.get_font_substitutions()
+    assert subs == {}
+
+
+def test_get_font_substitutions_empty_page():
+    pdf = pdfium.PdfDocument(TestFiles.empty)
+    page = pdf[0]
+    textpage = page.get_textpage()
+    subs = textpage.get_font_substitutions()
+    assert subs == {}
+
+
+def test_get_font_substitutions_fake_font():
+    pdf = pdfium.PdfDocument(FAKE_FONT_PDF)
+    page = pdf[0]
+    textpage = page.get_textpage()
+    subs = textpage.get_font_substitutions()
+    assert "FakeTestFont" in subs
+    assert isinstance(subs["FakeTestFont"], set)
+    assert len(subs["FakeTestFont"]) > 0

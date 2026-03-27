@@ -26,12 +26,25 @@ def init_lib():
     pdfium_c.FPDF_InitLibraryWithConfig(config)
     pdfium_i.LIBRARY_AVAILABLE.value = True
 
+    try:
+        from pypdfium2._font_tracking import _install_font_tracking
+        _install_font_tracking()
+    except Exception:
+        pass
+
 
 def destroy_lib():  # pragma: no cover
     assert pdfium_i.LIBRARY_AVAILABLE
     if pdfium_i.DEBUG_AUTOCLOSE:
         pdfium_i._safe_debug("Destroy PDFium")
     pdfium_c.FPDF_DestroyLibrary()
+
+    try:
+        from pypdfium2._font_tracking import _reset_font_tracking
+        _reset_font_tracking()
+    except Exception:
+        pass
+
     pdfium_i.LIBRARY_AVAILABLE.value = False
 
 

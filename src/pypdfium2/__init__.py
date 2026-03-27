@@ -5,3 +5,4 @@ import pypdfium2._library_scope
 from pypdfium2.version import *
 from pypdfium2._helpers import *
 from pypdfium2 import raw, internal
+from pypdfium2._font_tracking import get_font_requests, clear_font_requests
