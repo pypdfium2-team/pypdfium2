@@ -3,8 +3,11 @@
 
 import sys
 import atexit
+import logging
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
+
+logger = logging.getLogger(__name__)
 
 
 def init_lib():
@@ -30,7 +33,7 @@ def init_lib():
         from pypdfium2._font_tracking import _install_font_tracking
         _install_font_tracking()
     except Exception:
-        pass
+        logger.debug("Failed to install font tracking", exc_info=True)
 
 
 def destroy_lib():  # pragma: no cover
@@ -43,7 +46,7 @@ def destroy_lib():  # pragma: no cover
         from pypdfium2._font_tracking import _reset_font_tracking
         _reset_font_tracking()
     except Exception:
-        pass
+        logger.debug("Failed to reset font tracking", exc_info=True)
 
     pdfium_i.LIBRARY_AVAILABLE.value = False
 
