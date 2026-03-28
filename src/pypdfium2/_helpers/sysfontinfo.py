@@ -20,8 +20,12 @@ class PdfSysfontBase:
     
     Important:
         In subclass callbacks, you will typically want to wrap pdfium's default implementation rather than writing your own implementation from scratch.
-        This class exposes the default ``FPDF_SYSFONTINFO`` as ``self._default``.
+        This class exposes the default ``FPDF_SYSFONTINFO`` instance as ``self._default``.
         Invoke default callbacks with ``self._default_ptr`` as first argument, not with the pointer to the wrapper struct recieved as first argument after ``self`` in the function signature.
+    
+    Note:
+        When a :class:`.PdfSysfontBase` instance is created, it is (by default) kept alive until the end of the session through an exit handler.
+        To stop the sysfont handler earlier, call :meth:`.close`, which will unregister the exit handler and release the sysfont handler immediately.
     """
     
     def __init__(self):
@@ -48,13 +52,19 @@ class PdfSysfontBase:
         
         set_callbacks(self._wrapper, **callbacks)
         pdfium_c.FPDF_SetSystemFontInfo(self._wrapper)
+        
+        atexit.register(self._close_impl)
     
-    def close(self):
+    def _close_impl(self):
         id(self._wrapper)
         id(self._default)
         pdfium_c.FPDF_SetSystemFontInfo(None)
         # ^ this calls Release, so the default handler must be freed after (not before!) this call
         pdfium_c.FPDF_FreeDefaultSystemFontInfo(self._default_ptr)
+    
+    def close(self):  # manual
+        atexit.unregister(self._close_impl)
+        self._close_impl()
 
 
 class PdfSysfontListener (PdfSysfontBase):
@@ -106,4 +116,3 @@ class PdfSysfontListener (PdfSysfontBase):
 import atexit
 print("Installing sysfontinfo...")  # XXX
 sysfont_listener = PdfSysfontListener()
-atexit.register(sysfont_listener.close)
