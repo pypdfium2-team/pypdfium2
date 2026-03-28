@@ -7,7 +7,7 @@ import sys
 import logging
 import pypdfium2.raw as pdfium_c
 from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2.internal.utils import set_callback
+from pypdfium2.internal.utils import set_callbacks
 FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 
 logger = logging.getLogger(__name__)
@@ -16,21 +16,28 @@ logger = logging.getLogger(__name__)
 class PdfSysfontBase:
     
     def __init__(self):
+        
         self._default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
         if not self._default_ptr:
             raise PdfiumError(f"No default FPDF_SYSFONTINFO available on this platform ({sys.platform!r}), cannot use {type(self).__name__}.")
+        
         self._default = self._default_ptr.contents
         self._wrapper = FPDF_SYSFONTINFO()
         self._wrapper.version = self._default.version
-        set_callback(self._wrapper, "Release", self.release)
-        if self._default.version == 1:  # as per docs
-            set_callback(self._wrapper, "EnumFonts", self.enum_fonts)
-        set_callback(self._wrapper, "MapFont", self.map_font)
-        set_callback(self._wrapper, "GetFont", self.get_font)
-        set_callback(self._wrapper, "GetFontData", self.get_font_data)
-        set_callback(self._wrapper, "GetFaceName", self.get_face_name)
-        set_callback(self._wrapper, "GetFontCharset", self.get_font_charset)
-        set_callback(self._wrapper, "DeleteFont", self.delete_font)
+        callbacks = dict(
+            Release=self.release,
+            EnumFonts=self.enum_fonts,
+            MapFont=self.map_font,
+            GetFont=self.get_font,
+            GetFontData=self.get_font_data,
+            GetFaceName=self.get_face_name,
+            GetFontCharset=self.get_font_charset,
+            DeleteFont=self.delete_font,
+        )
+        if self._default.version != 1:  # as per docs
+            del callbacks["EnumFonts"]
+        
+        set_callbacks(self._wrapper, **callbacks)
         pdfium_c.FPDF_SetSystemFontInfo(self._wrapper)
     
     def close(self):
