@@ -5,7 +5,7 @@ import sys
 import pytest
 from pathlib import Path
 from argparse import Namespace
-import pypdfium2.__main__ as pdfium_cli
+import pypdfium2_cli.__main__ as pdfium_cli
 
 PyVersion = (sys.version_info.major, sys.version_info.minor)
 

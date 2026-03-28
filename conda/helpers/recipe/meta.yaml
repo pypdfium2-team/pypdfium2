@@ -16,7 +16,7 @@ build:
   number: 0
   noarch: python
   entry_points:
-    - pypdfium2 = pypdfium2.__main__:cli_main
+    - pypdfium2 = pypdfium2_cli.__main__:cli_main
   script_env:
     - PYPDFIUM_MODULES=helpers
   script:
