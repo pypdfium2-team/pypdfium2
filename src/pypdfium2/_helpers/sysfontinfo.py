@@ -76,9 +76,9 @@ class PdfSysfontListener (PdfSysfontBase):
         super().__init__()
         print(f"fontinfo default interace version is {self._default.version}")  # XXX
     
-    def close(self):
+    def _close_impl(self):
         logger.debug("Closing sysfontinfo...")
-        super().close()
+        super()._close_impl()
     
     def release(self, _):
         logger.debug("fontinfo::Release")
