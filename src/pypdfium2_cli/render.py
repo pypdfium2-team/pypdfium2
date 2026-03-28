@@ -15,9 +15,9 @@ from importlib.util import find_spec
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 import pypdfium2.raw as pdfium_c
-from pypdfium2._cli._parsers import (
+from pypdfium2_cli._setup import setup_logging
+from pypdfium2_cli._parsers import (
     add_input, get_input,
-    setup_logging,
     iterator_hasvalue,
     BooleanOptionalAction,
 )

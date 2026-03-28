@@ -24,15 +24,17 @@ class PdfUnspHandler:
         self.handlers = {}
         self._config = None
     
-    
     def __call__(self, _, type):
         for handler in self.handlers.values():
             handler(type)
     
+    @staticmethod
+    def _default(type):
+        lib_logger.warning(f"Unsupported PDF feature: {pdfium_i.UnsupportedInfoToStr.get(type)}")
     
     def setup(self, add_default=True):
         """
-        Attach the handler to PDFium, and register an exit function to keep the object alive for the rest of the session.
+        Attach the handler to PDFium, and register an exit function to keep the object alive until the end of session.
         
         Parameters:
             add_default (bool):
@@ -48,12 +50,6 @@ class PdfUnspHandler:
         if add_default:
             self.handlers["default"] = PdfUnspHandler._default
     
-    
     def _keep(self):
         id(self.handlers)
         id(self._config)
-    
-    
-    @staticmethod
-    def _default(type):
-        lib_logger.warning(f"Unsupported PDF feature: {pdfium_i.UnsupportedInfoToStr.get(type)}")

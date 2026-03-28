@@ -29,6 +29,10 @@ def color_tohex(color, rev_byteorder):
 def set_callback(struct, fname, callback):
     setattr(struct, fname, type( getattr(struct, fname) )(callback))
 
+def set_callbacks(struct, **kwargs):
+    for fname, callback in kwargs.items():
+        setattr(struct, fname, type( getattr(struct, fname) )(callback))
+
 
 def is_stream(buf, spec="r"):
     methods = []

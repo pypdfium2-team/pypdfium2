@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from pathlib import Path
-from pypdfium2._cli._parsers import (
+from pypdfium2_cli._parsers import (
     add_input, get_input,
     parse_numtext,
 )

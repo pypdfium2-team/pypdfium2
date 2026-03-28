@@ -126,8 +126,10 @@ def run_setup(modnames, pl_name, platfiles):
         write_json(ModuleDir_Helpers/VersionFN, helpers_info)
         kwargs["cmdclass"]["build_py"] = pypdfium_build_py
         kwargs["package_dir"]["pypdfium2"] = "src/pypdfium2"
+        kwargs["package_dir"]["pypdfium2_cli"] = "src/pypdfium2_cli"
+        kwargs["package_dir"]["pypdfium2_cfg"] = "src/pypdfium2_cfg"
         kwargs["package_data"]["pypdfium2"] = (VersionFN, )
-        kwargs["entry_points"] = dict(console_scripts=["pypdfium2 = pypdfium2.__main__:cli_main"])
+        kwargs["entry_points"] = dict(console_scripts=["pypdfium2 = pypdfium2_cli.__main__:cli_main"])
     if ModuleRaw in modnames:
         kwargs["package_dir"]["pypdfium2_raw"] = "src/pypdfium2_raw"
         if platfiles:

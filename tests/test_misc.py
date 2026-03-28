@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import re
 import sys
 import pytest
 import platform
@@ -32,11 +33,11 @@ def test_color_tohex(color_in, rev_byteorder, exp_color):
     assert pdfium_c.FPDF_GetBValue(exp_color) == channels[3]
 
 
-def _filter(prefix, skips=(), type=int):
+def _filter(expr, skips=(), type=int):
     items = []
     for attr in dir(pdfium_c):
         value = getattr(pdfium_c, attr)
-        if not attr.startswith(prefix) or not isinstance(value, type) or value in skips:
+        if not re.match(expr, attr) or not isinstance(value, type) or value in skips:
             continue
         items.append(value)
     return items
@@ -58,14 +59,15 @@ if "XFA" in PDFIUM_INFO.flags:
         (pdfium_i.BitmapTypeToStrReverse,  True,  BitmapNsp),
         (pdfium_i.BitmapStrToConst,        False, BitmapNsp),
         (pdfium_i.BitmapStrReverseToConst, False, BitmapNsp),
-        (pdfium_i.FormTypeToStr,           True,  _filter("FORMTYPE_", [pdfium_c.FORMTYPE_COUNT])),
-        (pdfium_i.ColorspaceToStr,         True,  _filter("FPDF_COLORSPACE_")),
-        (pdfium_i.ViewmodeToStr,           True,  _filter("PDFDEST_VIEW_")),
+        (pdfium_i.FormTypeToStr,           True,  _filter(r"FORMTYPE_", [pdfium_c.FORMTYPE_COUNT])),
+        (pdfium_i.ColorspaceToStr,         True,  _filter(r"FPDF_COLORSPACE_")),
+        (pdfium_i.ViewmodeToStr,           True,  _filter(r"PDFDEST_VIEW_")),
         (pdfium_i.ObjectTypeToStr,         True,  PageObjNsp),
         (pdfium_i.ObjectTypeToConst,       False, PageObjNsp),
-        (pdfium_i.PageModeToStr,           True,  _filter("PAGEMODE_")),
-        (ErrorMapping,                     True,  _filter("FPDF_ERR_")),
-        (pdfium_i.UnsupportedInfoToStr,    True,  _filter("FPDF_UNSP_")),
+        (pdfium_i.PageModeToStr,           True,  _filter(r"PAGEMODE_")),
+        (ErrorMapping,                     True,  _filter(r"FPDF_ERR_")),
+        (pdfium_i.UnsupportedInfoToStr,    True,  _filter(r"FPDF_UNSP_")),
+        (pdfium_i.CharsetToStr,            True,  _filter(r"FXFONT_\w+_CHARSET"))
     ]
 )
 def test_const_converters(mapping, use_keys, items):

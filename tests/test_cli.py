@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-import pypdfium2.__main__ as pdfium_cli
+import pypdfium2_cli.__main__ as pdfium_cli
 from .conftest import TestFiles, TestExpectations
 
 lib_logger = logging.getLogger("pypdfium2")
