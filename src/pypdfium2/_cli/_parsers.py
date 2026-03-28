@@ -12,6 +12,8 @@ import pypdfium2.internal as pdfium_i
 
 def setup_logging():
     
+    print("Setting up logging")  # XXX
+    
     # could also pass through the log level by parameter, but using an env var seemed easiest for now
     debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
     loglevel = getattr(logging, os.environ.get("PYPDFIUM_LOGLEVEL", "debug").upper())

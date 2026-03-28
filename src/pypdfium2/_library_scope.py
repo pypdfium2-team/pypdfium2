@@ -8,6 +8,7 @@ import pypdfium2.internal as pdfium_i
 
 
 def init_lib():
+    print("Initializing lib")  # XXX
     assert not pdfium_i.LIBRARY_AVAILABLE
     if pdfium_i.DEBUG_AUTOCLOSE:  # pragma: no cover
         # FIXME not shown on auto-init, because DEBUG_AUTOCLOSE can only be set on the caller side after pypdfium2 has been imported...
