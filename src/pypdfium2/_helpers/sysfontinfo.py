@@ -1,21 +1,25 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfFontListener", )
+__all__ = ("PdfSysfontBase", "PdfSysfontListener")
 
+import sys
 import logging
 import pypdfium2.raw as pdfium_c
+from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2.internal.utils import set_callback
 FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 
 logger = logging.getLogger(__name__)
 
-class PdfFontListener:
+
+class PdfSysfontBase:
     
     def __init__(self):
         self._default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
+        if not self._default_ptr:
+            raise PdfiumError(f"No default FPDF_SYSFONTINFO available on this platform ({sys.platform!r}), cannot use {type(self).__name__}.")
         self._default = self._default_ptr.contents
-        print(f"fontinfo default interace version is {self._default.version}")  # XXX
         self._wrapper = FPDF_SYSFONTINFO()
         self._wrapper.version = self._default.version
         set_callback(self._wrapper, "Release", self.release)
@@ -28,7 +32,25 @@ class PdfFontListener:
         set_callback(self._wrapper, "GetFontCharset", self.get_font_charset)
         set_callback(self._wrapper, "DeleteFont", self.delete_font)
         pdfium_c.FPDF_SetSystemFontInfo(self._wrapper)
+    
+    def close(self):
+        id(self._wrapper)
+        id(self._default)
+        pdfium_c.FPDF_SetSystemFontInfo(None)
+        # ^ this calls Release, so the default handler must be freed after (not before!) this call
+        pdfium_c.FPDF_FreeDefaultSystemFontInfo(self._default_ptr)
 
+
+class PdfSysfontListener (PdfSysfontBase):
+    
+    def __init__(self):
+        super().__init__()
+        print(f"fontinfo default interace version is {self._default.version}")  # XXX
+    
+    def close(self):
+        logger.debug("Closing sysfontinfo...")
+        super().close()
+    
     def release(self, _):
         logger.debug("fontinfo::Release")
         return self._default.Release(self._default_ptr)
@@ -60,16 +82,9 @@ class PdfFontListener:
     def delete_font(self, _, hFont):
         logger.debug(f"fontinfo::DeleteFont {hFont, }")
         return self._default.DeleteFont(self._default_ptr, hFont)
-    
-    def close(self):
-        logger.debug("Closing sysfontinfo...")
-        id(self._wrapper)
-        id(self._default)
-        pdfium_c.FPDF_SetSystemFontInfo(None)
-        # ^ this calls Release, so the default handler must be freed after (not before!) this call
-        pdfium_c.FPDF_FreeDefaultSystemFontInfo(self._default_ptr)
+
 
 import atexit
 print("Installing sysfontinfo...")  # XXX
-listener = PdfFontListener()
-atexit.register(listener.close)
+sysfont_listener = PdfSysfontListener()
+atexit.register(sysfont_listener.close)
