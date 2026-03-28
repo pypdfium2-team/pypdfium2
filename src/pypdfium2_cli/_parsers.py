@@ -16,6 +16,8 @@ def setup_logging():
     
     # could also pass through the log level by parameter, but using an env var seemed easiest for now
     debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
+    debug_sysfonts = bool(int( os.environ.get("DEBUG_SYSFONTS", 0) ))
+    debug_unsupported = bool(int( os.environ.get("DEBUG_UNSUPPORTED", 1) ))
     loglevel = getattr(logging, os.environ.get("PYPDFIUM_LOGLEVEL", "debug").upper())
     
     pdfium_i.DEBUG_AUTOCLOSE.value = debug_autoclose
@@ -23,10 +25,12 @@ def setup_logging():
     lib_logger.addHandler(logging.StreamHandler())
     lib_logger.setLevel(loglevel)
     
-    pdfium.PdfUnspHandler().setup()
+    if debug_unsupported:
+        pdfium.PdfUnspHandler().setup()
     
     print("Installing sysfontinfo...")  # XXX
-    sysfont_listener = pdfium.PdfSysfontListener()
+    if debug_sysfonts:
+        sysfont_listener = pdfium.PdfSysfontListener()
 
 
 def parse_numtext(numtext):

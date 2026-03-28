@@ -8,7 +8,7 @@ import atexit
 import logging
 import pypdfium2.raw as pdfium_c
 from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2.internal.utils import set_callbacks
+import pypdfium2.internal as pdfium_i
 FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class PdfSysfontBase:
         if self._default.version != 1:  # as per docs
             del callbacks["EnumFonts"]
         
-        set_callbacks(self._wrapper, **callbacks)
+        pdfium_i.set_callbacks(self._wrapper, **callbacks)
         pdfium_c.FPDF_SetSystemFontInfo(self._wrapper)
         
         atexit.register(self._close_impl)
@@ -78,11 +78,11 @@ class PdfSysfontListener (PdfSysfontBase):
         print(f"fontinfo default interace version is {self._default.version}")  # XXX
     
     def _close_impl(self):
-        logger.debug("Closing sysfontinfo...")
+        pdfium_i._safe_debug("Closing sysfontinfo...")
         super()._close_impl()
     
     def release(self, _):
-        logger.debug("fontinfo::Release")
+        pdfium_i._safe_debug("fontinfo::Release")
         return self._default.Release(self._default_ptr)
     
     def enum_fonts(self, _, pMapper):
