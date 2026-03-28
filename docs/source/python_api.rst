@@ -102,6 +102,10 @@ Attachment
 **********
 .. automodule:: pypdfium2._helpers.attachment
 
+System Font Info
+****************
+.. automodule:: pypdfium2._helpers.sysfontinfo
+
 Miscellaneous
 *************
 .. automodule:: pypdfium2._helpers.misc

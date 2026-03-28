@@ -14,6 +14,15 @@ logger = logging.getLogger(__name__)
 
 
 class PdfSysfontBase:
+    """
+    Base helper class to set up and register a ``FPDF_SYSFONTINFO`` callback system.
+    Callbacks need to be implemented by subclassing (names from ``FPDF_SYSFONTINFO``, converted to snake-case).
+    
+    Important:
+        In subclass callbacks, you will typically want to wrap pdfium's default implementation rather than writing your own implementation from scratch.
+        This class exposes the default ``FPDF_SYSFONTINFO`` as ``self._default``.
+        Invoke default callbacks with ``self._default_ptr`` as first argument, not with the pointer to the wrapper struct recieved as first argument after ``self`` in the function signature.
+    """
     
     def __init__(self):
         
@@ -25,14 +34,14 @@ class PdfSysfontBase:
         self._wrapper = FPDF_SYSFONTINFO()
         self._wrapper.version = self._default.version
         callbacks = dict(
-            Release=self.release,
-            EnumFonts=self.enum_fonts,
-            MapFont=self.map_font,
-            GetFont=self.get_font,
-            GetFontData=self.get_font_data,
-            GetFaceName=self.get_face_name,
-            GetFontCharset=self.get_font_charset,
-            DeleteFont=self.delete_font,
+            Release = self.release,
+            EnumFonts = self.enum_fonts,
+            MapFont = self.map_font,
+            GetFont = self.get_font,
+            GetFontData = self.get_font_data,
+            GetFaceName = self.get_face_name,
+            GetFontCharset = self.get_font_charset,
+            DeleteFont = self.delete_font,
         )
         if self._default.version != 1:  # as per docs
             del callbacks["EnumFonts"]
@@ -49,6 +58,9 @@ class PdfSysfontBase:
 
 
 class PdfSysfontListener (PdfSysfontBase):
+    """
+    TODO
+    """
     
     def __init__(self):
         super().__init__()
