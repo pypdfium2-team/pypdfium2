@@ -4,6 +4,7 @@
 __all__ = ("PdfSysfontBase", "PdfSysfontListener")
 
 import sys
+import atexit
 import logging
 import pypdfium2.raw as pdfium_c
 from pypdfium2._helpers.misc import PdfiumError
@@ -113,6 +114,5 @@ class PdfSysfontListener (PdfSysfontBase):
         return self._default.DeleteFont(self._default_ptr, hFont)
 
 
-import atexit
 print("Installing sysfontinfo...")  # XXX
 sysfont_listener = PdfSysfontListener()
