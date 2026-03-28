@@ -112,7 +112,3 @@ class PdfSysfontListener (PdfSysfontBase):
     def delete_font(self, _, hFont):
         logger.debug(f"fontinfo::DeleteFont {hFont, }")
         return self._default.DeleteFont(self._default_ptr, hFont)
-
-
-print("Installing sysfontinfo...")  # XXX
-sysfont_listener = PdfSysfontListener()

@@ -22,7 +22,11 @@ def setup_logging():
     lib_logger = logging.getLogger("pypdfium2")
     lib_logger.addHandler(logging.StreamHandler())
     lib_logger.setLevel(loglevel)
+    
     pdfium.PdfUnspHandler().setup()
+    
+    print("Installing sysfontinfo...")  # XXX
+    sysfont_listener = pdfium.PdfSysfontListener()
 
 
 def parse_numtext(numtext):
