@@ -172,7 +172,6 @@ def test_font_helpers(
     page = pdf[0]
     textpage = page.get_textpage()
     n_chars = textpage.count_chars()
-    print(n_chars)
 
     assert chr(pdfium_c.FPDFText_GetUnicode(textpage.raw, index)) == character
     textobj = textpage.get_textobj(index)
