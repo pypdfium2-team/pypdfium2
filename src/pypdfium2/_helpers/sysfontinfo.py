@@ -30,7 +30,16 @@ class PdfSysfontBase:
         To stop the sysfont handler earlier, call :meth:`.close`, which will unregister the exit handler and release the sysfont handler immediately.
     """
     
+    _SINGLETON = None
+    
     def __init__(self):
+        
+        self._is_closed = False
+        
+        if PdfSysfontBase._SINGLETON is not None:
+            logger.info(f"Constructing a new {type(self).__name__} instance implicitly closes previous sysfont handler instance {PdfSysfontBase._SINGLETON}")
+            PdfSysfontBase._SINGLETON.close()
+        PdfSysfontBase._SINGLETON = self
         
         self._default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
         if not self._default_ptr:
@@ -58,11 +67,14 @@ class PdfSysfontBase:
         atexit.register(self._close_impl)
     
     def _close_impl(self):
+        if self._is_closed:
+            return
         id(self._wrapper)
         id(self._default)
         pdfium_c.FPDF_SetSystemFontInfo(None)
         # ^ this calls Release, so the default handler must be freed after (not before!) this call
         pdfium_c.FPDF_FreeDefaultSystemFontInfo(self._default_ptr)
+        self._is_closed = True
     
     def close(self):  # manual
         atexit.unregister(self._close_impl)
@@ -75,6 +87,7 @@ class PdfSysfontListener (PdfSysfontBase):
     """
     
     def __init__(self):
+        logger.debug("Installing sysfontinfo...")
         super().__init__()
         logger.debug(f"fontinfo default interface version is {self._default.version}")
     
