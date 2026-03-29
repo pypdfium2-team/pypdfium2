@@ -16,10 +16,13 @@ def setup_logging():
     loglevel = getattr(logging, os.environ.get("PYPDFIUM_LOGLEVEL", "debug").upper())
     
     pypdfium2_cfg.DEBUG_AUTOCLOSE.value = debug_autoclose
-    lib_logger = logging.getLogger("pypdfium2")
-    lib_logger.addHandler(logging.StreamHandler())
-    lib_logger.setLevel(loglevel)
-    # lib_logger.debug("Just set up logging")
+    loggers = [logging.getLogger("pypdfium2"+m) for m in ("", "_raw", "_cfg", "_cli")]
+    for l in loggers:
+        l.addHandler(logging.StreamHandler())
+        l.setLevel(loglevel)
+    
+    cli_logger = logging.getLogger("pypdfium2_cli")
+    cli_logger.debug("Just set up logging")
     
     warnings.simplefilter("always")
     logging.captureWarnings(True)
@@ -29,5 +32,5 @@ def setup_logging():
         pdfium.PdfUnspHandler().setup()
     
     if debug_sysfonts:
-        lib_logger.debug("Installing sysfontinfo...")
+        cli_logger.debug("Installing sysfontinfo...")
         pdfium.PdfSysfontListener()
