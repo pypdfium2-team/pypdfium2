@@ -10,6 +10,7 @@ _DEPRECATION_REASON = " Using a separate submodule is necessary to allow for pro
 
 if __name__ == "__main__":
     _py_exe = os.path.basename(sys.executable)
+    warnings.simplefilter("always")
     warnings.warn(f"`{_py_exe} -m pypdfium2` is deprecated. Use `{_py_exe} -m pypdfium2_cli` or the `pypdfium2` entrypoint script instead."+_DEPRECATION_REASON, category=DeprecationWarning, stacklevel=2)
     cli_main()
 else:

@@ -4,6 +4,7 @@
 import os
 import sys
 import logging
+import warnings
 import argparse
 from pathlib import Path
 import pypdfium2._helpers as pdfium
@@ -24,6 +25,9 @@ def setup_logging():
     lib_logger = logging.getLogger("pypdfium2")
     lib_logger.addHandler(logging.StreamHandler())
     lib_logger.setLevel(loglevel)
+    
+    warnings.simplefilter("always")
+    logging.captureWarnings(True)
     
     if debug_unsupported:
         pdfium.PdfUnspHandler().setup()
