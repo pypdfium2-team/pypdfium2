@@ -9,10 +9,11 @@ import enum
 import uuid
 import weakref
 import logging
-from pypdfium2_cfg import _Mutable, DEBUG_AUTOCLOSE
+import pypdfium2_cfg as pdfium_cfg
+from pypdfium2_cfg import DEBUG_AUTOCLOSE  # compat
 
 logger = logging.getLogger(__name__)
-LIBRARY_AVAILABLE = _Mutable(False)  # set to true on library init
+LIBRARY_AVAILABLE = pdfium_cfg._Mutable(False)  # set to true on library init
 
 
 def _safe_debug(msg):  # pragma: no cover
@@ -42,7 +43,7 @@ class AutoCastable:
 
 def _close_template(close_func, raw, obj_repr, state, parent, args, kwargs):
     
-    if DEBUG_AUTOCLOSE:  # pragma: no cover
+    if pdfium_cfg.DEBUG_AUTOCLOSE:  # pragma: no cover
         _safe_debug(f"Close ({state.value.name.lower()}) {obj_repr}")
     
     if not LIBRARY_AVAILABLE:  # pragma: no cover
@@ -65,8 +66,8 @@ class AutoCloseable (AutoCastable):
         self._obj = self if obj is None else obj
         self._ex_args = args
         self._ex_kwargs = kwargs
-        self._autoclose_state = _Mutable(_STATE.AUTO)
-        self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
+        self._autoclose_state = pdfium_cfg._Mutable(_STATE.AUTO)
+        self._uuid = uuid.uuid4() if pdfium_cfg.DEBUG_AUTOCLOSE else None
         
         self._finalizer = None
         self._kids = []
