@@ -5,6 +5,7 @@ import sys
 import argparse
 import importlib
 import functools
+from os.path import basename
 from pypdfium2_cli._setup import setup_logging
 
 
@@ -35,7 +36,20 @@ def get_parser():
     main_parser = argparse.ArgumentParser(
         prog = "pypdfium2",
         formatter_class = argparse.RawTextHelpFormatter,
-        description = "Command line interface to the pypdfium2 library (Python binding to PDFium)",
+        description = """\
+Command line interface to the pypdfium2 library (Python binding to PDFium)
+Invoke as `pypdfium2` or `%(py_exe)s -m pypdfium2_cli`
+
+Environment variables:
+- PYPDFIUM_LOGLEVEL {debug,info,warning,error,critical} = debug
+  Controls the logging level.
+- DEBUG_AUTOCLOSE {0,1} = 0
+  Print debug info when PDFium objects are (auto-)closed.
+- DEBUG_SYSFONTS {0,1} = 0
+  Whether to regsiter a sysfont info handler.
+- DEBUG_UNSUPPORTED {0,1} = 1
+  Whether to enable or disable the unsupported feature handler.
+""" % dict(py_exe=basename(sys.executable)),
     )
     main_parser.add_argument(
         "--version", "-v",
