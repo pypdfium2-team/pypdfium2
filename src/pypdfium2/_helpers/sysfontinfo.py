@@ -23,7 +23,7 @@ class PdfSysfontBase:
     Important:
         In subclass callbacks, you will typically want to wrap pdfium's default implementation rather than writing your own implementation from scratch.
         This class exposes the default ``FPDF_SYSFONTINFO`` instance as ``self._default``.
-        Invoke default callbacks with ``self._default_ptr`` as first argument, not with the pointer to the wrapper struct recieved as first argument after ``self`` in the function signature.
+        Invoke default callbacks with ``self._default_ptr`` as first argument, not with the pointer to the wrapper struct received as first argument after ``self`` in the function signature.
     
     Note:
         When a :class:`.PdfSysfontBase` instance is created, it is (by default) kept alive until the end of the session through an exit handler.
@@ -76,7 +76,7 @@ class PdfSysfontListener (PdfSysfontBase):
     
     def __init__(self):
         super().__init__()
-        logger.debug(f"fontinfo default interace version is {self._default.version}")
+        logger.debug(f"fontinfo default interface version is {self._default.version}")
     
     def _close_impl(self):
         if pypdfium2_cfg.DEBUG_AUTOCLOSE:
