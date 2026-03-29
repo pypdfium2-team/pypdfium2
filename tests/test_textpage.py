@@ -172,7 +172,6 @@ def test_font_helpers(
     page = pdf[0]
     textpage = page.get_textpage()
     n_chars = textpage.count_chars()
-    print(n_chars)
 
     assert chr(pdfium_c.FPDFText_GetUnicode(textpage.raw, index)) == character
     textobj = textpage.get_textobj(index)
@@ -186,3 +185,18 @@ def test_font_helpers(
         assert fontobj.get_base_name() == base_name
         assert fontobj.get_family_name() == family_name
         assert fontobj.get_weight() == weight
+
+
+def test_font_is_embedded(textpage):
+    textobj = textpage.get_textobj(0)
+    font = textobj.get_font()
+    assert font.is_embedded() == True
+
+
+def test_font_is_embedded_failure(textpage):
+    textobj = textpage.get_textobj(0)
+    font = textobj.get_font()
+    from unittest.mock import patch
+    with patch.object(pdfium_c, "FPDFFont_GetIsEmbedded", return_value=-1):
+        with pytest.raises(pdfium.PdfiumError, match="Failed to determine font embedding status"):
+            font.is_embedded()

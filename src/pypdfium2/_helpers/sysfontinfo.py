@@ -4,6 +4,7 @@
 __all__ = ("PdfSysfontBase", "PdfSysfontListener")
 
 import sys
+import ctypes
 import atexit
 import logging
 import pypdfium2.raw as pdfium_c
@@ -70,45 +71,77 @@ class PdfSysfontBase:
 
 class PdfSysfontListener (PdfSysfontBase):
     """
-    TODO
+    Sysfont listener that wraps the default system font info, intercepting callbacks
+    to track which fonts PDFium requests and whether they were found on the system.
+
+    Use :meth:`get_font_requests` to retrieve the accumulated results, and
+    :meth:`clear_font_requests` to reset the log.
     """
-    
+
     def __init__(self):
         super().__init__()
-        print(f"fontinfo default interace version is {self._default.version}")  # XXX
-    
+        self._font_requests = {}
+
     def _close_impl(self):
         pdfium_i._safe_debug("Closing sysfontinfo...")
         super()._close_impl()
-    
+
+    def _record_request(self, face, result):
+        try:
+            if face:
+                name = ctypes.string_at(face).decode("utf-8", errors="replace")
+                if not self._font_requests.get(name, False):
+                    self._font_requests[name] = bool(result)
+        except Exception:
+            pass
+
+    def get_font_requests(self):
+        """
+        Return the accumulated font resolution log.
+
+        Returns:
+            dict[str, bool]:
+                Maps each font name (as requested by PDFium) to a boolean
+                indicating whether the font was found on the system.
+        """
+        return dict(self._font_requests)
+
+    def clear_font_requests(self):
+        """Clear the accumulated font resolution log."""
+        self._font_requests.clear()
+
     def release(self, _):
         pdfium_i._safe_debug("fontinfo::Release")
         return self._default.Release(self._default_ptr)
-    
+
     def enum_fonts(self, _, pMapper):
         logger.debug(f"fontinfo::EnumFonts {pMapper, }")
         return self._default.EnumFonts(self._default_ptr, pMapper)
-    
+
     def map_font(self, _, weight, bItalic, charset, pitch_family, face, bExact):
         logger.debug(f"fontinfo::MapFont {weight, bItalic, charset, pitch_family, face, bExact}")
-        return self._default.MapFont(self._default_ptr, weight, bItalic, charset, pitch_family, face, bExact)
-    
+        result = self._default.MapFont(self._default_ptr, weight, bItalic, charset, pitch_family, face, bExact)
+        self._record_request(face, result)
+        return result
+
     def get_font(self, _, face):
         logger.debug(f"fontinfo::GetFont {face, }")
-        return self._default.GetFont(self._default_ptr, face)
-    
+        result = self._default.GetFont(self._default_ptr, face)
+        self._record_request(face, result)
+        return result
+
     def get_font_data(self, _, hFont, table, buffer, buf_size):
         logger.debug(f"fontinfo::GetFontData {hFont, table, buffer, buf_size}")
         return self._default.GetFontData(self._default_ptr, hFont, table, buffer, buf_size)
-    
+
     def get_face_name(self, _, hFont, buffer, buf_size):
         logger.debug(f"fontinfo::GetFaceName {hFont, buffer, buf_size}")
         return self._default.GetFaceName(self._default_ptr, hFont, buffer, buf_size)
-    
+
     def get_font_charset(self, _, hFont):
         logger.debug(f"fontinfo::GetCharset {hFont, }")
         return self._default.GetFontCharset(self._default_ptr, hFont)
-    
+
     def delete_font(self, _, hFont):
         logger.debug(f"fontinfo::DeleteFont {hFont, }")
         return self._default.DeleteFont(self._default_ptr, hFont)
