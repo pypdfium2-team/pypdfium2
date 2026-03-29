@@ -1,18 +1,18 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import sys
 import atexit
+import logging
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 
+logger = logging.getLogger("pypdfium2")
+
 
 def init_lib():
-    print("Initializing lib")  # XXX
     assert not pdfium_i.LIBRARY_AVAILABLE
     if pdfium_i.DEBUG_AUTOCLOSE:  # pragma: no cover
-        # FIXME not shown on auto-init, because DEBUG_AUTOCLOSE can only be set on the caller side after pypdfium2 has been imported...
-        print("Initialize PDFium", file=sys.stderr)
+        logger.debug("Initialize PDFium")
     
     # PDFium init API may change in the future: https://crbug.com/pdfium/1446
     # NOTE Technically, FPDF_InitLibrary() would be sufficient for our purposes, but pdfium docs say "This will be deprecated in the future", so don't use it to be on the safe side. Also, avoid experimental config versions that might not be promoted to stable.

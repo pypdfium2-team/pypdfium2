@@ -9,8 +9,10 @@ import enum
 import uuid
 import weakref
 import logging
+from pypdfium2_cfg import _Mutable, DEBUG_AUTOCLOSE
 
 logger = logging.getLogger(__name__)
+LIBRARY_AVAILABLE = _Mutable(False)  # set to true on library init
 
 
 def _safe_debug(msg):  # pragma: no cover
@@ -19,22 +21,6 @@ def _safe_debug(msg):  # pragma: no cover
         os.write(sys.stderr.fileno(), (msg+"\n").encode())
     except Exception:  # e.g. io.UnsupportedOperation
         print(msg, file=sys.stderr)
-
-
-class _Mutable:
-    
-    def __init__(self, value):
-        self.value = value
-    
-    def __repr__(self):
-        return f"_Mutable({self.value})"
-    
-    def __bool__(self):
-        return bool(self.value)
-
-
-DEBUG_AUTOCLOSE = _Mutable(False)
-LIBRARY_AVAILABLE = _Mutable(False)  # set to true on library init
 
 
 class _STATE (enum.Enum):

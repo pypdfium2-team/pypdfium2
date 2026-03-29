@@ -1,29 +1,33 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-print("__main__.py imports")  # XXX
 import sys
 import argparse
 import importlib
-from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
-from pypdfium2_cli._parsers import setup_logging
+import functools
+from pypdfium2_cli._setup import setup_logging
 
-from pypdfium2_raw.bindings import _libs
 
-SubCommands = {
-    "arrange":        "Rearrange/merge documents",
-    "attachments":    "List/extract/edit embedded files",
-    "extract-images": "Extract images",
-    "extract-text":   "Extract text",
-    "imgtopdf":       "Convert images to PDF",
-    "pageobjects":    "Print info on pageobjects",
-    "pdfinfo":        "Print info on document and pages",
-    "render":         "Rasterize pages",
-    "tile":           "Tile pages (N-up)",
-    "toc":            "Print table of contents",
-}
-
-CmdToModule = {n: importlib.import_module(f"pypdfium2_cli.{n.replace('-', '_')}") for n in SubCommands}
+@functools.cache
+def init():
+    global PYPDFIUM_INFO, PDFIUM_INFO, _libs
+    from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
+    from pypdfium2_raw.bindings import _libs
+    
+    global SubCommands, CmdToModule
+    SubCommands = {
+        "arrange":        "Rearrange/merge documents",
+        "attachments":    "List/extract/edit embedded files",
+        "extract-images": "Extract images",
+        "extract-text":   "Extract text",
+        "imgtopdf":       "Convert images to PDF",
+        "pageobjects":    "Print info on pageobjects",
+        "pdfinfo":        "Print info on document and pages",
+        "render":         "Rasterize pages",
+        "tile":           "Tile pages (N-up)",
+        "toc":            "Print table of contents",
+    }
+    CmdToModule = {n: importlib.import_module(f"pypdfium2_cli.{n.replace('-', '_')}") for n in SubCommands}
 
 
 def get_parser():
@@ -55,6 +59,7 @@ def get_parser():
 
 def api_main(raw_args=sys.argv[1:]):
     
+    init()
     parser = get_parser()
     args = parser.parse_args(raw_args)
     
