@@ -901,6 +901,7 @@ The primary motivation behind this is to have a nice testing interface, but it m
 Usage should be largely self-explanatory, assuming some familiarity with the command-line.
 See `pypdfium2 --help` or `pypdfium2 $SUBCOMMAND --help` for available commands and options.
 
+If you wish to call pypdfium2's CLI through `python -m`, note that the module name is `pypdfium2_cli` (not just `pypdfium2`), unlike the entrypoint script.
 
 ## Licensing
 
@@ -1022,9 +1023,8 @@ pypdfium2 contains a small test suite to verify the library's functionality. It 
 python -m pytest tests/  # or `just test`
 ```
 
-Note that ...
-* you can pass `-sv` to get more detailed output.
-* `$DEBUG_AUTOCLOSE=1` may be set to get debugging information on automatic object finalization.
+Pass `-sv` to get more detailed output.
+Environment variables used by the CLI are also honored in the test suite: `PYPDFIUM_LOGLEVEL`, `DEBUG_AUTOCLOSE`, `DEBUG_SYSFONTS`, `DEBUG_UNSUPPORTED`. See [`pypdfium2 --help`](https://pypdfium2.readthedocs.io/en/stable/shell_api.html#main-help) for description.
 
 To get code coverage statistics, you may call
 ```bash
