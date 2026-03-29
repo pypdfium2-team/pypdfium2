@@ -6,6 +6,7 @@ __all__ = ("PdfSysfontBase", "PdfSysfontListener")
 import sys
 import atexit
 import logging
+import pypdfium2_cfg
 import pypdfium2.raw as pdfium_c
 from pypdfium2._helpers.misc import PdfiumError
 import pypdfium2.internal as pdfium_i
@@ -78,7 +79,8 @@ class PdfSysfontListener (PdfSysfontBase):
         logger.debug(f"fontinfo default interace version is {self._default.version}")
     
     def _close_impl(self):
-        pdfium_i._safe_debug("Closing sysfontinfo...")
+        if pypdfium2_cfg.DEBUG_AUTOCLOSE:
+            pdfium_i._safe_debug("Closing sysfontinfo...")
         super()._close_impl()
     
     def release(self, _):

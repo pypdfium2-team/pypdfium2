@@ -3,8 +3,8 @@
 
 import atexit
 import logging
+import pypdfium2_cfg
 import pypdfium2.raw as pdfium_c
-import pypdfium2_cfg as pdfium_cfg
 import pypdfium2.internal as pdfium_i
 
 logger = logging.getLogger("pypdfium2")
@@ -12,7 +12,7 @@ logger = logging.getLogger("pypdfium2")
 
 def init_lib():
     assert not pdfium_i.LIBRARY_AVAILABLE
-    if pdfium_cfg.DEBUG_AUTOCLOSE:  # pragma: no cover
+    if pypdfium2_cfg.DEBUG_AUTOCLOSE:  # pragma: no cover
         logger.debug("Initialize PDFium")
     
     # PDFium init API may change in the future: https://crbug.com/pdfium/1446
@@ -31,7 +31,7 @@ def init_lib():
 
 def destroy_lib():  # pragma: no cover
     assert pdfium_i.LIBRARY_AVAILABLE
-    if pdfium_cfg.DEBUG_AUTOCLOSE:
+    if pypdfium2_cfg.DEBUG_AUTOCLOSE:
         pdfium_i._safe_debug("Destroy PDFium")
     pdfium_c.FPDF_DestroyLibrary()
     pdfium_i.LIBRARY_AVAILABLE.value = False
