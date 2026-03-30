@@ -15,10 +15,11 @@ import pypdfium2.internal as pdfium_i
 FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 
 logger = logging.getLogger(__name__)
-if sys.version_info >= (3, 11):
-    _LOCALE_ENC = locale.getencoding()
-else:
-    _LOCALE_ENC = locale.getpreferredencoding()
+# if sys.version_info >= (3, 11):
+#     _LOCALE_ENC = locale.getencoding()
+# else:
+#     _LOCALE_ENC = locale.getpreferredencoding()
+
 
 class PdfSysfontBase:
     """
@@ -113,10 +114,10 @@ class PdfSysfontListener (PdfSysfontBase):
     
     def map_font(self, _, weight, bItalic, charset, pitch_family, face, bExact):
         # weight: 400 is normal and 700 is bold
-        face_str = ctypes.cast(face, ctypes.c_char_p).value
-        if face_str:
-            face_str = face_str.decode(_LOCALE_ENC)
-        logger.debug(f"fontinfo::MapFont (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pitch_family}, face={face_str!r}, bExact={bool(bExact)})")
+        face_bstr = ctypes.cast(face, ctypes.c_char_p).value
+        # if face_str:
+        #     face_str = face_str.decode(_LOCALE_ENC)
+        logger.debug(f"fontinfo::MapFont (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pitch_family}, face={face_bstr!r}, bExact={bool(bExact)})")
         return self._default.MapFont(self._default_ptr, weight, bItalic, charset, pitch_family, face, bExact)
     
     def get_font(self, _, face):
