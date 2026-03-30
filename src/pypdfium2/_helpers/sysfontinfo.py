@@ -6,15 +6,16 @@ __all__ = ("PdfSysfontBase", "PdfSysfontListener")
 import sys
 import ctypes
 import atexit
-import locale
 import logging
 import pypdfium2_cfg
 import pypdfium2.raw as pdfium_c
-from pypdfium2._helpers.misc import PdfiumError
 import pypdfium2.internal as pdfium_i
+from pypdfium2._helpers.misc import PdfiumError
 FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 
 logger = logging.getLogger(__name__)
+
+# import locale
 # if sys.version_info >= (3, 11):
 #     _LOCALE_ENC = locale.getencoding()
 # else:
@@ -118,8 +119,10 @@ class PdfSysfontListener (PdfSysfontBase):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
         # if face_str:
         #     face_str = face_str.decode(_LOCALE_ENC)
-        logger.debug(f"fontinfo::MapFont (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pitch_family}, face={face_bstr!r})")
-        return self._default.MapFont(self._default_ptr, weight, bItalic, charset, pitch_family, face, bExact)
+        logger.debug(f"fontinfo::MapFont:in (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pdfium_i.PdfFontPitchFamilyFlags(pitch_family).name!r}, face={face_bstr!r})")
+        out = self._default.MapFont(self._default_ptr, weight, bItalic, charset, pitch_family, face, bExact)
+        logger.debug(f"fontinfo::MapFont:out {out}")
+        return out
     
     def get_font(self, _, face):
         logger.debug(f"fontinfo::GetFont {face, }")
