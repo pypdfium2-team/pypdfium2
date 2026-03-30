@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
 class PdfSysfontBase:
     """
     Base helper class to set up and register a ``FPDF_SYSFONTINFO`` callback system.
-    Callbacks can be implemented by subclassing (names from ``FPDF_SYSFONTINFO``, converted to snake-case).
-    When a callback is not implemented, the constructor will automatically delegate it to the default handler.
+    Callbacks can be implemented by subclassing (names from ``FPDF_SYSFONTINFO``, converted to snake_case).
+    When a callback is not implemented, this constructor will automatically delegate it to the default handler.
     
     Note:\n
-        When a :class:`.PdfSysfontBase` instance is created, it is (by default) kept alive until the end of the session through an exit handler.
+        When a :class:`.PdfSysfontBase` instance is created, it is (by default) kept alive until the end of session, through an exit handler.
         To stop the sysfont handler earlier, call :meth:`.close`, which will unregister the exit handler and release the sysfont handler immediately.\n
         Sysfont handlers are singleton, i.e. only one handler can live at a time.
         When a new handler is created, the previous handler (if any) is implicitly closed.
@@ -104,10 +104,20 @@ class PdfSysfontListener (PdfSysfontBase):
     TODO
     """
     
-    def __init__(self):
+    def __init__(self, log_all=True):
+        if log_all:
+            self._get_callback = self._get_callback_impl
         logger.debug("Installing sysfontinfo...")
         super().__init__()
         logger.debug(f"fontinfo default interface version is {self._default.version}")
+    
+    def _get_callback_impl(self, c_name, py_name):
+        impl = getattr(self, py_name, None)
+        if not impl:
+            def impl(_, *args):
+                logger.debug(f"fontinfo::{c_name} {args}")
+                return getattr(self._default, c_name)(self._default_ptr, *args)
+        return impl
     
     def _close_impl(self):
         if pypdfium2_cfg.DEBUG_AUTOCLOSE:
@@ -128,14 +138,6 @@ class PdfSysfontListener (PdfSysfontBase):
         out = self._default.MapFont(self._default_ptr, weight, bItalic, charset, pitch_family, face, bExact)
         logger.debug(f"fontinfo::MapFont:out {out}")
         return out
-    
-    def _get_callback(self, c_name, py_name):
-        impl = getattr(self, py_name, None)
-        if not impl:
-            def impl(_, *args):
-                logger.debug(f"fontinfo::{c_name} {args}")
-                return getattr(self._default, c_name)(self._default_ptr, *args)
-        return impl
     
     # def enum_fonts(self, _, pMapper):
     #     # pMapper: opaque pointer to internal font mapper, used when calling FPDF_AddInstalledFont()
