@@ -181,5 +181,5 @@ CharsetToStr = _fallback_dict({
 
 class PdfFontPitchFamilyFlags (enum.Flag):
     FIXEDPITCH = pdfium_c.FXFONT_FF_FIXEDPITCH
-    ROMAN = pdfium_c.FXFONT_FF_ROMAN
-    SCRIPT = pdfium_c.FXFONT_FF_SCRIPT
+    ROMAN      = pdfium_c.FXFONT_FF_ROMAN
+    SCRIPT     = pdfium_c.FXFONT_FF_SCRIPT
