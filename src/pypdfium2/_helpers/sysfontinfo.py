@@ -25,16 +25,19 @@ logger = logging.getLogger(__name__)
 class PdfSysfontBase:
     """
     Base helper class to set up and register a ``FPDF_SYSFONTINFO`` callback system.
-    Callbacks need to be implemented by subclassing (names from ``FPDF_SYSFONTINFO``, converted to snake-case).
+    Callbacks can be implemented by subclassing (names from ``FPDF_SYSFONTINFO``, converted to snake-case).
+    When a callback is not implemented, the constructor will automatically delegate it to the default handler.
+    
+    Note:\n
+        When a :class:`.PdfSysfontBase` instance is created, it is (by default) kept alive until the end of the session through an exit handler.
+        To stop the sysfont handler earlier, call :meth:`.close`, which will unregister the exit handler and release the sysfont handler immediately.\n
+        Sysfont handlers are singleton, i.e. only one handler can live at a time.
+        When a new handler is created, the previous handler (if any) is implicitly closed.
     
     Important:
         In subclass callbacks, you will typically want to wrap pdfium's default implementation rather than writing your own implementation from scratch.
         This class exposes the default ``FPDF_SYSFONTINFO`` instance as ``self._default``.
         Invoke default callbacks with ``self._default_ptr`` as first argument, not with the pointer to the wrapper struct received as first argument after ``self`` in the function signature.
-    
-    Note:
-        When a :class:`.PdfSysfontBase` instance is created, it is (by default) kept alive until the end of the session through an exit handler.
-        To stop the sysfont handler earlier, call :meth:`.close`, which will unregister the exit handler and release the sysfont handler immediately.
     """
     
     _SINGLETON = None
@@ -114,7 +117,6 @@ class PdfSysfontListener (PdfSysfontBase):
     def release(self, _):
         pdfium_i._safe_debug("fontinfo::Release")
         return self._default.Release(self._default_ptr)
-    
     
     def map_font(self, _, weight, bItalic, charset, pitch_family, face, bExact):
         # weight: 400 is normal and 700 is bold
