@@ -86,6 +86,32 @@ class PdfSysfontBase:
     def close(self):  # manual
         atexit.unregister(self._close_impl)
         self._close_impl()
+    
+    # default implementations - this could be auto-generated in the future
+    
+    def release(self, _):
+        return self._default.Release(self._default_ptr)
+    
+    def enum_fonts(self, _, *args):
+        return self._default.EnumFonts(self._default_ptr, *args)
+    
+    def map_font(self, _, *args):
+        return self._default.MapFont(self._default_ptr, *args)
+    
+    def get_font(self, _, *args):
+        return self._default.GetFont(self._default_ptr, *args)
+    
+    def get_font_data(self, _, *args):
+        return self._default.GetFontData(self._default_ptr, *args)
+    
+    def get_face_name(self, _, *args):
+        return self._default.GetFaceName(self._default_ptr, *args)
+    
+    def get_font_charset(self, _, *args):
+        return self._default.GetFontCharset(self._default_ptr, *args)
+    
+    def delete_font(self, _, *args):
+        return self._default.DeleteFont(self._default_ptr, *args)
 
 
 class PdfSysfontListener (PdfSysfontBase):
