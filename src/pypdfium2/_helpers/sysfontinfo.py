@@ -4,7 +4,9 @@
 __all__ = ("PdfSysfontBase", "PdfSysfontListener")
 
 import sys
+import ctypes
 import atexit
+import locale
 import logging
 import pypdfium2_cfg
 import pypdfium2.raw as pdfium_c
@@ -13,7 +15,10 @@ import pypdfium2.internal as pdfium_i
 FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 
 logger = logging.getLogger(__name__)
-
+if sys.version_info >= (3, 11):
+    _LOCALE_ENC = locale.getencoding()
+else:
+    _LOCALE_ENC = locale.getpreferredencoding()
 
 class PdfSysfontBase:
     """
@@ -101,11 +106,17 @@ class PdfSysfontListener (PdfSysfontBase):
         return self._default.Release(self._default_ptr)
     
     def enum_fonts(self, _, pMapper):
+        # pMapper: opaque pointer to internal font mapper, used when calling FPDF_AddInstalledFont()
+        # note, we don't actually call FPDF_AddInstalledFont() as we call the default EnumFont, impl assuming this suffices.
         logger.debug(f"fontinfo::EnumFonts {pMapper, }")
         return self._default.EnumFonts(self._default_ptr, pMapper)
     
     def map_font(self, _, weight, bItalic, charset, pitch_family, face, bExact):
-        logger.debug(f"fontinfo::MapFont {weight, bItalic, charset, pitch_family, face, bExact}")
+        # weight: 400 is normal and 700 is bold
+        face_str = ctypes.cast(face, ctypes.c_char_p).value
+        if face_str:
+            face_str = face_str.decode(_LOCALE_ENC)
+        logger.debug(f"fontinfo::MapFont (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pitch_family}, face={face_str!r}, bExact={bool(bExact)})")
         return self._default.MapFont(self._default_ptr, weight, bItalic, charset, pitch_family, face, bExact)
     
     def get_font(self, _, face):

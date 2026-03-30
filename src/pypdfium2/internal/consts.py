@@ -160,3 +160,20 @@ UnsupportedInfoToStr = _fallback_dict({
     pdfium_c.FPDF_UNSP_ANNOT_ATTACHMENT:          "Attachment annotation",
     pdfium_c.FPDF_UNSP_ANNOT_SIG:                 "Signature annotation",
 })
+
+CharsetToStr = _fallback_dict({
+    pdfium_c.FXFONT_ANSI_CHARSET: "ANSI",
+    pdfium_c.FXFONT_DEFAULT_CHARSET: "default",
+    pdfium_c.FXFONT_SYMBOL_CHARSET: "symbol",
+    pdfium_c.FXFONT_SHIFTJIS_CHARSET: "shiftjis",
+    pdfium_c.FXFONT_HANGEUL_CHARSET: "hangeul",
+    pdfium_c.FXFONT_GB2312_CHARSET: "GB2312",
+    pdfium_c.FXFONT_CHINESEBIG5_CHARSET: "chinesebig5",
+    pdfium_c.FXFONT_GREEK_CHARSET: "greek",
+    pdfium_c.FXFONT_VIETNAMESE_CHARSET: "vietnamese",
+    pdfium_c.FXFONT_HEBREW_CHARSET: "hebrew",
+    pdfium_c.FXFONT_ARABIC_CHARSET: "arabic",
+    pdfium_c.FXFONT_CYRILLIC_CHARSET: "cyrillic",
+    pdfium_c.FXFONT_THAI_CHARSET: "thai",
+    pdfium_c.FXFONT_EASTERNEUROPEAN_CHARSET: "easterneuropean",
+})
