@@ -10,3 +10,4 @@ from pypdfium2._helpers.attachment import *
 from pypdfium2._helpers.page import *
 from pypdfium2._helpers.pageobjects import *
 from pypdfium2._helpers.textpage import *
+from pypdfium2._helpers.sysfontinfo import *

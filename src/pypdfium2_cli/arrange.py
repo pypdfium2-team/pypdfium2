@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import pypdfium2._helpers as pdfium
-from pypdfium2._cli._parsers import parse_numtext
+from pypdfium2_cli._parsers import parse_numtext
 
 
 def attach(parser):

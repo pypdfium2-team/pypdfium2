@@ -9,8 +9,11 @@ import enum
 import uuid
 import weakref
 import logging
+import pypdfium2_cfg
+from pypdfium2_cfg import DEBUG_AUTOCLOSE  # compat
 
 logger = logging.getLogger(__name__)
+LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
 
 
 def _safe_debug(msg):  # pragma: no cover
@@ -19,22 +22,6 @@ def _safe_debug(msg):  # pragma: no cover
         os.write(sys.stderr.fileno(), (msg+"\n").encode())
     except Exception:  # e.g. io.UnsupportedOperation
         print(msg, file=sys.stderr)
-
-
-class _Mutable:
-    
-    def __init__(self, value):
-        self.value = value
-    
-    def __repr__(self):
-        return f"_Mutable({self.value})"
-    
-    def __bool__(self):
-        return bool(self.value)
-
-
-DEBUG_AUTOCLOSE = _Mutable(False)
-LIBRARY_AVAILABLE = _Mutable(False)  # set to true on library init
 
 
 class _STATE (enum.Enum):
@@ -56,7 +43,7 @@ class AutoCastable:
 
 def _close_template(close_func, raw, obj_repr, state, parent, args, kwargs):
     
-    if DEBUG_AUTOCLOSE:  # pragma: no cover
+    if pypdfium2_cfg.DEBUG_AUTOCLOSE:  # pragma: no cover
         _safe_debug(f"Close ({state.value.name.lower()}) {obj_repr}")
     
     if not LIBRARY_AVAILABLE:  # pragma: no cover
@@ -79,8 +66,8 @@ class AutoCloseable (AutoCastable):
         self._obj = self if obj is None else obj
         self._ex_args = args
         self._ex_kwargs = kwargs
-        self._autoclose_state = _Mutable(_STATE.AUTO)
-        self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
+        self._autoclose_state = pypdfium2_cfg._Mutable(_STATE.AUTO)
+        self._uuid = uuid.uuid4() if pypdfium2_cfg.DEBUG_AUTOCLOSE else None
         
         self._finalizer = None
         self._kids = []
