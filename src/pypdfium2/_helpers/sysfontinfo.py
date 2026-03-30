@@ -55,19 +55,20 @@ class PdfSysfontBase:
         self._default = self._default_ptr.contents
         self._wrapper = FPDF_SYSFONTINFO()
         self._wrapper.version = self._default.version
-        callbacks = dict(
-            Release = self.release,
-            EnumFonts = self.enum_fonts,
-            MapFont = self.map_font,
-            GetFont = self.get_font,
-            GetFontData = self.get_font_data,
-            GetFaceName = self.get_face_name,
-            GetFontCharset = self.get_font_charset,
-            DeleteFont = self.delete_font,
-        )
+        cb_names = {
+            "Release": "release",
+            "EnumFonts": "enum_fonts",
+            "MapFont": "map_font",
+            "GetFont": "get_font",
+            "GetFontData": "get_font_data",
+            "GetFaceName": "get_face_name",
+            "GetFontCharset": "get_font_charset",
+            "DeleteFont": "delete_font",
+        }
         if self._default.version != 1:  # as per docs
-            del callbacks["EnumFonts"]
+            del cb_names["EnumFonts"]
         
+        callbacks = {cn: self._get_callback(cn, pn) for cn, pn in cb_names.items()}
         pdfium_i.set_callbacks(self._wrapper, **callbacks)
         pdfium_c.FPDF_SetSystemFontInfo(self._wrapper)
         
@@ -87,31 +88,12 @@ class PdfSysfontBase:
         atexit.unregister(self._close_impl)
         self._close_impl()
     
-    # default implementations - this could be auto-generated in the future
-    
-    def release(self, _):
-        return self._default.Release(self._default_ptr)
-    
-    def enum_fonts(self, _, *args):
-        return self._default.EnumFonts(self._default_ptr, *args)
-    
-    def map_font(self, _, *args):
-        return self._default.MapFont(self._default_ptr, *args)
-    
-    def get_font(self, _, *args):
-        return self._default.GetFont(self._default_ptr, *args)
-    
-    def get_font_data(self, _, *args):
-        return self._default.GetFontData(self._default_ptr, *args)
-    
-    def get_face_name(self, _, *args):
-        return self._default.GetFaceName(self._default_ptr, *args)
-    
-    def get_font_charset(self, _, *args):
-        return self._default.GetFontCharset(self._default_ptr, *args)
-    
-    def delete_font(self, _, *args):
-        return self._default.DeleteFont(self._default_ptr, *args)
+    def _get_callback(self, c_name, py_name):
+        impl = getattr(self, py_name, None)
+        if not impl:
+            def impl(_, *args):
+                return getattr(self._default, c_name)(self._default_ptr, *args)
+        return impl
 
 
 class PdfSysfontListener (PdfSysfontBase):
@@ -133,11 +115,6 @@ class PdfSysfontListener (PdfSysfontBase):
         pdfium_i._safe_debug("fontinfo::Release")
         return self._default.Release(self._default_ptr)
     
-    def enum_fonts(self, _, pMapper):
-        # pMapper: opaque pointer to internal font mapper, used when calling FPDF_AddInstalledFont()
-        # note, we don't actually call FPDF_AddInstalledFont() as we call the default EnumFont, impl assuming this suffices.
-        logger.debug(f"fontinfo::EnumFonts {pMapper, }")
-        return self._default.EnumFonts(self._default_ptr, pMapper)
     
     def map_font(self, _, weight, bItalic, charset, pitch_family, face, bExact):
         # weight: 400 is normal and 700 is bold
@@ -150,22 +127,36 @@ class PdfSysfontListener (PdfSysfontBase):
         logger.debug(f"fontinfo::MapFont:out {out}")
         return out
     
-    def get_font(self, _, face):
-        logger.debug(f"fontinfo::GetFont {face, }")
-        return self._default.GetFont(self._default_ptr, face)
+    def _get_callback(self, c_name, py_name):
+        impl = getattr(self, py_name, None)
+        if not impl:
+            def impl(_, *args):
+                logger.debug(f"fontinfo::{c_name} {args}")
+                return getattr(self._default, c_name)(self._default_ptr, *args)
+        return impl
     
-    def get_font_data(self, _, hFont, table, buffer, buf_size):
-        logger.debug(f"fontinfo::GetFontData {hFont, table, buffer, buf_size}")
-        return self._default.GetFontData(self._default_ptr, hFont, table, buffer, buf_size)
+    # def enum_fonts(self, _, pMapper):
+    #     # pMapper: opaque pointer to internal font mapper, used when calling FPDF_AddInstalledFont()
+    #     # note, we don't actually call FPDF_AddInstalledFont() as we call the default EnumFont, impl assuming this suffices.
+    #     logger.debug(f"fontinfo::EnumFonts {pMapper, }")
+    #     return self._default.EnumFonts(self._default_ptr, pMapper)
     
-    def get_face_name(self, _, hFont, buffer, buf_size):
-        logger.debug(f"fontinfo::GetFaceName {hFont, buffer, buf_size}")
-        return self._default.GetFaceName(self._default_ptr, hFont, buffer, buf_size)
+    # def get_font(self, _, face):
+    #     logger.debug(f"fontinfo::GetFont {face, }")
+    #     return self._default.GetFont(self._default_ptr, face)
     
-    def get_font_charset(self, _, hFont):
-        logger.debug(f"fontinfo::GetCharset {hFont, }")
-        return self._default.GetFontCharset(self._default_ptr, hFont)
+    # def get_font_data(self, _, hFont, table, buffer, buf_size):
+    #     logger.debug(f"fontinfo::GetFontData {hFont, table, buffer, buf_size}")
+    #     return self._default.GetFontData(self._default_ptr, hFont, table, buffer, buf_size)
     
-    def delete_font(self, _, hFont):
-        logger.debug(f"fontinfo::DeleteFont {hFont, }")
-        return self._default.DeleteFont(self._default_ptr, hFont)
+    # def get_face_name(self, _, hFont, buffer, buf_size):
+    #     logger.debug(f"fontinfo::GetFaceName {hFont, buffer, buf_size}")
+    #     return self._default.GetFaceName(self._default_ptr, hFont, buffer, buf_size)
+    
+    # def get_font_charset(self, _, hFont):
+    #     logger.debug(f"fontinfo::GetCharset {hFont, }")
+    #     return self._default.GetFontCharset(self._default_ptr, hFont)
+    
+    # def delete_font(self, _, hFont):
+    #     logger.debug(f"fontinfo::DeleteFont {hFont, }")
+    #     return self._default.DeleteFont(self._default_ptr, hFont)
