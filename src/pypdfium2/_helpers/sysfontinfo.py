@@ -114,10 +114,11 @@ class PdfSysfontListener (PdfSysfontBase):
     
     def map_font(self, _, weight, bItalic, charset, pitch_family, face, bExact):
         # weight: 400 is normal and 700 is bold
+        # bExact: obsolete, ignored
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
         # if face_str:
         #     face_str = face_str.decode(_LOCALE_ENC)
-        logger.debug(f"fontinfo::MapFont (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pitch_family}, face={face_bstr!r}, bExact={bool(bExact)})")
+        logger.debug(f"fontinfo::MapFont (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pitch_family}, face={face_bstr!r})")
         return self._default.MapFont(self._default_ptr, weight, bItalic, charset, pitch_family, face, bExact)
     
     def get_font(self, _, face):
