@@ -48,13 +48,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     
     def __init__(self, default=None):
         
-        if PdfSysfontBase._SINGLETON is not None:
-            logger.info(f"Constructing a new {type(self).__name__} instance implicitly closes previous sysfont handler instance {PdfSysfontBase._SINGLETON}")
-            PdfSysfontBase._SINGLETON.close()
-        PdfSysfontBase._SINGLETON = self
-        
         self._is_closed = False
-        
         if default is None:
             self._own_default = True
             default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
@@ -84,23 +78,33 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         
         callbacks = {cn: self._get_callback(cn, pn) for cn, pn in cb_names.items()}
         pdfium_i.set_callbacks(self.raw, **callbacks)
-        pdfium_c.FPDF_SetSystemFontInfo(self.raw)
-        
+
+        if PdfSysfontBase._SINGLETON is not None:
+            logger.info(f"Constructing a new {type(self).__name__} instance implicitly closes previous sysfont handler instance {PdfSysfontBase._SINGLETON}")
+            PdfSysfontBase._SINGLETON.close(_next_handler=self.raw)
+        else:
+            pdfium_c.FPDF_SetSystemFontInfo(self.raw)
+        PdfSysfontBase._SINGLETON = self
         atexit.register(self._close_impl)
     
-    def _close_impl(self):
+    def _close_impl(self, _next_handler=None):
+        
         if self._is_closed:
             return
-        if pypdfium2_cfg.DEBUG_AUTOCLOSE:
-            pdfium_i._safe_debug("Closing sysfontinfo...")
+        
+        pdfium_i._debug_close("Closing sysfontinfo...")
+        
         id(self.raw)
-        pdfium_c.FPDF_SetSystemFontInfo(None)
-        # ^ this calls Release, so the default handler must be freed after (not before!) this call
+        id(self.default)
+        
+        pdfium_c.FPDF_SetSystemFontInfo(_next_handler)
+        # ^ this calls self.default.Release, so the default handler must be freed after (not before!) this call
         if self._own_default:
             pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.default)
+        
         self._is_closed = True
     
-    def close(self):  # manual
+    def close(self, _next_handler=None):  # manual
         """
         Manually close the sysfont handler.
         This unregisters the exit handler and releases the sysfont handler immediately.
@@ -108,7 +112,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         See the note above for how sysfont handler lifetime is managed by default.
         """
         atexit.unregister(self._close_impl)
-        self._close_impl()
+        self._close_impl(_next_handler)
     
     def _get_callback(self, c_name, py_name):
         impl = getattr(self, py_name, None)
@@ -118,8 +122,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         return impl
     
     def release(self, _):
-        if pypdfium2_cfg.DEBUG_AUTOCLOSE:
-            pdfium_i._safe_debug("fontinfo::Release")
+        pdfium_i._debug_close("fontinfo::Release")
         return self.default.Release(self.default)
 
 

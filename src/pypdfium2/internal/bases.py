@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE", "_safe_debug")
+__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE", "_debug_close")
 
 import os
 import sys
@@ -16,8 +16,10 @@ logger = logging.getLogger(__name__)
 LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
 
 
-def _safe_debug(msg):  # pragma: no cover
-    # try to use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
+def _debug_close(msg):  # pragma: no cover
+    # try to use os.write() rather than print() or logger.whatever() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
+    if not DEBUG_AUTOCLOSE:
+        return
     try:
         os.write(sys.stderr.fileno(), (msg+"\n").encode())
     except Exception:  # e.g. io.UnsupportedOperation
@@ -43,11 +45,10 @@ class AutoCastable:
 
 def _close_template(close_func, raw, obj_repr, state, parent, args, kwargs):
     
-    if pypdfium2_cfg.DEBUG_AUTOCLOSE:  # pragma: no cover
-        _safe_debug(f"Close ({state.value.name.lower()}) {obj_repr}")
+    _debug_close(f"Close ({state.value.name.lower()}) {obj_repr}")
     
     if not LIBRARY_AVAILABLE:  # pragma: no cover
-        _safe_debug(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
+        _debug_close(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
         return
     
     assert state.value != _STATE.INVALID

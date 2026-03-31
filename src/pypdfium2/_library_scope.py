@@ -31,8 +31,7 @@ def init_lib():
 
 def destroy_lib():  # pragma: no cover
     assert pdfium_i.LIBRARY_AVAILABLE
-    if pypdfium2_cfg.DEBUG_AUTOCLOSE:
-        pdfium_i._safe_debug("Destroy PDFium")
+    pdfium_i._debug_close("Destroy PDFium")
     pdfium_c.FPDF_DestroyLibrary()
     pdfium_i.LIBRARY_AVAILABLE.value = False
 
