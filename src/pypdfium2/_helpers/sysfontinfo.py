@@ -48,7 +48,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     
     def __init__(self, default=None):
         
-        self._is_closed = False
+        self._need_close = False
         if default is None:
             self._own_default = True
             default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
@@ -78,7 +78,10 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         
         callbacks = {cn: self._get_callback(cn, pn) for cn, pn in cb_names.items()}
         pdfium_i.set_callbacks(self.raw, **callbacks)
-
+    
+    
+    def setup(self):
+        self._need_close = True
         if PdfSysfontBase._SINGLETON is not None:
             logger.info(f"Constructing a new {type(self).__name__} instance implicitly closes previous sysfont handler instance {PdfSysfontBase._SINGLETON}")
             PdfSysfontBase._SINGLETON.close(_next_handler=self.raw)
@@ -87,9 +90,10 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         PdfSysfontBase._SINGLETON = self
         atexit.register(self._close_impl)
     
+    
     def _close_impl(self, _next_handler=None):
         
-        if self._is_closed:
+        if not self._need_close:
             return
         
         pdfium_i._debug_close("Closing sysfontinfo...")
@@ -102,7 +106,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         if self._own_default:
             pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.default)
         
-        self._is_closed = True
+        self._need_close = False
     
     def close(self, _next_handler=None):  # manual
         """
@@ -113,6 +117,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         """
         atexit.unregister(self._close_impl)
         self._close_impl(_next_handler)
+    
     
     def _get_callback(self, c_name, py_name):
         impl = getattr(self, py_name, None)
