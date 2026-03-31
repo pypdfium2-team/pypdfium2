@@ -7,7 +7,6 @@ import sys
 import ctypes
 import atexit
 import logging
-import pypdfium2_cfg
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -49,15 +48,17 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     def __init__(self, default=None):
         
         self._is_installed = False
+        self._destroys_default = False
         if default is None:
-            self._own_default = True
+            self._made_default = True
             default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
             if not default_ptr:
                 raise PdfiumError(f"No default FPDF_SYSFONTINFO available on this platform ({sys.platform!r}), cannot use {type(self).__name__}.")
             self.default = default_ptr.contents
         else:
-            self._own_default = False
+            self._made_default = False
             if isinstance(default, PdfSysfontBase):
+                assert not default._destroys_default, "When a sysfontinfo is nested, it must not destroy its default."
                 default = default.raw  # resolve
             self.default = default
         
@@ -83,6 +84,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     
     def setup(self):
         self._is_installed = True
+        self._destroys_default = self._made_default
         if PdfSysfontBase._SINGLETON is not None:
             logger.info(f"Constructing a new {type(self).__name__} instance implicitly closes previous sysfont handler instance {PdfSysfontBase._SINGLETON}")
             PdfSysfontBase._SINGLETON.close()
@@ -97,11 +99,11 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         
         if self._is_installed:
             # this calls self.default.Release, so the default handler must be freed after (not before!) this call
-            pdfium_i._debug_close(f"Closing sysfontinfo")
+            pdfium_i._debug_close(f"Unset sysfontinfo")
             pdfium_c.FPDF_SetSystemFontInfo(None)
             self._is_installed = False
             PdfSysfontBase._SINGLETON = None
-        if self._own_default:
+        if self._destroys_default:
             pdfium_i._debug_close(f"Close default sysfontinfo")
             pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.default)
     
@@ -124,6 +126,8 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         return impl
     
     def release(self, _):
+        if not self._destroys_default:
+            return
         pdfium_i._debug_close("fontinfo::Release")
         return self.default.Release(self.default)
 
