@@ -56,11 +56,13 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         self._is_closed = False
         
         if default is None:
+            self._own_default = True
             default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
             if not default_ptr:
                 raise PdfiumError(f"No default FPDF_SYSFONTINFO available on this platform ({sys.platform!r}), cannot use {type(self).__name__}.")
             self.default = default_ptr.contents
         else:
+            self._own_default = False
             if isinstance(default, PdfSysfontBase):
                 default = default.raw  # resolve
             self.default = default
@@ -94,7 +96,8 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         id(self.raw)
         pdfium_c.FPDF_SetSystemFontInfo(None)
         # ^ this calls Release, so the default handler must be freed after (not before!) this call
-        pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.default)
+        if self._own_default:
+            pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.default)
         self._is_closed = True
     
     def close(self):  # manual
