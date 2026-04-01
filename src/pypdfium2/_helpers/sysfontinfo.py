@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfSysfontBase", "PdfSysfontListener")
+__all__ = ("PdfSysfontBase", "PdfSysfontListener", "PdfDefaultSysfontInfo")
 
 import sys
 import ctypes
@@ -16,13 +16,13 @@ FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 logger = logging.getLogger(__name__)
 
 
-class _DefaultSysfontInfoClass:
+class _PdfDefaultSysfontInfoClass (pdfium_i.AutoCastable):
     
     def __init__(self):
         self._is_loaded = False
     
     @cached_property
-    def value(self):
+    def raw(self):
         self._is_loaded = True
         logger.debug("Load default sysfont info")
         default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
@@ -37,15 +37,15 @@ class _DefaultSysfontInfoClass:
         if not self._is_loaded:
             return
         pdfium_i._debug_close("Free default sysfont info")
-        pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.value)
-        cached_property_clear(self, "value")
+        pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.raw)
+        cached_property_clear(self, "raw")
         self._is_loaded = False
     
     def close(self):
         atexit.unregister(self._close_impl)
         self._close_impl()
 
-_DefaultSysfontInfo = _DefaultSysfontInfoClass()
+PdfDefaultSysfontInfo = _PdfDefaultSysfontInfoClass()
 
 
 class PdfSysfontBase (pdfium_i.AutoCastable):
@@ -82,13 +82,17 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         
         self._reusable = reusable
         self._default_destroyed = False
+        self._child = None
         if default is None:
-            self.default = _DefaultSysfontInfo.value
-            self._child = None
+            self._own_default = True
+            self.default = PdfDefaultSysfontInfo.raw
         else:
+            self._own_default = False
             if isinstance(default, PdfSysfontBase):
                 self._child = default
                 default = default.raw  # resolve
+            elif isinstance(default, _PdfDefaultSysfontInfoClass):
+                default = default.raw
             self.default = default
         
         self.raw = FPDF_SYSFONTINFO()
@@ -139,9 +143,9 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         
         # important: unsetting the sysfontinfo implies self.default.Release(), so default can only be closed after (not before!) this call
         pdfium_c.FPDF_SetSystemFontInfo(None)
-        # when obj._child is None (as in the case of deepest_child), it has acquired pdfium's default sysfontinfo instance
-        if deepest_child._default_destroyed:
-            _DefaultSysfontInfo.close()
+        # When the object is not reusable and the innermost handler owns pdfium's default sysfontinfo, we can release it. (By design, the innermost handler is the only one that can, and most probably does.)
+        if not self._reusable and deepest_child._own_default:
+            PdfDefaultSysfontInfo.close()
         PdfSysfontBase._SINGLETON = None
     
     def close(self, reusable=None):  # manual

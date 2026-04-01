@@ -31,10 +31,4 @@ def setup_logging():
     if debug_unsupported:
         pdfium.PdfUnspHandler().setup()
     if debug_sysfonts:
-        h = pdfium.PdfSysfontListener()
-        h.setup()
-        h2 = pdfium.PdfSysfontListener(h)
-        h2.setup()
-        h3 = pdfium.PdfSysfontListener(h2)
-        h3.setup()
-        h3.close()
+        pdfium.PdfSysfontListener().setup()

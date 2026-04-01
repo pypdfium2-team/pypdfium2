@@ -16,4 +16,4 @@
      This makes `--clang-as-gcc` more straightforward to implement.
    * Also, extra `CFLAGS`, `CPPFLAGS`, `CXXFLAGS` and `LDFLAGS` are now honored in this build mode.
 - Basic FreeBSD CI added (powered by `cross-platform-actions`), testing installation with libreoffice-pdfium.
-  - On (Free)BSD with libreoffice-pdfium, pre-load implicit dependency libraries with `mode=RTLD_GLOBAL` to fix library loading.
+  - On (Free)BSD with libreoffice-pdfium, pre-load implicit dependency libraries with `mode=RTLD_GLOBAL` to fix library load.
