@@ -34,7 +34,7 @@ class PdfUnspHandler:
     
     def setup(self, add_default=True):
         """
-        Attach the handler to PDFium, and register an exit function to keep the object alive for the rest of the session.
+        Attach the handler to PDFium, and register an exit function to keep the object alive until the end of session.
         
         Parameters:
             add_default (bool):

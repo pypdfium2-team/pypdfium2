@@ -17,7 +17,7 @@ class PdfiumError (RuntimeError):
         self.err_code = err_code
 
 
-class PdfiumWarning (UserWarning):
+class PdfiumWarning (Warning):
 
     def __init__(self, msg, err_code=None):
         super().__init__(msg)

@@ -32,6 +32,7 @@ FAKE_FONT_PDF = (
 @pytest.fixture
 def listener():
     l = pdfium.PdfSysfontListener()
+    l.setup()
     yield l
     l.close()
 
@@ -69,6 +70,7 @@ def test_listener_clear(listener):
 
 def test_listener_manual_close():
     listener = pdfium.PdfSysfontListener()
+    listener.setup()
     pdf = pdfium.PdfDocument(FAKE_FONT_PDF)
     page = pdf[0]
     page.get_textpage()
@@ -86,6 +88,7 @@ def test_listener_clean_exit():
         [sys.executable, "-c", (
             "import pypdfium2 as pdfium; "
             "listener = pdfium.PdfSysfontListener(); "
+            "listener.setup(); "
             "pdf = pdfium.PdfDocument(%r); "
             "page = pdf[0]; "
             "tp = page.get_textpage(); "

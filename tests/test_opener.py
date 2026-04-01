@@ -158,6 +158,8 @@ def test_open_garbled_filename():
     pdf = pdfium.PdfDocument(garbled_path)
     page = pdf[0]
     assert isinstance(pdf, pdfium.PdfDocument) and isinstance(page, pdfium.PdfPage)
+    # clean up (the messed-up filename confuses some tools, e.g. codespell)
+    garbled_path.unlink()
 
 
 def test_open_new():

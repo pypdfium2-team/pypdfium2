@@ -4,25 +4,31 @@
 import sys
 import argparse
 import importlib
-from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
-from pypdfium2_cli._parsers import setup_logging
+import functools
+from os.path import basename
+from pypdfium2_cli._setup import setup_logging
 
-from pypdfium2_raw.bindings import _libs
 
-SubCommands = {
-    "arrange":        "Rearrange/merge documents",
-    "attachments":    "List/extract/edit embedded files",
-    "extract-images": "Extract images",
-    "extract-text":   "Extract text",
-    "imgtopdf":       "Convert images to PDF",
-    "pageobjects":    "Print info on pageobjects",
-    "pdfinfo":        "Print info on document and pages",
-    "render":         "Rasterize pages",
-    "tile":           "Tile pages (N-up)",
-    "toc":            "Print table of contents",
-}
-
-CmdToModule = {n: importlib.import_module(f"pypdfium2_cli.{n.replace('-', '_')}") for n in SubCommands}
+@functools.cache
+def init():
+    global PYPDFIUM_INFO, PDFIUM_INFO, _libs
+    from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
+    from pypdfium2_raw.bindings import _libs
+    
+    global SubCommands, CmdToModule
+    SubCommands = {
+        "arrange":        "Rearrange/merge documents",
+        "attachments":    "List/extract/edit embedded files",
+        "extract-images": "Extract images",
+        "extract-text":   "Extract text",
+        "imgtopdf":       "Convert images to PDF",
+        "pageobjects":    "Print info on pageobjects",
+        "pdfinfo":        "Print info on document and pages",
+        "render":         "Rasterize pages",
+        "tile":           "Tile pages (N-up)",
+        "toc":            "Print table of contents",
+    }
+    CmdToModule = {n: importlib.import_module(f"pypdfium2_cli.{n.replace('-', '_')}") for n in SubCommands}
 
 
 def get_parser():
@@ -30,7 +36,20 @@ def get_parser():
     main_parser = argparse.ArgumentParser(
         prog = "pypdfium2",
         formatter_class = argparse.RawTextHelpFormatter,
-        description = "Command line interface to the pypdfium2 library (Python binding to PDFium)",
+        description = """\
+Command line interface to the pypdfium2 library (Python binding to PDFium)
+Invoke as `pypdfium2` or `%(py_exe)s -m pypdfium2_cli`
+
+Environment variables:
+- PYPDFIUM_LOGLEVEL {debug,info,warning,error,critical} = debug
+  Controls the logging level.
+- DEBUG_AUTOCLOSE {0,1} = 0
+  Print debug info when PDFium objects are (auto-)closed.
+- DEBUG_SYSFONTS {0,1} = 0
+  Whether to regsiter a sysfont info handler.
+- DEBUG_UNSUPPORTED {0,1} = 1
+  Whether to enable or disable the unsupported feature handler.\
+""" % dict(py_exe=basename(sys.executable)),
     )
     main_parser.add_argument(
         "--version", "-v",
@@ -54,6 +73,7 @@ def get_parser():
 
 def api_main(raw_args=sys.argv[1:]):
     
+    init()
     parser = get_parser()
     args = parser.parse_args(raw_args)
     
