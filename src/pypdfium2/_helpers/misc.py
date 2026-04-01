@@ -18,7 +18,13 @@ class PdfiumError (RuntimeError):
 
 
 class PdfiumWarning (Warning):
-
+    """
+    ...
+    
+    Attributes:
+        err_code (int | None): ...
+    """
+    
     def __init__(self, msg, err_code=None):
         super().__init__(msg)
         self.err_code = err_code

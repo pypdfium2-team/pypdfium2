@@ -13,9 +13,14 @@ if sys.version_info < (3, 8):  # pragma: no cover
     # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
     def cached_property(func):
         return property( functools.lru_cache(maxsize=1)(func) )
+    
+    def cached_property_clear(obj, name):
+        getattr(type(obj), name).fget.cache_clear()
+
 else:
     cached_property = functools.cached_property
-
+    def cached_property_clear(obj, name):
+        delattr(obj, name)
 
 class _LazyClass:
     
