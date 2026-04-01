@@ -52,14 +52,12 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         self._destroys_default = False
         if default is None:
             self._made_default = True
-            default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
-            if not default_ptr:
-                raise PdfiumError(f"No default FPDF_SYSFONTINFO available on this platform ({sys.platform!r}), cannot use {type(self).__name__}.")
-            self.default = default_ptr.contents
+            self.default = self._get_default()
         else:
             self._made_default = False
             if isinstance(default, PdfSysfontBase):
                 assert not default._destroys_default, "When a sysfontinfo is nested, it must not destroy its default."
+                assert default.default is not None, "Cannot use a closed sysfont handler whose default has been freed."
                 default = default.raw  # resolve
             self.default = default
         
@@ -83,9 +81,22 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         atexit.register(self._close_impl)
     
     
+    def _get_default(self):
+        default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
+        if not default_ptr:
+            raise PdfiumError(f"No default FPDF_SYSFONTINFO available on this platform ({sys.platform!r}), cannot use {type(self).__name__}.")
+        return default_ptr.contents
+    
+    
     def setup(self):
+        if PdfSysfontBase._SINGLETON is self:
+            return
+        if self._made_default and self.default is None:
+            self.default = self._get_default()
         self._is_installed = True
         self._destroys_default = self._made_default
+        atexit.unregister(self._close_impl)
+        atexit.register(self._close_impl)
         if PdfSysfontBase._SINGLETON is not None:
             logger.info(f"Constructing a new {type(self).__name__} instance implicitly closes previous sysfont handler instance {PdfSysfontBase._SINGLETON}")
             PdfSysfontBase._SINGLETON.close()
@@ -106,7 +117,10 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             PdfSysfontBase._SINGLETON = None
         if self._destroys_default:
             pdfium_i._debug_close(f"Close default sysfontinfo")
-            pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.default)
+            self._destroys_default = False
+            default = self.default
+            self.default = None
+            pdfium_c.FPDF_FreeDefaultSystemFontInfo(default)
     
     def close(self):  # manual
         """
@@ -159,15 +173,11 @@ class PdfSysfontListener (PdfSysfontBase):
         return impl
 
     def _record_request(self, face, result):
-        try:
-            if face:
-                face_bstr = ctypes.cast(face, ctypes.c_char_p).value
-                if face_bstr:
-                    name = face_bstr.decode(locale.getpreferredencoding(False), errors="replace")
-                    if not self._font_requests.get(name, False):
-                        self._font_requests[name] = bool(result)
-        except Exception:
-            pass
+        face_bstr = ctypes.cast(face, ctypes.c_char_p).value
+        if face_bstr:
+            name = face_bstr.decode(locale.getpreferredencoding(False), errors="replace")
+            if not self._font_requests.get(name, False):
+                self._font_requests[name] = bool(result)
 
     def get_font_requests(self):
         """

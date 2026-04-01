@@ -6,6 +6,7 @@ import sys
 import subprocess
 import pytest
 import pypdfium2 as pdfium
+import pypdfium2.raw as pdfium_c
 from .conftest import TestFiles
 
 
@@ -76,6 +77,68 @@ def test_listener_manual_close():
     page.get_textpage()
     assert listener.get_font_requests() != {}
     listener.close()
+
+
+def test_listener_repeated_setup_and_reopen():
+    env = os.environ.copy()
+    src_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src")
+    env["PYTHONPATH"] = src_dir + os.pathsep + env.get("PYTHONPATH", "")
+
+    result = subprocess.run(
+        [sys.executable, "-c", (
+            "import pypdfium2 as pdfium; "
+            "listener = pdfium.PdfSysfontListener(); "
+            "listener.setup(); "
+            "listener.setup(); "
+            "listener.close(); "
+            "listener.setup(); "
+            "pdf = pdfium.PdfDocument(%r); "
+            "page = pdf[0]; "
+            "tp = page.get_textpage(); "
+            "assert listener.get_font_requests(); "
+        ) % FAKE_FONT_PDF],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env=env,
+    )
+    assert result.returncode == 0, f"stdout={result.stdout!r}, stderr={result.stderr!r}"
+    for marker in ["Traceback", "Exception ignored", "Error in atexit"]:
+        assert marker not in result.stderr, f"Found {marker!r} in stderr: {result.stderr!r}"
+
+
+def test_listener_closed_owner_cannot_chain():
+    listener = pdfium.PdfSysfontListener()
+    listener.setup()
+    listener.close()
+
+    with pytest.raises(AssertionError, match="default has been freed"):
+        pdfium.PdfSysfontListener(listener)
+
+
+def test_listener_borrowed_default_can_reopen_and_chain():
+    default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
+    assert default_ptr
+    listener = None
+    nested = None
+    try:
+        listener = pdfium.PdfSysfontListener(default_ptr.contents)
+        listener.setup()
+        listener.close()
+        listener.setup()
+        nested = pdfium.PdfSysfontListener(listener)
+        nested.setup()
+
+        pdf = pdfium.PdfDocument(FAKE_FONT_PDF)
+        page = pdf[0]
+        page.get_textpage()
+        assert nested.get_font_requests() != {}
+    finally:
+        if nested is not None:
+            nested.close()
+        if listener is not None:
+            listener.close()
+        pdfium_c.FPDF_FreeDefaultSystemFontInfo(default_ptr.contents)
 
 
 def test_listener_clean_exit():

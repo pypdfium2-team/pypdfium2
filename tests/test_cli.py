@@ -6,6 +6,7 @@ import sys
 import logging
 import filecmp
 import contextlib
+import importlib
 from pathlib import Path
 import pytest
 import pypdfium2 as pdfium
@@ -164,3 +165,10 @@ def test_render_multipage(tmp_path):
     
     out_files = list(out_dir.iterdir())
     assert sorted([f.name for f in out_files]) == ["multipage_1.jpg", "multipage_2.jpg", "multipage_3.jpg"]
+
+
+def test_get_parser_direct_call():
+    cli = importlib.reload(pdfium_cli)
+    parser = cli.get_parser()
+    args = parser.parse_args(["pdfinfo", str(TestFiles.text)])
+    assert args.subcommand == "pdfinfo"

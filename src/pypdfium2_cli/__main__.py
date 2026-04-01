@@ -32,7 +32,8 @@ def init():
 
 
 def get_parser():
-    
+
+    init()
     main_parser = argparse.ArgumentParser(
         prog = "pypdfium2",
         formatter_class = argparse.RawTextHelpFormatter,
