@@ -77,16 +77,21 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     
     def __init__(self, default=None, reusable=False):
         
+        self._is_installed = False
         self._reusable = reusable
-        self._default_destroyed = False
+        self._destroyed = False
         self._child = None
+        
         if default is None:
-            self._own_default = True
+            self._owns_pdfium_default = True
             self.default = PdfDefaultSysfontInfo.raw
         else:
-            self._own_default = False
+            self._owns_pdfium_default = False
             if isinstance(default, PdfSysfontBase):
                 self._child = default
+                # transfer ownership of the default instance
+                self._owns_pdfium_default = self._child._owns_pdfium_default
+                self._child._owns_pdfium_default = False
                 default = default.raw  # resolve
             elif isinstance(default, _PdfDefaultSysfontInfoClass):
                 default = default.raw
@@ -113,6 +118,11 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         # trust in python to keep any object members (self.raw, self.default) alive while the object itself is referenced
         # note that the object may still be needed after it was closed if reusable=True has been set and it is being wrapped by another sysfont handler
     
+    def _iterkids(self):
+        child = self._child
+        while child:
+            yield child
+            child = child._child
     
     def setup(self):
         """
@@ -124,32 +134,38 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             Sysfont handlers are singleton, i.e. only one handler can be active at a time.
             When a new handler is installed, the previous handler (if any) is implicitly closed.
         """
+        
         if PdfSysfontBase._SINGLETON is not None:
             logger.info(f"Installing a new {type(self).__name__} instance implicitly closes previous sysfont handler instance {PdfSysfontBase._SINGLETON}")
             PdfSysfontBase._SINGLETON.close(reusable=True)
-        if self._child and self._child._default_destroyed:
-            raise PdfiumError("You cannot register a sysfontinfo whose child's default handler is destroyed. Pass `reusable=True` when constructing or closing the child. Singleton replacement can do this implicitly.")
+        
+        if any(h._destroyed for h in (self, *self._iterkids())):
+            raise PdfiumError("You cannot register a sysfontinfo that has been destroyed, whether directly or indirectly. Pass `reusable=True` on construction or closing of handlers as necessary. Singleton replacement can do this implicitly.")
+        
         pdfium_c.FPDF_SetSystemFontInfo(self.raw)
         PdfSysfontBase._SINGLETON = self
+        self._is_installed = True
         atexit.register(self._close_impl)
     
     
     def _close_impl(self):
         
+        if not self._is_installed:
+            return
+        
         pdfium_i._debug_close(f"Close sysfontinfo")
         
         # propagate parent state across all children, direct or indirect
-        obj = self
-        while obj._child:
-            obj._child._reusable = obj._reusable
-            obj = obj._child
-        deepest_child = obj
+        for child in self._iterkids():
+            child._reusable = self._reusable
         
         # important: unsetting the sysfontinfo implies self.default.Release(), so default can only be closed after (not before!) this call
         pdfium_c.FPDF_SetSystemFontInfo(None)
-        # When the object is not reusable and the innermost handler owns pdfium's default sysfontinfo, we release it. By design, only the innermost handler can - and most probably does - own pdfium's default.
-        if not self._reusable and deepest_child._own_default:
+        # When the object is not reusable and we have ownership of the default instance, release it.
+        if not self._reusable and self._owns_pdfium_default:
             PdfDefaultSysfontInfo.close()
+            self._owns_pdfium_default = False
+        
         PdfSysfontBase._SINGLETON = None
     
     def close(self, reusable=None):  # manual
@@ -177,7 +193,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             pdfium_i._debug_close(f"fontinfo::Release: skip because it is reusable")
             return
         pdfium_i._debug_close(f"fontinfo::Release: actually release (wrapped={self._child})")
-        self._default_destroyed = True
+        self._destroyed = True
         return self.default.Release(self.default)
 
 
