@@ -29,7 +29,7 @@ class _PdfDefaultSysfontInfoClass (pdfium_i.AutoCastable):
         if not default_ptr:
             raise PdfiumError(f"No default FPDF_SYSFONTINFO available on this platform ({sys.platform!r}), cannot use {type(self).__name__}.")
         # trust in python to invoke exit handlers in reverse order to creation
-        # this atexit.register() goes before any PdfSysfontBase atexit.register(), so it should only ever be closed after the sysfontinfo which relies on this default to remain valid
+        # this goes before any PdfSysfontBase atexit.register(), so it should only ever be closed after the sysfontinfo which relies on this default to remain valid
         atexit.register(self._close_impl)
         return default_ptr.contents
     
@@ -50,19 +50,16 @@ PdfDefaultSysfontInfo = _PdfDefaultSysfontInfoClass()
 
 class PdfSysfontBase (pdfium_i.AutoCastable):
     """
-    Base helper class to set up and register a ``FPDF_SYSFONTINFO`` callback system.
+    Base helper class to create a ``FPDF_SYSFONTINFO`` callback system.
     Callbacks can be implemented by subclassing (names from ``FPDF_SYSFONTINFO``, converted to snake_case).
-    When a callback is not implemented, this constructor will automatically delegate it to the default handler.
+    When a callback is not implemented, it will be automatically delegated to the default handler.
+    
+    The constructor merely creates the underlying ``FPDF_SYSFONTINFO``.
+    Call :meth:`.setup` to actually register it with pdfium.
     
     Parameters:
         default (PdfSysfontBase | FPDF_SYSFONTINFO):
             TODO
-    
-    Note:\n
-        When a :class:`.PdfSysfontBase` instance is created, it is (by default) kept alive until the end of session, through an exit handler.
-        To stop the sysfont handler earlier, call :meth:`.close`.\n
-        Sysfont handlers are singleton, i.e. only one handler can live at a time.
-        When a new handler is created, the previous handler (if any) is implicitly closed.
     
     Important:
         In subclass callbacks, you will typically want to wrap pdfium's default implementation rather than writing your own implementation from scratch.
@@ -119,7 +116,13 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     
     def setup(self):
         """
-        TODO
+        Install (activate) the sysfont handler.
+        
+        Note:\n
+            Once this method has been called, the instance is (by default) kept alive until the end of session, through an exit handler.
+            To stop the sysfont handler earlier, call :meth:`.close`.\n
+            Sysfont handlers are singleton, i.e. only one handler can be active at a time.
+            When a new handler is installed, the previous handler (if any) is implicitly closed.
         """
         if PdfSysfontBase._SINGLETON is not None:
             logger.info(f"Installing a new {type(self).__name__} instance implicitly closes previous sysfont handler instance {PdfSysfontBase._SINGLETON}")
