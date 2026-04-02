@@ -31,4 +31,12 @@ def setup_logging():
     if debug_unsupported:
         pdfium.PdfUnspHandler().setup()
     if debug_sysfonts:
-        pdfium.PdfSysfontListener().setup()
+        h = pdfium.PdfSysfontListener()
+        h.setup()
+        h.close(reusable=True)  # TODO add safety mechanism
+        h.setup()
+        # h = pdfium.PdfSysfontListener()
+        # h2 = pdfium.PdfSysfontListener(h)
+        # h3 = pdfium.PdfSysfontListener(h2)
+        # h.close()
+        # h3.setup()  # XXX crashes
