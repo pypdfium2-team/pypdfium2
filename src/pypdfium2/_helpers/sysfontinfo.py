@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfSysfontBase", "PdfSysfontListener", "PdfDefaultSysfontInfo")
+__all__ = ("PdfSysfontBase", "PdfSysfontListener")
 
 import sys
 import ctypes
@@ -16,7 +16,7 @@ FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 logger = logging.getLogger(__name__)
 
 
-class _PdfDefaultSysfontInfoClass (pdfium_i.AutoCastable):
+class _DefaultSysfontInfoClass (pdfium_i.AutoCastable):
     
     def __init__(self):
         self._is_loaded = False
@@ -45,7 +45,7 @@ class _PdfDefaultSysfontInfoClass (pdfium_i.AutoCastable):
         atexit.unregister(self._close_impl)
         self._close_impl()
 
-PdfDefaultSysfontInfo = _PdfDefaultSysfontInfoClass()
+_DefaultSysfontInfo = _DefaultSysfontInfoClass()
 
 
 class PdfSysfontBase (pdfium_i.AutoCastable):
@@ -83,7 +83,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         self._child = None
         
         if default is None:
-            self.default = PdfDefaultSysfontInfo.raw
+            self.default = _DefaultSysfontInfo.raw
         else:
             if isinstance(default, PdfSysfontBase):
                 self._child = default
@@ -153,7 +153,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         
         pdfium_c.FPDF_SetSystemFontInfo(None)
         if self._destroyed:
-            PdfDefaultSysfontInfo.close()
+            _DefaultSysfontInfo.close()
         PdfSysfontBase._SINGLETON = None
     
     def close(self, reusable=None):  # manual
