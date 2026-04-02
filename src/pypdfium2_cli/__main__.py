@@ -46,7 +46,7 @@ Environment variables:
 - DEBUG_AUTOCLOSE {0,1} = 0
   Print debug info when PDFium objects are (auto-)closed.
 - DEBUG_SYSFONTS {0,1} = 0
-  Whether to regsiter a sysfont info handler.
+  Whether to register a sysfont info handler.
 - DEBUG_UNSUPPORTED {0,1} = 1
   Whether to enable or disable the unsupported feature handler.\
 """ % dict(py_exe=basename(sys.executable)),
