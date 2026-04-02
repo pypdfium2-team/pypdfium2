@@ -51,7 +51,7 @@ _DefaultSysfontInfo = _DefaultSysfontInfoClass()
 class PdfSysfontBase (pdfium_i.AutoCastable):
     """
     Base helper class to create a ``FPDF_SYSFONTINFO`` callback system.
-    Callbacks can be implemented by subclassing (names from `fpdf_sysfontinfo.h`, converted to snake_case).
+    Callbacks can be implemented by subclassing (names match with pdfium).
     When a callback is not implemented, it will be automatically delegated to the default handler.
     
     The constructor merely creates the underlying ``FPDF_SYSFONTINFO``.
@@ -107,20 +107,11 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         
         self.raw = FPDF_SYSFONTINFO()
         self.raw.version = self.default.version
-        cb_names = {
-            "Release": "release",
-            "EnumFonts": "enum_fonts",
-            "MapFont": "map_font",
-            "GetFont": "get_font",
-            "GetFontData": "get_font_data",
-            "GetFaceName": "get_face_name",
-            "GetFontCharset": "get_font_charset",
-            "DeleteFont": "delete_font",
-        }
-        if self.default.version != 1:  # as per docs
-            del cb_names["EnumFonts"]
+        cb_names = ("Release", "EnumFonts", "MapFont", "GetFont", "GetFontData", "GetFaceName", "GetFontCharset", "DeleteFont")
         
-        callbacks = {cn: self._get_callback(cn, pn) for cn, pn in cb_names.items()}
+        callbacks = {n: self._get_callback(n) for n in cb_names}
+        if self.default.version != 1:  # as per docs
+            del callbacks["EnumFonts"]
         pdfium_i.set_callbacks(self.raw, **callbacks)
         
         # trust in python to keep any object members (self.raw, self.default) alive while the object itself is referenced
@@ -184,14 +175,14 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         self._close_impl()
     
     
-    def _get_callback(self, c_name, py_name):
-        impl = getattr(self, py_name, None)
+    def _get_callback(self, name):
+        impl = getattr(self, name, None)
         if not impl:
             def impl(_, *args):
-                return getattr(self.default, c_name)(self.default, *args)
+                return getattr(self.default, name)(self.default, *args)
         return impl
     
-    def release(self, _):
+    def Release(self, _):
         if self._reusable:
             pdfium_i._debug_close(f"fontinfo::Release: skip because it is reusable")
             return
@@ -212,15 +203,15 @@ class PdfSysfontListener (PdfSysfontBase):
         super().__init__(default)
         logger.debug(f"fontinfo default interface version is {self.default.version}")
     
-    def _get_callback_impl(self, c_name, py_name):
-        impl = getattr(self, py_name, None)
+    def _get_callback_impl(self, name):
+        impl = getattr(self, name, None)
         if not impl:
             def impl(_, *args):
-                logger.debug(f"fontinfo::{c_name} {args}")
-                return getattr(self.default, c_name)(self.default, *args)
+                logger.debug(f"fontinfo::{name} {args}")
+                return getattr(self.default, name)(self.default, *args)
         return impl
     
-    def map_font(self, _, weight, bItalic, charset, pitch_family, face, bExact):
+    def MapFont(self, _, weight, bItalic, charset, pitch_family, face, bExact):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
         logger.debug(f"fontinfo::MapFont:in (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pdfium_i.PdfFontPitchFamilyFlags(pitch_family).name!r}, face={face_bstr!r})")
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, bExact)
