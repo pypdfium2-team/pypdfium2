@@ -99,10 +99,10 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         if default is None:
             self.default = _DefaultSysfontInfo.raw
         else:
-            if isinstance(default, PdfSysfontBase):
-                # TODO for any callbacks that were not re-implemented compared to PdfSysfontBase, propagate from default to avoid needless python function calls
-                self._child = default
             self.default = default
+            if isinstance(self.default, PdfSysfontBase):
+                self._child = self.default
+                self._propagate_from_default()
         self.version = self.default.version
         
         self.raw = FPDF_SYSFONTINFO()
@@ -112,9 +112,14 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         if self.default.version != 1:  # as per docs
             del callbacks["EnumFonts"]
         pdfium_i.set_callbacks(self.raw, **callbacks)
-        
-        # trust in python to keep any object members (self.raw, self.default) alive while the object itself is referenced
-        # note that the object may still be needed after it was closed if reusable=True has been set and it is being wrapped by another sysfont handler
+    
+    
+    def _propagate_from_default(self):
+        # for any callbacks that were not re-implemented compared to PdfSysfontBase, propagate from default to avoid needless python function calls
+        for cb_name in _CallbackNames:
+            candidate = getattr(self.default, cb_name)
+            if getattr(PdfSysfontBase, cb_name) is candidate.__func__:
+                setattr(self, cb_name, candidate)
     
     def _iterkids(self):
         child = self._child
@@ -140,6 +145,8 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         if any(h._destroyed for h in (self, *self._iterkids())):
             raise PdfiumError("You cannot register a sysfontinfo that has been destroyed, whether directly or indirectly. Pass `reusable=True` on setup or closing of handlers as necessary. Singleton replacement can do this implicitly.")
         
+        # trust in python to keep any object members (self.raw, self.default) alive while the object itself is referenced
+        # note that the object may still be needed after it was closed if reusable=True has been set and it is being wrapped by another sysfont handler
         pdfium_c.FPDF_SetSystemFontInfo(self.raw)
         PdfSysfontBase._SINGLETON = self
         self._is_installed = True
