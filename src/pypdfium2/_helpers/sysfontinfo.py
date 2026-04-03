@@ -1,10 +1,9 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfSysfontBase", "PdfSysfontListener")
+__all__ = ("PdfSysfontBase", )
 
 import sys
-import ctypes
 import atexit
 import logging
 import pypdfium2.raw as pdfium_c
@@ -56,7 +55,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     Callbacks can be implemented by subclassing (see `fpdf_sysfontinfo.h` for available callouts and their parameters).
     When a callback is not implemented, it will be automatically delegated to the default handler.
     
-    The constructor merely creates the underlying ``FPDF_SYSFONTINFO`` instance.
+    This constructor merely creates the underlying ``FPDF_SYSFONTINFO`` instance.
     Call :meth:`.setup` to actually register it with pdfium.
     
     System font handlers are built around the idea of wrapping another implementation, with the root implementation being provided by pdfium.
@@ -207,46 +206,4 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         return self.default.GetFontCharset(self.default, hFont)
     
     def DeleteFont(self, _, hFont):
-        return self.default.DeleteFont(self.default, hFont)
-
-
-class PdfSysfontListener (PdfSysfontBase):
-    """
-    TODO
-    """
-    
-    def __init__(self, default=None, log_all=True):  # XXX log_all
-        logger.debug("Installing sysfontinfo...")
-        super().__init__(default)
-        logger.debug(f"fontinfo default interface version is {self.version}")
-    
-    def MapFont(self, _, weight, bItalic, charset, pitch_family, face, bExact):
-        face_bstr = ctypes.cast(face, ctypes.c_char_p).value
-        logger.debug(f"fontinfo::MapFont:in (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pdfium_i.PdfFontPitchFamilyFlags(pitch_family).name!r}, face={face_bstr!r})")
-        out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, bExact)
-        logger.debug(f"fontinfo::MapFont:out {out}")
-        return out
-    
-    def EnumFonts(self, _, pMapper):
-        logger.debug(f"fontinfo::EnumFonts {pMapper, }")
-        return self.default.EnumFonts(self.default, pMapper)
-    
-    def GetFont(self, _, face):
-        logger.debug(f"fontinfo::GetFont {face, }")
-        return self.default.GetFont(self.default, face)
-    
-    def GetFontData(self, _, hFont, table, buffer, buf_size):
-        logger.debug(f"fontinfo::GetFontData {hFont, table, buffer, buf_size}")
-        return self.default.GetFontData(self.default, hFont, table, buffer, buf_size)
-    
-    def GetFaceName(self, _, hFont, buffer, buf_size):
-        logger.debug(f"fontinfo::GetFaceName {hFont, buffer, buf_size}")
-        return self.default.GetFaceName(self.default, hFont, buffer, buf_size)
-    
-    def GetFontCharset(self, _, hFont):
-        logger.debug(f"fontinfo::GetFontCharset {hFont, }")
-        return self.default.GetFontCharset(self.default, hFont)
-    
-    def DeleteFont(self, _, hFont):
-        logger.debug(f"fontinfo::DeleteFont {hFont, }")
         return self.default.DeleteFont(self.default, hFont)
