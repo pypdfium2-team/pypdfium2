@@ -47,6 +47,8 @@ class _DefaultSysfontInfoClass (pdfium_i.AutoCastable):
 
 _DefaultSysfontInfo = _DefaultSysfontInfoClass()
 
+_CallbackNames = ("Release", "EnumFonts", "MapFont", "GetFont", "GetFontData", "GetFaceName", "GetFontCharset", "DeleteFont")
+
 
 class PdfSysfontBase (pdfium_i.AutoCastable):
     """
@@ -97,17 +99,16 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         if default is None:
             self.default = _DefaultSysfontInfo.raw
         else:
-            # FIXME when another PdfSysfontBase is passed in as default, we want to use the plain python functions without CFUNCTYPE wrapper which adds significant overhead - this is going to take a complicated refactoring
             if isinstance(default, PdfSysfontBase):
+                # TODO for any callbacks that were not re-implemented compared to PdfSysfontBase, propagate from default to avoid needless python function calls
                 self._child = default
-                default = default.raw  # resolve
             self.default = default
+        self.version = self.default.version
         
         self.raw = FPDF_SYSFONTINFO()
-        self.raw.version = self.default.version
-        cb_names = ("Release", "EnumFonts", "MapFont", "GetFont", "GetFontData", "GetFaceName", "GetFontCharset", "DeleteFont")
+        self.raw.version = self.version
         
-        callbacks = {n: getattr(self, n) for n in cb_names}
+        callbacks = {n: getattr(self, n) for n in _CallbackNames}
         if self.default.version != 1:  # as per docs
             del callbacks["EnumFonts"]
         pdfium_i.set_callbacks(self.raw, **callbacks)
@@ -210,7 +211,7 @@ class PdfSysfontListener (PdfSysfontBase):
     def __init__(self, default=None, log_all=True):  # XXX log_all
         logger.debug("Installing sysfontinfo...")
         super().__init__(default)
-        logger.debug(f"fontinfo default interface version is {self.default.version}")
+        logger.debug(f"fontinfo default interface version is {self.version}")
     
     def MapFont(self, _, weight, bItalic, charset, pitch_family, face, bExact):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
