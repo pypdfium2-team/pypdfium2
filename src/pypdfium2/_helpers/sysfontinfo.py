@@ -52,7 +52,7 @@ _CallbackNames = ("Release", "EnumFonts", "MapFont", "GetFont", "GetFontData", "
 class PdfSysfontBase (pdfium_i.AutoCastable):
     """
     Base helper class to create a ``FPDF_SYSFONTINFO`` callback system.
-    Callbacks can be implemented by subclassing (see `fpdf_sysfontinfo.h` for available callouts and their parameters).
+    Callbacks can be implemented by subclassing (see `fpdf_sysfontinfo.h` for available callouts and their documentation).
     When a callback is not implemented, it will be automatically delegated to the default handler.
     
     This constructor merely creates the underlying ``FPDF_SYSFONTINFO`` instance.
@@ -74,14 +74,20 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     The important bit here is to pass ``self.default`` as first argument to the wrapped callback, not the first argument after ``self`` received in the method signature (named ``_`` above), which is a pointer to the wrapper itself.
     
     :class:`.PdfSysfontBase` instances can wrap one another as you might do in C.
-    However, ...
+    This allows for flexible combination of traits among different handler implementations.
     
     Parameters:
-        default (PdfSysfontBase | FPDF_SYSFONTINFO):
-            TODO
+        default (None | FPDF_SYSFONTINFO | PdfSysfontBase):
+            The sysfont handler to be wrapped. If None (the default), pdfium's root implementation will be used. Otherwise, this can be either a raw ``FPDF_SYSFONTINFO`` or another :class:`.PdfSysfontBase` instance.
+    
+    Note:
+        When another :class:`.PdfSysfontBase` instance is being wrapped, some tricks are applied to avoid overhead:\n
+        - Where wrapper and child share the same callback, the child method will be populated to the wrapper (so, as a side effect, even stacking instances of the same class would result in only one call).\n
+        - Also, only in the actual ``FPDF_SYSFONTINFO`` object are callbacks ever enclosed in their :func:`~ctypes.CFUNCTYPE`, whereas wrappers call the original function directly.
+    
     Attributes:
         raw (FPDF_SYSFONTINFO):
-            The sysfontinfo created and represented by this class. Wraps :attr:`.default`.
+            The underlying ``FPDF_SYSFONTINFO`` interface struct implemented by this class. Wraps :attr:`.default`.
         default (FPDF_SYSFONTINFO | PdfSysfontBase):
             The sysfont handler being wrapped. Wrapper callbacks typically delegate the actual work to the default implementation.
     """
@@ -101,7 +107,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             self.default = default
             if isinstance(self.default, PdfSysfontBase):
                 self._child = self.default
-                self._propagate_from_default()
+                self._populate_default_callbacks()
         self.version = self.default.version
         
         self.raw = FPDF_SYSFONTINFO()
@@ -113,11 +119,12 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         pdfium_i.set_callbacks(self.raw, **callbacks)
     
     
-    def _propagate_from_default(self):
-        # for any callbacks that were not re-implemented compared to PdfSysfontBase, propagate from default to avoid needless python function calls
+    def _populate_default_callbacks(self):
+        # for any callbacks that were not re-implemented, we populate from default to avoid needless python function calls
+        reference_class = type(self)
         for cb_name in _CallbackNames:
             candidate = getattr(self.default, cb_name)
-            if getattr(PdfSysfontBase, cb_name) is candidate.__func__:
+            if getattr(reference_class, cb_name) is candidate.__func__:
                 setattr(self, cb_name, candidate)
     
     def _iterkids(self):
@@ -164,6 +171,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         
         pdfium_c.FPDF_SetSystemFontInfo(None)
         if self._destroyed:
+            # Assuming pdfium's default impl was used. In the unlikely event that it was not used, this is a no-op.
             _DefaultSysfontInfo.close()
         PdfSysfontBase._SINGLETON = None
     
@@ -190,8 +198,8 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     def EnumFonts(self, _, pMapper):
         return self.default.EnumFonts(self.default, pMapper)
     
-    def MapFont(self, _, weight, bItalic, charset, pitch_family, face, bExact):
-        return self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, bExact)
+    def MapFont(self, _, weight, bItalic, charset, pitch_family, face, _ignored):
+        return self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, _ignored)
     
     def GetFont(self, _, face):
         return self.default.GetFont(self.default, face)

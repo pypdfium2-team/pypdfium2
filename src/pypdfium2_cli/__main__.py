@@ -48,7 +48,7 @@ Environment variables:
 - DEBUG_UNSUPPORTED {0,1} = 1
   Whether to enable or disable the unsupported feature handler.\
 - DEBUG_SYSFONTS {all,core,''} = ''
-  The sysfont listener to install, or an empty string if you do not want to debug sysfonts.
+  The sysfont listener to install, or an empty string to not inspect sysfonts.
 """ % dict(py_exe=basename(sys.executable)),
     )
     main_parser.add_argument(
