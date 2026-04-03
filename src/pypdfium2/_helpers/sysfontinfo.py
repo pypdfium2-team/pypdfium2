@@ -51,40 +51,38 @@ _DefaultSysfontInfo = _DefaultSysfontInfoClass()
 class PdfSysfontBase (pdfium_i.AutoCastable):
     """
     Base helper class to create a ``FPDF_SYSFONTINFO`` callback system.
-    Callbacks can be implemented by subclassing (names match with pdfium).
+    Callbacks can be implemented by subclassing, see `fpdf_sysfontinfo.h`.
     When a callback is not implemented, it will be automatically delegated to the default handler.
     
-    The constructor merely creates the underlying ``FPDF_SYSFONTINFO``.
+    The constructor merely creates the underlying ``FPDF_SYSFONTINFO`` instance.
     Call :meth:`.setup` to actually register it with pdfium.
     
-    System font handlers are built around the idea of wrapping another implementation rather than writing one from scratch, with the root implementation being provided by pdfium.
+    System font handlers are built around the idea of wrapping another implementation, with the root implementation being provided by pdfium.
     See the example below for how to invoke the default implementation in a callback:
     
     .. code-block:: python
         
         class MySysfontImpl (PdfSysfontBase):
-            # substitute callback_name_py and CallbackNameC accordingly
-            def callback_name_py(self, _, arg1, arg2, ...)
+            # substitute CallbackName accordingly
+            def CallbackName(self, _, arg1, arg2, ...)
                 print("Wrap before")
-                self.default.CallbackNameC(self.default, arg1, arg2, ...)
+                out = self.default.CallbackName(self.default, arg1, arg2, ...)
                 print("Wrap after")
+                return out
     
     The important bit here is to pass ``self.default`` as first argument to the wrapped callback, not the first argument after ``self`` received in the method signature (named ``_`` above), which is a pointer to the wrapper itself.
     
-    This is similar to calling a parent method in python subclassing.
-    The reason for keeping the raw syntax is to avoid enclosing the callback in yet another python function that may add overhead.
-    
-    :class:`.PdfSysfontBase` instances can wrap one another as you might do in C, though with overhead from the :func:`~ctypes.CFUNCTYPE` enclosures.
-    While this problem persists, it may be preferable to create a new python class to achieve the combination you need.
+    :class:`.PdfSysfontBase` instances can wrap one another as you might do in C.
+    However, ...
     
     Parameters:
         default (PdfSysfontBase | FPDF_SYSFONTINFO):
             TODO
     Attributes:
         raw (FPDF_SYSFONTINFO):
-            ...
-        default (FPDF_SYSFONTINFO):
-            ...
+            The sysfontinfo created and represented by this class. Wraps :attr:`.default`.
+        default (FPDF_SYSFONTINFO | PdfSysfontBase):
+            The sysfont handler being wrapped. Wrapper callbacks typically delegate the actual work to the default implementation.
     """
     
     _SINGLETON = None
