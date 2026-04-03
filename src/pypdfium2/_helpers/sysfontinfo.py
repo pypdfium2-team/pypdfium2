@@ -51,7 +51,7 @@ _DefaultSysfontInfo = _DefaultSysfontInfoClass()
 class PdfSysfontBase (pdfium_i.AutoCastable):
     """
     Base helper class to create a ``FPDF_SYSFONTINFO`` callback system.
-    Callbacks can be implemented by subclassing, see `fpdf_sysfontinfo.h`.
+    Callbacks can be implemented by subclassing (see `fpdf_sysfontinfo.h` for available callouts and their parameters).
     When a callback is not implemented, it will be automatically delegated to the default handler.
     
     The constructor merely creates the underlying ``FPDF_SYSFONTINFO`` instance.
@@ -107,7 +107,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         self.raw.version = self.default.version
         cb_names = ("Release", "EnumFonts", "MapFont", "GetFont", "GetFontData", "GetFaceName", "GetFontCharset", "DeleteFont")
         
-        callbacks = {n: self._get_callback(n) for n in cb_names}
+        callbacks = {n: getattr(self, n) for n in cb_names}
         if self.default.version != 1:  # as per docs
             del callbacks["EnumFonts"]
         pdfium_i.set_callbacks(self.raw, **callbacks)
@@ -172,14 +172,6 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         atexit.unregister(self._close_impl)
         self._close_impl()
     
-    
-    def _get_callback(self, name):
-        impl = getattr(self, name, None)
-        if not impl:
-            def impl(_, *args):
-                return getattr(self.default, name)(self.default, *args)
-        return impl
-    
     def Release(self, _):
         if self._reusable:
             pdfium_i._debug_close(f"fontinfo::Release: skip because it is reusable")
@@ -187,6 +179,27 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         pdfium_i._debug_close(f"fontinfo::Release: actually release (wrapped={self._child})")
         self._destroyed = True
         return self.default.Release(self.default)
+    
+    def EnumFonts(self, _, pMapper):
+        return self.default.EnumFonts(self.default, pMapper)
+    
+    def MapFont(self, _, weight, bItalic, charset, pitch_family, face, bExact):
+        return self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, bExact)
+    
+    def GetFont(self, _, face):
+        return self.default.GetFont(self.default, face)
+    
+    def GetFontData(self, _, hFont, table, buffer, buf_size):
+        return self.default.GetFontData(self.default, hFont, table, buffer, buf_size)
+    
+    def GetFaceName(self, _, hFont, buffer, buf_size):
+        return self.default.GetFaceName(self.default, hFont, buffer, buf_size)
+    
+    def GetFontCharset(self, _, hFont):
+        return self.default.GetFontCharset(self.default, hFont)
+    
+    def DeleteFont(self, _, hFont):
+        return self.default.DeleteFont(self.default, hFont)
 
 
 class PdfSysfontListener (PdfSysfontBase):
@@ -194,20 +207,10 @@ class PdfSysfontListener (PdfSysfontBase):
     TODO
     """
     
-    def __init__(self, default=None, log_all=True):
-        if log_all:
-            self._get_callback = self._get_callback_impl
+    def __init__(self, default=None, log_all=True):  # XXX log_all
         logger.debug("Installing sysfontinfo...")
         super().__init__(default)
         logger.debug(f"fontinfo default interface version is {self.default.version}")
-    
-    def _get_callback_impl(self, name):
-        impl = getattr(self, name, None)
-        if not impl:
-            def impl(_, *args):
-                logger.debug(f"fontinfo::{name} {args}")
-                return getattr(self.default, name)(self.default, *args)
-        return impl
     
     def MapFont(self, _, weight, bItalic, charset, pitch_family, face, bExact):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
@@ -215,3 +218,27 @@ class PdfSysfontListener (PdfSysfontBase):
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, bExact)
         logger.debug(f"fontinfo::MapFont:out {out}")
         return out
+    
+    def EnumFonts(self, _, pMapper):
+        logger.debug(f"fontinfo::EnumFonts {pMapper, }")
+        return self.default.EnumFonts(self.default, pMapper)
+    
+    def GetFont(self, _, face):
+        logger.debug(f"fontinfo::GetFont {face, }")
+        return self.default.GetFont(self.default, face)
+    
+    def GetFontData(self, _, hFont, table, buffer, buf_size):
+        logger.debug(f"fontinfo::GetFontData {hFont, table, buffer, buf_size}")
+        return self.default.GetFontData(self.default, hFont, table, buffer, buf_size)
+    
+    def GetFaceName(self, _, hFont, buffer, buf_size):
+        logger.debug(f"fontinfo::GetFaceName {hFont, buffer, buf_size}")
+        return self.default.GetFaceName(self.default, hFont, buffer, buf_size)
+    
+    def GetFontCharset(self, _, hFont):
+        logger.debug(f"fontinfo::GetFontCharset {hFont, }")
+        return self.default.GetFontCharset(self.default, hFont)
+    
+    def DeleteFont(self, _, hFont):
+        logger.debug(f"fontinfo::DeleteFont {hFont, }")
+        return self.default.DeleteFont(self.default, hFont)
