@@ -108,20 +108,20 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             if isinstance(self.default, PdfSysfontBase):
                 self._child = self.default
                 self._populate_default_callbacks()
-        self.version = self.default.version
         
+        self.version = self.default.version
         self.raw = FPDF_SYSFONTINFO()
         self.raw.version = self.version
         
         callbacks = {n: getattr(self, n) for n in _CallbackNames}
-        if self.default.version != 1:  # as per docs
+        if self.version != 1:  # as per docs
             del callbacks["EnumFonts"]
         pdfium_i.set_callbacks(self.raw, **callbacks)
     
     
     def _populate_default_callbacks(self):
         # for any callbacks that were not re-implemented, we populate from default to avoid needless python function calls
-        reference_class = type(self)
+        reference_class = type(self)  # or really just PdfSysfontBase?
         for cb_name in _CallbackNames:
             candidate = getattr(self.default, cb_name)
             if getattr(reference_class, cb_name) is candidate.__func__:
