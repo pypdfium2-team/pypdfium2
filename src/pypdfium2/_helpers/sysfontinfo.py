@@ -81,7 +81,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             The sysfont handler to be wrapped. If None (the default), pdfium's root implementation will be used. Otherwise, this can be either a raw ``FPDF_SYSFONTINFO`` or another :class:`.PdfSysfontBase` instance.
     
     Note:
-        When another :class:`.PdfSysfontBase` instance is being wrapped, some tricks are applied to avoid overhead:\n
+        When a :class:`.PdfSysfontBase` is being wrapped, some tricks are applied to avoid overhead:\n
         - Where wrapper and child share the same callback, the child method will be populated to the wrapper (so, as a side effect, even stacking instances of the same class would result in only one call).\n
         - Also, only in the actual ``FPDF_SYSFONTINFO`` object are callbacks ever enclosed in their :func:`~ctypes.CFUNCTYPE`, whereas wrappers call the original function directly.
     
@@ -182,6 +182,12 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         This unregisters the exit handler and releases the sysfont handler immediately.
         
         See the note above for how sysfont handler lifetime is managed by default.
+        
+        Parameters:
+            reusable (bool):
+                If False (the default), closing will destroy pdfium's default handler, rendering any direct or indirect wrappers thereof unusable.
+                If True, however, the default handler will not be harmed, so the object can be reused, like re-installing it some time after closing, wrapping it in another object, or just preserving the default handler for a new :class:`.PdfSysfontBase` instance.
+                This is automatically set to True on singleton replacement, when the previous handler is implicitly closed (i.e. ownership of the default instance is transferred to the new handler).
         """
         if reusable is not None:
             self._reusable = reusable
