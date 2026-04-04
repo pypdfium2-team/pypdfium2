@@ -90,6 +90,8 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             The underlying ``FPDF_SYSFONTINFO`` interface struct implemented by this class. Wraps :attr:`.default`.
         default (FPDF_SYSFONTINFO | PdfSysfontBase):
             The sysfont handler being wrapped. Wrapper callbacks typically delegate the actual work to the default implementation.
+        version (int):
+            The ``FPDF_SYSFONTINFO`` struct version used. Matches :attr:`.default.version` and :attr:`.raw.version`. This is provided for interface compatibility with ``FPDF_SYSFONTINFO``, so that :attr:`.default` can be either a raw struct or :class:`.PdfSysfontBase`.
     """
     
     #: PdfSysfontBase | None: Currently registered sysfont handler, or None if no sysfont handler is installed. This is a class-level attribute.
