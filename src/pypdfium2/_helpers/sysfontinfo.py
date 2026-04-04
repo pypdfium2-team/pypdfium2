@@ -67,11 +67,11 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             # substitute CallbackName accordingly
             def CallbackName(self, _, arg1, arg2, ...)
                 print("Wrap before")
+                # Important: Do not pass the _ argument here, that's a pointer to self.raw.
+                # Pass self.default instead. The C callback expects its own struct, not the wrapper.
                 out = self.default.CallbackName(self.default, arg1, arg2, ...)
                 print("Wrap after")
                 return out
-    
-    The important bit here is to pass ``self.default`` as first argument to the wrapped callback, not the first argument after ``self`` received in the method signature (named ``_`` above), which is a pointer to the wrapper itself.
     
     :class:`.PdfSysfontBase` instances can wrap one another as you might do in C.
     This allows for flexible combination of traits among different handler implementations.

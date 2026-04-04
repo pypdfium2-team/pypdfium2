@@ -72,6 +72,11 @@ Version
 .. automodule:: pypdfium2.version
 .. automodule:: pypdfium2_raw.version
 
+Errors and Warnings
+*******************
+.. TODO rename module?
+.. automodule:: pypdfium2._helpers.misc
+
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
@@ -100,17 +105,18 @@ Attachment
 **********
 .. automodule:: pypdfium2._helpers.attachment
 
-System Font Info
-****************
+Miscellaneous
+*************
 
+System Font Info
+----------------
 .. warning::
    This API is experimental and exempted from semantic versioning until this notice is removed.
 
 .. automodule:: pypdfium2._helpers.sysfontinfo
 
-Miscellaneous
-*************
-.. automodule:: pypdfium2._helpers.misc
+Unsupported Feature Info
+------------------------
 .. automodule:: pypdfium2._helpers.unsupported
 
 Internal
