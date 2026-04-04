@@ -104,7 +104,7 @@ System Font Info
 ****************
 
 .. warning::
-   This is expiermental API and, should it be necessary, may change until this notice is removed.
+   This API is experimental and exempted from semantic versioning until this notice is removed.
 
 .. automodule:: pypdfium2._helpers.sysfontinfo
 
