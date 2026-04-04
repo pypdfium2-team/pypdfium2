@@ -52,7 +52,7 @@ _CallbackNames = ("Release", "EnumFonts", "MapFont", "GetFont", "GetFontData", "
 class PdfSysfontBase (pdfium_i.AutoCastable):
     """
     Base helper class to create a ``FPDF_SYSFONTINFO`` callback system.
-    Callbacks can be implemented by subclassing (see `fpdf_sysfontinfo.h` for available callouts and their documentation).
+    Callbacks can be implemented by subclassing (see `fpdf_sysfontinfo.h` for available callouts and documentation).
     When a callback is not implemented, it will be automatically delegated to the default handler.
     
     This constructor merely creates the underlying ``FPDF_SYSFONTINFO`` instance.
@@ -82,7 +82,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     
     Note:
         When a :class:`.PdfSysfontBase` is being wrapped, some tricks are applied to avoid overhead:\n
-        - Where wrapper and child share the same callback, the child method will be populated to the wrapper (so, as a side effect, even stacking instances of the same class would result in only one call).\n
+        - Where wrapper and child share the same callback, the child method will be forwarded to the wrapper (so, as a side effect, even stacking instances of the same class would result in only one call).\n
         - Also, only in the actual ``FPDF_SYSFONTINFO`` object are callbacks ever enclosed in their :func:`~ctypes.CFUNCTYPE`, whereas wrappers call the original function directly.
     
     Attributes:
@@ -110,7 +110,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             self.default = default
             if isinstance(self.default, PdfSysfontBase):
                 self._child = self.default
-                self._populate_default_callbacks()
+                self._forward_default_callbacks()
         
         self.version = self.default.version
         self.raw = FPDF_SYSFONTINFO()
@@ -122,8 +122,8 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         pdfium_i.set_callbacks(self.raw, **callbacks)
     
     
-    def _populate_default_callbacks(self):
-        # for any callbacks that were not re-implemented, we populate from default to avoid needless python function calls
+    def _forward_default_callbacks(self):
+        # for any callbacks that were not re-implemented, we forward from default to avoid needless python function calls
         reference_class = type(self)  # or really just PdfSysfontBase?
         for cb_name in _CallbackNames:
             candidate = getattr(self.default, cb_name)
