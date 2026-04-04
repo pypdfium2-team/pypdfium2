@@ -143,15 +143,19 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def init_forms(self, config=None):
         """
-        Initialize a form env, if the document has forms. If already initialized, nothing will be done.
-        See the :attr:`formenv` attribute.
-    
+        Initialize a form env, if the document has forms.
+        If already initialized, nothing will be done. See the :attr:`formenv` attribute.
+        
+        If pdfium was built with XFA support and the PDF has XFA forms, it will be attempted to load these as well.
+        
         Attention:
             If form rendering is desired, this method shall be called right after document construction, before getting document length or page handles.
         
         Parameters:
             config (FPDF_FORMFILLINFO | None):
                 Custom form config interface to use (optional).
+        Raises:
+            PdfiumWarning: When attempting to load XFA forms fails, a warning will be issued using :func:`warnings.warn`, with :attr:`~.PdfiumWarning.err_code` information (:attr:`FPDF_ERR_XFA*`).
         """
         
         formtype = self.get_formtype()
