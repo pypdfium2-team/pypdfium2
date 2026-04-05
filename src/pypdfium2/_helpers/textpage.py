@@ -5,6 +5,7 @@ __all__ = ("PdfTextPage", "PdfTextSearcher")
 
 import ctypes
 import logging
+from codecs import decode
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -74,7 +75,8 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
         pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
         
-        return buffer.raw.decode("utf-16-le", errors=errors)
+        # alternatively: buffer.raw or bytes(buffer) .decode(...)
+        return decode(buffer, "utf-16-le", errors=errors)
     
     
     def _get_active_text_range(self, c_start, c_end, l_passive=0, r_passive=0):
@@ -135,7 +137,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         out_count = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
         assert in_count >= out_count, f"Buffer too small: {in_count} vs {out_count}"
         
-        return buffer.raw[:(out_count-1)*2].decode("utf-16-le", errors=errors)
+        return buffer[:(out_count-1)*2].decode("utf-16-le", errors=errors)
     
     
     def count_chars(self):

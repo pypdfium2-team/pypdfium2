@@ -254,7 +254,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         n_bytes = pdfium_c.FPDF_GetFileIdentifier(self, type, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
         pdfium_c.FPDF_GetFileIdentifier(self, type, buffer, n_bytes)
-        return buffer.raw[:n_bytes-2]
+        return buffer[:n_bytes-2]
     
     
     def get_version(self):
@@ -280,7 +280,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         n_bytes = pdfium_c.FPDF_GetMetaText(self, enc_key, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
         pdfium_c.FPDF_GetMetaText(self, enc_key, buffer, n_bytes)
-        return buffer.raw[:n_bytes-2].decode("utf-16-le")
+        return buffer[:n_bytes-2].decode("utf-16-le")
     
     
     METADATA_KEYS = ("Title", "Author", "Subject", "Keywords", "Creator", "Producer", "CreationDate", "ModDate")
@@ -461,7 +461,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         n_bytes = pdfium_c.FPDF_GetPageLabel(self, index, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
         pdfium_c.FPDF_GetPageLabel(self, index, buffer, n_bytes)
-        return buffer.raw[:n_bytes-2].decode("utf-16-le")
+        return buffer[:n_bytes-2].decode("utf-16-le")
     
     
     def page_as_xobject(self, index, dest_pdf):
@@ -640,7 +640,7 @@ class PdfBookmark (pdfium_i.AutoCastable):
         n_bytes = pdfium_c.FPDFBookmark_GetTitle(self, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
         pdfium_c.FPDFBookmark_GetTitle(self, buffer, n_bytes)
-        return buffer.raw[:n_bytes-2].decode("utf-16-le")
+        return buffer[:n_bytes-2].decode("utf-16-le")
     
     def get_count(self):
         """
