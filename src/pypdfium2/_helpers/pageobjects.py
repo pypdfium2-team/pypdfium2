@@ -184,7 +184,7 @@ class PdfTextObj (PdfObject):
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
         pdfium_c.FPDFTextObj_GetText(self, self.textpage, buffer_ptr, bufsize)
         
-        return buffer.raw[:bufsize-2].decode("utf-16-le")
+        return buffer[:bufsize-2].decode("utf-16-le")
     
     def get_font(self):
         """

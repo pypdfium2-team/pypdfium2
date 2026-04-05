@@ -49,7 +49,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         buffer = ctypes.create_string_buffer(n_bytes)
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
         pdfium_c.FPDFAttachment_GetName(self, buffer_ptr, n_bytes)
-        return buffer.raw[:n_bytes-2].decode("utf-16-le")
+        return buffer[:n_bytes-2].decode("utf-16-le")
     
     
     def get_data(self):
@@ -126,7 +126,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
         pdfium_c.FPDFAttachment_GetStringValue(self, enc_key, buffer_ptr, n_bytes)
         
-        return buffer.raw[:n_bytes-2].decode("utf-16-le")
+        return buffer[:n_bytes-2].decode("utf-16-le")
     
     
     def set_str_value(self, key, value):
