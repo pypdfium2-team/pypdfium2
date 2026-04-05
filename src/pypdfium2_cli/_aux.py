@@ -30,7 +30,8 @@ class SysfontListenerAll (SysfontListenerCore):
         return self.default.EnumFonts(self.default, pMapper)
     
     def GetFont(self, _, face):
-        logger.debug(f"fontinfo::GetFont {face, }")
+        face_bstr = ctypes.cast(face, ctypes.c_char_p).value
+        logger.debug(f"fontinfo::GetFont {face_bstr, }")
         return self.default.GetFont(self.default, face)
     
     def GetFontData(self, _, hFont, table, buffer, buf_size):
@@ -39,7 +40,10 @@ class SysfontListenerAll (SysfontListenerCore):
     
     def GetFaceName(self, _, hFont, buffer, buf_size):
         logger.debug(f"fontinfo::GetFaceName {hFont, buffer, buf_size}")
-        return self.default.GetFaceName(self.default, hFont, buffer, buf_size)
+        out = self.default.GetFaceName(self.default, hFont, buffer, buf_size)
+        if buf_size > 0:
+            logger.debug(f"-> {pdfium_i.get_buffer(buffer, buf_size-1).raw}")
+        return out
     
     def GetFontCharset(self, _, hFont):
         logger.debug(f"fontinfo::GetFontCharset {hFont, }")
