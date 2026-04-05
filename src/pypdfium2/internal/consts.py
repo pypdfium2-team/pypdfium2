@@ -162,6 +162,7 @@ UnsupportedInfoToStr = _fallback_dict({
     pdfium_c.FPDF_UNSP_ANNOT_SIG:                 "Signature annotation",
 })
 
+#: Convert a PDFium charset type constant (:attr:`FXFONT_*_CHARSET`) to string.
 CharsetToStr = _fallback_dict({
     pdfium_c.FXFONT_ANSI_CHARSET:            "ANSI",
     pdfium_c.FXFONT_DEFAULT_CHARSET:         "Default",
@@ -180,6 +181,7 @@ CharsetToStr = _fallback_dict({
 })
 
 class PdfFontPitchFamilyFlags (enum.Flag):
+    "Map PDFium font pitch and family flags to python :class:`enum.Flag`."
     FIXEDPITCH = pdfium_c.FXFONT_FF_FIXEDPITCH
     ROMAN      = pdfium_c.FXFONT_FF_ROMAN
     SCRIPT     = pdfium_c.FXFONT_FF_SCRIPT
