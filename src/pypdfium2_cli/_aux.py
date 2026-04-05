@@ -9,7 +9,7 @@ import pypdfium2.internal as pdfium_i
 logger = logging.getLogger("pypdfium2_cli")
 
 
-class SysfontListenerCore (pdfium.PdfSysfontBase):
+class PdfSysfontListener (pdfium.PdfSysfontBase):
     
     def __init__(self, default=None, log_all=True):
         logger.debug("Installing sysfontinfo...")
@@ -22,21 +22,11 @@ class SysfontListenerCore (pdfium.PdfSysfontBase):
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, _ignored)
         logger.debug(f"fontinfo::MapFont:out {out}")
         return out
-
-class SysfontListenerAll (SysfontListenerCore):
-
-    def EnumFonts(self, _, pMapper):
-        logger.debug(f"fontinfo::EnumFonts {pMapper, }")
-        return self.default.EnumFonts(self.default, pMapper)
     
     def GetFont(self, _, face):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
         logger.debug(f"fontinfo::GetFont {face_bstr, }")
         return self.default.GetFont(self.default, face)
-    
-    def GetFontData(self, _, hFont, table, buffer, buf_size):
-        logger.debug(f"fontinfo::GetFontData {hFont, table, buffer, buf_size}")
-        return self.default.GetFontData(self.default, hFont, table, buffer, buf_size)
     
     def GetFaceName(self, _, hFont, buffer, buf_size):
         logger.debug(f"fontinfo::GetFaceName {hFont, buffer, buf_size}")
@@ -44,6 +34,14 @@ class SysfontListenerAll (SysfontListenerCore):
         if buf_size > 0:
             logger.debug(f"-> {pdfium_i.get_buffer(buffer, buf_size-1).raw}")
         return out
+    
+    def EnumFonts(self, _, pMapper):
+        logger.debug(f"fontinfo::EnumFonts {pMapper, }")
+        return self.default.EnumFonts(self.default, pMapper)
+    
+    def GetFontData(self, _, hFont, table, buffer, buf_size):
+        logger.debug(f"fontinfo::GetFontData {hFont, table, buffer, buf_size}")
+        return self.default.GetFontData(self.default, hFont, table, buffer, buf_size)
     
     def GetFontCharset(self, _, hFont):
         logger.debug(f"fontinfo::GetFontCharset {hFont, }")
