@@ -10,7 +10,6 @@ import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._lazy import cached_property, cached_property_clear
-FPDF_SYSFONTINFO = pdfium_c.FPDF_SYSFONTINFO
 
 logger = logging.getLogger(__name__)
 
@@ -78,11 +77,12 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     
     Parameters:
         default (None | FPDF_SYSFONTINFO | PdfSysfontBase):
-            The sysfont handler to be wrapped. If None (the default), pdfium's root implementation will be used. Otherwise, this can be either a raw ``FPDF_SYSFONTINFO`` or another :class:`.PdfSysfontBase` instance.
+            The sysfont handler to be wrapped. If None (the default), pdfium's root implementation will be used.
+            Otherwise, this can be either a raw ``FPDF_SYSFONTINFO`` or another :class:`.PdfSysfontBase` instance.
     
     Note:
         When a :class:`.PdfSysfontBase` is being wrapped, some tricks are applied to avoid overhead:\n
-        - Where wrapper and child share the same callback, the child method will be forwarded to the wrapper (so, as a side effect, even stacking instances of the same class would result in only one call).\n
+        - Where wrapper and child share the same callback, the child method will be forwarded to the wrapper (so, as a side effect, even stacking instances of the same class would result in only one call).
         - Also, only in the actual ``FPDF_SYSFONTINFO`` object are callbacks ever enclosed in their :func:`~ctypes.CFUNCTYPE`, whereas wrappers call the original function directly.
     
     Attributes:
@@ -91,7 +91,8 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         default (FPDF_SYSFONTINFO | PdfSysfontBase):
             The sysfont handler being wrapped. Wrapper callbacks typically delegate the actual work to the default implementation.
         version (int):
-            The ``FPDF_SYSFONTINFO`` struct version used. Matches :attr:`.default.version` and :attr:`.raw.version`. This is provided for interface compatibility with ``FPDF_SYSFONTINFO``, so that :attr:`.default` can be either a raw struct or :class:`.PdfSysfontBase`.
+            The ``FPDF_SYSFONTINFO`` struct version used. Matches :attr:`.default.version` and :attr:`.raw.version`.
+            This is provided for interface compatibility with ``FPDF_SYSFONTINFO``, so that :attr:`.default` can be either a raw struct or :class:`.PdfSysfontBase`.
     """
     
     #: PdfSysfontBase | None: Currently registered sysfont handler, or None if no sysfont handler is installed. This is a class-level attribute.
@@ -113,7 +114,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
                 self._forward_default_callbacks()
         
         self.version = self.default.version
-        self.raw = FPDF_SYSFONTINFO()
+        self.raw = pdfium_c.FPDF_SYSFONTINFO()
         self.raw.version = self.version
         
         callbacks = {n: getattr(self, n) for n in _CallbackNames}
