@@ -8,7 +8,8 @@
 pypdfium2 is an ABI-level Python 3 binding to [PDFium](https://pdfium.googlesource.com/pdfium/+/refs/heads/main), a powerful and liberal-licensed library for PDF rendering, inspection, manipulation and creation.
 
 It is built with [ctypesgen](https://github.com/pypdfium2-team/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
-The custom setup infrastructure provides a seamless packaging and installation process. A wide range of platforms is supported with pre-built packages.
+The custom setup infrastructure provides a seamless packaging and installation process.
+A wide range of platforms is supported with pre-built packages.
 
 pypdfium2 includes [helpers](#support-model) to simplify common use cases, while the [raw PDFium API](#raw-pdfium-api) (ctypes) remains accessible as well.
 
@@ -37,9 +38,13 @@ This will bypass wheels and run setup, while requesting use of V8 builds through
 As of this writing, pypdfium2 does not require any mandatory runtime dependencies, apart from Python and PDFium itself (which is commonly bundled).
 
 However, some optional support model / CLI features need additional packages:
-* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a pouplar imaging library for Python. pypdfium2 provides convenience adapters to translate between raw bitmap buffers and PIL images. It also uses PIL for some command-line functionality (e.g. image saving).
-* [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing. As with `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
-* [`opencv-python`](https://github.com/opencv/opencv-python) (module `cv2`) is an imaging library built around numpy arrays. It can be used in the rendering CLI to save with pypdfium2's numpy adapter.
+* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a pouplar imaging library for Python.
+  pypdfium2 provides convenience adapters to translate between raw bitmap buffers and PIL images.
+  It also uses PIL for some command-line functionality (e.g. image saving).
+* [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing.
+  As with `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
+* [`opencv-python`](https://github.com/opencv/opencv-python) (module `cv2`) is an imaging library built around numpy arrays.
+  It can be used in the rendering CLI to save with pypdfium2's numpy adapter.
 
 pypdfium2 tries to defer imports of optional dependencies until they are actually needed, so there should be no startup overhead if you don't use them.
 
@@ -1024,7 +1029,8 @@ python -m pytest tests/  # or `just test`
 ```
 
 Pass `-sv` to get more detailed output.
-Environment variables used by the CLI are also honored in the test suite: `PYPDFIUM_LOGLEVEL`, `DEBUG_AUTOCLOSE`, `DEBUG_SYSFONTS`, `DEBUG_UNSUPPORTED`. See [`pypdfium2 --help`](https://pypdfium2.readthedocs.io/en/stable/shell_api.html#main-help) for description.
+Environment variables used by the CLI are also honored in the test suite: `PYPDFIUM_LOGLEVEL`, `DEBUG_AUTOCLOSE`, `DEBUG_SYSFONTS`, `DEBUG_UNSUPPORTED`.
+See [`pypdfium2 --help`](https://pypdfium2.readthedocs.io/en/stable/shell_api.html#main-help) for description.
 
 To get code coverage statistics, you may call
 ```bash

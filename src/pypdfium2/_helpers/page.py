@@ -329,7 +329,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             int: PDFium flattening status (:attr:`FLATTEN_*`). :attr:`FLATTEN_FAIL` is handled internally.
         """
         if not self.formenv:
-            raise RuntimeError("page.flatten() requires previous pdf.init_forms() before page retrieval.")
+            raise RuntimeError("page.flatten() requires prior pdf.init_forms(), before page retrieval.")
         rc = pdfium_c.FPDFPage_Flatten(self, flag)
         if rc == pdfium_c.FLATTEN_FAIL:
             raise PdfiumError("Failed to flatten annotations / form fields.")
