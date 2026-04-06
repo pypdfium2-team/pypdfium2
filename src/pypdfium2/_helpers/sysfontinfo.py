@@ -14,7 +14,7 @@ from pypdfium2._lazy import cached_property, cached_property_clear
 logger = logging.getLogger(__name__)
 
 
-class _DefaultSysfontInfoClass (pdfium_i.AutoCastable):
+class _DefaultSysfontInfoClass:
     
     def __init__(self):
         self._is_loaded = False
