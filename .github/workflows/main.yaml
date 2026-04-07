@@ -39,7 +39,7 @@ jobs:
     
     steps:
       
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
       
       - name: Set up Python
         uses: actions/setup-python@v6
