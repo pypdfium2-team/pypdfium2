@@ -141,7 +141,7 @@ def test_open_nonascii():
         traceback.print_exc()
 
 
-@pytest.mark.skipif(sys.platform.startswith("win32"), reason="Specific to non-Windows OSes")
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Specific to Linux")
 def test_open_garbled_filename():
     
     garbled_name = "CONTRATO DE LOCA\udcc7\udcc3O.pdf"
