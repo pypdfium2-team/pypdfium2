@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE", "_safe_debug")
+__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE", "_debug_close")
 
 import os
 import sys
@@ -9,32 +9,21 @@ import enum
 import uuid
 import weakref
 import logging
+import pypdfium2_cfg
+from pypdfium2_cfg import DEBUG_AUTOCLOSE  # compat
 
 logger = logging.getLogger(__name__)
+LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
 
 
-def _safe_debug(msg):  # pragma: no cover
-    # try to use os.write() rather than print() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
+def _debug_close(msg):  # pragma: no cover
+    # try to use os.write() rather than print() or logger.whatever() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
+    if not DEBUG_AUTOCLOSE:
+        return
     try:
         os.write(sys.stderr.fileno(), (msg+"\n").encode())
     except Exception:  # e.g. io.UnsupportedOperation
         print(msg, file=sys.stderr)
-
-
-class _Mutable:
-    
-    def __init__(self, value):
-        self.value = value
-    
-    def __repr__(self):
-        return f"_Mutable({self.value})"
-    
-    def __bool__(self):
-        return bool(self.value)
-
-
-DEBUG_AUTOCLOSE = _Mutable(False)
-LIBRARY_AVAILABLE = _Mutable(False)  # set to true on library init
 
 
 class _STATE (enum.Enum):
@@ -56,11 +45,10 @@ class AutoCastable:
 
 def _close_template(close_func, raw, obj_repr, state, parent, args, kwargs):
     
-    if DEBUG_AUTOCLOSE:  # pragma: no cover
-        _safe_debug(f"Close ({state.value.name.lower()}) {obj_repr}")
+    _debug_close(f"Close ({state.value.name.lower()}) {obj_repr}")
     
     if not LIBRARY_AVAILABLE:  # pragma: no cover
-        _safe_debug(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
+        _debug_close(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
         return
     
     assert state.value != _STATE.INVALID
@@ -79,8 +67,8 @@ class AutoCloseable (AutoCastable):
         self._obj = self if obj is None else obj
         self._ex_args = args
         self._ex_kwargs = kwargs
-        self._autoclose_state = _Mutable(_STATE.AUTO)
-        self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
+        self._autoclose_state = pypdfium2_cfg._Mutable(_STATE.AUTO)
+        self._uuid = uuid.uuid4() if pypdfium2_cfg.DEBUG_AUTOCLOSE else None
         
         self._finalizer = None
         self._kids = []

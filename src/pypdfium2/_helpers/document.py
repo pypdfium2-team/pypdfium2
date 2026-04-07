@@ -6,12 +6,13 @@ __all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
 import sys
 import ctypes
 import logging
+import warnings
 from pathlib import Path
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2.version import PDFIUM_INFO
-from pypdfium2._helpers.misc import PdfiumError
+from pypdfium2._helpers.misc import PdfiumError, PdfiumWarning
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.pageobjects import PdfObject
 from pypdfium2._helpers.attachment import PdfAttachment
@@ -142,15 +143,19 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def init_forms(self, config=None):
         """
-        Initialize a form env, if the document has forms. If already initialized, nothing will be done.
-        See the :attr:`formenv` attribute.
-    
+        Initialize a form env, if the document has forms.
+        If already initialized, nothing will be done. See the :attr:`formenv` attribute.
+        
+        If PDFium was built with XFA support and the PDF has XFA forms, it will be attempted to load these as well.
+        
         Attention:
             If form rendering is desired, this method shall be called right after document construction, before getting document length or page handles.
         
         Parameters:
             config (FPDF_FORMFILLINFO | None):
                 Custom form config interface to use (optional).
+        Raises:
+            PdfiumWarning: When an attempt to load XFA forms was made and it failed, a warning will be issued using :func:`warnings.warn`, with :attr:`~.PdfiumWarning.err_code` information (:attr:`FPDF_ERR_XFA*`).
         """
         
         formtype = self.get_formtype()
@@ -174,9 +179,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
             if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
                 ok = pdfium_c.FPDF_LoadXFA(self)
                 if not ok:
-                    # FIXME ability to propagate an optional exception with error code info?
                     err = pdfium_c.FPDF_GetLastError()
-                    logger.warning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}")
+                    warnings.warn(PdfiumWarning(f"FPDF_LoadXFA() failed with {pdfium_i.XFAErrorToStr.get(err)}", err))
             else:
                 logger.warning(
                     "init_forms() called on XFA pdf, but this pdfium binary was compiled without XFA support.\n"

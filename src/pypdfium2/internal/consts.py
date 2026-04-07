@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import enum
 import pypdfium2.raw as pdfium_c
 from pypdfium2.version import PDFIUM_INFO
 
@@ -160,3 +161,27 @@ UnsupportedInfoToStr = _fallback_dict({
     pdfium_c.FPDF_UNSP_ANNOT_ATTACHMENT:          "Attachment annotation",
     pdfium_c.FPDF_UNSP_ANNOT_SIG:                 "Signature annotation",
 })
+
+#: Convert a PDFium charset type constant (:attr:`FXFONT_*_CHARSET`) to string.
+CharsetToStr = _fallback_dict({
+    pdfium_c.FXFONT_ANSI_CHARSET:            "ANSI",
+    pdfium_c.FXFONT_DEFAULT_CHARSET:         "Default",
+    pdfium_c.FXFONT_SYMBOL_CHARSET:          "Symbol",
+    pdfium_c.FXFONT_SHIFTJIS_CHARSET:        "ShiftJIS",
+    pdfium_c.FXFONT_HANGEUL_CHARSET:         "Hangeul",
+    pdfium_c.FXFONT_GB2312_CHARSET:          "GB2312",
+    pdfium_c.FXFONT_CHINESEBIG5_CHARSET:     "ChineseBig5",
+    pdfium_c.FXFONT_GREEK_CHARSET:           "Greek",
+    pdfium_c.FXFONT_VIETNAMESE_CHARSET:      "Vietnamese",
+    pdfium_c.FXFONT_HEBREW_CHARSET:          "Hebrew",
+    pdfium_c.FXFONT_ARABIC_CHARSET:          "Arabic",
+    pdfium_c.FXFONT_CYRILLIC_CHARSET:        "Cyrillic",
+    pdfium_c.FXFONT_THAI_CHARSET:            "Thai",
+    pdfium_c.FXFONT_EASTERNEUROPEAN_CHARSET: "EasternEuropean",
+})
+
+class PdfFontPitchFamilyFlags (enum.Flag):
+    "Map PDFium font pitch and family flags to python :class:`enum.Flag`."
+    FIXEDPITCH = pdfium_c.FXFONT_FF_FIXEDPITCH
+    ROMAN      = pdfium_c.FXFONT_FF_ROMAN
+    SCRIPT     = pdfium_c.FXFONT_FF_SCRIPT

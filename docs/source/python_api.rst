@@ -4,7 +4,6 @@
 Python API
 ==========
 
-
 Preface
 *******
 
@@ -41,7 +40,6 @@ The support model API is still in beta stage. It only covers a subset of pdfium 
 .. [#raw_module] The latter does not automatically initialize pdfium on import.
 .. [#ctypes_param_hook] Implemented via ctypes hook `_as_parameter_ <https://docs.python.org/3/library/ctypes.html#calling-functions-with-your-own-custom-data-types>`_
 
-
 Memory management
 -----------------
 
@@ -74,6 +72,11 @@ Version
 .. automodule:: pypdfium2.version
 .. automodule:: pypdfium2_raw.version
 
+Errors and Warnings
+*******************
+.. TODO rename module?
+.. automodule:: pypdfium2._helpers.misc
+
 Document
 ********
 .. automodule:: pypdfium2._helpers.document
@@ -104,9 +107,17 @@ Attachment
 
 Miscellaneous
 *************
-.. automodule:: pypdfium2._helpers.misc
-.. automodule:: pypdfium2._helpers.unsupported
 
+System Font Info
+----------------
+.. warning::
+   This API is experimental and exempted from semantic versioning until this notice is removed.
+
+.. automodule:: pypdfium2._helpers.sysfontinfo
+
+Unsupported Feature Info
+------------------------
+.. automodule:: pypdfium2._helpers.unsupported
 
 Internal
 ********
