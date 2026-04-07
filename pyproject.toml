@@ -16,7 +16,7 @@ requires = [
 build-frontend = "build"
 test-command = [
     "python -m pypdfium2 --version",
-    "python {project}/conda/raw/minitest.py",
+    "python {project}/utils/minitest.py",
 ]
 
 [[tool.cibuildwheel.overrides]]

@@ -42,10 +42,10 @@ test:
   imports:
     - pypdfium2_raw
   source_files:
-    - conda/raw/minitest.py
+    - utils/minitest.py
   commands:
     - pip check
-    - python conda/raw/minitest.py
+    - python utils/minitest.py
 
 about:
   summary: Python bindings to PDFium (raw, external binary)

@@ -133,7 +133,7 @@ jobs:
         if: ${{ inputs.package == 'raw' }}
         run: |
           conda install -y pypdfium2_raw --override-channels -c ./conda_dist/ -c bblanchon -c defaults
-          python conda/raw/minitest.py
+          python utils/minitest.py
       
       - name: Install/Test helpers package
         if: ${{ inputs.package == 'helpers' }}
