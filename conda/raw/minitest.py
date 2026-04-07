@@ -7,8 +7,6 @@ import sys
 import atexit
 import pypdfium2_raw as pdfium
 
-atexit.register(pdfium.FPDF_DestroyLibrary)
-
 # see pypdfium2::_library_scope.py
 init_config = pdfium.FPDF_LIBRARY_CONFIG(
     version = 2,
@@ -17,6 +15,7 @@ init_config = pdfium.FPDF_LIBRARY_CONFIG(
     m_v8EmbedderSlot = 0,
 )
 pdfium.FPDF_InitLibraryWithConfig(init_config)
+atexit.register(pdfium.FPDF_DestroyLibrary)
 
 doc = pdfium.FPDF_CreateNewDocument()
 page = pdfium.FPDFPage_New(doc, 0, 595, 842)
