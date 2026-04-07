@@ -35,7 +35,7 @@ check:
 distcheck:
 	twine check dist/*
 	# ignore W002: erroneous detection of __init__.py files as duplicates
-	check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw"
+	check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw,pypdfium2_cli,pypdfium2_cfg"
 
 update *args:
 	python3 setupsrc/update.py {{args}}
