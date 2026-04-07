@@ -80,6 +80,9 @@ jobs:
       # TODO make controllable whether musllinux packages are built through pdfium-binaries or cibw augmentation, consider enabling them here if inputs.augment is false
       - name: Run PyPI packaging script
         run: just packaging-pypi
+        env:
+          # only passed to craft.py, which uses a GH REST API that can hit rate limits otherwise
+          GH_TOKEN: ${{ github.token }}
       
       - name: Upload release notes
         uses: actions/upload-artifact@v7
