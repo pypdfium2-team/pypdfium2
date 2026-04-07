@@ -39,6 +39,6 @@ jobs:
             python3 -m pip install -v .  # implies PDFIUM_PLATFORM=fallback -> system-search
             unset LD_PRELOAD
             python3 -m pypdfium2 --version
-            python3 ./conda/raw/minitest.py
+            python3 ./utils/minitest.py
             # Some APIs are missing from libreoffice-pdfium, suppress known failure
             python3 -m pytest tests/ || true
