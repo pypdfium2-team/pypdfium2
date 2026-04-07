@@ -17,7 +17,8 @@ coverage-core *args:
 	just _coverage_impl "src/pypdfium2/__main__.py,src/pypdfium2/_cli/*,src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 
 # TODO use just env() once we can require just >=1.15.0
-BROWSER := env_var_or_default('BROWSER', 'google-chrome')
+BROWSER  := env_var_or_default('BROWSER', 'google-chrome')
+GH_TOKEN := env_var_or_default('GH_TOKEN', '')
 
 docs-build:  # *args
 	python3 -m sphinx -b html docs/source docs/build/html
@@ -48,7 +49,7 @@ build-native *args:
 build-toolchained *args:
 	python3 setupsrc/build_toolchained.py {{args}}
 craft *args:
-	python3 setupsrc/craft.py {{args}}
+	GH_TOKEN={{GH_TOKEN}} python3 setupsrc/craft.py {{args}}
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
