@@ -25,7 +25,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     Document helper class.
     
     Parameters:
-        input_data (str | pathlib.Path | bytes | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
+        input (str | pathlib.Path | bytes | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
             The input PDF given as file path, bytes, ctypes array, byte stream, or raw PDFium document handle.
             A byte stream is defined as an object that implements ``seek() tell() read() readinto()``.
         password (str | None):
