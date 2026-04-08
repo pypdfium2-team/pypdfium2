@@ -52,13 +52,13 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
     """
     Base helper class to create a ``FPDF_SYSFONTINFO`` callback system.
     Callbacks can be implemented by subclassing (see `fpdf_sysfontinfo.h` for available callouts and documentation).
-    When a callback is not implemented, it will be automatically delegated to the default handler.
     
     This constructor merely creates the underlying ``FPDF_SYSFONTINFO`` instance.
     Call :meth:`.setup` to actually register it with pdfium.
     
-    System font handlers are built around the idea of wrapping another implementation, with the root implementation being provided by pdfium.
-    See the example below for how to invoke the default implementation in a callback:
+    System font handlers may wrap another implementation, by default the root implementation provided by pdfium.
+    When a callback is not implemented, it will be automatically delegated to the default handler.
+    See the example below for how to invoke the default handler in a callback:
     
     .. code-block:: python
         
@@ -72,8 +72,10 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
                 print("Wrap after")
                 return out
     
-    :class:`.PdfSysfontBase` instances can wrap one another as you might do in C.
-    This allows for flexible combination of traits among different handler implementations.
+    Alternatively, if using subclassing, you may want\n
+    .. code-block:: python\n
+        out = super().CallbackName(_, arg1, arg2, ...)\n
+    when the next class in the MRO has an implementation that you want to call.
     
     Parameters:
         default (None | FPDF_SYSFONTINFO | PdfSysfontBase):
@@ -81,13 +83,13 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             Otherwise, this can be either a raw ``FPDF_SYSFONTINFO`` or another :class:`.PdfSysfontBase` instance.
     
     Note:
-        When a :class:`.PdfSysfontBase` is being wrapped, some tricks are applied to avoid overhead:\n
+        When another :class:`.PdfSysfontBase` is being wrapped, some tricks are applied to avoid overhead:\n
         - Where wrapper and child share the same callback, the child method will be forwarded to the wrapper (so, as a side effect, even stacking instances of the same class would result in only one call).
         - Also, only in the actual ``FPDF_SYSFONTINFO`` object are callbacks ever enclosed in their :func:`~ctypes.CFUNCTYPE`, whereas wrappers call the original function directly.
     
     Attributes:
         raw (FPDF_SYSFONTINFO):
-            The underlying ``FPDF_SYSFONTINFO`` interface struct implemented by this class. Wraps :attr:`.default`.
+            The underlying ``FPDF_SYSFONTINFO`` interface struct implemented by this class. May wrap :attr:`.default`.
         default (FPDF_SYSFONTINFO | PdfSysfontBase):
             The sysfont handler being wrapped. Wrapper callbacks typically delegate the actual work to the default implementation.
         version (int):
