@@ -51,7 +51,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         If a boundary value is None, it defaults to the corresponding value of :meth:`.PdfPage.get_bbox`.
         
         Parameters:
-            errors (str): Error treatment when decoding the data (see :meth:`bytes.decode`).
+            errors (str): Error treatment when decoding the data (see :func:`codecs.decode`).
         Returns:
             str: The text on the page area in question, or an empty string if no text was found.
         """

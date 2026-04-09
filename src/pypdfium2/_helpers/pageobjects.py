@@ -301,7 +301,7 @@ class PdfImage (PdfObject):
     def get_px_size(self):
         """
         Returns:
-            (int, int): Image dimensions as a tuple of (width, height).
+            (int, int): Image dimension in pixels as a tuple of (width, height).
         """
         # https://pdfium-review.googlesource.com/c/pdfium/+/106290
         w, h = c_uint(), c_uint()
