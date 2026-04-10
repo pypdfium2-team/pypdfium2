@@ -44,7 +44,7 @@ body:
         python -c "import platform as p; print(p.platform())"
         conda list --show-channel-urls "pypdfium2|pdfium-binaries"
         conda config --show-sources
-        python -m pypdfium2 -v
+        python -m pypdfium2_cli -v
         python -m pip show pypdfium2_raw
         python -m pip show pypdfium2_helpers
         ```

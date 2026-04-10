@@ -15,7 +15,7 @@ requires = [
 [tool.cibuildwheel]
 build-frontend = "build"
 test-command = [
-    "python -m pypdfium2 --version",
+    "python -m pypdfium2_cli --version",
     "python {project}/utils/minitest.py",
 ]
 
