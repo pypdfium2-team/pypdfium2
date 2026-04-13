@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
       
       - name: Test in FreeBSD VM
-        uses: cross-platform-actions/action@v0.32.0
+        uses: cross-platform-actions/action@v1.0.0
         with:
           operating_system: freebsd
           version: '15.0'
