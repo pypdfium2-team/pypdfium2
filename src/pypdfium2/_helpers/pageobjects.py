@@ -7,6 +7,7 @@ import ctypes
 from ctypes import c_uint, c_float
 import logging
 from pathlib import Path
+from codecs import decode
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -176,15 +177,15 @@ class PdfTextObj (PdfObject):
         Returns:
             str: The objects's text content.
         """
-        bufsize = pdfium_c.FPDFTextObj_GetText(self, self.textpage, None, 0)
-        if bufsize == 0:
+        n_bytes = pdfium_c.FPDFTextObj_GetText(self, self.textpage, None, 0)
+        if n_bytes == 0:
             raise PdfiumError("Failed to get text from textobject.")
         
-        buffer = ctypes.create_string_buffer(bufsize)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
-        pdfium_c.FPDFTextObj_GetText(self, self.textpage, buffer_ptr, bufsize)
+        n_units = -(n_bytes // -2)  # ceildiv
+        buffer = (pdfium_c.FPDF_WCHAR * n_units)()
+        pdfium_c.FPDFTextObj_GetText(self, self.textpage, buffer, n_bytes)
         
-        return buffer[:bufsize-2].decode("utf-16-le")
+        return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
     
     def get_font(self):
         """
@@ -226,7 +227,7 @@ class PdfFont (pdfium_i.AutoCastable):
         buffer = ctypes.create_string_buffer(bufsize)
         api(self, buffer, bufsize)
         
-        return buffer.value.decode("utf-8")
+        return decode(memoryview(buffer)[:bufsize-1], "utf-8")
     
     def get_base_name(self):
         """
@@ -475,7 +476,7 @@ class PdfImage (PdfObject):
             length = pdfium_c.FPDFImageObj_GetImageFilter(self, i, None, 0)
             buffer = ctypes.create_string_buffer(length)
             pdfium_c.FPDFImageObj_GetImageFilter(self, i, buffer, length)
-            f = buffer.value.decode("utf-8")
+            f = decode(memoryview(buffer)[:length-1], "utf-8")
             filters.append(f)
         
         if skip_simple:

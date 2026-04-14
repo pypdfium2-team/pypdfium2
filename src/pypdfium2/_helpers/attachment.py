@@ -4,6 +4,7 @@
 __all__ = ("PdfAttachment", )
 
 import ctypes
+from codecs import decode
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
@@ -46,10 +47,10 @@ class PdfAttachment (pdfium_i.AutoCastable):
             str: Name of the attachment.
         """
         n_bytes = pdfium_c.FPDFAttachment_GetName(self, None, 0)
-        buffer = ctypes.create_string_buffer(n_bytes)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
-        pdfium_c.FPDFAttachment_GetName(self, buffer_ptr, n_bytes)
-        return buffer[:n_bytes-2].decode("utf-16-le")
+        n_units = -(n_bytes // -2)  # ceildiv
+        buffer = (pdfium_c.FPDF_WCHAR * n_units)()
+        pdfium_c.FPDFAttachment_GetName(self, buffer, n_bytes)
+        return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
     
     
     def get_data(self):
@@ -122,11 +123,11 @@ class PdfAttachment (pdfium_i.AutoCastable):
         if n_bytes <= 0:
             raise PdfiumError(f"Failed to get value of key '{key}'.")
         
-        buffer = ctypes.create_string_buffer(n_bytes)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(pdfium_c.FPDF_WCHAR))
-        pdfium_c.FPDFAttachment_GetStringValue(self, enc_key, buffer_ptr, n_bytes)
+        n_units = -(n_bytes // -2)  # ceildiv
+        buffer = (pdfium_c.FPDF_WCHAR * n_units)()
+        pdfium_c.FPDFAttachment_GetStringValue(self, enc_key, buffer, n_bytes)
         
-        return buffer[:n_bytes-2].decode("utf-16-le")
+        return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
     
     
     def set_str_value(self, key, value):
