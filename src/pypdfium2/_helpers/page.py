@@ -101,7 +101,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     def get_mediabox(self, fallback_ok=True):
         """
         Returns:
-            (float, float, float, float) | None:
+            (float,) * 4 | None:
             The page MediaBox in PDF canvas units, consisting of four coordinates (usually x0, y0, x1, y1).
             If MediaBox is not defined, returns ANSI A (0, 0, 612, 792) if ``fallback_ok=True``, None otherwise.
         
@@ -364,7 +364,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             rotation (int):
                 Additional rotation in degrees (0, 90, 180, or 270).
             
-            crop (tuple[float, float, float, float]):
+            crop (tuple[(float,) * 4]):
                 Amount in PDF canvas units to cut off from page borders (left, bottom, right, top). Crop is applied after rotation.
             
             may_draw_forms (bool):
@@ -373,7 +373,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             bitmap_maker (typing.Callable):
                 Callback function used to create the :class:`.PdfBitmap`.
             
-            fill_color (tuple[int, int, int, int]):
+            fill_color (tuple[(int,) * 4]):
                 Color the bitmap will be filled with before rendering. This uses RGBA syntax regardless of the pixel format used, with values from 0 to 255.
                 If the fill color is not opaque (i.e. has transparency), ``{BGR,RGB}A`` will be used.
             

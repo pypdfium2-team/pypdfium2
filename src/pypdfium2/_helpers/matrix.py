@@ -164,7 +164,7 @@ class PdfMatrix:
     def on_rect(self, left, bottom, right, top):
         """
         Returns:
-            (float, float, float, float): Transformed rectangle.
+            (float,) * 4: Transformed rectangle.
         """
         points = (
             self.on_point(left, top),

@@ -196,7 +196,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             This function replaces the color values in the given rectangle. It does not perform alpha compositing.
         
         Parameters:
-            color (tuple[int, int, int, int]):
+            color (tuple[(int,) * 4]):
                 RGBA fill color (a tuple of 4 integers ranging from 0 to 255).
         """
         c_color = pdfium_i.color_tohex(color, self.rev_byteorder)

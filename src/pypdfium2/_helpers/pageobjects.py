@@ -88,7 +88,7 @@ class PdfObject (pdfium_i.AutoCloseable):
         Get the bounds of the object on the page.
         
         Returns:
-            tuple[float * 4]: Left, bottom, right and top, in PDF page coordinates.
+            tuple[(float,) * 4]: Left, bottom, right and top, in PDF page coordinates.
         """
         if self.page is None:
             raise RuntimeError("Must not call get_bounds() on a loose pageobject.")
@@ -110,7 +110,7 @@ class PdfObject (pdfium_i.AutoCloseable):
             This function only supports image and text objects.
         
         Returns:
-            tuple[tuple[float*2] * 4]: Corner positions as (x, y) tuples, counter-clockwise from origin, i.e. bottom-left, bottom-right, top-right, top-left, in PDF page coordinates.
+            tuple[(tuple[float, float],) * 4]: Corner positions as (x, y) tuples, counter-clockwise from origin, i.e. bottom-left, bottom-right, top-right, top-left, in PDF page coordinates.
         """
         
         if self.type not in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
