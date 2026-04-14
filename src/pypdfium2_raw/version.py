@@ -69,7 +69,7 @@ Parameters:
         Version ciphers joined as string.
     desc (str):
         Descriptors (origin, flags) as string.
-    api_tag (tuple[int]):
+    api_tag (tuple[int, int, int]):
         Version ciphers grouped as tuple.
     major (int):
         Chromium major cipher.

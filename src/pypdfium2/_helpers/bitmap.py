@@ -356,7 +356,7 @@ class PdfPosConv:
     Parameters:
         page (PdfPage):
             Handle to the page.
-        pos_args (tuple[int*5]):
+        pos_args (tuple[(int,) * 5]):
             pdfium canvas args (start_x, start_y, size_x, size_y, rotate), as in ``FPDF_RenderPageBitmap()`` etc.
     """
     

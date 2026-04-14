@@ -39,7 +39,7 @@ Parameters:
         Version ciphers joined as str, including possible beta. Corresponds to the latest release tag at install time.
     desc (str):
         Non-cipher descriptors represented as str.
-    api_tag (tuple[int]):
+    api_tag (tuple[int, int, int]):
         Version ciphers joined as tuple, excluding possible beta.
     major (int):
         Major cipher.
