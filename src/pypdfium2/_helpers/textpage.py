@@ -56,6 +56,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             str: The text on the page area in question, or an empty string if no text was found.
         """
         
+        # TODO defer get_bbox() to a cached property? but raises questions if the bbox may change between calls.
         bbox = self.page.get_bbox()
         if left is None:
             left = bbox[0]
@@ -71,11 +72,11 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if n_chars <= 0:
             return ""
         
-        buffer = ctypes.create_string_buffer(n_chars * 2)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
-        pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
+        # alternatively: ctypes.create_string_buffer(n_chars * 2) and cast to POINTER(c_ushort)
+        buffer = (ctypes.c_ushort * n_chars)()
+        pdfium_c.FPDFText_GetBoundedText(*args, buffer, n_chars)
         
-        # alternatively: buffer.raw or bytes(buffer) .decode(...)
+        # alternatively: bytes(buffer).decode(...)
         return decode(buffer, "utf-16-le", errors=errors)
     
     
@@ -197,7 +198,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             loose (bool):
                 Get a more comprehensive box covering the entire font bounds, as opposed to the default tight box specific to the one character.
         Returns:
-            Float values for left, bottom, right and top in PDF canvas units.
+            float: Values for left, bottom, right and top in PDF canvas units.
         """
         
         if loose:
@@ -223,7 +224,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             :meth:`.count_rects` must be called once with default params before subsequent :meth:`.get_rect` calls for this function to work.
         
         Returns:
-            Float values for left, bottom, right and top in PDF canvas units.
+            float: Values for left, bottom, right and top in PDF canvas units.
         """
         l, b, r, t = c_double(), c_double(), c_double(), c_double()
         ok = pdfium_c.FPDFText_GetRect(self, index, l, t, r, b)  # yes, ltrb!
