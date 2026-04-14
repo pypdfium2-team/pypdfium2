@@ -101,3 +101,6 @@ def pages_c_array(pages):
     count = len(pages)
     c_array = (pdfium_c.FPDF_PAGE * count)(*(p.raw for p in pages))
     return c_array, count
+
+
+FPDF_WCHAR_size = ctypes.sizeof(pdfium_c.FPDF_WCHAR)

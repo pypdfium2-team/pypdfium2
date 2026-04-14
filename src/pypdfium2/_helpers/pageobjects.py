@@ -11,6 +11,7 @@ from codecs import decode
 from collections import namedtuple
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
+from pypdfium2.internal import FPDF_WCHAR_size
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
@@ -181,7 +182,7 @@ class PdfTextObj (PdfObject):
         if n_bytes == 0:
             raise PdfiumError("Failed to get text from textobject.")
         
-        n_units = -(n_bytes // -2)  # ceildiv
+        n_units = -(n_bytes // -FPDF_WCHAR_size)  # ceildiv
         buffer = (pdfium_c.FPDF_WCHAR * n_units)()
         pdfium_c.FPDFTextObj_GetText(self, self.textpage, buffer, n_bytes)
         

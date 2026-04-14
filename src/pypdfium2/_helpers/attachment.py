@@ -7,6 +7,7 @@ import ctypes
 from codecs import decode
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
+from pypdfium2.internal import FPDF_WCHAR_size
 from pypdfium2._helpers.misc import PdfiumError
 
 
@@ -47,7 +48,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
             str: Name of the attachment.
         """
         n_bytes = pdfium_c.FPDFAttachment_GetName(self, None, 0)
-        n_units = -(n_bytes // -2)  # ceildiv
+        n_units = -(n_bytes // -FPDF_WCHAR_size)  # ceildiv
         buffer = (pdfium_c.FPDF_WCHAR * n_units)()
         pdfium_c.FPDFAttachment_GetName(self, buffer, n_bytes)
         return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
@@ -123,7 +124,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         if n_bytes <= 0:
             raise PdfiumError(f"Failed to get value of key '{key}'.")
         
-        n_units = -(n_bytes // -2)  # ceildiv
+        n_units = -(n_bytes // -FPDF_WCHAR_size)  # ceildiv
         buffer = (pdfium_c.FPDF_WCHAR * n_units)()
         pdfium_c.FPDFAttachment_GetStringValue(self, enc_key, buffer, n_bytes)
         
