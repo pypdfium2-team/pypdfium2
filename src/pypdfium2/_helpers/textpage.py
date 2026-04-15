@@ -257,10 +257,10 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             match_case (bool):
                 If True, the search will be case-specific (upper and lower letters treated as different characters).
             match_whole_word (bool):
-                If True, substring occurrences will be ignored (e. g. `cat` would not match `category`).
+                If True, substring occurrences will be ignored (e.g. `cat` would not match `category`).
             consecutive (bool):
                 If False (the default), :meth:`.search` will skip past the current match to look for the next match.
-                If True, parts of the previous match may be caught again (e. g. searching for `aa` in `aaaa` would match 3 rather than 2 times).
+                If True, parts of the previous match may be caught again (e.g. searching for `aa` in `aaaa` would match 3 rather than 2 times).
             flags (int):
                 Passthrough of raw pdfium searching flags. Note that you may want to use the boolean options instead.
         Returns:
