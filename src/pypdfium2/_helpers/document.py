@@ -211,7 +211,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         Returns:
             bool: Whether the document is tagged (cf. PDF 1.7, 10.7 "Tagged PDF").
         """
-        return bool( pdfium_c.FPDFCatalog_IsTagged(self) )
+        return pdfium_c.FPDFCatalog_IsTagged(self) == 1
     
     
     def save(self, dest, version=None, flags=0):
