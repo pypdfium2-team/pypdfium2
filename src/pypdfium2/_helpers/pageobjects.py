@@ -15,7 +15,7 @@ from pypdfium2.internal import FPDF_WCHAR_size
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
-from pypdfium2._lazy import Lazy
+from pypdfium2._lazy import Lazy, cached_property
 
 logger = logging.getLogger(__name__)
 
@@ -229,6 +229,17 @@ class PdfFont (pdfium_i.AutoCastable):
         api(self, buffer, bufsize)
         
         return decode(memoryview(buffer)[:bufsize-1], "utf-8")
+    
+    @cached_property
+    def is_embedded(self):
+        """
+        bool: The font's embedding status. True if it is embedded (bundled) in the PDF, False otherwise.
+        This is a cached property, as a font object's embedding status is unlikely to change.
+        """
+        rc = pdfium_c.FPDFFont_GetIsEmbedded(self)
+        if rc == -1:
+            raise PdfiumError("Failed to determine font embedding status.")
+        return rc == 1
     
     def get_base_name(self):
         """

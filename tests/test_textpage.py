@@ -156,33 +156,35 @@ def test_get_text_bounded_defaults_with_rotation():
 
 
 @pytest.mark.parametrize(
-    "index,character,text,font_size,base_name,family_name,weight",
+    "index,exp_char,text,font_size,base_name,family_name,weight",
     [
         (0, "L", "Lorem ipsum dolor sit amet,", 16.0, "Ubuntu", "Ubuntu", 400),
         (5, " ", "Lorem ipsum dolor sit amet,", 16.0, "Ubuntu", "Ubuntu", 400),
         (27, "\r", None, None, None, None, None),
         (28, "\n", None, None, None, None, None),
         (43, "i", "consectetur adipisici elit,", 16.0, "Ubuntu", "Ubuntu", 400),
-    ],
+    ]
 )
-def test_font_helpers(
-    index, character, text, font_size, base_name, family_name, weight
-):
+def test_font_helpers(index, exp_char, text, font_size, base_name, family_name, weight):
+    
     pdf = pdfium.PdfDocument(TestFiles.text)
     page = pdf[0]
     textpage = page.get_textpage()
     n_chars = textpage.count_chars()
-    print(n_chars)
-
-    assert chr(pdfium_c.FPDFText_GetUnicode(textpage.raw, index)) == character
+    assert n_chars == 438
+    
+    char = chr(pdfium_c.FPDFText_GetUnicode(textpage.raw, index))
+    assert char == exp_char
+    
     textobj = textpage.get_textobj(index)
     if text is None:
         assert textobj is None
     else:
         assert textobj.extract() == text
         assert textobj.get_font_size() == font_size
-
+        
         fontobj = textobj.get_font()
         assert fontobj.get_base_name() == base_name
         assert fontobj.get_family_name() == family_name
         assert fontobj.get_weight() == weight
+        assert fontobj.is_embedded is True
