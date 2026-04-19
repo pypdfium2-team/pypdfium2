@@ -72,11 +72,9 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         if n_chars <= 0:
             return ""
         
-        # alternatively: ctypes.create_string_buffer(n_chars * 2) and cast to POINTER(c_ushort)
         buffer = (ctypes.c_ushort * n_chars)()
         pdfium_c.FPDFText_GetBoundedText(*args, buffer, n_chars)
         
-        # alternatively: bytes(buffer).decode(...)
         return decode(buffer, "utf-16-le", errors=errors)
     
     
@@ -133,12 +131,12 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         count -= l_passive + r_passive
         in_count = t_end+2 - t_start  # including NUL terminator
         
-        buffer = ctypes.create_string_buffer(in_count * 2)
-        buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
-        out_count = pdfium_c.FPDFText_GetText(self, index, count, buffer_ptr)
+        buffer = (ctypes.c_ushort * in_count)()
+        out_count = pdfium_c.FPDFText_GetText(self, index, count, buffer)
         assert in_count >= out_count, f"Buffer too small: {in_count} vs {out_count}"
         
-        return buffer[:(out_count-1)*2].decode("utf-16-le", errors=errors)
+        # memoryview preserves element size
+        return decode(memoryview(buffer)[:out_count-1], "utf-16-le", errors=errors)
     
     
     def count_chars(self):
@@ -259,10 +257,10 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             match_case (bool):
                 If True, the search will be case-specific (upper and lower letters treated as different characters).
             match_whole_word (bool):
-                If True, substring occurrences will be ignored (e. g. `cat` would not match `category`).
+                If True, substring occurrences will be ignored (e.g. `cat` would not match `category`).
             consecutive (bool):
                 If False (the default), :meth:`.search` will skip past the current match to look for the next match.
-                If True, parts of the previous match may be caught again (e. g. searching for `aa` in `aaaa` would match 3 rather than 2 times).
+                If True, parts of the previous match may be caught again (e.g. searching for `aa` in `aaaa` would match 3 rather than 2 times).
             flags (int):
                 Passthrough of raw pdfium searching flags. Note that you may want to use the boolean options instead.
         Returns:

@@ -8,6 +8,7 @@ import ctypes
 import logging
 import warnings
 from pathlib import Path
+from codecs import decode
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -284,7 +285,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         n_bytes = pdfium_c.FPDF_GetMetaText(self, enc_key, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
         pdfium_c.FPDF_GetMetaText(self, enc_key, buffer, n_bytes)
-        return buffer[:n_bytes-2].decode("utf-16-le")
+        return decode(memoryview(buffer)[:n_bytes-2], "utf-16-le")
     
     
     METADATA_KEYS = ("Title", "Author", "Subject", "Keywords", "Creator", "Producer", "CreationDate", "ModDate")
@@ -465,7 +466,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         n_bytes = pdfium_c.FPDF_GetPageLabel(self, index, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
         pdfium_c.FPDF_GetPageLabel(self, index, buffer, n_bytes)
-        return buffer[:n_bytes-2].decode("utf-16-le")
+        return decode(memoryview(buffer)[:n_bytes-2], "utf-16-le")
     
     
     def page_as_xobject(self, index, dest_pdf):
@@ -644,7 +645,7 @@ class PdfBookmark (pdfium_i.AutoCastable):
         n_bytes = pdfium_c.FPDFBookmark_GetTitle(self, None, 0)
         buffer = ctypes.create_string_buffer(n_bytes)
         pdfium_c.FPDFBookmark_GetTitle(self, buffer, n_bytes)
-        return buffer[:n_bytes-2].decode("utf-16-le")
+        return decode(memoryview(buffer)[:n_bytes-2], "utf-16-le")
     
     def get_count(self):
         """
