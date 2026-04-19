@@ -228,7 +228,7 @@ jobs:
       cibw_arch: AMD64
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
   
-  # Google's toolchain doesn't support native windows ARM hosts yet, but it supports cross-compilation from amd64.
+  # Cross-compile windows ARM64 from amd64 as that's Google's official approach. Native build on ARM64 may also work (see sbuild.yaml) but is less supported and needs a bit of patching.
   # https://cibuildwheel.pypa.io/en/stable/platforms/#windows-arm64
   # Note: build system probably ignores cibuildwheel's cross-compilation env vars, so setting target_cpu in GN config (through pyproject.toml) is key here.
   windows_arm64:

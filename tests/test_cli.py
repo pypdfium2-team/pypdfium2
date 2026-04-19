@@ -38,9 +38,7 @@ class StringIOWithFileno (io.StringIO):
     def __init__(self, orig_stderr):
         super().__init__()
         self._orig_stderr = orig_stderr
-    
-    def fileno(self):
-        return self._orig_stderr.fileno()
+        self.fileno = self._orig_stderr.fileno  # forward (fileno is a function)
 
 
 def run_cli(argv, exp_output=None, capture=("out", "err", "log"), normalize_lfs=False):
