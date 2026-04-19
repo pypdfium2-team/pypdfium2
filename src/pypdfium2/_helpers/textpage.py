@@ -101,7 +101,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         Parameters:
             index (int): Index of the first char to include.
             count (int): Number of chars to cover, relative to the internal char list. Defaults to -1 for all remaining chars after *index*.
-            errors (str): Error handling when decoding the data (see :meth:`bytes.decode`).
+            errors (str): Error handling when decoding the data (see :meth:`codecs.decode`).
         Returns:
             str: The text in the range in question, or an empty string if no text was found.
         
