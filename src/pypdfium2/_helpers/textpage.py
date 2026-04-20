@@ -10,6 +10,7 @@ import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.pageobjects import PdfTextObj
+from pypdfium2._lazy import cached_property
 
 c_double = ctypes.c_double
 logger = logging.getLogger(__name__)
@@ -44,11 +45,19 @@ class PdfTextPage (pdfium_i.AutoCloseable):
     def parent(self):  # AutoCloseable hook
         return self.page
     
+    @cached_property
+    def _page_bbox(self):
+        return self.page.get_bbox()
     
     def get_text_bounded(self, left=None, bottom=None, right=None, top=None, errors="ignore"):
         """
         Extract text from given boundaries, in PDF canvas units.
         If a boundary value is None, it defaults to the corresponding value of :meth:`.PdfPage.get_bbox`.
+        
+        .. versionchanged:: 5.7.1
+            The page bbox is now managed as a cached property, so it will only be retrieved if needed.
+            This helps avoid overhead when :meth:`.get_text_bounded` is called many times with given rectangles.
+            In the event that you changed the page bbox and want this method to adapt, manually ``del textpage._page_bbox``.
         
         Parameters:
             errors (str): Error treatment when decoding the data (see :func:`codecs.decode`).
@@ -56,16 +65,14 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             str: The text on the page area in question, or an empty string if no text was found.
         """
         
-        # TODO defer get_bbox() to a cached property? but raises questions if the bbox may change between calls.
-        bbox = self.page.get_bbox()
         if left is None:
-            left = bbox[0]
+            left = self._page_bbox[0]
         if bottom is None:
-            bottom = bbox[1]
+            bottom = self._page_bbox[1]
         if right is None:
-            right = bbox[2]
+            right = self._page_bbox[2]
         if top is None:
-            top = bbox[3]
+            top = self._page_bbox[3]
         
         args = (self, left, top, right, bottom)
         n_chars = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
