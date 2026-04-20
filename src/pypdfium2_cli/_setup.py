@@ -17,7 +17,6 @@ def setup_logging():
         l.setLevel(loglevel)
     
     warnings.simplefilter("always")
-    logging.captureWarnings(True)
     
     # cli_logger = logging.getLogger("pypdfium2_cli")
     # cli_logger.debug("Just set up logging")
