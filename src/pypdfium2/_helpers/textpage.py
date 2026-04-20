@@ -57,7 +57,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         .. versionchanged:: 5.7.1
             The page bbox is now managed as a cached property, so it will only be retrieved if needed.
             This helps avoid overhead when :meth:`.get_text_bounded` is called many times with given rectangles.
-            In the event that you changed the page bbox and want this method to adapt, manually ``del textpage._page_bbox``.
+            In the event that you changed the page bbox, manually ``del textpage._page_bbox`` (if loaded) or re-initialize the textpage.
         
         Parameters:
             errors (str): Error treatment when decoding the data (see :func:`codecs.decode`).
