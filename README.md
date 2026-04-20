@@ -657,7 +657,14 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```
 
 * For string output parameters, callers needs to provide a sufficiently long, pre-allocated buffer.
-  This may work differently depending on what type the function requires, which encoding is used, whether the number of bytes or characters is returned, and whether space for a NUL terminator is included or not. Carefully review the documentation of the function in question to fulfill its requirements.
+  This may work differently depending on what type the function requires, which encoding is used, whether the number of bytes or units is returned, and whether space for a NUL terminator is included or not. Carefully review the documentation of the function in question to fulfill its requirements.
+  
+  There are many different ways of handling output strings; this section describes the strategy used by pypdfium2's helpers.
+  
+  We will first import the `codecs.decode()` function which can be used on generic memory (whereas the `.decode()` method is only available on bytes or bytearrays):
+  ```python
+  from codecs import decode
+  ```
   
   Example A: Getting the title string of a bookmark.
   ```python
@@ -669,7 +676,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Second call with the actual buffer
   pdfium_c.FPDFBookmark_GetTitle(bookmark, buffer, n_bytes)
   # Decode to string, cutting off the NUL terminator (encoding: UTF-16LE)
-  title = buffer[:n_bytes-2].decode("utf-16-le")
+  title = decode(memoryview(buffer)[:n_bytes-2], "utf-16-le")
   ```
   
   Example B: Extracting text in given boundaries.
@@ -677,23 +684,24 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set)
   # Store common arguments for the two calls
   args = (textpage, left, top, right, bottom)
-  # First call to get the required number of units (not bytes!) - a possible NUL terminator is not included
-  n_chars = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
+  # First call to get the required number of units (not bytes!).
+  # A possible NUL terminator is not included.
+  n_units = pdfium_c.FPDFText_GetBoundedText(*args, None, 0)
   # If no characters were found, return an empty string
-  if n_chars <= 0:
+  if n_units <= 0:
       return ""
-  # Calculate the required number of bytes (encoding: UTF-16LE again)
-  # The function signature uses c_ushort, so 1 unit takes sizeof(c_ushort) == 2 bytes
-  n_bytes = 2 * n_chars
-  # Initialise the output buffer - this function can work without NUL terminator, so skip it
-  buffer = ctypes.create_string_buffer(n_bytes)
-  # Re-interpret the type from char to unsigned short* as required by the function
-  buffer_ptr = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort))
+  # Create the buffer. This particular API does not insist on space for a NUL terminator.
+  # Skip so we don't need to cut it off later.
+  buffer = (ctypes.c_ushort * n_units)()
   # Second call with the actual buffer
-  pdfium_c.FPDFText_GetBoundedText(*args, buffer_ptr, n_chars)
-  # Decode to string (You may want to pass `errors="ignore"` to skip possible errors in the PDF's encoding)
-  text = buffer.raw.decode("utf-16-le")
+  pdfium_c.FPDFText_GetBoundedText(*args, buffer, n_units)
+  # Decode to string (You may want to pass errors="ignore" to skip possible errors in the PDF's encoding)
+  text = decode(buffer, "utf-16-le")
   ```
+  
+  There are also APIs that return the number of bytes but expect a multi-byte type, e.g. `FPDF_WCHAR`.
+  In that case, you can calculate the number of units via `-(n_bytes // -ctypes.sizeof(pdfium_c.FPDF_WCHAR))` (this does a ceil division).
+  <!-- TODO add actual example -->
 
 * Not only are there different ways of string output that need to be handled according to the requirements of the function in question.
   String input, too, can work differently depending on encoding and type.
