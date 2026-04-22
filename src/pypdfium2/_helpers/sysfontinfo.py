@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfSysfontBase", )
+__all__ = ("PdfSysfontBase", "PdfDefaultTTFMap")
 
 import sys
+import ctypes
 import atexit
 import logging
 import pypdfium2.raw as pdfium_c
@@ -45,8 +46,34 @@ class _DefaultSysfontInfoClass:
 
 _DefaultSysfontInfo = _DefaultSysfontInfoClass()
 
-_CallbackNames = ("Release", "EnumFonts", "MapFont", "GetFont", "GetFontData", "GetFaceName", "GetFontCharset", "DeleteFont")
 
+class _DefaultTTFMapClass:
+    
+    @cached_property
+    def value(self):
+        logger.debug("Retrieving default TT Font map...")
+        count = pdfium_c.FPDF_GetDefaultTTFMapCount()
+        map = {}
+        for i in range(count):
+            entry = pdfium_c.FPDF_GetDefaultTTFMapEntry(i).contents
+            # TODO decode; check if the default font is even installed?
+            map[entry.charset] = ctypes.cast(entry.fontname, ctypes.c_char_p).value
+        return map
+    
+    def get(self, key, default=None):
+        out = self.value.get(key, default)
+        self.get = self.value.get  # optimize away layer of indirection
+        return out
+
+# FIXME sphinx docs don't support singleton pattern properly?
+PdfDefaultTTFMap = _DefaultTTFMapClass()
+"""
+This object exposes the default TT Font map used by pdfium.\n
+Access the ``.value`` cached property to obtain the map, or call ``.get(charset)``.
+"""
+
+
+_CallbackNames = ("Release", "EnumFonts", "MapFont", "GetFont", "GetFontData", "GetFaceName", "GetFontCharset", "DeleteFont")
 
 class PdfSysfontBase (pdfium_i.AutoCastable):
     """

@@ -7,6 +7,8 @@ from contextlib import contextmanager
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 
+DefaultTTFMap = pdfium.PdfDefaultTTFMap
+
 logger = logging.getLogger("pypdfium2_cli")
 
 @contextmanager
@@ -40,7 +42,8 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
         logger.debug(f"fontinfo::MapFont:in (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pdfium_i.PdfFontPitchFamilyFlags(pitch_family).name!r}, face={face_bstr!r})")
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, _ignored)
-        logger.debug(f"fontinfo::MapFont:out {out}")
+        vis_out = out or f"{out} (default: {DefaultTTFMap.get(charset)})"
+        logger.debug(f"fontinfo::MapFont:out {vis_out}")
         return out
     
     def GetFont(self, _, face):
