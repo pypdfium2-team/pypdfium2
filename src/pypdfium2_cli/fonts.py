@@ -52,7 +52,10 @@ def main(args):
     headers = ("Base name", "Family name", "Weight", "Source", "Pages")
     fonts_iter = _get_fonts_iter(all_fonts)
     if HAVE_TABULATE:
-        print(Lazy.tabulate(fonts_iter, headers=headers, stralign="left", tablefmt="pretty", maxcolwidths=[30, 30, None, None, 80]))
+        fonts_list = list(fonts_iter)
+        if not fonts_list:
+            return
+        print(Lazy.tabulate(fonts_list, headers=headers, stralign="left", tablefmt="pretty", maxcolwidths=[30, 30, None, None, 80]))
     else:
         logger.info("You may want to install `tabulate` for prettier output.")
         print(headers)
