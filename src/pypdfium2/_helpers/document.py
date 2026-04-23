@@ -687,8 +687,9 @@ class PdfDest (pdfium_i.AutoCastable):
         """
         val = pdfium_c.FPDFDest_GetDestPageIndex(self.pdf, self)
         return val if val >= 0 else None
-    
-    def get_view(self):
+
+    # TODO(apibreak) change seqtype default to tuple, or unconditionally return tuple?
+    def get_view(self, seqtype=list):
         """
         Returns:
             (int, list[float]): A tuple of (view_mode, view_pos).
@@ -699,5 +700,5 @@ class PdfDest (pdfium_i.AutoCastable):
         n_params = ctypes.c_ulong()
         pos = (pdfium_c.FS_FLOAT * 4)()
         mode = pdfium_c.FPDFDest_GetView(self, n_params, pos)
-        pos = list(pos)[:n_params.value]
+        pos = seqtype(pos)[:n_params.value]
         return mode, pos

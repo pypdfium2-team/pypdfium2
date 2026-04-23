@@ -18,7 +18,7 @@ def _compare_bookmark(bm, **kwargs):
     else:
         assert isinstance(dest, pdfium.PdfDest)
         assert kwargs["page_index"] == dest.get_index()
-        view_mode, view_pos = dest.get_view()
+        view_mode, view_pos = dest.get_view(seqtype=tuple)
         assert kwargs["view_mode"] == view_mode
         assert kwargs["view_pos"] == pytest.approx(view_pos, abs=1)
 
@@ -41,7 +41,7 @@ def test_gettoc():
     # check common values
     for bm in toc:
         dest = bm.get_dest()
-        view_mode, view_pos = dest.get_view()
+        view_mode, view_pos = dest.get_view(seqtype=tuple)
         assert view_mode == pdfium_c.PDFDEST_VIEW_XYZ
         assert round(view_pos[0]) == 89
     
