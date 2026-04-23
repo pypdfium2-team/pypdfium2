@@ -59,6 +59,7 @@ Document Info
 Font Info
 *********
 .. command-output:: pypdfium2 fonts --help
+.. command-output:: pypdfium2 fonts ../../tests/resources/multipage.pdf
 
 
 Renderer
@@ -74,3 +75,4 @@ Page Tiler
 TOC Reader
 **********
 .. command-output:: pypdfium2 toc --help
+.. command-output:: pypdfium2 toc ../../tests/resources/toc.pdf
