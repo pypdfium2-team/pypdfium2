@@ -28,6 +28,38 @@ def parse_numtext(numtext):
     return indices
 
 
+class _Range:
+    
+    def __init__(self, start, stop):
+        self.start = start
+        self.stop = stop
+    
+    def __repr__(self):
+        return f"{self.start}-{self.stop}"
+
+def pagenums_ranger(pagenums):
+    
+    prev = -1
+    range_start = None
+    out = []
+    
+    for n in pagenums:
+        if prev+1 == n:
+            if not range_start:
+                range_start = out.pop()  # prev
+        else:
+            if range_start:
+                out.append(_Range(range_start, prev))
+                range_start = None
+            out.append(n)
+        prev = n
+    
+    if range_start:
+        out.append(_Range(range_start, prev))
+    
+    return out
+
+
 def round_list(lst, n_digits):
     if not lst:
         return lst
@@ -88,38 +120,6 @@ def iterator_hasvalue(iterator):
         return False, None
     else:
         return True, _postpeek_generator(first_value, iterator)
-
-
-class _Range:
-    
-    def __init__(self, start, stop):
-        self.start = start
-        self.stop = stop
-    
-    def __repr__(self):
-        return f"{self.start}-{self.stop}"
-
-def pagenums_ranger(pagenums):
-    
-    prev = -1
-    range_start = None
-    out = []
-    
-    for n in pagenums:
-        if prev+1 == n:
-            if not range_start:
-                range_start = out.pop()  # prev
-        else:
-            if range_start:
-                out.append(_Range(range_start, prev))
-                range_start = None
-            out.append(n)
-        prev = n
-    
-    if range_start:
-        out.append(_Range(range_start, prev))
-    
-    return out
 
 
 if sys.version_info >= (3, 9):

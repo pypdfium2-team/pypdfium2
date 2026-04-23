@@ -3,9 +3,9 @@
 
 import logging
 from collections import namedtuple
+from importlib.util import find_spec
 import pypdfium2.raw as pdfium_c
 from pypdfium2._lazy import Lazy
-from importlib.util import find_spec
 from pypdfium2_cli._parsers import (
     add_input,
     get_input,
