@@ -478,7 +478,7 @@ class PdfPage (pdfium_i.AutoCloseable):
         if may_draw_forms and self.formenv:
             pdfium_c.FPDF_FFLDraw(self.formenv, *render_args)
         
-        bitmap._pos_args = (weakref.ref(self), *pos_args)
+        bitmap._render_args = (weakref.ref(self), pos_args)
         return bitmap
 
 

@@ -62,7 +62,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         )[self.format]
         
         # slot to store arguments for PdfPosConv, set on page rendering
-        self._pos_args = None
+        self._render_args = None
         
         super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
     
@@ -312,12 +312,17 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         This method requires passing in the page explicitly, to avoid holding a strong reference, so that bitmap and page can be independently freed by finalizer.
         """
-        # if the bitmap was rendered from a page, resolve the weakref and check identity
-        # before that, make sure *page* isn't None because that's what the weakref may resolve to if the referenced object is not alive anymore.
+        
+        # make sure *page* isn't None because that's what the weakref may resolve to if the referenced object is not alive anymore
         assert page, "Page must be non-null"
-        if not self._pos_args or self._pos_args[0]() is not page:
+        if not self._render_args:
+            raise RuntimeError("This bitmap does not belong to a page.")
+        
+        page_wref, pos_args = self._render_args
+        if page_wref() is not page:
             raise RuntimeError("This bitmap does not belong to the given page.")
-        return PdfPosConv(page, self._pos_args[1:])
+        
+        return PdfPosConv(page, pos_args)
 
 
 def _pil_convert_for_pdfium(pil_image):
