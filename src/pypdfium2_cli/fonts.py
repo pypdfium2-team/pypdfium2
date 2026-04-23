@@ -54,6 +54,7 @@ def main(args):
     if HAVE_TABULATE:
         print(Lazy.tabulate(fonts_iter, headers=headers, stralign="left", tablefmt="pretty", maxcolwidths=[30, 30, None, None, 80]))
     else:
+        logger.info("You may want to install `tabulate` for prettier output.")
         print(headers)
         for entry in fonts_iter:
             print(entry)
