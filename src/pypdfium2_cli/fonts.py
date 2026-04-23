@@ -14,7 +14,7 @@ from pypdfium2_cli._parsers import (
 logger = logging.getLogger("pypdfium2_cli")
 HAVE_TABULATE = bool(find_spec("tabulate"))
 
-FontHolder = namedtuple("FontHolder", ("obj", "family_names", "pages"))
+FontHolder = namedtuple("FontHolder", ("obj", "pages"))
 
 
 def attach(parser):
@@ -24,12 +24,8 @@ def _get_fonts_iter(all_fonts):
     for base_name, fontholder in all_fonts.items():
         fontobj = fontholder.obj
         source = "embedded" if fontobj.is_embedded else "system"
-        family_names = fontholder.family_names
-        if len(family_names) == 1:
-            family_names, = family_names
-        else:
-            family_names = sorted(family_names)
-        yield base_name, family_names, fontobj.get_weight(), source, sorted(fontholder.pages)
+        pages_str = " ".join(str(p) for p in sorted(fontholder.pages))
+        yield base_name, fontobj.get_family_name(), fontobj.get_weight(), source, pages_str
 
 def main(args):
     pdf = get_input(args)
@@ -44,13 +40,11 @@ def main(args):
         for textobj in page.get_objects(filter=(pdfium_c.FPDF_PAGEOBJ_TEXT,)):
             fontobj = textobj.get_font()
             base_name = fontobj.get_base_name()
-            family_name = fontobj.get_family_name()
             if base_name in all_fonts:
                 fontholder = all_fonts[base_name]
             else:
-                fontholder = FontHolder(fontobj, set(), set())
+                fontholder = FontHolder(fontobj, set())
                 all_fonts[base_name] = fontholder
-            fontholder.family_names.add(family_name)
             fontholder.pages.add(i+1)
     
     headers = ("Base name", "Family name", "Weight", "Source", "Pages")
