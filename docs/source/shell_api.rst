@@ -56,6 +56,11 @@ Document Info
 .. command-output:: pypdfium2 pdfinfo --help
 
 
+Font Info
+*********
+.. command-output:: pypdfium2 fonts --help
+
+
 Renderer
 ********
 .. command-output:: pypdfium2 render --help

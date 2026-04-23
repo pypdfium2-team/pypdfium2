@@ -23,6 +23,7 @@ def init():
         "imgtopdf":       "Convert images to PDF",
         "pageobjects":    "Print info on pageobjects",
         "pdfinfo":        "Print info on document and pages",
+        "fonts":          "List a document's fonts",
         "render":         "Rasterize pages",
         "tile":           "Tile pages (N-up)",
         "toc":            "Print table of contents",

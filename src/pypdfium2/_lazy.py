@@ -33,5 +33,10 @@ class _LazyClass:
     def numpy(self):
         logger.debug("Evaluating lazy import 'numpy' ...")
         import numpy; return numpy
+    
+    @cached_property
+    def tabulate(self):
+        logger.debug("Evaluating lazy import 'tabulate' ...")
+        from tabulate import tabulate; return tabulate
 
 Lazy = _LazyClass()
