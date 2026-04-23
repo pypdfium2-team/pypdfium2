@@ -45,6 +45,7 @@ However, some optional support model / CLI features need additional packages:
   As with `Pillow`, pypdfium2 provides helpers to get a numpy array view of a raw bitmap.
 * [`opencv-python`](https://github.com/opencv/opencv-python) (module `cv2`) is an imaging library built around numpy arrays.
   It can be used in the rendering CLI to save with pypdfium2's numpy adapter.
+* If [`tabulate`](https://github.com/astanin/python-tabulate) is installed, the CLI will give prettier output where tables are involved.
 
 pypdfium2 tries to defer imports of optional dependencies until they are actually needed, so there should be no startup overhead if you don't use them.
 
