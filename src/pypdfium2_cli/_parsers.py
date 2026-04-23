@@ -90,6 +90,42 @@ def iterator_hasvalue(iterator):
         return True, _postpeek_generator(first_value, iterator)
 
 
+class _Range:
+    
+    def __init__(self, start, stop=None):
+        self.start = start
+        self.stop = stop
+    
+    def __repr__(self):
+        return f"{self.start}-{self.stop}"
+
+def pagenums_ranger(pagenums):
+    
+    # possibly, the textbook Hacker's Delight has a smarter idea how to do this...
+    
+    prev = -1
+    curr_range = None
+    out = []
+    
+    for n in pagenums:
+        if prev+1 == n:
+            if not curr_range:
+                curr_range = _Range(prev)
+                out.pop()
+            curr_range.stop = n
+        else:
+            if curr_range:
+                out.append(curr_range)
+                curr_range = None
+            out.append(n)
+        prev = n
+    
+    if curr_range:
+        out.append(curr_range)
+    
+    return out
+
+
 if sys.version_info >= (3, 9):
     from argparse import BooleanOptionalAction
 

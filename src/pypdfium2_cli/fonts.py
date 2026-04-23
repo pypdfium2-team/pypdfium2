@@ -9,6 +9,7 @@ from importlib.util import find_spec
 from pypdfium2_cli._parsers import (
     add_input,
     get_input,
+    pagenums_ranger,
 )
 
 logger = logging.getLogger("pypdfium2_cli")
@@ -24,8 +25,9 @@ def _get_fonts_iter(all_fonts):
     for base_name, fontholder in all_fonts.items():
         fontobj = fontholder.obj
         source = "embedded" if fontobj.is_embedded else "system"
-        pages_str = " ".join(str(p) for p in sorted(fontholder.pages))
+        pages_str = ", ".join(str(p) for p in pagenums_ranger(sorted(fontholder.pages)))
         yield base_name, fontobj.get_family_name(), fontobj.get_weight(), source, pages_str
+
 
 def main(args):
     pdf = get_input(args)
