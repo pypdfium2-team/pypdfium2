@@ -13,21 +13,14 @@ from pypdfium2_cli._parsers import (
 logger = logging.getLogger("pypdfium2_cli")
 HAVE_TABULATE = bool(find_spec("tabulate"))
 
+
 def attach(parser):
     add_input(parser, pages=True)
-    # parser.add_argument(
-    #     "--class",
-    #     nargs = "+",
-    #     choices = ("embedded", "non-embedded"),
-    #     default = (),
-    # )
-
 
 def _get_fonts_iter(all_fonts):
     for base_name, fontobj in all_fonts.items():
         source = "embedded" if fontobj.is_embedded else "system"
         yield base_name, fontobj.get_family_name(), fontobj.get_weight(), source
-
 
 def main(args):
     pdf = get_input(args)
