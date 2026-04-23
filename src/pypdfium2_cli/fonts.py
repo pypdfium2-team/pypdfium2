@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import logging
+from collections import namedtuple
 import pypdfium2.raw as pdfium_c
 from pypdfium2._lazy import Lazy
 from importlib.util import find_spec
@@ -13,14 +14,22 @@ from pypdfium2_cli._parsers import (
 logger = logging.getLogger("pypdfium2_cli")
 HAVE_TABULATE = bool(find_spec("tabulate"))
 
+FontHolder = namedtuple("FontHolder", ("obj", "family_names", "pages"))
+
 
 def attach(parser):
     add_input(parser, pages=True)
 
 def _get_fonts_iter(all_fonts):
-    for base_name, fontobj in all_fonts.items():
+    for base_name, fontholder in all_fonts.items():
+        fontobj = fontholder.obj
         source = "embedded" if fontobj.is_embedded else "system"
-        yield base_name, fontobj.get_family_name(), fontobj.get_weight(), source
+        family_names = fontholder.family_names
+        if len(family_names) == 1:
+            family_names, = family_names
+        else:
+            family_names = sorted(family_names)
+        yield base_name, family_names, fontobj.get_weight(), source, sorted(fontholder.pages)
 
 def main(args):
     pdf = get_input(args)
@@ -34,12 +43,20 @@ def main(args):
         page = pdf[i]
         for textobj in page.get_objects(filter=(pdfium_c.FPDF_PAGEOBJ_TEXT,)):
             fontobj = textobj.get_font()
-            all_fonts[fontobj.get_base_name()] = fontobj
+            base_name = fontobj.get_base_name()
+            family_name = fontobj.get_family_name()
+            if base_name in all_fonts:
+                fontholder = all_fonts[base_name]
+            else:
+                fontholder = FontHolder(fontobj, set(), set())
+                all_fonts[base_name] = fontholder
+            fontholder.family_names.add(family_name)
+            fontholder.pages.add(i+1)
     
-    headers = ("Base name", "Family name", "Weight", "Source")
+    headers = ("Base name", "Family name", "Weight", "Source", "Pages")
     fonts_iter = _get_fonts_iter(all_fonts)
     if HAVE_TABULATE:
-        print(Lazy.tabulate(fonts_iter, headers=headers, stralign="left", tablefmt="pretty"))
+        print(Lazy.tabulate(fonts_iter, headers=headers, stralign="left", tablefmt="pretty", maxcolwidths=[30, 30, None, None, 80]))
     else:
         print(headers)
         for entry in fonts_iter:
