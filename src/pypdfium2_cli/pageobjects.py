@@ -18,7 +18,8 @@ from pypdfium2_cli._parsers import (
 
 PARAM_POS = "pos"
 PARAM_IMGINFO = "imginfo"
-INFO_PARAMS = (PARAM_POS, PARAM_IMGINFO)
+PARAM_TEXT = "text"
+INFO_PARAMS = (PARAM_POS, PARAM_IMGINFO, PARAM_TEXT)
 
 
 def attach(parser):
@@ -78,13 +79,15 @@ def main(args):
     
     show_pos = PARAM_POS in args.info
     show_imginfo = PARAM_IMGINFO in args.info
-    assert show_pos or show_imginfo
+    show_text = PARAM_TEXT in args.info
+    assert any((show_pos, show_imginfo, show_text))
     
     total_count = 0
     for i in args.pages:
         
         page = pdf[i]
-        hasvalue, obj_searcher = iterator_hasvalue( page.get_objects(args.filter, max_depth=args.max_depth) )
+        textpage = page.get_textpage() if show_text else None
+        hasvalue, obj_searcher = iterator_hasvalue( page.get_objects(args.filter, max_depth=args.max_depth, textpage=textpage) )
         if not hasvalue: continue
         
         print(f"# Page {i+1}")
@@ -99,7 +102,7 @@ def main(args):
             if show_pos:
                 bounds = round_list(obj.get_bounds(), args.n_digits)
                 print(pad_1 + f"Bounding Box: {bounds}")
-                if obj.type in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
+                if isinstance(obj, (pdfium.PdfImage, pdfium.PdfTextObj)):
                     quad_bounds = obj.get_quad_points()
                     print(pad_1 + f"Quad Points: {[round_list(p, args.n_digits) for p in quad_bounds]}")
             
@@ -108,6 +111,9 @@ def main(args):
                 metadata = obj.get_metadata()
                 assert (metadata.width, metadata.height) == obj.get_px_size()
                 print_img_metadata(metadata, args.n_digits, pad=pad_1)
+            
+            elif show_text and isinstance(obj, pdfium.PdfTextObj):
+                print(pad_1 + repr(obj.extract()))
             
             count += 1
         

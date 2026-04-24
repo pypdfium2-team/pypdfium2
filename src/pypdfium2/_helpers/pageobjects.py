@@ -61,7 +61,8 @@ class PdfObject (pdfium_i.AutoCloseable):
         return instance
     
     
-    def __init__(self, raw, page=None, pdf=None, container=None, level=0):
+    # textpage is only picked up by the PdfTextObj subclass, but included here so get_object() can just unconditionally pass the textpage without need for type if-checks
+    def __init__(self, raw, page=None, pdf=None, container=None, level=0, textpage=None):
         
         self.raw = raw
         self.page = page
@@ -183,6 +184,7 @@ class PdfTextObj (PdfObject):
             str: The objects's text content.
         Note:
             This method requires the :attr:`.textpage` attribute to be set.
+            For textobjects obtained through :meth:`.PdfPage.get_objects`, use the ``textpage`` passthrough parameter.
         """
         if not self.textpage:
             raise RuntimeError("PdfTextObj.extract() requires textpage to be set.")

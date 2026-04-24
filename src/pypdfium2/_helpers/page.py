@@ -266,8 +266,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to generate page content.")
     
     
-    # TODO add ability to pass through textpage to text objects
-    def get_objects(self, filter=None, max_depth=15, form=None, level=0):
+    def get_objects(self, filter=None, max_depth=15, form=None, level=0, textpage=None):
         """
         Iterate through the pageobjects on this page.
         
@@ -278,6 +277,8 @@ class PdfPage (pdfium_i.AutoCloseable):
                 If None or empty, all objects will be provided, regardless of their type.
             max_depth (int):
                 Maximum recursion depth to consider when descending into Form XObjects.
+            textpage (PdfTextPage | None):
+                Text page to pass through to any :class:`.PdfTextObj` instances.
         
         Yields:
             :class:`.PdfObject`: A pageobject.
@@ -291,6 +292,8 @@ class PdfPage (pdfium_i.AutoCloseable):
             count_objects = pdfium_c.FPDFPage_CountObjects
             get_object = pdfium_c.FPDFPage_GetObject
             parent = self
+            if textpage and textpage.page is not self:
+                raise ValueError("The given textpage does not belong to this page.")
         
         n_objects = count_objects(parent)
         if n_objects < 0:
@@ -303,7 +306,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 raise PdfiumError("Failed to get pageobject.")
             
             # Don't register as child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The parent page should remain alive while a pageobject is used, but it seems unjustified to store countless of weakrefs just to lock pageobjects when the parent page is closed.
-            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level)
+            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level, textpage=textpage)
             if not filter or helper_obj.type in filter:
                 yield helper_obj
             
@@ -313,6 +316,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                     max_depth = max_depth,
                     form = helper_obj,
                     level = level + 1,
+                    textpage = textpage,
                 )
     
     
