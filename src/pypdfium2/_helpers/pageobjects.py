@@ -228,17 +228,6 @@ class PdfFont (pdfium_i.AutoCastable):
         self.raw = raw
         self.parent = parent
     
-    def _get_name_impl(self, api, which):
-        
-        bufsize = api(self, None, 0)
-        if bufsize == 0:
-            raise PdfiumError(f"Failed to get font {which} name.")
-        
-        buffer = ctypes.create_string_buffer(bufsize)
-        api(self, buffer, bufsize)
-        
-        return decode(memoryview(buffer)[:bufsize-1], "utf-8")
-    
     @cached_property
     def is_embedded(self):
         """
@@ -250,19 +239,30 @@ class PdfFont (pdfium_i.AutoCastable):
             raise PdfiumError("Failed to determine font embedding status.")
         return rc == 1
     
-    def get_base_name(self):
+    def _get_name_impl(self, api, which, errors):
+        
+        bufsize = api(self, None, 0)
+        if bufsize == 0:
+            raise PdfiumError(f"Failed to get font {which} name.")
+        
+        buffer = ctypes.create_string_buffer(bufsize)
+        api(self, buffer, bufsize)
+        
+        return decode(memoryview(buffer)[:bufsize-1], "utf-8", errors=errors)
+    
+    def get_base_name(self, errors="replace"):
         """
         Returns:
             str: The base font name.
         """
-        return self._get_name_impl(pdfium_c.FPDFFont_GetBaseFontName, "base")
+        return self._get_name_impl(pdfium_c.FPDFFont_GetBaseFontName, "base", errors)
     
-    def get_family_name(self):
+    def get_family_name(self, errors="replace"):
         """
         Returns:
             str: The font family name.
         """
-        return self._get_name_impl(pdfium_c.FPDFFont_GetFamilyName, "family")
+        return self._get_name_impl(pdfium_c.FPDFFont_GetFamilyName, "family", errors)
     
     def get_weight(self):
         """
