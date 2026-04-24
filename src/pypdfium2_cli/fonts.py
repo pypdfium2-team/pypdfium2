@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import logging
+from ctypes import addressof
 from collections import namedtuple
 from importlib.util import find_spec
 import pypdfium2.raw as pdfium_c
@@ -22,11 +23,11 @@ def attach(parser):
     add_input(parser, pages=True)
 
 def _get_fonts_iter(all_fonts):
-    for base_name, fontholder in all_fonts.items():
+    for fontholder in all_fonts.values():
         fontobj = fontholder.obj
         source = "embedded" if fontobj.is_embedded else "system"
         pages_str = ", ".join(str(p) for p in pagenums_ranger(sorted(fontholder.pages)))
-        yield base_name, fontobj.get_family_name(), fontobj.get_weight(), source, pages_str
+        yield fontobj.get_base_name(), fontobj.get_family_name(), fontobj.get_weight(), source, pages_str
 
 
 def main(args):
@@ -41,12 +42,12 @@ def main(args):
         page = pdf[i]
         for textobj in page.get_objects(filter=(pdfium_c.FPDF_PAGEOBJ_TEXT,)):
             fontobj = textobj.get_font()
-            base_name = fontobj.get_base_name()
-            if base_name in all_fonts:
-                fontholder = all_fonts[base_name]
+            addr = addressof(fontobj.raw.contents)
+            if addr in all_fonts:
+                fontholder = all_fonts[addr]
             else:
                 fontholder = FontHolder(fontobj, set())
-                all_fonts[base_name] = fontholder
+                all_fonts[addr] = fontholder
             fontholder.pages.add(i+1)
     
     headers = ("Base name", "Family name", "Weight", "Source", "Pages")
