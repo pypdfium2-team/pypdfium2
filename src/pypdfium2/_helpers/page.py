@@ -266,6 +266,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to generate page content.")
     
     
+    # TODO add ability to pass through textpage to text objects
     def get_objects(self, filter=None, max_depth=15, form=None, level=0):
         """
         Iterate through the pageobjects on this page.

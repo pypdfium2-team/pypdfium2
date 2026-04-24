@@ -164,6 +164,10 @@ class PdfTextObj (PdfObject):
     Textobject helper class.
     
     You may want to call :meth:`.PdfPage.get_objects` or :meth:`.PdfTextPage.get_textobj` to obtain an instance of this class.
+    
+    Attributes:
+        textpage (PdfTextPage | None):
+            The parent textpage, or None if not set.
     """
     
     # TODO hold parent object in finalizer
@@ -177,7 +181,12 @@ class PdfTextObj (PdfObject):
         """
         Returns:
             str: The objects's text content.
+        Note:
+            This method requires the :attr:`.textpage` attribute to be set.
         """
+        if not self.textpage:
+            raise RuntimeError("PdfTextObj.extract() requires textpage to be set.")
+        
         n_bytes = pdfium_c.FPDFTextObj_GetText(self, self.textpage, None, 0)
         if n_bytes == 0:
             raise PdfiumError("Failed to get text from textobject.")
