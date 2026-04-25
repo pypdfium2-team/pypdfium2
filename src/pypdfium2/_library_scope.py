@@ -31,6 +31,8 @@ def init_lib():
 
 def destroy_lib():  # pragma: no cover
     assert pdfium_i.LIBRARY_AVAILABLE
+    for type, group in pdfium_i.ObjectTracker.items():
+        print(type.__name__, group)
     pdfium_i._debug_close("Destroy PDFium")
     pdfium_c.FPDF_DestroyLibrary()
     pdfium_i.LIBRARY_AVAILABLE.value = False

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE", "_debug_close")
+__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE", "_debug_close", "ObjectTracker")
 
 import os
 import sys
@@ -10,10 +10,13 @@ import uuid
 import weakref
 import logging
 import pypdfium2_cfg
+from collections import defaultdict
 from pypdfium2_cfg import DEBUG_AUTOCLOSE  # compat
 
 logger = logging.getLogger(__name__)
 LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
+
+ObjectTracker = defaultdict(set)
 
 
 def _debug_close(msg):  # pragma: no cover
@@ -43,7 +46,7 @@ class AutoCastable:
         return self.raw
 
 
-def _close_template(close_func, raw, obj_repr, state, parent, args, kwargs):
+def _close_template(close_func, raw, obj_type, obj_repr, state, parent, wref_to_self, args, kwargs):
     
     _debug_close(f"Close ({state.value.name.lower()}) {obj_repr}")
     
@@ -54,6 +57,8 @@ def _close_template(close_func, raw, obj_repr, state, parent, args, kwargs):
     assert state.value != _STATE.INVALID
     assert parent is None or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
+    _debug_close(f"{wref_to_self}")
+    ObjectTracker[obj_type].remove(wref_to_self)
 
 
 class AutoCloseable (AutoCastable):
@@ -69,6 +74,7 @@ class AutoCloseable (AutoCastable):
         self._ex_kwargs = kwargs
         self._autoclose_state = pypdfium2_cfg._Mutable(_STATE.AUTO)
         self._uuid = uuid.uuid4() if pypdfium2_cfg.DEBUG_AUTOCLOSE else None
+        self._wref_to_self = weakref.ref(self)
         
         self._finalizer = None
         self._kids = []
@@ -84,11 +90,13 @@ class AutoCloseable (AutoCastable):
     def _attach_finalizer(self):
         # NOTE this function captures the value of the `parent` property at finalizer installation time
         assert self._finalizer is None
-        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, repr(self), self._autoclose_state, self.parent, self._ex_args, self._ex_kwargs)
+        ObjectTracker[type(self)].add(self._wref_to_self)
+        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, type(self), repr(self), self._autoclose_state, self.parent, self._wref_to_self, self._ex_args, self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
         self._finalizer = None
+        ObjectTracker[type(self)].remove(self._wref_to_self)
     
     def _tree_closed(self):
         if self.raw is None:
