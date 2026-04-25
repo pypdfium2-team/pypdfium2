@@ -5,8 +5,8 @@ import sys
 import argparse
 import functools
 from os.path import basename
-from importlib import import_module
 from collections import defaultdict
+from importlib import import_module
 # Important: Do not import from the core `pypdfium2` module here, because it initializes the library, which must be deferred until after setup_logging(). Importing from the other modules (e.g. pypdfium2_cli itself) is fine.
 from pypdfium2_cli._setup import setup_logging
 
@@ -30,13 +30,14 @@ SubCommands = {
     "toc":            "Print table of contents",
 }
 
-class _ModuleLoaderClass (defaultdict):
+# could even inherit just from dict if we changed __init__ to take the factory
+class keydefaultdict (defaultdict):
     def __missing__(self, key):
-        value = import_module(f"pypdfium2_cli.{key.replace('-', '_')}")
+        value = self.default_factory(key)
         self[key] = value
         return value
 
-ModuleLoader = _ModuleLoaderClass()
+ModuleLoader = keydefaultdict(import_module)
 
 class _LocalLazyClass:
     @cached_property
@@ -82,7 +83,7 @@ Environment variables:
     elif sc_name in ("-v", "--version"):
         main_parser.add_argument("-v", "--version", action="version", version=LocalLazy.version_str)
     else:
-        mod = ModuleLoader[sc_name]
+        mod = ModuleLoader[f"pypdfium2_cli.{sc_name.replace('-', '_')}"]
         help = SubCommands[sc_name]
         desc = getattr(mod, "PARSER_DESC", None)
         desc = (help + "\n\n" + desc) if desc else help
