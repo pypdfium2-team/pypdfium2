@@ -3,10 +3,18 @@
 
 import sys
 import argparse
-import importlib
+import functools
 from os.path import basename
+from importlib import import_module
+from collections import defaultdict
 # Important: Do not import from the core `pypdfium2` module here, because it initializes the library, which must be deferred until after setup_logging(). Importing from the other modules (e.g. pypdfium2_cli itself) is fine.
 from pypdfium2_cli._setup import setup_logging
+
+if sys.version_info < (3, 8):  # pragma: no cover
+    def cached_property(func):
+        return property( functools.lru_cache(maxsize=1)(func) )
+else:
+    cached_property = functools.cached_property
 
 SubCommands = {
     "arrange":        "Rearrange/merge documents",
@@ -22,10 +30,22 @@ SubCommands = {
     "toc":            "Print table of contents",
 }
 
-def get_version():
-    from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
-    from pypdfium2_raw.bindings import _libs
-    return f"pypdfium2 {PYPDFIUM_INFO}\npdfium {PDFIUM_INFO} at {_libs['pdfium']._name}"
+class _ModuleLoaderClass (defaultdict):
+    def __missing__(self, key):
+        value = import_module(f"pypdfium2_cli.{key.replace('-', '_')}")
+        self[key] = value
+        return value
+
+ModuleLoader = _ModuleLoaderClass()
+
+class _LocalLazyClass:
+    @cached_property
+    def version_str(self):
+        from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
+        from pypdfium2_raw.bindings import _libs
+        return f"pypdfium2 {PYPDFIUM_INFO}\npdfium {PDFIUM_INFO} at {_libs['pdfium']._name}"
+
+LocalLazy = _LocalLazyClass()
 
 
 def get_parser(argv):
@@ -60,11 +80,10 @@ Environment variables:
         for name, help in SubCommands.items():
             subparsers.add_parser(name, help=help)
     elif sc_name in ("-v", "--version"):
-        main_parser.add_argument("-v", "--version", action="version", version=get_version())
+        main_parser.add_argument("-v", "--version", action="version", version=LocalLazy.version_str)
     else:
+        mod = ModuleLoader[sc_name]
         help = SubCommands[sc_name]
-        # TODO use lazy dictionary (defaultdict) for imports
-        mod = importlib.import_module(f"pypdfium2_cli.{sc_name.replace('-', '_')}")
         desc = getattr(mod, "PARSER_DESC", None)
         desc = (help + "\n\n" + desc) if desc else help
         subparser = subparsers.add_parser(
