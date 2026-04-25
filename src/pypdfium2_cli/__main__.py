@@ -28,6 +28,7 @@ def init():
         "tile":           "Tile pages (N-up)",
         "toc":            "Print table of contents",
     }
+    # TODO Only import the module that is actually used, see below.
     CmdToModule = {n: importlib.import_module(f"pypdfium2_cli.{n.replace('-', '_')}") for n in SubCommands}
 
 
@@ -61,6 +62,7 @@ Environment variables:
     )
     subparsers = main_parser.add_subparsers(dest="subcommand")
     
+    # TODO Only import and attach the module that is actually used. For main help, just add the subparsers without actually importing/attaching the modules.
     for name, help in SubCommands.items():
         mod = CmdToModule[name]
         desc = getattr(mod, "PARSER_DESC", None)
