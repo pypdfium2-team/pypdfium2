@@ -37,8 +37,11 @@ def get_parser():
         prog = "pypdfium2",
         formatter_class = argparse.RawTextHelpFormatter,
         description = """\
-Command line interface to the pypdfium2 library (Python binding to PDFium)
-Invoke as `pypdfium2` or `%(py_exe)s -m pypdfium2_cli`
+pypdfium2 is a Python binding to PDFium, a PDF processing library.
+This is the command-line interface. Invoke as `pypdfium2` or `%(py_exe)s -m pypdfium2_cli`.
+
+pypdfium2's CLI mainly serves testing purposes, similar to pdfium_test upstream.
+No API stability promises are being made.
 
 Environment variables:
 - PYPDFIUM_LOGLEVEL {debug,info,warning,error,critical} = debug
