@@ -1,6 +1,8 @@
 .. SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 .. SPDX-License-Identifier: CC-BY-4.0
 
+.. FIXME the many command-outputs seem to significantly slow down docs building
+
 Shell API
 =========
 
@@ -59,7 +61,6 @@ Document Info
 Font Info
 *********
 .. command-output:: pypdfium2 fonts --help
-.. command-output:: pypdfium2 fonts ../../tests/resources/multipage.pdf
 
 
 Renderer
@@ -75,4 +76,3 @@ Page Tiler
 TOC Reader
 **********
 .. command-output:: pypdfium2 toc --help
-.. command-output:: pypdfium2 toc ../../tests/resources/toc.pdf
