@@ -29,18 +29,37 @@ def init_lib():
     pdfium_i.LIBRARY_AVAILABLE.value = True
 
 
+def _close_objects():
+    
+    need_close = []
+    for cls, obj_wrefs in pdfium_i.ObjectTracker.items():
+        # logger.debug(f"{cls.__name__}: {obj_wrefs}")
+        for wref in obj_wrefs:
+            obj = wref()
+            if obj is None:
+                logger.warning(f"Weakref {wref} was not cleaned up from ObjectTracker.")
+            else:
+                # outsource actual closing to avoid "RuntimeError: Set changed size during iteration" (because closing removes the object from the set of weakrefs)
+                need_close.append(obj)
+    
+    if need_close:
+        logger.warning(f"The following objects are still open and will now be closed: {need_close}")
+        for obj in need_close:
+            obj.close()
+
+
 def destroy_lib():  # pragma: no cover
     assert pdfium_i.LIBRARY_AVAILABLE
-    for type, group in pdfium_i.ObjectTracker.items():
-        print(type.__name__, group)
-    pdfium_i._debug_close("Destroy PDFium")
-    pdfium_c.FPDF_DestroyLibrary()
-    pdfium_i.LIBRARY_AVAILABLE.value = False
+    try:
+        _close_objects()
+    finally:
+        pdfium_i._debug_close("Destroy PDFium")
+        pdfium_c.FPDF_DestroyLibrary()
+        pdfium_i.LIBRARY_AVAILABLE.value = False
 
 
 # Load pdfium
 init_lib()
 
 # Register an exit handler that will free pdfium
-# Trust in Python to call exit handlers only after all objects have been finalized
 atexit.register(destroy_lib)
