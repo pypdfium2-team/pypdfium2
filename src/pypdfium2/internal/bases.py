@@ -57,7 +57,6 @@ def _close_template(close_func, raw, obj_type, obj_repr, state, parent, wref_to_
     assert state.value != _STATE.INVALID
     assert parent is None or not parent._tree_closed()
     close_func(raw, *args, **kwargs)
-    _debug_close(f"{wref_to_self}")
     ObjectTracker[obj_type].remove(wref_to_self)
 
 
