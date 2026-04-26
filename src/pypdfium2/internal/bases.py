@@ -105,8 +105,9 @@ class AutoCloseable (AutoCastable):
             return True
         return False
     
-    def _add_kid(self, k):
-        self._kids.append( weakref.ref(k) )
+    def _add_kid(self, kid):
+        # assuming kid is also AutoCloseable
+        self._kids.append( kid._wref_to_self )
     
     
     def close(self, _by_parent=False):
