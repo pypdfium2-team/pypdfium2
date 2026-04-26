@@ -89,13 +89,14 @@ class AutoCloseable (AutoCastable):
     def _attach_finalizer(self):
         # NOTE this function captures the value of the `parent` property at finalizer installation time
         assert self._finalizer is None
-        ObjectTracker[type(self)].add(self._wref_to_self)
-        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, type(self), repr(self), self._autoclose_state, self.parent, self._wref_to_self, self._ex_args, self._ex_kwargs)
+        own_type = self.__class__
+        ObjectTracker[own_type].add(self._wref_to_self)
+        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, own_type, repr(self), self._autoclose_state, self.parent, self._wref_to_self, self._ex_args, self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
         self._finalizer = None
-        ObjectTracker[type(self)].remove(self._wref_to_self)
+        ObjectTracker[self.__class__].remove(self._wref_to_self)
     
     def _tree_closed(self):
         if self.raw is None:
