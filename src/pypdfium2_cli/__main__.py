@@ -1,13 +1,15 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# Important: Do not import from the core `pypdfium2` module here, since it initializes the library, which shall be deferred until after setup_logging().
+# Other modules can be imported as long as they don't import from `pypdfium2` in turn.
+
 import sys
 import argparse
 import functools
 from os.path import basename
 from collections import defaultdict
 from importlib import import_module
-# Important: Do not import from the core `pypdfium2` module here, because it initializes the library, which must be deferred until after setup_logging(). Importing from the other modules (e.g. pypdfium2_cli itself) is fine.
 from pypdfium2_cli._setup import setup_logging
 
 if sys.version_info < (3, 8):  # pragma: no cover
@@ -15,20 +17,6 @@ if sys.version_info < (3, 8):  # pragma: no cover
         return property( functools.lru_cache(maxsize=1)(func) )
 else:
     cached_property = functools.cached_property
-
-SubCommands = {
-    "arrange":        "Rearrange/merge documents",
-    "attachments":    "List/extract/edit embedded files",
-    "extract-images": "Extract images",
-    "extract-text":   "Extract text",
-    "imgtopdf":       "Convert images to PDF",
-    "pageobjects":    "Print info on pageobjects",
-    "pdfinfo":        "Print info on document and pages",
-    "fonts":          "List a document's fonts",
-    "render":         "Rasterize pages",
-    "tile":           "Tile pages (N-up)",
-    "toc":            "Print table of contents",
-}
 
 # could even inherit just from dict if we changed __init__ to take the factory
 class keydefaultdict (defaultdict):
@@ -47,6 +35,20 @@ class _LocalLazyClass:
         return f"pypdfium2 {PYPDFIUM_INFO}\npdfium {PDFIUM_INFO} at {_libs['pdfium']._name}"
 
 LocalLazy = _LocalLazyClass()
+
+SubCommands = {
+    "arrange":        "Rearrange/merge documents",
+    "attachments":    "List/extract/edit embedded files",
+    "extract-images": "Extract images",
+    "extract-text":   "Extract text",
+    "imgtopdf":       "Convert images to PDF",
+    "pageobjects":    "Print info on pageobjects",
+    "pdfinfo":        "Print info on document and pages",
+    "fonts":          "List a document's fonts",
+    "render":         "Rasterize pages",
+    "tile":           "Tile pages (N-up)",
+    "toc":            "Print table of contents",
+}
 
 
 def get_parser(argv):
@@ -72,17 +74,19 @@ Environment variables:
   Whether to install a sysfont listener.\
 """ % dict(py_exe=basename(sys.executable)),
     )
+    main_parser.add_argument(
+        "-v", "--version",
+        action = "version",
+        version = LocalLazy.version_str,
+    )
     subparsers = main_parser.add_subparsers(dest="subcommand")
     
     mod = None
     sc_name = (argv and argv[0]) or None
-    if sc_name in (None, "-h", "--help"):
-        main_parser.add_argument("-v", "--version", action="version", version="")
-        for name, help in SubCommands.items():
-            subparsers.add_parser(name, help=help)
-    elif sc_name in ("-v", "--version"):
-        main_parser.add_argument("-v", "--version", action="version", version=LocalLazy.version_str)
-    else:
+    other_scs = SubCommands.copy()
+    
+    if sc_name in SubCommands:
+        del other_scs[sc_name]
         mod = ModuleLoader[f"pypdfium2_cli.{sc_name.replace('-', '_')}"]
         help = SubCommands[sc_name]
         desc = getattr(mod, "PARSER_DESC", None)
@@ -92,6 +96,9 @@ Environment variables:
             formatter_class=argparse.RawTextHelpFormatter,
         )
         mod.attach(subparser)
+    
+    for name, help in other_scs.items():
+        subparsers.add_parser(name, help=help)
     
     return main_parser, mod
 
