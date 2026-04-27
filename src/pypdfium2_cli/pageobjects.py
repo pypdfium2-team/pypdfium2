@@ -6,7 +6,6 @@
 from collections import OrderedDict
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
-import pypdfium2.raw as pdfium_c
 from pypdfium2_cli._parsers import (
     add_input,
     add_n_digits,
