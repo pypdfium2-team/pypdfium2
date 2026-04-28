@@ -3,4 +3,3 @@ sphinx-rtd-theme
 sphinxcontrib-programoutput
 sphinx-issues
 myst-parser
-tabulate  # for example
