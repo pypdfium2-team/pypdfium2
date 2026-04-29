@@ -37,6 +37,44 @@ class _STATE (enum.Enum):
     BYPARENT = 2
 
 
+# class _Dataclass:
+#     
+#     def _iter_fields(self):
+#         for slot in self.__slots__:
+#             yield getattr(self, slot)
+#     
+#     def __repr__(self):
+#         return f"{type(self).__name__}{tuple(self._iter_fields())}"
+
+class _FinalizerInfo:  # (_Dataclass)
+    __slots__ = ("close_func", "args", "kwargs", "state")
+    def __init__(self, close_func, args, kwargs):
+        self.close_func = close_func
+        self.args, self.kwargs = args, kwargs
+        self.state = _STATE.AUTO
+
+class _FinalizerOwner:  # (_Dataclass)
+    __slots__ = ("raw", "type", "wref", "parent", "repr")
+    def __init__(self, raw, parent, wref, type, repr):
+        self.raw, self.parent = raw, parent
+        self.wref, self.type, self.repr = wref, type, repr
+
+
+def _close_template(info, owner):
+    
+    _debug_close(f"Close ({info.state.name.lower()}) {owner.repr}")
+    
+    if not LIBRARY_AVAILABLE:  # pragma: no cover
+        _debug_close(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
+        return
+    
+    assert info.state != _STATE.INVALID
+    parent = owner.parent
+    assert parent is None or not parent._tree_closed()
+    info.close_func(owner.raw, *info.args, **info.kwargs)
+    ObjectTracker[owner.type].remove(owner.wref)
+
+
 class AutoCastable:
     
     @property
@@ -47,20 +85,6 @@ class AutoCastable:
         return self.raw
 
 
-def _close_template(close_func, raw, obj_type, obj_repr, state, parent, wref_to_self, args, kwargs):
-    
-    _debug_close(f"Close ({state.value.name.lower()}) {obj_repr}")
-    
-    if not LIBRARY_AVAILABLE:  # pragma: no cover
-        _debug_close(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
-        return
-    
-    assert state.value != _STATE.INVALID
-    assert parent is None or not parent._tree_closed()
-    close_func(raw, *args, **kwargs)
-    ObjectTracker[obj_type].remove(wref_to_self)
-
-
 class AutoCloseable (AutoCastable):
     
     def __init__(self, close_func, *args, obj=None, needs_free=True, **kwargs):
@@ -68,32 +92,32 @@ class AutoCloseable (AutoCastable):
         # proactively prevent accidental double initialization
         assert not hasattr(self, "_finalizer")
         
-        self._close_func = close_func
-        self._obj = self if obj is None else obj
-        self._ex_args = args
-        self._ex_kwargs = kwargs
-        self._autoclose_state = pypdfium2_cfg._Mutable(_STATE.AUTO)
-        self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
-        
+        self._fin_info = _FinalizerInfo(close_func, args, kwargs)
+        self._fin_obj = self if obj is None else obj
         self._finalizer = None
         self._kids = []
+        
         if needs_free:
             self._attach_finalizer()
-    
-    def __repr__(self):
-        identifier = hex(id(self)) if self._uuid is None else self._uuid.hex[:14]
-        return f"<{type(self).__name__} {identifier}>"
     
     @cached_property
     def _wref_to_self(self):
         return weakref.ref(self)
     
+    @cached_property
+    def _uuid(self):
+        return uuid.uuid4() if DEBUG_AUTOCLOSE else None
+    
+    def __repr__(self):
+        identifier = hex(id(self)) if self._uuid is None else self._uuid.hex[:14]
+        return f"<{type(self).__name__} {identifier}>"
+    
     def _attach_finalizer(self):
-        # NOTE this function captures the value of the `parent` property at finalizer installation time
         assert self._finalizer is None
         own_type = type(self)
+        owner = _FinalizerOwner(self.raw, self.parent, self._wref_to_self, own_type, repr(self))
+        self._finalizer = weakref.finalize(self._fin_obj, _close_template, self._fin_info, owner)
         ObjectTracker[own_type].add(self._wref_to_self)
-        self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, own_type, repr(self), self._autoclose_state, self.parent, self._wref_to_self, self._ex_args, self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
@@ -127,9 +151,9 @@ class AutoCloseable (AutoCastable):
             if k and k.raw:
                 k.close(_by_parent=True)
         
-        self._autoclose_state.value = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT
+        self._fin_info.state = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT
         self._finalizer()
-        self._autoclose_state.value = _STATE.INVALID
+        self._fin_info.state = _STATE.INVALID
         self.raw = None
         self._finalizer = None
         self._kids.clear()
