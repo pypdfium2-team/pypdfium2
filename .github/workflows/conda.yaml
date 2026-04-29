@@ -48,7 +48,7 @@ jobs:
     steps:
       
       - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           python-version: ${{ inputs.py_version }}
@@ -111,7 +111,7 @@ jobs:
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Miniconda setup
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
@@ -154,7 +154,7 @@ jobs:
       
       # NOTE custom channels may not be actually necessary here
       - name: Miniconda setup
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
