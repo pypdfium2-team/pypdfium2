@@ -12,6 +12,7 @@ import logging
 import pypdfium2_cfg
 from collections import defaultdict
 from pypdfium2_cfg import DEBUG_AUTOCLOSE  # compat
+from pypdfium2._lazy import cached_property
 
 logger = logging.getLogger(__name__)
 LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
@@ -72,31 +73,32 @@ class AutoCloseable (AutoCastable):
         self._ex_args = args
         self._ex_kwargs = kwargs
         self._autoclose_state = pypdfium2_cfg._Mutable(_STATE.AUTO)
-        self._uuid = uuid.uuid4() if pypdfium2_cfg.DEBUG_AUTOCLOSE else None
-        self._wref_to_self = weakref.ref(self)
+        self._uuid = uuid.uuid4() if DEBUG_AUTOCLOSE else None
         
         self._finalizer = None
         self._kids = []
         if needs_free:
             self._attach_finalizer()
     
-    
     def __repr__(self):
         identifier = hex(id(self)) if self._uuid is None else self._uuid.hex[:14]
         return f"<{type(self).__name__} {identifier}>"
     
+    @cached_property
+    def _wref_to_self(self):
+        return weakref.ref(self)
     
     def _attach_finalizer(self):
         # NOTE this function captures the value of the `parent` property at finalizer installation time
         assert self._finalizer is None
-        own_type = self.__class__
+        own_type = type(self)
         ObjectTracker[own_type].add(self._wref_to_self)
         self._finalizer = weakref.finalize(self._obj, _close_template, self._close_func, self.raw, own_type, repr(self), self._autoclose_state, self.parent, self._wref_to_self, self._ex_args, self._ex_kwargs)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
         self._finalizer = None
-        ObjectTracker[self.__class__].remove(self._wref_to_self)
+        ObjectTracker[type(self)].remove(self._wref_to_self)
     
     def _tree_closed(self):
         if self.raw is None:
