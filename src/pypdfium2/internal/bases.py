@@ -9,8 +9,8 @@ import enum
 import uuid
 import weakref
 import logging
-import pypdfium2_cfg
 from collections import defaultdict
+import pypdfium2_cfg
 from pypdfium2_cfg import DEBUG_AUTOCLOSE  # compat
 from pypdfium2._lazy import cached_property
 
@@ -21,7 +21,7 @@ ObjectTracker = defaultdict(set)
 
 
 def _debug_close(msg):  # pragma: no cover
-    # try to use os.write() rather than print() or logger.whatever() to avoid "reentrant call" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
+    # try to use os.write() rather than print() or logger.whatever() to avoid "reentrant call" or "I/O operation on closed file" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
     if not DEBUG_AUTOCLOSE:
         return
     try:
@@ -54,7 +54,7 @@ class _FinalizerInfo:  # (_Dataclass)
         self.state = _STATE.AUTO
 
 class _FinalizerOwner:  # (_Dataclass)
-    __slots__ = ("raw", "type", "wref", "parent", "repr")
+    __slots__ = ("raw", "parent", "wref", "type", "repr")
     def __init__(self, raw, parent, wref, type, repr):
         self.raw, self.parent = raw, parent
         self.wref, self.type, self.repr = wref, type, repr
@@ -83,6 +83,10 @@ class AutoCastable:
         # if not self.raw:
         #     raise RuntimeError("bool(obj.raw) must evaluate to True for use as C function parameter")
         return self.raw
+    
+    @cached_property
+    def _wref_to_self(self):
+        return weakref.ref(self)
 
 
 class AutoCloseable (AutoCastable):
@@ -99,10 +103,6 @@ class AutoCloseable (AutoCastable):
         
         if needs_free:
             self._attach_finalizer()
-    
-    @cached_property
-    def _wref_to_self(self):
-        return weakref.ref(self)
     
     @cached_property
     def _uuid(self):
