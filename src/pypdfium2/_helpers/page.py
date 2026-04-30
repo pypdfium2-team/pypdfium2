@@ -312,7 +312,7 @@ class PdfPage (pdfium_i.AutoCloseable):
                 raise PdfiumError("Failed to get pageobject.")
             
             # Don't register as child object, because the lifetime of pageobjects that are part of a page is managed by pdfium. The parent page should remain alive while a pageobject is used, but it seems unjustified to store countless of weakrefs just to lock pageobjects when the parent page is closed.
-            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level, textpage=textpage)
+            helper_obj = PdfObject(raw_obj, page=self, pdf=self.pdf, container=form, level=level, textpage=textpage)  # tracked=False
             if not filter or helper_obj.type in filter:
                 yield helper_obj
             

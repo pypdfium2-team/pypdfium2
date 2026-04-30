@@ -62,7 +62,7 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     
     # textpage is only picked up by the PdfTextObj subclass, but included here so get_object() can just unconditionally pass the textpage without need for type if-checks
-    def __init__(self, raw, page=None, pdf=None, container=None, level=0, textpage=None, tracked=True):
+    def __init__(self, raw, page=None, pdf=None, container=None, level=0, textpage=None, tracked=False):
         
         self.raw = raw
         self.page = page
@@ -82,8 +82,8 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     @property
     def parent(self):  # AutoCloseable hook
-        # May be None (loose pageobject)
-        return self.pdf if self.page is None else self.page
+        # FIXME in the light of how the autoclose machinery uses .parent, this might not make sense? anyway, tracking is diabled for PdfObjects for now.
+        return self.pdf if self.page is None else self.page  # May be None (loose pageobject)
     
     
     def get_bounds(self):
