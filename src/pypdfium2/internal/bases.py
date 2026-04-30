@@ -54,9 +54,9 @@ class _FinalizerInfo:  # (_Dataclass)
         self.state = _STATE.AUTO
 
 class _FinalizerOwner:  # (_Dataclass)
-    __slots__ = ("raw", "parent", "kids", "wref", "type", "repr")
-    def __init__(self, raw, parent, kids, wref, type, repr):
-        self.raw, self.parent, self.kids = raw, parent, kids
+    __slots__ = ("raw", "parent", "wref", "type", "repr")
+    def __init__(self, raw, parent, wref, type, repr):
+        self.raw, self.parent = raw, parent
         self.wref, self.type, self.repr = wref, type, repr
 
 
@@ -69,15 +69,6 @@ def _close_template(info, owner):
     
     assert info.state != _STATE.INVALID
     
-    need_close = []
-    for k_wref in owner.kids:
-        k = k_wref()
-        if k and k.raw:
-            # closing a child will remove it from the parent's kids set, so again outsource the actual closing to avoid "RuntimeError: Set changed size during iteration"
-            need_close.append(k)
-    for k in need_close:
-        k.close(_by_parent=True)
-    
     parent = owner.parent
     if parent is not None:
         assert not parent._tree_closed()
@@ -86,7 +77,7 @@ def _close_template(info, owner):
                 parent._kids.remove(owner.wref)
             except KeyError as e:
                 # TODO need to clarify why this ever happens
-                _debug_close(f"{e}")
+                _debug_close(f"KeyError: {e}")
     
     info.close_func(owner.raw, *info.args, **info.kwargs)
     ObjectTracker[owner.type].remove(owner.wref)
@@ -134,7 +125,7 @@ class AutoCloseable (AutoCastable):
         own_type = type(self)
         # note, this captures the object's parent, repr and so on at finalizer installation time
         # in case they ever change, we'd have to assign the owner an attribute and update it
-        owner = _FinalizerOwner(self.raw, self.parent, self._kids, self._wref_to_self, own_type, repr(self))
+        owner = _FinalizerOwner(self.raw, self.parent, self._wref_to_self, own_type, repr(self))
         self._finalizer = weakref.finalize(self._fin_obj, _close_template, self._fin_info, owner)
         ObjectTracker[own_type].add(self._wref_to_self)
     
@@ -162,6 +153,16 @@ class AutoCloseable (AutoCastable):
         if not self._finalizer:
             self.raw = None
             return False
+        
+        # only need to check this in manual closing, with finalizers the API contract promises the order of invocation
+        need_close = []
+        for k_wref in self._kids:
+            k = k_wref()
+            if k and k.raw:
+                # closing a child will remove it from the parent's kids set, so again outsource the actual closing to avoid "RuntimeError: Set changed size during iteration"
+                need_close.append(k)
+        for k in need_close:
+            k.close(_by_parent=True)
         
         self._fin_info.state = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT
         self._finalizer()
