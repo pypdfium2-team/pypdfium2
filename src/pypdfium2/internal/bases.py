@@ -73,8 +73,8 @@ def _close_template(info, owner):
     parent = owner.parent
     if parent is not None:
         assert not parent._tree_closed()
-        if info.tracked and parent._kids:
-            assert owner.wref in parent._kids, f"{owner.repr} {owner.wref}, {parent}, {parent._kids}"
+        if info.tracked:
+            assert owner.wref in parent._kids, f"{owner.repr} {owner.wref}, {parent} {parent._kids}"
             parent._kids.remove(owner.wref)
     
     info.close_func(owner.raw, *info.args, **info.kwargs)
