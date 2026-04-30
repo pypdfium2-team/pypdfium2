@@ -616,7 +616,7 @@ class PdfXObject (pdfium_i.AutoCloseable):
         """
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
         # not a child object (see above)
-        return PdfObject(raw=raw_pageobj, pdf=self.pdf)
+        return PdfObject(raw=raw_pageobj, pdf=self.pdf, tracked=False)
 
 
 class PdfBookmark (pdfium_i.AutoCastable):

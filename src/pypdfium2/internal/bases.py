@@ -47,10 +47,11 @@ class _STATE (enum.Enum):
 #         return f"{type(self).__name__}{tuple(self._iter_fields())}"
 
 class _FinalizerInfo:  # (_Dataclass)
-    __slots__ = ("close_func", "args", "kwargs", "state")
-    def __init__(self, close_func, args, kwargs):
+    __slots__ = ("close_func", "args", "kwargs", "tracked", "state")
+    def __init__(self, close_func, args, kwargs, tracked):
         self.close_func = close_func
         self.args, self.kwargs = args, kwargs
+        self.tracked = tracked
         self.state = _STATE.AUTO
 
 class _FinalizerOwner:  # (_Dataclass)
@@ -72,11 +73,11 @@ def _close_template(info, owner):
     parent = owner.parent
     if parent is not None:
         assert not parent._tree_closed()
-        if parent._kids:
+        if info.tracked and parent._kids:
             try:
                 parent._kids.remove(owner.wref)
             except KeyError as e:
-                # TODO need to clarify why this ever happens
+                # FIXME Need to clarify why this ever happens. Probably we are missing tracked=False at some point?
                 _debug_close(f"KeyError: {e}")
     
     info.close_func(owner.raw, *info.args, **info.kwargs)
@@ -99,12 +100,12 @@ class AutoCastable:
 
 class AutoCloseable (AutoCastable):
     
-    def __init__(self, close_func, *args, obj=None, needs_free=True, **kwargs):
+    def __init__(self, close_func, *args, obj=None, needs_free=True, tracked=True, **kwargs):
         
         # proactively prevent accidental double initialization
         assert not hasattr(self, "_finalizer")
         
-        self._fin_info = _FinalizerInfo(close_func, args, kwargs)
+        self._fin_info = _FinalizerInfo(close_func, args, kwargs, tracked)
         self._fin_obj = self if obj is None else obj
         self._finalizer = None
         self._kids = set()

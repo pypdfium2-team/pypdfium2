@@ -62,7 +62,7 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     
     # textpage is only picked up by the PdfTextObj subclass, but included here so get_object() can just unconditionally pass the textpage without need for type if-checks
-    def __init__(self, raw, page=None, pdf=None, container=None, level=0, textpage=None):
+    def __init__(self, raw, page=None, pdf=None, container=None, level=0, textpage=None, tracked=True):
         
         self.raw = raw
         self.page = page
@@ -77,7 +77,7 @@ class PdfObject (pdfium_i.AutoCloseable):
                 raise ValueError("*page* must belong to *pdf* when constructing a pageobject.")
         
         # TODO if page is not None, hold it in the finalizer, unless the pageobject is detached from the page
-        super().__init__(pdfium_c.FPDFPageObj_Destroy, needs_free=(page is None))
+        super().__init__(pdfium_c.FPDFPageObj_Destroy, needs_free=(page is None), tracked=tracked)
     
     
     @property
