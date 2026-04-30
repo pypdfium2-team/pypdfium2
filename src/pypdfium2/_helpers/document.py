@@ -485,7 +485,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if not raw_xobject:
             raise PdfiumError(f"Failed to capture page at index {index} as FPDF_XOBJECT.")
         xobject = PdfXObject(raw=raw_xobject, pdf=dest_pdf)
-        self._add_kid(xobject)
+        dest_pdf._add_kid(xobject)
         return xobject
     
     

@@ -74,11 +74,8 @@ def _close_template(info, owner):
     if parent is not None:
         assert not parent._tree_closed()
         if info.tracked and parent._kids:
-            try:
-                parent._kids.remove(owner.wref)
-            except KeyError as e:
-                # FIXME Need to clarify why this ever happens. Probably we are missing tracked=False at some point?
-                _debug_close(f"KeyError: {e}")
+            assert owner.wref in parent._kids, f"{owner.repr} {owner.wref}, {parent}, {parent._kids}"
+            parent._kids.remove(owner.wref)
     
     info.close_func(owner.raw, *info.args, **info.kwargs)
     ObjectTracker[owner.type].remove(owner.wref)
@@ -125,7 +122,7 @@ class AutoCloseable (AutoCastable):
         assert self._finalizer is None
         own_type = type(self)
         # note, this captures the object's parent, repr and so on at finalizer installation time
-        # in case they ever change, we'd have to assign the owner an attribute and update it
+        # in case they ever change, we'd have to store the owner in an attribute and update it
         owner = _FinalizerOwner(self.raw, self.parent, self._wref_to_self, own_type, repr(self))
         self._finalizer = weakref.finalize(self._fin_obj, _close_template, self._fin_info, owner)
         ObjectTracker[own_type].add(self._wref_to_self)
