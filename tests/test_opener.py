@@ -202,6 +202,10 @@ def test_object_hierarchy():
     assert isinstance(pageobj.type, int)
     assert pageobj.page is page
     
+    fontobj = pdfium.PdfFont.load_standard(pdf, "Times-Roman")
+    assert fontobj.get_base_name() == "Times-Roman"
+    assert fontobj.parent is pdf
+    
     textpage = page.get_textpage()
     assert isinstance(textpage, pdfium.PdfTextPage)
     assert isinstance(textpage.raw, pdfium_c.FPDF_TEXTPAGE)
@@ -212,7 +216,7 @@ def test_object_hierarchy():
     assert isinstance(searcher.raw, pdfium_c.FPDF_SCHHANDLE)
     assert searcher.textpage is textpage
     
-    for obj in (searcher, textpage, page, pdf):
+    for obj in (searcher, textpage, page, fontobj, pdf):
         assert obj._finalizer and obj._finalizer.alive
         obj.close()
         assert not obj._finalizer
