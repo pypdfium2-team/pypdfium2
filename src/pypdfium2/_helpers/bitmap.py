@@ -64,7 +64,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         # slot to store arguments for PdfPosConv, set on page rendering
         self._render_args = None
         
-        super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer)
+        super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer, tracked=False)
     
     
     @property
