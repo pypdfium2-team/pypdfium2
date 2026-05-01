@@ -6,24 +6,11 @@
 
 import sys
 import argparse
-import functools
 from os.path import basename
-from collections import defaultdict
 from importlib import import_module
-from pypdfium2_cli._setup import setup_logging
-
-if sys.version_info < (3, 8):  # pragma: no cover
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-else:
-    cached_property = functools.cached_property
-
-# could even inherit just from dict if we changed __init__ to take the factory
-class keydefaultdict (defaultdict):
-    def __missing__(self, key):
-        value = self.default_factory(key)
-        self[key] = value
-        return value
+from pypdfium2_cli._setup import (
+    setup_logging, keydefaultdict, cached_property,
+)
 
 ModuleLoader = keydefaultdict(import_module)
 

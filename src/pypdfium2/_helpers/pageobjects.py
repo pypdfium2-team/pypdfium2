@@ -206,7 +206,7 @@ class PdfTextObj (PdfObject):
         """
         # The font object is _not_ owned by the caller, and the PdfTextObj must remain alive while the font object lives.
         raw_font = pdfium_c.FPDFTextObj_GetFont(self)
-        return PdfFont(raw_font, self)
+        return PdfFont(raw_font, self, needs_free=False)
     
     def get_font_size(self):
         """
@@ -220,15 +220,16 @@ class PdfTextObj (PdfObject):
         return r_size.value
 
 
-class PdfFont (pdfium_i.AutoCastable):
+class PdfFont (pdfium_i.AutoCloseable):
     """
     Font helper class.
     """
     
     # TODO hold parent in finalizer
-    def __init__(self, raw, parent=None):
+    def __init__(self, raw, parent=None, needs_free=False):
         self.raw = raw
         self.parent = parent
+        super().__init__(pdfium_c.FPDFFont_Close, needs_free=needs_free, tracked=needs_free)
     
     @cached_property
     def is_embedded(self):
@@ -275,6 +276,23 @@ class PdfFont (pdfium_i.AutoCastable):
         if weight == -1:
             raise PdfiumError("Failed to get font weight.")
         return weight
+    
+    STANDARD_14 = ("Times-Roman", "Times-Bold", "Times-Italic", "Times-BoldItalic", "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique", "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique", "Symbol", "ZapfDingbats")
+    """
+    Standard 14 fonts (Type 1, PostScript names) according to PDF32000_2008, section 9.6.2.2.
+    These fonts or suitable substitutes should be available to all PDF engines,
+    so PDFs that uses these fonts without embedding can still be expected to display correctly.
+    """
+    
+    @classmethod
+    def load_standard(cls, pdf, name):
+        assert name in cls.STANDARD_14
+        raw_font = pdfium_c.FPDFText_LoadStandardFont(pdf, name.encode("utf-8"))
+        if not raw_font:
+            raise PdfiumError(f"Failed to load standard font {name!r}.")
+        helper = PdfFont(raw_font, parent=pdf, needs_free=True)
+        pdf._add_kid(helper)
+        return helper
 
 
 class PdfImage (PdfObject):
