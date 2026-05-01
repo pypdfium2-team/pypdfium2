@@ -35,7 +35,7 @@ def _close_objects():
     
     need_close = []
     for cls, obj_wrefs in pdfium_i.ObjectTracker.items():
-        # logger.debug(f"{cls.__name__}: {obj_wrefs}")
+        # pdfium_i._debug_close(f"{cls and cls.__name__}: {obj_wrefs}")
         for wref in obj_wrefs:
             obj = wref()
             if obj is None:
