@@ -82,7 +82,7 @@ class PdfObject (pdfium_i.AutoCloseable):
     
     @property
     def parent(self):  # AutoCloseable hook
-        # FIXME in the light of how the autoclose machinery uses .parent, this might not make sense? anyway, tracking is diabled for PdfObjects for now.
+        # Not actually used by the autoclose machinery. PdfObjects are not tracked, and if they are part of a page we don't have ownership anyway.
         return self.pdf if self.page is None else self.page  # May be None (loose pageobject)
     
     

@@ -63,6 +63,10 @@ class _FinalizerOwner:  # (_Dataclass)
 
 def _close_template(info, owner):
     
+    # This function must not pull in any strong reference to the object being finalized
+    # https://docs.python.org/3/library/weakref.html#weakref.finalize
+    # > It is important to ensure that func, args and kwargs do not own any references to obj, either directly or indirectly, since otherwise obj will never be garbage collected. In particular, func should not be a bound method of obj.
+    
     _debug_close(f"Close ({info.state.name.lower()}) {owner.repr}")
     if not LIBRARY_AVAILABLE:  # pragma: no cover
         _debug_close(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
@@ -105,10 +109,13 @@ class AutoCloseable (AutoCastable):
         self._fin_info = _FinalizerInfo(close_func, args, kwargs, tracked)
         self._fin_obj = self if obj is None else obj
         self._finalizer = None
-        self._kids = set()
         
         if needs_free:
             self._attach_finalizer()
+    
+    @cached_property
+    def _kids(self):
+        return set()
     
     @cached_property
     def _uuid(self):
@@ -162,11 +169,14 @@ class AutoCloseable (AutoCastable):
         for k in need_close:
             k.close(_by_parent=True)
         
+        if self._kids:
+            _debug_close(f"Some kids weakrefs have not been cleaned up: {self._kids}")
+            self._kids.clear()
+        
         self._fin_info.state = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT
         self._finalizer()
         self._fin_info.state = _STATE.INVALID
         self.raw = None
         self._finalizer = None
-        self._kids.clear()
         
         return True
