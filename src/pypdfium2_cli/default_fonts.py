@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# import ctypes
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 from pypdfium2_cli.fonts import _show_fonts
-# from ctypes import byref, c_int
 
 def attach(parser):
     pass
@@ -26,10 +26,16 @@ def main(args):
     str_ttfmap = {pdfium_i.CharsetToStr[k]: v for k, v in ttfmap.items()}
     _show_fonts(("Charset", "Default font"), sorted(str_ttfmap.items()))
     
+    print("\n# Standard fonts")
+    _show_fonts(("Base name", "Family name"), _iterate_standard_fonts(), None)
+    
+    # # requires initial EnumFonts triggered through the above
     # sfh = pdfium.PdfSysfontBase.SINGLETON
     # if sfh:
     #     for charset, fontname in ttfmap.items():
-    #         sfh.MapFont(None, weight=0, bItalic=False, charset=charset, pitch_family=0, face=fontname, _ignored=byref(c_int(0)))
-    
-    print("\n# Standard fonts")
-    _show_fonts(("Base name", "Family name"), _iterate_standard_fonts(), None)
+    #         sfh_ref = ctypes.byref(sfh.raw)
+    #         font_handle = sfh.MapFont(sfh_ref, weight=0, bItalic=False, charset=charset, pitch_family=0, face=fontname, _ignored=ctypes.byref(ctypes.c_int(0)))
+    #         buf_size = sfh.GetFaceName(sfh_ref, font_handle, None, 0)
+    #         buf = ctypes.create_string_buffer(buf_size)
+    #         buf_ptr = ctypes.cast(buf, ctypes.POINTER(ctypes.c_char))
+    #         sfh.GetFaceName(sfh_ref, font_handle, buf_ptr, buf_size)
