@@ -281,11 +281,20 @@ class PdfFont (pdfium_i.AutoCloseable):
     """
     Standard 14 fonts (Type 1, PostScript names) according to PDF32000_2008, section 9.6.2.2.
     These fonts or suitable substitutes should be available to all PDF engines,
-    so PDFs that uses these fonts without embedding can still be expected to display correctly.
+    so PDFs that uses them without embedding can still be expected to display correctly.
     """
     
     @classmethod
     def load_standard(cls, pdf, name):
+        """
+        Load one of the Standard 14 fonts defined above into a PDF.
+        
+        Parameters:
+            pdf (PdfDocument):
+                The document to which the font shall be loaded.
+            name (str):
+                The font name. Must be one of :attr:`.STANDARD_14`.
+        """
         assert name in cls.STANDARD_14
         raw_font = pdfium_c.FPDFText_LoadStandardFont(pdf, name.encode("utf-8"))
         if not raw_font:
