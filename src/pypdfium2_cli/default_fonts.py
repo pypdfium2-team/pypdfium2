@@ -18,16 +18,15 @@ def _iterate_standard_fonts():
 
 def _map_default_fonts(sfh, ttfmap):
     for charset, fontname in ttfmap.items():
-        sfh_ref = ctypes.byref(sfh.raw)
-        font_handle = sfh.MapFont(sfh_ref, weight=0, bItalic=False, charset=charset, pitch_family=0, face=fontname, _ignored=ctypes.byref(ctypes.c_int(0)))
+        font_handle = sfh.MapFont(None, weight=0, bItalic=False, charset=charset, pitch_family=0, face=fontname, _ignored=ctypes.byref(ctypes.c_int(0)))
         if not font_handle:
             continue
-        buf_size = sfh.GetFaceName(sfh_ref, font_handle, None, 0)
+        buf_size = sfh.GetFaceName(None, font_handle, None, 0)
         if not (buf_size > 0):
             continue
         buf = ctypes.create_string_buffer(buf_size)
         buf_ptr = ctypes.cast(buf, ctypes.POINTER(ctypes.c_char))
-        sfh.GetFaceName(sfh_ref, font_handle, buf_ptr, buf_size)
+        sfh.GetFaceName(None, font_handle, buf_ptr, buf_size)
 
 def main(args):
     
