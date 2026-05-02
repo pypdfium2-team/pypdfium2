@@ -290,8 +290,8 @@ class PdfFont (pdfium_i.AutoCloseable):
         Load one of the Standard 14 fonts defined above into a PDF.
         
         If the font is not available in the system, a substitute will be used.
-        Checking :meth:`.get_family_name` should give a clue about internal subsitution (e.g. "Chrom Sans OTF", "Chrom Serif OTF").
-        For system subsitution, consider intercepting what goes through the :class:`.PdfSysfontBase` callbacks.
+        Checking :meth:`.get_family_name` should give a clue about internal substitution (e.g. "Chrom Sans OTF", "Chrom Serif OTF").
+        For system substitution, consider intercepting what goes through the :class:`.PdfSysfontBase` callbacks.
         
         Parameters:
             pdf (PdfDocument):
