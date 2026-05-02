@@ -37,14 +37,14 @@ def _iterate_fonts(all_fonts):
         yield fontobj.get_base_name(), fontobj.get_family_name(), fontobj.get_weight(), source, pages_str
 
 if HAVE_TABULATE:
-    def _show_fonts(headers, fonts_iter):
+    def _show_fonts(headers, fonts_iter, maxcolwidths=None):
         fonts_list = list(fonts_iter)
         if not fonts_list:
             return
-        print(Lazy.tabulate(fonts_list, headers=headers, stralign="left", tablefmt="pretty", maxcolwidths=[30, 30, None, None, 80]))
+        print(Lazy.tabulate(fonts_list, headers=headers, stralign="left", tablefmt="pretty", maxcolwidths=maxcolwidths))
 else:
-    def _show_fonts(headers, fonts_iter):
-        logger.info("You may want to install `tabulate` for prettier output.")
+    logger.info("You may want to install `tabulate` for prettier output.")
+    def _show_fonts(headers, fonts_iter, maxcolwidths=None):
         print(headers)
         for entry in fonts_iter:
             print(entry)
@@ -71,5 +71,6 @@ def main(args):
             fontholder.pages.add(i+1)
     
     headers = ("Base name", "Family name", "Weight", "Source", "Pages")
+    maxcolwidths = [30, 30, None, None, 80]
     fonts_iter = _iterate_fonts(all_fonts)
-    _show_fonts(headers, fonts_iter)
+    _show_fonts(headers, fonts_iter, maxcolwidths)

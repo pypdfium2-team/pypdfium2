@@ -32,6 +32,7 @@ SubCommands = {
     "pageobjects":    "Print info on pageobjects",
     "pdfinfo":        "Print info on document and pages",
     "fonts":          "List a document's fonts",
+    "default-fonts":  "Dump info about default fonts",
     "render":         "Rasterize pages",
     "tile":           "Tile pages (N-up)",
     "toc":            "Print table of contents",

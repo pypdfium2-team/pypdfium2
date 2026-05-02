@@ -53,7 +53,7 @@ class _DefaultTTFMapClass:
     
     @cached_property
     def value(self):
-        logger.debug("Retrieving default TT Font map...")
+        # logger.debug("Retrieving default TT Font map...")
         count = pdfium_c.FPDF_GetDefaultTTFMapCount()
         map = {}
         for i in range(count):
