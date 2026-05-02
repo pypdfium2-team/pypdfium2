@@ -303,7 +303,7 @@ class PdfFont (pdfium_i.AutoCloseable):
         raw_font = pdfium_c.FPDFText_LoadStandardFont(pdf, name.encode("utf-8"))
         if not raw_font:
             raise PdfiumError(f"Failed to load standard font {name!r}.")
-        helper = PdfFont(raw_font, parent=pdf, needs_free=True)
+        helper = cls(raw_font, parent=pdf, needs_free=True)
         pdf._add_kid(helper)
         return helper
 
