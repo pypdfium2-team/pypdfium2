@@ -5,6 +5,8 @@ import re
 import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
+import pypdfium2.internal as pdfium_i
+from pypdfium2._lazy import cached_property_clear
 from .conftest import TestFiles
 
 
@@ -188,3 +190,19 @@ def test_font_helpers(index, exp_char, text, font_size, base_name, family_name, 
         assert fontobj.get_family_name() == family_name
         assert fontobj.get_weight() == weight
         assert fontobj.is_embedded is True
+
+
+def _ttfmap_get(charset):
+    default = pdfium.PdfDefaultTTFMap.get(charset)
+    assert isinstance(default, bytes)
+    default2 = pdfium.PdfDefaultTTFMap.get(charset)
+    assert default == default2
+
+def test_ttfmap():
+    ttfmap = pdfium.PdfDefaultTTFMap.value
+    assert isinstance(ttfmap, dict) and ttfmap
+    assert all(k in pdfium_i.CharsetToStr for k in ttfmap.keys())
+    assert all(isinstance(v, bytes) for v in ttfmap.values())
+    _ttfmap_get(pdfium_c.FXFONT_ANSI_CHARSET)
+    cached_property_clear(pdfium.PdfDefaultTTFMap, "value")
+    _ttfmap_get(pdfium_c.FXFONT_ANSI_CHARSET)
