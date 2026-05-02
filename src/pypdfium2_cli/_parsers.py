@@ -39,6 +39,7 @@ class _Range:
 
 def pagenums_ranger(pagenums):
     
+    # provided pagenums are 1-based. for 0-based, prev would have to be -2
     prev = -1
     range_start = None
     out = []
