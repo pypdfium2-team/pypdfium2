@@ -9,7 +9,6 @@ from pypdfium2_cli.fonts import _show_fonts
 def attach(parser):
     pass
 
-
 def _iterate_standard_fonts():
     dummy_pdf = pdfium.PdfDocument.new()
     for fontname in pdfium.PdfFont.STANDARD_FONTS:
