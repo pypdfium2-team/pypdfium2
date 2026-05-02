@@ -72,7 +72,7 @@ def main(args):
                 all_fonts[addr] = fontholder
             fontholder.pages.add(i+1)
     
-    headers = ("Base name", "Family name", "Weight", "Embedded", "Pages")
+    headers = ("Base name", "Family name", "Weight", "Emb", "Pages")
     maxcolwidths = [30, 30, None, None, 80]
     fonts_iter = _iterate_fonts(all_fonts)
     _show_table(headers, fonts_iter, maxcolwidths)
