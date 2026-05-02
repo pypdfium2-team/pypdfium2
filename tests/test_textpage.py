@@ -202,7 +202,7 @@ def test_ttfmap():
     ttfmap = pdfium.PdfDefaultTTFMap.value
     assert isinstance(ttfmap, dict) and ttfmap
     assert all(isinstance(v, bytes) for v in ttfmap.values())
-    str_ttfmap = {pdfium_i.CharsetToStr[k]: v for k, v in pdfium.PdfDefaultTTFMap.value.items()}
+    str_ttfmap = {pdfium_i.CharsetToStr[k]: v for k, v in ttfmap.items()}
     #print(str_ttfmap)
     _ttfmap_get(pdfium_c.FXFONT_ANSI_CHARSET)
     cached_property_clear(pdfium.PdfDefaultTTFMap, "value")

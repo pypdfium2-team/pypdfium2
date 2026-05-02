@@ -33,8 +33,8 @@ def main(args):
     _show_table(("Base name", "Family name"), _iterate_standard_fonts(), None)
     
     print("\n# Default TTF map")
-    ttfmap = pdfium.PdfDefaultTTFMap.value
     print(f"All Charsets: {sorted(pdfium_i.CharsetToStr.values())}")
+    ttfmap = pdfium.PdfDefaultTTFMap.value
     missing = set(pdfium_i.CharsetToStr.keys()).difference(ttfmap.keys())
     missing = [pdfium_i.CharsetToStr[k] for k in missing]
     print(f"Absent from map: {missing}")
