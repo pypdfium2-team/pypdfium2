@@ -7,8 +7,6 @@ from contextlib import contextmanager
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 
-DefaultTTFMap = pdfium.PdfDefaultTTFMap
-
 logger = logging.getLogger("pypdfium2_cli")
 
 @contextmanager
@@ -42,7 +40,9 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
         logger.debug(f"fontinfo::MapFont:in (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pdfium_i.PdfFontPitchFamilyFlags(pitch_family).name!r}, face={face_bstr!r})")
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, _ignored)
-        vis_out = out or f"{out} (default: {DefaultTTFMap.get(charset)})"
+        # For internal substitution, check the family names in `pypdfium2 fonts` CLI output.
+        # If you see names like "Chrom Sans OTF" or "Chrom Serif OTF" then you probably got internal substitution.
+        vis_out = out or f"{out} (maybe internal substitution)"
         logger.debug(f"fontinfo::MapFont:out {vis_out}")
         return out
     
