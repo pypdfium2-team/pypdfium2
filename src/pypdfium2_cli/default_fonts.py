@@ -4,7 +4,7 @@
 import ctypes
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
-from pypdfium2_cli.fonts import _show_fonts
+from pypdfium2_cli.fonts import _show_table
 
 def attach(parser):
     pass
@@ -30,7 +30,7 @@ def _map_default_fonts(sfh, ttfmap):
 def main(args):
     
     print("# Standard fonts")
-    _show_fonts(("Base name", "Family name"), _iterate_standard_fonts(), None)
+    _show_table(("Base name", "Family name"), _iterate_standard_fonts(), None)
     
     print("\n# Default TTF map")
     ttfmap = pdfium.PdfDefaultTTFMap.value
@@ -39,7 +39,7 @@ def main(args):
     missing = [pdfium_i.CharsetToStr[k] for k in missing]
     print(f"Absent from map: {missing}")
     str_ttfmap = {pdfium_i.CharsetToStr[k]: v for k, v in ttfmap.items()}
-    _show_fonts(("Charset", "Default font"), sorted(str_ttfmap.items()))
+    _show_table(("Charset", "Default font"), sorted(str_ttfmap.items()))
     
     # requires initial EnumFonts triggered through standard fonts above
     sfh = pdfium.PdfSysfontBase.SINGLETON
