@@ -11,7 +11,7 @@ import pypdfium2_cfg
 
 
 def setup_logging():
-        
+    
     # could also pass through the log level by parameter, but using an env var seemed easiest for now
     loglevel = getattr(logging, os.environ.get("PYPDFIUM_LOGLEVEL", "debug").upper())
     loggers = [logging.getLogger("pypdfium2"+m) for m in ("", "_raw", "_cfg", "_cli")]
@@ -30,7 +30,7 @@ def setup_logging():
     pypdfium2_cfg.DEBUG_AUTOCLOSE.value = debug_autoclose
     
     import pypdfium2._helpers as pdfium
-    from pypdfium2_cli._aux import PdfSysfontListener
+    from pypdfium2_cli._sysfonts import PdfSysfontListener
     if debug_unsupported:
         pdfium.PdfUnspHandler().setup()
     if debug_sysfonts:
