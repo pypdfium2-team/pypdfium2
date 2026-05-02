@@ -26,7 +26,7 @@ def setup_logging():
     
     debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
     debug_unsupported = bool(int( os.environ.get("DEBUG_UNSUPPORTED", 1) ))
-    debug_sysfonts = os.environ.get("DEBUG_SYSFONTS", "")
+    debug_sysfonts = bool(int( os.environ.get("DEBUG_SYSFONTS", 0) ))
     pypdfium2_cfg.DEBUG_AUTOCLOSE.value = debug_autoclose
     
     import pypdfium2._helpers as pdfium
