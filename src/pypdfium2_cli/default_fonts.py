@@ -9,6 +9,19 @@ from pypdfium2_cli.fonts import _show_fonts
 def attach(parser):
     pass
 
+# def _map_default_fonts(sfh, ttfmap):
+#     for charset, fontname in ttfmap.items():
+#         sfh_ref = ctypes.byref(sfh.raw)
+#         font_handle = sfh.MapFont(sfh_ref, weight=0, bItalic=False, charset=charset, pitch_family=0, face=fontname, _ignored=ctypes.byref(ctypes.c_int(0)))
+#         if not font_handle:
+#             continue
+#         buf_size = sfh.GetFaceName(sfh_ref, font_handle, None, 0)
+#         if not (buf_size > 0):
+#             continue
+#         buf = ctypes.create_string_buffer(buf_size)
+#         buf_ptr = ctypes.cast(buf, ctypes.POINTER(ctypes.c_char))
+#         sfh.GetFaceName(sfh_ref, font_handle, buf_ptr, buf_size)
+
 def _iterate_standard_fonts():
     dummy_pdf = pdfium.PdfDocument.new()
     for fontname in pdfium.PdfFont.STANDARD_FONTS:
@@ -32,10 +45,4 @@ def main(args):
     # # requires initial EnumFonts triggered through the above
     # sfh = pdfium.PdfSysfontBase.SINGLETON
     # if sfh:
-    #     for charset, fontname in ttfmap.items():
-    #         sfh_ref = ctypes.byref(sfh.raw)
-    #         font_handle = sfh.MapFont(sfh_ref, weight=0, bItalic=False, charset=charset, pitch_family=0, face=fontname, _ignored=ctypes.byref(ctypes.c_int(0)))
-    #         buf_size = sfh.GetFaceName(sfh_ref, font_handle, None, 0)
-    #         buf = ctypes.create_string_buffer(buf_size)
-    #         buf_ptr = ctypes.cast(buf, ctypes.POINTER(ctypes.c_char))
-    #         sfh.GetFaceName(sfh_ref, font_handle, buf_ptr, buf_size)
+    #     _map_default_fonts(sfh, ttfmap)
