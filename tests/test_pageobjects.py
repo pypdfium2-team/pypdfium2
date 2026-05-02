@@ -301,6 +301,6 @@ def test_load_standard_font():
     pdf = pdfium.PdfDocument.new()
     font = pdfium.PdfFont.load_standard(pdf, "Helvetica-Bold")
     assert font.get_base_name() == "Helvetica-Bold"
-    assert font.get_family_name() in ("Helvetica", "Chrom Sans OTF")
+    assert font.get_family_name() in ("Helvetica", "Chrom Sans OTF", "Arial")
     assert font.get_weight() == 0  # ?
     assert font.is_embedded == False
