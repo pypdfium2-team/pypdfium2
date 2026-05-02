@@ -18,9 +18,9 @@ def main(args):
     print("# Default TTF map")
     print(f"All Charsets: {sorted(pdfium_i.CharsetToStr.values())}")
     missing = set(pdfium_i.CharsetToStr.keys()).difference(pdfium.PdfDefaultTTFMap.value.keys())
-    missing = tuple(pdfium_i.CharsetToStr[k] for k in missing)
+    missing = [pdfium_i.CharsetToStr[k] for k in missing]
     print(f"Absent from map: {missing}")
     str_ttfmap = {pdfium_i.CharsetToStr[k]: v for k, v in pdfium.PdfDefaultTTFMap.value.items()}
-    _show_fonts(["Charset", "Default font"], sorted(str_ttfmap.items()))
+    _show_fonts(("Charset", "Default font"), sorted(str_ttfmap.items()))
     print("\n# Standard fonts")
-    _show_fonts(["Base name", "Family name"], _iterate_standard_fonts(), None)
+    _show_fonts(("Base name", "Family name"), _iterate_standard_fonts(), None)
