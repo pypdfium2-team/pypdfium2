@@ -277,7 +277,7 @@ class PdfFont (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to get font weight.")
         return weight
     
-    STANDARD_14 = ("Times-Roman", "Times-Bold", "Times-Italic", "Times-BoldItalic", "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique", "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique", "Symbol", "ZapfDingbats")
+    STANDARD_FONTS = ("Times-Roman", "Times-Bold", "Times-Italic", "Times-BoldItalic", "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique", "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique", "Symbol", "ZapfDingbats")
     """
     Standard 14 fonts (Type 1, PostScript names) according to PDF32000_2008, section 9.6.2.2.
     These fonts or suitable substitutes should be available to all PDF engines,
@@ -293,9 +293,9 @@ class PdfFont (pdfium_i.AutoCloseable):
             pdf (PdfDocument):
                 The document to which the font shall be loaded.
             name (str):
-                The font name. Must be one of :attr:`.STANDARD_14`.
+                The font name. Must be one of :attr:`.STANDARD_FONTS`.
         """
-        assert name in cls.STANDARD_14
+        assert name in cls.STANDARD_FONTS
         raw_font = pdfium_c.FPDFText_LoadStandardFont(pdf, name.encode("utf-8"))
         if not raw_font:
             raise PdfiumError(f"Failed to load standard font {name!r}.")
