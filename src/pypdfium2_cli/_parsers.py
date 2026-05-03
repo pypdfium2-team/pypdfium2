@@ -99,7 +99,7 @@ def add_n_digits(parser):
     )
 
 
-def get_input(args, init_forms=False, **kwargs):
+def get_input(args, init_forms=True, **kwargs):
     pdf = pdfium.PdfDocument(args.input, password=args.password, **kwargs)
     if init_forms:
         pdf.init_forms()
