@@ -87,7 +87,7 @@ def test_open_ctypes_array(file):
 def test_open_raw():
     # not meant for embedders, but works for testing all the same
     pdf = pdfium.PdfDocument(TestFiles.empty)
-    pdf._finalizer.detach()
+    pdf._detach_finalizer()
     input = pdf.raw
     assert isinstance(input, pdfium_c.FPDF_DOCUMENT)
     pdf_new = pdfium.PdfDocument(input)

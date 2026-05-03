@@ -290,3 +290,17 @@ def test_loose_pageobject():
     po = xobject.as_pageobject()
     assert po._finalizer.alive
     po.close()
+
+
+def test_standard_14_fontnames():
+    assert len(pdfium.PdfFont.STANDARD_FONTS) == 14
+    assert pdfium.PdfFont.STANDARD_FONTS == ("Times-Roman", "Times-Bold", "Times-Italic", "Times-BoldItalic", "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique", "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique", "Symbol", "ZapfDingbats")
+
+
+def test_load_standard_font():
+    pdf = pdfium.PdfDocument.new()
+    font = pdfium.PdfFont.load_standard(pdf, "Helvetica-Bold")
+    assert font.get_base_name() == "Helvetica-Bold"
+    assert font.get_family_name() in ("Helvetica", "Chrom Sans OTF", "Arial")
+    assert font.get_weight() == 0  # ?
+    assert font.is_embedded == False

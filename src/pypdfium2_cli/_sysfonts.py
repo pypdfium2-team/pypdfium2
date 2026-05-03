@@ -3,26 +3,10 @@
 
 import ctypes
 import logging
-from contextlib import contextmanager
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 
-DefaultTTFMap = pdfium.PdfDefaultTTFMap
-
 logger = logging.getLogger("pypdfium2_cli")
-
-@contextmanager
-def _tmp_loglevel_ctx(logger, level):
-    _orig_loglevel = logger.getEffectiveLevel()
-    logger.setLevel(level)
-    try:
-        yield
-    finally:
-        logger.setLevel(_orig_loglevel)
-
-@contextmanager
-def _noop_ctx():
-    yield
 
 
 class PdfSysfontListener (pdfium.PdfSysfontBase):
@@ -32,17 +16,13 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
         super().__init__(default)
         logger.debug(f"fontinfo default interface version is {self.version}")
     
-    def setup(self, *args, tmp_loglevel=logging.INFO, **kwargs):
-        # NOTE this will still do the work (i.e. get strings, map flags and create the log string), just mask the actual logging
-        ctx = _noop_ctx() if tmp_loglevel is None else _tmp_loglevel_ctx(logger, tmp_loglevel)
-        with ctx:
-            super().setup(*args, **kwargs)
-    
     def MapFont(self, _, weight, bItalic, charset, pitch_family, face, _ignored):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
         logger.debug(f"fontinfo::MapFont:in (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pdfium_i.PdfFontPitchFamilyFlags(pitch_family).name!r}, face={face_bstr!r})")
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, _ignored)
-        vis_out = out or f"{out} (default: {DefaultTTFMap.get(charset)})"
+        # For internal substitution, check the family names in `pypdfium2 fonts` CLI output.
+        # If you see names like "Chrom Sans OTF" or "Chrom Serif OTF" then you probably got internal substitution.
+        vis_out = out or f"{out} (maybe internal substitution)"
         logger.debug(f"fontinfo::MapFont:out {vis_out}")
         return out
     
@@ -67,8 +47,11 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
         return self.default.GetFontData(self.default, hFont, table, buffer, buf_size)
     
     def GetFontCharset(self, _, hFont):
+        # XXX haven't yet seen a sample that triggers GetFontCharset
         logger.debug(f"fontinfo::GetFontCharset {hFont, }")
-        return self.default.GetFontCharset(self.default, hFont)
+        out = self.default.GetFontCharset(self.default, hFont)
+        logger.debug(f"-> charset: {pdfium_i.CharsetToStr.get(out)!r}")
+        return out
     
     def DeleteFont(self, _, hFont):
         logger.debug(f"fontinfo::DeleteFont {hFont, }")

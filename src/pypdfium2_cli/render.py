@@ -388,6 +388,7 @@ def _render_job(i, pdf, kwargs, engine):
     page = pdf[i]
     bitmap = page.render(**kwargs)
     engine(i, bitmap, page)
+    page.close()
 
 def _render_parallel_job(i):
     global ProcObjs

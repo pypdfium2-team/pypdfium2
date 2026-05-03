@@ -15,21 +15,22 @@ from pypdfium2._lazy import cached_property, cached_property_clear
 logger = logging.getLogger(__name__)
 
 
-class _DefaultSysfontInfoClass:
+class _DefaultSysfontInfoClass (pdfium_i.AutoCastable):
     
     def __init__(self):
         self._is_loaded = False
     
     @cached_property
     def raw(self):
-        self._is_loaded = True
         logger.debug("Load default sysfont info")
         default_ptr = pdfium_c.FPDF_GetDefaultSystemFontInfo()
         if not default_ptr:
             raise PdfiumError(f"No default FPDF_SYSFONTINFO available on this platform ({sys.platform!r}), cannot use {type(self).__name__}.")
+        self._is_loaded = True
         # trust in python to invoke exit handlers in reverse order to creation
         # this goes before any PdfSysfontBase atexit.register(), so it should only ever be closed after the sysfontinfo which relies on this default to remain valid
         atexit.register(self._close_impl)
+        pdfium_i.ObjectTracker[None].add(self._wref_to_self)
         return default_ptr.contents
     
     def _close_impl(self):
@@ -38,6 +39,7 @@ class _DefaultSysfontInfoClass:
         pdfium_i._debug_close("Free default sysfont info")
         pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.raw)
         cached_property_clear(self, "raw")
+        pdfium_i.ObjectTracker[None].remove(self._wref_to_self)
         self._is_loaded = False
     
     def close(self):
@@ -51,7 +53,7 @@ class _DefaultTTFMapClass:
     
     @cached_property
     def value(self):
-        logger.debug("Retrieving default TT Font map...")
+        # logger.debug("Retrieving default TT Font map...")
         count = pdfium_c.FPDF_GetDefaultTTFMapCount()
         map = {}
         for i in range(count):
@@ -191,6 +193,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         self._is_installed = True
         self._reusable = reusable
         atexit.register(self._close_impl)
+        pdfium_i.ObjectTracker[None].add(self._wref_to_self)
     
     
     def _close_impl(self):
@@ -207,6 +210,7 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
             # Assuming pdfium's default impl was used. In the unlikely event that it was not used, this is a no-op.
             _DefaultSysfontInfo.close()
         PdfSysfontBase.SINGLETON = None
+        pdfium_i.ObjectTracker[None].remove(self._wref_to_self)
     
     def close(self, reusable=None):  # manual
         """

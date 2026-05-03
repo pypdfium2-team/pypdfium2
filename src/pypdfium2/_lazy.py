@@ -36,7 +36,7 @@ class _LazyClass:
     
     @cached_property
     def tabulate(self):
-        logger.debug("Evaluating lazy import 'tabulate' ...")
+        # logger.debug("Evaluating lazy import 'tabulate' ...")
         from tabulate import tabulate; return tabulate
 
 Lazy = _LazyClass()

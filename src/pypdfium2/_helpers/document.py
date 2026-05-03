@@ -77,7 +77,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             self._data_holder += to_hold
             self._data_closer += to_close
         
-        super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer)
+        super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer, tracked=False)
     
     
     # Support using PdfDocument in a with-block
@@ -485,7 +485,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if not raw_xobject:
             raise PdfiumError(f"Failed to capture page at index {index} as FPDF_XOBJECT.")
         xobject = PdfXObject(raw=raw_xobject, pdf=dest_pdf)
-        self._add_kid(xobject)
+        dest_pdf._add_kid(xobject)
         return xobject
     
     
@@ -616,7 +616,7 @@ class PdfXObject (pdfium_i.AutoCloseable):
         """
         raw_pageobj = pdfium_c.FPDF_NewFormObjectFromXObject(self)
         # not a child object (see above)
-        return PdfObject(raw=raw_pageobj, pdf=self.pdf)
+        return PdfObject(raw=raw_pageobj, pdf=self.pdf)  # tracked=False
 
 
 class PdfBookmark (pdfium_i.AutoCastable):

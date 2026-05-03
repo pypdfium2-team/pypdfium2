@@ -2,13 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import sys
 import logging
 import warnings
+import functools
+from collections import defaultdict
 import pypdfium2_cfg
 
 
 def setup_logging():
-        
+    
     # could also pass through the log level by parameter, but using an env var seemed easiest for now
     loglevel = getattr(logging, os.environ.get("PYPDFIUM_LOGLEVEL", "debug").upper())
     loggers = [logging.getLogger("pypdfium2"+m) for m in ("", "_raw", "_cfg", "_cli")]
@@ -23,13 +26,26 @@ def setup_logging():
     
     debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
     debug_unsupported = bool(int( os.environ.get("DEBUG_UNSUPPORTED", 1) ))
-    debug_sysfonts = os.environ.get("DEBUG_SYSFONTS", "")
+    debug_sysfonts = bool(int( os.environ.get("DEBUG_SYSFONTS", 0) ))
     pypdfium2_cfg.DEBUG_AUTOCLOSE.value = debug_autoclose
     
     import pypdfium2._helpers as pdfium
-    from pypdfium2_cli._aux import PdfSysfontListener
+    from pypdfium2_cli._sysfonts import PdfSysfontListener
     if debug_unsupported:
         pdfium.PdfUnspHandler().setup()
     if debug_sysfonts:
-        # pass tmp_loglevel=None to show the initial sysfont enumeration triggered by FPDF_SetSystemFontInfo()
         PdfSysfontListener().setup()
+
+
+if sys.version_info < (3, 8):  # pragma: no cover
+    def cached_property(func):
+        return property( functools.lru_cache(maxsize=1)(func) )
+else:
+    cached_property = functools.cached_property
+
+# could even inherit just from dict if we changed __init__ to take the factory
+class keydefaultdict (defaultdict):
+    def __missing__(self, key):
+        value = self.default_factory(key)
+        self[key] = value
+        return value
