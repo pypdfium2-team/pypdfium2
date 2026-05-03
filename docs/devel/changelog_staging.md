@@ -11,9 +11,9 @@
   + Fixed some issues and inconsistencies in autoclose hooks that were unmasked by the above changes.
     * `PdfDocument.page_as_xobject()` now registers the XObject as a child of `dest_pdf` rather than `self`.
     * Pageobjects (`PdfObject`) are marked as untracked (as are `PdfDocument` and `PdfBitmap` for mere consistency).
-    * For pages registered as kids of a formenv, `PdfPage.parent` now points at the formenv. The `.parent` property should now be seen as purely an autoclose hook and not something to use for other puposes.
+    * For pages registered as kids of a formenv, `PdfPage.parent` now points at the formenv. The `.parent` property should now be seen as purely an autoclose hook and not something to use for other purposes.
     * Fixed a test suite call site to use `_detach_finalizer()` instead of `_finalizer.detach()`.
-  + Should any issues surface with these changes (e.g. hitting assertions, or performance concerns), please let us know. Provide logs with autoclose debugging enabled if applicable.
+  + Should any issues surface with these changes (e.g. hitting assertions, or performance concerns), please let us know. Provide logs with `DEBUG_AUTOCLOSE` enabled if applicable.
 - `PdfPage.get_objects()`: Added `textpage` passthrough parameter. This is required for `PdfTextObj.extract()`. Raise a meaningful exception if the textpage is missing. Demonstrate `.extract()` in pageobjects CLI.
 - `PdfFont.get_base_name()`, `.get_family_name()`: decoding `errors` option added, now defaults to `"replace"`.
 - New helpers `PdfFont.load_standard()`, `.STANDARD_FONTS` and `PdfDefaultTTFMap` added.
