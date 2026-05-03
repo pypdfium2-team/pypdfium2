@@ -58,8 +58,7 @@ class _DefaultTTFMapClass:
         map = {}
         for i in range(count):
             entry = pdfium_c.FPDF_GetDefaultTTFMapEntry(i).contents
-            # TODO decode; check if the default font is even installed?
-            map[entry.charset] = ctypes.cast(entry.fontname, ctypes.c_char_p).value
+            map[entry.charset] = ctypes.cast(entry.fontname, ctypes.c_char_p).value  # TODO decode
         return map
     
     def get(self, key, default=None):
@@ -72,6 +71,11 @@ PdfDefaultTTFMap = _DefaultTTFMapClass()
 """
 This object exposes the default TT Font map used by pdfium.\n
 Access the ``.value`` cached property to obtain the map, or call ``.get(charset)``.
+
+Note:
+    There is no guarantee as to whether a default font is installed or not.
+    If not installed, a system or internal substitute may be chosen by pdfium.
+    ``DEBUG_SYSFONTS=1 pypdfium2 default-fonts`` should give you some idea about substitution.
 """
 
 
