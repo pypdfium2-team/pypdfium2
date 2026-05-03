@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "DEBUG_AUTOCLOSE", "LIBRARY_AVAILABLE", "_debug_close", "ObjectTracker")
+__all__ = ("AutoCastable", "AutoCloseable", "ObjectTracker", "LIBRARY_AVAILABLE", "DEBUG_AUTOCLOSE", "_debug_close", "_warn_close")
 
 import os
 import sys
@@ -11,8 +11,8 @@ import weakref
 import logging
 from collections import defaultdict
 import pypdfium2_cfg
-from pypdfium2_cfg import DEBUG_AUTOCLOSE  # compat
 from pypdfium2._lazy import cached_property
+from pypdfium2_cfg import DEBUG_AUTOCLOSE  # bw compat
 
 logger = logging.getLogger(__name__)
 LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
@@ -20,14 +20,17 @@ LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
 ObjectTracker = defaultdict(set)
 
 
-def _debug_close(msg):  # pragma: no cover
+def _debug_close(msg, prio=logging.DEBUG):  # pragma: no cover
     # try to use os.write() rather than print() or logger.whatever() to avoid "reentrant call" or "I/O operation on closed file" exceptions on shutdown (see https://stackoverflow.com/q/75367828/15547292)
-    if not DEBUG_AUTOCLOSE:
+    if prio < DEBUG_AUTOCLOSE.value:
         return
     try:
         os.write(sys.stderr.fileno(), (msg+"\n").encode())
     except Exception:  # e.g. io.UnsupportedOperation
         print(msg, file=sys.stderr)
+
+def _warn_close(msg):
+    _debug_close(msg, logging.WARNING)
 
 
 class _STATE (enum.Enum):
@@ -69,7 +72,7 @@ def _close_template(info, owner):
     
     _debug_close(f"Close ({info.state.name.lower()}) {owner.repr}")
     if not LIBRARY_AVAILABLE:  # pragma: no cover
-        _debug_close(f"-> Cannot close object; pdfium library is destroyed. This may cause a memory leak.")
+        _warn_close(f"-> Cannot close {owner.repr}; pdfium library is destroyed. This may cause a memory leak.")
         return
     
     assert info.state != _STATE.INVALID
@@ -119,7 +122,7 @@ class AutoCloseable (AutoCastable):
     
     @cached_property
     def _uuid(self):
-        return uuid.uuid4() if DEBUG_AUTOCLOSE else None
+        return uuid.uuid4() if DEBUG_AUTOCLOSE.value < logging.WARNING else None
     
     def __repr__(self):
         identifier = hex(id(self)) if self._uuid is None else self._uuid.hex[:14]

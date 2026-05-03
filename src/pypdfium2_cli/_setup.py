@@ -10,10 +10,13 @@ from collections import defaultdict
 import pypdfium2_cfg
 
 
+def _get_loglevel(envvar, default):
+    return getattr(logging, os.environ.get(envvar, default).upper())
+
 def setup_logging():
     
     # could also pass through the log level by parameter, but using an env var seemed easiest for now
-    loglevel = getattr(logging, os.environ.get("PYPDFIUM_LOGLEVEL", "debug").upper())
+    loglevel = _get_loglevel("PYPDFIUM_LOGLEVEL", "debug")
     loggers = [logging.getLogger("pypdfium2"+m) for m in ("", "_raw", "_cfg", "_cli")]
     for l in loggers:
         l.addHandler(logging.StreamHandler())
@@ -24,10 +27,9 @@ def setup_logging():
     # cli_logger = logging.getLogger("pypdfium2_cli")
     # cli_logger.debug("Just set up logging")
     
-    debug_autoclose = bool(int( os.environ.get("DEBUG_AUTOCLOSE", 0) ))
     debug_unsupported = bool(int( os.environ.get("DEBUG_UNSUPPORTED", 1) ))
     debug_sysfonts = bool(int( os.environ.get("DEBUG_SYSFONTS", 0) ))
-    pypdfium2_cfg.DEBUG_AUTOCLOSE.value = debug_autoclose
+    pypdfium2_cfg.DEBUG_AUTOCLOSE.value = _get_loglevel("DEBUG_AUTOCLOSE", "warning")
     
     import pypdfium2._helpers as pdfium
     from pypdfium2_cli._sysfonts import PdfSysfontListener
