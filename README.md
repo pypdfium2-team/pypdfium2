@@ -653,8 +653,8 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Create a C array to store up to four coordinates
   view_pos = (pdfium_c.FS_FLOAT * 4)()
   view_mode = pdfium_c.FPDFDest_GetView(dest, n_params, view_pos)
-  # Convert the C array to a Python list and cut it down to the actual number of coordinates
-  view_pos = list(view_pos)[:n_params.value]
+  # Slice the array to the actual number of coordinates. This implicitly converts the C array to a Python list.
+  view_pos = view_pos[:n_params.value]
   ```
 
 * For string output parameters, callers needs to provide a sufficiently long, pre-allocated buffer.
