@@ -70,13 +70,14 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
 
-# # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-rst_prolog
-# # .. |br| raw:: html
-# #    <br/>
-# assert type(have_changes) is bool
-# rst_prolog = f"""
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-rst_prolog
 # .. |have_changes| replace:: {have_changes}
-# """
+# assert type(have_changes) is bool
+rst_prolog = f"""
+.. |br| raw:: html
+
+   <br />
+"""
 
 # def remove_namedtuple_aliases(app, what, name, obj, skip, options):
 #     if type(obj) is collections._tuplegetter:
@@ -140,6 +141,6 @@ def convert_gh_admonitions(app, relative_path, parent_docname, contents):
 
 def setup(app):
     app.add_css_file("custom.css")
-    # app.connect('autodoc-skip-member', remove_namedtuple_aliases)
     app.connect("include-read", convert_gh_admonitions)
     app.add_config_value("have_changes", True, "env")
+    # app.connect('autodoc-skip-member', remove_namedtuple_aliases)

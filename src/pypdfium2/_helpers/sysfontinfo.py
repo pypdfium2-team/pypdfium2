@@ -74,7 +74,7 @@ Access the ``.value`` cached property to obtain the map, or call ``.get(charset)
 
 Note:
     There is no guarantee as to whether a default font is installed or not.
-    If not installed, a system or internal substitute may be chosen by pdfium.
+    If not installed, a system or internal substitute may be chosen by pdfium. |br|
     ``DEBUG_SYSFONTS=1 pypdfium2 default-fonts`` should give you some idea about substitution.
 """
 
