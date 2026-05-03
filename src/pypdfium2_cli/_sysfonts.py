@@ -3,24 +3,10 @@
 
 import ctypes
 import logging
-from contextlib import contextmanager
 import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 
 logger = logging.getLogger("pypdfium2_cli")
-
-@contextmanager
-def _tmp_loglevel_ctx(logger, level):
-    _orig_loglevel = logger.getEffectiveLevel()
-    logger.setLevel(level)
-    try:
-        yield
-    finally:
-        logger.setLevel(_orig_loglevel)
-
-@contextmanager
-def _noop_ctx():
-    yield
 
 
 class PdfSysfontListener (pdfium.PdfSysfontBase):
@@ -29,12 +15,6 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
         logger.debug("Installing sysfontinfo...")
         super().__init__(default)
         logger.debug(f"fontinfo default interface version is {self.version}")
-    
-    def setup(self, *args, tmp_loglevel=logging.INFO, **kwargs):
-        # NOTE this will still do the work (i.e. get strings, map flags and create the log string), just mask the actual logging
-        ctx = _noop_ctx() if tmp_loglevel is None else _tmp_loglevel_ctx(logger, tmp_loglevel)
-        with ctx:
-            super().setup(*args, **kwargs)
     
     def MapFont(self, _, weight, bItalic, charset, pitch_family, face, _ignored):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value

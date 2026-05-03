@@ -34,7 +34,6 @@ def setup_logging():
     if debug_unsupported:
         pdfium.PdfUnspHandler().setup()
     if debug_sysfonts:
-        # pass tmp_loglevel=None to show the initial sysfont enumeration triggered by FPDF_SetSystemFontInfo()
         PdfSysfontListener().setup()
 
 
