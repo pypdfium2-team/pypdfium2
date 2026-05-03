@@ -170,7 +170,7 @@ class AutoCloseable (AutoCastable):
             k.close(_by_parent=True)
         
         if self._kids:
-            _debug_close(f"Some kids weakrefs have not been cleaned up: {self._kids}")
+            logger.warning(f"Some kids weakrefs have not been cleaned up: {self._kids}")
             self._kids.clear()
         
         self._fin_info.state = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT
