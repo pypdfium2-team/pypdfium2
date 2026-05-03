@@ -13,5 +13,6 @@
 - `PdfPage.get_objects()`: Added `textpage` passthrough parameter. This is required for `PdfTextObj.extract()`. Raise a meaningful exception if the textpage is missing. Demonstrate `.extract()` in pageobjects CLI.
 - `PdfFont.get_base_name()`, `.get_family_name()`: decoding `errors` option added, now defaults to `"replace"`.
 - New helpers `PdfFont.load_standard()`, `.STANDARD_FONTS` and `PdfDefaultTTFMap` added.
-- New font diagnostic CLIs added (`pypdfium2 fonts` and `default-fonts`). Optional dependency `tabulate`.
 - Errchecks added to `PdfPage.get_rotation()`, `.insert_obj()` and `PdfUnspHandler.setup()`.
+- New font diagnostic CLIs added (`pypdfium2 fonts` and `default-fonts`). Optional dependency `tabulate`.
+- In the CLI dispatcher, try to load only those modules that are actually used.

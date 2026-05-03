@@ -28,7 +28,6 @@ class PdfUnspHandler (pdfium_i.AutoCastable):
     def __init__(self):
         self.handlers = {}
         self.raw = pdfium_c.UNSUPPORT_INFO(version=1)
-        self._proxy = None
     
     def __call__(self, _, type):
         for handler in self.handlers.values():
