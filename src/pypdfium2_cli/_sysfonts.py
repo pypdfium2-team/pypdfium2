@@ -47,10 +47,10 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
         return self.default.GetFontData(self.default, hFont, table, buffer, buf_size)
     
     def GetFontCharset(self, _, hFont):
+        # XXX haven't yet seen a sample that triggers GetFontCharset
         logger.debug(f"fontinfo::GetFontCharset {hFont, }")
         out = self.default.GetFontCharset(self.default, hFont)
-        # XXX haven't yet seen a sample that triggers GetFontCharset
-        #logger.debug(f"-> charset: {pdfium_i.CharsetToStr.get(out)!r}")
+        logger.debug(f"-> charset: {pdfium_i.CharsetToStr.get(out)!r}")
         return out
     
     def DeleteFont(self, _, hFont):
