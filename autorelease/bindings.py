@@ -1704,7 +1704,7 @@ if hasattr(_libs['pdfium'], 'FPDFPage_SetRotation'):
 if hasattr(_libs['pdfium'], 'FPDFPage_InsertObject'):
     FPDFPage_InsertObject = _libs['pdfium']['FPDFPage_InsertObject']
     FPDFPage_InsertObject.argtypes = (FPDF_PAGE, FPDF_PAGEOBJECT)
-    FPDFPage_InsertObject.restype = None
+    FPDFPage_InsertObject.restype = FPDF_BOOL
 
 if hasattr(_libs['pdfium'], 'FPDFPage_InsertObjectAtIndex'):
     FPDFPage_InsertObjectAtIndex = _libs['pdfium']['FPDFPage_InsertObjectAtIndex']
@@ -2115,6 +2115,11 @@ if hasattr(_libs['pdfium'], 'FPDFText_SetCharcodes'):
     FPDFText_SetCharcodes = _libs['pdfium']['FPDFText_SetCharcodes']
     FPDFText_SetCharcodes.argtypes = (FPDF_PAGEOBJECT, POINTER(uint32_t), c_size_t)
     FPDFText_SetCharcodes.restype = FPDF_BOOL
+
+if hasattr(_libs['pdfium'], 'FPDFText_SetPositions'):
+    FPDFText_SetPositions = _libs['pdfium']['FPDFText_SetPositions']
+    FPDFText_SetPositions.argtypes = (FPDF_PAGEOBJECT, POINTER(c_float), c_size_t)
+    FPDFText_SetPositions.restype = FPDF_BOOL
 
 if hasattr(_libs['pdfium'], 'FPDFText_LoadFont'):
     FPDFText_LoadFont = _libs['pdfium']['FPDFText_LoadFont']
