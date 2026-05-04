@@ -11,8 +11,8 @@ import weakref
 import logging
 from collections import defaultdict
 import pypdfium2_cfg
-from pypdfium2._lazy import cached_property
 from pypdfium2_cfg import DEBUG_AUTOCLOSE  # bw compat
+from pypdfium2._lazy import cached_property
 
 logger = logging.getLogger(__name__)
 LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
@@ -173,7 +173,8 @@ class AutoCloseable (AutoCastable):
             k.close(_by_parent=True)
         
         if self._kids:
-            logger.warning(f"Some kids weakrefs have not been cleaned up: {self._kids}")
+            if DEBUG_AUTOCLOSE:
+                logger.warning(f"Some kids weakrefs have not been cleaned up: {self._kids}")
             self._kids.clear()
         
         self._fin_info.state = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT

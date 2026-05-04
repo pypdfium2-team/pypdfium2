@@ -13,7 +13,7 @@ logger = logging.getLogger("pypdfium2")
 def init_lib():
     assert not pdfium_i.LIBRARY_AVAILABLE
     if DEBUG_AUTOCLOSE:  # pragma: no cover
-        logger.log(DEBUG_AUTOCLOSE.value, "Initialize PDFium")
+        logger.debug("Initialize PDFium")
     
     # PDFium init API may change in the future: https://crbug.com/pdfium/1446
     # NOTE Technically, FPDF_InitLibrary() would be sufficient for our purposes, but pdfium docs say "This will be deprecated in the future", so don't use it to be on the safe side. Also, avoid experimental config versions that might not be promoted to stable.
