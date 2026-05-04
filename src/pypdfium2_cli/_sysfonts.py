@@ -22,7 +22,7 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, _ignored)
         # For internal substitution, check the family names in `pypdfium2 fonts` CLI output.
         # If you see names like "Chrom Sans OTF" or "Chrom Serif OTF" then you probably got internal substitution.
-        vis_out = out or f"{out}  # probably internal subst with Chrom font family"
+        vis_out = out or f"{out}  # probably internal subst with Chrome font"
         logger.debug(f"fontinfo::MapFont:out {vis_out}")
         return out
     

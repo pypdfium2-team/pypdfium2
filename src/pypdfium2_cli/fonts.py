@@ -34,7 +34,7 @@ def _iterate_fonts(all_fonts):
     for fontholder in all_fonts.values():
         fontobj = fontholder.obj
         base_name = fontobj.get_base_name()
-        embedded = "yes" if fontobj.is_embedded else ("no (std)" if base_name in PdfFont.STANDARD_FONTS else "no")
+        embedded = "yes" if fontobj.is_embedded else "no"
         pages_str = ", ".join(str(p) for p in pagenums_ranger(sorted(fontholder.pages)))
         yield base_name, fontobj.get_family_name(), fontobj.get_weight(), embedded, pages_str
 
