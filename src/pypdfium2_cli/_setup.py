@@ -18,8 +18,9 @@ def setup_logging():
     # could also pass through the log level by parameter, but using an env var seemed easiest for now
     loglevel = _get_loglevel("PYPDFIUM_LOGLEVEL", "debug")
     loggers = [logging.getLogger("pypdfium2"+m) for m in ("", "_raw", "_cfg", "_cli")]
+    streamhandler = logging.StreamHandler()
     for l in loggers:
-        l.addHandler(logging.StreamHandler())
+        l.addHandler(streamhandler)
         l.setLevel(loglevel)
     
     warnings.simplefilter("always")
