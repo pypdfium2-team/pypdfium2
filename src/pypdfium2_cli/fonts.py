@@ -7,7 +7,6 @@ from collections import namedtuple
 from importlib.util import find_spec
 import pypdfium2.raw as pdfium_c
 from pypdfium2._lazy import Lazy
-from pypdfium2._helpers import PdfFont
 from pypdfium2_cli._parsers import (
     add_input,
     get_input,
