@@ -32,7 +32,7 @@ test-command = [
 select = "*-manylinux_*"
 before-all = [
     "dnf clean all && dnf makecache --refresh",
-    "dnf -y install ninja-build",  # freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel
+    "dnf -y install ninja-build",  # freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel harfbuzz-devel
     "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64}
 ]
 
@@ -41,7 +41,7 @@ before-all = [
 select = "*-manylinux_armv7l"
 before-all = [
     "apt-get update",
-    "apt-get install -y generate-ninja ninja-build",  # libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+    "apt-get install -y generate-ninja ninja-build",  # libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev libharfbuzz-dev
 ]
 manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:2025.11.03-1"
 

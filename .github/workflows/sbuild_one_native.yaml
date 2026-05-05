@@ -70,7 +70,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+          sudo apt-get install -y generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev libharfbuzz-dev
       
       - name: Set up symlinks for clang
         if: ${{ inputs.compiler == 'clang' }}
