@@ -253,9 +253,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
         if compiler is Compiler.clang:
-            # https://crbug.com/410883044
-            # if "libc++" not in vendor_deps:
-            #     git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
+            # historically, https://crbug.com/410883044
+            if "libc++" not in vendor_deps:
+                git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
             if clang_ver < 21:  # guessed
                 git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
             # TODO should we handle other OSes here?

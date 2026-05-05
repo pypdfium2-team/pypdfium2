@@ -1,22 +1,40 @@
+diff --git a/config/BUILDCONFIG.gn b/config/BUILDCONFIG.gn
+index e403e0c..47709ad 100644
 --- a/config/BUILDCONFIG.gn
 +++ b/config/BUILDCONFIG.gn
-@@ -557,8 +557,7 @@ foreach(_target_type,
-         deps = []
+@@ -565,7 +565,7 @@ foreach(_target_type,
+         public_deps = []
        }
  
--      if (is_clang && (!defined(invoker.use_libcxx_modules) ||
--                       invoker.use_libcxx_modules)) {
-+      if (is_clang && false) {
-         # This is necessary for Clang modules builds.
-         deps += [
-           "//buildtools/third_party/libc++:std",
-@@ -661,8 +660,7 @@ foreach(_target_type,
-         deps += [ "//build/config:${_target_type}_deps" ]
+-      if (is_clang) {
++      if (false) {  # XXX(pypdfium2)
+         # When clang is used, some target may use clang module. This dependency
+         # is required for things to work, regardless of whether the libc++
+         # module is used in this target or not.
+@@ -573,7 +573,7 @@ foreach(_target_type,
        }
  
--      if (is_clang && (!defined(invoker.use_libcxx_modules) ||
--                       invoker.use_libcxx_modules)) {
-+      if (is_clang && false) {
-         # These are necessary for Clang modules builds.
-         deps += [
-           "//buildtools/third_party/libc++:_Builtin_limits",
+       if (!defined(use_libcxx_modules)) {
+-        use_libcxx_modules = is_clang
++        use_libcxx_modules = false  # XXX(pypdfium2)
+       }
+ 
+       if (filter_include(
+@@ -683,7 +683,7 @@ foreach(_target_type,
+         public_deps = []
+       }
+ 
+-      if (is_clang) {
++      if (false) {  # XXX(pypdfium2)
+         # When clang is used, some target may use clang module. This dependency
+         # is required for things to work, regardless of whether the libc++
+         # module is used in this target or not.
+@@ -691,7 +691,7 @@ foreach(_target_type,
+       }
+ 
+       if (!defined(use_libcxx_modules)) {
+-        use_libcxx_modules = is_clang
++        use_libcxx_modules = false  # XXX(pypdfium2)
+       }
+ 
+       if (filter_include(
