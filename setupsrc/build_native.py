@@ -267,9 +267,16 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             if no_libclang_rt:
                 git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             if Host._libc_name == "musl":
-                # For "our" builds, we only need the powerpc64le,riscv64,loongarch64 (and s390x) bits, but handling the others as well makes sense for users who want to build natively on musl with clang.
-                # Also, this might only be needed if we want to run unittests.
-                git_apply_patch(PatchDir/"clang_on_musl.patch", cwd=PDFIUM_DIR_build)
+                autopatch(
+                    PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
+                    "-unknown-linux-gnu", "-alpine-linux-musl",
+                    is_regex=False,
+                )
+                autopatch(
+                    PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
+                    "-linux-gnu", "-alpine-linux-musl",
+                    is_regex=False,
+                )
         # Create pseudo gclient config included by //build
         (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("build_with_chromium = false")
     
