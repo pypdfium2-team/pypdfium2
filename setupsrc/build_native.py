@@ -253,7 +253,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             # historically, https://crbug.com/410883044
             if "libc++" not in vendor_deps:
                 git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
-            if clang_ver < 21:  # guessed
+            if clang_ver < 23:
                 git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
