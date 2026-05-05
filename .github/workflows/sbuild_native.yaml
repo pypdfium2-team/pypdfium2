@@ -6,18 +6,18 @@ name: Sourcebuild Native
 on:
   workflow_dispatch:
     inputs:
-      linux_native_gcc:
-        type: boolean
-        default: true
-      linux_native_clang:
-        type: boolean
-        default: true
       pdfium_ver:
         type: string
         default: ''
       py_ver:
         type: string
         default: '3.12'
+      linux_native_gcc:
+        type: boolean
+        default: true
+      linux_native_clang:
+        type: boolean
+        default: true
       may_vendor:
         type: boolean
         default: true
