@@ -283,7 +283,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
     
     if "libc++" in vendor_deps:
-        df.fetch("buildtools", PDFIUM_DIR/"buildtools", reset=reset)
+        df.fetch("buildtools", PDFIUM_DIR/"buildtools")
         df.fetch("libcxx", PDFIUM_3RDPARTY/"libc++"/"src")
         df.fetch("libcxxabi", PDFIUM_3RDPARTY/"libc++abi"/"src")
         df.fetch("llvm_libc", PDFIUM_3RDPARTY/"llvm-libc"/"src")
