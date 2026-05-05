@@ -244,7 +244,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
         # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
-        # git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR_build)
+        git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
