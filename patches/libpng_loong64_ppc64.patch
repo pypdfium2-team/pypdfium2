@@ -17,7 +17,7 @@ index 25831ae..cd5acfd 100644
 +    defines += ["PNG_LOONGARCH_LSX_OPT=1"]
 +  }
 +  else if (current_cpu == "ppc64") {
-+    defines += ["PNG_POWERPC_VSX_OPT=1"]
++    defines += ["PNG_POWERPC_VSX_OPT=0"]
    }
  
    configs -= [ "//build/config/compiler:chromium_code" ]
