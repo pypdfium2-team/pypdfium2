@@ -371,8 +371,10 @@ def build(build_dir, config_dict, with_tests, n_jobs):
 
 def test(build_dir, vendor_deps):
     gtest_filter = []
-    gtest_filter.append("RetainPtr.SetContains")  # fails
-    # FlateModule.Encode may fail with older zlib (generates different results)
+    # Fails, probably because we're not using the vendored libc++. There are related compiler warnings. However, our CI compilers are too old to build the vendored libc++ (requires at least GCC 15 / Clang 20, but max we can get on Ubuntu 24.04 is GCC 14 / Clang 19).
+    if "libc++" not in vendor_deps:
+        gtest_filter.append("RetainPtr.SetContains")
+    # May fail with older zlib (generates different results)
     if "zlib" not in vendor_deps:
         gtest_filter.append("FlateModule.Encode")
     if Host._libc_name == "musl":
