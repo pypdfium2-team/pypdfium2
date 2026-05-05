@@ -273,10 +273,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # Create pseudo gclient config included by //build
         (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("build_with_chromium = false")
     
-    do_patches = df.fetch("abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
-    if do_patches and (Host._raw_machine, Host._libc_name) == ("ppc64le", "musl"):
-        git_apply_patch(PatchDir/"abseil_ppc64le_musl.patch", cwd=PDFIUM_3RDPARTY/"abseil-cpp")
-    
+    df.fetch("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     df.fetch("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
     if IS_ANDROID:
