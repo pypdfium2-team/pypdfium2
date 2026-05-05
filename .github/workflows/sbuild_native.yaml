@@ -12,16 +12,16 @@ on:
       py_ver:
         type: string
         default: '3.12'
+      vendor:
+        type: string
+        default: 'icu'
+      test_pdfium:
+        type: boolean
+        default: true
       linux_native_gcc:
         type: boolean
         default: true
       linux_native_clang:
-        type: boolean
-        default: true
-      may_vendor:
-        type: boolean
-        default: true
-      test_pdfium:
         type: boolean
         default: true
 
@@ -37,7 +37,7 @@ jobs:
       compiler: gcc
       pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ inputs.py_ver }}
-      may_vendor: ${{ inputs.may_vendor }}
+      vendor: ${{ inputs.vendor }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_arm64_native_gcc:
@@ -48,7 +48,7 @@ jobs:
       compiler: gcc
       pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ inputs.py_ver }}
-      may_vendor: ${{ inputs.may_vendor }}
+      vendor: ${{ inputs.vendor }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_x64_native_clang:
@@ -59,7 +59,7 @@ jobs:
       compiler: clang
       pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ inputs.py_ver }}
-      may_vendor: ${{ inputs.may_vendor }}
+      vendor: ${{ inputs.vendor }}
       test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_arm64_native_clang:
@@ -70,5 +70,5 @@ jobs:
       compiler: clang
       pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ inputs.py_ver }}
-      may_vendor: ${{ inputs.may_vendor }}
+      vendor: ${{ inputs.vendor }}
       test_pdfium: ${{ inputs.test_pdfium }}
