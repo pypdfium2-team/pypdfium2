@@ -31,6 +31,8 @@ DEPS_URLS = dict(
     nasm_source = _CR_PREFIX + "chromium/deps/nasm",
     libpng      = _CR_PREFIX + "chromium/src/third_party/libpng",
     zlib        = _CR_PREFIX + "chromium/src/third_party/zlib",
+    simdutf     = _CR_PREFIX + "chromium/src/third_party/simdutf",
+    harfbuzz    = _CR_PREFIX + "external/github.com/harfbuzz/harfbuzz",
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
@@ -150,7 +152,7 @@ class _DeferredDeps:
 
 def handle_deps(config, vendor_deps, with_tests):
     
-    deps_fields = ["build", "abseil", "fast_float"]
+    deps_fields = ["build", "abseil", "fast_float", "simdutf"]
     if IS_ANDROID:
         deps_fields.append("catapult")
     
@@ -158,7 +160,6 @@ def handle_deps(config, vendor_deps, with_tests):
         deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
     else:
         config["use_custom_libcxx"] = False
-        config["use_libcxx_modules"] = False
     
     if "icu" in vendor_deps:
         deps_fields.append("icu")
@@ -184,6 +185,11 @@ def handle_deps(config, vendor_deps, with_tests):
     else:
         config["use_system_zlib"] = True
     
+    if "harfbuzz" in vendor_deps:
+        deps_fields.append("harfbuzz")
+    else:
+        config["use_system_harfbuzz"] = True
+    
     if "lcms2" not in vendor_deps:
         config["use_system_lcms2"] = True
     if "openjpeg" not in vendor_deps:
@@ -196,7 +202,7 @@ def handle_deps(config, vendor_deps, with_tests):
     
     return _DeferredDeps(deps_fields)
 
-VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff")
+VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff", "harfbuzz")
 
 
 def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat):
@@ -238,11 +244,15 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
         # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
-        git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR_build)
+        # git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
-        if compiler is Compiler.clang:
+        if compiler is Compiler.gcc:
+            # broken by this roll: https://pdfium.googlesource.com/pdfium/+/0464426e8e6a1fe45a23ad01cfcd9ddc28373d50
+            # this commit is the culprit: https://chromium.googlesource.com/chromium/src/build.git/+/17cb503758e2be337c9f2273ade0a25962ba7991
+            git_apply_patch(PatchDir/"fix_gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
+        elif compiler is Compiler.clang:
             # https://crbug.com/410883044
             if "libc++" not in vendor_deps:
                 git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
@@ -263,14 +273,15 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                 # For "our" builds, we only need the powerpc64le,riscv64,loongarch64 (and s390x) bits, but handling the others as well makes sense for users who want to build natively on musl with clang.
                 # Also, this might only be needed if we want to run unittests.
                 git_apply_patch(PatchDir/"clang_on_musl.patch", cwd=PDFIUM_DIR_build)
-        # Create an empty gclient config
-        (PDFIUM_DIR_build/"config"/"gclient_args.gni").touch(exist_ok=True)
+        # Create pseudo gclient config included by //build
+        (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("build_with_chromium = false")
     
     do_patches = df.fetch("abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
     if do_patches and (Host._raw_machine, Host._libc_name) == ("ppc64le", "musl"):
         git_apply_patch(PatchDir/"abseil_ppc64le_musl.patch", cwd=PDFIUM_3RDPARTY/"abseil-cpp")
     
     df.fetch("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
+    df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
     if IS_ANDROID:
         df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
     
@@ -296,6 +307,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("libpng", PDFIUM_3RDPARTY/"libpng")
     if "zlib" in vendor_deps:
         df.fetch("zlib", PDFIUM_3RDPARTY/"zlib")
+    if "harfbuzz" in vendor_deps:
+        df.fetch("harfbuzz", PDFIUM_3RDPARTY/"harfbuzz"/"src")
     
     if with_tests:
         df.fetch("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
