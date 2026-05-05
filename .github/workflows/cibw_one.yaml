@@ -13,7 +13,7 @@ on:
       cibw_arch:
         type: string
       cibw_py_ver:
-        default: 'cp310'
+        default: 'cp314'
         type: string
       branch:
         type: string
@@ -36,7 +36,7 @@ on:
         type: string
         default: x86_64
       cibw_py_ver:
-        default: 'cp310'
+        default: 'cp314'
         type: string
       branch:
         type: string
