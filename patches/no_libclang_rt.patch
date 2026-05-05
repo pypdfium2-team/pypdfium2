@@ -1,30 +1,11 @@
-diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 5f0e525..eff69c8 100644
---- a/config/compiler/BUILD.gn
-+++ b/config/compiler/BUILD.gn
-@@ -1840,9 +1840,10 @@ config("runtime_library") {
-   # the C++ symbols. This config ensures the C++ symbols exist and are strong in
-   # order to cause that replacement to occur by explicitly linking in clang's
-   # compiler-rt library.
--  if (is_clang && !is_nacl && !is_cronet_build) {
--    configs += [ "//build/config/clang:compiler_builtins" ]
--  }
-+  # XXX(pypdfium2): disabled to use libgcc instead of libclang_rt
-+  # if (is_clang && !is_nacl && !is_cronet_build) {
-+  #   configs += [ "//build/config/clang:compiler_builtins" ]
-+  # }
- 
-   # TODO(crbug.com/40570904): Come up with a better name for is POSIX + Fuchsia
-   # configuration.
 diff --git a/config/clang/BUILD.gn b/config/clang/BUILD.gn
-index 8c03235..606bd0f 100644
+index e05032c..742358b 100644
 --- a/config/clang/BUILD.gn
 +++ b/config/clang/BUILD.gn
-@@ -261,37 +261,6 @@ template("clang_lib") {
-   }
+@@ -239,35 +239,10 @@ template("clang_lib") {
  }
  
--# Adds a dependency on the Clang runtime library clang_rt.builtins.
+ # Adds a dependency on the Clang runtime library clang_rt.builtins.
 -clang_lib("compiler_builtins") {
 -  if (is_mac) {
 -    libname = "osx"
@@ -50,11 +31,32 @@ index 8c03235..606bd0f 100644
 -    } else {
 -      assert(false, "unsupported target_platform=$target_platform")
 -    }
--  } else {
+-  } else if (current_cpu != "ppc64" && current_cpu != "s390x") {
 -    libname = "builtins"
 -  }
 -}
--
++# XXX(pypdfium2) --no-libclang-rt
++# clang_lib("compiler_builtins") {
++#   # ...
++# }
+ 
  # Adds a dependency on the Clang runtime library clang_rt.profile.
  clang_lib("compiler_profile") {
-   if (!toolchain_has_rust) {
+diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
+index e755e86..e64cc80 100644
+--- a/config/compiler/BUILD.gn
++++ b/config/compiler/BUILD.gn
+@@ -2012,9 +2012,10 @@ config("runtime_library") {
+   # the C++ symbols. This config ensures the C++ symbols exist and are strong in
+   # order to cause that replacement to occur by explicitly linking in clang's
+   # compiler-rt library.
+-  if (is_clang && !(is_a_target_toolchain && is_cronet_build)) {
+-    configs += [ "//build/config/clang:compiler_builtins" ]
+-  }
++  # XXX(pypdfium2) --no-libclang-rt
++  # if (is_clang && !(is_a_target_toolchain && is_cronet_build)) {
++  #   configs += [ "//build/config/clang:compiler_builtins" ]
++  # }
+ 
+   # TODO(crbug.com/40570904): Come up with a better name for is POSIX + Fuchsia
+   # configuration.
