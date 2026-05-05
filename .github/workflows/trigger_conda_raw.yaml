@@ -25,5 +25,5 @@ jobs:
               "new_only": "true",
               "test": "true",
               "publish": "true",
-              "py_version": "3.12"
+              "py_version": "3.14"
             }

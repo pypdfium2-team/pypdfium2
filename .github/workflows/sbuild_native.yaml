@@ -11,7 +11,7 @@ on:
         default: ''
       py_ver:
         type: string
-        default: '3.12'
+        default: '3.14'
       vendor:
         type: string
         default: 'icu'
