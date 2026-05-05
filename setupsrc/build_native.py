@@ -256,8 +256,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             # https://crbug.com/410883044
             # if "libc++" not in vendor_deps:
             #     git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
-            # if clang_ver < 21:  # guessed
-            #     git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
+            if clang_ver < 21:  # guessed
+                git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
@@ -286,7 +286,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
     
     if "libc++" in vendor_deps:
-        df.fetch("buildtools", PDFIUM_DIR/"buildtools")
+        do_patches = df.fetch("buildtools", PDFIUM_DIR/"buildtools", reset=reset)
+        if do_patches:
+            git_apply_patch(PatchDir/"buildtools_stdcxx_ver.patch", cwd=PDFIUM_DIR/"buildtools")
         df.fetch("libcxx", PDFIUM_3RDPARTY/"libc++"/"src")
         df.fetch("libcxxabi", PDFIUM_3RDPARTY/"libc++abi"/"src")
         df.fetch("llvm_libc", PDFIUM_3RDPARTY/"llvm-libc"/"src")
