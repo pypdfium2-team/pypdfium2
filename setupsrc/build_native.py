@@ -205,7 +205,7 @@ def handle_deps(config, vendor_deps, with_tests):
 VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff", "harfbuzz")
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -220,9 +220,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
-        if compat and not vendor_deps.issuperset(("openjpeg", "freetype")):
-            # compatibility patch for older system libraries from container
-            git_apply_patch(PatchDir/"legacy_libs_compat.patch", cwd=PDFIUM_DIR)
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
             if with_tests:
@@ -389,7 +386,7 @@ def test(build_dir, vendor_deps):
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, compat=False):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -421,7 +418,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = handle_deps(config, vendor_deps, with_tests)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat)
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps)
     setup_compiler(config, compiler, clang_ver, clang_path)
     build(build_dir, config, with_tests, n_jobs)
     if with_tests:
@@ -505,11 +502,6 @@ In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAG
         nargs = "+",
         action = "extend",
         help = "Dependencies not to vendor. Overrides --vendor.",
-    )
-    parser.add_argument(
-        "--compat",
-        action = "store_true",
-        help = "Whether to apply a compatibility patch for older system libraries (openjpeg/freetype).",
     )
     
     args = parser.parse_args(argv)
