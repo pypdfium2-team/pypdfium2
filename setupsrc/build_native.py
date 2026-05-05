@@ -378,7 +378,7 @@ def test(build_dir, vendor_deps):
         gtest_filter.append("WideString.FormatString")  # XXX?
     if Host._raw_machine == "s390x":
         # XXX actually crashes
-        gtest_filter.append("CPDFPageImageCache.RenderBug1924")
+        gtest_filter.append("CPDFPageImageCacheTest.RenderBug1924")
     if gtest_filter:
         os.environ["GTEST_FILTER"] = "*:-" + ":".join(gtest_filter)
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
