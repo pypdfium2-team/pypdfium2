@@ -11,7 +11,10 @@ on:
       compiler:
         type: string
         default: gcc
-      py_version:
+      pdfium_ver:
+        type: string
+        default: ''
+      py_ver:
         type: string
         default: '3.12'
       may_vendor:
@@ -31,7 +34,10 @@ on:
         options:
           - gcc
           - clang
-      py_version:
+      pdfium_ver:
+        type: string
+        default: ''
+      py_ver:
         type: string
         default: '3.12'
       may_vendor:
@@ -55,7 +61,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ inputs.py_version }}
+          python-version: ${{ inputs.py_ver }}
       
       - name: Check out pypdfium2 repository
         uses: actions/checkout@v6
@@ -81,9 +87,10 @@ jobs:
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
       
       - name: Build PDFium (native, ${{ inputs.compiler }})
-        run: python3 ./setupsrc/build_native.py --compiler "$COMPILER" $VENDOR_PARAM $TEST_PARAM
+        run: python3 ./setupsrc/build_native.py --compiler "$COMPILER" $VERSION_PARAM $VENDOR_PARAM $TEST_PARAM
         env:
           COMPILER: ${{ inputs.compiler }}
+          VERSION_PARAM: ${{ inputs.pdfium_ver && format('--version {0}', inputs.pdfium_ver) }}
           VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
           TEST_PARAM: ${{ inputs.test_pdfium && '--test' || '' }}
       

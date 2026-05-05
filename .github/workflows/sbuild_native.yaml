@@ -12,9 +12,18 @@ on:
       linux_native_clang:
         type: boolean
         default: true
-      py_version:
+      pdfium_ver:
+        type: string
+        default: ''
+      py_ver:
         type: string
         default: '3.12'
+      may_vendor:
+        type: boolean
+        default: true
+      test_pdfium:
+        type: boolean
+        default: true
 
 # TODO Windows/macOS native?
 
@@ -26,7 +35,10 @@ jobs:
     with:
       os: ubuntu-latest
       compiler: gcc
-      py_version: ${{ inputs.py_version }}
+      pdfium_ver: ${{ inputs.pdfium_ver }}
+      py_ver: ${{ inputs.py_ver }}
+      may_vendor: ${{ inputs.may_vendor }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_arm64_native_gcc:
     if: ${{ inputs.linux_native_gcc }}
@@ -34,7 +46,10 @@ jobs:
     with:
       os: ubuntu-24.04-arm
       compiler: gcc
-      py_version: ${{ inputs.py_version }}
+      pdfium_ver: ${{ inputs.pdfium_ver }}
+      py_ver: ${{ inputs.py_ver }}
+      may_vendor: ${{ inputs.may_vendor }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_x64_native_clang:
     if: ${{ inputs.linux_native_clang }}
@@ -42,7 +57,10 @@ jobs:
     with:
       os: ubuntu-latest
       compiler: clang
-      py_version: ${{ inputs.py_version }}
+      pdfium_ver: ${{ inputs.pdfium_ver }}
+      py_ver: ${{ inputs.py_ver }}
+      may_vendor: ${{ inputs.may_vendor }}
+      test_pdfium: ${{ inputs.test_pdfium }}
   
   linux_arm64_native_clang:
     if: ${{ inputs.linux_native_clang }}
@@ -50,4 +68,7 @@ jobs:
     with:
       os: ubuntu-24.04-arm
       compiler: clang
-      py_version: ${{ inputs.py_version }}
+      pdfium_ver: ${{ inputs.pdfium_ver }}
+      py_ver: ${{ inputs.py_ver }}
+      may_vendor: ${{ inputs.may_vendor }}
+      test_pdfium: ${{ inputs.test_pdfium }}
