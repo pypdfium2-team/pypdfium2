@@ -245,19 +245,19 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
         # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
         git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR_build)
+        # broken by this roll: https://pdfium.googlesource.com/pdfium/+/0464426e8e6a1fe45a23ad01cfcd9ddc28373d50
+        # this commit is the culprit: https://chromium.googlesource.com/chromium/src/build.git/+/17cb503758e2be337c9f2273ade0a25962ba7991
+        # it says gcc_toolchain but this patch is actually necessary for both compiler modes
+        git_apply_patch(PatchDir/"fix_gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
-        if compiler is Compiler.gcc:
-            # broken by this roll: https://pdfium.googlesource.com/pdfium/+/0464426e8e6a1fe45a23ad01cfcd9ddc28373d50
-            # this commit is the culprit: https://chromium.googlesource.com/chromium/src/build.git/+/17cb503758e2be337c9f2273ade0a25962ba7991
-            git_apply_patch(PatchDir/"fix_gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
-        elif compiler is Compiler.clang:
+        if compiler is Compiler.clang:
             # https://crbug.com/410883044
-            if "libc++" not in vendor_deps:
-                git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
-            if clang_ver < 21:  # guessed
-                git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
+            # if "libc++" not in vendor_deps:
+            #     git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
+            # if clang_ver < 21:  # guessed
+            #     git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
