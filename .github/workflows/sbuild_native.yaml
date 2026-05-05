@@ -14,7 +14,7 @@ on:
         default: true
       py_version:
         type: string
-        default: '3.12'
+        default: '3.14'
 
 # TODO Windows/macOS native?
 

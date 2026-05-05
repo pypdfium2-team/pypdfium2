@@ -25,7 +25,7 @@ on:
         default: false
         type: boolean
       py_version:
-        default: '3.12'
+        default: '3.14'
         type: string
       ref:
         default: ''
@@ -97,7 +97,7 @@ jobs:
       matrix:
         # Can't test 'windows-11-arm' because setup-miniconda doesn't support it AOTW
         os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest']
-        py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
     
     runs-on: ${{ matrix.os }}
     

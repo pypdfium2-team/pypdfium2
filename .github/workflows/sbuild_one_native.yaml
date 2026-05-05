@@ -13,7 +13,7 @@ on:
         default: gcc
       py_version:
         type: string
-        default: '3.12'
+        default: '3.14'
       may_vendor:
         type: boolean
         default: true
@@ -33,7 +33,7 @@ on:
           - clang
       py_version:
         type: string
-        default: '3.12'
+        default: '3.14'
       may_vendor:
         type: boolean
         default: true

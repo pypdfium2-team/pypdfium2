@@ -35,7 +35,7 @@ on:
         default: ubuntu-latest
       py_version:
         type: string
-        default: '3.12'
+        default: '3.14'
       target_cpu:
         type: string
         default: ''
