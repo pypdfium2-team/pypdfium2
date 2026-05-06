@@ -376,10 +376,10 @@ def build(build_dir, config_dict, with_tests, n_jobs):
     run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
 
 
-def test(build_dir, vendor_deps):
+def test(build_dir, vendor_deps, compiler):
     gtest_filter = []
-    # Fails, probably because we're not using the vendored libc++. There are related compiler warnings. However, our CI compilers are too old to build the vendored libc++ (requires at least GCC 15 / Clang 20, but max we can get on Ubuntu 24.04 is GCC 14 / Clang 19).
-    if "libc++" not in vendor_deps:
+    if compiler is Compiler.gcc:
+        # unknown failure
         gtest_filter.append("RetainPtr.SetContains")
     # May fail with older zlib (generates different results)
     if "zlib" not in vendor_deps:
@@ -430,7 +430,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     setup_compiler(config, compiler, clang_ver, clang_path)
     build(build_dir, config, with_tests, n_jobs)
     if with_tests:
-        test(build_dir, vendor_deps)
+        test(build_dir, vendor_deps, compiler)
     
     return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver)
 
