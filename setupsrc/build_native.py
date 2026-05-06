@@ -378,8 +378,8 @@ def build(build_dir, config_dict, with_tests, n_jobs):
 
 def test(build_dir, vendor_deps, compiler):
     gtest_filter = []
-    if compiler is Compiler.gcc:
-        # unknown failure
+    # obscure failure if either system libc++ or gcc config (or both) are used
+    if "libc++" not in vendor_deps or compiler is Compiler.gcc:
         gtest_filter.append("RetainPtr.SetContains")
     # May fail with older zlib (generates different results)
     if "zlib" not in vendor_deps:
