@@ -205,7 +205,7 @@ def handle_deps(config, vendor_deps, with_tests):
 VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff", "harfbuzz")
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, legacy_gn_compat):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -238,14 +238,14 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # > Extra flags to be appended when compiling both C and C++ files. "CPP" stands for "C PreProcessor" in this context, although it can be used for non-preprocessor flags as well. Not to be confused with "CXX" (which follows).
         env_append("CPPFLAGS", "-ffp-contract=off", " ")
     if do_patches:
-        # legacy_gn.patch: Work around error about path_exists() being undefined. This happens with older versions of GN.
+        # Patches for legacy versions of GN not supported by upstream
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
         # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
-        git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR_build)
-        # broken by this roll: https://pdfium.googlesource.com/pdfium/+/0464426e8e6a1fe45a23ad01cfcd9ddc28373d50
-        # this commit is the culprit: https://chromium.googlesource.com/chromium/src/build.git/+/17cb503758e2be337c9f2273ade0a25962ba7991
-        # it says gcc_toolchain but this patch is actually necessary for both compiler modes
-        git_apply_patch(PatchDir/"fix_gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
+        if legacy_gn_compat:
+            # Work around error about path_exists() being undefined
+            git_apply_patch(PatchDir/"legacy_gn_1.patch", cwd=PDFIUM_DIR_build)
+            # https://groups.google.com/g/pdfium/c/1__HW-wzJ8c/m/5MCYXAuDBQAJ
+            git_apply_patch(PatchDir/"legacy_gn_2.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
@@ -394,7 +394,7 @@ def test(build_dir, vendor_deps, compiler):
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, legacy_gn_compat=True):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -426,7 +426,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = handle_deps(config, vendor_deps, with_tests)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps)
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, legacy_gn_compat)
     setup_compiler(config, compiler, clang_ver, clang_path)
     build(build_dir, config, with_tests, n_jobs)
     if with_tests:
@@ -510,6 +510,12 @@ In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAG
         nargs = "+",
         action = "extend",
         help = "Dependencies not to vendor. Overrides --vendor.",
+    )
+    parser.add_argument(
+        "--no-legacy-gn",
+        dest = "legacy_gn_compat",
+        action = "store_false",
+        help = "Do not apply patches for compatibility with older GN not supported by upstream. i.e. this flag can be used to indicate that recent enough GN is available in the build env. It is highly recommended to pass this flag if you can.",
     )
     
     args = parser.parse_args(argv)
