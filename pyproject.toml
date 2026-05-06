@@ -90,7 +90,13 @@ before-all = [
     "ln -s $CLANG_PREFIX/bin/readelf $CLANG_PREFIX/bin/llvm-readelf",
 ]
 inherit.environment = "append"
-environment.BUILD_PARAMS = "$BUILD_PARAMS --compiler clang --clang-path /opt/clang --no-libclang-rt"
+environment.BUILD_PARAMS = "--vendor all --compiler clang --clang-path /opt/clang --no-libclang-rt"
+
+[[tool.cibuildwheel.overrides]]
+# vendored libc++ does not work on musl
+select = "*-musllinux_{ppc64le,riscv64,loongarch64,s390x}"
+inherit.environment = "append"
+environment.BUILD_PARAMS = "$BUILD_PARAMS --no-vendor libc++"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-*linux_s390x"
