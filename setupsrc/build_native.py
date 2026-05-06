@@ -84,6 +84,7 @@ DefaultConfig = {
     "pdf_use_skia": False,
     "pdf_use_partition_alloc": False,
     "use_sysroot": False,
+    "use_cxx23": False,
 }
 
 IS_ANDROID = Host.system == SysNames.android

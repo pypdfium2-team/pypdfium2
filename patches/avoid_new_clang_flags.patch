@@ -130,16 +130,3 @@ index e755e86..fbee39b 100644
      ]
  
      cflags_cc += [
-diff --git a/config/compiler/compiler.gni b/config/compiler/compiler.gni
-index 9e7353d..52a0760 100644
---- a/config/compiler/compiler.gni
-+++ b/config/compiler/compiler.gni
-@@ -49,7 +49,7 @@ declare_args() {
-             !(is_ios && current_cpu == "arm64e")
- 
-   # If false, build using C++20; otherwise, build using C++23.
--  use_cxx23 = true
-+  use_cxx23 = false  # XXX(pypdfium2)
- 
-   # If true, optimize for size.
-   # Default to favoring speed over size for platforms not listed below.
