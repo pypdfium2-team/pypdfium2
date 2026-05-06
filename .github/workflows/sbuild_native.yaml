@@ -43,8 +43,8 @@ jobs:
             condition: ${{ inputs.clang }}
     
     uses: ./.github/workflows/sbuild_one_native.yaml
-    if: ${{ matrix.condition }}
     with:
+      condition: ${{ matrix.condition }}
       os: ${{ matrix.os }}
       compiler: ${{ matrix.compiler }}
       pdfium_ver: ${{ inputs.pdfium_ver }}
