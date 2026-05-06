@@ -308,8 +308,11 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("nasm_source", PDFIUM_3RDPARTY/"nasm")
     if "libpng" in vendor_deps:
         do_patches = df.fetch("libpng", PDFIUM_3RDPARTY/"libpng", reset=reset)
-        if do_patches and Host._raw_machine in ("ppc64le", "loong64", "loongarch64"):
-            git_apply_patch(PatchDir/"libpng_loong64_ppc64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
+        if do_patches:
+            if Host._raw_machine == "loong64":
+                git_apply_patch(PatchDir/"libpng_loong64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
+            elif Host._raw_machine == "ppc64le":
+                git_apply_patch(PatchDir/"libpng_ppc64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
     if "zlib" in vendor_deps:
         df.fetch("zlib", PDFIUM_3RDPARTY/"zlib")
     if "harfbuzz" in vendor_deps:
