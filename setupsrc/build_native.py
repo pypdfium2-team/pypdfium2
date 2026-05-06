@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 # Related work: https://github.com/tiran/libpdfium and https://aur.archlinux.org/packages/libpdfium-nojs
 
-import re
 import os
+import re
 import sys
 import shutil
 import argparse
