@@ -24,6 +24,12 @@ on:
       clang:
         type: boolean
         default: true
+      x86_64:
+        type: boolean
+        default: true
+      arm64:
+        type: boolean
+        default: true
 
 # TODO Windows/macOS native?
 
@@ -38,13 +44,17 @@ jobs:
         compiler: ['gcc', 'clang']
         include:
           - compiler: gcc
-            condition: ${{ inputs.gcc }}
+            cc_condition: ${{ inputs.gcc }}
           - compiler: clang
-            condition: ${{ inputs.clang }}
+            cc_condition: ${{ inputs.clang }}
+          - os: ubuntu-latest
+            os_condition: ${{ inputs.x86_64 }}
+          - os: ubuntu-24.04-arm
+            os_condition: ${{ inputs.arm64 }}
     
     uses: ./.github/workflows/sbuild_one_native.yaml
     with:
-      condition: ${{ matrix.condition }}
+      condition: ${{ matrix.cc_condition && matrix.os_condition }}
       os: ${{ matrix.os }}
       compiler: ${{ matrix.compiler }}
       pdfium_ver: ${{ inputs.pdfium_ver }}
