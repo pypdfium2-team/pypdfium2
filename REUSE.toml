@@ -125,24 +125,12 @@ path = [
     "patches/fix_gcc_toolchain.patch",
     "patches/musl_fix_libclang_rt_finder.patch",
     "patches/libpng_loong64.patch",
+    "patches/libpng_ppc64.patch",
     "patches/win/arm64_native.patch",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
-
-[[annotations]]
-path = "patches/libpng_ppc64.patch"
-precedence = "aggregate"
-SPDX-FileCopyrightText = [
-    "2026 The libpng authors",
-    "2026 geisserml",
-]
-SPDX-License-Identifier = "Libpng"
-SPDX-FileComment = '''
-PDFium's copy of libpng lacks the PowerPC VSX intrinsics.
-This patch adds them from upstream libpng, at the matching version: https://github.com/pnggroup/libpng/tree/v1.6.55/powerpc
-'''
 
 [[annotations]]
 path = [
