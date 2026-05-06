@@ -159,8 +159,8 @@ You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolc
 However, for simplicity, both scripts/subtargets share just `sourcebuild` as staging directory.
 
 Dependencies:
-- When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib` (and maybe `glib` to satisfy the build system).
-- You might also want to know that pdfium bundles `agg, abseil, fast_float`.
+- When building with system libraries, the following packages need to be installed (including development headers): `freetype, icu-uc, lcms2, libjpeg, libopenjp2, libpng, libtiff, zlib, harfbuzz` (and maybe `glib` to satisfy the build system).
+- You might also want to know that pdfium bundles `agg, abseil, fast_float, simdutf`.
 - When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. If available, the compiler defaults to GCC, but Clang should also work if you set up some symlinks, and make sure you have the `libclang_rt` builtins or pass `--no-libclang-rt`.
 
 To do the toolchained build, you'd run something like:
@@ -173,7 +173,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 Or for the native build, on Ubuntu 24.04, you could do e.g.:
 ```bash
 # Install dependencies
-sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libicu-dev libglib2.0-dev
+sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libicu-dev libglib2.0-dev libharfbuzz-dev
 ```
 ```bash
 # Build with GCC
