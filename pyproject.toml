@@ -93,6 +93,7 @@ before-all = [
 ]
 inherit.environment = "append"
 # on glibc linux with static clang, we try to use the vendored libc++
+# beware: this overrides the default BUILD_PARAMS from above
 environment.BUILD_PARAMS = "--vendor all --compiler clang --clang-path /opt/clang --no-libclang-rt"
 
 [[tool.cibuildwheel.overrides]]
@@ -100,6 +101,12 @@ select = "*-musllinux_{ppc64le,riscv64,loongarch64,s390x}"
 inherit.environment = "append"
 # vendored libc++ is not compatible with musl
 environment.BUILD_PARAMS = "$BUILD_PARAMS --no-vendor libc++"
+
+[[tool.cibuildwheel.overrides]]
+# on i686 and riscv64, we can be confident of having recent enough GN available (see above)
+select = "*-manylinux_{i686,riscv64}"
+inherit.environment = "append"
+environment.BUILD_PARAMS = "$BUILD_PARAMS --no-legacy-gn"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-*linux_s390x"
