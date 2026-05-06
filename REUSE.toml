@@ -116,13 +116,15 @@ See also //BUILD_LICENSES/pdfium-binaries.txt for a copy of upstream's license f
 
 [[annotations]]
 path = [
-    "patches/ffp_contract.patch",
     "patches/avoid_new_clang_flags.patch",
     "patches/system_libcxx_with_clang.patch",
     "patches/legacy_gn.patch",
     "patches/android_build.patch",
     "patches/gn_build.patch",
     "patches/no_libclang_rt.patch",
+    "patches/fix_gcc_toolchain.patch",
+    "patches/musl_fix_libclang_rt_finder.patch",
+    "patches/libpng_loong64.patch",
     "patches/win/arm64_native.patch",
 ]
 precedence = "aggregate"
@@ -130,16 +132,17 @@ SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
-path = [
-    "patches/legacy_libs_compat.patch",
-    "patches/clang_on_musl.patch",
-]
+path = "patches/libpng_ppc64.patch"
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
-    "2026 wojiushixiaobai <296015668@qq.com>",
-    "2026 geisserml <geisserml@gmail.com>",
+    "2026 The libpng authors",
+    "2026 geisserml",
 ]
-SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
+SPDX-License-Identifier = "Libpng"
+SPDX-FileComment = '''
+PDFium's copy of libpng lacks the PowerPC VSX intrinsics.
+This patch adds them from upstream libpng, at the matching version: https://github.com/pnggroup/libpng/tree/v1.6.55/powerpc
+'''
 
 [[annotations]]
 path = [
@@ -155,15 +158,6 @@ SPDX-License-Identifier = "LicenseRef-Ignore"
 SPDX-FileComment = '''
 Derived from RedHat packaging repository: https://github.com/tiran/libpdfium/blob/d99370b3ac7f0c9cd7222be2dfab2c7b648f2e9e/0001-bigendian.patch
 Repo does not have an own license file, but assumably the patches are being made available under pdfium's license, or leastways an open-source license.
-'''
-
-[[annotations]]
-path = "patches/abseil_ppc64le_musl.patch"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "2025 The abseil authors"
-SPDX-License-Identifier = "Apache-2.0"
-SPDX-FileComment = '''
-Cherry-pick https://github.com/abseil/abseil-cpp/commit/8e7767542cfde43f16c142f05dce06cadb7f7f84
 '''
 
 [[annotations]]

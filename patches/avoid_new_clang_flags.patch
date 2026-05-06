@@ -1,16 +1,40 @@
+diff --git a/config/BUILDCONFIG.gn b/config/BUILDCONFIG.gn
+index e403e0c..7b808c9 100644
+--- a/config/BUILDCONFIG.gn
++++ b/config/BUILDCONFIG.gn
+@@ -361,8 +361,8 @@ default_compiler_configs = [
+   "//build/config/compiler:no_rtti",
+   "//build/config/compiler:no_unresolved_symbols",
+   "//build/config/compiler:runtime_library",
+-  "//build/config/compiler:sanitize_c_array_bounds",
+-  "//build/config/compiler:sanitize_return",
++  # "//build/config/compiler:sanitize_c_array_bounds",
++  # "//build/config/compiler:sanitize_return",
+   "//build/config/compiler:thin_archive",
+   "//build/config/compiler:thinlto_optimize_default",
+   "//build/config/compiler:tot_warnings",
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 94fc4b4c0..ecb14f421 100644
+index e755e86..fbee39b 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
-@@ -594,23 +594,7 @@ config("compiler") {
-       }
-     }
+@@ -629,9 +629,9 @@ config("compiler") {
+     # The performance improvement does not seem worth the risk. See
+     # https://crbug.com/484082200 for background and https://crrev.com/c/7593035
+     # for discussion.
+-    if (!is_wasm) {
+-      cflags += [ "-fno-lifetime-dse" ]
+-    }
++    # if (!is_wasm) {
++    #   cflags += [ "-fno-lifetime-dse" ]
++    # }
  
--    # TODO(crbug.com/40283598): This causes binary size growth and potentially
--    # other problems.
--    # TODO(crbug.com/40284925): This isn't supported by Cronet's mainline llvm version.
--    if (default_toolchain != "//build/toolchain/cros:target" &&
--        !llvm_android_mainline) {
+     # TODO(hans): Remove this once Clang generates better optimized debug info
+     # by default. https://crbug.com/765793
+@@ -649,19 +649,19 @@ config("compiler") {
+ 
+     # TODO(crbug.com/40283598): This causes binary size growth and potentially
+     # other problems.
+-    if (default_toolchain != "//build/toolchain/cros:target") {
 -      cflags += [
 -        "-mllvm",
 -        "-split-threshold-for-reg-with-hint=0",
@@ -23,44 +47,99 @@ index 94fc4b4c0..ecb14f421 100644
 -        }
 -      }
 -    }
-+    # XXX(pypdfium2) patched away overly new flags
++    # if (default_toolchain != "//build/toolchain/cros:target") {
++    #   cflags += [
++    #     "-mllvm",
++    #     "-split-threshold-for-reg-with-hint=0",
++    #   ]
++    #   if (use_thin_lto && is_a_target_toolchain) {
++    #     if (is_win) {
++    #       ldflags += [ "-mllvm:-split-threshold-for-reg-with-hint=0" ]
++    #     } else {
++    #       ldflags += [ "-Wl,-mllvm,-split-threshold-for-reg-with-hint=0" ]
++    #     }
++    #   }
++    # }
  
      # TODO(crbug.com/40192287): Investigate why/if this should be needed.
      if (is_win) {
-@@ -619,20 +603,6 @@ config("compiler") {
-       cflags += [ "-ffp-contract=off" ]
-     }
- 
--    # Enable ELF CREL (see crbug.com/357878242) for all platforms that use ELF
--    # (excluding toolchains that use an older version of LLVM).
--    # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
--    if (is_linux && use_lld && !llvm_android_mainline && current_cpu != "arm" &&
--        default_toolchain != "//build/toolchain/cros:target") {
+@@ -674,9 +674,9 @@ config("compiler") {
+     # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
+     # It also causes segfault on Linux s390x:
+     # https://github.com/llvm/llvm-project/issues/149511
+-    if (is_linux && use_lld && current_cpu != "arm" && current_cpu != "s390x") {
 -      cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
 -    }
--
--    # TODO(crbug.com/413427035): Remove once
--    # https://github.com/llvm/llvm-project/pull/136867/ is landed.
--    if (!is_win && !llvm_android_mainline &&
--        default_toolchain != "//build/toolchain/cros:target") {
--      cflags += [ "-fextend-variable-liveness=none" ]
--    }
++    # if (is_linux && use_lld && current_cpu != "arm" && current_cpu != "s390x") {
++    #   cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
++    # }
    }
  
    # C11/C++11 compiler flags setup.
-@@ -2079,11 +2049,13 @@ config("default_warnings") {
-         # TODO(crbug.com/330524456): -Wcast-function-type is under -Wextra now.
-         "-Wno-cast-function-type",
+@@ -1898,23 +1898,23 @@ config("clang_warning_suppression") {
+ # `is_component_build = false`.)
+ #
+ # See also: https://crbug.com/40891132#comment10
+-ubsan_hardening("c_array_bounds") {
+-  sanitizer = "array-bounds"
+-  condition = !(is_asan && target_cpu == "x86")
+-
+-  # Because we've enabled array-bounds sanitizing we also want to suppress
+-  # the related warning about "unsafe-buffer-usage-in-static-sized-array",
+-  # since we know that the array bounds sanitizing will catch any out-of-
+-  # bounds accesses.
+-  cflags = [ "-Wno-unsafe-buffer-usage-in-static-sized-array" ]
+-}
++# ubsan_hardening("c_array_bounds") {
++#   sanitizer = "array-bounds"
++#   condition = !(is_asan && target_cpu == "x86")
++#
++#   # Because we've enabled array-bounds sanitizing we also want to suppress
++#   # the related warning about "unsafe-buffer-usage-in-static-sized-array",
++#   # since we know that the array bounds sanitizing will catch any out-of-
++#   # bounds accesses.
++#   cflags = [ "-Wno-unsafe-buffer-usage-in-static-sized-array" ]
++# }
  
-+        # XXX(pypdfium2 commented out)
-+        
-         # TODO(crbug.com/40284799): Fix and re-enable.
--        "-Wno-thread-safety-reference-return",
-+        # "-Wno-thread-safety-reference-return",
+ # Enable UBSan subset to ensure we always hit `return` statement in non-void
+ # functions (https://crbug.com/489565636). This is equivalent to inserting
+ # `NOTREACHED()` at the end of such functions.
+-ubsan_hardening("return") {
+-  sanitizer = "return"
+-}
++# ubsan_hardening("return") {
++#   sanitizer = "return"
++# }
  
-         # TODO(crbug.com/376641662): Fix and re-enable.
--        "-Wno-nontrivial-memcall",
-+        # "-Wno-nontrivial-memcall",
-       ]
+ config("rustc_revision") {
+   if (rustc_revision != "") {
+@@ -2244,13 +2244,13 @@ config("default_warnings") {
+       "-Wno-cast-function-type",
  
-       cflags_cc += [
+       # TODO(crbug.com/40284799): Fix and re-enable.
+-      "-Wno-thread-safety-reference-return",
++      # "-Wno-thread-safety-reference-return",
+ 
+       # TODO(crbug.com/376641662): Fix and re-enable.
+-      "-Wno-nontrivial-memcall",
++      # "-Wno-nontrivial-memcall",
+ 
+       # TODO(crbug.com/432275627): Fix and re-enable.
+-      "-Wno-uninitialized-const-pointer",
++      # "-Wno-uninitialized-const-pointer",
+     ]
+ 
+     cflags_cc += [
+diff --git a/config/compiler/compiler.gni b/config/compiler/compiler.gni
+index 9e7353d..52a0760 100644
+--- a/config/compiler/compiler.gni
++++ b/config/compiler/compiler.gni
+@@ -49,7 +49,7 @@ declare_args() {
+             !(is_ios && current_cpu == "arm64e")
+ 
+   # If false, build using C++20; otherwise, build using C++23.
+-  use_cxx23 = true
++  use_cxx23 = false  # XXX(pypdfium2)
+ 
+   # If true, optimize for size.
+   # Default to favoring speed over size for platforms not listed below.

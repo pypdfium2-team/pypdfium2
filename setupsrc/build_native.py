@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 # Related work: https://github.com/tiran/libpdfium and https://aur.archlinux.org/packages/libpdfium-nojs
 
-import re
 import os
+import re
 import sys
 import shutil
 import argparse
@@ -31,6 +31,8 @@ DEPS_URLS = dict(
     nasm_source = _CR_PREFIX + "chromium/deps/nasm",
     libpng      = _CR_PREFIX + "chromium/src/third_party/libpng",
     zlib        = _CR_PREFIX + "chromium/src/third_party/zlib",
+    simdutf     = _CR_PREFIX + "chromium/src/third_party/simdutf",
+    harfbuzz    = _CR_PREFIX + "external/github.com/harfbuzz/harfbuzz",
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
@@ -150,7 +152,7 @@ class _DeferredDeps:
 
 def handle_deps(config, vendor_deps, with_tests):
     
-    deps_fields = ["build", "abseil", "fast_float"]
+    deps_fields = ["build", "abseil", "fast_float", "simdutf"]
     if IS_ANDROID:
         deps_fields.append("catapult")
     
@@ -158,7 +160,6 @@ def handle_deps(config, vendor_deps, with_tests):
         deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
     else:
         config["use_custom_libcxx"] = False
-        config["use_libcxx_modules"] = False
     
     if "icu" in vendor_deps:
         deps_fields.append("icu")
@@ -184,6 +185,11 @@ def handle_deps(config, vendor_deps, with_tests):
     else:
         config["use_system_zlib"] = True
     
+    if "harfbuzz" in vendor_deps:
+        deps_fields.append("harfbuzz")
+    else:
+        config["use_system_harfbuzz"] = True
+    
     if "lcms2" not in vendor_deps:
         config["use_system_lcms2"] = True
     if "openjpeg" not in vendor_deps:
@@ -196,10 +202,10 @@ def handle_deps(config, vendor_deps, with_tests):
     
     return _DeferredDeps(deps_fields)
 
-VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff")
+VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff", "harfbuzz")
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -214,9 +220,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
-        if compat and not vendor_deps.issuperset(("openjpeg", "freetype")):
-            # compatibility patch for older system libraries from container
-            git_apply_patch(PatchDir/"legacy_libs_compat.patch", cwd=PDFIUM_DIR)
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
             if with_tests:
@@ -239,14 +242,18 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
         # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
         git_apply_patch(PatchDir/"legacy_gn.patch", cwd=PDFIUM_DIR_build)
+        # broken by this roll: https://pdfium.googlesource.com/pdfium/+/0464426e8e6a1fe45a23ad01cfcd9ddc28373d50
+        # this commit is the culprit: https://chromium.googlesource.com/chromium/src/build.git/+/17cb503758e2be337c9f2273ade0a25962ba7991
+        # it says gcc_toolchain but this patch is actually necessary for both compiler modes
+        git_apply_patch(PatchDir/"fix_gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
         if compiler is Compiler.clang:
-            # https://crbug.com/410883044
+            # historically, https://crbug.com/410883044
             if "libc++" not in vendor_deps:
                 git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
-            if clang_ver < 21:  # guessed
+            if clang_ver < 23:
                 git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
@@ -260,17 +267,20 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             if no_libclang_rt:
                 git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             if Host._libc_name == "musl":
-                # For "our" builds, we only need the powerpc64le,riscv64,loongarch64 (and s390x) bits, but handling the others as well makes sense for users who want to build natively on musl with clang.
-                # Also, this might only be needed if we want to run unittests.
-                git_apply_patch(PatchDir/"clang_on_musl.patch", cwd=PDFIUM_DIR_build)
-        # Create an empty gclient config
-        (PDFIUM_DIR_build/"config"/"gclient_args.gni").touch(exist_ok=True)
+                if not no_libclang_rt:
+                    git_apply_patch(PatchDir/"musl_fix_libclang_rt_finder.patch", cwd=PDFIUM_DIR_build)
+                for pattern in ("-unknown-linux-gnu", "-linux-gnu"):  # two-pass
+                    autopatch(
+                        PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
+                        pattern, "-alpine-linux-musl",
+                        is_regex=False,
+                    )
+        # Create pseudo gclient config included by //build
+        (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("build_with_chromium = false")
     
-    do_patches = df.fetch("abseil", PDFIUM_3RDPARTY/"abseil-cpp", reset=reset)
-    if do_patches and (Host._raw_machine, Host._libc_name) == ("ppc64le", "musl"):
-        git_apply_patch(PatchDir/"abseil_ppc64le_musl.patch", cwd=PDFIUM_3RDPARTY/"abseil-cpp")
-    
+    df.fetch("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     df.fetch("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
+    df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
     if IS_ANDROID:
         df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
     
@@ -293,9 +303,16 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("jpeg_turbo", PDFIUM_3RDPARTY/"libjpeg_turbo")
         df.fetch("nasm_source", PDFIUM_3RDPARTY/"nasm")
     if "libpng" in vendor_deps:
-        df.fetch("libpng", PDFIUM_3RDPARTY/"libpng")
+        do_patches = df.fetch("libpng", PDFIUM_3RDPARTY/"libpng", reset=reset)
+        if do_patches:
+            if Host._raw_machine in ("loong64", "loongarch64"):
+                git_apply_patch(PatchDir/"libpng_loong64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
+            elif Host._raw_machine == "ppc64le":
+                git_apply_patch(PatchDir/"libpng_ppc64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
     if "zlib" in vendor_deps:
         df.fetch("zlib", PDFIUM_3RDPARTY/"zlib")
+    if "harfbuzz" in vendor_deps:
+        df.fetch("harfbuzz", PDFIUM_3RDPARTY/"harfbuzz"/"src")
     
     if with_tests:
         df.fetch("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
@@ -361,20 +378,23 @@ def build(build_dir, config_dict, with_tests, n_jobs):
 
 def test(build_dir, vendor_deps):
     gtest_filter = []
-    # FlateModule.Encode may fail with older zlib (generates different results)
+    # Fails, probably because we're not using the vendored libc++. There are related compiler warnings. However, our CI compilers are too old to build the vendored libc++ (requires at least GCC 15 / Clang 20, but max we can get on Ubuntu 24.04 is GCC 14 / Clang 19).
+    if "libc++" not in vendor_deps:
+        gtest_filter.append("RetainPtr.SetContains")
+    # May fail with older zlib (generates different results)
     if "zlib" not in vendor_deps:
         gtest_filter.append("FlateModule.Encode")
     if Host._libc_name == "musl":
         gtest_filter.append("WideString.FormatString")  # XXX?
     if Host._raw_machine == "s390x":
         # XXX actually crashes
-        gtest_filter.append("CPDFPageImageCache.RenderBug1924")
+        gtest_filter.append("CPDFPageImageCacheTest.RenderBug1924")
     if gtest_filter:
         os.environ["GTEST_FILTER"] = "*:-" + ":".join(gtest_filter)
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, compat=False):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -406,7 +426,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = handle_deps(config, vendor_deps, with_tests)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, compat)
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps)
     setup_compiler(config, compiler, clang_ver, clang_path)
     build(build_dir, config, with_tests, n_jobs)
     if with_tests:
@@ -490,11 +510,6 @@ In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAG
         nargs = "+",
         action = "extend",
         help = "Dependencies not to vendor. Overrides --vendor.",
-    )
-    parser.add_argument(
-        "--compat",
-        action = "store_true",
-        help = "Whether to apply a compatibility patch for older system libraries (openjpeg/freetype).",
     )
     
     args = parser.parse_args(argv)

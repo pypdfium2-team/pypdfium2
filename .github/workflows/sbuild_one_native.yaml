@@ -11,12 +11,15 @@ on:
       compiler:
         type: string
         default: gcc
-      py_version:
+      pdfium_ver:
+        type: string
+        default: ''
+      py_ver:
         type: string
         default: '3.14'
-      may_vendor:
-        type: boolean
-        default: true
+      vendor:
+        type: string
+        default: 'icu'
       test_pdfium:
         type: boolean
         default: true
@@ -31,12 +34,15 @@ on:
         options:
           - gcc
           - clang
-      py_version:
+      pdfium_ver:
+        type: string
+        default: ''
+      py_ver:
         type: string
         default: '3.14'
-      may_vendor:
-        type: boolean
-        default: true
+      vendor:
+        type: string
+        default: 'icu'
       test_pdfium:
         type: boolean
         default: true
@@ -55,7 +61,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ inputs.py_version }}
+          python-version: ${{ inputs.py_ver }}
       
       - name: Check out pypdfium2 repository
         uses: actions/checkout@v6
@@ -70,7 +76,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev
+          sudo apt-get install -y generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev libharfbuzz-dev
       
       - name: Set up symlinks for clang
         if: ${{ inputs.compiler == 'clang' }}
@@ -81,11 +87,12 @@ jobs:
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
       
       - name: Build PDFium (native, ${{ inputs.compiler }})
-        run: python3 ./setupsrc/build_native.py --compiler "$COMPILER" $VENDOR_PARAM $TEST_PARAM
+        run: python3 ./setupsrc/build_native.py --compiler "$COMPILER" $VERSION_PARAM $VENDOR_PARAM $TEST_PARAM
         env:
           COMPILER: ${{ inputs.compiler }}
-          VENDOR_PARAM: ${{ inputs.may_vendor && '--vendor icu' || '' }}
-          TEST_PARAM: ${{ inputs.test_pdfium && '--test' || '' }}
+          VERSION_PARAM: ${{ inputs.pdfium_ver && format('--version {0}', inputs.pdfium_ver) }}
+          VENDOR_PARAM: ${{ inputs.vendor && format('--vendor {0}', inputs.vendor) }}
+          TEST_PARAM: ${{ inputs.test_pdfium && '--test' }}
       
       - name: Show binary info
         run: |
