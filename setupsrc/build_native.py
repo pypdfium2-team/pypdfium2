@@ -269,16 +269,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             if Host._libc_name == "musl":
                 if not no_libclang_rt:
                     git_apply_patch(PatchDir/"musl_fix_libclang_rt_finder.patch", cwd=PDFIUM_DIR_build)
-                autopatch(
-                    PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
-                    "-unknown-linux-gnu", "-alpine-linux-musl",
-                    is_regex=False,
-                )
-                autopatch(
-                    PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
-                    "-linux-gnu", "-alpine-linux-musl",
-                    is_regex=False,
-                )
+                for pattern in ("-unknown-linux-gnu", "-linux-gnu"):  # two-pass
+                    autopatch(
+                        PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
+                        pattern, "-alpine-linux-musl",
+                        is_regex=False,
+                    )
         # Create pseudo gclient config included by //build
         (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("build_with_chromium = false")
     
