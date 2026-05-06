@@ -18,10 +18,10 @@ on:
       test_pdfium:
         type: boolean
         default: true
-      linux_native_gcc:
+      gcc:
         type: boolean
         default: true
-      linux_native_clang:
+      clang:
         type: boolean
         default: true
 
@@ -29,45 +29,24 @@ on:
 
 jobs:
   
-  linux_x64_native_gcc:
-    if: ${{ inputs.linux_native_gcc }}
+  build:
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'ubuntu-24.04-arm']
+        compiler: ['gcc', 'clang']
+        include:
+          - compiler: gcc
+            condition: ${{ inputs.gcc }}
+          - compiler: clang
+            condition: ${{ inputs.clang }}
+    
     uses: ./.github/workflows/sbuild_one_native.yaml
+    if: ${{ matrix.condition }}
     with:
-      os: ubuntu-latest
-      compiler: gcc
-      pdfium_ver: ${{ inputs.pdfium_ver }}
-      py_ver: ${{ inputs.py_ver }}
-      vendor: ${{ inputs.vendor }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_arm64_native_gcc:
-    if: ${{ inputs.linux_native_gcc }}
-    uses: ./.github/workflows/sbuild_one_native.yaml
-    with:
-      os: ubuntu-24.04-arm
-      compiler: gcc
-      pdfium_ver: ${{ inputs.pdfium_ver }}
-      py_ver: ${{ inputs.py_ver }}
-      vendor: ${{ inputs.vendor }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_x64_native_clang:
-    if: ${{ inputs.linux_native_clang }}
-    uses: ./.github/workflows/sbuild_one_native.yaml
-    with:
-      os: ubuntu-latest
-      compiler: clang
-      pdfium_ver: ${{ inputs.pdfium_ver }}
-      py_ver: ${{ inputs.py_ver }}
-      vendor: ${{ inputs.vendor }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_arm64_native_clang:
-    if: ${{ inputs.linux_native_clang }}
-    uses: ./.github/workflows/sbuild_one_native.yaml
-    with:
-      os: ubuntu-24.04-arm
-      compiler: clang
+      os: ${{ matrix.os }}
+      compiler: ${{ matrix.compiler }}
       pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ inputs.py_ver }}
       vendor: ${{ inputs.vendor }}
