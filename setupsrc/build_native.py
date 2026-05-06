@@ -381,14 +381,13 @@ def test(build_dir, vendor_deps, compiler):
     # obscure failure if either system libc++ or gcc config (or both) are used
     if "libc++" not in vendor_deps or compiler is Compiler.gcc:
         gtest_filter.append("RetainPtr.SetContains")
-    # May fail with older zlib (generates different results)
+    # may fail with older zlib (generates different results)
     if "zlib" not in vendor_deps:
         gtest_filter.append("FlateModule.Encode")
     if Host._libc_name == "musl":
-        gtest_filter.append("WideString.FormatString")  # XXX?
+        gtest_filter.append("WideString.FormatString")  # FIXME?
     if Host._raw_machine == "s390x":
-        # XXX actually crashes
-        gtest_filter.append("CPDFPageImageCacheTest.RenderBug1924")
+        gtest_filter.append("CPDFPageImageCacheTest.RenderBug1924")  # FIXME actually crashes
     if gtest_filter:
         os.environ["GTEST_FILTER"] = "*:-" + ":".join(gtest_filter)
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
