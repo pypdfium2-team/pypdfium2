@@ -1003,7 +1003,7 @@ def make_executable(path):
         return
     path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-def install_gn(target_dir=None, skip_if_present=True):
+def install_gn(target_dir=None, skip_if_present=True, cxx="g++"):
     if skip_if_present and shutil.which("gn"):
         log("+ gn found.")
         return
@@ -1018,15 +1018,15 @@ def install_gn(target_dir=None, skip_if_present=True):
     
     gn_dir = ProjectDir/"sbuild"/"gn"
     url = "https://gn.googlesource.com/gn/"
-    rev = "a0c5124a50608595a9aadebc4297e854ebd32c53"
+    rev = "9ece3f5254c273cb46606a6571963f931c3b012d"
     if not gn_dir.exists():
         git_clone_rev(url, rev, gn_dir, depth=1)
         git_apply_patch(PatchDir/"gn_build.patch", cwd=gn_dir)
     
-    os.environ["CXX"] = "g++"
-    run_cmd(["python3", "build/gen.py", "--no-last-commit-position", "--no-static-libstdc++", "--allow-warnings"], cwd=gn_dir)
-    run_cmd(["ninja", "-C", "out", "gn"], cwd=gn_dir)
-    del os.environ["CXX"]
+    env = os.environ.copy()
+    env["CXX"] = cxx
+    run_cmd(["python3", "build/gen.py", "--no-last-commit-position", "--no-static-libstdc++", "--allow-warnings"], cwd=gn_dir, env=env)
+    run_cmd(["ninja", "-C", "out", "gn"], cwd=gn_dir, env=env)
     
     shutil.copyfile(gn_dir/"out"/"gn", target_dir/"gn")
     make_executable(target_dir/"gn")
