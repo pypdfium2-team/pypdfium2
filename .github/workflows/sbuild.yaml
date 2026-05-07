@@ -51,6 +51,7 @@ jobs:
             condition: ${{ inputs.linux && inputs.testtargets }}
             # if we don't use the sysroot or an older container, the glibc requirement is high
             tag: manylinux_2_39_aarch64
+            py_ver: '3.13'
           
           - os: ubuntu-latest
             condition: ${{ inputs.linux }}
@@ -116,4 +117,4 @@ jobs:
       target_cpu: ${{ matrix.target_cpu }}
       target_os: ${{ matrix.target_os }}
       tag: ${{ matrix.tag }}
-      py_ver: ${{ inputs.py_ver }}
+      py_ver: ${{ matrix.py_ver || inputs.py_ver }}
