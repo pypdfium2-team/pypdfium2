@@ -21,151 +21,99 @@ on:
       testtargets:
         type: boolean
         default: false
-      py_version:
+      py_ver:
         type: string
         default: '3.14'
 
 jobs:
   
-  linux_x64:
-    if: ${{ inputs.linux }}
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux }}
+            tag: manylinux_2_17_x86_64.manylinux2014_x86_64
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux }}
+            target_cpu: x86
+            tag: manylinux_2_17_i686.manylinux2014_i686
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux }}
+            target_cpu: arm64
+            tag: manylinux_2_17_aarch64.manylinux2014_aarch64
+          
+          - os: ubuntu-24.04-arm
+            condition: ${{ inputs.linux && inputs.testtargets }}
+            # if we don't use the sysroot or an older container, the glibc requirement is high
+            tag: manylinux_2_39_aarch64
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux }}
+            target_cpu: arm
+            tag: manylinux_2_17_armv7l.manylinux2014_armv7l
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux }}
+            target_cpu: ppc64
+            tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
+          
+          - os: macos-latest  # arm64 host
+            condition: ${{ inputs.macos }}
+            target_cpu: x64
+            tag: macosx_11_0_x86_64
+          
+          - os: macos-latest
+            condition: ${{ inputs.macos }}
+            tag: macosx_11_0_arm64
+          
+          # test macOS the other way round while we still can
+          - os: macos-15-intel
+            condition: ${{ inputs.macos && inputs.testtargets }}
+            tag: macosx_11_0_x86_64
+          
+          - os: macos-15-intel
+            condition: ${{ inputs.macos && inputs.testtargets }}
+            target_cpu: arm64
+            tag: macosx_11_0_arm64
+          
+          - os: windows-latest  # amd64
+            condition: ${{ inputs.windows }}
+          
+          - os: windows-latest
+            condition: ${{ inputs.windows }}
+            target_cpu: arm64
+            tag: win_arm64
+          
+          - os: windows-latest
+            condition: ${{ inputs.windows }}
+            target_cpu: x86
+            tag: win32
+          
+          - os: windows-11-arm
+            condition: ${{ inputs.windows && inputs.testtargets }}
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.android }}
+            target_os: android
+            target_cpu: arm64
+            tag: android_21_arm64_v8a
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.android }}
+            target_os: android
+            target_cpu: arm
+            tag: android_21_armeabi_v7a
+    
     uses: ./.github/workflows/sbuild_one.yaml
     with:
-      os: ubuntu-latest
-      tag: manylinux_2_17_x86_64.manylinux2014_x86_64
-      py_version: ${{ inputs.py_version }}
-  
-  linux_x86:
-    if: ${{ inputs.linux }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ubuntu-latest
-      target_cpu: x86
-      tag: manylinux_2_17_i686.manylinux2014_i686
-      py_version: ${{ inputs.py_version }}
-  
-  linux_arm64:
-    if: ${{ inputs.linux }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ubuntu-latest
-      target_cpu: arm64
-      tag: manylinux_2_17_aarch64.manylinux2014_aarch64
-      py_version: ${{ inputs.py_version }}
-  
-  linux_native_arm64:
-    if: ${{ inputs.linux && inputs.testtargets }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      # if we don't use the sysroot or an older container, the glibc requirement is high
-      tag: manylinux_2_39_aarch64
-      py_version: ${{ inputs.py_version }}
-  
-  linux_armv7l:
-    if: ${{ inputs.linux }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ubuntu-latest
-      target_cpu: arm
-      tag: manylinux_2_17_armv7l.manylinux2014_armv7l
-      py_version: ${{ inputs.py_version }}
-  
-  linux_ppc64le:
-    if: ${{ inputs.linux }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ubuntu-latest
-      target_cpu: ppc64
-      tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
-      py_version: ${{ inputs.py_version }}
-  
-  macos_cross_x64:
-    if: ${{ inputs.macos }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: macos-latest  # arm64 host
-      target_cpu: x64
-      tag: macosx_11_0_x86_64
-      py_version: ${{ inputs.py_version }}
-  
-  macos_native_arm64:
-    if: ${{ inputs.macos }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: macos-latest
-      tag: macosx_11_0_arm64
-      py_version: ${{ inputs.py_version }}
-  
-  # test macOS the other way round while we still can
-  
-  macos_native_x64:
-    if: ${{ inputs.macos && inputs.testtargets }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: macos-15-intel
-      tag: macosx_11_0_x86_64
-      py_version: ${{ inputs.py_version }}
-  
-  macos_cross_arm64:
-    if: ${{ inputs.macos && inputs.testtargets }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: macos-15-intel
-      target_cpu: arm64
-      tag: macosx_11_0_arm64
-      py_version: ${{ inputs.py_version }}
-  
-  windows_x64:
-    if: ${{ inputs.windows }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: windows-latest
-      py_version: ${{ inputs.py_version }}
-  
-  windows_cross_arm64:
-    if: ${{ inputs.windows }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: windows-latest
-      target_cpu: arm64
-      tag: win_arm64
-      py_version: ${{ inputs.py_version }}
-  
-  windows_native_arm64:
-    if: ${{ inputs.windows && inputs.testtargets }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: windows-11-arm
-      target_cpu: arm64  # needed, even if native
-      py_version: ${{ inputs.py_version }}
-      test: true  # explicit, because of target_cpu
-  
-  windows_x86:
-    if: ${{ inputs.windows }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: windows-latest
-      target_cpu: x86
-      tag: win32
-      py_version: ${{ inputs.py_version }}
-  
-  android_arm64:
-    if: ${{ inputs.android }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ubuntu-latest
-      target_cpu: arm64
-      target_os: android
-      tag: android_21_arm64_v8a
-      py_version: ${{ inputs.py_version }}
-  
-  android_arm32:
-    if: ${{ inputs.android }}
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ubuntu-latest
-      target_cpu: arm
-      target_os: android
-      tag: android_21_armeabi_v7a
-      py_version: ${{ inputs.py_version }}
+      os: ${{ matrix.os }}
+      condition: ${{ matrix.condition }}
+      target_cpu: ${{ matrix.target_cpu }}
+      target_os: ${{ matrix.target_os }}
+      tag: ${{ matrix.tag }}
+      py_ver: ${{ inputs.py_ver }}

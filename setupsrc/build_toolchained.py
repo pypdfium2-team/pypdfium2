@@ -154,6 +154,9 @@ def main(
         os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
     
     # defaults handled internally to avoid duplication with parse_args()
+    if target_cpu is None:
+        if Host.platform == PlatNames.windows_arm64:
+            target_cpu = "arm64"  # needed, even if native
     if build_target is None:
         build_target = "pdfium"
     if build_ver is None:

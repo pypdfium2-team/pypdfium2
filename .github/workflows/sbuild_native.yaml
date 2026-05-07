@@ -54,8 +54,8 @@ jobs:
     
     uses: ./.github/workflows/sbuild_one_native.yaml
     with:
-      condition: ${{ matrix.cc_condition && matrix.os_condition }}
       os: ${{ matrix.os }}
+      condition: ${{ matrix.cc_condition && matrix.os_condition }}
       compiler: ${{ matrix.compiler }}
       pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ inputs.py_ver }}
