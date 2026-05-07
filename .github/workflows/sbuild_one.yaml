@@ -88,8 +88,8 @@ jobs:
       
       - name: Install Python deps
         run: |
-          # XXX need to use a venv after all, causes issues when pip attempts to uninstall system stuff
           python3 -m pip config set global.break-system-packages true  # q&d
+          python3 -m pip config set global.user true
           python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Update package list
