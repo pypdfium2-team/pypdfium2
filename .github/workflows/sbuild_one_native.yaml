@@ -56,17 +56,9 @@ defaults:
 
 jobs:
   
-  xxx:
-    runs-on: ${{ inputs.os }}
-    steps:
-      - name: Reveal condition value
-        run: echo $CONDITION
-        env:
-          CONDITION: ${{ inputs.condition }}
-  
   build:
     runs-on: ${{ inputs.os }}
-    if: ${{ inputs.condition }}
+    if: ${{ inputs.condition || inputs.condition == '' }}
     
     steps:
       
