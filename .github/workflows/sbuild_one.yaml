@@ -87,7 +87,9 @@ jobs:
           REPO_TAG: ${{ inputs.repo_tag }}
       
       - name: Install Python deps
-        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
+        run: |
+          python3 -m pip config set global.break-system-packages true  # q&d
+          python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Update package list
         if: ${{ startsWith(inputs.os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.os, '-arm')) }}
