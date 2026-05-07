@@ -113,10 +113,12 @@ def patch_pdfium(build_ver, target_os):
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
         git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir/"build")
-    if PORTABLE_MODE:
-        # apply patches for older GN
-        git_apply_patch(PatchDir/"legacy_gn_1.patch", PDFiumDir/"build")
-        git_apply_patch(PatchDir/"legacy_gn_2.patch", PDFiumDir/"build")
+    # FIXME legacy_gn patches target newer pdfium from build_native
+    # possible solutions: add back the old patch, build GN from source if it's too old, update pdfium here.
+    # if PORTABLE_MODE:
+    #     # apply patches for older GN
+    #     git_apply_patch(PatchDir/"legacy_gn_1.patch", PDFiumDir/"build")
+    #     git_apply_patch(PatchDir/"legacy_gn_2.patch", PDFiumDir/"build")
 
 
 def get_tool(name):
