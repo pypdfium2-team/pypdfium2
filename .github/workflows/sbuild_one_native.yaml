@@ -49,15 +49,20 @@ on:
       test_pdfium:
         type: boolean
         default: true
-      condition:
-        type: boolean
-        default: true
 
 defaults:
   run:
     shell: bash
 
 jobs:
+  
+  xxx:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Reveal condition value
+        run: echo $CONDITION
+        env:
+          CONDITION: ${{ inputs.condition }}
   
   build:
     runs-on: ${{ inputs.os }}
