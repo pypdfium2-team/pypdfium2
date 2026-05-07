@@ -36,216 +36,131 @@ on:
 
 jobs:
   
-  linux_x64:
-    if: ${{ inputs.linux_main && inputs.linux_glibc }}
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          
+          - condition: ${{ inputs.linux_main && inputs.linux_glibc }}
+            os: ubuntu-latest
+            cibw_class: manylinux
+            cibw_arch: x86_64
+          
+          - condition: ${{ inputs.linux_main && inputs.linux_musl }}
+            os: ubuntu-latest
+            cibw_class: musllinux
+            cibw_arch: x86_64
+          
+          - condition: ${{ inputs.linux_main && inputs.linux_glibc }}
+            os: ubuntu-24.04-arm
+            cibw_class: manylinux
+            cibw_arch: aarch64
+          
+          - condition: ${{ inputs.linux_main && inputs.linux_musl }}
+            os: ubuntu-24.04-arm
+            cibw_class: musllinux
+            cibw_arch: aarch64
+          
+          # ARM 32-bit emulation seems about as fast as native when using an ARM64 host. Same goes for x86_64 to i686.
+          # For some reason, `uname -m` reports the armv7l container as armv8l when using an ARM64 host, but the author tested a manylinux wheel produced here on Raspberry Pi 2B (armv7l) locally, and it does seem to work.
+          
+          - condition: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
+            os: ubuntu-24.04-arm
+            cibw_class: manylinux
+            cibw_arch: armv7l
+          
+          - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
+            os: ubuntu-24.04-arm
+            cibw_class: musllinux
+            cibw_arch: armv7l
+          
+          - condition: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
+            os: ubuntu-latest
+            cibw_class: manylinux
+            cibw_arch: i686
+          
+          - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
+            os: ubuntu-latest
+            cibw_class: musllinux
+            cibw_arch: i686
+          
+          - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
+            os: ubuntu-latest
+            cibw_class: manylinux
+            cibw_arch: ppc64le
+          
+          - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
+            os: ubuntu-latest
+            cibw_class: musllinux
+            cibw_arch: ppc64le
+          
+          - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
+            os: ubuntu-latest
+            cibw_class: manylinux
+            cibw_arch: s390x
+          
+          - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
+            os: ubuntu-latest
+            cibw_class: musllinux
+            cibw_arch: s390x
+          
+          - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
+            os: ubuntu-latest
+            cibw_class: manylinux
+            cibw_arch: riscv64
+          
+          - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
+            os: ubuntu-latest
+            cibw_class: musllinux
+            cibw_arch: riscv64
+          
+          - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
+            os: ubuntu-latest
+            cibw_class: manylinux
+            cibw_arch: loongarch64
+          
+          - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
+            os: ubuntu-latest
+            cibw_class: musllinux
+            cibw_arch: loongarch64
+          
+          # may need to leverage cross-compilation from arm64 in the future, similar to sbuild.yaml
+          - condition: ${{ inputs.macos }}
+            os: macos-15-intel
+            cibw_class: macosx
+            cibw_arch: x86_64
+          
+          # The toolchain supports macOS arm64 natively
+          - condition: ${{ inputs.macos }}
+            os: macos-latest
+            cibw_class: macosx
+            cibw_arch: arm64
+          
+          - condition: ${{ inputs.windows }}
+            os: windows-latest
+            cibw_target: win_amd64
+            cibw_arch: AMD64
+          
+          # Cross-compile windows ARM64 from amd64 as that's Google's official approach. Native build on ARM64 may also work (see sbuild.yaml) but is less supported and needs a bit of patching.
+          # https://cibuildwheel.pypa.io/en/stable/platforms/#windows-arm64
+          # Note: build system probably ignores cibuildwheel's cross-compilation env vars, so setting target_cpu in GN config (through pyproject.toml) is key here.
+          - condition: ${{ inputs.windows }}
+            os: windows-latest
+            cibw_target: win_arm64
+            cibw_arch: ARM64
+          
+          # Attempt the same for Windows 32-bit
+          - condition: ${{ inputs.windows }}
+            os: windows-latest
+            cibw_target: win32
+            cibw_arch: x86
+    
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ubuntu-latest
-      cibw_target: manylinux_x86_64
-      cibw_arch: x86_64
+      condition: ${{ matrix.condition }}
+      os: ${{ matrix.os }}
+      cibw_target: ${{ matrix.cibw_target || format('{0}_{1}', matrix.cibw_class, matrix.cibw_arch) }}
+      cibw_arch: ${{ matrix.cibw_arch }}
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  musllinux_x64:
-    if: ${{ inputs.linux_main && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: musllinux_x86_64
-      cibw_arch: x86_64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_arm64:
-    if: ${{ inputs.linux_main && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      cibw_target: manylinux_aarch64
-      cibw_arch: aarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  musllinux_arm64:
-    if: ${{ inputs.linux_main && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      cibw_target: musllinux_aarch64
-      cibw_arch: aarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  # ARM 32-bit emulation seems about as fast as native when using an ARM64 host. Same goes for x86_64 to i686.
-  # For some reason, `uname -m` reports the armv7l container as armv8l when using an ARM64 host, but the author tested a manylinux wheel produced here on Raspberry Pi 2B (armv7l) locally, and it does seem to work.
-  
-  linux_arm32:
-    if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      cibw_target: manylinux_armv7l
-      cibw_arch: armv7l
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  musllinux_arm32:
-    if: ${{ inputs.linux_fastemu && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-24.04-arm
-      cibw_target: musllinux_armv7l
-      cibw_arch: armv7l
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_i686:
-    if: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: manylinux_i686
-      cibw_arch: i686
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  musllinux_i686:
-    if: ${{ inputs.linux_fastemu && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: musllinux_i686
-      cibw_arch: i686
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_ppc64le:
-    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: manylinux_ppc64le
-      cibw_arch: ppc64le
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  musllinux_ppc64le:
-    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: musllinux_ppc64le
-      cibw_arch: ppc64le
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_s390x:
-    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: manylinux_s390x
-      cibw_arch: s390x
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  musllinux_s390x:
-    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: musllinux_s390x
-      cibw_arch: s390x
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_riscv64:
-    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: manylinux_riscv64
-      cibw_arch: riscv64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  musllinux_riscv64:
-    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: musllinux_riscv64
-      cibw_arch: riscv64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  linux_loongarch64:
-    if: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: manylinux_loongarch64
-      cibw_arch: loongarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  musllinux_loongarch64:
-    if: ${{ inputs.linux_clangcross && inputs.linux_musl }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: ubuntu-latest
-      cibw_target: musllinux_loongarch64
-      cibw_arch: loongarch64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      test_pdfium: ${{ inputs.test_pdfium }}
-  
-  # may need to leverage cross-compilation from arm64 in the future, similar to sbuild.yaml
-  macos_x64:
-    if: ${{ inputs.macos }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: macos-15-intel
-      cibw_target: macosx_x86_64
-      cibw_arch: x86_64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
-  # The toolchain supports macOS arm64 natively
-  macos_arm64:
-    if: ${{ inputs.macos }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: macos-latest
-      cibw_target: macosx_arm64
-      cibw_arch: arm64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
-  windows_x64:
-    if: ${{ inputs.windows }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: windows-latest
-      cibw_target: win_amd64
-      cibw_arch: AMD64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
-  # Cross-compile windows ARM64 from amd64 as that's Google's official approach. Native build on ARM64 may also work (see sbuild.yaml) but is less supported and needs a bit of patching.
-  # https://cibuildwheel.pypa.io/en/stable/platforms/#windows-arm64
-  # Note: build system probably ignores cibuildwheel's cross-compilation env vars, so setting target_cpu in GN config (through pyproject.toml) is key here.
-  windows_arm64:
-    if: ${{ inputs.windows }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: windows-latest
-      cibw_target: win_arm64
-      cibw_arch: ARM64
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
-  
-  # Attempt the same for Windows 32-bit
-  windows_32:
-    if: ${{ inputs.windows }}
-    uses: ./.github/workflows/cibw_one.yaml
-    with:
-      os: windows-latest
-      cibw_target: win32
-      cibw_arch: x86
-      cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      test_pdfium: ${{ inputs.test_pdfium }}  # currently, linux only

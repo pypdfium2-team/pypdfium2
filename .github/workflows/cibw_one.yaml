@@ -24,6 +24,9 @@ on:
       test_pdfium:
         type: boolean
         default: true
+      condition:
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs:
       os:
@@ -53,6 +56,7 @@ jobs:
   build:
     name: ${{ inputs.cibw_target }} on ${{ inputs.os }}
     runs-on: ${{ inputs.os }}
+    if: ${{ inputs.condition || inputs.condition == '' }}
     
     steps:
       

@@ -29,6 +29,6 @@ jobs:
               "augment": "true",
               "publish": "true",
               "conda": "true",
-              "py_version": "3.14",
+              "py_ver": "3.14",
               "runner": "ubuntu-latest"
             }

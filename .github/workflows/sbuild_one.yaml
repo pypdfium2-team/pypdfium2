@@ -8,7 +8,7 @@ on:
     inputs:
       os:
         type: string
-      py_version:
+      py_ver:
         type: string
       target_cpu:
         type: string
@@ -19,21 +19,21 @@ on:
       tag:
         type: string
         default: ''
-      test:
-        type: boolean
-        default: false
       branch:
         type: string
         default: ''
       repo_tag:
         type: string
         default: ''
+      condition:
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs:
       os:
         type: string
         default: ubuntu-latest
-      py_version:
+      py_ver:
         type: string
         default: '3.14'
       target_cpu:
@@ -45,9 +45,6 @@ on:
       tag:
         type: string
         default: ''
-      test:
-        type: boolean
-        default: false
       branch:
         type: string
         default: ''
@@ -63,13 +60,14 @@ jobs:
   
   build:
     runs-on: ${{ inputs.os }}
+    if: ${{ inputs.condition || inputs.condition == '' }}
     
     steps:
       
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ inputs.py_version }}
+          python-version: ${{ inputs.py_ver }}
       
       - name: Check out pypdfium2 repository
         uses: actions/checkout@v6
@@ -143,7 +141,7 @@ jobs:
           name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
       
       - name: Install and test wheel
-        if: ${{ inputs.test || (!inputs.target_cpu && !inputs.target_os) }}
+        if: ${{ !inputs.target_cpu && !inputs.target_os }}
         run: |
           python3 -m pip install ./dist/*.whl
           pypdfium2 -v
