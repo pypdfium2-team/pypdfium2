@@ -187,43 +187,43 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            cibw_class: musllinux
+            cibw_os: musllinux
             cibw_arch: x86_64
           - os: ubuntu-latest
-            cibw_class: musllinux
+            cibw_os: musllinux
             cibw_arch: i686
           - os: ubuntu-24.04-arm
-            cibw_class: musllinux
+            cibw_os: musllinux
             cibw_arch: aarch64
           - os: ubuntu-24.04-arm
-            cibw_class: musllinux
+            cibw_os: musllinux
             cibw_arch: armv7l
           - os: ubuntu-latest
-            cibw_class: musllinux
+            cibw_os: musllinux
             cibw_arch: ppc64le
           - os: ubuntu-latest
-            cibw_class: manylinux
+            cibw_os: manylinux
             cibw_arch: riscv64
           - os: ubuntu-latest
-            cibw_class: musllinux
+            cibw_os: musllinux
             cibw_arch: riscv64
           - os: ubuntu-latest
-            cibw_class: manylinux
+            cibw_os: manylinux
             cibw_arch: loongarch64
           - os: ubuntu-latest
-            cibw_class: musllinux
+            cibw_os: musllinux
             cibw_arch: loongarch64
           - os: ubuntu-latest
-            cibw_class: manylinux
+            cibw_os: manylinux
             cibw_arch: s390x
           - os: ubuntu-latest
-            cibw_class: musllinux
+            cibw_os: musllinux
             cibw_arch: s390x
     
     uses: ./.github/workflows/cibw_one.yaml
     with:
       os: ${{ matrix.os }}
-      cibw_target: ${{ matrix.cibw_class }}_${{ matrix.cibw_arch }}
+      cibw_target: ${{ matrix.cibw_os }}_${{ matrix.cibw_arch }}
       cibw_arch: ${{ matrix.cibw_arch }}
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
