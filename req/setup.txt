@@ -1,4 +1,3 @@
-pip
 build
 setuptools
 packaging
