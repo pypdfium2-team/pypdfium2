@@ -162,5 +162,5 @@ jobs:
       os: ${{ matrix.os }}
       cibw_target: ${{ matrix.cibw_target }}
       cibw_arch: ${{ matrix.cibw_arch }}
-      cibw_py_ver: ${{ matrix.cibw_py_ver }}
+      cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}  # currently, linux only
