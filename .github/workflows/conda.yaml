@@ -24,7 +24,7 @@ on:
       publish:
         default: false
         type: boolean
-      py_version:
+      py_ver:
         default: '3.14'
         type: string
       ref:
@@ -51,7 +51,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
-          python-version: ${{ inputs.py_version }}
+          python-version: ${{ inputs.py_ver }}
           # priority: highest to lowest
           # https://github.com/conda-incubator/setup-miniconda/blob/3afdf12ae89a97ee81acc85f1490189fba144938/README.md#example-4-conda-options
           channels: pypdfium2-team,bblanchon,defaults

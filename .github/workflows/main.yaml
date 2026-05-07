@@ -19,7 +19,7 @@ on:
       conda:
         default: false
         type: boolean
-      py_version:
+      py_ver:
         default: '3.14'
         type: string
       runner:
@@ -44,7 +44,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ inputs.py_version }}
+          python-version: ${{ inputs.py_ver }}
       
       - name: Check out repository
         uses: actions/checkout@v6
@@ -249,7 +249,7 @@ jobs:
   #     os: ${{ matrix.os }}
   #     target_cpu: ${{ matrix.target_cpu }}
   #     tag: ${{ matrix.tag }}
-  #     py_version: ${{ inputs.py_version }}
+  #     py_ver: ${{ inputs.py_ver }}
   #     repo_tag: ${{ needs.build.outputs.new_version }}
   #     branch: autorelease_tmp
   
@@ -284,7 +284,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ inputs.py_version }}
+          python-version: ${{ inputs.py_ver }}
       
       - name: Download release notes
         uses: actions/download-artifact@v8
@@ -397,7 +397,7 @@ jobs:
               "new_only": "false",
               "test": "true",
               "publish": "${{ inputs.publish }}",
-              "py_version": "${{ inputs.py_version }}"
+              "py_ver": "${{ inputs.py_ver }}"
             }
   
   
