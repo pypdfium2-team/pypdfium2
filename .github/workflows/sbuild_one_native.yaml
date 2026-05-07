@@ -75,7 +75,9 @@ jobs:
           fetch-depth: 0  # for git describe
       
       - name: Install python deps
-        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -U -r req/setup.txt -r req/test.txt
       
       - name: Install build deps
         run: |

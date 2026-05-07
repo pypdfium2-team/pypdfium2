@@ -54,7 +54,9 @@ jobs:
           persist-credentials: true  # needed for push
       
       - name: Install/update dependencies
-        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/utilities.txt
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/utilities.txt
       
       # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
       # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
@@ -157,8 +159,8 @@ jobs:
       
       - name: Install dependencies
         run: |
-          python3 -m pip install -U pip setuptools
-          python3 -m pip install -U pytest pillow numpy
+          python3 -m pip install -U pip
+          python3 -m pip install -U setuptools pytest pillow numpy
       
       - name: Install and run auditwheel (informational)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}

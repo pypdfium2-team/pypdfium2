@@ -46,7 +46,9 @@ jobs:
       # TODO(consider) run test suite after each way of installing?
       
       - name: Setup (default)
-        run: python3 -m pip install -v .
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -v .
       
       - name: Setup (editable)
         run: python3 -m pip install -v -e .
