@@ -44,22 +44,22 @@ jobs:
           
           - condition: ${{ inputs.linux_main && inputs.linux_glibc }}
             os: ubuntu-latest
-            cibw_target: manylinux_x86_64
+            cibw_class: manylinux
             cibw_arch: x86_64
           
           - condition: ${{ inputs.linux_main && inputs.linux_musl }}
             os: ubuntu-latest
-            cibw_target: musllinux_x86_64
+            cibw_class: musllinux
             cibw_arch: x86_64
           
           - condition: ${{ inputs.linux_main && inputs.linux_glibc }}
             os: ubuntu-24.04-arm
-            cibw_target: manylinux_aarch64
+            cibw_class: manylinux
             cibw_arch: aarch64
           
           - condition: ${{ inputs.linux_main && inputs.linux_musl }}
             os: ubuntu-24.04-arm
-            cibw_target: musllinux_aarch64
+            cibw_class: musllinux
             cibw_arch: aarch64
           
           # ARM 32-bit emulation seems about as fast as native when using an ARM64 host. Same goes for x86_64 to i686.
@@ -67,74 +67,74 @@ jobs:
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
             os: ubuntu-24.04-arm
-            cibw_target: manylinux_armv7l
+            cibw_class: manylinux
             cibw_arch: armv7l
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
             os: ubuntu-24.04-arm
-            cibw_target: musllinux_armv7l
+            cibw_class: musllinux
             cibw_arch: armv7l
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
             os: ubuntu-latest
-            cibw_target: manylinux_i686
+            cibw_class: manylinux
             cibw_arch: i686
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
             os: ubuntu-latest
-            cibw_target: musllinux_i686
+            cibw_class: musllinux
             cibw_arch: i686
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
             os: ubuntu-latest
-            cibw_target: manylinux_ppc64le
+            cibw_class: manylinux
             cibw_arch: ppc64le
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
             os: ubuntu-latest
-            cibw_target: musllinux_ppc64le
+            cibw_class: musllinux
             cibw_arch: ppc64le
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
             os: ubuntu-latest
-            cibw_target: manylinux_s390x
+            cibw_class: manylinux
             cibw_arch: s390x
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
             os: ubuntu-latest
-            cibw_target: musllinux_s390x
+            cibw_class: musllinux
             cibw_arch: s390x
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
             os: ubuntu-latest
-            cibw_target: manylinux_riscv64
+            cibw_class: manylinux
             cibw_arch: riscv64
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
             os: ubuntu-latest
-            cibw_target: musllinux_riscv64
+            cibw_class: musllinux
             cibw_arch: riscv64
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
             os: ubuntu-latest
-            cibw_target: manylinux_loongarch64
+            cibw_class: manylinux
             cibw_arch: loongarch64
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
             os: ubuntu-latest
-            cibw_target: musllinux_loongarch64
+            cibw_class: musllinux
             cibw_arch: loongarch64
           
           # may need to leverage cross-compilation from arm64 in the future, similar to sbuild.yaml
           - condition: ${{ inputs.macos }}
             os: macos-15-intel
-            cibw_target: macosx_x86_64
+            cibw_class: macosx
             cibw_arch: x86_64
           
           # The toolchain supports macOS arm64 natively
           - condition: ${{ inputs.macos }}
             os: macos-latest
-            cibw_target: macosx_arm64
+            cibw_class: macosx
             cibw_arch: arm64
           
           - condition: ${{ inputs.windows }}
@@ -160,7 +160,7 @@ jobs:
     with:
       condition: ${{ matrix.condition }}
       os: ${{ matrix.os }}
-      cibw_target: ${{ matrix.cibw_target }}
+      cibw_target: ${{ matrix.cibw_target || format('{0}_{1}', matrix.cibw_class, matrix.cibw_arch) }}
       cibw_arch: ${{ matrix.cibw_arch }}
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}  # currently, linux only
