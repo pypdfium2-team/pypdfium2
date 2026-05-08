@@ -32,6 +32,9 @@ defaults:
 
 jobs:
   
+  # TODO Split packaging across native hosts, merging build and test jobs (autorelease stuff can be handled in a prepare job before).
+  # Even merging with augment_cibw and augment_sbuild might be possible. This would allow us to easily switch between different build strategies.
+  
   build:
     runs-on: ${{ inputs.runner }}
     outputs:
