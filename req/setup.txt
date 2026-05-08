@@ -1,4 +1,9 @@
-build
-setuptools
-packaging
+# actual setup
+setuptools >= v70.1.0  # or older setuptools + `wheel`
 ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2
+
+# musllinux detection (`packaging` is a transitive dependency anyway)
+packaging
+
+# wheel building
+build
