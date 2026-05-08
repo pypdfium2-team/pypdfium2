@@ -49,7 +49,8 @@ pypdfium2 is a Python binding to PDFium, a PDF processing library.
 This is the command-line interface. Invoke as `pypdfium2` or `%(py_exe)s -m pypdfium2_cli`.
 
 pypdfium2's CLI mainly serves testing purposes, similar to pdfium_test upstream.
-No API stability promises are being made.
+It is not meant as a feature-complete PDF toolkit for end users.
+There are no API stability promises; backward incompatible changes may be made.
 
 Environment variables:
 - PYPDFIUM_LOGLEVEL {debug,info,warning,error,critical} = debug
