@@ -393,7 +393,7 @@ jobs:
     uses: ./.github/workflows/conda.yaml
     with:
       package: helpers
-      test: true
+      test: ${{ inputs.test }}
       publish: ${{ inputs.publish }}
       # py_ver: ${{ inputs.py_ver }}  # temporarily downgraded
   
