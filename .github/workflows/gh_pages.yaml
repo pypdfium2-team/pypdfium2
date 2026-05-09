@@ -10,7 +10,7 @@ on:
         type: boolean
         default: false
   workflow_dispatch:
-    inputs: &reusable_inputs
+    inputs: *reusable_inputs
   # push:
   #   branches:
   #     - main
