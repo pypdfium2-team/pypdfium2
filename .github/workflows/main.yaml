@@ -10,11 +10,11 @@ on:
       runner:
         type: string
         default: 'ubuntu-latest'
-        required: true
+        # required: true
       py_ver:
         type: string
         default: '3.14'
-        required: true
+        # required: true
       test:
         type: boolean
         default: true
