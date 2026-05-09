@@ -380,33 +380,25 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/  # the default
-      
-      # here we already have the repo, so using local workflow will work
-      - name: Trigger GH Pages rebuild
-        uses: ./.github/workflows/gh_pages.yaml  # takes no inputs
   
+  gh_pages:
+    needs: publish
+    if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
+    uses: ./.github/workflows/gh_pages.yaml  # takes no inputs
   
-  conda_trigger:
+  conda:
     needs: publish  # i.e. goes after, regardless if publish is active or not
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
-    runs-on: ${{ inputs.runner }}
-    
-    steps:
-      
-      - name: Check out repo to run local workflow
-        uses: actions/checkout@v6
-      
-      - name: Trigger conda pypdfium2_helpers build
-        uses: ./.github/workflows/conda.yaml
-        with:
-          package: helpers
-          test: true
-          publish: ${{ inputs.publish }}
-          py_ver: ${{ inputs.py_ver }}
+    uses: ./.github/workflows/conda.yaml
+    with:
+      package: helpers
+      test: true
+      publish: ${{ inputs.publish }}
+      py_ver: ${{ inputs.py_ver }}
   
   
   cleanup:
-    needs: [publish, conda_trigger]
+    needs: [publish, gh_pages, conda]
     if: ${{ !cancelled() }}
     runs-on: ${{ inputs.runner }}
     

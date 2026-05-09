@@ -14,19 +14,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  
   trigger:
-    runs-on: ubuntu-latest
-    
-    steps:
-      
-      - name: Check out repo to run local workflow
-        uses: actions/checkout@v6
-      
-      - name: Trigger
-        uses: ./.github/workflows/main.yaml
-        with:
-          test: true
-          augment: true
-          conda: true
-          # publish: true  # XXX temporarily commented out
+    uses: ./.github/workflows/main.yaml
+    with:
+      test: true
+      augment: true
+      conda: true
+      # publish: true  # XXX temporarily commented out
