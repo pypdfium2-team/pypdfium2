@@ -383,7 +383,8 @@ jobs:
   
   gh_pages:
     needs: publish
-    if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
+    # XXX testing
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}  # inputs.publish &&
     uses: ./.github/workflows/gh_pages.yaml  # takes no inputs
   
   conda:
