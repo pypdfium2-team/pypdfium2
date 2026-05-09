@@ -5,26 +5,30 @@
 
 name: Main packaging
 on:
-  workflow_dispatch:
+  workflow_call: &reusable_inputs
     inputs:
-      test:
-        default: true
-        type: boolean
-      augment:
-        default: false
-        type: boolean
-      publish:
-        default: false
-        type: boolean
-      conda:
-        default: false
-        type: boolean
-      py_ver:
-        default: '3.14'
-        type: string
       runner:
-        default: 'ubuntu-latest'
         type: string
+        default: 'ubuntu-latest'
+        required: true
+      py_ver:
+        type: string
+        default: '3.14'
+        required: true
+      test:
+        type: boolean
+        default: true
+      augment:
+        type: boolean
+        default: false
+      publish:
+        type: boolean
+        default: false
+      conda:
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs: *reusable_inputs
 
 defaults:
   run:
