@@ -38,7 +38,7 @@ jobs:
   build:
     name: ${{ inputs.cibw_target }} on ${{ inputs.os }}
     runs-on: ${{ inputs.os }}
-    if: ${{ inputs.condition || inputs.condition == '' }}
+    if: ${{ inputs.condition }}
     
     steps:
       
