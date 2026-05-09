@@ -379,6 +379,7 @@ jobs:
         with:
           packages-dir: dist/  # the default
       
+      # TODO change to reusable workflow call
       - name: Trigger GH Pages rebuild
         uses: benc-uk/workflow-dispatch@v1
         with:
