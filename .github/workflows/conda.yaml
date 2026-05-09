@@ -6,8 +6,7 @@ on:
   workflow_call:
     inputs: &reusable_inputs
       package:
-        type: string
-        default: raw  # choices: "raw" or "helpers"
+        type: string  # choices: "raw" or "helpers"
         required: true
       py_ver:
         type: string

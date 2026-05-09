@@ -5,8 +5,8 @@
 
 name: Main packaging
 on:
-  workflow_call: &reusable_inputs
-    inputs:
+  workflow_call:
+    inputs: &reusable_inputs
       runner:
         type: string
         default: 'ubuntu-latest'
@@ -279,7 +279,7 @@ jobs:
       id-token: write      # PyPI upload via "trusted publishing", and GH attestation
       attestations: write  # GH attestation
       contents: write      # autorelease repository changes
-      actions: write       # GH pages workflow-dispatch
+      actions: write       # GH pages build
     
     steps:
       
@@ -383,11 +383,8 @@ jobs:
         with:
           packages-dir: dist/  # the default
       
-      # TODO change to reusable workflow call
       - name: Trigger GH Pages rebuild
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: gh_pages.yaml  # takes no inputs
+        uses: ./.github/workflows/gh_pages.yaml  # takes no inputs
   
   
   conda_trigger:
@@ -397,18 +394,12 @@ jobs:
     
     steps:
       - name: Trigger conda pypdfium2_helpers build
-        uses: benc-uk/workflow-dispatch@v1
+        uses: ./.github/workflows/conda.yaml
         with:
-          workflow: conda.yaml
-          inputs: |
-            {
-              "package": "helpers",
-              "pdfium_ver": "latest",
-              "new_only": "false",
-              "test": "true",
-              "publish": "${{ inputs.publish }}",
-              "py_ver": "${{ inputs.py_ver }}"
-            }
+          package: helpers
+          test: true
+          publish: ${{ inputs.publish }}
+          py_ver: ${{ inputs.py_ver }}
   
   
   cleanup:

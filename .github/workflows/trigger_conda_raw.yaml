@@ -15,15 +15,9 @@ jobs:
     
     steps:
       - name: Trigger
-        uses: benc-uk/workflow-dispatch@v1
+        uses: ./.github/workflows/conda.yaml
         with:
-          workflow: conda.yaml
-          inputs: |
-            {
-              "package": "raw",
-              "pdfium_ver": "latest",
-              "new_only": "true",
-              "test": "true",
-              "publish": "true",
-              "py_ver": "3.14"
-            }
+          package: raw
+          new_only: true
+          test: true
+          # publish: true  # XXX temporarily commented out

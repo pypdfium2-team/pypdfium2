@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Separate trigger workflow because we can't configure inputs for scheduled workflow runs (and don't want publish enabled by default in the main workflow)
+# Separate trigger workflow because schedule uses default inputs, and clearly we don't want publish enabled by default
 
 name: Trigger main release
 on:
@@ -20,15 +20,9 @@ jobs:
     
     steps:
       - name: Trigger
-        uses: benc-uk/workflow-dispatch@v1
+        uses: ./.github/workflows/main.yaml
         with:
-          workflow: main.yaml
-          inputs: |
-            {
-              "test": "true",
-              "augment": "true",
-              "publish": "true",
-              "conda": "true",
-              "py_ver": "3.14",
-              "runner": "ubuntu-latest"
-            }
+          test: true
+          augment: true
+          conda: true
+          # publish: true  # XXX temporarily commented out
