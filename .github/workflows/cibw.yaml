@@ -6,33 +6,33 @@ on:
   workflow_dispatch:
     inputs:
       cibw_py_ver:
-        default: 'cp314'
         type: string
+        default: 'cp314'
       linux_main:
-        default: true
         type: boolean
+        default: true
       linux_fastemu:
-        default: true
         type: boolean
+        default: true
       linux_clangcross:
-        default: true
         type: boolean
+        default: true
       linux_glibc:
-        default: true
         type: boolean
+        default: true
       linux_musl:
-        default: true
         type: boolean
+        default: true
       test_pdfium:
-        default: true
         type: boolean
+        default: true
       # we're using the toolchained build for macOS and Windows for now
       macos:
-        default: true
         type: boolean
+        default: true
       windows:
-        default: true
         type: boolean
+        default: true
 
 jobs:
   
