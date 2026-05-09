@@ -19,6 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      
+      - name: Check out repo to run local workflow
+        uses: actions/checkout@v6
+      
       - name: Trigger
         uses: ./.github/workflows/main.yaml
         with:

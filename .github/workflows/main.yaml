@@ -381,6 +381,7 @@ jobs:
         with:
           packages-dir: dist/  # the default
       
+      # here we already have the repo, so using local workflow will work
       - name: Trigger GH Pages rebuild
         uses: ./.github/workflows/gh_pages.yaml  # takes no inputs
   
@@ -391,6 +392,10 @@ jobs:
     runs-on: ${{ inputs.runner }}
     
     steps:
+      
+      - name: Check out repo to run local workflow
+        uses: actions/checkout@v6
+      
       - name: Trigger conda pypdfium2_helpers build
         uses: ./.github/workflows/conda.yaml
         with:
