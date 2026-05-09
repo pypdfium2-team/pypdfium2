@@ -12,11 +12,9 @@ on:
       compiler:
         type: string
         default: gcc
-        # required: true
       py_ver:
         type: string
         default: '3.14'
-        # required: true
       pdfium_ver:
         type: string
         default: ''
