@@ -22,6 +22,9 @@ on:
       publish:
         type: boolean
         default: false
+      gh_pages:
+        type: boolean
+        default: false
       conda:
         type: boolean
         default: false
@@ -382,13 +385,14 @@ jobs:
           packages-dir: dist/  # the default
   
   gh_pages:
-    needs: publish
-    # XXX testing
-    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}  # inputs.publish &&
-    uses: ./.github/workflows/gh_pages.yaml  # takes no inputs
+    needs: publish  # i.e. goes after, regardless if publish is active or not
+    if: ${{ inputs.gh_pages && !cancelled() && !contains(needs.*.result, 'failure') }}
+    uses: ./.github/workflows/gh_pages.yaml
+    with:
+      publish: ${{ inputs.publish }}
   
   conda:
-    needs: publish  # i.e. goes after, regardless if publish is active or not
+    needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
     uses: ./.github/workflows/conda.yaml
     with:
