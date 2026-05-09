@@ -16,8 +16,9 @@ on:
         type: string
         required: true
       cibw_py_ver:
-        default: 'cp314'
         type: string
+        default: 'cp314'
+        required: true
       branch:
         type: string
         default: ''

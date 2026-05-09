@@ -12,12 +12,14 @@ on:
       compiler:
         type: string
         default: gcc
-      pdfium_ver:
-        type: string
-        default: ''
+        required: true
       py_ver:
         type: string
         default: '3.14'
+        required: true
+      pdfium_ver:
+        type: string
+        default: ''
       vendor:
         type: string
         default: 'icu'

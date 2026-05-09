@@ -12,6 +12,7 @@ on:
       py_ver:
         type: string
         default: '3.14'
+        required: true
       target_cpu:
         type: string
         default: ''
