@@ -3,33 +3,34 @@
 
 name: Conda packaging
 on:
-  workflow_dispatch:
-    inputs:
+  workflow_call:
+    inputs: &reusable_inputs
       package:
-        type: choice
-        default: raw
-        options:
-          - raw
-          - helpers
-      pdfium_ver:
-        default: 'latest'
         type: string
-      new_only:
-        # only with package == "raw", ignored otherwise (actually the default should be false in that case, but don't know if GH supports dynamic defaults depending on other inputs)
-        default: true
-        type: boolean
-      test:
-        default: true
-        type: boolean
-      publish:
-        default: false
-        type: boolean
+        default: raw  # choices: "raw" or "helpers"
+        required: true
       py_ver:
+        type: string
         default: '3.14'
+        required: true
+      pdfium_ver:
         type: string
+        default: ''  # implies latest
+      new_only:
+        # only with package == "raw", ignored otherwise
+        type: boolean
+        default: true
+      test:
+        type: boolean
+        default: true
+      publish:
+        type: boolean
+        default: false
       ref:
-        default: ''
         type: string
+        default: ''
+  workflow_dispatch:
+    inputs: *reusable_inputs
 
 # This is required for setup-miniconda / conda init
 # see https://github.com/conda-incubator/setup-miniconda#important
@@ -76,10 +77,10 @@ jobs:
           python -m pip install -U -r req/setup.txt
       
       - name: Build package
-        run: python3 conda/craft_conda_pkgs.py "$PACKAGE" --pdfium-ver "$PDFIUM_VER" $MAYBE_NEW_ONLY
+        run: python3 conda/craft_conda_pkgs.py "$PACKAGE" $VERSION_PARAM $MAYBE_NEW_ONLY
         env:
           PACKAGE: ${{ inputs.package }}
-          PDFIUM_VER: ${{ inputs.pdfium_ver }}
+          VERSION_PARAM: ${{ inputs.pdfium_ver && format('--pdfium-ver {0}', inputs.pdfium_ver) }}
           MAYBE_NEW_ONLY: ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }}
       
       - name: Upload artifact
