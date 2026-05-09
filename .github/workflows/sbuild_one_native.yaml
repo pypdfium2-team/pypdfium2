@@ -5,9 +5,10 @@ name: Sourcebuild One Native
 
 on:
   workflow_call:
-    inputs:
+    inputs: &reusable_inputs
       os:
         type: string
+        required: true
       compiler:
         type: string
         default: gcc
@@ -27,28 +28,7 @@ on:
         type: boolean
         default: true
   workflow_dispatch:
-    inputs:
-      os:
-        type: string
-        default: ubuntu-latest
-      compiler:
-        type: choice
-        default: gcc
-        options:
-          - gcc
-          - clang
-      pdfium_ver:
-        type: string
-        default: ''
-      py_ver:
-        type: string
-        default: '3.14'
-      vendor:
-        type: string
-        default: 'icu'
-      test_pdfium:
-        type: boolean
-        default: true
+    inputs: *reusable_inputs
 
 defaults:
   run:

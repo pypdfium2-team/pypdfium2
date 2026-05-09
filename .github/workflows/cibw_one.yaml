@@ -5,13 +5,16 @@
 name: CIBW build one
 on:
   workflow_call:
-    inputs:
+    inputs: &reusable_inputs
       os:
         type: string
+        required: true
       cibw_target:
         type: string
+        required: true
       cibw_arch:
         type: string
+        required: true
       cibw_py_ver:
         default: 'cp314'
         type: string
@@ -28,28 +31,7 @@ on:
         type: boolean
         default: true
   workflow_dispatch:
-    inputs:
-      os:
-        type: string
-        default: ubuntu-latest
-      cibw_target:
-        type: string
-        default: manylinux_x86_64
-      cibw_arch:
-        type: string
-        default: x86_64
-      cibw_py_ver:
-        default: 'cp314'
-        type: string
-      branch:
-        type: string
-        default: ''
-      repo_tag:
-        type: string
-        default: ''
-      test_pdfium:
-        type: boolean
-        default: true
+    inputs: *reusable_inputs
 
 jobs:
   

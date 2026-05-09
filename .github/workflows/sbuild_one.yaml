@@ -5,11 +5,13 @@ name: Sourcebuild One
 
 on:
   workflow_call:
-    inputs:
+    inputs: &reusable_inputs
       os:
         type: string
+        required: true
       py_ver:
         type: string
+        default: '3.14'
       target_cpu:
         type: string
         default: ''
@@ -29,28 +31,7 @@ on:
         type: boolean
         default: true
   workflow_dispatch:
-    inputs:
-      os:
-        type: string
-        default: ubuntu-latest
-      py_ver:
-        type: string
-        default: '3.14'
-      target_cpu:
-        type: string
-        default: ''
-      target_os:
-        type: string
-        default: ''
-      tag:
-        type: string
-        default: ''
-      branch:
-        type: string
-        default: ''
-      repo_tag:
-        type: string
-        default: ''
+    inputs: *reusable_inputs
 
 defaults:
   run:
