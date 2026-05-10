@@ -10,7 +10,7 @@ on:
         required: true
       py_ver:
         type: string
-        default: '3.12'
+        default: '3.13'
       pdfium_ver:
         type: string
         default: ''  # implies latest
@@ -98,6 +98,13 @@ jobs:
         # Can't test 'windows-11-arm' because setup-miniconda doesn't support it AOTW
         os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest']
         py: ['3.8', '3.14']  # '3.9', '3.10', '3.11', '3.12', '3.13',
+        # conda macos-15-intel doesn't seem to like python 3.14 yet - downgrade to 3.13
+        exclude:
+          - os: macos-15-intel
+            py: '3.14'
+        include:
+          - os: macos-15-intel
+            py: '3.13'
     
     runs-on: ${{ matrix.os }}
     
