@@ -21,4 +21,4 @@ jobs:
       augment: true
       gh_pages: true
       conda: true
-      # publish: true  # XXX temporarily commented out
+      publish: true
