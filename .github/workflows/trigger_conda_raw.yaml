@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Trigger conda_raw release
+name: Run conda_raw release
 on:
   schedule:
     # pdfium-binaries triggers conda on the first Monday of month at 4 o'clock UTC, so we'll want to rebuild after that, but before the next main release where we want to use the package
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  trigger:
+  conda_raw_release:
     uses: ./.github/workflows/conda.yaml
     with:
       package: raw

@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Separate trigger workflow because schedule uses default inputs, and clearly we don't want publish enabled by default
+# Separate workflow because schedule uses default inputs, and clearly we don't want publish enabled by default
 
-name: Trigger main release
+name: Run main release
 on:
   # NOTE Schedule currently suspended, to preserve PyPI disk space. Manually dispatch releases as needed.
   # # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  trigger:
+  run_main_release:
     uses: ./.github/workflows/main.yaml
     with:
       test: true
