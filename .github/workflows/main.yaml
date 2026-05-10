@@ -5,26 +5,31 @@
 
 name: Main packaging
 on:
-  workflow_dispatch:
-    inputs:
-      test:
-        default: true
-        type: boolean
-      augment:
-        default: false
-        type: boolean
-      publish:
-        default: false
-        type: boolean
-      conda:
-        default: false
-        type: boolean
-      py_ver:
-        default: '3.14'
-        type: string
+  workflow_call:
+    inputs: &reusable_inputs
       runner:
-        default: 'ubuntu-latest'
         type: string
+        default: 'ubuntu-latest'
+      py_ver:
+        type: string
+        default: '3.14'
+      test:
+        type: boolean
+        default: true
+      augment:
+        type: boolean
+        default: false
+      publish:
+        type: boolean
+        default: false
+      gh_pages:
+        type: boolean
+        default: false
+      conda:
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs: *reusable_inputs
 
 defaults:
   run:
@@ -32,8 +37,7 @@ defaults:
 
 jobs:
   
-  # TODO Split packaging across native hosts, merging build and test jobs (autorelease stuff can be handled in a prepare job before).
-  # Even merging with augment_cibw and augment_sbuild might be possible. This would allow us to easily switch between different build strategies.
+  # TODO Split packaging across native hosts, merging build and test jobs (autorelease.py can be run in a prepare job before). Add ability to select build strategy (binaries, sbuild, cibw) per target.
   
   build:
     runs-on: ${{ inputs.runner }}
@@ -275,7 +279,7 @@ jobs:
       id-token: write      # PyPI upload via "trusted publishing", and GH attestation
       attestations: write  # GH attestation
       contents: write      # autorelease repository changes
-      actions: write       # GH pages workflow-dispatch
+      actions: write       # GH pages build
     
     steps:
       
@@ -378,36 +382,27 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/  # the default
-      
-      - name: Trigger GH Pages rebuild
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: gh_pages.yaml  # takes no inputs
   
-  
-  conda_trigger:
+  gh_pages:
     needs: publish  # i.e. goes after, regardless if publish is active or not
+    if: ${{ inputs.gh_pages && !cancelled() && !contains(needs.*.result, 'failure') }}
+    uses: ./.github/workflows/gh_pages.yaml
+    with:
+      publish: ${{ inputs.publish }}
+  
+  conda:
+    needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
-    runs-on: ${{ inputs.runner }}
-    
-    steps:
-      - name: Trigger conda pypdfium2_helpers build
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: conda.yaml
-          inputs: |
-            {
-              "package": "helpers",
-              "pdfium_ver": "latest",
-              "new_only": "false",
-              "test": "true",
-              "publish": "${{ inputs.publish }}",
-              "py_ver": "${{ inputs.py_ver }}"
-            }
+    uses: ./.github/workflows/conda.yaml
+    with:
+      package: helpers
+      test: ${{ inputs.test }}
+      publish: ${{ inputs.publish }}
+      # py_ver: ${{ inputs.py_ver }}  # temporarily downgraded
   
   
   cleanup:
-    needs: [publish, conda_trigger]
+    needs: [publish, gh_pages, conda]
     if: ${{ !cancelled() }}
     runs-on: ${{ inputs.runner }}
     
