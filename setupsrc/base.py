@@ -39,7 +39,7 @@ PDFIUM_MIN_REQ = 6635
 # The PDFium versions our build scripts have last been tested with.
 # Ideally, they should be close to the release version in autorelease/record.json
 # To bump these versions, first test locally and update any patches as needed.
-# Then, make a branch and run "Sourcebuild" and "Sourcebuild Native" on CI to see if all targets continue to work.
+# Then, make a branch and run "Sourcebuild", "Sourcebuild Native" and "CIBW" on CI to see if all targets continue to work.
 # Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
 # Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
 SBUILD_NATIVE_PIN = 7831
