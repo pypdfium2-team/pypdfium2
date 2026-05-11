@@ -4,5 +4,5 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- Finally updated native sourcebuild from pdfium `7191` to `7831`.
+- Finally updated native sourcebuild from pdfium `7191` to `7835`.
   Updating the script & patches, and tracking down any issues that cropped up, adding new patches to fix them, turned out to be a huge undertaking.
