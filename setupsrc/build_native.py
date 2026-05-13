@@ -148,7 +148,9 @@ class _DeferredDeps:
         return result
     
     def __getitem__(self, key):
-        return self.deps[key]
+        out = self.deps[key]
+        self.__getitem__ = self.deps.__getitem__  # optimize
+        return out
 
 
 def handle_deps(config, vendor_deps, with_tests):
