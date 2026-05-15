@@ -97,7 +97,7 @@ before-all = [
 inherit.environment = "append"
 # on glibc linux with static clang, we try to use the vendored libc++
 # beware: this overrides the default BUILD_PARAMS from above
-environment.BUILD_PARAMS = "--vendor all --compiler clang --clang-path /opt/clang --no-libclang-rt"
+environment.BUILD_PARAMS = "--vendor all --no-legacy-gn --compiler clang --clang-path /opt/clang --no-libclang-rt"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux_{ppc64le,riscv64,loongarch64,s390x}"
