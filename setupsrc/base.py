@@ -992,7 +992,12 @@ def _install_dep(pkgname, exename=None, skip_if_present=True):
 def install_buildtools():
     log("Bootstrapping build tools...")
     _install_dep("ninja")
-    _install_dep("gn-dist", "gn")
+    try:
+        import gn_dist
+    except ImportError:
+        _install_dep("gn-dist", "gn")
+    else:
+        log("+ gn-dist found")
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
