@@ -549,19 +549,6 @@ class _host_platform:
             usr = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
         return Path(usr)
     
-    @cached_property
-    def local_bin(self):
-        # Path.home()/".local"/"bin"
-        if sys.version_info >= (3, 10):
-            user_scheme = sysconfig.get_preferred_scheme("user")
-        elif os.name == "nt":
-            user_scheme = "nt_user"
-        elif sys.platform.startswith("darwin") and getattr(sys, "_framework", None):
-            user_scheme = "osx_framework_user"
-        else:
-            user_scheme = "posix_user"
-        return Path( sysconfig.get_path("scripts", scheme=user_scheme) )
-    
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
         if self._raw_system == "linux" and self._libc_name:
