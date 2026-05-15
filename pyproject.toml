@@ -19,6 +19,32 @@ test-command = [
     "python {project}/utils/minitest.py",
 ]
 
+[tool.cibuildwheel.linux]
+environment-pass = ["TEST_PDFIUM"]
+# get recent GN
+before-build = [
+    "pip install 'gn-dist==2385'",
+    "export GN_DIR=$(python -c 'from gn_dist import GN; print(str(GN.parent))')",
+    "export PATH=\"$GN_DIR:$PATH\"",
+]
+
+[tool.cibuildwheel.linux.environment]
+PDFIUM_PLATFORM = "sourcebuild-native"
+# Vendored libc++ probably won't build with our older containers' GCC.
+# It says the minimum requirement is GCC 15 or Clang 20 which is too high e.g. for Ubuntu 24.04.
+BUILD_PARAMS = "--vendor all --no-vendor libc++ --no-legacy-gn"
+
+[tool.cibuildwheel.macos.environment]
+PDFIUM_PLATFORM = "sourcebuild-toolchained"
+# The deployment target is actually defined in the build script's GN config
+# But need to set it again here for auditwheel
+MACOSX_DEPLOYMENT_TARGET = "11.0.0"
+# Make sure the OS yields its real version
+SYSTEM_VERSION_COMPAT = 0
+
+[tool.cibuildwheel.windows.environment]
+PDFIUM_PLATFORM = "sourcebuild-toolchained"
+
 [[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
 select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_amd64"
@@ -33,7 +59,7 @@ select = "*-manylinux_*"
 before-all = [
     "dnf clean all && dnf makecache --refresh",
     "dnf -y install ninja-build",  # freetype-devel lcms2-devel libjpeg-devel openjpeg2-devel libpng-devel libtiff-devel zlib-devel glib2-devel harfbuzz-devel
-    "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64}
+    # "sh -c 'dnf -y install gn || true'",  # not manylinux_{i686,riscv64}
 ]
 
 # manylinux_armv7l uses a Ubuntu-based image, for lack of an RHEL-based one
@@ -41,7 +67,7 @@ before-all = [
 select = "*-manylinux_armv7l"
 before-all = [
     "apt-get update",
-    "apt-get install -y generate-ninja ninja-build",  # libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev libharfbuzz-dev
+    "apt-get install -y ninja-build",  # generate-ninja libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev libharfbuzz-dev
 ]
 manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:2025.11.03-1"
 
@@ -49,37 +75,10 @@ manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:2025.11.03-1"
 select = "*-musllinux_*"
 inherit.before-all = "append"
 before-all = [
-    "apk add gn ninja-build",  # freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev
+    "apk add ninja-build",  # gn freetype-dev lcms2-dev jpeg-dev openjpeg-dev libpng-dev tiff-dev zlib-dev glib-dev
 ]
-
-# For i686, no GN prebuilds seem to be available at the usual places.
-# Emulation is reasonably fast for this target, so let's try to bootstrap it.
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_i686"
-inherit.before-all = "append"
-before-all = [
-    "python3 {project}/utils/build_gn.py /usr/local/bin",
-]
-
-# We're in luck, Google actually serves GN binaries for riscv64
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_riscv64"
-inherit.before-all = "append"
-before-all = [
-    "export GN_ARCHIVE='./gn-linux-riscv64.zip'",
-    "curl -L -o '$GN_ARCHIVE' 'https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-riscv64/+/latest'",
-    "unzip -j '$GN_ARCHIVE' gn -d /usr/local/bin",
-    "unlink '$GN_ARCHIVE'",
-]
-
-[tool.cibuildwheel.linux]
-environment-pass = ["TEST_PDFIUM"]
-
-[tool.cibuildwheel.linux.environment]
-PDFIUM_PLATFORM = "sourcebuild-native"
-# Vendored libc++ probably won't build with our older containers' GCC.
-# It says the minimum requirement is GCC 15 or Clang 20 which is too high e.g. for Ubuntu 24.04.
-BUILD_PARAMS = "--vendor all --no-vendor libc++"
+inherit.environment = "append"
+environment.PATH = "/usr/lib/ninja-build/bin:$PATH"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-*linux_{ppc64le,riscv64,loongarch64,s390x}"
@@ -103,26 +102,9 @@ inherit.environment = "append"
 environment.BUILD_PARAMS = "$BUILD_PARAMS --no-vendor libc++"
 
 [[tool.cibuildwheel.overrides]]
-# on i686 and riscv64, we can be confident of having recent enough GN available (see above)
-select = "*-manylinux_{i686,riscv64}"
-inherit.environment = "append"
-environment.BUILD_PARAMS = "$BUILD_PARAMS --no-legacy-gn"
-
-[[tool.cibuildwheel.overrides]]
 select = "*-*linux_s390x"
 inherit.environment = "append"
 environment.BUILD_PARAMS = "$BUILD_PARAMS --clang-as-gcc"
-
-[tool.cibuildwheel.macos.environment]
-PDFIUM_PLATFORM = "sourcebuild-toolchained"
-# The deployment target is actually defined in the build script's GN config
-# But need to set it again here for auditwheel
-MACOSX_DEPLOYMENT_TARGET = "11.0.0"
-# Make sure the OS yields its real version
-SYSTEM_VERSION_COMPAT = 0
-
-[tool.cibuildwheel.windows.environment]
-PDFIUM_PLATFORM = "sourcebuild-toolchained"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-win_arm64"

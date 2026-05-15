@@ -993,51 +993,18 @@ def pack_sourcebuild(
     return full_ver, post_ver
 
 
-def install_ninja(skip_if_present=True):
+def _install_dep(pkgname, skip_if_present=True):
     if skip_if_present and shutil.which("ninja"):
-        log("+ ninja found.")
+        log(f"+ {pkgname} found.")
         return
     # https://github.com/scikit-build/ninja-python-distributions
-    log("- ninja not found, installing...")
-    run_cmd([sys.executable, "-m", "pip", "install", "ninja"], cwd=None)
-
-def make_executable(path):
-    if sys.platform.startswith("win32"):
-        return
-    path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
-def install_gn(target_dir=None, skip_if_present=True, cxx="g++"):
-    if skip_if_present and shutil.which("gn"):
-        log("+ gn found.")
-        return
-    
-    # TODO fetch binaries?
-    # https://chrome-infra-packages.appspot.com/p/gn/gn or
-    # https://github.com/loong64/gn/releases/latest
-    
-    log("- gn not found, attempt to build from scratch...")
-    if target_dir is None:
-        target_dir = Host.local_bin
-    
-    gn_dir = ProjectDir/"sbuild"/"gn"
-    url = "https://gn.googlesource.com/gn/"
-    rev = "9ece3f5254c273cb46606a6571963f931c3b012d"
-    if not gn_dir.exists():
-        git_clone_rev(url, rev, gn_dir, depth=1)
-        git_apply_patch(PatchDir/"gn_build.patch", cwd=gn_dir)
-    
-    env = os.environ.copy()
-    env["CXX"] = cxx
-    run_cmd(["python3", "build/gen.py", "--no-last-commit-position", "--no-static-libstdc++", "--allow-warnings"], cwd=gn_dir, env=env)
-    run_cmd(["ninja", "-C", "out", "gn"], cwd=gn_dir, env=env)
-    
-    shutil.copyfile(gn_dir/"out"/"gn", target_dir/"gn")
-    make_executable(target_dir/"gn")
+    log(f"- {pkgname} not found, installing...")
+    run_cmd([sys.executable, "-m", "pip", "install", pkgname], cwd=None)
 
 def install_buildtools():
     log("Bootstrapping build tools...")
-    install_ninja()
-    install_gn()
+    _install_dep("ninja")
+    _install_dep("gn")
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
