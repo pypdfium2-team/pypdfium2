@@ -1042,3 +1042,11 @@ def shared_autopatches(pdfium_dir):
         "#if 1  // defined(COMPONENT_BUILD)",
         is_regex=False, exp_count=1,
     )
+
+
+def honor_gn_dist():
+    try:
+        import gn_dist
+    except ImportError:
+        return
+    env_prepend("PATH", str(gn_dist.GN.parent), os.pathsep)
