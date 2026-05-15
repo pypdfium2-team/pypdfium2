@@ -993,18 +993,19 @@ def pack_sourcebuild(
     return full_ver, post_ver
 
 
-def _install_dep(pkgname, skip_if_present=True):
-    if skip_if_present and shutil.which("ninja"):
-        log(f"+ {pkgname} found.")
+def _install_dep(pkgname, exename=None, skip_if_present=True):
+    exename = exename or pkgname
+    if skip_if_present and shutil.which(exename):
+        log(f"+ {exename} found.")
         return
     # https://github.com/scikit-build/ninja-python-distributions
-    log(f"- {pkgname} not found, installing...")
+    log(f"- {exename} not found, installing...")
     run_cmd([sys.executable, "-m", "pip", "install", pkgname], cwd=None)
 
 def install_buildtools():
     log("Bootstrapping build tools...")
     _install_dep("ninja")
-    _install_dep("gn")
+    _install_dep("gn-dist", "gn")
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
