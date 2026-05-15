@@ -980,8 +980,8 @@ def pack_sourcebuild(
     return full_ver, post_ver
 
 
-def _install_dep(pkgname, exename=None, skip_if_present=True):
-    exename = exename or pkgname
+def _install_dep(exename, pkgname=None, skip_if_present=True):
+    pkgname = pkgname or exename
     if skip_if_present and shutil.which(exename):
         log(f"+ {exename} found.")
         return
@@ -995,7 +995,7 @@ def install_buildtools():
     try:
         import gn_dist
     except ImportError:
-        _install_dep("gn-dist", "gn")
+        _install_dep("gn", "gn-dist")
     else:
         log("+ gn-dist found")
 
