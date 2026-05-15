@@ -13,7 +13,7 @@ requires = [
 ]
 
 [tool.cibuildwheel]
-build-frontend = {name="build", args=["--no-isolation"]}
+build-frontend = {name="build", args=["-xn"]}
 before-build = [
     "pip install -r {project}/req/setup.txt",
 ]
