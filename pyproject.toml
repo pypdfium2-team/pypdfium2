@@ -15,7 +15,7 @@ requires = [
 [tool.cibuildwheel]
 build-frontend = {name="build", args=["--no-isolation"]}
 before-build = [
-    "pip install -r {project}/req/setup.txt"
+    "pip install -r {project}/req/setup.txt",
 ]
 test-command = [
     "python -m pypdfium2_cli --version",
@@ -24,12 +24,6 @@ test-command = [
 
 [tool.cibuildwheel.linux]
 environment-pass = ["TEST_PDFIUM"]
-inherit.before-build = "append"
-before-build = [
-    "pip install 'gn-dist==2385'",
-    "export GN_DIR=$(python -c 'from gn_dist import GN; print(str(GN.parent))')",
-    "export PATH=\"$GN_DIR:$PATH\"",
-]
 
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
@@ -47,6 +41,15 @@ SYSTEM_VERSION_COMPAT = 0
 
 [tool.cibuildwheel.windows.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-*linux*"
+inherit.before-build = "append"
+before-build = [
+    "pip install 'gn-dist==2385'",
+    "export GN_DIR=$(python -c 'from gn_dist import GN; print(str(GN.parent))')",
+    "export PATH=\"$GN_DIR:$PATH\"",
+]
 
 [[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
