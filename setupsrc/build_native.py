@@ -398,6 +398,8 @@ def test(build_dir, vendor_deps, compiler):
 
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, legacy_gn_compat=True):
     
+    honor_gn_dist()
+    
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
     if vendor_deps is None:
@@ -448,7 +450,9 @@ This does not use Google's binary toolchain, so it should be portable across dif
 Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
 For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.
 
-In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf (with trailing dash).\
+In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf (with trailing dash).
+
+Note, if the Python package `gn-dist` is installed, it will be prioritized over system GN.\
 """,
     )
     if ExtendAction is not None:  # from base.py

@@ -549,19 +549,6 @@ class _host_platform:
             usr = os.getenv("PREFIX", "/data/data/com.termux/files/usr")
         return Path(usr)
     
-    @cached_property
-    def local_bin(self):
-        # Path.home()/".local"/"bin"
-        if sys.version_info >= (3, 10):
-            user_scheme = sysconfig.get_preferred_scheme("user")
-        elif os.name == "nt":
-            user_scheme = "nt_user"
-        elif sys.platform.startswith("darwin") and getattr(sys, "_framework", None):
-            user_scheme = "osx_framework_user"
-        else:
-            user_scheme = "posix_user"
-        return Path( sysconfig.get_path("scripts", scheme=user_scheme) )
-    
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
         if self._raw_system == "linux" and self._libc_name:
@@ -993,51 +980,24 @@ def pack_sourcebuild(
     return full_ver, post_ver
 
 
-def install_ninja(skip_if_present=True):
-    if skip_if_present and shutil.which("ninja"):
-        log("+ ninja found.")
+def _install_dep(exename, pkgname=None, skip_if_present=True):
+    pkgname = pkgname or exename
+    if skip_if_present and shutil.which(exename):
+        log(f"+ {exename} found.")
         return
     # https://github.com/scikit-build/ninja-python-distributions
-    log("- ninja not found, installing...")
-    run_cmd([sys.executable, "-m", "pip", "install", "ninja"], cwd=None)
-
-def make_executable(path):
-    if sys.platform.startswith("win32"):
-        return
-    path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
-def install_gn(target_dir=None, skip_if_present=True, cxx="g++"):
-    if skip_if_present and shutil.which("gn"):
-        log("+ gn found.")
-        return
-    
-    # TODO fetch binaries?
-    # https://chrome-infra-packages.appspot.com/p/gn/gn or
-    # https://github.com/loong64/gn/releases/latest
-    
-    log("- gn not found, attempt to build from scratch...")
-    if target_dir is None:
-        target_dir = Host.local_bin
-    
-    gn_dir = ProjectDir/"sbuild"/"gn"
-    url = "https://gn.googlesource.com/gn/"
-    rev = "9ece3f5254c273cb46606a6571963f931c3b012d"
-    if not gn_dir.exists():
-        git_clone_rev(url, rev, gn_dir, depth=1)
-        git_apply_patch(PatchDir/"gn_build.patch", cwd=gn_dir)
-    
-    env = os.environ.copy()
-    env["CXX"] = cxx
-    run_cmd(["python3", "build/gen.py", "--no-last-commit-position", "--no-static-libstdc++", "--allow-warnings"], cwd=gn_dir, env=env)
-    run_cmd(["ninja", "-C", "out", "gn"], cwd=gn_dir, env=env)
-    
-    shutil.copyfile(gn_dir/"out"/"gn", target_dir/"gn")
-    make_executable(target_dir/"gn")
+    log(f"- {exename} not found, installing...")
+    run_cmd([sys.executable, "-m", "pip", "install", pkgname], cwd=None)
 
 def install_buildtools():
     log("Bootstrapping build tools...")
-    install_ninja()
-    install_gn()
+    _install_dep("ninja")
+    try:
+        import gn_dist
+    except ImportError:
+        _install_dep("gn", "gn-dist")
+    else:
+        log("+ gn-dist found")
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
@@ -1075,3 +1035,11 @@ def shared_autopatches(pdfium_dir):
         "#if 1  // defined(COMPONENT_BUILD)",
         is_regex=False, exp_count=1,
     )
+
+
+def honor_gn_dist():
+    try:
+        import gn_dist
+    except ImportError:
+        return
+    env_prepend("PATH", str(gn_dist.GN.parent), os.pathsep)
