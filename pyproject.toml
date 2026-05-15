@@ -14,6 +14,9 @@ requires = [
 
 [tool.cibuildwheel]
 build-frontend = {name="build", args=["--no-isolation"]}
+before-build = [
+    "pip install -r {project}/req/setup.txt"
+]
 test-command = [
     "python -m pypdfium2_cli --version",
     "python {project}/utils/minitest.py",
@@ -21,6 +24,7 @@ test-command = [
 
 [tool.cibuildwheel.linux]
 environment-pass = ["TEST_PDFIUM"]
+inherit.before-build = "append"
 before-build = [
     "pip install 'gn-dist==2385'",
     "export GN_DIR=$(python -c 'from gn_dist import GN; print(str(GN.parent))')",
