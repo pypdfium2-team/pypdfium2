@@ -46,7 +46,24 @@ PDFIUM_PLATFORM = "sourcebuild-toolchained"
 select = "*-*linux*"
 inherit.before-build = "append"
 before-build = [
-    "pip install 'gn-dist==2385'",
+    # TOML overrides/selectors are so awful...
+    "sh -c 'pip install --only-binary :all: \"gn-dist==2385\" || true'",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_loongarch64"
+inherit.before-build = "append"
+before-build = [
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2385/gn_dist-2385-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
+    "pip install ./gn_dist-*_loongarch64.whl"
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux_loongarch64"
+inherit.before-build = "append"
+before-build = [
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2385/gn_dist-2385-py3-none-musllinux_1_2_loongarch64.whl'",
+    "pip install ./gn_dist-*_loongarch64.whl"
 ]
 
 [[tool.cibuildwheel.overrides]]
