@@ -89,7 +89,8 @@ jobs:
         run: |
           sudo apt-get install -y ninja-build  # generate-ninja
           python3 -m pip install 'gn-dist==2385'
-          python3 -c "from gn_dist import GN; print(str(GN.parent))" >> $GITHUB_PATH
+          # in PORTABLE_MODE, build_toolchained.py does honor_gn_dist() on its own
+          #python3 -c "from gn_dist import GN; print(str(GN.parent))" >> $GITHUB_PATH
       
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.
       - name: Install Windows cross deps
