@@ -43,30 +43,6 @@ SYSTEM_VERSION_COMPAT = 0
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
 
 [[tool.cibuildwheel.overrides]]
-# TOML overrides/selectors are so awful...
-select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64}"  # not loongarch64
-inherit.before-build = "append"
-before-build = [
-    "pip install --only-binary :all: 'gn-dist==2385'",
-]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux_loongarch64"
-inherit.before-build = "append"
-before-build = [
-    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2385/gn_dist-2385-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
-    "pip install ./gn_dist-*_loongarch64.whl"
-]
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux_loongarch64"
-inherit.before-build = "append"
-before-build = [
-    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2385/gn_dist-2385-py3-none-musllinux_1_2_loongarch64.whl'",
-    "pip install ./gn_dist-*_loongarch64.whl"
-]
-
-[[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
 select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_amd64"
 test-requires = ["pytest", "pillow", "numpy"]
@@ -100,6 +76,29 @@ before-all = [
 ]
 inherit.environment = "append"
 environment.PATH = "/usr/lib/ninja-build/bin:$PATH"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64}"  # not loongarch64
+inherit.before-build = "append"
+before-build = [
+    "pip install --only-binary :all: 'gn-dist==2385'",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_loongarch64"
+inherit.before-build = "append"
+before-build = [
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2385/gn_dist-2385-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
+    "pip install ./gn_dist-*_loongarch64.whl"
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux_loongarch64"
+inherit.before-build = "append"
+before-build = [
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2385/gn_dist-2385-py3-none-musllinux_1_2_loongarch64.whl'",
+    "pip install ./gn_dist-*_loongarch64.whl"
+]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-*linux_{ppc64le,riscv64,loongarch64,s390x}"
