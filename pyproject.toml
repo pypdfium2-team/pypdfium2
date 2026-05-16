@@ -43,11 +43,11 @@ SYSTEM_VERSION_COMPAT = 0
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
 
 [[tool.cibuildwheel.overrides]]
-select = "*-*linux*"
+# TOML overrides/selectors are so awful...
+select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64}"  # not loongarch64
 inherit.before-build = "append"
 before-build = [
-    # TOML overrides/selectors are so awful...
-    "sh -c 'pip install --only-binary :all: \"gn-dist==2385\" || true'",
+    "pip install --only-binary :all: 'gn-dist==2385'",
 ]
 
 [[tool.cibuildwheel.overrides]]
