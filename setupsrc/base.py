@@ -5,13 +5,11 @@ import os
 import re
 import sys
 import json
-import stat
 import shutil
 import tarfile
 import platform
 import argparse
 import functools
-import sysconfig
 import subprocess
 import contextlib
 from pathlib import Path
