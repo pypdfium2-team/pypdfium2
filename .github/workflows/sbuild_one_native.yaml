@@ -63,7 +63,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev libharfbuzz-dev  # generate-ninja
-          python3 -m pip install 'gn-dist==2385'
+          python3 -m pip install -r req/gn.txt
       
       - name: Set up symlinks for clang
         if: ${{ inputs.compiler == 'clang' }}

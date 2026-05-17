@@ -150,7 +150,6 @@ def main(
     if PORTABLE_MODE:
         # cf. https://pkg.go.dev/go.chromium.org/luci/vpython#readme-configuration
         os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
-        honor_gn_dist()
     
     # defaults handled internally to avoid duplication with parse_args()
     if target_cpu is None:

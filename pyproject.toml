@@ -81,7 +81,7 @@ environment.PATH = "/usr/lib/ninja-build/bin:$PATH"
 select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64}"  # not loongarch64
 inherit.before-build = "append"
 before-build = [
-    "pip install --only-binary :all: 'gn-dist==2385'",
+    "pip install --only-binary :all: -r {project}/req/gn.txt",
 ]
 
 [[tool.cibuildwheel.overrides]]

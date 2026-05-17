@@ -982,8 +982,9 @@ def pack_sourcebuild(
 
 def _install_dep(exename, pkgname=None, skip_if_present=True):
     pkgname = pkgname or exename
-    if skip_if_present and shutil.which(exename):
-        log(f"+ {exename} found.")
+    which_exe = shutil.which(exename)
+    if skip_if_present and which_exe:
+        log(f"+ {exename} found at {which_exe}")
         return
     # https://github.com/scikit-build/ninja-python-distributions
     log(f"- {exename} not found, installing...")
@@ -992,12 +993,7 @@ def _install_dep(exename, pkgname=None, skip_if_present=True):
 def install_buildtools():
     log("Bootstrapping build tools...")
     _install_dep("ninja")
-    try:
-        import gn_dist
-    except ImportError:
-        _install_dep("gn", "gn-dist")
-    else:
-        log("+ gn-dist found")
+    _install_dep("gn", "gn-dist")
 
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
@@ -1035,11 +1031,3 @@ def shared_autopatches(pdfium_dir):
         "#if 1  // defined(COMPONENT_BUILD)",
         is_regex=False, exp_count=1,
     )
-
-
-def honor_gn_dist():
-    try:
-        import gn_dist
-    except ImportError:
-        return
-    env_prepend("PATH", str(gn_dist.GN.parent), os.pathsep)
