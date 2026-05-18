@@ -377,8 +377,8 @@ class PdfPage (pdfium_i.AutoCloseable):
             
             crop (tuple[float, float, float, float]):
                 Amount to cut off from view (left, bottom, right, top), in PDF canvas units.
-                Negative crop may extend rendering beyond the page's default clipping area.
                 Rendering crop applies on bitmap level (i.e. after rotation), unlike changing the page cropbox using :meth:`.set_cropbox`.
+                Negative crop is not supported (though no exception will be raised). It may produce a larger canvas but not actually expand the rendering area, as of PDFium 7825.
             
             may_draw_forms (bool):
                 If True, render form fields (provided the document has forms and :meth:`~.PdfDocument.init_forms` was called).
