@@ -145,8 +145,8 @@ class AutoCloseable (AutoCastable):
     def _tree_closed(self):
         if self.raw is None:
             return True
-        if self.parent != None and self.parent._tree_closed():
-            return True
+        if self.parent is not None:
+            return self.parent._tree_closed()
         return False
     
     def _add_kid(self, kid):
