@@ -17,7 +17,7 @@ _coverage_impl OMISSIONS *args:
 	python3 -m coverage run --omit "{{OMISSIONS}}" -m pytest tests/ {{args}}
 	python3 -m coverage report
 	python3 -m coverage html
-	{{BROWSER}} ./htmlcov/index.html
+	{{BROWSER}} ./htmlcov/index.html &
 coverage *args:
 	just _coverage_impl "src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 coverage-core *args:
