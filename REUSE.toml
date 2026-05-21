@@ -5,7 +5,7 @@
 
 version = 1
 SPDX-PackageName = "pypdfium2"
-SPDX-PackageSupplier = "geisserml <geisserml@gmail.com>"
+SPDX-PackageSupplier = "pypdfium2-team <geisserml@gmail.com>"
 SPDX-PackageDownloadLocation = "https://github.com/pypdfium2-team/pypdfium2"
 
 [[annotations]]
@@ -146,6 +146,13 @@ SPDX-FileComment = '''
 Derived from RedHat packaging repository: https://github.com/tiran/libpdfium/blob/d99370b3ac7f0c9cd7222be2dfab2c7b648f2e9e/0001-bigendian.patch
 Repo does not have an own license file, but assumably the patches are being made available under pdfium's license, or leastways an open-source license.
 '''
+
+[[annotations]]
+path = "patches/security/openjpeg.patch"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Even Rouault <even.rouault@spatialys.com>"
+SPDX-License-Identifier = "BSD-2-Clause"
+SPDX-FileComment = "Cherry-pick https://pdfium.googlesource.com/pdfium/+/65c78d0727c665106efed287a687b37d41a49439"
 
 [[annotations]]
 path = [
