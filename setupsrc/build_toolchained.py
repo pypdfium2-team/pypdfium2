@@ -208,6 +208,7 @@ def main(
         config_dict["target_os"] = target_os
         if target_os == "android":
             config_dict["default_min_sdk_version"] = 21
+            #config_dict["use_mold"] = False
     
     GN = get_tool("gn")
     Ninja = get_tool("ninja")

@@ -93,6 +93,7 @@ if IS_ANDROID:
         "sysroot": str(Host.usr.parent),
         "current_os": "android",
         "target_os": "android",
+        "use_mold": False,
     })
     del DefaultConfig["use_sysroot"]  # implies use_sysroot = true
     # On Android, it seems that the build system's CPU type statically defaults to "arm", but we want this script to be host-adaptive (plus, "arm64" is the more likely candidate).
