@@ -44,6 +44,7 @@ PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 CUSTOM_TOOLCHAIN_DIR = PDFIUM_DIR_build/"toolchain"/"linux"/"custom"
 # for docs / available options, see the comments in //build/toolchain/gcc_toolchain.gni - they're really helpful
 # further options e.g. enable_linker_map, extra_asmflags, shlib_extension
+# see also https://chromium.googlesource.com/chromium/src/+/6488187212e7e2f1c1decb5dcf72d4fce888428a/build/toolchain/linux/unbundle/
 CUSTOM_TOOLCHAIN_TEMPL = """\
 import("//build/toolchain/gcc_toolchain.gni")
 
@@ -53,9 +54,9 @@ gcc_toolchain("default") {
   ld = cxx
   
   _toolprefix = "%(TOOLPREFIX)s"
-  readelf = _toolprefix + "readelf"
-  nm = _toolprefix + "nm"
   ar = _toolprefix + "ar"
+  nm = _toolprefix + "nm"
+  readelf = _toolprefix + "readelf"
   
   extra_cflags = getenv("CFLAGS")
   extra_cppflags = getenv("CPPFLAGS")
@@ -450,7 +451,7 @@ This does not use Google's binary toolchain, so it should be portable across dif
 Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
 For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.
 
-In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf (with trailing dash).\
+In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.\
 """,
     )
     if ExtendAction is not None:  # from base.py
