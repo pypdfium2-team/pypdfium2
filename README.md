@@ -38,7 +38,7 @@ This will bypass wheels and run setup, while requesting use of V8 builds through
 As of this writing, pypdfium2 does not require any mandatory runtime dependencies, apart from Python and PDFium itself (which is commonly bundled).
 
 However, some optional support model / CLI features need additional packages:
-* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a pouplar imaging library for Python.
+* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a popular imaging library for Python.
   pypdfium2 provides convenience adapters to translate between raw bitmap buffers and PIL images.
   It also uses PIL for some command-line functionality (e.g. image saving).
 * [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing.
