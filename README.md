@@ -38,7 +38,7 @@ This will bypass wheels and run setup, while requesting use of V8 builds through
 As of this writing, pypdfium2 does not require any mandatory runtime dependencies, apart from Python and PDFium itself (which is commonly bundled).
 
 However, some optional support model / CLI features need additional packages:
-* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a pouplar imaging library for Python.
+* [`Pillow`](https://pillow.readthedocs.io/en/stable/) (module `PIL`) is a popular imaging library for Python.
   pypdfium2 provides convenience adapters to translate between raw bitmap buffers and PIL images.
   It also uses PIL for some command-line functionality (e.g. image saving).
 * [`NumPy`](https://numpy.org/doc/stable/index.html) is a library for scientific computing.
@@ -400,7 +400,7 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
     + With conda, it seems there is no way to create platform-specific but interpreter-independent python packages, so we cannot reasonably bundle pdfium. Thus, we have to use external pdfium, which is more complex and has some pitfalls.
 
 + To install
-  
+
   With permanent channel config (encouraged):
   ```bash
   conda config --add channels bblanchon
@@ -408,12 +408,12 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
   conda config --set channel_priority strict
   conda install pypdfium2-team::pypdfium2_helpers
   ```
-  
+
   Alternatively, with temporary channel config:
   ```bash
   conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon -c defaults
   ```
-  
+
   If desired, you may limit the channel config to the current environment by adding `--env`.
   Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel.
   Otherwise, you should be cautious when making changes to the environment.
@@ -495,9 +495,9 @@ Here are some examples of using the support model API.
   pil_image = bitmap.to_pil()
   pil_image.show()
   ```
-  
+
   Note, with the PIL adapter, it might be advantageous to use `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA, rev_byteorder=True` or perhaps `prefer_bgrx=True, maybe_alpha=True, rev_byteorder=True`, to achieve a pixel format supported natively by PIL, and avoid rendering with transparency to a non-alpha bitmap, which can slow down pdfium.
-  
+
   With `.to_numpy()`, all formats are zero-copy, but passing either `maybe_alpha=True` (if dynamic pixel format is acceptable) or `force_bitmap_format=pdfium_c.FPDFBitmap_BGRA` is also recommended for the transparency problem.
 
 * Try some page methods
@@ -506,7 +506,7 @@ Here are some examples of using the support model API.
   width, height = page.get_size()
   # Set the absolute page rotation to 90° clockwise
   page.set_rotation(90)
-  
+
   # Locate objects on the page
   for obj in page.get_objects():
       print(obj.level, obj.type, obj.get_bounds())
@@ -516,14 +516,14 @@ Here are some examples of using the support model API.
   ```python
   # Load a text page helper
   textpage = page.get_textpage()
-  
+
   # Extract text from the whole page
   text_all = textpage.get_text_bounded()
   # Extract text from a specific rectangular area
   text_rect = textpage.get_text_bounded(left=50, bottom=100, right=width-50, top=height-100)
   # Extract text from a specific char range
   text_span = textpage.get_text_range(index=10, count=15)
-  
+
   # Locate text on the page
   searcher = textpage.search("something", match_case=False, match_whole_word=False)
   # This returns the next occurrence as (char_index, char_count), or None if not found
@@ -533,7 +533,7 @@ Here are some examples of using the support model API.
 * Read the table of contents
   ```python
   import pypdfium2.internal as pdfium_i
-  
+
   for bm in pdf.get_toc(max_depth=15):
       count, dest = bm.get_count(), bm.get_dest()
       out = "    " * bm.level
@@ -563,14 +563,14 @@ Here are some examples of using the support model API.
 * Include a JPEG image in a PDF
   ```python
   pdf = pdfium.PdfDocument.new()
-  
+
   image = pdfium.PdfImage.new(pdf)
   image.load_jpeg("./tests/resources/mona_lisa.jpg")
   width, height = image.get_px_size()
-  
+
   matrix = pdfium.PdfMatrix().scale(width, height)
   image.set_matrix(matrix)
-  
+
   page = pdf.new_page(width, height)
   page.insert_obj(image)
   page.gen_content()
@@ -624,7 +624,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   ```
   Python `bytes` are converted to `FPDF_STRING` by ctypes autoconversion. This works because `FPDF_STRING` is actually an alias to `POINTER(c_char)` (i.e. `char*`), which is a primitive pointer type.
   When passing a string to a C function, it must always be NUL-terminated, as the function merely receives a pointer to the first item and then continues to read memory until it finds a NUL terminator.
-  
+
 [^bindings_decl]: From the auto-generated bindings file. We maintain a reference copy at `autorelease/bindings.py`. Or if you have an editable install, there will also be `src/pypdfium2_raw/bindings.py`.
 
 * First of all, function parameters are not only used for input, but also for output:
@@ -659,14 +659,14 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 
 * For string output parameters, callers needs to provide a sufficiently long, pre-allocated buffer.
   This may work differently depending on what type the function requires, which encoding is used, whether the number of bytes or units is returned, and whether space for a NUL terminator is included or not. Carefully review the documentation of the function in question to fulfill its requirements.
-  
+
   There are many different ways of handling output strings; this section describes the strategy used by pypdfium2's helpers.
-  
+
   We will first import the `codecs.decode()` function which can be used on generic memory (whereas the `.decode()` method is only available on bytes or bytearrays):
   ```python
   from codecs import decode
   ```
-  
+
   Example A: Getting the title string of a bookmark.
   ```python
   # (Assuming `bookmark` is an FPDF_BOOKMARK)
@@ -679,7 +679,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Decode to string, cutting off the NUL terminator (encoding: UTF-16LE)
   title = decode(memoryview(buffer)[:n_bytes-2], "utf-16-le")
   ```
-  
+
   Example B: Extracting text in given boundaries.
   ```python
   # (Assuming `textpage` is an FPDF_TEXTPAGE and the boundary variables are set)
@@ -699,7 +699,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Decode to string (You may want to pass errors="ignore" to skip possible errors in the PDF's encoding)
   text = decode(buffer, "utf-16-le")
   ```
-  
+
   There are also APIs that return the number of bytes but expect a multi-byte type, e.g. `FPDF_WCHAR`.
   In that case, you can calculate the number of units via `-(n_bytes // -ctypes.sizeof(pdfium_c.FPDF_WCHAR))` (this does a ceil division).
   <!-- TODO add actual example -->
@@ -761,43 +761,43 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
           seen.add(address)
       bookmark = pdfium_c.FPDFBookmark_GetNextSibling(pdf, bookmark)
   ```
-  
+
   [^ctypes_no_oor]: Confer the [ctypes documentation on Pointers](https://docs.python.org/3/library/ctypes.html#pointers).
 
 * In many situations, callback functions come in handy.[^callback_usecases] Thanks to `ctypes`, it is seamlessly possible to use callbacks across Python/C language boundaries.
-  
+
   [^callback_usecases]: e. g. incremental read/write, management of progressive tasks, ...
-  
+
   Example: Loading a document from a Python buffer. This way, file access can be controlled in Python while the data does not need to be in memory at once.
   ```python
   import os
-  
+
   # Factory class to create callable objects holding a reference to a Python buffer
   class _reader_class:
-    
+
     def __init__(self, py_buffer):
         self.py_buffer = py_buffer
-    
+
     def __call__(self, _, position, buffer_ptr, size):
         # Write data from Python buffer into C buffer, as explained before
         c_buffer = (ctypes.c_ubyte * size).from_address( ctypes.addressof(buffer_ptr.contents) )
         self.py_buffer.seek(position)
         self.py_buffer.readinto(c_buffer)
         return 1  # non-zero return code for success
-  
+
   # (Assuming py_buffer is a Python file buffer, e. g. io.BufferedReader)
   # Get the length of the buffer
   py_buffer.seek(0, os.SEEK_END)
   file_len = py_buffer.tell()
   py_buffer.seek(0)
-  
+
   # Set up an interface structure for custom file access
   fileaccess = pdfium_c.FPDF_FILEACCESS()
   fileaccess.m_FileLen = file_len
-  
+
   # Assign the callback, wrapped in its CFUNCTYPE
   fileaccess.m_GetBlock = type(fileaccess.m_GetBlock)( _reader_class(py_buffer) )
-  
+
   # Finally, load the document
   pdf = pdfium_c.FPDF_LoadCustomDocument(fileaccess, None)
   ```
@@ -806,36 +806,36 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
 <!-- FIXME The data holder strategy shown below is wonky. Should use Py_IncRef() / Py_DecRef() C APIs instead. -->
 
 * When using the raw API, special care needs to be taken regarding object lifetime, considering that Python may garbage collect objects as soon as their reference count reaches zero. However, the interpreter has no way of magically knowing how long the underlying resources of a Python object might still be needed on the C side, so measures need to be taken to keep such objects referenced until PDFium does not depend on them anymore.
-  
+
   If resources need to remain valid after the time of a function call, PDFium docs usually indicate this clearly. Ignoring requirements on object lifetime will lead to memory corruption (commonly resulting in a segfault sooner or later).
-  
+
   For instance, the docs on `FPDF_LoadCustomDocument()` state that
   > The application must keep the file resources |pFileAccess| points to valid until the returned FPDF_DOCUMENT is closed. |pFileAccess| itself does not need to outlive the FPDF_DOCUMENT.
-  
+
   This means that the callback function and the Python buffer need to be kept alive as long as the `FPDF_DOCUMENT` is used.
   This can be achieved by referencing these objects in an accompanying class, e. g.
-  
+
   ```python
   class PdfDataHolder:
-      
+
       def __init__(self, buffer, function):
           self.buffer = buffer
           self.function = function
-      
+
       def close(self):
           # Make sure both objects remain available until this function is called
           # No-op id() call to denote that the object needs to stay in memory up to this point
           id(self.function)
           self.buffer.close()
-  
+
   # ... set up an FPDF_FILEACCESS structure
-  
+
   # (Assuming `py_buffer` is the buffer and `fileaccess` the FPDF_FILEACCESS interface)
   data_holder = PdfDataHolder(py_buffer, fileaccess.m_GetBlock)
   pdf = pdfium_c.FPDF_LoadCustomDocument(fileaccess, None)
-  
+
   # ... work with the pdf
-  
+
   # Close the PDF to free resources
   pdfium_c.FPDF_CloseDocument(pdf)
   # Close the data holder, to keep the object itself and thereby the objects it
@@ -850,20 +850,20 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   import os.path
   import PIL.Image
   import pypdfium2.raw as pdfium_c
-  
+
   # Load the document
   filepath = os.path.abspath("tests/resources/render.pdf")
   pdf = pdfium_c.FPDF_LoadDocument((filepath+"\x00").encode("utf-8"), None)
-  
+
   # Check page count to make sure it was loaded correctly
   page_count = pdfium_c.FPDF_GetPageCount(pdf)
   assert page_count >= 1
-  
+
   # Load the first page and get its dimensions
   page = pdfium_c.FPDF_LoadPage(pdf, 0)
   width  = math.ceil(pdfium_c.FPDF_GetPageWidthF(page))
   height = math.ceil(pdfium_c.FPDF_GetPageHeightF(page))
-  
+
   # Create a bitmap
   # (Note, pdfium is faster at rendering transparency if we use BGRA rather than BGRx)
   use_alpha = pdfium_c.FPDFPage_HasTransparency(page)
@@ -871,7 +871,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   # Fill the whole bitmap with a white background
   # The color is given as a 32-bit integer in ARGB format (8 bits per channel)
   pdfium_c.FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF)
-  
+
   # Store common rendering arguments
   render_args = (
       bitmap,  # the bitmap
@@ -884,10 +884,10 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
       0,       # rotation (as constant, not in degrees!)
       pdfium_c.FPDF_LCD_TEXT | pdfium_c.FPDF_ANNOT,  # rendering flags, combined with binary or
   )
-  
+
   # Render the page
   pdfium_c.FPDF_RenderPageBitmap(*render_args)
-  
+
   # Get the value of a pointer to the first item of the buffer
   buffer_ptrval = pdfium_c.FPDFBitmap_GetBuffer(bitmap)
   assert buffer_ptrval, "buffer pointer value must be non-null"
@@ -895,12 +895,12 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   buffer_ptr = ctypes.cast(buffer_ptrval, ctypes.POINTER(ctypes.c_ubyte))
   # Re-interpret as array
   buffer = (ctypes.c_ubyte * (width * height * 4)).from_address(ctypes.addressof(buffer_ptr.contents))
-  
+
   # Create a PIL image from the buffer contents
   img = PIL.Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA", 0, 1)
   # Save it as file
   img.save("out.png")
-  
+
   # Free resources
   pdfium_c.FPDFBitmap_Destroy(bitmap)
   pdfium_c.FPDF_ClosePage(page)
