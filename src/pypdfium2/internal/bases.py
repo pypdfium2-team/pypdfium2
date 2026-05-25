@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("AutoCastable", "AutoCloseable", "ObjectTracker", "LIBRARY_AVAILABLE", "DEBUG_AUTOCLOSE", "_debug_close", "_warn_close")
+__all__ = ("AutoCastable", "AutoCloseable", "ObjectTracker", "ObjectCallbacks", "LIBRARY_AVAILABLE", "DEBUG_AUTOCLOSE", "_debug_close", "_warn_close")
 
 import os
 import sys
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
 
 ObjectTracker = defaultdict(set)
+ObjectCallbacks = []
 
 
 def _debug_close(msg, prio=logging.DEBUG):  # pragma: no cover

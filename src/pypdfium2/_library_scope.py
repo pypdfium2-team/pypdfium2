@@ -29,10 +29,17 @@ def init_lib():
     pdfium_i.LIBRARY_AVAILABLE.value = True
 
 
-def _close_objects():
+def _close_strongref_objs():
+    # clients beware: it is important to ensure that no callback tries to alter ObjectCallbacks itself
+    for callback in reversed(pdfium_i.ObjectCallbacks):
+        callback()
+    pdfium_i.ObjectCallbacks.clear()
+
+
+def _close_weakref_objs():
     
     need_close = []
-    for cls, obj_wrefs in pdfium_i.ObjectTracker.items():
+    for obj_wrefs in pdfium_i.ObjectTracker.values():
         # pdfium_i._debug_close(f"{cls and cls.__name__}: {obj_wrefs}")
         for wref in obj_wrefs:
             obj = wref()
@@ -51,7 +58,8 @@ def _close_objects():
 def destroy_lib():  # pragma: no cover
     assert pdfium_i.LIBRARY_AVAILABLE
     try:
-        _close_objects()
+        _close_strongref_objs()
+        _close_weakref_objs()
     finally:
         pdfium_i._debug_close("Destroy PDFium")
         pdfium_c.FPDF_DestroyLibrary()

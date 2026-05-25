@@ -3,7 +3,6 @@
 
 __all__ = ("PdfUnspHandler", )
 
-import atexit
 import logging
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -63,7 +62,7 @@ class PdfUnspHandler (pdfium_i.AutoCastable):
             raise PdfiumError("Failed to register PdfUnspHandler object.")
         PdfUnspHandler.SINGLETON = self
         
-        # TODO might want to have this unregistered in destroy_lib() after library destruction
-        atexit.register(self._keep)
+        # TODO defer until after destroy_lib?
+        pdfium_i.ObjectCallbacks.append(self._keep)
         if add_default:
             self.handlers["default"] = PdfUnspHandler._default
