@@ -17,4 +17,4 @@
 - Limited who has maintainer access to the repo and project sites.
   `mara004`, the author and so far only active committer of pypdfium2, now is (and will remain) sole owner.
   Inactive co-maintainers no longer have access, but are welcome to submit PRs.
-  In the event of `mara004` being unable to pursue this project further, it can be forked and a new maintainer may build their own trust, but given the risks inherent to maintainer changes, the existing userbase will never be handed over to another maintainer (attempts to pressure us otherwise will not be tolerated).
+  In the event of the author being unable to pursue this project further, it can be forked and a new maintainer may build their own trust, but given the risks inherent to maintainer changes, it has been decided that pypdfium2 will remain `mara004`'s personal project. The existing userbase will not be handed over to another maintainer.
