@@ -14,6 +14,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  # FIXME broken permissions (assumably) when using reusable workflow call (previous benc-uk/workflow-dispatch approach just worked)
   run_main_release:
     uses: ./.github/workflows/main.yaml
     with:
