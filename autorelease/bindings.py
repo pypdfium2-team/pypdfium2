@@ -1811,6 +1811,11 @@ if hasattr(_libs['pdfium'], 'FPDFPageObj_AddMark'):
     FPDFPageObj_AddMark.argtypes = (FPDF_PAGEOBJECT, FPDF_BYTESTRING)
     FPDFPageObj_AddMark.restype = FPDF_PAGEOBJECTMARK
 
+if hasattr(_libs['pdfium'], 'FPDFPageObj_AddExistingMark'):
+    FPDFPageObj_AddExistingMark = _libs['pdfium']['FPDFPageObj_AddExistingMark']
+    FPDFPageObj_AddExistingMark.argtypes = (FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK)
+    FPDFPageObj_AddExistingMark.restype = FPDF_BOOL
+
 if hasattr(_libs['pdfium'], 'FPDFPageObj_RemoveMark'):
     FPDFPageObj_RemoveMark = _libs['pdfium']['FPDFPageObj_RemoveMark']
     FPDFPageObj_RemoveMark.argtypes = (FPDF_PAGEOBJECT, FPDF_PAGEOBJECTMARK)
@@ -2140,6 +2145,11 @@ if hasattr(_libs['pdfium'], 'FPDFTextObj_GetFontSize'):
     FPDFTextObj_GetFontSize = _libs['pdfium']['FPDFTextObj_GetFontSize']
     FPDFTextObj_GetFontSize.argtypes = (FPDF_PAGEOBJECT, POINTER(c_float))
     FPDFTextObj_GetFontSize.restype = FPDF_BOOL
+
+if hasattr(_libs['pdfium'], 'FPDFTextObj_SetFontSize'):
+    FPDFTextObj_SetFontSize = _libs['pdfium']['FPDFTextObj_SetFontSize']
+    FPDFTextObj_SetFontSize.argtypes = (FPDF_PAGEOBJECT, c_float)
+    FPDFTextObj_SetFontSize.restype = FPDF_BOOL
 
 if hasattr(_libs['pdfium'], 'FPDFFont_Close'):
     FPDFFont_Close = _libs['pdfium']['FPDFFont_Close']
