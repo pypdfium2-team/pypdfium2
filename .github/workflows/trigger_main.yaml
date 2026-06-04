@@ -3,7 +3,7 @@
 
 # Separate workflow because schedule uses default inputs, and clearly we don't want publish enabled by default
 
-name: Run main release
+name: Trigger main release
 on:
   # NOTE Schedule currently suspended, to preserve PyPI disk space. Manually dispatch releases as needed.
   # # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
@@ -14,9 +14,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  # FIXME broken permissions (assumably) when using reusable workflow call (previous benc-uk/workflow-dispatch approach just worked)
+  # NOTE recently changed to reusable workflow call, let's see if this works. If it does not, we can revert back to benc-uk/workflow-dispatch.
   run_main_release:
     uses: ./.github/workflows/main.yaml
+    secrets: inherit  # Anaconda API token (for conda_helpers publish)
     with:
       test: true
       augment: true
