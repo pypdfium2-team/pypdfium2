@@ -166,14 +166,15 @@ Dependencies:
 To do the toolchained build, you'd run something like:
 ```bash
 # call build script with --help to list options
-python setupsrc/build_toolchained.py
+python ./setupsrc/build_toolchained.py
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
 Or for the native build, on Ubuntu 24.04, you could do e.g.:
 ```bash
 # Install dependencies
-sudo apt-get install generate-ninja ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libicu-dev libglib2.0-dev libharfbuzz-dev
+python -m pip install -r req/gn.txt  # pdfium is picky about the GN version, needs newer GN than what stable distros usually provide
+sudo apt-get install ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libicu-dev libglib2.0-dev libharfbuzz-dev  # generate-ninja
 ```
 ```bash
 # Build with GCC
@@ -213,8 +214,11 @@ git config --global --add safe.directory '$PROJECTS_FOLDER/*'
 
 To install the dependencies, you'll need something like
 ```bash
-pkg install gn ninja freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff glib
+pkg install gn ninja freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff harfbuzz glib
 ```
+Assuming Termux provides recent enough GN. Outdated GN may fail with the most obscure errors.
+If in doubt, check the expected version in `req/gn.txt` against the version provided by Termux.
+`gn-dist` does not currently provide Android wheels. Sourcebuild fallback might work but has not yet been tested on Android.
 
 Then apply the clang symlinks as described above, but use `ARCH=$(uname -m)-android`
 and substitute `/usr` with `$PREFIX` (`/data/data/com.termux/files/usr`).
@@ -239,7 +243,7 @@ mv data/sourcebuild/libpdfium.cr.so data/sourcebuild/libpdfium.so
 ```
 Then install with `PDFIUM_PLATFORM=sourcebuild`.
 
-In case dependency libraries were built separately, you may also need to set the OS library search path, e.g.:
+In case dependency libraries were built separately, you may also need to adjust the OS library search path, e.g.:
 ```bash
 PY_VERSION="3.12"  # adapt this to your setup
 LD_LIBRARY_PATH="$PREFIX/lib/python$PY_VERSION/site-packages/pypdfium2_raw"
@@ -727,7 +731,7 @@ Nonetheless, the following guide may be helpful to get started with the raw API,
   assert buffer_ptrval  # make sure it's non-null
   # Get an actual pointer object so we can access .contents
   buffer_ptr = ctypes.cast(buffer_ptrval, ctypes.POINTER(ctypes.c_ubyte))
-  # Buffer as ctypes array (referencing the original buffer, will be unavailable as soon as the bitmap is destroyed)
+  # Buffer as ctypes array (a view of the original buffer, will be unavailable as soon as the bitmap is destroyed)
   c_buffer = (ctypes.c_ubyte * size).from_address( ctypes.addressof(buffer_ptr.contents) )
   # Buffer as Python bytes (independent copy)
   py_buffer = bytes(c_buffer)
