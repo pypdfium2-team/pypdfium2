@@ -400,6 +400,11 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
+    elif build_ver == "latest":
+        build_ver = PdfiumVer.get_latest_upstream().build
+    elif build_ver == "latest-binaries":
+        build_ver = PdfiumVer.get_latest()
+    
     if vendor_deps is None:
         vendor_deps = set()
     if compiler is None:
@@ -449,14 +454,16 @@ Build PDFium from source natively with a self-managed checkout and system tools/
 
 This does not use Google's binary toolchain, so it should be portable across different Linux architectures.
 Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
-For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.
+See the notes in pypdfium2's README.md for more information.
 
 In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.
 
 Clang users note, pdfium expects a very recent version of clang.
 Upstream does not aim for compatibility with clang older than the version they currently use.
 pypdfium2 patches pdfium for compatibility with clang 22.
-For versions older than that, --clang-as-gcc mode is implicitly enabled.\
+For versions older than that, --clang-as-gcc mode is implicitly enabled.
+
+Some parameters take a default from an environment variable, for easy passthrough with cibuildwheel.\
 """,
     )
     if ExtendAction is not None:  # from base.py
@@ -465,14 +472,15 @@ For versions older than that, --clang-as-gcc mode is implicitly enabled.\
     parser.add_argument(
         "--version",
         dest = "build_ver",
-        help = f"The pdfium version to use. Currently defaults to {SBUILD_NATIVE_PIN}. Pass 'main' to try the latest state.",
+        default = os.environ.get("PDFIUM_VER"),
+        help = f"The pdfium version to use. Currently defaults to {SBUILD_NATIVE_PIN}. Pass 'main' to try the latest state. Defaults to $PDFIUM_VER.",
     )
     parser.add_argument(
         "--test",
         dest = "with_tests",
         action = "store_true",
         default = bool(int( os.environ.get("TEST_PDFIUM", 0) )),
-        help = "Whether to build and run tests. Recommended, except on very slow hosts. (Defaults to the value of $TEST_PDFIUM, for passthrough with cibuildwheel.)",
+        help = "Whether to build and run tests. Recommended, except on very slow hosts. Defaults to $TEST_PDFIUM.",
     )
     parser.add_argument(
         "-j", "--jobs",
