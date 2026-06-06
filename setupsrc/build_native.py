@@ -243,12 +243,11 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # > Extra flags to be appended when compiling both C and C++ files. "CPP" stands for "C PreProcessor" in this context, although it can be used for non-preprocessor flags as well. Not to be confused with "CXX" (which follows).
         env_append("CPPFLAGS", "-ffp-contract=off", " ")
     if do_patches:
+        # it says gcc_toolchain but actually needed for clang as well
+        git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
-        if full_ver.build >= 7873:  # 5563ca5
-            # it says gcc_toolchain but actually needed for clang as well
-            git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if Host._raw_machine in ("loong64", "loongarch64"):
             # for libpng
             git_apply_patch(PatchDir/"loong64_use_lsx.patch", cwd=PDFIUM_DIR_build)
