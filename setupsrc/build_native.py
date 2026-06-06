@@ -445,7 +445,11 @@ This does not use Google's binary toolchain, so it should be portable across dif
 Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
 For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.
 
-In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.\
+In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.
+
+Clang users note, pdfium expects a very recent version of clang.
+Upstream does not aim for compatibility with clang older than the version they currently use.
+pypdfium2 patches pdfium for compatibility with clang 22. For versions older than that, consider passing --clang-as-gcc, or patch pdfium's //build on your own.\
 """,
     )
     if ExtendAction is not None:  # from base.py

@@ -116,13 +116,10 @@ See also //BUILD_LICENSES/pdfium-binaries.txt for a copy of upstream's license f
 
 [[annotations]]
 path = [
-    "patches/avoid_new_clang_flags.patch",
+    "patches/clang_22_compat.patch",
     "patches/system_libcxx_with_clang.patch",
-    "patches/legacy_gn_1.patch",
-    "patches/legacy_gn_2.patch",
     "patches/android_build.patch",
     "patches/no_libclang_rt.patch",
-    "patches/musl_fix_libclang_rt_finder.patch",
     "patches/libpng_loong64.patch",
     "patches/libpng_ppc64.patch",
     "patches/gcc_toolchain.patch",
