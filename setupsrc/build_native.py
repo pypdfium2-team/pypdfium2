@@ -256,7 +256,10 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
-        if compiler is Compiler.clang:
+        if compiler is Compiler.gcc:
+            if full_ver.build >= 7873:  # 5563ca5
+                git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
+        elif compiler is Compiler.clang:
             # historically, https://crbug.com/410883044
             if "libc++" not in vendor_deps:
                 git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)

@@ -125,6 +125,7 @@ path = [
     "patches/musl_fix_libclang_rt_finder.patch",
     "patches/libpng_loong64.patch",
     "patches/libpng_ppc64.patch",
+    "patches/gcc_toolchain.patch",
     "patches/win/arm64_native.patch",
 ]
 precedence = "aggregate"
