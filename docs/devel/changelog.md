@@ -17,6 +17,7 @@
   Scripting to build GN from source previously included in pypdfium2's setup has moved to `gn-dist`.
   In `build_native.py`, patches for legacy GN are still included and enabled by default for now, but you can pass `--no-legacy-gn` to skip them.
   To make updating more straightforward, this mode will be made default and the patches will be removed in the future.
+- In cibuildwheel config, pass `-xn` to the build frontend to make `before-build` usable to install PyPI dependencies such as `gn-dist` (which we do not want to have in the main `pyproject.toml [build-system] requires`).
 - Workflows overhaul.
   * Deduplicated `workflow_dispatch` and `workflow_call` inputs using YAML anchors & aliases (available on GHA since 09/2025).
   * Replaced `benc-uk/workflow-dispatch` action with reusable workflow calls.
