@@ -225,8 +225,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
-        if full_ver.build < 7848:
-            git_apply_patch(PatchDir/"security"/"openjpeg.patch", cwd=PDFIUM_DIR)  # CVE-2026-6192
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
             if with_tests:
