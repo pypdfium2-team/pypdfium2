@@ -254,9 +254,16 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if compiler is Compiler.clang:
             if clang_ver < 23:
                 git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
+            if no_libclang_rt:
+                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             if "libc++" not in vendor_deps:
                 # historically, https://crbug.com/410883044
-                git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
+                autopatch(
+                    PDFIUM_DIR_build/"config"/"BUILDCONFIG.gn",
+                    "use_libcxx_modules = is_clang",
+                    "use_libcxx_modules = false",
+                    is_regex=False, exp_count=2,
+                )
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
@@ -266,8 +273,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                 f'ldflags += [ "-fuse-ld={lld_path}" ]',
                 is_regex=False, exp_count=1,
             )
-            if no_libclang_rt:
-                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             if Host._libc_name == "musl":
                 for pattern in ("-unknown-linux-gnu", "-linux-gnu"):  # two-pass
                     autopatch(

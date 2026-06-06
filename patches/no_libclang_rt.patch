@@ -1,8 +1,8 @@
 diff --git a/config/clang/BUILD.gn b/config/clang/BUILD.gn
-index e05032c..742358b 100644
+index c38670a..f0aa8df 100644
 --- a/config/clang/BUILD.gn
 +++ b/config/clang/BUILD.gn
-@@ -239,35 +239,10 @@ template("clang_lib") {
+@@ -242,35 +242,10 @@ template("clang_lib") {
  }
  
  # Adds a dependency on the Clang runtime library clang_rt.builtins.
@@ -43,17 +43,16 @@ index e05032c..742358b 100644
  # Adds a dependency on the Clang runtime library clang_rt.profile.
  clang_lib("compiler_profile") {
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index e755e86..e64cc80 100644
+index e1da114..7bf7a1b 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
-@@ -2012,9 +2012,10 @@ config("runtime_library") {
-   # the C++ symbols. This config ensures the C++ symbols exist and are strong in
-   # order to cause that replacement to occur by explicitly linking in clang's
-   # compiler-rt library.
+@@ -1684,9 +1684,9 @@ config("runtime_library") {
+   # can be replaced by the C++ symbols. This config ensures the C++ symbols
+   # exist and are strong in order to cause that replacement to occur by
+   # explicitly linking in clang's compiler-rt library.
 -  if (is_clang && !(is_a_target_toolchain && is_cronet_build)) {
 -    configs += [ "//build/config/clang:compiler_builtins" ]
 -  }
-+  # XXX(pypdfium2) --no-libclang-rt
 +  # if (is_clang && !(is_a_target_toolchain && is_cronet_build)) {
 +  #   configs += [ "//build/config/clang:compiler_builtins" ]
 +  # }

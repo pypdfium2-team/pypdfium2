@@ -1,8 +1,8 @@
 diff --git a/config/BUILDCONFIG.gn b/config/BUILDCONFIG.gn
-index e403e0c..7b808c9 100644
+index 12595c1..64be83c 100644
 --- a/config/BUILDCONFIG.gn
 +++ b/config/BUILDCONFIG.gn
-@@ -361,8 +361,8 @@ default_compiler_configs = [
+@@ -371,8 +371,8 @@ default_compiler_configs = [
    "//build/config/compiler:no_rtti",
    "//build/config/compiler:no_unresolved_symbols",
    "//build/config/compiler:runtime_library",
@@ -14,10 +14,23 @@ index e403e0c..7b808c9 100644
    "//build/config/compiler:thinlto_optimize_default",
    "//build/config/compiler:tot_warnings",
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index e755e86..fdb15b0 100644
+index e1da114..8aed18c 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
-@@ -626,13 +626,6 @@ config("compiler") {
+@@ -576,12 +576,6 @@ config("compiler") {
+   if (is_clang) {
+     # Flags for diagnostics.
+     cflags += [ "-fcolor-diagnostics" ]
+-    if (!is_win) {
+-      cflags += [ "-fdiagnostics-show-inlining-chain" ]
+-    } else {
+-      # Combine after https://github.com/llvm/llvm-project/pull/192241
+-      cflags += [ "/clang:-fdiagnostics-show-inlining-chain" ]
+-    }
+     if (diagnostics_print_source_range_info && !is_win) {
+       cflags += [ "-fdiagnostics-print-source-range-info" ]
+     }
+@@ -612,13 +606,6 @@ config("compiler") {
        ]
      }
  
@@ -31,3 +44,12 @@ index e755e86..fdb15b0 100644
      # TODO(hans): Remove this once Clang generates better optimized debug info
      # by default. https://crbug.com/765793
      cflags += [
+@@ -1922,7 +1909,7 @@ config("default_warnings") {
+       "-Wno-uninitialized-const-pointer",
+ 
+       # TODO(crbug.com/495753203): Fix and re-enable.
+-      "-Wno-unused-but-set-global",
++      # "-Wno-unused-but-set-global",
+     ]
+ 
+     cflags_cc += [
