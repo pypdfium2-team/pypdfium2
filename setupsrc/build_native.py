@@ -269,8 +269,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             if no_libclang_rt:
                 git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             if Host._libc_name == "musl":
-                if not no_libclang_rt:
-                    git_apply_patch(PatchDir/"musl_fix_libclang_rt_finder.patch", cwd=PDFIUM_DIR_build)
                 for pattern in ("-unknown-linux-gnu", "-linux-gnu"):  # two-pass
                     autopatch(
                         PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
