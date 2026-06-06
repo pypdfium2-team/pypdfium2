@@ -1005,6 +1005,7 @@ def autopatch(file, pattern, repl, is_regex, exp_count=None):
     if exp_count is not None:
         assert n_subs == exp_count
     file.write_text(content)
+    return n_subs
 
 def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
     for file in dir.glob(globexpr):

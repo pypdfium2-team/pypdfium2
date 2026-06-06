@@ -21,7 +21,7 @@ DEPS_URLS = dict(
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
     catapult   = _CR_PREFIX + "catapult",  # android
     # vendorable dependencies
-    icu         = _CR_PREFIX + "chromium/deps/icu",  # cibuildwheel
+    icu         = _CR_PREFIX + "chromium/deps/icu",
     buildtools  = _CR_PREFIX + "chromium/src/buildtools",
     libcxx      = _CR_PREFIX + "external/github.com/llvm/llvm-project/libcxx",
     libcxxabi   = _CR_PREFIX + "external/github.com/llvm/llvm-project/libcxxabi",
@@ -245,12 +245,10 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     if do_patches:
         # it says gcc_toolchain but actually needed for clang as well
         git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
-        if IS_ANDROID:
-            # fix linkage step
+        if IS_ANDROID:  # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
         if Host._raw_machine in ("loong64", "loongarch64"):
-            # for libpng
-            git_apply_patch(PatchDir/"loong64_use_lsx.patch", cwd=PDFIUM_DIR_build)
+            git_apply_patch(PatchDir/"loong64_use_lsx.patch", cwd=PDFIUM_DIR_build)  # for libpng
         if compiler is Compiler.clang:
             if clang_ver < 23:
                 git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
@@ -274,12 +272,15 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                 is_regex=False, exp_count=1,
             )
             if Host._libc_name == "musl":
+                n_subs = 0
                 for pattern in ("-unknown-linux-gnu", "-linux-gnu"):  # two-pass
-                    autopatch(
+                    n_subs += autopatch(
                         PDFIUM_DIR_build/"config"/"compiler_cpu_abi.gn",
                         pattern, "-alpine-linux-musl",
                         is_regex=False,
                     )
+                # confirm there have been a couple of substitutions
+                assert n_subs > 3  # likely much more than that
         # Create pseudo gclient config included by //build
         (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("build_with_chromium = false")
     
@@ -462,7 +463,7 @@ Upstream does not aim for compatibility with clang older than the version they c
 pypdfium2 patches pdfium for compatibility with clang 22.
 For versions older than that, --clang-as-gcc mode is implicitly enabled.
 
-Some parameters take a default from an environment variable, for easy passthrough with cibuildwheel.\
+Some flags take a default from an environment variable, for easy passthrough with cibuildwheel.\
 """,
     )
     if ExtendAction is not None:  # from base.py
