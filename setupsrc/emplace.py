@@ -79,7 +79,8 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
             builder = dict(native=build_native, toolchained=build_toolchained)[sub_target]
             build_params_env = shlex.split( os.getenv("BUILD_PARAMS", default_build_params) )
             build_params = vars(builder.parse_args(build_params_env))
-            build_params.update(dict(build_ver=pdfium_ver))
+            if pdfium_ver:
+                build_params.update(dict(build_ver=pdfium_ver))
             log(build_params)
             builder.main(**build_params)
         else:
