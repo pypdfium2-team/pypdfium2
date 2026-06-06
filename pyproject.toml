@@ -28,7 +28,7 @@ environment-pass = ["TEST_PDFIUM"]
 PDFIUM_PLATFORM = "sourcebuild-native"
 # Vendored libc++ probably won't build with our older containers' GCC.
 # It says the minimum requirement is GCC 15 or Clang 20 which is too high e.g. for Ubuntu 24.04.
-BUILD_PARAMS = "--vendor all --no-vendor libc++ --no-legacy-gn"
+BUILD_PARAMS = "--vendor all --no-vendor libc++"
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
@@ -112,7 +112,7 @@ before-all = [
 inherit.environment = "append"
 # on glibc linux with static clang, we try to use the vendored libc++
 # beware: this overrides the default BUILD_PARAMS from above
-environment.BUILD_PARAMS = "--vendor all --no-legacy-gn --compiler clang --clang-path /opt/clang --no-libclang-rt"
+environment.BUILD_PARAMS = "--vendor all --compiler clang --clang-path /opt/clang --no-libclang-rt"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux_{ppc64le,riscv64,loongarch64,s390x}"
