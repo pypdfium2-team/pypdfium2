@@ -1,0 +1,33 @@
+diff --git a/config/BUILDCONFIG.gn b/config/BUILDCONFIG.gn
+index e403e0c..7b808c9 100644
+--- a/config/BUILDCONFIG.gn
++++ b/config/BUILDCONFIG.gn
+@@ -361,8 +361,8 @@ default_compiler_configs = [
+   "//build/config/compiler:no_rtti",
+   "//build/config/compiler:no_unresolved_symbols",
+   "//build/config/compiler:runtime_library",
+-  "//build/config/compiler:sanitize_c_array_bounds",
+-  "//build/config/compiler:sanitize_return",
++  # "//build/config/compiler:sanitize_c_array_bounds",
++  # "//build/config/compiler:sanitize_return",
+   "//build/config/compiler:thin_archive",
+   "//build/config/compiler:thinlto_optimize_default",
+   "//build/config/compiler:tot_warnings",
+diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
+index e755e86..fdb15b0 100644
+--- a/config/compiler/BUILD.gn
++++ b/config/compiler/BUILD.gn
+@@ -626,13 +626,6 @@ config("compiler") {
+       ]
+     }
+ 
+-    # The performance improvement does not seem worth the risk. See
+-    # https://crbug.com/484082200 for background and https://crrev.com/c/7593035
+-    # for discussion.
+-    if (!is_wasm) {
+-      cflags += [ "-fno-lifetime-dse" ]
+-    }
+-
+     # TODO(hans): Remove this once Clang generates better optimized debug info
+     # by default. https://crbug.com/765793
+     cflags += [
