@@ -74,7 +74,7 @@ jobs:
           sudo ln -s /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a /usr/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a
       
       - name: Build PDFium (native, ${{ inputs.compiler }})
-        run: python3 ./setupsrc/build_native.py --no-legacy-gn --compiler "$COMPILER" $VERSION_PARAM $VENDOR_PARAM $TEST_PARAM
+        run: python3 ./setupsrc/build_native.py --compiler "$COMPILER" $VERSION_PARAM $VENDOR_PARAM $TEST_PARAM
         env:
           COMPILER: ${{ inputs.compiler }}
           VERSION_PARAM: ${{ inputs.pdfium_ver && format('--version {0}', inputs.pdfium_ver) }}

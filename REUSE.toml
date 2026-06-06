@@ -116,14 +116,10 @@ See also //BUILD_LICENSES/pdfium-binaries.txt for a copy of upstream's license f
 
 [[annotations]]
 path = [
-    "patches/avoid_new_clang_flags.patch",
-    "patches/system_libcxx_with_clang.patch",
-    "patches/legacy_gn_1.patch",
-    "patches/legacy_gn_2.patch",
+    "patches/clang_22_compat.patch",
     "patches/android_build.patch",
     "patches/no_libclang_rt.patch",
-    "patches/musl_fix_libclang_rt_finder.patch",
-    "patches/libpng_loong64.patch",
+    "patches/loong64_use_lsx.patch",
     "patches/libpng_ppc64.patch",
     "patches/gcc_toolchain.patch",
     "patches/win/arm64_native.patch",
@@ -147,13 +143,6 @@ SPDX-FileComment = '''
 Derived from RedHat packaging repository: https://github.com/tiran/libpdfium/blob/d99370b3ac7f0c9cd7222be2dfab2c7b648f2e9e/0001-bigendian.patch
 Repo does not have an own license file, but assumably the patches are being made available under pdfium's license, or leastways an open-source license.
 '''
-
-[[annotations]]
-path = "patches/security/openjpeg.patch"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "2026 Even Rouault <even.rouault@spatialys.com>"
-SPDX-License-Identifier = "BSD-2-Clause"
-SPDX-FileComment = "Cherry-pick https://pdfium.googlesource.com/pdfium/+/65c78d0727c665106efed287a687b37d41a49439"
 
 [[annotations]]
 path = [

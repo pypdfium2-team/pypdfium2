@@ -1,0 +1,13 @@
+diff --git a/config/loongarch64.gni b/config/loongarch64.gni
+index 9a95ec9..a9dc9d2 100644
+--- a/config/loongarch64.gni
++++ b/config/loongarch64.gni
+@@ -7,7 +7,7 @@ import("//build/config/v8_target_cpu.gni")
+ if (current_cpu == "loong64") {
+   declare_args() {
+     # LOONGARCH64 SIMD Arch compilation flag.
+-    loongarch64_use_lsx = false
++    loongarch64_use_lsx = true
+     loongarch64_use_lasx = false
+   }
+ }

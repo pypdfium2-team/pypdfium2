@@ -210,7 +210,7 @@ def handle_deps(config, vendor_deps, with_tests):
 VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff", "harfbuzz")
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, legacy_gn_compat):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -225,8 +225,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
-        if full_ver.build < 7848:
-            git_apply_patch(PatchDir/"security"/"openjpeg.patch", cwd=PDFIUM_DIR)  # CVE-2026-6192
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
             if with_tests:
@@ -245,26 +243,28 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # > Extra flags to be appended when compiling both C and C++ files. "CPP" stands for "C PreProcessor" in this context, although it can be used for non-preprocessor flags as well. Not to be confused with "CXX" (which follows).
         env_append("CPPFLAGS", "-ffp-contract=off", " ")
     if do_patches:
-        # Patches for legacy versions of GN not supported by upstream
-        # Recent GN binaries can be obtained from https://chrome-infra-packages.appspot.com/p/gn/gn
-        # Note that merely calling depot_tools `gn` is not sufficient, as it is only a wrapper script looking for vendored GN in the target repository, and if not present (as in this case), falls back to system GN.
-        if legacy_gn_compat:
-            # Work around error about path_exists() being undefined
-            git_apply_patch(PatchDir/"legacy_gn_1.patch", cwd=PDFIUM_DIR_build)
-            # https://groups.google.com/g/pdfium/c/1__HW-wzJ8c/m/5MCYXAuDBQAJ
-            git_apply_patch(PatchDir/"legacy_gn_2.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:
             # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
-        if compiler is Compiler.gcc:
-            if full_ver.build >= 7873:  # 5563ca5
-                git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
-        elif compiler is Compiler.clang:
-            # historically, https://crbug.com/410883044
-            if "libc++" not in vendor_deps:
-                git_apply_patch(PatchDir/"system_libcxx_with_clang.patch", cwd=PDFIUM_DIR_build)
+        if full_ver.build >= 7873:  # 5563ca5
+            # it says gcc_toolchain but actually needed for clang as well
+            git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
+        if Host._raw_machine in ("loong64", "loongarch64"):
+            # for libpng
+            git_apply_patch(PatchDir/"loong64_use_lsx.patch", cwd=PDFIUM_DIR_build)
+        if compiler is Compiler.clang:
             if clang_ver < 23:
-                git_apply_patch(PatchDir/"avoid_new_clang_flags.patch", cwd=PDFIUM_DIR_build)
+                git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
+            if no_libclang_rt:
+                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
+            if "libc++" not in vendor_deps:
+                # historically, https://crbug.com/410883044
+                autopatch(
+                    PDFIUM_DIR_build/"config"/"BUILDCONFIG.gn",
+                    "use_libcxx_modules = is_clang",
+                    "use_libcxx_modules = false",
+                    is_regex=False, exp_count=2,
+                )
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
@@ -274,14 +274,10 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                 f'ldflags += [ "-fuse-ld={lld_path}" ]',
                 is_regex=False, exp_count=1,
             )
-            if no_libclang_rt:
-                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             if Host._libc_name == "musl":
-                if not no_libclang_rt:
-                    git_apply_patch(PatchDir/"musl_fix_libclang_rt_finder.patch", cwd=PDFIUM_DIR_build)
                 for pattern in ("-unknown-linux-gnu", "-linux-gnu"):  # two-pass
                     autopatch(
-                        PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
+                        PDFIUM_DIR_build/"config"/"compiler_cpu_abi.gn",
                         pattern, "-alpine-linux-musl",
                         is_regex=False,
                     )
@@ -314,11 +310,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("nasm_source", PDFIUM_3RDPARTY/"nasm")
     if "libpng" in vendor_deps:
         do_patches = df.fetch("libpng", PDFIUM_3RDPARTY/"libpng", reset=reset)
-        if do_patches:
-            if Host._raw_machine in ("loong64", "loongarch64"):
-                git_apply_patch(PatchDir/"libpng_loong64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
-            elif Host._raw_machine == "ppc64le":
-                git_apply_patch(PatchDir/"libpng_ppc64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
+        if do_patches and Host._raw_machine == "ppc64le":
+            git_apply_patch(PatchDir/"libpng_ppc64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
     if "zlib" in vendor_deps:
         df.fetch("zlib", PDFIUM_3RDPARTY/"zlib")
     if "harfbuzz" in vendor_deps:
@@ -403,7 +396,7 @@ def test(build_dir, vendor_deps, compiler):
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, legacy_gn_compat=True):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -422,12 +415,15 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     if compiler is Compiler.clang:
         if clang_path is None:
             clang_path = Host.usr
+        clang_ver = _get_clang_ver(clang_path)
+        if clang_ver < 22:
+            log("Warning: Clang below version 22 is not supported with upstream's clang config - implicitly switching to --clang-as-gcc mode. If you mean to manually patch pdfium's //build for compatibility with older clang (possible, but no fun to maintain), take out this check.")
+            clang_as_gcc = True
+            clang_ver = None
         if clang_as_gcc:
             env_prepend("PATH", str(clang_path/"bin"), os.pathsep)
             set_envs(CC="clang", CXX="clang++", TOOLPREFIX="llvm-")
             compiler = Compiler.gcc
-        else:
-            clang_ver = _get_clang_ver(clang_path)
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
@@ -435,7 +431,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = handle_deps(config, vendor_deps, with_tests)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, legacy_gn_compat)
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps)
     setup_compiler(config, compiler, clang_ver, clang_path)
     build(build_dir, config, with_tests, n_jobs)
     if with_tests:
@@ -455,7 +451,12 @@ This does not use Google's binary toolchain, so it should be portable across dif
 Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
 For instance, it should also work on Android (Termux) natively. See the notes in pypdfium2's README.md for more information.
 
-In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.\
+In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.
+
+Clang users note, pdfium expects a very recent version of clang.
+Upstream does not aim for compatibility with clang older than the version they currently use.
+pypdfium2 patches pdfium for compatibility with clang 22.
+For versions older than that, --clang-as-gcc mode is implicitly enabled.\
 """,
     )
     if ExtendAction is not None:  # from base.py
@@ -519,12 +520,6 @@ In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAG
         nargs = "+",
         action = "extend",
         help = "Dependencies not to vendor. Overrides --vendor.",
-    )
-    parser.add_argument(
-        "--no-legacy-gn",
-        dest = "legacy_gn_compat",
-        action = "store_false",
-        help = "Do not apply patches for compatibility with older GN not supported by upstream. i.e. this flag can be used to indicate that recent enough GN is available in the build env. It is highly recommended to pass this flag if you can.",
     )
     
     args = parser.parse_args(argv)
