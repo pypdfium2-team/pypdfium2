@@ -472,7 +472,7 @@ Some parameters take a default from an environment variable, for easy passthroug
     parser.add_argument(
         "--version",
         dest = "build_ver",
-        default = os.environ.get("PDFIUM_VER"),
+        default = (os.environ.get("PDFIUM_VER") or None),
         help = f"The pdfium version to use. Currently defaults to {SBUILD_NATIVE_PIN}. Pass 'main' to try the latest state. Defaults to $PDFIUM_VER.",
     )
     parser.add_argument(
