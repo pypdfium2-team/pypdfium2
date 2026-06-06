@@ -277,7 +277,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             if Host._libc_name == "musl":
                 for pattern in ("-unknown-linux-gnu", "-linux-gnu"):  # two-pass
                     autopatch(
-                        PDFIUM_DIR_build/"config"/"compiler"/"BUILD.gn",
+                        PDFIUM_DIR_build/"config"/"compiler_cpu_abi.gn",
                         pattern, "-alpine-linux-musl",
                         is_regex=False,
                     )
