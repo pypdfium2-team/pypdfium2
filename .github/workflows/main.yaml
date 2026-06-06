@@ -198,15 +198,19 @@ jobs:
           - os: ubuntu-latest
             cibw_os: musllinux
             cibw_arch: x86_64
+            pdfium_ver: latest-binaries  # TODO take literal version from a step output
           - os: ubuntu-latest
             cibw_os: musllinux
             cibw_arch: i686
+            pdfium_ver: latest-binaries
           - os: ubuntu-24.04-arm
             cibw_os: musllinux
             cibw_arch: aarch64
+            pdfium_ver: latest-binaries
           - os: ubuntu-24.04-arm
             cibw_os: musllinux
             cibw_arch: armv7l
+            pdfium_ver: latest-binaries
           - os: ubuntu-latest
             cibw_os: musllinux
             cibw_arch: ppc64le
@@ -234,9 +238,10 @@ jobs:
       os: ${{ matrix.os }}
       cibw_target: ${{ matrix.cibw_os }}_${{ matrix.cibw_arch }}
       cibw_arch: ${{ matrix.cibw_arch }}
+      pdfium_ver: ${{ matrix.pdfium_ver }}
+      test_pdfium: true
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
-      test_pdfium: true
   
   
   # # NOTE ppc64le is now supported with pdfium-binaries, commented out. However, this strategy might be useful for other platforms in the future.

@@ -46,21 +46,25 @@ jobs:
             os: ubuntu-latest
             cibw_os: manylinux
             cibw_arch: x86_64
+            pdfium_ver: latest
           
           - condition: ${{ inputs.linux_main && inputs.linux_musl }}
             os: ubuntu-latest
             cibw_os: musllinux
             cibw_arch: x86_64
+            pdfium_ver: latest
           
           - condition: ${{ inputs.linux_main && inputs.linux_glibc }}
             os: ubuntu-24.04-arm
             cibw_os: manylinux
             cibw_arch: aarch64
+            pdfium_ver: latest
           
           - condition: ${{ inputs.linux_main && inputs.linux_musl }}
             os: ubuntu-24.04-arm
             cibw_os: musllinux
             cibw_arch: aarch64
+            pdfium_ver: latest
           
           # ARM 32-bit emulation seems about as fast as native when using an ARM64 host. Same goes for x86_64 to i686.
           # For some reason, `uname -m` reports the armv7l container as armv8l when using an ARM64 host, but the author tested a manylinux wheel produced here on Raspberry Pi 2B (armv7l) locally, and it does seem to work.
@@ -69,21 +73,25 @@ jobs:
             os: ubuntu-24.04-arm
             cibw_os: manylinux
             cibw_arch: armv7l
+            pdfium_ver: latest
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
             os: ubuntu-24.04-arm
             cibw_os: musllinux
             cibw_arch: armv7l
+            pdfium_ver: latest
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
             os: ubuntu-latest
             cibw_os: manylinux
             cibw_arch: i686
+            pdfium_ver: latest
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
             os: ubuntu-latest
             cibw_os: musllinux
             cibw_arch: i686
+            pdfium_ver: latest
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
             os: ubuntu-latest
@@ -163,4 +171,5 @@ jobs:
       cibw_target: ${{ matrix.cibw_target || format('{0}_{1}', matrix.cibw_os, matrix.cibw_arch) }}
       cibw_arch: ${{ matrix.cibw_arch }}
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
+      pdfium_ver: ${{ inputs.pdfium_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}  # currently, linux only
