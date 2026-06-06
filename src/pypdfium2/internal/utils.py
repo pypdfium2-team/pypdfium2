@@ -8,8 +8,6 @@ import pypdfium2.raw as pdfium_c
 
 def color_tohex(color, rev_byteorder):
     
-    if len(color) != 4:
-        raise ValueError("Color must consist of exactly 4 values.")
     if not all(0 <= c <= 255 for c in color):
         raise ValueError("Color value exceeds boundaries.")
     
@@ -27,20 +25,20 @@ def color_tohex(color, rev_byteorder):
 
 
 def set_callback(struct, fname, callback):
-    setattr(struct, fname, type( getattr(struct, fname) )(callback))
+    setattr(struct, fname, type(getattr(struct, fname))(callback))
 
 def set_callbacks(struct, **kwargs):
     for fname, callback in kwargs.items():
-        setattr(struct, fname, type( getattr(struct, fname) )(callback))
+        setattr(struct, fname, type(getattr(struct, fname))(callback))
 
 
 def is_stream(buf, spec="r"):
     methods = []
     assert set(spec).issubset( set("rw") )
     if "r" in spec:
-        methods += ["seek", "tell", "read", "readinto"]
+        methods += ("seek", "tell", "read", "readinto")
     if "w" in spec:
-        methods += ["write"]
+        methods.append("write")
     return all(callable(getattr(buf, a, None)) for a in methods)
 
 
