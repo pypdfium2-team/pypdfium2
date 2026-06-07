@@ -39,7 +39,6 @@ if PORTABLE_MODE:
         # clang may or may not be available for the host in question, so let's just use GCC
         "is_clang": False,
         "use_custom_libcxx": False,
-        "use_libcxx_modules": False,
     })
 
 
