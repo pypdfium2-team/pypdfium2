@@ -1,5 +1,4 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
-# SPDX-FileContributor: 2025 wojiushixiaobai <296015668@qq.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: CIBW build one
@@ -97,23 +96,14 @@ jobs:
       # So our best bet is to do it by hand:
       
       - name: Post-test
-        # x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test them again in a different container
+        # x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test again in a different container
         if: ${{ contains(inputs.cibw_target, 'linux') }}
         # q&d: suppress known test suite failures on s390x and musllinux_armv7l
         continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
+        # get_container.py outputs the env vars CONTAINER, PREPARE_CMD, INIT_SHELL and DOCKER_FLAGS
+        # The docker command mounts the pypdfium2 repo instead of copying it, i.e. shared among host and container. This seems to work fine on GH actions. Local users might need to add --security-opt label=disable on some distros.
         run: |
-          # get_container.py outputs the env vars CONTAINER, PREPARE_CMD, INIT_SHELL and DOCKER_FLAGS
           eval "$(python3 ./utils/get_container.py $TARGET)"
-          # Just sharing the pypdfium2 dir among host and container is easier (and faster) than copying.
-          # Note, on RHEL/Fedora (rsp. hosts that use SELinux), you'll need to add --security-opt label=disable
-          docker run -i --rm -v "$PWD:/pypdfium2" -e PREPARE_CMD $DOCKER_FLAGS "$CONTAINER" $INIT_SHELL <<END
-          eval "\$PREPARE_CMD"
-          # alternatively: python3 -m pip config set global.break-system-packages true
-          python3 -m venv --system-site-packages testenv
-          VENV_PY=/testenv/bin/python3
-          cd /pypdfium2
-          \$VENV_PY -m pip install ./wheelhouse/*.whl
-          \$VENV_PY -m pytest tests/
-          END
+          docker run -e PREPARE_CMD -i --rm -v "$PWD:/pypdfium2" $DOCKER_FLAGS "$CONTAINER" $INIT_SHELL /pypdfium2/utils/test_in_docker.sh
         env:
           TARGET: ${{ inputs.cibw_target }}
