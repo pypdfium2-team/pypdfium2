@@ -102,6 +102,8 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     else:
         pdfium_msg += f"- No pdfium-binaries update, still at `{new_pdfium}`."
     
+    pdfium_msg += " Additional builds may use various other versions of pdfium."
+    
     content = Changelog.read_text()
     pos = content.index("\n", content.index("# Changelog")) + 1
     part_a = content[:pos].strip() + "\n"
