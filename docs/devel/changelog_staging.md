@@ -6,7 +6,7 @@
 # Changelog for next release
 - Updated `build_toolchained.py` from PDFium `7191` to `7880`. Despite the gap, this turned out fairly straightforward.
 - Updated `build_native.py` from PDFium `7841` to `7880` (see below for more info).
-  Added a new patch to fix a build system issue introduced upstream.
+  Added patch to fix a build system issue introduced upstream.
 - Pragmatic `build_native.py` changes to make updating a bit more feasible:
   Patches for legacy GN and the transitional `--no-legacy-gn` option have been removed; recent GN is now required.
   Clang patches now just aim for compatibility with clang >= 22, much reducing patch complexity. For clang versions older than that, `--clang-as-gcc` mode is implicitly enabled.
