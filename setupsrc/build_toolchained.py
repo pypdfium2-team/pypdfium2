@@ -12,6 +12,7 @@ from base import *  # local
 SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
+PDFiumDir_build = PDFiumDir / "build"
 PDFiumOutDir = PDFiumDir / "out" / "Default"
 
 DEFAULT_MODE = Host.platform == PlatNames.linux_x64 or Host.system in (SysNames.windows, SysNames.darwin)
@@ -78,6 +79,7 @@ def dl_pdfium(GClient, do_update, revision, target_os):
             # > By default, don't check out android. Will be overridden by gclient variables.
             # > TODO(crbug.com/875037): Remove this once the bug in gclient is fixed.
             extra_vars += ["--custom-var", "checkout_android=True"]
+        # TODO change checkout_configuration back to minimal once https://pdfium-review.googlesource.com/c/pdfium/+/149310 is merged
         run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=small", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=DEFAULT_MODE)
     
     if do_update:
@@ -104,13 +106,15 @@ def patch_pdfium(build_ver, target_os):
     shared_autopatches(PDFiumDir)
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
-        git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
+        git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir_build)
         _create_resources_rc(build_ver)
         if Host._raw_machine == "arm64":
-            git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir/"build")
+            git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir_build)
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
-        git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir/"build")
+        git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir_build)
+    if PORTABLE_MODE:
+        git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
 
 
 def get_tool(name):
