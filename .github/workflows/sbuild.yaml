@@ -21,6 +21,9 @@ on:
       testtargets:
         type: boolean
         default: false
+      pdfium_ver:
+        type: string
+        default: ''
       py_ver:
         type: string
         default: '3.14'
@@ -117,4 +120,5 @@ jobs:
       target_cpu: ${{ matrix.target_cpu }}
       target_os: ${{ matrix.target_os }}
       tag: ${{ matrix.tag }}
+      pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ matrix.py_ver || inputs.py_ver }}
