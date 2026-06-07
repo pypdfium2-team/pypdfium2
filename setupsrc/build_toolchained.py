@@ -20,9 +20,10 @@ PORTABLE_MODE = not DEFAULT_MODE
 # run `gn args --list out/Default/` for build config docs
 
 DefaultConfig = {
+    "use_glib": False,
+    "use_siso": False,
     "is_debug": False,
     "treat_warnings_as_errors": False,
-    "use_glib": False,
     "is_component_build": False,
     "pdf_is_standalone": True,
     "pdf_use_partition_alloc": False,
@@ -40,9 +41,6 @@ if PORTABLE_MODE:
         "use_custom_libcxx": False,
         "use_libcxx_modules": False,
     })
-
-if sys.platform.startswith("darwin"):
-    DefaultConfig["mac_deployment_target"] = "11.0.0"
 
 
 def dl_depottools(do_update):
@@ -159,9 +157,6 @@ def main(
         build_target = "pdfium"
     if build_ver is None:
         build_ver = SBUILD_TOOLCHAINED_PIN
-        # our current ppc64(le) build strategy needs more recent pdfium
-        if target_cpu == "ppc64":
-            build_ver = 7592
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     
@@ -207,8 +202,8 @@ def main(
     if target_os:
         config_dict["target_os"] = target_os
         if target_os == "android":
-            config_dict["default_min_sdk_version"] = 21
-            #config_dict["use_mold"] = False
+            config_dict["default_min_sdk_version"] = 23
+            config_dict["use_mold"] = False
     
     GN = get_tool("gn")
     Ninja = get_tool("ninja")

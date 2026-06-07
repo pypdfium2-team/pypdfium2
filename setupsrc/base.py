@@ -41,7 +41,7 @@ PDFIUM_MIN_REQ = 6635
 # Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
 # Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
 SBUILD_NATIVE_PIN = 7880
-SBUILD_TOOLCHAINED_PIN = 7191
+SBUILD_TOOLCHAINED_PIN = 7880
 
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"

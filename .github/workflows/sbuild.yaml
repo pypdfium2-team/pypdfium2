@@ -102,13 +102,13 @@ jobs:
             condition: ${{ inputs.android }}
             target_os: android
             target_cpu: arm64
-            tag: android_21_arm64_v8a
+            tag: android_23_arm64_v8a
           
           - os: ubuntu-latest
             condition: ${{ inputs.android }}
             target_os: android
             target_cpu: arm
-            tag: android_21_armeabi_v7a
+            tag: android_23_armeabi_v7a
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
