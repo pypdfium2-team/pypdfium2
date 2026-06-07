@@ -12,6 +12,7 @@ from base import *  # local
 SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
 PDFiumDir      = SBDir / "pdfium"
+PDFiumDir_build = PDFiumDir / "build"
 PDFiumOutDir = PDFiumDir / "out" / "Default"
 
 DEFAULT_MODE = Host.platform == PlatNames.linux_x64 or Host.system in (SysNames.windows, SysNames.darwin)
@@ -20,9 +21,10 @@ PORTABLE_MODE = not DEFAULT_MODE
 # run `gn args --list out/Default/` for build config docs
 
 DefaultConfig = {
+    "use_glib": False,
+    "use_siso": False,
     "is_debug": False,
     "treat_warnings_as_errors": False,
-    "use_glib": False,
     "is_component_build": False,
     "pdf_is_standalone": True,
     "pdf_use_partition_alloc": False,
@@ -38,11 +40,7 @@ if PORTABLE_MODE:
         # clang may or may not be available for the host in question, so let's just use GCC
         "is_clang": False,
         "use_custom_libcxx": False,
-        "use_libcxx_modules": False,
     })
-
-if sys.platform.startswith("darwin"):
-    DefaultConfig["mac_deployment_target"] = "11.0.0"
 
 
 def dl_depottools(do_update):
@@ -81,7 +79,8 @@ def dl_pdfium(GClient, do_update, revision, target_os):
             # > By default, don't check out android. Will be overridden by gclient variables.
             # > TODO(crbug.com/875037): Remove this once the bug in gclient is fixed.
             extra_vars += ["--custom-var", "checkout_android=True"]
-        run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=DEFAULT_MODE)
+        # TODO change checkout_configuration back to minimal once https://pdfium-review.googlesource.com/c/pdfium/+/149310 is merged
+        run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=small", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=DEFAULT_MODE)
     
     if do_update:
         log("PDFium: download/sync ...")
@@ -102,18 +101,22 @@ def _create_resources_rc(build_ver):
     content = content.replace("$VERSION", str(build_ver))
     output_path.write_text(content)
 
-def patch_pdfium(build_ver, target_os):
+def patch_pdfium(build_ver, target_cpu, target_os):
     # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
     shared_autopatches(PDFiumDir)
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
-        git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir/"build")
+        git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir_build)
         _create_resources_rc(build_ver)
         if Host._raw_machine == "arm64":
-            git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir/"build")
+            git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir_build)
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
-        git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir/"build")
+        git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir_build)
+    if PORTABLE_MODE:
+        git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
+    if target_cpu == "ppc64":  # linux
+        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
 
 
 def get_tool(name):
@@ -159,9 +162,6 @@ def main(
         build_target = "pdfium"
     if build_ver is None:
         build_ver = SBUILD_TOOLCHAINED_PIN
-        # our current ppc64(le) build strategy needs more recent pdfium
-        if target_cpu == "ppc64":
-            build_ver = 7592
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     
@@ -184,7 +184,7 @@ def main(
         # remove depot_tools from PATH after checkout phase, gn/ninja wrappers don't work on unhandled platforms.
         os.environ["PATH"] = orig_path
     if did_pdfium_sync:
-        patch_pdfium(build_ver, target_os)
+        patch_pdfium(build_ver, target_cpu, target_os)
     
     config_dict = DefaultConfig.copy()
     
@@ -207,8 +207,8 @@ def main(
     if target_os:
         config_dict["target_os"] = target_os
         if target_os == "android":
-            config_dict["default_min_sdk_version"] = 21
-            #config_dict["use_mold"] = False
+            config_dict["default_min_sdk_version"] = 23
+            config_dict["use_mold"] = False
     
     GN = get_tool("gn")
     Ninja = get_tool("ninja")

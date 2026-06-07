@@ -21,6 +21,9 @@ on:
       testtargets:
         type: boolean
         default: false
+      pdfium_ver:
+        type: string
+        default: ''
       py_ver:
         type: string
         default: '3.14'
@@ -102,13 +105,13 @@ jobs:
             condition: ${{ inputs.android }}
             target_os: android
             target_cpu: arm64
-            tag: android_21_arm64_v8a
+            tag: android_23_arm64_v8a
           
           - os: ubuntu-latest
             condition: ${{ inputs.android }}
             target_os: android
             target_cpu: arm
-            tag: android_21_armeabi_v7a
+            tag: android_23_armeabi_v7a
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
@@ -117,4 +120,5 @@ jobs:
       target_cpu: ${{ matrix.target_cpu }}
       target_os: ${{ matrix.target_os }}
       tag: ${{ matrix.tag }}
+      pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ matrix.py_ver || inputs.py_ver }}

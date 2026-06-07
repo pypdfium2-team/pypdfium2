@@ -9,6 +9,9 @@ on:
       os:
         type: string
         required: true
+      pdfium_ver:
+        type: string
+        default: ''
       py_ver:
         type: string
         default: '3.14'
@@ -100,8 +103,9 @@ jobs:
           features: 'OptionId.WindowsDesktopDebuggers'
       
       - name: Build PDFium (toolchained)
-        run: python3 ./setupsrc/build_toolchained.py $CPU_PARAM $OS_PARAM
+        run: python3 ./setupsrc/build_toolchained.py $VERSION_PARAM $CPU_PARAM $OS_PARAM
         env:
+          VERSION_PARAM: ${{ inputs.version && format('--version {0}', inputs.version) }}
           CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
           OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
       
