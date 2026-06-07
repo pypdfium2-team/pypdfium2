@@ -101,7 +101,7 @@ def _create_resources_rc(build_ver):
     content = content.replace("$VERSION", str(build_ver))
     output_path.write_text(content)
 
-def patch_pdfium(build_ver, target_os):
+def patch_pdfium(build_ver, target_cpu, target_os):
     # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
     shared_autopatches(PDFiumDir)
     if sys.platform.startswith("win32"):
@@ -115,6 +115,8 @@ def patch_pdfium(build_ver, target_os):
         git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir_build)
     if PORTABLE_MODE:
         git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
+    if target_cpu == "ppc64":  # linux
+        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
 
 
 def get_tool(name):
@@ -182,7 +184,7 @@ def main(
         # remove depot_tools from PATH after checkout phase, gn/ninja wrappers don't work on unhandled platforms.
         os.environ["PATH"] = orig_path
     if did_pdfium_sync:
-        patch_pdfium(build_ver, target_os)
+        patch_pdfium(build_ver, target_cpu, target_os)
     
     config_dict = DefaultConfig.copy()
     

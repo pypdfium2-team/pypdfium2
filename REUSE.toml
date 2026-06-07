@@ -101,7 +101,8 @@ path = [
     "patches/win/use_resources_rc.patch",
     "patches/win/build.patch",
     "patches/win/resources.rc",
-    "patches/android_crossbuild.patch"
+    "patches/android_crossbuild.patch",
+    "patches/ppc64_cross.patch",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
