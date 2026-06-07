@@ -8,6 +8,9 @@ on:
       cibw_py_ver:
         type: string
         default: 'cp314'
+      pdfium_ver:
+        type: string
+        default: ''
       linux_main:
         type: boolean
         default: true
@@ -171,5 +174,5 @@ jobs:
       cibw_target: ${{ matrix.cibw_target || format('{0}_{1}', matrix.cibw_os, matrix.cibw_arch) }}
       cibw_arch: ${{ matrix.cibw_arch }}
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
-      pdfium_ver: ${{ matrix.pdfium_ver }}
+      pdfium_ver: ${{ inputs.pdfium_ver || matrix.pdfium_ver }}
       test_pdfium: ${{ inputs.test_pdfium }}  # currently, linux only
