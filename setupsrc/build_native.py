@@ -19,6 +19,7 @@ DEPS_URLS = dict(
     build      = _CR_PREFIX + "chromium/src/build",
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
+    simdutf    = _CR_PREFIX + "chromium/src/third_party/simdutf",
     catapult   = _CR_PREFIX + "catapult",  # android
     # vendorable dependencies
     icu         = _CR_PREFIX + "chromium/deps/icu",
@@ -31,7 +32,6 @@ DEPS_URLS = dict(
     nasm_source = _CR_PREFIX + "chromium/deps/nasm",
     libpng      = _CR_PREFIX + "chromium/src/third_party/libpng",
     zlib        = _CR_PREFIX + "chromium/src/third_party/zlib",
-    simdutf     = _CR_PREFIX + "chromium/src/third_party/simdutf",
     harfbuzz    = _CR_PREFIX + "external/github.com/harfbuzz/harfbuzz",
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
@@ -456,14 +456,17 @@ This does not use Google's binary toolchain, so it should be portable across dif
 Whether this might also work on other OSes depends on PDFium's build system and the availability of a Linux-like system library environment.
 See the notes in pypdfium2's README.md for more information.
 
-In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.
+Note that pdfium is picky about the GN version, and requires newer GN than what stable distributions usually provide. Be warned that outdated GN may fail with the most obscure errors.
+We suggest that you `pip install -r req/gn.txt` which will install an appropriate version of gn-dist from PyPI. gn-dist is also maintained by the pypdfium2 authors.
 
-Clang users note, pdfium expects a very recent version of clang.
+Likewise, clang users should note that pdfium expects a very recent version of clang.
 Upstream does not aim for compatibility with clang older than the version they currently use.
-pypdfium2 patches pdfium for compatibility with clang 22.
-For versions older than that, --clang-as-gcc mode is implicitly enabled.
+pypdfium2 patches pdfium for compatibility with clang 22. For versions older than that, --clang-as-gcc mode is implicitly enabled.
 
-Some flags take a default from an environment variable, for easy passthrough with cibuildwheel.\
+In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.
+In clang mode, --clang-path lets you choose the clang build used, but flags are not honored yet.
+
+Some params take a default from an environment variable, for easy passthrough with cibuildwheel.\
 """,
     )
     if ExtendAction is not None:  # from base.py

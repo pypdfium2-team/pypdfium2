@@ -216,9 +216,8 @@ To install the dependencies, you'll need something like
 ```bash
 pkg install gn ninja freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff harfbuzz glib
 ```
-Assuming Termux provides recent enough GN. Outdated GN may fail with the most obscure errors.
-If in doubt, check the expected version in `req/gn.txt` against the version provided by Termux.
-`gn-dist` does not currently provide Android wheels. Sourcebuild fallback might work but has not yet been tested on Android.
+Assuming Termux provides recent enough GN. If in doubt, check the expected version in `req/gn.txt` against the version provided by Termux.
+`gn-dist` does not currently provide Android wheels – sourcebuild fallback *might* work on Android with minor changes but has not yet been tested.
 
 Then apply the clang symlinks as described above, but use `ARCH=$(uname -m)-android`
 and substitute `/usr` with `$PREFIX` (`/data/data/com.termux/files/usr`).
