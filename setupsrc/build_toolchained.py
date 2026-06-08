@@ -32,15 +32,6 @@ DefaultConfig = {
     "pdf_enable_xfa": False,
     "pdf_use_skia": False,
 }
-if PORTABLE_MODE:
-    # TODO Would be great if we could enable the sysroot where available, to lower glibc requirement. However, this seems to conflict with the gcc/system libcxx options.
-    DefaultConfig.update({
-        "use_sysroot": False,
-        "clang_use_chrome_plugins": False,
-        # clang may or may not be available for the host in question, so let's just use GCC
-        "is_clang": False,
-        "use_custom_libcxx": False,
-    })
 
 
 def dl_depottools(do_update):
@@ -67,10 +58,6 @@ def dl_pdfium(GClient, do_update, revision, target_os):
     
     had_pdfium = PDFiumDir.exists()
     if not had_pdfium or (target_os and do_update):
-        if PORTABLE_MODE:
-            run_cmd([sys.executable, "-m", "pip", "install", "httplib2==0.22.0"], cwd=None)
-            # TODO in install_buildtools(), check system GN version and install gn-dist if it is too old
-            install_buildtools()
         log("PDFium: configure ...")
         do_update = True
         extra_vars = []
@@ -101,7 +88,7 @@ def _create_resources_rc(build_ver):
     content = content.replace("$VERSION", str(build_ver))
     output_path.write_text(content)
 
-def patch_pdfium(build_ver, target_cpu, target_os):
+def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
     # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
     shared_autopatches(PDFiumDir)
     if sys.platform.startswith("win32"):
@@ -110,13 +97,16 @@ def patch_pdfium(build_ver, target_cpu, target_os):
         _create_resources_rc(build_ver)
         if Host._raw_machine == "arm64":
             git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir_build)
+    if sys.platform.startswith("linux") and target_cpu == "ppc64":
+        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
         git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir_build)
     if PORTABLE_MODE:
         git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
-    if target_cpu == "ppc64":  # linux
-        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
+        if patch_clang:
+            git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
+            git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
 
 
 def get_tool(name):
@@ -148,11 +138,9 @@ def main(
         win_sdk_dir  = None,
         target_cpu   = None,
         target_os    = None,
+        use_sysroot  = None,
+        clang_path   = None,
     ):
-    
-    if PORTABLE_MODE:
-        # cf. https://pkg.go.dev/go.chromium.org/luci/vpython#readme-configuration
-        os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
     
     # defaults handled internally to avoid duplication with parse_args()
     if target_cpu is None:
@@ -162,8 +150,37 @@ def main(
         build_target = "pdfium"
     if build_ver is None:
         build_ver = SBUILD_TOOLCHAINED_PIN
+    patch_clang = False
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
+    config_dict = DefaultConfig.copy()
+    
+    if PORTABLE_MODE:
+        
+        # cf. https://pkg.go.dev/go.chromium.org/luci/vpython#readme-configuration
+        os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
+        
+        if not PDFiumDir.exists():
+            run_cmd([sys.executable, "-m", "pip", "install", "httplib2==0.22.0"], cwd=None)
+            # TODO in install_buildtools(), check system GN version and install gn-dist if it is too old
+            install_buildtools()
+        
+        config_dict["clang_use_chrome_plugins"] = False
+        if not use_sysroot:
+            config_dict.update({
+                "use_sysroot": False,
+                # default to GCC because vendored clang is not portable
+                "is_clang": False,
+                "use_custom_libcxx": False,
+            })
+        elif clang_path:
+            clang_ver = get_clang_version(clang_path)
+            patch_clang = clang_ver < 23
+            config_dict.update({
+                "is_clang": True,  # implied
+                "clang_base_path": str(clang_path),  # without trailing slash
+                "clang_version": clang_ver,
+            })
     
     if Host.system == SysNames.windows:
         if win_sdk_dir is None:
@@ -184,9 +201,7 @@ def main(
         # remove depot_tools from PATH after checkout phase, gn/ninja wrappers don't work on unhandled platforms.
         os.environ["PATH"] = orig_path
     if did_pdfium_sync:
-        patch_pdfium(build_ver, target_cpu, target_os)
-    
-    config_dict = DefaultConfig.copy()
+        patch_pdfium(build_ver, target_cpu, target_os, patch_clang)
     
     # TODO compare target_cpu against host to determine whether it's actually cross
     # this is a bit difficult currently as we don't have a direct mapping between google and python-style CPU names
@@ -252,6 +267,17 @@ def parse_args(argv):
         "--target-os",
         help = "The target operating system, similar to --target-cpu. This is intended for compiling the mobile platforms (e.g. Android) from a desktop device. Note, this script has some issues with rebuilds - you may need to pass --update so that new patches can be applied."
     )
+    parser.add_argument(
+        "--use-sysroot",
+        action = "store_true",
+        help = "Attempt to use a sysroot even in PORTABLE_MODE, with respect to packaging. Also implies using clang, since use_sysroot = true does not seem to work with GCC. If vendored clang is not available, you will need to provide a custom --clang-path, e.g. /usr if you system's clang is recent enough.",
+    )
+    parser.add_argument(
+        "--clang-path",
+        type = lambda p: Path(p).expanduser().resolve(),
+        help = "Custom clang path, if --use-sysroot is given.",
+    )
+    
     return parser.parse_args(argv)
 
 

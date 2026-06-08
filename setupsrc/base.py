@@ -1030,3 +1030,13 @@ def shared_autopatches(pdfium_dir):
         "#if 1  // defined(COMPONENT_BUILD)",
         is_regex=False, exp_count=1,
     )
+
+
+def get_clang_version(clang_root):
+    from packaging.version import Version
+    output = run_cmd([str(clang_root/"bin"/"clang"), "--version"], capture=True, cwd=None)
+    log(output)
+    version = re.search(r"version ([\d\.]+)", output).group(1)
+    version = Version(version).major
+    log(f"Determined clang version {version!r}")
+    return version

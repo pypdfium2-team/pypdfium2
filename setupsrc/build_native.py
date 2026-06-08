@@ -326,15 +326,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     return full_ver
 
 
-def _get_clang_ver(clang_path):
-    from packaging.version import Version
-    output = run_cmd([str(clang_path/"bin"/"clang"), "--version"], capture=True, cwd=None)
-    log(output)
-    version = re.search(r"version ([\d\.]+)", output).group(1)
-    version = Version(version).major
-    log(f"Determined clang version {version!r}")
-    return version
-
 def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
         config["is_clang"] = False
@@ -420,7 +411,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     if compiler is Compiler.clang:
         if clang_path is None:
             clang_path = Host.usr
-        clang_ver = _get_clang_ver(clang_path)
+        clang_ver = get_clang_version(clang_path)
         if clang_ver < 22:
             log("Warning: Clang below version 22 is not supported with upstream's clang config - implicitly switching to --clang-as-gcc mode. If you mean to manually patch pdfium's //build for compatibility with older clang (possible, but no fun to maintain), take out this check.")
             clang_as_gcc = True
