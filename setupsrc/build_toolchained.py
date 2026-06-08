@@ -79,8 +79,7 @@ def dl_pdfium(do_update, revision, target_os, orig_path):
             # > By default, don't check out android. Will be overridden by gclient variables.
             # > TODO(crbug.com/875037): Remove this once the bug in gclient is fixed.
             extra_vars += ["--custom-var", "checkout_android=True"]
-        # TODO change checkout_configuration back to minimal once https://pdfium-review.googlesource.com/c/pdfium/+/149310 is merged
-        run_cmd([*gclient_cmd, "config", "--custom-var", "checkout_configuration=small", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=DEFAULT_MODE)
+        run_cmd([*gclient_cmd, "config", "--custom-var", "checkout_configuration=minimal", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=DEFAULT_MODE)
     
     if do_update:
         log("PDFium: download/sync ...")
