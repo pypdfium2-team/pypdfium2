@@ -247,6 +247,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:  # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
+        # if Host._raw_machine in ("loong64", "loongarch64"):
+        #     git_apply_patch(PatchDir/"loong64_use_lsx.patch", cwd=PDFIUM_DIR_build)  # for libpng
         if compiler is Compiler.clang:
             if clang_ver < 23:
                 git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
@@ -307,7 +309,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("jpeg_turbo", PDFIUM_3RDPARTY/"libjpeg_turbo")
         df.fetch("nasm_source", PDFIUM_3RDPARTY/"nasm")
     if "libpng" in vendor_deps:
-        df.fetch("libpng", PDFIUM_3RDPARTY/"libpng", reset=reset)
+        do_patches = df.fetch("libpng", PDFIUM_3RDPARTY/"libpng", reset=reset)
+        if do_patches and Host._raw_machine in ("ppc64le", "loong64", "loongarch64"):
+            git_apply_patch(PatchDir/"libpng_ppc64_loong64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
     if "zlib" in vendor_deps:
         df.fetch("zlib", PDFIUM_3RDPARTY/"zlib")
     if "harfbuzz" in vendor_deps:
