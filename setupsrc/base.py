@@ -227,16 +227,16 @@ def write_json(fp, data, indent=2):
         return json.dump(data, buf, indent=indent)
 
 def env_prepend(key, value, sep):
-    orig = os.environ.get(key, "")
-    if orig:
-        orig = sep + orig
-    os.environ[key] = value + orig
+    tail = os.environ.get(key, "")
+    if tail:
+        tail = sep + tail
+    os.environ[key] = value + tail
 
 def env_append(key, value, sep):
-    orig = os.environ.get(key, "")
-    if orig:
-        orig += sep
-    os.environ[key] = orig + value
+    head = os.environ.get(key, "")
+    if head:
+        head += sep
+    os.environ[key] = head + value
 
 def set_envs(**kwargs):
     for key, value in kwargs.items():

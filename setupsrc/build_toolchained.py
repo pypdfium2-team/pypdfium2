@@ -38,7 +38,6 @@ def dl_depottools(do_update):
     
     mkdir(SBDir)
     
-    is_update = True
     if DepotToolsDir.exists():
         if do_update:
             log("DepotTools: Revert and update ...")
@@ -46,16 +45,30 @@ def dl_depottools(do_update):
             run_cmd(["git", "pull", DepotToolsURL], cwd=DepotToolsDir)
         else:
             log("DepotTools: Using existing repository as-is.")
-            is_update = False
     else:
         log("DepotTools: Download ...")
         run_cmd(["git", "clone", "--depth", "1", DepotToolsURL, DepotToolsDir], cwd=SBDir)
     
-    return is_update
-
-
-def dl_pdfium(GClient, do_update, revision, target_os):
+    orig_path = os.environ["PATH"]
+    env_prepend("PATH", str(DepotToolsDir), os.pathsep)
     
+    return orig_path
+
+
+def _get_tool_impl(name):
+    bin = DepotToolsDir/name
+    if sys.platform.startswith("win32"):
+        bin = bin.with_suffix(".bat")
+    return bin
+
+def _get_gclient_cmd():
+    if PORTABLE_MODE:
+        return (sys.executable, DepotToolsDir/f"gclient.py")
+    return (_get_tool_impl("gclient"), )
+
+def dl_pdfium(do_update, revision, target_os, orig_path):
+    
+    gclient_cmd = _get_gclient_cmd()
     had_pdfium = PDFiumDir.exists()
     if not had_pdfium or (target_os and do_update):
         log("PDFium: configure ...")
@@ -67,15 +80,19 @@ def dl_pdfium(GClient, do_update, revision, target_os):
             # > TODO(crbug.com/875037): Remove this once the bug in gclient is fixed.
             extra_vars += ["--custom-var", "checkout_android=True"]
         # TODO change checkout_configuration back to minimal once https://pdfium-review.googlesource.com/c/pdfium/+/149310 is merged
-        run_cmd([*GClient, "config", "--custom-var", "checkout_configuration=small", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=DEFAULT_MODE)
+        run_cmd([*gclient_cmd, "config", "--custom-var", "checkout_configuration=small", *extra_vars, "--unmanaged", PdfiumURL], cwd=SBDir, check=DEFAULT_MODE)
     
     if do_update:
         log("PDFium: download/sync ...")
-        args = [*GClient, "sync"]
+        args = [*gclient_cmd, "sync"]
         if had_pdfium:
             args += ["-D", "--reset"]
         args += ["--revision", f"origin/{revision}", "--no-history", "--shallow"]
         run_cmd(args, cwd=SBDir, check=DEFAULT_MODE)
+    
+    if PORTABLE_MODE:
+        # remove depot_tools from PATH after checkout phase, gn/ninja wrappers don't seem portable
+        os.environ["PATH"] = orig_path
     
     return do_update
 
@@ -109,26 +126,95 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
             git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
 
 
-def get_tool(name):
+def _get_tool(name):
     if PORTABLE_MODE:
-        if name == "gclient":
-            args = (sys.executable, DepotToolsDir/f"{name}.py")
-        else:
-            args = (name, )
-    else:
-        bin = DepotToolsDir/name
-        if sys.platform.startswith("win32"):
-            bin = bin.with_suffix(".bat")
-        args = (bin, )
-    return args
+        return name
+    return _get_tool_impl(name)
 
-def configure(GN, config):
+def configure(config):
     mkdir(PDFiumOutDir)
     (PDFiumOutDir / "args.gn").write_text(config)
-    run_cmd([*GN, "gen", PDFiumOutDir], cwd=PDFiumDir)
+    gn = _get_tool("gn")
+    run_cmd([gn, "gen", PDFiumOutDir], cwd=PDFiumDir)
 
-def build(Ninja, target):
-    run_cmd([*Ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
+def build(target):
+    ninja = _get_tool("ninja")
+    run_cmd([ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
+
+
+def handle_portable_mode(config, use_sysroot, clang_path):
+    
+    patch_clang = False
+    if not PORTABLE_MODE:
+        return patch_clang
+    
+    # cf. https://pkg.go.dev/go.chromium.org/luci/vpython#readme-configuration
+    os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
+    
+    if not PDFiumDir.exists():
+        run_cmd([sys.executable, "-m", "pip", "install", "httplib2==0.22.0"], cwd=None)
+        # TODO in install_buildtools(), check system GN version and install gn-dist if it is too old
+        install_buildtools()
+    
+    config["clang_use_chrome_plugins"] = False
+    if use_sysroot:
+        assert clang_path, "--use-sysroot requires a --clang-path to be given"
+        clang_ver = get_clang_version(clang_path)
+        patch_clang = clang_ver < 23
+        config.update({
+            "is_clang": True,  # default
+            "clang_base_path": str(clang_path),  # without trailing slash
+            "clang_version": clang_ver,
+        })
+    else:
+        config.update({
+            "use_sysroot": False,
+            # default to GCC because vendored clang is not portable
+            "is_clang": False,
+            "use_custom_libcxx": False,
+        })
+    
+    return patch_clang
+
+
+def handle_windows(win_sdk_dir):
+    if not sys.platform.startswith("win32"):
+        return
+    if win_sdk_dir is None:
+        # Current GH Actions windows-latest
+        sdk_cpu = "arm64" if Host._raw_machine == "arm64" else "x64"
+        win_sdk_dir = Path(fR"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\{sdk_cpu}")
+    assert win_sdk_dir.exists()
+    env_append("PATH", str(win_sdk_dir), os.pathsep)  # ... prepend?
+    os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
+
+
+def handle_cross(config, target_cpu, target_os):
+    
+    # TODO compare target_cpu against host to determine whether it's actually cross
+    # this is a bit difficult currently as we don't have a direct mapping between google and python-style CPU names
+    is_cross = False
+    
+    if target_cpu:
+        config["target_cpu"] = target_cpu
+        is_cross = True  # assumed
+        if sys.platform.startswith("linux"):
+            if not target_os:
+                sysroot_cpu = target_cpu
+                if target_cpu == "ppc64":
+                    sysroot_cpu = "ppc64le"
+                run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", sysroot_cpu], cwd=PDFiumDir)
+            if target_cpu == "ppc64":
+                config["sysroot"] = "//build/linux/debian_bullseye_ppc64el-sysroot"
+                config["use_sysroot"] = True
+    
+    if target_os:
+        config["target_os"] = target_os
+        if target_os == "android":
+            config["default_min_sdk_version"] = 23
+            config["use_mold"] = False
+    
+    return is_cross
 
 
 def main(
@@ -150,87 +236,22 @@ def main(
         build_target = "pdfium"
     if build_ver is None:
         build_ver = SBUILD_TOOLCHAINED_PIN
-    patch_clang = False
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
-    config_dict = DefaultConfig.copy()
+    config = DefaultConfig.copy()
     
-    if PORTABLE_MODE:
-        
-        # cf. https://pkg.go.dev/go.chromium.org/luci/vpython#readme-configuration
-        os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
-        
-        if not PDFiumDir.exists():
-            run_cmd([sys.executable, "-m", "pip", "install", "httplib2==0.22.0"], cwd=None)
-            # TODO in install_buildtools(), check system GN version and install gn-dist if it is too old
-            install_buildtools()
-        
-        config_dict["clang_use_chrome_plugins"] = False
-        if use_sysroot:
-            assert clang_path, "--use-sysroot requires a --clang-path to be given"
-            clang_ver = get_clang_version(clang_path)
-            patch_clang = clang_ver < 23
-            config_dict.update({
-                "is_clang": True,  # default
-                "clang_base_path": str(clang_path),  # without trailing slash
-                "clang_version": clang_ver,
-            })
-        else:
-            config_dict.update({
-                "use_sysroot": False,
-                # default to GCC because vendored clang is not portable
-                "is_clang": False,
-                "use_custom_libcxx": False,
-            })
+    patch_clang = handle_portable_mode(config, use_sysroot, clang_path)
+    handle_windows(win_sdk_dir)
     
-    if Host.system == SysNames.windows:
-        if win_sdk_dir is None:
-            # Current GH Actions windows-latest
-            sdk_cpu = "arm64" if Host._raw_machine == "arm64" else "x64"
-            win_sdk_dir = Path(fR"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\{sdk_cpu}")
-        assert win_sdk_dir.exists()
-        env_append("PATH", str(win_sdk_dir), os.pathsep)  # ... prepend?
-        os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"
-    
-    dl_depottools(do_update)
-    orig_path = os.environ["PATH"]
-    env_prepend("PATH", str(DepotToolsDir), os.pathsep)
-    
-    GClient = get_tool("gclient")
-    did_pdfium_sync = dl_pdfium(GClient, do_update, pdfium_rev, target_os)
-    if PORTABLE_MODE:
-        # remove depot_tools from PATH after checkout phase, gn/ninja wrappers don't work on unhandled platforms.
-        os.environ["PATH"] = orig_path
+    orig_path = dl_depottools(do_update)
+    did_pdfium_sync = dl_pdfium(do_update, pdfium_rev, target_os, orig_path)
     if did_pdfium_sync:
         patch_pdfium(build_ver, target_cpu, target_os, patch_clang)
     
-    # TODO compare target_cpu against host to determine whether it's actually cross
-    # this is a bit difficult currently as we don't have a direct mapping between google and python-style CPU names
-    is_cross = False
-    if target_cpu:
-        config_dict["target_cpu"] = target_cpu
-        is_cross = True  # assumed
-        if Host.system == SysNames.linux:
-            if not target_os:
-                sysroot_cpu = target_cpu
-                if target_cpu == "ppc64":
-                    sysroot_cpu = "ppc64le"
-                run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", sysroot_cpu], cwd=PDFiumDir)
-            if target_cpu == "ppc64":
-                config_dict["sysroot"] = "//build/linux/debian_bullseye_ppc64el-sysroot"
-                config_dict["use_sysroot"] = True
-    
-    if target_os:
-        config_dict["target_os"] = target_os
-        if target_os == "android":
-            config_dict["default_min_sdk_version"] = 23
-            config_dict["use_mold"] = False
-    
-    GN = get_tool("gn")
-    Ninja = get_tool("ninja")
-    config_str = serialize_gn_config(config_dict)
-    configure(GN, config_str)
-    build(Ninja, build_target)
+    is_cross = handle_cross(config, target_cpu, target_os)
+    config_str = serialize_gn_config(config)
+    configure(config_str)
+    build(build_target)
     
     return pack_sourcebuild(PDFiumDir, PDFiumOutDir, "toolchained", v_full, build_ver, load_lib=(not is_cross))
 
