@@ -123,3 +123,5 @@ jobs:
       tag: ${{ matrix.tag }}
       pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ matrix.py_ver || inputs.py_ver }}
+      custom_clang: ${{ matrix.custom_clang }}
+      build_params: ${{ matrix.build_params }}

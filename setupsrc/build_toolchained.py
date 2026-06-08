@@ -239,7 +239,6 @@ def main(
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     config = DefaultConfig.copy()
-    
     patch_clang = handle_portable_mode(config, use_sysroot, clang_path)
     handle_windows(win_sdk_dir)
     
