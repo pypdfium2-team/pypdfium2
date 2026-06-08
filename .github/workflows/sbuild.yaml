@@ -56,6 +56,13 @@ jobs:
           - os: ubuntu-24.04-arm
             condition: ${{ inputs.linux && inputs.targets_test }}
             py_ver: '3.13'
+            # if we don't use the sysroot or an older container, the glibc requirement is high
+            # see below for an alternative approach that uses the sysroot on aarch64 natively
+            tag: manylinux_2_39_aarch64
+          
+          - os: ubuntu-24.04-arm
+            condition: ${{ inputs.linux && inputs.targets_test }}
+            py_ver: '3.13'
             custom_clang: true
             build_params: '--use-sysroot --clang-path /opt/clang'
             tag: manylinux_2_17_aarch64.manylinux2014_aarch64
