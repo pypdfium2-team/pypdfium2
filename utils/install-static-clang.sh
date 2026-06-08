@@ -1,12 +1,24 @@
 #!/bin/bash
 # SPDX-FileCopyrightText: 2025 Matthieu Darbois
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileComment: From scikit-build/ninja-python-distributions. License assumed from project license.
 
 # Stop at any error, show all commands
 set -exuo pipefail
 
+INSTALL_ONLY=0
 TOOLCHAIN_PATH=/opt/clang
+
+for arg in "$@"; do
+case "$arg" in
+--install-only)
+	INSTALL_ONLY=1;;
+*)
+	echo "Unknown argument: $arg"
+	exit 1;;
+esac
+done
 
 # Download static-clang
 DEFAULT_ARCH="$(uname -m)"
@@ -41,7 +53,13 @@ EOF
 curl -fsSLO "${STATIC_CLANG_URL}"
 sha256sum -c "${STATIC_CLANG_FILENAME}.sha256"
 tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
+ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
 popd
+
+if [[ $INSTALL_ONLY -eq 1 ]]; then
+echo "Install-only mode selected. Exiting early."
+exit 0
+fi
 
 # configure target triple
 case "${AUDITWHEEL_POLICY}-${AUDITWHEEL_ARCH}" in

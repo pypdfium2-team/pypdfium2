@@ -9,16 +9,19 @@ on:
       os:
         type: string
         required: true
-      pdfium_ver:
-        type: string
-        default: ''
       py_ver:
         type: string
         default: '3.14'
+      pdfium_ver:
+        type: string
+        default: ''
       target_cpu:
         type: string
         default: ''
       target_os:
+        type: string
+        default: ''
+      build_params:
         type: string
         default: ''
       tag:
@@ -30,6 +33,9 @@ on:
       repo_tag:
         type: string
         default: ''
+      custom_clang:
+        type: boolean
+        default: false
       condition:
         type: boolean
         default: true
@@ -70,6 +76,10 @@ jobs:
         env:
           REPO_TAG: ${{ inputs.repo_tag }}
       
+      - name: Install custom clang
+        if: ${{ inputs.custom_clang }}
+        run: ./utils/install-static-clang.sh --install-only
+      
       - name: Install Python deps
         run: |
           python3 -m pip install -U pip
@@ -103,11 +113,12 @@ jobs:
           features: 'OptionId.WindowsDesktopDebuggers'
       
       - name: Build PDFium (toolchained)
-        run: python3 ./setupsrc/build_toolchained.py $VERSION_PARAM $CPU_PARAM $OS_PARAM
+        run: python3 ./setupsrc/build_toolchained.py $VERSION_PARAM $CPU_PARAM $OS_PARAM $BUILD_PARAMS
         env:
           VERSION_PARAM: ${{ inputs.version && format('--version {0}', inputs.version) }}
           CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
           OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
+          BUILD_PARAMS: ${{ inputs.build_params }}
       
       - name: Show binary info
         run: file ./data/sourcebuild/*.{so,dylib,dll}

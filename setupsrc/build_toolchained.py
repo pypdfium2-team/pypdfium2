@@ -166,20 +166,21 @@ def main(
             install_buildtools()
         
         config_dict["clang_use_chrome_plugins"] = False
-        if not use_sysroot:
+        if use_sysroot:
+            assert clang_path, "--use-sysroot requires a --clang-path to be given"
+            clang_ver = get_clang_version(clang_path)
+            patch_clang = clang_ver < 23
+            config_dict.update({
+                "is_clang": True,  # default
+                "clang_base_path": str(clang_path),  # without trailing slash
+                "clang_version": clang_ver,
+            })
+        else:
             config_dict.update({
                 "use_sysroot": False,
                 # default to GCC because vendored clang is not portable
                 "is_clang": False,
                 "use_custom_libcxx": False,
-            })
-        elif clang_path:
-            clang_ver = get_clang_version(clang_path)
-            patch_clang = clang_ver < 23
-            config_dict.update({
-                "is_clang": True,  # implied
-                "clang_base_path": str(clang_path),  # without trailing slash
-                "clang_version": clang_ver,
             })
     
     if Host.system == SysNames.windows:
@@ -270,7 +271,7 @@ def parse_args(argv):
     parser.add_argument(
         "--use-sysroot",
         action = "store_true",
-        help = "Attempt to use a sysroot even in PORTABLE_MODE, with respect to packaging. Also implies using clang, since use_sysroot = true does not seem to work with GCC. If vendored clang is not available, you will need to provide a custom --clang-path, e.g. /usr if you system's clang is recent enough.",
+        help = "Attempt to use a sysroot even in PORTABLE_MODE, with respect to packaging. Also implies using clang, since use_sysroot = true does not seem to work with GCC. Since pdfium only vendors x64 clang, you also need to provide a custom --clang-path, e.g. /usr if you system's clang is recent enough.",
     )
     parser.add_argument(
         "--clang-path",
