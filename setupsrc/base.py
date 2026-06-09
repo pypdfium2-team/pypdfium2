@@ -95,11 +95,13 @@ PdfiumFlagsDict = {
 # TODO consider StrEnum or something
 
 class SysNames:
-    darwin  = "darwin"
-    windows = "windows"
-    linux   = "linux"
-    android = "android"
-    ios     = "ios"
+    darwin     = "darwin"
+    windows    = "windows"
+    linux      = "linux"
+    # linux_musl is only used under special circumstances, mostly just maps to linux
+    linux_musl = "linux_musl"
+    android    = "android"
+    ios        = "ios"
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
@@ -132,6 +134,7 @@ class PlatNames:
     ios_arm64_dev    = SysNames.ios     + "_arm64_dev"   # device
     ios_arm64_simu   = SysNames.ios     + "_arm64_simu"  # simulator
     ios_x64_simu     = SysNames.ios     + "_x64_simu"    # simulator
+
 
 # Map platform names to the package names used by pdfium-binaries/google.
 PdfiumBinariesMap = {
@@ -169,52 +172,14 @@ PdfiumBinariesMap.update({
 })
 
 
-def _manylinux_tag(arch, glibc="2_17"):
-    return f"manylinux_{glibc}_{arch}.manylinux2014_{arch}"
-
-_MacWheeltagPatterns = {
-    PlatNames.darwin_x64:       "macosx_{}_x86_64",
-    PlatNames.darwin_arm64:     "macosx_{}_arm64",
-    # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
-    PlatNames.darwin_univ2:     "macosx_{}_universal2",
-}
-
-PlatToWheeltag = {
-    # Upstream does not specify the minimum macOS version, so this needs to be manually investigated.
-    # In the future, we'll want to auto-detect the version using macholib or otool/vtool (there already is an experimental code path for this).
-    **{k: v.format("12_0") for k, v in _MacWheeltagPatterns.items()},
-    
-    PlatNames.windows_x64:      "win_amd64",
-    PlatNames.windows_arm64:    "win_arm64",
-    PlatNames.windows_x86:      "win32",
-    
-    PlatNames.linux_x64:        _manylinux_tag("x86_64"),
-    PlatNames.linux_x86:        _manylinux_tag("i686"),
-    PlatNames.linux_arm64:      _manylinux_tag("aarch64"),
-    PlatNames.linux_arm32:      _manylinux_tag("armv7l"),
-    PlatNames.linux_ppc64le:    _manylinux_tag("ppc64le"),
-    
-    # pdfium-binaries statically link musl, so we can declare the lowest possible requirement.
-    # The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
-    PlatNames.linux_musl_x64:   "musllinux_1_1_x86_64",
-    PlatNames.linux_musl_x86:   "musllinux_1_1_i686",
-    PlatNames.linux_musl_arm64: "musllinux_1_1_aarch64",
-    
-    # Android - see PEP 738 # Packaging
-    # AOTW, pdfium-binaries/steps/05-configure.sh defines default_min_sdk_version = 23
-    PlatNames.android_arm64:    "android_23_arm64_v8a",
-    PlatNames.android_arm32:    "android_23_armeabi_v7a",
-    PlatNames.android_x64:      "android_23_x86_64",
-    PlatNames.android_x86:      "android_23_x86",
-    
-    # iOS - see PEP 730 # Packaging
-    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. Note that the PEP says:
-    # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
-    # I take it this means you'd need to change the library search path to that Frameworks location in bindings.
-    PlatNames.ios_arm64_dev:    "ios_15_0_arm64_iphoneos",
-    PlatNames.ios_arm64_simu:   "ios_15_0_arm64_iphonesimulator",
-    PlatNames.ios_x64_simu:     "ios_15_0_x86_64_iphonesimulator",
-}
+def plat_to_system(pl_name, distinguish_musl=False):
+    if pl_name == ExtPlats.sourcebuild:
+        # Note, this may be None if on an unknown host
+        return Host.system
+    if distinguish_musl and pl_name.startswith(SysNames.linux_musl):
+        return SysNames.linux_musl
+    # other ExtPlats intentionally not handled here
+    return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
 
 
 def log(*args, **kwargs):
@@ -466,14 +431,6 @@ def merge_tag(info, mode):
             log("Warning: Ignored post-tag desc. This should not happen in autorelease CI.")
     
     return tag
-
-
-def plat_to_system(pl_name):
-    if pl_name == ExtPlats.sourcebuild:
-        # Note, this may be None if on an unknown host
-        return Host.system
-    # other ExtPlats intentionally not handled here
-    return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
 
 
 # platform.libc_ver() currently returns an empty string for musl, so use the packaging module to confirm.
@@ -1070,12 +1027,69 @@ def mac_get_version(dll_path):
     return max(_mac_iter_versions(dll_path))
 
 
+def _manylinux_tag(arch):
+    return "manylinux_{}" + f"_{arch}" + f".manylinux2014_{arch}"  # see below
+
+_WheeltagPatterns = {
+    # Upstream does not specify the minimum macOS version, so this needs to be manually investigated.
+    # In the future, we'll want to auto-detect the version using macholib or otool/vtool (there already is an experimental code path for this).
+    PlatNames.darwin_x64:       "macosx_{}_x86_64",
+    PlatNames.darwin_arm64:     "macosx_{}_arm64",
+    # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
+    PlatNames.darwin_univ2:     "macosx_{}_universal2",
+    
+    PlatNames.windows_x64:      "win_amd64",
+    PlatNames.windows_arm64:    "win_arm64",
+    PlatNames.windows_x86:      "win32",
+    
+    PlatNames.linux_x64:        _manylinux_tag("x86_64"),
+    PlatNames.linux_x86:        _manylinux_tag("i686"),
+    PlatNames.linux_arm64:      _manylinux_tag("aarch64"),
+    PlatNames.linux_arm32:      _manylinux_tag("armv7l"),
+    PlatNames.linux_ppc64le:    _manylinux_tag("ppc64le"),
+    
+    # pdfium-binaries statically link musl, so we can declare the lowest possible requirement.
+    # The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
+    PlatNames.linux_musl_x64:   "musllinux_{}_x86_64",
+    PlatNames.linux_musl_x86:   "musllinux_{}_i686",
+    PlatNames.linux_musl_arm64: "musllinux_{}_aarch64",
+    
+    # Android - see PEP 738 # Packaging
+    # AOTW, pdfium-binaries/steps/05-configure.sh defines default_min_sdk_version = 23
+    PlatNames.android_arm64:    "android_{}_arm64_v8a",
+    PlatNames.android_arm32:    "android_{}_armeabi_v7a",
+    PlatNames.android_x64:      "android_{}_x86_64",
+    PlatNames.android_x86:      "android_{}_x86",
+    
+    # iOS - see PEP 730 # Packaging
+    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. Note that the PEP says:
+    # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
+    # I take it this means you'd need to change the library search path to that Frameworks location in bindings.
+    PlatNames.ios_arm64_dev:    "ios_{}_arm64_iphoneos",
+    PlatNames.ios_arm64_simu:   "ios_{}_arm64_iphonesimulator",
+    PlatNames.ios_x64_simu:     "ios_{}_x86_64_iphonesimulator",
+}
+
+_WheeltagVersions = {
+    SysNames.darwin: "12_0",
+    SysNames.ios: "15_0",
+    SysNames.linux: "2_17",
+    SysNames.linux_musl: "1_1",
+    SysNames.android: "23",
+    SysNames.windows: None,
+}
+
 def get_wheel_tag(pl_name, dll_path, autotag):
+    
+    tag_pattern = _WheeltagPatterns[pl_name]
     if autotag:
         if sys.platform.startswith("darwin") and HAVE_MACHOLIB:
             mac_major, mac_minor = mac_get_version(dll_path)
             log(f"Auto-detected min macOS version for {dll_path.name}: {mac_major, mac_minor}")
-            return _MacWheeltagPatterns[pl_name].format(f"{mac_major}_{mac_minor}")
+            return tag_pattern.format(f"{mac_major}_{mac_minor}")
         else:
             log("Auto-tagging unavailable, falling back to static tag.")
-    return PlatToWheeltag[pl_name]
+    
+    sys_name = plat_to_system(pl_name, distinguish_musl=True)
+    hardcoded_version = _WheeltagVersions[sys_name]
+    return tag_pattern.format(hardcoded_version)
