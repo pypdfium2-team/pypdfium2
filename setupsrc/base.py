@@ -172,9 +172,11 @@ def _manylinux_tag(arch, glibc="2_17"):
     return f"manylinux_{glibc}_{arch}.manylinux2014_{arch}"
 
 PlatToWheeltag = {
-    # AOTW, pdfium-binaries/steps/05-configure.sh defines mac_deployment_target = "11.0.0"
+    # Upstream does not specify the minimum macOS version.
+    # AOTW, XCode 26 is used, and [1] specifies that the lowest deployment target with XCode 26 is macOS 11, so we assume that.
+    # In the future, we'll want to auto-detect the version using macholib or otool/vtool.
+    # [^1]: https://developer.apple.com/xcode/system-requirements/
     PlatNames.darwin_x64:       "macosx_11_0_x86_64",
-    # macOS 11 is the first version available on arm64
     PlatNames.darwin_arm64:     "macosx_11_0_arm64",
     # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
     PlatNames.darwin_univ2:     "macosx_11_0_universal2",
