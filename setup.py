@@ -155,11 +155,11 @@ def run_setup(modnames, pl_name):
             plat_tag = None
             license_files.append("BUILD_LICENSES/**")
         else:  # pdfium-binaries
+            autotag = bool(int( os.environ.get("AUTOTAG", False) ))
             plat_tag = get_wheel_tag(pl_name, dll_path, autotag)
             # FIXME This gives a deeply nested directory structure.
             # The author is not aware of a way to achieve a more flat structure with setuptools.
             license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
-        autotag = bool(int( os.environ.get("AUTOTAG", False) ))
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(plat_tag)
     
