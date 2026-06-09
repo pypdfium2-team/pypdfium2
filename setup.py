@@ -6,6 +6,7 @@
 import os
 import sys
 from pathlib import Path
+from functools import partial
 import setuptools
 from setuptools.command.build_py import build_py as buildpy_orig
 try:
@@ -52,6 +53,8 @@ def bdist_factory(incoming_plat_tag):
 
 
 def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
+    
+    # https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
     
     class pypdfium_buildpy (buildpy_orig):
             
@@ -184,6 +187,17 @@ def _parse_modspec(modspec):
         modnames = ModulesAll
     return modnames
 
+def _resolve_platname(pl_name):
+    resolved = pl_name
+    if pl_name == ExtPlats.fallback:
+        try:
+            system_pdfium._get_pdfium()
+        except system_pdfium.PdfiumNotFoundError:
+            resolved = ExtPlats.sourcebuild
+        else:
+            resolved = ExtPlats.system
+    return resolved
+
 
 def main():
     
@@ -195,17 +209,8 @@ def main():
     if pl_name == ExtPlats.sdist and modnames != ModulesAll:
         raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
-    datagen = lambda: prepare_setup(pl_name, sub_target, requested_ver, flags)
-    
-    if pl_name == ExtPlats.fallback:
-        try:
-            system_pdfium._get_pdfium()
-        except system_pdfium.PdfiumNotFoundError:
-            pl_name = ExtPlats.sourcebuild
-        else:
-            pl_name = ExtPlats.system
-    
-    run_setup(modnames, pl_name, datagen)
+    datagen = partial(prepare_setup, pl_name, sub_target, requested_ver, flags)
+    run_setup(modnames, _resolve_platname(pl_name), datagen)
 
 
 if __name__ == "__main__":
