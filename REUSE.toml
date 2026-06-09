@@ -101,7 +101,7 @@ path = [
     "patches/win/use_resources_rc.patch",
     "patches/win/build.patch",
     "patches/win/resources.rc",
-    "patches/android_crossbuild.patch",
+    "patches/android_cross.patch",
     "patches/ppc64_cross.patch",
 ]
 precedence = "aggregate"
@@ -118,7 +118,7 @@ See also //BUILD_LICENSES/pdfium-binaries.txt for a copy of upstream's license f
 [[annotations]]
 path = [
     "patches/clang_22_compat.patch",
-    "patches/android_build.patch",
+    "patches/android_native.patch",
     "patches/no_libclang_rt.patch",
     "patches/libpng_ppc64_loong64.patch",
     "patches/gcc_toolchain.patch",

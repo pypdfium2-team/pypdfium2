@@ -117,7 +117,7 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
         git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
-        git_apply_patch(PatchDir/"android_crossbuild.patch", PDFiumDir_build)
+        git_apply_patch(PatchDir/"android_cross.patch", PDFiumDir_build)
     if PORTABLE_MODE:
         git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
         if patch_clang:
