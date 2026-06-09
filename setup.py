@@ -16,7 +16,7 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent/"setupsrc"))
 from base import *
 from emplace import prepare_setup
-from tagging import get_wheel_tag
+from _tagging import get_wheel_tag
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels.

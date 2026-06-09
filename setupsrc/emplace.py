@@ -12,6 +12,7 @@ import update as update_pdfium
 import build_native
 import build_toolchained
 import system_pdfium
+from _build_helpers import install_buildtools
 
 
 def _repr_info(version, flags):

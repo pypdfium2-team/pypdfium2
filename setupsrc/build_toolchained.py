@@ -7,7 +7,9 @@ import sys
 import argparse
 from pathlib import Path
 
-from base import *  # local
+# local
+from base import *
+from _build_helpers import *
 
 SBDir = ProjectDir / "sbuild" / "toolchained"
 DepotToolsDir  = SBDir / "depot_tools"
