@@ -46,16 +46,16 @@ _WheeltagPatterns = {
 }
 
 _WheeltagVersions = {
-    # --- AS OF THIS WRITING ---
+    # --- AS OF THIS WRITING (06/2026) ---
     
-    # macOS: Upstream does not specify a deployment target in config. Can be checked with our auto-tagging codepath (requires a macOS host).
+    # macOS: Can be checked with our auto-tagging codepath (requires a macOS host). Upstream does not specify a deployment target in config.
     SysNames.darwin: "12_0",
     
     # iOS: unclear, guessed from the lowest version XCode 26 can achieve according to [1]
     # [1]: https://developer.apple.com/xcode/system-requirements/
     SysNames.ios: "15_0",
     
-    # Linux (glibc): Upstream does not state the version. Build system uses sysroots with symbol reversioning, hence consistently low glibc requirement. Need to watch out for upstream changes, though. Can be checked with `auditwheel show`.
+    # Linux (glibc): Can be checked with `auditwheel show`. Upstream build system uses sysroots with symbol reversioning, hence consistently low glibc requirement. Need to watch out for upstream changes, though.
     SysNames.linux: "2_17",
     
     # Linux (musl): pdfium-binaries statically link musl, so we can declare the lowest possible requirement. The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
@@ -64,7 +64,7 @@ _WheeltagVersions = {
     # pdfium-binaries/steps/05-configure.sh says default_min_sdk_version = 23
     SysNames.android: "23",
     
-    # Windows tags are not versioned, .format() will ignore this
+    # Windows tags are not versioned, .format() will ignore this. FWIW, the minimum Windows version might be 7 or 8.
     SysNames.windows: None,
 }
 
