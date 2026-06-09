@@ -771,10 +771,6 @@ def clean_platfiles():
             shutil.rmtree(fp)
 
 
-def build_pl_suffix(version, use_v8):
-    return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
-
-
 def parse_pl_spec(pl_spec):
     
     # TODO split up in individual env vars after all?
@@ -806,16 +802,6 @@ def parse_pl_spec(pl_spec):
         req_ver = int(req_ver)
     
     return pl_name, subspec, req_ver, flags
-
-
-def parse_modspec(modspec):
-    if modspec:
-        modnames = modspec.split(",")
-        assert set(modnames).issubset(ModulesAll)
-        assert len(modnames) in (1, 2)
-    else:
-        modnames = ModulesAll
-    return modnames
 
 
 def get_next_changelog(flush=False):

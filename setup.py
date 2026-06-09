@@ -174,12 +174,22 @@ def run_setup(modnames, pl_name):
     setuptools.setup(**kwargs)
 
 
+def _parse_modspec(modspec):
+    if modspec:
+        modnames = modspec.split(",")
+        assert set(modnames).issubset(ModulesAll)
+        assert len(modnames) in (1, 2)
+    else:
+        modnames = ModulesAll
+    return modnames
+
+
 def main():
     
     raw_modspec = os.environ.get(ModulesSpec_EnvVar, "")
     raw_platspec = os.environ.get(PlatSpec_EnvVar, "")
     
-    modnames = parse_modspec(raw_modspec)
+    modnames = _parse_modspec(raw_modspec)
     pl_name, sub_target, requested_ver, flags = parse_pl_spec(raw_platspec)
     
     if pl_name == ExtPlats.sdist and modnames != ModulesAll:
