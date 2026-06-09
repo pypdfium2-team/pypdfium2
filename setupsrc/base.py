@@ -135,7 +135,6 @@ class PlatNames:
     ios_arm64_simu   = SysNames.ios     + "_arm64_simu"  # simulator
     ios_x64_simu     = SysNames.ios     + "_x64_simu"    # simulator
 
-
 # Map platform names to the package names used by pdfium-binaries/google.
 PdfiumBinariesMap = {
     PlatNames.darwin_x64:    "mac-x64",
