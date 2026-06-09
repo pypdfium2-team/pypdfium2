@@ -191,7 +191,6 @@ def main():
     
     modnames = _parse_modspec(raw_modspec)
     pl_name, sub_target, requested_ver, flags = parse_pl_spec(raw_platspec)
-    
     if pl_name == ExtPlats.sdist and modnames != ModulesAll:
         raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     

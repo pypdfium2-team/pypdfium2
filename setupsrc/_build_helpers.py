@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import re
+import shutil
+import urllib.request as url_request
 from base import *  # local
 
 
