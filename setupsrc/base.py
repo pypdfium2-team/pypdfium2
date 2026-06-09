@@ -208,9 +208,9 @@ PlatToWheeltag = {
     # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. Note that the PEP says:
     # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
     # I take it this means you'd need to change the library search path to that Frameworks location in bindings.
-    PlatNames.ios_arm64_dev:    "ios_12_0_arm64_iphoneos",
-    PlatNames.ios_arm64_simu:   "ios_12_0_arm64_iphonesimulator",
-    PlatNames.ios_x64_simu:     "ios_12_0_x86_64_iphonesimulator",
+    PlatNames.ios_arm64_dev:    "ios_15_0_arm64_iphoneos",
+    PlatNames.ios_arm64_simu:   "ios_15_0_arm64_iphonesimulator",
+    PlatNames.ios_x64_simu:     "ios_15_0_x86_64_iphonesimulator",
 }
 
 
