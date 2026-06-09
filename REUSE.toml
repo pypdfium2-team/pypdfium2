@@ -120,8 +120,7 @@ path = [
     "patches/clang_22_compat.patch",
     "patches/android_build.patch",
     "patches/no_libclang_rt.patch",
-    "patches/loong64_use_lsx.patch",
-    "patches/libpng_ppc64.patch",
+    "patches/libpng_ppc64_loong64.patch",
     "patches/gcc_toolchain.patch",
     "patches/win/arm64_native.patch",
 ]
