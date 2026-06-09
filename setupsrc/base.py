@@ -180,11 +180,9 @@ _MacWheeltagPatterns = {
 }
 
 PlatToWheeltag = {
-    # Upstream does not specify the minimum macOS version.
-    # AOTW, XCode 26 is used, and [1] specifies that the lowest deployment target with XCode 26 is macOS 11, so we assume that.
-    # In the future, we'll want to auto-detect the version using macholib or otool/vtool.
-    # [^1]: https://developer.apple.com/xcode/system-requirements/
-    **{k: v.format("11_0") for k, v in _MacWheeltagPatterns.items()},
+    # Upstream does not specify the minimum macOS version, so this needs to be manually investigated.
+    # In the future, we'll want to auto-detect the version using macholib or otool/vtool (there already is an experimental code path for this).
+    **{k: v.format("12_0") for k, v in _MacWheeltagPatterns.items()},
     
     PlatNames.windows_x64:      "win_amd64",
     PlatNames.windows_arm64:    "win_arm64",
@@ -1051,7 +1049,7 @@ def get_clang_version(clang_root):
 
 HAVE_MACHOLIB = sys.platform.startswith("darwin") and bool(find_spec("macholib"))
 
-def mac_get_version(dll_path):
+def _mac_iter_versions(dll_path):
     # adapted from matthew-brett/delocate
     from macholib.MachO import MachO
     from macholib.mach_o import LC_BUILD_VERSION, LC_VERSION_MIN_MACOSX  # CPU_TYPE_NAMES
@@ -1065,7 +1063,11 @@ def mac_get_version(dll_path):
             else:
                 continue
             # cpu_type = CPU_TYPE_NAMES.get(header.header.cputype, "unknown")
-            return (raw_version >> 16 & 0xFF), (raw_version >> 8 & 0xFF)
+            yield (raw_version >> 16 & 0xFF), (raw_version >> 8 & 0xFF)
+            break
+
+def mac_get_version(dll_path):
+    return max(_mac_iter_versions(dll_path))
 
 
 def get_wheel_tag(pl_name, dll_path, autotag):
