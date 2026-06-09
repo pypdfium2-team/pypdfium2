@@ -165,8 +165,9 @@ def test_render_multipage(tmp_path):
     assert sorted([f.name for f in out_files]) == ["multipage_1.jpg", "multipage_2.jpg", "multipage_3.jpg"]
 
 
-def test_default_fonts():
-    sfl = PdfSysfontListener()
+@pytest.mark.parametrize("sfl_class", [pdfium.PdfSysfontBase, PdfSysfontListener])
+def test_default_fonts(sfl_class):
+    sfl = sfl_class()
     sfl.setup()
     try:
         run_cli(["default-fonts"])

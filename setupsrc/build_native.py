@@ -244,6 +244,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         env_append("CPPFLAGS", "-ffp-contract=off", " ")
     if do_patches:
         # it says gcc_toolchain but actually needed for clang as well
+        # -> upstream fix merged, can be removed or put behind version guard once pdfium rolls //build and we update pdfium
         git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:  # fix linkage step
             git_apply_patch(PatchDir/"android_build.patch", cwd=PDFIUM_DIR_build)
@@ -309,7 +310,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     if "libpng" in vendor_deps:
         do_patches = df.fetch("libpng", PDFIUM_3RDPARTY/"libpng", reset=reset)
         if do_patches and Host._raw_machine in ("ppc64le", "loong64", "loongarch64"):
-            # upstream CL merged, can be removed or put behind version guard once we update pdfium provided pdfium has updated libpng
+            # upstream CL merged, can be removed or put behind version guard once pdfium rolls libpng and we update pdfium
             git_apply_patch(PatchDir/"libpng_ppc64_loong64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
     if "zlib" in vendor_deps:
         df.fetch("zlib", PDFIUM_3RDPARTY/"zlib")
