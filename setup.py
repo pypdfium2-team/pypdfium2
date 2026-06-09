@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent/"setupsrc"))
 from base import *
 import system_pdfium
 from emplace import prepare_setup
-from _tagging import get_wheel_tag
+from tagging import get_wheel_tag
 
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels.
