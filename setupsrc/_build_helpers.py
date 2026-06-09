@@ -99,7 +99,7 @@ def _install_dep(exename, pkgname=None, skip_if_present=True):
 def install_buildtools():
     log("Bootstrapping build tools...")
     _install_dep("ninja")
-    _install_dep("gn", "gn-dist")
+    _install_dep("gn", "gn-dist==2407")
 
 
 def _to_gn(value):
