@@ -11,6 +11,7 @@ import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2_cli.__main__ as pdfium_cli
+from pypdfium2_cli._sysfonts import PdfSysfontListener
 from .conftest import TestFiles, TestExpectations
 
 lib_logger = logging.getLogger("pypdfium2")
@@ -162,3 +163,12 @@ def test_render_multipage(tmp_path):
     
     out_files = list(out_dir.iterdir())
     assert sorted([f.name for f in out_files]) == ["multipage_1.jpg", "multipage_2.jpg", "multipage_3.jpg"]
+
+
+def test_default_fonts():
+    sfl = PdfSysfontListener()
+    sfl.setup()
+    try:
+        run_cli(["default-fonts"])
+    finally:
+        sfl.close()
