@@ -467,7 +467,7 @@ Some params take a default from an environment variable, for easy passthrough wi
         "--version",
         dest = "build_ver",
         default = (os.environ.get("PDFIUM_VER") or None),
-        help = f"The pdfium version to use. Either a literal version integer, or 'main', 'latest' or 'latest-binaries'. Defaults to the pinned version {SBUILD_NATIVE_PIN}, or $PDFIUM_VER if set.",
+        help = f"The pdfium version to use. Either a literal version number, or 'main', 'latest' or 'latest-binaries'. Defaults to the pinned version {SBUILD_NATIVE_PIN}, or $PDFIUM_VER if set.",
     )
     parser.add_argument(
         "--test",

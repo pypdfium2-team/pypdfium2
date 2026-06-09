@@ -267,7 +267,8 @@ def parse_args(argv):
     parser.add_argument(
         "--version", "-v",
         dest = "build_ver",
-        help = f"PDFium version to use. Currently defaults to {SBUILD_TOOLCHAINED_PIN!r}. Pass 'main' to try the latest state.",
+        default = (os.environ.get("PDFIUM_VER") or None),
+        help = f"PDFium version to use. Either a literal version number, or 'main' to try the latest state. Defaults to the pinned version {SBUILD_TOOLCHAINED_PIN}, or $PDFIUM_VER if set.",
     )
     parser.add_argument(
         "--target", "-t",
