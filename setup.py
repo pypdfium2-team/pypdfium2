@@ -188,15 +188,14 @@ def _parse_modspec(modspec):
     return modnames
 
 def _resolve_platname(pl_name):
-    resolved = pl_name
     if pl_name == ExtPlats.fallback:
         try:
             system_pdfium._get_pdfium()
         except system_pdfium.PdfiumNotFoundError:
-            resolved = ExtPlats.sourcebuild
+            return ExtPlats.sourcebuild
         else:
-            resolved = ExtPlats.system
-    return resolved
+            return ExtPlats.system
+    return pl_name
 
 
 def main():
@@ -205,11 +204,11 @@ def main():
     raw_platspec = os.environ.get(PlatSpec_EnvVar, "")
     
     modnames = _parse_modspec(raw_modspec)
-    pl_name, sub_target, requested_ver, flags = parse_pl_spec(raw_platspec)
+    pl_name, *args = parse_pl_spec(raw_platspec)
     if pl_name == ExtPlats.sdist and modnames != ModulesAll:
         raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
-    datagen = partial(prepare_setup, pl_name, sub_target, requested_ver, flags)
+    datagen = partial(prepare_setup, pl_name, *args)
     run_setup(modnames, _resolve_platname(pl_name), datagen)
 
 
