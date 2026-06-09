@@ -8,7 +8,6 @@ import re
 import sys
 import shutil
 import itertools
-import functools
 from pathlib import Path
 from ctypes.util import find_library
 from urllib.request import urlopen
