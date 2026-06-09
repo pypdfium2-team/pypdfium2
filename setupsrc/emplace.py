@@ -149,7 +149,6 @@ def prepare_setup(pl_name, sub_target, pdfium_ver, flags):
     pl_name = stage_platfiles(pl_name, sub_target, pdfium_ver, flags)
     # Copy platform files into actual source tree
     copy_platfiles(pl_name)
-    return pl_name
 
 
 def main():

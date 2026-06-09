@@ -55,7 +55,7 @@ _WheeltagVersions = {
     # [1]: https://developer.apple.com/xcode/system-requirements/
     SysNames.ios: "15_0",
     
-    # Linux (glibc): Can be checked with `auditwheel show`. Upstream build system uses sysroots with symbol reversioning, hence consistently low glibc requirement. Need to watch out for upstream changes, though.
+    # Linux (glibc): Can be checked with `auditwheel show`. Upstream build system uses sysroots with symbol reversioning, hence consistently low glibc requirement. Need to watch out for changes, though.
     SysNames.linux: "2_17",
     
     # Linux (musl): pdfium-binaries statically link musl, so we can declare the lowest possible requirement. The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
