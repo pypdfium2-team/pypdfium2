@@ -833,62 +833,7 @@ def get_next_changelog(flush=False):
     return devel_msg
 
 
-def git_apply_patch(patch, cwd, git_args=()):
-    run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
-
-
-def git_clone_rev(url, rev, target_dir, depth=1):
-    # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
-    # NOTE Once we can require git >= 2.49.0, `git clone --depth <n> --revision <sha>` will do. (The author currently uses git 2.42.0.)
-    mkdir(target_dir)
-    depth_param = ["--depth", str(depth)] if depth else []
-    run_cmd(["git", "-c", "advice.defaultBranchName=false", "init"], cwd=target_dir)
-    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
-    run_cmd(["git", "fetch", *depth_param, "origin", rev], cwd=target_dir)
-    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
-
-
-def _to_gn(value):
-    if isinstance(value, bool):
-        return str(value).lower()
-    elif isinstance(value, str):
-        return f'"{value}"'
-    elif isinstance(value, int):
-        return str(value)
-    elif isinstance(value, list):
-        return f"[{','.join(_to_gn(v) for v in value)}]"
-    else:
-        raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
-
-def serialize_gn_config(config_dict):
-    parts = []
-    for key, value in config_dict.items():
-        parts.append(f"{key} = {_to_gn(value)}")
-    result = "\n".join(parts)
-    log(f"\nBuild config:\n{result}\n")
-    return result
-
-
-_SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
-
-def get_shimheaders_tool(pdfium_dir, rev="main"):
-
-    tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
-    shimheaders_file = tools_dir / "generate_shim_headers.py"
-    shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
-
-    if not shimheaders_file.exists():
-        log(f"Downloading {shimheaders_file.name} at revision {rev}")
-        mkdir(tools_dir)
-        url_request.urlretrieve(shimheaders_url, shimheaders_file)
-
-
 def purge_dir(dir):
     if dir.exists():
         shutil.rmtree(dir)
     dir.mkdir(parents=True)
-
-
-def git_get_hash(repo_dir, n_digits=None):
-    short = f"--short={n_digits}" if n_digits else "--short"
-    return "g" + run_cmd(["git", "rev-parse", short, "HEAD"], cwd=repo_dir, capture=True)

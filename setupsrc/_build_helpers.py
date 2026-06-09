@@ -19,6 +19,11 @@ def handle_sbuild_vers(short_ver):
     return full_ver, pdfium_rev, chromium_rev
 
 
+def git_get_hash(repo_dir, n_digits=None):
+    short = f"--short={n_digits}" if n_digits else "--short"
+    return "g" + run_cmd(["git", "rev-parse", short, "HEAD"], cwd=repo_dir, capture=True)
+
+
 def pack_sourcebuild(
         pdfium_dir, build_dir, sub_target,
         full_ver, build_ver=None, post_ver=None,
@@ -48,6 +53,9 @@ def pack_sourcebuild(
     return full_ver, post_ver
 
 
+def git_apply_patch(patch, cwd, git_args=()):
+    run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
+
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
     log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
     content = file.read_text()
@@ -64,26 +72,6 @@ def autopatch(file, pattern, repl, is_regex, exp_count=None):
 def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
     for file in dir.glob(globexpr):
         autopatch(file, pattern, repl, is_regex, exp_count)
-
-def shared_autopatches(pdfium_dir):
-    autopatch_dir(
-        pdfium_dir/"public"/"cpp", "*.h",
-        r'"public/(.+)"', r'"../\1"',
-        is_regex=True, exp_count=None,
-    )
-    # bundle dependencies (e.g. abseil) into the pdfium DLL
-    autopatch(
-        pdfium_dir/"BUILD.gn",
-        'component("pdfium")',
-        'shared_library("pdfium")',
-        is_regex=False, exp_count=1,
-    )
-    autopatch(
-        pdfium_dir/"public"/"fpdfview.h",
-        "#if defined(COMPONENT_BUILD)",
-        "#if 1  // defined(COMPONENT_BUILD)",
-        is_regex=False, exp_count=1,
-    )
 
 
 def get_clang_version(clang_root):
@@ -110,3 +98,59 @@ def install_buildtools():
     log("Bootstrapping build tools...")
     _install_dep("ninja")
     _install_dep("gn", "gn-dist")
+
+
+def _to_gn(value):
+    if isinstance(value, bool):
+        return str(value).lower()
+    elif isinstance(value, str):
+        return f'"{value}"'
+    elif isinstance(value, int):
+        return str(value)
+    elif isinstance(value, list):
+        return f"[{','.join(_to_gn(v) for v in value)}]"
+    else:
+        raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
+
+def serialize_gn_config(config_dict):
+    parts = []
+    for key, value in config_dict.items():
+        parts.append(f"{key} = {_to_gn(value)}")
+    result = "\n".join(parts)
+    log(f"\nBuild config:\n{result}\n")
+    return result
+
+
+_SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
+
+def get_shimheaders_tool(pdfium_dir, rev="main"):
+
+    tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
+    shimheaders_file = tools_dir / "generate_shim_headers.py"
+    shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
+
+    if not shimheaders_file.exists():
+        log(f"Downloading {shimheaders_file.name} at revision {rev}")
+        mkdir(tools_dir)
+        url_request.urlretrieve(shimheaders_url, shimheaders_file)
+
+
+def shared_autopatches(pdfium_dir):
+    autopatch_dir(
+        pdfium_dir/"public"/"cpp", "*.h",
+        r'"public/(.+)"', r'"../\1"',
+        is_regex=True, exp_count=None,
+    )
+    # bundle dependencies (e.g. abseil) into the pdfium DLL
+    autopatch(
+        pdfium_dir/"BUILD.gn",
+        'component("pdfium")',
+        'shared_library("pdfium")',
+        is_regex=False, exp_count=1,
+    )
+    autopatch(
+        pdfium_dir/"public"/"fpdfview.h",
+        "#if defined(COMPONENT_BUILD)",
+        "#if 1  // defined(COMPONENT_BUILD)",
+        is_regex=False, exp_count=1,
+    )
