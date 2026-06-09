@@ -27,7 +27,7 @@ class BinaryDistribution (setuptools.Distribution):
         return True
 
 
-def bdist_factory(pl_name):
+def bdist_factory(pl_name, dll_path, autotag):
     
     class pypdfium_bdist (bdist_wheel):
         
@@ -44,7 +44,7 @@ def bdist_factory(pl_name):
                 if not plat_tag:
                     _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
             else:
-                plat_tag = PlatToWheeltag[pl_name]
+                plat_tag = get_wheel_tag(pl_name, dll_path, autotag)
             return "py3", "none", plat_tag
     
     return pypdfium_bdist
@@ -72,6 +72,8 @@ LICENSES_SDIST = (
     "REUSE.toml",
 )
 
+BASE_PLATFILES = (BindingsFN, VersionFN)
+
 
 def assert_exists(dir, data_files):
     missing = tuple(f for f in data_files if not (dir/f).exists())
@@ -79,7 +81,7 @@ def assert_exists(dir, data_files):
         assert False, f"Missing data files: {missing}"
 
 
-def run_setup(modnames, pl_name, platfiles):
+def run_setup(modnames, pl_name):
     
     # FIXME ambiguity between `pl_name == ExtPlats.sdist` and `ModuleRaw not in modnames` ?
     
@@ -93,6 +95,15 @@ def run_setup(modnames, pl_name, platfiles):
         package_data = {},
         install_requires = [],
     )
+    
+    platfiles = []
+    dll_path = None
+    if pl_name != ExtPlats.sdist:
+        platfiles += BASE_PLATFILES
+        if pl_name != ExtPlats.system:
+            sys_name = plat_to_system(pl_name)
+            dll_path = ModuleDir_Raw / libname_for_system(sys_name)
+            platfiles.append(dll_path.name)
     
     license_files = list(LICENSES_SHARED)
     if pl_name == ExtPlats.sdist:
@@ -136,7 +147,7 @@ def run_setup(modnames, pl_name, platfiles):
             kwargs["package_data"]["pypdfium2_raw"] = platfiles
     
     if ModuleRaw not in modnames or pl_name == ExtPlats.sdist:
-        kwargs["exclude_package_data"] = {"pypdfium2_raw": (VersionFN, BindingsFN, *LIBNAME_GLOBS)}
+        kwargs["exclude_package_data"] = {"pypdfium2_raw": (*BASE_PLATFILES, *LIBNAME_GLOBS)}
     elif pl_name == ExtPlats.system:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": LIBNAME_GLOBS}
     else:
@@ -146,8 +157,9 @@ def run_setup(modnames, pl_name, platfiles):
             # FIXME This gives a deeply nested directory structure.
             # The author is not aware of a way to achieve a more flat structure with setuptools.
             license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
+        autotag = bool(int( os.environ.get("AUTOTAG", False) ))
         kwargs["distclass"] = BinaryDistribution
-        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name)
+        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name, dll_path, autotag)
     
     kwargs["license_files"] = license_files
     
@@ -172,11 +184,9 @@ def main():
         raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
     if ModuleRaw in modnames and pl_name != ExtPlats.sdist:
-        platfiles, pl_name = prepare_setup(pl_name, sub_target, requested_ver, flags)
-    else:
-        platfiles = ()
+        pl_name = prepare_setup(pl_name, sub_target, requested_ver, flags)
     
-    run_setup(modnames, pl_name, platfiles)
+    run_setup(modnames, pl_name)
 
 
 if __name__ == "__main__":

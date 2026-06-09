@@ -14,6 +14,7 @@ import subprocess
 import contextlib
 from pathlib import Path
 from collections import namedtuple
+from importlib.util import find_spec
 import urllib.request as url_request
 
 if sys.version_info < (3, 8):
@@ -171,15 +172,19 @@ PdfiumBinariesMap.update({
 def _manylinux_tag(arch, glibc="2_17"):
     return f"manylinux_{glibc}_{arch}.manylinux2014_{arch}"
 
+_MacWheeltagPatterns = {
+    PlatNames.darwin_x64:       "macosx_{}_x86_64",
+    PlatNames.darwin_arm64:     "macosx_{}_arm64",
+    # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
+    PlatNames.darwin_univ2:     "macosx_{}_universal2",
+}
+
 PlatToWheeltag = {
     # Upstream does not specify the minimum macOS version.
     # AOTW, XCode 26 is used, and [1] specifies that the lowest deployment target with XCode 26 is macOS 11, so we assume that.
     # In the future, we'll want to auto-detect the version using macholib or otool/vtool.
     # [^1]: https://developer.apple.com/xcode/system-requirements/
-    PlatNames.darwin_x64:       "macosx_11_0_x86_64",
-    PlatNames.darwin_arm64:     "macosx_11_0_arm64",
-    # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
-    PlatNames.darwin_univ2:     "macosx_11_0_universal2",
+    **{k: v.format("11_0") for k, v in _MacWheeltagPatterns.items()},
     
     PlatNames.windows_x64:      "win_amd64",
     PlatNames.windows_arm64:    "win_arm64",
@@ -1042,3 +1047,33 @@ def get_clang_version(clang_root):
     version = Version(version).major
     log(f"Determined clang version {version!r}")
     return version
+
+
+HAVE_MACHOLIB = sys.platform.startswith("darwin") and bool(find_spec("macholib"))
+
+def mac_get_version(dll_path):
+    # adapted from matthew-brett/delocate
+    from macholib.MachO import MachO
+    from macholib.mach_o import LC_BUILD_VERSION, LC_VERSION_MIN_MACOSX  # CPU_TYPE_NAMES
+    macho = MachO(dll_path)
+    for header in macho.headers:
+        for cmd in header.commands:
+            if cmd[0].cmd == LC_BUILD_VERSION:
+                raw_version = cmd[1].minos
+            elif cmd[0].cmd == LC_VERSION_MIN_MACOSX:
+                raw_version = cmd[1].version
+            else:
+                continue
+            # cpu_type = CPU_TYPE_NAMES.get(header.header.cputype, "unknown")
+            return (raw_version >> 16 & 0xFF), (raw_version >> 8 & 0xFF)
+
+
+def get_wheel_tag(pl_name, dll_path, autotag):
+    if autotag:
+        if sys.platform.startswith("darwin") and HAVE_MACHOLIB:
+            mac_major, mac_minor = mac_get_version(dll_path)
+            log(f"Auto-detected min macOS version for {dll_path.name}: {mac_major, mac_minor}")
+            return _MacWheeltagPatterns[pl_name].format(f"{mac_major}_{mac_minor}")
+        else:
+            log("Auto-tagging unavailable, falling back to static tag.")
+    return PlatToWheeltag[pl_name]

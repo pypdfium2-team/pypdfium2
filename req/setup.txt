@@ -7,3 +7,4 @@ packaging
 
 # wheel building
 build
+macholib; sys_platform == 'darwin'
