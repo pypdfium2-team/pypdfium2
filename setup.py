@@ -27,7 +27,7 @@ class BinaryDistribution (setuptools.Distribution):
         return True
 
 
-def bdist_factory(pl_name, dll_path, autotag):
+def bdist_factory(incoming_plat_tag):
     
     class pypdfium_bdist (bdist_wheel):
         
@@ -37,14 +37,13 @@ def bdist_factory(pl_name, dll_path, autotag):
             self.root_is_pure = False
         
         def get_tag(self, *args, **kws):
-            if pl_name == ExtPlats.sourcebuild:
+            plat_tag = incoming_plat_tag
+            if not plat_tag:  # sourcebuild
                 # In case of cross-compilation (or even just proper packaging), the caller needs to set the tag.
                 plat_tag = os.environ.get("CROSS_TAG")
                 # Otherwise, forward the host's tag as provided by bdist_wheel (wraps sysconfig.get_platform())
                 if not plat_tag:
                     _py, _abi, plat_tag = bdist_wheel.get_tag(self, *args, **kws)
-            else:
-                plat_tag = get_wheel_tag(pl_name, dll_path, autotag)
             return "py3", "none", plat_tag
     
     return pypdfium_bdist
@@ -158,8 +157,9 @@ def run_setup(modnames, pl_name):
             # The author is not aware of a way to achieve a more flat structure with setuptools.
             license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
         autotag = bool(int( os.environ.get("AUTOTAG", False) ))
+        plat_tag = get_wheel_tag(pl_name, dll_path, autotag)
         kwargs["distclass"] = BinaryDistribution
-        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name, dll_path, autotag)
+        kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(plat_tag)
     
     kwargs["license_files"] = license_files
     
