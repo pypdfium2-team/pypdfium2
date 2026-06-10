@@ -110,12 +110,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     @staticmethod
-    def _close_formenv_impl(formenv):
-        if not formenv or not formenv.raw:
-            return
-        pdfium_c.FPDFDOC_ExitFormFillEnvironment(formenv)
-        formenv.raw = None
-        id(formenv.config)
+    def _close_formenv_impl(raw_formenv, config):
+        pdfium_c.FPDFDOC_ExitFormFillEnvironment(raw_formenv)
+        id(config)
     
     @staticmethod
     def _close_impl(raw, pre_close_callbacks, data_holder, data_closer):
@@ -189,9 +186,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
         
-        close_callback = partial(PdfDocument._close_formenv_impl, self.formenv)
-        self._pre_close_callbacks.append(close_callback)
-        self.formenv = PdfFormEnv(raw, config, close_callback)
+        self.formenv = PdfFormEnv(raw, self, config)
+        self.formenv._close_callback = partial(PdfDocument._close_formenv_impl, raw, config)
+        self._pre_close_callbacks.append(self.formenv._close_callback)
         
         if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
             if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
@@ -593,10 +590,15 @@ class PdfFormEnv (pdfium_i.AutoCastable):
             Accompanying form configuration interface, to be kept alive.
     """
     
-    def __init__(self, raw, config, close_callback):
+    def __init__(self, raw, pdf, config):
         self.raw = raw
+        self.pdf = pdf
         self.config = config
-        self._close_callback = close_callback
+        self._close_callback = None
+    
+    @property
+    def parent(self):
+        return self.pdf
     
     def close(self):
         warnings.warn("PdfFormEnv.close() is deprecated and now a no-op. Call the new PdfDocument.close_forms() API instead.", category=DeprecationWarning)
