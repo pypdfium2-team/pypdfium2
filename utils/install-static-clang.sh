@@ -36,20 +36,13 @@ case "${STATIC_CLANG_ARCH}" in
 	s390x) GO_ARCH=s390x;;
 	*) echo "No static-clang toolchain for ${CLANG_ARCH}">2; exit 1;;
 esac
-STATIC_CLANG_VERSION=22.1.5.0
+STATIC_CLANG_VERSION=22.1.7.0
 STATIC_CLANG_FILENAME="static-clang-linux-${GO_ARCH}.tar.xz"
-STATIC_CLANG_URL="https://github.com/mayeut/static-clang-images/releases/download/v${STATIC_CLANG_VERSION}/${STATIC_CLANG_FILENAME}"
+STATIC_CLANG_BASEURL="https://github.com/mayeut/static-clang-images/releases/download/v${STATIC_CLANG_VERSION}"
+STATIC_CLANG_URL="${STATIC_CLANG_BASEURL}/${STATIC_CLANG_FILENAME}"
+SHASUMS_URL="${STATIC_CLANG_BASEURL}/sha256sums.txt"
 pushd /tmp
-cat<<'EOF' | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
-cf4da67771369479eeca35620d29a9df532630d28558776e82ea3bcec2da7cf2  static-clang-linux-386.tar.xz
-42c1a282ad30f75e7e4b3f5cc014a423b49ea4d4b9ac0be48afceacc1d33c7e2  static-clang-linux-amd64.tar.xz
-904bbbe7faeeeee6e5367a701a7f5bf0ad300b9d25fbde1deba6125d0a4d8be7  static-clang-linux-arm.tar.xz
-48c147c80d6763e5756407b11e562dbb1e380647e2cdd60b5cea3c7bc6b3d7ce  static-clang-linux-arm64.tar.xz
-b486a1e0994e81778bd7cc4a5b93c4f62434e86cbd9459bc8e09be94b02dcd94  static-clang-linux-loong64.tar.xz
-7af40b0e66e6b65cf3c1270841bd4d8ce36b104d34babb8c0955eb0d2714223d  static-clang-linux-ppc64le.tar.xz
-17fbb19f667264902720d6cb2191abd903d9e4b78142fc527baed1fb87667bff  static-clang-linux-riscv64.tar.xz
-7376b32aa002c6c65cc0d72c120edb8a85a7fed6572c970ba0ad95b1df172345  static-clang-linux-s390x.tar.xz
-EOF
+curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
 curl -fsSLO "${STATIC_CLANG_URL}"
 sha256sum -c "${STATIC_CLANG_FILENAME}.sha256"
 tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
