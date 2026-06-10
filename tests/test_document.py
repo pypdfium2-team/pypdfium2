@@ -4,8 +4,11 @@
 # TODO test formenv and page deletion
 
 import re
+import gc
 import ctypes
 import pathlib
+import weakref
+import itertools
 import pytest
 from .conftest import TestFiles
 
@@ -251,3 +254,90 @@ def test_post_close():
     pdf.close()
     with pytest.raises(ctypes.ArgumentError):
         pdf.get_version()
+
+
+def test_formenv_gc_collectable():
+    # Regression test: document and formenv reference each other, so they can only be reclaimed by the cyclic GC. The finalizer state must not root them in the global finalizer registry, otherwise they would never be collected (memory leak).
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+    assert pdf.formenv is not None
+    page = pdf[0]
+
+    pdf_ref, formenv_ref, page_ref = weakref.ref(pdf), weakref.ref(pdf.formenv), weakref.ref(page)
+    del pdf, page
+    gc.collect()
+
+    assert pdf_ref() is None
+    assert formenv_ref() is None
+    assert page_ref() is None
+
+
+@pytest.mark.parametrize("order", list(itertools.permutations(["page", "formenv", "pdf"])))
+def test_formenv_teardown_takeover_any_order(order):
+
+    # Simulate the GC same-run case, where the finalizer order between document, formenv and pages is not guaranteed: whichever close function runs first shall take over pending teardown work in due order, and the remaining calls shall degrade to no-ops.
+
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+    formenv = pdf.formenv
+    page = pdf[0]
+
+    # detach the finalizers and invoke the close functions by hand in the given order
+    for obj in (pdf, formenv, page):
+        obj._detach_finalizer()
+
+    holder = pdf._page_holders[-1]
+    impls = dict(
+        pdf = lambda: pdfium.PdfDocument._close_impl(pdf.raw, pdf._data_holder, pdf._data_closer, pdf._formenv_holder, pdf._page_holders),
+        formenv = lambda: pdfium.PdfFormEnv._close_impl(formenv.raw, pdf._formenv_holder, pdf._page_holders, pdf._wref_to_self),
+        page = lambda: pdfium.PdfPage._close_impl(page.raw, pdf._formenv_holder, holder),
+    )
+    for key in order:
+        impls[key]()
+
+    assert not holder
+    assert not pdf._formenv_holder
+    assert pdf.formenv is None
+
+
+def test_formenv_close_and_reinit():
+
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+    formenv = pdf.formenv
+    page = pdf[0]
+
+    # closing the formenv implicitly closes pages retrieved through it, and resets pdf.formenv
+    formenv.close()
+    assert formenv.raw is None and page.raw is None
+    assert pdf.formenv is None and not pdf._formenv_holder
+
+    # forms can be re-initialized afterwards
+    pdf.init_forms()
+    assert pdf.formenv is not None
+    page = pdf[0]
+    page.render(may_draw_forms=True)
+    pdf.close()
+    assert pdf.formenv is None
+
+
+def test_page_gc_with_live_formenv():
+
+    # Pages may be reclaimed by GC while document and formenv stay alive and usable.
+
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+
+    for _ in range(3):
+        page = pdf[0]
+        page_ref = weakref.ref(page)
+        del page
+        gc.collect()
+        assert page_ref() is None
+
+    # holders of closed pages are pruned on page retrieval
+    page = pdf[0]
+    assert len(pdf._page_holders) <= 2
+
+    page.render(may_draw_forms=True)
+    pdf.close()
