@@ -36,11 +36,18 @@ case "${STATIC_CLANG_ARCH}" in
 	s390x) GO_ARCH=s390x;;
 	*) echo "No static-clang toolchain for ${CLANG_ARCH}">2; exit 1;;
 esac
-STATIC_CLANG_VERSION=22.1.7.0
+
+STATIC_CLANG_VERSION=latest  # or pin 22.1.7.0
+if [ "$STATIC_CLANG_VERSION" == "latest" ]; then
+	STATIC_CLANG_BASEURL="https://github.com/mayeut/static-clang-images/releases/latest/download"
+else
+	STATIC_CLANG_BASEURL="https://github.com/mayeut/static-clang-images/releases/download/v${STATIC_CLANG_VERSION}"
+fi
+
 STATIC_CLANG_FILENAME="static-clang-linux-${GO_ARCH}.tar.xz"
-STATIC_CLANG_BASEURL="https://github.com/mayeut/static-clang-images/releases/download/v${STATIC_CLANG_VERSION}"
 STATIC_CLANG_URL="${STATIC_CLANG_BASEURL}/${STATIC_CLANG_FILENAME}"
 SHASUMS_URL="${STATIC_CLANG_BASEURL}/sha256sums.txt"
+
 pushd /tmp
 curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
 curl -fsSLO "${STATIC_CLANG_URL}"
