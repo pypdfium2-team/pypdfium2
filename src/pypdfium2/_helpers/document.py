@@ -68,16 +68,18 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
+        self._formenv_holder = []
+        self._page_holders = []
         self.formenv = None
-        
+
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
         else:
             self.raw, to_hold, to_close = _open_pdf(self._input, self._password, self._autoclose)
             self._data_holder += to_hold
             self._data_closer += to_close
-        
-        super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer, tracked=False)
+
+        super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer, self._formenv_holder, self._page_holders, tracked=False)
     
     
     # Support using PdfDocument in a with-block
@@ -108,7 +110,21 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     @staticmethod
-    def _close_impl(raw, data_holder, data_closer):
+    def _close_impl(raw, data_holder, data_closer, formenv_holder, page_holders):
+        # Pages or formenv may not have been closed in due order before the document: when document, formenv and pages are reclaimed in the same GC run, finalizer order is not guaranteed. Take over any pending teardown now, before closing the document.
+        for holder in page_holders:
+            if holder:
+                if formenv_holder:
+                    pdfium_c.FORM_OnBeforeClosePage(holder[0], formenv_holder[0])
+                pdfium_c.FPDF_ClosePage(holder[0])
+                holder.clear()
+
+        page_holders.clear()
+        
+        if formenv_holder:
+            pdfium_c.FPDFDOC_ExitFormFillEnvironment(formenv_holder[0])
+            formenv_holder.clear()
+
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
             id(data)
@@ -173,6 +189,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
+        
+        assert not self._formenv_holder
+        self._formenv_holder += (raw, config)
         self.formenv = PdfFormEnv(raw, self, config)
         self._add_kid(self.formenv)
         
@@ -572,21 +591,37 @@ class PdfFormEnv (pdfium_i.AutoCloseable):
             Parent document this form env belongs to.
     """
     
+    # The finalizer state must not hold strong references to the parent document: pdf.formenv points back to this object, so a strong reference from the finalizer state (args or owner) would root the document <-> formenv reference cycle in the global finalizer registry, making it immortal (memory leak).
+    # Consequently, child-before-parent finalization order is not guaranteed when document, formenv and pages are reclaimed in the same GC run. pdf._formenv_holder keeps raw/config alive as long as needed, and tells whichever close function runs first whether the form env still needs to be exited (same for pages, cf. PdfPage).
+    _WEAK_PARENT = True
+
     def __init__(self, raw, pdf, config):
         self.raw = raw
         self.pdf = pdf
         self.config = config
-        super().__init__(PdfFormEnv._close_impl, self.config, self.pdf)
-    
+        super().__init__(PdfFormEnv._close_impl, pdf._formenv_holder, pdf._page_holders, pdf._wref_to_self)
+
     @property
     def parent(self):  # AutoCloseable hook
         return self.pdf
-    
+
     @staticmethod
-    def _close_impl(raw, config, pdf):
-        pdfium_c.FPDFDOC_ExitFormFillEnvironment(raw)
-        id(config)
-        pdf.formenv = None
+    def _close_impl(raw, formenv_holder, page_holders, pdf_wref):
+        if formenv_holder:
+            # close pending pages first (only relevant in the GC same-run case, where the page helpers are necessarily dead already - live pages keep the document, and thus the formenv, alive)
+            for holder in page_holders:
+                if holder:
+                    pdfium_c.FORM_OnBeforeClosePage(holder[0], raw)
+                    pdfium_c.FPDF_ClosePage(holder[0])
+                    holder.clear()
+                    
+            pdfium_c.FPDFDOC_ExitFormFillEnvironment(raw)
+            formenv_holder.clear()
+
+        pdf = pdf_wref()
+
+        if pdf is not None:
+            pdf.formenv = None
 
 
 class PdfXObject (pdfium_i.AutoCloseable):

@@ -76,8 +76,13 @@ def _close_template(info, owner):
         return
     
     assert info.state != _STATE.INVALID
-    
+
     parent = owner.parent
+
+    if isinstance(parent, weakref.ref):
+        # _WEAK_PARENT - may be None if the parent is dead or trash in the same GC run
+        parent = parent()
+
     if parent is not None:
         assert not parent._tree_closed()
         if info.tracked:
@@ -103,7 +108,12 @@ class AutoCastable:
 
 
 class AutoCloseable (AutoCastable):
-    
+
+    # If True, the finalizer state holds the parent via weakref rather than a strong reference.
+    # This must be set for objects the parent strongly references back (e.g. document <-> formenv): otherwise, the global finalizer registry would root the resulting reference cycle, so that it could never be garbage collected.
+    # The price is that child-before-parent finalization order is not guaranteed anymore when both objects are reclaimed in the same GC run, so the parent's close function must be able to handle the child's cleanup if it runs first (cf. PdfDocument/PdfFormEnv._close_impl).
+    _WEAK_PARENT = False
+
     def __init__(self, close_func, *args, obj=None, needs_free=True, tracked=True, **kwargs):
         
         # proactively prevent accidental double initialization
@@ -133,7 +143,12 @@ class AutoCloseable (AutoCastable):
         own_type = type(self)
         # note, this captures the object's parent, repr and so on at finalizer installation time
         # in case they ever change, we'd have to store the owner in an attribute and update it
-        owner = _FinalizerOwner(self.raw, self.parent, self._wref_to_self, own_type, repr(self))
+        parent = self.parent
+        
+        if self._WEAK_PARENT and parent is not None:
+            parent = parent._wref_to_self
+            
+        owner = _FinalizerOwner(self.raw, parent, self._wref_to_self, own_type, repr(self))
         self._finalizer = weakref.finalize(self._fin_obj, _close_template, self._fin_info, owner)
         ObjectTracker[own_type].add(self._wref_to_self)
     

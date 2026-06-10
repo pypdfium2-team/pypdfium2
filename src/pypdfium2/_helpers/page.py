@@ -32,18 +32,34 @@ class PdfPage (pdfium_i.AutoCloseable):
             Formenv handle, if the parent pdf had an active formenv at the time of page retrieval. None otherwise.
     """
     
+    # The finalizer state must not hold strong references to the parent document or formenv, which would delay (or, with the formenv's backref cycle, entirely prevent) their garbage collection - see PdfFormEnv.
+    # Instead, mutable holders of raw handles are shared between the finalizers of page, formenv and document, so that whichever runs first can take over pending teardown work in due order.
+    _WEAK_PARENT = True
+
     def __init__(self, raw, pdf, formenv):
         self.raw = raw
         self.pdf = pdf
         self.formenv = formenv
-        super().__init__(PdfPage._close_impl, self.formenv)
-    
-    
+
+        # prune holders of closed pages, so the list does not grow unboundedly over a document's lifetime
+        pdf._page_holders[:] = [h for h in pdf._page_holders if h]
+        holder = [raw]
+        pdf._page_holders.append(holder)
+
+        super().__init__(PdfPage._close_impl, pdf._formenv_holder if formenv else None, holder)
+
+
     @staticmethod
-    def _close_impl(raw, formenv):
-        if formenv:
-            pdfium_c.FORM_OnBeforeClosePage(raw, formenv)
+    def _close_impl(raw, formenv_holder, holder):
+        if not holder:
+            return  # page was already closed by the formenv's or document's finalizer (GC same-run case)
+        
+        if formenv_holder:
+            # formenv_holder being empty means the formenv was already exited (GC same-run case); skip FORM_OnBeforeClosePage() then, as the page views have been torn down along with the formenv
+            pdfium_c.FORM_OnBeforeClosePage(raw, formenv_holder[0])
+            
         pdfium_c.FPDF_ClosePage(raw)
+        holder.clear()
     
     
     @property
