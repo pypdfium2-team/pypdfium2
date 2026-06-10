@@ -155,8 +155,6 @@ def run_setup(modnames, pl_name, datagen):
         if platfiles:
             kwargs["package_data"]["pypdfium2_raw"] = platfiles
     
-    kwargs["cmdclass"]["build_py"] = buildpy_factory(pl_name, modnames, datagen, helpers_info, kwargs["package_data"])
-    
     if ModuleRaw not in modnames or pl_name == ExtPlats.sdist:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": (*BASE_PLATFILES, *LIBNAME_GLOBS)}
     elif pl_name == ExtPlats.system:
@@ -168,13 +166,14 @@ def run_setup(modnames, pl_name, datagen):
         else:  # pdfium-binaries
             autotag = bool(int( os.environ.get("AUTOTAG", False) ))
             plat_tag = get_wheel_tag(pl_name, dll_path, autotag)
-            # FIXME This gives a deeply nested directory structure.
-            # The author is not aware of a way to achieve a more flat structure with setuptools.
+            # FIXME setuptools doesn't like license files only being generated in build_py, raises deprecation warning
             license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(plat_tag)
     
+    kwargs["cmdclass"]["build_py"] = buildpy_factory(pl_name, modnames, datagen, helpers_info, kwargs["package_data"])
     kwargs["license_files"] = license_files
+    
     setuptools.setup(**kwargs)
 
 
