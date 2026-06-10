@@ -11,7 +11,9 @@ import argparse
 from enum import Enum
 from pathlib import Path
 
-from base import *  # local
+# local
+from base import *
+from _build_helpers import *
 
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
@@ -106,6 +108,17 @@ if IS_ANDROID:
         DefaultConfig.update(current_cpu=cpu, target_cpu=cpu)
     else:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
+
+
+def git_clone_rev(url, rev, target_dir, depth=1):
+    # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
+    # NOTE Once we can require git >= 2.49.0, `git clone --depth <n> --revision <sha>` will do. (The author currently uses git 2.42.0.)
+    mkdir(target_dir)
+    depth_param = ["--depth", str(depth)] if depth else []
+    run_cmd(["git", "-c", "advice.defaultBranchName=false", "init"], cwd=target_dir)
+    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
+    run_cmd(["git", "fetch", *depth_param, "origin", rev], cwd=target_dir)
+    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
 
 
 class DepsFetcher:
@@ -467,7 +480,7 @@ Some params take a default from an environment variable, for easy passthrough wi
         "--version",
         dest = "build_ver",
         default = (os.environ.get("PDFIUM_VER") or None),
-        help = f"The pdfium version to use. Either a literal version integer, or 'main', 'latest' or 'latest-binaries'. Defaults to the pinned version {SBUILD_NATIVE_PIN}, or $PDFIUM_VER if set.",
+        help = f"The pdfium version to use. Either a literal version number, or 'main', 'latest' or 'latest-binaries'. Defaults to the pinned version {SBUILD_NATIVE_PIN}, or $PDFIUM_VER if set.",
     )
     parser.add_argument(
         "--test",

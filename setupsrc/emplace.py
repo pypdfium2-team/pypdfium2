@@ -12,6 +12,7 @@ import update as update_pdfium
 import build_native
 import build_toolchained
 import system_pdfium
+from _build_helpers import install_buildtools
 
 
 def _repr_info(version, flags):
@@ -141,16 +142,13 @@ def copy_platfiles(pl_name):
     assert all(fp.exists() for fp in platfiles), "Some platform files are missing"
     for fp in platfiles:
         shutil.copy(fp, ModuleDir_Raw/fp.name)
-    
-    return tuple(fp.name for fp in platfiles)
 
 
 def prepare_setup(pl_name, sub_target, pdfium_ver, flags):
     # Write platform files into a data staging directory
     pl_name = stage_platfiles(pl_name, sub_target, pdfium_ver, flags)
     # Copy platform files into actual source tree
-    platfiles = copy_platfiles(pl_name)
-    return platfiles, pl_name
+    copy_platfiles(pl_name)
 
 
 def main():

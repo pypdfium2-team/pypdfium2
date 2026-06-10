@@ -32,9 +32,8 @@ BUILD_PARAMS = "--vendor all --no-vendor libc++"
 
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
-# The deployment target is actually defined in the build script's GN config
-# But need to set it again here for auditwheel
-MACOSX_DEPLOYMENT_TARGET = "11.0.0"
+# cibw/delocate want a deployment target to be set
+MACOSX_DEPLOYMENT_TARGET = "12.0.0"
 # Make sure the OS yields its real version
 SYSTEM_VERSION_COMPAT = 0
 
@@ -87,7 +86,7 @@ before-build = [
 select = "*-manylinux_loongarch64"
 inherit.before-build = "append"
 before-build = [
-    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2385.1/gn_dist-2385.1-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407/gn_dist-2407-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
     "pip install ./gn_dist-*_loongarch64.whl"
 ]
 
@@ -95,7 +94,7 @@ before-build = [
 select = "*-musllinux_loongarch64"
 inherit.before-build = "append"
 before-build = [
-    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2385.1/gn_dist-2385.1-py3-none-musllinux_1_2_loongarch64.whl'",
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407/gn_dist-2407-py3-none-musllinux_1_2_loongarch64.whl'",
     "pip install ./gn_dist-*_loongarch64.whl"
 ]
 

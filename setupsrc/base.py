@@ -41,7 +41,7 @@ PDFIUM_MIN_REQ = 6635
 # Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
 # Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
 SBUILD_NATIVE_PIN = 7880
-SBUILD_TOOLCHAINED_PIN = 7880
+SBUILD_TOOLCHAINED_PIN = 7884
 
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
@@ -94,11 +94,13 @@ PdfiumFlagsDict = {
 # TODO consider StrEnum or something
 
 class SysNames:
-    darwin  = "darwin"
-    windows = "windows"
-    linux   = "linux"
-    android = "android"
-    ios     = "ios"
+    darwin     = "darwin"
+    windows    = "windows"
+    linux      = "linux"
+    # linux_musl is only used under special circumstances, mostly just maps to linux
+    linux_musl = "linux_musl"
+    android    = "android"
+    ios        = "ios"
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
@@ -168,54 +170,38 @@ PdfiumBinariesMap.update({
 })
 
 
-def _manylinux_tag(arch, glibc="2_17"):
-    return f"manylinux_{glibc}_{arch}.manylinux2014_{arch}"
-
-PlatToWheeltag = {
-    # Upstream does not specify the minimum macOS version.
-    # AOTW, XCode 26 is used, and [1] specifies that the lowest deployment target with XCode 26 is macOS 11, so we assume that.
-    # In the future, we'll want to auto-detect the version using macholib or otool/vtool.
-    # [^1]: https://developer.apple.com/xcode/system-requirements/
-    PlatNames.darwin_x64:       "macosx_11_0_x86_64",
-    PlatNames.darwin_arm64:     "macosx_11_0_arm64",
-    # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
-    PlatNames.darwin_univ2:     "macosx_11_0_universal2",
-    
-    PlatNames.windows_x64:      "win_amd64",
-    PlatNames.windows_arm64:    "win_arm64",
-    PlatNames.windows_x86:      "win32",
-    
-    PlatNames.linux_x64:        _manylinux_tag("x86_64"),
-    PlatNames.linux_x86:        _manylinux_tag("i686"),
-    PlatNames.linux_arm64:      _manylinux_tag("aarch64"),
-    PlatNames.linux_arm32:      _manylinux_tag("armv7l"),
-    PlatNames.linux_ppc64le:    _manylinux_tag("ppc64le"),
-    
-    # pdfium-binaries statically link musl, so we can declare the lowest possible requirement.
-    # The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
-    PlatNames.linux_musl_x64:   "musllinux_1_1_x86_64",
-    PlatNames.linux_musl_x86:   "musllinux_1_1_i686",
-    PlatNames.linux_musl_arm64: "musllinux_1_1_aarch64",
-    
-    # Android - see PEP 738 # Packaging
-    # AOTW, pdfium-binaries/steps/05-configure.sh defines default_min_sdk_version = 23
-    PlatNames.android_arm64:    "android_23_arm64_v8a",
-    PlatNames.android_arm32:    "android_23_armeabi_v7a",
-    PlatNames.android_x64:      "android_23_x86_64",
-    PlatNames.android_x86:      "android_23_x86",
-    
-    # iOS - see PEP 730 # Packaging
-    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. Note that the PEP says:
-    # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
-    # I take it this means you'd need to change the library search path to that Frameworks location in bindings.
-    PlatNames.ios_arm64_dev:    "ios_15_0_arm64_iphoneos",
-    PlatNames.ios_arm64_simu:   "ios_15_0_arm64_iphonesimulator",
-    PlatNames.ios_x64_simu:     "ios_15_0_x86_64_iphonesimulator",
-}
-
-
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
+
+def plat_to_system(pl_name, distinguish_musl=False):
+    if pl_name == ExtPlats.sourcebuild:
+        # Note, this may be None if on an unknown host
+        return Host.system
+    if distinguish_musl and pl_name.startswith(SysNames.linux_musl):
+        return SysNames.linux_musl
+    # other ExtPlats intentionally not handled here
+    return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
+
+def libname_for_system(system, name="pdfium", prefix=None):
+    # Map system to pdfium shared library name
+    if prefix is None:
+        prefix = "" if system == SysNames.windows else "lib"
+    if system == SysNames.windows:
+        return f"{prefix}{name}.dll"
+    elif system in (SysNames.darwin, SysNames.ios):
+        return f"{prefix}{name}.dylib"
+    elif system in (SysNames.linux, SysNames.android):
+        return f"{prefix}{name}.so"
+    else:
+        # take libname pattern from caller
+        pattern = os.getenv("LIBNAME_PATTERN")
+        if pattern:
+            return pattern.format(name)
+        # NOTE alternatively, we could do this only for BSD/POSIX
+        # as a downstream fallback, we could also list the dir in question and pick the file that contains the libname
+        log(f"Unhandled system {Host._raw_system!r} ({sys.platform!r})" + " - assuming 'lib{}.so' pattern. Set $LIBNAME_PATTERN if this is not right.")
+        return f"lib{name}.so"
+
 
 def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
@@ -246,27 +232,6 @@ def set_envs(**kwargs):
 
 def query_envs(**kwargs):
     return {k: os.environ.get(k, d) for k, d in kwargs.items()}
-
-
-def libname_for_system(system, name="pdfium", prefix=None):
-    # Map system to pdfium shared library name
-    if prefix is None:
-        prefix = "" if system == SysNames.windows else "lib"
-    if system == SysNames.windows:
-        return f"{prefix}{name}.dll"
-    elif system in (SysNames.darwin, SysNames.ios):
-        return f"{prefix}{name}.dylib"
-    elif system in (SysNames.linux, SysNames.android):
-        return f"{prefix}{name}.so"
-    else:
-        # take libname pattern from caller
-        pattern = os.getenv("LIBNAME_PATTERN")
-        if pattern:
-            return pattern.format(name)
-        # NOTE alternatively, we could do this only for BSD/POSIX
-        # as a downstream fallback, we could also list the dir in question and pick the file that contains the libname
-        log(f"Unhandled system {Host._raw_system!r} ({sys.platform!r})" + " - assuming 'lib{}.so' pattern. Set $LIBNAME_PATTERN if this is not right.")
-        return f"lib{name}.so"
 
 
 IGNORE_FULLVER = bool(int(os.environ.get("IGNORE_FULLVER", 0)))
@@ -463,14 +428,6 @@ def merge_tag(info, mode):
             log("Warning: Ignored post-tag desc. This should not happen in autorelease CI.")
     
     return tag
-
-
-def plat_to_system(pl_name):
-    if pl_name == ExtPlats.sourcebuild:
-        # Note, this may be None if on an unknown host
-        return Host.system
-    # other ExtPlats intentionally not handled here
-    return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
 
 
 # platform.libc_ver() currently returns an empty string for musl, so use the packaging module to confirm.
@@ -814,10 +771,6 @@ def clean_platfiles():
             shutil.rmtree(fp)
 
 
-def build_pl_suffix(version, use_v8):
-    return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
-
-
 def parse_pl_spec(pl_spec):
     
     # TODO split up in individual env vars after all?
@@ -851,16 +804,6 @@ def parse_pl_spec(pl_spec):
     return pl_name, subspec, req_ver, flags
 
 
-def parse_modspec(modspec):
-    if modspec:
-        modnames = modspec.split(",")
-        assert set(modnames).issubset(ModulesAll)
-        assert len(modnames) in (1, 2)
-    else:
-        modnames = ModulesAll
-    return modnames
-
-
 def get_next_changelog(flush=False):
     
     content = ChangelogStaging.read_text()
@@ -876,169 +819,7 @@ def get_next_changelog(flush=False):
     return devel_msg
 
 
-def git_apply_patch(patch, cwd, git_args=()):
-    run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
-
-
-def git_clone_rev(url, rev, target_dir, depth=1):
-    # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
-    # NOTE Once we can require git >= 2.49.0, `git clone --depth <n> --revision <sha>` will do. (The author currently uses git 2.42.0.)
-    mkdir(target_dir)
-    depth_param = ["--depth", str(depth)] if depth else []
-    run_cmd(["git", "-c", "advice.defaultBranchName=false", "init"], cwd=target_dir)
-    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
-    run_cmd(["git", "fetch", *depth_param, "origin", rev], cwd=target_dir)
-    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
-
-
-def _to_gn(value):
-    if isinstance(value, bool):
-        return str(value).lower()
-    elif isinstance(value, str):
-        return f'"{value}"'
-    elif isinstance(value, int):
-        return str(value)
-    elif isinstance(value, list):
-        return f"[{','.join(_to_gn(v) for v in value)}]"
-    else:
-        raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
-
-def serialize_gn_config(config_dict):
-    parts = []
-    for key, value in config_dict.items():
-        parts.append(f"{key} = {_to_gn(value)}")
-    result = "\n".join(parts)
-    log(f"\nBuild config:\n{result}\n")
-    return result
-
-
-_SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
-
-def get_shimheaders_tool(pdfium_dir, rev="main"):
-
-    tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
-    shimheaders_file = tools_dir / "generate_shim_headers.py"
-    shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
-
-    if not shimheaders_file.exists():
-        log(f"Downloading {shimheaders_file.name} at revision {rev}")
-        mkdir(tools_dir)
-        url_request.urlretrieve(shimheaders_url, shimheaders_file)
-
-
 def purge_dir(dir):
     if dir.exists():
         shutil.rmtree(dir)
     dir.mkdir(parents=True)
-
-
-def git_get_hash(repo_dir, n_digits=None):
-    short = f"--short={n_digits}" if n_digits else "--short"
-    return "g" + run_cmd(["git", "rev-parse", short, "HEAD"], cwd=repo_dir, capture=True)
-
-
-def handle_sbuild_vers(short_ver):
-    if short_ver == "main":
-        full_ver = PdfiumVer.get_latest_upstream()
-        pdfium_rev = short_ver
-        chromium_rev = short_ver
-    else:
-        assert str(short_ver).isnumeric()
-        full_ver = PdfiumVer.to_full(short_ver)
-        full_ver_str = str(full_ver)
-        pdfium_rev = f"chromium/{short_ver}"
-        chromium_rev = full_ver_str
-    return full_ver, pdfium_rev, chromium_rev
-
-
-def pack_sourcebuild(
-        pdfium_dir, build_dir, sub_target,
-        full_ver, build_ver=None, post_ver=None,
-        load_lib=True,
-    ):
-    log("Packing data files for sourcebuild...")
-    
-    if not post_ver:
-        assert build_ver
-        if build_ver == "main":
-            log("Warning: Don't know how to get number of commits with shallow checkout. A NaN placeholder will be set.")
-            post_ver = dict(n_commits=NaN, hash=git_get_hash(pdfium_dir, n_digits=11))
-        else:
-            post_ver = dict(n_commits=0, hash=None)
-    
-    dest_dir = DataDir/ExtPlats.sourcebuild
-    purge_dir(dest_dir)
-    
-    libname = libname_for_system(Host.system)
-    shutil.copy(build_dir/libname, dest_dir/libname)
-    
-    # We want to use local headers instead of downloading with build_pdfium_bindings(), therefore call run_ctypesgen() directly
-    ct_paths = (dest_dir/CTG_LIBPATTERN, ) if load_lib else ()
-    run_ctypesgen(dest_dir/BindingsFN, headers_dir=pdfium_dir/"public", ct_paths=ct_paths, version=full_ver.build)
-    write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **post_ver)
-    
-    return full_ver, post_ver
-
-
-def _install_dep(exename, pkgname=None, skip_if_present=True):
-    pkgname = pkgname or exename
-    which_exe = shutil.which(exename)
-    if skip_if_present and which_exe:
-        log(f"+ {exename} found at {which_exe}")
-        return
-    # https://github.com/scikit-build/ninja-python-distributions
-    log(f"- {exename} not found, installing...")
-    run_cmd([sys.executable, "-m", "pip", "install", pkgname], cwd=None)
-
-def install_buildtools():
-    log("Bootstrapping build tools...")
-    _install_dep("ninja")
-    _install_dep("gn", "gn-dist")
-
-
-def autopatch(file, pattern, repl, is_regex, exp_count=None):
-    log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
-    content = file.read_text()
-    if is_regex:
-        content, n_subs = re.subn(pattern, repl, content)
-    else:
-        n_subs = content.count(pattern)
-        content = content.replace(pattern, repl)
-    if exp_count is not None:
-        assert n_subs == exp_count
-    file.write_text(content)
-    return n_subs
-
-def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
-    for file in dir.glob(globexpr):
-        autopatch(file, pattern, repl, is_regex, exp_count)
-
-def shared_autopatches(pdfium_dir):
-    autopatch_dir(
-        pdfium_dir/"public"/"cpp", "*.h",
-        r'"public/(.+)"', r'"../\1"',
-        is_regex=True, exp_count=None,
-    )
-    # bundle dependencies (e.g. abseil) into the pdfium DLL
-    autopatch(
-        pdfium_dir/"BUILD.gn",
-        'component("pdfium")',
-        'shared_library("pdfium")',
-        is_regex=False, exp_count=1,
-    )
-    autopatch(
-        pdfium_dir/"public"/"fpdfview.h",
-        "#if defined(COMPONENT_BUILD)",
-        "#if 1  // defined(COMPONENT_BUILD)",
-        is_regex=False, exp_count=1,
-    )
-
-
-def get_clang_version(clang_root):
-    from packaging.version import Version
-    output = run_cmd([str(clang_root/"bin"/"clang"), "--version"], capture=True, cwd=None)
-    log(output)
-    version = re.search(r"version ([\d\.]+)", output).group(1)
-    version = Version(version).major
-    log(f"Determined clang version {version!r}")
-    return version

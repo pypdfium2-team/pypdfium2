@@ -91,6 +91,9 @@ def tmp_ctypesgen_pin():
     log(f"Reset pyproject.toml")
 
 
+def _build_pl_suffix(version, use_v8):
+    return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
+
 def _run_pypi_build(caller_args):
     # -nx: --no-isolation --skip-dependency-check
     assert build_module, "Module 'build' is not importable. Cannot craft PyPI packages."
@@ -111,7 +114,7 @@ def main_pypi(args):
             _run_pypi_build(["--sdist"])
     
     if args.wheels:
-        suffix = build_pl_suffix(args.pdfium_ver, args.use_v8)
+        suffix = _build_pl_suffix(args.pdfium_ver, args.use_v8)
         for plat in WheelPlatforms:
             os.environ[PlatSpec_EnvVar] = plat + suffix
             _run_pypi_build(["--wheel"])
