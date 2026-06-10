@@ -4,9 +4,15 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- Updated `build_toolchained.py` from PDFium `7191` to `7880`. Despite the gap, this turned out fairly straightforward.
+- Updated `build_toolchained.py` from PDFium `7191` to `7884`. Despite the gap, this turned out fairly straightforward.
+  Also, significantly improved code style. Added ability to use a sysroot in `PORTABLE_MODE` (requires bringing your own clang). Fix `install_buildtools()` by calling it before any depot_tools wrappers are added to `PATH`.
 - Updated `build_native.py` from PDFium `7841` to `7880` (see below for more info).
   Added patch to fix a build system issue introduced upstream.
+  Updated `gn-dist` from `2385` to `2407`, to match the revision specified in upstream's `DEPS` file.
+- Finally, prevent custom setup code from running multiple times in `pip install` by deferring data files generation into `build_py`, as suggested in cibuildwheel FAQ.
+  Also, make the DLL path available to the tagging stage so that minimum OS requirements could be auto-detected from binaries in the future, instead of hardcoding them.
+  This took some refactoring the control flow.
+- Corrected minimum macOS requirement to `12_0`. Added an experimental code path to auto-detect the min version using `macholib`. This is not active in packaging yet, since a native macOS host is needed. (We plan to split packaging across native hosts in the future. Currently, all repacking is done in a single job.)
 - Pragmatic `build_native.py` changes to make updating a bit more feasible:
   Patches for legacy GN and the transitional `--no-legacy-gn` option have been removed; recent GN is now required.
   Clang patches now just aim for compatibility with clang >= 22, much reducing patch complexity. For clang versions older than that, `--clang-as-gcc` mode is implicitly enabled.
