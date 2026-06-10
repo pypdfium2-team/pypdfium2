@@ -69,6 +69,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._data_holder = []
         self._data_closer = []
         self.formenv = None
+        self._formenv_holder = _ObjectHolder(None)
         
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
@@ -77,7 +78,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             self._data_holder += to_hold
             self._data_closer += to_close
         
-        super().__init__(PdfDocument._close_impl, self._data_holder, self._data_closer, tracked=False)
+        super().__init__(PdfDocument._close_impl, self._formenv_holder, self._data_holder, self._data_closer, tracked=False)
     
     
     # Support using PdfDocument in a with-block
@@ -108,7 +109,13 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     @staticmethod
-    def _close_impl(raw, data_holder, data_closer):
+    def _close_impl(raw, formenv_holder, data_holder, data_closer):
+        
+        formenv = formenv_holder.obj
+        if formenv:
+            pdfium_c.FPDFDOC_ExitFormFillEnvironment(formenv)
+            id(formenv.config)
+        
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
             id(data)
@@ -173,8 +180,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
-        self.formenv = PdfFormEnv(raw, self, config)
-        self._add_kid(self.formenv)
+        self.formenv = PdfFormEnv(raw, config)
+        self._formenv_holder.obj = self.formenv
         
         if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
             if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
@@ -374,9 +381,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         if self.formenv:
             pdfium_c.FORM_OnAfterLoadPage(page, self.formenv)
-            self.formenv._add_kid(page)
-        else:
-            self._add_kid(page)
+        self._add_kid(page)
         
         return page
     
@@ -559,7 +564,12 @@ def _open_pdf(input_data, password, autoclose):
     return pdf, to_hold, to_close
 
 
-class PdfFormEnv (pdfium_i.AutoCloseable):
+class _ObjectHolder:
+    def __init__(self, obj):
+        self.obj = obj
+
+
+class PdfFormEnv (pdfium_i.AutoCastable):
     """
     Form environment helper class.
     
@@ -568,25 +578,14 @@ class PdfFormEnv (pdfium_i.AutoCloseable):
             The underlying PDFium form env handle.
         config (FPDF_FORMFILLINFO):
             Accompanying form configuration interface, to be kept alive.
-        pdf (PdfDocument):
-            Parent document this form env belongs to.
     """
     
-    def __init__(self, raw, pdf, config):
+    def __init__(self, raw, config):
         self.raw = raw
-        self.pdf = pdf
         self.config = config
-        super().__init__(PdfFormEnv._close_impl, self.config, self.pdf)
     
-    @property
-    def parent(self):  # AutoCloseable hook
-        return self.pdf
-    
-    @staticmethod
-    def _close_impl(raw, config, pdf):
-        pdfium_c.FPDFDOC_ExitFormFillEnvironment(raw)
-        id(config)
-        pdf.formenv = None
+    def close(self):  # bw compat no-op
+        pass
 
 
 class PdfXObject (pdfium_i.AutoCloseable):
