@@ -162,12 +162,10 @@ def run_setup(modnames, pl_name, datagen):
     else:
         if pl_name == ExtPlats.sourcebuild:
             plat_tag = None
-            license_files.append("BUILD_LICENSES/**")
         else:  # pdfium-binaries
             autotag = bool(int( os.environ.get("AUTOTAG", False) ))
             plat_tag = get_wheel_tag(pl_name, dll_path, autotag)
-            # FIXME setuptools doesn't like license files only being generated in build_py, raises deprecation warning
-            license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
+        license_files.append("BUILD_LICENSES/**")
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(plat_tag)
     
