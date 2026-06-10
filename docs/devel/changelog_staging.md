@@ -4,6 +4,7 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Fixed a memory leak with form environments: `PdfDocument.formenv` and the formenv's finalizer state referenced each other, rooting the document <-> formenv reference cycle in the global `weakref.finalize` registry, so that it could never be garbage collected. Also, `PdfPage`'s finalizer state held strong references to formenv/document, which (due to GC generation promotion) could delay their collection indefinitely. Finalizer states now hold parents weakly; correct child-before-parent teardown order in the GC case is ensured by sharing mutable raw-handle holders between the finalizers of document, formenv and pages, so whichever runs first takes over pending teardown work in due order. Explicit `close()` calls behave as before, and remain recommended for deterministic resource release.
 - Updated `build_toolchained.py` from PDFium `7191` to `7880`. Despite the gap, this turned out fairly straightforward.
 - Updated `build_native.py` from PDFium `7841` to `7880` (see below for more info).
   Added patch to fix a build system issue introduced upstream.
