@@ -9,6 +9,7 @@ import logging
 import warnings
 from pathlib import Path
 from codecs import decode
+from functools import partial
 
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -66,10 +67,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._input = input
         self._password = password
         self._autoclose = autoclose
+        self._pre_close_callbacks = []
         self._data_holder = []
         self._data_closer = []
         self.formenv = None
-        self._formenv_holder = _ObjectHolder(None)
         
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
             self.raw = self._input
@@ -78,7 +79,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
             self._data_holder += to_hold
             self._data_closer += to_close
         
-        super().__init__(PdfDocument._close_impl, self._formenv_holder, self._data_holder, self._data_closer, tracked=False)
+        super().__init__(PdfDocument._close_impl, self._pre_close_callbacks, self._data_holder, self._data_closer, tracked=False)
     
     
     # Support using PdfDocument in a with-block
@@ -109,14 +110,21 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     @staticmethod
-    def _close_impl(raw, formenv_holder, data_holder, data_closer):
+    def _close_formenv_impl(formenv):
+        if not formenv or not formenv.raw:
+            return
+        pdfium_c.FPDFDOC_ExitFormFillEnvironment(formenv)
+        formenv.raw = None
+        id(formenv.config)
+    
+    @staticmethod
+    def _close_impl(raw, pre_close_callbacks, data_holder, data_closer):
         
-        formenv = formenv_holder.obj
-        if formenv:
-            pdfium_c.FPDFDOC_ExitFormFillEnvironment(formenv)
-            id(formenv.config)
+        for cb in pre_close_callbacks:
+            cb()
         
         pdfium_c.FPDF_CloseDocument(raw)
+        
         for data in data_holder:
             id(data)
         for data in data_closer:
@@ -180,8 +188,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
         raw = pdfium_c.FPDFDOC_InitFormFillEnvironment(self, config)
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
-        self.formenv = PdfFormEnv(raw, config)
-        self._formenv_holder.obj = self.formenv
+        
+        close_callback = partial(PdfDocument._close_formenv_impl, self.formenv)
+        self._pre_close_callbacks.append(close_callback)
+        self.formenv = PdfFormEnv(raw, config, close_callback)
         
         if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
             if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
@@ -195,6 +205,14 @@ class PdfDocument (pdfium_i.AutoCloseable):
                     "Run `PDFIUM_PLATFORM=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2` to get a build with XFA support."
                 )
     
+    
+    def close_forms(self):
+        """ TODO """
+        if not self.formenv:
+            return
+        self._pre_close_callbacks.remove(self.formenv._close_callback)
+        self.formenv._close_callback()
+        self.formenv = None
     
     def get_formtype(self):
         """
@@ -564,11 +582,6 @@ def _open_pdf(input_data, password, autoclose):
     return pdf, to_hold, to_close
 
 
-class _ObjectHolder:
-    def __init__(self, obj):
-        self.obj = obj
-
-
 class PdfFormEnv (pdfium_i.AutoCastable):
     """
     Form environment helper class.
@@ -580,12 +593,13 @@ class PdfFormEnv (pdfium_i.AutoCastable):
             Accompanying form configuration interface, to be kept alive.
     """
     
-    def __init__(self, raw, config):
+    def __init__(self, raw, config, close_callback):
         self.raw = raw
         self.config = config
+        self._close_callback = close_callback
     
-    def close(self):  # bw compat no-op
-        pass
+    def close(self):
+        warnings.warn("PdfFormEnv.close() is deprecated and now a no-op. Call the new PdfDocument.close_forms() API instead.", category=DeprecationWarning)
 
 
 class PdfXObject (pdfium_i.AutoCloseable):
