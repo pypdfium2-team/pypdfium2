@@ -611,10 +611,10 @@ class PdfFormEnv (pdfium_i.AutoCastable):
     def close(self):
         """
         .. deprecated:: 5.10.0
-            This method is now a no-op. Call :meth:`.PdfDocument.close_forms` instead.
+            This method is now a no-op. Please use :meth:`.PdfDocument.close_forms` instead.
         """
         # Explicit closing should clean up the .formenv attribute from the parent document, so it cannot be implemented here.
-        warnings.warn("PdfFormEnv.close() is deprecated and now a no-op. Call PdfDocument.close_forms() instead.", category=DeprecationWarning)
+        warnings.warn("PdfFormEnv.close() is deprecated and now a no-op. Please use PdfDocument.close_forms() instead.", category=DeprecationWarning)
 
 def _formenv_close_impl(formenv):
     if not formenv.raw:
