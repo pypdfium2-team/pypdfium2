@@ -2,10 +2,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# requires just >= 1.29.0
-unexport GH_TOKEN
 BROWSER := env('BROWSER', 'google-chrome')
-_token  := env('GH_TOKEN', '')
 
 list:
 	just -l
@@ -52,7 +49,7 @@ build-native *args:
 build-toolchained *args:
 	python3 setupsrc/build_toolchained.py {{args}}
 craft *args:
-	@GH_TOKEN={{_token}} python3 setupsrc/craft.py {{args}}
+	python3 setupsrc/craft.py {{args}}
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 

@@ -3,14 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-_GH_TOKEN = os.environ.pop("GH_TOKEN", "")
-
-import json
 import shutil
 import argparse
 import tempfile
 import contextlib
-import urllib.request as url_request
 from pathlib import Path
 
 from base import *  # local
@@ -67,20 +63,10 @@ def tmp_replace_ctx(fp, orig, tmp):
 @contextlib.contextmanager
 def tmp_ctypesgen_pin():
     
-    global _GH_TOKEN
-    
     pin = os.environ.get("CTYPESGEN_PIN", None)
     if not pin:
-        head_url = "https://api.github.com/repos/pypdfium2-team/ctypesgen/git/refs/heads/pypdfium2"
-        if _GH_TOKEN:
-            req = url_request.Request(head_url, headers={"Authorization": f"Bearer {_GH_TOKEN}"})
-            _GH_TOKEN = ""
-        else:
-            req = head_url
-        with url_request.urlopen(req) as rq:
-            content = rq.read().decode()
-        content = json.loads(content)
-        pin = content["object"]["sha"]
+        git_output = run_cmd(["git", "ls-remote", "https://github.com/pypdfium2-team/ctypesgen", "refs/heads/pypdfium2"], cwd=None, capture=True)
+        pin = git_output.split()[0]
         log(f"Resolved pypdfium2 ctypesgen HEAD to SHA {pin}")
     
     base_txt = "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@"
