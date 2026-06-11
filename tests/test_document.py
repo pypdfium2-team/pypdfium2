@@ -275,3 +275,10 @@ def test_init_forms_without_forms():
     pdf = pdfium.PdfDocument(TestFiles.empty)
     assert pdf.init_forms() is False
     assert pdf.formenv is None
+
+
+def test_formenv_close_deprecation():
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+    with pytest.deprecated_call():
+        pdf.formenv.close()
