@@ -112,6 +112,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def _close_impl(raw, formenv_holder, data_holder, data_closer):
         formenv = formenv_holder.obj
         if formenv:
+            pdfium_i._debug_close(f"Close (byparent) {formenv}")
             _formenv_close_impl(formenv)
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
@@ -209,6 +210,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         """
         if not self.formenv:
             return
+        pdfium_i._debug_close(f"Close (explicit) {self.formenv}")
         _formenv_close_impl(self.formenv)
         self.formenv = None
         self._formenv_holder.obj = None
