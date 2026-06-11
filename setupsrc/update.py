@@ -9,7 +9,7 @@ import shutil
 import tarfile
 import argparse
 import functools
-from pathlib import Path
+# from pathlib import Path
 import urllib.request as url_request
 from concurrent.futures import ThreadPoolExecutor
 

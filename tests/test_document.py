@@ -251,3 +251,34 @@ def test_post_close():
     pdf.close()
     with pytest.raises(ctypes.ArgumentError):
         pdf.get_version()
+
+
+def test_forms_init_and_close():
+    
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    assert pdf.close_forms() is False  # no-op
+    assert pdf.init_forms() is True
+    assert pdf.init_forms() is False   # no-op
+    assert isinstance(pdf.formenv, pdfium.PdfFormEnv)
+    assert pdf.close_forms() is True
+    assert pdf.formenv is None
+    assert pdf._formenv_holder.obj is None
+    assert pdf.close_forms() is False  # no-op
+    pdf.close()  # includes another no-op .close_forms()
+    
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+    pdf.close()  # includes actual .close_forms()
+
+
+def test_init_forms_without_forms():
+    pdf = pdfium.PdfDocument(TestFiles.empty)
+    assert pdf.init_forms() is False
+    assert pdf.formenv is None
+
+
+def test_formenv_close_deprecation():
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+    with pytest.deprecated_call():
+        pdf.formenv.close()
