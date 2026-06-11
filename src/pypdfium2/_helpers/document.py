@@ -112,7 +112,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def _close_impl(raw, formenv_holder, data_holder, data_closer):
         formenv = formenv_holder.obj
         if formenv:
-            formenv._close_impl()
+            _formenv_close_impl(formenv)
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
             id(data)
@@ -194,10 +194,16 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     
     def close_formenv(self):
-        """ TODO """
+        """
+        Manually close the formenv, if initialized.
+        
+        If this method is not called, the formenv will be closed when the PDF is closed.
+        
+        .. versionadded:: 5.10.0
+        """
         if not self.formenv:
             return
-        self.formenv._close_impl()
+        _formenv_close_impl(self.formenv)
         self.formenv = None
         self._formenv_holder.obj = None
     
@@ -586,22 +592,24 @@ class PdfFormEnv (pdfium_i.AutoCastable):
             Accompanying form configuration interface, to be kept alive.
     
     .. versionchanged:: 5.10.0
-        TODO
+        The ``pdf`` attribute and ``parent`` alias had to be removed to fix an indirect self-reference causing trouble with finalization.
+        Formenv lifetime is now managed through the parent :class:`.PdfDocument` itself, avoiding circular connection.
     """
     
     def __init__(self, raw, config):
         self.raw = raw
         self.config = config
     
-    def _close_impl(self):
-        if not self.raw:
-            return
-        pdfium_c.FPDFDOC_ExitFormFillEnvironment(self.raw)
-        self.raw = None
-        id(self.config)
-    
     def close(self):
-        warnings.warn("TODO", category=DeprecationWarning)
+        # Explicit closing should clean up the .formenv attribute from the parent document, so it cannot be implemented here.
+        warnings.warn("PdfFormEnv.close() is deprecated and now a no-op. Call PdfDocument.close_forms() instead.", category=DeprecationWarning)
+
+def _formenv_close_impl(formenv):
+    if not formenv.raw:
+        return
+    pdfium_c.FPDFDOC_ExitFormFillEnvironment(formenv.raw)
+    formenv.raw = None
+    id(formenv.config)
 
 
 class PdfXObject (pdfium_i.AutoCloseable):
