@@ -195,6 +195,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def close_formenv(self):
         """ TODO """
+        if not self.formenv:
+            return
         self.formenv._close_impl()
         self.formenv = None
         self._formenv_holder.obj = None
