@@ -601,8 +601,8 @@ class PdfFormEnv (pdfium_i.AutoCastable):
             Accompanying form configuration interface, to be kept alive.
     
     .. versionchanged:: 5.10.0
-        The ``pdf`` attribute and ``parent`` alias had to be removed to fix an indirect self-reference causing trouble with finalization.
-        Formenv lifetime is now managed through the parent :class:`.PdfDocument` itself, avoiding circular connection.
+        The ``pdf`` attribute and ``parent`` alias had to be removed to fix trouble with finalization due to an indirect self-reference.
+        Formenv lifetime is now managed through the parent :class:`.PdfDocument` itself to avoid a reference circle.
     """
     
     def __init__(self, raw, config):
