@@ -122,6 +122,12 @@ class PdfDocument (pdfium_i.AutoCloseable):
         data_closer.clear()
     
     
+    def close(self, *args, **kwargs):
+        # clean up formenv references from self on explicit closing
+        self.close_forms()
+        super().close(*args, **kwargs)
+    
+    
     def __len__(self):
         return pdfium_c.FPDF_GetPageCount(self)
     
@@ -601,6 +607,10 @@ class PdfFormEnv (pdfium_i.AutoCastable):
         self.config = config
     
     def close(self):
+        """
+        .. deprecated:: 5.10.0
+            This method is now a no-op. Call :meth:`.PdfDocument.close_forms` instead.
+        """
         # Explicit closing should clean up the .formenv attribute from the parent document, so it cannot be implemented here.
         warnings.warn("PdfFormEnv.close() is deprecated and now a no-op. Call PdfDocument.close_forms() instead.", category=DeprecationWarning)
 
