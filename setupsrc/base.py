@@ -94,11 +94,11 @@ PdfiumFlagsDict = {
 # TODO consider StrEnum or something
 
 class SysNames:
-    darwin     = "darwin"
-    windows    = "windows"
-    linux      = "linux"
-    android    = "android"
-    ios        = "ios"
+    darwin  = "darwin"
+    windows = "windows"
+    linux   = "linux"
+    android = "android"
+    ios     = "ios"
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
