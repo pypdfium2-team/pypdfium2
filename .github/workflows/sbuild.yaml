@@ -58,7 +58,7 @@ jobs:
             py_ver: '3.13'
             # if we don't use the sysroot or an older container, the glibc requirement is high
             # see below for an alternative approach that uses the sysroot on aarch64 natively
-            tag: manylinux_2_39_aarch64
+            tag: manylinux_2_38_aarch64
           
           - os: ubuntu-24.04-arm
             condition: ${{ inputs.linux && inputs.targets_test }}
