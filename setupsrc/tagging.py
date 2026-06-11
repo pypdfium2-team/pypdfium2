@@ -48,7 +48,7 @@ _WheeltagPatterns = {
 _WheeltagVersions = {
     # --- AS OF THIS WRITING (06/2026) ---
     
-    # macOS: Can be checked with our auto-tagging codepath (requires a macOS host). Upstream does not specify a deployment target in config.
+    # macOS: Can be checked with `vtool` or our experimental auto-tagging codepath (requires a macOS host). Upstream does not specify a deployment target in config.
     SysNames.darwin: "12_0",
     
     # iOS: unclear, guessed from the lowest version XCode 26 can achieve according to [1]

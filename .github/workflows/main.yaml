@@ -169,14 +169,6 @@ jobs:
           python3 -m pip install -U pip
           python3 -m pip install -U setuptools pytest pillow numpy
       
-      - name: Install and run auditwheel (informational)
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          python3 -m pip install -U auditwheel
-          python3 -m auditwheel show $WHEEL
-        env:
-          WHEEL: ${{ matrix.wheel }}
-      
       - name: Install pypdfium2 from artifact
         run: python3 -m pip install $WHEEL
         env:
@@ -184,6 +176,21 @@ jobs:
       
       - name: Run Test Suite
         run: python3 -m pytest tests/
+      
+      - name: On Linux, run auditwheel (informational)
+        if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.py == '3.14' }}
+        run: |
+          python3 -m pip install -U auditwheel
+          python3 -m auditwheel show $WHEEL
+        env:
+          WHEEL: ${{ matrix.wheel }}
+      
+      - name: On macOS, run vtool (informational)
+        if: ${{ startsWith(matrix.os, 'macos-') && matrix.py == '3.14' }}
+        # or: PDFIUM_DLL=$(python3 -c 'import pypdfium2_raw; from pathlib import Path; print(Path(pypdfium2_raw.__file__).parent/"libpdfium.dylib")')
+        run: |
+          PDFIUM_DLL=$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")
+          vtool -show-build $PDFIUM_DLL
   
   
   augment_cibw:
