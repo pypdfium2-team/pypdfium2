@@ -193,7 +193,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 )
     
     
-    def close_formenv(self):
+    def close_forms(self):
         """
         Manually close the formenv, if initialized.
         
