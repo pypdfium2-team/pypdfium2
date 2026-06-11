@@ -17,7 +17,7 @@
 
 *API changes*
 - Fixed a long-standing issue concerning formenv autoclose logic.
-  `PdfDocument` stores the formenv, but `PdfFormEnv` referenced back to the parent `PdfDocument` including in its finalizer, forming a reference circle / indirect self-reference. This is illegal with `weakref.finalize()`.
+  `PdfDocument` stores the formenv, but `PdfFormEnv` referenced back to the parent `PdfDocument` including in the formenv's finalizer, forming a reference circle / indirect self-reference. This is illegal with `weakref.finalize()`.
   Addressing this issue properly required some changes to the public API:
   * `PdfFormEnv`: The `pdf` attribute and `parent` alias have been removed. Since `pdf` is created on the caller side, it is expected that callers would access their object directly rather than through the formenv.
   * Formenv lifetime is now managed through `PdfDocument`.
@@ -27,7 +27,7 @@
   
   We are aware that, technically, this is an API-breaking change, but it has been decided not to increment the major version, given that `PdfFormEnv`'s `pdf` and `parent` attributes are insignificant to most callers, and removing them helps fix a real issue.
   
-  The exact consequences of this self-reference are still unclear to us, since for some reason formenvs seem to have been garbage collected / finalized anyway, but sings of corruption have been observed.
+  The exact consequences of this self-reference are still unclear to us, since for some reason formenvs seem to have been garbage collected / finalized anyway, but signs of corruption have been observed.
 
 *Setup*
 - Finally, prevent custom setup code from running multiple times in `pip install` by deferring data files generation into `build_py`, as suggested in cibuildwheel FAQ.
