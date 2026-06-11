@@ -175,7 +175,7 @@ def handle_portable_mode(config, use_sysroot, clang_path):
     if not use_sysroot:
         config["use_sysroot"] = False
     elif not clang_path:
-        log("Warning: --use-sysroot given, but no --clang-path - this will probably fail.")
+        log("Warning: --use-sysroot with GCC / system libcxx. This may or may not work. If it fails, bring your own clang and pass --clang-path.")
     
     return patch_clang
 
@@ -295,7 +295,7 @@ def parse_args(argv):
     parser.add_argument(
         "--use-sysroot",
         action = "store_true",
-        help = "Attempt to use a sysroot even in PORTABLE_MODE, with respect to packaging. Also implies using clang, since use_sysroot = true does not seem to work with GCC. Since pdfium only vendors x64 clang, you also need to provide a custom --clang-path, e.g. /usr if you system's clang is recent enough.",
+        help = "Attempt to use a sysroot even in PORTABLE_MODE, with respect to packaging. This may or may not work with GCC / system libcxx. If it does not, bring your own clang and pass --clang-path.",
     )
     parser.add_argument(
         "--clang-path",

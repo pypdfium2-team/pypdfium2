@@ -38,7 +38,7 @@
 *Workflows & Build scripts*
 - Made the PDFium version configurable in cibuildwheel config and workflows.
 - Added `secrets: inherit` to trigger workflows to hopefully fix a publish issue caused by the change to reusable workflow calls.
-- `build_toolchained.py`: Significantly improved code style. Added ability to use a sysroot in `PORTABLE_MODE` (requires bringing your own clang). Fix `install_buildtools()` by calling it before any depot_tools wrappers are added to `PATH`.
+- `build_toolchained.py`: Significantly improved code style. In `PORTABLE_MODE`, added ability to use a sysroot and/or clang (requires passing `--clang-path ...`). Fix `install_buildtools()` by calling it before any depot_tools wrappers are added to `PATH`.
 - Pragmatic `build_native.py` changes to make updating a bit more feasible:
   Patches for legacy GN and the transitional `--no-legacy-gn` option have been removed; recent GN is now required.
   Clang patches now just aim for compatibility with clang >= 22, much reducing patch complexity. For clang versions older than that, `--clang-as-gcc` mode is implicitly enabled.
