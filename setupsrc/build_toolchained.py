@@ -171,11 +171,11 @@ def handle_portable_mode(config, use_sysroot, clang_path):
             "is_clang": False,
             "use_custom_libcxx": False,
         })
+        if use_sysroot:
+            log("Warning: --use-sysroot with GCC / system libcxx. This may or may not work. If it fails, bring your own clang and pass --clang-path.")
     
     if not use_sysroot:
         config["use_sysroot"] = False
-    elif not clang_path:
-        log("Warning: --use-sysroot with GCC / system libcxx. This may or may not work. If it fails, bring your own clang and pass --clang-path.")
     
     return patch_clang
 
@@ -295,12 +295,12 @@ def parse_args(argv):
     parser.add_argument(
         "--use-sysroot",
         action = "store_true",
-        help = "Attempt to use a sysroot even in PORTABLE_MODE, with respect to packaging. This may or may not work with GCC / system libcxx. If it does not, bring your own clang and pass --clang-path.",
+        help = "(PORTABLE_MODE only) Attempt to use a sysroot, on behalf of packaging, assuming a sysroot is available for the platform in question and has been automatically downloaded by gclient. This may or may not work with GCC / system libcxx. If it does not, bring your own clang and pass --clang-path.",
     )
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = "Custom clang path, if in PORTABLE_MODE, ignored otherwise.",
+        help = "(PORTABLE_MODE only) Custom clang path. AOTW, clang >= 22 is required.",
     )
     
     return parser.parse_args(argv)
