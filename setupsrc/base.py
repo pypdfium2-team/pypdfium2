@@ -97,8 +97,6 @@ class SysNames:
     darwin     = "darwin"
     windows    = "windows"
     linux      = "linux"
-    # linux_musl is only used under special circumstances, mostly just maps to linux
-    linux_musl = "linux_musl"
     android    = "android"
     ios        = "ios"
 
@@ -173,12 +171,10 @@ PdfiumBinariesMap.update({
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
-def plat_to_system(pl_name, distinguish_musl=False):
+def plat_to_system(pl_name):
     if pl_name == ExtPlats.sourcebuild:
         # Note, this may be None if on an unknown host
         return Host.system
-    if distinguish_musl and pl_name.startswith(SysNames.linux_musl):
-        return SysNames.linux_musl
     # other ExtPlats intentionally not handled here
     return getattr(SysNames, pl_name.split("_", maxsplit=1)[0])
 

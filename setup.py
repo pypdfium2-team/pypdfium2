@@ -163,8 +163,7 @@ def run_setup(modnames, pl_name, datagen):
         if pl_name == ExtPlats.sourcebuild:
             plat_tag = None
         else:  # pdfium-binaries
-            autotag = bool(int( os.environ.get("AUTOTAG", False) ))
-            plat_tag = get_wheel_tag(pl_name, dll_path, autotag)
+            plat_tag = get_wheel_tag(pl_name, dll_path)
         license_files.append("BUILD_LICENSES/**")
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(plat_tag)

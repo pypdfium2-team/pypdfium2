@@ -28,8 +28,6 @@ jobs:
     
     runs-on: ${{ matrix.os }}
     permissions: {}
-    env:
-      AUTOTAG: '1'
     
     steps:
       

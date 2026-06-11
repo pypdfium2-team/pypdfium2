@@ -25,7 +25,7 @@
   * `PdfPage.parent` now always points to a `PdfDocument`, not sometimes a `PdfFormEnv`.
     Conversely, page weakrefs are always stored on `PdfDocument`, not sometimes on `PdfFormEnv`.
   
-  We are aware that, technically, this is an API-breaking change, but it has been decided not to increment the major version, given that `PdfFormEnv`'s `pdf` and `parent` attributes are insignificant to most callers, and removing them fixes a real issue.
+  We are aware that, technically, this is an API-breaking change, but it has been decided not to increment the major version, given that `PdfFormEnv`'s `pdf` and `parent` attributes are insignificant to most callers, and removing them helps fix a real issue.
   
   The exact consequences of this self-reference are still unclear to us, since for some reason formenvs seem to have been garbage collected / finalized anyway, but sings of corruption have been observed.
 
