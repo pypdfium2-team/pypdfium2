@@ -172,7 +172,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         formtype = self.get_formtype()
         if formtype == pdfium_c.FORMTYPE_NONE or self.formenv:
-            return
+            return False
         
         if not config:
             if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
@@ -198,6 +198,8 @@ class PdfDocument (pdfium_i.AutoCloseable):
                     "init_forms() called on XFA pdf, but this pdfium binary was compiled without XFA support.\n"
                     "Run `PDFIUM_PLATFORM=auto-v8 pip install -v pypdfium2 --no-binary pypdfium2` to get a build with XFA support."
                 )
+        
+        return True
     
     
     def close_forms(self):
@@ -209,11 +211,12 @@ class PdfDocument (pdfium_i.AutoCloseable):
         .. versionadded:: 5.10.0
         """
         if not self.formenv:
-            return
+            return False
         pdfium_i._debug_close(f"Close (explicit) {self.formenv}")
         _formenv_close_impl(self.formenv)
         self.formenv = None
         self._formenv_holder.obj = None
+        return True
     
     
     def get_formtype(self):
