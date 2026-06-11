@@ -112,8 +112,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def _close_impl(raw, formenv_holder, data_holder, data_closer):
         formenv = formenv_holder.obj
         if formenv:
-            pdfium_i._debug_close(f"Close (byparent) {formenv}")
-            _formenv_close_impl(formenv)
+            _formenv_close_impl(formenv, caller_info="inparent, implicit")
         pdfium_c.FPDF_CloseDocument(raw)
         for data in data_holder:
             id(data)
@@ -125,7 +124,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     def close(self, *args, **kwargs):
         # clean up formenv references from self on explicit closing
-        self.close_forms()
+        self.close_forms(_caller_info="inparent, explicit")
         super().close(*args, **kwargs)
     
     
@@ -202,7 +201,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return True
     
     
-    def close_forms(self):
+    def close_forms(self, _caller_info="explicit"):
         """
         Manually close the formenv, if initialized.
         
@@ -212,8 +211,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
         """
         if not self.formenv:
             return False
-        pdfium_i._debug_close(f"Close (explicit) {self.formenv}")
-        _formenv_close_impl(self.formenv)
+        _formenv_close_impl(self.formenv, caller_info=_caller_info)
         self.formenv = None
         self._formenv_holder.obj = None
         return True
@@ -619,9 +617,10 @@ class PdfFormEnv (pdfium_i.AutoCastable):
         # Explicit closing should clean up the .formenv attribute from the parent document, so it cannot be implemented here.
         warnings.warn("PdfFormEnv.close() is deprecated and now a no-op. Please use PdfDocument.close_forms() instead.", category=DeprecationWarning)
 
-def _formenv_close_impl(formenv):
+def _formenv_close_impl(formenv, caller_info=""):
     if not formenv.raw:
         return
+    pdfium_i._debug_close(f"Close ({caller_info}) {formenv}")
     pdfium_c.FPDFDOC_ExitFormFillEnvironment(formenv.raw)
     formenv.raw = None
     id(formenv.config)
