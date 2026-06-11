@@ -16,6 +16,8 @@
     Conversely, page weakrefs are always stored on `PdfDocument`, not sometimes on `PdfFormEnv`.
   
   We are aware that, technically, this is an API-breaking change, but it has been decided not to increment the major version, given that `PdfFormEnv.pdf` and `.parent` are insignificant to most callers, and removing them fixes a real issue.
+  
+  The exact consequences of this self-reference are still unclear to us, since for some reason formenvs seem to have been garbage collected / finalized anyway, but sings of corruption have been observed.
 
 *Dependency updates*
 - Updated `build_toolchained.py` from PDFium `7191` to `7884`. Despite the gap, this turned out fairly straightforward.
