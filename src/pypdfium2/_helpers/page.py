@@ -48,8 +48,7 @@ class PdfPage (pdfium_i.AutoCloseable):
     
     @property
     def parent(self):  # AutoCloseable hook
-        # this needs to point at the nearest dependency, because that's the one that holds a weakref to this object
-        return self.pdf if self.formenv is None else self.formenv
+        return self.pdf
     
     
     def get_width(self):
