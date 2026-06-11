@@ -33,8 +33,7 @@
 - Finally, prevent custom setup code from running multiple times in `pip install` by deferring data files generation into `build_py`, as suggested in cibuildwheel FAQ.
   Also, make the DLL path available to the tagging stage so that minimum OS requirements could be auto-detected from binaries in the future, instead of hardcoding them.
   This took some refactoring the control flow.
-- Corrected minimum macOS requirement to `12_0`, as determined by `vtool -show-build`. (Upstream config no longer specifies a deployment target.)
-  In the future, we plan to split packaging across native hosts and automate tagging using auditwheel/delocate.
+- Corrected minimum macOS requirement to `12_0`, as determined by `vtool -show-build`. (Upstream config no longer specifies a deployment target.) In the future, we plan to split packaging across native hosts and automate tagging using auditwheel/delocate.
 
 *Workflows & Build scripts*
 - Made the PDFium version configurable in cibuildwheel config and workflows.

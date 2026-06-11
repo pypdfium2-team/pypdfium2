@@ -158,8 +158,7 @@ def handle_portable_mode(config, use_sysroot, clang_path):
         install_buildtools()
     
     config["clang_use_chrome_plugins"] = False
-    if use_sysroot:
-        assert clang_path, "--use-sysroot requires a --clang-path to be given"
+    if clang_path:
         clang_ver = get_clang_version(clang_path)
         patch_clang = clang_ver < 23
         config.update({
@@ -169,11 +168,14 @@ def handle_portable_mode(config, use_sysroot, clang_path):
         })
     else:
         config.update({
-            "use_sysroot": False,
-            # default to GCC because vendored clang is not portable
             "is_clang": False,
             "use_custom_libcxx": False,
         })
+    
+    if not use_sysroot:
+        config["use_sysroot"] = False
+    elif not clang_path:
+        log("Warning: --use-sysroot given, but no --clang-path - this will probably fail.")
     
     return patch_clang
 
@@ -298,7 +300,7 @@ def parse_args(argv):
     parser.add_argument(
         "--clang-path",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = "Custom clang path, if --use-sysroot is given.",
+        help = "Custom clang path, if in PORTABLE_MODE, ignored otherwise.",
     )
     
     return parser.parse_args(argv)
