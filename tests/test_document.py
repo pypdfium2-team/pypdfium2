@@ -254,6 +254,7 @@ def test_post_close():
 
 
 def test_forms_init_and_close():
+    
     pdf = pdfium.PdfDocument(TestFiles.forms)
     assert pdf.close_forms() is False  # no-op
     assert pdf.init_forms() is True
@@ -263,6 +264,11 @@ def test_forms_init_and_close():
     assert pdf.formenv is None
     assert pdf._formenv_holder.obj is None
     assert pdf.close_forms() is False  # no-op
+    pdf.close()  # includes another no-op .close_forms()
+    
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+    pdf.close()  # includes actual .close_forms()
 
 
 def test_init_forms_without_forms():
