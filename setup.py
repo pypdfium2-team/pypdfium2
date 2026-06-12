@@ -57,7 +57,7 @@ def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
     # https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
     
     class pypdfium_buildpy (buildpy_orig):
-            
+        
         def run(self, *args, **kwargs):
             
             if ModuleRaw in modnames and pl_name != ExtPlats.sdist:
@@ -65,13 +65,6 @@ def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
                 assert_exists(ModuleDir_Raw, package_data["pypdfium2_raw"])
             
             if ModuleHelpers in modnames:
-                if pl_name == ExtPlats.sdist:
-                    if helpers_info["dirty"]:
-                        # ignore dirty state due to craft.py::tmp_ctypesgen_pin()
-                        if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
-                            helpers_info["dirty"] = False
-                    else:
-                        log("Warning: sdist without ctypesgen pin, or git describe not working?")
                 helpers_info["is_editable"] = bool(self.editable_mode)
                 write_json(ModuleDir_Helpers/VersionFN, helpers_info)
                 assert_exists(ModuleDir_Helpers, package_data["pypdfium2"])
@@ -79,6 +72,28 @@ def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
             buildpy_orig.run(self, *args, **kwargs)
     
     return pypdfium_buildpy
+
+
+def get_fixed_helpers_info(pl_name):
+    
+    helpers_info = get_helpers_info()
+    if pl_name != ExtPlats.sdist:
+        return helpers_info
+    
+    if helpers_info["dirty"]:
+        # ignore dirty state due to craft.py::tmp_ctypesgen_pin()
+        if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
+            helpers_info["dirty"] = False
+    else:
+        log("Warning: sdist without ctypesgen pin, or git describe not working?")
+    
+    return helpers_info
+
+
+def assert_exists(dir, data_files):
+    missing = tuple(f for f in data_files if not (dir/f).exists())
+    if missing:
+        assert False, f"Missing data files: {missing}"
 
 
 LICENSES_SHARED = (
@@ -92,12 +107,6 @@ LICENSES_SDIST = (
 )
 
 BASE_PLATFILES = (BindingsFN, VersionFN)
-
-
-def assert_exists(dir, data_files):
-    missing = tuple(f for f in data_files if not (dir/f).exists())
-    if missing:
-        assert False, f"Missing data files: {missing}"
 
 
 def run_setup(modnames, pl_name, datagen):
@@ -143,7 +152,7 @@ def run_setup(modnames, pl_name, datagen):
     
     helpers_info = None
     if ModuleHelpers in modnames:
-        helpers_info = get_helpers_info()
+        helpers_info = get_fixed_helpers_info(pl_name)
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         kwargs["package_dir"]["pypdfium2"] = "src/pypdfium2"
         kwargs["package_dir"]["pypdfium2_cli"] = "src/pypdfium2_cli"
