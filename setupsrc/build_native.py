@@ -110,15 +110,16 @@ if IS_ANDROID:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
-def git_clone_rev(url, rev, target_dir, depth=1):
+def git_clone_rev(name, url, rev, target_dir, depth=1):
     # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
     # NOTE Once we can require git >= 2.49.0, `git clone --depth <n> --revision <sha>` will do. (The author currently uses git 2.42.0.)
     mkdir(target_dir)
     depth_param = ["--depth", str(depth)] if depth else []
-    run_cmd(["git", "-c", "advice.defaultBranchName=false", "init"], cwd=target_dir)
-    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir)
+    log(f"\nCloning {name} from {url!r} at {rev} ...")
+    run_cmd(["git", "init"], cwd=target_dir, silent=True)
+    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir, silent=True)
     run_cmd(["git", "fetch", *depth_param, "origin", rev], cwd=target_dir)
-    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
+    run_cmd(["git", "checkout", "FETCH_HEAD"], cwd=target_dir, silent=True)
 
 
 class DepsFetcher:
@@ -130,14 +131,14 @@ class DepsFetcher:
         
         if target_dir.exists():
             if reset:
-                log(f"Discarding unstaged changes on {target_dir.name!r} as per --reset option.")
+                log(f"\n{target_dir.name}: Discarding unstaged changes as per --reset option.")
                 run_cmd(["git", "restore", "."], cwd=target_dir)
                 return True
             else:
                 return False
         
         rev = self.deps_info[name]
-        git_clone_rev(DEPS_URLS[name], rev, target_dir, depth)
+        git_clone_rev(name, DEPS_URLS[name], rev, target_dir, depth)
         
         return True
 

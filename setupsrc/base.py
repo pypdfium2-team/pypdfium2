@@ -591,17 +591,21 @@ class _host_platform:
 Host = _host_platform()
 
 
-def run_cmd(command, cwd, capture=False, check=True, str_cast=True, stderr=None, **kwargs):
+def run_cmd(command, cwd, capture=False, check=True, str_cast=True, stderr=None, silent=False, **kwargs):
     
     if str_cast:
         command = [str(c) for c in command]
+    if not silent:
+        log(f"{command} (cwd={cwd!r})")
     
-    log(f"{command} (cwd={cwd!r})")
     if capture:
         kwargs["stdout"] = subprocess.PIPE
         if stderr is not None:
             # allow the caller to pass e.g. subprocess.STDOUT
             kwargs["stderr"] = stderr
+    elif silent:
+        kwargs["stdout"] = subprocess.DEVNULL
+        kwargs["stderr"] = subprocess.DEVNULL
     
     comp_process = subprocess.run(command, cwd=cwd, check=check, **kwargs)
     if capture:
