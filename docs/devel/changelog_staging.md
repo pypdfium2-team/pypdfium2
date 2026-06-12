@@ -6,8 +6,8 @@
 # Changelog for next release
 
 *Dependency updates*
-- Updated `build_toolchained.py` from PDFium `7191` to `7884`. Despite the gap, this turned out fairly straightforward.
-- Updated `build_native.py` from PDFium `7841` to `7880`.
+- Updated `build_toolchained.py` from PDFium `7191` to `7889`. Despite the gap, this turned out fairly straightforward.
+- Updated `build_native.py` from PDFium `7841` to `7889`.
 - Updated `gn-dist` from `2385` to `2407`, to match the revision specified in upstream's `DEPS` file.
 - Updated cibuildwheel to `4.0.0`.
 - Let `install-static-clang.sh` use latest.
