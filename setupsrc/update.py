@@ -134,11 +134,15 @@ def do_verify(verify, archives, version):
         return
     
     attest_path = DataDir/f"pdfium-{version}-attestation.json"
+    trusted_root = DataDir/"trusted_root.jsonl"
     if not attest_path.exists():
         urlretrieve(f"{ReleaseURL}{version}/pdfium-attestation.json", attest_path)
+    if not trusted_root.exists():
+        with trusted_root.open("wb") as fh:
+            run_cmd(["gh", "attestation", "trusted-root"], stdout=fh, cwd=DataDir)
     
     for artifact_path in archives.values():
-        run_cmd(["gh", "attestation", "verify", "-R", "bblanchon/pdfium-binaries", str(artifact_path), "-b", str(attest_path)], cwd=DataDir, check=True)
+        run_cmd(["gh", "attestation", "verify", str(artifact_path), "-R", "bblanchon/pdfium-binaries", "-b", str(attest_path), "--custom-trusted-root", str(trusted_root)], cwd=DataDir, check=True)
 
 
 def postprocess_android():
