@@ -74,7 +74,7 @@ def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
     return pypdfium_buildpy
 
 
-def get_fixed_helpers_info(pl_name):
+def _get_fixed_helpers_info(pl_name):
     
     helpers_info = get_helpers_info()
     if pl_name != ExtPlats.sdist:
@@ -151,7 +151,7 @@ def run_setup(modnames, pl_name, datagen):
     
     helpers_info = None
     if ModuleHelpers in modnames:
-        helpers_info = get_fixed_helpers_info(pl_name)
+        helpers_info = _get_fixed_helpers_info(pl_name)
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         kwargs["package_dir"]["pypdfium2"] = "src/pypdfium2"
         kwargs["package_dir"]["pypdfium2_cli"] = "src/pypdfium2_cli"
@@ -192,14 +192,14 @@ def _parse_modspec(modspec):
     return modnames
 
 def _resolve_platname(pl_name):
-    if pl_name == ExtPlats.fallback:
-        try:
-            system_pdfium._get_pdfium()
-        except system_pdfium.PdfiumNotFoundError:
-            return ExtPlats.sourcebuild
-        else:
-            return ExtPlats.system
-    return pl_name
+    if pl_name != ExtPlats.fallback:
+        return pl_name
+    try:
+        system_pdfium._get_pdfium()
+    except system_pdfium.PdfiumNotFoundError:
+        return ExtPlats.sourcebuild
+    else:
+        return ExtPlats.system
 
 
 def main():
