@@ -9,11 +9,11 @@
 - Updated `build_toolchained.py` from PDFium `7191` to `7884`. Despite the gap, this turned out fairly straightforward.
 - Updated `build_native.py` from PDFium `7841` to `7880`.
 - Updated `gn-dist` from `2385` to `2407`, to match the revision specified in upstream's `DEPS` file.
+- Updated cibuildwheel to `4.0.0`.
+- Let `install-static-clang.sh` use latest.
 - We now try to track latest PDFium in CIBW targets that use `build_native.py` with GCC, as this mode needs few patches.
   In releases, this affects `musllinux_{x86_64,i686,aarch64,armv7l}`. Let's see how this goes.
   If it breaks too often, we may go back to the pinned version or even `pdfium-binaries` for some musl targets.
-- Updated cibuildwheel to `4.0.0`.
-- Let `install-static-clang.sh` use latest.
 
 *API changes*
 - Fixed a long-standing issue concerning formenv autoclose logic.
@@ -27,7 +27,8 @@
   
   We are aware that, technically, this is an API-breaking change, but it has been decided not to increment the major version, given that `PdfFormEnv`'s `pdf` and `parent` attributes are insignificant to most callers, and removing them helps fix a real issue.
   
-  The exact consequences of this self-reference are still unclear to us, since for some reason formenvs seem to have been garbage collected / finalized anyway, but signs of corruption have been observed.
+  The exact consequences of this self-reference are yet unclear to us, but memory leaks (due to finalizers not being called) and/or corruption seem possible.
+  Thanks to `@noxthot` for a report that triggered this investigation.
 
 *Setup*
 - Finally, prevent custom setup code from running multiple times in `pip install` by deferring data files generation into `build_py`, as suggested in cibuildwheel FAQ.
