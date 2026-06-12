@@ -7,6 +7,93 @@ import urllib.request as url_request
 from base import *  # local
 
 
+def _install_dep(exename, pkgname=None, skip_if_present=True):
+    pkgname = pkgname or exename
+    which_exe = shutil.which(exename)
+    if skip_if_present and which_exe:
+        log(f"+ {exename} found at {which_exe}")
+        return
+    # https://github.com/scikit-build/ninja-python-distributions
+    log(f"- {exename} not found, installing...")
+    run_cmd([sys.executable, "-m", "pip", "install", pkgname], cwd=None)
+
+def install_buildtools():
+    log("Bootstrapping build tools...")
+    _install_dep("ninja")
+    _install_dep("gn", "gn-dist==2407")
+
+def get_clang_version(clang_root):
+    from packaging.version import Version
+    output = run_cmd([str(clang_root/"bin"/"clang"), "--version"], capture=True, cwd=None)
+    log(output)
+    version = re.search(r"version ([\d\.]+)", output).group(1)
+    version = Version(version).major
+    log(f"Determined clang version {version!r}")
+    return version
+
+
+def git_apply_patch(patch, cwd, git_args=()):
+    run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
+
+def autopatch(file, pattern, repl, is_regex, exp_count=None):
+    log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
+    content = file.read_text()
+    if is_regex:
+        content, n_subs = re.subn(pattern, repl, content)
+    else:
+        n_subs = content.count(pattern)
+        content = content.replace(pattern, repl)
+    if exp_count is not None:
+        assert n_subs == exp_count
+    file.write_text(content)
+    return n_subs
+
+def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
+    for file in dir.glob(globexpr):
+        autopatch(file, pattern, repl, is_regex, exp_count)
+
+def shared_autopatches(pdfium_dir):
+    autopatch_dir(
+        pdfium_dir/"public"/"cpp", "*.h",
+        r'"public/(.+)"', r'"../\1"',
+        is_regex=True, exp_count=None,
+    )
+    # bundle dependencies (e.g. abseil) into the pdfium DLL
+    autopatch(
+        pdfium_dir/"BUILD.gn",
+        'component("pdfium")',
+        'shared_library("pdfium")',
+        is_regex=False, exp_count=1,
+    )
+    autopatch(
+        pdfium_dir/"public"/"fpdfview.h",
+        "#if defined(COMPONENT_BUILD)",
+        "#if 1  // defined(COMPONENT_BUILD)",
+        is_regex=False, exp_count=1,
+    )
+
+
+def _to_gn(value):
+    if isinstance(value, bool):
+        return str(value).lower()
+    elif isinstance(value, str):
+        return f'"{value}"'
+    elif isinstance(value, int):
+        return str(value)
+    elif isinstance(value, list):
+        return f"[{','.join(_to_gn(v) for v in value)}]"
+    else:
+        raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
+
+def serialize_gn_config(config_dict):
+    parts = []
+    for key, value in config_dict.items():
+        parts.append(f"{key} = {_to_gn(value)}")
+    result = "\n".join(parts)
+    log(f"\nBuild config:\n{result}\n")
+    return result
+
+
 def handle_sbuild_vers(short_ver):
     if short_ver == "main":
         full_ver = PdfiumVer.get_latest_upstream()
@@ -53,106 +140,3 @@ def pack_sourcebuild(
     write_pdfium_info(dest_dir, full_ver, origin=f"sourcebuild-{sub_target}", **post_ver)
     
     return full_ver, post_ver
-
-
-def git_apply_patch(patch, cwd, git_args=()):
-    run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
-
-def autopatch(file, pattern, repl, is_regex, exp_count=None):
-    log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
-    content = file.read_text()
-    if is_regex:
-        content, n_subs = re.subn(pattern, repl, content)
-    else:
-        n_subs = content.count(pattern)
-        content = content.replace(pattern, repl)
-    if exp_count is not None:
-        assert n_subs == exp_count
-    file.write_text(content)
-    return n_subs
-
-def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
-    for file in dir.glob(globexpr):
-        autopatch(file, pattern, repl, is_regex, exp_count)
-
-
-def get_clang_version(clang_root):
-    from packaging.version import Version
-    output = run_cmd([str(clang_root/"bin"/"clang"), "--version"], capture=True, cwd=None)
-    log(output)
-    version = re.search(r"version ([\d\.]+)", output).group(1)
-    version = Version(version).major
-    log(f"Determined clang version {version!r}")
-    return version
-
-
-def _install_dep(exename, pkgname=None, skip_if_present=True):
-    pkgname = pkgname or exename
-    which_exe = shutil.which(exename)
-    if skip_if_present and which_exe:
-        log(f"+ {exename} found at {which_exe}")
-        return
-    # https://github.com/scikit-build/ninja-python-distributions
-    log(f"- {exename} not found, installing...")
-    run_cmd([sys.executable, "-m", "pip", "install", pkgname], cwd=None)
-
-def install_buildtools():
-    log("Bootstrapping build tools...")
-    _install_dep("ninja")
-    _install_dep("gn", "gn-dist==2407")
-
-
-def _to_gn(value):
-    if isinstance(value, bool):
-        return str(value).lower()
-    elif isinstance(value, str):
-        return f'"{value}"'
-    elif isinstance(value, int):
-        return str(value)
-    elif isinstance(value, list):
-        return f"[{','.join(_to_gn(v) for v in value)}]"
-    else:
-        raise TypeError(f"Not sure how to serialize type {type(value).__name__}")
-
-def serialize_gn_config(config_dict):
-    parts = []
-    for key, value in config_dict.items():
-        parts.append(f"{key} = {_to_gn(value)}")
-    result = "\n".join(parts)
-    log(f"\nBuild config:\n{result}\n")
-    return result
-
-
-_SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
-
-def get_shimheaders_tool(pdfium_dir, rev="main"):
-
-    tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
-    shimheaders_file = tools_dir / "generate_shim_headers.py"
-    shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
-
-    if not shimheaders_file.exists():
-        log(f"Downloading {shimheaders_file.name} at revision {rev}")
-        mkdir(tools_dir)
-        url_request.urlretrieve(shimheaders_url, shimheaders_file)
-
-
-def shared_autopatches(pdfium_dir):
-    autopatch_dir(
-        pdfium_dir/"public"/"cpp", "*.h",
-        r'"public/(.+)"', r'"../\1"',
-        is_regex=True, exp_count=None,
-    )
-    # bundle dependencies (e.g. abseil) into the pdfium DLL
-    autopatch(
-        pdfium_dir/"BUILD.gn",
-        'component("pdfium")',
-        'shared_library("pdfium")',
-        is_regex=False, exp_count=1,
-    )
-    autopatch(
-        pdfium_dir/"public"/"fpdfview.h",
-        "#if defined(COMPONENT_BUILD)",
-        "#if 1  // defined(COMPONENT_BUILD)",
-        is_regex=False, exp_count=1,
-    )

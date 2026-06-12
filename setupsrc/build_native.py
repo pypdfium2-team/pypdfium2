@@ -224,6 +224,20 @@ def handle_deps(config, vendor_deps, with_tests):
 VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcms2", "openjpeg", "libtiff", "harfbuzz")
 
 
+_SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
+
+def _get_shimheaders_tool(pdfium_dir, rev="main"):
+
+    tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
+    shimheaders_file = tools_dir / "generate_shim_headers.py"
+    shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
+
+    if not shimheaders_file.exists():
+        log(f"Downloading {shimheaders_file.name} at revision {rev}")
+        mkdir(tools_dir)
+        url_request.urlretrieve(shimheaders_url, shimheaders_file)
+
+
 def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
     
     assert not IGNORE_FULLVER
@@ -333,7 +347,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("gtest", PDFIUM_3RDPARTY/"googletest"/"src")
         df.fetch("test_fonts", PDFIUM_3RDPARTY/"test_fonts")
     
-    get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
+    _get_shimheaders_tool(PDFIUM_DIR, rev=chromium_rev)
     
     return full_ver
 
