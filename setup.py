@@ -121,7 +121,6 @@ def run_setup(modnames, pl_name, datagen):
         cmdclass = {},
         package_dir = {},
         package_data = {},
-        install_requires = [],
     )
     
     platfiles = []
@@ -140,7 +139,7 @@ def run_setup(modnames, pl_name, datagen):
     if modnames == [ModuleHelpers]:
         kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
-        kwargs["install_requires"].append("pypdfium2_raw")
+        kwargs["install_requires"] = ["pypdfium2_raw"]
     elif modnames == [ModuleRaw]:
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
