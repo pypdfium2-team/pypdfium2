@@ -1,5 +1,35 @@
+diff --git a/core/fxcrt/binary_buffer_unittest.cpp b/core/fxcrt/binary_buffer_unittest.cpp
+index 30a7e24..eea5215 100644
+--- a/core/fxcrt/binary_buffer_unittest.cpp
++++ b/core/fxcrt/binary_buffer_unittest.cpp
+@@ -3,6 +3,7 @@
+ // found in the LICENSE file.
+ 
+ #include "core/fxcrt/binary_buffer.h"
++#include "core/fxcrt/byteorder.h"
+ 
+ #include <utility>
+ #include <vector>
+@@ -122,7 +123,7 @@ TEST(BinaryBuffer, AppendBytes) {
+ // Assumes little endian.
+ TEST(BinaryBuffer, AppendUint16) {
+   BinaryBuffer buffer;
+-  buffer.AppendUint16(0x4321);
++  buffer.AppendUint16(FromLE16(0x4321));
+   EXPECT_EQ(2u, buffer.GetSize());
+   EXPECT_EQ(2u, buffer.GetLength());
+   EXPECT_EQ(0x21u, buffer.GetSpan()[0]);
+@@ -132,7 +133,7 @@ TEST(BinaryBuffer, AppendUint16) {
+ // Assumes little endian.
+ TEST(BinaryBuffer, AppendUint32) {
+   BinaryBuffer buffer;
+-  buffer.AppendUint32(0x87654321);
++  buffer.AppendUint32(FromLE32(0x87654321));
+   EXPECT_EQ(4u, buffer.GetSize());
+   EXPECT_EQ(4u, buffer.GetLength());
+   EXPECT_EQ(0x21u, buffer.GetSpan()[0]);
 diff --git a/core/fxcrt/cfx_seekablestreamproxy.cpp b/core/fxcrt/cfx_seekablestreamproxy.cpp
-index 33cc528..95dc752 100644
+index c358401..c01cfd0 100644
 --- a/core/fxcrt/cfx_seekablestreamproxy.cpp
 +++ b/core/fxcrt/cfx_seekablestreamproxy.cpp
 @@ -89,11 +89,19 @@ void SwapByteOrder(pdfium::span<uint16_t> str) {

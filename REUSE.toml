@@ -129,10 +129,7 @@ SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 
 [[annotations]]
-path = [
-    "patches/bigendian.patch",
-    "patches/bigendian_test.patch",
-]
+path = "patches/bigendian.patch"
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
     "2025 Christian Heimes <cheimes@redhat.com>",
