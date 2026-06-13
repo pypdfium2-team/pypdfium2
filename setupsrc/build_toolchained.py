@@ -43,7 +43,7 @@ def dl_depottools(do_update):
     if DepotToolsDir.exists():
         if do_update:
             log("DepotTools: Revert and update ...")
-            run_cmd(["git", "reset", "--hard", "HEAD"], cwd=DepotToolsDir)
+            run_cmd(["git", "restore", "."], cwd=DepotToolsDir)
             run_cmd(["git", "pull", DepotToolsURL], cwd=DepotToolsDir)
         else:
             log("DepotTools: Using existing repository as-is.")
