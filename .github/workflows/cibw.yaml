@@ -17,7 +17,7 @@ on:
         # 2: Like 1, but also use sysroot on armv7l with GCC (Ubuntu-based container)
         # 3: Use sysroot on all manylinux targets where available. This fails on the older RHEL-based containers with GCC. With recent clang + vendored libc++ (or a plain ubuntu-latest host, not a manylinux container), it would probably work.
         type: int
-        default: 1
+        default: 2
       linux_main:
         type: boolean
         default: true
