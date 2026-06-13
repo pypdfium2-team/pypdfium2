@@ -227,6 +227,7 @@ jobs:
           - os: ubuntu-latest
             cibw_os: manylinux
             cibw_arch: riscv64
+            use_sysroot: true
           
           - os: ubuntu-latest
             cibw_os: musllinux
@@ -254,6 +255,7 @@ jobs:
       cibw_target: ${{ matrix.cibw_os }}_${{ matrix.cibw_arch }}
       cibw_arch: ${{ matrix.cibw_arch }}
       pdfium_ver: ${{ matrix.pdfium_ver }}
+      use_sysroot: ${{ matrix.use_sysroot || false }}
       test_pdfium: true
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp

@@ -205,8 +205,9 @@ def handle_cross(config, target_cpu, target_os):
             if not target_os:
                 sysroot_cpu = target_cpu
                 if target_cpu == "ppc64":
-                    sysroot_cpu = "ppc64le"
-                run_cmd([sys.executable, "build/linux/sysroot_scripts/install-sysroot.py", "--arch", sysroot_cpu], cwd=PDFiumDir)
+                    sysroot_cpu = "ppc64el"
+                sysroot_script = PDFiumDir/"build"/"linux"/"sysroot_scripts"/"install-sysroot.py"
+                run_cmd([sys.executable, str(sysroot_script), "--arch", sysroot_cpu], cwd=PDFiumDir)
             if target_cpu == "ppc64":
                 config["sysroot"] = "//build/linux/debian_bullseye_ppc64el-sysroot"
                 config["use_sysroot"] = True

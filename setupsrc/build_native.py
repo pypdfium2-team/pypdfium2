@@ -370,6 +370,32 @@ def setup_compiler(config, compiler, clang_ver, clang_path):
         assert False, f"Unhandled compiler {compiler}"
 
 
+_SysrootMap = sysroot_cpu = {
+    "x86_64":  ("amd64",   "bullseye"),
+    "i686":    ("i386",    "bullseye"),
+    "armv7l":  ("armhf",   "bullseye"),
+    "armv8l":  ("armhf",   "bullseye"),
+    "aarch64": ("arm64",   "bullseye"),
+    "ppc64le": ("ppc64el", "bullseye"),
+    "riscv64": ("riscv64", "trixie"),
+}
+
+def handle_sysroot(use_sysroot, config, compiler, vendor_deps):
+    
+    if not (use_sysroot and sys.platform.startswith("linux") and Host._libc_name == "glibc"):
+        return
+    
+    sysroot_cpu, deb_name = _SysrootMap.get(Host._raw_machine, (Host._raw_machine, "bullseye"))
+    sysroot_script = PDFIUM_DIR/"build"/"linux"/"sysroot_scripts"/"install-sysroot.py"
+    run_cmd([sys.executable, str(sysroot_script), "--arch", sysroot_cpu], cwd=PDFIUM_DIR)
+    
+    config["use_sysroot"] = True
+    config["sysroot"] = f"//build/linux/debian_{deb_name}_{sysroot_cpu}-sysroot"
+    
+    if compiler is Compiler.gcc or "libc++" not in vendor_deps:
+        log("Warning: --use-sysroot works best with clang and vendored libc++. It may or may not work with GCC / system libc++.")
+
+
 def build(build_dir, config_dict, with_tests, n_jobs):
     
     # Create target dir, or reuse existing
@@ -414,7 +440,7 @@ def test(build_dir, vendor_deps, compiler):
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None):
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, use_sysroot=False):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -456,6 +482,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     mkdir(SOURCES_DIR)
     full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps)
     setup_compiler(config, compiler, clang_ver, clang_path)
+    handle_sysroot(use_sysroot, config, compiler, vendor_deps)
     build(build_dir, config, with_tests, n_jobs)
     if with_tests:
         test(build_dir, vendor_deps, compiler)
@@ -549,6 +576,12 @@ Some params take a default from an environment variable, for easy passthrough wi
         nargs = "+",
         action = "extend",
         help = "Dependencies not to vendor. Overrides --vendor.",
+    )
+    parser.add_argument(
+        "--use-sysroot",
+        action = "store_true",
+        default = bool(int( os.environ.get("USE_SYSROOT", 0) )),
+        help = "Attempt to use a Google-processed Debian sysroot for the build. This may help achieve a lower glibc requirement. This option is Linux glibc only, and ignored on other platforms. If no sysroot is available for the host CPU, this will fail.",
     )
     
     args = parser.parse_args(argv)

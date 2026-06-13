@@ -11,6 +11,13 @@ on:
       pdfium_ver:
         type: string
         default: ''
+      use_sysroot_level:
+        # 0: Don't use sysroot anywhere
+        # 1: Use sysroot with clang and vendored libc++ (ppc64le, riscv64)
+        # 2: Like 1, but also use sysroot on armv7l with GCC (ubuntu container)
+        # 3: Use sysroot on all manylinux targets that have a sysroot. This fails on the older RHEL-based containers with GCC. With recent clang + vendored libc++, or a plain ubuntu-latest host without container, it would probably work.
+        type: int
+        default: 1
       linux_main:
         type: boolean
         default: true
@@ -50,6 +57,7 @@ jobs:
             cibw_os: manylinux
             cibw_arch: x86_64
             pdfium_ver: latest
+            use_sysroot: ${{ inputs.use_sysroot_level >= 3 }}
           
           - condition: ${{ inputs.linux_main && inputs.linux_musl }}
             os: ubuntu-latest
@@ -62,6 +70,7 @@ jobs:
             cibw_os: manylinux
             cibw_arch: aarch64
             pdfium_ver: latest
+            use_sysroot: ${{ inputs.use_sysroot_level >= 3 }}
           
           - condition: ${{ inputs.linux_main && inputs.linux_musl }}
             os: ubuntu-24.04-arm
@@ -77,6 +86,7 @@ jobs:
             cibw_os: manylinux
             cibw_arch: armv7l
             pdfium_ver: latest
+            use_sysroot: ${{ inputs.use_sysroot_level >= 2 }}
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
             os: ubuntu-24.04-arm
@@ -89,6 +99,7 @@ jobs:
             cibw_os: manylinux
             cibw_arch: i686
             pdfium_ver: latest
+            use_sysroot: ${{ inputs.use_sysroot_level >= 3 }}
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
             os: ubuntu-latest
@@ -100,6 +111,7 @@ jobs:
             os: ubuntu-latest
             cibw_os: manylinux
             cibw_arch: ppc64le
+            use_sysroot: ${{ inputs.use_sysroot_level >= 1 }}
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
             os: ubuntu-latest
@@ -120,6 +132,7 @@ jobs:
             os: ubuntu-latest
             cibw_os: manylinux
             cibw_arch: riscv64
+            use_sysroot: ${{ inputs.use_sysroot_level >= 1 }}
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
             os: ubuntu-latest
@@ -175,4 +188,5 @@ jobs:
       cibw_arch: ${{ matrix.cibw_arch }}
       cibw_py_ver: ${{ inputs.cibw_py_ver }}
       pdfium_ver: ${{ inputs.pdfium_ver || matrix.pdfium_ver }}
+      use_sysroot: ${{ matrix.use_sysroot || false }}
       test_pdfium: ${{ inputs.test_pdfium }}  # currently, linux only

@@ -22,7 +22,7 @@ test-command = [
 ]
 
 [tool.cibuildwheel.linux]
-environment-pass = ["TEST_PDFIUM", "PDFIUM_VER"]
+environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
 
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
