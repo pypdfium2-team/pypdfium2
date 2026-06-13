@@ -210,11 +210,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         .. versionadded:: 5.10.0
         """
-        formenv = self._formenv_holder.obj
-        if not formenv:
+        assert self._formenv_holder.obj is self.formenv
+        if not self.formenv:
             return False
-        assert formenv is self.formenv
-        _formenv_close_impl(formenv, caller_info=_caller_info)
+        _formenv_close_impl(self.formenv, caller_info=_caller_info)
         self.formenv = None
         self._formenv_holder.obj = None
         return True
