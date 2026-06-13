@@ -158,7 +158,7 @@ class AutoCloseable (AutoCastable):
         
         if not self.raw:
             return False
-        if not self._finalizer:
+        if not self._finalizer or not self._finalizer.alive:
             self.raw = None
             return False
         
