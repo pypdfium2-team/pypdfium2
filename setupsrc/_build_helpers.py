@@ -3,24 +3,25 @@
 
 import re
 import shutil
-import urllib.request as url_request
 from base import *  # local
 
 
-def _install_dep(exename, pkgname=None, skip_if_present=True):
-    pkgname = pkgname or exename
+def _install_dep(exename, install_args=None):
+    if not install_args:
+        install_args = (exename, )
     which_exe = shutil.which(exename)
-    if skip_if_present and which_exe:
+    if which_exe:
         log(f"+ {exename} found at {which_exe}")
         return
-    # https://github.com/scikit-build/ninja-python-distributions
     log(f"- {exename} not found, installing...")
-    run_cmd([sys.executable, "-m", "pip", "install", pkgname], cwd=None)
+    run_cmd([sys.executable, "-m", "pip", "install", *install_args], cwd=None)
 
 def install_buildtools():
-    log("Bootstrapping build tools...")
+    log("Check build tool dependencies...")
+    # https://github.com/scikit-build/ninja-python-distributions
     _install_dep("ninja")
-    _install_dep("gn", "gn-dist==2407")
+    # https://github.com/pypdfium2-team/gn-dist/
+    _install_dep("gn", ("-r", str(ProjectDir/"req"/"gn.txt")))
 
 def get_clang_version(clang_root):
     from packaging.version import Version
