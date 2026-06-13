@@ -163,6 +163,18 @@ Dependencies:
 - You might also want to know that pdfium bundles `agg, abseil, fast_float, simdutf`.
 - When building with system tools, `gn (generate-ninja)`, `ninja`, and a compiler are needed. If available, the compiler defaults to GCC, but Clang should also work if you set up some symlinks, and make sure you have the `libclang_rt` builtins or pass `--no-libclang-rt`.
 
+> [!IMPORTANT]
+> PDFium requires recent GN. Outdated GN may fail with the most obscure errors.<br/>
+> With `build_native.py`, we recommend that you install [`gn-dist`](https://github.com/pypdfium2-team/gn-dist/) from PyPI, which is also maintained by pypdfium2-team:
+> ```bash
+> python3 -m pip install -r req/gn.txt
+> ```
+> Using the requirements file found in this repo will ensure you install a GN version appropriate to the PDFium version pinned by pypdfium2's build scripts.
+> 
+> GN packages provided by stable distributions are typically too old for PDFium, so we do not recommend installing GN with a system package manager like `apt`.
+> 
+> With `build_toolchained.py`, `gclient`-orchestrated checkout should automatically provide you with a GN build from Google's CIPD. If it does not (e.g. because you are on an unhandled platform), also use `gn-dist`. If there are no wheels for your platform, sourcebuild fallback will step in.
+
 To do the toolchained build, you'd run something like:
 ```bash
 # call build script with --help to list options
@@ -173,7 +185,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 Or for the native build, on Ubuntu 24.04, you could do e.g.:
 ```bash
 # Install dependencies
-python -m pip install -r req/gn.txt  # pdfium is picky about the GN version, needs newer GN than what stable distros usually provide
+python -m pip install -r req/gn.txt  # see above
 sudo apt-get install ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libicu-dev libglib2.0-dev libharfbuzz-dev  # generate-ninja
 ```
 ```bash
@@ -1142,7 +1154,7 @@ This results in pypdfium2 being part of a large dependency tree.
 
 * [Benoît Blanchon](https://github.com/bblanchon): Author/Maintainer of [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/) and [patches](https://github.com/bblanchon/pdfium-binaries/tree/master/patches).
 * [Yinlin Hu](https://github.com/YinlinHu): `pypdfium` prototype and `kuafu` PDF viewer.
-* [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium in `redstork`, `redstork-ui` and `pdfbrain`.
+* [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium from Python in `redstork`, `redstork-ui` and `pdfbrain`.
 * [Tim Head](https://github.com/betatim): Original idea for Python bindings to PDFium with ctypesgen in `wowpng`.
 * [Adam Huganir](https://github.com/adam-huganir): Help with maintenance and development decisions since the beginning of the project.
 * [Christian Heimes](https://github.com/tiran): RPM packaging for pdfium. Showing how to build pdfium natively without Google's toolchain.
