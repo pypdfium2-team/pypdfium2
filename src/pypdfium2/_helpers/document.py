@@ -68,7 +68,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         self._autoclose = autoclose
         self._data_holder = []
         self._data_closer = []
-        self.formenv = None
         self._formenv_holder = _ObjectHolder(None)
         
         if isinstance(self._input, pdfium_c.FPDF_DOCUMENT):
@@ -153,6 +152,15 @@ class PdfDocument (pdfium_i.AutoCloseable):
         return cls(new_pdf)
     
     
+    @property
+    def formenv(self):
+        return self._formenv_holder.obj
+    
+    @formenv.setter
+    def formenv(self, value):
+        self._formenv_holder.obj = value
+    
+    
     def init_forms(self, config=None):
         """
         Initialize a form env, if the document has forms.
@@ -185,7 +193,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         if not raw:
             raise PdfiumError(f"Initializing form env failed for document {self}.")
         self.formenv = PdfFormEnv(raw, config)
-        self._formenv_holder.obj = self.formenv
         
         if formtype in (pdfium_c.FORMTYPE_XFA_FULL, pdfium_c.FORMTYPE_XFA_FOREGROUND):
             if "XFA" in PDFIUM_INFO.flags:  # pragma: no cover
@@ -210,12 +217,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         .. versionadded:: 5.10.0
         """
-        assert self._formenv_holder.obj is self.formenv
         if not self.formenv:
             return False
         _formenv_close_impl(self.formenv, caller_info=_caller_info)
         self.formenv = None
-        self._formenv_holder.obj = None
         return True
     
     
