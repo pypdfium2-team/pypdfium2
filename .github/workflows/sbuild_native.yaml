@@ -6,18 +6,15 @@ name: Sourcebuild Native
 on:
   workflow_dispatch:
     inputs:
-      pdfium_ver:
-        type: string
-        default: ''
       py_ver:
         type: string
         default: '3.14'
+      pdfium_ver:
+        type: string
+        default: ''
       vendor:
         type: string
         default: 'icu'
-      test_pdfium:
-        type: boolean
-        default: true
       gcc:
         type: boolean
         default: true
@@ -28,6 +25,9 @@ on:
         type: boolean
         default: true
       arm64:
+        type: boolean
+        default: true
+      test_pdfium:
         type: boolean
         default: true
 
@@ -57,7 +57,7 @@ jobs:
       os: ${{ matrix.os }}
       condition: ${{ matrix.cc_condition && matrix.os_condition }}
       compiler: ${{ matrix.compiler }}
-      pdfium_ver: ${{ inputs.pdfium_ver }}
       py_ver: ${{ inputs.py_ver }}
+      pdfium_ver: ${{ inputs.pdfium_ver }}
       vendor: ${{ inputs.vendor }}
       test_pdfium: ${{ inputs.test_pdfium }}

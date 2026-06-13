@@ -79,7 +79,7 @@ jobs:
           COMPILER: ${{ inputs.compiler }}
           VERSION_PARAM: ${{ inputs.pdfium_ver && format('--version {0}', inputs.pdfium_ver) }}
           VENDOR_PARAM: ${{ inputs.vendor && format('--vendor {0}', inputs.vendor) }}
-          TEST_PARAM: ${{ inputs.test_pdfium && '--test' }}
+          TEST_PARAM: ${{ inputs.test_pdfium && '--test' || '' }}
       
       - name: Show binary info
         run: |

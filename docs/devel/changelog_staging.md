@@ -6,8 +6,8 @@
 # Changelog for next release
 
 *Dependency updates*
-- Updated `build_toolchained.py` from PDFium `7191` to `7890`. Despite the gap, this turned out fairly straightforward.
-- Updated `build_native.py` from PDFium `7841` to `7890`.
+- Updated `build_toolchained.py` PDFium pin from `7191` to `7890`. Despite the gap, this turned out fairly straightforward.
+- Updated `build_native.py` PDFium pin from `7841` to `7890`.
 - Updated `gn-dist` from `2385` to `2407`, to match the revision specified in upstream's `DEPS` file.
 - Updated cibuildwheel to `4.0.0`.
 - Let `install-static-clang.sh` use latest.
@@ -44,6 +44,7 @@
   Clang patches now just aim for compatibility with clang >= 22, much reducing patch complexity. For clang versions older than that, `--clang-as-gcc` mode is implicitly enabled.
   More patches have been simplified, removed, changed to autopatch or upstreamed (pending removal, need to await dependency rolls).
   Overall, `build_native.py` is now more focused on producing builds with cibuildwheel; maintainability and easier updates are prioritized over excess compatibility with older dependencies. Basically, we will require what pdfium requires.
-- Made the PDFium version configurable in cibuildwheel config and workflows.
 - On Linux with glibc, `build_native.py` is now capable of using a sysroot. With our current cibuildwheel config, this can be used to lower the glibc requirements of `manylinux_{ppc64le,riscv64,armv7l}` (opt-in via `USE_SYSROOT=1`).
+- Made the PDFium version configurable in cibuildwheel config and workflows.
 - Added `secrets: inherit` to trigger workflows to hopefully fix a publish issue caused by the change to reusable workflow calls.
+- Other setup improvements. Use plain `git` instead of GH API to get the ctypesgen revision. Drastically speed up attestation verification by sharing the trusted root.

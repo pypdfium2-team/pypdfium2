@@ -83,7 +83,7 @@ jobs:
           CIBW_BUILD: "${{ inputs.cibw_py_ver }}-${{ inputs.cibw_target }}"
           CIBW_ARCHS: "${{ inputs.cibw_arch }}"
           PDFIUM_VER: "${{ inputs.pdfium_ver }}"
-          USE_SYSROOT: ${{ inputs.use_sysroot && 1 || 0 }}
+          USE_SYSROOT: "${{ inputs.use_sysroot && 1 || 0 }}"
           TEST_PDFIUM: "${{ inputs.test_pdfium && 1 || 0 }}"
         with:
           output-dir: wheelhouse
