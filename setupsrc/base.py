@@ -549,7 +549,7 @@ class _host_platform:
                 return self._handle_linux("x86")
             elif self._raw_machine == "aarch64":
                 return self._handle_linux("arm64")
-            elif self._raw_machine == "armv7l":
+            elif self._raw_machine in ("armv7l", "armv8l"):
                 return self._handle_linux("arm32", musl_ok=False)
             elif self._raw_machine == "ppc64le":
                 return self._handle_linux("ppc64le", musl_ok=False)
