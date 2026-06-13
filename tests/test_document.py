@@ -264,11 +264,21 @@ def test_forms_init_and_close():
     assert pdf.formenv is None
     assert pdf._formenv_holder.obj is None
     assert pdf.close_forms() is False  # no-op
-    pdf.close()  # includes another no-op .close_forms()
+    # this closes the pdf, but mustn't close the formenv again
+    assert pdf.close() is True
     
     pdf = pdfium.PdfDocument(TestFiles.forms)
     pdf.init_forms()
-    pdf.close()  # includes actual .close_forms()
+    assert pdf.close() is True  # closes formenv and pdf
+    
+    pdf = pdfium.PdfDocument(TestFiles.forms)
+    pdf.init_forms()
+    # ensure that even calling the plain finalizer cleans pdf.formenv, since it is implemented as a property around the mutable finalizer holder
+    pdf._finalizer()
+    assert pdf.formenv is None
+    assert pdf._formenv_holder.obj is None
+    # also, ensure that pdf.close() will be a no-op when pdf._finalizer() has been called unprotected
+    assert pdf.close() is False
 
 
 def test_init_forms_without_forms():

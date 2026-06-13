@@ -122,12 +122,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
         data_closer.clear()
     
     
-    def close(self, *args, **kwargs):
-        # clean up formenv references from self on explicit closing
-        self.close_forms(_caller_info="explicit, before_parent")
-        super().close(*args, **kwargs)
-    
-    
     def __len__(self):
         return pdfium_c.FPDF_GetPageCount(self)
     
@@ -626,11 +620,12 @@ class PdfFormEnv (pdfium_i.AutoCastable):
 
 def _formenv_close_impl(formenv, caller_info=""):
     if not formenv.raw:
-        return
+        return False
     pdfium_i._debug_close(f"Close ({caller_info}) {formenv}")
     pdfium_c.FPDFDOC_ExitFormFillEnvironment(formenv.raw)
     formenv.raw = None
     id(formenv.config)
+    return True
 
 
 class PdfXObject (pdfium_i.AutoCloseable):
