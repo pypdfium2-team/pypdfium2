@@ -8,7 +8,7 @@
 *Dependency updates*
 - Updated `build_toolchained.py` PDFium pin from `7191` to `7890`. Despite the gap, this turned out fairly straightforward.
 - Updated `build_native.py` PDFium pin from `7841` to `7890`.
-- Updated `gn-dist` from `2385` to `2407`, to match the revision specified in upstream's `DEPS` file.
+- Updated `gn-dist` from `2385` to `2407.1`, to match the revision specified in upstream's `DEPS` file.
 - Updated cibuildwheel to `4.1.0`.
 - Let `install-static-clang.sh` use latest.
 - We now try to track latest PDFium in CIBW targets that use `build_native.py` with GCC, as this mode needs few patches.

@@ -86,7 +86,7 @@ before-build = [
 select = "*-manylinux_loongarch64"
 inherit.before-build = "append"
 before-build = [
-    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407/gn_dist-2407-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407.1/gn_dist-2407.1-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
     "pip install ./gn_dist-*_loongarch64.whl"
 ]
 
@@ -94,7 +94,7 @@ before-build = [
 select = "*-musllinux_loongarch64"
 inherit.before-build = "append"
 before-build = [
-    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407/gn_dist-2407-py3-none-musllinux_1_2_loongarch64.whl'",
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407.1/gn_dist-2407.1-py3-none-musllinux_1_2_loongarch64.whl'",
     "pip install ./gn_dist-*_loongarch64.whl"
 ]
 
