@@ -229,10 +229,15 @@ To install the dependencies, you'll need something like
 pkg install gn ninja freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff harfbuzz glib
 ```
 Assuming Termux provides recent enough GN. If in doubt, check the expected version in `req/gn.txt` against the version provided by Termux.
-`gn-dist` does not currently provide Android wheels – sourcebuild fallback *might* work on Android with minor changes but has not yet been tested.
+We have not yet sorted out how to build GN on Android natively (it fails with linkage errors).
 
-Then apply the clang symlinks as described above, but use `ARCH=$(uname -m)-android`
-and substitute `/usr` with `$PREFIX` (`/data/data/com.termux/files/usr`).
+Then apply the clang symlinks. It works slightly different on Android, e.g.:
+```bash
+VERSION=21
+ARCH=$(uname -m)-android
+ln -s "$PREFIX/lib/clang/$VERSION/lib/linux" "$PREFIX/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu"
+ln -s "$PREFIX/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a" "$PREFIX/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a"
+```
 
 Last time we tested `build_native` on Android, there were some bugs with freetype/openjpeg includes. A *quick & dirty* workaround with symlinks is:
 ```bash

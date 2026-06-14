@@ -120,7 +120,7 @@ def git_clone_rev(name, url, rev, target_dir, depth=1):
     run_cmd(["git", "init"], cwd=target_dir, silent=True)
     run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir, silent=True)
     run_cmd(["git", "fetch", *depth_param, "origin", rev], cwd=target_dir)
-    run_cmd(["git", "checkout", "FETCH_HEAD"], cwd=target_dir, silent=True)
+    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
 
 
 class DepsFetcher:
