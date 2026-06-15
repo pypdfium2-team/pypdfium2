@@ -109,10 +109,12 @@ def _make_encryption_cases(file, passwords):
         lambda: file.read_bytes(),
         lambda: file.open("rb"),
     )
+    cases = []
     for i, pwd in enumerate(passwords):
         for j, maker in enumerate(input_makers):
             # set explicit ID to prevent pytest from printing the whole bytes object
-            yield pytest.param(maker(), pwd, id="pwd%s-input%s" % (i, j))
+            cases.append( pytest.param(maker(), pwd, id="pwd%s-input%s" % (i, j)) )
+    return cases
 
 
 @pytest.mark.parametrize(
