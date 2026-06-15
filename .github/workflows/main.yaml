@@ -164,7 +164,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install -U pip
-          python3 -m pip install -U setuptools pytest pillow numpy
+          python3 -m pip install -U setuptools -r req/test.txt
       
       - name: Install pypdfium2 from artifact
         run: python3 -m pip install $WHEEL
