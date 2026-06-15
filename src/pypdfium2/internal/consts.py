@@ -10,6 +10,9 @@ class _fallback_dict (dict):
     
     def get(self, key, default_prefix="Unhandled constant"):
         return dict.get(self, key, f"{default_prefix} {key}")
+    
+    def copy(self):
+        return _fallback_dict(self)  # dict constructor copies
 
 
 #: Convert a rotation value in degrees to a PDFium constant.

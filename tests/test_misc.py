@@ -45,11 +45,15 @@ def _filter(expr, skips=(), type=int):
 
 BitmapNsp = _filter("FPDFBitmap_", [pdfium_c.FPDFBitmap_Unknown])
 PageObjNsp = _filter("FPDF_PAGEOBJ_")
-ErrorMapping = pdfium_i.ErrorToStr
-# FIXME this will cause an erroneous test failure when using the reference bindings with a non-XFA build
+
+ErrorMapping = pdfium_i.ErrorToStr.copy()
 if "XFA" in PDFIUM_INFO.flags:
     ErrorMapping.update(pdfium_i.XFAErrorToStr)
-
+elif hasattr(pdfium_c, "FPDF_ERR_XFALOAD"):  # refbindings
+    ErrorMapping.update({
+        pdfium_c.FPDF_ERR_XFALOAD:   "Load error",
+        pdfium_c.FPDF_ERR_XFALAYOUT: "Layout error",
+    })
 
 @pytest.mark.parametrize(
     ["mapping", "use_keys", "items"],
