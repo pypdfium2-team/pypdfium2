@@ -165,8 +165,8 @@ def test_render_multipage(tmp_path):
     assert sorted([f.name for f in out_files]) == ["multipage_1.jpg", "multipage_2.jpg", "multipage_3.jpg"]
 
 
-@pytest.mark.skipif(sys.platform.startswith("win32"), reason="Fails on windows, TBI")
-@pytest.mark.parametrize("sfl_class", [pdfium.PdfSysfontBase, PdfSysfontListener])
+#@pytest.mark.skipif(sys.platform.startswith("win32"), reason="Fails on windows, TBI")
+@pytest.mark.parametrize("sfl_class", [PdfSysfontListener, pdfium.PdfSysfontBase])
 def test_default_fonts(sfl_class):
     sfl = sfl_class()
     sfl.setup()

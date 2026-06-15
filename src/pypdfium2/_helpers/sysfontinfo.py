@@ -155,6 +155,8 @@ class PdfSysfontBase (pdfium_i.AutoCastable):
         callbacks = {n: getattr(self, n) for n in _CallbackNames}
         if self.version != 1:  # as per docs
             del callbacks["EnumFonts"]
+        logger.debug(str(callbacks))
+        logger.debug(str(dir(self.raw)))
         pdfium_i.set_callbacks(self.raw, **callbacks)
     
     

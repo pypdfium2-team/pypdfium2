@@ -172,7 +172,7 @@ jobs:
           WHEEL: ${{ matrix.wheel }}
       
       - name: Run Test Suite
-        run: python3 -m pytest tests/
+        run: python3 -m pytest tests/ -sv
       
       - name: On Linux, run auditwheel (informational)
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.py == '3.14' }}
