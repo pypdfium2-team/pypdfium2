@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: BSD testing
+name: Test FreeBSD
 on:
   workflow_dispatch:
 
@@ -41,4 +41,4 @@ jobs:
             python3 -m pypdfium2 --version
             python3 ./utils/minitest.py
             # Some APIs are missing from libreoffice-pdfium, suppress known failure
-            python3 -m pytest tests/ || true
+            python3 -m pytest tests/ -sv || true
