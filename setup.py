@@ -168,11 +168,19 @@ def run_setup(modnames, pl_name, datagen):
     elif pl_name == ExtPlats.system:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": LIBNAME_GLOBS}
     else:
+        
         if pl_name == ExtPlats.sourcebuild:
             plat_tag = None
+            use_tarball_licenses = False
         else:  # pdfium-binaries
             plat_tag = get_wheel_tag(pl_name, dll_path)
-        license_files.append("BUILD_LICENSES/**")
+            use_tarball_licenses = bool(int( os.getenv("USE_TARBALL_LICENSES", 0) ))
+        
+        if use_tarball_licenses:
+            license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
+        else:
+            license_files.append("BUILD_LICENSES/**")
+        
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(plat_tag)
     

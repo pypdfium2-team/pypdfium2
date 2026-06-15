@@ -100,10 +100,13 @@ def main_pypi(args):
             _run_pypi_build(["--sdist"])
     
     if args.wheels:
+        
         if not args.pdfium_ver or args.pdfium_ver == "latest":
             args.pdfium_ver = PdfiumVer.get_latest()
         else:
             args.pdfium_ver = int(args.pdfium_ver)
+        
+        os.environ["USE_TARBALL_LICENSES"] = "1"
         suffix = _build_pl_suffix(args.pdfium_ver, args.use_v8)
         for plat in WheelPlatforms:
             os.environ[PlatSpec_EnvVar] = plat + suffix
