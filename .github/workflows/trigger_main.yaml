@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Separate workflow because schedule uses default inputs, and clearly we don't want publish enabled by default
+# Separate trigger workflow because we can't configure inputs for scheduled workflow runs (and don't want publish enabled by default in the main workflow)
 
 name: Trigger main release
 on:
@@ -14,13 +14,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  # NOTE recently changed to reusable workflow call, let's see if this works. If it does not, we can revert back to benc-uk/workflow-dispatch.
-  run_main_release:
-    uses: ./.github/workflows/main.yaml
-    secrets: inherit  # Anaconda API token (for conda_helpers publish)
-    with:
-      test: true
-      augment: true
-      gh_pages: true
-      conda: true
-      publish: true
+  
+  trigger:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # IMPORTANT Need to use workflow dispatch here, not reusable workflow call.
+      # This is because pypa/gh-action-pypi-publish actually fails when nested in a reusable workflow call. (This broke PyPI upload of our 5.10.0 release. For some reason, TestPyPI upload passed, probably because it has attestations disabled...)
+      - name: Trigger
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: main.yaml
+          inputs: |
+            {
+              "runner": "ubuntu-latest"
+              "py_ver": "3.14",
+              "test": "true",
+              "augment": "true",
+              "publish": "true",
+              "gh_pages": "true",
+              "conda": "true",
+            }
