@@ -946,8 +946,7 @@ If you wish to call pypdfium2's CLI through `python -m`, note that the module na
 ## Licensing
 
 > [!NOTE]
-> *Disclaimer: This project is provided on an "as-is" basis. This is not legal advice, and there is ABSOLUTELY NO WARRANTY for any information provided in this document or elsewhere in the pypdfium2 project, including earlier revisions.*
-> *We disclaim liability for any possible damages resulting from using this license information. It is the embedder's responsibility to check on licensing.*
+> __Disclaimer:__ *This project is provided on an "as-is" basis. This is not legal advice, and there is absolutely no warranty. Please check relevant licenses on your own.*
 > *See also [GitHub's disclaimer](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository#disclaimer).*
 
 pypdfium2 itself is available by the terms and conditions of [`Apache-2.0`](LICENSES/Apache-2.0.txt) / [`BSD-3-Clause`](LICENSES/BSD-3-Clause.txt).
