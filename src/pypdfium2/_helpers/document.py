@@ -50,8 +50,6 @@ class PdfDocument (pdfium_i.AutoCloseable):
     Attributes:
         raw (FPDF_DOCUMENT):
             The underlying PDFium document handle.
-        formenv (PdfFormEnv | None):
-            Form env, if the document has forms and :meth:`.init_forms` was called.
     """
     
     def __init__(self, input, password=None, autoclose=False):
@@ -148,6 +146,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     @property
     def formenv(self):
+        """
+        PdfFormEnv | None: Form env, if the document has forms and :meth:`.init_forms` was called.
+        """
         return self._formenv_holder.obj
     
     @formenv.setter
@@ -158,7 +159,7 @@ class PdfDocument (pdfium_i.AutoCloseable):
     def init_forms(self, config=None):
         """
         Initialize a form env, if the document has forms.
-        If already initialized, nothing will be done. See the :attr:`formenv` attribute.
+        If already initialized, nothing will be done. See the :attr:`formenv` property.
         
         If PDFium was built with XFA support and the PDF has XFA forms, it will be attempted to load these as well.
         
