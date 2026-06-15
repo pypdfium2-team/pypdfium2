@@ -73,6 +73,12 @@ Python dependencies should be automatically installed, unless `--no-build-isolat
 > Our release sdists, and latest pypdfium2 from git, will automatically use matching ctypesgen.<br>
 > However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own, and install pypdfium2 without build isolation.
 
+> [!CAUTION]
+> **ctypesgen works best on Linux.**
+> Caution is advised when building bindings natively on other OSes.<br/>
+> In particular, there are known bindings generation issues on Windows that will cause some code (e.g. `FPDF_SYSFONTINFO`) to not function properly.
+> For that reason, consider opting into the [reference bindings](autorelease/bindings.py) via `PDFIUM_BINDINGS=reference`.
+
 #### Get the code
 
 ```bash

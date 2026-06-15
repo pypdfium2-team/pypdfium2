@@ -8,6 +8,9 @@ on:
       upload_data:
         type: boolean
         default: false
+      may_use_refbindings:
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs: *reusable_inputs
 
@@ -50,22 +53,18 @@ jobs:
       
       # TODO(consider) run test suite after each way of installing?
       
-      - name: Setup (default)
+      - name: Test various install strategies
         run: |
           python3 -m pip install -U pip
+          # isolated
           python3 -m pip install -v .
-      
-      - name: Setup (editable)
-        run: python3 -m pip install -v -e .
-      
-      - name: Install/update deps for non-isolated setup
-        run: python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/docs.txt
-      
-      - name: Setup (default, no isolation)
-        run: python3 -m pip install -v --no-build-isolation .
-      
-      - name: Setup (editable, no isolation)
-        run: python3 -m pip install -v --no-build-isolation -e .
+          python3 -m pip install -v -e .
+          # non-isolated
+          python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/docs.txt
+          python3 -m pip install -v --no-build-isolation .
+          python3 -m pip install -v --no-build-isolation -e .
+        env:
+          PDFIUM_BINDINGS: ${{ inputs.may_use_refbindings && startsWith(inputs.os, 'windows') && 'reference' || '' }}
       
       - name: Upload generated bindings for inspection
         if: ${{ inputs.upload_data }}
