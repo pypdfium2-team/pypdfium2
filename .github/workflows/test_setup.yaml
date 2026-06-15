@@ -3,8 +3,13 @@
 
 name: Test Setup
 on:
-  workflow_dispatch:
   workflow_call:
+    inputs: &reusable_inputs
+      upload_data:
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs: *reusable_inputs
 
 defaults:
   run:
@@ -67,3 +72,11 @@ jobs:
       
       - name: Run test suite
         run: python3 -m pytest tests/ -sv
+      
+      - name: Upload generated bindings for inspection
+        if: ${{ inputs.upload_data }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: bindings_${{ matrix.os }}_py${{ matrix.py }}
+          path: |
+            data/bindings/bindings.py
