@@ -67,13 +67,6 @@ jobs:
       - name: Setup (editable, no isolation)
         run: python3 -m pip install -v --no-build-isolation -e .
       
-      - name: Build docs
-        run: python3 -m sphinx -b html docs/source docs/build/html
-      
-      - name: Run test suite
-        run: python3 -m pytest tests/ -sv
-        continue-on-error: true
-      
       - name: Upload generated bindings for inspection
         if: ${{ inputs.upload_data }}
         uses: actions/upload-artifact@v7
@@ -81,3 +74,9 @@ jobs:
           name: bindings_${{ matrix.os }}_py${{ matrix.py }}
           path: |
             data/bindings/bindings.py
+      
+      - name: Build docs
+        run: python3 -m sphinx -b html docs/source docs/build/html
+      
+      - name: Run test suite
+        run: python3 -m pytest tests/ -sv
