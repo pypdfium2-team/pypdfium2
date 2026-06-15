@@ -9,7 +9,7 @@
 
 ## 5.10.1 (2026-06-15)
 
-- No pdfium-binaries update, still at `7891`. Additional builds may use various other versions of pdfium.
+- Updated pdfium-binaries from `7869` to `7891`. Additional builds may use various other versions of pdfium.
 - The previous release failed to upload to PyPI (see below). This release fixes the publish issue but is effectively identical to `5.10.0`. Due to tag protection from immutable releases, `5.10.0` cannot be deleted.
 
 *Dependency updates*
