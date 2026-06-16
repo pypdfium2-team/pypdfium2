@@ -679,9 +679,12 @@ def run_ctypesgen(
     
     # include windows-only members (e.g. refbindings, cross-packaging)
     # see the comments in utils/spoof/windows.h for more info on this approach
-    # this is not needed on a native host, the pre-processor will define _WIN32 and have the real windows.h on its standard search path
-    if windows_cross and not sys.platform.startswith("win32"):
-        args += ["-D", "_WIN32", "-I", ProjectDir/"utils"/"spoof"]
+    # actually, also do this on windows natively to save ctypesgen from a lot of trouble processing windows system headers where it keeps running into syntax errors
+    is_windows_host = sys.platform.startswith("win32")
+    if windows_cross and not is_windows_host:
+        args += ["-D", "_WIN32"]
+    if windows_cross or is_windows_host:
+        args += ["-I", ProjectDir/"utils"/"spoof"]
     
     # symbols - try to exclude some garbage aliases that get pulled in from struct tags
     # (this captures anything that ends with _, _t, or begins with _, and is not needed by other symbols)
