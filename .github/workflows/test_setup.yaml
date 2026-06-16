@@ -8,9 +8,9 @@ on:
       upload_data:
         type: boolean
         default: false
-      may_use_refbindings:
-        type: boolean
-        default: true
+      # may_use_refbindings:
+      #   type: boolean
+      #   default: false
   workflow_dispatch:
     inputs: *reusable_inputs
 
@@ -63,8 +63,8 @@ jobs:
           python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/docs.txt
           python3 -m pip install -v --no-build-isolation .
           python3 -m pip install -v --no-build-isolation -e .
-        env:
-          PDFIUM_BINDINGS: ${{ inputs.may_use_refbindings && startsWith(matrix.os, 'windows') && 'reference' || '' }}
+        # env:
+        #   PDFIUM_BINDINGS: ${{ inputs.may_use_refbindings && startsWith(matrix.os, 'windows') && 'reference' || '' }}
       
       - name: Upload generated bindings for inspection
         if: ${{ inputs.upload_data }}
