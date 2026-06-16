@@ -371,13 +371,15 @@ def setup_compiler(config, compiler, clang_ver, clang_path):
 
 
 _SysrootMap = sysroot_cpu = {
-    "x86_64":  ("amd64",   "bullseye"),
-    "i686":    ("i386",    "bullseye"),
-    "armv7l":  ("armhf",   "bullseye"),
-    "armv8l":  ("armhf",   "bullseye"),
-    "aarch64": ("arm64",   "bullseye"),
-    "ppc64le": ("ppc64el", "bullseye"),
-    "riscv64": ("riscv64", "trixie"),
+    "x86_64":   ("amd64",    "bullseye"),
+    "i686":     ("i386",     "bullseye"),
+    "armv7l":   ("armhf",    "bullseye"),
+    "armv8l":   ("armhf",    "bullseye"),
+    "aarch64":  ("arm64",    "bullseye"),
+    "ppc64le":  ("ppc64el",  "bullseye"),
+    "mipsle":   ("mipsel",   "bullseye"),
+    "mips64le": ("mips64el", "bullseye"),
+    "riscv64":  ("riscv64",  "trixie"),
 }
 
 def handle_sysroot(use_sysroot, config, compiler, vendor_deps):
