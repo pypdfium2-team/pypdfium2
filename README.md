@@ -1,6 +1,11 @@
 <!-- SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
+> [!IMPORTANT]
+> **The pypdfium2 project does not tolerate AI issues and PRs!**
+> Any issues or PRs that exhibit the typical characteristics of low-quality generative AI will be labelled as `spam / ai` and closed/locked immediately, no matter how important they may claim to be.
+> Users who violate this policy repeatedly should not be surprised to find themselves blocked.
+
 # pypdfium2
 
 <!-- [![Downloads](https://pepy.tech/badge/pypdfium2/month)](https://pepy.tech/project/pypdfium2) -->

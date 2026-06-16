@@ -16,6 +16,8 @@ body:
         There might be unofficial PyPA packages of pypdfium2 in the wild.
         **We do not support third-party builds, and they are not eligible for a bug report.** Please make sure to use our official packages.
       options:
+        - label: I understand that AI issues are not accepted by this project. *Issues that show typical characteristics of AI will be closed immediately and the reporter may be blocked.*
+          required: true
         - label: I confirm to be using an **official package** of `pypdfium2` from `PyPI` or `GitHub/pypdfium2-team` (unmodified sources).
           required: true
   

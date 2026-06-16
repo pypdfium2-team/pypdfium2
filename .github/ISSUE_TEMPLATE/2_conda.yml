@@ -17,6 +17,8 @@ body:
     attributes:
       label: Checklist
       options:
+        - label: I understand that AI issues are not accepted by this project. *Issues that show typical characteristics of AI will be closed immediately and the reporter may be blocked.*
+          required: true
         - label: I have verified to be using the **official packages** from the `pypdfium2-team` and `bblanchon` channels.
           required: true
         - label: I confirm **requirements are satisfied** and **no conflicting builds** of pypdfium2/pdfium-binaries installed at the same time.

@@ -1,16 +1,21 @@
 **Important:** External contributors are required to comply with the template.
 
+<!--
+STOP! IF THE PATCH YOU ARE ABOUT TO SUBMIT WAS MADE WITH AI, DISCARD IT AND SHOW YOURSELF OUT!
+
+If you did not use AI, welcome! Please read the points below.
+- Use the Preview tab to see how the PR will render.
+- Answer the questions below, choosing the section(s) relevant to your PR. Non-applying sections shall be set to `closed`.
+- Place an `x` in the [ ] for yes, leave it empty for no. If a question is not applicable, remove the [ ], but keep the message in place.
+-->
+
 ## Description
 
 *Explain your changes here*
 
 ## Checklist
 
-<!--
-- Use the Preview tab to see how the PR will render.
-- Answer the questions below, choosing the section(s) relevant to your PR. Non-applying sections shall be set to `closed`.
-- Place an `x` in the [ ] for yes, leave it empty for no. If a question is not applicable, remove the [ ], but keep the message in place.
--->
+- [ ] I understand that AI pull requests are not accepted by this project. *PRs that show typical characteristics of AI will be closed immediately and the reporter may be blocked.*
 
 <details open><summary>Helpers</summary>
 
