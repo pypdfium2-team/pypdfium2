@@ -12,7 +12,7 @@ DOCKER_CPU_MAP = {
     "armv7l": "arm32v7",
     "i686": "i386",
     "loongarch64": "loong64",
-}  # ppc64le, riscv64, s390x equal
+}  # ppc64le, riscv64, s390x, mips64le equal
 
 # cf. https://github.com/pypa/cibuildwheel/blob/bb153041f0defc85849ef2d519c39c9218d889d0/cibuildwheel/oci_container.py#L30-L59
 PLATFORM_CPU_MAP = {
@@ -32,13 +32,16 @@ def _get_container(os_class, cpu):
     else:
         prefix = ""
     if os_class == "manylinux":
-        return f"{prefix}{docker_cpu}/debian:trixie-slim", docker_flags, _DEBIAN_CMD, "bash"
+        which_debian = "bookworm" if cpu == "mips64le" else "trixie"
+        return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", docker_flags, _DEBIAN_CMD, "bash"
     elif os_class == "musllinux":
         return f"{prefix}{docker_cpu}/alpine:3", docker_flags, _ALPINE_CMD, "sh"
     else:
         assert False, os_class
 
 os_class, cpu = sys.argv[1].split("_", maxsplit=1)
+if cpu == "mips64el":  # remap for convenience
+    cpu = "mips64le"
 container, docker_flags, prepare_cmd, shell = _get_container(os_class, cpu)
 print(f'export CONTAINER="{container}"')
 print(f'export PREPARE_CMD="{prepare_cmd}"')
