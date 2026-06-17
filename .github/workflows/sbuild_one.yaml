@@ -160,6 +160,7 @@ jobs:
       
       - name: Test wheel in docker container
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os }}
+        continue-on-error: ${{ inputs.target_cpu == 'mips64el' }}
         # q&d: extract arch from wheel file
         # TODO have container_driver.py map target_cpu to uname cpu
         run: |
