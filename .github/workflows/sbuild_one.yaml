@@ -101,11 +101,8 @@ jobs:
       - name: Create symlinks if needed
         if: ${{ inputs.target_cpu == 'mips64' }}
         run: |
-          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-13 /usr/local/bin/mips64-linux-gnuabi64-g++
-          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-gcc-13 /usr/local/bin/mips64-linux-gnuabi64-gcc
-          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-ar /usr/local/bin/mips64-linux-gnuabi64-ar
-          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-nm /usr/local/bin/mips64-linux-gnuabi64-nm
-          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-readelf /usr/local/bin/mips64-linux-gnuabi64-readelf
+          sudo ln -s /usr/bin/mips64-linux-gnuabi64-g++-13 /usr/local/bin/mips64-linux-gnuabi64-g++
+          sudo ln -s /usr/bin/mips64-linux-gnuabi64-gcc-13 /usr/local/bin/mips64-linux-gnuabi64-gcc
       
       - name: Install Linux native deps  # fallback
         if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}

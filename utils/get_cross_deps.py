@@ -8,8 +8,8 @@ def get_gcc_id(arch):
         return "arm-linux-gnueabihf"
     elif arch == "ppc64le":
         return "powerpc64le-linux-gnu"
-    elif arch == "mips64le":
-        return "mips64el-linux-gnuabi64"
+    elif arch == "mips64":
+        return "mips64-linux-gnuabi64"
     # elif arch in ("loong64", "loongarch64"):
     #     return "loongarch64-unknown-linux-gnu"
     else:  # aarch64, (riscv64)
@@ -25,7 +25,6 @@ else:
         "arm": "armv7l",
         "arm64": "aarch64",
         "ppc64": "ppc64le",
-        "mips64": "mips64le",
     }.get(target_cpu, target_cpu)
     gcc_id = get_gcc_id(uname_cpu)
     deps += ["libc6-i386", "gcc-13-multilib", f"g++-13-{gcc_id}", f"gcc-13-{gcc_id}"]
