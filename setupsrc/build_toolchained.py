@@ -194,23 +194,21 @@ def handle_windows(win_sdk_dir):
 
 def handle_cross(config, target_cpu, target_os):
     
-    # TODO compare target_cpu against host to determine whether it's actually cross
+    # TODO compare target_cpu (and target_os) against host to determine whether it's actually cross
     # this is a bit difficult currently as we don't have a direct mapping between google and python-style CPU names
     is_cross = False
     
     if target_cpu:
         config["target_cpu"] = target_cpu
         is_cross = True  # assumed
-        if sys.platform.startswith("linux"):
-            if not target_os:
-                sysroot_cpu = target_cpu
-                if target_cpu == "ppc64":
-                    sysroot_cpu = "ppc64el"
-                sysroot_script = PDFiumDir/"build"/"linux"/"sysroot_scripts"/"install-sysroot.py"
-                run_cmd([sys.executable, str(sysroot_script), "--arch", sysroot_cpu], cwd=PDFiumDir)
+        if sys.platform.startswith("linux") and not target_os:
+            sysroot_cpu = target_cpu
             if target_cpu == "ppc64":
-                config["sysroot"] = "//build/linux/debian_bullseye_ppc64el-sysroot"
+                sysroot_cpu = "ppc64el"
+                config["sysroot"] = f"//build/linux/debian_bullseye_{sysroot_cpu}-sysroot"
                 config["use_sysroot"] = True
+            sysroot_script = PDFiumDir/"build"/"linux"/"sysroot_scripts"/"install-sysroot.py"
+            run_cmd([sys.executable, str(sysroot_script), "--arch", sysroot_cpu], cwd=PDFiumDir)
     
     if target_os:
         config["target_os"] = target_os
