@@ -104,10 +104,6 @@ jobs:
         if: ${{ contains(inputs.cibw_target, 'linux') }}
         # q&d: suppress known test suite failures on s390x and musllinux_armv7l
         continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
-        # get_container.py outputs the env vars CONTAINER, PREPARE_CMD, INIT_SHELL and DOCKER_FLAGS
-        # The docker command mounts the pypdfium2 repo instead of copying it, i.e. shared among host and container. This seems to work fine on GH actions. Local users might need to add --security-opt label=disable on some distros.
-        run: |
-          eval "$(python3 ./utils/get_container.py $TARGET)"
-          docker run -e PREPARE_CMD -i --rm -v "$PWD:/pypdfium2" $DOCKER_FLAGS "$CONTAINER" $INIT_SHELL /pypdfium2/utils/test_in_docker.sh
+        run: python3 ./utils/container_driver.py "$TARGET"
         env:
           TARGET: ${{ inputs.cibw_target }}

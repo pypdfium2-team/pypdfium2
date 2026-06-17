@@ -1,7 +1,13 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import sys
+import subprocess
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
+from base import ProjectDir, log  # local
 
 _DEBIAN_CMD = "apt update && apt install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
 _ALPINE_CMD = "apk add python3 py3-pip py3-pillow py3-numpy py3-pytest"
@@ -26,7 +32,7 @@ PLATFORM_CPU_MAP = {
 def _get_container(os_class, cpu):
     docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
     platform_cpu = PLATFORM_CPU_MAP.get(cpu, cpu)
-    docker_flags = f"--platform linux/{platform_cpu}"
+    docker_flags = ("--platform", f"linux/{platform_cpu}")
     if docker_cpu == "loong64":
         prefix = f"ghcr.io/"
     else:
@@ -39,11 +45,22 @@ def _get_container(os_class, cpu):
     else:
         assert False, os_class
 
-os_class, cpu = sys.argv[1].split("_", maxsplit=1)
-if cpu == "mips64el":  # remap for convenience
-    cpu = "mips64le"
-container, docker_flags, prepare_cmd, shell = _get_container(os_class, cpu)
-print(f'export CONTAINER="{container}"')
-print(f'export PREPARE_CMD="{prepare_cmd}"')
-print(f'export INIT_SHELL="{shell}"')
-print(f'export DOCKER_FLAGS="{docker_flags}"')
+def run_process(argv, **kwargs):
+    log(argv)
+    return subprocess.run(argv, **kwargs)
+
+def main():
+    
+    os_class, cpu = sys.argv[1].split("_", maxsplit=1)
+    if cpu == "mips64el":  # remap for convenience
+        cpu = "mips64le"
+    
+    container, docker_flags, prepare_cmd, shell = _get_container(os_class, cpu)
+    log(f"{container}, {docker_flags}, {prepare_cmd}, {shell}")
+    
+    env = os.environ.copy()
+    env["PREPARE_CMD"] = prepare_cmd
+    run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/test_in_docker.sh"], cwd=ProjectDir, env=env, check=True)
+
+if __name__ == "__main__":
+    main()
