@@ -151,6 +151,12 @@ def build(target):
     run_cmd([ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
 
 
+def _use_gcc(config):
+    config.update({
+        "is_clang": False,
+        "use_custom_libcxx": False,
+    })
+
 def handle_portable_mode(config, use_sysroot, clang_path):
     
     patch_clang = False
@@ -175,10 +181,7 @@ def handle_portable_mode(config, use_sysroot, clang_path):
             "clang_version": clang_ver,
         })
     else:
-        config.update({
-            "is_clang": False,
-            "use_custom_libcxx": False,
-        })
+        _use_gcc(config)
         if use_sysroot:
             log("Warning: --use-sysroot with GCC / system libcxx. This may or may not work. If it fails, bring your own clang and pass --clang-path.")
     
@@ -235,6 +238,7 @@ def main(
         win_sdk_dir  = None,
         target_cpu   = None,
         target_os    = None,
+        prefer_gcc   = None,
         use_sysroot  = None,
         clang_path   = None,
     ):
@@ -250,6 +254,8 @@ def main(
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     config = DefaultConfig.copy()
+    if prefer_gcc:
+        _use_gcc(config)
     patch_clang = handle_portable_mode(config, use_sysroot, clang_path)
     handle_windows(win_sdk_dir)
     
@@ -301,9 +307,13 @@ def parse_args(argv):
         help = "The target operating system, similar to --target-cpu. This is intended for compiling the mobile platforms (e.g. Android) from a desktop device. Note, this script has some issues with rebuilds - you may need to pass --update so that new patches can be applied."
     )
     parser.add_argument(
+        "--prefer-gcc",
+        help = "If this option is given, attempt to use GCC (and system libc++, implied) even for cross-compilation. There is no point passing this option in PORTABLE_MODE, where GCC is default.",
+    )
+    parser.add_argument(
         "--use-sysroot",
         action = "store_true",
-        help = "(PORTABLE_MODE only) Attempt to use a sysroot, on behalf of packaging, assuming a sysroot is available for the platform in question and has been automatically downloaded by gclient. This may or may not work with GCC / system libcxx. If it does not, bring your own clang and pass --clang-path.",
+        help = "(PORTABLE_MODE only) Attempt to use a sysroot, on behalf of packaging, assuming a sysroot is available for the platform in question and has been automatically downloaded by gclient. If it does not, bring your own clang and pass --clang-path.",
     )
     parser.add_argument(
         "--clang-path",

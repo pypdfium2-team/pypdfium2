@@ -27,15 +27,15 @@ on:
       tag:
         type: string
         default: ''
+      custom_clang:
+        type: boolean
+        default: false
       branch:
         type: string
         default: ''
       repo_tag:
         type: string
         default: ''
-      custom_clang:
-        type: boolean
-        default: false
       condition:
         type: boolean
         default: true
@@ -98,11 +98,11 @@ jobs:
         env:
           TARGET_CPU: ${{ inputs.target_cpu }}
       
-      # - name: Create symlinks if needed
-      #   if: ${{ inputs.target_cpu == 'mips64el' }}
-      #   run: |
-      #     sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-13 /usr/local/bin/mips64el-linux-gnuabi64-g++
-      #     sudo ln -s /usr/bin/mips64el-linux-gnuabi64-gcc-13 /usr/local/bin/mips64el-linux-gnuabi64-gcc
+      - name: Create symlinks for GCC
+        if: ${{ contains(inputs.build_params, '--prefer-gcc') && inputs.target_cpu == 'mips64el' }}
+        run: |
+          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-13 /usr/local/bin/mips64el-linux-gnuabi64-g++
+          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-gcc-13 /usr/local/bin/mips64el-linux-gnuabi64-gcc
       
       - name: Install Linux native deps  # fallback
         if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}
