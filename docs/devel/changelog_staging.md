@@ -4,4 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- `mips64el` cross-build capability added to toolchained sourcebuild (uses clang). This took a great deal of tinkering.
+- `mips64` little-endian wheel added to release. `build_toolchained.py` is now capable of building it, based on upstream's `mips64el` target (with patches). This took a great deal of tinkering.

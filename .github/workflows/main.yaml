@@ -272,7 +272,8 @@ jobs:
         include:
           - os: ubuntu-latest
             target_cpu: mips64el
-            # in mips64le/debian docker, uname -m says just "mips64", and pip install will refuse anything else
+            # in mips64le/debian docker, uname -m says just "mips64"
+            # FIXME pip install still refuses the wheel
             tag: manylinux_2_17_mips64.manylinux2014_mips64
     
     uses: ./.github/workflows/sbuild_one.yaml
