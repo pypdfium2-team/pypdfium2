@@ -103,7 +103,7 @@ jobs:
       
       # TODO handle platforms other than mips64el, delegate to a python script
       - name: Create symlinks for GCC
-        if: ${{ inputs.prefer_gcc && inputs.target_cpu == 'mips64el' }}
+        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.prefer_gcc && inputs.target_cpu == 'mips64el' }}
         run: |
           sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-13 /usr/local/bin/mips64el-linux-gnuabi64-g++
           sudo ln -s /usr/bin/mips64el-linux-gnuabi64-gcc-13 /usr/local/bin/mips64el-linux-gnuabi64-gcc
