@@ -21,12 +21,12 @@ on:
       target_os:
         type: string
         default: ''
-      prefer_gcc:
-        type: boolean
-        default: false
       build_params:
         type: string
         default: ''
+      prefer_gcc:
+        type: boolean
+        default: false
       custom_clang:
         type: boolean
         default: false
@@ -147,12 +147,26 @@ jobs:
           path: ./dist/*.whl
           name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
       
-      - name: Install and test wheel
+      - name: Test wheel on build host
         if: ${{ !(inputs.target_cpu || inputs.target_os) }}
         run: |
           python3 -m pip install ./dist/*.whl
           pypdfium2 -v
           python3 -m pytest tests/
+      
+      - name: Set up QEMU
+        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu && !inputs.target_os }}
+        uses: docker/setup-qemu-action@v4
+      
+      - name: Test wheel in docker container
+        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os }}
+        # q&d: extract arch from wheel file
+        # TODO have container_driver.py map target_cpu to uname cpu
+        run: |
+          TARGET=$(ls dist/*.whl | grep -o -P 'manylinux_[\d_]+_\K.+?(?=\.)')
+          echo "$TARGET"
+          mkdir wheelhouse && cp dist/*.whl wheelhouse/
+          python3 ./utils/container_driver.py "manylinux_${TARGET}"
       
       - name: On Linux, run auditwheel (informational)
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu != 'mips64el' }}
