@@ -115,8 +115,8 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
         _create_resources_rc(build_ver)
         if Host._raw_machine == "arm64":
             git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir_build)
-    if sys.platform.startswith("linux") and target_cpu == "ppc64":
-        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
+    if sys.platform.startswith("linux") and target_cpu in ("ppc64", "mips64"):
+        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)  # TODO rename
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
         git_apply_patch(PatchDir/"android_cross.patch", PDFiumDir_build)
