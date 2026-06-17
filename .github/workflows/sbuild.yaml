@@ -83,6 +83,12 @@ jobs:
             target_cpu: ppc64
             tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
           
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux && inputs.targets_main }}
+            target_cpu: mips64el
+            # in mips64le/debian docker, uname -m says just "mips64", and pip install will refuse anything else
+            tag: manylinux_2_17_mips64.manylinux2014_mips64
+          
           - os: macos-latest  # arm64 host
             condition: ${{ inputs.macos && inputs.targets_main }}
             target_cpu: x64

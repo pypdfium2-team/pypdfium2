@@ -261,28 +261,28 @@ jobs:
       branch: autorelease_tmp
   
   
-  # # NOTE ppc64le is now supported with pdfium-binaries, commented out. However, this strategy might be useful for other platforms in the future.
-  # augment_sbuild:
-  #   
-  #   if: ${{ inputs.augment }}
-  #   needs: build
-  #   
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       include:
-  #         - os: ubuntu-latest
-  #           target_cpu: ppc64le
-  #           tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
-  #   
-  #   uses: ./.github/workflows/sbuild_one.yaml
-  #   with:
-  #     os: ${{ matrix.os }}
-  #     target_cpu: ${{ matrix.target_cpu }}
-  #     tag: ${{ matrix.tag }}
-  #     py_ver: ${{ inputs.py_ver }}
-  #     repo_tag: ${{ needs.build.outputs.new_version }}
-  #     branch: autorelease_tmp
+  augment_sbuild:
+    
+    if: ${{ inputs.augment }}
+    needs: build
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target_cpu: mips64el
+            # in mips64le/debian docker, uname -m says just "mips64", and pip install will refuse anything else
+            tag: manylinux_2_17_mips64.manylinux2014_mips64
+    
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: ${{ matrix.os }}
+      target_cpu: ${{ matrix.target_cpu }}
+      tag: ${{ matrix.tag }}
+      py_ver: ${{ inputs.py_ver }}
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
   
   
   publish:
@@ -335,18 +335,19 @@ jobs:
           merge-multiple: true
           pattern: cibw-*
       
-      # - name: Download extra packages (sbuild)
-      #   uses: actions/download-artifact@v8
-      #   with:
-      #     path: dist/
-      #     merge-multiple: true
-      #     pattern: sbuild_*
+      - name: Download extra packages (sbuild)
+        uses: actions/download-artifact@v8
+        with:
+          path: dist/
+          merge-multiple: true
+          pattern: sbuild_*
       
       - name: Isolate non-PyPI builds
         if: ${{ inputs.augment }}
         run: |
           mkdir gh_only
-          mv dist/*linux_*_loongarch64*.whl gh_only/
+          mv dist/*linux_*_loongarch64*.whl gh_only/  # augment_cibw
+          mv dist/*linux_*_mips64*.whl gh_only/       # augment_sbuild
       
       - name: Apply and push repository changes
         run: |
