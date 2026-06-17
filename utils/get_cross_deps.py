@@ -8,8 +8,8 @@ def get_gcc_id(arch):
         return "arm-linux-gnueabihf"
     elif arch == "ppc64le":
         return "powerpc64le-linux-gnu"
-    elif arch == "mips64":
-        return "mips64-linux-gnuabi64"
+    elif arch == "mips64el":
+        return "mips64el-linux-gnuabi64"
     # elif arch in ("loong64", "loongarch64"):
     #     return "loongarch64-unknown-linux-gnu"
     else:  # aarch64, (riscv64)

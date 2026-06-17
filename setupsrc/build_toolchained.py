@@ -122,13 +122,13 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
         # without this patch, we end up with a tiny binary that has no symbols
         git_apply_patch(PatchDir/"android_cross.patch", PDFiumDir_build)
     
-    if sys.platform.startswith("linux") and target_cpu in ("ppc64", "mips64"):
-        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)  # TODO rename
-    if PORTABLE_MODE or target_cpu == "mips64":
+    if sys.platform.startswith("linux") and target_cpu == "ppc64":
+        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
+    if PORTABLE_MODE:
         git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
-    if PORTABLE_MODE and patch_clang:
-        git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
-        git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
+        if patch_clang:
+            git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
+            git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
 
 
 def _get_tool(name):
@@ -212,10 +212,6 @@ def handle_cross(config, target_cpu, target_os):
                 sysroot_cpu = "ppc64el"
                 config["sysroot"] = f"//build/linux/debian_bullseye_{sysroot_cpu}-sysroot"
                 config["use_sysroot"] = True
-            # For some reason, when setting target_cpu = "mips64", pdfium's build system will use system GCC. This is unlike ppc64 or any other targets we use.
-            # We have to use system libc++ because system GCC is not able to build the vendored libc++, which needs an ultra recent compiler.
-            elif target_cpu == "mips64":
-                config["use_custom_libcxx"] = False
             sysroot_script = PDFiumDir/"build"/"linux"/"sysroot_scripts"/"install-sysroot.py"
             run_cmd([sys.executable, str(sysroot_script), "--arch", sysroot_cpu], cwd=PDFiumDir)
     
