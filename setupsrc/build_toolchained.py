@@ -106,7 +106,7 @@ def _create_resources_rc(build_ver):
     content = content.replace("$VERSION", str(build_ver))
     output_path.write_text(content)
 
-def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
+def patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc):
     # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
     
     shared_autopatches(PDFiumDir)
@@ -123,13 +123,14 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
         git_apply_patch(PatchDir/"android_cross.patch", PDFiumDir_build)
     
     # linux implied
+    mips64el_clang = target_cpu == "mips64el" and not prefer_gcc
     if target_cpu in ("ppc64", "mips64el"):
         git_apply_patch(PatchDir/"extra_arch_cross.patch", PDFiumDir)
-    if target_cpu == "mips64el":
+    if mips64el_clang:
         git_apply_patch(PatchDir/"mips64el_cross.patch", PDFiumDir_build)
     if PORTABLE_MODE:
         git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
-    if (PORTABLE_MODE and patch_clang) or target_cpu == "mips64el":
+    if (PORTABLE_MODE and patch_clang) or mips64el_clang:
         git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
     if PORTABLE_MODE and patch_clang:
         git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
@@ -262,7 +263,7 @@ def main(
     orig_path = dl_depottools(do_update)
     did_pdfium_sync = dl_pdfium(do_update, pdfium_rev, target_os, orig_path)
     if did_pdfium_sync:
-        patch_pdfium(build_ver, target_cpu, target_os, patch_clang)
+        patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc)
     
     is_cross = handle_cross(config, target_cpu, target_os)
     config_str = serialize_gn_config(config)
