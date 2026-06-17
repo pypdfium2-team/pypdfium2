@@ -310,12 +310,12 @@ def parse_args(argv):
     parser.add_argument(
         "--prefer-gcc",
         action = "store_true",
-        help = "If this option is given, attempt to use GCC (and system libc++, implied) even for cross-compilation. There is no point passing this option in PORTABLE_MODE, where GCC is default.",
+        help = "If this option is given, attempt to use GCC (and system libc++, implied) even for cross-compilation. There is no point passing this option in PORTABLE_MODE, where GCC is default. Be careful, using GCC / system libc++ may or may not work when a sysroot is used as we do.",
     )
     parser.add_argument(
         "--use-sysroot",
         action = "store_true",
-        help = "(PORTABLE_MODE only) Attempt to use a sysroot, on behalf of packaging, assuming a sysroot is available for the platform in question and has been automatically downloaded by gclient. If it does not, bring your own clang and pass --clang-path.",
+        help = "(PORTABLE_MODE only) Attempt to use a sysroot, on behalf of packaging, assuming a sysroot is available for the platform in question and has been automatically downloaded by gclient. Be careful, using a sysroot may or may not work with GCC / system libc++. If it does not, bring your own clang and pass --clang-path.",
     )
     parser.add_argument(
         "--clang-path",
