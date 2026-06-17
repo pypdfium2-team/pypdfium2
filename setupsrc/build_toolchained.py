@@ -207,10 +207,15 @@ def handle_cross(config, target_cpu, target_os):
         is_cross = True  # assumed
         if sys.platform.startswith("linux") and not target_os:
             sysroot_cpu = target_cpu
+            # //build/config/sysroot.gni does not handle ppc64 yet
             if target_cpu == "ppc64":
                 sysroot_cpu = "ppc64el"
                 config["sysroot"] = f"//build/linux/debian_bullseye_{sysroot_cpu}-sysroot"
                 config["use_sysroot"] = True
+            # For some reason, when setting target_cpu = "mips64", pdfium's build system will use system GCC. This is unlike ppc64 or any other targets we use.
+            # We have to use system libc++ because system GCC is not able to build the vendored libc++, which needs an ultra recent compiler.
+            elif target_cpu == "mips64":
+                config["use_custom_libcxx"] = False
             sysroot_script = PDFiumDir/"build"/"linux"/"sysroot_scripts"/"install-sysroot.py"
             run_cmd([sys.executable, str(sysroot_script), "--arch", sysroot_cpu], cwd=PDFiumDir)
     

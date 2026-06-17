@@ -94,7 +94,7 @@ jobs:
         run: |
           PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU)
           echo $PACKAGES; sudo apt-get install -y $PACKAGES
-          ls -l /usr/bin |grep g++
+          ls -l /usr/bin |grep -E '\-(gcc|g\+\+|ar|nm|readelf)(-[0-9.]+)?$'
         env:
           TARGET_CPU: ${{ inputs.target_cpu }}
       
@@ -102,6 +102,10 @@ jobs:
         if: ${{ inputs.target_cpu == 'mips64' }}
         run: |
           sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-13 /usr/local/bin/mips64-linux-gnuabi64-g++
+          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-gcc-13 /usr/local/bin/mips64-linux-gnuabi64-gcc
+          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-ar /usr/local/bin/mips64-linux-gnuabi64-ar
+          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-nm /usr/local/bin/mips64-linux-gnuabi64-nm
+          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-readelf /usr/local/bin/mips64-linux-gnuabi64-readelf
       
       - name: Install Linux native deps  # fallback
         if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}
