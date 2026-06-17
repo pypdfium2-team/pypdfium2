@@ -11,7 +11,10 @@ CPUNAME=$(uname -m)
 if [ "$CPUNAME" == "mips64" ]; then
     # pip refuses the wheel, no matter if we're using "mips64" (matching uname), "mips64le" or whatever. This quick & dirty hack lets us install the wheel anyway.
     SITE_PACKAGES="/testenv/lib/python3.11/site-packages"
-    $VENV_PY -m pip install --platform manylinux_2_17_mips64 --no-deps --target "$SITE_PACKAGES" ./wheelhouse/*.whl
+    STAGING_DIR="/tmp/staging"
+    $VENV_PY -m pip install --platform manylinux_2_17_mips64 --no-deps --target $STAGING_DIR ./wheelhouse/*.whl
+    mv $STAGING_DIR/bin/* -t /testenv/bin && rmdir $STAGING_DIR/bin
+    mv $STAGING_DIR/* -t $SITE_PACKAGES
 else
     $VENV_PY -m pip install ./wheelhouse/*.whl
 fi
