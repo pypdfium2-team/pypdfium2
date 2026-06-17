@@ -94,8 +94,14 @@ jobs:
         run: |
           PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU)
           echo $PACKAGES; sudo apt-get install -y $PACKAGES
+          ls -l /usr/bin |grep g++
         env:
           TARGET_CPU: ${{ inputs.target_cpu }}
+      
+      - name: Create symlinks if needed
+        if: ${{ inputs.target_cpu == 'mips64' }}
+        run: |
+          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-13 /usr/local/bin/mips64-linux-gnuabi64-g++
       
       - name: Install Linux native deps  # fallback
         if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}
