@@ -150,7 +150,7 @@ jobs:
           python3 -m pytest tests/
       
       - name: On Linux, run auditwheel (informational)
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os }}
+        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu != 'mips64' }}
         run: |
           python3 -m pip install -U auditwheel
           python3 -m auditwheel show dist/*.whl
