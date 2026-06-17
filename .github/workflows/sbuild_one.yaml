@@ -129,7 +129,7 @@ jobs:
           VERSION_PARAM: ${{ inputs.pdfium_ver && format('--version {0}', inputs.pdfium_ver) }}
           CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
           OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
-          GCC_PARAM: ${{ inputs.prefer_gcc && '--prefer_gcc' || '' }}
+          GCC_PARAM: ${{ inputs.prefer_gcc && '--prefer-gcc' || '' }}
           BUILD_PARAMS: ${{ inputs.build_params }}
       
       - name: Show binary info
