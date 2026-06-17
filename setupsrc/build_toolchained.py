@@ -108,23 +108,27 @@ def _create_resources_rc(build_ver):
 
 def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
     # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
+    
     shared_autopatches(PDFiumDir)
+    
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
         git_apply_patch(PatchDir/"win"/"build.patch", PDFiumDir_build)
         _create_resources_rc(build_ver)
         if Host._raw_machine == "arm64":
             git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir_build)
-    if sys.platform.startswith("linux") and target_cpu in ("ppc64", "mips64"):
-        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)  # TODO rename
+    
     if target_os == "android":
         # without this patch, we end up with a tiny binary that has no symbols
         git_apply_patch(PatchDir/"android_cross.patch", PDFiumDir_build)
-    if PORTABLE_MODE:
+    
+    if sys.platform.startswith("linux") and target_cpu in ("ppc64", "mips64"):
+        git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)  # TODO rename
+    if PORTABLE_MODE or target_cpu == "mips64":
         git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
-        if patch_clang:
-            git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
-            git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
+    if PORTABLE_MODE and patch_clang:
+        git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
+        git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
 
 
 def _get_tool(name):
