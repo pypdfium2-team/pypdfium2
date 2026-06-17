@@ -123,12 +123,13 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc):
         git_apply_patch(PatchDir/"android_cross.patch", PDFiumDir_build)
     
     # linux implied
+    mips64el_gcc = target_cpu == "mips64el" and prefer_gcc
     mips64el_clang = target_cpu == "mips64el" and not prefer_gcc
     if target_cpu in ("ppc64", "mips64el"):
         git_apply_patch(PatchDir/"extra_arch_cross.patch", PDFiumDir)
     if mips64el_clang:
         git_apply_patch(PatchDir/"mips64el_cross.patch", PDFiumDir_build)
-    if PORTABLE_MODE:
+    if PORTABLE_MODE and mips64el_gcc:
         git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
     if (PORTABLE_MODE and patch_clang) or mips64el_clang:
         git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
