@@ -309,6 +309,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--prefer-gcc",
+        action = "store_true",
         help = "If this option is given, attempt to use GCC (and system libc++, implied) even for cross-compilation. There is no point passing this option in PORTABLE_MODE, where GCC is default.",
     )
     parser.add_argument(

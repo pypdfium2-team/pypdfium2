@@ -21,15 +21,18 @@ on:
       target_os:
         type: string
         default: ''
+      prefer_gcc:
+        type: boolean
+        default: false
       build_params:
-        type: string
-        default: ''
-      tag:
         type: string
         default: ''
       custom_clang:
         type: boolean
         default: false
+      tag:
+        type: string
+        default: ''
       branch:
         type: string
         default: ''
@@ -98,8 +101,9 @@ jobs:
         env:
           TARGET_CPU: ${{ inputs.target_cpu }}
       
+      # TODO handle platforms other than mips64el, delegate to a python script
       - name: Create symlinks for GCC
-        if: ${{ contains(inputs.build_params, '--prefer-gcc') && inputs.target_cpu == 'mips64el' }}
+        if: ${{ inputs.prefer_gcc && inputs.target_cpu == 'mips64el' }}
         run: |
           sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-13 /usr/local/bin/mips64el-linux-gnuabi64-g++
           sudo ln -s /usr/bin/mips64el-linux-gnuabi64-gcc-13 /usr/local/bin/mips64el-linux-gnuabi64-gcc
@@ -120,11 +124,12 @@ jobs:
           features: 'OptionId.WindowsDesktopDebuggers'
       
       - name: Build PDFium (toolchained)
-        run: python3 ./setupsrc/build_toolchained.py $VERSION_PARAM $CPU_PARAM $OS_PARAM $BUILD_PARAMS
+        run: python3 ./setupsrc/build_toolchained.py $VERSION_PARAM $CPU_PARAM $OS_PARAM $GCC_PARAM $BUILD_PARAMS
         env:
           VERSION_PARAM: ${{ inputs.pdfium_ver && format('--version {0}', inputs.pdfium_ver) }}
           CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
           OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
+          GCC_PARAM: ${{ inputs.prefer_gcc && '--prefer_gcc' || '' }}
           BUILD_PARAMS: ${{ inputs.build_params }}
       
       - name: Show binary info
