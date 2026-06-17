@@ -4,4 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- `mips64le` cross-build capability added to toolchained sourcebuild. Both Clang or GCC can be used. This took a great deal of tinkering.
+- `mips64el` cross-build capability added to toolchained sourcebuild. Both Clang or GCC can be used. This took a great deal of tinkering.
