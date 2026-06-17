@@ -53,6 +53,22 @@ jobs:
             target_cpu: arm64
             tag: manylinux_2_17_aarch64.manylinux2014_aarch64
           
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux && inputs.targets_main }}
+            target_cpu: arm
+            tag: manylinux_2_17_armv7l.manylinux2014_armv7l
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux && inputs.targets_main }}
+            target_cpu: ppc64
+            tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
+          
+          - os: ubuntu-latest
+            condition: ${{ inputs.linux && inputs.targets_main }}
+            target_cpu: mips64el
+            # in mips64le/debian docker, uname -m says just "mips64", and pip install will refuse anything else
+            tag: manylinux_2_17_mips64.manylinux2014_mips64
+          
           - os: ubuntu-24.04-arm
             condition: ${{ inputs.linux && inputs.targets_test }}
             py_ver: '3.13'
@@ -72,22 +88,6 @@ jobs:
             build_params: '--use-sysroot --clang-path /opt/clang'
             custom_clang: true
             tag: manylinux_2_17_aarch64.manylinux2014_aarch64
-          
-          - os: ubuntu-latest
-            condition: ${{ inputs.linux && inputs.targets_main }}
-            target_cpu: arm
-            tag: manylinux_2_17_armv7l.manylinux2014_armv7l
-          
-          - os: ubuntu-latest
-            condition: ${{ inputs.linux && inputs.targets_main }}
-            target_cpu: ppc64
-            tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
-          
-          - os: ubuntu-latest
-            condition: ${{ inputs.linux && inputs.targets_main }}
-            target_cpu: mips64el
-            # in mips64le/debian docker, uname -m says just "mips64", and pip install will refuse anything else
-            tag: manylinux_2_17_mips64.manylinux2014_mips64
           
           - os: macos-latest  # arm64 host
             condition: ${{ inputs.macos && inputs.targets_main }}
