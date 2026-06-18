@@ -39,49 +39,49 @@ jobs:
       matrix:
         include:
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             condition: ${{ inputs.linux && inputs.targets_main }}
             tag: manylinux_2_17_x86_64.manylinux2014_x86_64
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             condition: ${{ inputs.linux && inputs.targets_main }}
             target_cpu: x86
             tag: manylinux_2_17_i686.manylinux2014_i686
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             condition: ${{ inputs.linux && inputs.targets_main }}
             target_cpu: arm64
             tag: manylinux_2_17_aarch64.manylinux2014_aarch64
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             condition: ${{ inputs.linux && inputs.targets_main }}
             target_cpu: arm
             tag: manylinux_2_17_armv7l.manylinux2014_armv7l
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             condition: ${{ inputs.linux && inputs.targets_main }}
             target_cpu: ppc64
             tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             condition: ${{ inputs.linux && inputs.targets_main }}
             target_cpu: mips64el
             tag: manylinux_2_17_mips64le.manylinux2014_mips64le
           
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             condition: ${{ inputs.linux && inputs.targets_test }}
             py_ver: '3.13'
             # if we don't use the sysroot or an older container, the glibc requirement is high
             # see below for an alternative approach that uses the sysroot on aarch64 natively
             tag: manylinux_2_38_aarch64
           
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             condition: ${{ inputs.linux && inputs.targets_test }}
             py_ver: '3.13'
             build_params: '--use-sysroot'
             tag: manylinux_2_17_aarch64.manylinux2014_aarch64
           
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             condition: ${{ inputs.linux && inputs.targets_test }}
             py_ver: '3.13'
             build_params: '--use-sysroot --clang-path /opt/clang'
@@ -120,16 +120,16 @@ jobs:
             target_cpu: x86
             tag: win32
           
-          - os: windows-11-arm
+          - os: windows-11-vs2026-arm
             condition: ${{ inputs.windows && inputs.targets_test }}
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             condition: ${{ inputs.android && inputs.targets_main }}
             target_os: android
             target_cpu: arm64
             tag: android_23_arm64_v8a
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             condition: ${{ inputs.android && inputs.targets_main }}
             target_os: android
             target_cpu: arm

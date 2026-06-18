@@ -15,7 +15,7 @@ on:
         # 0: Don't use sysroot anywhere
         # 1: Use sysroot with clang and vendored libc++ where available, i.e. manylinux_{ppc64le,riscv64}
         # 2: Like 1, but also use sysroot on armv7l with GCC (Ubuntu-based container)
-        # 3: Use sysroot on all manylinux targets where available. This fails on the older RHEL-based containers with GCC. With recent clang + vendored libc++ (or a plain ubuntu-latest host, not a manylinux container), it would probably work.
+        # 3: Use sysroot on all manylinux targets where available. This fails on the older RHEL-based containers with GCC. With recent clang + vendored libc++ (or a plain ubuntu runner, not a manylinux container), it would probably work.
         type: int
         default: 2
       linux_main:
@@ -53,27 +53,27 @@ jobs:
         include:
           
           - condition: ${{ inputs.linux_main && inputs.linux_glibc }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: x86_64
             pdfium_ver: latest
             use_sysroot: ${{ inputs.sysroot_level >= 3 }}
           
           - condition: ${{ inputs.linux_main && inputs.linux_musl }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: x86_64
             pdfium_ver: latest
           
           - condition: ${{ inputs.linux_main && inputs.linux_glibc }}
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             cibw_os: manylinux
             cibw_arch: aarch64
             pdfium_ver: latest
             use_sysroot: ${{ inputs.sysroot_level >= 3 }}
           
           - condition: ${{ inputs.linux_main && inputs.linux_musl }}
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             cibw_os: musllinux
             cibw_arch: aarch64
             pdfium_ver: latest
@@ -82,70 +82,70 @@ jobs:
           # For some reason, `uname -m` reports the armv7l container as armv8l when using an ARM64 host, but the author tested a manylinux wheel produced here on Raspberry Pi 2B (armv7l) locally, and it does seem to work.
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             cibw_os: manylinux
             cibw_arch: armv7l
             pdfium_ver: latest
             use_sysroot: ${{ inputs.sysroot_level >= 2 }}
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             cibw_os: musllinux
             cibw_arch: armv7l
             pdfium_ver: latest
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_glibc }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: i686
             pdfium_ver: latest
             use_sysroot: ${{ inputs.sysroot_level >= 3 }}
           
           - condition: ${{ inputs.linux_fastemu && inputs.linux_musl }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: i686
             pdfium_ver: latest
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: ppc64le
             use_sysroot: ${{ inputs.sysroot_level >= 1 }}
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: ppc64le
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: s390x
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: s390x
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: riscv64
             use_sysroot: ${{ inputs.sysroot_level >= 1 }}
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: riscv64
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_glibc }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: loongarch64
           
           - condition: ${{ inputs.linux_clangcross && inputs.linux_musl }}
-            os: ubuntu-latest
+            os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: loongarch64
           

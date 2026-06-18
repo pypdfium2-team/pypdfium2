@@ -101,12 +101,12 @@ jobs:
         env:
           TARGET_CPU: ${{ inputs.target_cpu }}
       
-      # TODO handle platforms other than mips64el, delegate to a python script
-      - name: Create symlinks for GCC
-        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.prefer_gcc && inputs.target_cpu == 'mips64el' }}
-        run: |
-          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-14 /usr/local/bin/mips64el-linux-gnuabi64-g++
-          sudo ln -s /usr/bin/mips64el-linux-gnuabi64-gcc-14 /usr/local/bin/mips64el-linux-gnuabi64-gcc
+      # # TODO handle platforms other than mips64el, delegate to a python script
+      # - name: Create symlinks for GCC
+      #   if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.prefer_gcc }}
+      #   run: |
+      #     sudo ln -s /usr/bin/mips64el-linux-gnuabi64-g++-16 /usr/local/bin/mips64el-linux-gnuabi64-g++
+      #     sudo ln -s /usr/bin/mips64el-linux-gnuabi64-gcc-16 /usr/local/bin/mips64el-linux-gnuabi64-gcc
       
       - name: Install Linux native deps  # fallback
         if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}
@@ -160,10 +160,9 @@ jobs:
       
       - name: Test wheel in docker container
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os }}
-        # Progressive render API test fails on MIPS for some reason, possibly because of changes to the linker config (mips64el_cross.patch) which were needed to build.
         continue-on-error: ${{ inputs.target_cpu == 'mips64el' }}
-        # q&d: extract arch from wheel file -> TODO have container_driver.py map target_cpu to uname cpu
         run: |
+          # q&d: extract arch from wheel file -> TODO in container_driver.py, map target_cpu to uname cpu?
           TARGET=$(ls dist/*.whl | grep -o -P 'manylinux_[\d_]+_\K.+?(?=\.)')
           echo "$TARGET"
           mkdir wheelhouse && cp dist/*.whl wheelhouse/

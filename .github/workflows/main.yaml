@@ -9,7 +9,7 @@ on:
     inputs: &reusable_inputs
       runner:
         type: string
-        default: 'ubuntu-latest'
+        default: 'ubuntu-26.04'
       py_ver:
         type: string
         default: '3.14'
@@ -115,20 +115,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-arm']
+        os: ['ubuntu-26.04', 'ubuntu-26.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-vs2026-arm']
         py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
         exclude:
           # not supported by setup-python action
-          - os: windows-11-arm
+          - os: windows-11-vs2026-arm
             py: '3.8'
-          # - os: windows-11-arm
+          # - os: windows-11-vs2026-arm
           #   py: '3.9'
-          # - os: windows-11-arm
+          # - os: windows-11-vs2026-arm
           #   py: '3.10'
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             wheel: dist/*manylinux_*_x86_64*.whl
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             wheel: dist/*manylinux_*_aarch64*.whl
           - os: macos-15-intel
             wheel: dist/*macosx_*_x86_64*.whl
@@ -136,7 +136,7 @@ jobs:
             wheel: dist/*macosx_*_arm64*.whl
           - os: windows-latest
             wheel: dist/*win_amd64.whl
-          - os: windows-11-arm
+          - os: windows-11-vs2026-arm
             wheel: dist/*win_arm64.whl
     
     runs-on: ${{ matrix.os }}
@@ -200,52 +200,52 @@ jobs:
       matrix:
         include:
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: x86_64
             pdfium_ver: latest-binaries  # TODO take literal version from a step output
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: i686
             pdfium_ver: latest-binaries
           
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             cibw_os: musllinux
             cibw_arch: aarch64
             pdfium_ver: latest-binaries
           
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             cibw_os: musllinux
             cibw_arch: armv7l
             pdfium_ver: latest-binaries
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: ppc64le
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: riscv64
             use_sysroot: true
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: riscv64
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: loongarch64
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: loongarch64
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: manylinux
             cibw_arch: s390x
           
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             cibw_os: musllinux
             cibw_arch: s390x
     
@@ -270,7 +270,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             target_cpu: mips64el
             tag: manylinux_2_17_mips64le.manylinux2014_mips64le
     

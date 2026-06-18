@@ -19,7 +19,7 @@ target_cpu = sys.argv[1]
 deps = []
 
 if target_cpu == "x86":
-    deps += ["g++-multilib"]
+    deps.append("g++-multilib")
 else:
     uname_cpu = {
         "arm": "armv7l",
@@ -27,6 +27,8 @@ else:
         "ppc64": "ppc64le",
     }.get(target_cpu, target_cpu)
     gcc_id = get_gcc_id(uname_cpu)
-    deps += ["libc6-i386", "gcc-14-multilib", f"g++-14-{gcc_id}", f"gcc-14-{gcc_id}"]
+    gcc_ver = 16
+    gcc_suffix = f"{gcc_ver}-{gcc_id}"
+    deps += ("libc6-i386", f"gcc-{gcc_ver}-multilib", f"g++-{gcc_suffix}", f"gcc-{gcc_suffix}")
 
 print(" ".join(shlex.quote(d) for d in deps))

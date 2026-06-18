@@ -16,7 +16,7 @@ on:
 jobs:
   
   trigger:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     
     steps:
       # IMPORTANT Need to use workflow dispatch here, not reusable workflow call.
@@ -27,7 +27,7 @@ jobs:
           workflow: main.yaml
           inputs: |
             {
-              "runner": "ubuntu-latest"
+              "runner": "ubuntu-26.04"
               "py_ver": "3.14",
               "test": "true",
               "augment": "true",

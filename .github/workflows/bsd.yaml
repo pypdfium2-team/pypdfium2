@@ -9,7 +9,7 @@ jobs:
   
   freebsd_lo:
     name: Install on FreeBSD with libreoffice pdfium
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       
       - name: Check out pypdfium2
