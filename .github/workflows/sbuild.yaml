@@ -63,23 +63,17 @@ jobs:
             target_cpu: ppc64
             tag: manylinux_2_17_ppc64le.manylinux2014_ppc64le
           
-          - os: ubuntu-26.04
+          - os: ubuntu-24.04  # dont't use 26.04, it lacks GCC cross for MIPS :(
             condition: ${{ inputs.linux && inputs.targets_main }}
             target_cpu: mips64el
             tag: manylinux_2_17_mips64le.manylinux2014_mips64le
           
-          - os: ubuntu-26.04-arm
+          - os: ubuntu-24.04-arm  # don't use 26.04, due to glibc req (see below)
             condition: ${{ inputs.linux && inputs.targets_test }}
             py_ver: '3.13'
             # if we don't use the sysroot or an older container, the glibc requirement is high
             # see below for an alternative approach that uses the sysroot on aarch64 natively
             tag: manylinux_2_38_aarch64
-          
-          - os: ubuntu-26.04-arm
-            condition: ${{ inputs.linux && inputs.targets_test }}
-            py_ver: '3.13'
-            build_params: '--use-sysroot'
-            tag: manylinux_2_17_aarch64.manylinux2014_aarch64
           
           - os: ubuntu-26.04-arm
             condition: ${{ inputs.linux && inputs.targets_test }}

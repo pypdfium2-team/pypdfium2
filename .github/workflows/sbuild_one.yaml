@@ -30,6 +30,9 @@ on:
       custom_clang:
         type: boolean
         default: false
+      docker_test:
+        type: boolean
+        default: true
       tag:
         type: string
         default: ''
@@ -95,13 +98,14 @@ jobs:
       - name: Install Linux/Android cross deps
         if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
         run: |
-          PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU)
+          PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU $RUNNER_OS)
           echo $PACKAGES; sudo apt-get install -y $PACKAGES
           ls -l /usr/bin |grep -E '\-(gcc|g\+\+|ar|nm|readelf)(-[0-9.]+)?$'
         env:
+          RUNNER_OS: ${{ inputs.os }}
           TARGET_CPU: ${{ inputs.target_cpu }}
       
-      # TODO handle platforms other than ppc64, delegate to a python script
+      # TODO handle platforms other than ppc64, delegate to a script
       - name: Create symlinks for GCC
         if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.prefer_gcc && inputs.target_cpu == 'ppc64' }}
         run: |
@@ -158,11 +162,11 @@ jobs:
         if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu && !inputs.target_os }}
         uses: docker/setup-qemu-action@v4
       
+      # q&d: extract arch from wheelname -> TODO(container_driver), map target_cpu to uname cpu?
       - name: Test wheel in docker container
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os }}
+        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.docker_test }}
         continue-on-error: ${{ inputs.target_cpu == 'mips64el' }}
         run: |
-          # q&d: extract arch from wheel file -> TODO in container_driver.py, map target_cpu to uname cpu?
           TARGET=$(ls dist/*.whl | grep -o -P 'manylinux_[\d_]+_\K.+?(?=\.)')
           echo "$TARGET"
           mkdir wheelhouse && cp dist/*.whl wheelhouse/

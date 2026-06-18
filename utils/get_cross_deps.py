@@ -16,6 +16,7 @@ def get_gcc_id(arch):
         return f"{arch}-linux-gnu"
 
 target_cpu = sys.argv[1]
+host_os = sys.argv[2] if len(sys.argv) > 2 else None
 deps = []
 
 if target_cpu == "x86":
@@ -26,8 +27,11 @@ else:
         "arm64": "aarch64",
         "ppc64": "ppc64le",
     }.get(target_cpu, target_cpu)
+    gcc_ver = {
+        "ubuntu-24.04": 14,
+        "ubuntu-26.04": 16,
+    }.get(host_os, 14)
     gcc_id = get_gcc_id(uname_cpu)
-    gcc_ver = 16
     gcc_suffix = f"{gcc_ver}-{gcc_id}"
     deps += ("libc6-i386", f"gcc-{gcc_ver}-multilib", f"g++-{gcc_suffix}", f"gcc-{gcc_suffix}")
 
