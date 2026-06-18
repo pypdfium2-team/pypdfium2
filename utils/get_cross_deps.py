@@ -27,6 +27,6 @@ else:
         "ppc64": "ppc64le",
     }.get(target_cpu, target_cpu)
     gcc_id = get_gcc_id(uname_cpu)
-    deps += ["libc6-i386", "gcc-13-multilib", f"g++-13-{gcc_id}", f"gcc-13-{gcc_id}"]
+    deps += ["libc6-i386", "gcc-14-multilib", f"g++-14-{gcc_id}", f"gcc-14-{gcc_id}"]
 
 print(" ".join(shlex.quote(d) for d in deps))

@@ -153,12 +153,6 @@ def build(target):
     run_cmd([ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
 
 
-def _use_gcc(config):
-    config.update({
-        "is_clang": False,
-        "use_custom_libcxx": False,
-    })
-
 def handle_portable_mode(config, use_sysroot, clang_path):
     
     patch_clang = False
@@ -183,7 +177,10 @@ def handle_portable_mode(config, use_sysroot, clang_path):
             "clang_version": clang_ver,
         })
     else:
-        _use_gcc(config)
+        config.update({
+            "is_clang": False,
+            "use_custom_libcxx": False,
+        })
         if use_sysroot:
             log("Warning: --use-sysroot with GCC / system libcxx. This may or may not work. If it fails, bring your own clang and pass --clang-path.")
     
@@ -257,7 +254,7 @@ def main(
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     config = DefaultConfig.copy()
     if prefer_gcc:
-        _use_gcc(config)
+        config["is_clang"] = False
     patch_clang = handle_portable_mode(config, use_sysroot, clang_path)
     handle_windows(win_sdk_dir)
     
@@ -311,7 +308,7 @@ def parse_args(argv):
     parser.add_argument(
         "--prefer-gcc",
         action = "store_true",
-        help = "If this option is given, attempt to use GCC (and system libc++, implied) even for cross-compilation. There is no point passing this option in PORTABLE_MODE, where GCC is default. Be careful, using GCC / system libc++ may or may not work when a sysroot is used as we do.",
+        help = "Attempt to use GCC for (cross-)compilation. This will set is_clang = false but leave use_custom_libcxx unchanged. This may or may not work for you, as the vendored libc++ requires a very cutting edge compiler. This option is effectively ignored in PORTABLE_MODE, where GCC & system libc++ are default.",
     )
     parser.add_argument(
         "--use-sysroot",
