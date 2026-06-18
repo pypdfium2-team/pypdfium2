@@ -1,0 +1,42 @@
+diff --git a/toolchain/linux/BUILD.gn b/toolchain/linux/BUILD.gn
+index a6e20a0..03d7837 100644
+--- a/toolchain/linux/BUILD.gn
++++ b/toolchain/linux/BUILD.gn
+@@ -83,12 +83,13 @@ clang_toolchain("clang_x86") {
+ }
+ 
+ gcc_toolchain("x86") {
+-  cc = "gcc"
+-  cxx = "g++"
++  toolprefix = "i686-linux-gnu-"
++  cc = "${toolprefix}gcc"
++  cxx = "${toolprefix}g++"
+ 
+-  readelf = "readelf"
+-  nm = "nm"
+-  ar = "ar"
++  readelf = "${toolprefix}readelf"
++  nm = "${toolprefix}nm"
++  ar = "${toolprefix}ar"
+   ld = cxx
+ 
+   # Output linker map files for binary size analysis.
+@@ -312,12 +313,13 @@ gcc_toolchain("s390x") {
+ }
+ 
+ gcc_toolchain("ppc64") {
+-  cc = "gcc"
+-  cxx = "g++"
++  toolprefix = "powerpc64le-linux-gnu-"
++  cc = "${toolprefix}gcc"
++  cxx = "${toolprefix}g++"
+ 
+-  readelf = "readelf"
+-  nm = "nm"
+-  ar = "ar"
++  readelf = "${toolprefix}readelf"
++  nm = "${toolprefix}nm"
++  ar = "${toolprefix}ar"
+   ld = cxx
+ 
+   toolchain_args = {
