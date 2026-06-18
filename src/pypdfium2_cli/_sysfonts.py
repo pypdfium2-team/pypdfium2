@@ -12,9 +12,13 @@ logger = logging.getLogger("pypdfium2_cli")
 class PdfSysfontListener (pdfium.PdfSysfontBase):
     
     def __init__(self, default=None):
-        logger.debug("Installing sysfontinfo...")
+        logger.debug("Building sysfontinfo instance...")
         super().__init__(default)
         logger.debug(f"fontinfo default interface version is {self.version}")
+    
+    def setup(self, *args, **kwargs):
+        logger.debug("Installing sysfontinfo...")
+        return super().setup(*args, **kwargs)
     
     def MapFont(self, _, weight, bItalic, charset, pitch_family, face, _ignored):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
@@ -22,7 +26,7 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, _ignored)
         # For internal substitution, check the family names in `pypdfium2 fonts` CLI output.
         # If you see names like "Chrom Sans OTF" or "Chrom Serif OTF" then you probably got internal substitution.
-        vis_out = out or f"{out}  # probably internal subst with Chrome font"
+        vis_out = out or f"{out}  # unknown/internal"
         logger.debug(f"fontinfo::MapFont:out {vis_out}")
         return out
     
