@@ -588,6 +588,9 @@ def _open_pdf(input_data, password, autoclose):
 
 
 class _ObjectHolder:
+    
+    __slots__ = ("obj", )
+    
     def __init__(self, obj):
         self.obj = obj
 
