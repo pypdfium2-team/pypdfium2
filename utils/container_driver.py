@@ -12,22 +12,27 @@ from base import ProjectDir, log  # local
 _DEBIAN_CMD = "apt update && apt install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
 _ALPINE_CMD = "apk add python3 py3-pip py3-pillow py3-numpy py3-pytest"
 
+# Map uname-style machine name to docker container arch name
+# Check the respective docker hub pages for a list of platforms (e.g. https://hub.docker.com/_/debian#quick-reference-cont)
 DOCKER_CPU_MAP = {
-    "x86_64": "amd64",
+    "x86_64":  "amd64",
+    "i686":    "i386",
     "aarch64": "arm64v8",
-    "armv7l": "arm32v7",
-    "i686": "i386",
-    "loongarch64": "loong64",
-}  # ppc64le, riscv64, s390x, mips64le equal
+    "armv7l":  "arm32v7",
+}
 
-# cf. https://github.com/pypa/cibuildwheel/blob/bb153041f0defc85849ef2d519c39c9218d889d0/cibuildwheel/oci_container.py#L30-L59
+# Map uname-style machine name to binfmt handler name.
+# Check tonistiigi/binfmt for a canonical list (also seen in setup-qemu-action output).
 PLATFORM_CPU_MAP = {
-    "x86_64": "amd64",
+    "x86_64":  "amd64",
+    "i686":    "386",
     "aarch64": "arm64",
-    "armv7l": "arm/v7",
-    "i686": "386",
-    "loongarch64": "loong64",
-}  # dto.
+    "armv7l":  "arm/v7",
+}
+
+# The following platform names match across conventions, so they do not need to be explicitly handled above:
+# loong64, mips64le, ppc64le, riscv64, s390x
+
 
 def _get_container(os_class, cpu):
     docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
@@ -52,6 +57,8 @@ def run_process(argv, **kwargs):
 def main():
     
     os_class, cpu = sys.argv[1].split("_", maxsplit=1)
+    cpu = {"loongarch64": "loong64"}.get(cpu, cpu)
+    
     container, docker_flags, prepare_cmd, shell = _get_container(os_class, cpu)
     log(f"{container}, {docker_flags}, {prepare_cmd}, {shell}")
     
