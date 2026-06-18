@@ -183,6 +183,13 @@ CharsetToStr = _fallback_dict({
     pdfium_c.FXFONT_EASTERNEUROPEAN_CHARSET: "EasternEuropean",
 })
 
+RenderStatusToStr = _fallback_dict({
+    pdfium_c.FPDF_RENDER_READY:         "ready",
+    pdfium_c.FPDF_RENDER_TOBECONTINUED: "to be continued",
+    pdfium_c.FPDF_RENDER_DONE:          "done",
+    pdfium_c.FPDF_RENDER_FAILED:        "failed",
+})
+
 class PdfFontPitchFamilyFlags (enum.Flag):
     "Map PDFium font pitch and family flags to python :class:`enum.Flag`."
     FIXEDPITCH = pdfium_c.FXFONT_FF_FIXEDPITCH

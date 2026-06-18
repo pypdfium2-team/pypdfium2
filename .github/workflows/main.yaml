@@ -346,7 +346,7 @@ jobs:
         run: |
           mkdir gh_only
           mv dist/*linux_*_loongarch64*.whl gh_only/  # augment_cibw
-          mv dist/*linux_*_mips64le*.whl gh_only/       # augment_sbuild
+          mv dist/*linux_*_mips64le*.whl gh_only/     # augment_sbuild
       
       - name: Apply and push repository changes
         run: |

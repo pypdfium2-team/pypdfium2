@@ -484,7 +484,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             pdfium_i.set_callback(pause, "NeedToPauseNow", lambda _: False)
             fpdf_cs = color_scheme.convert(rev_byteorder)
             status = pdfium_c.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_cs, pause)
-            assert status == pdfium_c.FPDF_RENDER_DONE
+            assert status == pdfium_c.FPDF_RENDER_DONE, f"Render status is {pdfium_i.RenderStatusToStr[status]!r}, but 'done' was expected."
             pdfium_c.FPDF_RenderPage_Close(self)
         
         if may_draw_forms and self.formenv:
