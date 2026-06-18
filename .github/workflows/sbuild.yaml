@@ -66,9 +66,7 @@ jobs:
           - os: ubuntu-latest
             condition: ${{ inputs.linux && inputs.targets_main }}
             target_cpu: mips64el
-            # in mips64le/debian docker, uname -m says just "mips64"
-            # FIXME pip install still refuses the wheel
-            tag: manylinux_2_17_mips64.manylinux2014_mips64
+            tag: manylinux_2_17_mips64le.manylinux2014_mips64le
           
           - os: ubuntu-24.04-arm
             condition: ${{ inputs.linux && inputs.targets_test }}

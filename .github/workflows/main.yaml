@@ -272,9 +272,7 @@ jobs:
         include:
           - os: ubuntu-latest
             target_cpu: mips64el
-            # in mips64le/debian docker, uname -m says just "mips64"
-            # FIXME pip install still refuses the wheel
-            tag: manylinux_2_17_mips64.manylinux2014_mips64
+            tag: manylinux_2_17_mips64le.manylinux2014_mips64le
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
@@ -348,7 +346,7 @@ jobs:
         run: |
           mkdir gh_only
           mv dist/*linux_*_loongarch64*.whl gh_only/  # augment_cibw
-          mv dist/*linux_*_mips64*.whl gh_only/       # augment_sbuild
+          mv dist/*linux_*_mips64le*.whl gh_only/       # augment_sbuild
       
       - name: Apply and push repository changes
         run: |

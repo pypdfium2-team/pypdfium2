@@ -18,9 +18,7 @@ DOCKER_CPU_MAP = {
     "armv7l": "arm32v7",
     "i686": "i386",
     "loongarch64": "loong64",
-    # with sbuild_one.yaml, the CPU name is inferred from the wheelname, which is mips64
-    "mips64": "mips64le",
-}  # ppc64le, riscv64, s390x equal
+}  # ppc64le, riscv64, s390x, mips64le equal
 
 # cf. https://github.com/pypa/cibuildwheel/blob/bb153041f0defc85849ef2d519c39c9218d889d0/cibuildwheel/oci_container.py#L30-L59
 PLATFORM_CPU_MAP = {
@@ -29,7 +27,6 @@ PLATFORM_CPU_MAP = {
     "armv7l": "arm/v7",
     "i686": "386",
     "loongarch64": "loong64",
-    "mips64": "mips64le",
 }  # dto.
 
 def _get_container(os_class, cpu):
