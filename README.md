@@ -2,7 +2,8 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 > [!IMPORTANT]
-> **AI-"assisted" issues and PRs are banned from this project!** [See below.](#no-ai-issues-and-prs-policy)
+> **AI-"assisted" issues and PRs are banned from this project!**
+> See [#449](https://github.com/pypdfium2-team/pypdfium2/discussions/449) or [below](#no-ai-issues-and-prs-policy) for more info.
 
 # pypdfium2
 
