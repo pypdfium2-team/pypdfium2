@@ -9,7 +9,7 @@ def _manylinux_tag(arch):
 _WheeltagPatterns = {
     # -- MINVER info is provided on an "AS OF THIS WRITING" basis (06/2026) --
     
-    # MINVER(macOS): Can be checked with `vtool` (requires a macOS host). Upstream no longer specify a deployment target in config.
+    # MINVER(macOS): Can be checked with `vtool` on a native host, or cross-checked with macholib. Upstream no longer specify a deployment target in config.
     PlatNames.darwin_x64:       ("macosx_{}_x86_64", "12_0"),
     PlatNames.darwin_arm64:     ("macosx_{}_arm64",  "12_0"),
     # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
@@ -43,11 +43,10 @@ _WheeltagPatterns = {
     # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. Note that the PEP says:
     # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
     # I take it this means you'd need to change the library search path to that Frameworks location in bindings.
-    # MINVER(ios): Unclear, guessed from the lowest version XCode 26 can achieve according to [1]
-    # [1]: https://developer.apple.com/xcode/system-requirements/
-    PlatNames.ios_arm64_dev:    ("ios_{}_arm64_iphoneos",         "15_0"),
-    PlatNames.ios_arm64_simu:   ("ios_{}_arm64_iphonesimulator",  "15_0"),
-    PlatNames.ios_x64_simu:     ("ios_{}_x86_64_iphonesimulator", "15_0"),
+    # MINVER(ios): Can be cross-checked with `macholib`.
+    PlatNames.ios_arm64_dev:    ("ios_{}_arm64_iphoneos",         "26_0"),
+    PlatNames.ios_arm64_simu:   ("ios_{}_arm64_iphonesimulator",  "26_0"),
+    PlatNames.ios_x64_simu:     ("ios_{}_x86_64_iphonesimulator", "26_0"),
 }
 
 def get_wheel_tag(pl_name, dll_path):
