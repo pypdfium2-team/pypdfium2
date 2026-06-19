@@ -6,19 +6,12 @@ pypdfium2
 
 Welcome to the documentation for the support model of pypdfium2.
 
-
-**Platform support & packaging strategies**
-
-.. csv-table::
-   :file: ../../PLATFORMS.csv
-   :header-rows: 1
-
-
 .. toctree::
    :maxdepth: 2
    :caption: Usage
    
    readme
+   platforms
    python_api
    shell_api
 
