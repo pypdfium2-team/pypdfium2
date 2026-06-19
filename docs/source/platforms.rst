@@ -19,3 +19,5 @@ Platform support & build strategies
 .. csv-table::
    :file: ../../PLATFORMS.csv
    :header-rows: 1
+
+.. TODO add legend
