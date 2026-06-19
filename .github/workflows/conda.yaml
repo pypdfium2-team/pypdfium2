@@ -44,7 +44,7 @@ jobs:
   
   build:
     
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     steps:
       
       - name: Set up Miniconda
@@ -154,7 +154,7 @@ jobs:
     
     if: ${{ inputs.publish }}
     needs: [build, test]
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     
     # TODO upload as GH release as well
     
