@@ -15,7 +15,7 @@ If you did not use AI, welcome! Please read the points below.
 
 ## Checklist
 
-- [ ] I understand that AI pull requests are not accepted by this project. *PRs that show typical characteristics of AI will be closed immediately and the reporter may be blocked.*
+- [ ] I understand that **AI pull requests are banned** from this project. *PRs that show typical characteristics of AI will be closed immediately and the reporter may be blocked.*
 
 <details open><summary>Helpers</summary>
 

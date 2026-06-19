@@ -2,9 +2,7 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 > [!IMPORTANT]
-> **The pypdfium2 project does not tolerate AI issues and PRs!**
-> Any issues or PRs that exhibit the typical characteristics of low-quality generative AI will be labelled as `spam / ai` and closed/locked immediately, no matter how important they may claim to be.
-> Users who violate this policy repeatedly should not be surprised to find themselves blocked.
+> **AI-"assisted" issues and PRs are banned from this project!** [See below.](#no-ai-issues-and-prs-policy)
 
 # pypdfium2
 
@@ -991,10 +989,18 @@ Roadmap:
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
 * [ctypesgen](https://github.com/pypdfium2-team/ctypesgen/issues): Bindings generator (fork). See also [upstream](https://github.com/ctypesgen/ctypesgen/issues).
 
+### No AI issues and PRs policy
+
+AI issues and PRs are banned from this project.
+
+Any issues or PRs that exhibit the typical characteristics of low-quality generative AI will be labelled as `spam / ai` and closed/locked immediately, no matter how important they may claim to be.
+
+Our issue and PR templates make it quite plain that AI is not allowed, so users who violate this policy should not be surprised to find themselves blocked.
+
 ### Response policy
 <!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
 
-Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide usage support.
+Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide much usage support.
 
 The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and we are free to silently reject PRs we do not like.
 

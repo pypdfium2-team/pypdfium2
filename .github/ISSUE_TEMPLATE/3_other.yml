@@ -10,7 +10,7 @@ body:
     attributes:
       label: Checklist
       options:
-        - label: I understand that AI issues are not accepted by this project. *Issues that show typical characteristics of AI will be closed immediately and the reporter may be blocked.*
+        - label: I understand that **AI issues are banned** from this project. *Issues that show typical characteristics of AI will be closed immediately and the reporter may be blocked.*
           required: true
         - label: I confirm this is **not a question or feature request**. *Otherwise, use the Discussions page.*
           required: true
