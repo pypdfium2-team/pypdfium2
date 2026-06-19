@@ -16,3 +16,8 @@
 - Updated to `ubuntu-26.04` and `windows-11-vs2026-arm` runners (mostly).
 - `get_cross_deps.py`: Use GCC 16 on `ubuntu-26.04`, and GCC 14 on `ubuntu-24.04`.
 - Docs: Comprehensive platform support table added – check it out!
+- Put up a notice that AI issues/PRs are banned from this project, and updated templates accordingly.
+  Any users who continue to file AI issues will be blocked.
+  After receiving half a dozen consecutive issues and PRs full of bloat, confusion and wildly invented false claims, which nearly all turned out to have been produced by Claude Code, we feel compelled to take this step.
+  Honestly, letting AI output a big heap of garbage will ultimately take everyone involved far more time than writing a few truthful, hallucination-free lines on your own.
+  TLDR: If you encounter an issue that you want to see fixed, do not use AI to write bug reports. If you do not want your issue fixed, fine, keep talking to your clanker, but pypdfium2's issue tracker is not a good place to offload its garbage.
