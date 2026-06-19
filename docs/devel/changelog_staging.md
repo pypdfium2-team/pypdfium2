@@ -10,3 +10,4 @@
 - `sbuild_one.yaml` now also docker-tests Linux wheels, to make sure cross-compiled builds actually work.
 - CI: Updated to `ubuntu-26.04` and `windows-11-vs2026-arm` runners (mostly).
 - `get_cross_deps.py`: Use GCC 16 on `ubuntu-26.04`, and GCC 14 on `ubuntu-24.04`.
+- Docs: Comprehensive platform support table added – check it out!

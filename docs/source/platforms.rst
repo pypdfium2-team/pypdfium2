@@ -14,7 +14,7 @@
 Platforms
 =========
 
-Platform support & packaging strategies
+Platform support & build strategies
 
 .. csv-table::
    :file: ../../PLATFORMS.csv
