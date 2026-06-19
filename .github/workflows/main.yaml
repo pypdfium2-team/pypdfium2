@@ -115,7 +115,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # stick with ubuntu-24.04 for now, as it still has python 3.8, unlike 26.04
+        # stick with ubuntu-24.04 for now so we can keep testing python 3.8
         os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-vs2026-arm']
         py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
         exclude:
@@ -127,9 +127,9 @@ jobs:
           # - os: windows-11-vs2026-arm
           #   py: '3.10'
         include:
-          - os: ubuntu-26.04
+          - os: ubuntu-24.04
             wheel: dist/*manylinux_*_x86_64*.whl
-          - os: ubuntu-26.04-arm
+          - os: ubuntu-24.04-arm
             wheel: dist/*manylinux_*_aarch64*.whl
           - os: macos-15-intel
             wheel: dist/*macosx_*_x86_64*.whl

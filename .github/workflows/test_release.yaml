@@ -23,7 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-26.04', 'ubuntu-26.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-vs2026-arm']
+        # stick with ubuntu-24.04 for now so we can keep testing python 3.8
+        os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-vs2026-arm']
         py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
         exclude:
           # not supported by setup-python action

@@ -97,7 +97,8 @@ jobs:
       fail-fast: false
       matrix:
         # Can't test Windows 11 ARM64 because setup-miniconda doesn't support it AOTW
-        os: ['ubuntu-26.04', 'ubuntu-26.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest']
+        # Also, stick with ubuntu-24.04 for now so we can keep testing python 3.8
+        os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest']
         py: ['3.8', '3.14']  # '3.9', '3.10', '3.11', '3.12', '3.13',
         exclude:
           - os: macos-15-intel

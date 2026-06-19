@@ -13,7 +13,7 @@
 - Corrected minimum iOS requirement to `26_0` according to `macholib`.
   (We do not release iOS wheels but it is handled in setup.)
 - `sbuild_one.yaml` now also docker-tests Linux wheels, to make sure cross-compiled builds actually work.
-- Updated to `ubuntu-26.04` and `windows-11-vs2026-arm` runners (mostly).
+- Start using `ubuntu-26.04` and `windows-11-vs2026-arm` runners. Some workflows intentionally stick with `ubuntu-24.04` for the time being so we can keep testing older Python versions. (On `ubuntu-26.04`, the lowest python version shipped by `actions/setup-python` is 3.10 which is pretty high new considering that some older distributions are still running Python 3.6.)
 - `get_cross_deps.py`: Use GCC 16 on `ubuntu-26.04`, and GCC 14 on `ubuntu-24.04`.
 - Docs: Comprehensive platform support table added – check it out!
 - Put up a notice that AI issues/PRs are banned from this project, and updated templates accordingly.
