@@ -142,7 +142,7 @@ def main_conda_helpers(args):
     # This is so we can share the value and need to change it only in one place.
     os.environ["PDFIUM_MIN"] = str(PDFIUM_MIN_REQ)
     # Set the current pdfium version as upper boundary, for inherent API safety.
-    # pdfium does not do semantic versioning, so upward flexibility is difficult.
+    # Upward flexibility is difficult. For one thing, pdfium does not do semantic versioning. For another, unforeseen issues can crop up anytime, and we do not want them to break older releases.
     os.environ["PDFIUM_MAX"] = str(args.pdfium_ver)
     
     # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
