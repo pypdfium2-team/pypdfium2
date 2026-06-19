@@ -23,7 +23,7 @@ coverage-core *args:
 docs-build:  # *args
 	python3 -m sphinx -b html docs/source docs/build/html
 docs-open:
-	{{BROWSER}} docs/build/html/index.html &>/dev/null
+	{{BROWSER}} docs/build/html/index.html &>/dev/null &
 docs-clean:
 	rm -rf docs/build/html
 
