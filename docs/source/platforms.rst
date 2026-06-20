@@ -1,6 +1,10 @@
 .. SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 .. SPDX-License-Identifier: CC-BY-4.0
 
+.. NOTE With Sphinx / RTD theme, default handling of tables is awful.
+.. The custom CSS below lets us expand the big table to the right, and wrap text in the small table.
+.. Disclaimer: The author has no prior knowledge of CSS. The code below is a result of asking AI + trial & error. If you can improve it, please open a PR.
+
 .. raw:: html
 
    <style>
@@ -11,8 +15,11 @@
      overflow: visible !important;
    }
    
-   .wy-table-responsive .fullwidth-table {
-     width: 100% !important;
+   table.textwrap-table td,
+   table.textwrap-table th {
+     white-space: normal !important;
+     overflow-wrap: break-word !important;
+     word-break: normal !important;
    }
    </style>
 
@@ -22,14 +29,15 @@ Platforms
 
 Platform support & build strategies (as of 06/2026)
 
+Platforms with prebuilds
+------------------------
+
 .. csv-table::
    :file: ../../PLATFORMS.csv
    :header-rows: 1
-   :class: fullwidth-table
-
 
 Legend
-------
+^^^^^^
 
 - Build strategies
   
@@ -46,7 +54,7 @@ Legend
 
 - **Release** (status, version tracked, build strategy)
   
-  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only (platform rejected by PyPI), 🟨 Setup only
+  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only (platform rejected by PyPI), 🟦 Setup only
   + 🔄 Latest version, 📌 Pinned version
 
 .. admonition:: Help wanted
@@ -57,21 +65,42 @@ Legend
 Other platforms
 ---------------
 
-.. csv-table::
+.. list-table::
    :header-rows: 1
+   :widths: 15,5,50
+   :class: textwrap-table
    
-   Platform,Status,Comment
-   FreeBSD,⬜,1
-   OpenBSD / \*BSD,❌,2
-   Illumos,❌,2
-   Haiku,❌,2
-   SerenityOS,❌,2
-   AIX,❌,2
-   z/OS,❌,2
-
-1) Fallback installation with libreoffice-pdfium should work and is occasionally tested on our CI.
-   Note, however, that libreoffice-pdfium is a bit incomplete.
-   Building from source might work with a feasible amount of patching.
-   It *may* be possible to provide prebuilds for x86_64 in the future.
-   There is also upstream work in progress to have PDFium added to the ports collection.
-2) No known PDFium prebuilds available for this platform.
+   * - Platform
+     - Status
+     - Comment
+   * - FreeBSD
+     - 🟦
+     - Fallback installation with libreoffice-pdfium should work, and we occasionally test it on CI.
+       Note, however, that libreoffice-pdfium tends to be a bit incomplete. |br|
+       Building from source might work with a feasible amount of patching.
+       It *may* be possible to provide prebuilds for x86_64 in the future. |br|
+       There is also upstream work in progress to have PDFium added to the ports collection.
+   * - OpenBSD / \*BSD
+     - ❓
+     - Libreoffice is not built with PDFium on OpenBSD. |br|
+       However, if building on FreeBSD is possible, it may be doable on other BSDs, too.
+   * - Illumos
+     - ❌
+     - No known prebuilds available. |br|
+       PDFium has not been ported to this platform.
+   * - Haiku
+     - ❌
+     - No known prebuilds available. |br|
+       PDFium has not been ported to this platform.
+   * - SerenityOS
+     - ❌
+     - No known prebuilds available. |br|
+       PDFium has not been ported to this platform.
+   * - AIX
+     - ❓
+     - No known prebuilds available. Proprietary OS. |br|
+       Chromium build infrastructure appears to have some degree of support for AIX but the exact status is unknown.
+   * - z/OS
+     - ❌
+     - No known prebuilds available. Proprietary OS. |br|
+       PDFium has not been ported to this platform.
