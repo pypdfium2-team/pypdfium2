@@ -3,7 +3,7 @@
 
 > [!IMPORTANT]
 > **AI-"assisted" issues and PRs are banned from this project!**
-> See [#449](https://github.com/pypdfium2-team/pypdfium2/discussions/449) or [below](#no-ai-issues-and-prs-policy) for more info.
+> See [below](#no-ai-issues-and-prs-policy).
 
 # pypdfium2
 
@@ -997,6 +997,8 @@ AI issues and PRs are banned from this project.
 Any issues or PRs that exhibit the typical characteristics of low-quality generative AI will be labelled as `spam / ai` and closed/locked immediately, no matter how important they may claim to be.
 
 Our issue and PR templates make it quite plain that AI is not allowed, so users who violate this policy should not be surprised to find themselves blocked.
+
+[This announcement](https://github.com/pypdfium2-team/pypdfium2/discussions/449) offers some more background as to why this decision was reached.
 
 ### Response policy
 <!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->

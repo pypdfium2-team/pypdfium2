@@ -13,8 +13,8 @@ on:
         default: ''
       sysroot_level:
         # 0: Don't use sysroot anywhere
-        # 1: Use sysroot with clang and vendored libc++ where available, i.e. manylinux_{ppc64le,riscv64}
-        # 2: Like 1, but also use sysroot on armv7l with GCC (Ubuntu-based container)
+        # 1: With clang and vendored libc++, use sysroot where available, i.e. manylinux_{ppc64le,riscv64}
+        # 2: Like 1, but also use sysroot on armv7l with GCC (Ubuntu-based container) -> FIXME actually pointless?
         # 3: Use sysroot on all manylinux targets where available. This fails on the older RHEL-based containers with GCC. With recent clang + vendored libc++ (or a plain ubuntu runner, not a manylinux container), it would probably work.
         type: int
         default: 2
