@@ -122,7 +122,7 @@ jobs:
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.
       - name: Install Windows cross deps
         if: ${{ startsWith(inputs.os, 'windows') && !endsWith(inputs.os, '-arm') && inputs.target_cpu }}
-        uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9
+        uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9  # v1.0.5
         with:
           version-sdk: 26100
           features: 'OptionId.WindowsDesktopDebuggers'
