@@ -48,7 +48,7 @@ jobs:
     steps:
       
       - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
         with:
           auto-update-conda: true
           python-version: ${{ inputs.py_ver }}
@@ -119,7 +119,7 @@ jobs:
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Miniconda setup
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
@@ -162,7 +162,7 @@ jobs:
       
       # NOTE custom channels may not be actually necessary here
       - name: Miniconda setup
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}

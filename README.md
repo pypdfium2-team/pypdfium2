@@ -459,7 +459,7 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
 + To set up channels in a GH workflow
   ```yaml
   - name: ...
-    uses: conda-incubator/setup-miniconda@v3
+    uses: conda-incubator/setup-miniconda@v4  # or pin to hash
     with:
       # ... your options
       channels: pypdfium2-team,bblanchon

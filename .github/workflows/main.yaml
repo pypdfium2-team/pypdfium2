@@ -46,7 +46,7 @@ jobs:
     
     steps:
       
-      - uses: extractions/setup-just@v4
+      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
       
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -392,7 +392,7 @@ jobs:
       
       # FIXME skip gh_only/*.whl if !inputs.augment
       - name: Publish to GitHub
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1  # TODO pin to hash?
         with:
           immutableCreate: true
           artifacts: 'dist/*.whl,gh_only/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
