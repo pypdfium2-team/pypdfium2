@@ -8,14 +8,3 @@
 .admonition.important > .admonition-title {
    background-color: #8957e5;
 }
-
-.wy-table-responsive {  /* :has(.fullwidth-table) */
-  width: 100% !important;
-  max-width: 100% !important;
-  flex-grow: 1 !important;
-  overflow: visible !important;
-}
-
-.wy-table-responsive .fullwidth-table {
-  width: 100% !important;
-}
