@@ -37,7 +37,7 @@ case "${STATIC_CLANG_ARCH}" in
 	*) echo "No static-clang toolchain for ${CLANG_ARCH}">2; exit 1;;
 esac
 
-STATIC_CLANG_VERSION=latest  # or pin 22.1.7.0
+STATIC_CLANG_VERSION=latest  # or pin 22.1.8.0
 if [ "$STATIC_CLANG_VERSION" == "latest" ]; then
 	STATIC_CLANG_BASEURL="https://github.com/mayeut/static-clang-images/releases/latest/download"
 else
@@ -47,11 +47,17 @@ fi
 STATIC_CLANG_FILENAME="static-clang-linux-${GO_ARCH}.tar.xz"
 STATIC_CLANG_URL="${STATIC_CLANG_BASEURL}/${STATIC_CLANG_FILENAME}"
 SHASUMS_URL="${STATIC_CLANG_BASEURL}/sha256sums.txt"
+ATTESTATIONS_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
 
 pushd /tmp
-curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
 curl -fsSLO "${STATIC_CLANG_URL}"
+
+curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
 sha256sum -c "${STATIC_CLANG_FILENAME}.sha256"
+
+curl -fsSLO "${ATTESTATIONS_URL}"
+which gh && gh attestation verify "${STATIC_CLANG_FILENAME}" -R "mayeut/static-clang-images" -b ./attestation-bundle.json
+
 tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
 ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
 popd
