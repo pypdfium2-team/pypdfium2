@@ -23,5 +23,5 @@
   Any users who continue to file AI issues will be blocked.
   After half a dozen consecutive issues and PRs full of confusion, bloat and wildly invented false claims, which nearly all turned out to have been produced by Claude Code, we feel compelled to take this step.
   Frankly, dumping a big heap of AI garbage will ultimately take everyone involved far more time than writing a few truthful, hallucination-free lines on your own.
-  **If you encounter an issue, our condition for your chance to have us investigate (and hopefully fix) your issue is that you must act respectfully and provide a workable bug report without any AI involvement.**
+  **If you encounter an issue, our condition for your chance to have us investigate (and hopefully fix) it is that you must act respectfully and provide a workable bug report without any AI involvement.**
   If you want to keep talking to your clanker, that's your choice, but pypdfium2's issue tracker is not a waste deposit for AI garbage!
