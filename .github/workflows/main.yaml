@@ -274,15 +274,18 @@ jobs:
           - os: ubuntu-24.04  # dont't use 26.04, it lacks GCC cross for MIPS :(
             target_cpu: mips64el
             tag: manylinux_2_17_mips64le.manylinux2014_mips64le
+            docker_test: true
           - os: ubuntu-24.04  # dto.
             target_cpu: mipsel
             tag: manylinux_2_17_mipsle.manylinux2014_mipsle
+            docker_test: false
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       os: ${{ matrix.os }}
       target_cpu: ${{ matrix.target_cpu }}
       tag: ${{ matrix.tag }}
+      docker_test: ${{ matrix.docker_test }}
       py_ver: ${{ inputs.py_ver }}
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
