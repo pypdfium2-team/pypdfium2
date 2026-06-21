@@ -162,7 +162,8 @@ jobs:
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu && inputs.docker_test }}
         uses: docker/setup-qemu-action@v4
       
-      # q&d: extract arch from wheelname -> TODO(container_driver), map target_cpu to uname cpu?
+      # q&d: extract arch from wheelname
+      # FIXME: Fails if no tag is provided. Better map target_cpu to uname cpu properly?
       - name: Test wheel in docker container
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.docker_test }}
         continue-on-error: ${{ inputs.target_cpu == 'mips64el' }}
