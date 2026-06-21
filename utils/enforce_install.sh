@@ -6,16 +6,10 @@
 
 set -exuo pipefail
 
-VENV_ROOT="$1"
-PLATFORM_TAG="$2"
-WHEEL_PATH="$3"
+WHEEL_PATH="$1"
+PYTHON="$2"
+WHEEL_DIR=$(dirname $WHEEL_PATH)
 
-STAGING_DIR="/tmp/staging"
-VENV_PY="$VENV_ROOT/bin/python3"
-PY_VERSION=$($VENV_PY -c 'import sys; v = sys.version_info; print(f"{v.major}.{v.minor}")')
-PKGDIR="$VENV_ROOT/lib/python$PY_VERSION/site-packages"
-
-$VENV_PY -m pip install --platform "$PLATFORM_TAG" --no-deps --target "$STAGING_DIR" "$WHEEL_PATH"
-ls -l "$STAGING_DIR"
-mv $STAGING_DIR/bin/* -t "$VENV_ROOT/bin" && rmdir "$STAGING_DIR/bin"
-mv $STAGING_DIR/* -t $PKGDIR
+HOST_PLATFORM=$($PYTHON -c "import sysconfig; print(sysconfig.get_platform())")
+RETAGGED_WHEEL_NAME=$($PYTHON -m wheel tags --platform-tag=linux_mips64 $WHEEL_PATH)
+$PYTHON -m pip install -v $WHEEL_DIR/$RETAGGED_WHEEL_NAME

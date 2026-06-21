@@ -11,13 +11,15 @@ VENV_ROOT="/testenv"
 VENV_PY="$VENV_ROOT/bin/python3"
 PYPDFIUM_DIR="/pypdfium2"
 WHEEL_PATH="./wheelhouse/*.whl"
-
-cd "$PYPDFIUM_DIR"
 CPUNAME=$(uname -m)
+
+$VENV_PY -m pip install -U pip
+cd "$PYPDFIUM_DIR"
 # In mips64le/debian docker, `uname -m` says just "mips64"
 if [ "$CPUNAME" == "mips64" ]; then
-    # On MIPS, `pip install` appears to refuse platform wheels, no matter if the tag is "mips64le", "mips64" (matching uname) or whatever. Use this hack to install anyway.
-    bash "$PYPDFIUM_DIR/utils/enforce_install.sh" "$VENV_ROOT" "manylinux_2_17_mips64le" $WHEEL_PATH
+    # https://github.com/pypa/pip/issues/14095
+    $VENV_PY -m pip install -U wheel
+    bash "$PYPDFIUM_DIR/utils/enforce_install.sh" $WHEEL_PATH $VENV_PY
 else
     $VENV_PY -m pip install $WHEEL_PATH
 fi
