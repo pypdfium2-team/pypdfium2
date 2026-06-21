@@ -274,6 +274,9 @@ jobs:
           - os: ubuntu-24.04  # dont't use 26.04, it lacks GCC cross for MIPS :(
             target_cpu: mips64el
             tag: manylinux_2_17_mips64le.manylinux2014_mips64le
+          - os: ubuntu-24.04  # dto.
+            target_cpu: mipsel
+            tag: manylinux_2_17_mipsle.manylinux2014_mipsle
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
@@ -348,6 +351,7 @@ jobs:
           mkdir gh_only
           mv dist/*linux_*_loongarch64*.whl gh_only/  # augment_cibw
           mv dist/*linux_*_mips64le*.whl gh_only/     # augment_sbuild
+          mv dist/*linux_*_mipsle*.whl gh_only/
       
       - name: Apply and push repository changes
         run: |

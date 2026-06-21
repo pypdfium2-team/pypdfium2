@@ -68,6 +68,11 @@ jobs:
             target_cpu: mips64el
             tag: manylinux_2_17_mips64le.manylinux2014_mips64le
           
+          - os: ubuntu-24.04  # dto.
+            condition: ${{ inputs.linux && inputs.targets_main }}
+            target_cpu: mipsel
+            tag: manylinux_2_17_mipsle.manylinux2014_mipsle
+          
           - os: ubuntu-24.04-arm  # don't use 26.04, due to glibc req (see below)
             condition: ${{ inputs.linux && inputs.targets_test }}
             py_ver: '3.13'

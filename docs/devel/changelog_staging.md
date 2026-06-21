@@ -4,9 +4,10 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- New platform: `manylinux_2_17_mips64le` wheel added to release. `build_toolchained.py` is now capable of building it, based on upstream's `mips64el` target (with patches). This took a great deal of tinkering.
+- New platforms: `manylinux_2_17_{mips64le,mipsle}` wheels added to release. `build_toolchained.py` is now capable of building these, based on upstream's `mips64el` and `mipsel` targets (with minor patches). This took a great deal of tinkering, however.
   Like `loongarch64`, PyPI does not accept MIPS wheels (yet), so they are only released to GitHub.
   Also, `pip` actually seems incapable of installing platform wheels on MIPS. We are providing a workaround script to bypass this limitation. Usage e.g. `./utils/enforce_install.sh ~/.local manylinux_2_17_mips64le ./pypdfium2-5.11.0-*.whl`.
+  The `mipsle` build is untested, for lack of a container image and binfmt handler.
 - Work around a bindings generation issue on Windows by avoiding inclusion of system `windows.h`.
   Added a notice to the Readme that ctypesgen may not work too well on non-Linux systems.
   Make test suite pass when reference bindings are used.
