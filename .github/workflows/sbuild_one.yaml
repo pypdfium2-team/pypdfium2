@@ -159,7 +159,7 @@ jobs:
           python3 -m pytest tests/
       
       - name: Set up QEMU
-        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu && !inputs.target_os }}
+        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu && inputs.docker_test }}
         uses: docker/setup-qemu-action@v4
       
       # q&d: extract arch from wheelname -> TODO(container_driver), map target_cpu to uname cpu?
@@ -173,7 +173,7 @@ jobs:
           python3 ./utils/container_driver.py "manylinux_${TARGET}"
       
       - name: On Linux, run auditwheel (informational)
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu != 'mips64el' }}
+        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}
         run: |
           python3 -m pip install -U auditwheel
           python3 -m auditwheel show dist/*.whl

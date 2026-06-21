@@ -12,7 +12,7 @@ def get_gcc_id(arch):
         return "mips64el-linux-gnuabi64"
     # elif arch in ("loong64", "loongarch64"):
     #     return "loongarch64-unknown-linux-gnu"
-    else:  # aarch64, (riscv64)
+    else:  # aarch64, mipsel, (riscv64)
         return f"{arch}-linux-gnu"
 
 target_cpu = sys.argv[1]

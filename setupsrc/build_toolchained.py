@@ -123,19 +123,18 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc):
         git_apply_patch(PatchDir/"android_cross.patch", PDFiumDir_build)
     
     if sys.platform.startswith("linux"):
-        mips64_clang = target_cpu == "mips64el" and not prefer_gcc
-        if target_cpu in ("ppc64", "mips64el"):
-            git_apply_patch(PatchDir/"extra_arch_cross.patch", PDFiumDir)
-        if mips64_clang:
-            git_apply_patch(PatchDir/"mips64el_cross.patch", PDFiumDir_build)
-        if target_cpu in ("ppc64", "x86") and prefer_gcc:
-            git_apply_patch(PatchDir/"gcc_cross.patch", PDFiumDir_build)
-        if PORTABLE_MODE or prefer_gcc:
-            git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
-        if (PORTABLE_MODE and patch_clang) or mips64_clang:
+        is_mips = target_cpu in ("mips64el", "mipsel")
+        is_mips_clang = is_mips and not prefer_gcc
+        if target_cpu == "ppc64":
+            git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
+        if is_mips_clang:
+            git_apply_patch(PatchDir/"mips_cross.patch", PDFiumDir_build)
+        if (PORTABLE_MODE and patch_clang) or is_mips_clang:
             git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
         if PORTABLE_MODE and patch_clang:
             git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
+        if PORTABLE_MODE or prefer_gcc:
+            git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
 
 
 def _get_tool(name):

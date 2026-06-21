@@ -123,7 +123,7 @@ path = [
     "patches/libpng_ppc64_loong64.patch",
     "patches/gcc_toolchain.patch",
     "patches/gcc_cross.patch",
-    "patches/mips64el_cross.patch",
+    "patches/mips_cross.patch",
     "patches/win/arm64_native.patch",
 ]
 precedence = "aggregate"
