@@ -3,20 +3,19 @@
 
 .. NOTE With Sphinx / RTD theme, default handling of tables is awful.
 .. The custom CSS below lets us expand the big table to the right, and wrap text in the small table.
-.. Disclaimer: The author has no prior knowledge of CSS. The bit of code below is a result of browsing, asking AI + trial & error. If you can improve it, please open a PR.
+.. Disclaimer: The author has no prior knowledge of CSS. The bit of code below is a result of browsing + trial & error. If you can improve it, please open a PR.
 
 .. raw:: html
 
    <style>
-   .wy-table-responsive {  /* :has(.fullwidth-table) */
-     width: 100% !important;
-     max-width: 100% !important;
-     flex-grow: 1 !important;
+   /* applies to table container in "covered-platforms" section */
+   #covered-platforms .wy-table-responsive {
      overflow: visible !important;
    }
    
-   table.textwrap-table td,
-   table.textwrap-table th {
+   /* applies to table header and data cells of textwrap-table */
+   table.textwrap-table th,
+   table.textwrap-table td {
      white-space: normal !important;
      overflow-wrap: break-word !important;
      word-break: normal !important;
