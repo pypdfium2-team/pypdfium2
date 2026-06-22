@@ -11,9 +11,9 @@
   * The `mipsle` build is untested (apart from `file` showing the correct target signature), for lack of a container image and binfmt handler.
 - Docs: Comprehensive [platform support table](https://pypdfium2-team.github.io/pypdfium2/platforms.html) added – check it out!
 - Work around a bindings generation issue on Windows by avoiding inclusion of system `windows.h`.
-  Added a notice to the Readme that ctypesgen may not work too well on non-Linux systems.
+  Added a notice that ctypesgen may not work too well on non-Linux systems.
   Make test suite pass when reference bindings are used.
-- Fix conda packaging of `pypdfium2_raw`, which was broken by the setup changes in 5.10.
+- Fix conda packaging of `pypdfium2_raw`, which was broken by setup changes in 5.10.
   The root issue in setup with `PYPDFIUM_MODULES=raw` now requiring a pre-generated version file remains, though.
 - Corrected minimum iOS requirement to `26_0` as per `macholib`.
   (We do not release iOS wheels but it is handled in setup.)
@@ -23,6 +23,5 @@
 - Put up a notice that AI issues/PRs are banned from this project, and updated templates accordingly.
   Any users who continue to file AI issues will be blocked.
   After half a dozen consecutive issues and PRs full of confusion, bloat and wildly invented false claims, which nearly all turned out to have been produced by Claude Code, we feel compelled to take this step.
-  Frankly, dumping a big heap of AI garbage will ultimately take everyone involved far more time than writing a few truthful, hallucination-free lines on your own.
   **If you encounter an issue, our condition for your chance to have us investigate (and hopefully fix) it is that you must act respectfully and provide a workable bug report without any AI involvement.**
-  If you want to keep talking to your clanker, that's your choice, but pypdfium2's issue tracker is not a waste deposit for AI garbage!
+  TLDR pypdfium2's issue tracker is not a waste deposit for AI garbage.

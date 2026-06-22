@@ -33,6 +33,12 @@ Covered platforms
    :file: ../../PLATFORMS.csv
    :header-rows: 1
 
+Notes
+
+1. MIPS platforms are not officially part of the manylinux standard, so the wheel tags we use are actually rejected by ``pip``, as they are not in its internal whitelist.
+   This can be remedied by re-tagging with ``wheel`` locally to match the host's ``sysconfig.get_platform()`` value.
+   ``pip`` maintainers have been informed of this situation.
+
 Legend
 ^^^^^^
 
@@ -48,17 +54,20 @@ Legend
 
 - **Tier**: Platform support level
   
-  1. 🟢 Best / Core platform
-  2. 🔵 Passable / Secondary platform
-  3. 🟡 More complicated
-  4. 🔴 Big known issues (e.g. endianness bugs)
-  5. ⚪ Not classified
+  + 🟢 1 Core, 🔵 2 Secondary, 🟡 3 Complicated, 🔴 4 Major issues, ⚪ Not classified
 
 - Build strategies
   
   + **PBIN** = Repack external builds from ``bblanchon/pdfium-binaries``.
   + **SBLD** = Built at pypdfium2 via ``sbuild.yaml`` (``build_toolchained.py``).
   + **CIBW** = Built at pypdfium2 via ``cibw.yaml`` (``build_native.py`` + containers on Linux, ``build_toolchained.py`` on Windows and macOS).
+
+- 🐍 Conda (**PBIN** only)
+  
+  + ✅ Released to conda
+  + ⏸️ Built, but conda upload is paused due to storage limits. Get in touch with ``pdfium-binaries`` if you would like this to be reinstated.
+  + ❓ Built, but unclear if this could be released to conda
+  + ❌ Not built at pdfium-binaries
 
 - 🧪 Testing status
   
