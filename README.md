@@ -13,7 +13,7 @@ pypdfium2 is an ABI-level Python 3 binding to [PDFium](https://pdfium.googlesour
 
 It is built with [ctypesgen](https://github.com/pypdfium2-team/ctypesgen) and external [PDFium binaries](https://github.com/bblanchon/pdfium-binaries/).
 The custom setup infrastructure provides a seamless packaging and installation process.
-A wide range of platforms is supported with pre-built packages.
+A wide range of platforms is covered with pre-built packages. Check out our [platform support page](https://pypdfium2-team.github.io/pypdfium2/platforms.html).
 
 pypdfium2 includes [helpers](#support-model) to simplify common use cases, while the [raw PDFium API](#raw-pdfium-api) (ctypes) remains accessible as well.
 
