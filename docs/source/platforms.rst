@@ -36,27 +36,55 @@ Covered platforms
 Legend
 ^^^^^^
 
+- **MinVer**: Minimum required OS versions for present release.
+  Other build strategies may result in different min versions, and older versions of pypdfium2 may have lower requirements.
+  
+  + 🟢 Low/OK, 🟡 Medium/Acceptable, 🟠 Elevated, 🔴 High, ⚪ Uncertain / not tagged
+
+- **Release**: status, version tracked, build strategy
+  
+  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only (platform rejected by PyPI), 🟦 Setup only
+  + 🔄 Latest version, 📌 Pinned version
+
+- **Tier**: Platform support level
+  
+  1. 🟢 Best / Core platform
+  2. 🔵 Passable / Secondary platform
+  3. 🟡 More complicated
+  4. 🔴 Big known issues (e.g. endianness bugs)
+  5. ⚪ Not classified
+
 - Build strategies
   
   + **PBIN** = Repack external builds from ``bblanchon/pdfium-binaries``.
   + **SBLD** = Built at pypdfium2 via ``sbuild.yaml`` (``build_toolchained.py``).
   + **CIBW** = Built at pypdfium2 via ``cibw.yaml`` (``build_native.py`` + containers on Linux, ``build_toolchained.py`` on Windows and macOS).
 
-- **MinVer**: Minimum required OS versions for present release.
-  Other build strategies may result in different min versions, and older releases of pypdfium2 may have lower min versions.
-  On Linux, low glibc requirements can be achieved by using upstream's sysroots.
-  The CIBW strategy typically results in higher glibc requirements, since sysroots don't work in GCC build mode yet, and are not available for some targets (e.g. ``loong64``, ``s390x``).
+- 🧪 Testing status
   
-  + 🟢 Low/OK, 🟡 Medium/Acceptable, 🟠 Elevated, 🔴 High, ⚪ Uncertain / not tagged
+  + ✅ Tested on a native host
+  + ☑️ Tested in an emulated container
+  + 🟨 Tested when native compilation is used, untested otherwise.
+  + ❌ Not automatically tested
 
-- **Release** (status, version tracked, build strategy)
+- ✖️ Cross compilation status
   
-  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only (platform rejected by PyPI), 🟦 Setup only
-  + 🔄 Latest version, 📌 Pinned version
+  + ⬜ Native compilation
+  + 🔳 Cross compilation
+  + 🔲 Both is possible
+
+- ⚙️ Compiler used (CIBW only, PBIN and SBLD always use clang)
+
+- **NAT**: Can be built natively at end user level?
+  
+  + ✅ Yes
+  + ☑️ Yes (tested in docker)
+  + ❔ Unknown
+  + 🚧 This used to work in the past, but is currently broken.
 
 .. admonition:: Help wanted
    
-   Reckon you can turn more ❌ into ✅ ? Please give it a try & open a PR.
+   Reckon you can turn more ❌ into ✅ ? Please give it a try and open a PR.
 
 
 Other platforms
