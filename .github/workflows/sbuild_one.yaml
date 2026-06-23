@@ -66,7 +66,7 @@ jobs:
           python-version: ${{ inputs.py_ver }}
       
       - name: Check out pypdfium2 repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
         with:
           repository: ${{ github.repository }}
           persist-credentials: false

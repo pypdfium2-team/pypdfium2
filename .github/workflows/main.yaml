@@ -54,7 +54,7 @@ jobs:
           python-version: ${{ inputs.py_ver }}
       
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in "Get new version" step
@@ -150,7 +150,7 @@ jobs:
           python-version: ${{ matrix.py }}
       
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
         with:
           repository: ${{ github.repository }}
           ref: autorelease_tmp
@@ -312,7 +312,7 @@ jobs:
     steps:
       
       - name: Check out repository (deep)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0
@@ -439,7 +439,7 @@ jobs:
     steps:
       
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
         with:
           repository: ${{ github.repository }}
           persist-credentials: true  # needed for push
