@@ -76,7 +76,7 @@ Legend
   + 🟨 Tested when native compilation is used, untested otherwise.
   + ❌ Not automatically tested
 
-- ✖️ Cross compilation status
+- 🛠️ Cross compilation indicator
   
   + ⬜ Native compilation
   + 🔳 Cross compilation

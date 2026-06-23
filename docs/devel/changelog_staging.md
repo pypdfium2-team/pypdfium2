@@ -23,5 +23,5 @@
 - Put up a notice that AI issues/PRs are banned from this project, and updated templates accordingly.
   Any users who continue to file AI issues will be blocked.
   After half a dozen consecutive issues and PRs full of confusion, bloat and wildly invented false claims, which nearly all turned out to have been produced by Claude Code, we feel compelled to take this step.
-  **If you encounter an issue, our condition for your chance to have us investigate (and hopefully fix) it is that you must act respectfully and provide a workable bug report without any AI involvement.**
+  **If you encounter an issue, our condition for your chance to have us investigate (and hopefully fix) your issue is that you must act respectfully and provide a workable bug report without any AI involvement.**
   TLDR pypdfium2's issue tracker is not a waste deposit for AI garbage.

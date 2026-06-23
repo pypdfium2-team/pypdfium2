@@ -1,4 +1,4 @@
-Platform,MinVer,Release,Tier,PBIN,🐍,🧪,✖️,SBLD,🧪,✖️,CIBW,🧪,✖️,⚙️,NAT,Since,Notes
+Platform,MinVer,Release,Tier,PBIN,🐍,🧪,🛠️,SBLD,🧪,🛠️,CIBW,🧪,🛠️,⚙️,NAT,Since,Notes
 macOS arm64,🟡 12,✅🔄 PBIN,🟢 1,✅,✅,✅,⬜,✅,✅,⬜,✅,✅,⬜,clang,✅,0.1.0 '21,
 macOS x86_64,🟡 12,✅🔄 PBIN,🔵 2,✅,✅,✅,🔳,✅,🟨,🔲,✅,✅,⬜,clang,✅,0.1.0 '21,
 Windows x86_64,⚪ 7/8?,✅🔄 PBIN,🟢 1,✅,✅,✅,⬜,✅,✅,⬜,✅,✅,⬜,clang,✅,0.1.0 '21,
