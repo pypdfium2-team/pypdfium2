@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import *
 from craft import ArtifactStash
-from emplace import prepare_setup
+from emplace import stage_platfiles
 
 CondaDir = ProjectDir / "conda"
 CondaRaw_BuildNumF = CondaDir / "raw" / "build_num.txt"
@@ -109,7 +109,9 @@ def _get_build_num(args):
 class CondaExtPlatfiles:
     
     def __enter__(self):
-        self.platfiles = [DataDir/ExtPlats.system/fn for fn in (BindingsFN, VersionFN)]
+        sys_dir = DataDir/ExtPlats.system
+        self.platfiles = [sys_dir/BindingsFN, sys_dir/VersionFN, ModuleDir_Raw/VersionFN]
+        shutil.copyfile(sys_dir/VersionFN, ModuleDir_Raw/VersionFN)
         run_cmd(["git", "add", "-f"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
     
     def __exit__(self, *_):
@@ -127,7 +129,7 @@ def main_conda_raw(args):
     os.environ["PDFIUM_FULL"] = str(full_ver)
     os.environ["BUILD_NUM"] = str(_get_build_num(args))
     
-    prepare_setup(ExtPlats.system, "generate", args.pdfium_ver, flags=())
+    stage_platfiles(ExtPlats.system, "generate", args.pdfium_ver, flags=())
     with CondaExtPlatfiles():
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon", "-c", "defaults"])
 

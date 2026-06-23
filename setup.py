@@ -143,8 +143,9 @@ def run_setup(modnames, pl_name, datagen):
     elif modnames == [ModuleRaw]:
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
-        # FIXME Requires pre-generated version file. This broke in 5.10, when datagen was deferred into build_py. Ultimately, we might want to look for a different build backend after all.
-        pdfium_fullver, _ = read_pdfium_info(DataDir/pl_name)
+        # FIXME Requires pre-generated version file. This is since 5.10, when datagen was deferred into build_py.
+        log(f"Warning: PYPDFIUM_MODULES=raw expects pre-generated version file at src/pypdfium2_raw/{VersionFN}. Callers must ensure this matches the version being built!")
+        pdfium_fullver, _ = read_pdfium_info(ModuleDir_Raw)
         kwargs["version"] = str(pdfium_fullver)
     else:
         assert any(m in modnames for m in (ModuleHelpers, ModuleRaw)), \
