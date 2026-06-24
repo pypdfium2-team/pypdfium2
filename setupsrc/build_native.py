@@ -335,10 +335,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("jpeg_turbo", PDFIUM_3RDPARTY/"libjpeg_turbo")
         df.fetch("nasm_source", PDFIUM_3RDPARTY/"nasm")
     if "libpng" in vendor_deps:
-        do_patches = df.fetch("libpng", PDFIUM_3RDPARTY/"libpng", reset=reset)
-        if do_patches and Host._raw_machine in ("ppc64le", "loong64", "loongarch64"):
-            # upstream CL merged, can be removed or put behind version guard once pdfium rolls libpng and we update pdfium
-            git_apply_patch(PatchDir/"libpng_ppc64_loong64.patch", cwd=PDFIUM_3RDPARTY/"libpng")
+        df.fetch("libpng", PDFIUM_3RDPARTY/"libpng", reset=reset)
     if "zlib" in vendor_deps:
         df.fetch("zlib", PDFIUM_3RDPARTY/"zlib")
     if "harfbuzz" in vendor_deps:
