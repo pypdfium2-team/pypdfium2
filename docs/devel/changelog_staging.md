@@ -12,6 +12,7 @@
 - Docs: Comprehensive [platform support table](https://pypdfium2-team.github.io/pypdfium2/platforms.html) added – check it out!
 - Work around a bindings generation issue on Windows by avoiding inclusion of system `windows.h`.
   Added a notice that ctypesgen may not work too well on non-Linux systems.
+- Honor reference bindings properly: don't download headers or reuse cached bindings.
   Make test suite pass when reference bindings are used.
 - Fix conda packaging of `pypdfium2_raw`, which was broken by setup changes in 5.10.
   The root issue in setup with `PYPDFIUM_MODULES=raw` now requiring a pre-generated version file remains, though.
