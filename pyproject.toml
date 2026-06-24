@@ -104,8 +104,7 @@ inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
-    # TODO download/verify artifacts on host runner and have them copied into the container
-    "bash ./utils/install-static-clang.sh",
+    "bash ./utils/install-static-clang.sh -d {project}/clang_image",
     "export CLANG_PREFIX=/opt/clang",
 ]
 inherit.environment = "append"
