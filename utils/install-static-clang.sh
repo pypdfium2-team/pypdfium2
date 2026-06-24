@@ -9,7 +9,6 @@ set -exuo pipefail
 
 OPT_DOWNLOADDIR="/tmp"
 OPT_SCRIPTMODE=""
-OPT_INSTALLONLY=0
 
 while getopts "d:m:" OPTION
 do
