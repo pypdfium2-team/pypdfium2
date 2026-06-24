@@ -66,8 +66,8 @@ else
     curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
     sha256sum -c "${STATIC_CLANG_FILENAME}.sha256"
     curl -fsSLO "${ATTESTATIONS_URL}"
-    which gh && gh attestation verify "${STATIC_CLANG_FILENAME}" -R "mayeut/static-clang-images" -b ./attestation-bundle.json
-    # which sigstore && sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle ./attestation-bundle.json
+    gh attestation verify "${STATIC_CLANG_FILENAME}" -R "mayeut/static-clang-images" -b ./attestation-bundle.json
+    # or: sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle ./attestation-bundle.json
 fi
 
 if [[ "${OPT_SCRIPTMODE}" == "download" ]]; then
