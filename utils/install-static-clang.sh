@@ -59,7 +59,7 @@ ATTESTATIONS_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
 mkdir -p "${OPT_DOWNLOADDIR}"
 pushd "${OPT_DOWNLOADDIR}"
 
-if [[ "${OPT_SCRIPTMODE}" == "skip" ]]; then
+if [[ "${OPT_SCRIPTMODE}" == "skip-download" ]]; then
 	echo "Skip-download mode"
 else
     curl -fsSLO "${STATIC_CLANG_URL}"
