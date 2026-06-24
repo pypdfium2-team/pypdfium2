@@ -32,7 +32,7 @@ If you did not use AI, welcome! Please read the points below.
 - [ ] I believe the change is maintainable and does not cause unreasonable complexity or code fragmentation.
 - [ ] The change does not shift a maintenance burden or upstream downstream tasks. *Keep handlers generic, avoid overly downstream-specific or (for us) effectively dead code passages.*
 - [ ] I have assessed that the targeted use case cannot reasonably be satisfied by existing means, such as [Caller-provided data files][2], or the change forms a notable improvement over possible alternatives.
-- [ ] I believe the targeted use case is supported by pypdfium2-team. *Note that we may not want to support esoteric or artificially restricted setup envs.*
+- [ ] I believe the targeted use case is supported by pypdfium2-team. *Artificially restricted setup envs are not officially supported, e.g. offline setup (for offline installation, use wheels).*
 
 </details>
 <details open><summary>Other</summary>
