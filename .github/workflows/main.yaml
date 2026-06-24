@@ -392,7 +392,7 @@ jobs:
           subject-path: 'dist/*, gh_only/*'
       
       - name: Rename provenance file
-        run: mv "$SRC_PATH" pypdfium2-attestation.json
+        run: mv "$SRC_PATH" pypdfium2.sigstore.json
         env:
           SRC_PATH: ${{ steps.provenance.outputs.bundle-path }}
       
@@ -401,7 +401,7 @@ jobs:
         uses: ncipollo/release-action@v1  # TODO pin to hash?
         with:
           immutableCreate: true
-          artifacts: 'dist/*.whl,gh_only/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
+          artifacts: 'dist/*.whl,gh_only/*.whl,dist/*.tar.gz,pypdfium2.sigstore.json'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.build.outputs.new_version }}
