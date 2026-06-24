@@ -56,7 +56,8 @@ curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILE
 sha256sum -c "${STATIC_CLANG_FILENAME}.sha256"
 
 curl -fsSLO "${ATTESTATIONS_URL}"
-sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle ./attestation-bundle.json
+which gh && gh attestation verify "${STATIC_CLANG_FILENAME}" -R "mayeut/static-clang-images" -b ./attestation-bundle.json || \
+which sigstore && sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle ./attestation-bundle.json
 
 tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
 ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
