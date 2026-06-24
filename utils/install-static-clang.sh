@@ -72,6 +72,7 @@ fi
 
 if [[ "${OPT_SCRIPTMODE}" == "download" ]]; then
 echo "Download-only mode"
+rm ./attestation-bundle.json "${STATIC_CLANG_FILENAME}.sha256"
 exit 0
 fi
 
