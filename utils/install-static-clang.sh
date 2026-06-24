@@ -7,18 +7,18 @@
 # Stop at any error, show all commands
 set -exuo pipefail
 
-OPT_DOWNLOADDIR="/tmp"
-OPT_SCRIPTMODE=""
+STAGING_DIR="/tmp"
+SCRIPT_MODE=""
 
 while getopts "d:m:" OPTION
 do
   case $OPTION in
     d)
-		OPT_DOWNLOADDIR="$OPTARG"
-		echo "download dir: $OPT_DOWNLOADDIR";;
+		STAGING_DIR="$OPTARG"
+		echo "download dir: $STAGING_DIR";;
 	m)
-		OPT_SCRIPTMODE="$OPTARG"
-		echo "mode: $OPT_SCRIPTMODE";;
+		SCRIPT_MODE="$OPTARG"
+		echo "mode: $SCRIPT_MODE";;
     *)
       echo "Invalid flag -$OPTION"
       exit 1
@@ -55,10 +55,10 @@ STATIC_CLANG_URL="${STATIC_CLANG_BASEURL}/${STATIC_CLANG_FILENAME}"
 SHASUMS_URL="${STATIC_CLANG_BASEURL}/sha256sums.txt"
 ATTESTATIONS_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
 
-mkdir -p "${OPT_DOWNLOADDIR}"
-pushd "${OPT_DOWNLOADDIR}"
+mkdir -p "${STAGING_DIR}"
+pushd "${STAGING_DIR}"
 
-if [[ "${OPT_SCRIPTMODE}" == "skip-download" ]]; then
+if [[ "${SCRIPT_MODE}" == "skip-download" ]]; then
 	echo "skip-download mode"
 else
     curl -fsSLO "${STATIC_CLANG_URL}"
@@ -69,7 +69,7 @@ else
     # or: sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle ./attestation-bundle.json
 fi
 
-if [[ "${OPT_SCRIPTMODE}" == "download-only" ]]; then
+if [[ "${SCRIPT_MODE}" == "download-only" ]]; then
 echo "download-only mode"
 rm ./attestation-bundle.json "${STATIC_CLANG_FILENAME}.sha256"
 exit 0
@@ -80,7 +80,7 @@ tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
 ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
 popd
 
-if [[ "${OPT_SCRIPTMODE}" == "install-only" ]]; then
+if [[ "${SCRIPT_MODE}" == "install-only" ]]; then
 echo "install-only mode"
 exit 0
 fi
