@@ -60,7 +60,7 @@ mkdir -p "${OPT_DOWNLOADDIR}"
 pushd "${OPT_DOWNLOADDIR}"
 
 if [[ "${OPT_SCRIPTMODE}" == "skip-download" ]]; then
-	echo "Skip-download mode"
+	echo "skip-download mode"
 else
     curl -fsSLO "${STATIC_CLANG_URL}"
     curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
@@ -70,8 +70,8 @@ else
     # or: sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle ./attestation-bundle.json
 fi
 
-if [[ "${OPT_SCRIPTMODE}" == "download" ]]; then
-echo "Download-only mode"
+if [[ "${OPT_SCRIPTMODE}" == "download-only" ]]; then
+echo "download-only mode"
 rm ./attestation-bundle.json "${STATIC_CLANG_FILENAME}.sha256"
 exit 0
 fi
@@ -81,8 +81,8 @@ tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
 ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
 popd
 
-if [[ "${OPT_SCRIPTMODE}" == "install" ]]; then
-echo "Install-only mode"
+if [[ "${OPT_SCRIPTMODE}" == "install-only" ]]; then
+echo "install-only mode"
 exit 0
 fi
 

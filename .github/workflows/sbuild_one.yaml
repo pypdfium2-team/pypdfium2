@@ -89,7 +89,7 @@ jobs:
       
       - name: Install custom clang
         if: ${{ inputs.custom_clang }}
-        run: bash ./utils/install-static-clang.sh -m install
+        run: bash ./utils/install-static-clang.sh -m install-only
       
       - name: Update package list
         if: ${{ startsWith(inputs.os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.os, '-arm')) }}
