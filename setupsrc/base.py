@@ -628,6 +628,13 @@ def tmp_cwd_context(tmp_cwd):
 
 CTG_LIBPATTERN = "{prefix}{name}.{suffix}"
 
+def _apply_refbindings(target_path, version):
+    log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
+    record_ver = PdfiumVer.pinned
+    if version != record_ver:
+        log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
+    shutil.copyfile(RefBindingsFile, target_path)
+
 # TODO make version mandatory
 def run_ctypesgen(
         target_path, headers_dir, flags=(),
@@ -638,12 +645,7 @@ def run_ctypesgen(
     ):
     
     if USE_REFBINDINGS:
-        log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
-        record_ver = PdfiumVer.pinned
-        if version != record_ver:
-            log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
-        shutil.copyfile(RefBindingsFile, target_path)
-        return target_path
+        return _apply_refbindings(target_path, version)
     
     # Import ctypesgen only in this function so it does not have to be available for other setup tasks
     import ctypesgen
@@ -711,10 +713,9 @@ def _make_json_compat(obj):
 
 def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     
-    ver_path = DataDir_Bindings/VersionFN
-    bind_path = BindingsFile
-    if not headers_dir:
-        headers_dir = DataDir_Bindings/"headers"
+    bindings_path = BindingsFile
+    if USE_REFBINDINGS:
+        return _apply_refbindings(bindings_path, version)
     
     # TODO register all defaults?
     curr_info = {"version": version, **kwargs}
@@ -723,16 +724,19 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     curr_info = _make_json_compat(curr_info)
     
     prev_ver = None
+    ver_path = DataDir_Bindings/VersionFN
     if ver_path.exists():
         prev_info = read_json(ver_path)
         prev_ver = prev_info["version"]
-        if bind_path.exists() and prev_info == curr_info:
+        if bindings_path.exists() and prev_info == curr_info:
             log(f"Using cached bindings")
             return
         else:
             log(f"Bindings cache state differs:", prev_info, curr_info, sep="\n")
     
     # try to reuse headers if only bindings params differ, not version
+    if not headers_dir:
+        headers_dir = DataDir_Bindings/"headers"
     if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
         log("Using cached headers")
     else:
@@ -748,7 +752,6 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         archive_path.unlink()
     
     log(f"Building bindings ...")
-    bindings_path = DataDir_Bindings/BindingsFN
     run_ctypesgen(bindings_path, headers_dir, version=version, **kwargs)
     write_json(ver_path, curr_info)
 
