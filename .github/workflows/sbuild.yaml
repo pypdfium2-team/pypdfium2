@@ -72,6 +72,7 @@ jobs:
             condition: ${{ inputs.linux && inputs.targets_main }}
             target_cpu: mipsel
             tag: manylinux_2_17_mipsle.manylinux2014_mipsle
+            docker_test: false
           
           - os: ubuntu-24.04-arm  # don't use 26.04, due to glibc req (see below)
             condition: ${{ inputs.linux && inputs.targets_test }}
@@ -145,3 +146,4 @@ jobs:
       py_ver: ${{ matrix.py_ver || inputs.py_ver }}
       custom_clang: ${{ matrix.custom_clang || false }}
       build_params: ${{ matrix.build_params }}
+      docker_test: ${{ matrix.docker_test == '' && true || matrix.docker_test }}
