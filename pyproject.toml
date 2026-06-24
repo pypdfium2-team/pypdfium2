@@ -104,6 +104,7 @@ inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
+    "pip install -U sigstore",
     "bash ./utils/install-static-clang.sh",
     "export CLANG_PREFIX=/opt/clang",
 ]
