@@ -15,12 +15,12 @@ do
   case $OPTION in
     d)
 		STAGING_DIR="$OPTARG"
-		echo "download dir: $STAGING_DIR";;
+		echo "download dir: ${STAGING_DIR}";;
 	m)
 		SCRIPT_MODE="$OPTARG"
-		echo "mode: $SCRIPT_MODE";;
+		echo "mode: ${SCRIPT_MODE}";;
     *)
-      echo "Invalid flag -$OPTION"
+      echo "Invalid flag -${OPTION}"
       exit 1
   esac
 done
@@ -53,7 +53,9 @@ fi
 STATIC_CLANG_FILENAME="static-clang-linux-${GO_ARCH}.tar.xz"
 STATIC_CLANG_URL="${STATIC_CLANG_BASEURL}/${STATIC_CLANG_FILENAME}"
 SHASUMS_URL="${STATIC_CLANG_BASEURL}/sha256sums.txt"
-ATTESTATIONS_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
+SHASUMS_PATH="${STAGING_DIR}/${STATIC_CLANG_FILENAME}.sha256"
+ATTEST_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
+ATTEST_PATH="${STAGING_DIR}/attestation-bundle.json"
 
 mkdir -p "${STAGING_DIR}"
 pushd "${STAGING_DIR}"
@@ -62,20 +64,20 @@ if [[ "${SCRIPT_MODE}" == "skip-download" ]]; then
 	echo "skip-download mode"
 else
     curl -fsSLO "${STATIC_CLANG_URL}"
-    curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
-    sha256sum -c "${STATIC_CLANG_FILENAME}.sha256"
-    curl -fsSLO "${ATTESTATIONS_URL}"
-    gh attestation verify "${STATIC_CLANG_FILENAME}" -R "mayeut/static-clang-images" -b ./attestation-bundle.json
-    # or: sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle ./attestation-bundle.json
+    curl -fsSL "${SHASUMS_URL}" | grep "${STATIC_CLANG_FILENAME}" > "${SHASUMS_PATH}"
+    sha256sum -c "${SHASUMS_PATH}"
+    curl -fsSLO "${ATTEST_URL}"
+    gh attestation verify "${STATIC_CLANG_FILENAME}" -R "mayeut/static-clang-images" -b "${ATTEST_PATH}"
+    # or: sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle "${ATTEST_PATH}"
 fi
 
 if [[ "${SCRIPT_MODE}" == "download-only" ]]; then
 echo "download-only mode"
-rm ./attestation-bundle.json "${STATIC_CLANG_FILENAME}.sha256"
+rm "${ATTEST_PATH}" "${SHASUMS_PATH}"
 exit 0
 fi
 
-TOOLCHAIN_PATH=/opt/clang
+TOOLCHAIN_PATH="/opt/clang"
 tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
 ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
 popd
