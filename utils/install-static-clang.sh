@@ -79,7 +79,7 @@ fi
 
 TOOLCHAIN_PATH="/opt/clang"
 tar -C /opt -xf "$STATIC_CLANG_FILENAME"
-ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
+ln -s "${TOOLCHAIN_PATH}/bin/readelf" "${TOOLCHAIN_PATH}/bin/llvm-readelf"
 popd
 
 if [[ "$SCRIPT_MODE" == "install-only" ]]; then
