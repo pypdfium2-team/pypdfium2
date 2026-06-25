@@ -702,14 +702,14 @@ class PdfBookmark (pdfium_i.AutoCastable):
     def get_color(self):
         """
         Returns:
-            tuple[int,int,int] | None: The bookmark's RGB color, otherwise None if the bookmark does not specify a color or on failure.
+            tuple[float,float,float] | None: The bookmark's RGB color, otherwise None if the bookmark does not specify a color or on failure.
         """
         # requires pdfium > 7912
         r, g, b = ctypes.c_float(), ctypes.c_float(), ctypes.c_float()
         ok = pdfium_c.FPDFBookmark_GetColor(self, r, g, b)
         if not ok:
             return None
-        return round(r.value*255), round(g.value*255), round(b.value*255)
+        return r.value, g.value, b.value
     
     def get_dest(self):
         """

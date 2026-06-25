@@ -28,16 +28,16 @@ def main(args):
     
     for bm in toc:
         
+        # unconditionally add "->" to avoid ambiguity with titles potentially containing the same
         count = bm.get_count()
         count_str = f"{count:+}" if count != 0 else "*"
-        title = bm.get_title()
         out = "    " * bm.level
-        # unconditionally add "->" to avoid ambiguity with titles potentially containing the same
-        out += "[%s] %s -> " % (count_str, title)
+        out += "[%s] %s -> " % (count_str, bm.get_title())
         
         dest = bm.get_dest()
         if dest:
-            index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
+            index = dest.get_index()
+            view_mode, view_pos = dest.get_view()
             out += "%s  # %s %s" % (
                 index+1 if index != None else "?",
                 pdfium_i.ViewmodeToStr.get(view_mode),
@@ -48,6 +48,7 @@ def main(args):
         
         color = bm.get_color()
         if color:
+            color = round_list(color, args.n_digits)
             out += f" | RGB{color}"
         
         print(out)
