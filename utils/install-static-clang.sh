@@ -7,18 +7,24 @@
 # Stop at any error, show all commands
 set -exuo pipefail
 
-INSTALL_ONLY=0
-TOOLCHAIN_PATH=/opt/clang
+STAGING_DIR="/tmp"
+SCRIPT_MODE=""
 
-for arg in "$@"; do
-case "$arg" in
---install-only)
-	INSTALL_ONLY=1;;
-*)
-	echo "Unknown argument: $arg"
-	exit 1;;
-esac
+while getopts "d:m:" OPTION
+do
+  case $OPTION in
+    d)
+		STAGING_DIR="$(realpath $OPTARG)"
+		echo "download dir: $STAGING_DIR";;
+	m)
+		SCRIPT_MODE="$OPTARG"
+		echo "mode: $SCRIPT_MODE";;
+    *)
+      echo "Invalid flag -$OPTION"
+      exit 1
+  esac
 done
+
 
 # Download static-clang
 DEFAULT_ARCH="$(uname -m)"
@@ -38,7 +44,7 @@ case "${STATIC_CLANG_ARCH}" in
 esac
 
 STATIC_CLANG_VERSION=latest  # or pin 22.1.8.0
-if [ "$STATIC_CLANG_VERSION" == "latest" ]; then
+if [ "${STATIC_CLANG_VERSION}" == "latest" ]; then
 	STATIC_CLANG_BASEURL="https://github.com/mayeut/static-clang-images/releases/latest/download"
 else
 	STATIC_CLANG_BASEURL="https://github.com/mayeut/static-clang-images/releases/download/v${STATIC_CLANG_VERSION}"
@@ -47,24 +53,37 @@ fi
 STATIC_CLANG_FILENAME="static-clang-linux-${GO_ARCH}.tar.xz"
 STATIC_CLANG_URL="${STATIC_CLANG_BASEURL}/${STATIC_CLANG_FILENAME}"
 SHASUMS_URL="${STATIC_CLANG_BASEURL}/sha256sums.txt"
-ATTESTATIONS_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
+SHASUMS_NAME="${STATIC_CLANG_FILENAME}.sha256"
+ATTEST_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
+ATTEST_NAME="attestation-bundle.json"
 
-pushd /tmp
-curl -fsSLO "${STATIC_CLANG_URL}"
+mkdir -p "$STAGING_DIR"
+pushd "$STAGING_DIR"
 
-curl -fsSL $SHASUMS_URL | grep "${STATIC_CLANG_FILENAME}" > "${STATIC_CLANG_FILENAME}.sha256"
-sha256sum -c "${STATIC_CLANG_FILENAME}.sha256"
+if [[ "$SCRIPT_MODE" == "skip-download" ]]; then
+	echo "skip-download mode"
+else
+    curl -fsSLO "$STATIC_CLANG_URL"
+    curl -fsSL "$SHASUMS_URL" | grep "$STATIC_CLANG_FILENAME" > "$SHASUMS_NAME"
+    sha256sum -c "$SHASUMS_NAME"
+    curl -fsSLO "$ATTEST_URL"
+    gh attestation verify "$STATIC_CLANG_FILENAME" -R "mayeut/static-clang-images" -b "$ATTEST_NAME"
+    # or: sigstore verify github "$STATIC_CLANG_FILENAME" --repository "mayeut/static-clang-images" --bundle "$ATTEST_NAME"
+fi
 
-curl -fsSLO "${ATTESTATIONS_URL}"
-which gh && gh attestation verify "${STATIC_CLANG_FILENAME}" -R "mayeut/static-clang-images" -b ./attestation-bundle.json || \
-which sigstore && sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle ./attestation-bundle.json
+if [[ "$SCRIPT_MODE" == "download-only" ]]; then
+echo "download-only mode"
+rm "$ATTEST_NAME" "$SHASUMS_NAME"
+exit 0
+fi
 
-tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
-ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
+TOOLCHAIN_PATH="/opt/clang"
+tar -C /opt -xf "$STATIC_CLANG_FILENAME"
+ln -s "${TOOLCHAIN_PATH}/bin/readelf" "${TOOLCHAIN_PATH}/bin/llvm-readelf"
 popd
 
-if [[ $INSTALL_ONLY -eq 1 ]]; then
-echo "Install-only mode selected. Exiting early."
+if [[ "$SCRIPT_MODE" == "install-only" ]]; then
+echo "install-only mode"
 exit 0
 fi
 
