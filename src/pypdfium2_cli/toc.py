@@ -29,10 +29,11 @@ def main(args):
     for bm in toc:
         
         # unconditionally add "->" to avoid ambiguity with titles potentially containing the same
+        title = bm.get_title()
         count = bm.get_count()
         count_str = f"{count:+}" if count != 0 else "*"
         out = "    " * bm.level
-        out += "[%s] %s -> " % (count_str, bm.get_title())
+        out += "[%s] %s -> " % (count_str, title)
         
         dest = bm.get_dest()
         if dest:
@@ -48,7 +49,8 @@ def main(args):
         
         color = bm.get_color()
         if color:
-            color = round_list(color, args.n_digits)
-            out += f" | RGB{color}"
+            r, g, b = tuple(round(c*255) for c in color)
+            out += " | " + f"\x1b[38;2;{r};{g};{b}m" + "⬤" + "\x1b[0m"
+            out += " RGB" + str(round_list(color, args.n_digits))
         
         print(out)
