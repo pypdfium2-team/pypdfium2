@@ -566,7 +566,7 @@ class _host_platform:
         elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
             self._system = SysNames.android
-            log(f"android {self._raw_machine}")  # sys.getandroidapilevel() platform.android_ver()
+            log(f"android {self._raw_machine} {sys.getandroidapilevel()}")  # platform.android_ver()
             if self._raw_machine == "aarch64":
                 return PlatNames.android_arm64
             elif self._raw_machine == "armv7l":
