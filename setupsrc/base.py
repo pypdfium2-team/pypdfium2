@@ -121,6 +121,8 @@ class PlatNames:
     linux_arm64      = SysNames.linux   + "_arm64"
     linux_arm32      = SysNames.linux   + "_arm32"
     linux_ppc64le    = SysNames.linux   + "_ppc64le"
+    linux_mips64le   = SysNames.linux   + "_mips64le"
+    linux_mipsle     = SysNames.linux   + "_mipsle"
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
@@ -156,6 +158,8 @@ WheelPlatforms = list(PdfiumBinariesMap.keys())
 # export PLATFORMS=(linux_musl_x64 linux_musl_x86 linux_musl_arm64 darwin_univ2 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
 # for PLAT in ${PLATFORMS[@]}; do echo $PLAT; just emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
+    PlatNames.linux_mips64le:   "linux-mips64el",
+    PlatNames.linux_mipsle:     "linux-mipsel",
     PlatNames.linux_musl_x64:   "linux-musl-x64",
     PlatNames.linux_musl_x86:   "linux-musl-x86",
     PlatNames.linux_musl_arm64: "linux-musl-arm64",
@@ -542,7 +546,8 @@ class _host_platform:
         
         elif self._raw_system == "linux":
             self._system = SysNames.linux
-            log(f"linux {self._raw_machine} {self._libc_name, self._libc_ver}")
+            is_little_endian = sys.byteorder == "little"
+            log(f"linux {self._raw_machine} {self._libc_name, self._libc_ver, sys.byteorder}")
             if self._raw_machine == "x86_64":
                 return self._handle_linux("x64")
             elif self._raw_machine == "i686":
@@ -553,6 +558,10 @@ class _host_platform:
                 return self._handle_linux("arm32", musl_ok=False)
             elif self._raw_machine == "ppc64le":
                 return self._handle_linux("ppc64le", musl_ok=False)
+            elif self._raw_machine.startswith("mips64") and is_little_endian:
+                return self._handle_linux("mips64le", musl_ok=False)
+            elif self._raw_machine.startswith("mips") and is_little_endian:
+                return self._handle_linux("mipsle", musl_ok=False)
         
         elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
