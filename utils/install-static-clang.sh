@@ -15,12 +15,12 @@ do
   case $OPTION in
     d)
 		STAGING_DIR="$OPTARG"
-		echo "download dir: ${STAGING_DIR}";;
+		echo "download dir: $STAGING_DIR";;
 	m)
 		SCRIPT_MODE="$OPTARG"
-		echo "mode: ${SCRIPT_MODE}";;
+		echo "mode: $SCRIPT_MODE";;
     *)
-      echo "Invalid flag -${OPTION}"
+      echo "Invalid flag -$OPTION"
       exit 1
   esac
 done
@@ -57,32 +57,32 @@ SHASUMS_PATH="${STAGING_DIR}/${STATIC_CLANG_FILENAME}.sha256"
 ATTEST_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
 ATTEST_PATH="${STAGING_DIR}/attestation-bundle.json"
 
-mkdir -p "${STAGING_DIR}"
-pushd "${STAGING_DIR}"
+mkdir -p "$STAGING_DIR"
+pushd "$STAGING_DIR"
 
-if [[ "${SCRIPT_MODE}" == "skip-download" ]]; then
+if [[ "$SCRIPT_MODE" == "skip-download" ]]; then
 	echo "skip-download mode"
 else
-    curl -fsSLO "${STATIC_CLANG_URL}"
-    curl -fsSL "${SHASUMS_URL}" | grep "${STATIC_CLANG_FILENAME}" > "${SHASUMS_PATH}"
-    sha256sum -c "${SHASUMS_PATH}"
-    curl -fsSLO "${ATTEST_URL}"
-    gh attestation verify "${STATIC_CLANG_FILENAME}" -R "mayeut/static-clang-images" -b "${ATTEST_PATH}"
-    # or: sigstore verify github "${STATIC_CLANG_FILENAME}" --repository "mayeut/static-clang-images" --bundle "${ATTEST_PATH}"
+    curl -fsSLO "$STATIC_CLANG_URL"
+    curl -fsSL "$SHASUMS_URL" | grep "$STATIC_CLANG_FILENAME" > "$SHASUMS_PATH"
+    sha256sum -c "$SHASUMS_PATH"
+    curl -fsSLO "$ATTEST_URL"
+    gh attestation verify "$STATIC_CLANG_FILENAME" -R "mayeut/static-clang-images" -b "$ATTEST_PATH"
+    # or: sigstore verify github "$STATIC_CLANG_FILENAME" --repository "mayeut/static-clang-images" --bundle "$ATTEST_PATH"
 fi
 
-if [[ "${SCRIPT_MODE}" == "download-only" ]]; then
+if [[ "$SCRIPT_MODE" == "download-only" ]]; then
 echo "download-only mode"
-rm "${ATTEST_PATH}" "${SHASUMS_PATH}"
+rm "$ATTEST_PATH" "$SHASUMS_PATH"
 exit 0
 fi
 
 TOOLCHAIN_PATH="/opt/clang"
-tar -C /opt -xf "${STATIC_CLANG_FILENAME}"
+tar -C /opt -xf "$STATIC_CLANG_FILENAME"
 ln -s $TOOLCHAIN_PATH/bin/readelf $TOOLCHAIN_PATH/bin/llvm-readelf
 popd
 
-if [[ "${SCRIPT_MODE}" == "install-only" ]]; then
+if [[ "$SCRIPT_MODE" == "install-only" ]]; then
 echo "install-only mode"
 exit 0
 fi
