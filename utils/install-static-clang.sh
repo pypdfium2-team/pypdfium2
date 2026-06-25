@@ -14,7 +14,7 @@ while getopts "d:m:" OPTION
 do
   case $OPTION in
     d)
-		STAGING_DIR="$OPTARG"
+		STAGING_DIR="$(realpath $OPTARG)"
 		echo "download dir: $STAGING_DIR";;
 	m)
 		SCRIPT_MODE="$OPTARG"
@@ -53,9 +53,9 @@ fi
 STATIC_CLANG_FILENAME="static-clang-linux-${GO_ARCH}.tar.xz"
 STATIC_CLANG_URL="${STATIC_CLANG_BASEURL}/${STATIC_CLANG_FILENAME}"
 SHASUMS_URL="${STATIC_CLANG_BASEURL}/sha256sums.txt"
-SHASUMS_PATH="${STAGING_DIR}/${STATIC_CLANG_FILENAME}.sha256"
+SHASUMS_NAME="${STATIC_CLANG_FILENAME}.sha256"
 ATTEST_URL="${STATIC_CLANG_BASEURL}/attestation-bundle.json"
-ATTEST_PATH="${STAGING_DIR}/attestation-bundle.json"
+ATTEST_NAME="attestation-bundle.json"
 
 mkdir -p "$STAGING_DIR"
 pushd "$STAGING_DIR"
@@ -64,16 +64,16 @@ if [[ "$SCRIPT_MODE" == "skip-download" ]]; then
 	echo "skip-download mode"
 else
     curl -fsSLO "$STATIC_CLANG_URL"
-    curl -fsSL "$SHASUMS_URL" | grep "$STATIC_CLANG_FILENAME" > "$SHASUMS_PATH"
-    sha256sum -c "$SHASUMS_PATH"
+    curl -fsSL "$SHASUMS_URL" | grep "$STATIC_CLANG_FILENAME" > "$SHASUMS_NAME"
+    sha256sum -c "$SHASUMS_NAME"
     curl -fsSLO "$ATTEST_URL"
-    gh attestation verify "$STATIC_CLANG_FILENAME" -R "mayeut/static-clang-images" -b "$ATTEST_PATH"
-    # or: sigstore verify github "$STATIC_CLANG_FILENAME" --repository "mayeut/static-clang-images" --bundle "$ATTEST_PATH"
+    gh attestation verify "$STATIC_CLANG_FILENAME" -R "mayeut/static-clang-images" -b "$ATTEST_NAME"
+    # or: sigstore verify github "$STATIC_CLANG_FILENAME" --repository "mayeut/static-clang-images" --bundle "$ATTEST_NAME"
 fi
 
 if [[ "$SCRIPT_MODE" == "download-only" ]]; then
 echo "download-only mode"
-rm "$ATTEST_PATH" "$SHASUMS_PATH"
+rm "$ATTEST_NAME" "$SHASUMS_NAME"
 exit 0
 fi
 
