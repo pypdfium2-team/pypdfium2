@@ -4,6 +4,7 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Build scripts: Updated PDFium pin from `7891` to `7911`.
 - New platforms: `manylinux_2_17_{mips64le,mipsle}` wheels added to release.
   * `build_toolchained.py` is now capable of building these, based on upstream's `mips64el` and `mipsel` targets (with minor patches). This took a great deal of tinkering, however.
   * Like `loongarch64`, PyPI does not accept MIPS wheels (yet), so they are only released to GitHub.
