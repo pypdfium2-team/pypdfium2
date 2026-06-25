@@ -709,7 +709,7 @@ class PdfBookmark (pdfium_i.AutoCastable):
         ok = pdfium_c.FPDFBookmark_GetColor(self, r, g, b)
         if not ok:
             return None
-        return r.value*255, g.value*255, b.value*255
+        return round(r.value*255), round(g.value*255), round(b.value*255)
     
     def get_dest(self):
         """

@@ -1,0 +1,169 @@
+%PDF-1.7
+% ò¤ô
+1 0 obj <<
+  /Type /Catalog
+  /Pages 2 0 R
+  /Outlines 8 0 R
+>>
+endobj
+2 0 obj <<
+  /Type /Pages
+  /Count 2
+  /Kids [
+    3 0 R
+    4 0 R
+  ]
+>>
+endobj
+% Page number 0.
+3 0 obj <<
+  /Type /Page
+  /Parent 2 0 R
+  /Resources <<
+    /Font <<
+      /F1 5 0 R
+    >>
+  >>
+  /Contents [6 0 R]
+  /MediaBox [0 0 612 792]
+>>
+endobj
+% Page number 1.
+4 0 obj <<
+  /Type /Page
+  /Parent 2 0 R
+  /Resources  <<
+    /Font <<
+      /F1 5 0 R
+    >>
+  >>
+  /Contents [7 0 R]
+  /MediaBox [0 0 612 792]
+>>
+endobj
+% Font resource.
+5 0 obj <<
+  /Type /Font
+  /Subtype /Type1
+  /BaseFont /Arial
+>>
+endobj
+% Content for page 0.
+6 0 obj <<
+  /Length 37
+>>
+stream
+BT
+/F1 20 Tf
+100 600 TD
+(Page1) Tj
+ET
+endstream
+endobj
+% Content for page 1.
+7 0 obj <<
+  /Length 37
+>>
+stream
+BT
+/F1 20 Tf
+100 600 TD
+(Page2) Tj
+ET
+endstream
+endobj
+% Root bookmark
+8 0 obj <<
+  /Type /Outlines
+  /Count 3
+  /First 9 0 R
+  /Last 12 0 R
+>>
+endobj
+% First child bookmark (leaf node)
+9 0 obj <<
+  /Title (No Color Array)
+  /Parent 8 0 R
+  /Next 10 0 R
+  /Dest (foo)
+>>
+endobj
+% Second child bookmark (open)
+10 0 obj <<
+  /Title (Color Is Not An Array)
+  /Parent 8 0 R
+  /First 11 0 R
+  /Last 11 0 R
+  /Prev 9 0 R
+  /Next 12 0 R
+  /Count 1
+  /C 200
+  /A <<
+    /Type /Action
+    /S /URI
+    /URI (https://theplay.test)
+  >>
+>>
+endobj
+% First grandchild bookmark
+11 0 obj <<
+  /Title (Color Array Has The Wrong Number Of Elements)
+  /Parent 10 0 R
+  /Dest [3 0 R /XYZ 100 200 0]
+  /C [0.111 0.222 0.333 0.444]
+>>
+endobj
+% Third child bookmark (closed)
+12 0 obj <<
+  /Title (Color Array Has Entries Greater Than 1)
+  /Parent 8 0 R
+  /First 13 0 R
+  /Last 14 0 R
+  /Prev 10 0 R
+  /Count -2
+  /Dest (bar)
+  /C [1.5 0 0.5]
+>>
+endobj
+% Second grandchild bookmark
+13 0 obj <<
+  /Title (Color Array Has Entries Less Than 0)
+  /Parent 12 0 R
+  /Next 14 0 R
+  /Dest (bar)
+  /C [-1 0 0.5]
+>>
+endobj
+% Third grandchild bookmark
+14 0 obj <<
+  /Title (Valid Color Array)
+  /Parent 12 0 R
+  /Prev 13 0 R
+  /Dest (bar)
+  /C [0.1 0.2 0.3]
+>>
+endobj
+xref
+0 15
+0000000000 65535 f 
+0000000015 00000 n 
+0000000086 00000 n 
+0000000184 00000 n 
+0000000355 00000 n 
+0000000527 00000 n 
+0000000621 00000 n 
+0000000732 00000 n 
+0000000837 00000 n 
+0000000952 00000 n 
+0000001075 00000 n 
+0000001329 00000 n 
+0000001518 00000 n 
+0000001724 00000 n 
+0000001883 00000 n 
+trailer <<
+  /Root 1 0 R
+  /Size 15
+>>
+startxref
+1999
+%%EOF

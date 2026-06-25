@@ -57,6 +57,12 @@ def test_gettoc():
     )
 
 
+def test_gettoc_colored():
+    pdf = pdfium.PdfDocument(TestFiles.toc_colored)
+    toc = pdf.get_toc()
+    # TODO
+
+
 def test_gettoc_circular(caplog):
     
     pdf = pdfium.PdfDocument(TestFiles.toc_circular)

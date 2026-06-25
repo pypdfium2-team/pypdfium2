@@ -27,13 +27,15 @@ def main(args):
     toc = pdf.get_toc(max_depth=args.max_depth)
     
     for bm in toc:
-        count, dest = bm.get_count(), bm.get_dest()
+        
+        count = bm.get_count()
+        count_str = f"{count:+}" if count != 0 else "*"
+        title = bm.get_title()
         out = "    " * bm.level
-        out += "[%s] %s -> " % (
-            f"{count:+}" if count != 0 else "*",
-            bm.get_title(),
-        )
-        # distinguish between "dest == None" and "dest with unknown mode" while keeping the output machine readable
+        # unconditionally add "->" to avoid ambiguity with titles potentially containing the same
+        out += "[%s] %s -> " % (count_str, title)
+        
+        dest = bm.get_dest()
         if dest:
             index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
             out += "%s  # %s %s" % (
@@ -43,4 +45,9 @@ def main(args):
             )
         else:
             out += "_"
+        
+        color = bm.get_color()
+        if color:
+            out += f" | RGB{color}"
+        
         print(out)
