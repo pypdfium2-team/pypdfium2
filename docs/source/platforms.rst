@@ -61,6 +61,7 @@ Legend
   + **PBIN** = Repack external builds from ``bblanchon/pdfium-binaries``.
   + **SBLD** = Built at pypdfium2 via ``sbuild.yaml`` (``build_toolchained.py``).
   + **CIBW** = Built at pypdfium2 via ``cibw.yaml`` (``build_native.py`` + containers on Linux, ``build_toolchained.py`` on Windows and macOS).
+  + ✅ Platform built, ❌ Not built, ⏳coming soon
 
 - 🐍 Conda (**PBIN** only)
   
