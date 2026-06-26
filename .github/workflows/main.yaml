@@ -64,6 +64,7 @@ jobs:
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/utilities.txt
+          python3 -m pip install -U macholib  # macOS/iOS auto-tagging
       
       # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
       # We can't push the tag at this stage because we don't know the outcome of the following jobs yet

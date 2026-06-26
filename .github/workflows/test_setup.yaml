@@ -62,6 +62,7 @@ jobs:
           python3 -m pip install -v -e .
           # non-isolated
           python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/docs.txt
+          python3 -m pip install 'macholib; sys_platform == "darwin"'
           python3 -m pip install -v --no-build-isolation .
           python3 -m pip install -v --no-build-isolation -e .
         # env:
