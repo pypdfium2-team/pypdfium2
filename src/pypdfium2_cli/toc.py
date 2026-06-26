@@ -22,7 +22,7 @@ def attach(parser):
         "--color-indicator",
         action = BooleanOptionalAction,
         default = True,
-        help = "Whether to enable or disable the color indicator, for bookmarks that declare a color. The indicator is based on a Unicode symbol wrapped in an ANSI escape sequence. Default is enabled.",
+        help = "Whether to add a color indicator to bookmarks that declare a color. The indicator is a Unicode symbol wrapped in an ANSI escape sequence. Default is enabled.",
     )
 
 
@@ -48,11 +48,11 @@ def main(args):
     
     for bm in pdf.get_toc(max_depth=args.max_depth):
         
-        # unconditionally add "->" to avoid ambiguity with titles potentially containing the same
         title = bm.get_title()
         count = bm.get_count()
         count_str = f"{count:+}" if count != 0 else "*"
         out = "    " * bm.level
+        # unconditionally add "->" regardless of whether a dest follows or not, to avoid ambiguity with titles potentially containing the same
         out += "[%s] %s -> " % (count_str, title)
         
         dest = bm.get_dest()
