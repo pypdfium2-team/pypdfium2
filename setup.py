@@ -30,6 +30,28 @@ class BinaryDistribution (setuptools.Distribution):
         return True
 
 
+def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
+    
+    # https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
+    
+    class pypdfium_buildpy (buildpy_orig):
+        
+        def run(self, *args, **kwargs):
+            
+            if ModuleRaw in modnames and pl_name != ExtPlats.sdist:
+                datagen()
+                assert_exists(ModuleDir_Raw, package_data["pypdfium2_raw"])
+            
+            if ModuleHelpers in modnames:
+                helpers_info["is_editable"] = bool(self.editable_mode)
+                write_json(ModuleDir_Helpers/VersionFN, helpers_info)
+                assert_exists(ModuleDir_Helpers, package_data["pypdfium2"])
+            
+            buildpy_orig.run(self, *args, **kwargs)
+    
+    return pypdfium_buildpy
+
+
 def bdist_factory(pl_name, dll_path):
     
     class pypdfium_bdist (bdist_wheel):
@@ -51,28 +73,6 @@ def bdist_factory(pl_name, dll_path):
             return "py3", "none", plat_tag
     
     return pypdfium_bdist
-
-
-def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
-    
-    # https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
-    
-    class pypdfium_buildpy (buildpy_orig):
-        
-        def run(self, *args, **kwargs):
-            
-            if ModuleRaw in modnames and pl_name != ExtPlats.sdist:
-                datagen()
-                assert_exists(ModuleDir_Raw, package_data["pypdfium2_raw"])
-            
-            if ModuleHelpers in modnames:
-                helpers_info["is_editable"] = bool(self.editable_mode)
-                write_json(ModuleDir_Helpers/VersionFN, helpers_info)
-                assert_exists(ModuleDir_Helpers, package_data["pypdfium2"])
-            
-            buildpy_orig.run(self, *args, **kwargs)
-    
-    return pypdfium_buildpy
 
 
 def _get_fixed_helpers_info(pl_name):
