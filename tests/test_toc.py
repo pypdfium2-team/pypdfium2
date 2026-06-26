@@ -57,10 +57,36 @@ def test_gettoc():
     )
 
 
-def test_gettoc_colored():
-    pdf = pdfium.PdfDocument(TestFiles.toc_colored)
+def test_gettoc_viewmodes_colored():
+    pdf = pdfium.PdfDocument(TestFiles.toc_viewmodes)
     toc = pdf.get_toc()
-    # TODO
+    _compare_bookmark(
+        next(toc),
+        title = "XYZ 2.1-Page1 red bold",
+        page_index = 0,
+        view_mode = pdfium_c.PDFDEST_VIEW_XYZ,
+        view_pos = (100.0, 100.0, 2.1),
+        count = 0,
+        color = (1.0, 0.0, 0.0),  # red
+    )
+    _compare_bookmark(
+        next(toc),
+        title = "Fit-Page2 green Italic",
+        page_index = 1,
+        view_mode = pdfium_c.PDFDEST_VIEW_FIT,
+        view_pos = (),
+        count = 0,
+        color = (0.0, 1.0, 0.0),  # green
+    )
+    _compare_bookmark(
+        next(toc),
+        title = "FitB Italic&Bold b",
+        page_index = 2,
+        view_mode = pdfium_c.PDFDEST_VIEW_FITB,
+        view_pos = (),
+        count = 0,
+        color = (0.0, 0.0, 1.0),  # blue
+    )
 
 
 def test_gettoc_circular(caplog):
