@@ -8,10 +8,11 @@ import pypdfium2.raw as pdfium_c
 from .conftest import TestFiles
 
 
-def _compare_bookmark(bm, **kwargs):
+def _compare_bookmark(bm, title, count, color=None, **kwargs):
     assert isinstance(bm, pdfium.PdfBookmark)
-    assert kwargs["title"] == bm.get_title()
-    assert kwargs["count"] == bm.get_count()
+    assert title == bm.get_title()
+    assert count == bm.get_count()
+    assert color == bm.get_color()
     dest = bm.get_dest()
     if dest is None:
         assert kwargs["dest"] is None
@@ -53,6 +54,38 @@ def test_gettoc():
         view_mode = pdfium_c.PDFDEST_VIEW_XYZ,
         view_pos = (89, 657, 0),
         count = 0,
+    )
+
+
+def test_gettoc_viewmodes_colored():
+    pdf = pdfium.PdfDocument(TestFiles.toc_viewmodes)
+    toc = pdf.get_toc()
+    _compare_bookmark(
+        next(toc),
+        title = "XYZ 2.1-Page1 red bold",
+        page_index = 0,
+        view_mode = pdfium_c.PDFDEST_VIEW_XYZ,
+        view_pos = (100.0, 100.0, 2.1),
+        count = 0,
+        color = (1.0, 0.0, 0.0),  # red
+    )
+    _compare_bookmark(
+        next(toc),
+        title = "Fit-Page2 green Italic",
+        page_index = 1,
+        view_mode = pdfium_c.PDFDEST_VIEW_FIT,
+        view_pos = (),
+        count = 0,
+        color = (0.0, 1.0, 0.0),  # green
+    )
+    _compare_bookmark(
+        next(toc),
+        title = "FitB Italic&Bold b",
+        page_index = 2,
+        view_mode = pdfium_c.PDFDEST_VIEW_FITB,
+        view_pos = (),
+        count = 0,
+        color = (0.0, 0.0, 1.0),  # blue
     )
 
 

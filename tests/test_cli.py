@@ -85,7 +85,11 @@ def _get_text(pdf, index):
 
 @pytest.mark.parametrize("resource", ["toc", "toc_viewmodes", "toc_circular", "toc_maxdepth"])
 def test_toc(resource):
-    run_cli(["toc", getattr(TestFiles, resource)], getattr(TestExpectations, resource))
+    run_cli(["toc", getattr(TestFiles, resource), "--no-color-indicator"], getattr(TestExpectations, resource))
+
+# escape sequences do look weird in plain text but they achieve what they're supposed to achieve in a shell
+def test_toc_colorized():
+    run_cli(["toc", TestFiles.toc_viewmodes, "--color-indicator"], TestExpectations.toc_viewmodes_colored)
 
 
 def test_attachments(tmp_path):

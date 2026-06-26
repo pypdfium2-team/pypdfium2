@@ -62,12 +62,7 @@ def pagenums_ranger(pagenums):
 
 
 def round_list(lst, n_digits):
-    if not lst:
-        return lst
-    result = [round(v, n_digits) for v in lst]
-    if isinstance(lst, tuple):
-        result = tuple(result)
-    return result
+    return type(lst)(round(v, n_digits) for v in lst)
 
 
 def add_input(parser, pages=True):

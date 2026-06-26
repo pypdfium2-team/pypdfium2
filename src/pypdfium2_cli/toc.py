@@ -3,10 +3,9 @@
 
 import pypdfium2.internal as pdfium_i
 from pypdfium2_cli._parsers import (
-    add_input,
-    add_n_digits,
-    get_input,
-    round_list,
+    add_input, add_n_digits,
+    get_input, round_list,
+    BooleanOptionalAction,
 )
 
 
@@ -19,23 +18,47 @@ def attach(parser):
         default = 15,
         help = "Maximum recursion depth to consider when parsing the table of contents",
     )
+    parser.add_argument(
+        "--color-indicator",
+        action = BooleanOptionalAction,
+        default = True,
+        help = "Whether to add a color indicator to bookmarks that declare a color. The indicator is a Unicode symbol wrapped in an ANSI escape sequence. Default is enabled.",
+    )
+
+
+class ColorIndicator:
+    
+    def __init__(self, enable, indicator, sep):
+        self.get = self._impl if enable else self._noop
+        self.indicator = indicator
+        self.sep = sep
+    
+    def _impl(self, color):
+        r, g, b = tuple(round(c*255) for c in color)
+        return f"\x1b[38;2;{r};{g};{b}m" + self.indicator + "\x1b[0m" + self.sep
+    
+    def _noop(self, color):
+        return ""
 
 
 def main(args):
     
     pdf = get_input(args)
-    toc = pdf.get_toc(max_depth=args.max_depth)
+    icol = ColorIndicator(args.color_indicator, "⬤", sep=" ").get
     
-    for bm in toc:
-        count, dest = bm.get_count(), bm.get_dest()
+    for bm in pdf.get_toc(max_depth=args.max_depth):
+        
+        title = bm.get_title()
+        count = bm.get_count()
+        count_str = f"{count:+}" if count != 0 else "*"
         out = "    " * bm.level
-        out += "[%s] %s -> " % (
-            f"{count:+}" if count != 0 else "*",
-            bm.get_title(),
-        )
-        # distinguish between "dest == None" and "dest with unknown mode" while keeping the output machine readable
+        # unconditionally add "->" regardless of whether a dest follows or not, to avoid ambiguity with titles potentially containing the same
+        out += "[%s] %s -> " % (count_str, title)
+        
+        dest = bm.get_dest()
         if dest:
-            index, (view_mode, view_pos) = dest.get_index(), dest.get_view()
+            index = dest.get_index()
+            view_mode, view_pos = dest.get_view()
             out += "%s  # %s %s" % (
                 index+1 if index != None else "?",
                 pdfium_i.ViewmodeToStr.get(view_mode),
@@ -43,4 +66,9 @@ def main(args):
             )
         else:
             out += "_"
+        
+        color = bm.get_color()
+        if color:
+            out += " | " + icol(color) + f"RGB{round_list(color, args.n_digits)}"
+        
         print(out)

@@ -1,8 +1,8 @@
-[*] XYZ 2.1-Page1 red bold -> 1  # XYZ [100.0, 100.0, 2.1]
-[*] Fit-Page2 green Italic -> 2  # Fit []
-[*] FitB Italic&Bold b -> 3  # FitB []
-[*] FitV Page4 -> 4  # FitV [500.0]
-[*] FitH Page5 -> 5  # FitH [600.0]
-[*] FitR Page6 -> 6  # FitR [100.0, 100.0, 200.0, 200.0]
-[*] FitBH Page7 -> 7  # FitBH [100.0]
-[*] FitBV Page8 -> 8  # FitBV [100.0]
+[*] XYZ 2.1-Page1 red bold -> 1  # XYZ [100.0, 100.0, 2.1] | RGB(1.0, 0.0, 0.0)
+[*] Fit-Page2 green Italic -> 2  # Fit [] | RGB(0.0, 1.0, 0.0)
+[*] FitB Italic&Bold b -> 3  # FitB [] | RGB(0.0, 0.0, 1.0)
+[*] FitV Page4 -> 4  # FitV [500.0] | RGB(0.0, 0.0, 1.0)
+[*] FitH Page5 -> 5  # FitH [600.0] | RGB(0.0, 0.0, 1.0)
+[*] FitR Page6 -> 6  # FitR [100.0, 100.0, 200.0, 200.0] | RGB(0.0, 0.0, 1.0)
+[*] FitBH Page7 -> 7  # FitBH [100.0] | RGB(0.0, 0.0, 1.0)
+[*] FitBV Page8 -> 8  # FitBV [100.0] | RGB(0.0, 0.0, 1.0)
