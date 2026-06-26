@@ -701,8 +701,10 @@ class PdfBookmark (pdfium_i.AutoCastable):
     
     def get_color(self):
         """
+        .. versionadded:: 5.11.0
+        
         Returns:
-            tuple[float,float,float] | None: The bookmark's RGB color as float values between 0 and 1, or None if no valid color is defined.
+            tuple[float,float,float] | None: The bookmark's RGB color as float values between 0 and 1, or None if the bookmark does not define a (valid) color.
         """
         # requires pdfium > 7912
         r, g, b = ctypes.c_float(), ctypes.c_float(), ctypes.c_float()
