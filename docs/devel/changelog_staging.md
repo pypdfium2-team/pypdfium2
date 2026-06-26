@@ -5,7 +5,7 @@
 
 # Changelog for next release
 - Build scripts: Updated PDFium pin from `7891` to `7913`.
-- New API `PdfBookmark.get_color()` added. This is based on upstream's new `FPDFBookmark_GetColor()` API. Integrated `get_color()` into `pypdfium2 toc` CLI.
+- New `PdfBookmark.get_color()` helper added. This is based on upstream's new `FPDFBookmark_GetColor()` API. Integrated `get_color()` into `pypdfium2 toc` CLI.
   Thanks to Aryan Krishnan for the upstream part.
 - New platforms: `manylinux_2_17_{mips64le,mipsle}` wheels added to release.
   * `build_toolchained.py` is now capable of building these, based on upstream's `mips64el` and `mipsel` targets (with minor patches). This took a great deal of tinkering, however.
@@ -13,14 +13,13 @@
   * Note that `pip` actually rejects our wheels because MIPS is not officially part of the manylinux standard and thus not contained in pip's internal whitelist. This can be remedied by re-tagging with `wheel` locally to match the host's `sysconfig.get_platform()` value. See [pip ticket #14095](https://github.com/pypa/pip/issues/14095) for more info.
   * The `mipsle` build is untested (apart from `file` showing the correct target signature), for lack of a container image and binfmt handler.
 - Docs: Comprehensive [platform support table](https://pypdfium2-team.github.io/pypdfium2/platforms.html) added – check it out!
+- Setup: Auto-detect minimum required macOS and iOS versions using `macholib`, which actually runs cross-platform.
+  Corrected hardcoded `iOS` min version to `26_0`. (We do not currently publish iOS wheels but it is handled in setup.)
 - Work around a bindings generation issue on Windows by avoiding inclusion of system `windows.h`.
-  Added a notice that ctypesgen may not work too well on non-Linux systems.
 - Honor reference bindings properly: don't download headers or reuse cached bindings.
   Make test suite pass when reference bindings are used.
 - Fix conda packaging of `pypdfium2_raw`, which was broken by setup changes in 5.10.
   The root issue in setup with `PYPDFIUM_MODULES=raw` now requiring a pre-generated version file remains, though.
-- Corrected minimum iOS requirement to `26_0` as per `macholib`.
-  (We do not release iOS wheels but it is handled in setup.)
 - `sbuild_one.yaml` now also tests Linux targets in Docker, to make sure cross-compiled builds actually work.
 - Start using `ubuntu-26.04` and `windows-11-vs2026-arm` runners. Some workflows intentionally stick with `ubuntu-24.04` for the time being so we can keep testing older Python versions. (On `ubuntu-26.04`, the lowest python version shipped by `actions/setup-python` is 3.10 which is pretty high considering that some older distributions are still running Python 3.6.)
 - `get_cross_deps.py`: Use GCC 16 on `ubuntu-26.04`, and GCC 14 on `ubuntu-24.04`.

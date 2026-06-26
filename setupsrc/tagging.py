@@ -77,19 +77,28 @@ def mac_get_version(dll_path):
     return max(_mac_iter_versions(dll_path))
 
 
-@functools.lru_cache(maxsize=1)
-def get_wheel_tag(pl_name, dll_path, autotag=True):
+def autominver(dll_path, sys_name, hardcoded_ver):
     
-    sys_name = plat_to_system(pl_name)
-    tag_pattern, hardcoded_ver = _WheeltagPatterns[pl_name]
+    autotag_ok = bool(int( os.environ.get("AUTOTAG_OK", 1) ))
+    if not autotag_ok:
+        return None
     
     # TODO implement auto-versioning for other OSes
-    if autotag and sys_name in (SysNames.darwin, SysNames.ios) and HAVE_MACHOLIB:
+    detected_ver = None
+    if sys_name in (SysNames.darwin, SysNames.ios) and HAVE_MACHOLIB:
         mac_major, mac_minor = mac_get_version(dll_path)
         log(f"Auto-detected min macOS version for {dll_path.name}: {mac_major, mac_minor}")
         detected_ver = f"{mac_major}_{mac_minor}"
-        if detected_ver != hardcoded_ver:
-            log(f"Warning: detected {detected_ver!r} != hardcoded {hardcoded_ver!r}. Probably the hardcoded version is outdated, or the detected version might be incorrect.")
-        return tag_pattern.format(detected_ver)
     
-    return tag_pattern.format(hardcoded_ver)
+    if detected_ver and (detected_ver != hardcoded_ver):
+        log(f"Warning: detected {detected_ver!r} != hardcoded {hardcoded_ver!r}. Probably the hardcoded version is outdated, or the detected version might be incorrect.")
+    
+    return detected_ver
+
+
+@functools.lru_cache(maxsize=1)
+def get_wheel_tag(pl_name, dll_path):
+    sys_name = plat_to_system(pl_name)
+    tag_pattern, hardcoded_ver = _WheeltagPatterns[pl_name]
+    detected_ver = autominver(dll_path, sys_name, hardcoded_ver)
+    return tag_pattern.format(detected_ver or hardcoded_ver)
