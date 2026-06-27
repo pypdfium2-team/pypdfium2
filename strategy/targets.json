@@ -1,51 +1,74 @@
 {
     "pbin": {
         "macosx_arm64": {
-            "target": "darwin_arm64", "runner_os": "macos-latest"},
+            "runner_os": "macos-latest",
+            "target": "darwin_arm64"},
         "macosx_x86_64": {
-            "target": "darwin_x64", "runner_os": "macos-15-intel"},
+            "runner_os": "macos-15-intel",
+            "target": "darwin_x64"},
         "macosx_universal2": {
-            "target": "darwin_univ2", "runner_os": "macos-latest"},
+            "runner_os": "macos-latest",
+            "target": "darwin_univ2"},
         "win_amd64": {
-            "target": "windows_x64", "runner_os": "windows-latest"},
+            "runner_os": "windows-latest",
+            "target": "windows_x64"},
         "win_arm64": {
-            "target": "windows_arm64", "runner_os": "windows-11-vs2026-arm"},
+            "runner_os": "windows-11-vs2026-arm",
+            "target": "windows_arm64"},
         "win32": {
-            "target": "windows_x86", "runner_os": "windows-latest"},
+            "runner_os": "windows-latest",
+            "target": "windows_x86"},
         "manylinux_x86_64": {
-            "target": "linux_x64", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "linux_x64"},
         "manylinux_i686": {
-            "target": "linux_x86", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "linux_x86"},
         "manylinux_aarch64": {
-            "target": "linux_arm64", "runner_os": "ubuntu-26.04-arm"},
+            "runner_os": "ubuntu-26.04-arm",
+            "target": "linux_arm64"},
         "manylinux_armv7l": {
-            "target": "linux_arm32", "runner_os": "ubuntu-26.04-arm"},
+            "runner_os": "ubuntu-26.04-arm",
+            "target": "linux_arm32"},
         "manylinux_ppc64le": {
-            "target": "linux_ppc64le", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "linux_ppc64le"},
         "manylinux_mips64le": {
-            "target": "linux_mips64le", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "linux_mips64le"},
         "manylinux_mipsle": {
-            "target": "linux_mipsle", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "linux_mipsle"},
         "musllinux_x86_64": {
-            "target": "linux_musl_x64", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "linux_musl_x64"},
         "musllinux_i686": {
-            "target": "linux_musl_x86", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "linux_musl_x86"},
         "musllinux_aarch64": {
-            "target": "linux_musl_arm64", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "linux_musl_arm64"},
         "android_arm64_v8a": {
-            "target": "android_arm64", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "android_arm64"},
         "android_armeabi_v7a": {
-            "target": "android_arm32", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "android_arm32"},
         "android_x86_64": {
-            "target": "android_x64", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "android_x64"},
         "android_x86": {
-            "target": "android_x86", "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "target": "android_x86"},
         "ios_arm64_iphoneos": {
-            "target": "ios_arm64_dev", "runner_os": "macos-latest"},
+            "runner_os": "macos-latest",
+            "target": "ios_arm64_dev"},
         "ios_arm64_iphonesimulator": {
-            "target": "ios_arm64_simu", "runner_os": "macos-latest"},
+            "runner_os": "macos-latest",
+            "target": "ios_arm64_simu"},
         "ios_x86_64_iphonesimulator": {
-            "target": "ios_x64_simu", "runner_os": "macos-15-intel"}
+            "runner_os": "macos-15-intel",
+            "target": "ios_x64_simu"}
     },
     "cibw": {
         "macosx_arm64": {
@@ -53,11 +76,15 @@
         "macosx_x86_64": {
             "runner_os": "macos-15-intel"},
         "win_amd64": {
-            "runner_os": "windows-latest", "cibw_arch": "AMD64"},
+            "runner_os": "windows-latest",
+            "cibw_arch": "AMD64"},
         "win_arm64": {
-            "runner_os": "windows-latest", "test_os": "windows-11-vs2026-arm", "cibw_arch": "ARM64"},
+            "runner_os": "windows-latest",
+            "test_os": "windows-11-vs2026-arm",
+            "cibw_arch": "ARM64"},
         "win32": {
-            "runner_os": "windows-latest", "cibw_arch": "x86"},
+            "runner_os": "windows-latest",
+            "cibw_arch": "x86"},
         "manylinux_x86_64": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_x86_64": {
@@ -75,7 +102,8 @@
         "musllinux_i686": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_ppc64le": {
-            "runner_os": "ubuntu-26.04", "use_sysroot": true},
+            "runner_os": "ubuntu-26.04",
+            "use_sysroot": true},
         "musllinux_ppc64le": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_s390x": {
@@ -83,7 +111,8 @@
         "musllinux_s390x": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_riscv64": {
-            "runner_os": "ubuntu-26.04", "use_sysroot": true},
+            "runner_os": "ubuntu-26.04",
+            "use_sysroot": true},
         "musllinux_riscv64": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_loongarch64": {
@@ -95,13 +124,17 @@
         "macosx_arm64": {
             "runner_os": "macos-latest"},
         "macosx_x86_64": {
-            "runner_os": "macos-latest", "test_os": "macos-15-intel", "target_cpu": "x64"},
+            "runner_os": "macos-latest",
+            "test_os": "macos-15-intel",
+            "target_cpu": "x64"},
         "macosx_x86_64:native": {
             "runner_os": "macos-15-intel"},
         "win_amd64": {
             "runner_os": "windows-latest"},
         "win_arm64": {
-            "runner_os": "windows-latest", "test_os": "windows-11-vs2026-arm", "target_cpu": "arm64"},
+            "runner_os": "windows-latest",
+            "test_os": "windows-11-vs2026-arm",
+            "target_cpu": "arm64"},
         "win32": {
             "runner_os": "windows-latest"},
         "win_arm64:native": {
@@ -109,22 +142,37 @@
         "manylinux_x86_64": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_i686": {
-            "runner_os": "ubuntu-26.04", "target_cpu": "x86"},
+            "runner_os": "ubuntu-26.04",
+            "target_cpu": "x86"},
         "manylinux_aarch64": {
-            "runner_os": "ubuntu-26.04", "test_os": "ubuntu-26.04-arm", "target_cpu": "arm64"},
+            "runner_os": "ubuntu-26.04",
+            "test_os": "ubuntu-26.04-arm",
+            "target_cpu": "arm64"},
         "manylinux_aarch64:native": {
-            "runner_os": "ubuntu-26.04-arm", "custom_clang": true, "build_params": "--use-sysroot --clang-path /opt/clang"},
+            "runner_os": "ubuntu-26.04-arm",
+            "custom_clang": true,
+            "build_params": "--use-sysroot --clang-path /opt/clang"},
         "manylinux_armv7l": {
-            "runner_os": "ubuntu-26.04", "test_os": "ubuntu-26.04-arm", "target_cpu": "arm"},
+            "runner_os": "ubuntu-26.04",
+            "test_os": "ubuntu-26.04-arm",
+            "target_cpu": "arm"},
         "manylinux_ppc64le": {
-            "runner_os": "ubuntu-26.04", "target_cpu": "ppc64"},
+            "runner_os": "ubuntu-26.04",
+            "target_cpu": "ppc64"},
         "manylinux_mips64le": {
-            "runner_os": "ubuntu-24.04", "target_cpu": "mips64el"},
+            "runner_os": "ubuntu-24.04",
+            "target_cpu": "mips64el"},
         "manylinux_mipsle": {
-            "runner_os": "ubuntu-24.04", "target_cpu": "mipsel", "docker_test": false},
+            "runner_os": "ubuntu-24.04",
+            "target_cpu": "mipsel",
+            "docker_test": false},
         "android_arm64_v8a": {
-            "runner_os": "ubuntu-26.04", "target_os": "android", "target_cpu": "arm64"},
+            "runner_os": "ubuntu-26.04",
+            "target_os": "android",
+            "target_cpu": "arm64"},
         "android_armeabi_v7a": {
-            "runner_os": "ubuntu-26.04", "target_os": "android", "target_cpu": "arm"}
+            "runner_os": "ubuntu-26.04",
+            "target_os": "android",
+            "target_cpu": "arm"}
     }
 }
