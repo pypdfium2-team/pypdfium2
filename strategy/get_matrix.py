@@ -46,19 +46,6 @@ def read_json(fp):
         return json.load(buf)
 
 
-def dumpstr(matrices):
-    output = []
-    for target_class, entries in matrices.items():
-        output.append(f"{target_class}_needed={bool(entries)}")
-        output.append(f"{target_class}_matrix={json.dumps(entries)}")
-    return "\n".join(output)
-
-def dump(output, file, where, end=""):
-    log(f"--- Dump output to {where} ---")
-    print(output, file=file)
-    log("--------- End dump ----------" + end)
-
-
 class Inference:
     
     @staticmethod
@@ -71,16 +58,12 @@ class Inference:
             entry["cibw_arch"] = entry["label"].split("_", maxsplit=1)[-1]
 
 
-def main():
-    
-    args = parse_args(sys.argv[1:])
-    TARGET_CLASSES = ("pbin", "cibw", "sbuild")
-    TARGETS_JSON = read_json(STRATEGY_DIR/"targets.json")
-    
+def get_matrices(args, tt_classes, tt_json):
     matrices = {}
-    for target_class in TARGET_CLASSES:
+    
+    for target_class in tt_classes:
         
-        targets = TARGETS_JSON[target_class]
+        targets = tt_json[target_class]
         selected_keys = getattr(args, target_class)
         if selected_keys == ["all"]:
             selected_keys = list(targets.keys())
@@ -95,16 +78,42 @@ def main():
             inference(entry)
             matrix_entries.append(entry)
     
-    if args.reveal:
-        log(f"args: {vars(args)}\n")
-        for target_class, entries in matrices.items():
-            log(target_class)
-            for entry in entries:
-                log(entry)
-            log()
+    return matrices
+
+
+def reveal_config(args, matrices):
+    log(f"args: {vars(args)}\n")
+    for target_class, entries in matrices.items():
+        log(target_class)
+        for entry in entries:
+            log(entry)
+        log()
+
+def dumpstr(matrices):
+    output = []
+    for target_class, entries in matrices.items():
+        output.append(f"{target_class}_needed={bool(entries)}")
+        output.append(f"{target_class}_matrix={json.dumps(entries)}")
+    return "\n".join(output)
+
+def dump(output, file, where, end=""):
+    log(f"--- Dump output to {where} ---")
+    print(output, file=file)
+    log("--------- End dump ----------" + end)
+
+
+def main():
     
+    args = parse_args(sys.argv[1:])
+    TARGET_CLASSES = ("pbin", "cibw", "sbuild")
+    TARGETS_JSON = read_json(STRATEGY_DIR/"targets.json")
+    
+    matrices = get_matrices(args, TARGET_CLASSES, TARGETS_JSON)
     output = dumpstr(matrices)
-    dump(output, sys.stderr, "stderr", end="\n")
+    
+    if args.reveal:
+        reveal_config(args, matrices)
+        dump(output, sys.stderr, "stderr", end="\n")
     dump(output, sys.stdout, "stdout")
 
 
