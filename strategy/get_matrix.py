@@ -38,6 +38,11 @@ Check //strategy/targets.json for available targets per build strategy.\
         "--sbuild", nargs="*", default=[],
         help = "sbuild targets to build.",
     )
+    parser.add_argument(
+        "--reveal",
+        action = "store_true",
+        help = "Print human-readable output to stderr.",
+    )
     return parser.parse_args(argv)
 
 
@@ -53,11 +58,22 @@ class Inference:
             entry["cibw_arch"] = entry["label"].split("_", maxsplit=1)[-1]
 
 
+def dumpstr(matrices):
+    output = []
+    for target_class, entries in matrices.items():
+        output.append(f"{target_class}_needed={bool(entries)}")
+        output.append(f"{target_class}_matrix={json.dumps(entries)}")
+    return "\n".join(output)
+
+def dump(output, file, where, end=""):
+    log(f"--- Dump output to {where} ---")
+    print(output, file=file)
+    log("--------- End dump ----------" + end)
+
+
 def main():
     
     args = parse_args(sys.argv[1:])
-    log(f"args: {vars(args)}\n")
-    
     TARGET_CLASSES = ("pbin", "cibw", "sbuild")
     TARGETS_JSON = read_json(STRATEGY_DIR/"targets.json")
     
@@ -79,12 +95,17 @@ def main():
             inference(entry)
             matrix_entries.append(entry)
     
-    for target_class, entries in matrices.items():
-        log(target_class)
-        for entry in entries:
-            log(entry)
-        log()
-
+    if args.reveal:
+        log(f"args: {vars(args)}\n")
+        for target_class, entries in matrices.items():
+            log(target_class)
+            for entry in entries:
+                log(entry)
+            log()
+    
+    output = dumpstr(matrices)
+    dump(output, sys.stderr, "stderr", end="\n")
+    dump(output, sys.stdout, "stdout")
 
 if __name__ == '__main__':
     main()
