@@ -33,7 +33,12 @@ class Inference:
     
     @staticmethod
     def sbld(key, entry):
-        entry.setdefault("tag", key)
+        if "tag" not in entry:
+            tag = key.rsplit(":", maxsplit=1)[0]
+            if tag.startswith("manylinux_"):
+                arch = tag.split("_", maxsplit=1)[-1]
+                tag = f"manylinux_2_17_{arch}.manylinux2014_{arch}"
+            entry["tag"] = tag
         return entry
 
 

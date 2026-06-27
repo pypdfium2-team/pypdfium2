@@ -148,40 +148,32 @@
         "win_arm64:native": {
             "runner_os": "windows-11-vs2026-arm"},
         "manylinux_x86_64": {
-            "runner_os": "ubuntu-26.04",
-            "tag": "manylinux_2_17_x86_64.manylinux2014_x86_64"},
+            "runner_os": "ubuntu-26.04"},
         "manylinux_i686": {
             "runner_os": "ubuntu-26.04",
-            "target_cpu": "x86",
-            "tag": "manylinux_2_17_i686.manylinux2014_i686"},
+            "target_cpu": "x86"},
         "manylinux_aarch64": {
             "runner_os": "ubuntu-26.04",
             "test_os": "ubuntu-26.04-arm",
-            "target_cpu": "arm64",
-            "tag": "manylinux_2_17_aarch64.manylinux2014_aarch64"},
+            "target_cpu": "arm64"},
         "manylinux_aarch64:native": {
             "runner_os": "ubuntu-26.04-arm",
             "custom_clang": true,
-            "build_params": "--use-sysroot --clang-path /opt/clang",
-            "tag": "manylinux_2_17_aarch64.manylinux2014_aarch64"},
+            "build_params": "--use-sysroot --clang-path /opt/clang"},
         "manylinux_armv7l": {
             "runner_os": "ubuntu-26.04",
             "test_os": "ubuntu-26.04-arm",
-            "target_cpu": "arm",
-            "tag": "manylinux_2_17_armv7l.manylinux2014_armv7l"},
+            "target_cpu": "arm"},
         "manylinux_ppc64le": {
             "runner_os": "ubuntu-26.04",
-            "target_cpu": "ppc64",
-            "tag": "manylinux_2_17_ppc64le.manylinux2014_ppc64le"},
+            "target_cpu": "ppc64"},
         "manylinux_mips64le": {
             "runner_os": "ubuntu-24.04",
-            "target_cpu": "mips64el",
-            "tag": "manylinux_2_17_mips64le.manylinux2014_mips64le"},
+            "target_cpu": "mips64el"},
         "manylinux_mipsle": {
             "runner_os": "ubuntu-24.04",
             "target_cpu": "mipsel",
-            "docker_test": false,
-            "tag": "manylinux_2_17_mipsle.manylinux2014_mipsle"},
+            "docker_test": false},
         "android_arm64_v8a": {
             "runner_os": "ubuntu-26.04",
             "target_os": "android",
