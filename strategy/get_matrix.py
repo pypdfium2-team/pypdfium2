@@ -43,12 +43,12 @@ class Inference:
         return entry
 
 
-def get_matrices(args, strategic_targets):
+def get_matrices(args, all_targets):
     matrices = {}
     
     for strategy in STRATEGIES:
         
-        targets = strategic_targets[strategy]
+        targets = all_targets[strategy]
         matrices[strategy] = matrix_entries = []
         inference = getattr(Inference, strategy, Inference._noop)
         
@@ -133,9 +133,9 @@ See //strategy/targets.json for canonical configuration, or below for available 
 
 def main():
     
-    strategic_targets = read_json(THIS_DIR/"targets.json")
-    args = parse_args(sys.argv[1:], strategic_targets)
-    matrices = get_matrices(args, strategic_targets)
+    all_targets = read_json(THIS_DIR/"targets.json")
+    args = parse_args(sys.argv[1:], all_targets)
+    matrices = get_matrices(args, all_targets)
     output = dumpstr(matrices)
     
     if args.reveal:
