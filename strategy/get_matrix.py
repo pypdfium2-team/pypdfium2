@@ -6,16 +6,6 @@ import json
 import argparse
 from pathlib import Path
 
-STRATEGY_DIR = Path(__file__).parent.resolve()
-
-
-def log(*args, **kwargs):
-    print(*args, **kwargs, file=sys.stderr)
-
-def read_json(fp):
-    with open(fp, "r") as buf:
-        return json.load(buf)
-
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(
@@ -46,16 +36,14 @@ Check //strategy/targets.json for available targets per build strategy.\
     return parser.parse_args(argv)
 
 
-class Inference:
-    
-    @staticmethod
-    def _noop(entry):
-        pass
-    
-    @staticmethod
-    def cibw(entry):
-        if "cibw_arch" not in entry:
-            entry["cibw_arch"] = entry["label"].split("_", maxsplit=1)[-1]
+STRATEGY_DIR = Path(__file__).parent.resolve()
+
+def log(*args, **kwargs):
+    print(*args, **kwargs, file=sys.stderr)
+
+def read_json(fp):
+    with open(fp, "r") as buf:
+        return json.load(buf)
 
 
 def dumpstr(matrices):
@@ -69,6 +57,18 @@ def dump(output, file, where, end=""):
     log(f"--- Dump output to {where} ---")
     print(output, file=file)
     log("--------- End dump ----------" + end)
+
+
+class Inference:
+    
+    @staticmethod
+    def _noop(entry):
+        pass
+    
+    @staticmethod
+    def cibw(entry):
+        if "cibw_arch" not in entry:
+            entry["cibw_arch"] = entry["label"].split("_", maxsplit=1)[-1]
 
 
 def main():
@@ -106,6 +106,7 @@ def main():
     output = dumpstr(matrices)
     dump(output, sys.stderr, "stderr", end="\n")
     dump(output, sys.stdout, "stdout")
+
 
 if __name__ == '__main__':
     main()
