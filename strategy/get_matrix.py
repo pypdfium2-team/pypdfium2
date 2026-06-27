@@ -78,13 +78,19 @@ def dump(output, file, where, trailer=""):
     log("--------- End dump ----------" + trailer)
 
 
-def parse_args(argv):
+def parse_args(argv, strategic_targets):
+    PBIN_KEYS = " ".join(strategic_targets["pbin"].keys())
+    CIBW_KEYS = " ".join(strategic_targets["cibw"].keys())
+    SBUILD_KEYS = " ".join(strategic_targets["sbuild"].keys())
     parser = argparse.ArgumentParser(
         formatter_class = argparse.RawTextHelpFormatter,
-        description = """\
+        description = f"""\
 Generate build matrices for given targets. This is intended for use in pypdfium2's GHA workflows.
+See //strategy/targets.json for canonical configuration, or below for available targets per build strategy.
 
-Check //strategy/targets.json for available targets per build strategy.\
+PBIN: {PBIN_KEYS}
+CIBW: {CIBW_KEYS}
+SBLD: {SBUILD_KEYS}\
 """,
     )
     parser.add_argument(
@@ -109,8 +115,8 @@ Check //strategy/targets.json for available targets per build strategy.\
 
 def main():
     
-    args = parse_args(sys.argv[1:])
     strategic_targets = read_json(THIS_DIR/"targets.json")
+    args = parse_args(sys.argv[1:], strategic_targets)
     matrices = get_matrices(args, strategic_targets)
     output = dumpstr(matrices)
     
