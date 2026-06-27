@@ -4,6 +4,7 @@
 import sys
 import json
 import argparse
+import collections
 from pathlib import Path
 
 
@@ -78,6 +79,9 @@ def dump(output, file, where, trailer=""):
     log("--------- End dump ----------" + trailer)
 
 
+def _get_duplicates(iterable):
+    return tuple(k for k, v in collections.Counter(iterable).items() if v > 1)
+
 def parse_args(argv, strategic_targets):
     targets_help = ""
     targets_help += "PBIN: " + " ".join(strategic_targets["pbin"].keys()) + "\n"
@@ -107,7 +111,11 @@ See //strategy/targets.json for canonical configuration, or below for available 
         action = "store_true",
         help = "Print human-readable output to stderr.",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    for strategy in STRATEGIES:
+        duplicates = _get_duplicates( getattr(args, strategy) )
+        assert not duplicates, f"Duplicate targets: {duplicates}"
+    return args
 
 
 def main():
