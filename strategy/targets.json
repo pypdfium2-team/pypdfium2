@@ -121,9 +121,14 @@
             "runner_os": "ubuntu-26.04"}
     },
     "sbld": {
-        "macosx_arm64:native": {
+        "macosx_arm64": {
             "runner_os": "macos-latest",
             "tag": "macosx_12_0_arm64"},
+        "macosx_x86_64": {
+            "runner_os": "macos-latest",
+            "test_os": "macos-15-intel",
+            "target_cpu": "x64",
+            "tag": "macosx_12_0_x86_64"},
         "macosx_arm64:cross": {
             "runner_os": "macos-15-intel",
             "test_os": "macos-latest",
@@ -131,11 +136,6 @@
             "tag": "macosx_12_0_arm64"},
         "macosx_x86_64:native": {
             "runner_os": "macos-15-intel",
-            "tag": "macosx_12_0_x86_64"},
-        "macosx_x86_64:cross": {
-            "runner_os": "macos-latest",
-            "test_os": "macos-15-intel",
-            "target_cpu": "x64",
             "tag": "macosx_12_0_x86_64"},
         "win_amd64": {
             "runner_os": "windows-latest"},
