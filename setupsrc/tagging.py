@@ -77,7 +77,13 @@ def mac_get_version(dll_path):
     return max(_mac_iter_versions(dll_path))
 
 
-def autominver(dll_path, sys_name, hardcoded_ver):
+def errlog(msg, skip_err):
+    if skip_err:
+        log(msg)
+    else:
+        raise RuntimeError(msg)
+
+def autominver(dll_path, sys_name, hardcoded_ver, skip_err=(not IS_CI)):
     
     autotag_ok = bool(int( os.environ.get("AUTOTAG_OK", 1) ))
     if not autotag_ok:
@@ -90,8 +96,8 @@ def autominver(dll_path, sys_name, hardcoded_ver):
         log(f"Auto-detected min macOS version for {dll_path.name}: {mac_major, mac_minor}")
         detected_ver = f"{mac_major}_{mac_minor}"
     
-    if detected_ver and (detected_ver != hardcoded_ver):
-        log(f"Warning: detected {detected_ver!r} != hardcoded {hardcoded_ver!r}. Probably the hardcoded version is outdated, or the detected version might be incorrect.")
+    if detected_ver and (hardcoded_ver != detected_ver):
+        errlog(f"Warning: hardcoded {hardcoded_ver!r} != detected {detected_ver!r}. Probably the hardcoded version is outdated, or the detected version might be incorrect.", skip_err)
     
     return detected_ver
 
