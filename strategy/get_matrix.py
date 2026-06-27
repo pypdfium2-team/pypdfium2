@@ -23,7 +23,7 @@ def parse_args(argv):
         description = """\
 Generate build matrices for given targets. This is intended for use in pypdfium2's GHA workflows.
 
-Check //strategy/targets.json for available targets per build strategy.
+Check //strategy/targets.json for available targets per build strategy.\
 """,
     )
     parser.add_argument(
@@ -44,42 +44,46 @@ Check //strategy/targets.json for available targets per build strategy.
 class Inference:
     
     @staticmethod
-    def pbin(key, entry):
-        return entry
+    def _noop(entry):
+        pass
     
     @staticmethod
-    def cibw(key, entry):
-        entry["cibw_target"] = key
+    def cibw(entry):
         if "cibw_arch" not in entry:
-            entry["cibw_arch"] = key.split("_", maxsplit=1)[-1]
-        return entry
-    
-    @staticmethod
-    def sbuild(key, entry):
-        entry["target_id"] = key
-        return entry
+            entry["cibw_arch"] = entry["label"].split("_", maxsplit=1)[-1]
 
 
 def main():
     
     args = parse_args(sys.argv[1:])
-    log(vars(args))
-    print()
+    log(f"args: {vars(args)}\n")
     
+    TARGET_CLASSES = ("pbin", "cibw", "sbuild")
     TARGETS_JSON = read_json(STRATEGY_DIR/"targets.json")
-    for target_class in ("pbin", "cibw", "sbuild"):
+    
+    matrices = {}
+    for target_class in TARGET_CLASSES:
         
         targets = TARGETS_JSON[target_class]
         selected_keys = getattr(args, target_class)
         if selected_keys == ["all"]:
             selected_keys = list(targets.keys())
         
-        inference = getattr(Inference, target_class)
-        for key in selected_keys:
-            entry = inference(key, targets[key])
-            log(f"{key}\n    {entry}")
+        matrix_entries = []
+        matrices[target_class] = matrix_entries
         
-        print()
+        inference = getattr(Inference, target_class, Inference._noop)
+        for key in selected_keys:
+            entry = {"label": key}
+            entry.update(targets[key])
+            inference(entry)
+            matrix_entries.append(entry)
+    
+    for target_class, entries in matrices.items():
+        log(target_class)
+        for entry in entries:
+            log(entry)
+        log()
 
 
 if __name__ == '__main__':
