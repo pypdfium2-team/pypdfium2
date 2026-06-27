@@ -52,12 +52,17 @@ def get_matrices(args, strategic_targets):
     return matrices
 
 
-def reveal_config(args, matrices):
-    log(f"args: {vars(args)}\n")
+def _repr_entry(entry):
+    assert entry, "no empty entries expected"
+    output = "\n".join(f"  {k}: {v!r}" for k, v in entry.items())
+    output = "-" + output[1:]
+    return output
+
+def pprint_matrices(matrices):
     for strategy, entries in matrices.items():
-        log(strategy)
+        log(f"{strategy}:")
         for entry in entries:
-            log(entry)
+            log(_repr_entry(entry))
         log()
 
 def dumpstr(matrices):
@@ -110,7 +115,8 @@ def main():
     output = dumpstr(matrices)
     
     if args.reveal:
-        reveal_config(args, matrices)
+        log(f"args: {vars(args)}\n")
+        pprint_matrices(matrices)
         dump(output, sys.stderr, "stderr", trailer="\n")
     dump(output, sys.stdout, "stdout")
 
