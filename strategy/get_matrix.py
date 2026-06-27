@@ -22,13 +22,19 @@ def read_json(fp):
 class Inference:
     
     @staticmethod
-    def _noop(entry):
-        pass
+    def _noop(key, entry):
+        return entry
     
     @staticmethod
-    def cibw(entry):
+    def cibw(key, entry):
         if "cibw_arch" not in entry:
-            entry["cibw_arch"] = entry["label"].split("_", maxsplit=1)[-1]
+            entry["cibw_arch"] = key.split("_", maxsplit=1)[-1]
+        return entry
+    
+    @staticmethod
+    def sbld(key, entry):
+        entry.setdefault("tag", key)
+        return entry
 
 
 def get_matrices(args, strategic_targets):
@@ -41,9 +47,7 @@ def get_matrices(args, strategic_targets):
         inference = getattr(Inference, strategy, Inference._noop)
         
         for key in getattr(args, strategy):
-            entry = {"label": key}
-            entry.update(targets[key])
-            inference(entry)
+            entry = {"label": key, **inference(key, targets[key])}
             matrix_entries.append(entry)
     
     return matrices
