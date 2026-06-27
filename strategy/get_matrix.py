@@ -7,36 +7,7 @@ import argparse
 from pathlib import Path
 
 
-def parse_args(argv):
-    parser = argparse.ArgumentParser(
-        formatter_class = argparse.RawTextHelpFormatter,
-        description = """\
-Generate build matrices for given targets. This is intended for use in pypdfium2's GHA workflows.
-
-Check //strategy/targets.json for available targets per build strategy.\
-""",
-    )
-    parser.add_argument(
-        "--pbin", nargs="*", default=[],
-        help = "pdfium-binaries targets to build.",
-    )
-    parser.add_argument(
-        "--cibw", nargs="*", default=[],
-        help = "CIBW targets to build.",
-    )
-    parser.add_argument(
-        "--sbuild", nargs="*", default=[],
-        help = "sbuild targets to build.",
-    )
-    parser.add_argument(
-        "--reveal",
-        action = "store_true",
-        help = "Print human-readable output to stderr.",
-    )
-    return parser.parse_args(argv)
-
-
-STRATEGY_DIR = Path(__file__).parent.resolve()
+THIS_DIR = Path(__file__).parent.resolve()
 STRATEGIES = ("pbin", "cibw", "sbuild")
 
 def log(*args, **kwargs):
@@ -59,12 +30,12 @@ class Inference:
             entry["cibw_arch"] = entry["label"].split("_", maxsplit=1)[-1]
 
 
-def get_matrices(args, targets_json):
+def get_matrices(args, strategic_targets):
     matrices = {}
     
     for strategy in STRATEGIES:
         
-        targets = targets_json[strategy]
+        targets = strategic_targets[strategy]
         selected_keys = getattr(args, strategy)
         if selected_keys == ["all"]:
             selected_keys = list(targets.keys())
@@ -103,12 +74,41 @@ def dump(output, file, where, end=""):
     log("--------- End dump ----------" + end)
 
 
+def parse_args(argv):
+    parser = argparse.ArgumentParser(
+        formatter_class = argparse.RawTextHelpFormatter,
+        description = """\
+Generate build matrices for given targets. This is intended for use in pypdfium2's GHA workflows.
+
+Check //strategy/targets.json for available targets per build strategy.\
+""",
+    )
+    parser.add_argument(
+        "--pbin", nargs="*", default=[],
+        help = "pdfium-binaries targets to build.",
+    )
+    parser.add_argument(
+        "--cibw", nargs="*", default=[],
+        help = "CIBW targets to build.",
+    )
+    parser.add_argument(
+        "--sbuild", nargs="*", default=[],
+        help = "sbuild targets to build.",
+    )
+    parser.add_argument(
+        "--reveal",
+        action = "store_true",
+        help = "Print human-readable output to stderr.",
+    )
+    return parser.parse_args(argv)
+
+
 def main():
     
     args = parse_args(sys.argv[1:])
-    TARGETS_JSON = read_json(STRATEGY_DIR/"targets.json")
+    strategic_targets = read_json(THIS_DIR/"targets.json")
     
-    matrices = get_matrices(args, TARGETS_JSON)
+    matrices = get_matrices(args, strategic_targets)
     output = dumpstr(matrices)
     
     if args.reveal:
