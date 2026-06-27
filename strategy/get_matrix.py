@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 THIS_DIR = Path(__file__).parent.resolve()
-STRATEGIES = ("pbin", "cibw", "sbuild")
+STRATEGIES = ("pbin", "cibw", "sbld")
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -37,14 +37,10 @@ def get_matrices(args, strategic_targets):
     for strategy in STRATEGIES:
         
         targets = strategic_targets[strategy]
-        selected_keys = getattr(args, strategy)
-        if selected_keys == ["all"]:
-            selected_keys = list(targets.keys())
-        
         matrices[strategy] = matrix_entries = []
         inference = getattr(Inference, strategy, Inference._noop)
         
-        for key in selected_keys:
+        for key in getattr(args, strategy):
             entry = {"label": key}
             entry.update(targets[key])
             inference(entry)
@@ -82,11 +78,12 @@ def dump(output, file, where, trailer=""):
 def _get_duplicates(iterable):
     return tuple(k for k, v in collections.Counter(iterable).items() if v > 1)
 
-def parse_args(argv, strategic_targets):
-    targets_help = ""
-    targets_help += "PBIN: " + " ".join(strategic_targets["pbin"].keys()) + "\n"
-    targets_help += "CIBW: " + " ".join(strategic_targets["cibw"].keys()) + "\n"
-    targets_help += "SBLD: " + " ".join(strategic_targets["sbuild"].keys())
+def parse_args(argv, all_targets):
+    
+    targets_help = "\n".join(
+        f"{s.upper()}: " + " ".join(all_targets[s].keys()) for s in STRATEGIES
+    )
+    
     parser = argparse.ArgumentParser(
         formatter_class = argparse.RawTextHelpFormatter,
         description = f"""\
@@ -96,25 +93,31 @@ See //strategy/targets.json for canonical configuration, or below for available 
     )
     parser.add_argument(
         "--pbin", nargs="*", default=[],
-        help = "pdfium-binaries targets to build.",
+        help = "PBIN (pdfium-binaries) targets to build.",
     )
     parser.add_argument(
         "--cibw", nargs="*", default=[],
-        help = "CIBW targets to build.",
+        help = "CIBW (cibuildwheel) targets to build.",
     )
     parser.add_argument(
-        "--sbuild", nargs="*", default=[],
-        help = "sbuild targets to build.",
+        "--sbld", nargs="*", default=[],
+        help = "SBLD (sbuild) targets to build.",
     )
     parser.add_argument(
         "--reveal",
         action = "store_true",
         help = "Print human-readable output to stderr.",
     )
+    
     args = parser.parse_args(argv)
     for strategy in STRATEGIES:
-        duplicates = _get_duplicates( getattr(args, strategy) )
+        selected_targets = getattr(args, strategy)
+        duplicates = _get_duplicates(selected_targets)
         assert not duplicates, f"Duplicate targets: {duplicates}"
+        if selected_targets == ["all"]:
+            selected_targets = list(all_targets[strategy].keys())
+            setattr(args, strategy, selected_targets)
+    
     return args
 
 
