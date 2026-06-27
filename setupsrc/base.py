@@ -4,6 +4,7 @@
 import os
 import re
 import sys
+import enum
 import json
 import shutil
 import tarfile
@@ -99,6 +100,10 @@ class SysNames:
     linux   = "linux"
     android = "android"
     ios     = "ios"
+
+class SysEndianness (enum.Enum):
+    little = enum.auto()
+    big = enum.auto()
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
@@ -463,6 +468,7 @@ class _host_platform:
         # For the machine name, the platform module just passes through info provided by the OS (e.g. the uname command on unix), so we can determine the relevant names from Python's source code, system specs or info available online (e.g. https://en.wikipedia.org/wiki/Uname)
         self._raw_system = platform.system().lower()
         self._raw_machine = platform.machine().lower()
+        self._endianness = SysEndianness[sys.byteorder]
         
         if self._raw_system == "linux":
             self._libc_name, self._libc_ver = _get_libc_info()
@@ -503,8 +509,8 @@ class _host_platform:
     
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
-        if self._raw_system == "linux" and self._libc_name:
-            info += f", {self._libc_name} {self._libc_ver}"
+        if self._raw_system == "linux":
+            info += f", {self._libc_name, self._libc_ver, self._endianness.name}"
         return f"<Host: {info}>"
     
     def _handle_linux(self, archid, musl_ok=True):
@@ -546,8 +552,9 @@ class _host_platform:
         
         elif self._raw_system == "linux":
             self._system = SysNames.linux
-            is_little_endian = sys.byteorder == "little"
-            log(f"linux {self._raw_machine} {self._libc_name, self._libc_ver, sys.byteorder}")
+            log(repr(self))
+            if self._endianness != SysEndianness.little:
+                raise UnhandledPlatformError("Only little-endian platforms are supported with pdfium-binaries on setup. Please check PyPI for possible wheels.")
             if self._raw_machine == "x86_64":
                 return self._handle_linux("x64")
             elif self._raw_machine == "i686":
@@ -556,11 +563,11 @@ class _host_platform:
                 return self._handle_linux("arm64")
             elif self._raw_machine in ("armv7l", "armv8l"):
                 return self._handle_linux("arm32", musl_ok=False)
-            elif self._raw_machine.startswith("ppc64") and is_little_endian:  # ppc64le
+            elif self._raw_machine.startswith("ppc64"):  # ppc64le
                 return self._handle_linux("ppc64le", musl_ok=False)
-            elif self._raw_machine.startswith("mips64") and is_little_endian:
+            elif self._raw_machine.startswith("mips64"):
                 return self._handle_linux("mips64le", musl_ok=False)
-            elif self._raw_machine.startswith("mips") and is_little_endian:
+            elif self._raw_machine.startswith("mips"):
                 return self._handle_linux("mipsle", musl_ok=False)
         
         elif self._raw_system == "android":  # PEP 738
