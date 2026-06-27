@@ -3,7 +3,7 @@
 
 > [!IMPORTANT]
 > **AI-"assisted" issues and PRs are banned from this project!**
-> See [below](#no-ai-issues-and-prs-policy).
+> [See below.](#no-ai-issues-and-prs-policy)
 
 # pypdfium2
 
