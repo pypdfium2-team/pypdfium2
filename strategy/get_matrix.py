@@ -70,7 +70,7 @@ def _repr_entry(entry):
     output = "-" + output[1:]
     return output
 
-def pprint_matrices(matrices):
+def pprint_mat(matrices):
     for strategy, entries in matrices.items():
         log(f"{strategy}:")
         for entry in entries:
@@ -142,7 +142,7 @@ def main():
     output = dumpstr(matrices)
     if args.reveal:
         log(f"args: {vars(args)}\n")
-        pprint_matrices(matrices)
+        pprint_mat(matrices)
         dump(output, sys.stderr, "stderr", trailer="\n")
     
     dump(output, sys.stdout, "stdout")
