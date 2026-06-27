@@ -556,7 +556,7 @@ class _host_platform:
                 return self._handle_linux("arm64")
             elif self._raw_machine in ("armv7l", "armv8l"):
                 return self._handle_linux("arm32", musl_ok=False)
-            elif self._raw_machine == "ppc64le":
+            elif self._raw_machine.startswith("ppc64") and is_little_endian:  # ppc64le
                 return self._handle_linux("ppc64le", musl_ok=False)
             elif self._raw_machine.startswith("mips64") and is_little_endian:
                 return self._handle_linux("mips64le", musl_ok=False)
