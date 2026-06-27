@@ -40,8 +40,7 @@ def get_matrices(args, strategic_targets):
         if selected_keys == ["all"]:
             selected_keys = list(targets.keys())
         
-        matrix_entries = []
-        matrices[strategy] = matrix_entries
+        matrices[strategy] = matrix_entries = []
         inference = getattr(Inference, strategy, Inference._noop)
         
         for key in selected_keys:
