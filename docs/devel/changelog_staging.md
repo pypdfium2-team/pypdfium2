@@ -14,7 +14,7 @@
   * The `mipsle` build is untested (apart from `file` showing the correct target signature), for lack of a container image and binfmt handler.
 - Docs: Comprehensive [platform support table](https://pypdfium2-team.github.io/pypdfium2/platforms.html) added – check it out!
 - Setup: Auto-detect minimum required macOS and iOS versions using `macholib`, which actually runs cross-platform.
-  Corrected hardcoded `iOS` min version to `26_0`. (We do not currently publish iOS wheels but it is handled in setup.)
+  This corrects the `iOS` min version to `26_0`. (We do not currently publish iOS wheels but it is handled in setup.)
 - Work around a bindings generation issue on Windows by avoiding inclusion of system `windows.h`.
 - Honor reference bindings properly: don't download headers or reuse cached bindings.
   Make test suite pass when reference bindings are used.

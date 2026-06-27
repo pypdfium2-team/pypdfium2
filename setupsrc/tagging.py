@@ -24,11 +24,13 @@ _WheeltagPatterns = {
     PlatNames.windows_x86:      ("win32",     None),
     
     # Minver can be checked with `auditwheel show`. Upstream build system uses sysroots with symbol reversioning, hence consistently low glibc requirement. Need to watch out for changes, though.
-    PlatNames.linux_x64:        (_manylinux_tag("x86_64"),  "2_17"),
-    PlatNames.linux_x86:        (_manylinux_tag("i686"),    "2_17"),
-    PlatNames.linux_arm64:      (_manylinux_tag("aarch64"), "2_17"),
-    PlatNames.linux_arm32:      (_manylinux_tag("armv7l"),  "2_17"),
-    PlatNames.linux_ppc64le:    (_manylinux_tag("ppc64le"), "2_17"),
+    PlatNames.linux_x64:        (_manylinux_tag("x86_64"),   "2_17"),
+    PlatNames.linux_x86:        (_manylinux_tag("i686"),     "2_17"),
+    PlatNames.linux_arm64:      (_manylinux_tag("aarch64"),  "2_17"),
+    PlatNames.linux_arm32:      (_manylinux_tag("armv7l"),   "2_17"),
+    PlatNames.linux_ppc64le:    (_manylinux_tag("ppc64le"),  "2_17"),
+    PlatNames.linux_mips64le:   (_manylinux_tag("mips64le"), "2_17"),  # not official manylinux
+    PlatNames.linux_mipsle:     (_manylinux_tag("mipsle"),   "2_17"),  # not official manylinux
     
     # pdfium-binaries statically link musl, so we can declare the lowest possible requirement. The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
     PlatNames.linux_musl_x64:   ("musllinux_{}_x86_64",  "1_1"),
@@ -55,21 +57,21 @@ _WheeltagPatterns = {
 
 HAVE_MACHOLIB = bool(find_spec("macholib"))
 if HAVE_MACHOLIB:
+    from macholib import mach_o
     from macholib.MachO import MachO
-    from macholib.mach_o import LC_BUILD_VERSION, LC_VERSION_MIN_MACOSX  # CPU_TYPE_NAMES
 
 def _mac_iter_versions(dll_path):
     # adapted from matthew-brett/delocate
     macho = MachO(dll_path)
     for header in macho.headers:
         for cmd in header.commands:
-            if cmd[0].cmd == LC_BUILD_VERSION:
+            if cmd[0].cmd == mach_o.LC_BUILD_VERSION:
                 raw_version = cmd[1].minos
-            elif cmd[0].cmd == LC_VERSION_MIN_MACOSX:
+            elif cmd[0].cmd == mach_o.LC_VERSION_MIN_MACOSX:
                 raw_version = cmd[1].version
             else:
                 continue
-            # cpu_type = CPU_TYPE_NAMES.get(header.header.cputype, "unknown")
+            # cpu_type = mach_o.CPU_TYPE_NAMES.get(header.header.cputype, "unknown")
             yield (raw_version >> 16 & 0xFF), (raw_version >> 8 & 0xFF)
             break
 
