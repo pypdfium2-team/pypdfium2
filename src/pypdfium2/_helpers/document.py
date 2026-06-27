@@ -208,9 +208,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
         """
         Manually close the formenv, if initialized.
         
-        If this method is not called, the formenv will be closed when the PDF is closed.
+        Formenvs that were not explicitly closed will be closed when their PDF is closed.
         
-        .. versionadded:: 5.10.0
+        .. versionadded:: 5.10
         """
         if not self.formenv:
             return False
@@ -599,9 +599,9 @@ class PdfFormEnv (pdfium_i.AutoCastable):
     """
     Form environment helper class.
     
-    .. versionchanged:: 5.10.0
-        The ``pdf`` attribute and ``parent`` alias had to be removed to fix trouble with finalization due to an indirect self-reference.
-        Formenv lifetime is now managed through the parent :class:`.PdfDocument` itself to avoid a reference circle.
+    .. versionchanged:: 5.10
+        The ``pdf`` attribute and ``parent`` alias had to be removed to fix possible trouble with finalization due to an indirect self-reference.
+        Formenv lifetime is now managed through the parent :class:`.PdfDocument` itself to break a reference circle.
     
     Attributes:
         raw (FPDF_FORMHANDLE):
@@ -616,7 +616,7 @@ class PdfFormEnv (pdfium_i.AutoCastable):
     
     def close(self):
         """
-        .. deprecated:: 5.10.0
+        .. deprecated:: 5.10
             This method is now a no-op. Please use :meth:`.PdfDocument.close_forms` instead.
         """
         # Explicit closing should clean up the .formenv attribute from the parent document, so it cannot be implemented here.
