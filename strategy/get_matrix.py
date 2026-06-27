@@ -45,7 +45,6 @@ class Inference:
     
     @staticmethod
     def pbin(key, entry):
-        entry["target"] = key
         return entry
     
     @staticmethod
@@ -58,13 +57,8 @@ class Inference:
     @staticmethod
     def sbuild(key, entry):
         entry["target_id"] = key
-        tag = key.rsplit(":", maxsplit=1)[0]
-        if tag.startswith("linux"):
-            arch = tag.split("_", maxsplit=1)[-1]
-            tag = f"manylinux_2_17_{arch}.manylinux2014_{arch}"
-        entry["tag"] = tag
         return entry
-    
+
 
 def main():
     
