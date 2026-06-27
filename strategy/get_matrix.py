@@ -67,10 +67,10 @@ def dumpstr(matrices):
         output.append(f"{strategy}_matrix={json.dumps(entries)}")
     return "\n".join(output)
 
-def dump(output, file, where, end=""):
+def dump(output, file, where, trailer=""):
     log(f"--- Dump output to {where} ---")
     print(output, file=file)
-    log("--------- End dump ----------" + end)
+    log("--------- End dump ----------" + trailer)
 
 
 def parse_args(argv):
@@ -106,13 +106,12 @@ def main():
     
     args = parse_args(sys.argv[1:])
     strategic_targets = read_json(THIS_DIR/"targets.json")
-    
     matrices = get_matrices(args, strategic_targets)
     output = dumpstr(matrices)
     
     if args.reveal:
         reveal_config(args, matrices)
-        dump(output, sys.stderr, "stderr", end="\n")
+        dump(output, sys.stderr, "stderr", trailer="\n")
     dump(output, sys.stdout, "stdout")
 
 
