@@ -18,6 +18,9 @@ def read_json(fp):
     with open(fp, "r") as buf:
         return json.load(buf)
 
+def _get_duplicates(iterable):
+    return tuple(k for k, v in collections.Counter(iterable).items() if v > 1)
+
 
 class Inference:
     
@@ -85,9 +88,6 @@ def dump(output, file, where, trailer=""):
     log("--------- End dump ----------" + trailer)
 
 
-def _get_duplicates(iterable):
-    return tuple(k for k, v in collections.Counter(iterable).items() if v > 1)
-
 def parse_args(argv, all_targets):
     
     targets_help = "\n".join(
@@ -136,12 +136,13 @@ def main():
     all_targets = read_json(THIS_DIR/"targets.json")
     args = parse_args(sys.argv[1:], all_targets)
     matrices = get_matrices(args, all_targets)
-    output = dumpstr(matrices)
     
+    output = dumpstr(matrices)
     if args.reveal:
         log(f"args: {vars(args)}\n")
         pprint_matrices(matrices)
         dump(output, sys.stderr, "stderr", trailer="\n")
+    
     dump(output, sys.stdout, "stdout")
 
 
