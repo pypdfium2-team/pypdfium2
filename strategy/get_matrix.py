@@ -27,6 +27,7 @@ class Inference:
     
     @staticmethod
     def cibw(key, entry):
+        entry["cibw_target"] = key
         if "cibw_arch" not in entry:
             entry["cibw_arch"] = key.split("_", maxsplit=1)[-1]
         return entry
@@ -52,7 +53,7 @@ def get_matrices(args, strategic_targets):
         inference = getattr(Inference, strategy, Inference._noop)
         
         for key in getattr(args, strategy):
-            entry = {"label": key, **inference(key, targets[key])}
+            entry = {"label": f"{strategy}-{key}", **inference(key, targets[key])}
             matrix_entries.append(entry)
     
     return matrices
