@@ -58,7 +58,7 @@ def get_matrices(args, all_targets):
         inference = getattr(Inference, strategy, Inference._noop)
         
         for key in getattr(args, strategy):
-            entry = {"label": f"{strategy}-{key}", **inference(key, targets[key])}
+            entry = {"label": f"{strategy}:{key}", **inference(key, targets[key])}
             matrix_entries.append(entry)
     
     return matrices
