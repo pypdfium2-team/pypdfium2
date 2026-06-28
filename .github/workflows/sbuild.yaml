@@ -91,21 +91,21 @@ jobs:
           - os: macos-latest  # arm64 host
             condition: ${{ inputs.macos && inputs.targets_main }}
             target_cpu: x64
-            tag: macosx_11_0_x86_64
+            tag: macosx_12_0_x86_64
           
           - os: macos-latest
             condition: ${{ inputs.macos && inputs.targets_main }}
-            tag: macosx_11_0_arm64
+            tag: macosx_12_0_arm64
           
           # test macOS the other way round while we still can
           - os: macos-15-intel
             condition: ${{ inputs.macos && inputs.targets_test }}
-            tag: macosx_11_0_x86_64
+            tag: macosx_12_0_x86_64
           
           - os: macos-15-intel
             condition: ${{ inputs.macos && inputs.targets_test }}
             target_cpu: arm64
-            tag: macosx_11_0_arm64
+            tag: macosx_12_0_arm64
           
           - os: windows-latest  # amd64
             condition: ${{ inputs.windows && inputs.targets_main }}
