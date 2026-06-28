@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# We endeavor to keep this script stdlib-only. Do not import external dependencies or from setupsrc/ in this file.
+# We endeavor to keep this script stdlib-only. Please do not import external dependencies or from setupsrc/ here.
 
 import sys
 import json
@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 THIS_DIR = Path(__file__).parent.resolve()
-STRATEGIES = ("pbin", "cibw", "sbuild")
+STRATEGIES = ("pbin", "sbuild", "cibw")
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -108,12 +108,12 @@ See //strategy/targets.json for canonical configuration, or below for available 
         help = "PBIN (pdfium-binaries) targets to build.",
     )
     parser.add_argument(
-        "--cibw", nargs="*", default=[],
-        help = "CIBW (cibuildwheel) targets to build.",
-    )
-    parser.add_argument(
         "--sbuild", nargs="*", default=[],
         help = "SBLD (sbuild) targets to build.",
+    )
+    parser.add_argument(
+        "--cibw", nargs="*", default=[],
+        help = "CIBW (cibuildwheel) targets to build.",
     )
     parser.add_argument(
         "--profiles",
