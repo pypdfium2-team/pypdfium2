@@ -62,11 +62,10 @@ def parse_args():
         description = "Install and test pypdfium2 in docker container",
     )
     parser.add_argument("target")
-    parser.add_argument(
-        "-w", "--wheelfile",
-        type = lambda p: Path(p).expanduser().resolve(),
-    )
-    return parser.parse_args(sys.argv[1:])
+    parser.add_argument("-w", "--wheel-path")
+    args = parser.parse_args(sys.argv[1:])
+    args.wheel_path = Path("/pypdfium2") / args.wheel_path
+    return args
 
 
 def main():
@@ -80,8 +79,7 @@ def main():
     
     env = os.environ.copy()
     env["PREPARE_CMD"] = prepare_cmd
-    container_wheel = str(Path("/pypdfium2") / args.wheelfile.relative_to(ProjectDir))
-    _run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/test_in_docker.sh", container_wheel], cwd=ProjectDir, env=env, check=True)
+    _run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/test_in_docker.sh", str(args.wheel_path)], cwd=ProjectDir, env=env, check=True)
 
 
 if __name__ == "__main__":
