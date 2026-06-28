@@ -116,8 +116,7 @@ See //strategy/targets.json for canonical configuration, or below for available 
         help = "CIBW (cibuildwheel) targets to build.",
     )
     parser.add_argument(
-        "--profiles",
-        type = lambda p: Path(p).expanduser().resolve(),
+        "--profile",
         help = "...",
     )
     parser.add_argument(
@@ -127,6 +126,12 @@ See //strategy/targets.json for canonical configuration, or below for available 
     )
     
     args = parser.parse_args(argv)
+    
+    if args.profile:
+        profile_json = read_json(THIS_DIR/"profiles.json")[args.profile]
+        for s in STRATEGIES:
+            setattr(args, s, profile_json[s]+getattr(args, s))
+    
     for strategy in STRATEGIES:
         selected_targets = getattr(args, strategy)
         duplicates = _get_duplicates(selected_targets)
