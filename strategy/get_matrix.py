@@ -89,6 +89,15 @@ def dump(output, file, where, trailer=""):
     print(output, file=file)
     log("--------- End dump ----------" + trailer)
 
+def reveal_info(args, matrices, output):
+    if not args.reveal:
+        return
+    log(f"args: {vars(args)}\n")
+    pprint_mat(matrices)
+    n_targets = sum(len(l) for l in matrices.values())
+    log(f"A total of {n_targets} targets will be built.\n")
+    dump(output, sys.stderr, "stderr", trailer="\n")
+
 
 def parse_args(argv, all_targets):
     
@@ -149,16 +158,10 @@ def main():
     
     all_targets = read_json(THIS_DIR/"targets.json")
     args = parse_args(sys.argv[1:], all_targets)
+    
     matrices = get_matrices(args, all_targets)
-    
     output = dumpstr(matrices)
-    if args.reveal:
-        log(f"args: {vars(args)}\n")
-        pprint_mat(matrices)
-        n_targets = sum(len(l) for l in matrices.values())
-        log(f"A total of {n_targets} targets will be built.\n")
-        dump(output, sys.stderr, "stderr", trailer="\n")
-    
+    reveal_info(args, matrices, output)
     dump(output, sys.stdout, "stdout")
 
 
