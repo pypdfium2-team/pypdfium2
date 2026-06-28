@@ -128,13 +128,13 @@ jobs:
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v7
         with:
-          path: ./dist/*.whl
+          path: dist/*.whl
           name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
       
       - name: Test wheel on build host
         if: ${{ !(inputs.target_cpu || inputs.target_os) }}
         run: |
-          python3 -m pip install ./dist/*.whl
+          python3 -m pip install dist/*.whl
           pypdfium2 -v
           python3 -m pytest tests/
       
@@ -150,8 +150,7 @@ jobs:
         run: |
           TARGET=$(ls dist/*.whl | grep -o -P 'manylinux_[\d_]+_\K.+?(?=\.)')
           echo "$TARGET"
-          mkdir wheelhouse && cp dist/*.whl wheelhouse/
-          python3 ./utils/container_driver.py "manylinux_${TARGET}"
+          python3 ./utils/container_driver.py "manylinux_${TARGET}" -w dist/*.whl
       
       - name: On Linux, run auditwheel (informational)
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}

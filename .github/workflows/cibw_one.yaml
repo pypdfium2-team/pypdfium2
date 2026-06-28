@@ -101,6 +101,6 @@ jobs:
       - name: Post-test
         if: ${{ contains(inputs.cibw_target, 'linux') }}
         continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
-        run: python3 ./utils/container_driver.py "$TARGET"
+        run: python3 ./utils/container_driver.py "$TARGET" -w wheelhouse/*.whl
         env:
           TARGET: ${{ inputs.cibw_target }}

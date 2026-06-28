@@ -89,7 +89,7 @@ jobs:
       - name: Post-process with auditwheel
         run: |
           python3 -m pip install -U auditwheel
-          python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
+          python3 -m auditwheel repair dist/*.whl -w wheelhouse
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v7
