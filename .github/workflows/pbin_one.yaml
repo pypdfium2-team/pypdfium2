@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: PBIN one
+on:
+  workflow_call:
+    inputs: &reusable_inputs
+      runner_os:
+        type: string
+        required: true
+      pbin_target:
+        type: string
+        default: ''
+      pdfium_ver:
+        type: string
+        default: ''
+      branch:
+        type: string
+        default: ''
+      repo_tag:
+        type: string
+        default: ''
+  workflow_dispatch:
+    inputs: *reusable_inputs
+
+jobs:
+  
+  build:
+    name: ${{ inputs.pbin_target }} on ${{ inputs.runner_os }}
+    runs-on: ${{ inputs.runner_os }}
+    
+    steps:
+      - name: Check out pypdfium2
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ inputs.branch || github.ref_name }}
+      # TODO ...

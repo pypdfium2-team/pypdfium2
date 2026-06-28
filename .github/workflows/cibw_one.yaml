@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: CIBW build one
+name: CIBW one
 on:
   workflow_call:
     inputs: &reusable_inputs
@@ -17,12 +17,6 @@ on:
       cibw_py_ver:
         type: string
         default: 'cp314'
-      branch:
-        type: string
-        default: ''
-      repo_tag:
-        type: string
-        default: ''
       pdfium_ver:
         type: string
         default: ''
@@ -32,9 +26,12 @@ on:
       test_pdfium:
         type: boolean
         default: true
-      condition:
-        type: boolean
-        default: true
+      branch:
+        type: string
+        default: ''
+      repo_tag:
+        type: string
+        default: ''
   workflow_dispatch:
     inputs: *reusable_inputs
 
@@ -43,7 +40,6 @@ jobs:
   build:
     name: ${{ inputs.cibw_target }} on ${{ inputs.os }}
     runs-on: ${{ inputs.os }}
-    if: ${{ inputs.condition }}
     
     steps:
       

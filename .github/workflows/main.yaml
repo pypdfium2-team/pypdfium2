@@ -5,8 +5,8 @@
 
 name: Main packaging
 on:
-  workflow_call:
-    inputs: &reusable_inputs
+  workflow_dispatch:
+    inputs:
       runner:
         type: string
         default: 'ubuntu-26.04'
@@ -28,8 +28,6 @@ on:
       conda:
         type: boolean
         default: false
-  workflow_dispatch:
-    inputs: *reusable_inputs
 
 defaults:
   run:

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Sourcebuild One
+name: SBLD one
 
 on:
   workflow_call:
@@ -42,9 +42,6 @@ on:
       repo_tag:
         type: string
         default: ''
-      condition:
-        type: boolean
-        default: true
   workflow_dispatch:
     inputs: *reusable_inputs
 
@@ -56,7 +53,6 @@ jobs:
   
   build:
     runs-on: ${{ inputs.os }}
-    if: ${{ inputs.condition }}
     
     steps:
       
