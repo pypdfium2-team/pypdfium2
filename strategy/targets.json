@@ -17,7 +17,7 @@
             "pbin_target": "windows_x64",
             "test_on_host": true},
         "win_arm64": {
-            "runner_os": "windows-11-vs2026-arm",
+            "runner_os": "windows-11-arm",
             "pbin_target": "windows_arm64",
             "test_on_host": true},
         "win32": {
@@ -113,12 +113,12 @@
             "runner_os": "windows-latest"},
         "win_arm64": {
             "runner_os": "windows-latest",
-            "test_os": "windows-11-vs2026-arm",
+            "test_os": "windows-11-arm",
             "target_cpu": "arm64"},
         "win32": {
             "runner_os": "windows-latest"},
         "win_arm64:native": {
-            "runner_os": "windows-11-vs2026-arm"},
+            "runner_os": "windows-11-arm"},
         "manylinux_x86_64": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_i686": {
@@ -167,7 +167,7 @@
             "cibw_arch": "AMD64"},
         "win_arm64": {
             "runner_os": "windows-latest",
-            "test_os": "windows-11-vs2026-arm",
+            "test_os": "windows-11-arm",
             "cibw_arch": "ARM64"},
         "win32": {
             "runner_os": "windows-latest",
