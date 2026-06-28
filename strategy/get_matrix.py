@@ -155,6 +155,8 @@ def main():
     if args.reveal:
         log(f"args: {vars(args)}\n")
         pprint_mat(matrices)
+        n_targets = sum(len(l) for l in matrices.values())
+        log(f"A total of {n_targets} targets will be built.\n")
         dump(output, sys.stderr, "stderr", trailer="\n")
     
     dump(output, sys.stdout, "stdout")
