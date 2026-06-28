@@ -11,9 +11,15 @@ on:
       pbin_target:
         type: string
         default: ''
+      py_ver:
+        type: string
+        default: '3.14'
       pdfium_ver:
         type: string
-        default: ''
+        default: 'latest'
+      test_on_host:
+        type: boolean
+        default: true
       branch:
         type: string
         default: ''
@@ -51,4 +57,31 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.py_ver }}
-          pip-install: -U -r req/setup.txt -r req/test.txt -r req/utilities.txt
+          pip-install: -U -r req/setup.txt -r req/test.txt
+      
+      - name: Build wheel
+        run: python3 -m build -wxn
+        env:
+          PDFIUM_PLATFORM: "${{ inputs.pbin_target }}:${{ inputs.pdfium_ver }}"
+      
+      - name: Upload wheel as artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: ./dist/*.whl
+          name: "pbin/${{ inputs.pbin_target }}"
+      
+      - name: Test wheel on host
+        if: ${{ inputs.test_on_host }}
+        run: |
+          python3 -m pip install dist/pypdfium2-*.whl
+          python3 -m pytest tests/ -sv
+      
+      # TODO ...
+      - name: Test wheel in docker
+        if: ${{ startsWith(inputs.pbin_target, 'linux_') }}
+        run: |
+          TARGET=$(ls dist/*.whl | grep -o -P 'manylinux_[\d_]+_\K.+?(?=\.)')
+          echo "$TARGET"
+          mkdir wheelhouse && cp dist/*.whl wheelhouse/
+          python3 ./utils/container_driver.py "manylinux_${TARGET}"
+

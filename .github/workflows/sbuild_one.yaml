@@ -144,7 +144,7 @@ jobs:
       
       # q&d: extract arch from wheelname
       # FIXME: Fails if no tag is provided. Better map target_cpu to uname cpu properly?
-      - name: Test wheel in docker container
+      - name: Test wheel in docker
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.docker_test }}
         continue-on-error: ${{ inputs.target_cpu == 'mips64el' }}
         run: |

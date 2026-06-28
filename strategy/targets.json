@@ -2,73 +2,95 @@
     "pbin": {
         "macosx_arm64": {
             "runner_os": "macos-latest",
-            "pbin_target": "darwin_arm64"},
+            "pbin_target": "darwin_arm64",
+            "test_on_host": true},
         "macosx_x86_64": {
             "runner_os": "macos-15-intel",
-            "pbin_target": "darwin_x64"},
+            "pbin_target": "darwin_x64",
+            "test_on_host": true},
         "macosx_universal2": {
             "runner_os": "macos-latest",
-            "pbin_target": "darwin_univ2"},
+            "pbin_target": "darwin_univ2",
+            "test_on_host": true},
         "win_amd64": {
             "runner_os": "windows-latest",
-            "pbin_target": "windows_x64"},
+            "pbin_target": "windows_x64",
+            "test_on_host": true},
         "win_arm64": {
             "runner_os": "windows-11-vs2026-arm",
-            "pbin_target": "windows_arm64"},
+            "pbin_target": "windows_arm64",
+            "test_on_host": true},
         "win32": {
             "runner_os": "windows-latest",
-            "pbin_target": "windows_x86"},
+            "pbin_target": "windows_x86",
+            "test_on_host": false},
         "manylinux_x86_64": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "linux_x64"},
+            "pbin_target": "linux_x64",
+            "test_on_host": true},
         "manylinux_i686": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "linux_x86"},
+            "pbin_target": "linux_x86",
+            "test_on_host": false},
         "manylinux_aarch64": {
             "runner_os": "ubuntu-26.04-arm",
-            "pbin_target": "linux_arm64"},
+            "pbin_target": "linux_arm64",
+            "test_on_host": true},
         "manylinux_armv7l": {
             "runner_os": "ubuntu-26.04-arm",
-            "pbin_target": "linux_arm32"},
+            "pbin_target": "linux_arm32",
+            "test_on_host": false},
         "manylinux_ppc64le": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "linux_ppc64le"},
+            "pbin_target": "linux_ppc64le",
+            "test_on_host": false},
         "manylinux_mips64le": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "linux_mips64le"},
+            "pbin_target": "linux_mips64le",
+            "test_on_host": false},
         "manylinux_mipsle": {
             "runner_os": "ubuntu-26.04",
             "pbin_target": "linux_mipsle"},
         "musllinux_x86_64": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "linux_musl_x64"},
+            "pbin_target": "linux_musl_x64",
+            "test_on_host": false},
         "musllinux_i686": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "linux_musl_x86"},
+            "pbin_target": "linux_musl_x86",
+            "test_on_host": false},
         "musllinux_aarch64": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "linux_musl_arm64"},
+            "pbin_target": "linux_musl_arm64",
+            "test_on_host": false},
         "android_arm64_v8a": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "android_arm64"},
+            "pbin_target": "android_arm64",
+            "test_on_host": false},
         "android_armeabi_v7a": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "android_arm32"},
+            "pbin_target": "android_arm32",
+            "test_on_host": false},
         "android_x86_64": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "android_x64"},
+            "pbin_target": "android_x64",
+            "test_on_host": false},
         "android_x86": {
             "runner_os": "ubuntu-26.04",
-            "pbin_target": "android_x86"},
+            "pbin_target": "android_x86",
+            "test_on_host": false},
         "ios_arm64_iphoneos": {
             "runner_os": "macos-latest",
-            "pbin_target": "ios_arm64_dev"},
+            "pbin_target": "ios_arm64_dev",
+            "test_on_host": false},
         "ios_arm64_iphonesimulator": {
             "runner_os": "macos-latest",
-            "pbin_target": "ios_arm64_simu"},
+            "pbin_target": "ios_arm64_simu",
+            "test_on_host": false},
         "ios_x86_64_iphonesimulator": {
             "runner_os": "macos-15-intel",
-            "pbin_target": "ios_x64_simu"}
+            "pbin_target": "ios_x64_simu",
+            "test_on_host": false}
     },
     "sbuild": {
         "macosx_arm64": {
