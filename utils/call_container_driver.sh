@@ -1,7 +1,4 @@
 #! /usr/bin/env bash
-# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
-# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
-
 set -exuo pipefail
 
 # q&d: infer container target name from wheel name

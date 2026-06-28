@@ -159,3 +159,17 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "unknown"
 SPDX-License-Identifier = "LicenseRef-Ignore"
 SPDX-FileComment = "Licenses for compiled binaries of pdfium."
+
+[[annotations]]
+path = [
+    "strategy/targets.json",
+    "strategy/profiles.json",
+    "utils/auth_and_tag.sh",
+    "utils/call_container_driver.sh",
+    "utils/enforce_install.sh",
+    "utils/inside_docker.sh",
+    "utils/regextract.py",
+]
+SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
+SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
+SPDX-FileComment = "Strategy data files and small utility scripts."
