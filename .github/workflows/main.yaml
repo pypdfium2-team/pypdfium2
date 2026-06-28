@@ -96,12 +96,11 @@ jobs:
     
     steps:
       
-      - name: Check out repository (deep)
+      - name: Check out pypdfium2 (deep, authenticated)
         uses: actions/checkout@v6
         with:
-          repository: ${{ github.repository }}
-          fetch-depth: 0
-          persist-credentials: true  # needed for push
+          fetch-depth: 0  # for git describe
+          persist-credentials: true  # for push
       
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -225,11 +224,10 @@ jobs:
     
     steps:
       
-      - name: Check out repository
+      - name: Check out pypdfium2 (shallow, authenticated)
         uses: actions/checkout@v6
         with:
-          repository: ${{ github.repository }}
-          persist-credentials: true  # needed for push
+          persist-credentials: true  # for push
     
       - name: Remove temporary branch
         run: git push origin --delete autorelease_tmp

@@ -31,11 +31,11 @@ jobs:
     
     steps:
       
-      - name: Check out pypdfium2
+      - name: Check out pypdfium2 (deep)
         uses: actions/checkout@v6
         with:
-          persist-credentials: false
           fetch-depth: 0  # for git describe
+          persist-credentials: false
           ref: ${{ inputs.branch || github.ref_name }}
       
       - name: Create pypdfium2 tag (optional)

@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       
-      - name: Check out pypdfium2
+      - name: Check out pypdfium2 (deep)
         uses: actions/checkout@v6
         with:
+          fetch-depth: 0  # for git describe
           persist-credentials: false
-          fetch-depth: 0
       
       - name: Test in FreeBSD VM
         uses: cross-platform-actions/action@be3d7e9ff5c8770b9c51b1a8c8c5446e1cad7cf9  # v1.2.0

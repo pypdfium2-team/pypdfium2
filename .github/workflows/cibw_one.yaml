@@ -43,11 +43,11 @@ jobs:
     
     steps:
       
-      - name: Check out pypdfium2
+      - name: Check out pypdfium2 (deep)
         uses: actions/checkout@v6
         with:
+          fetch-depth: 0  # for git describe
           persist-credentials: false
-          fetch-depth: 0
           ref: ${{ inputs.branch || github.ref_name }}
       
       - name: Create pypdfium2 tag (optional)
@@ -94,10 +94,8 @@ jobs:
           path: ./wheelhouse/*.whl
           name: cibw-${{ inputs.cibw_target }}
       
-      # cibuildwheel does not support custom test containers:
-      # https://github.com/pypa/cibuildwheel/discussions/2553
-      # So let's just do it on our own. We need container_driver.py for SBUILD and PBIN anyway.
-      # Notes:
+      # CIBW does not support custom test containers: https://github.com/pypa/cibuildwheel/discussions/2553
+      # So let's just do it on our own; we need container_driver.py for SBUILD and PBIN anyway. Notes:
       # - x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test again in a different container
       # - Suppress known test suite failures on s390x and musllinux_armv7l
       - name: Post-test

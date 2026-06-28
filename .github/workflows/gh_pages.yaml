@@ -31,10 +31,9 @@ jobs:
     
     steps:
       
-      - name: Check out repository
+      - name: Check out pypdfium2 (deep)
         uses: actions/checkout@v6
         with:
-          repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in conf.py
           persist-credentials: false
       
