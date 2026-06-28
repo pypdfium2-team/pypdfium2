@@ -64,12 +64,6 @@ jobs:
         env:
           PDFIUM_PLATFORM: "${{ inputs.pbin_target }}:${{ inputs.pdfium_ver }}"
       
-      - name: Upload wheel as artifact
-        uses: actions/upload-artifact@v7
-        with:
-          path: dist/*.whl
-          name: "pbin-${{ inputs.pbin_target }}"
-      
       - name: Test wheel on host
         if: ${{ inputs.test_on_host }}
         run: |
@@ -83,3 +77,9 @@ jobs:
       - name: Test wheel in docker
         if: ${{ startsWith(inputs.pbin_target, 'linux_') }}
         run: ./utils/call_container_driver.sh dist/*.whl
+      
+      - name: Upload wheel as artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/*.whl
+          name: "pbin-${{ inputs.pbin_target }}"
