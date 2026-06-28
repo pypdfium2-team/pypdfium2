@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Maintainer's note: This workflow is registered for trusted publishing on pypdfium2's PyPI page, by filename. So if this file shall be renamed, remember to update the filename in PyPI settings as well.
+# Maintainer's note: This workflow is registered for trusted publishing on pypdfium2's PyPI page, by filename. So if this file shall be renamed, remember to update the filename in PyPI and TestPyPI settings as well.
 
 name: Main packaging
 on:
@@ -13,12 +13,6 @@ on:
       py_ver:
         type: string
         default: '3.14'
-      test:
-        type: boolean
-        default: true
-      augment:
-        type: boolean
-        default: false
       publish:
         type: boolean
         default: false
@@ -35,219 +29,41 @@ defaults:
 
 jobs:
   
-  # TODO Split packaging across native hosts, merging build and test jobs (autorelease.py can be run in a prepare job before). Add ability to select build strategy (binaries, sbuild, cibw) per target.
-  
-  build:
-    runs-on: ${{ inputs.runner }}
-    outputs:
-      new_version: ${{ steps.get_version.outputs.new_version }}
-    
-    steps:
-      
-      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
-      
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ inputs.py_ver }}
-      
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.repository }}
-          fetch-depth: 0  # for git describe in "Get new version" step
-          persist-credentials: true  # needed for push
-      
-      - name: Install/update dependencies
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/utilities.txt
-          python3 -m pip install -U macholib  # macOS/iOS auto-tagging
-      
-      # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
-      # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
-      # In the future, we might want to move away from using a git branch & tag at this stage, and instead transfer the changes as a patchfile.
-      - name: Run autorelease script
-        run: |
-          git config user.email "geisserml@gmail.com"
-          git config user.name "geisserml"
-          git reset --hard HEAD
-          # autorelease.py --register automatically switches us onto the autorelease_tmp branch
-          python3 setupsrc/autorelease.py --register
-      
-      - name: Get new version
-        id: get_version
-        run: echo "new_version=$(git describe --abbrev=0)" >> $GITHUB_OUTPUT
-      
-      - name: Install pypdfium2
-        run: python3 -m pip install -v --no-build-isolation -e .
-      
-      - name: Run test suite
-        run: python3 -m pytest tests/
-      
-      # TODO make controllable whether musllinux packages are built through pdfium-binaries or cibw augmentation, consider enabling them here if inputs.augment is false
-      - name: Run PyPI packaging script
-        run: just packaging-pypi
-      
-      - name: Upload release notes
-        uses: actions/upload-artifact@v7
-        with:
-          name: release_notes
-          path: RELEASE.md
-      
-      # https://github.com/actions/upload-artifact/issues/331 ...
-      - name: Upload packages
-        uses: actions/upload-artifact@v7
-        with:
-          name: packages
-          path: dist/*
-      
-      # tag deliberately not pushed (see above)
-      - name: Push autorelease_tmp branch
-        run: git push -u origin autorelease_tmp
+  # XXX
   
   
-  test:
-    if: ${{ inputs.test }}
-    needs: build
+  sbuild:
     
-    strategy:
-      fail-fast: false
-      matrix:
-        # stick with ubuntu-24.04 for now so we can keep testing python 3.8
-        os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-vs2026-arm']
-        py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
-        exclude:
-          # not supported by setup-python action
-          - os: windows-11-vs2026-arm
-            py: '3.8'
-          # - os: windows-11-vs2026-arm
-          #   py: '3.9'
-          # - os: windows-11-vs2026-arm
-          #   py: '3.10'
-        include:
-          - os: ubuntu-24.04
-            wheel: dist/*manylinux_*_x86_64*.whl
-          - os: ubuntu-24.04-arm
-            wheel: dist/*manylinux_*_aarch64*.whl
-          - os: macos-15-intel
-            wheel: dist/*macosx_*_x86_64*.whl
-          - os: macos-latest
-            wheel: dist/*macosx_*_arm64*.whl
-          - os: windows-latest
-            wheel: dist/*win_amd64.whl
-          - os: windows-11-vs2026-arm
-            wheel: dist/*win_arm64.whl
-    
-    runs-on: ${{ matrix.os }}
-    
-    steps:
-      
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.py }}
-      
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.repository }}
-          ref: autorelease_tmp
-          persist-credentials: false
-      
-      - name: Download packages
-        uses: actions/download-artifact@v8
-        with:
-          name: packages
-          path: dist/
-      
-      - name: Install dependencies
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U setuptools -r req/test.txt
-      
-      - name: Install pypdfium2 from artifact
-        run: python3 -m pip install $WHEEL
-        env:
-          WHEEL: ${{ matrix.wheel }}
-      
-      - name: Run Test Suite
-        run: python3 -m pytest tests/ -sv
-      
-      - name: On Linux, run auditwheel (informational)
-        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.py == '3.14' }}
-        run: |
-          python3 -m pip install -U auditwheel
-          python3 -m auditwheel show $WHEEL
-        env:
-          WHEEL: ${{ matrix.wheel }}
-      
-      - name: On macOS, run vtool (informational)
-        if: ${{ startsWith(matrix.os, 'macos') && matrix.py == '3.14' }}
-        # or: PDFIUM_DLL=$(python3 -c 'import pypdfium2_raw; from pathlib import Path; print(Path(pypdfium2_raw.__file__).parent/"libpdfium.dylib")')
-        run: |
-          PDFIUM_DLL=$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")
-          vtool -show-build $PDFIUM_DLL
-  
-  
-  augment_cibw:
-    
-    if: ${{ inputs.augment }}
-    needs: build
+    # if: XXX
+    # needs: XXX
     
     strategy:
       fail-fast: false
       matrix:
         include:
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: x86_64
-            pdfium_ver: latest-binaries  # TODO take literal version from a step output
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: i686
-            pdfium_ver: latest-binaries
-          
-          - os: ubuntu-26.04-arm
-            cibw_os: musllinux
-            cibw_arch: aarch64
-            pdfium_ver: latest-binaries
-          
-          - os: ubuntu-26.04-arm
-            cibw_os: musllinux
-            cibw_arch: armv7l
-            pdfium_ver: latest-binaries
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: ppc64le
-          
-          - os: ubuntu-26.04
-            cibw_os: manylinux
-            cibw_arch: riscv64
-            use_sysroot: true
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: riscv64
-          
-          - os: ubuntu-26.04
-            cibw_os: manylinux
-            cibw_arch: loongarch64
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: loongarch64
-          
-          - os: ubuntu-26.04
-            cibw_os: manylinux
-            cibw_arch: s390x
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: s390x
+          - dummy: XXX
+    
+    uses: ./.github/workflows/sbuild_one.yaml
+    with:
+      os: ${{ matrix.os }}
+      target_cpu: ${{ matrix.target_cpu }}
+      tag: ${{ matrix.tag }}
+      docker_test: ${{ matrix.docker_test }}
+      py_ver: ${{ inputs.py_ver }}
+      repo_tag: ${{ needs.build.outputs.new_version }}
+      branch: autorelease_tmp
+  
+  
+  cibw:
+    
+    # if: XXX
+    # needs: XXX
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dummy: XXX
     
     uses: ./.github/workflows/cibw_one.yaml
     with:
@@ -261,42 +77,12 @@ jobs:
       branch: autorelease_tmp
   
   
-  augment_sbuild:
-    
-    if: ${{ inputs.augment }}
-    needs: build
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-24.04  # dont't use 26.04, it lacks GCC cross for MIPS :(
-            target_cpu: mips64el
-            tag: manylinux_2_17_mips64le.manylinux2014_mips64le
-            docker_test: true
-          - os: ubuntu-24.04  # dto.
-            target_cpu: mipsel
-            tag: manylinux_2_17_mipsle.manylinux2014_mipsle
-            docker_test: false
-    
-    uses: ./.github/workflows/sbuild_one.yaml
-    with:
-      os: ${{ matrix.os }}
-      target_cpu: ${{ matrix.target_cpu }}
-      tag: ${{ matrix.tag }}
-      docker_test: ${{ matrix.docker_test }}
-      py_ver: ${{ inputs.py_ver }}
-      repo_tag: ${{ needs.build.outputs.new_version }}
-      branch: autorelease_tmp
-  
-  
   publish:
     
     needs:
-      - build
-      - test
-      - augment_cibw
-      - augment_sbuild
+      - cibw
+      - sbuild
+      # XXX
     
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
@@ -348,7 +134,7 @@ jobs:
           pattern: sbuild_*
       
       - name: Isolate non-PyPI builds
-        if: ${{ inputs.augment }}
+        # if: XXX
         run: |
           mkdir gh_only
           mv dist/*linux_*_loongarch64*.whl -t gh_only/
@@ -395,7 +181,7 @@ jobs:
         env:
           SRC_PATH: ${{ steps.provenance.outputs.bundle-path }}
       
-      # FIXME skip gh_only/*.whl if !inputs.augment
+      # FIXME skip gh_only/*.whl if it does not exist
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1  # TODO pin to hash?
         with:
@@ -411,12 +197,14 @@ jobs:
         with:
           packages-dir: dist/  # the default
   
+  
   gh_pages:
     needs: publish  # i.e. goes after, regardless if publish is active or not
     if: ${{ inputs.gh_pages && !cancelled() && !contains(needs.*.result, 'failure') }}
     uses: ./.github/workflows/gh_pages.yaml
     with:
       publish: ${{ inputs.publish }}
+  
   
   conda:
     needs: publish
@@ -425,7 +213,7 @@ jobs:
     secrets: inherit  # Anaconda API token
     with:
       package: helpers
-      test: ${{ inputs.test }}
+      test: true
       publish: ${{ inputs.publish }}
       # py_ver: ${{ inputs.py_ver }}  # temporarily downgraded
   

@@ -24,9 +24,6 @@ on:
       build_params:
         type: string
         default: ''
-      prefer_gcc:
-        type: boolean
-        default: false
       custom_clang:
         type: boolean
         default: false
@@ -101,13 +98,6 @@ jobs:
           RUNNER_OS: ${{ inputs.os }}
           TARGET_CPU: ${{ inputs.target_cpu }}
       
-      # TODO handle platforms other than ppc64, delegate to a script
-      - name: Create symlinks for GCC
-        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.prefer_gcc && inputs.target_cpu == 'ppc64' }}
-        run: |
-          sudo ln -s /usr/bin/powerpc64le-linux-gnu-g++-16 /usr/local/bin/powerpc64le-linux-gnu-g++
-          sudo ln -s /usr/bin/powerpc64le-linux-gnu-gcc-16 /usr/local/bin/powerpc64le-linux-gnu-gcc
-      
       - name: Install Linux native deps  # fallback
         if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}
         run: |
@@ -129,7 +119,6 @@ jobs:
           VERSION_PARAM: ${{ inputs.pdfium_ver && format('--version {0}', inputs.pdfium_ver) }}
           CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
           OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
-          GCC_PARAM: ${{ inputs.prefer_gcc && '--prefer-gcc' || '' }}
           BUILD_PARAMS: ${{ inputs.build_params }}
       
       - name: Show binary info
