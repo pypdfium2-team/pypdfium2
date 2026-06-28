@@ -109,15 +109,15 @@ See //strategy/targets.json for canonical configuration, or below for available 
     )
     parser.add_argument(
         "--pbin", nargs="*", default=[],
-        help = "PBIN (pdfium-binaries) targets to build.",
+        help = "PBIN (pdfium-binaries) targets to build. Either a sequence of platform IDs as seen above, or 'all'.",
     )
     parser.add_argument(
         "--sbuild", nargs="*", default=[],
-        help = "SBLD (sbuild) targets to build.",
+        help = "SBLD (sbuild) targets to build. dto.",
     )
     parser.add_argument(
         "--cibw", nargs="*", default=[],
-        help = "CIBW (cibuildwheel) targets to build.",
+        help = "CIBW (cibuildwheel) targets to build. dto.",
     )
     parser.add_argument(
         "--reveal",
