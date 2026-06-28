@@ -3,7 +3,6 @@
 
 name: PBIN one
 on:
-  pull_request:  # XXX
   workflow_call:
     inputs: &reusable_inputs
       runner_os:
