@@ -52,10 +52,7 @@ jobs:
       
       - name: Create pypdfium2 tag (optional)
         if: ${{ inputs.repo_tag }}
-        run: |
-          git config user.email "geisserml@gmail.com"
-          git config user.name "geisserml"
-          git tag -a "$REPO_TAG" -m "Autorelease"
+        run: ./utils/auth_and_tag.sh "$REPO_TAG"
         env:
           REPO_TAG: ${{ inputs.repo_tag }}
       
