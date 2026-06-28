@@ -298,7 +298,7 @@ jobs:
       - build
       - test
       - augment_cibw
-      # - augment_sbuild
+      - augment_sbuild
     
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner }}
