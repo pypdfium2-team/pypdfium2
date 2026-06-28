@@ -1,12 +1,14 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 from pypdfium2_cli._parsers import (
     add_input, add_n_digits,
     get_input, round_list,
     BooleanOptionalAction,
 )
+from pypdfium2.version import PDFIUM_INFO
 
 
 def attach(parser):
@@ -41,6 +43,12 @@ class ColorIndicator:
         return ""
 
 
+if PDFIUM_INFO.build > 7912:
+    get_color = pdfium.PdfBookmark.get_color
+else:
+    def get_color(bm):
+        return None
+
 def main(args):
     
     pdf = get_input(args)
@@ -67,7 +75,7 @@ def main(args):
         else:
             out += "_"
         
-        color = bm.get_color()
+        color = get_color(bm)
         if color:
             out += " | " + icol(color) + f"RGB{round_list(color, args.n_digits)}"
         
