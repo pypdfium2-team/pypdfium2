@@ -18,9 +18,9 @@ cd "$PYPDFIUM_DIR"
 if [ "$CPUNAME" == "mips64" ]; then
     # https://github.com/pypa/pip/issues/14095
     $VENV_PY -m pip install -U wheel
-    bash "$PYPDFIUM_DIR/utils/enforce_install.sh" $WHEELFILE $VENV_PY
+    bash "$PYPDFIUM_DIR/utils/enforce_install.sh" "$WHEELFILE" "$VENV_PY"
 else
-    $VENV_PY -m pip install $WHEELFILE
+    $VENV_PY -m pip install "$WHEELFILE"
 fi
 
 $VENV_PY -m pytest tests/

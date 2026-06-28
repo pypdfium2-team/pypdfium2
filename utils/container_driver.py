@@ -62,7 +62,7 @@ def parse_args():
         description = "Install and test pypdfium2 in docker container",
     )
     parser.add_argument("target")
-    parser.add_argument("-w", "--wheel-path")
+    parser.add_argument("-w", "--wheel-path", required=True)
     args = parser.parse_args(sys.argv[1:])
     args.wheel_path = Path("/pypdfium2") / args.wheel_path
     return args
