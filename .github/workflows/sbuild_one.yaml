@@ -53,11 +53,6 @@ jobs:
     
     steps:
       
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ inputs.py_ver }}
-      
       - name: Check out pypdfium2 repository
         uses: actions/checkout@v6
         with:
@@ -75,10 +70,11 @@ jobs:
         env:
           REPO_TAG: ${{ inputs.repo_tag }}
       
-      - name: Install Python deps
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.py_ver }}
+          pip-install: -U -r req/setup.txt -r req/test.txt
       
       - name: Install custom clang
         if: ${{ inputs.custom_clang }}

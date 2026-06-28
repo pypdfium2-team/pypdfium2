@@ -31,23 +31,21 @@ jobs:
     
     steps:
       
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.14'
-      
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0  # for git describe in conf.py
           persist-credentials: false
       
-      - name: Install deps & pypdfium2
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -r req/docs.txt
-          python3 -m pip install -v .
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          pip-install: -r req/docs.txt
+      
+      - name: Install pypdfium2
+        run: python3 -m pip install -v .
       
       - name: Build documentation
         run: python3 -m sphinx -b html docs/source docs/build/html

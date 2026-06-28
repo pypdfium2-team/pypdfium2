@@ -94,15 +94,14 @@ jobs:
           path: ./wheelhouse/*.whl
           name: cibw-${{ inputs.cibw_target }}
       
-      # For the rarer Linux architectures, Pillow and Numpy don't currently provide wheels on PyPI. However, Linux distributions do provide packages.
-      # Sadly, cibuildwheel isn't really suited for working with system python (cf. https://github.com/pypa/cibuildwheel/discussions/2553)
-      # Also, the need to use an older distribution for build (to achieve low glibc requirement) contradicts the desire for a more recent python software stack for testing.
-      # So our best bet is to do it by hand:
-      
+      # cibuildwheel does not support custom test containers:
+      # https://github.com/pypa/cibuildwheel/discussions/2553
+      # So let's just do it on our own. We need container_driver.py for SBUILD and PBIN anyway.
+      # Notes:
+      # - x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test again in a different container
+      # - Suppress known test suite failures on s390x and musllinux_armv7l
       - name: Post-test
-        # x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test again in a different container
         if: ${{ contains(inputs.cibw_target, 'linux') }}
-        # q&d: suppress known test suite failures on s390x and musllinux_armv7l
         continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
         run: python3 ./utils/container_driver.py "$TARGET"
         env:

@@ -30,10 +30,25 @@ jobs:
     runs-on: ${{ inputs.runner_os }}
     
     steps:
+      
       - name: Check out pypdfium2
         uses: actions/checkout@v6
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 0  # for git describe
           ref: ${{ inputs.branch || github.ref_name }}
-      # TODO ...
+      
+      - name: Create pypdfium2 tag (optional)
+        if: ${{ inputs.repo_tag }}
+        run: |
+          git config user.email "geisserml@gmail.com"
+          git config user.name "geisserml"
+          git tag -a "$REPO_TAG" -m "Autorelease"
+        env:
+          REPO_TAG: ${{ inputs.repo_tag }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.py_ver }}
+          pip-install: -U -r req/setup.txt -r req/test.txt -r req/utilities.txt
