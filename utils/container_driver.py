@@ -35,6 +35,11 @@ PLATFORM_CPU_MAP = {
 # loong64, mips64le, ppc64le, riscv64, s390x
 
 
+def _run_process(argv, **kwargs):
+    log(argv)
+    return subprocess.run(argv, **kwargs)
+
+
 def _get_container(os_class, cpu):
     docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
     platform_cpu = PLATFORM_CPU_MAP.get(cpu, cpu)
@@ -51,9 +56,6 @@ def _get_container(os_class, cpu):
     else:
         assert False, os_class
 
-def run_process(argv, **kwargs):
-    log(argv)
-    return subprocess.run(argv, **kwargs)
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -65,6 +67,7 @@ def parse_args():
         type = lambda p: Path(p).expanduser().resolve(),
     )
     return parser.parse_args(sys.argv[1:])
+
 
 def main():
     
@@ -78,7 +81,8 @@ def main():
     env = os.environ.copy()
     env["PREPARE_CMD"] = prepare_cmd
     container_wheel = str(Path("/pypdfium2") / args.wheelfile.relative_to(ProjectDir))
-    run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/test_in_docker.sh", container_wheel], cwd=ProjectDir, env=env, check=True)
+    _run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/test_in_docker.sh", container_wheel], cwd=ProjectDir, env=env, check=True)
+
 
 if __name__ == "__main__":
     main()
