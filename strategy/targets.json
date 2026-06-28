@@ -87,35 +87,35 @@
             "cibw_arch": "x86"},
         "manylinux_x86_64": {
             "runner_os": "ubuntu-26.04"},
-        "musllinux_x86_64": {
-            "runner_os": "ubuntu-26.04"},
         "manylinux_aarch64": {
-            "runner_os": "ubuntu-26.04-arm"},
-        "musllinux_aarch64": {
             "runner_os": "ubuntu-26.04-arm"},
         "manylinux_armv7l": {
             "runner_os": "ubuntu-26.04-arm"},
-        "musllinux_armv7l": {
-            "runner_os": "ubuntu-26.04-arm"},
         "manylinux_i686": {
-            "runner_os": "ubuntu-26.04"},
-        "musllinux_i686": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_ppc64le": {
             "runner_os": "ubuntu-26.04",
             "use_sysroot": true},
-        "musllinux_ppc64le": {
-            "runner_os": "ubuntu-26.04"},
         "manylinux_s390x": {
-            "runner_os": "ubuntu-26.04"},
-        "musllinux_s390x": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_riscv64": {
             "runner_os": "ubuntu-26.04",
             "use_sysroot": true},
-        "musllinux_riscv64": {
-            "runner_os": "ubuntu-26.04"},
         "manylinux_loongarch64": {
+            "runner_os": "ubuntu-26.04"},
+        "musllinux_x86_64": {
+            "runner_os": "ubuntu-26.04"},
+        "musllinux_aarch64": {
+            "runner_os": "ubuntu-26.04-arm"},
+        "musllinux_armv7l": {
+            "runner_os": "ubuntu-26.04-arm"},
+        "musllinux_i686": {
+            "runner_os": "ubuntu-26.04"},
+        "musllinux_ppc64le": {
+            "runner_os": "ubuntu-26.04"},
+        "musllinux_s390x": {
+            "runner_os": "ubuntu-26.04"},
+        "musllinux_riscv64": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_loongarch64": {
             "runner_os": "ubuntu-26.04"}

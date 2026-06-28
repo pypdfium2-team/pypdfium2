@@ -116,6 +116,11 @@ See //strategy/targets.json for canonical configuration, or below for available 
         help = "SBLD (sbuild) targets to build.",
     )
     parser.add_argument(
+        "--profiles",
+        type = lambda p: Path(p).expanduser().resolve(),
+        help = "...",
+    )
+    parser.add_argument(
         "--reveal",
         action = "store_true",
         help = "Print human-readable output to stderr.",
@@ -129,6 +134,8 @@ See //strategy/targets.json for canonical configuration, or below for available 
         if selected_targets == ["all"]:
             selected_targets = list(all_targets[strategy].keys())
             setattr(args, strategy, selected_targets)
+    
+    assert any(getattr(args, s) for s in STRATEGIES), "At least one target must be given."
     
     return args
 
