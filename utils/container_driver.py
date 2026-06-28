@@ -79,7 +79,7 @@ def main():
     
     env = os.environ.copy()
     env["PREPARE_CMD"] = prepare_cmd
-    _run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/test_in_docker.sh", str(args.wheel_path)], cwd=ProjectDir, env=env, check=True)
+    _run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/inside_docker.sh", str(args.wheel_path)], cwd=ProjectDir, env=env, check=True)
 
 
 if __name__ == "__main__":
