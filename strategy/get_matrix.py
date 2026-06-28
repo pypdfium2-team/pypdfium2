@@ -104,6 +104,10 @@ See //strategy/targets.json for canonical configuration, or below for available 
 """ + targets_help,
     )
     parser.add_argument(
+        "--profile",
+        help = "Targets profile or template to use. Check //strategy/profiles.json for available profiles. (The target options below append to the template.)",
+    )
+    parser.add_argument(
         "--pbin", nargs="*", default=[],
         help = "PBIN (pdfium-binaries) targets to build.",
     )
@@ -114,10 +118,6 @@ See //strategy/targets.json for canonical configuration, or below for available 
     parser.add_argument(
         "--cibw", nargs="*", default=[],
         help = "CIBW (cibuildwheel) targets to build.",
-    )
-    parser.add_argument(
-        "--profile",
-        help = "...",
     )
     parser.add_argument(
         "--reveal",
@@ -135,7 +135,7 @@ See //strategy/targets.json for canonical configuration, or below for available 
     for strategy in STRATEGIES:
         selected_targets = getattr(args, strategy)
         duplicates = _get_duplicates(selected_targets)
-        assert not duplicates, f"Duplicate targets: {duplicates}"
+        assert not duplicates, f"Duplicates within {strategy.upper()} strategy: {duplicates}"
         if selected_targets == ["all"]:
             selected_targets = list(all_targets[strategy].keys())
             setattr(args, strategy, selected_targets)
