@@ -71,6 +71,7 @@ jobs:
           conda install -y conda-build conda-verify
           git config --global user.email "geisserml@gmail.com"
           git config --global user.name "geisserml"
+          python -m pip install -U pip
           python -m pip install -U -r req/setup.txt
       
       - name: Build package
