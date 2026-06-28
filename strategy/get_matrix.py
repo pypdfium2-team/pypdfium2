@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# To keep this script as swift as possible, we endeavor not to import from setupsrc/ here
+# We endeavor to keep this script stdlib-only. Do not import external dependencies or from setupsrc/ in this file.
 
 import sys
 import json
@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 THIS_DIR = Path(__file__).parent.resolve()
-STRATEGIES = ("pbin", "cibw", "sbld")
+STRATEGIES = ("pbin", "cibw", "sbuild")
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -38,7 +38,7 @@ class Inference:
         return entry
     
     @staticmethod
-    def sbld(key, entry):
+    def sbuild(key, entry):
         if "tag" not in entry:
             tag = key.rsplit(":", maxsplit=1)[0]
             if tag.startswith("manylinux_"):
@@ -112,7 +112,7 @@ See //strategy/targets.json for canonical configuration, or below for available 
         help = "CIBW (cibuildwheel) targets to build.",
     )
     parser.add_argument(
-        "--sbld", nargs="*", default=[],
+        "--sbuild", nargs="*", default=[],
         help = "SBLD (sbuild) targets to build.",
     )
     parser.add_argument(

@@ -120,7 +120,7 @@
         "musllinux_loongarch64": {
             "runner_os": "ubuntu-26.04"}
     },
-    "sbld": {
+    "sbuild": {
         "macosx_arm64": {
             "runner_os": "macos-latest",
             "tag": "macosx_12_0_arm64"},
