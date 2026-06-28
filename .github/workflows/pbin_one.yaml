@@ -76,6 +76,10 @@ jobs:
           python3 -m pip install dist/*.whl
           python3 -m pytest tests/ -sv
       
+      - name: Set up QEMU
+        if: ${{ startsWith(inputs.pbin_target, 'linux_') && !inputs.test_on_host }}
+        uses: docker/setup-qemu-action@v4
+      
       - name: Test wheel in docker
         if: ${{ startsWith(inputs.pbin_target, 'linux_') }}
         run: ./utils/call_container_driver.sh dist/*.whl
