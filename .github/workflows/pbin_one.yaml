@@ -76,11 +76,6 @@ jobs:
           python3 -m pip install dist/*.whl
           python3 -m pytest tests/ -sv
       
-      # TODO ...
       - name: Test wheel in docker
         if: ${{ startsWith(inputs.pbin_target, 'linux_') }}
-        run: |
-          TARGET=$(ls dist/*.whl | grep -o -P 'manylinux_[\d_]+_\K.+?(?=\.)')
-          echo "$TARGET"
-          python3 ./utils/container_driver.py "manylinux_${TARGET}" -w dist/*.whl
-
+        run: ./utils/call_container_driver.sh dist/*.whl

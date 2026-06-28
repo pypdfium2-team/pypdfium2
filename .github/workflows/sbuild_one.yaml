@@ -142,15 +142,10 @@ jobs:
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu && inputs.docker_test }}
         uses: docker/setup-qemu-action@v4
       
-      # q&d: extract arch from wheelname
-      # FIXME: Fails if no tag is provided. Better map target_cpu to uname cpu properly?
       - name: Test wheel in docker
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.docker_test }}
         continue-on-error: ${{ inputs.target_cpu == 'mips64el' }}
-        run: |
-          TARGET=$(ls dist/*.whl | grep -o -P 'manylinux_[\d_]+_\K.+?(?=\.)')
-          echo "$TARGET"
-          python3 ./utils/container_driver.py "manylinux_${TARGET}" -w dist/*.whl
+        run: ./utils/call_container_driver.sh dist/*.whl
       
       - name: On Linux, run auditwheel (informational)
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}
