@@ -132,7 +132,7 @@ def main_conda_helpers(args):
     
     _handle_ver(args, CondaPkgVer.get_latest_bindings)
     helpers_info = parse_git_tag()
-    helpers_ver = merge_tag(helpers_info, "py")
+    helpers_ver = merge_tag(helpers_info, mode=None)  # XXX
     os.environ["M_HELPERS_VER"] = helpers_ver
     
     build_num = _get_build_num("pypdfium2_helpers", helpers_ver, args.new_only)
