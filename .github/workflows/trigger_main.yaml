@@ -27,11 +27,11 @@ jobs:
           workflow: main.yaml
           inputs: |
             {
-              "runner": "ubuntu-26.04"
+              "runner": "ubuntu-26.04",
               "py_ver": "3.14",
               "test": "true",
               "augment": "true",
               "publish": "true",
               "gh_pages": "true",
-              "conda": "true",
+              "conda": "true"
             }
