@@ -10,7 +10,7 @@ import collections
 from pathlib import Path
 
 
-THIS_DIR = Path(__file__).parent.resolve()
+THIS_DIR = Path(__file__).resolve().parent
 STRATEGIES = ("pbin", "sbuild", "cibw")
 
 def log(*args, **kwargs):
