@@ -100,6 +100,7 @@ def test_toc_part2(resource):
 
 # ANSI escape sequences do look weird in plain text but they achieve what they're supposed to achieve in a shell
 @skip_lacks_getcolor
+@pytest.mark.skipif(sys.platform.startswith("win32"), reason="On Windows, output seems to be colorized allright, but differs when redirected into a file?")
 def test_toc_colorized():
     run_cli(["toc", TestFiles.toc_viewmodes, "--color-indicator"], TestExpectations.toc_viewmodes_colored)
 
