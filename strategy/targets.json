@@ -163,12 +163,10 @@
         "macosx_x86_64": {
             "runner_os": "macos-15-intel"},
         "win_amd64": {
-            "runner_os": "windows-latest",
-            "cibw_arch": "AMD64"},
+            "runner_os": "windows-latest"},
         "win_arm64": {
             "runner_os": "windows-latest",
-            "test_os": "windows-11-arm",
-            "cibw_arch": "ARM64"},
+            "test_os": "windows-11-arm"},
         "win32": {
             "runner_os": "windows-latest",
             "cibw_arch": "x86"},
