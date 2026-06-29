@@ -4,7 +4,6 @@
 import os
 import re
 import sys
-import enum
 import json
 import shutil
 import tarfile
@@ -60,7 +59,7 @@ ModulesAll         = (ModuleRaw, ModuleHelpers)
 BindingsFN = "bindings.py"
 VersionFN  = "version.json"
 
-ProjectDir        = Path(__file__).parents[1].resolve()
+ProjectDir        = Path(__file__).resolve().parents[1]
 DataDir           = ProjectDir / "data"
 DataDir_Bindings  = DataDir / "bindings"
 BindingsFile      = DataDir_Bindings / BindingsFN
@@ -100,10 +99,6 @@ class SysNames:
     linux   = "linux"
     android = "android"
     ios     = "ios"
-
-class SysEndianness (enum.Enum):
-    little = enum.auto()
-    big = enum.auto()
 
 class ExtPlats:
     sourcebuild = "sourcebuild"
@@ -468,7 +463,6 @@ class _host_platform:
         # For the machine name, the platform module just passes through info provided by the OS (e.g. the uname command on unix), so we can determine the relevant names from Python's source code, system specs or info available online (e.g. https://en.wikipedia.org/wiki/Uname)
         self._raw_system = platform.system().lower()
         self._raw_machine = platform.machine().lower()
-        self._endianness = SysEndianness[sys.byteorder]
         
         if self._raw_system == "linux":
             self._libc_name, self._libc_ver = _get_libc_info()
@@ -510,7 +504,7 @@ class _host_platform:
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
         if self._raw_system == "linux":
-            info += f", {self._libc_name, self._libc_ver, self._endianness.name}"
+            info += f", {self._libc_name, self._libc_ver, sys.byteorder}"
         return f"<Host: {info}>"
     
     def _handle_linux(self, archid, musl_ok=True):
@@ -553,7 +547,7 @@ class _host_platform:
         elif self._raw_system == "linux":
             self._system = SysNames.linux
             log(repr(self))
-            if self._endianness != SysEndianness.little:
+            if sys.byteorder != "little":
                 raise UnhandledPlatformError("Only little-endian platforms are supported with pdfium-binaries on setup. Please check PyPI for possible wheels.")
             if self._raw_machine == "x86_64":
                 return self._handle_linux("x64")
