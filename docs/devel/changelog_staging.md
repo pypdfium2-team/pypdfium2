@@ -7,6 +7,7 @@
 - Build scripts: Updated PDFium pin from `7891` to `7913`.
 - New `PdfBookmark.get_color()` helper added. This is based on upstream's new `FPDFBookmark_GetColor()` API. Integrated `get_color()` into `pypdfium2 toc` CLI.
   Thanks to Aryan Krishnan for the upstream part.
+  * **Note:** Since conda pdfium-binaries are built on a slower schedule (to preserve storage space), this new API is not available to conda users just yet, but once new pdfium-binaries are out, we will re-upload this release to conda with incremented build number & different pdfium version bounds. (Backward compatibility is provided, i.e. internal call sites like `pypdfium2 toc` will not attempt to call `get_color()` with older pdfium.)
 - New platforms: `manylinux_2_17_{mips64le,mipsle}` wheels added to release.
   * `build_toolchained.py` is now capable of building these, based on upstream's `mips64el` and `mipsel` targets (with minor patches). This took a great deal of tinkering, however.
   * Like `loongarch64`, PyPI does not accept MIPS wheels (yet), so they are only released to GitHub.
