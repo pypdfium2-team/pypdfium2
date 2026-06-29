@@ -4,6 +4,7 @@
 {% set pdfium_min = environ["PDFIUM_MIN"] %}
 {% set pdfium_max = environ["PDFIUM_MAX"] %}
 {% set helpers_ver = environ["M_HELPERS_VER"] %}
+{% set build_num = environ["BUILD_NUM"] %}
 
 package:
   name: pypdfium2_helpers
@@ -13,7 +14,7 @@ source:
   git_url: ../../..
 
 build:
-  number: 0
+  number: {{ build_num }}
   noarch: python
   entry_points:
     - pypdfium2 = pypdfium2_cli.__main__:cli_main

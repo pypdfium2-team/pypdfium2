@@ -79,7 +79,7 @@ jobs:
         env:
           PACKAGE: ${{ inputs.package }}
           VERSION_PARAM: ${{ inputs.pdfium_ver && format('--pdfium-ver {0}', inputs.pdfium_ver) }}
-          MAYBE_NEW_ONLY: ${{ inputs.package == 'raw' && inputs.new_only && '--new-only' || '' }}
+          MAYBE_NEW_ONLY: ${{ inputs.new_only && '--new-only' || '' }}
       
       - name: Upload artifact
         uses: actions/upload-artifact@v7

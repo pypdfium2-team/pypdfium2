@@ -1542,6 +1542,11 @@ if hasattr(_libs['pdfium'], 'FPDFBookmark_GetAction'):
     FPDFBookmark_GetAction.argtypes = (FPDF_BOOKMARK, )
     FPDFBookmark_GetAction.restype = FPDF_ACTION
 
+if hasattr(_libs['pdfium'], 'FPDFBookmark_GetColor'):
+    FPDFBookmark_GetColor = _libs['pdfium']['FPDFBookmark_GetColor']
+    FPDFBookmark_GetColor.argtypes = (FPDF_BOOKMARK, POINTER(c_float), POINTER(c_float), POINTER(c_float))
+    FPDFBookmark_GetColor.restype = FPDF_BOOL
+
 if hasattr(_libs['pdfium'], 'FPDFAction_GetType'):
     FPDFAction_GetType = _libs['pdfium']['FPDFAction_GetType']
     FPDFAction_GetType.argtypes = (FPDF_ACTION, )
