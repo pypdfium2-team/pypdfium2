@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import *
-from emplace import stage_platfiles
 from craft import ArtifactStash
+from emplace import stage_platfiles
 
 CondaDir = ProjectDir / "conda"
 CondaRaw_BuildNumF = CondaDir / "raw" / "build_num.txt"
@@ -88,28 +88,23 @@ def _handle_ver(args, get_latest):
         args.pdfium_ver = int(args.pdfium_ver)
 
 
-def _get_build_num(args):
-    
-    # parse existing releases to automatically handle arbitrary version builds
-    # TODO expand to pypdfium2_helpers as well, so we could rebuild with different pdfium bounds in a workflow
-    
-    search = reversed(run_conda_search("pypdfium2_raw", "pypdfium2-team"))
-    
-    if args.new_only:
-        # or `args.pdfium_ver not in {...}` to allow new builds of older versions
-        assert args.pdfium_ver > max(int(d["version"]) for d in search), f"--new-only given, but {args.pdfium_ver} already has a build"
-    
-    # determine build number
-    build_num = max((d["build_number"] for d in search if int(d["version"]) == args.pdfium_ver), default=None)
+def _get_build_num(package, planned_ver, new_only):
+    # infer build number from existing releases to automatically handle arbitrary version builds
+    search = reversed(run_conda_search(package, "pypdfium2-team"))
+    build_num = max((d["build_number"] for d in search if d["version"] == planned_ver), default=None)
     build_num = 0 if build_num is None else build_num+1
-    
+    if new_only and build_num > 0:
+        raise RuntimeError(f"--new-only given, but {planned_ver} already has a build")
+    log(f"Determined build number {build_num}")
     return build_num
 
 
 class CondaExtPlatfiles:
     
     def __enter__(self):
-        self.platfiles = tuple(DataDir/ExtPlats.system/fn for fn in (BindingsFN, VersionFN))
+        sys_dir = DataDir/ExtPlats.system
+        self.platfiles = [sys_dir/BindingsFN, sys_dir/VersionFN, ModuleDir_Raw/VersionFN]
+        shutil.copyfile(sys_dir/VersionFN, ModuleDir_Raw/VersionFN)
         run_cmd(["git", "add", "-f"] + [str(f) for f in self.platfiles], cwd=ProjectDir)
     
     def __exit__(self, *_):
@@ -125,7 +120,8 @@ def main_conda_raw(args):
     assert not (IGNORE_FULLVER or GIVEN_FULLVER)
     full_ver = PdfiumVer.to_full(args.pdfium_ver)
     os.environ["PDFIUM_FULL"] = str(full_ver)
-    os.environ["BUILD_NUM"] = str(_get_build_num(args))
+    build_num = _get_build_num("pypdfium2_raw", str(args.pdfium_ver), args.new_only)
+    os.environ["BUILD_NUM"] = str(build_num)
     
     stage_platfiles(ExtPlats.system, "generate", args.pdfium_ver, flags=())
     with CondaExtPlatfiles():
@@ -136,13 +132,17 @@ def main_conda_helpers(args):
     
     _handle_ver(args, CondaPkgVer.get_latest_bindings)
     helpers_info = parse_git_tag()
-    os.environ["M_HELPERS_VER"] = merge_tag(helpers_info, "py")
+    helpers_ver = merge_tag(helpers_info, "py")
+    os.environ["M_HELPERS_VER"] = helpers_ver
+    
+    build_num = _get_build_num("pypdfium2_helpers", helpers_ver, args.new_only)
+    os.environ["BUILD_NUM"] = str(build_num)
     
     # Pass the minimum pdfium requirement by env variable.
     # This is so we can share the value and need to change it only in one place.
     os.environ["PDFIUM_MIN"] = str(PDFIUM_MIN_REQ)
     # Set the current pdfium version as upper boundary, for inherent API safety.
-    # pdfium does not do semantic versioning, so upward flexibility is difficult.
+    # Upward flexibility is difficult. For one thing, pdfium does not do semantic versioning. For another, unforeseen issues can crop up anytime, and we do not want them to break older releases.
     os.environ["PDFIUM_MAX"] = str(args.pdfium_ver)
     
     # NOTE To build with a local pypdfium2_raw, add the args below for the source dir, and remove the pypdfium2-team prefix from the helpers recipe's run requirements
@@ -167,7 +167,6 @@ def main():
         with ArtifactStash():
             main_conda_raw(args)
     elif args.type == T_HELPERS:
-        assert not args.new_only, "--new-only / buildnum handling not implemented for helpers package"
         main_conda_helpers(args)
     else:
         assert False  # unreached, handled by argparse
