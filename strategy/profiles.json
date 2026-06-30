@@ -21,7 +21,7 @@
     },
     "testtargets": {
         "pbin": ["macosx_x86_64:cross"],
-        "sbuild": ["macosx_arm64:cross", "macosx_x86_64:native", "win_arm64:native", "manylinux_aarch64:native"],
-        "cibw": []
+        "sbuild": ["macosx_x86_64:native", "win_arm64:native", "macosx_arm64:cross","manylinux_aarch64:native"],
+        "cibw": ["macosx_x86_64:native", "win_arm64:native"]
     }
 }
