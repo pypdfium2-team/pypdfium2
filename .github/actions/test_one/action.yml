@@ -23,12 +23,14 @@ runs:
     
     - name: Get PDFium DLL path
       id: get_dll
+      shell: bash
       run:
         PDFIUM_DLL=$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")
         echo "pdfium_dll=${PDFIUM_DLL}" >> $GITHUB_OUTPUT
     
     - name: Test wheel on host
       if: ${{ inputs.test_on_host }}
+      shell: bash
       run: |
         python3 -m pip install -U -r req/test.txt
         python3 -m pip install $WHEEL_EXP
@@ -39,12 +41,14 @@ runs:
     
     - name: macOS - Show binary info
       if: ${{ startsWith(inputs.runner_os, 'macos-') }}
+      shell: bash
       run: vtool -show-build "$PDFIUM_DLL"
       env:
         PDFIUM_DLL: ${{ steps.get_dll.outputs.pdfium_dll }}
     
     - name: macOS - Test Intel under emulation
       if: ${{ startsWith(inputs.runner_os, 'macos-') && (!inputs.test_on_host || inputs.mac_universal) }}
+      shell: bash
       run: |
         # assuming python is universal (it should be)
         arch -x86_64 python3 -m venv testenv
@@ -58,6 +62,7 @@ runs:
     
     - name: Linux - Show binary info
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') }}
+      shell: bash
       run: file "$PDFIUM_DLL"
       env:
         PDFIUM_DLL: ${{ steps.get_dll.outputs.pdfium_dll }}
@@ -68,6 +73,7 @@ runs:
     
     - name: Linux - Test in Docker container
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
+      shell: bash
       run: ./utils/call_container_driver.sh $WHEEL_EXP
       env:
         WHEEL_EXP: ${{ inputs.wheel_exp }}
