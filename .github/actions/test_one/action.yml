@@ -9,19 +9,19 @@ inputs:
     required: true
   test_on_host:
     description: 'Do native testing'
-    default: true
+    default: 'true'
   docker:
     description: 'Do docker testing'
-    default: true
+    default: 'true'
   docker_ignore_error:
     description: 'Ignore docker test failure'
-    default: false
+    default: ''
   auditwheel:
     description: 'Run auditwheel show (informational)'
-    default: true
+    default: 'true'
   mac_universal:
     description: 'If testing macOS, indicates the wheel is universal'
-    default: false
+    default: ''
 
 runs:
   using: 'composite'
