@@ -8,6 +8,9 @@ inputs:
   runner_os:
     description: 'Runner OS'
     required: true
+  py_vers:
+    description: 'Python versions to test. (Setup is required from caller.)'
+    required: true
   test_on_host:
     description: 'Do native testing'
     default: 'true'
@@ -37,22 +40,32 @@ runs:
       if: ${{ inputs.test_on_host }}
       shell: bash
       run: |
-        python3 -m pip install -U -r req/test.txt
-        python3 -m pip install dist/*.whl
-        python3 -m pypdfium2_cli --version
-        python3 -m pytest tests/ -sv
+        for VERSION in $PY_VERS; do
+          PYTHON="python${VERSION}"
+          $PYTHON -m pip install -U -r req/test.txt
+          $PYTHON -m pip install dist/*.whl
+          $PYTHON -m pypdfium2_cli --version
+          $PYTHON -m pytest tests/ -sv
+        done
+      env:
+        PY_VERS: "${{ inputs.py_vers }}"
     
     - name: macOS - Test Intel under emulation
       if: ${{ startsWith(inputs.runner_os, 'macos-') && (inputs.mac_universal || !inputs.test_on_host) }}
       shell: bash
       # assuming python is universal (it should be)
       run: |
-        arch -x86_64 python3 -m venv testenv
-        PYTHON="arch -x86_64 ./testenv/bin/python3"
-        $PYTHON -c "import platform as p; print(p.machine())"
-        $PYTHON -m pip install dist/*.whl
-        $PYTHON -m pip install -U -r req/test.txt
-        $PYTHON -m pytest tests/ -sv
+        for VERSION in $PY_VERS; do
+          BASE_PYTHON="python${VERSION}"
+          arch -x86_64 $BASE_PYTHON -m venv testenv
+          PYTHON="arch -x86_64 ./testenv/bin/python${VERSION}"
+          $PYTHON -c "import platform as p; print(p.machine())"
+          $PYTHON -m pip install dist/*.whl
+          $PYTHON -m pip install -U -r req/test.txt
+          $PYTHON -m pytest tests/ -sv
+        done
+      env:
+        PY_VERS: "${{ inputs.py_vers }}"
     
     - name: macOS - Show binary info
       if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.dll_glob }}
