@@ -127,9 +127,10 @@ jobs:
       
       - name: Test wheel
         uses: ./.github/actions/test_one
+        if: ${{ !inputs.target_os }}
         with:
           runner_os: ${{ inputs.os }}
-          test_on_host: ${{ !(inputs.target_cpu || inputs.target_os) }}
-          docker: ${{ !(inputs.target_os || inputs.target_cpu == 'mipsel') }}
+          test_on_host: ${{ !inputs.target_cpu }}
+          docker: ${{ inputs.target_cpu != 'mipsel' }}
           docker_ignore_error: ${{ inputs.target_cpu == 'mips64el' }}
-          auditwheel: ${{ !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}
+          auditwheel: ${{ !startsWith(inputs.target_cpu, 'mips') }}
