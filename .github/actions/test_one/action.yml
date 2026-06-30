@@ -42,10 +42,7 @@ runs:
       run: |
         for VERSION in $PY_VERS; do
           PYTHON="python${VERSION}"
-          $PYTHON -m pip install -U -r req/test.txt
-          $PYTHON -m pip install dist/*.whl
-          $PYTHON -m pypdfium2_cli --version
-          $PYTHON -m pytest tests/ -sv
+          bash ./utils/test_scriptlet.sh "$PYTHON"
         done
       env:
         PY_VERS: "${{ inputs.py_vers }}"
@@ -57,12 +54,10 @@ runs:
       run: |
         for VERSION in $PY_VERS; do
           BASE_PYTHON="python${VERSION}"
-          arch -x86_64 $BASE_PYTHON -m venv testenv
+          arch -x86_64 $BASE_PYTHON -m venv "testenv_${VERSION}"
           PYTHON="arch -x86_64 ./testenv/bin/python${VERSION}"
           $PYTHON -c "import platform as p; print(p.machine())"
-          $PYTHON -m pip install dist/*.whl
-          $PYTHON -m pip install -U -r req/test.txt
-          $PYTHON -m pytest tests/ -sv
+          bash ./utils/test_scriptlet.sh "$PYTHON"
         done
       env:
         PY_VERS: "${{ inputs.py_vers }}"
