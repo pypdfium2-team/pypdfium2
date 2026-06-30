@@ -128,6 +128,7 @@ jobs:
       - name: Test wheel
         uses: ./.github/actions/test_one
         if: ${{ !inputs.target_os }}
+        # https://github.com/actions/runner/issues/2238 :angry:
         with:
           runner_os: ${{ inputs.os }}
           test_on_host: ${{ !inputs.target_cpu || '' }}
