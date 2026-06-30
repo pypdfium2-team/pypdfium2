@@ -6,8 +6,6 @@ description: 'Test one wheel, with container/emulator if needed'
 inputs:
   runner_os:
     required: true
-  wheel_exp:
-    default: 'dist/*.whl'
   test_on_host:
     default: true
   docker:
@@ -30,11 +28,9 @@ runs:
       shell: bash
       run: |
         python3 -m pip install -U -r req/test.txt
-        python3 -m pip install $WHEEL_EXP
+        python3 -m pip install dist/*.whl
         python3 -m pypdfium2_cli --version
         python3 -m pytest tests/ -sv
-      env:
-        WHEEL_EXP: ${{ inputs.wheel_exp }}
     
     - name: macOS - Test Intel under emulation
       if: ${{ startsWith(inputs.runner_os, 'macos-') && (!inputs.test_on_host || inputs.mac_universal) }}
@@ -44,11 +40,9 @@ runs:
         arch -x86_64 python3 -m venv testenv
         PYTHON="arch -x86_64 ./testenv/bin/python3"
         $PYTHON -c "import platform as p; print(p.machine())"
-        $PYTHON -m pip install $WHEEL_EXP
+        $PYTHON -m pip install dist/*.whl
         $PYTHON -m pip install -U -r req/test.txt
         $PYTHON -m pytest tests/ -sv
-      env:
-        WHEEL_EXP: ${{ inputs.wheel_exp }}
     
     - name: macOS - Show binary info
       if: ${{ startsWith(inputs.runner_os, 'macos-') }}
@@ -65,9 +59,7 @@ runs:
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
       continue-on-error: ${{ inputs.docker_ignore_error }}
       shell: bash
-      run: ./utils/call_container_driver.sh $WHEEL_EXP
-      env:
-        WHEEL_EXP: ${{ inputs.wheel_exp }}
+      run: ./utils/call_container_driver.sh dist/*.whl
     
     - name: Linux - Run auditwheel show
       if: ${{ startsWith(inputs.os, 'ubuntu-') && inputs.auditwheel }}
