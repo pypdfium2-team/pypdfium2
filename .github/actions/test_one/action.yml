@@ -27,7 +27,7 @@ runs:
       run: |
         python3 -m pip install -U -r req/test.txt
         python3 -m pip install $WHEEL_EXP
-        python3 -m pypdfium2 --version
+        python3 -m pypdfium2_cli --version
         python3 -m pytest tests/ -sv
       env:
         WHEEL_EXP: ${{ inputs.wheel_exp }}
