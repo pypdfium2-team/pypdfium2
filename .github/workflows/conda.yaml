@@ -72,11 +72,11 @@ jobs:
           conda install -y conda-build conda-verify
           git config --global user.email "geisserml@gmail.com"
           git config --global user.name "geisserml"
-          python3 -m pip install -U pip
+          python -m pip install -U pip
           python -m pip install -U -r req/setup.txt
       
       - name: Build package
-        run: python3 conda/craft_conda_pkgs.py "$PACKAGE" $VERSION_PARAM $MAYBE_NEW_ONLY
+        run: python conda/craft_conda_pkgs.py "$PACKAGE" $VERSION_PARAM $MAYBE_NEW_ONLY
         env:
           PACKAGE: ${{ inputs.package }}
           VERSION_PARAM: ${{ inputs.pdfium_ver && format('--pdfium-ver {0}', inputs.pdfium_ver) }}
