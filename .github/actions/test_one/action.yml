@@ -33,7 +33,7 @@ runs:
         python3 -m pytest tests/ -sv
     
     - name: macOS - Test Intel under emulation
-      if: ${{ startsWith(inputs.runner_os, 'macos-') && (!inputs.test_on_host || inputs.mac_universal) }}
+      if: ${{ startsWith(inputs.runner_os, 'macos-') && (inputs.mac_universal || !inputs.test_on_host) }}
       shell: bash
       # assuming python is universal (it should be)
       run: |
