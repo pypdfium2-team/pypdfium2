@@ -73,7 +73,7 @@ jobs:
       
       - name: Test wheel
         uses: ./.github/actions/test_one
-        # https://github.com/actions/runner/issues/2238 :angry:
+        # https://github.com/actions/runner/issues/2238 ...
         with:
           runner_os: ${{ inputs.runner_os }}
           py_vers: ${{ inputs.py_ver }}

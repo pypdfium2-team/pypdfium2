@@ -3,7 +3,7 @@
 
 name: 'Test one'
 description: 'Test one wheel, with container/emulator if needed'
-# https://github.com/actions/runner/issues/2238 :angry:
+# https://github.com/actions/runner/issues/2238 ...
 inputs:
   runner_os:
     description: 'Runner OS'
