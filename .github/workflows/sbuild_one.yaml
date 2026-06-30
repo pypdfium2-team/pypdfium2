@@ -27,9 +27,6 @@ on:
       custom_clang:
         type: boolean
         default: false
-      docker_test:
-        type: boolean
-        default: true
       tag:
         type: string
         default: ''
@@ -133,10 +130,6 @@ jobs:
         with:
           runner_os: ${{ inputs.os }}
           test_on_host: ${{ !(inputs.target_cpu || inputs.target_os) }}
-          docker: ${{ inputs.docker_test && !inputs.target_os }}
-      
-      - name: Linux - Run auditwheel show
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}
-        run: |
-          python3 -m pip install -U auditwheel
-          python3 -m auditwheel show dist/*.whl
+          docker: ${{ !(inputs.target_os || inputs.target_cpu == 'mipsel') }}
+          docker_ignore_error: ${{ inputs.target_cpu == 'mips64el' }}
+          auditwheel: ${{ !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}

@@ -150,8 +150,7 @@
             "target_cpu": "mips64el"},
         "manylinux_mipsle": {
             "runner_os": "ubuntu-24.04",
-            "target_cpu": "mipsel",
-            "docker_test": false},
+            "target_cpu": "mipsel"},
         "android_arm64_v8a": {
             "runner_os": "ubuntu-26.04",
             "target_os": "android",

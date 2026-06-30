@@ -48,7 +48,6 @@ jobs:
       os: ${{ matrix.os }}
       target_cpu: ${{ matrix.target_cpu }}
       tag: ${{ matrix.tag }}
-      docker_test: ${{ matrix.docker_test }}
       py_ver: ${{ inputs.py_ver }}
       repo_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp

@@ -12,6 +12,10 @@ inputs:
     default: true
   docker:
     default: true
+  docker_ignore_error:
+    default: false
+  auditwheel:
+    default: true
   mac_universal:
     default: false
 
@@ -46,20 +50,27 @@ runs:
       env:
         WHEEL_EXP: ${{ inputs.wheel_exp }}
     
-    - name: Linux - Set up QEMU (if needed)
-      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && !inputs.test_on_host }}
-      uses: docker/setup-qemu-action@v4
-    
-    - name: Linux - Test in Docker container
-      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
-      shell: bash
-      run: ./utils/call_container_driver.sh $WHEEL_EXP
-      env:
-        WHEEL_EXP: ${{ inputs.wheel_exp }}
-    
     - name: macOS - Show binary info
       if: ${{ startsWith(inputs.runner_os, 'macos-') }}
       shell: bash
       run: |
         PDFIUM_DLL="$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")"
         vtool -show-build "$PDFIUM_DLL"
+    
+    - name: Linux - Set up QEMU (if needed)
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && !inputs.test_on_host }}
+      uses: docker/setup-qemu-action@v4
+    
+    - name: Linux - Test in Docker container
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
+      continue-on-error: ${{ inputs.docker_ignore_error }}
+      shell: bash
+      run: ./utils/call_container_driver.sh $WHEEL_EXP
+      env:
+        WHEEL_EXP: ${{ inputs.wheel_exp }}
+    
+    - name: Linux - Run auditwheel show
+      if: ${{ startsWith(inputs.os, 'ubuntu-') && inputs.auditwheel }}
+      run: |
+        python3 -m pip install -U auditwheel
+        python3 -m auditwheel show dist/*.whl
