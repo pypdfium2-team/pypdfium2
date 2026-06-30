@@ -55,7 +55,7 @@ runs:
         for VERSION in $PY_VERS; do
           BASE_PYTHON="python${VERSION}"
           arch -x86_64 $BASE_PYTHON -m venv "testenv_${VERSION}"
-          PYTHON="arch -x86_64 ./testenv/bin/python${VERSION}"
+          PYTHON="arch -x86_64 ./testenv/bin/python"
           $PYTHON -c "import platform as p; print(p.machine())"
           bash ./utils/test_scriptlet.sh "$PYTHON"
         done
