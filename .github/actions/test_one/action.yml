@@ -51,12 +51,7 @@ runs:
         $PYTHON -m pip install -U -r req/test.txt
         $PYTHON -m pytest tests/ -sv
     
-    - name: macOS - Show binary info
-      if: ${{ startsWith(inputs.runner_os, 'macos-') }}
-      shell: bash
-      run: |
-        PDFIUM_DLL="$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")"
-        vtool -show-build "$PDFIUM_DLL"
+    # TODO run vtool on macOS? rather difficult though, because test_on_host can be false and the binary is packed into the wheel.
     
     - name: Linux - Set up QEMU (if needed)
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && !inputs.test_on_host }}
