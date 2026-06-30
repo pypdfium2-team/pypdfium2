@@ -18,10 +18,10 @@ inputs:
     description: 'Ignore docker test failure'
     default: ''
   auditwheel:
-    description: 'Run auditwheel show (informational)'
+    description: 'Run auditwheel show'
     default: 'true'
   mac_universal:
-    description: 'If testing macOS, indicates the wheel is universal'
+    description: 'On macOS, indicate that the wheel is universal'
     default: ''
 
 runs:

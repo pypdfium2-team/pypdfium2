@@ -71,7 +71,7 @@ jobs:
         with:
           runner_os: ${{ inputs.runner_os }}
           test_on_host: ${{ inputs.test_on_host || '' }}
-          mac_universal: ${{ (inputs.pbin_target == 'darwin_univ2') || '' }}
+          mac_universal: ${{ inputs.pbin_target == 'darwin_univ2' || '' }}
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v7
