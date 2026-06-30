@@ -113,6 +113,9 @@ jobs:
           OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
           BUILD_PARAMS: ${{ inputs.build_params }}
       
+      - name: Show binary info
+        run: shopt -s nullglob; file ./data/sourcebuild/*.{so,dylib,dll}
+      
       - name: Build wheel
         run: python3 -m build -wxn
         env:
@@ -132,7 +135,7 @@ jobs:
           test_on_host: ${{ !(inputs.target_cpu || inputs.target_os) }}
           docker: ${{ inputs.docker_test && !inputs.target_os }}
       
-      - name: On Linux, run auditwheel (informational)
+      - name: Linux - Run auditwheel show
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}
         run: |
           python3 -m pip install -U auditwheel

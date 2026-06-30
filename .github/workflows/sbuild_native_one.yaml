@@ -77,9 +77,7 @@ jobs:
           TEST_PARAM: ${{ inputs.test_pdfium && '--test' || '' }}
       
       - name: Show binary info
-        run: |
-          shopt -s nullglob
-          file ./data/sourcebuild/*.{so,dylib,dll}
+        run: shopt -s nullglob; file ./data/sourcebuild/*.{so,dylib,dll}
       
       - name: Build wheel
         run: python3 -m build -wxn
