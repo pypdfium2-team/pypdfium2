@@ -1,0 +1,73 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: 'Test one'
+description: 'Test one wheel, with container/emulator if needed'
+inputs:
+  runner_os:
+    required: true
+  wheel_exp:
+    default: 'dist/*.whl'
+  test_on_host:
+    default: true
+  docker:
+    default: true
+  mac_universal:
+    default: false
+
+runs:
+  using: 'composite'
+  steps:
+    
+    # TODO test multiple python versions
+    
+    - name: Get PDFium DLL path
+      id: get_dll
+      run:
+        PDFIUM_DLL=$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")
+        echo "pdfium_dll=${PDFIUM_DLL}" >> $GITHUB_OUTPUT
+    
+    - name: Test wheel on host
+      if: ${{ inputs.test_on_host }}
+      run: |
+        python3 -m pip install -U -r req/test.txt
+        python3 -m pip install $WHEEL_EXP
+        python3 -m pypdfium2 --version
+        python3 -m pytest tests/ -sv
+      env:
+        WHEEL_EXP: ${{ inputs.wheel_exp }}
+    
+    - name: macOS - Show binary info
+      if: ${{ startsWith(inputs.runner_os, 'macos-') }}
+      run: vtool -show-build "$PDFIUM_DLL"
+      env:
+        PDFIUM_DLL: ${{ steps.get_dll.outputs.pdfium_dll }}
+    
+    - name: macOS - Test Intel under emulation
+      if: ${{ startsWith(inputs.runner_os, 'macos-') && (!inputs.test_on_host || inputs.mac_universal) }}
+      run: |
+        # assuming python is universal (it should be)
+        arch -x86_64 python3 -m venv testenv
+        PYTHON="arch -x86_64 ./testenv/bin/python3"
+        $PYTHON -c "import platform as p; print(p.machine())"
+        $PYTHON -m pip install $WHEEL_EXP
+        $PYTHON -m pip install -U -r req/test.txt
+        $PYTHON -m pytest tests/ -sv
+      env:
+        WHEEL_EXP: ${{ inputs.wheel_exp }}
+    
+    - name: Linux - Show binary info
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') }}
+      run: file "$PDFIUM_DLL"
+      env:
+        PDFIUM_DLL: ${{ steps.get_dll.outputs.pdfium_dll }}
+    
+    - name: Linux - Set up QEMU (if needed)
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && !inputs.test_on_host }}
+      uses: docker/setup-qemu-action@v4
+    
+    - name: Linux - Test in Docker container
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
+      run: ./utils/call_container_driver.sh $WHEEL_EXP
+      env:
+        WHEEL_EXP: ${{ inputs.wheel_exp }}

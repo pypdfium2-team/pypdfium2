@@ -20,9 +20,6 @@ on:
       test_on_host:
         type: boolean
         default: true
-      mac_emulate_intel:
-        type: boolean
-        default: false
       branch:
         type: string
         default: ''
@@ -61,37 +58,19 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.py_ver }}
-          pip-install: -U -r req/setup.txt -r req/test.txt
+          pip-install: -U -r req/setup.txt
       
       - name: Build wheel
         run: python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: "${{ inputs.pbin_target }}:${{ inputs.pdfium_ver }}"
       
-      - name: Test wheel on host
-        if: ${{ inputs.test_on_host }}
-        run: |
-          python3 -m pip install dist/*.whl
-          python3 -m pytest tests/ -sv
-      
-      - name: macOS - Test x86_64 under emulation
-        if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.mac_emulate_intel }}
-        run: |
-          # assuming python is universal (it should be)
-          arch -x86_64 python3 -m venv testenv
-          PYTHON="arch -x86_64 ./testenv/bin/python3"
-          $PYTHON -c "import platform as p; print(p.machine())"
-          $PYTHON -m pip install dist/*.whl
-          $PYTHON -m pip install -U -r req/test.txt
-          $PYTHON -m pytest tests/ -sv
-      
-      - name: Linux - Set up QEMU (if needed)
-        if: ${{ startsWith(inputs.pbin_target, 'linux_') && !inputs.test_on_host }}
-        uses: docker/setup-qemu-action@v4
-      
-      - name: Linux - Test wheel in docker
-        if: ${{ startsWith(inputs.pbin_target, 'linux_') }}
-        run: ./utils/call_container_driver.sh dist/*.whl
+      - name: Test wheel
+        uses: ./.github/actions/test_one
+        with:
+          runner_os: ${{ inputs.runner_os }}
+          test_on_host: ${{ inputs.test_on_host }}
+          mac_universal: ${{ inputs.pbin_target == 'darwin_univ2' }}
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v7

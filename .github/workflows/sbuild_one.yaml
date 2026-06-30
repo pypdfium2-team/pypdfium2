@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.py_ver }}
-          pip-install: -U -r req/setup.txt -r req/test.txt
+          pip-install: -U -r req/setup.txt
       
       - name: Install custom clang
         if: ${{ inputs.custom_clang }}
@@ -128,28 +128,15 @@ jobs:
           path: dist/*.whl
           name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
       
-      - name: Test wheel on build host
-        if: ${{ !(inputs.target_cpu || inputs.target_os) }}
-        run: |
-          python3 -m pip install dist/*.whl
-          pypdfium2 -v
-          python3 -m pytest tests/
-      
-      - name: Set up QEMU
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu && inputs.docker_test }}
-        uses: docker/setup-qemu-action@v4
-      
-      - name: Test wheel in docker
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.docker_test }}
-        continue-on-error: ${{ inputs.target_cpu == 'mips64el' }}
-        run: ./utils/call_container_driver.sh dist/*.whl
+      - name: Test wheel
+        uses: ./.github/actions/test_one
+        with:
+          runner_os: ${{ inputs.os }}
+          test_on_host: ${{ !(inputs.target_cpu || inputs.target_os) }}
+          docker: ${{ inputs.docker_test && !inputs.target_os }}
       
       - name: On Linux, run auditwheel (informational)
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}
         run: |
           python3 -m pip install -U auditwheel
           python3 -m auditwheel show dist/*.whl
-      
-      - name: On macOS, run vtool (informational)
-        if: ${{ startsWith(inputs.os, 'macos') }}
-        run: vtool -show-build ./data/sourcebuild/libpdfium.dylib
