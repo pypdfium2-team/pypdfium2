@@ -32,19 +32,12 @@ runs:
       env:
         WHEEL_EXP: ${{ inputs.wheel_exp }}
     
-    - name: Get PDFium DLL path
-      id: get_dll
-      shell: bash
-      run:
-        PDFIUM_DLL=$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")
-        echo "pdfium_dll=$(echo $PDFIUM_DLL)" >> $GITHUB_OUTPUT
-    
     - name: macOS - Show binary info
       if: ${{ startsWith(inputs.runner_os, 'macos-') }}
       shell: bash
-      run: vtool -show-build "$PDFIUM_DLL"
-      env:
-        PDFIUM_DLL: ${{ steps.get_dll.outputs.pdfium_dll }}
+      run: |
+        PDFIUM_DLL="$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")"
+        vtool -show-build "$PDFIUM_DLL"
     
     - name: macOS - Test Intel under emulation
       if: ${{ startsWith(inputs.runner_os, 'macos-') && (!inputs.test_on_host || inputs.mac_universal) }}
@@ -63,9 +56,9 @@ runs:
     - name: Linux - Show binary info
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') }}
       shell: bash
-      run: file "$PDFIUM_DLL"
-      env:
-        PDFIUM_DLL: ${{ steps.get_dll.outputs.pdfium_dll }}
+      run: |
+        PDFIUM_DLL="$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")"
+        file "$PDFIUM_DLL"
     
     - name: Linux - Set up QEMU (if needed)
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && !inputs.test_on_host }}
