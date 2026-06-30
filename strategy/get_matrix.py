@@ -32,9 +32,9 @@ class Inference:
     
     @staticmethod
     def cibw(key, entry):
-        entry["cibw_target"] = key
+        entry["cibw_target"] = key.rsplit(":", maxsplit=1)[0]
         if "cibw_arch" not in entry:
-            cibw_arch = key.split("_", maxsplit=1)[-1]
+            cibw_arch = entry["cibw_target"].split("_", maxsplit=1)[-1]
             if key.startswith("win_"):
                 cibw_arch = cibw_arch.upper()
             entry["cibw_arch"] = cibw_arch
