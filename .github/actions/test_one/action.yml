@@ -5,16 +5,22 @@ name: 'Test one'
 description: 'Test one wheel, with container/emulator if needed'
 inputs:
   runner_os:
+    description: 'Runner OS'
     required: true
   test_on_host:
+    description: 'Do native testing'
     default: true
   docker:
+    description: 'Do docker testing'
     default: true
   docker_ignore_error:
+    description: 'Ignore docker test failure'
     default: false
   auditwheel:
+    description: 'Run auditwheel show (informational)'
     default: true
   mac_universal:
+    description: 'If testing macOS, indicates the wheel is universal'
     default: false
 
 runs:
