@@ -20,6 +20,9 @@ on:
       test_on_host:
         type: boolean
         default: true
+      mac_emulate_intel:
+        type: boolean
+        default: false
       branch:
         type: string
         default: ''
@@ -71,11 +74,20 @@ jobs:
           python3 -m pip install dist/*.whl
           python3 -m pytest tests/ -sv
       
-      - name: Set up QEMU
+      - name: macOS - Test x86_64 under emulation
+        if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.mac_emulate_intel }}
+        run: |
+          arch -x86_64 python3 -m venv testenv
+          PYTHON=./testenv/bin/python3
+          arch -x86_64 $PYTHON -m pip install dist/*.whl
+          arch -x86_64 $PYTHON -m pip install -U -r req/test.txt
+          arch -x86_64 $PYTHON -m pytest tests/ -sv
+      
+      - name: Linux - Set up QEMU (if needed)
         if: ${{ startsWith(inputs.pbin_target, 'linux_') && !inputs.test_on_host }}
         uses: docker/setup-qemu-action@v4
       
-      - name: Test wheel in docker
+      - name: Linux - Test wheel in docker
         if: ${{ startsWith(inputs.pbin_target, 'linux_') }}
         run: ./utils/call_container_driver.sh dist/*.whl
       
