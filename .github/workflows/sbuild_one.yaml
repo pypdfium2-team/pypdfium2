@@ -135,3 +135,4 @@ jobs:
           docker: ${{ inputs.target_cpu != 'mipsel' || '' }}
           docker_ignore_error: ${{ inputs.target_cpu == 'mips64el' || '' }}
           auditwheel: ${{ !startsWith(inputs.target_cpu, 'mips') || '' }}
+          dll_glob: './data/sourcebuild/*pdfium.*'

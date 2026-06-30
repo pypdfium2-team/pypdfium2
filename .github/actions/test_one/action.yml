@@ -23,6 +23,9 @@ inputs:
   mac_universal:
     description: 'On macOS, indicate that the wheel is universal'
     default: ''
+  dll_glob:
+    description: 'Where to find the PDFium DLL in question'
+    default: ''
 
 runs:
   using: 'composite'
@@ -51,7 +54,12 @@ runs:
         $PYTHON -m pip install -U -r req/test.txt
         $PYTHON -m pytest tests/ -sv
     
-    # TODO run vtool on macOS? rather difficult though, because test_on_host can be false and the binary is packed into the wheel.
+    - name: macOS - Show binary info
+      if: ${{ inputs.dll_glob }}
+      shell: bash
+      run: vtool -show-build $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
     
     - name: Linux - Set up QEMU (if needed)
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && !inputs.test_on_host }}
@@ -66,6 +74,13 @@ runs:
         WHEEL_PATH="$(ls dist/*.whl)"
         TARGET="$(python3 ./utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")"
         python3 ./utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
+    
+    - name: Linux - Show binary info
+      if: ${{ inputs.dll_glob }}
+      shell: bash
+      run: file $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
     
     - name: Linux - Run auditwheel show
       if: ${{ startsWith(inputs.os, 'ubuntu-') && inputs.auditwheel }}
