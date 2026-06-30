@@ -55,7 +55,7 @@ runs:
         $PYTHON -m pytest tests/ -sv
     
     - name: macOS - Show binary info
-      if: ${{ inputs.dll_glob }}
+      if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.dll_glob }}
       shell: bash
       run: vtool -show-build $DLL_GLOB
       env:
@@ -76,7 +76,7 @@ runs:
         python3 ./utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
     
     - name: Linux - Show binary info
-      if: ${{ inputs.dll_glob }}
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.dll_glob }}
       shell: bash
       run: file $DLL_GLOB
       env:
