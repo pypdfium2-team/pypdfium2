@@ -34,8 +34,6 @@ runs:
   using: 'composite'
   steps:
     
-    # TODO test multiple python versions
-    
     - name: Test wheel on host
       if: ${{ inputs.test_on_host }}
       shell: bash
