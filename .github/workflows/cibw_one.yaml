@@ -85,7 +85,7 @@ jobs:
         with:
           output-dir: wheelhouse
       
-      - name: Upload artifact
+      - name: Upload wheel as artifact
         uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
