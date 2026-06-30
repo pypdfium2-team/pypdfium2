@@ -12,9 +12,6 @@ on:
       py_ver:
         type: string
         default: '3.14'
-      test_py_vers:
-        type: string
-        default: '3.8 3.11'
       pdfium_ver:
         type: string
         default: ''
@@ -69,7 +66,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ inputs.test_py_vers }} ${{ inputs.py_ver }}
+          python-version: ${{ inputs.py_ver }}
           pip-install: -U -r req/setup.txt
       
       - name: Install custom clang
@@ -134,7 +131,7 @@ jobs:
         # https://github.com/actions/runner/issues/2238 :angry:
         with:
           runner_os: ${{ inputs.os }}
-          py_vers: ${{ inputs.test_py_vers }}
+          py_vers: ${{ inputs.py_ver }}
           test_on_host: ${{ !inputs.target_cpu || '' }}
           docker: ${{ inputs.target_cpu != 'mipsel' || '' }}
           docker_ignore_error: ${{ inputs.target_cpu == 'mips64el' || '' }}
