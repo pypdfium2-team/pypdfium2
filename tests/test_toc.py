@@ -5,7 +5,6 @@ import pytest
 import logging
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
-from pypdfium2.version import PDFIUM_INFO
 from .conftest import TestFiles
 
 
@@ -13,8 +12,7 @@ def _compare_bookmark(bm, title, count, color=None, **kwargs):
     assert isinstance(bm, pdfium.PdfBookmark)
     assert title == bm.get_title()
     assert count == bm.get_count()
-    if PDFIUM_INFO.build > 7912:
-        assert color == bm.get_color()
+    assert color == bm.get_color()
     dest = bm.get_dest()
     if dest is None:
         assert kwargs["dest"] is None

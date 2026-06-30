@@ -11,7 +11,6 @@ import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2_cli.__main__ as pdfium_cli
-from pypdfium2.version import PDFIUM_INFO
 from pypdfium2_cli._sysfonts import PdfSysfontListener
 from .conftest import TestFiles, TestExpectations
 
@@ -84,22 +83,11 @@ def _get_text(pdf, index):
     return pdf[index].get_textpage().get_text_bounded()
 
 
-skip_lacks_getcolor = pytest.mark.skipif(PDFIUM_INFO.build <= 7912, reason="Old PDFium, lacks FPDFBookmark_GetColor()")
-
-def _toc_case(resource):
+@pytest.mark.parametrize("resource", ["toc", "toc_viewmodes", "toc_maxdepth", "toc_circular"])
+def test_toc_part1(resource):
     run_cli(["toc", getattr(TestFiles, resource), "--no-color-indicator"], getattr(TestExpectations, resource))
 
-@pytest.mark.parametrize("resource", ["toc", "toc_circular"])
-def test_toc_part1(resource):
-    _toc_case(resource)
-
-@skip_lacks_getcolor
-@pytest.mark.parametrize("resource", ["toc_viewmodes", "toc_maxdepth"])
-def test_toc_part2(resource):
-    _toc_case(resource)
-
 # ANSI escape sequences do look weird in plain text but they achieve what they're supposed to achieve in a shell
-@skip_lacks_getcolor
 @pytest.mark.skipif(sys.platform.startswith("win32"), reason="Output differs on Windows, TBI.")
 def test_toc_colorized():
     run_cli(["toc", TestFiles.toc_viewmodes, "--color-indicator"], TestExpectations.toc_viewmodes_colored)
