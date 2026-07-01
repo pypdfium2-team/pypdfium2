@@ -37,27 +37,15 @@ runs:
     - name: Test wheel on host
       if: ${{ inputs.test_on_host }}
       shell: bash
-      run: |
-        for VERSION in $PY_VERS; do
-          PYTHON="python${VERSION}"
-          bash ./utils/test_scriptlet.sh "$PYTHON"
-        done
+      run: ./utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
       env:
         PY_VERS: "${{ inputs.py_vers }}"
     
     - name: macOS - Test Intel under emulation
       if: ${{ startsWith(inputs.runner_os, 'macos-') && (inputs.mac_universal || !inputs.test_on_host) }}
       shell: bash
-      # assuming python is universal (it should be)
-      run: |
-        for VERSION in $PY_VERS; do
-          BASE_PYTHON="python${VERSION}"
-          VENV_NAME="testenv_${VERSION}"
-          arch -x86_64 $BASE_PYTHON -m venv $VENV_NAME
-          PYTHON="arch -x86_64 ./${VENV_NAME}/bin/python"
-          $PYTHON -c "import platform as p; print(p.machine())"
-          bash ./utils/test_scriptlet.sh "$PYTHON"
-        done
+      # assuming macOS python is universal (it should be)
+      run: ./utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv --prefix "arch -x86_64"
       env:
         PY_VERS: "${{ inputs.py_vers }}"
     
