@@ -38,17 +38,19 @@ errors = {}
 for py_ver in reversed(args.py_vers):
     
     python = f"python{py_ver}"
+    bin_dir = Path()
     if args.venv:
         venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
         run([python, "-m", "venv", venv_name, "--clear"])
-        python = str(Path(venv_name)/"bin"/"python")
+        bin_dir = Path(venv_name)/"bin"
+        python = str(bin_dir/"python")
     if archprefix:
         run([python, "-c", "import platform as p; print(p.machine())"])
     
     run([python, "-m", "pip", "install", args.wheel_path])
     run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
     try:
-        run([python, "-m", "pypdfium2_cli", "--version"])
+        run([str(bin_dir/"pypdfium2"), "--version"])
         run([python, "-m", "pytest", "tests/"])
     except subprocess.CalledProcessError as e:
         errors[py_ver] = e.returncode
