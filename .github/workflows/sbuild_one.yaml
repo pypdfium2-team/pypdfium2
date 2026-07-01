@@ -115,9 +115,6 @@ jobs:
           OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
           BUILD_PARAMS: ${{ inputs.build_params }}
       
-      - name: Show binary info
-        run: shopt -s nullglob; file ./data/sourcebuild/*.{so,dylib,dll}
-      
       - name: Build wheel
         run: python3 -m build -wxn
         env:

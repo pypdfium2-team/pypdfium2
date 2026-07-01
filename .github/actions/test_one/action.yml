@@ -49,13 +49,6 @@ runs:
       env:
         PY_VERS: "${{ inputs.py_vers }}"
     
-    - name: macOS - Show binary info
-      if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.dll_glob }}
-      shell: bash
-      run: vtool -show-build $DLL_GLOB
-      env:
-        DLL_GLOB: ${{ inputs.dll_glob }}
-    
     - name: Linux - Set up QEMU (if needed)
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && !inputs.test_on_host }}
       uses: docker/setup-qemu-action@v4
@@ -70,16 +63,25 @@ runs:
         TARGET="$(python3 ./utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")"
         python3 ./utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
     
-    - name: Linux - Show binary info
-      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.dll_glob }}
-      shell: bash
-      run: file $DLL_GLOB
-      env:
-        DLL_GLOB: ${{ inputs.dll_glob }}
-    
     - name: Linux - Run auditwheel show
       if: ${{ startsWith(inputs.os, 'ubuntu-') && inputs.auditwheel }}
       shell: bash
       run: |
         python3 -m pip install -U auditwheel
         python3 -m auditwheel show dist/*.whl
+    
+    # informational
+    
+    - name: Inspect DLL with file
+      if: ${{ inputs.dll_glob }}
+      shell: bash
+      run: file $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
+    
+    - name: macOS - Inspect DLL with vtool
+      if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.dll_glob }}
+      shell: bash
+      run: vtool -show-build $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
