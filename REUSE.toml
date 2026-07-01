@@ -164,11 +164,11 @@ SPDX-FileComment = "Licenses for compiled binaries of pdfium."
 path = [
     "strategy/targets.json",
     "strategy/profiles.json",
-    "utils/test_scriptlet.sh",
+    "utils/regextract.py",
+    "utils/delimit.py",
     "utils/auth_and_tag.sh",
     "utils/enforce_install.sh",
     "utils/inside_docker.sh",
-    "utils/regextract.py",
 ]
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
