@@ -136,6 +136,6 @@ jobs:
           py_vers: ${{ inputs.py_vers }}
           test_on_host: ${{ !inputs.target_cpu || '' }}
           docker: ${{ inputs.target_cpu != 'mipsel' || '' }}
-          docker_ignore_error: ${{ inputs.target_cpu == 'mips64el' || '' }}
+          docker_ignore_error: ${{ inputs.target_cpu == 'mips64el' }}  # uses fromJSON
           auditwheel: ${{ !startsWith(inputs.target_cpu, 'mips') || '' }}
           dll_glob: './data/sourcebuild/*pdfium.*'

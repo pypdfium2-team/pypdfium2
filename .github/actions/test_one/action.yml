@@ -19,7 +19,7 @@ inputs:
     default: 'true'
   docker_ignore_error:
     description: 'Ignore docker test failure'
-    default: ''
+    default: 'false'  # uses fromJSON
   auditwheel:
     description: 'Run auditwheel show'
     default: 'true'
@@ -56,7 +56,8 @@ runs:
     
     - name: Linux - Test in Docker container
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
-      continue-on-error: ${{ inputs.docker_ignore_error }}
+      # continue-on-error requires an actual bool, or so it seems
+      continue-on-error: ${{ fromJSON(inputs.docker_ignore_error) }}
       shell: bash
       # q&d: infer container target name from wheel name
       run: |
