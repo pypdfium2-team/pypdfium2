@@ -36,8 +36,8 @@ errors = {}
 for py_ver in reversed(args.py_vers):
     python = f"python{py_ver}"
     if args.venv:
-        venv_name = f"testenv_{py_ver}"
-        run([python, "-m", "venv", venv_name])
+        venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
+        run([python, "-m", "venv", venv_name, "--clear"])
         python = str(Path(venv_name)/"bin"/"python")
     if archprefix:
         run([python, "-c", "import platform as p; print(p.machine())"])
