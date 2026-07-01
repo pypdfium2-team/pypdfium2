@@ -1085,8 +1085,6 @@ To get code coverage statistics, you may call
 just coverage
 ```
 
-<!-- TODO any chance to avoid `bash -c` ? -->
-
 Sometimes, it can also be helpful to test code on many PDFs.[^testing_corpora]
 In this case, the command-line interface and `find` come in handy:
 ```bash
@@ -1098,66 +1096,7 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 
 [^testing_corpora]: For instance, one could use the testing corpora of open-source PDF libraries (pdfium, pikepdf/ocrmypdf, mupdf/ghostscript, tika/pdfbox, pdfjs, ...)
 
-### Release workflow
-
-The release process is fully automated using Python scripts and scheduled release workflows.
-You may also trigger the workflow manually from the GitHub Actions panel or similar.
-
-Python release scripts are located in the folder `setupsrc`, along with custom setup code:
-* `update.py` downloads binaries.
-* `craft.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
-* `autorelease.py` takes care of versioning, changelog, release note generation and VCS check-in.
-
-The autorelease script has some peculiarities maintainers should know about:
-* The changelog for the next release shall be written into `docs/devel/changelog_staging.md`.
-  On release, it will be moved into the main changelog under `docs/source/changelog.md`, annotated with the PDFium version update.
-  It will also be shown on the GitHub release page.
-* pypdfium2 versioning uses the pattern `major.minor.patch`, optionally with an appended beta mark (e. g. `2.7.1`, `2.11.0`, `3.0.0b1`, ...).
-  Update types such as major or beta may be controlled via `autorelease/config.json`
-
-In case of necessity, you may also forego CI and do the release locally, which would roughly work like this (though ideally it should never be needed):
-* Run the autorelease script (this will implicitly switch onto the `autorelease_tmp` branch, make a release commit, and create the tag):
-  ```bash
-  python3 setupsrc/autorelease.py --register
-  ```
-* Merge the `autorelease_tmp` branch:
-  ```bash
-  git checkout main
-  git merge autorelease_tmp
-  ```
-* Build the packages
-  ```bash
-  just packaging-pypi
-  ```
-* Push release commit/tag to the repository:
-  ```bash
-  git push
-  git push --tags
-  ```
-* Upload to PyPI
-  ```bash
-  # this will interactively ask for your username/password
-  twine upload dist/*
-  ```
-* Update the `stable` branch to trigger a documentation rebuild
-  ```bash
-  git checkout stable
-  git rebase origin/main  # or: git reset --hard main
-  git push
-  git checkout main
-  ```
-
-If something went wrong with commit or tag, you can still revert the changes:
-```bash
-# perform an interactive rebase to change history (substitute $N_COMMITS with the number of commits to drop or modify)
-git rebase -i HEAD~$N_COMMITS
-git push --force
-# delete remote tag (substitute $TAGNAME accordingly)
-git push --delete origin $TAGNAME
-# delete local tag
-git tag -d $TAGNAME
-```
-Faulty PyPI releases may be yanked using the web interface.
+<!-- TODO document release workflow -->
 
 
 ## Popular dependents
