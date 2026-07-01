@@ -9,7 +9,7 @@ on:
       os:
         type: string
         required: true
-      py_ver:
+      py_vers:
         type: string
         default: '3.14'
       pdfium_ver:
@@ -63,10 +63,15 @@ jobs:
         env:
           REPO_TAG: ${{ inputs.repo_tag }}
       
+      - name: Write Python versions
+        run: ./utils/delimit.py $'\n' $PY_VERS > ".python-version"
+        env:
+          PY_VERS: ${{ inputs.py_vers }}
+      
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ inputs.py_ver }}
+          python-version-file: '.python-version'
           pip-install: -U -r req/setup.txt
       
       - name: Install custom clang
@@ -131,7 +136,7 @@ jobs:
         # https://github.com/actions/runner/issues/2238 ...
         with:
           runner_os: ${{ inputs.os }}
-          py_vers: ${{ inputs.py_ver }}
+          py_vers: ${{ inputs.py_vers }}
           test_on_host: ${{ !inputs.target_cpu || '' }}
           docker: ${{ inputs.target_cpu != 'mipsel' || '' }}
           docker_ignore_error: ${{ inputs.target_cpu == 'mips64el' || '' }}
