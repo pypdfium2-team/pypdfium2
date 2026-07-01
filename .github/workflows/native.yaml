@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: SBLD Native
+name: Build Native
 
 on:
   workflow_dispatch:
@@ -52,7 +52,7 @@ jobs:
           - os: ubuntu-26.04-arm
             os_condition: ${{ inputs.arm64 }}
     
-    uses: ./.github/workflows/sbuild_native_one.yaml
+    uses: ./.github/workflows/native_one.yaml
     with:
       os: ${{ matrix.os }}
       condition: ${{ matrix.cc_condition && matrix.os_condition }}
