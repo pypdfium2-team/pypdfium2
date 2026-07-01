@@ -47,7 +47,7 @@ for py_ver in reversed(args.py_vers):
     run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
     try:
         run([python, "-m", "pypdfium2_cli", "--version"])
-        run([python, "-m", "pytest", "tests/", "-sv"])
+        run([python, "-m", "pytest", "tests/"])
     except subprocess.CalledProcessError as e:
         errors[py_ver] = e.returncode
     else:
