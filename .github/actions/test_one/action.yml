@@ -50,7 +50,7 @@ runs:
         PY_VERS: "${{ inputs.py_vers }}"
     
     - name: Linux - Set up QEMU (if needed)
-      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && !inputs.test_on_host }}
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker && !inputs.test_on_host }}
       uses: docker/setup-qemu-action@v4
     
     - name: Linux - Test in Docker container
