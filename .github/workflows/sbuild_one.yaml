@@ -127,15 +127,17 @@ jobs:
           path: dist/*.whl
           name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
       
+      # https://github.com/actions/runner/issues/2238 ...
+      # Bear in mind: some fields, e.g. continue-on-error, require an actual bool (check GH docs).
+      # In that case, use fromJSON() in the called action, and don't map to empty string here.
+      # Using empty/non-empty string as bool substitute should be OK for if conditionals though.
       - name: Test wheel
         uses: ./.github/actions/test_one
         if: ${{ !inputs.target_os }}
-        # https://github.com/actions/runner/issues/2238 ...
         with:
           runner_os: ${{ inputs.os }}
           py_vers: ${{ inputs.py_vers }}
           test_on_host: ${{ !inputs.target_cpu || '' }}
           docker: ${{ inputs.target_cpu != 'mipsel' || '' }}
-          docker_ignore_error: ${{ inputs.target_cpu == 'mips64el' }}  # uses fromJSON
           auditwheel: ${{ !startsWith(inputs.target_cpu, 'mips') || '' }}
           dll_glob: './data/sourcebuild/*pdfium.*'
