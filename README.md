@@ -972,7 +972,7 @@ To the author's knowledge, pypdfium2 is one of the rare Python libraries capable
 > The exact licensing situation depends on how the builds were made.<br>
 > Note that a subset of pypdfium2 builds might link with the `libgcc` runtime library. Check the builds you use and, if affected, libgcc's license to see if that's OK for your use.
 
-[^liberal_pdf_renderlibs]: Other mature, liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). They can also be accessed from Python, as shown in the author's gists: [pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc) (+ [setup](https://gist.github.com/mara004/881d0c5a99b8444fd5d1d21a333b70f8)), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7). These days, novel options have surfaced, including `docling-parse` and `pdf_oxide`, but we are not familiar with them yet.
+[^liberal_pdf_renderlibs]: Other mature, liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). While they can be accessed from Python in principle, as shown in the author's gists ([pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7)), there don't seem to be proper python bindings projects to these libraries yet. These days, novel options have surfaced, including `docling-parse` and `pdf_oxide`, but the author is not familiar with them.
 
 
 ## Issues / Contributions
