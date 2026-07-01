@@ -17,7 +17,7 @@ def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
 parser = argparse.ArgumentParser(
-    description="Test with multiple python versions"
+    description = "Test with multiple python versions",
 )
 parser.add_argument("-w", "--wheel-path", required=True)
 parser.add_argument("--py-vers", nargs="+", required=True)
