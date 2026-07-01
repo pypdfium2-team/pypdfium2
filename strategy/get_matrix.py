@@ -69,9 +69,7 @@ def get_matrices(args, all_targets):
 
 def _repr_entry(entry):
     assert entry, "no empty entries expected"
-    output = "\n".join(f"  {k}: {v!r}" for k, v in entry.items())
-    output = "-" + output[1:]
-    return output
+    return "- " + "\n  ".join(f"{k}: {v!r}" for k, v in entry.items())
 
 def pprint_mat(matrices):
     for strategy, entries in matrices.items():
