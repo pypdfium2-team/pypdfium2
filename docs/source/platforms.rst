@@ -89,6 +89,7 @@ Legend
   
   + ✅ Yes
   + ☑️ Yes (tested in docker)
+  + 🅿️ Probably (might need minor tweaks)
   + ❔ Unknown
   + 🚧 This used to work in the past, but is currently broken.
 

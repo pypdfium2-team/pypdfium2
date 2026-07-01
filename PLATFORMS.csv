@@ -12,8 +12,8 @@ Linux glibc ppc64le,🟢 2.17,✅🔄 PBIN,🔵 2-3,✅,✅,❌,🔳,✅,☑️,
 Linux glibc s390x,🟡 2.28,✅📌 CIBW,🔴 4,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,5.2.0 '25 ?,
 Linux glibc riscv64,🟠 2.34,✅📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,5.2.0 '25,
 Linux glibc loong64,🔴 2.38,🟩📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,5.2.0 '25,
-Linux glibc mips64le,🟢 2.17,🟩📌 SBLD,🟡 3,✅,❓,❌,🔳,✅,☑️,🔳,❌,NA,NA,NA,❔,5.11.0 '26,1
-Linux glibc mipsle,🟢 2.17,🟩📌 SBLD,🟡 3,⏳,❓,NA,NA,✅,❌,🔳,❌,NA,NA,NA,❔,5.11.0 '26,1
+Linux glibc mips64le,🟢 2.17,🟩📌 SBLD,🟡 3,✅,❓,❌,🔳,✅,☑️,🔳,❌,NA,NA,NA,🅿️,5.11.0 '26,1
+Linux glibc mipsle,🟢 2.17,🟩📌 SBLD,🟡 3,⏳,❓,NA,NA,✅,❌,🔳,❌,NA,NA,NA,🅿️,5.11.0 '26,1
 Linux musl x86_64,🟢 1.2,✅🔄 CIBW,🔵 2,✅,❓,❌,🔳,❌,NA,NA,✅,✅,⬜,gcc,✅,4.21.0 '23 ?,
 Linux musl i686,🟢 1.2,✅🔄 CIBW,🔵 2-3,✅,❓,❌,🔳,❌,NA,NA,✅,☑️,⬜,gcc,✅,4.21.0 '23 ?,
 Linux musl aarch64,🟢 1.2,✅🔄 CIBW,🔵 2,✅,❓,❌,🔳,❌,NA,NA,✅,✅,⬜,gcc,✅,4.21.0 '23 ?,
