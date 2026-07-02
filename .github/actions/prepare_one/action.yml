@@ -53,8 +53,9 @@ runs:
       shell: python
       run: |
         import os, shlex
+        from pathlib import Path
         py_vers = shlex.split(os.environ["PY_VERS"])
-        print("\n".join(py_vers))
+        Path(".python-version").write_text("\n".join(py_vers))
       env:
         PY_VERS: "${{ inputs.py_vers }}"
     
