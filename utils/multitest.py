@@ -4,17 +4,33 @@
 
 # Author's note: This basically replicates a small chunk of what cibuildwheel does internally. I'm starting to really see what cibuildwheel exists for...
 
+import os
 import sys
 import shlex
 import argparse
 import subprocess
 from pathlib import Path
 
+
 UTILS_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = UTILS_DIR.parent
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
+
+# work around https://github.com/actions/setup-python/issues/1079
+IS_GHA = bool(os.getenv("GITHUB_ACTIONS"))
+def _get_python_exe_map():
+    if not (sys.platform.startswith("win32") and IS_GHA):
+        return {}
+    install_dir = Path(R"C:\hostedtoolcache\windows\Python")
+    subdirs = tuple(install_dir.iterdir())
+    log(subdirs)
+    # TODO ...
+    return {}
+
+PyExeMap = _get_python_exe_map()
+
 
 parser = argparse.ArgumentParser(
     description = "Test with multiple python versions",
@@ -32,17 +48,21 @@ if args.prefix:
 def run(cmd):
     cmd = archprefix + cmd
     log(cmd)
-    subprocess.run(cmd, check=True, cwd=PROJECT_DIR)
+    subprocess.run(cmd, check=True, cwd=str(PROJECT_DIR))
+
 
 errors = {}
 for py_ver in reversed(args.py_vers):
     
     python = f"python{py_ver}"
+    if PyExeMap:
+        python = PyExeMap.get(python, python)
+    
     bin_dir = Path()
     if args.venv:
         venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
-        run([python, "-m", "venv", venv_name, "--clear"])
-        bin_dir = Path(venv_name)/"bin"
+        run([python, "-m", "venv", venv_name])
+        bin_dir = PROJECT_DIR/venv_name/"bin"
         python = str(bin_dir/"python")
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
