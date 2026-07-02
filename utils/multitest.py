@@ -77,6 +77,7 @@ for py_ver in reversed(args.py_vers):
         venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
         run([python, "-m", "venv", venv_name])
         bin_dir = PROJECT_DIR/venv_name/"bin"
+        log(tuple(bin_dir.iterdir()))
         python = str(bin_dir/PYTHON_EXE)
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
