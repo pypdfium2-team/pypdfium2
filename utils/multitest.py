@@ -16,10 +16,8 @@ from pathlib import Path
 
 UTILS_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = UTILS_DIR.parent
-IS_GHA = bool(os.getenv("GITHUB_ACTIONS"))
 IS_WINDOWS = sys.platform.startswith("win32")
 PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")
-PYTHON_BIN_DIR = "Scripts" if IS_WINDOWS else "bin"
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -29,18 +27,19 @@ def log(*args, **kwargs):
 def _get_python_exe_map():
     
     exemap = {}
-    if not (sys.platform.startswith("win32") and IS_GHA):
+    if not (sys.platform.startswith("win32") and bool(os.getenv("GITHUB_ACTIONS"))):
         return exemap
     
-    CPUNAME = platform.machine().lower()
-    install_dir = Path(R"C:\hostedtoolcache\windows\Python")
+    # cf. https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
+    install_dir = Path(os.environ['RUNNER_TOOL_CACHE']) / "Python"
     subdirs = tuple(install_dir.iterdir())
-    identity = {"amd64": "x64"}.get(CPUNAME, CPUNAME)
+    cpu_id = platform.machine().lower()
+    cpu_id = {"amd64": "x64"}.get(cpu_id, cpu_id)
     for subdir in subdirs:
         match = re.match(r"(\d.\d*).", subdir.name)
         if not match:
             continue
-        exemap[f"python{match.group(1)}"] = str(subdir/identity/PYTHON_EXE)
+        exemap[match.group(1)] = str(subdir/cpu_id/PYTHON_EXE)
     
     return exemap
 
@@ -71,13 +70,13 @@ for py_ver in reversed(args.py_vers):
     
     python = f"python{py_ver}"
     if PyExeMap:
-        python = PyExeMap.get(python, python)
+        python = PyExeMap.get(py_ver, python)
     
     bin_dir = Path()
     if args.venv:
         venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
         run([python, "-m", "venv", venv_name])
-        bin_dir = Path(venv_name)/PYTHON_BIN_DIR
+        bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
