@@ -16,8 +16,8 @@ from pathlib import Path
 
 UTILS_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = UTILS_DIR.parent
-IS_WINDOWS = sys.platform.startswith("win32")
 IS_GHA = bool(os.getenv("GITHUB_ACTIONS"))
+IS_WINDOWS = sys.platform.startswith("win32")
 PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")
 PYTHON_BIN_DIR = "Scripts" if IS_WINDOWS else "bin"
 
