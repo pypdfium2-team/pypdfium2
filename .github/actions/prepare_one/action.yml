@@ -6,17 +6,17 @@ description: 'Prepare one build (post-checkout)'
 inputs:
   # post-checkout
   assert_sha:
-    description: 'Ensure HEAD commit hash matches this value after checkout. Optional'
+    description: 'Ensure HEAD commit hash matches this value after checkout.'
     default: ''
   replicate_tag:
-    description: 'Create the given tag after checkout. Optional.'
+    description: 'Create the given tag after checkout.'
     default: ''
   # python
   py_vers:
-    description: 'Python versions to set up (space-separated, may be quoted). Optional. If not given, setup-python will not be called.'
+    description: 'Python versions to set up (space-separated, may be quoted). If not given, setup-python will not be called.'
     default: ''
   pip_install:
-    description: 'Arguments to pip-install input of setup-python. Optional.'
+    description: 'Arguments to pip-install input of setup-python.'
     default: ''
 
 runs:
