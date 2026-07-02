@@ -50,7 +50,7 @@ jobs:
       wheel_tag: ${{ matrix.wheel_tag }}
       py_ver: ${{ inputs.py_ver }}
       replicate_tag: ${{ needs.build.outputs.new_version }}
-      branch: autorelease_tmp
+      # branch: ...  # TODO pass exact SHA of autorelease commit
   
   
   cibw:
@@ -73,7 +73,7 @@ jobs:
       use_sysroot: ${{ matrix.use_sysroot || false }}
       test_pdfium: true
       replicate_tag: ${{ needs.build.outputs.new_version }}
-      branch: autorelease_tmp
+      # branch: ...  # TODO pass exact SHA of autorelease commit
   
   
   publish:
@@ -142,6 +142,7 @@ jobs:
         run: |
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
+          # TODO assert HEAD commit hash matches the autorelease commit (no tampering)
           git checkout main
           git merge origin/autorelease_tmp
           git tag -a "$NEW_VERSION" -m "Autorelease"

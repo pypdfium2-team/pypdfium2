@@ -23,9 +23,6 @@ on:
       branch:
         type: string
         default: ''
-      assert_sha:
-        type: string
-        default: ''
       replicate_tag:
         type: string
         default: ''
@@ -54,7 +51,6 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare_one
         with:
-          assert_sha: ${{ inputs.assert_sha }}
           replicate_tag: ${{ inputs.replicate_tag }}
           py_vers: ${{ inputs.py_vers }}
           pip_install: -U -r req/setup.txt

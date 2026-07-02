@@ -5,9 +5,6 @@ name: 'Prepare one'
 description: 'Prepare one build (post-checkout)'
 inputs:
   # post-checkout
-  assert_sha:
-    description: 'Ensure HEAD commit hash matches this value after checkout.'
-    default: ''
   replicate_tag:
     description: 'Create the given tag after checkout.'
     default: ''
@@ -22,21 +19,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    
-    - name: Confirm commit hash
-      if: ${{ inputs.assert_sha }}
-      shell: python
-      run: |
-        import os, sys, subprocess
-        p = subprocess.run("git rev-parse HEAD", shell=True, capture_output=True)
-        current_sha = p.stdout.decode().strip()
-        expected_sha = os.environ["ASSERT_SHA"]
-        if expected_sha != current_sha:
-            raise Exception(f"Commit hash mismatch: expected {expected_sha!r}, but got {current_sha!r}. This indicates the input ref may have been tampered with, and it would be unsafe to proceed.")
-        else:
-            print(f"Commit hash confirmed, matches expectation: {current_sha!r}.", file=sys.stderr)
-      env:
-        ASSERT_SHA: ${{ inputs.assert_sha }}
     
     - name: Create pypdfium2 tag (optional)
       if: ${{ inputs.replicate_tag }}
