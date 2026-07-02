@@ -2,12 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: 'Prepare one'
-description: 'Prepare one build (checkout & initial setup)'
+description: 'Prepare one build (post-checkout)'
 inputs:
-  # checkout
-  ref:
-    description: 'Ref to check out. Required.'
-    required: true
+  # post-checkout
   assert_sha:
     description: 'Ensure HEAD commit hash matches this value after checkout. Optional'
     default: ''
@@ -25,13 +22,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    
-    - name: Check out pypdfium2 (deep)
-      uses: actions/checkout@v6
-      with:
-        fetch-depth: 0  # for git describe
-        persist-credentials: false
-        ref: ${{ inputs.ref }}
     
     - name: Confirm commit hash
       if: ${{ inputs.assert_sha }}

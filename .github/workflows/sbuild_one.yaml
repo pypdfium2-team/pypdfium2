@@ -52,10 +52,16 @@ jobs:
     
     steps:
       
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # for git describe
+          persist-credentials: false
+          ref: ${{ inputs.branch || github.ref_name }}
+      
       - name: Prepare
         uses: ./.github/actions/prepare_one
         with:
-          ref: ${{ inputs.branch || github.ref_name }}
           assert_sha: ${{ inputs.assert_sha }}
           replicate_tag: ${{ inputs.replicate_tag }}
           py_vers: ${{ inputs.py_vers }}
