@@ -34,7 +34,7 @@ def _get_python_exe_map():
     install_dir = Path(os.environ['RUNNER_TOOL_CACHE']) / "Python"
     subdirs = tuple(install_dir.iterdir())
     cpu_id = platform.machine().lower()
-    cpu_id = {"amd64": "x64"}.get(cpu_id, cpu_id)
+    cpu_id = {"amd64": "x64"}.get(cpu_id, cpu_id)  # arm64 and x86 implied
     for subdir in subdirs:
         match = re.match(r"(\d.\d*).", subdir.name)
         if not match:
