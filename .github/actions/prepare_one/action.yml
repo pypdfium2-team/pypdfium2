@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: 'Prepare one'
+description: 'Prepare one build (checkout & initial setup)'
+inputs:
+  # checkout
+  ref:
+    description: 'Ref to check out. Required.'
+    required: true
+  assert_sha:
+    description: 'Ensure HEAD commit hash matches this value after checkout. Optional'
+    default: ''
+  replicate_tag:
+    description: 'Create the given tag after checkout. Optional.'
+    default: ''
+  # python
+  py_vers:
+    description: 'Python versions to set up (space-separated, may be quoted). Optional. If not given, setup-python will not be called.'
+    default: ''
+  pip_install:
+    description: 'Arguments to pip-install input of setup-python. Optional.'
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    
+    - name: Check out pypdfium2 (deep)
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0  # for git describe
+        persist-credentials: false
+        ref: ${{ inputs.ref }}
+    
+    # TODO implement assert_sha step
+    
+    - name: Create pypdfium2 tag (optional)
+      if: ${{ inputs.replicate_tag }}
+      shell: bash
+      run: ./utils/auth_and_tag.sh "$REPLICATE_TAG"
+      env:
+        REPLICATE_TAG: ${{ inputs.replicate_tag }}
+    
+    - name: Write Python versions
+      if: ${{ inputs.py_vers }}
+      shell: bash
+      run: ./utils/delimit.py $'\n' $PY_VERS > ".python-version"
+      env:
+        PY_VERS: ${{ inputs.py_vers }}
+    
+    - name: Set up Python
+      if: ${{ inputs.py_vers }}
+      uses: actions/setup-python@v6
+      with:
+        python-version-file: '.python-version'
+        pip-install: ${{ inputs.pip_install }}

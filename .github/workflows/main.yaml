@@ -49,7 +49,7 @@ jobs:
       target_cpu: ${{ matrix.target_cpu }}
       tag: ${{ matrix.tag }}
       py_ver: ${{ inputs.py_ver }}
-      repo_tag: ${{ needs.build.outputs.new_version }}
+      replicate_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
   
   
@@ -72,7 +72,7 @@ jobs:
       pdfium_ver: ${{ matrix.pdfium_ver }}
       use_sysroot: ${{ matrix.use_sysroot || false }}
       test_pdfium: true
-      repo_tag: ${{ needs.build.outputs.new_version }}
+      replicate_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
   
   

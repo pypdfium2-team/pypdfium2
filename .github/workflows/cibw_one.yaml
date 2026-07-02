@@ -29,7 +29,10 @@ on:
       branch:
         type: string
         default: ''
-      repo_tag:
+      assert_sha:
+        type: string
+        default: ''
+      replicate_tag:
         type: string
         default: ''
   workflow_dispatch:
@@ -43,18 +46,12 @@ jobs:
     
     steps:
       
-      - name: Check out pypdfium2 (deep)
-        uses: actions/checkout@v6
+      - name: Prepare
+        uses: ./.github/actions/prepare_one
         with:
-          fetch-depth: 0  # for git describe
-          persist-credentials: false
           ref: ${{ inputs.branch || github.ref_name }}
-      
-      - name: Create pypdfium2 tag (optional)
-        if: ${{ inputs.repo_tag }}
-        run: ./utils/auth_and_tag.sh "$REPO_TAG"
-        env:
-          REPO_TAG: ${{ inputs.repo_tag }}
+          assert_sha: ${{ inputs.assert_sha }}
+          replicate_tag: ${{ inputs.replicate_tag }}
       
       - name: Set up QEMU
         if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
