@@ -16,20 +16,22 @@ from pathlib import Path
 
 UTILS_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = UTILS_DIR.parent
+IS_WINDOWS = sys.platform.startswith("win32")
 IS_GHA = bool(os.getenv("GITHUB_ACTIONS"))
-CPUNAME = platform.machine().lower()
+PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
 
+# work around https://github.com/actions/setup-python/issues/1079
 def _get_python_exe_map():
     
     exemap = {}
     if not (sys.platform.startswith("win32") and IS_GHA):
         return exemap
     
-    # work around https://github.com/actions/setup-python/issues/1079
+    CPUNAME = platform.machine().lower()
     install_dir = Path(R"C:\hostedtoolcache\windows\Python")
     subdirs = tuple(install_dir.iterdir())
     identity = {"amd64": "x64"}.get(CPUNAME, CPUNAME)
@@ -37,7 +39,7 @@ def _get_python_exe_map():
         match = re.match(r"(\d.\d*).", subdir.name)
         if not match:
             continue
-        exemap[f"python{match.group(1)}"] = subdir/identity/"python.exe"
+        exemap[f"python{match.group(1)}"] = str(subdir/identity/PYTHON_EXE)
     
     return exemap
 
@@ -75,7 +77,7 @@ for py_ver in reversed(args.py_vers):
         venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
         run([python, "-m", "venv", venv_name])
         bin_dir = PROJECT_DIR/venv_name/"bin"
-        python = str(bin_dir/"python")
+        python = str(bin_dir/PYTHON_EXE)
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
     if archprefix:
