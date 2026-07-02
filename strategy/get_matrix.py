@@ -67,15 +67,12 @@ def get_matrices(args, all_targets):
     return matrices
 
 
-def _repr_entry(entry):
-    assert entry, "no empty entries expected"
-    return "- " + "\n  ".join(f"{k}: {v!r}" for k, v in entry.items())
-
 def pprint_mat(matrices):
     for strategy, entries in matrices.items():
         log(f"{strategy}:")
         for entry in entries:
-            log(_repr_entry(entry))
+            assert entry, "no empty entries expected"
+            log("- " + "\n  ".join(f"{k}: {v!r}" for k, v in entry.items()))
         log()
 
 def dumpstr(matrices):
