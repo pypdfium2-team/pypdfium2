@@ -123,6 +123,13 @@ select = "*-*linux_s390x"
 inherit.environment = "append"
 environment.BUILD_PARAMS = "$BUILD_PARAMS --clang-as-gcc"
 
+# Cross-compiled or hybrid macOS and Windows targets
+
+[[tool.cibuildwheel.overrides]]
+select = "*-macosx_x86_64"
+inherit.environment = "append"
+environment.BUILD_PARAMS = "--target-cpu x64"
+
 [[tool.cibuildwheel.overrides]]
 select = "*-win_arm64"
 inherit.environment = "append"

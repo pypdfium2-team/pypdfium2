@@ -45,11 +45,11 @@ Legend
 - **MinVer**: Minimum required OS versions for present release.
   Other build strategies may result in different min versions, and older versions of pypdfium2 may have lower requirements.
   
-  + 🟢 Low/OK, 🟡 Medium/Acceptable, 🟠 Elevated, 🔴 High, ⚪ Uncertain / not tagged
+  + 🟢 Low/Good, 🔵 Reasonable, 🟡 Medium, 🟠 Elevated, 🔴 High, ⚪ Not tagged
 
 - **Release**: status, version tracked, build strategy
   
-  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only (platform rejected by PyPI), 🟦 Setup only
+  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only [1]_, 🟦 Setup only
   + 🔄 Latest version, 📌 Pinned version
 
 - **Tier**: Platform support level
@@ -89,8 +89,11 @@ Legend
   
   + ✅ Yes
   + ☑️ Yes (tested in docker)
+  + 🅿️ Probably (might need minor tweaks)
   + ❔ Unknown
   + 🚧 This used to work in the past, but is currently broken.
+
+.. [1] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse). As with pip, there's nothing we can do about that, and a patch is unlikely to be accepted without prior standardization and a tiring discussion whether PyPA consider the platform worth supporting. If anyone volunteers to do the lobbying, please do so, and reach out if it was successful.
 
 .. admonition:: Help wanted
    

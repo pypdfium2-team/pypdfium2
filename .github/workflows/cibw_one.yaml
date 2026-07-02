@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: CIBW build one
+name: CIBW one
 on:
   workflow_call:
     inputs: &reusable_inputs
@@ -17,12 +17,6 @@ on:
       cibw_py_ver:
         type: string
         default: 'cp314'
-      branch:
-        type: string
-        default: ''
-      repo_tag:
-        type: string
-        default: ''
       pdfium_ver:
         type: string
         default: ''
@@ -32,9 +26,12 @@ on:
       test_pdfium:
         type: boolean
         default: true
-      condition:
-        type: boolean
-        default: true
+      branch:
+        type: string
+        default: ''
+      replicate_tag:
+        type: string
+        default: ''
   workflow_dispatch:
     inputs: *reusable_inputs
 
@@ -43,25 +40,20 @@ jobs:
   build:
     name: ${{ inputs.cibw_target }} on ${{ inputs.os }}
     runs-on: ${{ inputs.os }}
-    if: ${{ inputs.condition }}
     
     steps:
       
-      - name: Check out pypdfium2
+      - name: Check out pypdfium2 (deep)
         uses: actions/checkout@v6
         with:
+          fetch-depth: 0  # for git describe
           persist-credentials: false
-          fetch-depth: 0
           ref: ${{ inputs.branch || github.ref_name }}
       
-      - name: Create pypdfium2 tag (optional)
-        if: ${{ inputs.repo_tag }}
-        run: |
-          git config user.email "geisserml@gmail.com"
-          git config user.name "geisserml"
-          git tag -a "$REPO_TAG" -m "Autorelease"
-        env:
-          REPO_TAG: ${{ inputs.repo_tag }}
+      - name: Prepare
+        uses: ./.github/actions/prepare_one
+        with:
+          replicate_tag: ${{ inputs.replicate_tag }}
       
       - name: Set up QEMU
         if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
@@ -92,22 +84,19 @@ jobs:
         with:
           output-dir: wheelhouse
       
-      - name: Upload artifact
+      - name: Upload wheel as artifact
         uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
           name: cibw-${{ inputs.cibw_target }}
       
-      # For the rarer Linux architectures, Pillow and Numpy don't currently provide wheels on PyPI. However, Linux distributions do provide packages.
-      # Sadly, cibuildwheel isn't really suited for working with system python (cf. https://github.com/pypa/cibuildwheel/discussions/2553)
-      # Also, the need to use an older distribution for build (to achieve low glibc requirement) contradicts the desire for a more recent python software stack for testing.
-      # So our best bet is to do it by hand:
-      
+      # CIBW does not support custom test containers: https://github.com/pypa/cibuildwheel/discussions/2553
+      # So let's just do it on our own; we need container_driver.py for SBUILD and PBIN anyway. Notes:
+      # - x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test again in a different container
+      # - Suppress known test suite failures on s390x and musllinux_armv7l
       - name: Post-test
-        # x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test again in a different container
         if: ${{ contains(inputs.cibw_target, 'linux') }}
-        # q&d: suppress known test suite failures on s390x and musllinux_armv7l
         continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
-        run: python3 ./utils/container_driver.py "$TARGET"
+        run: python3 ./utils/container_driver.py "$TARGET" -w wheelhouse/*.whl
         env:
           TARGET: ${{ inputs.cibw_target }}
