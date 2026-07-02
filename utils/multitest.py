@@ -60,7 +60,7 @@ if args.prefix:
 def run(cmd):
     cmd = archprefix + cmd
     log(cmd)
-    subprocess.run(cmd, check=True, cwd=str(PROJECT_DIR))
+    subprocess.run(cmd, check=True, cwd=PROJECT_DIR)
 
 PyExeMap = _get_python_exe_map()
 
@@ -75,9 +75,10 @@ for py_ver in reversed(args.py_vers):
     bin_dir = Path()
     if args.venv:
         venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
-        run([python, "-m", "venv", venv_name])
-        bin_dir = PROJECT_DIR/venv_name/"bin"
-        log(tuple(bin_dir.iterdir()))
+        venv_dir = PROJECT_DIR/venv_name
+        run([python, "-m", "venv", str(venv_dir)])
+        log(tuple(venv_dir.iterdir()))
+        bin_dir = venv_dir/"bin"
         python = str(bin_dir/PYTHON_EXE)
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
