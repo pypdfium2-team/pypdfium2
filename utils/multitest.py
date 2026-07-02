@@ -31,7 +31,7 @@ def _get_python_exe_map():
         return exemap
     
     # cf. https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
-    install_dir = Path(os.environ['RUNNER_TOOL_CACHE']) / "Python"
+    install_dir = Path(os.environ["RUNNER_TOOL_CACHE"]) / "Python"
     subdirs = tuple(install_dir.iterdir())
     cpu_id = platform.machine().lower()
     cpu_id = {"amd64": "x64"}.get(cpu_id, cpu_id)  # arm64 and x86 implied
