@@ -19,6 +19,7 @@ PROJECT_DIR = UTILS_DIR.parent
 IS_WINDOWS = sys.platform.startswith("win32")
 IS_GHA = bool(os.getenv("GITHUB_ACTIONS"))
 PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")
+PYTHON_BIN_DIR = "Scripts" if IS_WINDOWS else "bin"
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -77,8 +78,8 @@ for py_ver in reversed(args.py_vers):
         venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
         venv_dir = PROJECT_DIR/venv_name
         run([python, "-m", "venv", str(venv_dir)])
-        log(tuple(venv_dir.iterdir()))
-        bin_dir = venv_dir/"bin"
+        bin_dir = venv_dir/PYTHON_BIN_DIR
+        log(tuple(bin_dir.iterdir()))
         python = str(bin_dir/PYTHON_EXE)
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
