@@ -1006,7 +1006,9 @@ Our issue and PR templates make it quite plain that AI is not allowed, so users 
 
 Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide much usage support.
 
-The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and we are free to silently reject PRs we do not like.
+The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and PRs considered unsuitable by pypdfium2 maintainers will be rejected without further ado.
+We will not enter any time-wasting discussion – if the code owner decides a change is inappropriate, that's it.
+Any attempts to pressure us to merge a PR will not be tolerated, and may result in the offender being blocked.
 
 ### Known limitations
 
