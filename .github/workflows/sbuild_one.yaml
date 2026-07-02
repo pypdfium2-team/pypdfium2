@@ -26,7 +26,7 @@ on:
       custom_clang:
         type: boolean
         default: false
-      tag:
+      wheel_tag:
         type: string
         default: ''
       branch:
@@ -106,7 +106,7 @@ jobs:
         run: python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: sourcebuild
-          CROSS_TAG: ${{ inputs.tag }}  # optional
+          CROSS_TAG: ${{ inputs.wheel_tag }}  # optional
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v7

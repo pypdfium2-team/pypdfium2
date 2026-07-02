@@ -47,7 +47,7 @@ jobs:
     with:
       os: ${{ matrix.os }}
       target_cpu: ${{ matrix.target_cpu }}
-      tag: ${{ matrix.tag }}
+      wheel_tag: ${{ matrix.wheel_tag }}
       py_ver: ${{ inputs.py_ver }}
       replicate_tag: ${{ needs.build.outputs.new_version }}
       branch: autorelease_tmp
