@@ -165,7 +165,6 @@ path = [
     "strategy/targets.json",
     "strategy/profiles.json",
     "utils/regextract.py",
-    "utils/delimit.py",
     "utils/enforce_install.sh",
     "utils/inside_docker.sh",
 ]

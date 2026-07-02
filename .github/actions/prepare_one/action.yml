@@ -50,10 +50,13 @@ runs:
     
     - name: Write Python versions
       if: ${{ inputs.py_vers }}
-      shell: bash
-      run: ./utils/delimit.py $'\n' $PY_VERS > ".python-version"
+      shell: python
+      run: |
+        import os, shlex
+        py_vers = shlex.split(os.environ["PY_VERS"])
+        print("\n".join(py_vers))
       env:
-        PY_VERS: ${{ inputs.py_vers }}
+        PY_VERS: "${{ inputs.py_vers }}"
     
     - name: Set up Python
       if: ${{ inputs.py_vers }}
