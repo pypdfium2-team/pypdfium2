@@ -4,9 +4,11 @@
 
 # Author's note: This basically replicates a small chunk of what cibuildwheel does internally. I'm starting to really see what cibuildwheel exists for...
 
+import re
 import os
 import sys
 import shlex
+import platform
 import argparse
 import subprocess
 from pathlib import Path
@@ -14,22 +16,30 @@ from pathlib import Path
 
 UTILS_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = UTILS_DIR.parent
+IS_GHA = bool(os.getenv("GITHUB_ACTIONS"))
+CPUNAME = platform.machine().lower()
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
-# work around https://github.com/actions/setup-python/issues/1079
-IS_GHA = bool(os.getenv("GITHUB_ACTIONS"))
+
 def _get_python_exe_map():
+    
+    exemap = {}
     if not (sys.platform.startswith("win32") and IS_GHA):
-        return {}
+        return exemap
+    
+    # work around https://github.com/actions/setup-python/issues/1079
     install_dir = Path(R"C:\hostedtoolcache\windows\Python")
     subdirs = tuple(install_dir.iterdir())
-    log(subdirs)
-    # TODO ...
-    return {}
-
-PyExeMap = _get_python_exe_map()
+    identity = {"amd64": "x64"}.get(CPUNAME, CPUNAME)
+    for subdir in subdirs:
+        match = re.match(r"(\d.\d*).", subdir.name)
+        if not match:
+            continue
+        exemap[f"python{match.group(1)}"] = subdir/identity/"python.exe"
+    
+    return exemap
 
 
 parser = argparse.ArgumentParser(
@@ -49,6 +59,8 @@ def run(cmd):
     cmd = archprefix + cmd
     log(cmd)
     subprocess.run(cmd, check=True, cwd=str(PROJECT_DIR))
+
+PyExeMap = _get_python_exe_map()
 
 
 errors = {}
