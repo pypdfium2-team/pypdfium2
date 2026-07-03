@@ -88,7 +88,7 @@ Legend
 - **NAT**: Can be built natively at end user level?
   
   + ✅ Yes
-  + ☑️ Yes (tested in docker)
+  + ☑️ Yes (tested with QEMU)
   + 🅿️ Probably (might need minor tweaks)
   + 🚧 This used to work in the past, but is currently broken.
   + ``NA`` Unknown
