@@ -12,8 +12,11 @@ inputs:
   py_vers:
     description: 'Python versions to set up (space-separated, may be quoted). If not given, setup-python will not be called.'
     default: ''
+  py_arch:
+    description: 'Passthrough to architecture input of setup-python'
+    default: ''
   pip_install:
-    description: 'Arguments to pip-install input of setup-python.'
+    description: 'Passthrough to pip-install input of setup-python.'
     default: ''
 
 runs:
@@ -41,11 +44,10 @@ runs:
       env:
         PY_VERS: "${{ inputs.py_vers }}"
     
-    # TODO add passthrough for `architecture` input and use it to test 32-bit windows
-    # cf. https://github.com/actions/setup-python#supported-architectures
     - name: Set up Python
       if: ${{ inputs.py_vers }}
       uses: actions/setup-python@v6
       with:
         python-version-file: '.python-version'
         pip-install: ${{ inputs.pip_install }}
+        architecture: ${{ inputs.py_arch }}

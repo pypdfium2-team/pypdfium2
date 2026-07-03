@@ -18,6 +18,7 @@ UTILS_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = UTILS_DIR.parent
 IS_WINDOWS = sys.platform.startswith("win32")
 PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")
+WITH_32BIT = bool(int( os.environ.get("WITH_32BIT", 0) ))
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -34,7 +35,10 @@ def _get_python_exe_map():
     install_dir = Path(os.environ["RUNNER_TOOL_CACHE"]) / "Python"
     subdirs = tuple(install_dir.iterdir())
     cpu_id = platform.machine().lower()
-    cpu_id = {"amd64": "x64"}.get(cpu_id, cpu_id)  # arm64 and x86 implied
+    if WITH_32BIT and cpu_id == "amd64":
+        cpu_id = "x86"
+    else:
+        cpu_id = {"amd64": "x64"}.get(cpu_id, cpu_id)  # arm64 and x86 implied
     for subdir in subdirs:
         match = re.match(r"(\d.\d*).", subdir.name)
         if not match:

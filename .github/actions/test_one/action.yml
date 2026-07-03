@@ -23,6 +23,8 @@ inputs:
   mac_universal:
     description: 'On macOS, indicate that the wheel is universal'
     default: ''
+  with_32bit:
+    description: "Indicate 32-bit python interpreter"
   dll_glob:
     description: 'Where to find the PDFium DLL in question'
     default: ''
@@ -38,6 +40,7 @@ runs:
       run: ./utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
       env:
         PY_VERS: "${{ inputs.py_vers }}"
+        WITH_32BIT: "${{ inputs.with_32bit && 1 || 0 }}"
     
     - name: macOS - Test Intel under emulation
       if: ${{ startsWith(inputs.runner_os, 'macos-') && (inputs.mac_universal || !inputs.test_on_host) }}
