@@ -1,5 +1,2 @@
-autoflake
-codespell
-reuse
 check-wheel-contents
 twine
