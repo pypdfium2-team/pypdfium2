@@ -26,9 +26,6 @@ on:
       cibw:
         type: string
         default: ''
-      sdist:
-        type: boolean
-        default: true
       checks:
         type: boolean
         default: true
@@ -54,14 +51,16 @@ jobs:
   prepare:
     runs-on: ${{ inputs.runner_os }}
     outputs:
-      ref: ${{ steps.get_version.outputs.ref }}
-      version: ${{ steps.get_version.outputs.version }}
       pbin_needed: ${{ steps.get_matrix.outputs.pbin_needed }}
       sbuild_needed: ${{ steps.get_matrix.outputs.sbuild_needed }}
       cibw_needed: ${{ steps.get_matrix.outputs.cibw_needed }}
       pbin_matrix: ${{ steps.get_matrix.outputs.pbin_matrix }}
       sbuild_matrix: ${{ steps.get_matrix.outputs.sbuild_matrix }}
       cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
+      ref: ${{ steps.get_version.outputs.ref }}
+      version: ${{ steps.get_version.outputs.version }}
+    
+    # avoid the need to allocate separate runners, at the cost of some fragmentation
     
     steps:
       
@@ -91,7 +90,7 @@ jobs:
           CIBW_TARGETS: ${{ inputs.cibw }}
       
       - name: Install common dependencies
-        if: ${{ inputs.sdist || inputs.checks || inputs.autorelease }}
+        if: ${{ inputs.checks || inputs.autorelease }}
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -U -r req/setup.txt
@@ -112,7 +111,7 @@ jobs:
           python3 setupsrc/autorelease.py --register
       
       - name: Pack sdist
-        if: ${{ inputs.sdist || inputs.checks }}
+        if: ${{ inputs.checks || inputs.autorelease }}
         run: python3 setupsrc/craft.py --sdist
       
       - name: Run test suite
@@ -129,7 +128,7 @@ jobs:
           echo "version=$(git describe --abbrev=0)" >> "$GITHUB_OUTPUT"
       
       - name: Upload sdist
-        if: ${{ inputs.sdist }}
+        if: ${{ inputs.autorelease }}
         uses: actions/upload-artifact@v7
         with:
           name: sdist
