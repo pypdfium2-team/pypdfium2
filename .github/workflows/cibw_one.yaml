@@ -67,7 +67,7 @@ jobs:
           features: 'OptionId.WindowsDesktopDebuggers'
       
       - name: Download clang image
-        if: ${{ contains(inputs.cibw_target, 'linux') && contains(fromJson('["ppc64le","riscv64","loongarch64","s390x"]'), inputs.cibw_arch) }}
+        if: ${{ contains(inputs.cibw_target, 'linux') && contains(fromJSON('["ppc64le","riscv64","loongarch64","s390x"]'), inputs.cibw_arch) }}
         run: bash ./utils/install-static-clang.sh -d ./clang_image -m download-only
       
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides

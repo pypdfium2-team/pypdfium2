@@ -151,10 +151,10 @@ jobs:
   pbin:
     
     needs: prepare
-    if: ${{ fromJson(needs.prepare.outputs.pbin_needed) }}
+    if: ${{ fromJSON(needs.prepare.outputs.pbin_needed) }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.prepare.outputs.pbin_matrix) }}
+      matrix: ${{ fromJSON(needs.prepare.outputs.pbin_matrix) }}
     
     uses: ./.github/workflows/pbin_one.yaml
     with:
@@ -168,11 +168,11 @@ jobs:
   
   sbuild:
     needs: prepare
-    if: ${{ fromJson(needs.prepare.outputs.sbuild_needed) }}
+    if: ${{ fromJSON(needs.prepare.outputs.sbuild_needed) }}
     
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.prepare.outputs.sbuild_matrix) }}
+      matrix: ${{ fromJSON(needs.prepare.outputs.sbuild_matrix) }}
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
@@ -189,11 +189,11 @@ jobs:
   
   cibw:
     needs: prepare
-    if: ${{ fromJson(needs.prepare.outputs.cibw_needed) }}
+    if: ${{ fromJSON(needs.prepare.outputs.cibw_needed) }}
     
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.prepare.outputs.cibw_matrix) }}
+      matrix: ${{ fromJSON(needs.prepare.outputs.cibw_matrix) }}
     
     uses: ./.github/workflows/cibw_one.yaml
     with:
