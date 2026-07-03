@@ -79,7 +79,7 @@ def dumpstr(matrices):
     output = []
     for strategy, entries in matrices.items():
         output.append(f"{strategy}_needed={str(bool(entries)).lower()}")
-        output.append(f"{strategy}_matrix={json.dumps(entries)}")
+        output.append('%s_matrix={"include": %s}' % (strategy, json.dumps(entries)))
     return "\n".join(output)
 
 def dump(output, file, where, trailer=""):

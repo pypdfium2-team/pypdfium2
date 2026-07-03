@@ -292,7 +292,7 @@ jobs:
           git push --force
           git checkout main
         env:
-          NEW_VERSION: ${{ needs.build.outputs.new_version }}
+          NEW_VERSION: ${{ needs.prepare.outputs.version }}
       
       # Upload to TestPyPI / PyPI via "trusted publishing".
       # https://docs.pypi.org/trusted-publishers/adding-a-publisher/
@@ -327,8 +327,8 @@ jobs:
           artifacts: 'dist/*.whl,gh_only/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.build.outputs.new_version }}
-          prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
+          tag: ${{ needs.prepare.outputs.version }}
+          prerelease: ${{ contains(needs.prepare.outputs.version, 'b') }}
       
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
