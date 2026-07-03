@@ -63,6 +63,13 @@ Legend
   + **CIBW** = Built at pypdfium2 via ``cibw.yaml`` (``build_native.py`` + containers on Linux, ``build_toolchained.py`` on Windows and macOS).
   + ✅ Platform supported, ❌ Not supported with that strategy, ⏳Coming soon
 
+- 🐍 Conda *(PBIN only)*
+  
+  + ✅ Released to conda
+  + ⏸️ Built, but conda upload is paused due to storage limits. Get in touch with ``pdfium-binaries`` if you would like this to be reinstated.
+  + ❓ Built, but unclear if there were any point releasing this to conda (not a priority)
+  + ❌ Not built at pdfium-binaries
+
 - 🧪 Testing status
   
   + ✅ Tested on host
@@ -75,13 +82,6 @@ Legend
   + ⬜ Native compilation
   + 🔳 Cross compilation
   + 🔲 Both is possible / applies
-
-- 🐍 Conda *(PBIN only)*
-  
-  + ✅ Released to conda
-  + ⏸️ Built, but conda upload is paused due to storage limits. Get in touch with ``pdfium-binaries`` if you would like this to be reinstated.
-  + ❓ Built, but unclear if there were any point releasing this to conda (not a priority)
-  + ❌ Not built at pdfium-binaries
 
 - ⚙️ Compiler used *(CIBW only – PBIN and SBLD always use clang)*
 
