@@ -52,7 +52,7 @@ jobs:
     runs-on: ${{ inputs.runner_os }}
     outputs:
       ref: ${{ steps.get_version.outputs.ref }}
-      new_version: ${{ steps.get_version.outputs.new_version }}
+      version: ${{ steps.get_version.outputs.version }}
       pbin_needed: ${{ steps.get_matrix.outputs.pbin_needed }}
       sbuild_needed: ${{ steps.get_matrix.outputs.sbuild_needed }}
       cibw_needed: ${{ steps.get_matrix.outputs.cibw_needed }}
@@ -69,7 +69,7 @@ jobs:
           persist-credentials: true  # needed for push
       
       - name: Set up Python
-        if: ${{ inputs.py_ver && (inputs.checks || inputs.autorelease || inputs.publish) }}
+        if: ${{ inputs.py_ver && (inputs.checks || inputs.autorelease) }}
         uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.py_ver }}
@@ -88,7 +88,7 @@ jobs:
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
       
       - name: Run pre-release checks
-        if: ${{ inputs.checks || inputs.publish }}
+        if: ${{ inputs.checks }}
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -U -r req/check.txt
@@ -96,7 +96,7 @@ jobs:
           git fetch --unshallow
       
       - name: Run autorelease script
-        if: ${{ inputs.autorelease || inputs.publish }}
+        if: ${{ inputs.autorelease }}
         run: |
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
@@ -104,14 +104,20 @@ jobs:
           python3 setupsrc/autorelease.py --register
       
       - name: Run test suite
-        if: ${{ inputs.checks || inputs.publish }}
+        if: ${{ inputs.checks }}
         run: |
-          python3 -m pip install -v --no-build-isolation .
+          python3 -m pip install -v .
           python3 -m pip install -U -r req/test.txt
           python3 -m pytest tests/ -sv
       
+      - name: Determine ref/version
+        id: get_version
+        run: |
+          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(git describe --abbrev=0)" >> "$GITHUB_OUTPUT"
+      
       - name: Upload release notes
-        if: ${{ inputs.autorelease || inputs.publish }}
+        if: ${{ inputs.autorelease }}
         uses: actions/upload-artifact@v7
         with:
           name: release_notes
@@ -119,7 +125,7 @@ jobs:
       
       # tag intentionally not pushed
       - name: Push autorelease_tmp branch
-        if: ${{ inputs.autorelease || inputs.publish }}
+        if: ${{ inputs.autorelease }}
         run: git push -u origin autorelease_tmp
   
   
