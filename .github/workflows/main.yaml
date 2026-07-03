@@ -58,7 +58,7 @@ jobs:
       sbuild_matrix: ${{ steps.get_matrix.outputs.sbuild_matrix }}
       cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
       ref: ${{ steps.get_version.outputs.ref }}
-      version: ${{ steps.get_version.outputs.version }}
+      version: ${{ inputs.autorelease && steps.get_version.outputs.version || '' }}
     
     # avoid the need to allocate separate runners & try to share as much as possible
     # this goes at the cost of some fragmentation
@@ -163,7 +163,7 @@ jobs:
       # py_vers: ${{ ... }}  # TODO
       test_on_host: ${{ matrix.test_on_host }}
       ref: ${{ needs.prepare.outputs.ref }}
-      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version || '' }}
+      replicate_tag: ${{ needs.prepare.outputs.version }}
   
   
   sbuild:
@@ -184,7 +184,7 @@ jobs:
       custom_clang: ${{ matrix.custom_clang || false }}
       wheel_tag: ${{ matrix.tag }}
       ref: ${{ needs.prepare.outputs.ref }}
-      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version || '' }}
+      replicate_tag: ${{ needs.prepare.outputs.version }}
   
   
   cibw:
@@ -204,7 +204,7 @@ jobs:
       # pdfium_ver: ${{ ... }}  # TODO
       use_sysroot: ${{ matrix.use_sysroot || false }}
       ref: ${{ needs.prepare.outputs.ref }}
-      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version || '' }}
+      replicate_tag: ${{ needs.prepare.outputs.version }}
   
   
   publish:
