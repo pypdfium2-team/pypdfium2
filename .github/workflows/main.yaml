@@ -154,7 +154,7 @@ jobs:
     if: ${{ needs.prepare.outputs.pbin_needed }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.prepare.outputs.pbin_matrix) }}
+      matrix: ${{ fromJson(needs.prepare.outputs.pbin_matrix) }}
     
     uses: ./.github/workflows/pbin_one.yaml
     with:
@@ -172,7 +172,7 @@ jobs:
     
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.prepare.outputs.sbuild_matrix) }}
+      matrix: ${{ fromJson(needs.prepare.outputs.sbuild_matrix) }}
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
@@ -193,7 +193,7 @@ jobs:
     
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.prepare.outputs.cibw_matrix) }}
+      matrix: ${{ fromJson(needs.prepare.outputs.cibw_matrix) }}
     
     uses: ./.github/workflows/cibw_one.yaml
     with:

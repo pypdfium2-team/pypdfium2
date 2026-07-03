@@ -119,7 +119,7 @@ jobs:
       
       # https://github.com/actions/runner/issues/2238 ...
       # Bear in mind: some fields, e.g. continue-on-error, require an actual bool (check GH docs).
-      # In that case, need to use fromJSON() in the called action, and not map to empty string here.
+      # In that case, need to use fromJson() in the called action, and not map to empty string here.
       # Using empty/non-empty string as bool substitute should be OK for if conditionals though.
       - name: Test wheel
         uses: ./.github/actions/test_one
