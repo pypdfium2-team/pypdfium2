@@ -359,7 +359,7 @@ jobs:
   
   cleanup:
     needs: [publish, gh_pages, conda]
-    if: ${{ !cancelled() }}
+    if: ${{ inputs.autorelease && !cancelled() }}
     runs-on: ${{ inputs.runner_os }}
     
     steps:
