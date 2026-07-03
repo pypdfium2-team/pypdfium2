@@ -51,9 +51,9 @@ jobs:
   prepare:
     runs-on: ${{ inputs.runner_os }}
     outputs:
-      pbin_needed: ${{ fromJson(steps.get_matrix.outputs.pbin_needed) }}
-      sbuild_needed: ${{ fromJson(steps.get_matrix.outputs.sbuild_needed) }}
-      cibw_needed: ${{ fromJson(steps.get_matrix.outputs.cibw_needed) }}
+      pbin_needed: ${{ steps.get_matrix.outputs.pbin_needed }}
+      sbuild_needed: ${{ steps.get_matrix.outputs.sbuild_needed }}
+      cibw_needed: ${{ steps.get_matrix.outputs.cibw_needed }}
       pbin_matrix: ${{ steps.get_matrix.outputs.pbin_matrix }}
       sbuild_matrix: ${{ steps.get_matrix.outputs.sbuild_matrix }}
       cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
@@ -151,7 +151,7 @@ jobs:
   pbin:
     
     needs: prepare
-    if: ${{ needs.prepare.outputs.pbin_needed }}
+    if: ${{ fromJson(needs.prepare.outputs.pbin_needed) }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.pbin_matrix) }}
@@ -168,7 +168,7 @@ jobs:
   
   sbuild:
     needs: prepare
-    if: ${{ needs.prepare.outputs.sbuild_needed }}
+    if: ${{ fromJson(needs.prepare.outputs.sbuild_needed) }}
     
     strategy:
       fail-fast: false
@@ -189,7 +189,7 @@ jobs:
   
   cibw:
     needs: prepare
-    if: ${{ needs.prepare.outputs.cibw_needed }}
+    if: ${{ fromJson(needs.prepare.outputs.cibw_needed) }}
     
     strategy:
       fail-fast: false
