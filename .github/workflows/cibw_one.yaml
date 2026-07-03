@@ -5,7 +5,7 @@ name: CIBW one
 on:
   workflow_call:
     inputs: &reusable_inputs
-      os:
+      runner_os:
         type: string
         required: true
       cibw_target:
@@ -38,8 +38,8 @@ on:
 jobs:
   
   build:
-    name: ${{ inputs.cibw_target }} on ${{ inputs.os }}
-    runs-on: ${{ inputs.os }}
+    name: ${{ inputs.cibw_target }} on ${{ inputs.runner_os }}
+    runs-on: ${{ inputs.runner_os }}
     
     steps:
       
@@ -60,7 +60,7 @@ jobs:
         uses: docker/setup-qemu-action@v4
       
       - name: Install Windows cross deps
-        if: ${{ startsWith(inputs.os, 'windows') && inputs.cibw_arch != 'AMD64' }}
+        if: ${{ startsWith(inputs.runner_os, 'windows') && inputs.cibw_arch != 'AMD64' }}
         uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9  # v1.0.5
         with:
           version-sdk: 26100

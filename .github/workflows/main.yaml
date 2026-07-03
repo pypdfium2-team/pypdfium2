@@ -60,7 +60,8 @@ jobs:
       ref: ${{ steps.get_version.outputs.ref }}
       version: ${{ steps.get_version.outputs.version }}
     
-    # avoid the need to allocate separate runners, at the cost of some fragmentation
+    # avoid the need to allocate separate runners & try to share as much as possible
+    # this goes at the cost of some fragmentation
     
     steps:
       
@@ -157,7 +158,12 @@ jobs:
     
     uses: ./.github/workflows/pbin_one.yaml
     with:
-      ...
+      runner_os: ${{ matrix.runner_os }}
+      pbin_target: ${{ matrix.pbin_target }}
+      # py_vers: ${{ ... }}  # TODO
+      test_on_host: ${{ matrix.test_on_host }}
+      ref: ${{ needs.prepare.outputs.ref }}
+      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version }}
   
   
   sbuild:
@@ -170,7 +176,15 @@ jobs:
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
-      ...
+      os: ${{ matrix.runner_os }}
+      # py_vers: ${{ ... }}  # TODO
+      target_cpu: ${{ matrix.target_cpu }}
+      target_os: ${{ matrix.target_os }}
+      build_params: ${{ matrix.build_params }}
+      custom_clang: ${{ matrix.custom_clang || false }}
+      wheel_tag: ${{ matrix.tag }}
+      ref: ${{ needs.prepare.outputs.ref }}
+      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version }}
   
   
   cibw:
@@ -183,7 +197,14 @@ jobs:
     
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      ...
+      runner_os: ${{ matrix.runner_os }}
+      cibw_target: ${{ matrix.cibw_target }}
+      cibw_arch: ${{ matrix.cibw_arch }}
+      # cibw_py_ver: ${{ ... }}  # TODO
+      # pdfium_ver: ${{ ... }}  # TODO
+      use_sysroot: ${{ matrix.use_sysroot || false }}
+      ref: ${{ needs.prepare.outputs.ref }}
+      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version }}
   
   
   publish:
