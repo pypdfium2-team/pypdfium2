@@ -371,6 +371,7 @@ def parse_given_tag(full_tag):
 
 def parse_git_tag():
     desc = run_cmd(["git", "describe", "--tags", "--dirty"], capture=True, cwd=ProjectDir)
+    log(f"Git says {desc}")
     return parse_given_tag(desc)
 
 
