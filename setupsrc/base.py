@@ -489,6 +489,7 @@ class _host_platform:
     
     @cached_property
     def is_32bit(self):
+        # https://stackoverflow.com/a/27943402/15547292
         return struct.calcsize("P") == 4
     
     @cached_property
