@@ -95,13 +95,13 @@ jobs:
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -U -r req/setup.txt
+          git fetch --unshallow
       
       - name: Run pre-release checks
         if: ${{ inputs.checks }}
         run: |
           python3 -m pip install -U -r req/check.txt
           just check
-          git fetch --unshallow
       
       - name: Run autorelease script
         if: ${{ inputs.autorelease }}
