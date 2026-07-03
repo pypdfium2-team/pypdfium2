@@ -16,7 +16,7 @@ on:
       profile:
         # see strategy/profiles.json for choices
         type: string
-        default: 'default'
+        default: ''
       pbin:
         type: string
         default: ''
@@ -85,7 +85,7 @@ jobs:
         id: get_matrix
         run: python3 strategy/get_matrix.py $PROFILE_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS >> "$GITHUB_OUTPUT"
         env:
-          PROFILE_OPT: ${{ inputs.profile && format('--profile "{0}"', inputs.profile) || '' }}
+          PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
           PBIN_TARGETS: ${{ inputs.pbin }} 
           SBUILD_TARGETS: ${{ inputs.sbuild }}
           CIBW_TARGETS: ${{ inputs.cibw }}
