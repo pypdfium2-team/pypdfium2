@@ -224,25 +224,31 @@ jobs:
         with:
           name: release_notes
       
-      - name: Download main packages
+      - name: Download sdist
+        uses: actions/download-artifact@v8
+        with:
+          name: sdist
+      
+      - name: Download PBIN wheels
         uses: actions/download-artifact@v8
         with:
           path: dist/
-          name: packages
+          merge-multiple: true
+          pattern: pbin-*
       
-      - name: Download extra packages (cibw)
+      - name: Download SBLD wheels
+        uses: actions/download-artifact@v8
+        with:
+          path: dist/
+          merge-multiple: true
+          pattern: sbuild_*  # XXX
+      
+      - name: Download CIBW wheels
         uses: actions/download-artifact@v8
         with:
           path: dist/
           merge-multiple: true
           pattern: cibw-*
-      
-      - name: Download extra packages (sbuild)
-        uses: actions/download-artifact@v8
-        with:
-          path: dist/
-          merge-multiple: true
-          pattern: sbuild_*
       
       - name: Isolate non-PyPI builds
         # if: XXX
