@@ -7,19 +7,32 @@ name: Main packaging
 on:
   workflow_dispatch:
     inputs:
-      runner:
+      runner_os:
         type: string
         default: 'ubuntu-26.04'
       py_ver:
         type: string
         default: '3.14'
-      publish:
+      profile:
+        # see strategy/profiles.json for choices
+        type: string
+        default: 'default'
+      pbin:
+        type: string
+        default: ''
+      sbuild:
+        type: string
+        default: ''
+      cibw:
+        type: string
+        default: ''
+      conda:
         type: boolean
         default: false
       gh_pages:
         type: boolean
         default: false
-      conda:
+      publish:
         type: boolean
         default: false
 
@@ -27,64 +40,92 @@ defaults:
   run:
     shell: bash
 
-jobs:
+jobs:  
   
-  # XXX
+  prepare:
+    runs-on: ${{ inputs.runner_os }}
+    outputs:
+      ref: ${{ steps.get_version.outputs.ref }}
+      new_version: ${{ steps.get_version.outputs.new_version }}
+      pbin_needed: ${{ steps.get_matrix.outputs.pbin_needed }}
+      sbuild_needed: ${{ steps.get_matrix.outputs.sbuild_needed }}
+      cibw_needed: ${{ steps.get_matrix.outputs.cibw_needed }}
+      pbin_matrix: ${{ steps.get_matrix.outputs.pbin_matrix }}
+      sbuild_matrix: ${{ steps.get_matrix.outputs.sbuild_matrix }}
+      cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
+    
+    steps:
+      
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # for git describe in "Get new version" step
+          persist-credentials: true  # needed for push
+      
+      - name: Determine build matrix
+        id: get_matrix
+        run: python3 strategy/get_matrix.py "$PROFILE_OPT" --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS >> "$GITHUB_OUTPUT"
+        env:
+          PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
+          PBIN_TARGETS: ${{ inputs.pbin }} 
+          SBUILD_TARGETS: ${{ inputs.sbuild }}
+          CIBW_TARGETS: ${{ inputs.cibw }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.py_ver }}
+  
+  
+  pbin:
+    
+    needs: prepare
+    if: ${{ needs.prepare.outputs.pbin_needed }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.pbin_matrix) }}
+    
+    uses: ./.github/workflows/pbin_one.yaml
+    with:
+      ...
   
   
   sbuild:
-    
-    # if: XXX
-    # needs: XXX
+    needs: prepare
+    if: ${{ needs.prepare.outputs.sbuild_needed }}
     
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - dummy: XXX
+      matrix: ${{ fromJSON(needs.prepare.outputs.sbuild_matrix) }}
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
-      os: ${{ matrix.os }}
-      target_cpu: ${{ matrix.target_cpu }}
-      wheel_tag: ${{ matrix.wheel_tag }}
-      py_ver: ${{ inputs.py_ver }}
-      replicate_tag: ${{ needs.build.outputs.new_version }}
-      # ref: ...  # TODO pass exact SHA of autorelease commit
+      ...
   
   
   cibw:
-    
-    # if: XXX
-    # needs: XXX
+    needs: prepare
+    if: ${{ needs.prepare.outputs.cibw_needed }}
     
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - dummy: XXX
+      matrix: ${{ fromJSON(needs.prepare.outputs.cibw_matrix) }}
     
     uses: ./.github/workflows/cibw_one.yaml
     with:
-      os: ${{ matrix.os }}
-      cibw_target: ${{ matrix.cibw_os }}_${{ matrix.cibw_arch }}
-      cibw_arch: ${{ matrix.cibw_arch }}
-      pdfium_ver: ${{ matrix.pdfium_ver }}
-      use_sysroot: ${{ matrix.use_sysroot || false }}
-      test_pdfium: true
-      replicate_tag: ${{ needs.build.outputs.new_version }}
-      # ref: ...  # TODO pass exact SHA of autorelease commit
+      ...
   
   
   publish:
     
     needs:
+      - prepare
+      - pbin
       - cibw
       - sbuild
-      # XXX
     
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner_os }}
     
     environment: release  # PyPI upload via "trusted publishing"
     permissions:
@@ -220,7 +261,7 @@ jobs:
   cleanup:
     needs: [publish, gh_pages, conda]
     if: ${{ !cancelled() }}
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner_os }}
     
     steps:
       
