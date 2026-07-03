@@ -91,6 +91,7 @@ jobs:
           CIBW_TARGETS: ${{ inputs.cibw }}
       
       - name: Install common dependencies
+        if: ${{ inputs.sdist || inputs.checks || inputs.autorelease }}
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -U -r req/setup.txt
