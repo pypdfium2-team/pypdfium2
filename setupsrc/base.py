@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import json
+import struct
 import shutil
 import tarfile
 import platform
@@ -487,6 +488,10 @@ class _host_platform:
         return self._system
     
     @cached_property
+    def is_32bit(self):
+        return struct.calcsize("P") == 4
+    
+    @cached_property
     def libname_glob(self):
         return libname_for_system(Host.system, name="*")
     
@@ -503,8 +508,6 @@ class _host_platform:
     
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
-        if self._raw_system == "linux":
-            info += f", {self._libc_name, self._libc_ver, sys.byteorder}"
         return f"<Host: {info}>"
     
     def _handle_linux(self, archid, musl_ok=True):
@@ -523,68 +526,80 @@ class _host_platform:
     
     def _get_platform(self):
         
-        # TODO 32-bit interpreters running on 64-bit machines?
+        mach = self._raw_machine
+        bitness_name = ("32" if self.is_32bit else "64") + "bit"
+        cpu_identity = (mach, bitness_name, sys.byteorder)
         
         if self._raw_system == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
             self._system = SysNames.darwin
-            log(f"macOS {self._raw_machine}")  # platform.mac_ver()
-            if self._raw_machine == "x86_64":
+            log(f"macOS {cpu_identity} {platform.mac_ver()}")
+            if mach == "x86_64":
                 return PlatNames.darwin_x64
-            elif self._raw_machine == "arm64":
+            elif mach == "arm64":
                 return PlatNames.darwin_arm64
         
         elif self._raw_system == "windows":
             self._system = SysNames.windows
-            log(f"windows {self._raw_machine}")  # platform.win32_ver()
-            if self._raw_machine == "amd64":
+            log(f"Windows {cpu_identity} {platform.win32_ver()}")
+            if self.is_32bit:
+                mach = {"arm64": "x86"}.get(mach, mach)
+            if mach == "amd64":
                 return PlatNames.windows_x64
-            elif self._raw_machine == "x86":
+            elif mach == "x86":
                 return PlatNames.windows_x86
-            elif self._raw_machine == "arm64":
+            elif mach == "arm64":
                 return PlatNames.windows_arm64
         
         elif self._raw_system == "linux":
             self._system = SysNames.linux
-            log(repr(self))
+            log(f"Linux {cpu_identity} {self._libc_name, self._libc_ver}")
             if sys.byteorder != "little":
                 raise UnhandledPlatformError("Only little-endian platforms are supported with pdfium-binaries on setup. Please check PyPI for possible wheels.")
-            if self._raw_machine == "x86_64":
+            if self.is_32bit:
+                if mach.startswith("mips64"):
+                    mach = "mipsle"
+                else:
+                    mach = {"x86_64": "i686", "aarch64": "armv8l"}.get(mach, mach)
+            if mach == "x86_64":
                 return self._handle_linux("x64")
-            elif self._raw_machine == "i686":
+            elif mach == "i686":
                 return self._handle_linux("x86")
-            elif self._raw_machine == "aarch64":
+            elif mach == "aarch64":
                 return self._handle_linux("arm64")
-            elif self._raw_machine in ("armv7l", "armv8l"):
+            elif mach in ("armv7l", "armv8l"):
                 return self._handle_linux("arm32", musl_ok=False)
-            elif self._raw_machine.startswith("ppc64"):  # ppc64le
+            elif mach.startswith("ppc64"):  # ppc64le
                 return self._handle_linux("ppc64le", musl_ok=False)
-            elif self._raw_machine.startswith("mips64"):
+            elif mach.startswith("mips64"):
                 return self._handle_linux("mips64le", musl_ok=False)
-            # elif self._raw_machine.startswith("mips"):
-            #     return self._handle_linux("mipsle", musl_ok=False)
+            elif mach.startswith("mips"):
+                return self._handle_linux("mipsle", musl_ok=False)
         
         elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
             self._system = SysNames.android
-            log(f"android {self._raw_machine} {sys.getandroidapilevel()}")  # platform.android_ver()
-            if self._raw_machine == "aarch64":
+            api_level = sys.getandroidapilevel()
+            log(f"Android {cpu_identity}, API {api_level}, {platform.android_ver()}")
+            if self.is_32bit:
+                mach = {"aarch64": "armv8l", "x86_64": "i686"}.get(mach, mach)
+            if mach == "aarch64":
                 return PlatNames.android_arm64
-            elif self._raw_machine == "armv7l":
+            elif mach in ("armv7l", "armv8l"):
                 return PlatNames.android_arm32
-            elif self._raw_machine == "x86_64":
+            elif mach == "x86_64":
                 return PlatNames.android_x64
-            elif self._raw_machine == "i686":
+            elif mach == "i686":
                 return PlatNames.android_x86
         
         elif self._raw_system in ("ios", "ipados"):  # PEP 730
             # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
             self._system = SysNames.ios
             ios_ver = platform.ios_ver()
-            log(f"{self._raw_system} {self._raw_machine} {ios_ver}")
-            if self._raw_machine == "arm64":
+            log(f"{self._raw_system} {cpu_identity}")
+            if mach == "arm64":
                 return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
-            elif self._raw_machine == "x86_64":
+            elif mach == "x86_64":
                 assert ios_ver.is_simulator, "iOS x86_64 can only be simulator"
                 return PlatNames.ios_x64_simu
         
