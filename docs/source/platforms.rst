@@ -91,7 +91,8 @@ Legend
   + ☑️ Yes (tested in Docker)
   + 🅿️ Probably (might need minor tweaks)
   + 🚧 This used to work in the past, but is currently broken.
-  + ``NA`` Unknown
+
+- NA: Not applicable / Unknown (placeholder)
 
 .. [1] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse). As with pip, there's nothing we can do about that, and a patch is unlikely to be accepted without prior standardization and a tiring discussion whether PyPA consider the platform worth supporting. If anyone volunteers to do the lobbying, please do so, and reach out if it was successful.
 
