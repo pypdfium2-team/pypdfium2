@@ -124,6 +124,7 @@ jobs:
       
       - name: Determine ref/version
         id: get_version
+        # XXX git describe will return false with shallow checkout
         run: |
           echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "version=$(git describe --abbrev=0)" >> "$GITHUB_OUTPUT"
