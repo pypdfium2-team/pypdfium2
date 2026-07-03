@@ -49,5 +49,5 @@ runs:
       uses: actions/setup-python@v6
       with:
         python-version-file: '.python-version'
-        pip-install: ${{ inputs.pip_install }}
         architecture: ${{ inputs.py_arch }}
+        pip-install: ${{ inputs.pip_install }}
