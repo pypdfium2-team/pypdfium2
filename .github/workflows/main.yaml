@@ -50,7 +50,7 @@ jobs:
       wheel_tag: ${{ matrix.wheel_tag }}
       py_ver: ${{ inputs.py_ver }}
       replicate_tag: ${{ needs.build.outputs.new_version }}
-      # branch: ...  # TODO pass exact SHA of autorelease commit
+      # ref: ...  # TODO pass exact SHA of autorelease commit
   
   
   cibw:
@@ -73,7 +73,7 @@ jobs:
       use_sysroot: ${{ matrix.use_sysroot || false }}
       test_pdfium: true
       replicate_tag: ${{ needs.build.outputs.new_version }}
-      # branch: ...  # TODO pass exact SHA of autorelease commit
+      # ref: ...  # TODO pass exact SHA of autorelease commit
   
   
   publish:

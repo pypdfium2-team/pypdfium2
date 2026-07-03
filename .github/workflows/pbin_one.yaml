@@ -20,7 +20,7 @@ on:
       test_on_host:
         type: boolean
         default: true
-      branch:
+      ref:
         type: string
         default: ''
       replicate_tag:
@@ -46,7 +46,7 @@ jobs:
         with:
           fetch-depth: 0  # for git describe
           persist-credentials: false
-          ref: ${{ inputs.branch || github.ref_name }}
+          ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Prepare
         uses: ./.github/actions/prepare_one
