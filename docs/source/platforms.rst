@@ -72,8 +72,8 @@ Legend
 
 - 🧪 Testing status
   
-  + ✅ Tested on a native host
-  + ☑️ Tested in an emulated container
+  + ✅ Tested on host
+  + ☑️ Tested under emulation (QEMU/Rosetta)
   + 🟨 Only tested when native compilation is used, but it is not the default
   + ❌ Not automatically tested
 
@@ -88,7 +88,7 @@ Legend
 - **NAT**: Can be built natively at end user level?
   
   + ✅ Yes
-  + ☑️ Yes (tested with QEMU)
+  + ☑️ Yes (tested in docker)
   + 🅿️ Probably (might need minor tweaks)
   + 🚧 This used to work in the past, but is currently broken.
   + ``NA`` Unknown
