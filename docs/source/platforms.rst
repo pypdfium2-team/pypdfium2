@@ -85,7 +85,7 @@ Legend
   + ❓ Built, but unclear if there were any point releasing this to conda (not a priority)
   + ❌ Not built at pdfium-binaries
 
-- **NAT**: Can be built natively at end user level?
+- **NAT**: Can be built natively on-device?
   
   + ✅ Yes (tested on GHA)
   + ☑️ Yes (tested in Docker)
