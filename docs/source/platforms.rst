@@ -67,7 +67,7 @@ Legend
   
   + ✅ Released to conda
   + ⏸️ Built, but conda upload is paused due to storage limits. Get in touch with ``pdfium-binaries`` if you would like this to be reinstated.
-  + ❓/❔ Built, but unclear if this could be released to conda
+  + 🔶/🔸 Built, but not released to conda (and not a priority)
   + ``NA`` Not built at pdfium-binaries
 
 - 🧪 Testing status
