@@ -83,7 +83,7 @@ jobs:
       
       - name: Determine build matrix
         id: get_matrix
-        run: python3 strategy/get_matrix.py $PROFILE_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS >> "$GITHUB_OUTPUT"
+        run: python3 strategy/get_matrix.py $PROFILE_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal >> "$GITHUB_OUTPUT"
         env:
           PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
           PBIN_TARGETS: ${{ inputs.pbin }} 
