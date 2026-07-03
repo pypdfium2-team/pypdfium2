@@ -53,7 +53,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare_one
         with:
-          replicate_tag: ${{ inputs.replicate_tag || '' }}
+          replicate_tag: ${{ inputs.replicate_tag }}
       
       - name: Set up QEMU
         if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}

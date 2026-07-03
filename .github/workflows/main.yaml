@@ -164,7 +164,7 @@ jobs:
       # py_vers: ${{ ... }}  # TODO
       test_on_host: ${{ matrix.test_on_host }}
       ref: ${{ needs.prepare.outputs.ref }}
-      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version }}
+      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version || '' }}
   
   
   sbuild:
@@ -185,7 +185,7 @@ jobs:
       custom_clang: ${{ matrix.custom_clang || false }}
       wheel_tag: ${{ matrix.tag }}
       ref: ${{ needs.prepare.outputs.ref }}
-      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version }}
+      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version || '' }}
   
   
   cibw:
@@ -205,7 +205,7 @@ jobs:
       # pdfium_ver: ${{ ... }}  # TODO
       use_sysroot: ${{ matrix.use_sysroot || false }}
       ref: ${{ needs.prepare.outputs.ref }}
-      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version }}
+      replicate_tag: ${{ inputs.autorelease && needs.prepare.outputs.version || '' }}
   
   
   publish:

@@ -51,7 +51,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare_one
         with:
-          replicate_tag: ${{ inputs.replicate_tag || '' }}
+          replicate_tag: ${{ inputs.replicate_tag }}
           py_vers: ${{ inputs.py_vers }}
           py_arch: ${{ inputs.pbin_target == 'windows_x86' && 'x86' || '' }}
           pip_install: -U -r req/setup.txt
