@@ -49,6 +49,7 @@ jobs:
           fetch-depth: 0  # for git describe
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
+          fetch-tags: true
       
       - name: Prepare
         uses: ./.github/actions/prepare_one
