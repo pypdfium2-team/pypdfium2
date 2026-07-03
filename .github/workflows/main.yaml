@@ -51,9 +51,9 @@ jobs:
   prepare:
     runs-on: ${{ inputs.runner_os }}
     outputs:
-      pbin_needed: ${{ steps.get_matrix.outputs.pbin_needed }}
-      sbuild_needed: ${{ steps.get_matrix.outputs.sbuild_needed }}
-      cibw_needed: ${{ steps.get_matrix.outputs.cibw_needed }}
+      pbin_needed: ${{ fromJson(steps.get_matrix.outputs.pbin_needed) }}
+      sbuild_needed: ${{ fromJson(steps.get_matrix.outputs.sbuild_needed) }}
+      cibw_needed: ${{ fromJson(steps.get_matrix.outputs.cibw_needed) }}
       pbin_matrix: ${{ steps.get_matrix.outputs.pbin_matrix }}
       sbuild_matrix: ${{ steps.get_matrix.outputs.sbuild_matrix }}
       cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
