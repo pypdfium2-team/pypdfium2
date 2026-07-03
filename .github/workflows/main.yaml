@@ -26,6 +26,9 @@ on:
       cibw:
         type: string
         default: ''
+      sdist:
+        type: boolean
+        default: true
       checks:
         type: boolean
         default: true
@@ -74,6 +77,10 @@ jobs:
         with:
           python-version: ${{ inputs.py_ver }}
       
+      - name: Set up Just
+        if: ${{ inputs.checks }}
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
+      
       - name: Determine build matrix
         id: get_matrix
         run: python3 strategy/get_matrix.py "$PROFILE_OPT" --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS >> "$GITHUB_OUTPUT"
@@ -83,14 +90,14 @@ jobs:
           SBUILD_TARGETS: ${{ inputs.sbuild }}
           CIBW_TARGETS: ${{ inputs.cibw }}
       
-      - name: Set up Just
-        if: ${{ inputs.checks }}
-        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
+      - name: Install common dependencies
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install -U -r req/setup.txt
       
       - name: Run pre-release checks
         if: ${{ inputs.checks }}
         run: |
-          python3 -m pip install -U pip
           python3 -m pip install -U -r req/check.txt
           just check
           git fetch --unshallow
@@ -103,10 +110,14 @@ jobs:
           # autorelease.py --register automatically switches to the autorelease_tmp branch
           python3 setupsrc/autorelease.py --register
       
+      - name: Pack sdist
+        if: ${{ inputs.sdist || inputs.checks }}
+        run: python3 setupsrc/craft.py --sdist
+      
       - name: Run test suite
         if: ${{ inputs.checks }}
         run: |
-          python3 -m pip install -v .
+          python3 -m pip install -v dist/pypdfium2-*.tar.gz
           python3 -m pip install -U -r req/test.txt
           python3 -m pytest tests/ -sv
       
