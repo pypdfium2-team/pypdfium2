@@ -74,7 +74,7 @@ Legend
   
   + ⬜ Native compilation
   + 🔳 Cross compilation
-  + 🔲 Both is possible
+  + 🔲 Both is possible / applies
 
 - ⚙️ Compiler used *(CIBW only – PBIN and SBLD always use clang)*
 
