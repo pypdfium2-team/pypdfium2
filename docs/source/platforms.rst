@@ -76,9 +76,9 @@ Legend
   + 🔳 Cross compilation
   + 🔲 Both is possible
 
-- ⚙️ Compiler used (**CIBW** only – PBIN and SBLD always use clang)
+- ⚙️ Compiler used *(CIBW only – PBIN and SBLD always use clang)*
 
-- 🐍 Conda (**PBIN** only)
+- 🐍 Conda *(PBIN only)*
   
   + ✅ Released to conda
   + ⏸️ Built, but conda upload is paused due to storage limits. Get in touch with ``pdfium-binaries`` if you would like this to be reinstated.
