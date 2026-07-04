@@ -767,6 +767,8 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     else:
         log("Downloading headers...")
         mkdir(headers_dir)
+        # FIXME PDFium Gitiles is flaky and sometimes refuses automated download. But with Git, downloading just a subset of a repository *at a specific revision* is infernally complex.
+        # If you are a Git expert and know how to do this, please open a PR. Thanks.
         archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
         url_request.urlretrieve(archive_url, archive_path)
