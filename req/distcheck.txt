@@ -1,2 +1,2 @@
-check-wheel-contents
 twine
+check-wheel-contents
