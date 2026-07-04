@@ -95,6 +95,7 @@ jobs:
           just check
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
+          python3 setupsrc/emplace.py auto:latest
           python3 setupsrc/autorelease.py --register  # switches to autorelease_tmp branch
           python3 setupsrc/craft.py --sdist
           twine check dist/pypdfium2-*.tar.gz
