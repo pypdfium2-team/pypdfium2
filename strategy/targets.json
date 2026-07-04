@@ -11,13 +11,11 @@
         "macosx_x86_64:cross": {
             "runner_os": "macos-latest",
             "pbin_target": "darwin_x64",
-            "test_on_host": false,
-            "mac_emulate_intel": true},
+            "test_on_host": false},
         "macosx_universal2": {
             "runner_os": "macos-latest",
             "pbin_target": "darwin_univ2",
-            "test_on_host": true,
-            "mac_emulate_intel": true},
+            "test_on_host": true},
         "win_amd64": {
             "runner_os": "windows-latest",
             "pbin_target": "windows_x64",
