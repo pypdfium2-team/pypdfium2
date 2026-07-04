@@ -111,27 +111,10 @@ def do_extract(archives, version, flags):
         arc_path.unlink()
 
 
-def _have_recent_gh():
-    
-    if not shutil.which("gh"):
-        log("gh CLI is not installed")
-        return False
-    
-    from packaging.version import Version
-    gh_version = run_cmd(["gh", "--version"], cwd=None, capture=True)
-    gh_version = Version( re.match(r"gh version ([\d.]+)", gh_version).group(1) )
-    
-    if gh_version >= Version("2.47.0"):
-        return True
-    else:
-        log("gh CLI version is too old for verification")
-        return False
-
-
 def do_verify(verify, archives, version):
     
     if verify is None:
-        verify = version >= 7557 and _have_recent_gh()
+        verify = version >= 7557 and shutil.which("gh")  # assuming gh >= 2.47.0
     if not verify:
         log("Warning: Verification is off. If this is not intentional, make sure `gh` (GitHub CLI) is installed.")
         return
