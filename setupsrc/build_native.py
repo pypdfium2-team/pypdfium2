@@ -119,15 +119,13 @@ class DepsFetcher:
     def fetch(self, name, target_dir, reset=False):
         if target_dir.exists():
             if reset:
-                log(f"\n{target_dir.name}: Discarding unstaged changes as per --reset option.")
+                log(f"{target_dir.name}: Discarding unstaged changes as per --reset option.")
                 run_cmd(["git", "restore", "."], cwd=target_dir)
                 return True
             else:
                 return False
-        # assuming git >= 2.49.0
-        clone_dir = target_dir.parent
-        mkdir(clone_dir)
-        run_cmd(["git", "clone", "--depth=1", "--revision", self.deps_info[name], DEPS_URLS[name], target_dir.name], cwd=clone_dir)
+        mkdir(target_dir.parent)  # v assuming git >= 2.49.0
+        run_cmd(["git", "clone", "--depth=1", "--revision", self.deps_info[name], DEPS_URLS[name], target_dir.name], cwd=target_dir.parent)
         return True
 
 
