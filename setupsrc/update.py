@@ -102,6 +102,7 @@ def do_extract(archives, version, flags):
             tar_libdir = "lib" if system != SysNames.windows else "bin"
             tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
             if not have_headers:
+                log(f"Extracting pdfium headers from pdfium-binaries {pl_name} tarball")
                 tar_extract_headers(tar, headers_dir, prefix="include/")
                 have_headers = True
             full_ver = _parse_ver_file(tar.extractfile("VERSION"), version)

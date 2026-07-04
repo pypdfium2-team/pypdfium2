@@ -54,9 +54,6 @@
             "runner_os": "ubuntu-26.04",
             "pbin_target": "linux_mips64le",
             "test_on_host": false},
-        "manylinux_mipsle": {
-            "runner_os": "ubuntu-26.04",
-            "pbin_target": "linux_mipsle"},
         "musllinux_x86_64": {
             "runner_os": "ubuntu-26.04",
             "pbin_target": "linux_musl_x64",
