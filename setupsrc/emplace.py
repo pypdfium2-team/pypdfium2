@@ -59,7 +59,7 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
     if pl_name == ExtPlats.system:
         pl_dir = DataDir/pl_name
         if sub_target:
-            purge_dir(pl_dir)
+            mkdir_clean(pl_dir)
         if sub_target == "search":
             full_ver = PdfiumVer.to_full(pdfium_ver) if pdfium_ver else None
             full_ver = system_pdfium.main(full_ver, flags=flags)

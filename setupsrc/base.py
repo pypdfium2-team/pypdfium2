@@ -207,6 +207,11 @@ def libname_for_system(system, name="pdfium", prefix=None):
 def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
 
+def mkdir_clean(path):
+    if path.exists():
+        shutil.rmtree(path)
+    mkdir(path)
+
 def read_json(fp):
     with open(fp, "r") as buf:
         return json.load(buf)
@@ -736,7 +741,19 @@ def _make_json_compat(obj):
         return obj
 
 
-def build_pdfium_bindings(version, headers_dir=None, **kwargs):
+def tar_extract_headers(tar, dest_dir, prefix=""):
+    mkdir_clean(dest_dir)
+    pattern = re.escape(prefix) + r"fpdf(\w+)\.h"
+    for m in tar.getmembers():
+        m_path = m.name
+        if m.isfile() and re.fullmatch(pattern, m_path, flags=re.ASCII):
+            tar_extract_file(tar, m, dest_dir/Path(m_path).name)
+
+def get_have_headers(headers_dir):
+    return headers_dir.exists() and list(headers_dir.glob("fpdf*.h"))
+
+
+def build_pdfium_bindings(version, **kwargs):
     
     bindings_path = BindingsFile
     if USE_REFBINDINGS:
@@ -748,11 +765,9 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     curr_info.setdefault("flags", [])
     curr_info = _make_json_compat(curr_info)
     
-    prev_ver = None
     ver_path = DataDir_Bindings/VersionFN
     if ver_path.exists():
         prev_info = read_json(ver_path)
-        prev_ver = prev_info["version"]
         if bindings_path.exists() and prev_info == curr_info:
             log(f"Using cached bindings")
             return
@@ -760,22 +775,17 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
             log(f"Bindings cache state differs:", prev_info, curr_info, sep="\n")
     
     # try to reuse headers if only bindings params differ, not version
-    if not headers_dir:
-        headers_dir = DataDir_Bindings/"headers"
-    if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
+    headers_dir = DataDir_Bindings/f"headers_{version}"
+    if get_have_headers(headers_dir):
         log("Using cached headers")
     else:
         log("Downloading headers...")
         mkdir(headers_dir)
-        # FIXME Upstream Gitiles is flaky and sometimes refuses automated download.
-        # However, there does not seem to be a good alternative, with git being notoriously unfriendly when it comes to downloading just a subset of files.
         archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
         url_request.urlretrieve(archive_url, archive_path)
         with tarfile.open(archive_path) as tar:
-            for m in tar.getmembers():
-                if m.isfile() and re.fullmatch(r"fpdf(\w+)\.h", m.name, flags=re.ASCII):
-                    tar_extract_file(tar, m, headers_dir/m.name)
+            tar_extract_headers(tar, headers_dir)
         archive_path.unlink()
     
     log(f"Building bindings ...")
@@ -846,9 +856,3 @@ def get_next_changelog(flush=False):
         ChangelogStaging.write_text(header)
     
     return devel_msg
-
-
-def purge_dir(dir):
-    if dir.exists():
-        shutil.rmtree(dir)
-    dir.mkdir(parents=True)
