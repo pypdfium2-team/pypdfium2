@@ -559,10 +559,8 @@ class _host_platform:
             if sys.byteorder != "little":
                 raise UnhandledPlatformError("Only little-endian platforms are supported with pdfium-binaries on setup. Please check PyPI for possible wheels.")
             if self.is_32bit:
-                if mach.startswith("mips64"):
-                    mach = "mipsle"
-                else:
-                    mach = {"x86_64": "i686", "aarch64": "armv8l"}.get(mach, mach)
+                # TODO once pdfium-binaries have 32-bit MIPS builds, remap mips64 as well
+                mach = {"x86_64": "i686", "aarch64": "armv8l"}.get(mach, mach)
             if mach == "x86_64":
                 return self._handle_linux("x64")
             elif mach == "i686":
@@ -575,8 +573,8 @@ class _host_platform:
                 return self._handle_linux("ppc64le", musl_ok=False)
             elif mach.startswith("mips64"):
                 return self._handle_linux("mips64le", musl_ok=False)
-            elif mach.startswith("mips"):
-                return self._handle_linux("mipsle", musl_ok=False)
+            # elif mach.startswith("mips"):
+            #     return self._handle_linux("mipsle", musl_ok=False)
         
         elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
