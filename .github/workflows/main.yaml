@@ -102,6 +102,13 @@ jobs:
           python3 -m pip install -v dist/pypdfium2-*.tar.gz
           python3 -m pip install -U -r req/test.txt
           python3 -m pytest tests/ -sv
+          git push -u origin autorelease_tmp  # just the branch (not tag)
+      
+      - name: Determine ref/version
+        id: get_version
+        run: |
+          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(git describe --abbrev=0)" >> "$GITHUB_OUTPUT"
       
       - name: Upload sdist
         if: ${{ inputs.autorelease }}
@@ -116,17 +123,6 @@ jobs:
         with:
           name: release_notes
           path: RELEASE.md
-      
-      # tag intentionally not pushed
-      - name: Push autorelease_tmp branch
-        if: ${{ inputs.autorelease }}
-        run: git push -u origin autorelease_tmp
-      
-      - name: Determine ref/version
-        id: get_version
-        run: |
-          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "version=$(git describe --abbrev=0)" >> "$GITHUB_OUTPUT"
   
   
   pbin:
