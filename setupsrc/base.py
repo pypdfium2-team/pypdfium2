@@ -160,6 +160,8 @@ PdfiumBinariesMap = {
     PlatNames.ios_x64_simu:     "ios-simulator-x64",
 }
 
+ALL_PLATFORMS = tuple(PdfiumBinariesMap.keys())
+
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -843,3 +845,11 @@ def get_next_changelog(flush=False):
         ChangelogStaging.write_text(header)
     
     return devel_msg
+
+
+def handle_platforms(platforms):
+    if not platforms or platforms == ["auto"]:
+        platforms = (Host.platform, )
+    elif platforms == ["all"]:
+        platforms = ALL_PLATFORMS
+    return platforms

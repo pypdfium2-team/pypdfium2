@@ -142,12 +142,9 @@ def postprocess_android():
         log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
-ALL_PLATFORMS = tuple(PdfiumBinariesMap.keys())
-
 def main(platforms, version, robust=False, max_workers=None, use_v8=False, verify=None):
     
-    if not platforms or platforms == ["all"]:
-        platforms = ALL_PLATFORMS
+    platforms = handle_platforms(platforms)
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     flags = ("V8", "XFA") if use_v8 else ()

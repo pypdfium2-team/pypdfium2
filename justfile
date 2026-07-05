@@ -41,7 +41,7 @@ distcheck:
 download *args:
 	python3 setupsrc/update.py {{args}}
 download-verify *args:
-	just download --verify {{args}}
+	python3 setupsrc/update.py --verify {{args}}
 emplace *args:
 	python3 setupsrc/emplace.py {{args}}
 build-native *args:
@@ -53,4 +53,4 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-xpack *args: clean check (download-verify args) (craft args) distcheck
+xpack *args='-p all': clean check (download-verify args) (craft args) distcheck

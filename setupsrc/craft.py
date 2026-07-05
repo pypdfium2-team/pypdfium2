@@ -106,8 +106,7 @@ def main_pypi(args):
         else:
             args.pdfium_ver = int(args.pdfium_ver)
         
-        if not args.platforms or args.platforms == ["all"]:
-            args.platforms = tuple(PdfiumBinariesMap.keys())
+        args.platforms = handle_platforms(args.platforms)
         
         os.environ["USE_TARBALL_LICENSES"] = "1"
         suffix = _build_pl_suffix(args.pdfium_ver, args.use_v8)
