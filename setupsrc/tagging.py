@@ -30,7 +30,6 @@ _WheeltagPatterns = {
     PlatNames.linux_arm32:      (_manylinux_tag("armv7l"),   "2_17"),
     PlatNames.linux_ppc64le:    (_manylinux_tag("ppc64le"),  "2_17"),
     PlatNames.linux_mips64le:   (_manylinux_tag("mips64le"), "2_17"),  # not official manylinux
-    # PlatNames.linux_mipsle:     (_manylinux_tag("mipsle"),   "2_17"),  # not official manylinux
     
     # pdfium-binaries statically link musl, so we can declare the lowest possible requirement. The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
     PlatNames.linux_musl_x64:   ("musllinux_{}_x86_64",  "1_1"),
