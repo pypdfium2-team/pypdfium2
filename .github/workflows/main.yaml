@@ -268,9 +268,9 @@ jobs:
       - name: Isolate non-PyPI builds
         # if: XXX
         run: |
+          shopt -s nullglob
           mkdir gh_only
-          mv dist/*linux_*_loongarch64*.whl -t gh_only/
-          mv dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl -t gh_only/
+          mv dist/*linux_*_loongarch64*.whl dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl -t gh_only/
       
       - name: Apply and push repository changes
         run: |
@@ -319,7 +319,7 @@ jobs:
         uses: ncipollo/release-action@v1  # TODO pin to hash?
         with:
           immutableCreate: true
-          artifacts: 'dist/*.whl,gh_only/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
+          artifacts: 'dist/*.tar.gz,dist/*.whl,gh_only/*.whl,pypdfium2-attestation.json'
           bodyFile: 'RELEASE.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.prepare.outputs.version }}
