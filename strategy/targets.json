@@ -27,7 +27,7 @@
         "win32": {
             "runner_os": "windows-latest",
             "pbin_target": "windows_x86",
-            "test_on_host": false},
+            "test_on_host": true},
         "manylinux_x86_64": {
             "runner_os": "ubuntu-26.04",
             "pbin_target": "linux_x64",
