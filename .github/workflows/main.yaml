@@ -92,7 +92,7 @@ jobs:
           python-version: ${{ inputs.base_py }}
           pip-install: -U -r req/check.txt -r req/setup.txt
       
-      - name: Checks, autorelease, sdist, tests
+      - name: Checks & Autorelease
         if: ${{ inputs.autorelease }}
         run: |
           git config user.email "geisserml@gmail.com"
