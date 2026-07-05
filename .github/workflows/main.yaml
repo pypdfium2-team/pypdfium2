@@ -123,7 +123,7 @@ jobs:
       - name: Check out pypdfium2
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # for git describe
           persist-credentials: false
           ref: ${{ needs.prepare.outputs.ref }}
       
@@ -360,6 +360,7 @@ jobs:
       - name: Check out pypdfium2 (shallow, authenticated)
         uses: actions/checkout@v6
         with:
+          fetch-depth: 1
           persist-credentials: true  # for push
     
       - name: Remove temporary branch
