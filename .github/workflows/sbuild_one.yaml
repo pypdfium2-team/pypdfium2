@@ -131,4 +131,4 @@ jobs:
           docker: ${{ inputs.target_cpu != 'mipsel' || '' }}
           auditwheel: ${{ !startsWith(inputs.target_cpu, 'mips') || '' }}
           with_32bit: ${{ (startsWith(inputs.os, 'windows') && inputs.target_cpu == 'x86') || '' }}
-          dll_glob: './data/sourcebuild/*pdfium.*'
+          dll_glob: 'data/sourcebuild/*pdfium.*'
