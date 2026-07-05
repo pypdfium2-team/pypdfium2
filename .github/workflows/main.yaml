@@ -265,12 +265,11 @@ jobs:
           merge-multiple: true
           pattern: cibw-*
       
-      - name: Isolate non-PyPI builds
-        # if: XXX
+      - name: Isolate GH-only builds, if any
         run: |
           shopt -s nullglob
           mkdir gh_only
-          mv dist/*linux_*_loongarch64*.whl dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl -t gh_only/
+          mv dist/*linux_*_loongarch64*.whl dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl -t gh_only/ || true
       
       - name: Apply and push repository changes
         run: |
