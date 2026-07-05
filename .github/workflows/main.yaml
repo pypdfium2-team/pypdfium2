@@ -256,7 +256,7 @@ jobs:
         with:
           path: dist/
           merge-multiple: true
-          pattern: sbuild_*  # XXX
+          pattern: sbuild-*
       
       - name: Download CIBW wheels
         uses: actions/download-artifact@v8

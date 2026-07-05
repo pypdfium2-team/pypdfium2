@@ -115,7 +115,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           path: dist/*.whl
-          name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
+          name: "sbuild-${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}"
       
       # https://github.com/actions/runner/issues/2238 ...
       # Bear in mind: some fields, e.g. continue-on-error, require an actual bool (check GH docs).
