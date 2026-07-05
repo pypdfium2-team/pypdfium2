@@ -33,6 +33,26 @@ runs:
   using: 'composite'
   steps:
     
+    - name: Inspect DLL with file
+      if: ${{ inputs.dll_glob }}
+      shell: bash
+      run: file $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
+    
+    - name: macOS - Inspect DLL with vtool
+      if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.dll_glob }}
+      shell: bash
+      run: vtool -show-build $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
+    
+    - name: Check wheel
+      shell: bash
+      run: |
+        twine check dist/*.whl
+        check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw,pypdfium2_cli,pypdfium2_cfg"
+    
     # https://github.com/orgs/community/discussions/18597 ...
     - name: Test wheel on host
       if: ${{ inputs.test_on_host }}
@@ -69,19 +89,3 @@ runs:
       run: |
         python3 -m pip install -U auditwheel
         python3 -m auditwheel show dist/*.whl
-    
-    # informational
-    
-    - name: Inspect DLL with file
-      if: ${{ inputs.dll_glob }}
-      shell: bash
-      run: file $DLL_GLOB
-      env:
-        DLL_GLOB: ${{ inputs.dll_glob }}
-    
-    - name: macOS - Inspect DLL with vtool
-      if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.dll_glob }}
-      shell: bash
-      run: vtool -show-build $DLL_GLOB
-      env:
-        DLL_GLOB: ${{ inputs.dll_glob }}

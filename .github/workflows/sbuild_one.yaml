@@ -62,7 +62,7 @@ jobs:
           replicate_tag: ${{ inputs.replicate_tag }}
           py_vers: ${{ inputs.py_vers }}
           py_arch: ${{ (startsWith(inputs.os, 'windows') && inputs.target_cpu == 'x86') && 'x86' || '' }}
-          pip_install: -U -r req/setup.txt
+          pip_install: -U -r req/setup.txt -r req/distcheck.txt
       
       - name: Install custom clang
         if: ${{ inputs.custom_clang }}
