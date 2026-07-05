@@ -68,7 +68,7 @@ jobs:
       
       - name: Download clang image
         if: ${{ contains(inputs.cibw_target, 'linux') && contains(fromJSON('["ppc64le","riscv64","loongarch64","s390x"]'), inputs.cibw_arch) }}
-        run: bash ./utils/install-static-clang.sh -d ./clang_image -m download-only
+        run: bash utils/install-static-clang.sh -d ./clang_image -m download-only
       
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
       - name: Build wheels
@@ -97,6 +97,6 @@ jobs:
       - name: Post-test
         if: ${{ contains(inputs.cibw_target, 'linux') }}
         continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
-        run: python3 ./utils/container_driver.py "$TARGET" -w wheelhouse/*.whl
+        run: python3 utils/container_driver.py "$TARGET" -w wheelhouse/*.whl
         env:
           TARGET: ${{ inputs.cibw_target }}

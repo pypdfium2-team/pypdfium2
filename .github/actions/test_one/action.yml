@@ -33,6 +33,8 @@ runs:
   using: 'composite'
   steps:
     
+    # https://github.com/orgs/community/discussions/18597 ...
+    
     - name: Inspect DLL with file
       if: ${{ inputs.dll_glob }}
       shell: bash
@@ -53,11 +55,10 @@ runs:
         twine check dist/*.whl
         check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw,pypdfium2_cli,pypdfium2_cfg"
     
-    # https://github.com/orgs/community/discussions/18597 ...
     - name: Test wheel on host
       if: ${{ inputs.test_on_host }}
       shell: bash
-      run: ./utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
+      run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
       env:
         PY_VERS: "${{ inputs.py_vers }}"
         WITH_32BIT: "${{ inputs.with_32bit && 1 || 0 }}"
@@ -66,7 +67,7 @@ runs:
       if: ${{ startsWith(inputs.runner_os, 'macos-') && (inputs.mac_universal || !inputs.test_on_host) }}
       shell: bash
       # assuming macOS python is universal (it should be)
-      run: ./utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv --prefix "arch -x86_64"
+      run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv --prefix "arch -x86_64"
       env:
         PY_VERS: "${{ inputs.py_vers }}"
     
@@ -80,8 +81,8 @@ runs:
       # q&d: infer container target name from wheel name
       run: |
         WHEEL_PATH="$(ls dist/*.whl)"
-        TARGET="$(python3 ./utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")"
-        python3 ./utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
+        TARGET="$(python3 utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")"
+        python3 utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
     
     - name: Linux - Run auditwheel show
       if: ${{ startsWith(inputs.os, 'ubuntu-') && inputs.auditwheel }}

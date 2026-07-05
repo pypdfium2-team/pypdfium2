@@ -66,7 +66,7 @@ jobs:
       
       - name: Install custom clang
         if: ${{ inputs.custom_clang }}
-        run: bash ./utils/install-static-clang.sh -m install-only
+        run: bash utils/install-static-clang.sh -m install-only
       
       - name: Update package list
         if: ${{ startsWith(inputs.os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.os, '-arm')) }}
@@ -75,7 +75,7 @@ jobs:
       - name: Install Linux/Android cross deps
         if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
         run: |
-          PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU $RUNNER_OS)
+          PACKAGES=$(python3 utils/get_cross_deps.py $TARGET_CPU $RUNNER_OS)
           echo $PACKAGES; sudo apt-get install -y $PACKAGES
           ls -l /usr/bin |grep -E '\-(gcc|g\+\+|ar|nm|readelf)(-[0-9.]+)?$'
         env:
