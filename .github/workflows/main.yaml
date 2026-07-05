@@ -10,9 +10,6 @@ on:
       runner_os:
         type: string
         default: 'ubuntu-26.04'
-      base_py:
-        type: string
-        default: '3.14'
       py_vers:
         type: string
         default: '3.14'
@@ -89,7 +86,7 @@ jobs:
         if: ${{ inputs.autorelease }}
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ inputs.base_py }}
+          python-version: '3.14'
           pip-install: -U -r req/check.txt -r req/setup.txt
       
       - name: Checks & Autorelease
