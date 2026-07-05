@@ -25,6 +25,9 @@ on:
       publish:
         type: boolean
         default: false
+      actually_publish:
+        type: boolean
+        default: false
       ref:
         type: string
         default: ''
@@ -177,9 +180,10 @@ jobs:
           path: conda_dist/
       
       - name: Upload to Anaconda
-        env:
-          PACKAGE: ${{ inputs.package }}
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        if: ${{ inputs.actually_publish }}
         run: |
           ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${PACKAGE}-*.conda
           anaconda upload $ARTIFACT_PATH
+        env:
+          PACKAGE: ${{ inputs.package }}
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}

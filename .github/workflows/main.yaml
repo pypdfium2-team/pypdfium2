@@ -366,6 +366,7 @@ jobs:
       package: helpers
       test: true
       publish: ${{ inputs.publish }}
+      actually_publish: ${{ inputs.actually_publish }}
   
   
   cleanup:
