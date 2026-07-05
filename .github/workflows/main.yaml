@@ -134,7 +134,7 @@ jobs:
         uses: ./.github/actions/prepare_one
         with:
           py_vers: ${{ inputs.py_vers }}
-          pip_install: -U build twine
+          pip_install: -U -r setup.txt twine
       
       - name: Craft sdist
         run: |
