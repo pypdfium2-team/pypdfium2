@@ -92,43 +92,29 @@ def _extract_licenses(tar, pl_dir):
 
 
 def do_extract(archives, version, flags):
-    
+    headers_dir = DataDir_Bindings/f"headers_{version}"
+    have_headers = get_have_headers(headers_dir)
     for pl_name, arc_path in archives.items():
-        
         with tarfile.open(arc_path) as tar:
             pl_dir = DataDir/pl_name
             system = plat_to_system(pl_name)
             libname = libname_for_system(system)
             tar_libdir = "lib" if system != SysNames.windows else "bin"
             tar_extract_file(tar, f"{tar_libdir}/{libname}", pl_dir/libname)
-            _extract_licenses(tar, pl_dir)
+            if not have_headers:
+                log(f"Extracting pdfium headers from pdfium-binaries {pl_name} tarball")
+                tar_extract_headers(tar, headers_dir, prefix="include/")
+                have_headers = True
             full_ver = _parse_ver_file(tar.extractfile("VERSION"), version)
             write_pdfium_info(pl_dir, full_ver, origin="pdfium-binaries", flags=flags)
-        
+            _extract_licenses(tar, pl_dir)
         arc_path.unlink()
-
-
-def _have_recent_gh():
-    
-    if not shutil.which("gh"):
-        log("gh CLI is not installed")
-        return False
-    
-    from packaging.version import Version
-    gh_version = run_cmd(["gh", "--version"], cwd=None, capture=True)
-    gh_version = Version( re.match(r"gh version ([\d.]+)", gh_version).group(1) )
-    
-    if gh_version >= Version("2.47.0"):
-        return True
-    else:
-        log("gh CLI version is too old for verification")
-        return False
 
 
 def do_verify(verify, archives, version):
     
     if verify is None:
-        verify = version >= 7557 and _have_recent_gh()
+        verify = version >= 7557 and shutil.which("gh")  # assuming gh >= 2.47.0
     if not verify:
         log("Warning: Verification is off. If this is not intentional, make sure `gh` (GitHub CLI) is installed.")
         return

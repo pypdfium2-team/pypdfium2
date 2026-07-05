@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import json
+import struct
 import shutil
 import tarfile
 import platform
@@ -122,7 +123,6 @@ class PlatNames:
     linux_arm32      = SysNames.linux   + "_arm32"
     linux_ppc64le    = SysNames.linux   + "_ppc64le"
     linux_mips64le   = SysNames.linux   + "_mips64le"
-    linux_mipsle     = SysNames.linux   + "_mipsle"
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
@@ -155,11 +155,10 @@ WheelPlatforms = list(PdfiumBinariesMap.keys())
 
 # Additional platforms we don't currently build wheels for this way in craft.py
 # To package these manually, you can do e.g. (in bash):
-# export PLATFORMS=(linux_mips64le linux_mipsle linux_musl_x64 linux_musl_x86 linux_musl_arm64 darwin_univ2 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
+# export PLATFORMS=(linux_mips64le linux_musl_x64 linux_musl_x86 linux_musl_arm64 darwin_univ2 android_x64 android_x86 ios_arm64_dev ios_arm64_simu ios_x64_simu)
 # for PLAT in ${PLATFORMS[@]}; do echo $PLAT; just emplace $PLAT; PDFIUM_PLATFORM=$PLAT python3 -m build -wxn; done
 PdfiumBinariesMap.update({
     PlatNames.linux_mips64le:   "linux-mips64el",
-    PlatNames.linux_mipsle:     "linux-mipsel",
     PlatNames.linux_musl_x64:   "linux-musl-x64",
     PlatNames.linux_musl_x86:   "linux-musl-x86",
     PlatNames.linux_musl_arm64: "linux-musl-arm64",
@@ -205,6 +204,11 @@ def libname_for_system(system, name="pdfium", prefix=None):
 
 def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
+
+def mkdir_clean(path):
+    if path.exists():
+        shutil.rmtree(path)
+    mkdir(path)
 
 def read_json(fp):
     with open(fp, "r") as buf:
@@ -487,6 +491,11 @@ class _host_platform:
         return self._system
     
     @cached_property
+    def is_32bit(self):
+        # https://stackoverflow.com/a/27943402/15547292
+        return struct.calcsize("P") == 4
+    
+    @cached_property
     def libname_glob(self):
         return libname_for_system(Host.system, name="*")
     
@@ -503,8 +512,6 @@ class _host_platform:
     
     def __repr__(self):
         info = f"{self._raw_system} {self._raw_machine}"
-        if self._raw_system == "linux":
-            info += f", {self._libc_name, self._libc_ver, sys.byteorder}"
         return f"<Host: {info}>"
     
     def _handle_linux(self, archid, musl_ok=True):
@@ -523,68 +530,78 @@ class _host_platform:
     
     def _get_platform(self):
         
-        # TODO 32-bit interpreters running on 64-bit machines?
+        mach = self._raw_machine
+        bitness_name = ("32" if self.is_32bit else "64") + "bit"
+        cpu_identity = (mach, bitness_name, sys.byteorder)
         
         if self._raw_system == "darwin":
             # platform.machine() is the actual architecture. sysconfig.get_platform() may return universal2, but by default we only use the arch-specific binaries.
             self._system = SysNames.darwin
-            log(f"macOS {self._raw_machine}")  # platform.mac_ver()
-            if self._raw_machine == "x86_64":
+            log(f"macOS {cpu_identity} {platform.mac_ver()}")
+            if mach == "x86_64":
                 return PlatNames.darwin_x64
-            elif self._raw_machine == "arm64":
+            elif mach == "arm64":
                 return PlatNames.darwin_arm64
         
         elif self._raw_system == "windows":
             self._system = SysNames.windows
-            log(f"windows {self._raw_machine}")  # platform.win32_ver()
-            if self._raw_machine == "amd64":
+            log(f"Windows {cpu_identity} {platform.win32_ver()}")
+            if self.is_32bit:
+                mach = {"arm64": "x86"}.get(mach, mach)
+            if mach == "amd64":
                 return PlatNames.windows_x64
-            elif self._raw_machine == "x86":
+            elif mach == "x86":
                 return PlatNames.windows_x86
-            elif self._raw_machine == "arm64":
+            elif mach == "arm64":
                 return PlatNames.windows_arm64
         
         elif self._raw_system == "linux":
             self._system = SysNames.linux
-            log(repr(self))
+            log(f"Linux {cpu_identity} {self._libc_name, self._libc_ver}")
             if sys.byteorder != "little":
                 raise UnhandledPlatformError("Only little-endian platforms are supported with pdfium-binaries on setup. Please check PyPI for possible wheels.")
-            if self._raw_machine == "x86_64":
+            if self.is_32bit:
+                # TODO once pdfium-binaries have 32-bit MIPS builds, remap mips64 as well
+                mach = {"x86_64": "i686", "aarch64": "armv8l"}.get(mach, mach)
+            if mach == "x86_64":
                 return self._handle_linux("x64")
-            elif self._raw_machine == "i686":
+            elif mach == "i686":
                 return self._handle_linux("x86")
-            elif self._raw_machine == "aarch64":
+            elif mach == "aarch64":
                 return self._handle_linux("arm64")
-            elif self._raw_machine in ("armv7l", "armv8l"):
+            elif mach in ("armv7l", "armv8l"):
                 return self._handle_linux("arm32", musl_ok=False)
-            elif self._raw_machine.startswith("ppc64"):  # ppc64le
+            elif mach.startswith("ppc64"):  # ppc64le
                 return self._handle_linux("ppc64le", musl_ok=False)
-            elif self._raw_machine.startswith("mips64"):
+            elif mach.startswith("mips64"):
                 return self._handle_linux("mips64le", musl_ok=False)
-            elif self._raw_machine.startswith("mips"):
-                return self._handle_linux("mipsle", musl_ok=False)
+            # elif mach.startswith("mips"):
+            #     return self._handle_linux("mipsle", musl_ok=False)
         
         elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
             self._system = SysNames.android
-            log(f"android {self._raw_machine} {sys.getandroidapilevel()}")  # platform.android_ver()
-            if self._raw_machine == "aarch64":
+            api_level = sys.getandroidapilevel()
+            log(f"Android {cpu_identity}, API {api_level}, {platform.android_ver()}")
+            if self.is_32bit:
+                mach = {"aarch64": "armv8l", "x86_64": "i686"}.get(mach, mach)
+            if mach == "aarch64":
                 return PlatNames.android_arm64
-            elif self._raw_machine == "armv7l":
+            elif mach in ("armv7l", "armv8l"):
                 return PlatNames.android_arm32
-            elif self._raw_machine == "x86_64":
+            elif mach == "x86_64":
                 return PlatNames.android_x64
-            elif self._raw_machine == "i686":
+            elif mach == "i686":
                 return PlatNames.android_x86
         
         elif self._raw_system in ("ios", "ipados"):  # PEP 730
             # This is currently untested. We don't have access to an iOS device, so this is basically guessed from what the PEP mentions.
             self._system = SysNames.ios
             ios_ver = platform.ios_ver()
-            log(f"{self._raw_system} {self._raw_machine} {ios_ver}")
-            if self._raw_machine == "arm64":
+            log(f"{self._raw_system} {cpu_identity}")
+            if mach == "arm64":
                 return PlatNames.ios_arm64_simu if ios_ver.is_simulator else PlatNames.ios_arm64_dev
-            elif self._raw_machine == "x86_64":
+            elif mach == "x86_64":
                 assert ios_ver.is_simulator, "iOS x86_64 can only be simulator"
                 return PlatNames.ios_x64_simu
         
@@ -721,7 +738,19 @@ def _make_json_compat(obj):
         return obj
 
 
-def build_pdfium_bindings(version, headers_dir=None, **kwargs):
+def tar_extract_headers(tar, dest_dir, prefix=""):
+    mkdir_clean(dest_dir)
+    pattern = re.escape(prefix) + r"fpdf(\w+)\.h"
+    for m in tar.getmembers():
+        m_path = m.name
+        if m.isfile() and re.fullmatch(pattern, m_path, flags=re.ASCII):
+            tar_extract_file(tar, m, dest_dir/Path(m_path).name)
+
+def get_have_headers(headers_dir):
+    return headers_dir.exists() and list(headers_dir.glob("fpdf*.h"))
+
+
+def build_pdfium_bindings(version, **kwargs):
     
     bindings_path = BindingsFile
     if USE_REFBINDINGS:
@@ -733,11 +762,9 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
     curr_info.setdefault("flags", [])
     curr_info = _make_json_compat(curr_info)
     
-    prev_ver = None
     ver_path = DataDir_Bindings/VersionFN
     if ver_path.exists():
         prev_info = read_json(ver_path)
-        prev_ver = prev_info["version"]
         if bindings_path.exists() and prev_info == curr_info:
             log(f"Using cached bindings")
             return
@@ -745,9 +772,8 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
             log(f"Bindings cache state differs:", prev_info, curr_info, sep="\n")
     
     # try to reuse headers if only bindings params differ, not version
-    if not headers_dir:
-        headers_dir = DataDir_Bindings/"headers"
-    if prev_ver == version and headers_dir.exists() and list(headers_dir.glob("fpdf*.h")):
+    headers_dir = DataDir_Bindings/f"headers_{version}"
+    if get_have_headers(headers_dir):
         log("Using cached headers")
     else:
         log("Downloading headers...")
@@ -756,9 +782,7 @@ def build_pdfium_bindings(version, headers_dir=None, **kwargs):
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
         url_request.urlretrieve(archive_url, archive_path)
         with tarfile.open(archive_path) as tar:
-            for m in tar.getmembers():
-                if m.isfile() and re.fullmatch(r"fpdf(\w+)\.h", m.name, flags=re.ASCII):
-                    tar_extract_file(tar, m, headers_dir/m.name)
+            tar_extract_headers(tar, headers_dir)
         archive_path.unlink()
     
     log(f"Building bindings ...")
@@ -829,9 +853,3 @@ def get_next_changelog(flush=False):
         ChangelogStaging.write_text(header)
     
     return devel_msg
-
-
-def purge_dir(dir):
-    if dir.exists():
-        shutil.rmtree(dir)
-    dir.mkdir(parents=True)

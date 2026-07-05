@@ -25,6 +25,9 @@ on:
       publish:
         type: boolean
         default: false
+      actually_publish:
+        type: boolean
+        default: false
       ref:
         type: string
         default: ''
@@ -58,11 +61,10 @@ jobs:
           channel-priority: strict
           show-channel-urls: true
       
-      - name: Check out repository
+      - name: Check out pypdfium2 (deep)
         uses: actions/checkout@v6
         with:
-          repository: ${{ github.repository }}
-          fetch-depth: 0
+          fetch-depth: 0  # for git describe
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
       
@@ -111,10 +113,9 @@ jobs:
     
     steps:
       
-      - name: Check out repository
+      - name: Check out pypdfium2 (shallow)
         uses: actions/checkout@v6
         with:
-          repository: ${{ github.repository }}
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
       
@@ -179,9 +180,10 @@ jobs:
           path: conda_dist/
       
       - name: Upload to Anaconda
-        env:
-          PACKAGE: ${{ inputs.package }}
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        if: ${{ inputs.actually_publish }}
         run: |
           ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${PACKAGE}-*.conda
           anaconda upload $ARTIFACT_PATH
+        env:
+          PACKAGE: ${{ inputs.package }}
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}

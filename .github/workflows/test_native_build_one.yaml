@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Sourcebuild One Native
+name: Test Native Build one
 
 on:
   workflow_call:
@@ -42,22 +42,17 @@ jobs:
     
     steps:
       
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # for git describe
+          persist-credentials: false
+      
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.py_ver }}
-      
-      - name: Check out pypdfium2 repository
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.repository }}
-          persist-credentials: false
-          fetch-depth: 0  # for git describe
-      
-      - name: Install python deps
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt
+          pip-install: -U -r req/setup.txt -r req/test.txt
       
       - name: Install build deps
         run: |
@@ -82,9 +77,7 @@ jobs:
           TEST_PARAM: ${{ inputs.test_pdfium && '--test' || '' }}
       
       - name: Show binary info
-        run: |
-          shopt -s nullglob
-          file ./data/sourcebuild/*.{so,dylib,dll}
+        run: file data/sourcebuild/*pdfium.*
       
       - name: Build wheel
         run: python3 -m build -wxn
@@ -94,13 +87,13 @@ jobs:
       - name: Post-process with auditwheel
         run: |
           python3 -m pip install -U auditwheel
-          python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
+          python3 -m auditwheel repair dist/*.whl -w wheelhouse
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
-          name: sbuild-native-${{ inputs.compiler }}_${{ inputs.os }}
+          name: "native-${{ inputs.compiler }}_${{ inputs.os }}"
       
       - name: Install and test wheel
         run: |

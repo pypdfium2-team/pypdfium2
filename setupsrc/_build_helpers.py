@@ -135,7 +135,7 @@ def pack_sourcebuild(
             post_ver = dict(n_commits=0, hash=None)
     
     dest_dir = DataDir/ExtPlats.sourcebuild
-    purge_dir(dest_dir)
+    mkdir_clean(dest_dir)
     
     libname = libname_for_system(Host.system)
     shutil.copy(build_dir/libname, dest_dir/libname)

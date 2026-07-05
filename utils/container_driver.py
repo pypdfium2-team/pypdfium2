@@ -3,6 +3,7 @@
 
 import os
 import sys
+import argparse
 import subprocess
 from pathlib import Path
 
@@ -34,6 +35,11 @@ PLATFORM_CPU_MAP = {
 # loong64, mips64le, ppc64le, riscv64, s390x
 
 
+def _run_process(argv, **kwargs):
+    log(argv)
+    return subprocess.run(argv, **kwargs)
+
+
 def _get_container(os_class, cpu):
     docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
     platform_cpu = PLATFORM_CPU_MAP.get(cpu, cpu)
@@ -50,13 +56,22 @@ def _get_container(os_class, cpu):
     else:
         assert False, os_class
 
-def run_process(argv, **kwargs):
-    log(argv)
-    return subprocess.run(argv, **kwargs)
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description = "Install and test pypdfium2 in docker container",
+    )
+    parser.add_argument("target")
+    parser.add_argument("-w", "--wheel-path", required=True)
+    args = parser.parse_args(sys.argv[1:])
+    args.wheel_path = Path("/pypdfium2") / args.wheel_path
+    return args
+
 
 def main():
     
-    os_class, cpu = sys.argv[1].split("_", maxsplit=1)
+    args = parse_args()
+    os_class, cpu = args.target.split("_", maxsplit=1)
     cpu = {"loongarch64": "loong64"}.get(cpu, cpu)
     
     container, docker_flags, prepare_cmd, shell = _get_container(os_class, cpu)
@@ -64,7 +79,8 @@ def main():
     
     env = os.environ.copy()
     env["PREPARE_CMD"] = prepare_cmd
-    run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/test_in_docker.sh"], cwd=ProjectDir, env=env, check=True)
+    _run_process(["docker", "run", "--security-opt", "label=disable", "-e", "PREPARE_CMD", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "/pypdfium2/utils/inside_docker.sh", str(args.wheel_path)], cwd=ProjectDir, env=env, check=True)
+
 
 if __name__ == "__main__":
     main()

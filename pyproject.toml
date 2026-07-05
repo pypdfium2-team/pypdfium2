@@ -42,7 +42,7 @@ PDFIUM_PLATFORM = "sourcebuild-toolchained"
 
 [[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
-select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_amd64"
+select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win{_amd64,32}"
 test-requires = ["pytest", "pillow", "numpy"]
 inherit.test-command = "append"
 test-command = [
@@ -104,7 +104,7 @@ inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
-    "bash ./utils/install-static-clang.sh -d {project}/clang_image -m skip-download",
+    "bash utils/install-static-clang.sh -d {project}/clang_image -m skip-download",
     "export CLANG_PREFIX=/opt/clang",
 ]
 inherit.environment = "append"
@@ -122,6 +122,13 @@ environment.BUILD_PARAMS = "$BUILD_PARAMS --no-vendor libc++"
 select = "*-*linux_s390x"
 inherit.environment = "append"
 environment.BUILD_PARAMS = "$BUILD_PARAMS --clang-as-gcc"
+
+# Cross-compiled or hybrid macOS and Windows targets
+
+[[tool.cibuildwheel.overrides]]
+select = "*-macosx_x86_64"
+inherit.environment = "append"
+environment.BUILD_PARAMS = "--target-cpu x64"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-win_arm64"

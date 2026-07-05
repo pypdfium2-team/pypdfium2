@@ -45,11 +45,11 @@ Legend
 - **MinVer**: Minimum required OS versions for present release.
   Other build strategies may result in different min versions, and older versions of pypdfium2 may have lower requirements.
   
-  + 🟢 Low/OK, 🟡 Medium/Acceptable, 🟠 Elevated, 🔴 High, ⚪ Uncertain / not tagged
+  + 🟢 Low/Good, 🔵 Reasonable, 🟡 Medium, 🟠 Elevated, 🔴 High, ⚪ Not tagged
 
 - **Release**: status, version tracked, build strategy
   
-  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only (platform rejected by PyPI), 🟦 Setup only
+  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only [1]_, 🟦 Setup only
   + 🔄 Latest version, 📌 Pinned version
 
 - **Tier**: Platform support level
@@ -63,17 +63,17 @@ Legend
   + **CIBW** = Built at pypdfium2 via ``cibw.yaml`` (``build_native.py`` + containers on Linux, ``build_toolchained.py`` on Windows and macOS).
   + ✅ Platform supported, ❌ Not supported with that strategy, ⏳Coming soon
 
-- 🐍 Conda (**PBIN** only)
+- 🐍 Conda *(PBIN only)*
   
   + ✅ Released to conda
   + ⏸️ Built, but conda upload is paused due to storage limits. Get in touch with ``pdfium-binaries`` if you would like this to be reinstated.
-  + ❓ Built, but unclear if this could be released to conda
+  + ❓ Built, but unclear if there were any point releasing this to conda (not a priority)
   + ❌ Not built at pdfium-binaries
 
 - 🧪 Testing status
   
-  + ✅ Tested on a native host
-  + ☑️ Tested in an emulated container
+  + ✅ Tested on host
+  + ☑️ Tested under emulation (QEMU/Rosetta)
   + 🟨 Only tested when native compilation is used, but it is not the default
   + ❌ Not automatically tested
 
@@ -81,16 +81,20 @@ Legend
   
   + ⬜ Native compilation
   + 🔳 Cross compilation
-  + 🔲 Both is possible
+  + 🔲 Both is possible / applies
 
-- ⚙️ Compiler used (CIBW only, PBIN and SBLD always use clang)
+- ⚙️ Compiler used *(CIBW only – PBIN and SBLD always use clang)*
 
-- **NAT**: Can be built natively at end user level?
+- **NAT**: Can be built natively on-device?
   
-  + ✅ Yes
-  + ☑️ Yes (tested in docker)
-  + ❔ Unknown
+  + ✅ Yes (tested on GHA)
+  + ☑️ Yes (tested in Docker)
+  + 🅿️ Probably (might need minor tweaks)
   + 🚧 This used to work in the past, but is currently broken.
+
+- NA: Not applicable / Unknown (placeholder)
+
+.. [1] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse). As with pip, there's nothing we can do about that, and a patch is unlikely to be accepted without prior standardization and a tiring discussion whether PyPA consider the platform worth supporting. If anyone volunteers to do the lobbying, please do so, and reach out if it was successful.
 
 .. admonition:: Help wanted
    

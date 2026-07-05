@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: 'Test one'
+description: 'Test one wheel, with container/emulator if needed'
+# https://github.com/actions/runner/issues/2238 ...
+inputs:
+  runner_os:
+    description: 'Runner OS'
+    required: true
+  py_vers:
+    description: 'Python versions to test. (Setup is required from caller.)'
+    required: true
+  test_on_host:
+    description: 'Do native testing'
+    default: 'true'
+  docker:
+    description: 'Do docker testing'
+    default: 'true'
+  auditwheel:
+    description: 'Run auditwheel show'
+    default: 'true'
+  mac_emulate_intel:
+    description: 'On macOS, indicate an x86_64 component to be tested under Rosetta emulation'
+    default: ''
+  windows_32bit:
+    description: "Indicate 32-bit python interpreter"
+  dll_glob:
+    description: 'Where to find the PDFium DLL in question'
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    
+    # https://github.com/orgs/community/discussions/18597 ...
+    
+    - name: Inspect DLL with file
+      shell: bash
+      run: file $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
+    
+    - name: macOS - Inspect DLL with vtool
+      if: ${{ startsWith(inputs.runner_os, 'macos-') }}
+      shell: bash
+      run: vtool -show-build $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
+    
+    - name: Test wheel on host
+      if: ${{ inputs.test_on_host }}
+      shell: bash
+      run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
+      env:
+        PY_VERS: "${{ inputs.py_vers }}"
+        WINDOWS_32BIT: "${{ inputs.windows_32bit && 1 || 0 }}"
+    
+    - name: macOS - Test Intel under emulation
+      if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.mac_emulate_intel }}
+      shell: bash
+      # assuming macOS python is universal (it should be)
+      run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv --prefix "arch -x86_64"
+      env:
+        PY_VERS: "${{ inputs.py_vers }}"
+    
+    - name: Linux - Set up QEMU (if needed)
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker && !inputs.test_on_host }}
+      uses: docker/setup-qemu-action@v4
+    
+    - name: Linux - Test in Docker container
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
+      shell: bash
+      # q&d: infer container target name from wheel name
+      run: |
+        WHEEL_PATH="$(ls dist/*.whl)"
+        TARGET="$(python3 utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")"
+        python3 utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
+    
+    - name: Linux - Run auditwheel show
+      if: ${{ startsWith(inputs.os, 'ubuntu-') && inputs.auditwheel }}
+      shell: bash
+      run: |
+        python3 -m pip install -U auditwheel
+        python3 -m auditwheel show dist/*.whl

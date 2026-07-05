@@ -18,3 +18,4 @@ jobs:
       new_only: true
       test: true
       publish: true
+      actually_publish: true
