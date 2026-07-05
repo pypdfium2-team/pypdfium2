@@ -302,6 +302,8 @@ jobs:
           attestations: false
           verbose: true
       
+      # FIXME do we have to skip gh_only/ if empty?
+      
       - name: Attest build provenance
         id: provenance
         uses: actions/attest-build-provenance@v4
@@ -313,7 +315,6 @@ jobs:
         env:
           SRC_PATH: ${{ steps.provenance.outputs.bundle-path }}
       
-      # FIXME skip gh_only/*.whl if it does not exist
       - name: Publish to GitHub
         uses: ncipollo/release-action@v1  # TODO pin to hash?
         with:
