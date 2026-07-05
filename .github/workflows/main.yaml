@@ -219,7 +219,7 @@ jobs:
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner_os }}
     
-    # environment: release  # PyPI upload via "trusted publishing"  # XXX testing
+    environment: release  # PyPI upload via "trusted publishing"
     permissions:
       id-token: write      # PyPI upload via "trusted publishing", and GH attestation
       attestations: write  # GH attestation
