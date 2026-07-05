@@ -123,12 +123,12 @@ jobs:
       # Using empty/non-empty string as bool substitute should be OK for if conditionals though.
       - name: Test wheel
         uses: ./.github/actions/test_one
-        if: ${{ !inputs.target_os }}
         with:
           runner_os: ${{ inputs.os }}
           py_vers: ${{ inputs.py_vers }}
-          test_on_host: ${{ !inputs.target_cpu || '' }}
-          docker: ${{ inputs.target_cpu != 'mipsel' || '' }}
+          test_on_host: ${{ !(inputs.target_os || inputs.target_cpu) || '' }}
+          docker: ${{ !(inputs.target_os || inputs.target_cpu == 'mipsel') || '' }}
           auditwheel: ${{ !startsWith(inputs.target_cpu, 'mips') || '' }}
-          with_32bit: ${{ (startsWith(inputs.os, 'windows') && inputs.target_cpu == 'x86') || '' }}
+          windows_32bit: ${{ startsWith(inputs.os, 'windows') && inputs.target_cpu == 'x86' || '' }}
+          mac_emulate_intel: ${{ inputs.target_cpu && !endsWith(inputs.os, '-intel') || '' }}
           dll_glob: 'data/sourcebuild/*pdfium.*'
