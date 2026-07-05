@@ -22,7 +22,7 @@ jobs:
       # IMPORTANT Need to use workflow dispatch here, not reusable workflow call.
       # This is because pypa/gh-action-pypi-publish actually fails when nested in a reusable workflow call. (This broke PyPI upload of our 5.10.0 release. For some reason, TestPyPI upload passed, probably because it has attestations disabled...)
       - name: Trigger
-        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26  # v1.3.2
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1.3.2
         with:
           workflow: main.yaml
           # XXX update inputs once workflows overhaul is finished

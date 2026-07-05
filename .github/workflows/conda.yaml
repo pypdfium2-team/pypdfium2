@@ -51,7 +51,7 @@ jobs:
     steps:
       
       - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ inputs.py_ver }}
@@ -62,7 +62,7 @@ jobs:
           show-channel-urls: true
       
       - name: Check out pypdfium2 (deep)
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0  # for git describe
           persist-credentials: false
@@ -85,7 +85,7 @@ jobs:
           MAYBE_NEW_ONLY: ${{ inputs.new_only && '--new-only' || '' }}
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: conda_package
           path: conda/${{ inputs.package }}/out/
@@ -114,20 +114,20 @@ jobs:
     steps:
       
       - name: Check out pypdfium2 (shallow)
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Miniconda setup
-        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
           channels: defaults
       
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: conda_package
           path: conda_dist/
@@ -163,7 +163,7 @@ jobs:
       
       # NOTE custom channels may not be actually necessary here
       - name: Miniconda setup
-        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
@@ -174,7 +174,7 @@ jobs:
         run: conda install -y anaconda-client
       
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: conda_package
           path: conda_dist/

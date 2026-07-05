@@ -43,13 +43,13 @@ jobs:
     steps:
       
       - name: Check out pypdfium2 (deep)
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0  # for git describe
           persist-credentials: false
       
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: ${{ inputs.py_ver }}
           pip-install: -U -r req/setup.txt -r req/test.txt
@@ -90,7 +90,7 @@ jobs:
           python3 -m auditwheel repair dist/*.whl -w wheelhouse
       
       - name: Upload wheel as artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: ./wheelhouse/*.whl
           name: "native-${{ inputs.compiler }}_${{ inputs.os }}"

@@ -66,7 +66,7 @@ jobs:
     steps:
       
       - name: Check out pypdfium2
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: ${{ !inputs.autorelease && 1 || 0 }}
           persist-credentials: ${{ inputs.autorelease }}  # for push
@@ -83,11 +83,11 @@ jobs:
       
       - name: Set up Just
         if: ${{ inputs.autorelease }}
-        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
       
       - name: Set up Python
         if: ${{ inputs.autorelease }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.14'
           pip-install: -U -r req/check.txt -r req/setup.txt -r req/test.txt
@@ -106,7 +106,7 @@ jobs:
       
       - name: Upload release notes
         if: ${{ inputs.autorelease }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release_notes
           path: RELEASE.md
@@ -126,7 +126,7 @@ jobs:
     steps:
       
       - name: Check out pypdfium2
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0  # for git describe
           persist-credentials: false
@@ -147,7 +147,7 @@ jobs:
           PY_VERS: ${{ inputs.py_vers }}
       
       - name: Upload sdist
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sdist
           path: dist/pypdfium2-*.tar.gz
@@ -229,50 +229,50 @@ jobs:
     steps:
       
       - name: Check out pypdfium2 (deep, authenticated)
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0  # for git describe
           persist-credentials: true  # for push
       
       - name: Download release notes
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: release_notes
       
       - name: Download sdist
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: sdist
       
       - name: Download PBIN wheels
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: dist/
           merge-multiple: true
           pattern: pbin-*
       
       - name: Download SBLD wheels
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: dist/
           merge-multiple: true
           pattern: sbuild-*
       
       - name: Download CIBW wheels
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: dist/
           merge-multiple: true
           pattern: cibw-*
       
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.14'
           pip-install: -U -r req/distcheck.txt
       
       - name: Set up Just
-        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
       
       - name: Check artifacts
         run: just distcheck
@@ -308,7 +308,7 @@ jobs:
       
       - name: Publish to TestPyPI
         if: ${{ inputs.actually_publish }}
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist/  # the default
@@ -321,7 +321,7 @@ jobs:
       - name: Attest build provenance
         if: ${{ inputs.actually_publish }}
         id: provenance
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-path: 'dist/*, gh_only/*'
       
@@ -333,7 +333,7 @@ jobs:
       
       - name: Publish to GitHub
         if: ${{ inputs.actually_publish }}
-        uses: ncipollo/release-action@v1  # TODO pin to hash?
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           immutableCreate: true
           artifacts: 'dist/*.tar.gz,dist/*.whl,gh_only/*.whl,pypdfium2-attestation.json'
@@ -344,7 +344,7 @@ jobs:
       
       - name: Publish to PyPI
         if: ${{ inputs.actually_publish }}
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           packages-dir: dist/  # the default
   
@@ -377,7 +377,7 @@ jobs:
     steps:
       
       - name: Check out pypdfium2 (shallow, authenticated)
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 1
           persist-credentials: true  # for push
