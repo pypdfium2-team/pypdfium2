@@ -10,6 +10,9 @@ on:
       runner_os:
         type: string
         default: 'ubuntu-26.04'
+      base_py:
+        type: string
+        default: '3.14'
       py_vers:
         type: string
         default: '3.14'
@@ -27,6 +30,9 @@ on:
         type: string
         default: ''
       autorelease:
+        type: boolean
+        default: true
+      sdist:
         type: boolean
         default: true
       conda:
@@ -79,12 +85,12 @@ jobs:
         if: ${{ inputs.autorelease }}
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
       
-      - name: Prepare Python
-        uses: ./.github/actions/prepare_one
+      - name: Set up Python
         if: ${{ inputs.autorelease }}
+        uses: actions/setup-python@v6
         with:
-          py_vers: ${{ inputs.py_vers }}
-          pip_install: -U -r req/setup.txt -r req/check.txt twine
+          python-version: ${{ inputs.base_py }}
+          pip-install: -U -r req/check.txt -r req/setup.txt
       
       - name: Checks, autorelease, sdist, tests
         if: ${{ inputs.autorelease }}
@@ -94,25 +100,7 @@ jobs:
           just check
           python3 setupsrc/emplace.py auto:latest
           python3 setupsrc/autorelease.py --register  # switches to autorelease_tmp branch
-          python3 setupsrc/craft.py --sdist
-          twine check dist/pypdfium2-*.tar.gz
-          python3 utils/multitest.py -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
           git push -u origin autorelease_tmp  # just the branch (not tag)
-        env:
-          PY_VERS: ${{ inputs.py_vers }}
-      
-      - name: Determine ref/version
-        id: get_version
-        run: |
-          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "version=$(git describe --abbrev=0)" >> "$GITHUB_OUTPUT"
-      
-      - name: Upload sdist
-        if: ${{ inputs.autorelease }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: sdist
-          path: dist/pypdfium2-*.tar.gz
       
       - name: Upload release notes
         if: ${{ inputs.autorelease }}
@@ -120,6 +108,47 @@ jobs:
         with:
           name: release_notes
           path: RELEASE.md
+      
+      - name: Determine ref/version
+        id: get_version
+        run: |
+          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(git describe --abbrev=0)" >> "$GITHUB_OUTPUT"
+  
+  
+  sdist:
+    needs: prepare
+    if: ${{ inputs.sdist || inputs.publish }}
+    runs-on: ${{ inputs.runner_os }}
+    
+    steps:
+      
+      - name: Check out pypdfium2
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ needs.prepare.outputs.ref }}
+      
+      - name: Prepare Python
+        uses: ./.github/actions/prepare_one
+        with:
+          py_vers: ${{ inputs.py_vers }}
+          pip_install: -U build twine
+      
+      - name: Craft sdist
+        run: |
+          python3 setupsrc/craft.py --sdist
+          twine check dist/pypdfium2-*.tar.gz
+          python3 utils/multitest.py -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
+        env:
+          PY_VERS: ${{ inputs.py_vers }}
+      
+      - name: Upload sdist
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdist
+          path: dist/pypdfium2-*.tar.gz
   
   
   pbin:
@@ -184,12 +213,7 @@ jobs:
   
   publish:
     
-    needs:
-      - prepare
-      - pbin
-      - cibw
-      - sbuild
-    
+    needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ${{ inputs.runner_os }}
     
