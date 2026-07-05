@@ -142,10 +142,12 @@ def postprocess_android():
         log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
+ALL_PLATFORMS = tuple(PdfiumBinariesMap.keys())
+
 def main(platforms, version, robust=False, max_workers=None, use_v8=False, verify=None):
     
-    if not platforms:
-        platforms = WheelPlatforms
+    if not platforms or platforms == ["all"]:
+        platforms = ALL_PLATFORMS
     if len(platforms) != len(set(platforms)):
         raise ValueError("Duplicate platforms not allowed.")
     flags = ("V8", "XFA") if use_v8 else ()
@@ -162,7 +164,6 @@ def main(platforms, version, robust=False, max_workers=None, use_v8=False, verif
 # low-level interface for internal use - end users should go with cached, higher-level emplace.py or setup.py instead
 
 def parse_args(argv):
-    platform_choices = list(PdfiumBinariesMap.keys())
     parser = argparse.ArgumentParser(
         description = "Download pre-built PDFium packages.",
     )
@@ -170,8 +171,7 @@ def parse_args(argv):
         "--platforms", "-p",
         nargs = "+",
         metavar = "ID",
-        choices = platform_choices,
-        help = f"The platform(s) to include. Defaults to the platforms we build wheels for. Choices: {platform_choices}",
+        help = f"The platform(s) to include. Defaults to the platforms we build wheels for. Choices: {ALL_PLATFORMS}",
     )
     parser.add_argument(
         "--use-v8",

@@ -106,9 +106,12 @@ def main_pypi(args):
         else:
             args.pdfium_ver = int(args.pdfium_ver)
         
+        if not args.platforms or args.platforms == ["all"]:
+            args.platforms = tuple(PdfiumBinariesMap.keys())
+        
         os.environ["USE_TARBALL_LICENSES"] = "1"
         suffix = _build_pl_suffix(args.pdfium_ver, args.use_v8)
-        for plat in WheelPlatforms:
+        for plat in args.platforms:
             os.environ[PlatSpec_EnvVar] = plat + suffix
             _run_pypi_build(["--wheel"])
             clean_platfiles()
@@ -119,6 +122,7 @@ def main():
     parser = argparse.ArgumentParser(
         description = "Craft PyPI packages for pypdfium2"
     )
+    parser.add_argument("-p", "--platforms", nargs="+")
     parser.add_argument("--pdfium-ver", default=None)
     parser.add_argument("--use-v8", action="store_true")
     parser.add_argument("--wheels", action="store_true")

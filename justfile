@@ -38,10 +38,10 @@ distcheck:
 	# ignore W002: erroneous detection of __init__.py files as duplicates
 	check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw,pypdfium2_cli,pypdfium2_cfg"
 
-update *args:
+download *args:
 	python3 setupsrc/update.py {{args}}
-update-verify *args:
-	just update --verify {{args}}
+download-verify *args:
+	just download --verify {{args}}
 emplace *args:
 	python3 setupsrc/emplace.py {{args}}
 build-native *args:
@@ -53,4 +53,4 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-packaging-pypi: clean check update-verify craft distcheck
+xpack *args: clean check (download-verify args) (craft args) distcheck
