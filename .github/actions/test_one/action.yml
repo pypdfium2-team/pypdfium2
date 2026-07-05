@@ -48,12 +48,6 @@ runs:
       env:
         DLL_GLOB: ${{ inputs.dll_glob }}
     
-    - name: Check wheel
-      shell: bash
-      run: |
-        twine check dist/*.whl
-        check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw,pypdfium2_cli,pypdfium2_cfg"
-    
     - name: Test wheel on host
       if: ${{ inputs.test_on_host }}
       shell: bash

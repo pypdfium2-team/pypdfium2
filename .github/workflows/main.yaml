@@ -231,11 +231,6 @@ jobs:
           fetch-depth: 0  # for git describe
           persist-credentials: true  # for push
       
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.14'
-      
       - name: Download release notes
         uses: actions/download-artifact@v8
         with:
@@ -266,6 +261,18 @@ jobs:
           path: dist/
           merge-multiple: true
           pattern: cibw-*
+      
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          pip-install: -U -r req/distcheck.txt
+      
+      - name: Set up Just
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
+      
+      - name: Check artifacts
+        run: just distcheck
       
       - name: Isolate GH-only builds, if any
         run: |
