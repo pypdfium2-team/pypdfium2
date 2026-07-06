@@ -41,5 +41,6 @@ jobs:
               "sdist": "true",
               "conda": "true",
               "gh_pages": "true",
-              "publish": "true"
+              "publish": "true",
+              "actually_publish": "false"  # XXX
             }
