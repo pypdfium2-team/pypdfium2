@@ -157,7 +157,7 @@ jobs:
   
   
   pbin:
-    name: PBIN (Repack pdfium-binaries)
+    name: PBIN ${{ matrix.pbin_target }} on ${{ matrix.runner_os }}
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.pbin_needed) }}
     permissions:
@@ -177,7 +177,7 @@ jobs:
   
   
   sbuild:
-    name: SBLD (Build with Chromium toolchain)
+    name: SBLD ${{ matrix.target_os || matrix.os }} ${{ matrix.target_cpu }}
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.sbuild_needed) }}
     permissions:
@@ -201,7 +201,7 @@ jobs:
   
   
   cibw:
-    name: CIBW (Build with cibuildwheel)
+    name: CIBW ${{ matrix.cibw_target }} on ${{ matrix.runner_os }}
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.cibw_needed) }}
     permissions:
