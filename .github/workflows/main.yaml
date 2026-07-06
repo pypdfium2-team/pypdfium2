@@ -158,8 +158,8 @@ jobs:
     
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.pbin_needed) }}
-    permissions:
-      contents: read  # needed by called workflow
+    permissions:  # needed by called workflow
+      contents: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.pbin_matrix) }}
@@ -177,8 +177,8 @@ jobs:
   sbuild:
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.sbuild_needed) }}
-    permissions:
-      contents: read  # needed by called workflow
+    permissions:  # needed by called workflow
+      contents: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.sbuild_matrix) }}
@@ -200,8 +200,8 @@ jobs:
   cibw:
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.cibw_needed) }}
-    permissions:
-      contents: read  # needed by called workflow
+    permissions:  # needed by called workflow
+      contents: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.cibw_matrix) }}
@@ -370,8 +370,8 @@ jobs:
   conda:
     needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
-    permissions:
-      contents: read  # needed by called workflow
+    permissions:  # needed by called workflow
+      contents: read
     
     uses: ./.github/workflows/conda.yaml
     with:
