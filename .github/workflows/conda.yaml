@@ -31,6 +31,10 @@ on:
       ref:
         type: string
         default: ''
+    secrets:
+      anaconda_api_token:
+        description: 'Anaconda API token. Required if actually_publish is true.'
+        required: false
   workflow_dispatch:
     inputs: *reusable_inputs
 

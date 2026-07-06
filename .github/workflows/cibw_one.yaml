@@ -35,6 +35,9 @@ on:
   workflow_dispatch:
     inputs: *reusable_inputs
 
+permissions:
+  contents: read
+
 jobs:
   
   build:

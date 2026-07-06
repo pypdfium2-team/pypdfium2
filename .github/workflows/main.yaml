@@ -355,7 +355,8 @@ jobs:
     needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
     uses: ./.github/workflows/conda.yaml
-    secrets: inherit  # Anaconda API token
+    secrets:
+      anaconda_api_token: ${{ inputs.actually_publish && secrets.ANACONDA_API_TOKEN }}
     with:
       package: helpers
       test: true

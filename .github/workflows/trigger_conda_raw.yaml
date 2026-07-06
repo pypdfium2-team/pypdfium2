@@ -12,7 +12,8 @@ jobs:
   # NOTE recently changed to reusable workflow call, let's see if this works. If it does not, we can revert back to benc-uk/workflow-dispatch.
   conda_raw_release:
     uses: ./.github/workflows/conda.yaml
-    secrets: inherit  # Anaconda API token
+    secrets:
+      anaconda_api_token: ${{ secrets.ANACONDA_API_TOKEN }}
     with:
       package: raw
       new_only: true
