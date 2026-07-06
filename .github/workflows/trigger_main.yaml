@@ -45,4 +45,5 @@ jobs:
           }
           EOF
         env:
+          GH_TOKEN: ${{ github.token }}
           REF_NAME: ${{ github.ref_name }}
