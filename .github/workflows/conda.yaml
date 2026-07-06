@@ -101,7 +101,7 @@ jobs:
   
   test:
     
-    name: Test ${{ matrix.os }} with Python ${{ matrix.py }}
+    name: Test ${{ matrix.os }} with Py ${{ matrix.py }}
     if: ${{ inputs.test }}
     needs: build
     permissions:
