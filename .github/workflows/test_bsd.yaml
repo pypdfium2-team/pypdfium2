@@ -11,10 +11,10 @@ jobs:
   
   freebsd_lo:
     name: Install on FreeBSD with libreoffice pdfium
-    runs-on: ubuntu-26.04
     permissions:
       contents: read  # recommended by checkout action
     
+    runs-on: ubuntu-26.04
     steps:
       
       - name: Check out pypdfium2 (deep)

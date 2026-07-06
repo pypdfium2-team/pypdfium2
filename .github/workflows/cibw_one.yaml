@@ -41,10 +41,10 @@ jobs:
   
   build:
     name: ${{ inputs.cibw_target }} on ${{ inputs.runner_os }}
-    runs-on: ${{ inputs.runner_os }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
       - name: Check out pypdfium2 (deep)
