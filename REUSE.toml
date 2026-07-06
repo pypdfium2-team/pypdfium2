@@ -162,8 +162,6 @@ SPDX-FileComment = "Licenses for compiled binaries of pdfium."
 
 [[annotations]]
 path = [
-    "strategy/targets.json",
-    "strategy/profiles.json",
     "utils/check.sh",
     "utils/regextract.py",
     "utils/enforce_install.sh",
@@ -171,4 +169,13 @@ path = [
 ]
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
-SPDX-FileComment = "Strategy data files and small utility scripts."
+SPDX-FileComment = "Small utility scripts."
+
+[[annotations]]
+path = [
+    "strategy/targets.json",
+    "strategy/profiles.json",
+]
+SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
+SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
+SPDX-FileComment = "Build strategy tables."
