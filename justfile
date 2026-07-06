@@ -51,4 +51,4 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-xpack *args='-p all': clean check (download args) (craft args) distcheck
+xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
