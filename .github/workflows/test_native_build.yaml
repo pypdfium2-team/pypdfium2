@@ -40,16 +40,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-26.04', 'ubuntu-26.04-arm']
+        os: ['ubuntu-24.04', 'ubuntu-24.04-arm']
         compiler: ['gcc', 'clang']
         include:
           - compiler: gcc
             cc_condition: ${{ inputs.gcc }}
           - compiler: clang
             cc_condition: ${{ inputs.clang }}
-          - os: ubuntu-26.04
+          - os: ubuntu-24.04
             os_condition: ${{ inputs.x64 }}
-          - os: ubuntu-26.04-arm
+          - os: ubuntu-24.04-arm
             os_condition: ${{ inputs.arm64 }}
     
     uses: ./.github/workflows/test_native_build_one.yaml

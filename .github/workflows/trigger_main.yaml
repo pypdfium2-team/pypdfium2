@@ -29,14 +29,17 @@ jobs:
         uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1.3.2
         with:
           workflow: main.yaml
-          # XXX update inputs once workflows overhaul is finished
           inputs: |
             {
-              "runner": "ubuntu-26.04",
-              "py_ver": "3.14",
-              "test": "true",
-              "augment": "true",
-              "publish": "true",
+              "runner_os": "ubuntu-26.04",
+              "py_vers": "3.11 3.14",
+              "profile": "default",
+              "pbin": "",
+              "sbuild": "",
+              "cibw": "",
+              "autorelease": "true",
+              "sdist": "true",
+              "conda": "true",
               "gh_pages": "true",
-              "conda": "true"
+              "publish": "true"
             }
