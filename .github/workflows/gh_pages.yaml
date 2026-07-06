@@ -11,13 +11,6 @@ on:
         default: false
   workflow_dispatch:
     inputs: *reusable_inputs
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - docs/**
-  #     - src/**
-  #     - README.md
 
 # Allow one concurrent deployment
 concurrency:
