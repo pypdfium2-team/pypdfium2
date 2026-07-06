@@ -22,7 +22,7 @@ permissions: {}
 jobs:
   
   build:
-    name: Build docs with Sphinx
+    name: Build docs
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     

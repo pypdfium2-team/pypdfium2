@@ -223,7 +223,7 @@ jobs:
   
   
   publish:
-    name: Publish to PyPI & GitHub
+    name: Publish to PyPI & GH
     needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     
@@ -359,7 +359,7 @@ jobs:
   
   
   gh_pages:
-    name: Update GH Pages
+    name: GH Pages
     needs: publish  # i.e. goes after, regardless if publish is active or not
     if: ${{ inputs.gh_pages && !cancelled() && !contains(needs.*.result, 'failure') }}
     permissions:
@@ -373,7 +373,7 @@ jobs:
   
   
   conda:
-    name: Conda package pypdfium2_helpers
+    name: Conda pypdfium2_helpers
     needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
     permissions:
