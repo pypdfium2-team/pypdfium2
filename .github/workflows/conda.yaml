@@ -101,7 +101,7 @@ jobs:
   
   test:
     
-    name: Test built conda package
+    name: Test ${{ matrix.os }} ${{ matrix.py }}
     if: ${{ inputs.test }}
     needs: build
     permissions:
