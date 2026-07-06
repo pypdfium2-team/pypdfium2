@@ -39,8 +39,6 @@ distcheck:
 	check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw,pypdfium2_cli,pypdfium2_cfg"
 
 download *args:
-	python3 setupsrc/update.py {{args}}
-download-verify *args:
 	python3 setupsrc/update.py --verify {{args}}
 emplace *args:
 	python3 setupsrc/emplace.py {{args}}
@@ -53,4 +51,4 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-xpack *args='-p all': clean check (download-verify args) (craft args) distcheck
+xpack *args='-p all': clean check (download args) (craft args) distcheck
