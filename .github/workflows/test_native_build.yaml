@@ -20,7 +20,7 @@ on:
       clang:
         type: boolean
         default: true
-      x86_64:
+      x64:
         type: boolean
         default: true
       arm64:
@@ -48,7 +48,7 @@ jobs:
           - compiler: clang
             cc_condition: ${{ inputs.clang }}
           - os: ubuntu-26.04
-            os_condition: ${{ inputs.x86_64 }}
+            os_condition: ${{ inputs.x64 }}
           - os: ubuntu-26.04-arm
             os_condition: ${{ inputs.arm64 }}
     
