@@ -28,7 +28,7 @@ jobs:
       # TODO unlock actually_publish
       - name: Trigger
         run: |
-          gh workflow run main.yaml -R pypdfium2-team/pypdfium2 --ref "$REF_NAME" --json <<EOF
+          gh workflow run main.yaml -R "$REPOSITORY" --ref "$REF_NAME" --json <<EOF
           {
             "runner_os": "ubuntu-26.04",
             "py_vers": "3.11 3.14",
@@ -46,4 +46,5 @@ jobs:
           EOF
         env:
           GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
           REF_NAME: ${{ github.ref_name }}
