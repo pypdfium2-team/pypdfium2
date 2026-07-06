@@ -36,7 +36,7 @@ distcheck:
 	check-wheel-contents dist/*.whl
 
 zizmor:
-     zizmor .github --collect=all --persona auditor
+     zizmor .github/ --persona auditor
 
 download *args:
 	python3 setupsrc/update.py --verify {{args}}
