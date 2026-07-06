@@ -17,13 +17,13 @@ jobs:
   # Need to use workflow dispatch here, not reusable workflow call.
   # This is because pypa/gh-action-pypi-publish actually fails when nested in a reusable workflow call. (This broke PyPI upload of our 5.10.0 release. For some reason, TestPyPI upload passed, probably because it has attestations disabled...)
   trigger:
-    name: Trigger release workflow
+    name: Dispatch release workflow
     permissions:
       actions: write  # allow workflow dispatch
     runs-on: ubuntu-26.04
     steps:
       # TODO unlock actually_publish
-      - name: Dispatch workflow run
+      - name: Dispatch workflow with GH CLI
         run: |
           gh workflow run main.yaml -R "$REPOSITORY" --ref "$REF_NAME" --json <<EOF
           {
