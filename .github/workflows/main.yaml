@@ -271,11 +271,10 @@ jobs:
           python-version: '3.14'
           pip-install: -U -r req/distcheck.txt
       
-      - name: Set up Just
-        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
-      
       - name: Check artifacts
-        run: just distcheck
+        run: |
+          twine check dist/*
+          check-wheel-contents dist/*.whl
       
       - name: Isolate GH-only builds, if any
         run: |
