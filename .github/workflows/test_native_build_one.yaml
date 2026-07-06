@@ -39,11 +39,12 @@ permissions: {}
 jobs:
   
   build:
-    runs-on: ${{ inputs.runner_os }}
+    name: Native build on ${{ inputs.runner_os }} with ${{ inputs.compiler }}
     if: ${{ inputs.condition }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
       - name: Check out pypdfium2 (deep)

@@ -52,10 +52,11 @@ permissions: {}
 jobs:
   
   build:
-    runs-on: ubuntu-26.04
+    name: Build conda pypdfium2_${{ inputs.package }}
     permissions:
       contents: read  # recommended by checkout action
     
+    runs-on: ubuntu-26.04
     steps:
       
       - name: Set up Miniconda
@@ -100,6 +101,7 @@ jobs:
   
   test:
     
+    name: Test built conda package
     if: ${{ inputs.test }}
     needs: build
     permissions:
@@ -162,14 +164,13 @@ jobs:
   
   publish:
     
+    name: Publish to Anaconda
     if: ${{ inputs.publish }}
     needs: [build, test]
-    runs-on: ubuntu-26.04
     permissions:
       contents: read  # recommended by checkout action
     
-    # TODO upload as GH release as well
-    
+    runs-on: ubuntu-26.04
     steps:
       
       # NOTE custom channels may not be actually necessary here
@@ -189,6 +190,8 @@ jobs:
         with:
           name: conda_package
           path: conda_dist/
+      
+      # TODO upload as GH release as well?
       
       - name: Upload to Anaconda
         if: ${{ inputs.actually_publish }}

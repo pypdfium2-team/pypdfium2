@@ -47,10 +47,11 @@ permissions: {}
 jobs:
   
   build:
-    runs-on: ${{ inputs.os }}
+    name: Build ${{ inputs.target_os || inputs.os }} ${{ inputs.target_cpu }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
+    runs-on: ${{ inputs.os }}
     steps:
       
       - name: Check out pypdfium2 (deep)

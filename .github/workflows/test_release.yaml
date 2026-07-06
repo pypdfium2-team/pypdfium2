@@ -20,6 +20,7 @@ permissions: {}
 
 jobs:
   test-release:
+    name: Test PyPI Release
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     strategy:

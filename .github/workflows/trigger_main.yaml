@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Separate trigger workflow because we can't configure inputs for scheduled workflow runs (and don't want publish enabled by default in the main workflow)
-
 name: Trigger main release
 on:
   # NOTE Schedule currently suspended, to preserve PyPI disk space. Manually dispatch releases as needed.
@@ -16,17 +14,16 @@ on:
 permissions: {}
 
 jobs:
-  
+  # Need to use workflow dispatch here, not reusable workflow call.
+  # This is because pypa/gh-action-pypi-publish actually fails when nested in a reusable workflow call. (This broke PyPI upload of our 5.10.0 release. For some reason, TestPyPI upload passed, probably because it has attestations disabled...)
   trigger:
-    runs-on: ubuntu-26.04
+    name: Trigger release workflow
     permissions:
-      actions: write
-    
+      actions: write  # allow workflow dispatch
+    runs-on: ubuntu-26.04
     steps:
-      # IMPORTANT Need to use workflow dispatch here, not reusable workflow call.
-      # This is because pypa/gh-action-pypi-publish actually fails when nested in a reusable workflow call. (This broke PyPI upload of our 5.10.0 release. For some reason, TestPyPI upload passed, probably because it has attestations disabled...)
       # TODO unlock actually_publish
-      - name: Trigger
+      - name: Dispatch workflow run
         run: |
           gh workflow run main.yaml -R "$REPOSITORY" --ref "$REF_NAME" --json <<EOF
           {

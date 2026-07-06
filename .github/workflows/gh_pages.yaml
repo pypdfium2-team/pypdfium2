@@ -22,10 +22,11 @@ permissions: {}
 jobs:
   
   build:
-    runs-on: ubuntu-26.04
+    name: Build docs with Sphinx
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
+    runs-on: ubuntu-26.04
     steps:
       
       - name: Check out pypdfium2 (deep)
@@ -52,18 +53,19 @@ jobs:
           path: 'docs/build/html'
   
   publish:
+    name: Publish to GH Pages
     needs: build
     if: ${{ inputs.publish }}
-    runs-on: ubuntu-26.04
     
     permissions:
-      pages: write     # deployment to GH pages
-      id-token: write  # deployment to GH pages
+      pages: write     # Deploy to GH pages
+      id-token: write  # Deploy to GH pages
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     
+    runs-on: ubuntu-26.04
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GH Pages
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

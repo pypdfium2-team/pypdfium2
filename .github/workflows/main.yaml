@@ -54,7 +54,7 @@ permissions: {}
 jobs:
   
   prepare:
-    runs-on: ${{ inputs.runner_os }}
+    name: Prepare build (matrix, checks, autorelease)
     permissions:
       contents: write  # needed for push
     outputs:
@@ -67,6 +67,7 @@ jobs:
       ref: ${{ steps.get_version.outputs.ref }}
       version: ${{ inputs.autorelease && steps.get_version.outputs.version || '' }}
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
       - name: Check out pypdfium2
@@ -119,12 +120,13 @@ jobs:
   
   
   sdist:
+    name: Craft sdist
     needs: prepare
     if: ${{ inputs.sdist || inputs.publish }}
-    runs-on: ${{ inputs.runner_os }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
       - name: Check out pypdfium2
@@ -155,11 +157,11 @@ jobs:
   
   
   pbin:
-    
+    name: PBIN (Repack pdfium-binaries)
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.pbin_needed) }}
-    permissions:  # needed by called workflow
-      contents: read
+    permissions:
+      contents: read  # needed by called workflow
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.pbin_matrix) }}
@@ -175,10 +177,11 @@ jobs:
   
   
   sbuild:
+    name: SBLD (Build with Chromium toolchain)
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.sbuild_needed) }}
-    permissions:  # needed by called workflow
-      contents: read
+    permissions:
+      contents: read  # needed by called workflow
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.sbuild_matrix) }}
@@ -198,10 +201,11 @@ jobs:
   
   
   cibw:
+    name: CIBW (Build with cibuildwheel)
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.cibw_needed) }}
-    permissions:  # needed by called workflow
-      contents: read
+    permissions:
+      contents: read  # needed by called workflow
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.cibw_matrix) }}
@@ -219,10 +223,9 @@ jobs:
   
   
   publish:
-    
+    name: Publish to PyPI & GitHub
     needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
-    runs-on: ${{ inputs.runner_os }}
     
     # environment: release  # PyPI upload via "trusted publishing"  # XXX testing
     permissions:
@@ -231,6 +234,7 @@ jobs:
       contents: write      # autorelease repository changes
       actions: write       # GH pages build
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
       - name: Check out pypdfium2 (deep, authenticated)
@@ -354,12 +358,13 @@ jobs:
   
   
   gh_pages:
+    name: Update GH Pages
     needs: publish  # i.e. goes after, regardless if publish is active or not
     if: ${{ inputs.gh_pages && !cancelled() && !contains(needs.*.result, 'failure') }}
-    permissions:  # needed by called workflow
-      contents: read
-      pages: write
-      id-token: write
+    permissions:
+      contents: read   # needed by called workflow
+      pages: write     # dto.
+      id-token: write  # dto.
     
     uses: ./.github/workflows/gh_pages.yaml
     with:
@@ -367,10 +372,11 @@ jobs:
   
   
   conda:
+    name: Conda package pypdfium2_helpers
     needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
-    permissions:  # needed by called workflow
-      contents: read
+    permissions:
+      contents: read  # needed by called workflow
     
     uses: ./.github/workflows/conda.yaml
     with:
@@ -383,12 +389,13 @@ jobs:
   
   
   cleanup:
+    name: Clean up temporary branch
     needs: [publish, gh_pages, conda]
     if: ${{ inputs.autorelease && !cancelled() }}
-    runs-on: ${{ inputs.runner_os }}
     permissions:
       contents: write  # needed for push
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
       - name: Check out pypdfium2 (shallow, authenticated)
