@@ -6,7 +6,7 @@
 # Changelog for next release
 - Major CI overhaul.
   + TODO
-  + We now hash-pin all actions across `pypdfium2`, `gn-dist` and the `ctypesgen` fork.
+  + Hash-pinned all actions across `pypdfium2`, `gn-dist` and the `ctypesgen` fork.
 - With 32-bit interpreters running on 64-bit hosts, setup should now select the 32-bit target.
 - With pdfium-binaries, use (and cache) the included pdfium headers.
   In most cases, this should let us avoid upstream Gitiles, which turns out to be flaky in automated access.
