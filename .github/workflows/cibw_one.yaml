@@ -40,7 +40,7 @@ permissions: {}
 jobs:
   
   build:
-    name: ${{ inputs.cibw_target }} on ${{ inputs.runner_os }}
+    name: Build ${{ inputs.cibw_target }} on ${{ inputs.runner_os }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     

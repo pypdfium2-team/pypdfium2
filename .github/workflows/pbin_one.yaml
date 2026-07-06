@@ -38,7 +38,7 @@ permissions: {}
 jobs:
   
   build:
-    name: ${{ inputs.pbin_target }} on ${{ inputs.runner_os }}
+    name: Build ${{ inputs.pbin_target }} on ${{ inputs.runner_os }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
