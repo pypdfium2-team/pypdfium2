@@ -29,6 +29,7 @@ jobs:
         uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1.3.2
         with:
           workflow: main.yaml
+          # TODO unlock actually_publish before merge
           inputs: |
             {
               "runner_os": "ubuntu-26.04",
@@ -42,5 +43,5 @@ jobs:
               "conda": "true",
               "gh_pages": "true",
               "publish": "true",
-              "actually_publish": "false"  # XXX
+              "actually_publish": "false"
             }
