@@ -56,7 +56,7 @@ jobs:
   prepare:
     runs-on: ${{ inputs.runner_os }}
     permissions:
-      contents: write
+      contents: write  # needed for push
     outputs:
       pbin_needed: ${{ steps.get_matrix.outputs.pbin_needed }}
       sbuild_needed: ${{ steps.get_matrix.outputs.sbuild_needed }}
@@ -356,6 +356,12 @@ jobs:
   gh_pages:
     needs: publish  # i.e. goes after, regardless if publish is active or not
     if: ${{ inputs.gh_pages && !cancelled() && !contains(needs.*.result, 'failure') }}
+    permissions:  # needed by called workflow
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
+    
     uses: ./.github/workflows/gh_pages.yaml
     with:
       publish: ${{ inputs.publish }}
@@ -364,20 +370,25 @@ jobs:
   conda:
     needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
+    permissions:
+      contents: read  # needed by called workflow
+    
     uses: ./.github/workflows/conda.yaml
-    secrets:
-      anaconda_api_token: ${{ inputs.actually_publish && secrets.ANACONDA_API_TOKEN }}
     with:
       package: helpers
       test: true
       publish: ${{ inputs.publish }}
       actually_publish: ${{ inputs.actually_publish }}
+    secrets:
+      anaconda_api_token: ${{ inputs.actually_publish && secrets.ANACONDA_API_TOKEN }}
   
   
   cleanup:
     needs: [publish, gh_pages, conda]
     if: ${{ inputs.autorelease && !cancelled() }}
     runs-on: ${{ inputs.runner_os }}
+    permissions:
+      contents: write  # needed for push
     
     steps:
       
