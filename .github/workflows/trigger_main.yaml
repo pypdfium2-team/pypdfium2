@@ -13,10 +13,14 @@ on:
   #   - cron: '0 4 10 * *'  # monthly, 10th day
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   
   trigger:
     runs-on: ubuntu-26.04
+    permissions:
+      actions: write
     
     steps:
       # IMPORTANT Need to use workflow dispatch here, not reusable workflow call.

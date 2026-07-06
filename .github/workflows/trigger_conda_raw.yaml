@@ -8,6 +8,8 @@ on:
     - cron: '0 4 8 * *'  # monthly, 8th day
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   # NOTE recently changed to reusable workflow call, let's see if this works. If it does not, we can revert back to benc-uk/workflow-dispatch.
   conda_raw_release:

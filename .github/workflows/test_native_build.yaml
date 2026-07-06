@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 name: Test Native Build
-
 on:
   workflow_dispatch:
     inputs:
@@ -31,12 +30,11 @@ on:
         type: boolean
         default: true
 
-# TODO Windows/macOS native?
+permissions: {}
 
 jobs:
-  
+  # TODO Windows/macOS native?
   build:
-    
     strategy:
       fail-fast: false
       matrix:

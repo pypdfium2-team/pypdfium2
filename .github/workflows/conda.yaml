@@ -44,14 +44,18 @@ defaults:
   run:
     shell: bash -el {0}
 
+permissions: {}
+
 # TODO it might be nice to support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be fairly complicated
 # TODO add ability to rebuild helpers with different pdfium version bounds
 
 jobs:
   
   build:
-    
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read  # recommended by checkout action
+    
     steps:
       
       - name: Set up Miniconda
@@ -98,6 +102,8 @@ jobs:
     
     if: ${{ inputs.test }}
     needs: build
+    permissions:
+      contents: read  # recommended by checkout action
     
     strategy:
       fail-fast: false
@@ -114,7 +120,6 @@ jobs:
             py: '3.12'
     
     runs-on: ${{ matrix.os }}
-    
     steps:
       
       - name: Check out pypdfium2 (shallow)
@@ -160,6 +165,8 @@ jobs:
     if: ${{ inputs.publish }}
     needs: [build, test]
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read  # recommended by checkout action
     
     # TODO upload as GH release as well
     

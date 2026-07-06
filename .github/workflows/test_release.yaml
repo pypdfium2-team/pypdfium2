@@ -16,10 +16,12 @@ defaults:
   run:
     shell: bash
 
-jobs:
+permissions: {}
 
+jobs:
   test-release:
-  
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +38,6 @@ jobs:
           #   py: '3.10'
     
     runs-on: ${{ matrix.os }}
-    
     steps:
       
       - name: Set up Python

@@ -49,10 +49,14 @@ defaults:
   run:
     shell: bash
 
-jobs:  
+permissions: {}
+
+jobs:
   
   prepare:
     runs-on: ${{ inputs.runner_os }}
+    permissions:
+      contents: write
     outputs:
       pbin_needed: ${{ steps.get_matrix.outputs.pbin_needed }}
       sbuild_needed: ${{ steps.get_matrix.outputs.sbuild_needed }}
@@ -118,6 +122,8 @@ jobs:
     needs: prepare
     if: ${{ inputs.sdist || inputs.publish }}
     runs-on: ${{ inputs.runner_os }}
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
     
     steps:
       
