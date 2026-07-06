@@ -380,7 +380,7 @@ jobs:
       publish: ${{ inputs.publish }}
       actually_publish: ${{ inputs.actually_publish }}
     secrets:
-      anaconda_api_token: ${{ inputs.actually_publish && secrets.ANACONDA_API_TOKEN }}
+      anaconda_api_token: ${{ secrets.ANACONDA_API_TOKEN }}
   
   
   cleanup:
