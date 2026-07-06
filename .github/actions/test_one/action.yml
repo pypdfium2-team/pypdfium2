@@ -78,7 +78,7 @@ runs:
         python3 utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
     
     - name: Linux - Run auditwheel show
-      if: ${{ startsWith(inputs.os, 'ubuntu-') && inputs.auditwheel }}
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.auditwheel }}
       shell: bash
       run: |
         python3 -m pip install -U auditwheel
