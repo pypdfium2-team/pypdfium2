@@ -29,6 +29,7 @@ on:
         default: true
   workflow_dispatch:
     inputs: *reusable_inputs
+  pull_request:  # XXX
 
 defaults:
   run:
