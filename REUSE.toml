@@ -164,6 +164,7 @@ SPDX-FileComment = "Licenses for compiled binaries of pdfium."
 path = [
     "strategy/targets.json",
     "strategy/profiles.json",
+    "utils/check.sh",
     "utils/regextract.py",
     "utils/enforce_install.sh",
     "utils/inside_docker.sh",
