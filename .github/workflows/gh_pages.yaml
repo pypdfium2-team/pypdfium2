@@ -30,6 +30,9 @@ jobs:
   
   build:
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
+    
     steps:
       
       - name: Check out pypdfium2 (deep)

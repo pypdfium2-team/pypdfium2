@@ -357,6 +357,7 @@ jobs:
     needs: publish  # i.e. goes after, regardless if publish is active or not
     if: ${{ inputs.gh_pages && !cancelled() && !contains(needs.*.result, 'failure') }}
     permissions:  # needed by called workflow
+      contents: read
       pages: write
       id-token: write
     
