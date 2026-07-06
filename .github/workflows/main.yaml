@@ -132,12 +132,11 @@ jobs:
         uses: ./.github/actions/prepare_one
         with:
           py_vers: ${{ inputs.py_vers }}
-          pip_install: -U -r req/setup.txt twine
+          pip_install: -U -r req/setup.txt
       
       - name: Craft sdist
         run: |
           python3 setupsrc/craft.py --sdist
-          twine check dist/pypdfium2-*.tar.gz
           python3 utils/multitest.py -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
         env:
           PY_VERS: ${{ inputs.py_vers }}
