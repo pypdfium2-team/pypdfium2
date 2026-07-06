@@ -29,7 +29,6 @@ on:
       test_pdfium:
         type: boolean
         default: true
-  pull_request:  # XXX
 
 permissions: {}
 
