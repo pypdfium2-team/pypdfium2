@@ -35,14 +35,15 @@ on:
   workflow_dispatch:
     inputs: *reusable_inputs
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   
   build:
     name: ${{ inputs.cibw_target }} on ${{ inputs.runner_os }}
     runs-on: ${{ inputs.runner_os }}
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
     
     steps:
       

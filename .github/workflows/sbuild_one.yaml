@@ -42,13 +42,14 @@ defaults:
   run:
     shell: bash
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   
   build:
     runs-on: ${{ inputs.os }}
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
     
     steps:
       

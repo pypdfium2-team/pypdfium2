@@ -33,14 +33,15 @@ defaults:
   run:
     shell: bash
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   
   build:
     name: ${{ inputs.pbin_target }} on ${{ inputs.runner_os }}
     runs-on: ${{ inputs.runner_os }}
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
     
     steps:
       
