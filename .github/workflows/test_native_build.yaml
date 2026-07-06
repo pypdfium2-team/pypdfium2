@@ -35,6 +35,8 @@ permissions: {}
 jobs:
   # TODO Windows/macOS native?
   build:
+    permissions:
+      contents: read  # needed by called workflow
     strategy:
       fail-fast: false
       matrix:
