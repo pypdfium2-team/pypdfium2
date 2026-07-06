@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 rules:
-  # Opinions differ on what is or isn't a misfeature. Disable.
-  # (We like setup-python's pip-install input.)
+  # Opinions differ on what is or isn't a misfeature. Disable. (FWIW, we like setup-python's pip-install input.)
   misfeature:
     disable: true
