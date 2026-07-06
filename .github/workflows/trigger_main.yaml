@@ -3,7 +3,7 @@
 
 name: Trigger main release
 on:
-  # NOTE Schedule currently suspended, to preserve PyPI disk space. Manually dispatch releases as needed.
+  # NOTE Schedule currently suspended. Manually dispatch releases as needed.
   # # https://github.com/bblanchon/pdfium-binaries/blob/master/.github/workflows/trigger.yml
   # # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   # # https://crontab.guru/
@@ -14,8 +14,7 @@ on:
 permissions: {}
 
 jobs:
-  # Need to use workflow dispatch here, not reusable workflow call.
-  # This is because pypa/gh-action-pypi-publish actually fails when nested in a reusable workflow call. (This broke PyPI upload of our 5.10.0 release. For some reason, TestPyPI upload passed, probably because it has attestations disabled...)
+  # Need to use workflow dispatch here. pypa/gh-action-pypi-publish does not support the reusable workflow call model. (This broke PyPI upload of our 5.10.0 release. TestPyPI did not catch the issue.)
   trigger:
     name: Dispatch release workflow
     permissions:
