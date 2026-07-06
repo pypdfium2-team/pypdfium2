@@ -177,7 +177,7 @@ jobs:
   
   
   sbuild:
-    name: SBLD ${{ matrix.target_os || matrix.os }} ${{ matrix.target_cpu }}
+    name: SBLD ${{ matrix.target_os || matrix.runner_os }} ${{ matrix.target_cpu }}
     needs: prepare
     if: ${{ fromJSON(needs.prepare.outputs.sbuild_needed) }}
     permissions:
