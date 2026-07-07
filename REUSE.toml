@@ -166,6 +166,7 @@ path = [
     "utils/regextract.py",
     "utils/enforce_install.sh",
     "utils/inside_docker.sh",
+    "utils/call_container_driver.sh",
 ]
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
