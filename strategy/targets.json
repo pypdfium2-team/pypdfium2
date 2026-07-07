@@ -136,7 +136,6 @@
             "build_params": "--use-sysroot --clang-path /opt/clang"},
         "manylinux_armv7l": {
             "runner_os": "ubuntu-26.04",
-            "test_os": "ubuntu-26.04-arm",
             "target_cpu": "arm"},
         "manylinux_ppc64le": {
             "runner_os": "ubuntu-26.04",
