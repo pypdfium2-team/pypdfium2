@@ -131,6 +131,14 @@ jobs:
       # Bear in mind: some fields, e.g. continue-on-error, require an actual bool (check GH docs).
       # In that case, need to use fromJSON() in the called action, and not map to empty string here.
       # Using empty/non-empty string as bool substitute should be OK for if conditionals though.
+      
+      - name: Inspect build
+        uses: ./.github/actions/inspect_step
+        with:
+          runner_os: ${{ inputs.runner_os }}
+          auditwheel: ${{ !(inputs.target_os || startsWith(inputs.target_cpu, 'mips')) || '' }}
+          dll_glob: 'data/sourcebuild/*pdfium.*'
+      
       - name: Test wheel
         uses: ./.github/actions/test_step
         with:
@@ -138,10 +146,8 @@ jobs:
           py_vers: ${{ inputs.py_vers }}
           test_on_host: ${{ !(inputs.target_os || inputs.target_cpu) || '' }}
           docker: ${{ !(inputs.target_os || inputs.target_cpu == 'mipsel') || '' }}
-          auditwheel: ${{ !(inputs.target_os || startsWith(inputs.target_cpu, 'mips')) || '' }}
           windows_32bit: ${{ startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86' || '' }}
           mac_emulate_intel: ${{ inputs.target_cpu && !endsWith(inputs.runner_os, '-intel') || '' }}
-          dll_glob: 'data/sourcebuild/*pdfium.*'
   
   test_other:
     name: Test on ${{ inputs.test_os }}

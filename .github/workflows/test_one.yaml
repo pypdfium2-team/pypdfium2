@@ -54,16 +54,10 @@ jobs:
         with:
           py_vers: ${{ inputs.py_vers }}
       
-      - name: Test on host
-        if: ${{ !inputs.docker }}
-        run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
-        env:
-          PY_VERS: ${{ inputs.py_vers }}
-      
-      - name: Set up QEMU
-        if: ${{ inputs.docker }}
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
-      
-      - name: Test in container
-        if: ${{ inputs.docker }}
-        run: ./utils/call_container_driver.sh
+      - name: Test
+        uses: ./.github/actions/test_step
+        with:
+          runner_os: ${{ inputs.runner_os }}
+          py_vers: ${{ inputs.py_vers }}
+          test_on_host: ${{ !inputs.docker || '' }}
+          docker: ${{ inputs.docker || '' }}

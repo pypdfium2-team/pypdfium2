@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: 'Test one'
+name: 'Test'
 description: 'Test one wheel, with container/emulator if needed'
 # https://github.com/actions/runner/issues/2238 ...
 inputs:
@@ -17,36 +17,17 @@ inputs:
   docker:
     description: 'Do docker testing'
     default: 'true'
-  auditwheel:
-    description: 'Run auditwheel show'
-    default: 'true'
   mac_emulate_intel:
     description: 'On macOS, indicate an x86_64 component to be tested under Rosetta emulation'
     default: ''
   windows_32bit:
     description: "Indicate 32-bit python interpreter"
-  dll_glob:
-    description: 'Where to find the PDFium DLL in question'
-    default: ''
 
 runs:
   using: 'composite'
   steps:
     
     # https://github.com/orgs/community/discussions/18597 ...
-    
-    - name: Inspect DLL with file
-      shell: bash
-      run: file $DLL_GLOB
-      env:
-        DLL_GLOB: ${{ inputs.dll_glob }}
-    
-    - name: macOS - Inspect DLL with vtool
-      if: ${{ startsWith(inputs.runner_os, 'macos-') }}
-      shell: bash
-      run: vtool -show-build $DLL_GLOB
-      env:
-        DLL_GLOB: ${{ inputs.dll_glob }}
     
     - name: Test wheel on host
       if: ${{ inputs.test_on_host }}
@@ -72,10 +53,3 @@ runs:
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
       shell: bash
       run: ./utils/call_container_driver.sh
-    
-    - name: Linux - Run auditwheel show
-      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.auditwheel }}
-      shell: bash
-      run: |
-        python3 -m pip install -U auditwheel
-        python3 -m auditwheel show dist/*.whl

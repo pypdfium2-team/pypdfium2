@@ -125,5 +125,5 @@ jobs:
     with:
       runner_os: ${{ inputs.test_os }}
       artifact_id: ${{ needs.build.outputs.artifact_id }}
-      py_vers: ${{ inputs.py_vers }}
+      # py_vers: ${{ inputs.py_vers }}  # XXX
       ref: ${{ inputs.ref }}
