@@ -52,4 +52,4 @@ runs:
     - name: Linux - Test in Docker container
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
       shell: bash
-      run: ./utils/call_container_driver.sh
+      run: ./utils/call_container_driver.sh dist/*.whl
