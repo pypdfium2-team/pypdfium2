@@ -31,15 +31,14 @@ def _get_python_exe_map():
     if not (sys.platform.startswith("win32") and bool(os.getenv("GITHUB_ACTIONS"))):
         return exemap
     
-    # cf. https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
-    install_dir = Path(os.environ["RUNNER_TOOL_CACHE"]) / "Python"
-    subdirs = tuple(install_dir.iterdir())
     cpu_id = platform.machine().lower()
     if WINDOWS_32BIT and cpu_id == "amd64":
         cpu_id = "x86"
     else:
         cpu_id = {"amd64": "x64"}.get(cpu_id, cpu_id)  # arm64 and x86 implied
-    for subdir in subdirs:
+    # cf. https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
+    install_dir = Path(os.environ["RUNNER_TOOL_CACHE"]) / "Python"
+    for subdir in install_dir.iterdir():
         match = re.match(r"(\d.\d*).", subdir.name)
         if not match:
             continue
