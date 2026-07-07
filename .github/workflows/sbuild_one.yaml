@@ -49,7 +49,7 @@ permissions: {}
 jobs:
   
   build:
-    name: Build ${{ inputs.target_os || inputs.runner_os }} ${{ inputs.target_cpu }}, test_on_host=${{ inputs.test_on_host }}
+    name: Build ${{ inputs.target_os || inputs.runner_os }} ${{ inputs.target_cpu }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
