@@ -731,7 +731,7 @@ def _make_json_compat(obj):
 
 
 def tar_extract_headers(tar, dest_dir, prefix=""):
-    mkdir_clean(dest_dir)
+    mkdir(dest_dir)
     pattern = re.escape(prefix) + r"fpdf(\w+)\.h"
     for m in tar.getmembers():
         m_path = m.name
@@ -769,7 +769,6 @@ def build_pdfium_bindings(version, **kwargs):
         log("Using cached headers")
     else:
         log("Downloading headers...")
-        mkdir(headers_dir)
         archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
         url_request.urlretrieve(archive_url, archive_path)
