@@ -50,7 +50,7 @@ jobs:
           artifact-ids: ${{ inputs.artifact_id }}
           path: dist/
       
-      - name: Test ${{ inputs.py_vers }}
+      - name: Test with Py ${{ inputs.py_vers }}
         run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
         env:
           PY_VERS: ${{ inputs.py_vers }}
