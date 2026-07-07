@@ -8,6 +8,9 @@ on:
       runner_os:
         type: string
         required: true
+      test_os:
+        type: string
+        default: ''
       cibw_target:
         type: string
         required: true

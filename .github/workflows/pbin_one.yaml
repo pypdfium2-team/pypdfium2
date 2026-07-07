@@ -8,6 +8,9 @@ on:
       runner_os:
         type: string
         required: true
+      test_os:
+        type: string
+        default: ''
       pbin_target:
         type: string
         default: ''

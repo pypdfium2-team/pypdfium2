@@ -5,9 +5,12 @@ name: SBLD one
 on:
   workflow_call:
     inputs: &reusable_inputs
-      os:
+      runner_os:
         type: string
         required: true
+      test_os:
+        type: string
+        default: ''
       py_vers:
         type: string
         default: '3.14'
@@ -46,11 +49,11 @@ permissions: {}
 jobs:
   
   build:
-    name: Build ${{ inputs.target_os || inputs.os }} ${{ inputs.target_cpu }}, test_on_host=${{ inputs.test_on_host }}
+    name: Build ${{ inputs.target_os || inputs.runner_os }} ${{ inputs.target_cpu }}, test_on_host=${{ inputs.test_on_host }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
-    runs-on: ${{ inputs.os }}
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
       - name: Check out pypdfium2 (deep)
@@ -65,7 +68,7 @@ jobs:
         with:
           replicate_tag: ${{ inputs.replicate_tag }}
           py_vers: ${{ inputs.py_vers }}
-          py_arch: ${{ (startsWith(inputs.os, 'windows') && inputs.target_cpu == 'x86') && 'x86' || '' }}
+          py_arch: ${{ (startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86') && 'x86' || '' }}
           pip_install: -U -r req/setup.txt
       
       - name: Install custom clang
@@ -73,21 +76,21 @@ jobs:
         run: bash utils/install-static-clang.sh -m install-only
       
       - name: Update package list
-        if: ${{ startsWith(inputs.os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.os, '-arm')) }}
+        if: ${{ startsWith(inputs.runner_os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.runner_os, '-arm')) }}
         run: sudo apt-get update
       
       - name: Install Linux/Android cross deps
-        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
+        if: ${{ startsWith(inputs.runner_os, 'ubuntu') && inputs.target_cpu }}
         run: |
           PACKAGES=$(python3 utils/get_cross_deps.py $TARGET_CPU $RUNNER_OS)
           echo $PACKAGES; sudo apt-get install -y $PACKAGES
           ls -l /usr/bin |grep -E '\-(gcc|g\+\+|ar|nm|readelf)(-[0-9.]+)?$'
         env:
-          RUNNER_OS: ${{ inputs.os }}
+          RUNNER_OS: ${{ inputs.runner_os }}
           TARGET_CPU: ${{ inputs.target_cpu }}
       
       - name: Install Linux native deps  # fallback
-        if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}
+        if: ${{ startsWith(inputs.runner_os, 'ubuntu') && endsWith(inputs.runner_os, '-arm') }}
         run: |
           sudo apt-get install -y ninja-build  # generate-ninja
           python3 -m pip install -r req/gn.txt
@@ -95,7 +98,7 @@ jobs:
       
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.
       - name: Install Windows cross deps
-        if: ${{ startsWith(inputs.os, 'windows') && !endsWith(inputs.os, '-arm') && inputs.target_cpu }}
+        if: ${{ startsWith(inputs.runner_os, 'windows') && !endsWith(inputs.runner_os, '-arm') && inputs.target_cpu }}
         uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9 # v1.0.5
         with:
           version-sdk: 26100
@@ -119,7 +122,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: dist/*.whl
-          name: "sbuild-${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}"
+          name: "sbuild-${{ inputs.target_os || inputs.runner_os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}"
       
       # https://github.com/actions/runner/issues/2238 ...
       # Bear in mind: some fields, e.g. continue-on-error, require an actual bool (check GH docs).
@@ -128,11 +131,11 @@ jobs:
       - name: Test wheel
         uses: ./.github/actions/test_step
         with:
-          runner_os: ${{ inputs.os }}
+          runner_os: ${{ inputs.runner_os }}
           py_vers: ${{ inputs.py_vers }}
           test_on_host: ${{ !(inputs.target_os || inputs.target_cpu) || '' }}
           docker: ${{ !(inputs.target_os || inputs.target_cpu == 'mipsel') || '' }}
           auditwheel: ${{ !(inputs.target_os || startsWith(inputs.target_cpu, 'mips')) || '' }}
-          windows_32bit: ${{ startsWith(inputs.os, 'windows') && inputs.target_cpu == 'x86' || '' }}
-          mac_emulate_intel: ${{ inputs.target_cpu && !endsWith(inputs.os, '-intel') || '' }}
+          windows_32bit: ${{ startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86' || '' }}
+          mac_emulate_intel: ${{ inputs.target_cpu && !endsWith(inputs.runner_os, '-intel') || '' }}
           dll_glob: 'data/sourcebuild/*pdfium.*'
