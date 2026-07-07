@@ -53,7 +53,7 @@ jobs:
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Prepare
-        uses: ./.github/actions/prepare_one
+        uses: ./.github/actions/prepare_step
         with:
           replicate_tag: ${{ inputs.replicate_tag }}
           py_vers: ${{ inputs.py_vers }}
@@ -72,7 +72,7 @@ jobs:
           name: "pbin-${{ inputs.pbin_target }}"
       
       - name: Test wheel
-        uses: ./.github/actions/test_one
+        uses: ./.github/actions/test_step
         # https://github.com/actions/runner/issues/2238 ...
         with:
           runner_os: ${{ inputs.runner_os }}

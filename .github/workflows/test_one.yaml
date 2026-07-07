@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Test one
+on:
+  workflow_call:
+    inputs:
+      runner_os:
+        type: string
+        required: true
+      artifact_name:
+        type: string
+        required: true
+      py_vers:
+        type: string
+        default: '3.14'
+
+defaults:
+  run:
+    shell: bash
+
+permissions: {}
+
+jobs:
+  test:
+    name: Test on ${{ inputs.runner_os }} with ${{ inputs.artifact_name }}
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
+    
+    runs-on: ${{ inputs.runner_os }}
+    steps:
+      - name: TODO
+        run: echo TODO

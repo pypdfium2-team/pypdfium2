@@ -137,7 +137,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
       
       - name: Prepare Python
-        uses: ./.github/actions/prepare_one
+        uses: ./.github/actions/prepare_step
         with:
           py_vers: ${{ inputs.py_vers }}
           pip_install: -U -r req/setup.txt

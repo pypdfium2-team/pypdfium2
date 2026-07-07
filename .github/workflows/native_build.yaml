@@ -52,7 +52,7 @@ jobs:
           - os: ubuntu-24.04-arm
             os_condition: ${{ inputs.arm64 }}
     
-    uses: ./.github/workflows/test_native_build_one.yaml
+    uses: ./.github/workflows/native_build_one.yaml
     with:
       os: ${{ matrix.os }}
       condition: ${{ matrix.cc_condition && matrix.os_condition }}

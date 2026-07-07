@@ -62,7 +62,7 @@ jobs:
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Prepare
-        uses: ./.github/actions/prepare_one
+        uses: ./.github/actions/prepare_step
         with:
           replicate_tag: ${{ inputs.replicate_tag }}
           py_vers: ${{ inputs.py_vers }}
@@ -127,7 +127,7 @@ jobs:
       # In that case, need to use fromJSON() in the called action, and not map to empty string here.
       # Using empty/non-empty string as bool substitute should be OK for if conditionals though.
       - name: Test wheel
-        uses: ./.github/actions/test_one
+        uses: ./.github/actions/test_step
         with:
           runner_os: ${{ inputs.os }}
           py_vers: ${{ inputs.py_vers }}

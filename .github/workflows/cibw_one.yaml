@@ -55,7 +55,7 @@ jobs:
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Prepare
-        uses: ./.github/actions/prepare_one
+        uses: ./.github/actions/prepare_step
         with:
           replicate_tag: ${{ inputs.replicate_tag }}
       
