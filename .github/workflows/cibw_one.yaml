@@ -115,7 +115,7 @@ jobs:
           TARGET: ${{ inputs.cibw_target }}
   
   test_other:
-    name: Test ${{ inputs.cibw_target }} on ${{ inputs.test_os }}
+    name: 'Test on another runner: ${{ inputs.test_os }}'
     if: ${{ inputs.test_os }}
     needs: build
     permissions:
