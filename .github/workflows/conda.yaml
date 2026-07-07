@@ -43,7 +43,6 @@ on:
 defaults:
   run:
     shell: bash -el {0}
-
 permissions: {}
 
 # TODO it might be nice to support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be fairly complicated

@@ -48,7 +48,6 @@ on:
 defaults:
   run:
     shell: bash
-
 permissions: {}
 
 jobs:

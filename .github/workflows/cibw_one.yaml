@@ -35,6 +35,9 @@ on:
   workflow_dispatch:
     inputs: *reusable_inputs
 
+defaults:
+  run:
+    shell: bash
 permissions: {}
 
 jobs:
