@@ -121,7 +121,7 @@ jobs:
   sdist:
     name: Craft sdist
     needs: prepare
-    if: ${{ inputs.sdist || inputs.publish }}
+    if: ${{ inputs.sdist }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
