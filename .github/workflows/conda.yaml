@@ -25,9 +25,16 @@ on:
       publish:
         type: boolean
         default: false
+      actually_publish:
+        type: boolean
+        default: false
       ref:
         type: string
         default: ''
+    secrets:
+      anaconda_api_token:
+        description: 'Anaconda API token. Required if actually_publish is true.'
+        required: false
   workflow_dispatch:
     inputs: *reusable_inputs
 
@@ -36,6 +43,7 @@ on:
 defaults:
   run:
     shell: bash -el {0}
+permissions: {}
 
 # TODO it might be nice to support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be fairly complicated
 # TODO add ability to rebuild helpers with different pdfium version bounds
@@ -43,12 +51,15 @@ defaults:
 jobs:
   
   build:
+    name: Build conda pypdfium2_${{ inputs.package }}
+    permissions:
+      contents: read  # recommended by checkout action
     
     runs-on: ubuntu-26.04
     steps:
       
       - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ inputs.py_ver }}
@@ -58,11 +69,10 @@ jobs:
           channel-priority: strict
           show-channel-urls: true
       
-      - name: Check out repository
-        uses: actions/checkout@v6
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          repository: ${{ github.repository }}
-          fetch-depth: 0
+          fetch-depth: 0  # for git describe
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
       
@@ -83,15 +93,18 @@ jobs:
           MAYBE_NEW_ONLY: ${{ inputs.new_only && '--new-only' || '' }}
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: conda_package
           path: conda/${{ inputs.package }}/out/
   
   test:
     
+    name: Test ${{ matrix.os }} with Py ${{ matrix.py }}
     if: ${{ inputs.test }}
     needs: build
+    permissions:
+      contents: read  # recommended by checkout action
     
     strategy:
       fail-fast: false
@@ -108,25 +121,23 @@ jobs:
             py: '3.12'
     
     runs-on: ${{ matrix.os }}
-    
     steps:
       
-      - name: Check out repository
-        uses: actions/checkout@v6
+      - name: Check out pypdfium2 (shallow)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          repository: ${{ github.repository }}
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Miniconda setup
-        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
           channels: defaults
       
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: conda_package
           path: conda_dist/
@@ -152,17 +163,18 @@ jobs:
   
   publish:
     
+    name: Publish to Anaconda
     if: ${{ inputs.publish }}
     needs: [build, test]
+    permissions:
+      contents: read  # recommended by checkout action
+    
     runs-on: ubuntu-26.04
-    
-    # TODO upload as GH release as well
-    
     steps:
       
       # NOTE custom channels may not be actually necessary here
       - name: Miniconda setup
-        uses: conda-incubator/setup-miniconda@v4  # TODO pin to hash?
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
@@ -173,15 +185,18 @@ jobs:
         run: conda install -y anaconda-client
       
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: conda_package
           path: conda_dist/
       
+      # TODO upload as GH release as well?
+      
       - name: Upload to Anaconda
-        env:
-          PACKAGE: ${{ inputs.package }}
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        if: ${{ inputs.actually_publish }}
         run: |
           ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${PACKAGE}-*.conda
           anaconda upload $ARTIFACT_PATH
+        env:
+          PACKAGE: ${{ inputs.package }}
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}

@@ -9,13 +9,18 @@ on:
   #   - cron: '0 4 8 * *'  # monthly, 8th day
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
-  # NOTE recently changed to reusable workflow call, let's see if this works. If it does not, we can revert back to benc-uk/workflow-dispatch.
   conda_raw_release:
+    permissions:
+      contents: read  # needed by called workflow
     uses: ./.github/workflows/conda.yaml
-    secrets: inherit  # Anaconda API token
     with:
       package: raw
       new_only: true
       test: true
       publish: true
+      actually_publish: false  # TODO unlock before merge
+    secrets:
+      anaconda_api_token: ${{ secrets.ANACONDA_API_TOKEN }}
