@@ -12,13 +12,14 @@ on:
   workflow_dispatch:
 
 permissions: {}
-
 jobs:
+  
   # Need to use workflow dispatch here. pypa/gh-action-pypi-publish does not support the reusable workflow call model. (This broke PyPI upload of our 5.10.0 release. TestPyPI did not catch the issue.)
   trigger:
     name: Dispatch release workflow
     permissions:
       actions: write  # allow workflow dispatch
+    
     runs-on: ubuntu-26.04
     steps:
       # TODO unlock actually_publish
