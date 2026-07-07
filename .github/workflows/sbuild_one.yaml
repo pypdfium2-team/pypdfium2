@@ -133,7 +133,7 @@ jobs:
           py_vers: ${{ inputs.py_vers }}
           test_on_host: ${{ !(inputs.target_os || inputs.target_cpu) || '' }}
           docker: ${{ !(inputs.target_os || inputs.target_cpu == 'mipsel') || '' }}
-          auditwheel: ${{ !startsWith(inputs.target_cpu, 'mips') || '' }}
+          auditwheel: ${{ !(inputs.target_os || startsWith(inputs.target_cpu, 'mips')) || '' }}
           windows_32bit: ${{ startsWith(inputs.os, 'windows') && inputs.target_cpu == 'x86' || '' }}
           mac_emulate_intel: ${{ inputs.target_cpu && !endsWith(inputs.os, '-intel') || '' }}
           dll_glob: 'data/sourcebuild/*pdfium.*'
