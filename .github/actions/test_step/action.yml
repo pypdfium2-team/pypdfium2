@@ -55,7 +55,7 @@ runs:
     - name: Linux - Restart Docker  # XXX
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}  # inputs.restart_docker
       shell: bash
-      run: sudo /etc/init.d/docker restart
+      run: sudo snap restart docker
     
     - name: Linux - Test in Docker container
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
