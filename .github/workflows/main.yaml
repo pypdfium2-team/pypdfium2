@@ -141,7 +141,7 @@ jobs:
           py_vers: ${{ inputs.py_vers }}
           pip_install: -U -r req/setup.txt
       
-      - name: Craft sdist
+      - name: Build & test sdist
         run: |
           python3 setupsrc/craft.py --sdist
           python3 utils/multitest.py -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
