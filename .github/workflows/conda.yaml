@@ -164,7 +164,7 @@ jobs:
   publish:
     
     name: Publish to Anaconda
-    if: ${{ inputs.publish }}
+    if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     needs: [build, test]
     permissions:
       contents: read  # recommended by checkout action
@@ -196,7 +196,7 @@ jobs:
         if: ${{ inputs.actually_publish }}
         run: |
           ARTIFACT_PATH=conda_dist/noarch/pypdfium2_${PACKAGE}-*.conda
-          anaconda upload $ARTIFACT_PATH
+          anaconda --verbose upload $ARTIFACT_PATH
         env:
           PACKAGE: ${{ inputs.package }}
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
