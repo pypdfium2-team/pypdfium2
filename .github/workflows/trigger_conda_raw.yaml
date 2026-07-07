@@ -8,10 +8,6 @@ on:
   #   # pdfium-binaries triggers conda on the first Monday of month at 4 o'clock UTC, so we'll want to rebuild after that, but before the next main release where we want to use the package
   #   - cron: '0 4 8 * *'  # monthly, 8th day
   workflow_dispatch:
-    inputs:
-      test:
-        type: boolean
-        default: true
 
 permissions: {}
 
@@ -23,7 +19,7 @@ jobs:
     with:
       package: raw
       new_only: true
-      test: ${{ inputs.test }}
+      test: true
       publish: true
       actually_publish: true
     secrets:
