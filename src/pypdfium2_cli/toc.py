@@ -30,16 +30,16 @@ def attach(parser):
 
 class ColorIndicator:
     
-    def __init__(self, enable, indicator, sep):
-        self.get = self._impl if enable else self._noop
+    def __init__(self, indicator, sep):
         self.indicator = indicator
         self.sep = sep
     
-    def _impl(self, color):
+    def __call__(self, color):
         r, g, b = tuple(round(c*255) for c in color)
         return f"\x1b[38;2;{r};{g};{b}m" + self.indicator + "\x1b[0m" + self.sep
     
-    def _noop(self, color):
+    @staticmethod
+    def noop(color):
         return ""
 
 
@@ -49,10 +49,14 @@ else:
     def get_color(bm):
         return None
 
+
 def main(args):
     
     pdf = get_input(args)
-    icol = ColorIndicator(args.color_indicator, "⬤", sep=" ").get
+    if args.color_indicator:
+        icol = ColorIndicator("⬤", sep=" ")
+    else:
+        icol = ColorIndicator.noop
     
     for bm in pdf.get_toc(max_depth=args.max_depth):
         
