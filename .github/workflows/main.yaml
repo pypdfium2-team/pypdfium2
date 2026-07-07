@@ -168,6 +168,7 @@ jobs:
     uses: ./.github/workflows/pbin_one.yaml
     with:
       runner_os: ${{ matrix.runner_os }}
+      test_os: ${{ matrix.test_os }}
       pbin_target: ${{ matrix.pbin_target }}
       # py_vers: ${{ ... }}  # TODO
       test_on_host: ${{ matrix.test_on_host }}
@@ -188,6 +189,7 @@ jobs:
     uses: ./.github/workflows/sbuild_one.yaml
     with:
       runner_os: ${{ matrix.runner_os }}
+      test_os: ${{ matrix.test_os }}
       # py_vers: ${{ ... }}  # TODO
       # pdfium_ver: ${{ ... }}  # TODO
       target_cpu: ${{ matrix.target_cpu }}
@@ -212,6 +214,7 @@ jobs:
     uses: ./.github/workflows/cibw_one.yaml
     with:
       runner_os: ${{ matrix.runner_os }}
+      test_os: ${{ matrix.test_os }}
       cibw_target: ${{ matrix.cibw_target }}
       cibw_arch: ${{ matrix.cibw_arch }}
       # cibw_py_ver: ${{ ... }}  # TODO
