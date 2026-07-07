@@ -14,6 +14,9 @@ on:
       py_vers:
         type: string
         default: '3.14'
+      ref:
+        type: string
+        default: ''
 
 defaults:
   run:
@@ -28,6 +31,13 @@ jobs:
     
     runs-on: ${{ inputs.runner_os }}
     steps:
+      
+      - name: Check out pypdfium2 (shallow)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Prepare
         uses: ./.github/actions/prepare_step
