@@ -71,6 +71,10 @@ def parse_args():
 def main():
     
     args = parse_args()
+    if args.target == "manylinux_i686" and bool(os.getenv("GITHUB_ACTIONS")):
+        print("Debian i686 container has network problems on GHA. Skipping.", file=sys.stderr)
+        return
+    
     os_class, cpu = args.target.split("_", maxsplit=1)
     cpu = {"loongarch64": "loong64"}.get(cpu, cpu)
     
