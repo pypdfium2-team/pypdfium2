@@ -52,6 +52,8 @@ jobs:
     name: Build ${{ inputs.target_os || inputs.runner_os }} ${{ inputs.target_cpu }}
     permissions:
       contents: read  # recommended by checkout and setup-python actions
+    outputs:
+      artifact_id: ${{ steps.upload-artifact.outputs.artifact-id }}
     
     runs-on: ${{ inputs.runner_os }}
     steps:
@@ -119,6 +121,7 @@ jobs:
           CROSS_TAG: ${{ inputs.wheel_tag }}  # optional
       
       - name: Upload wheel as artifact
+        id: upload-artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: dist/*.whl
@@ -139,3 +142,17 @@ jobs:
           windows_32bit: ${{ startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86' || '' }}
           mac_emulate_intel: ${{ inputs.target_cpu && !endsWith(inputs.runner_os, '-intel') || '' }}
           dll_glob: 'data/sourcebuild/*pdfium.*'
+  
+  test_other:
+    name: Test on ${{ inputs.test_os }}
+    if: ${{ inputs.test_os }}
+    needs: build
+    permissions:
+      contents: read  # needed by called workflow
+    
+    uses: ./.github/workflows/test_one.yaml
+    with:
+      runner_os: ${{ inputs.test_os }}
+      artifact_id: ${{ needs.build.outputs.artifact_id }}
+      py_vers: ${{ inputs.py_vers }}
+      ref: ${{ inputs.ref }}
