@@ -160,7 +160,7 @@ jobs:
       
       - name: Set up QEMU
         if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu && inputs.docker_test }}
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@v4.1.0
       
       # q&d: extract arch from wheelname
       # FIXME: Fails if no tag is provided. Better map target_cpu to uname cpu properly?
