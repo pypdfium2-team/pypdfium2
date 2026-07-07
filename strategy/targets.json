@@ -14,6 +14,7 @@
             "test_on_host": false},
         "macosx_universal2": {
             "runner_os": "macos-latest",
+            "test_os": "macos-15-intel",
             "pbin_target": "darwin_univ2",
             "test_on_host": true},
         "win_amd64": {
@@ -65,11 +66,11 @@
             "pbin_target": "linux_musl_arm64",
             "test_on_host": false},
         "android_arm64_v8a": {
-            "runner_os": "ubuntu-26.04",
+            "runner_os": "ubuntu-26.04-arm",
             "pbin_target": "android_arm64",
             "test_on_host": false},
         "android_armeabi_v7a": {
-            "runner_os": "ubuntu-26.04",
+            "runner_os": "ubuntu-26.04-arm",
             "pbin_target": "android_arm32",
             "test_on_host": false},
         "android_x86_64": {
