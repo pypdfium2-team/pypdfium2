@@ -3,7 +3,7 @@
 
 > [!IMPORTANT]
 > **AI-"assisted" issues and PRs are banned from this project!**
-> [See below.](#no-ai-issues-and-prs-policy)
+> [See below.](#no-ai-issues-and-prs)
 
 # pypdfium2
 
@@ -991,7 +991,18 @@ Roadmap:
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
 * [ctypesgen](https://github.com/pypdfium2-team/ctypesgen/issues): Bindings generator (fork). See also [upstream](https://github.com/ctypesgen/ctypesgen/issues).
 
-### No AI issues and PRs policy
+### Policy
+<!-- Inspired by bluesky's contributions policy: https://github.com/bluesky-social/indigo -->
+
+Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide much usage support.
+
+The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and PRs that we consider unsuitable will be rejected without further ado.
+If the code owner decides a change is inappropriate, that's it, and we will not enter any time-wasting discussion.
+Any attempts to pressure us to merge a PR will not be tolerated, and may result in the offender being blocked.
+
+#### No AI issues and PRs
+
+<!-- Due to an extreme influx of AI slop on GitHub, nearly all major projects have added some kind of AI policy. This is ours. Perhaps, GitHub banning AI issues/PRs in the first place (similar to Stackoverflow) might have been the better approach. -->
 
 AI issues and PRs are banned from this project.
 
@@ -1000,15 +1011,6 @@ Any issues or PRs that exhibit the typical characteristics of low-quality genera
 Our issue and PR templates make it quite plain that AI is not allowed, so users who violate this policy should not be surprised to find themselves blocked.
 
 [This announcement](https://github.com/pypdfium2-team/pypdfium2/discussions/449) offers some more background as to why this decision was reached.
-
-### Response policy
-<!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
-
-Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide much usage support.
-
-The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and PRs that we consider unsuitable will be rejected without further ado.
-We will not enter any time-wasting discussion – if the code owner decides a change is inappropriate, that's it.
-Any attempts to pressure us to merge a PR will not be tolerated, and may result in the offender being blocked.
 
 ### Known limitations
 
