@@ -95,7 +95,7 @@ jobs:
           mac_emulate_intel: ${{ inputs.pbin_target == 'darwin_univ2' || (startsWith(inputs.pbin_target, 'darwin_') && !inputs.test_on_host) || '' }}
   
   test_other:
-    name: 'Test on another runner: ${{ inputs.test_os }}'
+    name: 'Test on another runner ${{ inputs.test_os }}'
     if: ${{ inputs.test_os }}
     needs: build
     permissions:

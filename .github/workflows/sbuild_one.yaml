@@ -150,7 +150,7 @@ jobs:
           mac_emulate_intel: ${{ inputs.target_cpu && !endsWith(inputs.runner_os, '-intel') || '' }}
   
   test_other:
-    name: 'Test on another runner: ${{ inputs.test_os }}'
+    name: 'Test on another runner ${{ inputs.test_os }}'
     if: ${{ inputs.test_os }}
     needs: build
     permissions:
