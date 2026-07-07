@@ -52,4 +52,7 @@ runs:
     - name: Linux - Test in Docker container
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
       shell: bash
-      run: ./utils/call_container_driver.sh dist/*.whl
+      run: |
+        WHEEL_PATH="$(ls dist/*.whl)"
+        TARGET="$(python3 utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")"
+        python3 utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
