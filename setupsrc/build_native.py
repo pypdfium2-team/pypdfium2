@@ -125,7 +125,7 @@ class DepsFetcher:
             else:
                 return False
         mkdir(target_dir.parent)  # assuming git >= 2.49.0
-        run_cmd(["git", "clone", "--depth=1", "--revision", self.deps_info[name], DEPS_URLS[name], target_dir.name], cwd=target_dir.parent)
+        run_cmd(["git", "-c", "advice.detachedHead=false", "clone", "--depth=1", "--revision", self.deps_info[name], DEPS_URLS[name], target_dir.name], cwd=target_dir.parent)
         return True
 
 
