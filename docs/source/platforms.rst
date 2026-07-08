@@ -33,13 +33,11 @@ Covered platforms
    :file: ../../PLATFORMS.csv
    :header-rows: 1
 
-Notes
-
-1. MIPS platforms are not officially part of the manylinux standard, so the wheel tags we use are actually rejected by ``pip``, as they are not in its internal whitelist.
+.. [1] MIPS platforms are not officially part of the manylinux standard, so the wheel tags we use are actually rejected by ``pip``, as they are not in its internal whitelist.
    This can be remedied by re-tagging with ``wheel`` locally to match the host's ``sysconfig.get_platform()`` value.
    ``pip`` maintainers have been informed of this situation.
-2. Untested, for lack of a container and binfmt handler.
-3. iOS is untested, and has special considerations regarding the `management of binary extension modules <https://docs.python.org/3/using/ios.html#binary-extension-modules>`_.
+.. [2] Untested, for lack of a container and binfmt handler.
+.. [3] iOS is untested, and has special considerations regarding the `management of binary extension modules <https://docs.python.org/3/using/ios.html#binary-extension-modules>`_.
    You should be prepared to patch the library search path in ``pypdfium2_raw/bindings.py``.
    Pull requests to pypdfium2 and/or ctypesgen welcome.
 
@@ -53,7 +51,7 @@ Legend
 
 - **Release**: status, version tracked, build strategy
   
-  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only [1]_, 🟦 Setup only
+  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only [#gh_only]_, 🟦 Setup only
   + 🔄 Latest version, 📌 Pinned version
 
 - **Tier**: Platform support level
@@ -98,7 +96,7 @@ Legend
 
 - NA: Not applicable / Unknown (placeholder)
 
-.. [1] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse).
+.. [#gh_only] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse).
 
 .. admonition:: Help wanted
    
