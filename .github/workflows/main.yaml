@@ -291,7 +291,7 @@ jobs:
         run: |
           shopt -s nullglob
           mkdir artifacts/ && cp dist/* -t artifacts/
-          rm dist/*linux_*_loongarch64*.whl dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl || true
+          rm -f dist/*linux_*_loongarch64*.whl dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl
       
       - name: Apply and push repository changes
         if: ${{ inputs.actually_publish }}
