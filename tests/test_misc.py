@@ -177,4 +177,4 @@ def test_musllinux_packaging_api_available():
     else:
         assert musl_ver, "Not glibc or android libc, expected musl"
         if libc_name:
-            warnings.warn(f"platform.libc_ver() now returns {(libc_name, libc_ver)} for musl")
+            assert libc_name == "musl"
