@@ -229,12 +229,11 @@ jobs:
     needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     
-    # environment: release  # PyPI upload via "trusted publishing"  # XXX testing
+    environment: release  # PyPI upload
     permissions:
-      id-token: write      # PyPI upload via "trusted publishing", and GH attestation
+      id-token: write      # PyPI upload, GH attestation
       attestations: write  # GH attestation
-      contents: write      # autorelease repository changes
-      actions: write       # GH pages build
+      contents: write      # git push
     
     runs-on: ${{ inputs.runner_os }}
     steps:
@@ -310,11 +309,6 @@ jobs:
           git checkout main
         env:
           NEW_VERSION: ${{ needs.prepare.outputs.version }}
-      
-      # Upload to TestPyPI / PyPI via "trusted publishing".
-      # https://docs.pypi.org/trusted-publishers/adding-a-publisher/
-      # https://docs.pypi.org/trusted-publishers/using-a-publisher/
-      # https://github.com/pypa/gh-action-pypi-publish
       
       - name: Publish to TestPyPI
         if: ${{ inputs.actually_publish }}
