@@ -65,7 +65,7 @@ jobs:
       cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
       ref: ${{ steps.get_version.outputs.ref }}
       version: ${{ inputs.autorelease && steps.get_version.outputs.version || '' }}
-      branch_name: ${{ steps.autorelease.outputs.branch_name }}
+      branch_name: ${{ inputs.autorelease && steps.autorelease.outputs.branch_name || '' }}
     
     runs-on: ${{ inputs.runner_os }}
     steps:
