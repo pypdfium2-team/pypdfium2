@@ -87,7 +87,7 @@ Legend
 
 - ⚙️ Compiler used *(CIBW only – PBIN and SBLD always use clang)*
 
-- **NAT**: Can be built natively on-device?
+- **DEV**: Can be built from source natively on-device?
   
   + ✅ Yes (tested on GHA)
   + ☑️ Yes (tested in Docker)
