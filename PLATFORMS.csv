@@ -27,6 +27,6 @@ Android arm64,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,N
 Android armeabi,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,NA,
 Android x86_64,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,
 Android x86,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,
-iOS arm64 device,🔴 26,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
-iOS arm64 simulator,🔴 26,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
-iOS x86_64 simulator,🔴 26,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
+iOS arm64 device,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
+iOS arm64 simulator,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
+iOS x86_64 simulator,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
