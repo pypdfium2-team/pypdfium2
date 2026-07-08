@@ -1,3 +1,4 @@
 setuptools >= v70.1.0  # or older setuptools + `wheel`
 ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2
 build
+macholib; sys_platform == 'darwin'
