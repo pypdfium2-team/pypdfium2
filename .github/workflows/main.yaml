@@ -65,6 +65,7 @@ jobs:
       cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
       ref: ${{ steps.get_version.outputs.ref }}
       version: ${{ inputs.autorelease && steps.get_version.outputs.version || '' }}
+      branch_name: ${{ steps.autorelease.outputs.branch_name }}
     
     runs-on: ${{ inputs.runner_os }}
     steps:
@@ -94,6 +95,7 @@ jobs:
       
       - name: Checks & Autorelease
         if: ${{ inputs.autorelease }}
+        id: autorelease
         run: |
           ./utils/check.sh
           git config user.email "geisserml@gmail.com"
@@ -104,6 +106,7 @@ jobs:
           python3 -m pip install -v --no-build-isolation -e .
           python3 -m pytest tests/ -sv
           git push -u origin "$BRANCH_NAME"  # just the branch (not tag)
+          echo "branch_name=${BRANCH_NAME}" >> "$GITHUB_OUTPUT"
         env:
           RUN_ID: ${{ github.run_id }}
       
@@ -232,7 +235,7 @@ jobs:
     needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     
-    environment: release  # PyPI upload
+    # environment: release  # PyPI upload  # XXX temporarily commented out
     permissions:
       id-token: write      # PyPI upload, GH attestation
       attestations: write  # GH attestation
@@ -302,7 +305,6 @@ jobs:
           git config user.name "geisserml"
           # TODO assert HEAD commit hash matches the autorelease commit (no tampering)
           git checkout main
-          BRANCH_NAME="autorelease_tmp_${RUN_ID}"
           git merge "origin/${BRANCH_NAME}"
           git tag -a "$NEW_VERSION" -m "Autorelease"
           git push
@@ -313,7 +315,7 @@ jobs:
           git checkout main
         env:
           NEW_VERSION: ${{ needs.prepare.outputs.version }}
-          RUN_ID: ${{ github.run_id }}
+          BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}
       
       - name: Publish to TestPyPI
         if: ${{ inputs.actually_publish }}
@@ -392,7 +394,7 @@ jobs:
   
   cleanup:
     name: Clean up temporary branch
-    needs: [publish, gh_pages, conda]
+    needs: [prepare, publish, gh_pages, conda]
     if: ${{ inputs.autorelease && !cancelled() }}
     permissions:
       contents: write  # needed for push
@@ -407,8 +409,6 @@ jobs:
           persist-credentials: true  # for push
     
       - name: Remove temporary branch
-        run: |
-          BRANCH_NAME="autorelease_tmp_${RUN_ID}"
-          git push origin --delete "$BRANCH_NAME"
+        run: git push origin --delete "$BRANCH_NAME"
         env:
-          RUN_ID: ${{ github.run_id }}
+          BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}
