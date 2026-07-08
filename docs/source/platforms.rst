@@ -38,6 +38,8 @@ Notes
 1. MIPS platforms are not officially part of the manylinux standard, so the wheel tags we use are actually rejected by ``pip``, as they are not in its internal whitelist.
    This can be remedied by re-tagging with ``wheel`` locally to match the host's ``sysconfig.get_platform()`` value.
    ``pip`` maintainers have been informed of this situation.
+2. The ``mipsle`` target is untested, for lack of a container and binfmt handler.
+3. iOS is untested. PEP 730 says that "[iOS] wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step." While the exact meaning remains unclear to us, you should be prepared to patch the library search path in ``pypdfium2_raw/bindings.py`` if necessary.
 
 Legend
 ^^^^^^

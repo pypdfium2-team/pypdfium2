@@ -44,9 +44,7 @@ _WheeltagPatterns = {
     PlatNames.android_x86:      ("android_{}_x86",         "23"),
     
     # iOS - see PEP 730 # Packaging
-    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. Note that the PEP says:
-    # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
-    # I take it this means you'd need to change the library search path to that Frameworks location in bindings.
+    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. See the notes in docs/source/platforms.rst.
     # Minver can be (cross-)checked with `macholib`.
     PlatNames.ios_arm64_dev:    ("ios_{}_arm64_iphoneos",         "26_0"),
     PlatNames.ios_arm64_simu:   ("ios_{}_arm64_iphonesimulator",  "26_0"),
