@@ -117,8 +117,8 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     Changelog.write_text(content)
 
 
-def register_changes(new_tag):
-    run_local(["git", "checkout", "-B", "autorelease_tmp"])
+def register_changes(new_tag, branch_name):
+    run_local(["git", "checkout", "-B", branch_name])
     run_local(["git", "add", *PlacesToRegister])
     run_local(["git", "commit", "-m", f"[autorelease main] update {new_tag}"])
     # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
@@ -190,9 +190,9 @@ def main():
         description = "Automatic update script for pypdfium2, to be run in the CI release workflow."
     )
     parser.add_argument(
-        "--register",
-        action = "store_true",
-        help = "Save changes in autorelease_tmp branch."
+        "--to-branch",
+        dest = "branch",
+        help = "Save changes to given branch name."
     )
     args = parser.parse_args()
     
@@ -212,8 +212,8 @@ def main():
     is_beta = new_helpers["beta"] is not None
     summary = get_next_changelog(flush=(not is_beta))
     log_changes(summary, record["pdfium"], new_pdfium, new_tag, is_beta)
-    if args.register:
-        register_changes(new_tag)
+    if args.branch:
+        register_changes(new_tag, args.branch)
         parsed_helpers = parse_git_tag()
         if new_helpers != parsed_helpers:
             log(
@@ -221,7 +221,7 @@ def main():
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
             assert not IS_CI
-    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, args.register)
+    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch))
 
 
 if __name__ == "__main__":

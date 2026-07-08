@@ -99,10 +99,13 @@ jobs:
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
           python3 setupsrc/emplace.py auto:latest
-          python3 setupsrc/autorelease.py --register  # switches to autorelease_tmp branch
+          BRANCH_NAME="autorelease_tmp_${RUN_ID}"
+          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME"
           python3 -m pip install -v --no-build-isolation -e .
           python3 -m pytest tests/ -sv
-          git push -u origin autorelease_tmp  # just the branch (not tag)
+          git push -u origin "$BRANCH_NAME"  # just the branch (not tag)
+        env:
+          RUN_ID: ${{ github.run_id }}
       
       - name: Upload release notes
         if: ${{ inputs.autorelease }}
@@ -299,7 +302,8 @@ jobs:
           git config user.name "geisserml"
           # TODO assert HEAD commit hash matches the autorelease commit (no tampering)
           git checkout main
-          git merge origin/autorelease_tmp
+          BRANCH_NAME="autorelease_tmp_${RUN_ID}"
+          git merge "origin/${BRANCH_NAME}"
           git tag -a "$NEW_VERSION" -m "Autorelease"
           git push
           git push --tags
@@ -309,6 +313,7 @@ jobs:
           git checkout main
         env:
           NEW_VERSION: ${{ needs.prepare.outputs.version }}
+          RUN_ID: ${{ github.run_id }}
       
       - name: Publish to TestPyPI
         if: ${{ inputs.actually_publish }}
@@ -402,4 +407,8 @@ jobs:
           persist-credentials: true  # for push
     
       - name: Remove temporary branch
-        run: git push origin --delete autorelease_tmp
+        run: |
+          BRANCH_NAME="autorelease_tmp_${RUN_ID}"
+          git push origin --delete "$BRANCH_NAME"
+        env:
+          RUN_ID: ${{ github.run_id }}
