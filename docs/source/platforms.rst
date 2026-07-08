@@ -94,6 +94,8 @@ Legend
   + 🅿️ Probably (might need minor tweaks)
   + 🚧 This used to work in the past, but is currently broken.
 
+- **V**: Major version added
+
 - NA: Not applicable / Unknown (placeholder)
 
 .. [#gh_only] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse).
