@@ -161,7 +161,8 @@
         "macosx_arm64": {
             "runner_os": "macos-latest"},
         "macosx_x86_64": {
-            "runner_os": "macos-latest"},
+            "runner_os": "macos-latest",
+            "test_os": "macos-15-intel"},
         "macosx_x86_64:native": {
             "runner_os": "macos-15-intel"},
         "win_amd64": {
