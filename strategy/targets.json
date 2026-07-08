@@ -118,7 +118,8 @@
             "test_os": "windows-11-arm",
             "target_cpu": "arm64"},
         "win32": {
-            "runner_os": "windows-latest"},
+            "runner_os": "windows-latest",
+            "target_cpu": "x86"},
         "win_arm64:native": {
             "runner_os": "windows-11-arm"},
         "manylinux_x86_64": {
