@@ -44,7 +44,7 @@ _WheeltagPatterns = {
     PlatNames.android_x86:      ("android_{}_x86",         "23"),
     
     # iOS - see PEP 730 # Packaging
-    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. See the notes in docs/source/platforms.rst.
+    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. See the notes in docs/source/platforms.rst concerning binary extension modules on iOS.
     # Minver can be (cross-)checked with `macholib`.
     PlatNames.ios_arm64_dev:    ("ios_{}_arm64_iphoneos",         "26_0"),
     PlatNames.ios_arm64_simu:   ("ios_{}_arm64_iphonesimulator",  "26_0"),
