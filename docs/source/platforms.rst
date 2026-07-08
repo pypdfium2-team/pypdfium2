@@ -51,7 +51,7 @@ Legend
 
 - **Release**: status, version tracked, build strategy
   
-  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only [#gh_only]_, 🟦 Setup only
+  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only [#gh_only]_, 🟦 Setup only, 🟨 dto. (open issues)
   + 🔄 Latest version, 📌 Pinned version
 
 - **Tier**: Platform support level
