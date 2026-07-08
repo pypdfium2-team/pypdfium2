@@ -24,7 +24,7 @@
 Platforms
 =========
 
-Platform support & build strategies (as of 06/2026)
+Platform support & build strategies (as of 07/2026)
 
 Covered platforms
 -----------------
