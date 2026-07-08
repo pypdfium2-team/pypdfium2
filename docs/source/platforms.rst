@@ -94,7 +94,7 @@ Legend
   + 🅿️ Probably (might need minor tweaks)
   + 🚧 This used to work in the past, but is currently broken.
 
-- **V**: Major version added
+- **N**: Notes
 
 - NA: Not applicable / Unknown (placeholder)
 
