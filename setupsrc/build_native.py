@@ -213,11 +213,11 @@ VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcm
 _SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
 
 def _get_shimheaders_tool(pdfium_dir, rev="main"):
-
+    
     tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
     shimheaders_file = tools_dir / "generate_shim_headers.py"
     shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
-
+    
     if not shimheaders_file.exists():
         log(f"Downloading {shimheaders_file.name} at revision {rev}")
         mkdir(tools_dir)
