@@ -2,6 +2,14 @@
 # SPDX-License-Identifier: CC-BY-4.0
 
 rules:
+  
   # Opinions differ on what is or isn't a misfeature. Disable. (FWIW, we like setup-python's pip-install input.)
   misfeature:
+    disable: true
+  
+  # There is not much point trying to limit workflow concurrency in this project.
+  # We often find ourselves intentionally dispatching multiple runs with different targets/config.
+  # Options are so diverse that group identifiers would soon become over-complex, and cancelling an in-progress run almost never be intended.
+  # None of pypdfium2's workflows are meant to be dispatched by non-maintainers, and we never trigger runs on commits or pull requests.
+  concurrency-limits:
     disable: true
