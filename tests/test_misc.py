@@ -5,7 +5,6 @@ import re
 import sys
 import pytest
 import platform
-import warnings
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
