@@ -132,7 +132,7 @@ jobs:
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
-    runs-on: ${{ inputs.runner_os }}
+    runs-on: 'ubuntu-24.04'
     steps:
       
       - name: Check out pypdfium2
