@@ -6,15 +6,15 @@ Windows x86_64,⚪ ?,✅🔄 PBIN,🟢 1,✅,✅,✅,⬜,✅,✅,⬜,✅,✅,⬜
 Windows x86,⚪ ?,✅🔄 PBIN,🔵 2,✅,⏸️,✅,🔳,✅,✅,🔳,✅,✅,🔳,clang,NA,
 Windows arm64,⚪ 10?,✅🔄 PBIN,🔵 2,✅,✅,✅,🔳,✅,✅,🔲,✅,✅,🔲,clang,✅,
 Linux glibc x86_64,🟢 2.17,✅🔄 PBIN,🟢 1,✅,✅,✅,⬜,✅,✅,⬜,✅,✅,⬜,gcc,✅,
-Linux glibc i686,🟢 2.17,✅🔄 PBIN,🟢 1-2,✅,⏸️,☑️,🔳,✅,☑️,🔳,✅,☑️,⬜,gcc,✅,
+Linux glibc i686,🟢 2.17,✅🔄 PBIN,🟢 1-2,✅,⏸️,🚧,🔳,✅,🚧,🔳,✅,🚧,⬜,gcc,✅,[1]_
 Linux glibc aarch64,🟢 2.17,✅🔄 PBIN,🟢 1,✅,✅,✅,🔳,✅,✅,🔲,✅,✅,⬜,gcc,✅,
 Linux glibc armv7l,🟢 2.17,✅🔄 PBIN,🟢 1-2,✅,⏸️,☑️,🔳,✅,☑️,🔳,✅,☑️,⬜,gcc,✅,
 Linux glibc ppc64le,🟢 2.17,✅🔄 PBIN,🔵 2-3,✅,✅,☑️,🔳,✅,☑️,🔳,✅,☑️,🔳,clang,☑️,
 Linux glibc s390x,🟡 2.28,✅📌 CIBW,🔴 4,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
 Linux glibc riscv64,🟠 2.34,✅📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
 Linux glibc loong64,🔴 2.38,🟩📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Linux glibc mips64le,🟢 2.17,🟩📌 SBLD,🟡 3,✅,❓,☑️,🔳,✅,☑️,🔳,❌,NA,NA,NA,🅿️,[1]_
-Linux glibc mipsle,🟢 2.17,🟩📌 SBLD,🟡 3,⏳,❌,NA,NA,✅,❌,🔳,❌,NA,NA,NA,🅿️,[1]_ [2]_
+Linux glibc mips64le,🟢 2.17,🟩📌 SBLD,🟡 3,✅,❓,☑️,🔳,✅,☑️,🔳,❌,NA,NA,NA,🅿️,[2]_
+Linux glibc mipsle,🟢 2.17,🟩📌 SBLD,🟡 3,⏳,❌,NA,NA,✅,❌,🔳,❌,NA,NA,NA,🅿️,[2]_ [3]_
 Linux musl x86_64,🟢 1.2,✅🔄 CIBW,🔵 2,✅,❓,✅,🔳,❌,NA,NA,✅,✅,⬜,gcc,✅,
 Linux musl i686,🟢 1.2,✅🔄 CIBW,🔵 2-3,✅,❓,☑️,🔳,❌,NA,NA,✅,☑️,⬜,gcc,✅,
 Linux musl aarch64,🟢 1.2,✅🔄 CIBW,🔵 2,✅,❓,✅,🔳,❌,NA,NA,✅,✅,⬜,gcc,✅,
@@ -27,6 +27,6 @@ Android arm64,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,N
 Android armeabi,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,NA,
 Android x86_64,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,
 Android x86,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,
-iOS arm64 device,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
-iOS arm64 simulator,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
-iOS x86_64 simulator,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[3]_
+iOS arm64 device,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[4]_
+iOS arm64 simulator,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[4]_
+iOS x86_64 simulator,🔴 26,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[4]_
