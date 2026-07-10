@@ -34,9 +34,6 @@ class _PyVer (namedtuple("_PyVer", ("major", "minor"))):
         major, minor = str_version.split(".")
         return cls(int(major), int(minor))
     
-    def __repr__(self):
-        return f"_PyVer{tuple(self)}"
-    
     def __str__(self):
         return f"{self.major}.{self.minor}"
 
