@@ -37,12 +37,14 @@ class _PyVer (namedtuple("_PyVer", ("major", "minor"))):
     def __str__(self):
         return f"{self.major}.{self.minor}"
 
+_NoMinPy = _PyVer(0, 0)
+
 class PyVers:
     
     _RunnerMinPy = {
-        "windows-11-arm": (3, 11),
-        "ubuntu-26.04": (3, 10),
-        "ubuntu-26.04-arm": (3, 10),
+        "windows-11-arm": _PyVer(3, 11),
+        "ubuntu-26.04": _PyVer(3, 10),
+        "ubuntu-26.04-arm": _PyVer(3, 10),
     }
     
     def __init__(self, versions):
@@ -56,7 +58,7 @@ class PyVers:
         return type(self)(v for v in self.versions if min_py <= v)
     
     def for_runner(self, runner_os):
-        min_py = self._RunnerMinPy.get(runner_os, (0, 0))
+        min_py = self._RunnerMinPy.get(runner_os, _NoMinPy)
         return self.bounds(min_py)
     
     def override(self, version):
