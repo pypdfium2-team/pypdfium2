@@ -96,7 +96,7 @@ class Inference:
             entry["py_vers"] = str(self.py_vers[-1])
             self._add_testpys(entry)
     
-    # strategeis
+    # strategies
     
     def pbin(self, key, entry):
         self._add_pys(entry, entry["test_on_host"])
