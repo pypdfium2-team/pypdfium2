@@ -34,6 +34,9 @@ class _PyVer (namedtuple("_PyVer", ("major", "minor"))):
         major, minor = str_version.split(".")
         return cls(int(major), int(minor))
     
+    def __repr__(self):
+        return f"_PyVer{tuple(self)}"
+    
     def __str__(self):
         return f"{self.major}.{self.minor}"
 
@@ -63,6 +66,9 @@ class PyVers:
         if version in self.versions:
             self.versions.remove(version)
         self.versions.append(version)
+    
+    def __repr__(self):
+        return f"PyVers.from_str({str(self)!r})"
     
     def __str__(self):
         return shlex.join(str(v) for v in self.versions)
