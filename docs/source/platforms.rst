@@ -93,11 +93,13 @@ Legend
   + ✅ Yes (tested on GHA)
   + ☑️ Yes (tested in Docker)
   + 🅿️ Probably (might need minor tweaks)
-  + 🚧 This used to work in the past, but is currently broken.
 
 - **N**: Notes
 
-- NA: Not applicable / Unknown (placeholder)
+- Common identifiers
+  
+  + NA: Not applicable / Unknown (placeholder)
+  + 🚧 This used to work in the past, but is currently broken.
 
 .. [#gh_only] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse).
 
