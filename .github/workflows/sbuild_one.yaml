@@ -147,7 +147,7 @@ jobs:
           test_on_host: ${{ !(inputs.target_os || inputs.target_cpu) || '' }}
           docker: ${{ !(inputs.target_os || inputs.target_cpu == 'mipsel') || '' }}
           windows_32bit: ${{ startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86' || '' }}
-          mac_emulate_intel: ${{ inputs.target_cpu && !endsWith(inputs.runner_os, '-intel') || '' }}
+          mac_consider_rosetta: ${{ inputs.target_cpu == 'x64' || '' }}
   
   test_other:
     name: 'Test on another runner - ${{ inputs.test_os }}'

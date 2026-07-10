@@ -17,8 +17,8 @@ inputs:
   docker:
     description: 'Do docker testing'
     default: 'true'
-  mac_emulate_intel:
-    description: 'On macOS, indicate an x86_64 component to be tested under Rosetta emulation'
+  mac_consider_rosetta:
+    description: 'When on a macOS non-Intel host, indicate an Intel component to test under Rosetta emulation.'
     default: ''
   windows_32bit:
     description: "Indicate 32-bit python interpreter"
@@ -38,7 +38,7 @@ runs:
         WINDOWS_32BIT: "${{ inputs.windows_32bit && 1 || 0 }}"
     
     - name: macOS - Test Intel under emulation
-      if: ${{ startsWith(inputs.runner_os, 'macos-') && inputs.mac_emulate_intel }}
+      if: ${{ startsWith(inputs.runner_os, 'macos-') && !endsWith(inputs.runner_os, '-intel') && inputs.mac_consider_rosetta }}
       shell: bash
       # assuming macOS python is universal (it should be)
       run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv --prefix "arch -x86_64"
