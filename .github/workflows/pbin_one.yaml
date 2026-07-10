@@ -92,7 +92,7 @@ jobs:
           test_on_host: ${{ inputs.test_on_host || '' }}
           docker: ${{ startsWith(inputs.pbin_target, 'linux_') || '' }}
           windows_32bit: ${{ inputs.pbin_target == 'windows_x86' || '' }}
-          mac_emulate_intel: ${{ inputs.pbin_target == 'darwin_univ2' || (startsWith(inputs.pbin_target, 'darwin_') && !inputs.test_on_host) || '' }}
+          mac_emulate_intel: ${{ inputs.pbin_target == 'darwin_univ2' || (inputs.pbin_target == 'darwin_x64' && inputs.runner_os != 'macos-15-intel') || '' }}
   
   test_other:
     name: 'Test on another runner - ${{ inputs.test_os }}'

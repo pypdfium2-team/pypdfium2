@@ -5,6 +5,7 @@
 
 import sys
 import json
+import shlex
 import argparse
 import collections
 from pathlib import Path
@@ -26,12 +27,20 @@ def _get_duplicates(iterable):
 
 class Inference:
     
-    @staticmethod
-    def _noop(key, entry):
+    def __init__(self, py_vers):
+        self.py_vers = py_vers
+    
+    def _add_pys(self, entry, condition):
+        if condition or entry.pop("py_vers", None):
+            entry["py_vers"] = self.py_vers.for_runner(entry["runner_os"]).to_str()
+        else:
+            entry["py_vers"] = self.py_vers.peek_str()
+    
+    def pbin(self, key, entry):
+        self._add_pys(entry, entry["test_on_host"])
         return entry
     
-    @staticmethod
-    def cibw(key, entry):
+    def cibw(self, key, entry):
         entry["cibw_target"] = key.rsplit(":", maxsplit=1)[0]
         if "cibw_arch" not in entry:
             cibw_arch = entry["cibw_target"].split("_", maxsplit=1)[-1]
@@ -40,15 +49,49 @@ class Inference:
             entry["cibw_arch"] = cibw_arch
         return entry
     
-    @staticmethod
-    def sbuild(key, entry):
+    def sbuild(self, key, entry):
         if "tag" not in entry:
             tag = key.rsplit(":", maxsplit=1)[0]
             if tag.startswith("manylinux_"):
                 arch = tag.split("_", maxsplit=1)[-1]
                 tag = f"manylinux_2_17_{arch}.manylinux2014_{arch}"
             entry["tag"] = tag
+        self._add_pys(entry, not ("target_os" in entry or "target_cpu" in entry))
         return entry
+
+
+class PyVers:
+    
+    _RunnerMinPy = {
+        "windows-11-arm": (3, 11),
+        "ubuntu-26.04": (3, 10),
+        "ubuntu-26.04-arm": (3, 10),
+    }
+    
+    def __init__(self, versions):
+        self.versions = tuple(versions)
+    
+    @classmethod
+    def from_str(cls, str_versions):
+        versions = []
+        for str_ver in str_versions:
+            major, minor = str_ver.split(".")
+            versions.append((int(major), int(minor)))
+        return PyVers(versions)
+    
+    def bounds(self, min_py):
+        return PyVers(v for v in self.versions if v >= min_py)
+    
+    def for_runner(self, runner_os):
+        min_py = self._RunnerMinPy.get(runner_os, None)
+        return self.bounds(min_py) if min_py else self
+    
+    def to_str(self):
+        return shlex.join(f"{major}.{minor}" for (major, minor) in self.versions)
+    
+    def peek_str(self, index=-1):
+        major, minor = self.versions[index]
+        return f"{major}.{minor}"
 
 
 def get_matrices(args, all_targets):
@@ -58,7 +101,7 @@ def get_matrices(args, all_targets):
         
         targets = all_targets[strategy]
         matrices[strategy] = matrix_entries = []
-        inference = getattr(Inference, strategy, Inference._noop)
+        inference = getattr(Inference(args.py_vers), strategy)
         
         for key in getattr(args, strategy):
             entry = {"label": f"{strategy}-{key}", **inference(key, targets[key])}
@@ -127,12 +170,20 @@ See //strategy/targets.json for canonical configuration, or below for available 
         help = "CIBW (cibuildwheel) targets to build. dto.",
     )
     parser.add_argument(
+        "--py-vers", nargs="+",
+        help = "Sequence of Python versions, as passed to setup-python and multitest.py. The last version specified becomes the main version used for build; other versions are for testing, which will be performed in reverse order, with the main version tested first. Versions unavailable to the runner in question will be implicitly excluded on a per-target basis.",
+    )
+    parser.add_argument(
         "--reveal",
         action = "store_true",
         help = "Print human-readable output to stderr.",
     )
     
     args = parser.parse_args(argv)
+    
+    if not args.py_vers:
+        args.py_vers = ("3.8", "3.11", "3.14")
+    args.py_vers = PyVers.from_str(args.py_vers)
     
     if args.profile:
         profile_json = read_json(THIS_DIR/"profiles.json")[args.profile]

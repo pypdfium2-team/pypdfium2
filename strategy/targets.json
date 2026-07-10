@@ -5,13 +5,15 @@
             "pbin_target": "darwin_arm64",
             "test_on_host": true},
         "macosx_x86_64": {
+            "runner_os": "macos-latest",
+            "test_os": "macos-15-intel",
+            "pbin_target": "darwin_x64",
+            "test_on_host": false,
+            "py_vers": true},
+        "macosx_x86_64:native": {
             "runner_os": "macos-15-intel",
             "pbin_target": "darwin_x64",
             "test_on_host": true},
-        "macosx_x86_64:cross": {
-            "runner_os": "macos-latest",
-            "pbin_target": "darwin_x64",
-            "test_on_host": false},
         "macosx_universal2": {
             "runner_os": "macos-latest",
             "test_os": "macos-15-intel",
@@ -30,7 +32,7 @@
             "pbin_target": "windows_x86",
             "test_on_host": true},
         "manylinux_x86_64": {
-            "runner_os": "ubuntu-26.04",
+            "runner_os": "ubuntu-24.04",
             "pbin_target": "linux_x64",
             "test_on_host": true},
         "manylinux_i686": {
@@ -38,7 +40,7 @@
             "pbin_target": "linux_x86",
             "test_on_host": false},
         "manylinux_aarch64": {
-            "runner_os": "ubuntu-26.04-arm",
+            "runner_os": "ubuntu-24.04-arm",
             "pbin_target": "linux_arm64",
             "test_on_host": true},
         "manylinux_armv7l": {
@@ -119,20 +121,21 @@
             "target_cpu": "arm64"},
         "win32": {
             "runner_os": "windows-latest",
-            "target_cpu": "x86"},
+            "target_cpu": "x86",
+            "py_vers": true},
         "win_arm64:native": {
             "runner_os": "windows-11-arm"},
         "manylinux_x86_64": {
-            "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-24.04"},
         "manylinux_i686": {
             "runner_os": "ubuntu-26.04",
             "target_cpu": "x86"},
         "manylinux_aarch64": {
             "runner_os": "ubuntu-26.04",
-            "test_os": "ubuntu-26.04-arm",
+            "test_os": "ubuntu-24.04-arm",
             "target_cpu": "arm64"},
         "manylinux_aarch64:native": {
-            "runner_os": "ubuntu-26.04-arm",
+            "runner_os": "ubuntu-24.04-arm",
             "custom_clang": true,
             "build_params": "--use-sysroot --clang-path /opt/clang"},
         "manylinux_armv7l": {
