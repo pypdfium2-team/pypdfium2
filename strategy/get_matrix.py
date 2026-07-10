@@ -60,8 +60,8 @@ class PyVers:
         return PyVers(v for v in self.versions if min_py <= v <= max_py)
     
     def for_runner(self, runner_os, max_py=None):
-        min_py = self._RunnerMinPy.get(runner_os, None)
-        return self.bounds(min_py, max_py) if min_py else self
+        min_py = self._RunnerMinPy.get(runner_os, (0, 0))
+        return self.bounds(min_py, max_py)
     
     def __str__(self):
         return shlex.join(str(v) for v in self.versions)
@@ -87,6 +87,8 @@ class Inference:
     def _add_pys(self, entry, condition):
         if condition or entry.pop("need_py_vers", None):
             max_py = entry.pop("max_py", None)
+            if max_py:
+                max_py = _PyVer.from_str(max_py)
             entry["py_vers"] = self._get_all_pys(entry["runner_os"], max_py)
         else:
             entry["py_vers"] = str(self.py_vers[-1])
