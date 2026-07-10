@@ -77,7 +77,6 @@ Legend
   
   + ✅ Tested on host
   + ☑️ Tested under emulation (QEMU/Rosetta)
-  + 🟨 Only tested when native compilation is used, but it is not the default
   + ❌ Not automatically tested
 
 - 🛠️ Cross compilation indicator
