@@ -200,6 +200,7 @@ See //strategy/targets.json for canonical configuration, or below for available 
     )
     parser.add_argument(
         "--py-vers", nargs="+",
+        required = True,
         help = "Sequence of Python versions, as passed to setup-python and multitest.py. The last version specified becomes the main version used for build; other versions are for testing, which will be performed in reverse order, with the main version tested first. Versions unavailable to the runner in question will be implicitly excluded on a per-target basis.",
     )
     parser.add_argument(
@@ -209,9 +210,6 @@ See //strategy/targets.json for canonical configuration, or below for available 
     )
     
     args = parser.parse_args(argv)
-    
-    if not args.py_vers:
-        args.py_vers = ("3.8", "3.11", "3.14")
     args.py_vers = PyVers.from_str(args.py_vers)
     
     if args.profile:

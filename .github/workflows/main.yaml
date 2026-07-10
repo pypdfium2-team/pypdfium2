@@ -12,7 +12,7 @@ on:
         default: 'ubuntu-26.04'
       py_vers:
         type: string
-        default: ''  # handled in get_matrix.py
+        default: '3.8 3.11 3.14'
       profile:
         # see strategy/profiles.json for choices
         type: string
