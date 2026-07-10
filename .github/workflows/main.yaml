@@ -204,7 +204,6 @@ jobs:
       target_os: ${{ matrix.target_os }}
       target_cpu: ${{ matrix.target_cpu }}
       build_params: ${{ matrix.build_params }}
-      custom_clang: ${{ matrix.custom_clang || false }}
       wheel_tag: ${{ matrix.tag }}
       ref: ${{ needs.prepare.outputs.ref }}
       replicate_tag: ${{ needs.prepare.outputs.version }}

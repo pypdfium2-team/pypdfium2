@@ -109,8 +109,9 @@ inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
-    "bash utils/install-static-clang.sh -d {project}/clang_image -m skip-download",
+    "manylinux-install-clang",
     "export CLANG_PREFIX=/opt/clang",
+    "ln -s $CLANG_PREFIX/bin/readelf $CLANG_PREFIX/bin/llvm-readelf",
 ]
 inherit.environment = "append"
 # on glibc linux with static clang, we try to use the vendored libc++

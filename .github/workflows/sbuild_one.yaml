@@ -29,9 +29,6 @@ on:
       build_params:
         type: string
         default: ''
-      custom_clang:
-        type: boolean
-        default: false
       wheel_tag:
         type: string
         default: ''
@@ -75,10 +72,6 @@ jobs:
           py_vers: ${{ inputs.py_vers }}
           py_arch: ${{ (startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86') && 'x86' || '' }}
           pip_install: -U -r req/setup.txt
-      
-      - name: Install custom clang
-        if: ${{ inputs.custom_clang }}
-        run: bash utils/install-static-clang.sh -m install-only
       
       - name: Update package list
         if: ${{ startsWith(inputs.runner_os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.runner_os, '-arm')) }}

@@ -135,9 +135,8 @@
             "target_cpu": "arm64"},
         "manylinux_aarch64:native": {
             "runner_os": "ubuntu-24.04-arm",
-            "custom_clang": true,
-            "build_params": "--use-sysroot --clang-path /opt/clang",
-            "py_override": "3.13"},
+            "py_override": "3.13",
+            "tag": "manylinux_2_38_aarch64"},
         "manylinux_armv7l": {
             "runner_os": "ubuntu-26.04",
             "target_cpu": "arm"},
