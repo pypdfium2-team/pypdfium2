@@ -56,7 +56,7 @@ class PyVers:
         return cls(_PyVer.from_str(v) for v in str_versions)
     
     def bounds(self, min_py):
-        return PyVers(v for v in self.versions if min_py <= v)
+        return type(self)(v for v in self.versions if min_py <= v)
     
     def for_runner(self, runner_os):
         min_py = self._RunnerMinPy.get(runner_os, (0, 0))
