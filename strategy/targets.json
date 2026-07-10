@@ -8,7 +8,8 @@
             "runner_os": "macos-latest",
             "test_os": "macos-15-intel",
             "pbin_target": "darwin_x64",
-            "test_on_host": false},
+            "test_on_host": false,
+            "need_py_vers": true},
         "macosx_x86_64:native": {
             "runner_os": "macos-15-intel",
             "pbin_target": "darwin_x64",
@@ -103,7 +104,8 @@
             "runner_os": "macos-latest",
             "test_os": "macos-15-intel",
             "target_cpu": "x64",
-            "tag": "macosx_12_0_x86_64"},
+            "tag": "macosx_12_0_x86_64",
+            "need_py_vers": true},
         "macosx_arm64:cross": {
             "runner_os": "macos-15-intel",
             "test_os": "macos-latest",
