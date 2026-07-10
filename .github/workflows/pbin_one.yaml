@@ -11,12 +11,15 @@ on:
       test_os:
         type: string
         default: ''
-      pbin_target:
-        type: string
-        default: ''
       py_vers:
         type: string
         default: '3.14'
+      testos_py_vers:
+        type: string
+        default: ''
+      pbin_target:
+        type: string
+        default: ''
       pdfium_ver:
         type: string
         default: 'latest'
@@ -105,5 +108,5 @@ jobs:
     with:
       runner_os: ${{ inputs.test_os }}
       artifact_id: ${{ needs.build.outputs.artifact_id }}
-      py_vers: ${{ inputs.py_vers }}
+      py_vers: ${{ inputs.testos_py_vers || inputs.py_vers }}
       ref: ${{ inputs.ref }}

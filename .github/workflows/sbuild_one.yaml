@@ -14,13 +14,16 @@ on:
       py_vers:
         type: string
         default: '3.14'
+      testos_py_vers:
+        type: string
+        default: ''
       pdfium_ver:
         type: string
         default: ''
-      target_cpu:
+      target_os:
         type: string
         default: ''
-      target_os:
+      target_cpu:
         type: string
         default: ''
       build_params:
@@ -136,7 +139,7 @@ jobs:
         uses: ./.github/actions/inspect_step
         with:
           runner_os: ${{ inputs.runner_os }}
-          auditwheel: ${{ !(inputs.target_os || startsWith(inputs.target_cpu, 'mips')) || '' }}
+          auditwheel: ${{ !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') || '' }}
           dll_glob: 'data/sourcebuild/*pdfium.*'
       
       - name: Test wheel
@@ -144,8 +147,8 @@ jobs:
         with:
           runner_os: ${{ inputs.runner_os }}
           py_vers: ${{ inputs.py_vers }}
-          test_on_host: ${{ !(inputs.target_os || inputs.target_cpu) || '' }}
-          docker: ${{ !(inputs.target_os || inputs.target_cpu == 'mipsel') || '' }}
+          test_on_host: ${{ !inputs.target_os && !inputs.target_cpu || '' }}
+          docker: ${{ !inputs.target_os && inputs.target_cpu != 'mipsel' || '' }}
           windows_32bit: ${{ startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86' || '' }}
           mac_consider_rosetta: ${{ inputs.target_cpu == 'x64' || '' }}
   
@@ -160,5 +163,5 @@ jobs:
     with:
       runner_os: ${{ inputs.test_os }}
       artifact_id: ${{ needs.build.outputs.artifact_id }}
-      py_vers: ${{ inputs.py_vers }}
+      py_vers: ${{ inputs.testos_py_vers || inputs.py_vers }}
       ref: ${{ inputs.ref }}

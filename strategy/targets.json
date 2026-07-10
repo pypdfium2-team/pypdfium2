@@ -8,8 +8,7 @@
             "runner_os": "macos-latest",
             "test_os": "macos-15-intel",
             "pbin_target": "darwin_x64",
-            "test_on_host": false,
-            "py_vers": true},
+            "test_on_host": false},
         "macosx_x86_64:native": {
             "runner_os": "macos-15-intel",
             "pbin_target": "darwin_x64",

@@ -176,8 +176,9 @@ jobs:
     with:
       runner_os: ${{ matrix.runner_os }}
       test_os: ${{ matrix.test_os }}
-      pbin_target: ${{ matrix.pbin_target }}
       py_vers: ${{ matrix.py_vers }}
+      testos_py_vers: ${{ matrix.testos_py_vers }}
+      pbin_target: ${{ matrix.pbin_target }}
       test_on_host: ${{ matrix.test_on_host }}
       ref: ${{ needs.prepare.outputs.ref }}
       replicate_tag: ${{ needs.prepare.outputs.version }}
@@ -198,9 +199,10 @@ jobs:
       runner_os: ${{ matrix.runner_os }}
       test_os: ${{ matrix.test_os }}
       py_vers: ${{ matrix.py_vers }}
+      testos_py_vers: ${{ matrix.testos_py_vers }}
       # pdfium_ver: ${{ ... }}  # TODO
-      target_cpu: ${{ matrix.target_cpu }}
       target_os: ${{ matrix.target_os }}
+      target_cpu: ${{ matrix.target_cpu }}
       build_params: ${{ matrix.build_params }}
       custom_clang: ${{ matrix.custom_clang || false }}
       wheel_tag: ${{ matrix.tag }}
@@ -222,9 +224,10 @@ jobs:
     with:
       runner_os: ${{ matrix.runner_os }}
       test_os: ${{ matrix.test_os }}
+      # cibw_py_ver: ${{ ... }}  # TODO
+      testos_py_vers: ${{ matrix.testos_py_vers }}
       cibw_target: ${{ matrix.cibw_target }}
       cibw_arch: ${{ matrix.cibw_arch }}
-      # cibw_py_ver: ${{ ... }}  # TODO
       # pdfium_ver: ${{ ... }}  # TODO
       use_sysroot: ${{ matrix.use_sysroot || false }}
       ref: ${{ needs.prepare.outputs.ref }}

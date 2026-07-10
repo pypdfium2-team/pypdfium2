@@ -30,11 +30,23 @@ class Inference:
     def __init__(self, py_vers):
         self.py_vers = py_vers
     
+    # utils
+    
+    def _get_all_pys(self, runner_os):
+        return self.py_vers.for_runner(runner_os).to_str()
+    
+    def _add_testpys(self, entry):
+        if "test_os" in entry:
+            entry["testos_py_vers"] = self._get_all_pys(entry["test_os"])
+    
     def _add_pys(self, entry, condition):
         if condition or entry.pop("py_vers", None):
-            entry["py_vers"] = self.py_vers.for_runner(entry["runner_os"]).to_str()
+            entry["py_vers"] = self._get_all_pys(entry["runner_os"])
         else:
             entry["py_vers"] = self.py_vers.peek_str()
+            self._add_testpys(entry)
+    
+    # strategeis
     
     def pbin(self, key, entry):
         self._add_pys(entry, entry["test_on_host"])
@@ -47,6 +59,7 @@ class Inference:
             if key.startswith("win_"):
                 cibw_arch = cibw_arch.upper()
             entry["cibw_arch"] = cibw_arch
+        self._add_testpys(entry)
         return entry
     
     def sbuild(self, key, entry):

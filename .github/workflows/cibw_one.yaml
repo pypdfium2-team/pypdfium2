@@ -11,15 +11,18 @@ on:
       test_os:
         type: string
         default: ''
+      cibw_py_ver:
+        type: string
+        default: 'cp314'
+      testos_py_vers:
+        type: string
+        default: '3.14'
       cibw_target:
         type: string
         required: true
       cibw_arch:
         type: string
         required: true
-      cibw_py_ver:
-        type: string
-        default: 'cp314'
       pdfium_ver:
         type: string
         default: ''
@@ -125,5 +128,5 @@ jobs:
     with:
       runner_os: ${{ inputs.test_os }}
       artifact_id: ${{ needs.build.outputs.artifact_id }}
-      # py_vers: ${{ inputs.py_vers }}  # XXX
+      py_vers: ${{ inputs.testos_py_vers }}
       ref: ${{ inputs.ref }}
