@@ -27,8 +27,6 @@ def _get_duplicates(iterable):
     return tuple(k for k, v in collections.Counter(iterable).items() if v > 1)
 
 
-_InfPy = (float("inf"), float("inf"))
-
 class _PyVer (namedtuple("_PyVer", ("major", "minor"))):
     
     @classmethod
@@ -38,7 +36,6 @@ class _PyVer (namedtuple("_PyVer", ("major", "minor"))):
     
     def __str__(self):
         return f"{self.major}.{self.minor}"
-
 
 class PyVers:
     
