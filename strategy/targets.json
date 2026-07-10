@@ -137,7 +137,7 @@
             "runner_os": "ubuntu-24.04-arm",
             "custom_clang": true,
             "build_params": "--use-sysroot --clang-path /opt/clang",
-            "max_py": "3.13"},
+            "py_override": "3.13"},
         "manylinux_armv7l": {
             "runner_os": "ubuntu-26.04",
             "target_cpu": "arm"},

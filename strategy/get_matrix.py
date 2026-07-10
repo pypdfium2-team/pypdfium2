@@ -49,19 +49,23 @@ class PyVers:
     }
     
     def __init__(self, versions):
-        self.versions = tuple(versions)
+        self.versions = list(versions)
     
     @classmethod
     def from_str(cls, str_versions):
         return cls(_PyVer.from_str(v) for v in str_versions)
     
-    def bounds(self, min_py, max_py=None):
-        max_py = max_py or _InfPy
-        return PyVers(v for v in self.versions if min_py <= v <= max_py)
+    def bounds(self, min_py):
+        return PyVers(v for v in self.versions if min_py <= v)
     
-    def for_runner(self, runner_os, max_py=None):
+    def for_runner(self, runner_os):
         min_py = self._RunnerMinPy.get(runner_os, (0, 0))
-        return self.bounds(min_py, max_py)
+        return self.bounds(min_py)
+    
+    def override(self, version):
+        if version in self.versions:
+            self.versions.remove(version)
+        self.versions.append(version)
     
     def __str__(self):
         return shlex.join(str(v) for v in self.versions)
@@ -77,19 +81,17 @@ class Inference:
     
     # utils
     
-    def _get_all_pys(self, runner_os, max_py=None):
-        return str(self.py_vers.for_runner(runner_os, max_py))
-    
     def _add_testpys(self, entry):
         if "test_os" in entry:
-            entry["testos_py_vers"] = self._get_all_pys(entry["test_os"])
+            entry["testos_py_vers"] = str(self.py_vers.for_runner(entry["test_os"]))
     
     def _add_pys(self, entry, condition):
         if condition or entry.pop("need_py_vers", None):
-            max_py = entry.pop("max_py", None)
-            if max_py:
-                max_py = _PyVer.from_str(max_py)
-            entry["py_vers"] = self._get_all_pys(entry["runner_os"], max_py)
+            py_vers = self.py_vers.for_runner(entry["runner_os"])
+            py_override = entry.pop("py_override", None)
+            if py_override:
+                py_vers.override(_PyVer.from_str(py_override))
+            entry["py_vers"] = str(py_vers)
         else:
             entry["py_vers"] = str(self.py_vers[-1])
             self._add_testpys(entry)
