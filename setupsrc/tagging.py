@@ -13,10 +13,10 @@ _WheeltagPatterns = {
     # -- Minver info is provided on an "AS OF THIS WRITING" basis (06/2026) --
     
     # Minver can be checked with `vtool` on a native host, or (cross-)checked with macholib. Upstream no longer specify a deployment target in config.
-    PlatNames.darwin_x64:       ("macosx_{}_x86_64", "12_0"),
-    PlatNames.darwin_arm64:     ("macosx_{}_arm64",  "12_0"),
+    PlatNames.darwin_x64:       ("macosx_{}_x86_64", "13_0"),
+    PlatNames.darwin_arm64:     ("macosx_{}_arm64",  "13_0"),
     # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
-    PlatNames.darwin_univ2:     ("macosx_{}_universal2", "12_0"),
+    PlatNames.darwin_univ2:     ("macosx_{}_universal2", "13_0"),
     
     # Windows tags are not versioned. FWIW, the minimum Windows version might be 7 or 8.
     PlatNames.windows_x64:      ("win_amd64", None),
