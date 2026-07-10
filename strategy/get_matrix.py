@@ -10,6 +10,8 @@ import argparse
 import collections
 from pathlib import Path
 
+namedtuple = collections.namedtuple
+
 
 THIS_DIR = Path(__file__).resolve().parent
 STRATEGIES = ("pbin", "sbuild", "cibw")
@@ -25,6 +27,49 @@ def _get_duplicates(iterable):
     return tuple(k for k, v in collections.Counter(iterable).items() if v > 1)
 
 
+_InfPy = (float("inf"), float("inf"))
+
+class _PyVer (namedtuple("_PyVer", ("major", "minor"))):
+    
+    @classmethod
+    def from_str(cls, str_version):
+        major, minor = str_version.split(".")
+        return cls(int(major), int(minor))
+    
+    def __str__(self):
+        return f"{self.major}.{self.minor}"
+
+
+class PyVers:
+    
+    _RunnerMinPy = {
+        "windows-11-arm": (3, 11),
+        "ubuntu-26.04": (3, 10),
+        "ubuntu-26.04-arm": (3, 10),
+    }
+    
+    def __init__(self, versions):
+        self.versions = tuple(versions)
+    
+    @classmethod
+    def from_str(cls, str_versions):
+        return cls(_PyVer.from_str(v) for v in str_versions)
+    
+    def bounds(self, min_py, max_py=None):
+        max_py = max_py or _InfPy
+        return PyVers(v for v in self.versions if min_py <= v <= max_py)
+    
+    def for_runner(self, runner_os, max_py=None):
+        min_py = self._RunnerMinPy.get(runner_os, None)
+        return self.bounds(min_py, max_py) if min_py else self
+    
+    def __str__(self):
+        return shlex.join(str(v) for v in self.versions)
+    
+    def __getitem__(self, i):
+        return self.versions[i]
+
+
 class Inference:
     
     def __init__(self, py_vers):
@@ -32,18 +77,19 @@ class Inference:
     
     # utils
     
-    def _get_all_pys(self, runner_os):
-        return self.py_vers.for_runner(runner_os).to_str()
+    def _get_all_pys(self, runner_os, max_py=None):
+        return str(self.py_vers.for_runner(runner_os, max_py))
     
     def _add_testpys(self, entry):
         if "test_os" in entry:
             entry["testos_py_vers"] = self._get_all_pys(entry["test_os"])
     
     def _add_pys(self, entry, condition):
-        if condition or entry.pop("py_vers", None):
-            entry["py_vers"] = self._get_all_pys(entry["runner_os"])
+        if condition or entry.pop("need_py_vers", None):
+            max_py = entry.pop("max_py", None)
+            entry["py_vers"] = self._get_all_pys(entry["runner_os"], max_py)
         else:
-            entry["py_vers"] = self.py_vers.peek_str()
+            entry["py_vers"] = str(self.py_vers[-1])
             self._add_testpys(entry)
     
     # strategeis
@@ -71,40 +117,6 @@ class Inference:
             entry["tag"] = tag
         self._add_pys(entry, not ("target_os" in entry or "target_cpu" in entry))
         return entry
-
-
-class PyVers:
-    
-    _RunnerMinPy = {
-        "windows-11-arm": (3, 11),
-        "ubuntu-26.04": (3, 10),
-        "ubuntu-26.04-arm": (3, 10),
-    }
-    
-    def __init__(self, versions):
-        self.versions = tuple(versions)
-    
-    @classmethod
-    def from_str(cls, str_versions):
-        versions = []
-        for str_ver in str_versions:
-            major, minor = str_ver.split(".")
-            versions.append((int(major), int(minor)))
-        return PyVers(versions)
-    
-    def bounds(self, min_py):
-        return PyVers(v for v in self.versions if v >= min_py)
-    
-    def for_runner(self, runner_os):
-        min_py = self._RunnerMinPy.get(runner_os, None)
-        return self.bounds(min_py) if min_py else self
-    
-    def to_str(self):
-        return shlex.join(f"{major}.{minor}" for (major, minor) in self.versions)
-    
-    def peek_str(self, index=-1):
-        major, minor = self.versions[index]
-        return f"{major}.{minor}"
 
 
 def get_matrices(args, all_targets):
