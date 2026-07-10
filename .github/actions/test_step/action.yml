@@ -53,6 +53,6 @@ runs:
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
       shell: bash
       run: |
-        WHEEL_PATH="$(ls dist/*.whl)"
-        TARGET="$(python3 utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")"
+        WHEEL_PATH=$(ls dist/*.whl)
+        TARGET=$(python3 utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")
         python3 utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"
