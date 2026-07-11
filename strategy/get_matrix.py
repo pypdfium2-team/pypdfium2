@@ -92,7 +92,8 @@ class Inference:
             py_vers = self.py_vers.for_runner(entry["runner_os"])
             py_override = entry.pop("py_override", None)
             if py_override:
-                py_vers.override(_PyVer.from_str(py_override))
+                py_override = _PyVer.from_str(py_override)
+                py_vers.override(py_override)
             entry["py_vers"] = str(py_vers)
         else:
             entry["py_vers"] = str(self.py_vers[-1])
