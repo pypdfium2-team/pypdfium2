@@ -28,7 +28,7 @@ jobs:
           gh workflow run main.yaml -R "$REPOSITORY" --ref "$REF_NAME" --json <<EOF
           {
             "runner_os": "ubuntu-26.04",
-            "py_vers": "",
+            "py_vers": "3.8 3.11 3.14",
             "profile": "default",
             "pbin": "",
             "sbuild": "",
