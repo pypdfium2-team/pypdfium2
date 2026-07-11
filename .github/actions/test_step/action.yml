@@ -12,16 +12,16 @@ inputs:
     description: 'Python versions to test. (Setup is required from caller.)'
     required: true
   test_on_host:
-    description: 'Do native testing'
+    description: 'Do native testing on the host runner.'
     default: 'true'
   docker:
-    description: 'Do docker testing'
+    description: 'Linux: Test in Docker container (emulated if need be).'
     default: 'true'
   mac_consider_rosetta:
-    description: 'When on a macOS non-Intel host, indicate an Intel component to test under Rosetta emulation.'
+    description: 'macOS non-Intel host: Indicate an Intel component to test under Rosetta emulation.'
     default: ''
   windows_32bit:
-    description: "Indicate 32-bit python interpreter"
+    description: "Windows: Indicate that a 32-bit Python interpreter should be used."
 
 runs:
   using: 'composite'
