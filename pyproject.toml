@@ -29,7 +29,7 @@ test-command = [
 [tool.cibuildwheel.linux]
 environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
 manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:latest"
-manylinux-riscv64-image = "ghcr.io/mayeut/manylinux_2_31:2026.06.16-1"
+manylinux-riscv64-image = "ghcr.io/mayeut/manylinux_2_35:latest"
 
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
