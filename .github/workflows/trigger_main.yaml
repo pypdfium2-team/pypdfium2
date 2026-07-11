@@ -13,35 +13,28 @@ on:
 
 permissions: {}
 jobs:
-  
   # Need to use workflow dispatch here. pypa/gh-action-pypi-publish does not support the reusable workflow call model. (This broke PyPI upload of our 5.10.0 release. TestPyPI did not catch the issue.)
   trigger:
-    name: Dispatch release workflow
+    name: Trigger release workflow
     permissions:
-      actions: write  # allow workflow dispatch
+      actions: write  # needed by dispatch.yaml
     
-    runs-on: ubuntu-26.04
-    steps:
-      # TODO unlock actually_publish
-      - name: Dispatch workflow with GH CLI
-        run: |
-          gh workflow run main.yaml -R "$REPOSITORY" --ref "$REF_NAME" --json <<EOF
-          {
-            "runner_os": "ubuntu-26.04",
-            "py_vers": "3.8 3.11 3.14",
-            "profile": "default",
-            "pbin": "",
-            "sbuild": "",
-            "cibw": "",
-            "autorelease": "true",
-            "sdist": "true",
-            "conda": "true",
-            "gh_pages": "true",
-            "publish": "true",
-            "actually_publish": "false"
-          }
-          EOF
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPOSITORY: ${{ github.repository }}
-          REF_NAME: ${{ github.ref_name }}
+    # TODO unlock actually_publish
+    uses: ./.github/workflows/dispatch.yaml
+    with:
+      workflow_file: main.yaml
+      inputs: |
+        {
+          "runner_os": "ubuntu-26.04",
+          "py_vers": "3.8 3.11 3.14",
+          "profile": "default",
+          "pbin": "",
+          "sbuild": "",
+          "cibw": "",
+          "autorelease": "true",
+          "sdist": "true",
+          "conda": "true",
+          "gh_pages": "true",
+          "publish": "true",
+          "actually_publish": "false"
+        }
