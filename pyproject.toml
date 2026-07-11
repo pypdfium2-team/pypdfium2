@@ -28,6 +28,8 @@ test-command = [
 
 [tool.cibuildwheel.linux]
 environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
+manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:latest"
+manylinux-riscv64-image = "ghcr.io/mayeut/manylinux_2_31:2026.06.16-1"
 
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
@@ -69,7 +71,6 @@ before-all = [
     "apt-get update",
     "apt-get install -y ninja-build",  # generate-ninja libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libglib2.0-dev libharfbuzz-dev  # libicu-dev
 ]
-manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:latest"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux_*"
