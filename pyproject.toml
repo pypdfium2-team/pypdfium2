@@ -29,7 +29,6 @@ test-command = [
 [tool.cibuildwheel.linux]
 environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
 manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:latest"
-manylinux-riscv64-image = "quay.io/pypa/manylinux_2_39_riscv64:latest"
 
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
@@ -110,7 +109,8 @@ inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
-    "manylinux-install-clang",
+    # FIXME manylinux-install-clang lacks attestation verification
+    "manylinux-install-clang -v latest",
     "export CLANG_PREFIX=/opt/clang",
     "ln -s $CLANG_PREFIX/bin/readelf $CLANG_PREFIX/bin/llvm-readelf",
 ]
