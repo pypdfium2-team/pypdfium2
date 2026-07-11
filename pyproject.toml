@@ -109,8 +109,8 @@ inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
-    # FIXME manylinux-install-clang lacks attestation verification
-    "manylinux-install-clang -v latest",
+    # NOTE manylinux-install-clang lacks attestation verification, but static-clang-images have immutable releases, so use a pinned version for safety
+    "manylinux-install-clang -v 22.1.8.1",
     "export CLANG_PREFIX=/opt/clang",
     "ln -s $CLANG_PREFIX/bin/readelf $CLANG_PREFIX/bin/llvm-readelf",
 ]
