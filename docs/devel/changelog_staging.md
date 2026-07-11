@@ -6,7 +6,7 @@
 # Changelog for next release
 - Major CI overhaul.
   + TODO
-  + Hash-pinned all actions across `pypdfium2`, `gn-dist` and the `ctypesgen` fork.
+  + Hash-pinned all actions across `pypdfium2`, `gn-dist` and the `ctypesgen` fork. Tightened permissions. `zizmor` compliance with the default persona.
 
 *Setup / Packaging*
 - macOS `13.0+` is now required for current PDFium, according to dylib header inspection. Updated wheel tags accordingly.
