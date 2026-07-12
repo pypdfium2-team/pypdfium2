@@ -35,8 +35,8 @@ distcheck:
 	twine check dist/*
 	check-wheel-contents dist/*.whl
 
-zizmor:
-     zizmor .github/ --persona auditor
+zizmor *args:
+     zizmor .github/ --persona auditor {{args}}
 
 download *args:
 	python3 setupsrc/update.py --verify {{args}}
