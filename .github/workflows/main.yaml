@@ -378,22 +378,26 @@ jobs:
       publish: ${{ inputs.publish }}
   
   
-  # TODO convert to dispatch?
   conda:
-    name: Conda pypdfium2_helpers
+    name: Trigger conda pypdfium2_helpers
     needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
     permissions:
-      contents: read  # needed by called workflow
+      actions: write  # needed by dispatch.yaml
     
-    uses: ./.github/workflows/conda.yaml
+    uses: ./.github/workflows/dispatch.yaml
     with:
-      package: helpers
-      test: true
-      publish: ${{ inputs.publish }}
-      actually_publish: ${{ inputs.actually_publish }}
-    secrets:
-      anaconda_api_token: ${{ secrets.ANACONDA_API_TOKEN }}
+      workflow_file: conda.yaml
+      inputs: |
+        {
+          "package": "helpers",
+          "py_ver": "3.12",
+          "pdfium_ver": "",
+          "new_only": "true",
+          "test": "true",
+          "publish": "${{ inputs.publish }}",
+          "actually_publish": "${{ inputs.actually_publish }}"
+        }
   
   
   cleanup:

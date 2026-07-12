@@ -16,7 +16,6 @@ on:
         type: string
         default: ''  # implies latest
       new_only:
-        # only with package == "raw", ignored otherwise
         type: boolean
         default: true
       test:
