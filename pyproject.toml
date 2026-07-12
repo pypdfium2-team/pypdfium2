@@ -13,8 +13,11 @@ requires = [
 
 [tool.check-wheel-contents]
 # W002: erroneous detection of __init__.py files as duplicates
-ignore = ["W002"]
-toplevel = "pypdfium2,pypdfium2_raw,pypdfium2_cli,pypdfium2_cfg"
+# W009: Wheel contains multiple toplevel library entries
+# W010: Toplevel library directory contains no Python modules (pypdfium2.libs)
+# W201: Wheel library is missing specified toplevel entry (pypdfium2.libs)
+# W202: Wheel library has undeclared toplevel entry (pypdfium2.libs)
+ignore = ["W002", "W009", "W010", "W201", "W202"]
 
 [tool.cibuildwheel]
 build-frontend = {name="build", args=["-xn"]}
