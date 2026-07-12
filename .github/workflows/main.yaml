@@ -373,6 +373,7 @@ jobs:
     
     uses: ./.github/workflows/dispatch.yaml
     with:
+      runner_os: ${{ inputs.runner_os }}
       workflow_file: conda.yaml
       inputs: |
         {
