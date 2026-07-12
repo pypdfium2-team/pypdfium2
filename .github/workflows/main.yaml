@@ -295,10 +295,10 @@ jobs:
           twine check dist/*
           check-wheel-contents dist/*.whl
       
-      - name: Mask GH-only builds from PyPI
+      - name: Mask non-PyPI builds
         run: |
-          shopt -s nullglob
           mkdir artifacts/ && cp dist/* -t artifacts/
+          shopt -s nullglob
           rm -f dist/*linux_*_loongarch64*.whl dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl
       
       - name: Apply and push repository changes
@@ -320,16 +320,6 @@ jobs:
           NEW_VERSION: ${{ needs.prepare.outputs.version }}
           BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}
       
-      - name: Publish to TestPyPI
-        if: ${{ inputs.actually_publish }}
-        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: dist/  # the default
-          # https://github.com/pypa/gh-action-pypi-publish/issues/283#issuecomment-2499296440
-          attestations: false
-          verbose: true
-      
       - name: Attest build provenance
         if: ${{ inputs.actually_publish }}
         id: provenance
@@ -343,25 +333,20 @@ jobs:
         env:
           SRC_PATH: ${{ steps.provenance.outputs.bundle-path }}
       
-      # TODO migrate to `gh release`
-      # gh release create "$TAG" --verify-tag --notes-file RELEASE.md $MAYBE_BETA $ARTIFACTS
-      # with token in env
-      - name: Publish to GitHub
-        if: ${{ inputs.actually_publish }}
-        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
-        with:
-          immutableCreate: true
-          artifacts: 'artifacts/*.tar.gz,artifacts/*.whl,pypdfium2-attestation.json'
-          bodyFile: 'RELEASE.md'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.prepare.outputs.version }}
-          prerelease: ${{ contains(needs.prepare.outputs.version, 'b') }}
-      
       - name: Publish to PyPI
         if: ${{ inputs.actually_publish }}
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           packages-dir: dist/  # the default
+          # skip-existing: true
+      
+      - name: Publish to GitHub
+        if: ${{ inputs.actually_publish }}
+        run: gh release create "$TAG" --notes-file RELEASE.md --verify-tag --fail-on-no-commits $BETA_FLAG artifacts/* pypdfium2-attestation.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.prepare.outputs.version }}
+          BETA_FLAG: ${{ contains(needs.prepare.outputs.version, 'b') && '--prerelease' || '' }}
   
   
   gh_pages:
