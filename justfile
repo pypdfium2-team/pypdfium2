@@ -35,6 +35,7 @@ distcheck:
 	twine check dist/*
 	check-wheel-contents dist/*.whl
 
+# pass --no-ignores --no-config to emit all findings
 zizmor *args:
      zizmor .github/ --persona auditor {{args}}
 
