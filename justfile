@@ -35,9 +35,9 @@ distcheck:
 	twine check dist/*
 	check-wheel-contents dist/*.whl
 
-# pass --no-ignores --no-config to emit all findings
 zizmor *args:
      zizmor .github/ --persona auditor {{args}}
+zizmor-noisy *args: (zizmor '--no-ignores --no-config' args)
 
 download *args:
 	python3 setupsrc/update.py --verify {{args}}
