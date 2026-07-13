@@ -12,7 +12,9 @@ def _manylinux_tag(arch):
 _WheeltagPatterns = {
     # -- Minver info is provided on an "AS OF THIS WRITING" basis (06/2026) --
     
-    # Minver can be checked with `vtool` on a native host, or (cross-)checked with macholib. Upstream no longer specify a deployment target in config.
+    # Minver can be auto-detected from the dylib header (via macholib or vtool).
+    # That said, upstream define mac_deployment_target and mac_min_system_version in //build/config/mac/mac_sdk.gni:
+    # https://chromium.googlesource.com/chromium/src/build.git/+/73c0fa98c5cf963c60ea685c57826fa7ba6253d8/config/mac/mac_sdk.gni#17
     PlatNames.darwin_x64:       ("macosx_{}_x86_64", "13_0"),
     PlatNames.darwin_arm64:     ("macosx_{}_arm64",  "13_0"),
     # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to

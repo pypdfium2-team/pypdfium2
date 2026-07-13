@@ -40,6 +40,7 @@ BUILD_PARAMS = "--vendor all --no-vendor libc++"
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
 # cibw/delocate want a deployment target to be set
+# TODO this will need to be updated to 13 once we build pdfium > 7928
 MACOSX_DEPLOYMENT_TARGET = "12.0.0"
 # Make sure the OS yields its real version
 SYSTEM_VERSION_COMPAT = 0
