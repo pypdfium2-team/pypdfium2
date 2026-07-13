@@ -7,10 +7,8 @@ import sys
 import json
 import shlex
 import argparse
-import collections
 from pathlib import Path
-
-namedtuple = collections.namedtuple
+from collections import namedtuple
 
 
 THIS_DIR = Path(__file__).resolve().parent
@@ -22,9 +20,6 @@ def log(*args, **kwargs):
 def read_json(fp):
     with open(fp, "r") as buf:
         return json.load(buf)
-
-def _get_duplicates(iterable):
-    return tuple(k for k, v in collections.Counter(iterable).items() if v > 1)
 
 
 class _PyVer (namedtuple("_PyVer", ("major", "minor"))):
@@ -76,6 +71,10 @@ class PyVers:
         return self.versions[i]
 
 
+def _target_only(key):
+    return key.rsplit(":", maxsplit=1)[0]
+
+
 class Inference:
     
     def __init__(self, py_vers):
@@ -101,23 +100,23 @@ class Inference:
     
     # strategies
     
-    def pbin(self, key, entry):
+    def pbin(self, target, entry):
         self._add_pys(entry, entry["test_on_host"])
         return entry
     
-    def cibw(self, key, entry):
-        entry["cibw_target"] = key.rsplit(":", maxsplit=1)[0]
+    def cibw(self, target, entry):
+        entry["cibw_target"] = target
         if "cibw_arch" not in entry:
             cibw_arch = entry["cibw_target"].split("_", maxsplit=1)[-1]
-            if key.startswith("win_"):
+            if target.startswith("win_"):
                 cibw_arch = cibw_arch.upper()
             entry["cibw_arch"] = cibw_arch
         self._add_testpys(entry)
         return entry
     
-    def sbuild(self, key, entry):
+    def sbuild(self, target, entry):
         if "tag" not in entry:
-            tag = key.rsplit(":", maxsplit=1)[0]
+            tag = target
             if tag.startswith("manylinux_"):
                 arch = tag.split("_", maxsplit=1)[-1]
                 tag = f"manylinux_2_17_{arch}.manylinux2014_{arch}"
@@ -136,7 +135,7 @@ def get_matrices(args, all_targets):
         inference = getattr(Inference(args.py_vers), strategy)
         
         for key in getattr(args, strategy):
-            entry = {"label": f"{strategy}-{key}", **inference(key, targets[key])}
+            entry = {"label": f"{strategy}-{key}", **inference(_target_only(key), targets[key])}
             matrix_entries.append(entry)
     
     return matrices
@@ -207,6 +206,11 @@ See //strategy/targets.json for canonical configuration, or below for available 
         help = "Sequence of Python versions, as passed to setup-python and multitest.py. The last version specified becomes the main version used for build; other versions are for testing, which will be performed in reverse order, with the main version tested first. Versions unavailable to the runner in question will be implicitly excluded on a per-target basis.",
     )
     parser.add_argument(
+        "--no-duplicates",
+        action = "store_true",
+        help = "Disallow building the same platform multiple times through different targets/strategies. This option should be passed when publish aggregation is enabled, which cannot deal with duplicate wheels, whereas for testing purposes, it is OK to build the same platform in multiple ways. Tip: Use one of the release presets (e.g. --profile default or prefer-*) - these should not contain any duplicates.",
+    )
+    parser.add_argument(
         "--reveal",
         action = "store_true",
         help = "Print human-readable output to stderr.",
@@ -220,15 +224,18 @@ See //strategy/targets.json for canonical configuration, or below for available 
         for s in STRATEGIES:
             setattr(args, s, profile_json[s]+getattr(args, s))
     
+    all_selected = []
     for strategy in STRATEGIES:
-        selected_targets = getattr(args, strategy)
-        duplicates = _get_duplicates(selected_targets)
-        assert not duplicates, f"Duplicates within {strategy.upper()} strategy: {duplicates}"
-        if selected_targets == ["all"]:
-            selected_targets = list(all_targets[strategy].keys())
-            setattr(args, strategy, selected_targets)
+        selected = getattr(args, strategy)
+        assert len(selected) == len(set(selected)), f"Duplicate labels within {strategy.upper()} strategy"
+        if selected == ["all"]:
+            selected = list(all_targets[strategy].keys())
+            setattr(args, strategy, selected)
+        all_selected.extend(selected)
     
-    assert any(getattr(args, s) for s in STRATEGIES), "At least one target must be given."
+    assert all_selected, "At least one target must be given."
+    if args.no_duplicates:
+        assert len(all_selected) == len(set(_target_only(k) for k in all_selected)), "Sum of targets would result in duplicate wheels, but --no-duplicates is set."
     
     return args
 
