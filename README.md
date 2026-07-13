@@ -1000,7 +1000,7 @@ The same applies to Pull Requests. We will accept contributions only if we find 
 If the code owner decides a change is inappropriate, that's it, and we will not enter any time-wasting discussion.
 Any attempts to pressure us to merge a PR will not be tolerated, and may result in the offender being blocked.
 
-#### No AI issues and PRs
+### No AI issues and PRs
 
 <!-- Due to an extreme influx of AI slop on GitHub, nearly all major projects have added some kind of AI policy. This is ours. Perhaps, GitHub banning AI issues/PRs in the first place (similar to Stackoverflow) might have been the better approach. -->
 
