@@ -6,7 +6,7 @@
 # Changelog for next release
 *Requirements*
 - macOS `13.0+` is now required for current PDFium (declared in upstream config and confirmed with dylib header inspection). Updated wheel tags accordingly.
-- Increased tool dependency requirements
+- Increased setup dependency requirements
   + `build_native.py` now expects `git >= 2.49.0` so we can use modern `git clone --revision` features.
   + If `gh` is installed, `gh >= 2.47.0` will be required, as we now assume availability of the `gh attestation` subcommand without consulting `gh --version`.
 
