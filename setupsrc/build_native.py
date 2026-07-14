@@ -359,8 +359,8 @@ _SysrootMap = sysroot_cpu = {
     "armv8l":   ("armhf",    "bullseye"),
     "aarch64":  ("arm64",    "bullseye"),
     "ppc64le":  ("ppc64el",  "bullseye"),
-    "mipsle":   ("mipsel",   "bullseye"),
     "mips64le": ("mips64el", "bullseye"),
+    "mipsle":   ("mipsel",   "bullseye"),
     "riscv64":  ("riscv64",  "trixie"),
 }
 

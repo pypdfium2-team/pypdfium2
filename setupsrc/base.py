@@ -123,6 +123,7 @@ class PlatNames:
     linux_arm32      = SysNames.linux   + "_arm32"
     linux_ppc64le    = SysNames.linux   + "_ppc64le"
     linux_mips64le   = SysNames.linux   + "_mips64le"
+    linux_mipsle     = SysNames.linux   + "_mipsle"
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
@@ -149,6 +150,7 @@ PdfiumBinariesMap = {
     PlatNames.android_arm64:    "android-arm64",
     PlatNames.android_arm32:    "android-arm",
     PlatNames.linux_mips64le:   "linux-mips64el",
+    # PlatNames.linux_mipsle:     "linux-mipsel",  # coming soon
     PlatNames.linux_musl_x64:   "linux-musl-x64",
     PlatNames.linux_musl_x86:   "linux-musl-x86",
     PlatNames.linux_musl_arm64: "linux-musl-arm64",
@@ -552,9 +554,16 @@ class _host_platform:
             log(f"Linux {cpu_identity} {self._libc_name, self._libc_ver}")
             if sys.byteorder != "little":
                 raise UnhandledPlatformError("Only little-endian platforms are supported with pdfium-binaries on setup. Please check PyPI for possible wheels.")
+            prefix_map = (
+                ("ppc64", "ppc64le"),
+                ("mips64", "mips64le"),
+                ("mips", "mipsle")
+            )
+            for prefix, resolved_mach in prefix_map:
+                if mach.startswith(prefix):
+                    mach = resolved_mach
             if self.is_32bit:
-                # TODO once pdfium-binaries have 32-bit MIPS builds, remap mips64 as well
-                mach = {"x86_64": "i686", "aarch64": "armv8l"}.get(mach, mach)
+                mach = {"x86_64": "i686", "aarch64": "armv8l", "mips64le": "mipsle"}.get(mach, mach)
             if mach == "x86_64":
                 return self._handle_linux("x64")
             elif mach == "i686":
@@ -563,12 +572,8 @@ class _host_platform:
                 return self._handle_linux("arm64")
             elif mach in ("armv7l", "armv8l"):
                 return self._handle_linux("arm32", musl_ok=False)
-            elif mach.startswith("ppc64"):  # ppc64le
-                return self._handle_linux("ppc64le", musl_ok=False)
-            elif mach.startswith("mips64"):
-                return self._handle_linux("mips64le", musl_ok=False)
-            # elif mach.startswith("mips"):
-            #     return self._handle_linux("mipsle", musl_ok=False)
+            elif mach in ("ppc64le", "mips64le", "mipsle"):
+                return self._handle_linux(mach, musl_ok=False)
         
         elif self._raw_system == "android":  # PEP 738
             # The PEP isn't too explicit about the machine names, but based on related CPython PRs, it looks like platform.machine() retains the raw uname values as on Linux, whereas sysconfig.get_platform() will map to the wheel tags
