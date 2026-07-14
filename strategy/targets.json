@@ -194,13 +194,17 @@
         "manylinux_loongarch64": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_x86_64": {
-            "runner_os": "ubuntu-26.04"},
-        "musllinux_aarch64": {
-            "runner_os": "ubuntu-26.04-arm"},
-        "musllinux_armv7l": {
-            "runner_os": "ubuntu-26.04-arm"},
+            "runner_os": "ubuntu-26.04",
+            "pdfium_ver": "latest-binaries"},
         "musllinux_i686": {
-            "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "pdfium_ver": "latest-binaries"},
+        "musllinux_aarch64": {
+            "runner_os": "ubuntu-26.04-arm",
+            "pdfium_ver": "latest-binaries"},
+        "musllinux_armv7l": {
+            "runner_os": "ubuntu-26.04-arm",
+            "pdfium_ver": "latest-binaries"},
         "musllinux_ppc64le": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_s390x": {

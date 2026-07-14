@@ -208,7 +208,7 @@ See //strategy/targets.json for canonical configuration, or below for available 
     parser.add_argument(
         "--no-duplicates",
         action = "store_true",
-        help = "Disallow building the same platform multiple times through different targets/strategies. This option should be passed when publish aggregation is enabled, which cannot deal with duplicate wheels, whereas for testing purposes, it is OK to build the same platform in multiple ways. Tip: Use one of the release presets (e.g. --profile default or prefer-*) - these should not contain any duplicates.",
+        help = "Disallow building the same platform multiple times through different targets/strategies. This option should be passed when publish aggregation is enabled, which cannot deal with duplicate wheels, whereas for testing purposes, it is OK to build the same platform in multiple ways. Tip: Use one of the release presets (e.g. --profile default or prefer-*), these should not contain any duplicates.",
     )
     parser.add_argument(
         "--reveal",

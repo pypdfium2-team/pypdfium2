@@ -196,11 +196,12 @@ jobs:
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
+      # TODO pdfium_ver: propagate exact version from prepare step instead of latest-binaries?
       runner_os: ${{ matrix.runner_os }}
       test_os: ${{ matrix.test_os }}
       py_vers: ${{ matrix.py_vers }}
       testos_py_vers: ${{ matrix.testos_py_vers }}
-      # pdfium_ver: ${{ ... }}  # TODO
+      pdfium_ver: ${{ matrix.pdfium_ver }}  # '' if unset
       target_os: ${{ matrix.target_os }}
       target_cpu: ${{ matrix.target_cpu }}
       build_params: ${{ matrix.build_params }}
@@ -227,7 +228,7 @@ jobs:
       testos_py_vers: ${{ matrix.testos_py_vers }}
       cibw_target: ${{ matrix.cibw_target }}
       cibw_arch: ${{ matrix.cibw_arch }}
-      # pdfium_ver: ${{ ... }}  # TODO
+      pdfium_ver: ${{ matrix.pdfium_ver }}  # '' if unset
       use_sysroot: ${{ matrix.use_sysroot || false }}
       ref: ${{ needs.prepare.outputs.ref }}
       replicate_tag: ${{ needs.prepare.outputs.version }}
