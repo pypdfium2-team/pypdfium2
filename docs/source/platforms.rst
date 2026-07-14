@@ -64,7 +64,7 @@ Legend
   + **PBIN** = Repack external builds from ``bblanchon/pdfium-binaries``.
   + **SBLD** = Built at pypdfium2 via ``sbuild.yaml`` (``build_toolchained.py``).
   + **CIBW** = Built at pypdfium2 via ``cibw.yaml`` (``build_native.py`` + containers on Linux, ``build_toolchained.py`` on Windows and macOS).
-  + ✅ Platform supported, ❌ Not supported with that strategy, ⏳Planned
+  + ✅ Platform supported, ❌ Not supported with that strategy, ⏳In planning
 
 - 🐍 Conda *(PBIN only)*
   
@@ -76,7 +76,7 @@ Legend
 - 🧪 Testing status
   
   + ✅ Tested on host
-  + ☑️ Tested under emulation (QEMU/Rosetta)
+  + ☑️ Tested under emulation
   + ❌ Not automatically tested
 
 - 🛠️ Cross compilation indicator
@@ -89,8 +89,8 @@ Legend
 
 - **DEV**: Can be built from source natively on-device?
   
-  + ✅ Yes (tested on GHA)
-  + ☑️ Yes (tested in Docker)
+  + ✅ Yes (tested with GHA)
+  + ☑️ Yes (tested with Docker)
   + 🅿️ Probably (might need minor tweaks)
 
 - **N**: Notes
