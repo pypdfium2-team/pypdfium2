@@ -15,9 +15,8 @@
 Largest CI/workflows rework yet ("strategic builds"). Many testing gaps filled (see the updated platform support table).
 
 - Dynamic selection of targets and Python versions across 3 build strategies (pdfium-binaries repackaging, build using chromium toolchain, native build through cibuildwheel). This means releases can now be made using any selection of targets/strategies, configurable through workflow inputs on a per-run basis.
-- In principle, this would allow us to make releases just using our own builds, without external binaries. This is a step towards independence.
+- In principle, this would allow us to make releases just using our own builds, without external binaries. We plan to explore this from time to time.
 That said, pypdfium2's conda packages continue to be tied to the pdfium-binaries, and setup will continue to provide you with pdfium-binaries by default.
-We would probably explore making our own releases from time to time, but otherwise keep using pdfium-binaries as primary strategy for the foreseeable future.
 - Test multiple Python versions in one job (either the build job, or a dedicated test job if another runner image is needed). Share testing across build strategies through composite action / reusable workflow. Use Docker testing where needed. Added ability to test macOS Intel from arm64 through Rosetta emulation (`arch -x86_64` prefix).
 - Split up pdfium-binaries packaging in individual jobs.
 - Hash-pinned all actions across `pypdfium2`, `gn-dist` and the `ctypesgen` fork. Tightened permissions. Replaced superfluous actions with built-in `gh` CLI. `zizmor` compliance (with a few intentional suppressions).
