@@ -79,10 +79,11 @@ jobs:
       # run get_matrix.py using the runner's pre-installed python
       - name: Determine build matrix
         id: get_matrix
-        run: python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal >> "$GITHUB_OUTPUT"
+        run: python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal >> "$GITHUB_OUTPUT"
         env:
           PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
           PYVERS_OPT: ${{ inputs.py_vers && format('--py-vers {0}', inputs.py_vers) || '' }}
+          DUPLICATES_OPT: ${{ inputs.publish && '--no-duplicates' || '' }}
           PBIN_TARGETS: ${{ inputs.pbin }} 
           SBUILD_TARGETS: ${{ inputs.sbuild }}
           CIBW_TARGETS: ${{ inputs.cibw }}
