@@ -43,7 +43,7 @@ PDFIUM_PLATFORM = "sourcebuild-toolchained"
 # TODO this will need to be updated to 13 once we build pdfium > 7928
 MACOSX_DEPLOYMENT_TARGET = "12.0.0"
 # Make sure the OS yields its real version
-SYSTEM_VERSION_COMPAT = 0
+SYSTEM_VERSION_COMPAT = "0"
 
 [tool.cibuildwheel.windows.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
