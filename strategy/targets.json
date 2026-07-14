@@ -106,11 +106,6 @@
             "target_cpu": "x64",
             "tag": "macosx_12_0_x86_64",
             "need_py_vers": true},
-        "macosx_arm64:cross": {
-            "runner_os": "macos-15-intel",
-            "test_os": "macos-latest",
-            "target_cpu": "arm64",
-            "tag": "macosx_12_0_arm64"},
         "macosx_x86_64:native": {
             "runner_os": "macos-15-intel",
             "tag": "macosx_12_0_x86_64"},
