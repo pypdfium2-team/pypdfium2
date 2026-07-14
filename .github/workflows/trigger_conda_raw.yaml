@@ -21,6 +21,6 @@ jobs:
       new_only: true
       test: true
       publish: true
-      actually_publish: false  # TODO unlock when merged
+      actually_publish: true
     secrets:
       anaconda_api_token: ${{ secrets.ANACONDA_API_TOKEN }}

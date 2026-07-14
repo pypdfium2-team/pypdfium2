@@ -19,7 +19,6 @@ jobs:
     permissions:
       actions: write  # needed by dispatch.yaml
     
-    # TODO unlock actually_publish
     uses: ./.github/workflows/dispatch.yaml
     with:
       workflow_file: main.yaml
@@ -36,5 +35,5 @@ jobs:
           "conda": "true",
           "gh_pages": "true",
           "publish": "true",
-          "actually_publish": "false"
+          "actually_publish": "true"
         }
