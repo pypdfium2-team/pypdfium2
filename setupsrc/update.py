@@ -28,7 +28,7 @@ def clear_data(download_files):
             shutil.rmtree(pl_dir)
 
 
-def _get_package(pl_name, version, robust, use_v8):
+def _get_package(pl_name, version, use_v8):
     
     pl_dir = DataDir / pl_name
     mkdir(pl_dir)
@@ -40,30 +40,21 @@ def _get_package(pl_name, version, robust, use_v8):
     fn = prefix + f"{PdfiumBinariesMap[pl_name]}.tgz"
     fu = f"{ReleaseURL}{version}/{fn}"
     fp = pl_dir / fn
-    
-    try:
-        urlretrieve(fu, fp)
-    except Exception as e:
-        if robust:
-            log(str(e))
-            return None, None
-        else:
-            raise
+    urlretrieve(fu, fp)
     
     return pl_name, fp
 
 
-def do_download(platforms, version, use_v8, max_workers, robust):
+def do_download(platforms, version, use_v8, max_workers):
     
     if not max_workers:
         max_workers = len(platforms)
     
     archives = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        func = functools.partial(_get_package, version=version, robust=robust, use_v8=use_v8)
+        func = functools.partial(_get_package, version=version, use_v8=use_v8)
         for pl_name, file_path in pool.map(func, platforms):
-            if pl_name is not None:
-                archives[pl_name] = file_path
+            archives[pl_name] = file_path
     
     return archives
 
@@ -142,7 +133,7 @@ def postprocess_android():
         log("If you are on Termux, consider installing termux-elf-cleaner to clean up possible linker warnings.")
 
 
-def main(platforms, version, robust=False, max_workers=None, use_v8=False, verify=None):
+def main(platforms, version, max_workers=None, use_v8=False, verify=None):
     
     platforms = handle_platforms(platforms)
     if len(platforms) != len(set(platforms)):
@@ -150,7 +141,7 @@ def main(platforms, version, robust=False, max_workers=None, use_v8=False, verif
     flags = ("V8", "XFA") if use_v8 else ()
     
     clear_data(platforms)
-    archives = do_download(platforms, version, use_v8, max_workers, robust)
+    archives = do_download(platforms, version, use_v8, max_workers)
     do_verify(verify, archives, version)
     
     do_extract(archives, version, flags)
@@ -183,11 +174,6 @@ def parse_args(argv):
         "--max-workers",
         type = int,
         help = "Maximum number of jobs to run in parallel when downloading binaries.",
-    )
-    parser.add_argument(
-        "--robust",
-        action = "store_true",
-        help = "Skip missing binaries instead of raising an exception.",
     )
     parser.add_argument(
         "--verify",
