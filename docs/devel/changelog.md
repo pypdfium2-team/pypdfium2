@@ -54,7 +54,7 @@
   If it breaks too often, we may go back to the pinned version or even `pdfium-binaries` for some musl targets.
 
 *Packaging*
-- Corrected minimum macOS requirement to `12_0`, as determined by `vtool -show-build`. (Upstream config no longer specifies a deployment target.)
+- Corrected minimum macOS requirement to `12_0`, as determined by `vtool -show-build`.
 - Lowered `riscv64` wheel's glibc requirement from `2_38` to `2_34` by using upstream's sysroot.
 
 *API changes*

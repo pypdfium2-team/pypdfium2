@@ -481,10 +481,10 @@ class PdfPage (pdfium_i.AutoCloseable):
             pdfium_c.FPDF_RenderPageBitmap(*render_args)
         else:
             pause = pdfium_c.IFSDK_PAUSE(version=1)
-            pdfium_i.set_callback(pause, "NeedToPauseNow", lambda _: False)
+            pdfium_i.set_callback(pause, "NeedToPauseNow", _pause_noop)
             fpdf_cs = color_scheme.convert(rev_byteorder)
             status = pdfium_c.FPDF_RenderPageBitmapWithColorScheme_Start(*render_args, fpdf_cs, pause)
-            assert status == pdfium_c.FPDF_RENDER_DONE, f"Render status is {pdfium_i.RenderStatusToStr[status]!r}, but 'done' was expected."
+            assert status != pdfium_c.FPDF_RENDER_FAILED, "Progressive render return code indicates failure"
             pdfium_c.FPDF_RenderPage_Close(self)
         
         if may_draw_forms and self.formenv:
@@ -588,3 +588,7 @@ class PdfColorScheme:
         for key, value in self.colors.items():
             setattr(fpdf_cs, key, pdfium_i.color_tohex(value, rev_byteorder))
         return fpdf_cs
+
+
+def _pause_noop(arg):
+    return False

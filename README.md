@@ -3,7 +3,7 @@
 
 > [!IMPORTANT]
 > **AI-"assisted" issues and PRs are banned from this project!**
-> [See below.](#no-ai-issues-and-prs-policy)
+> [See below.](#no-ai-issues-and-prs)
 
 # pypdfium2
 
@@ -383,10 +383,10 @@ PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 
 #### Further setup info (formal summary)
 
-This is a *somewhat* formal description of pypdfium2's setup capabilities.
+This is a somewhat formal description of pypdfium2's setup capabilities.
 It is meant to sum up and complement the above documentation on specific sub-targets.
 
-Disclaimer: As it is hard to keep up with constantly evolving setup code, it is possible this documentation may be outdated/incomplete. Also keep in mind that these APIs could change any time, and may be mainly of internal interest.
+As it is hard to keep up with constantly evolving setup code, it is possible this documentation may be outdated/incomplete. Also keep in mind that these APIs could change any time, and are mainly of internal interest.
 
 * Binaries are stored in platform-specific sub-directories of `data/`, along with bindings and version information.
 
@@ -405,6 +405,7 @@ Disclaimer: As it is hard to keep up with constantly evolving setup code, it is 
 * `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
   - May be used by packagers to decouple raw bindings and helpers, which may be relevant if packaging against system pdfium.
   - Would also allow to install only the raw module without helpers, or only helpers with a custom raw module.
+  - Be careful, `PYPDFIUM_MODULES=raw` requires a pre-generated version file to infer the package version.
 
 * `$PDFIUM_BINDINGS=reference` allows to override ctypesgen and use the reference bindings file `autorelease/bindings.py` instead.
   - This is a convenience option to get pypdfium2 installed from source even if a working ctypesgen / C pre-processor is not available in the install env. *May be automatically enabled under given circumstances.*
@@ -971,7 +972,7 @@ To the author's knowledge, pypdfium2 is one of the rare Python libraries capable
 > The exact licensing situation depends on how the builds were made.<br>
 > Note that a subset of pypdfium2 builds might link with the `libgcc` runtime library. Check the builds you use and, if affected, libgcc's license to see if that's OK for your use.
 
-[^liberal_pdf_renderlibs]: The only other liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java), but python bindings packages don't exist yet or are unsatisfactory. However, we wrote some gists that show it'd be possible in principle: [pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc) (+ [setup](https://gist.github.com/mara004/881d0c5a99b8444fd5d1d21a333b70f8)), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7).
+[^liberal_pdf_renderlibs]: Other mature, liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). While they can be accessed from Python in principle, as shown in the author's gists ([pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7)), there don't seem to be proper python bindings projects to these libraries yet. These days, novel options have surfaced, including `docling-parse` and `pdf_oxide`, but the author is not familiar with them.
 
 
 ## Issues / Contributions
@@ -990,7 +991,18 @@ Roadmap:
 * [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/issues): Binary builder.
 * [ctypesgen](https://github.com/pypdfium2-team/ctypesgen/issues): Bindings generator (fork). See also [upstream](https://github.com/ctypesgen/ctypesgen/issues).
 
-### No AI issues and PRs policy
+### Policy
+<!-- Inspired by bluesky's contributions policy: https://github.com/bluesky-social/indigo -->
+
+Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide much usage support.
+
+The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and PRs that we consider unsuitable will be rejected without further ado.
+If the code owner decides a change is inappropriate, that's it, and we will not enter any time-wasting discussion.
+Any attempts to pressure us to merge a PR will not be tolerated, and may result in the offender being blocked.
+
+### No AI issues and PRs
+
+<!-- Due to an extreme influx of AI slop on GitHub, nearly all major projects have added some kind of AI policy. This is ours. Perhaps, GitHub banning AI issues/PRs in the first place (similar to Stackoverflow) might have been the better approach. -->
 
 AI issues and PRs are banned from this project.
 
@@ -999,13 +1011,6 @@ Any issues or PRs that exhibit the typical characteristics of low-quality genera
 Our issue and PR templates make it quite plain that AI is not allowed, so users who violate this policy should not be surprised to find themselves blocked.
 
 [This announcement](https://github.com/pypdfium2-team/pypdfium2/discussions/449) offers some more background as to why this decision was reached.
-
-### Response policy
-<!-- Inspired by bluesky's contribution rules: https://github.com/bluesky-social/indigo -->
-
-Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide much usage support.
-
-The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and we are free to silently reject PRs we do not like.
 
 ### Known limitations
 
@@ -1038,7 +1043,7 @@ Also, while ABI bindings tend to be more convenient, they have some technical dr
 
 ### Long lines
 
-The pypdfium2 codebase does not hard wrap long lines.
+We do not hard wrap long lines.
 It is recommended to set up automatic word wrap in your text editor, e.g. VS Code:
 ```
 editor.wordWrap = bounded
@@ -1047,20 +1052,20 @@ editor.wordWrapColumn = 100
 
 ### Command recipes
 
-The pypdfium2 project uses the [`just` command runner](https://github.com/casey/just), which can be seen as a more modern, more flexible alternative to `make`. In particular, there's no good way to pass through positional arguments with `make`.
+We use the [`just` command runner](https://github.com/casey/just), which can be seen as a modern, flexible alternative to `make`. In particular, there's no good way to pass through positional arguments with `make`.
 
 Run `just -l` (or open the `justfile`) to view the available commands.
 
 ### Docs
 
-pypdfium2 provides API documentation using [Sphinx](https://github.com/sphinx-doc/sphinx/), which can be rendered to various formats, including HTML:
+pypdfium2 has API documentation built with [Sphinx](https://github.com/sphinx-doc/sphinx/), which can be rendered to various formats, including HTML:
 ```bash
 sphinx-build -b html ./docs/source ./docs/build/html/
 just docs-build  # short alias
 ```
 <!-- there's also a Makefile in docs/ as generated by sphinx-quickstart (cd docs/; make build) -->
 
-Built docs are primarily hosted on [`readthedocs.org`](https://readthedocs.org/projects/pypdfium2/).
+Docs are primarily hosted on [`readthedocs.org`](https://readthedocs.org/projects/pypdfium2/).
 It may be configured using a [`.readthedocs.yaml`](.readthedocs.yaml) file (see [instructions](https://docs.readthedocs.io/en/stable/config-file/v2.html)), and the administration page on the web interface.
 RTD theoretically supports hosting multiple versions, but currently, we only host one build for the latest release through the `stable` branch.
 New builds are automatically triggered by a webhook whenever a linked branch is pushed.
@@ -1085,8 +1090,6 @@ To get code coverage statistics, you may call
 just coverage
 ```
 
-<!-- TODO any chance to avoid `bash -c` ? -->
-
 Sometimes, it can also be helpful to test code on many PDFs.[^testing_corpora]
 In this case, the command-line interface and `find` come in handy:
 ```bash
@@ -1098,66 +1101,7 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 
 [^testing_corpora]: For instance, one could use the testing corpora of open-source PDF libraries (pdfium, pikepdf/ocrmypdf, mupdf/ghostscript, tika/pdfbox, pdfjs, ...)
 
-### Release workflow
-
-The release process is fully automated using Python scripts and scheduled release workflows.
-You may also trigger the workflow manually from the GitHub Actions panel or similar.
-
-Python release scripts are located in the folder `setupsrc`, along with custom setup code:
-* `update.py` downloads binaries.
-* `craft.py` builds platform-specific wheel packages and a source distribution suitable for PyPI upload.
-* `autorelease.py` takes care of versioning, changelog, release note generation and VCS check-in.
-
-The autorelease script has some peculiarities maintainers should know about:
-* The changelog for the next release shall be written into `docs/devel/changelog_staging.md`.
-  On release, it will be moved into the main changelog under `docs/source/changelog.md`, annotated with the PDFium version update.
-  It will also be shown on the GitHub release page.
-* pypdfium2 versioning uses the pattern `major.minor.patch`, optionally with an appended beta mark (e. g. `2.7.1`, `2.11.0`, `3.0.0b1`, ...).
-  Update types such as major or beta may be controlled via `autorelease/config.json`
-
-In case of necessity, you may also forego CI and do the release locally, which would roughly work like this (though ideally it should never be needed):
-* Run the autorelease script (this will implicitly switch onto the `autorelease_tmp` branch, make a release commit, and create the tag):
-  ```bash
-  python3 setupsrc/autorelease.py --register
-  ```
-* Merge the `autorelease_tmp` branch:
-  ```bash
-  git checkout main
-  git merge autorelease_tmp
-  ```
-* Build the packages
-  ```bash
-  just packaging-pypi
-  ```
-* Push release commit/tag to the repository:
-  ```bash
-  git push
-  git push --tags
-  ```
-* Upload to PyPI
-  ```bash
-  # this will interactively ask for your username/password
-  twine upload dist/*
-  ```
-* Update the `stable` branch to trigger a documentation rebuild
-  ```bash
-  git checkout stable
-  git rebase origin/main  # or: git reset --hard main
-  git push
-  git checkout main
-  ```
-
-If something went wrong with commit or tag, you can still revert the changes:
-```bash
-# perform an interactive rebase to change history (substitute $N_COMMITS with the number of commits to drop or modify)
-git rebase -i HEAD~$N_COMMITS
-git push --force
-# delete remote tag (substitute $TAGNAME accordingly)
-git push --delete origin $TAGNAME
-# delete local tag
-git tag -d $TAGNAME
-```
-Faulty PyPI releases may be yanked using the web interface.
+<!-- TODO document release workflow -->
 
 
 ## Popular dependents
@@ -1181,7 +1125,7 @@ This results in pypdfium2 being part of a large dependency tree.
 * [Mike Kroutikov](https://github.com/mkroutikov): Examples on how to use PDFium from Python in `redstork`, `redstork-ui` and `pdfbrain`.
 * [Matthieu Darbois](http://github.com/mayeut): Provider of static clang images – native performance builds in otherwise qemu-driven containers. Help with bypassing `libclang_rt` dependency.
 * [wojiushixiaobai](https://github.com/wojiushixiaobai): Helpful pointers and draft workflow for cibuildwheel. Supporting extra Linux architectures via emulated containers.
-* [Christian Heimes](https://github.com/tiran): RPM packaging for pdfium. Showing how to build pdfium natively without Google's toolchain.
+* [Christian Heimes](https://github.com/tiran): RPM packaging for pdfium. Showing how to build pdfium natively without Google's toolchain. Big-endian fixes.
 * [Marvin Gießing](https://github.com/mgiessing): Investigation on building PDFium for a then unhandled Linux architecture (ppc64le).
 * [Adam Huganir](https://github.com/adam-huganir): Help with maintenance and development decisions since the beginning of the project.
 * [Tim Head](https://github.com/betatim): Original idea for Python bindings to PDFium with ctypesgen in `wowpng`.

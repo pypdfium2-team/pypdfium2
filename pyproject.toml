@@ -11,6 +11,12 @@ requires = [
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
 ]
 
+[tool.check-wheel-contents]
+# W002: erroneous detection of __init__.py files as duplicates
+# W009: Wheel contains multiple toplevel library entries
+# W010: Toplevel library directory contains no Python modules (pypdfium2.libs)
+ignore = ["W002", "W009", "W010"]
+
 [tool.cibuildwheel]
 build-frontend = {name="build", args=["-xn"]}
 before-build = [
@@ -23,6 +29,7 @@ test-command = [
 
 [tool.cibuildwheel.linux]
 environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
+manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:latest"
 
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
@@ -33,6 +40,7 @@ BUILD_PARAMS = "--vendor all --no-vendor libc++"
 [tool.cibuildwheel.macos.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
 # cibw/delocate want a deployment target to be set
+# TODO this will need to be updated to 13 once we build pdfium > 7928
 MACOSX_DEPLOYMENT_TARGET = "12.0.0"
 # Make sure the OS yields its real version
 SYSTEM_VERSION_COMPAT = 0
@@ -42,7 +50,7 @@ PDFIUM_PLATFORM = "sourcebuild-toolchained"
 
 [[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
-select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_amd64"
+select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_amd64 *-win32"
 test-requires = ["pytest", "pillow", "numpy"]
 inherit.test-command = "append"
 test-command = [
@@ -64,7 +72,6 @@ before-all = [
     "apt-get update",
     "apt-get install -y ninja-build",  # generate-ninja libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libglib2.0-dev libharfbuzz-dev  # libicu-dev
 ]
-manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:latest"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux_*"
@@ -104,8 +111,9 @@ inherit.environment-pass = "append"
 environment-pass = ["RUNNER_ARCH"]
 inherit.before-all = "prepend"
 before-all = [
-    "bash ./utils/install-static-clang.sh -d {project}/clang_image -m skip-download",
+    "manylinux-install-clang -v latest",
     "export CLANG_PREFIX=/opt/clang",
+    "ln -s $CLANG_PREFIX/bin/readelf $CLANG_PREFIX/bin/llvm-readelf",
 ]
 inherit.environment = "append"
 # on glibc linux with static clang, we try to use the vendored libc++
@@ -122,6 +130,13 @@ environment.BUILD_PARAMS = "$BUILD_PARAMS --no-vendor libc++"
 select = "*-*linux_s390x"
 inherit.environment = "append"
 environment.BUILD_PARAMS = "$BUILD_PARAMS --clang-as-gcc"
+
+# Cross-compiled or hybrid macOS and Windows targets
+
+[[tool.cibuildwheel.overrides]]
+select = "*-macosx_x86_64"
+inherit.environment = "append"
+environment.BUILD_PARAMS = "--target-cpu x64"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-win_arm64"

@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Sourcebuild Native
-
+name: Test Native Build
 on:
   workflow_dispatch:
     inputs:
@@ -21,7 +20,7 @@ on:
       clang:
         type: boolean
         default: true
-      x86_64:
+      x64:
         type: boolean
         default: true
       arm64:
@@ -31,28 +30,29 @@ on:
         type: boolean
         default: true
 
-# TODO Windows/macOS native?
+permissions: {}
 
 jobs:
-  
+  # TODO Windows/macOS native?
   build:
-    
+    permissions:
+      contents: read  # needed by called workflow
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-26.04', 'ubuntu-26.04-arm']
+        os: ['ubuntu-24.04', 'ubuntu-24.04-arm']
         compiler: ['gcc', 'clang']
         include:
           - compiler: gcc
             cc_condition: ${{ inputs.gcc }}
           - compiler: clang
             cc_condition: ${{ inputs.clang }}
-          - os: ubuntu-26.04
-            os_condition: ${{ inputs.x86_64 }}
-          - os: ubuntu-26.04-arm
+          - os: ubuntu-24.04
+            os_condition: ${{ inputs.x64 }}
+          - os: ubuntu-24.04-arm
             os_condition: ${{ inputs.arm64 }}
     
-    uses: ./.github/workflows/sbuild_one_native.yaml
+    uses: ./.github/workflows/native_build_one.yaml
     with:
       os: ${{ matrix.os }}
       condition: ${{ matrix.cc_condition && matrix.os_condition }}

@@ -1,119 +1,94 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Sourcebuild One
-
+name: SBLD one
 on:
   workflow_call:
     inputs: &reusable_inputs
-      os:
+      runner_os:
         type: string
         required: true
-      py_ver:
-        type: string
-        default: '3.14'
-      pdfium_ver:
+      test_os:
         type: string
         default: ''
-      target_cpu:
+      py_vers:
+        type: string
+        default: '3.14'
+      testos_py_vers:
+        type: string
+        default: ''
+      pdfium_ver:
         type: string
         default: ''
       target_os:
         type: string
         default: ''
+      target_cpu:
+        type: string
+        default: ''
       build_params:
         type: string
         default: ''
-      prefer_gcc:
-        type: boolean
-        default: false
-      custom_clang:
-        type: boolean
-        default: false
-      docker_test:
-        type: boolean
-        default: true
-      tag:
+      wheel_tag:
         type: string
         default: ''
-      branch:
+      ref:
         type: string
         default: ''
-      repo_tag:
+      replicate_tag:
         type: string
         default: ''
-      condition:
-        type: boolean
-        default: true
   workflow_dispatch:
     inputs: *reusable_inputs
 
 defaults:
   run:
     shell: bash
+permissions: {}
 
 jobs:
   
   build:
-    runs-on: ${{ inputs.os }}
-    if: ${{ inputs.condition }}
+    name: Build ${{ inputs.target_os || inputs.runner_os }} ${{ inputs.target_cpu }}
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
+    outputs:
+      artifact_id: ${{ steps.upload-artifact.outputs.artifact-id }}
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          python-version: ${{ inputs.py_ver }}
-      
-      - name: Check out pypdfium2 repository
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.repository }}
-          persist-credentials: false
           fetch-depth: 0  # for git describe
-          ref: ${{ inputs.branch || github.ref_name }}
+          persist-credentials: false
+          ref: ${{ inputs.ref || github.ref_name }}
       
-      - name: Create pypdfium2 tag (optional)
-        if: ${{ inputs.repo_tag }}
-        run: |
-          git config user.email "geisserml@gmail.com"
-          git config user.name "geisserml"
-          git tag -a "$REPO_TAG" -m "Autorelease"
-        env:
-          REPO_TAG: ${{ inputs.repo_tag }}
-      
-      - name: Install Python deps
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt
-      
-      - name: Install custom clang
-        if: ${{ inputs.custom_clang }}
-        run: bash ./utils/install-static-clang.sh -m install-only
+      - name: Prepare
+        uses: ./.github/actions/prepare_step
+        with:
+          replicate_tag: ${{ inputs.replicate_tag }}
+          py_vers: ${{ inputs.py_vers }}
+          py_arch: ${{ (startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86') && 'x86' || '' }}
+          pip_install: -U -r req/setup.txt
       
       - name: Update package list
-        if: ${{ startsWith(inputs.os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.os, '-arm')) }}
+        if: ${{ startsWith(inputs.runner_os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.runner_os, '-arm')) }}
         run: sudo apt-get update
       
       - name: Install Linux/Android cross deps
-        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.target_cpu }}
+        if: ${{ startsWith(inputs.runner_os, 'ubuntu') && inputs.target_cpu }}
         run: |
-          PACKAGES=$(python3 ./utils/get_cross_deps.py $TARGET_CPU $RUNNER_OS)
+          PACKAGES=$(python3 utils/get_cross_deps.py $TARGET_CPU $RUNNER_OS)
           echo $PACKAGES; sudo apt-get install -y $PACKAGES
           ls -l /usr/bin |grep -E '\-(gcc|g\+\+|ar|nm|readelf)(-[0-9.]+)?$'
         env:
-          RUNNER_OS: ${{ inputs.os }}
+          RUNNER_OS: ${{ inputs.runner_os }}
           TARGET_CPU: ${{ inputs.target_cpu }}
       
-      # TODO handle platforms other than ppc64, delegate to a script
-      - name: Create symlinks for GCC
-        if: ${{ startsWith(inputs.os, 'ubuntu') && inputs.prefer_gcc && inputs.target_cpu == 'ppc64' }}
-        run: |
-          sudo ln -s /usr/bin/powerpc64le-linux-gnu-g++-16 /usr/local/bin/powerpc64le-linux-gnu-g++
-          sudo ln -s /usr/bin/powerpc64le-linux-gnu-gcc-16 /usr/local/bin/powerpc64le-linux-gnu-gcc
-      
       - name: Install Linux native deps  # fallback
-        if: ${{ startsWith(inputs.os, 'ubuntu') && endsWith(inputs.os, '-arm') }}
+        if: ${{ startsWith(inputs.runner_os, 'ubuntu') && endsWith(inputs.runner_os, '-arm') }}
         run: |
           sudo apt-get install -y ninja-build  # generate-ninja
           python3 -m pip install -r req/gn.txt
@@ -121,8 +96,8 @@ jobs:
       
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.
       - name: Install Windows cross deps
-        if: ${{ startsWith(inputs.os, 'windows') && !endsWith(inputs.os, '-arm') && inputs.target_cpu }}
-        uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9  # v1.0.5
+        if: ${{ startsWith(inputs.runner_os, 'windows') && !endsWith(inputs.runner_os, '-arm') && inputs.target_cpu }}
+        uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9 # v1.0.5
         with:
           version-sdk: 26100
           features: 'OptionId.WindowsDesktopDebuggers'
@@ -133,52 +108,53 @@ jobs:
           VERSION_PARAM: ${{ inputs.pdfium_ver && format('--version {0}', inputs.pdfium_ver) }}
           CPU_PARAM: ${{ inputs.target_cpu && format('--target-cpu {0}', inputs.target_cpu) }}
           OS_PARAM: ${{ inputs.target_os && format('--target-os {0}', inputs.target_os) }}
-          GCC_PARAM: ${{ inputs.prefer_gcc && '--prefer-gcc' || '' }}
           BUILD_PARAMS: ${{ inputs.build_params }}
-      
-      - name: Show binary info
-        run: file ./data/sourcebuild/*.{so,dylib,dll}
       
       - name: Build wheel
         run: python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: sourcebuild
-          CROSS_TAG: ${{ inputs.tag }}  # optional
+          CROSS_TAG: ${{ inputs.wheel_tag }}  # optional
       
       - name: Upload wheel as artifact
-        uses: actions/upload-artifact@v7
+        id: upload-artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          path: ./dist/*.whl
-          name: sbuild_${{ inputs.target_os || inputs.os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}
+          path: dist/*.whl
+          name: "sbuild-${{ inputs.target_os || inputs.runner_os }}${{ inputs.target_cpu && format('_{0}', inputs.target_cpu) }}"
       
-      - name: Test wheel on build host
-        if: ${{ !(inputs.target_cpu || inputs.target_os) }}
-        run: |
-          python3 -m pip install ./dist/*.whl
-          pypdfium2 -v
-          python3 -m pytest tests/
+      # https://github.com/actions/runner/issues/2238 ...
+      # Bear in mind: some fields, e.g. continue-on-error, require an actual bool (check GH docs).
+      # In that case, need to use fromJSON() in the called action, and not map to empty string here.
+      # Using empty/non-empty string as bool substitute should be OK for if conditionals though.
       
-      - name: Set up QEMU
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.target_cpu && inputs.docker_test }}
-        uses: docker/setup-qemu-action@v4
+      - name: Inspect build
+        uses: ./.github/actions/inspect_step
+        with:
+          runner_os: ${{ inputs.runner_os }}
+          auditwheel: ${{ !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') || '' }}
+          dll_glob: 'data/sourcebuild/*pdfium.*'
       
-      # q&d: extract arch from wheelname
-      # FIXME: Fails if no tag is provided. Better map target_cpu to uname cpu properly?
-      - name: Test wheel in docker container
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && inputs.docker_test }}
-        continue-on-error: ${{ inputs.target_cpu == 'mips64el' }}
-        run: |
-          TARGET=$(ls dist/*.whl | grep -o -P 'manylinux_[\d_]+_\K.+?(?=\.)')
-          echo "$TARGET"
-          mkdir wheelhouse && cp dist/*.whl wheelhouse/
-          python3 ./utils/container_driver.py "manylinux_${TARGET}"
-      
-      - name: On Linux, run auditwheel (informational)
-        if: ${{ startsWith(inputs.os, 'ubuntu') && !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') }}
-        run: |
-          python3 -m pip install -U auditwheel
-          python3 -m auditwheel show dist/*.whl
-      
-      - name: On macOS, run vtool (informational)
-        if: ${{ startsWith(inputs.os, 'macos') }}
-        run: vtool -show-build ./data/sourcebuild/libpdfium.dylib
+      - name: Test wheel
+        uses: ./.github/actions/test_step
+        with:
+          runner_os: ${{ inputs.runner_os }}
+          py_vers: ${{ inputs.py_vers }}
+          test_on_host: ${{ !inputs.target_os && !inputs.target_cpu || '' }}
+          docker: ${{ !inputs.target_os && inputs.target_cpu != 'mipsel' || '' }}
+          windows_32bit: ${{ startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86' || '' }}
+          mac_consider_rosetta: ${{ inputs.target_cpu == 'x64' || '' }}
+  
+  test_other:
+    name: 'Test on another runner - ${{ inputs.test_os }}'
+    if: ${{ inputs.test_os }}
+    needs: build
+    permissions:
+      contents: read  # needed by called workflow
+    
+    uses: ./.github/workflows/test_one.yaml
+    with:
+      runner_os: ${{ inputs.test_os }}
+      artifact_id: ${{ needs.build.outputs.artifact_id }}
+      py_vers: ${{ inputs.testos_py_vers || inputs.py_vers }}
+      ref: ${{ inputs.ref }}

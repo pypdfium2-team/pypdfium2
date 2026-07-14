@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: Sourcebuild One Native
+name: Test Native Build one
 
 on:
   workflow_call:
     inputs: &reusable_inputs
-      os:
+      runner_os:
         type: string
         required: true
       compiler:
@@ -33,31 +33,30 @@ on:
 defaults:
   run:
     shell: bash
+permissions: {}
 
 jobs:
   
   build:
-    runs-on: ${{ inputs.os }}
+    name: Native build on ${{ inputs.runner_os }} with ${{ inputs.compiler }}
     if: ${{ inputs.condition }}
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0  # for git describe
+          persist-credentials: false
+      
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: ${{ inputs.py_ver }}
-      
-      - name: Check out pypdfium2 repository
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.repository }}
-          persist-credentials: false
-          fetch-depth: 0  # for git describe
-      
-      - name: Install python deps
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt
+          pip-install: -U -r req/setup.txt -r req/test.txt
       
       - name: Install build deps
         run: |
@@ -65,6 +64,7 @@ jobs:
           sudo apt-get install -y ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev zlib1g-dev libicu-dev libtiff-dev libglib2.0-dev libharfbuzz-dev  # generate-ninja
           python3 -m pip install -r req/gn.txt
       
+      # TODO update to ubuntu 26.04 default clang ...
       - name: Set up symlinks for clang
         if: ${{ inputs.compiler == 'clang' }}
         run: |
@@ -82,9 +82,7 @@ jobs:
           TEST_PARAM: ${{ inputs.test_pdfium && '--test' || '' }}
       
       - name: Show binary info
-        run: |
-          shopt -s nullglob
-          file ./data/sourcebuild/*.{so,dylib,dll}
+        run: file data/sourcebuild/*pdfium.*
       
       - name: Build wheel
         run: python3 -m build -wxn
@@ -94,13 +92,13 @@ jobs:
       - name: Post-process with auditwheel
         run: |
           python3 -m pip install -U auditwheel
-          python3 -m auditwheel repair ./dist/*.whl -w wheelhouse
+          python3 -m auditwheel repair dist/*.whl -w wheelhouse
       
       - name: Upload wheel as artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: ./wheelhouse/*.whl
-          name: sbuild-native-${{ inputs.compiler }}_${{ inputs.os }}
+          name: "native-${{ inputs.runner_os }}_${{ inputs.compiler }}"
       
       - name: Install and test wheel
         run: |

@@ -1,367 +1,317 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Maintainer's note: This workflow is registered for trusted publishing on pypdfium2's PyPI page, by filename. So if this file shall be renamed, remember to update the filename in PyPI settings as well.
+# Maintainer's note: This workflow is registered for trusted publishing on pypdfium2's PyPI page, by filename. So if this file shall be renamed, remember to update the filename in PyPI and TestPyPI settings as well.
 
 name: Main packaging
 on:
-  workflow_call:
-    inputs: &reusable_inputs
-      runner:
+  workflow_dispatch:
+    inputs:
+      runner_os:
         type: string
         default: 'ubuntu-26.04'
-      py_ver:
+      py_vers:
         type: string
-        default: '3.14'
-      test:
+        default: '3.8 3.11 3.14'
+      profile:
+        # see strategy/profiles.json for choices
+        type: string
+        default: ''
+      pbin:
+        type: string
+        default: ''
+      sbuild:
+        type: string
+        default: ''
+      cibw:
+        type: string
+        default: ''
+      autorelease:
         type: boolean
         default: true
-      augment:
+      sdist:
         type: boolean
-        default: false
-      publish:
+        default: true
+      conda:
         type: boolean
         default: false
       gh_pages:
         type: boolean
         default: false
-      conda:
+      publish:
         type: boolean
         default: false
-  workflow_dispatch:
-    inputs: *reusable_inputs
+      actually_publish:
+        type: boolean
+        default: false
 
 defaults:
   run:
     shell: bash
+permissions: {}
 
 jobs:
   
-  # TODO Split packaging across native hosts, merging build and test jobs (autorelease.py can be run in a prepare job before). Add ability to select build strategy (binaries, sbuild, cibw) per target.
-  
-  build:
-    runs-on: ${{ inputs.runner }}
+  prepare:
+    name: Prepare build (matrix, checks, autorelease)
+    permissions:
+      contents: write  # needed for push
     outputs:
-      new_version: ${{ steps.get_version.outputs.new_version }}
+      pbin_needed: ${{ steps.get_matrix.outputs.pbin_needed }}
+      sbuild_needed: ${{ steps.get_matrix.outputs.sbuild_needed }}
+      cibw_needed: ${{ steps.get_matrix.outputs.cibw_needed }}
+      pbin_matrix: ${{ steps.get_matrix.outputs.pbin_matrix }}
+      sbuild_matrix: ${{ steps.get_matrix.outputs.sbuild_matrix }}
+      cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
+      ref: ${{ steps.get_version.outputs.ref }}
+      version: ${{ inputs.autorelease && steps.get_version.outputs.version || '' }}
+      branch_name: ${{ inputs.autorelease && steps.autorelease.outputs.branch_name || '' }}
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
-      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
+      - name: Check out pypdfium2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: ${{ !inputs.autorelease && 1 || 0 }}
+          persist-credentials: ${{ inputs.autorelease }}  # zizmor: ignore[artipacked]
+      
+      # run get_matrix.py using the runner's pre-installed python
+      - name: Determine build matrix
+        id: get_matrix
+        run: python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal >> "$GITHUB_OUTPUT"
+        env:
+          PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
+          PYVERS_OPT: ${{ inputs.py_vers && format('--py-vers {0}', inputs.py_vers) || '' }}
+          DUPLICATES_OPT: ${{ inputs.publish && '--no-duplicates' || '' }}
+          PBIN_TARGETS: ${{ inputs.pbin }} 
+          SBUILD_TARGETS: ${{ inputs.sbuild }}
+          CIBW_TARGETS: ${{ inputs.cibw }}
       
       - name: Set up Python
-        uses: actions/setup-python@v6
+        if: ${{ inputs.autorelease }}
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          python-version: ${{ inputs.py_ver }}
+          python-version: '3.14'
+          pip-install: -U -r req/check.txt -r req/setup.txt -r req/test.txt
       
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.repository }}
-          fetch-depth: 0  # for git describe in "Get new version" step
-          persist-credentials: true  # needed for push
-      
-      - name: Install/update dependencies
+      - name: Checks & Autorelease
+        if: ${{ inputs.autorelease }}
+        id: autorelease
         run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U -r req/setup.txt -r req/test.txt -r req/utilities.txt
-          python3 -m pip install -U macholib  # macOS/iOS auto-tagging
-      
-      # NOTE autorelease sets a tag, but it's just temporary for informational purpose and does not match the actually published tag
-      # We can't push the tag at this stage because we don't know the outcome of the following jobs yet
-      # In the future, we might want to move away from using a git branch & tag at this stage, and instead transfer the changes as a patchfile.
-      - name: Run autorelease script
-        run: |
+          ./utils/check.sh
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
-          git reset --hard HEAD
-          # autorelease.py --register automatically switches us onto the autorelease_tmp branch
-          python3 setupsrc/autorelease.py --register
-      
-      - name: Get new version
-        id: get_version
-        run: echo "new_version=$(git describe --abbrev=0)" >> $GITHUB_OUTPUT
-      
-      - name: Install pypdfium2
-        run: python3 -m pip install -v --no-build-isolation -e .
-      
-      - name: Run test suite
-        run: python3 -m pytest tests/
-      
-      # TODO make controllable whether musllinux packages are built through pdfium-binaries or cibw augmentation, consider enabling them here if inputs.augment is false
-      - name: Run PyPI packaging script
-        run: just packaging-pypi
+          python3 setupsrc/emplace.py auto:latest
+          BRANCH_NAME="autorelease_tmp_${RUN_ID}"
+          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME"
+          python3 -m pip install -v --no-build-isolation -e .
+          python3 -m pytest tests/ -sv
+          git push -u origin "$BRANCH_NAME"  # just the branch (not tag)
+          echo "branch_name=${BRANCH_NAME}" >> "$GITHUB_OUTPUT"
+        env:
+          RUN_ID: ${{ github.run_id }}
       
       - name: Upload release notes
-        uses: actions/upload-artifact@v7
+        if: ${{ inputs.autorelease }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release_notes
           path: RELEASE.md
       
-      # https://github.com/actions/upload-artifact/issues/331 ...
-      - name: Upload packages
-        uses: actions/upload-artifact@v7
-        with:
-          name: packages
-          path: dist/*
-      
-      # tag deliberately not pushed (see above)
-      - name: Push autorelease_tmp branch
-        run: git push -u origin autorelease_tmp
+      - name: Determine ref/version
+        id: get_version
+        run: |
+          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(git describe --abbrev=0)" >> "$GITHUB_OUTPUT"
   
   
-  test:
-    if: ${{ inputs.test }}
-    needs: build
+  sdist:
+    name: Craft sdist
+    needs: prepare
+    if: ${{ inputs.sdist }}
+    permissions:
+      contents: read  # recommended by checkout and setup-python actions
     
-    strategy:
-      fail-fast: false
-      matrix:
-        # stick with ubuntu-24.04 for now so we can keep testing python 3.8
-        os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-vs2026-arm']
-        py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
-        exclude:
-          # not supported by setup-python action
-          - os: windows-11-vs2026-arm
-            py: '3.8'
-          # - os: windows-11-vs2026-arm
-          #   py: '3.9'
-          # - os: windows-11-vs2026-arm
-          #   py: '3.10'
-        include:
-          - os: ubuntu-24.04
-            wheel: dist/*manylinux_*_x86_64*.whl
-          - os: ubuntu-24.04-arm
-            wheel: dist/*manylinux_*_aarch64*.whl
-          - os: macos-15-intel
-            wheel: dist/*macosx_*_x86_64*.whl
-          - os: macos-latest
-            wheel: dist/*macosx_*_arm64*.whl
-          - os: windows-latest
-            wheel: dist/*win_amd64.whl
-          - os: windows-11-vs2026-arm
-            wheel: dist/*win_arm64.whl
-    
-    runs-on: ${{ matrix.os }}
-    
+    runs-on: 'ubuntu-24.04'
     steps:
       
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Check out pypdfium2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          python-version: ${{ matrix.py }}
-      
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.repository }}
-          ref: autorelease_tmp
+          fetch-depth: 0  # for git describe
           persist-credentials: false
+          ref: ${{ needs.prepare.outputs.ref }}
       
-      - name: Download packages
-        uses: actions/download-artifact@v8
+      - name: Prepare Python
+        uses: ./.github/actions/prepare_step
         with:
-          name: packages
-          path: dist/
+          py_vers: ${{ inputs.py_vers }}
+          pip_install: -U -r req/setup.txt
       
-      - name: Install dependencies
+      - name: Build & test sdist
         run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U setuptools -r req/test.txt
-      
-      - name: Install pypdfium2 from artifact
-        run: python3 -m pip install $WHEEL
+          python3 setupsrc/craft.py --sdist
+          python3 utils/multitest.py -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
         env:
-          WHEEL: ${{ matrix.wheel }}
+          PY_VERS: ${{ inputs.py_vers }}
       
-      - name: Run Test Suite
-        run: python3 -m pytest tests/ -sv
-      
-      - name: On Linux, run auditwheel (informational)
-        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.py == '3.14' }}
-        run: |
-          python3 -m pip install -U auditwheel
-          python3 -m auditwheel show $WHEEL
-        env:
-          WHEEL: ${{ matrix.wheel }}
-      
-      - name: On macOS, run vtool (informational)
-        if: ${{ startsWith(matrix.os, 'macos') && matrix.py == '3.14' }}
-        # or: PDFIUM_DLL=$(python3 -c 'import pypdfium2_raw; from pathlib import Path; print(Path(pypdfium2_raw.__file__).parent/"libpdfium.dylib")')
-        run: |
-          PDFIUM_DLL=$(python3 -c "from pypdfium2_raw.bindings import _libs; print(_libs['pdfium']._name)")
-          vtool -show-build $PDFIUM_DLL
+      - name: Upload sdist
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sdist
+          path: dist/pypdfium2-*.tar.gz
   
   
-  augment_cibw:
-    
-    if: ${{ inputs.augment }}
-    needs: build
-    
+  pbin:
+    name: PBIN ${{ matrix.pbin_target }} on ${{ matrix.runner_os }}
+    needs: prepare
+    if: ${{ fromJSON(needs.prepare.outputs.pbin_needed) }}
+    permissions:
+      contents: read  # needed by called workflow
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: x86_64
-            pdfium_ver: latest-binaries  # TODO take literal version from a step output
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: i686
-            pdfium_ver: latest-binaries
-          
-          - os: ubuntu-26.04-arm
-            cibw_os: musllinux
-            cibw_arch: aarch64
-            pdfium_ver: latest-binaries
-          
-          - os: ubuntu-26.04-arm
-            cibw_os: musllinux
-            cibw_arch: armv7l
-            pdfium_ver: latest-binaries
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: ppc64le
-          
-          - os: ubuntu-26.04
-            cibw_os: manylinux
-            cibw_arch: riscv64
-            use_sysroot: true
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: riscv64
-          
-          - os: ubuntu-26.04
-            cibw_os: manylinux
-            cibw_arch: loongarch64
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: loongarch64
-          
-          - os: ubuntu-26.04
-            cibw_os: manylinux
-            cibw_arch: s390x
-          
-          - os: ubuntu-26.04
-            cibw_os: musllinux
-            cibw_arch: s390x
+      matrix: ${{ fromJSON(needs.prepare.outputs.pbin_matrix) }}
     
-    uses: ./.github/workflows/cibw_one.yaml
+    uses: ./.github/workflows/pbin_one.yaml
     with:
-      os: ${{ matrix.os }}
-      cibw_target: ${{ matrix.cibw_os }}_${{ matrix.cibw_arch }}
-      cibw_arch: ${{ matrix.cibw_arch }}
-      pdfium_ver: ${{ matrix.pdfium_ver }}
-      use_sysroot: ${{ matrix.use_sysroot || false }}
-      test_pdfium: true
-      repo_tag: ${{ needs.build.outputs.new_version }}
-      branch: autorelease_tmp
+      runner_os: ${{ matrix.runner_os }}
+      test_os: ${{ matrix.test_os }}
+      py_vers: ${{ matrix.py_vers }}
+      testos_py_vers: ${{ matrix.testos_py_vers }}
+      pbin_target: ${{ matrix.pbin_target }}
+      test_on_host: ${{ matrix.test_on_host }}
+      ref: ${{ needs.prepare.outputs.ref }}
+      replicate_tag: ${{ needs.prepare.outputs.version }}
   
   
-  augment_sbuild:
-    
-    if: ${{ inputs.augment }}
-    needs: build
-    
+  sbuild:
+    name: SBLD ${{ matrix.target_os || matrix.runner_os }} ${{ matrix.target_cpu }}
+    needs: prepare
+    if: ${{ fromJSON(needs.prepare.outputs.sbuild_needed) }}
+    permissions:
+      contents: read  # needed by called workflow
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-24.04  # dont't use 26.04, it lacks GCC cross for MIPS :(
-            target_cpu: mips64el
-            tag: manylinux_2_17_mips64le.manylinux2014_mips64le
-            docker_test: true
-          - os: ubuntu-24.04  # dto.
-            target_cpu: mipsel
-            tag: manylinux_2_17_mipsle.manylinux2014_mipsle
-            docker_test: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.sbuild_matrix) }}
     
     uses: ./.github/workflows/sbuild_one.yaml
     with:
-      os: ${{ matrix.os }}
+      # TODO pdfium_ver: propagate exact version from prepare step instead of latest-binaries?
+      runner_os: ${{ matrix.runner_os }}
+      test_os: ${{ matrix.test_os }}
+      py_vers: ${{ matrix.py_vers }}
+      testos_py_vers: ${{ matrix.testos_py_vers }}
+      pdfium_ver: ${{ matrix.pdfium_ver }}  # '' if unset
+      target_os: ${{ matrix.target_os }}
       target_cpu: ${{ matrix.target_cpu }}
-      tag: ${{ matrix.tag }}
-      docker_test: ${{ matrix.docker_test }}
-      py_ver: ${{ inputs.py_ver }}
-      repo_tag: ${{ needs.build.outputs.new_version }}
-      branch: autorelease_tmp
+      build_params: ${{ matrix.build_params }}
+      wheel_tag: ${{ matrix.tag }}
+      ref: ${{ needs.prepare.outputs.ref }}
+      replicate_tag: ${{ needs.prepare.outputs.version }}
+  
+  
+  cibw:
+    name: CIBW ${{ matrix.cibw_target }} on ${{ matrix.runner_os }}
+    needs: prepare
+    if: ${{ fromJSON(needs.prepare.outputs.cibw_needed) }}
+    permissions:
+      contents: read  # needed by called workflow
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.cibw_matrix) }}
+    
+    uses: ./.github/workflows/cibw_one.yaml
+    with:
+      runner_os: ${{ matrix.runner_os }}
+      test_os: ${{ matrix.test_os }}
+      # cibw_py_ver: ${{ ... }}  # TODO
+      testos_py_vers: ${{ matrix.testos_py_vers }}
+      cibw_target: ${{ matrix.cibw_target }}
+      cibw_arch: ${{ matrix.cibw_arch }}
+      pdfium_ver: ${{ matrix.pdfium_ver }}  # '' if unset
+      use_sysroot: ${{ matrix.use_sysroot || false }}
+      ref: ${{ needs.prepare.outputs.ref }}
+      replicate_tag: ${{ needs.prepare.outputs.version }}
   
   
   publish:
-    
-    needs:
-      - build
-      - test
-      - augment_cibw
-      - augment_sbuild
-    
+    name: Publish to PyPI & GH
+    needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
-    runs-on: ${{ inputs.runner }}
     
-    environment: release  # PyPI upload via "trusted publishing"
+    # environment: release  # PyPI upload  # XXX temporarily commented out
     permissions:
-      id-token: write      # PyPI upload via "trusted publishing", and GH attestation
+      id-token: write      # PyPI upload, GH attestation
       attestations: write  # GH attestation
-      contents: write      # autorelease repository changes
-      actions: write       # GH pages build
+      contents: write      # git push
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
-      - name: Check out repository (deep)
-        uses: actions/checkout@v6
+      - name: Check out pypdfium2 (deep, authenticated)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          repository: ${{ github.repository }}
-          fetch-depth: 0
-          persist-credentials: true  # needed for push
-      
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ inputs.py_ver }}
+          fetch-depth: 0  # for git describe
+          persist-credentials: true  # zizmor: ignore[artipacked]
       
       - name: Download release notes
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: release_notes
       
-      - name: Download main packages
-        uses: actions/download-artifact@v8
+      - name: Download sdist
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: dist/
-          name: packages
+          name: sdist
       
-      - name: Download extra packages (cibw)
-        uses: actions/download-artifact@v8
+      - name: Download PBIN wheels
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: dist/
+          merge-multiple: true
+          pattern: pbin-*
+      
+      - name: Download SBLD wheels
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: dist/
+          merge-multiple: true
+          pattern: sbuild-*
+      
+      - name: Download CIBW wheels
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: dist/
           merge-multiple: true
           pattern: cibw-*
       
-      - name: Download extra packages (sbuild)
-        uses: actions/download-artifact@v8
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          path: dist/
-          merge-multiple: true
-          pattern: sbuild_*
+          python-version: '3.14'
+          pip-install: -U -r req/distcheck.txt
       
-      - name: Isolate non-PyPI builds
-        if: ${{ inputs.augment }}
+      - name: Check artifacts
         run: |
-          mkdir gh_only
-          mv dist/*linux_*_loongarch64*.whl -t gh_only/
-          mv dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl -t gh_only/
+          twine check dist/*
+          check-wheel-contents dist/*.whl
+      
+      - name: Mask non-PyPI builds
+        run: |
+          mkdir artifacts/ && cp dist/* -t artifacts/
+          shopt -s nullglob
+          rm -f dist/*linux_*_loongarch64*.whl dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl
       
       - name: Apply and push repository changes
+        if: ${{ inputs.actually_publish }}
         run: |
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
+          # TODO assert HEAD commit hash matches the autorelease commit (no tampering)
           git checkout main
-          git merge origin/autorelease_tmp
+          git merge "origin/${BRANCH_NAME}"
           git tag -a "$NEW_VERSION" -m "Autorelease"
           git push
           git push --tags
@@ -370,85 +320,92 @@ jobs:
           git push --force
           git checkout main
         env:
-          NEW_VERSION: ${{ needs.build.outputs.new_version }}
-      
-      # Upload to TestPyPI / PyPI via "trusted publishing".
-      # https://docs.pypi.org/trusted-publishers/adding-a-publisher/
-      # https://docs.pypi.org/trusted-publishers/using-a-publisher/
-      # https://github.com/pypa/gh-action-pypi-publish
-      
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: dist/  # the default
-          # https://github.com/pypa/gh-action-pypi-publish/issues/283#issuecomment-2499296440
-          attestations: false
-          verbose: true
+          NEW_VERSION: ${{ needs.prepare.outputs.version }}
+          BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}
       
       - name: Attest build provenance
+        if: ${{ inputs.actually_publish }}
         id: provenance
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
-          subject-path: 'dist/*, gh_only/*'
+          subject-path: 'artifacts/*'
       
       - name: Rename provenance file
+        if: ${{ inputs.actually_publish }}
         run: mv "$SRC_PATH" pypdfium2-attestation.json
         env:
           SRC_PATH: ${{ steps.provenance.outputs.bundle-path }}
       
-      # FIXME skip gh_only/*.whl if !inputs.augment
-      - name: Publish to GitHub
-        uses: ncipollo/release-action@v1  # TODO pin to hash?
-        with:
-          immutableCreate: true
-          artifacts: 'dist/*.whl,gh_only/*.whl,dist/*.tar.gz,pypdfium2-attestation.json'
-          bodyFile: 'RELEASE.md'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.build.outputs.new_version }}
-          prerelease: ${{ contains(needs.build.outputs.new_version, 'b') }}
-      
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        if: ${{ inputs.actually_publish }}
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           packages-dir: dist/  # the default
+          # skip-existing: true
+      
+      - name: Publish to GitHub
+        if: ${{ inputs.actually_publish }}
+        run: gh release create "$TAG" --notes-file RELEASE.md --verify-tag --fail-on-no-commits $BETA_FLAG artifacts/* pypdfium2-attestation.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.prepare.outputs.version }}
+          BETA_FLAG: ${{ contains(needs.prepare.outputs.version, 'b') && '--prerelease' || '' }}
+  
   
   gh_pages:
+    name: GH Pages
     needs: publish  # i.e. goes after, regardless if publish is active or not
     if: ${{ inputs.gh_pages && !cancelled() && !contains(needs.*.result, 'failure') }}
+    permissions:
+      contents: read   # needed by called workflow
+      pages: write     # dto.
+      id-token: write  # dto.
+    
     uses: ./.github/workflows/gh_pages.yaml
     with:
       publish: ${{ inputs.publish }}
   
+  
   conda:
+    name: Trigger conda pypdfium2_helpers
     needs: publish
     if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
     permissions:
-      contents: read  # needed by called workflow
+      actions: write  # needed by dispatch.yaml
     
-    uses: ./.github/workflows/conda.yaml
+    uses: ./.github/workflows/dispatch.yaml
     with:
-      package: helpers
-      test: ${{ inputs.test }}
-      publish: ${{ inputs.publish }}
-      actually_publish: ${{ inputs.publish }}
-      # py_ver: ${{ inputs.py_ver }}  # temporarily downgraded
-    secrets:
-      anaconda_api_token: ${{ secrets.ANACONDA_API_TOKEN }}
+      runner_os: ${{ inputs.runner_os }}
+      workflow_file: conda.yaml
+      inputs: |
+        {
+          "package": "helpers",
+          "py_ver": "3.12",
+          "pdfium_ver": "",
+          "new_only": "true",
+          "test": "true",
+          "publish": "${{ inputs.publish }}",
+          "actually_publish": "${{ inputs.actually_publish }}"
+        }
   
   
   cleanup:
-    needs: [publish, gh_pages, conda]
-    if: ${{ !cancelled() }}
-    runs-on: ${{ inputs.runner }}
+    name: Clean up temporary branch
+    needs: [prepare, publish, gh_pages, conda]
+    if: ${{ inputs.autorelease && !cancelled() }}
+    permissions:
+      contents: write  # needed for push
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
-      - name: Check out repository
-        uses: actions/checkout@v6
+      - name: Check out pypdfium2 (shallow, authenticated)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          repository: ${{ github.repository }}
-          persist-credentials: true  # needed for push
+          fetch-depth: 1
+          persist-credentials: true  # zizmor: ignore[artipacked]
     
       - name: Remove temporary branch
-        run: git push origin --delete autorelease_tmp
+        run: git push origin --delete "$BRANCH_NAME"
+        env:
+          BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}

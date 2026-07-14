@@ -111,36 +111,21 @@ if IS_ANDROID:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
-def git_clone_rev(name, url, rev, target_dir, depth=1):
-    # https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
-    # NOTE Once we can require git >= 2.49.0, `git clone --depth <n> --revision <sha>` will do. (The author currently uses git 2.42.0.)
-    mkdir(target_dir)
-    depth_param = ["--depth", str(depth)] if depth else []
-    log(f"\nCloning {name} from {url!r} at {rev} ...")
-    run_cmd(["git", "init"], cwd=target_dir, silent=True)
-    run_cmd(["git", "remote", "add", "origin", url], cwd=target_dir, silent=True)
-    run_cmd(["git", "fetch", *depth_param, "origin", rev], cwd=target_dir)
-    run_cmd(["git", "-c", "advice.detachedHead=false", "checkout", "FETCH_HEAD"], cwd=target_dir)
-
-
 class DepsFetcher:
     
     def __init__(self, deps_info):
         self.deps_info = deps_info
 
-    def fetch(self, name, target_dir, reset=False, depth=1):
-        
+    def fetch(self, name, target_dir, reset=False):
         if target_dir.exists():
             if reset:
-                log(f"\n{target_dir.name}: Discarding unstaged changes as per --reset option.")
+                log(f"{target_dir.name}: Discarding unstaged changes as per --reset option.")
                 run_cmd(["git", "restore", "."], cwd=target_dir)
                 return True
             else:
                 return False
-        
-        rev = self.deps_info[name]
-        git_clone_rev(name, DEPS_URLS[name], rev, target_dir, depth)
-        
+        mkdir(target_dir.parent)  # assuming git >= 2.49.0
+        run_cmd(["git", "-c", "advice.detachedHead=false", "clone", "--depth=1", "--revision", self.deps_info[name], DEPS_URLS[name], target_dir.name], cwd=target_dir.parent)
         return True
 
 
@@ -228,11 +213,11 @@ VendorableDeps = ("libc++", "icu", "freetype", "libjpeg", "libpng", "zlib", "lcm
 _SHIMHEADERS_URL = "https://raw.githubusercontent.com/chromium/chromium/{rev}/tools/generate_shim_headers/generate_shim_headers.py"
 
 def _get_shimheaders_tool(pdfium_dir, rev="main"):
-
+    
     tools_dir = pdfium_dir / "tools" / "generate_shim_headers"
     shimheaders_file = tools_dir / "generate_shim_headers.py"
     shimheaders_url = _SHIMHEADERS_URL.format(rev=rev)
-
+    
     if not shimheaders_file.exists():
         log(f"Downloading {shimheaders_file.name} at revision {rev}")
         mkdir(tools_dir)
@@ -270,9 +255,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         # > Extra flags to be appended when compiling both C and C++ files. "CPP" stands for "C PreProcessor" in this context, although it can be used for non-preprocessor flags as well. Not to be confused with "CXX" (which follows).
         env_append("CPPFLAGS", "-ffp-contract=off", " ")
     if do_patches:
-        # it says gcc_toolchain but actually needed for clang as well
-        # -> upstream fix merged, can be removed or put behind version guard once pdfium rolls //build and we update pdfium
-        git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
+        if full_ver.build <= 7928:
+            # it says gcc_toolchain but actually needed for clang as well
+            git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:  # fix linkage step
             git_apply_patch(PatchDir/"android_native.patch", cwd=PDFIUM_DIR_build)
         if compiler is Compiler.clang:

@@ -1,28 +1,28 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-name: CIBW build one
+name: CIBW one
 on:
   workflow_call:
     inputs: &reusable_inputs
-      os:
+      runner_os:
         type: string
         required: true
+      test_os:
+        type: string
+        default: ''
+      cibw_py_ver:
+        type: string
+        default: 'cp314'
+      testos_py_vers:
+        type: string
+        default: '3.14'
       cibw_target:
         type: string
         required: true
       cibw_arch:
         type: string
         required: true
-      cibw_py_ver:
-        type: string
-        default: 'cp314'
-      branch:
-        type: string
-        default: ''
-      repo_tag:
-        type: string
-        default: ''
       pdfium_ver:
         type: string
         default: ''
@@ -32,55 +32,58 @@ on:
       test_pdfium:
         type: boolean
         default: true
-      condition:
-        type: boolean
-        default: true
+      ref:
+        type: string
+        default: ''
+      replicate_tag:
+        type: string
+        default: ''
   workflow_dispatch:
     inputs: *reusable_inputs
+
+defaults:
+  run:
+    shell: bash
+permissions: {}
 
 jobs:
   
   build:
-    name: ${{ inputs.cibw_target }} on ${{ inputs.os }}
-    runs-on: ${{ inputs.os }}
-    if: ${{ inputs.condition }}
+    name: Build ${{ inputs.cibw_target }} on ${{ inputs.runner_os }}
+    permissions:
+      contents: read  # recommended by checkout action
+    outputs:
+      artifact_id: ${{ steps.upload-artifact.outputs.artifact-id }}
     
+    runs-on: ${{ inputs.runner_os }}
     steps:
       
-      - name: Check out pypdfium2
-        uses: actions/checkout@v6
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          fetch-depth: 0  # for git describe
           persist-credentials: false
-          fetch-depth: 0
-          ref: ${{ inputs.branch || github.ref_name }}
+          ref: ${{ inputs.ref || github.ref_name }}
       
-      - name: Create pypdfium2 tag (optional)
-        if: ${{ inputs.repo_tag }}
-        run: |
-          git config user.email "geisserml@gmail.com"
-          git config user.name "geisserml"
-          git tag -a "$REPO_TAG" -m "Autorelease"
-        env:
-          REPO_TAG: ${{ inputs.repo_tag }}
+      - name: Prepare
+        uses: ./.github/actions/prepare_step
+        with:
+          replicate_tag: ${{ inputs.replicate_tag }}
       
       - name: Set up QEMU
         if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
       
       - name: Install Windows cross deps
-        if: ${{ startsWith(inputs.os, 'windows') && inputs.cibw_arch != 'AMD64' }}
-        uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9  # v1.0.5
+        if: ${{ startsWith(inputs.runner_os, 'windows') && inputs.cibw_arch != 'AMD64' }}
+        uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9 # v1.0.5
         with:
           version-sdk: 26100
           features: 'OptionId.WindowsDesktopDebuggers'
       
-      - name: Download clang image
-        if: ${{ contains(inputs.cibw_target, 'linux') && contains(fromJson('["ppc64le","riscv64","loongarch64","s390x"]'), inputs.cibw_arch) }}
-        run: bash ./utils/install-static-clang.sh -d ./clang_image -m download-only
-      
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
       - name: Build wheels
-        uses: loong64/cibuildwheel@e2eb224eba52e082e342e0d7d7e1443a22a170f2  # v4.1.0
+        uses: loong64/cibuildwheel@e2eb224eba52e082e342e0d7d7e1443a22a170f2 # v4.1.0
         env:
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time.
           # Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
@@ -92,22 +95,34 @@ jobs:
         with:
           output-dir: wheelhouse
       
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
+      - name: Upload wheel as artifact
+        id: upload-artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: ./wheelhouse/*.whl
-          name: cibw-${{ inputs.cibw_target }}
+          name: cibw-${{ inputs.cibw_target }}-${{ inputs.runner_os }}
       
-      # For the rarer Linux architectures, Pillow and Numpy don't currently provide wheels on PyPI. However, Linux distributions do provide packages.
-      # Sadly, cibuildwheel isn't really suited for working with system python (cf. https://github.com/pypa/cibuildwheel/discussions/2553)
-      # Also, the need to use an older distribution for build (to achieve low glibc requirement) contradicts the desire for a more recent python software stack for testing.
-      # So our best bet is to do it by hand:
-      
+      # CIBW does not support custom test containers: https://github.com/pypa/cibuildwheel/discussions/2553
+      # So let's just do it on our own; we need container_driver.py for SBUILD and PBIN anyway. Notes:
+      # - x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test again in a different container
+      # - Suppress known test suite failures on s390x and musllinux_armv7l
       - name: Post-test
-        # x86_64 and aarch64 (manylinux and musllinux) are already handled within cibuildwheel, but doesn't harm to test again in a different container
         if: ${{ contains(inputs.cibw_target, 'linux') }}
-        # q&d: suppress known test suite failures on s390x and musllinux_armv7l
         continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
-        run: python3 ./utils/container_driver.py "$TARGET"
+        run: python3 utils/container_driver.py "$TARGET" -w wheelhouse/*.whl
         env:
           TARGET: ${{ inputs.cibw_target }}
+  
+  test_other:
+    name: 'Test on another runner - ${{ inputs.test_os }}'
+    if: ${{ inputs.test_os }}
+    needs: build
+    permissions:
+      contents: read  # needed by called workflow
+    
+    uses: ./.github/workflows/test_one.yaml
+    with:
+      runner_os: ${{ inputs.test_os }}
+      artifact_id: ${{ needs.build.outputs.artifact_id }}
+      py_vers: ${{ inputs.testos_py_vers }}
+      ref: ${{ inputs.ref }}

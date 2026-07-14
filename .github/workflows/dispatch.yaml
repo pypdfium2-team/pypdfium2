@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: Dispatch workflow
+on:
+  workflow_call:
+    inputs:
+      workflow_file:
+        type: string
+        required: true
+      inputs:
+        type: string
+        required: true
+      runner_os:
+        type: string
+        default: 'ubuntu-26.04'
+
+permissions: {}
+
+jobs:
+  trigger:
+    name: Trigger ${{ inputs.workflow_file }}
+    permissions:
+      actions: write  # allow workflow dispatch
+    
+    runs-on: ${{ inputs.runner_os }}
+    steps:
+      - name: Dispatch ${{ inputs.workflow_file }} with GH CLI
+        run: echo "$INPUTS" | gh workflow run "$WORKFLOW_FILE" -R "$REPOSITORY" --ref "$REF_NAME" --json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_FILE: ${{ inputs.workflow_file }}
+          INPUTS: ${{ inputs.inputs }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}

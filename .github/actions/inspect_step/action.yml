@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: 'Inspect'
+description: 'Inspect one build'
+inputs:
+  runner_os:
+    description: 'Runner OS'
+    required: true
+  dll_glob:
+    description: 'Where to find the PDFium DLL in question'
+    default: ''
+  auditwheel:
+    description: 'Run auditwheel show'
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    
+    - name: Inspect DLL with file
+      shell: bash
+      run: file $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
+    
+    - name: macOS - Inspect DLL with vtool
+      if: ${{ startsWith(inputs.runner_os, 'macos-') }}
+      shell: bash
+      run: vtool -show-build $DLL_GLOB
+      env:
+        DLL_GLOB: ${{ inputs.dll_glob }}
+    
+    - name: Linux - Run auditwheel show
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.auditwheel }}
+      shell: bash
+      run: |
+        python3 -m pip install -U auditwheel
+        python3 -m auditwheel show dist/*.whl

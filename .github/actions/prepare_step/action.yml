@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: 'Prepare'
+description: 'Prepare one build (post-checkout)'
+inputs:
+  # post-checkout
+  replicate_tag:
+    description: 'Create the given tag after checkout.'
+    default: ''
+  # python
+  py_vers:
+    description: 'Python versions to set up (space-separated, may be quoted). If not given, setup-python will not be called.'
+    default: ''
+  py_arch:
+    description: 'Passthrough to architecture input of setup-python'
+    default: ''
+  pip_install:
+    description: 'Passthrough to pip-install input of setup-python.'
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    
+    - name: Create pypdfium2 tag (optional)
+      if: ${{ inputs.replicate_tag }}
+      shell: bash
+      run: |
+        git config user.email "geisserml@gmail.com"
+        git config user.name "geisserml"
+        git tag -a "$REPLICATE_TAG" -m "Autorelease"
+      env:
+        REPLICATE_TAG: ${{ inputs.replicate_tag }}
+    
+    - name: Write Python versions
+      if: ${{ inputs.py_vers }}
+      shell: python
+      run: |
+        import os, shlex
+        from pathlib import Path
+        py_vers = shlex.split(os.environ["PY_VERS"])
+        Path(".python-version").write_text("\n".join(py_vers))
+      env:
+        PY_VERS: "${{ inputs.py_vers }}"
+    
+    - name: Set up Python
+      if: ${{ inputs.py_vers }}
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+      with:
+        python-version-file: '.python-version'
+        architecture: ${{ inputs.py_arch }}
+        pip-install: ${{ inputs.pip_install }}

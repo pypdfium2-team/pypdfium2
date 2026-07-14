@@ -5,7 +5,6 @@ import re
 import sys
 import pytest
 import platform
-import warnings
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
@@ -177,4 +176,4 @@ def test_musllinux_packaging_api_available():
     else:
         assert musl_ver, "Not glibc or android libc, expected musl"
         if libc_name:
-            warnings.warn(f"platform.libc_ver() now returns {(libc_name, libc_ver)} for musl")
+            assert libc_name == "musl"

@@ -30,18 +30,17 @@ docs-clean:
 clean:
 	rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
 check:
-	autoflake src/ setupsrc/ tests/ setup.py docs/source/conf.py --recursive --remove-all-unused-imports --ignore-pass-statements --ignore-init-module-imports
-	codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sbuild,./patches,./dist,./LICENSES,./BUILD_LICENSES,./RELEASE.md,./.git,./htmlcov,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate,intoto"
-	reuse lint
+	./utils/check.sh
 distcheck:
 	twine check dist/*
-	# ignore W002: erroneous detection of __init__.py files as duplicates
-	check-wheel-contents dist/*.whl --ignore W002 --toplevel "pypdfium2,pypdfium2_raw,pypdfium2_cli,pypdfium2_cfg"
+	check-wheel-contents dist/*.whl
 
-update *args:
-	python3 setupsrc/update.py {{args}}
-update-verify *args:
-	just update --verify {{args}}
+zizmor *args:
+     zizmor .github/ --persona auditor {{args}}
+zizmor-noisy *args: (zizmor '--no-ignores --no-config' args)
+
+download *args:
+	python3 setupsrc/update.py --verify {{args}}
 emplace *args:
 	python3 setupsrc/emplace.py {{args}}
 build-native *args:
@@ -53,4 +52,4 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
-packaging-pypi: clean check update-verify craft distcheck
+xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck

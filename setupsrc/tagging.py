@@ -12,11 +12,13 @@ def _manylinux_tag(arch):
 _WheeltagPatterns = {
     # -- Minver info is provided on an "AS OF THIS WRITING" basis (06/2026) --
     
-    # Minver can be checked with `vtool` on a native host, or (cross-)checked with macholib. Upstream no longer specify a deployment target in config.
-    PlatNames.darwin_x64:       ("macosx_{}_x86_64", "12_0"),
-    PlatNames.darwin_arm64:     ("macosx_{}_arm64",  "12_0"),
+    # Minver can be auto-detected from the dylib header (via macholib or vtool).
+    # That said, upstream define mac_deployment_target and mac_min_system_version in //build/config/mac/mac_sdk.gni:
+    # https://chromium.googlesource.com/chromium/src/build.git/+/73c0fa98c5cf963c60ea685c57826fa7ba6253d8/config/mac/mac_sdk.gni#17
+    PlatNames.darwin_x64:       ("macosx_{}_x86_64", "13_0"),
+    PlatNames.darwin_arm64:     ("macosx_{}_arm64",  "13_0"),
     # universal binary format (combo of x64 and arm64) - we prefer arch-specific wheels, but allow callers to build a universal wheel if they want to
-    PlatNames.darwin_univ2:     ("macosx_{}_universal2", "12_0"),
+    PlatNames.darwin_univ2:     ("macosx_{}_universal2", "13_0"),
     
     # Windows tags are not versioned. FWIW, the minimum Windows version might be 7 or 8.
     PlatNames.windows_x64:      ("win_amd64", None),
@@ -30,7 +32,6 @@ _WheeltagPatterns = {
     PlatNames.linux_arm32:      (_manylinux_tag("armv7l"),   "2_17"),
     PlatNames.linux_ppc64le:    (_manylinux_tag("ppc64le"),  "2_17"),
     PlatNames.linux_mips64le:   (_manylinux_tag("mips64le"), "2_17"),  # not official manylinux
-    PlatNames.linux_mipsle:     (_manylinux_tag("mipsle"),   "2_17"),  # not official manylinux
     
     # pdfium-binaries statically link musl, so we can declare the lowest possible requirement. The builds have been confirmed to work in a musllinux_1_1 container, as of Nov 2025.
     PlatNames.linux_musl_x64:   ("musllinux_{}_x86_64",  "1_1"),
@@ -45,9 +46,7 @@ _WheeltagPatterns = {
     PlatNames.android_x86:      ("android_{}_x86",         "23"),
     
     # iOS - see PEP 730 # Packaging
-    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. Note that the PEP says:
-    # "These wheels can include binary modules in-situ (i.e., co-located with the Python source, in the same way as wheels for a desktop platform); however, they will need to be post-processed as binary modules need to be moved into the “Frameworks” location for distribution. This can be automated with an Xcode build step."
-    # I take it this means you'd need to change the library search path to that Frameworks location in bindings.
+    # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. See the notes in docs/source/platforms.rst concerning binary extension modules on iOS.
     # Minver can be (cross-)checked with `macholib`.
     PlatNames.ios_arm64_dev:    ("ios_{}_arm64_iphoneos",         "26_0"),
     PlatNames.ios_arm64_simu:   ("ios_{}_arm64_iphonesimulator",  "26_0"),

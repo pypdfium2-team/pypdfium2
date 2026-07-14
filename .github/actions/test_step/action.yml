@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: 'Test'
+description: 'Test one wheel, with container/emulator if needed'
+# https://github.com/actions/runner/issues/2238 ...
+inputs:
+  runner_os:
+    description: 'Runner OS'
+    required: true
+  py_vers:
+    description: 'Python versions to test. (Setup is required from caller.)'
+    required: true
+  test_on_host:
+    description: 'Do native testing on the host runner.'
+    default: 'true'
+  docker:
+    description: 'Linux: Test in Docker container (emulated if need be).'
+    default: 'true'
+  mac_consider_rosetta:
+    description: 'macOS non-Intel host: Indicate an Intel component to test under Rosetta emulation.'
+    default: ''
+  windows_32bit:
+    description: "Windows: Indicate that a 32-bit Python interpreter should be used."
+
+runs:
+  using: 'composite'
+  steps:
+    
+    # https://github.com/orgs/community/discussions/18597 ...
+    
+    - name: Test wheel on host
+      if: ${{ inputs.test_on_host }}
+      shell: bash
+      run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
+      env:
+        PY_VERS: "${{ inputs.py_vers }}"
+        WINDOWS_32BIT: "${{ inputs.windows_32bit && 1 || 0 }}"
+    
+    - name: macOS - Test Intel under emulation
+      if: ${{ startsWith(inputs.runner_os, 'macos-') && !endsWith(inputs.runner_os, '-intel') && inputs.mac_consider_rosetta }}
+      shell: bash
+      # assuming macOS python is universal (it should be)
+      run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv --prefix "arch -x86_64"
+      env:
+        PY_VERS: "${{ inputs.py_vers }}"
+    
+    - name: Linux - Set up QEMU (if needed)
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker && !inputs.test_on_host }}
+      uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+    
+    - name: Linux - Test in Docker container
+      if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.docker }}
+      shell: bash
+      run: |
+        # q&d: infer target name from wheel file name
+        WHEEL_PATH=$(ls dist/*.whl)
+        TARGET=$(python3 utils/regextract.py "-(\w+linux)_[\d_]+_(\w+)\." "%s_%s" "$WHEEL_PATH")
+        python3 utils/container_driver.py "$TARGET" -w "$WHEEL_PATH"

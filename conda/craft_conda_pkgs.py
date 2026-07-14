@@ -123,6 +123,8 @@ def main_conda_raw(args):
     build_num = _get_build_num("pypdfium2_raw", str(args.pdfium_ver), args.new_only)
     os.environ["BUILD_NUM"] = str(build_num)
     
+    # q&d: have a go with the pdfium-binaries first to circumvent gitiles
+    stage_platfiles(Host.platform, None, args.pdfium_ver, flags=())
     stage_platfiles(ExtPlats.system, "generate", args.pdfium_ver, flags=())
     with CondaExtPlatfiles():
         run_conda_build(CondaDir/"raw", CondaDir/"raw"/"out", args=["--override-channels", "-c", "bblanchon", "-c", "defaults"])

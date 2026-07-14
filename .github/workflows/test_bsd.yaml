@@ -5,21 +5,26 @@ name: Test FreeBSD
 on:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   
   freebsd_lo:
     name: Install on FreeBSD with libreoffice pdfium
+    permissions:
+      contents: read  # recommended by checkout action
+    
     runs-on: ubuntu-26.04
     steps:
       
-      - name: Check out pypdfium2
-        uses: actions/checkout@v6
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          fetch-depth: 0  # for git describe
           persist-credentials: false
-          fetch-depth: 0
       
       - name: Test in FreeBSD VM
-        uses: cross-platform-actions/action@be3d7e9ff5c8770b9c51b1a8c8c5446e1cad7cf9  # v1.2.0
+        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
         with:
           operating_system: freebsd
           version: '15.0'
@@ -39,6 +44,6 @@ jobs:
             python3 -m pip install -v .  # implies PDFIUM_PLATFORM=fallback -> system-search
             unset LD_PRELOAD
             python3 -m pypdfium2 --version
-            python3 ./utils/minitest.py
+            python3 utils/minitest.py
             # Some APIs are missing from libreoffice-pdfium, suppress known failure
             python3 -m pytest tests/ -sv || true

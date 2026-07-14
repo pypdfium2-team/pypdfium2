@@ -16,7 +16,6 @@ on:
         type: string
         default: ''  # implies latest
       new_only:
-        # only with package == "raw", ignored otherwise
         type: boolean
         default: true
       test:
@@ -45,8 +44,7 @@ defaults:
     shell: bash -el {0}
 permissions: {}
 
-# TODO it might be nice to support building both packages in one run and testing the helpers package with the newly-built raw package, but this may be fairly complicated
-# TODO add ability to rebuild helpers with different pdfium version bounds
+# Might be nice to support building both packages in one run and testing the helpers package with the newly-built raw package, but this would be fairly complicated.
 
 jobs:
   
