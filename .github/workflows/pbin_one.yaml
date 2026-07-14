@@ -68,7 +68,9 @@ jobs:
           pip_install: -U -r req/setup.txt
       
       - name: Build wheel
-        run: python3 -m build -wxn
+        run: |
+          python3 setupsrc/emplace.py
+          USE_TARBALL_LICENSES=1 python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: "${{ inputs.pbin_target }}:${{ inputs.pdfium_ver }}"
       
