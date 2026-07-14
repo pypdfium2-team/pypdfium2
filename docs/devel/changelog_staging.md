@@ -5,7 +5,7 @@
 
 # Changelog for next release
 - Largest CI/workflows rework yet ("strategic builds"). Many testing gaps filled (see the updated platform support table).
-  + Dynamic selection of targets and Python versions across 3 build strategies (pdfium-binaries repackging, build using chromium toolchain, native build through cibuildwheel). This means releases can now be made using any selection of targets/strategies, configurable through workflow inputs on a per-run basis.
+  + Dynamic selection of targets and Python versions across 3 build strategies (pdfium-binaries repackaging, build using chromium toolchain, native build through cibuildwheel). This means releases can now be made using any selection of targets/strategies, configurable through workflow inputs on a per-run basis.
   + In principle, this would allow us to make releases just using our own builds, without external binaries, which is a step towards independence.
   That said, pypdfium2's conda packages continue to be tied to the pdfium-binaries, and setup will continue to provide you with pdfium-binaries by default.
   We would probably explore making our own releases from time to time, but otherwise continue to use pdfium-binaries for the foreseeable future.
