@@ -241,7 +241,6 @@ def main():
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
             assert not IS_CI
-    
     make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), args.strategy_info)
 
 

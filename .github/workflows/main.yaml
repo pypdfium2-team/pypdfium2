@@ -65,7 +65,6 @@ jobs:
       cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
       ref: ${{ steps.get_version.outputs.ref }}
       version: ${{ inputs.autorelease && steps.get_version.outputs.version || '' }}
-      branch_name: ${{ inputs.autorelease && steps.autorelease.outputs.branch_name || '' }}
     
     runs-on: ${{ inputs.runner_os }}
     steps:
@@ -79,7 +78,7 @@ jobs:
       # run get_matrix.py using the runner's pre-installed python
       - name: Determine build matrix
         id: get_matrix
-        run: python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --write-info strategy_record.json >> "$GITHUB_OUTPUT"
+        run: python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --write-info strategy_info.json >> "$GITHUB_OUTPUT"
         env:
           PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
           PYVERS_OPT: ${{ inputs.py_vers && format('--py-vers {0}', inputs.py_vers) || '' }}
@@ -104,11 +103,10 @@ jobs:
           git config user.name "geisserml"
           python3 setupsrc/emplace.py auto:latest
           BRANCH_NAME="autorelease_tmp_${RUN_ID}"
-          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME" --strategy-info strategy_record.json
+          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME" --strategy-info strategy_info.json
           python3 -m pip install -v --no-build-isolation -e .
           python3 -m pytest tests/ -sv
           git push -u origin "$BRANCH_NAME"  # just the branch (not tag)
-          echo "branch_name=${BRANCH_NAME}" >> "$GITHUB_OUTPUT"
         env:
           RUN_ID: ${{ github.run_id }}
       
@@ -311,7 +309,7 @@ jobs:
           git config user.name "geisserml"
           # TODO assert HEAD commit hash matches the autorelease commit (no tampering)
           git checkout main
-          git merge "origin/${BRANCH_NAME}"
+          git merge "origin/autorelease_tmp_${RUN_ID}"
           git tag -a "$NEW_VERSION" -m "Autorelease"
           git push
           git push --tags
@@ -320,8 +318,7 @@ jobs:
           git push --force
           git checkout main
         env:
-          NEW_VERSION: ${{ needs.prepare.outputs.version }}
-          BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}
+          RUN_ID: ${{ github.run_id }}
       
       - name: Attest build provenance
         if: ${{ inputs.actually_publish }}
@@ -406,6 +403,6 @@ jobs:
           persist-credentials: true  # zizmor: ignore[artipacked]
     
       - name: Remove temporary branch
-        run: git push origin --delete "$BRANCH_NAME"
+        run: git push origin --delete "autorelease_tmp_${RUN_ID}"
         env:
-          BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}
+          RUN_ID: ${{ github.run_id }}
