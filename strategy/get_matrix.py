@@ -175,12 +175,12 @@ def reveal_info(args, matrices, output):
     dump(output, sys.stderr, "stderr", trailer="\n")
 
 def write_info(args):
-    if not args.write_info:
+    if not args.strategy_file:
         return
-    log(f"\nRecording strategies in {args.write_info}")
+    log(f"\nRecording strategies in {args.strategy_file}")
     strategies = {s: getattr(args, s) for s in STRATEGIES}
     n_targets = sum(len(g) for g in strategies.values())
-    write_json(args.write_info, {"strategies": strategies, "n_targets": n_targets})
+    write_json(args.strategy_file, {"strategies": strategies, "n_targets": n_targets})
 
 
 def parse_args(argv, all_targets):
@@ -228,7 +228,7 @@ See //strategy/targets.json for canonical configuration, or below for available 
         help = "Print human-readable output to stderr.",
     )
     parser.add_argument(
-        "--write-info",
+        "--strategy-file",
         metavar = "FILE_PATH",
         type = lambda p: Path(p).expanduser().resolve(),
         help = "Write resolved strategies (JSON) to the given FILE_PATH.",

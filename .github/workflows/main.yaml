@@ -78,7 +78,9 @@ jobs:
       # run get_matrix.py using the runner's pre-installed python
       - name: Determine build matrix
         id: get_matrix
-        run: python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --write-info strategy_info.json >> "$GITHUB_OUTPUT"
+        run: |
+          mkdir release_info/
+          python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --strategy-file release_info/strategy.json >> "$GITHUB_OUTPUT"
         env:
           PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
           PYVERS_OPT: ${{ inputs.py_vers && format('--py-vers {0}', inputs.py_vers) || '' }}
@@ -103,19 +105,19 @@ jobs:
           git config user.name "geisserml"
           python3 setupsrc/emplace.py auto:latest
           BRANCH_NAME="autorelease_tmp_${RUN_ID}"
-          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME" --strategy-info strategy_info.json
+          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME" --strategy-file release_info/strategy.json -o release_info/
           python3 -m pip install -v --no-build-isolation -e .
           python3 -m pytest tests/ -sv
           git push -u origin "$BRANCH_NAME"  # just the branch (not tag)
         env:
           RUN_ID: ${{ github.run_id }}
       
-      - name: Upload release notes
+      - name: Upload release info
         if: ${{ inputs.autorelease }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: release_notes
-          path: RELEASE.md
+          name: release_info
+          path: release_info/*
       
       - name: Determine ref/version
         id: get_version
@@ -157,7 +159,7 @@ jobs:
       - name: Upload sdist
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: sdist
+          name: dist-sdist
           path: dist/pypdfium2-*.tar.gz
   
   
@@ -253,37 +255,18 @@ jobs:
           fetch-depth: 0  # for git describe
           persist-credentials: true  # zizmor: ignore[artipacked]
       
-      - name: Download release notes
+      - name: Download release info
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: release_notes
+          name: release_info
+          path: release_info/
       
-      - name: Download sdist
+      - name: Download wheels & sdist
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: dist/
-          name: sdist
-      
-      - name: Download PBIN wheels
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          path: dist/
+          pattern: dist-*
           merge-multiple: true
-          pattern: pbin-*
-      
-      - name: Download SBLD wheels
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          path: dist/
-          merge-multiple: true
-          pattern: sbuild-*
-      
-      - name: Download CIBW wheels
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          path: dist/
-          merge-multiple: true
-          pattern: cibw-*
       
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
@@ -342,7 +325,7 @@ jobs:
       
       - name: Publish to GitHub
         if: ${{ inputs.actually_publish }}
-        run: gh release create "$TAG" --notes-file RELEASE.md --verify-tag --fail-on-no-commits $BETA_FLAG artifacts/* pypdfium2-attestation.json
+        run: gh release create "$TAG" --notes-file release_info/RELEASE.md --verify-tag --fail-on-no-commits $BETA_FLAG artifacts/* pypdfium2-attestation.json release_info/strategy.json
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.prepare.outputs.version }}

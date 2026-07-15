@@ -140,22 +140,22 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     return clog
 
 
-def _visual_repr(iterable):
+def _strlist(iterable):
     return f"`[{', '.join(iterable)}]`"
 
-def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register, strategy_info):
+def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register, strategy_file, output_dir):
     
     relnotes = ""
     relnotes += f"## Release {new_tag}\n\n"
     
-    if strategy_info:
-        strategies = strategy_info["strategies"]
+    if strategy_file:
+        strategies = strategy_file["strategies"]
         relnotes += f"""\
 ### Build info\n
-This release was made using the following build strategies:
-- PBIN (pdfium-binaries): {_visual_repr(strategies["pbin"])}
-- SBLD (toolchained): {_visual_repr(strategies["sbuild"])}
-- CIBW (native or toolchained): {_visual_repr(strategies["cibw"])}\n
+This release was made with the following build strategies:
+- PBIN: {_strlist(strategies["pbin"])}
+- SBLD: {_strlist(strategies["sbuild"])}
+- CIBW: {_strlist(strategies["cibw"])}\n
 """
     if summary:
         relnotes += "### Summary\n\n"
@@ -196,7 +196,7 @@ This release was made using the following build strategies:
         relnotes += "\n" + "*Commit logs skipped (too big).*"
     relnotes += "\n"
     
-    (ProjectDir/"RELEASE.md").write_text(relnotes)
+    (output_dir/"RELEASE.md").write_text(relnotes)
 
 
 def main():
@@ -210,9 +210,15 @@ def main():
         help = "Save changes to given branch name."
     )
     parser.add_argument(
-        "--strategy-info",
+        "--strategy-file",
         type = lambda p: read_json(Path(p).expanduser().resolve()),
         help = "Build strategy info written by //strategy/get_matrix.py",
+    )
+    parser.add_argument(
+        "-o", "--output-dir",
+        type = lambda p: Path(p).expanduser().resolve(),
+        default = ProjectDir/"release_info",
+        help = "Output dir for release notes.",
     )
     args = parser.parse_args()
     
@@ -241,7 +247,7 @@ def main():
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
             assert not IS_CI
-    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), args.strategy_info)
+    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), args.strategy_file, args.output_dir)
 
 
 if __name__ == "__main__":
