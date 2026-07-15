@@ -21,6 +21,10 @@ def read_json(fp):
     with open(fp, "r") as buf:
         return json.load(buf)
 
+def write_json(fp, data, indent=2):
+    with open(fp, "w") as buf:
+        return json.dump(data, buf, indent=indent)
+
 
 class _PyVer (namedtuple("_PyVer", ("major", "minor"))):
     
@@ -170,6 +174,14 @@ def reveal_info(args, matrices, output):
     log(f"A total of {n_targets} targets will be built.\n")
     dump(output, sys.stderr, "stderr", trailer="\n")
 
+def write_info(args):
+    if not args.write_info:
+        return
+    log(f"\nRecording strategies in {args.write_info}")
+    strategies = {s: getattr(args, s) for s in STRATEGIES}
+    n_targets = sum(len(g) for g in strategies.values())
+    write_json(args.write_info, {"strategies": strategies, "n_targets": n_targets})
+
 
 def parse_args(argv, all_targets):
     
@@ -215,6 +227,12 @@ See //strategy/targets.json for canonical configuration, or below for available 
         action = "store_true",
         help = "Print human-readable output to stderr.",
     )
+    parser.add_argument(
+        "--write-info",
+        metavar = "FILE_PATH",
+        type = lambda p: Path(p).expanduser().resolve(),
+        help = "Write resolved strategies (JSON) to the given FILE_PATH.",
+    )
     
     args = parser.parse_args(argv)
     args.py_vers = PyVers.from_str(args.py_vers)
@@ -249,6 +267,7 @@ def main():
     output = dumpstr(matrices)
     reveal_info(args, matrices, output)
     dump(output, sys.stdout, "stdout")
+    write_info(args)
 
 
 if __name__ == '__main__':

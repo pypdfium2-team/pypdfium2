@@ -94,6 +94,14 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
     return (c_updates, new_pdfium), (py_updates, new_helpers)
 
 
+def register_changes(new_tag, branch_name):
+    run_local(["git", "checkout", "-B", branch_name])
+    run_local(["git", "add", *PlacesToRegister])
+    run_local(["git", "commit", "-m", f"[autorelease main] update {new_tag}"])
+    # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
+    run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
+
+
 def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     
     pdfium_msg = f"## {new_tag} ({time.strftime('%Y-%m-%d')})\n\n"
@@ -117,14 +125,6 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     Changelog.write_text(content)
 
 
-def register_changes(new_tag, branch_name):
-    run_local(["git", "checkout", "-B", branch_name])
-    run_local(["git", "add", *PlacesToRegister])
-    run_local(["git", "commit", "-m", f"[autorelease main] update {new_tag}"])
-    # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
-    run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
-
-
 def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag, target_known):
     clog = "\n<details>\n"
     clog += f"  <summary>{name} commit log</summary>\n\n"
@@ -140,16 +140,31 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     return clog
 
 
-def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register):
+def _visual_repr(iterable):
+    return f"`[{', '.join(iterable)}]`"
+
+def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register, strategy_info):
     
     relnotes = ""
-    relnotes += f"## Changes (Release {new_tag})\n\n"
-    relnotes += "### Summary (pypdfium2)\n\n"
+    relnotes += f"## Release {new_tag}\n\n"
+    
+    if strategy_info:
+        strategies = strategy_info["strategies"]
+        relnotes += f"""\
+### Build info\n
+This release was made using the following build strategies:
+- PBIN (pdfium-binaries): {_visual_repr(strategies["pbin"])}
+- SBLD (toolchained): {_visual_repr(strategies["sbuild"])}
+- CIBW (native or toolchained): {_visual_repr(strategies["cibw"])}\n
+"""
     if summary:
+        relnotes += "### Summary\n\n"
         relnotes += summary
     
     # even if python code was not updated, there will be a release commit
-    clog = _get_log(
+    
+    clog = "### Commit logs\n"
+    clog += _get_log(
         "pypdfium2", RepositoryURL, ProjectDir,
         prev_tag, new_tag,
         "/tree/", "/commit/", "",
@@ -190,6 +205,11 @@ def main():
         description = "Automatic update script for pypdfium2, to be run in the CI release workflow."
     )
     parser.add_argument(
+        "--strategy-info",
+        type = lambda p: Path(p).expanduser().resolve(),
+        help = "Build strategy info written by //strategy/get_matrix.py",
+    )
+    parser.add_argument(
         "--to-branch",
         dest = "branch",
         help = "Save changes to given branch name."
@@ -221,7 +241,12 @@ def main():
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
             assert not IS_CI
-    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch))
+    
+    if args.strategy_info:
+        strategy_info = read_json(args.strategy_info)
+    else:
+        strategy_info = None
+    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), strategy_info)
 
 
 if __name__ == "__main__":
