@@ -217,7 +217,7 @@ def main():
         do_versioning(config, record, prev_helpers, latest_pdfium)
     
     prev_tag = merge_tag(prev_helpers, mode=None)
-    assert prev_tag == record["tag"]
+    assert prev_tag == record["tag"], f"{prev_tag} != {record['tag']}"
     new_tag = merge_tag(new_helpers, mode=None)
     write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
     
