@@ -18,7 +18,7 @@ Largest CI/workflows rework yet ("Strategic builds"). Many testing gaps filled (
 - In principle, this would allow us to make releases just using our own builds, without external binaries. We plan to explore this from time to time. That said, pypdfium2's conda packages continue to be tied to the pdfium-binaries, and setup will continue to provide you with pdfium-binaries by default.
 - Test multiple Python versions in one job (either the build job, or a dedicated test job if another runner image is needed). Share testing across build strategies through composite action / reusable workflow. Use Docker testing where needed. Added ability to test macOS Intel from arm64 through Rosetta emulation (`arch -x86_64` prefix).
 - Split up pdfium-binaries packaging in individual jobs.
-- Hash-pinned all actions across `pypdfium2`, `gn-dist` and the `ctypesgen` fork. Tightened permissions. Replaced superfluous actions with built-in `gh` CLI. `zizmor` compliance (with a few intentional suppressions).
+- Hash-pinned all actions across `pypdfium2`, `gn-dist` and the `ctypesgen` fork. Tightened permissions. Replaced superfluous actions with built-in `gh` CLI. Use exact commit hash rather than branch name to transfer state between jobs. `zizmor` compliance (with a few intentional suppressions).
 
 *Setup*
 - With 32-bit interpreters running on 64-bit hosts, setup should now select the 32-bit target.
