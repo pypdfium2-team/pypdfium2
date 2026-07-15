@@ -10,6 +10,7 @@
 ## 5.12.0 (2026-07-15)
 
 - Updated pdfium-binaries from `7920` to `7947`. Additional builds may use various other versions of pdfium.
+
 *Requirements*
 - macOS `13.0+` is now required for current PDFium (declared in upstream config and confirmed with dylib header inspection). Updated wheel tags accordingly.
 - Setup: Increased tool dependency requirements
