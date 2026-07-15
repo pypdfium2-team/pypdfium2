@@ -211,7 +211,7 @@ def main():
     )
     parser.add_argument(
         "--strategy-info",
-        type = lambda p: Path(p).expanduser().resolve(),
+        type = lambda p: read_json(Path(p).expanduser().resolve()),
         help = "Build strategy info written by //strategy/get_matrix.py",
     )
     args = parser.parse_args()
@@ -242,11 +242,7 @@ def main():
             )
             assert not IS_CI
     
-    if args.strategy_info:
-        strategy_info = read_json(args.strategy_info)
-    else:
-        strategy_info = None
-    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), strategy_info)
+    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), args.strategy_info)
 
 
 if __name__ == "__main__":
