@@ -329,7 +329,7 @@ jobs:
       
       - name: Publish to GitHub
         if: ${{ inputs.actually_publish }}
-        run: gh release create "$TAG" --notes-file release_info/RELEASE.md --verify-tag --fail-on-no-commits $BETA_FLAG artifacts/* release_info/*.{json,txt} pypdfium2-attestation.json
+        run: gh release create "$TAG" --notes-file release_info/RELEASE.md --verify-tag $BETA_FLAG artifacts/* release_info/*.{json,txt} pypdfium2-attestation.json
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.prepare.outputs.version }}
