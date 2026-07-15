@@ -80,7 +80,8 @@ jobs:
         id: get_matrix
         run: |
           mkdir release_info/
-          python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --strategy-file release_info/strategy.json >> "$GITHUB_OUTPUT"
+          python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --strategy-file release_info/strategy.json > release_info/matrix.json
+          cat release_info/matrix.json >> "$GITHUB_OUTPUT"
         env:
           PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
           PYVERS_OPT: ${{ inputs.py_vers && format('--py-vers {0}', inputs.py_vers) || '' }}
@@ -325,7 +326,7 @@ jobs:
       
       - name: Publish to GitHub
         if: ${{ inputs.actually_publish }}
-        run: gh release create "$TAG" --notes-file release_info/RELEASE.md --verify-tag --fail-on-no-commits $BETA_FLAG artifacts/* pypdfium2-attestation.json release_info/strategy.json
+        run: gh release create "$TAG" --notes-file release_info/RELEASE.md --verify-tag --fail-on-no-commits $BETA_FLAG artifacts/* release_info/*.json pypdfium2-attestation.json
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.prepare.outputs.version }}
