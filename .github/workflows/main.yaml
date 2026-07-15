@@ -280,6 +280,7 @@ jobs:
         run: |
           twine check dist/*
           check-wheel-contents dist/*.whl
+          ls -l release_info/
       
       - name: Mask non-PyPI builds
         run: |
