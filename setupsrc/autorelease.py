@@ -152,12 +152,12 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
         relnotes += summary
     if strategy_file:
         strategies = strategy_file["strategies"]
-        relnotes += f"""\
+        relnotes += f"""
 ### Build info\n
 This release was made with the following build strategies:
 - PBIN: {_strlist(strategies["pbin"])}
 - SBLD: {_strlist(strategies["sbuild"])}
-- CIBW: {_strlist(strategies["cibw"])}\n
+- CIBW: {_strlist(strategies["cibw"])}
 """
     
     # even if python code was not updated, there will be a release commit
