@@ -147,7 +147,9 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
     
     relnotes = ""
     relnotes += f"## Release {new_tag}\n\n"
-    
+    if summary:
+        relnotes += "### Summary\n\n"
+        relnotes += summary
     if strategy_file:
         strategies = strategy_file["strategies"]
         relnotes += f"""\
@@ -157,12 +159,8 @@ This release was made with the following build strategies:
 - SBLD: {_strlist(strategies["sbuild"])}
 - CIBW: {_strlist(strategies["cibw"])}\n
 """
-    if summary:
-        relnotes += "### Summary\n\n"
-        relnotes += summary
     
     # even if python code was not updated, there will be a release commit
-    
     clog = "### Commit logs\n"
     clog += _get_log(
         "pypdfium2", RepositoryURL, ProjectDir,
