@@ -305,6 +305,7 @@ jobs:
           git checkout main
         env:
           RUN_ID: ${{ github.run_id }}
+          NEW_VERSION: ${{ needs.prepare.outputs.version }}
       
       - name: Attest build provenance
         if: ${{ inputs.actually_publish }}
