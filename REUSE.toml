@@ -146,7 +146,7 @@ path = [
     "PLATFORMS.csv",
     "docs/build/.gitkeep",
     "sbuild/.gitkeep",
-    "RELEASE.md",  # TODO add to gitignore?
+    "release_info/*",  # TODO add to gitignore?
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 geisserml"
