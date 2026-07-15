@@ -205,14 +205,14 @@ def main():
         description = "Automatic update script for pypdfium2, to be run in the CI release workflow."
     )
     parser.add_argument(
-        "--strategy-info",
-        type = lambda p: Path(p).expanduser().resolve(),
-        help = "Build strategy info written by //strategy/get_matrix.py",
-    )
-    parser.add_argument(
         "--to-branch",
         dest = "branch",
         help = "Save changes to given branch name."
+    )
+    parser.add_argument(
+        "--strategy-info",
+        type = lambda p: Path(p).expanduser().resolve(),
+        help = "Build strategy info written by //strategy/get_matrix.py",
     )
     args = parser.parse_args()
     

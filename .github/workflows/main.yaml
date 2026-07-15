@@ -79,7 +79,7 @@ jobs:
       # run get_matrix.py using the runner's pre-installed python
       - name: Determine build matrix
         id: get_matrix
-        run: python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal >> "$GITHUB_OUTPUT"
+        run: python3 strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --write-info strategy_record.json >> "$GITHUB_OUTPUT"
         env:
           PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}
           PYVERS_OPT: ${{ inputs.py_vers && format('--py-vers {0}', inputs.py_vers) || '' }}
@@ -104,7 +104,7 @@ jobs:
           git config user.name "geisserml"
           python3 setupsrc/emplace.py auto:latest
           BRANCH_NAME="autorelease_tmp_${RUN_ID}"
-          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME"
+          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME" --strategy-info strategy_record.json
           python3 -m pip install -v --no-build-isolation -e .
           python3 -m pytest tests/ -sv
           git push -u origin "$BRANCH_NAME"  # just the branch (not tag)
