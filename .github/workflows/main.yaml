@@ -147,6 +147,7 @@ jobs:
       - name: Prepare Python
         uses: ./.github/actions/prepare_step
         with:
+          replicate_tag: ${{ needs.prepare.outputs.version }}
           py_vers: ${{ inputs.py_vers }}
           pip_install: -U -r req/setup.txt
       
