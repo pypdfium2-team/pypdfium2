@@ -242,7 +242,7 @@ jobs:
     needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     
-    # environment: release  # PyPI upload  # XXX temporarily commented out
+    environment: release  # PyPI upload
     permissions:
       id-token: write      # PyPI upload, GH attestation
       attestations: write  # GH attestation
