@@ -21,15 +21,6 @@ def run_local(*args, **kws):
 
 
 def update_refbindings(version):
-    
-    # We endeavor to make the reference bindings as universal and robust as possible, thus the symbol guards, flags, relative runtime libpath + system search.
-    # Also, skip symbol source info for cleaner diffs, so one can see pdfium API changes at a glance.
-    
-    # REFBINDINGS_FLAGS:
-    # Given the symbol guards, we can define all standalone feature flags.
-    # We don't currently define flags that depend on external headers, though it should be possible in principle by adding them to $CPATH (or equivalent).
-    # Note that Skia is currently a standalone flag because pdfium only provides a typedef void* for a Skia canvas and casts internally
-    
     RefBindingsFile.unlink()
     build_pdfium_bindings(
         version, flags=REFBINDINGS_FLAGS,
@@ -169,8 +160,6 @@ This release was made with the following build strategies:
         target_known=register
     )
     
-    # FIXME seems to take rather long - possibility to limit history size?
-    # TODO specifically show changes to public/ ?
     if c_updates:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
