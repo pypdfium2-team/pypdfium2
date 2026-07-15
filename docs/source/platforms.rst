@@ -33,7 +33,7 @@ Covered platforms
    :file: ../../PLATFORMS.csv
    :header-rows: 1
 
-.. [1] Since v5.12.0, build strategies used and platforms included may vary between releases. While we endeavor to keep this table up-to-date with the current release on a best effort basis, the canonical resource is the release itself.
+.. [1] Since v5.12.0, build strategies used and platforms included may vary between releases. While we endeavor to keep this table up-to-date with the current release on a best effort basis, the authoritative resource is the release itself.
 .. [2] Testing is temporarily disabled, due to issues with the Docker container when called from GHA. It does work locally. To be investigated.
 .. [3] MIPS platforms are not officially part of the manylinux standard, so the wheel tags we use are actually rejected by ``pip``, as they are not in its internal whitelist.
    This can be remedied by re-tagging with ``wheel`` locally to match the host's ``sysconfig.get_platform()`` value.
