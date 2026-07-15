@@ -100,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: ./wheelhouse/*.whl
-          name: cibw-${{ inputs.cibw_target }}-${{ inputs.runner_os }}
+          name: "dist-cibw-${{ inputs.cibw_target }}-${{ inputs.runner_os }}"
       
       # CIBW does not support custom test containers: https://github.com/pypa/cibuildwheel/discussions/2553
       # So let's just do it on our own; we need container_driver.py for SBUILD and PBIN anyway. Notes:

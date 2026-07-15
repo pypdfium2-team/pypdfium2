@@ -94,6 +94,14 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
     return (c_updates, new_pdfium), (py_updates, new_helpers)
 
 
+def register_changes(new_tag, branch_name):
+    run_local(["git", "checkout", "-B", branch_name])
+    run_local(["git", "add", *PlacesToRegister])
+    run_local(["git", "commit", "-m", f"[autorelease main] update {new_tag}"])
+    # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
+    run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
+
+
 def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     
     pdfium_msg = f"## {new_tag} ({time.strftime('%Y-%m-%d')})\n\n"
@@ -117,14 +125,6 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     Changelog.write_text(content)
 
 
-def register_changes(new_tag, branch_name):
-    run_local(["git", "checkout", "-B", branch_name])
-    run_local(["git", "add", *PlacesToRegister])
-    run_local(["git", "commit", "-m", f"[autorelease main] update {new_tag}"])
-    # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
-    run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
-
-
 def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag, target_known):
     clog = "\n<details>\n"
     clog += f"  <summary>{name} commit log</summary>\n\n"
@@ -140,16 +140,29 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     return clog
 
 
-def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register):
+def _strlist(iterable):
+    return f"`[{', '.join(iterable)}]`"
+
+def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register, strategy_file, output_dir):
     
     relnotes = ""
-    relnotes += f"## Changes (Release {new_tag})\n\n"
-    relnotes += "### Summary (pypdfium2)\n\n"
+    relnotes += f"## Release {new_tag}\n\n"
     if summary:
+        relnotes += "### Summary\n\n"
         relnotes += summary
+    if strategy_file:
+        strategies = strategy_file["strategies"]
+        relnotes += f"""
+### Build info\n
+This release was made with the following build strategies:
+- PBIN: {_strlist(strategies["pbin"])}
+- SBLD: {_strlist(strategies["sbuild"])}
+- CIBW: {_strlist(strategies["cibw"])}
+"""
     
     # even if python code was not updated, there will be a release commit
-    clog = _get_log(
+    clog = "### Commit logs\n"
+    clog += _get_log(
         "pypdfium2", RepositoryURL, ProjectDir,
         prev_tag, new_tag,
         "/tree/", "/commit/", "",
@@ -162,7 +175,7 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
-            clog += "\n" + _get_log(
+            clog += _get_log(
                 "PDFium", PdfiumURL, tmpdir/"pdfium_history",
                 str(prev_pdfium), str(new_pdfium),
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
@@ -181,7 +194,7 @@ def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_upd
         relnotes += "\n" + "*Commit logs skipped (too big).*"
     relnotes += "\n"
     
-    (ProjectDir/"RELEASE.md").write_text(relnotes)
+    (output_dir/"RELEASE.md").write_text(relnotes)
 
 
 def main():
@@ -193,6 +206,17 @@ def main():
         "--to-branch",
         dest = "branch",
         help = "Save changes to given branch name."
+    )
+    parser.add_argument(
+        "--strategy-file",
+        type = lambda p: read_json(Path(p).expanduser().resolve()),
+        help = "Build strategy info written by //strategy/get_matrix.py",
+    )
+    parser.add_argument(
+        "-o", "--output-dir",
+        type = lambda p: Path(p).expanduser().resolve(),
+        default = ProjectDir/"release_info",
+        help = "Output dir for release notes.",
     )
     args = parser.parse_args()
     
@@ -221,7 +245,7 @@ def main():
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
             assert not IS_CI
-    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch))
+    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), args.strategy_file, args.output_dir)
 
 
 if __name__ == "__main__":
