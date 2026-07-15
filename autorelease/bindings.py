@@ -382,7 +382,7 @@ FPDF_FONTBACKENDTYPE_FONTATIONS = 1
 FPDF_FONT_BACKEND_TYPE = enum_anon_4
 
 class struct_FPDF_LIBRARY_CONFIG_ (Structure):
-    __slots__ = ('version', 'm_pUserFontPaths', 'm_pIsolate', 'm_v8EmbedderSlot', 'm_pPlatform', 'm_RendererType', 'm_FontLibraryType')
+    __slots__ = ('version', 'm_pUserFontPaths', 'm_pIsolate', 'm_v8EmbedderSlot', 'm_pPlatform', 'm_RendererType', 'm_FontLibraryType', 'm_BrotliEnabled')
 
 struct_FPDF_LIBRARY_CONFIG_._fields_ = (
     ('version', c_int),
@@ -392,6 +392,7 @@ struct_FPDF_LIBRARY_CONFIG_._fields_ = (
     ('m_pPlatform', POINTER(None)),
     ('m_RendererType', FPDF_RENDERER_TYPE),
     ('m_FontLibraryType', FPDF_FONT_BACKEND_TYPE),
+    ('m_BrotliEnabled', FPDF_BOOL),
 )
 
 FPDF_LIBRARY_CONFIG = struct_FPDF_LIBRARY_CONFIG_
