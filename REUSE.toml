@@ -133,12 +133,14 @@ path = "patches/bigendian.patch"
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
     "2025 Christian Heimes <cheimes@redhat.com>",
+    "2026 Helmut Januschka <helmut@januschka.com>",
     "2026 geisserml <geisserml@gmail.com>",
 ]
 SPDX-License-Identifier = "LicenseRef-Ignore"
 SPDX-FileComment = '''
 Derived from RedHat packaging repository: https://github.com/tiran/libpdfium/blob/d99370b3ac7f0c9cd7222be2dfab2c7b648f2e9e/0001-bigendian.patch
 Repo does not have an own license file, but assumably the patches are being made available under pdfium's license, or leastways an open-source license.
+Updated by PDFium contributor @hjanuschka.
 '''
 
 [[annotations]]
