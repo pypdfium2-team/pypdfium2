@@ -7,6 +7,12 @@
 # Changelog
 
 
+## 5.12.1 (2026-07-17)
+
+- No pdfium-binaries update, still at `7947`. Additional builds may use various other versions of pdfium.
+- Fix missing mkdir call in bindings build (blunder). This particularly matters for `PDFIUM_PLATFORM=system-search` / fallback setup.
+
+
 ## 5.12.0 (2026-07-15)
 
 - Updated pdfium-binaries from `7920` to `7947`. Additional builds may use various other versions of pdfium.

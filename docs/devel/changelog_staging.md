@@ -4,4 +4,3 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- Fix missing mkdir call in bindings build (blunder). This particularly matters for `PDFIUM_PLATFORM=system-search` / fallback setup.
