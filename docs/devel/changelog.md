@@ -15,6 +15,8 @@
 
 ## 5.12.0 (2026-07-15)
 
+*__NOTE__: This release has been yanked from PyPI. 5.12.1 is the drop-in replacement, which fixes a setup blunder but is otherwise identical to 5.12.0.*
+
 - Updated pdfium-binaries from `7920` to `7947`. Additional builds may use various other versions of pdfium.
 
 *Requirements*
