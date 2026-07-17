@@ -774,6 +774,7 @@ def build_pdfium_bindings(version, **kwargs):
         log("Using cached headers")
     else:
         log("Downloading headers...")
+        mkdir(DataDir_Bindings)
         archive_url = f"{PdfiumURL}/+archive/refs/heads/chromium/{version}/public.tar.gz"
         archive_path = DataDir_Bindings / "pdfium_public.tar.gz"
         url_request.urlretrieve(archive_url, archive_path)
