@@ -10,7 +10,8 @@ import functools
 logger = logging.getLogger(__name__)
 
 if sys.version_info < (3, 8):  # pragma: no cover
-    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
+    # Alternatively, we could write our own cached property backport with python's descriptor protocol
+    # -> FIXME For some reason, functools class-level cache breaks our autoclose machinery! This means pypdfium2 is currently broken on Python < 3.8. So yes, we definitely need our own instance-level backport.
     def cached_property(func):
         return property( functools.lru_cache(maxsize=1)(func) )
     
