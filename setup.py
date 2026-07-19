@@ -43,7 +43,7 @@ def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
                 assert_exists(ModuleDir_Raw, package_data["pypdfium2_raw"])
             
             if ModuleHelpers in modnames:
-                helpers_info["is_editable"] = bool(self.editable_mode)
+                helpers_info["is_editable"] = getattr(self, "editable_mode", None)
                 write_json(ModuleDir_Helpers/VersionFN, helpers_info)
                 assert_exists(ModuleDir_Helpers, package_data["pypdfium2"])
             
