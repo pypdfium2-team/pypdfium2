@@ -6,7 +6,7 @@ class cached_property:
     Custom cached property implementation.
     To clear a cached property from an object, simply ``del`` it (e.g. ``del obj.name``).
     
-    .. note::
+    Note:
         
         Though this implementation does not explicitly access ``__dict__``, attempts to use cached_property in a slotted class will fail just as the stdlib's, because attributes of a slotted class cannot be shadowed on instance level, which is essential for a decorator-based cached property that should assume zero overhead after the initial access.
         
