@@ -1,8 +1,10 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# Literature:
 # https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it
-# alternative approach: https://github.com/tim-mitchell/prebuilt_binaries
+# https://stackoverflow.com/questions/69647983/how-to-add-platform-specific-package-data-in-setup-py
+# https://github.com/tim-mitchell/prebuilt_binaries
 
 import os
 import sys
