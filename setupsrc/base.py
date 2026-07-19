@@ -17,10 +17,10 @@ from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
 
+# TODO(geisserml) use our own cached_property implementation from src/pypdfium_cfg/stl.py
 if sys.version_info < (3, 8):
-    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
     def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
+        return property( functools.lru_cache(maxsize=None)(func) )
 else:
     cached_property = functools.cached_property
 
