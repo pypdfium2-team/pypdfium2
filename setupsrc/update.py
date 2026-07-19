@@ -60,14 +60,14 @@ def do_download(platforms, version, use_v8, max_workers):
 
 
 def _parse_ver_file(buffer, short_ver):
+    full_ver = PdfiumVer._vdict.get(short_ver, None)
+    if full_ver:
+        return full_ver
     content = buffer.read().decode().strip()
     full_ver = [int(l.split("=")[-1].strip()) for l in content.split("\n")]
     full_ver = PdfiumVer.scheme(*full_ver)
     assert full_ver.build == short_ver
-    if short_ver in PdfiumVer._vdict:
-        assert PdfiumVer._vdict[short_ver] == full_ver
-    else:
-        PdfiumVer._vdict[full_ver.build] = full_ver
+    PdfiumVer._vdict[full_ver.build] = full_ver
     log(f"Resolved {short_ver} -> {full_ver} (by pdfium-binaries VERSION)")
     return full_ver
 
