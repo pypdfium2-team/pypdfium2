@@ -188,7 +188,7 @@ def run_setup(modnames, pl_name, datagen):
     kwargs["cmdclass"]["build_py"] = buildpy_factory(pl_name, modnames, datagen, helpers_info, kwargs["package_data"])
     kwargs["license_files"] = license_files
     
-    # An explicit package finder is required for older versions of Python which are stuck with older setuptools, e.g. Python 3.6 which has max. setuptools 59.6.0.
+    # An explicit package finder is required for older versions of Python which are stuck with older setuptools (e.g. Python 3.6 has max. setuptools 59.6.0).
     # Note that this finder cannot be moved to pyproject.toml because older setuptools do not look for it there yet, whereas with newer setuptools (>= 61) this could just be omitted entirely thanks to auto-discovery.
     kwargs["packages"] = setuptools.find_packages(where='src', include=['pypdfium2*'])
     
