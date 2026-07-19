@@ -4,6 +4,7 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
+    # We do not declare an explicit setuptools min version for a variety of reasons. Last time it was tested, setuptools 59 (max with Python 3.6) still kind of worked.
     "setuptools",
     "packaging",
     # XXX dependence on wheel is historical, with setuptools >= v70.1.0 this is not needed anymore
