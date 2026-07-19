@@ -13,6 +13,7 @@ class cached_property:
         While this is a limitation of Python's ``__slots__`` feature, it may be possible to achieve the same goal through a different approach.
         We would probably try implementing a ``__getattr__`` method with a dict of cached property names and functions, and add the names to the slots.
         This should also be overhead-free, since once the slot is assigned ``__getattr__`` would no longer be called, and you can use ``del`` likewise to unassign the slot and reroute access to ``__getattr__``.
+        This transformation could be automated with a metaclass.
     """
     
     def __init__(self, func):
