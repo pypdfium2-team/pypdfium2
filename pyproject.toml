@@ -11,11 +11,6 @@ requires = [
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["pypdfium2*"]
-namespaces = false
-
 [tool.check-wheel-contents]
 # W002: erroneous detection of __init__.py files as duplicates
 # W009: Wheel contains multiple toplevel library entries

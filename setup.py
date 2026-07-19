@@ -189,6 +189,7 @@ def run_setup(modnames, pl_name, datagen):
     kwargs["cmdclass"]["build_py"] = buildpy_factory(pl_name, modnames, datagen, helpers_info, kwargs["package_data"])
     kwargs["license_files"] = license_files
     
+    kwargs["packages"] = setuptools.find_packages(where='src', include=['pypdfium2*'])
     setuptools.setup(**kwargs)
 
 
