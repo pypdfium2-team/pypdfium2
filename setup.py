@@ -118,8 +118,7 @@ def run_setup(modnames, pl_name, datagen):
         name = "pypdfium2",
         description = "Python bindings to PDFium",
         license = "BSD-3-Clause, Apache-2.0, dependency licenses",
-        # TODO Fix and re-enable Python >= 3.6 (see the note in src/pypdfium2/_lazy.py for why it is broken)
-        python_requires = ">= 3.6",  # XXX lowered for work
+        python_requires = ">= 3.6",
         cmdclass = {},
         package_dir = {},
         package_data = {},
