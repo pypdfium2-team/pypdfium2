@@ -7,7 +7,10 @@ class cached_property:
     To clear a cached property from an object, simply ``del`` it (e.g. ``del obj.name``).
     
     .. note::
+        
         Although this implementation does not explicitly access ``__dict__``, attempts to use cached_property in a slotted class will fail just as the stdlib's, because attributes of a slotted class cannot be shadowed on instance level, which is essential for any zero-overhead cached property implementation.
+        
+        This is just a limitation of Python's ``__slots__`` feature.
     """
     
     def __init__(self, func):
