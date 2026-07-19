@@ -5,23 +5,39 @@
 
 import sys
 import logging
-import functools
 
 logger = logging.getLogger(__name__)
 
-if sys.version_info < (3, 8):  # pragma: no cover
-    # Alternatively, we could write our own cached property backport with python's descriptor protocol
-    # -> FIXME For some reason, functools class-level cache breaks our autoclose machinery! This means pypdfium2 is currently broken on Python < 3.8. So yes, we definitely need our own instance-level backport.
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-    
-    def cached_property_clear(obj, name):
-        getattr(type(obj), name).fget.cache_clear()
 
-else:
-    cached_property = functools.cached_property
-    def cached_property_clear(obj, name):
-        delattr(obj, name)
+class cached_property:
+    """
+    Custom cached property implementation.
+    To clear a cached property from an object, simply `del` it (e.g. `del obj.name`).
+    
+    .. note::
+        Although this implementation does not explicitly access __dict__, attempts to use cached_property in a slotted class will fail just as the stdlib's, because attributes of a slotted class cannot be shadowed on instance level, which is essential for any zero-overhead cached property implementation.
+    """
+    
+    def __init__(self, func):
+        self.func = func
+        self.assigned_name = None
+        self.__doc__ = func.__doc__
+    
+    if sys.version_info >= (3, 6):
+        def __set_name__(self, owner, name):
+            if self.assigned_name is None:
+                self.assigned_name = name
+            else:
+                assert name == self.assigned_name, f"A cached property is tied to one attribute. You cannot assign to both {name!r} and {self.assigned_name!r}."
+    
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+        value = self.func(instance)
+        name = self.assigned_name or self.func.__name__
+        setattr(instance, name, value)
+        return value
+
 
 class _LazyClass:
     

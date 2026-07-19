@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Literature:
+# Background reading:
 # https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it
 # https://stackoverflow.com/questions/69647983/how-to-add-platform-specific-package-data-in-setup-py
 # https://github.com/tim-mitchell/prebuilt_binaries
+# https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
 
 import os
 import sys
@@ -36,21 +37,16 @@ class BinaryDistribution (setuptools.Distribution):
 
 def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
     
-    # https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
-    
     class pypdfium_buildpy (buildpy_orig):
         
         def run(self, *args, **kwargs):
-            
             if ModuleRaw in modnames and pl_name != ExtPlats.sdist:
                 datagen()
                 assert_exists(ModuleDir_Raw, package_data["pypdfium2_raw"])
-            
             if ModuleHelpers in modnames:
                 helpers_info["is_editable"] = getattr(self, "editable_mode", None)
                 write_json(ModuleDir_Helpers/VersionFN, helpers_info)
                 assert_exists(ModuleDir_Helpers, package_data["pypdfium2"])
-            
             buildpy_orig.run(self, *args, **kwargs)
     
     return pypdfium_buildpy
