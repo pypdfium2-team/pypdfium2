@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# See also https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it and https://github.com/innodatalabs/redstork/blob/master/setup.py
+# https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it
+# alternative approach: https://github.com/tim-mitchell/prebuilt_binaries
 
 import os
 import sys
@@ -23,6 +24,7 @@ from tagging import get_wheel_tag
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels.
 # This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
+# FIXME For some reason, this does not work properly with Python 3.6 / older setuptools - we still get a purelib folder, even though Root-Is-Purelib is false. :(
 
 class BinaryDistribution (setuptools.Distribution):
     
@@ -189,7 +191,10 @@ def run_setup(modnames, pl_name, datagen):
     kwargs["cmdclass"]["build_py"] = buildpy_factory(pl_name, modnames, datagen, helpers_info, kwargs["package_data"])
     kwargs["license_files"] = license_files
     
+    # An explicit package finder is required for older versions of Python which are stuck with older setuptools, e.g. Python 3.6 which has max. setuptools 59.6.0.
+    # Note that this finder cannot be moved to pyproject.toml because older setuptools do not look for it there yet, whereas with newer setuptools (>= 61) this could just be omitted entirely thanks to auto-discovery.
     kwargs["packages"] = setuptools.find_packages(where='src', include=['pypdfium2*'])
+    
     setuptools.setup(**kwargs)
 
 
