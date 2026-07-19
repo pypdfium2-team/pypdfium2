@@ -15,17 +15,17 @@ class cached_property:
         self.assigned_name = None
         self.__doc__ = getattr(func, "__doc__", None)
     
-    # Optional. On older Python versions that do not call this hook, the func's __name__ wil be used as fallback.
-    def __set_name__(self, owner, name):
+    # Optional. On older Python versions that do not call this hook, the func's __name__ will be used as fallback.
+    def __set_name__(self, cls, name):
         if self.assigned_name is None:
             self.assigned_name = name
         else:
             assert name == self.assigned_name, f"A cached property is tied to one attribute. You cannot assign to both {name!r} and {self.assigned_name!r}."
     
-    def __get__(self, instance, owner=None):
-        if instance is None:
+    def __get__(self, obj, cls=None):
+        if obj is None:
             return self
-        value = self.func(instance)
+        value = self.func(obj)
         name = self.assigned_name or self.func.__name__
-        setattr(instance, name, value)
+        setattr(obj, name, value)
         return value
