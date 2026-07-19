@@ -13,7 +13,7 @@ class cached_property:
     def __init__(self, func):
         self.func = func
         self.assigned_name = None
-        self.__doc__ = getattr(func, "__doc__", None)
+        self.__doc__ = func.__doc__
     
     # Optional. On older Python versions that do not call this hook, the func's __name__ will be used as fallback.
     def __set_name__(self, cls, name):
