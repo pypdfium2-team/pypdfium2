@@ -8,7 +8,7 @@ class cached_property:
     
     Note:
         
-        Though this implementation does not explicitly access ``__dict__``, attempts to use cached_property in a slotted class will fail just as the stdlib's, because attributes of a slotted class cannot be shadowed on instance level, which is essential for a decorator-based cached property that should assume zero overhead after the initial access.
+        Though this implementation does not explicitly access ``__dict__``, attempts to use cached_property in a slotted class will fail just as the stdlib's, because attributes cannot be shadowed on instance level, which however is essential for a descriptor-based cached property that should assume zero overhead after initialization.
         
         While this is a limitation of Python's ``__slots__`` feature, it may be possible to achieve the same goal through a different approach.
         We would probably try implementing a ``__getattr__`` method with a dict of cached property names and functions, and add the names to the slots.
