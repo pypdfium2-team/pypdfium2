@@ -14,7 +14,7 @@ class cached_property:
     
     Warning:
         Don't be tempted to think you could replace :class:`.cached_property` by stacking :class:`property` and :func:`functools.lru_cache`. You cannot. LRU cache operates on class level, not instance level, which has a ton of negative though not immediately obvious implications.
-        When setting a maxsize, caches will be lost once there are more instance objects. E.g. with maxsize=1 only one instance object (the most recently used) can have a cache, whereas any other cached values are silently lost and re-created on access. Without a maxsize, the cache will grow indefinitely, and mind the strong references causing your values to never be garbage collected!
+        When setting a maxsize, caches will be lost once there are more instance objects. E.g. with maxsize=1 only one instance object (the most recently used) can have a cache, whereas any other cached values are silently lost and re-created on access. Without a maxsize, the cache will grow indefinitely, and mind the strong references causing your values to never be garbage collected! There are more implications, e.g. lru_cache uses hashing, so your classes must be hashable, etc.
     """
     
     def __init__(self, func):
