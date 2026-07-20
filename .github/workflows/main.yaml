@@ -99,7 +99,6 @@ jobs:
       
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
-        id: inc_ver
         run: |
           ./utils/check.sh
           git config user.email "geisserml@gmail.com"
