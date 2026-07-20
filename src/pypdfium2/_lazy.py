@@ -4,7 +4,7 @@
 # see https://gist.github.com/mara004/6915e904797916b961e9c53b4fc874ec for alternative approaches to deferred imports
 
 import logging
-from pypdfium2_cfg.stl import cached_property
+from pypdfium2_stl import cached_property
 
 logger = logging.getLogger(__name__)
 
