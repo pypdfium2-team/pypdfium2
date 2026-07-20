@@ -15,56 +15,58 @@ from base import *
 from system_pdfium import _yield_lo_candidates
 
 
-def _versioning_impl(config, prev_helpers, prev_pdfium, new_pdfium):
+def _versioning_impl(config, prev_info, prev_pdfium, new_pdfium):
     
     # make sure we have a valid state
     assert not prev_pdfium > new_pdfium
-    if prev_helpers["dirty"]:
+    if prev_info["dirty"]:
         log("Warning: dirty state. This should not happen in CI.")
         assert not IS_CI
     
-    helpers_update = prev_helpers["n_commits"] > 0
+    helpers_update = prev_info["n_commits"] > 0
     pdfium_update = prev_pdfium < new_pdfium
     if not pdfium_update and not helpers_update:
         log("Warning: Neither pypdfium2 code nor pdfium-binaries updated. New release pointless?")
     
     new_config = deepcopy(config)
-    new_helpers = deepcopy(prev_helpers)
-    # reset new_helpers to release state
-    new_helpers["n_commits"] = 0
-    new_helpers["hash"] = None
+    new_info = deepcopy(prev_info)
+    # reset new_info to release state
+    new_info["n_commits"] = 0
+    new_info["hash"] = None
     
     if config["major"]:
-        new_helpers["major"] += 1
-        new_helpers["minor"] = 0
-        new_helpers["patch"] = 0
+        new_info["major"] += 1
+        new_info["minor"] = 0
+        new_info["patch"] = 0
         new_config["major"] = False
-    elif prev_helpers["beta"] is None:
+    elif prev_info["beta"] is None:
         # If we're not doing a major update and the previous version was not a beta, update minor and/or patch. Note that we still want to run this if adding a new beta tag.
         if (helpers_update and not config["humble"]) or config["humble"] is False:
             # py code update, or manually requested minor release -> increment minor version and reset patch version
-            new_helpers["minor"] += 1
-            new_helpers["patch"] = 0
+            new_info["minor"] += 1
+            new_info["patch"] = 0
         else:
             # no py code update, or manually requested patch release -> increment patch version
-            new_helpers["patch"] += 1
+            new_info["patch"] += 1
     
     if config["humble"] is not None:
         new_config["humble"] = None
     if config["beta"]:
         # If the new version shall be a beta, set or increment the tag
-        if new_helpers["beta"] is None:
-            new_helpers["beta"] = 0
-        new_helpers["beta"] += 1
+        if new_info["beta"] is None:
+            new_info["beta"] = 0
+        new_info["beta"] += 1
         new_config["beta"] = False
-    elif prev_helpers["beta"] is not None:
+    elif prev_info["beta"] is not None:
         # If the previous version was a beta but the new one shall not be, remove the tag
-        new_helpers["beta"] = None
+        new_info["beta"] = None
     
-    return new_config, new_helpers, helpers_update, pdfium_update
+    write_json(AR_ConfigFile, new_config)
+    
+    return new_info, pdfium_update
 
 
-VersionInfo = namedtuple("VersionInfo", ("prev_tag", "new_tag", "is_beta", "new_helpers_info", "prev_pdfium", "new_pdfium", "helpers_update", "pdfium_update"))
+VersionInfo = namedtuple("VersionInfo", ("prev_tag", "new_tag", "is_beta", "new_ver_map", "prev_pdfium", "new_pdfium", "pdfium_update"))
 
 def handle_versions():
     
@@ -74,20 +76,18 @@ def handle_versions():
     prev_pdfium = record["pdfium"]
     new_pdfium = PdfiumVer.get_latest()
     
-    prev_helpers_info = parse_git_tag()
-    prev_tag = merge_tag(prev_helpers_info, mode=None)
+    prev_ver_map = parse_git_tag()
+    prev_tag = merge_tag(prev_ver_map, mode=None)
     assert prev_tag == record['tag'], f"{prev_tag} != {record['tag']}"
     
-    new_config, new_helpers_info, helpers_update, pdfium_update = _versioning_impl(config, prev_helpers_info, prev_pdfium, new_pdfium)
-    
-    write_json(AR_ConfigFile, new_config)
-    new_tag = merge_tag(new_helpers_info, mode=None)
+    new_ver_map, pdfium_update = _versioning_impl(config, prev_ver_map, prev_pdfium, new_pdfium)
+    new_tag = merge_tag(new_ver_map, mode=None)
     write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
     
-    is_beta = new_helpers_info["beta"] is not None
+    is_beta = new_ver_map["beta"] is not None
     return VersionInfo(
-        prev_tag, new_tag, is_beta, new_helpers_info,
-        prev_pdfium, new_pdfium, helpers_update, pdfium_update,
+        prev_tag, new_tag, is_beta, new_ver_map,
+        prev_pdfium, new_pdfium, pdfium_update,
     )
 
 
@@ -156,11 +156,11 @@ def register_changes(args, v_info: VersionInfo):
     # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
     _run_local(["git", "tag", "-a", v_info.new_tag, "-m", "Autorelease"])
     
-    parsed_info = parse_git_tag()
-    if v_info.new_helpers_info != parsed_info:
+    parsed_ver_map = parse_git_tag()
+    if v_info.new_ver_map != parsed_ver_map:
         log(
             "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
-            f"In: {v_info.new_helpers_info}\n" + f"Out: {parsed_info}"
+            f"In: {v_info.new_ver_map}\n" + f"Out: {parsed_ver_map}"
         )
         assert not IS_CI
 
