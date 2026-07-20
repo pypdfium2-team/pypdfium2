@@ -106,12 +106,13 @@ jobs:
           git config user.name "geisserml"
           python3 setupsrc/emplace.py auto:latest
           BRANCH_NAME="autorelease_tmp_${RUN_ID}"
-          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME" --strategy-file release_info/strategy.json -o release_info/
+          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME" --strategy-file release_info/strategy.json -o release_info/ $PDFIUM_HISTORY_OPT
           python3 -m pip install -v --no-build-isolation -e .
           python3 -m pytest tests/ -sv
           git push -u origin "$BRANCH_NAME"  # just the branch (not tag)
         env:
           RUN_ID: ${{ github.run_id }}
+          PDFIUM_HISTORY_OPT: ${{ inputs.publish && '--pdfium-history' || '' }}
       
       - name: Upload release info
         if: ${{ inputs.autorelease }}

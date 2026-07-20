@@ -100,7 +100,6 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
         pdfium_msg += f"- Updated pdfium-binaries from `{prev_pdfium}` to `{new_pdfium}`."
     else:
         pdfium_msg += f"- No pdfium-binaries update, still at `{new_pdfium}`."
-    
     pdfium_msg += " Additional builds may use various other versions of pdfium."
     
     content = Changelog.read_text()
@@ -134,7 +133,7 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
 def _strlist(iterable):
     return f"`[{', '.join(iterable)}]`"
 
-def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register, strategy_file, output_dir):
+def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register, strategy_file, output_dir, with_pdfium_history):
     
     relnotes = ""
     relnotes += f"## Release {new_tag}\n\n"
@@ -160,7 +159,7 @@ This release was made with the following build strategies:
         target_known=register
     )
     
-    if c_updates:
+    if c_updates and with_pdfium_history:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
@@ -207,6 +206,11 @@ def main():
         default = ProjectDir/"release_info",
         help = "Output dir for release notes.",
     )
+    parser.add_argument(
+        "--pdfium-history",
+        action = "store_true",
+        help = "Whether to include pdfium commit log (requires cloning pdfium)",
+    )
     args = parser.parse_args()
     
     latest_pdfium = PdfiumVer.get_latest()
@@ -234,7 +238,7 @@ def main():
                 f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
             )
             assert not IS_CI
-    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), args.strategy_file, args.output_dir)
+    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), args.strategy_file, args.output_dir, args.pdfium_history)
 
 
 if __name__ == "__main__":
