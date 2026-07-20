@@ -148,7 +148,7 @@ PdfiumBinariesMap = {
     PlatNames.android_arm64:    "android-arm64",
     PlatNames.android_arm32:    "android-arm",
     PlatNames.linux_mips64le:   "linux-mips64el",
-    # PlatNames.linux_mipsle:     "linux-mipsel",  # coming soon
+    PlatNames.linux_mipsle:     "linux-mipsel",
     PlatNames.linux_musl_x64:   "linux-musl-x64",
     PlatNames.linux_musl_x86:   "linux-musl-x86",
     PlatNames.linux_musl_arm64: "linux-musl-arm64",

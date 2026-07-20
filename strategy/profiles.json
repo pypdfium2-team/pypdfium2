@@ -5,8 +5,8 @@
         "cibw": ["manylinux_riscv64", "manylinux_loongarch64", "manylinux_s390x", "musllinux_x86_64", "musllinux_aarch64", "musllinux_armv7l", "musllinux_i686", "musllinux_ppc64le", "musllinux_s390x", "musllinux_riscv64", "musllinux_loongarch64"]
     },
     "prefer-pbin": {
-        "pbin": ["macosx_arm64", "macosx_x86_64", "win_amd64", "win_arm64", "win32", "manylinux_x86_64", "manylinux_i686", "manylinux_aarch64", "manylinux_armv7l", "manylinux_ppc64le", "manylinux_mips64le", "musllinux_x86_64", "musllinux_i686", "musllinux_aarch64", "android_arm64_v8a", "android_armeabi_v7a"],
-        "sbuild": ["manylinux_mipsle"],
+        "pbin": ["macosx_arm64", "macosx_x86_64", "win_amd64", "win_arm64", "win32", "manylinux_x86_64", "manylinux_i686", "manylinux_aarch64", "manylinux_armv7l", "manylinux_ppc64le", "manylinux_mips64le", "manylinux_mipsle", "musllinux_x86_64", "musllinux_i686", "musllinux_aarch64", "android_arm64_v8a", "android_armeabi_v7a"],
+        "sbuild": [],
         "cibw": ["manylinux_riscv64", "manylinux_loongarch64", "manylinux_s390x", "musllinux_armv7l", "musllinux_ppc64le", "musllinux_s390x", "musllinux_riscv64", "musllinux_loongarch64"]
     },
     "prefer-sbuild": {
