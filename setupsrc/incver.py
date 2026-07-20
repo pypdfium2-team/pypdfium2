@@ -86,7 +86,10 @@ def handle_versions():
     write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
     
     is_beta = new_helpers_info["beta"] is not None
-    return VersionInfo(prev_tag, new_tag, is_beta, new_helpers_info, prev_pdfium, new_pdfium, helpers_update, pdfium_update)
+    return VersionInfo(
+        prev_tag, new_tag, is_beta, new_helpers_info,
+        prev_pdfium, new_pdfium, helpers_update, pdfium_update,
+    )
 
 
 def update_refbindings(version):
