@@ -10,7 +10,7 @@ import logging
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
-from pypdfium2._lazy import cached_property, cached_property_clear
+from pypdfium2_stl import cached_property
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class _DefaultSysfontInfoClass (pdfium_i.AutoCastable):
             return
         pdfium_i._debug_close("Free default sysfont info")
         pdfium_c.FPDF_FreeDefaultSystemFontInfo(self.raw)
-        cached_property_clear(self, "raw")
+        del self.raw
         pdfium_i.ObjectTracker[None].remove(self._wref_to_self)
         self._is_loaded = False
     

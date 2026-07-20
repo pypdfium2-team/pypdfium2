@@ -15,7 +15,8 @@ from pypdfium2.internal import FPDF_WCHAR_size
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.matrix import PdfMatrix
 from pypdfium2._helpers.bitmap import PdfBitmap
-from pypdfium2._lazy import Lazy, cached_property
+from pypdfium2._lazy import Lazy
+from pypdfium2_stl import cached_property
 
 logger = logging.getLogger(__name__)
 

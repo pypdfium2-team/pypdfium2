@@ -3,25 +3,10 @@
 
 # see https://gist.github.com/mara004/6915e904797916b961e9c53b4fc874ec for alternative approaches to deferred imports
 
-import sys
 import logging
-import functools
+from pypdfium2_stl import cached_property
 
 logger = logging.getLogger(__name__)
-
-if sys.version_info < (3, 8):  # pragma: no cover
-    # Alternatively, we could write our own cached property backport with python's descriptor protocol
-    # -> FIXME For some reason, functools class-level cache breaks our autoclose machinery! This means pypdfium2 is currently broken on Python < 3.8. So yes, we definitely need our own instance-level backport.
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-    
-    def cached_property_clear(obj, name):
-        getattr(type(obj), name).fget.cache_clear()
-
-else:
-    cached_property = functools.cached_property
-    def cached_property_clear(obj, name):
-        delattr(obj, name)
 
 class _LazyClass:
     

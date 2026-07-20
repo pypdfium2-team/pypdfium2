@@ -1,7 +1,11 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# See also https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it and https://github.com/innodatalabs/redstork/blob/master/setup.py
+# Background reading:
+# https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it
+# https://stackoverflow.com/questions/69647983/how-to-add-platform-specific-package-data-in-setup-py
+# https://github.com/tim-mitchell/prebuilt_binaries
+# https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
 
 import os
 import sys
@@ -23,6 +27,7 @@ from tagging import get_wheel_tag
 
 # Use a custom distclass declaring we have a binary extension, to prevent modules from being nested in a purelib/ subdirectory in wheels.
 # This will also set `Root-Is-Purelib: false` in the WHEEL file, and make the wheel tag platform specific by default.
+# FIXME For some reason, this does not work properly with Python 3.6 / older setuptools - we still get a purelib folder, even though Root-Is-Purelib is false. :(
 
 class BinaryDistribution (setuptools.Distribution):
     
@@ -32,21 +37,16 @@ class BinaryDistribution (setuptools.Distribution):
 
 def buildpy_factory(pl_name, modnames, datagen, helpers_info, package_data):
     
-    # https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
-    
     class pypdfium_buildpy (buildpy_orig):
         
         def run(self, *args, **kwargs):
-            
             if ModuleRaw in modnames and pl_name != ExtPlats.sdist:
                 datagen()
                 assert_exists(ModuleDir_Raw, package_data["pypdfium2_raw"])
-            
             if ModuleHelpers in modnames:
                 helpers_info["is_editable"] = getattr(self, "editable_mode", None)
                 write_json(ModuleDir_Helpers/VersionFN, helpers_info)
                 assert_exists(ModuleDir_Helpers, package_data["pypdfium2"])
-            
             buildpy_orig.run(self, *args, **kwargs)
     
     return pypdfium_buildpy
@@ -118,8 +118,7 @@ def run_setup(modnames, pl_name, datagen):
         name = "pypdfium2",
         description = "Python bindings to PDFium",
         license = "BSD-3-Clause, Apache-2.0, dependency licenses",
-        # TODO Fix and re-enable Python >= 3.6 (see the note in src/pypdfium2/_lazy.py for why it is broken)
-        python_requires = ">= 3.8",
+        python_requires = ">= 3.6",
         cmdclass = {},
         package_dir = {},
         package_data = {},
@@ -158,8 +157,8 @@ def run_setup(modnames, pl_name, datagen):
         helpers_info = _get_fixed_helpers_info(pl_name)
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         kwargs["package_dir"]["pypdfium2"] = "src/pypdfium2"
-        kwargs["package_dir"]["pypdfium2_cli"] = "src/pypdfium2_cli"
-        kwargs["package_dir"]["pypdfium2_cfg"] = "src/pypdfium2_cfg"
+        for sm in ("cli", "cfg", "stl"):
+            kwargs["package_dir"][f"pypdfium2_{sm}"] = f"src/pypdfium2_{sm}"
         kwargs["package_data"]["pypdfium2"] = (VersionFN, )
         kwargs["entry_points"] = dict(console_scripts=["pypdfium2 = pypdfium2_cli.__main__:cli_main"])
     if ModuleRaw in modnames:
@@ -188,6 +187,10 @@ def run_setup(modnames, pl_name, datagen):
     
     kwargs["cmdclass"]["build_py"] = buildpy_factory(pl_name, modnames, datagen, helpers_info, kwargs["package_data"])
     kwargs["license_files"] = license_files
+    
+    # An explicit package finder is required for older versions of Python which are stuck with older setuptools (e.g. Python 3.6 has max setuptools 59.6.0).
+    # Note that this finder cannot be moved to pyproject.toml because older setuptools do not look for it there yet, whereas with newer setuptools (>= 61) this could just be omitted entirely thanks to auto-discovery.
+    kwargs["packages"] = setuptools.find_packages(where='src', include=['pypdfium2*'])
     
     setuptools.setup(**kwargs)
 

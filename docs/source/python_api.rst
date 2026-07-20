@@ -119,13 +119,19 @@ Unsupported Feature Info
 ------------------------
 .. automodule:: pypdfium2._helpers.unsupported
 
-Internal
-********
+Internal API
+************
 
 .. warning::
    The following helpers are considered internal, so their API may change any time.
-   They are isolated in an own namespace (``pypdfium2.internal``).
+   They are isolated their own namespaces.
 
+pypdfium2_stl
+-------------
+.. automodule:: pypdfium2_stl.shared.stl
+
+pypdfium2.internal
+------------------
 .. automodule:: pypdfium2.internal.consts
 .. automodule:: pypdfium2.internal.bases
 .. automodule:: pypdfium2.internal.utils

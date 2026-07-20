@@ -6,7 +6,6 @@ import pytest
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
-from pypdfium2._lazy import cached_property_clear
 from .conftest import TestFiles
 
 
@@ -205,5 +204,5 @@ def test_ttfmap():
     str_ttfmap = {pdfium_i.CharsetToStr[k]: v for k, v in ttfmap.items()}
     #print(str_ttfmap)
     _ttfmap_get(pdfium_c.FXFONT_ANSI_CHARSET)
-    cached_property_clear(pdfium.PdfDefaultTTFMap, "value")
+    del pdfium.PdfDefaultTTFMap.value
     _ttfmap_get(pdfium_c.FXFONT_ANSI_CHARSET)

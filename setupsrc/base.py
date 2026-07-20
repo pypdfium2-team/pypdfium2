@@ -17,12 +17,11 @@ from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
 
-if sys.version_info < (3, 8):
-    # NOTE alternatively, we could write our own cached property backport with python's descriptor protocol
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-else:
-    cached_property = functools.cached_property
+ProjectDir = Path(__file__).resolve().parents[1]
+
+# Add this path to your IDE's search path, e.g. VS Code python.analysis.extraPaths
+sys.path.insert(0, str(ProjectDir/"src"/"pypdfium2_stl"/"shared"))
+from stl import cached_property
 
 if sys.version_info < (3, 8):
     class ExtendAction (argparse.Action):
@@ -60,7 +59,6 @@ ModulesAll         = (ModuleRaw, ModuleHelpers)
 BindingsFN = "bindings.py"
 VersionFN  = "version.json"
 
-ProjectDir        = Path(__file__).resolve().parents[1]
 DataDir           = ProjectDir / "data"
 DataDir_Bindings  = DataDir / "bindings"
 BindingsFile      = DataDir_Bindings / BindingsFN

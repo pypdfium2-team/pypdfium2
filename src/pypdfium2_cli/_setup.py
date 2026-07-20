@@ -2,10 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
-import sys
 import logging
 import warnings
-import functools
 from collections import defaultdict
 import pypdfium2_cfg
 
@@ -39,12 +37,6 @@ def setup_logging():
     if debug_sysfonts:
         PdfSysfontListener().setup()
 
-
-if sys.version_info < (3, 8):  # pragma: no cover
-    def cached_property(func):
-        return property( functools.lru_cache(maxsize=1)(func) )
-else:
-    cached_property = functools.cached_property
 
 # could even inherit just from dict if we changed __init__ to take the factory
 class keydefaultdict (defaultdict):
