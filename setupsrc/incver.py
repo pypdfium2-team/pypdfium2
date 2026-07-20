@@ -165,9 +165,6 @@ def register_changes(args, v_info: VersionInfo):
         assert not IS_CI
 
 
-def _strlist(iterable):
-    return f"`[{', '.join(iterable)}]`"
-
 def make_releasenotes(summary, args, v_info: VersionInfo):
     
     relnotes = ""
@@ -180,9 +177,9 @@ def make_releasenotes(summary, args, v_info: VersionInfo):
         relnotes += f"""
 ### Build info\n
 This release was made with the following build strategies:
-- PBIN: {_strlist(strategies["pbin"])}
-- SBLD: {_strlist(strategies["sbuild"])}
-- CIBW: {_strlist(strategies["cibw"])}
+- PBIN: [{', '.join(strategies["pbin"])}]
+- SBLD: [{', '.join(strategies["sbuild"])}]
+- CIBW: [{', '.join(strategies["cibw"])}]
 """
     
     # even if python code was not updated, there will be a release commit
