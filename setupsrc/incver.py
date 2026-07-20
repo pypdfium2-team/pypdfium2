@@ -8,43 +8,25 @@ import argparse
 import tempfile
 from pathlib import Path
 from copy import deepcopy
+from collections import namedtuple
 
 # local
 from base import *
 from system_pdfium import _yield_lo_candidates
 
 
-PlacesToRegister = (AutoreleaseDir, Changelog, ChangelogStaging, RefBindingsFile)
-
-def run_local(*args, **kws):
-    return run_cmd(*args, **kws, cwd=ProjectDir)
-
-
-def update_refbindings(version):
-    RefBindingsFile.unlink()
-    build_pdfium_bindings(
-        version, flags=REFBINDINGS_FLAGS,
-        rt_paths=(f"./{CTG_LIBPATTERN}", *_yield_lo_candidates(SysNames.linux)),
-        search_sys_despite_libpaths=True,
-        guard_symbols=True, no_srcinfo=True,
-        windows_cross=True,
-    )
-    shutil.copyfile(BindingsFile, RefBindingsFile)
-    assert RefBindingsFile.exists()
-
-
-def do_versioning(config, record, prev_helpers, new_pdfium):
+def _versioning_impl(config, prev_helpers, prev_pdfium, new_pdfium):
     
     # make sure we have a valid state
-    assert not record["pdfium"] > new_pdfium
+    assert not prev_pdfium > new_pdfium
     if prev_helpers["dirty"]:
         log("Warning: dirty state. This should not happen in CI.")
         assert not IS_CI
     
-    py_updates = prev_helpers["n_commits"] > 0
-    c_updates = record["pdfium"] < new_pdfium
+    helpers_update = prev_helpers["n_commits"] > 0
+    pdfium_update = prev_pdfium < new_pdfium
     
-    if not c_updates and not py_updates:
+    if not pdfium_update and not helpers_update:
         log("Warning: Neither pypdfium2 code nor pdfium-binaries updated. New release pointless?")
     
     # reset prev_helpers to release state
@@ -60,7 +42,7 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
         new_config["major"] = False
     elif prev_helpers["beta"] is None:
         # If we're not doing a major update and the previous version was not a beta, update minor and/or patch. Note that we still want to run this if adding a new beta tag.
-        if (py_updates and not config["humble"]) or config["humble"] is False:
+        if (helpers_update and not config["humble"]) or config["humble"] is False:
             # py code update, or manually requested minor release -> increment minor version and reset patch version
             new_helpers["minor"] += 1
             new_helpers["patch"] = 0
@@ -82,24 +64,54 @@ def do_versioning(config, record, prev_helpers, new_pdfium):
     
     write_json(AR_ConfigFile, new_config)
     
-    return (c_updates, new_pdfium), (py_updates, new_helpers)
+    return new_helpers, helpers_update, pdfium_update
 
 
-def register_changes(new_tag, branch_name):
-    run_local(["git", "checkout", "-B", branch_name])
-    run_local(["git", "add", *PlacesToRegister])
-    run_local(["git", "commit", "-m", f"[autorelease main] update {new_tag}"])
-    # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
-    run_local(["git", "tag", "-a", new_tag, "-m", "Autorelease"])
+VersionInfo = namedtuple("VersionInfo", ("prev_tag", "new_tag", "is_beta", "new_helpers_info", "prev_pdfium", "new_pdfium", "helpers_update", "pdfium_update"))
 
-
-def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
+def handle_versions():
     
-    pdfium_msg = f"## {new_tag} ({time.strftime('%Y-%m-%d')})\n\n"
-    if prev_pdfium != new_pdfium:
-        pdfium_msg += f"- Updated pdfium-binaries from `{prev_pdfium}` to `{new_pdfium}`."
+    config = read_json(AR_ConfigFile)
+    record = read_json(AR_RecordFile)
+    
+    prev_pdfium = record["pdfium"]
+    new_pdfium = PdfiumVer.get_latest()
+    
+    prev_helpers_info = parse_git_tag()
+    prev_tag = merge_tag(prev_helpers_info, mode=None)
+    assert prev_tag == record['tag'], f"{prev_tag} != {record['tag']}"
+    
+    new_helpers_info, helpers_update, pdfium_update = _versioning_impl(config, prev_helpers_info, prev_pdfium, new_pdfium)
+    new_tag = merge_tag(new_helpers_info, mode=None)
+    write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
+    
+    is_beta = new_helpers_info["beta"] is not None
+    return VersionInfo(
+        prev_tag, new_tag, is_beta, new_helpers_info,
+        prev_pdfium, new_pdfium, helpers_update, pdfium_update,
+    )
+
+
+def update_refbindings(version):
+    RefBindingsFile.unlink()
+    build_pdfium_bindings(
+        version, flags=REFBINDINGS_FLAGS,
+        rt_paths=(f"./{CTG_LIBPATTERN}", *_yield_lo_candidates(SysNames.linux)),
+        search_sys_despite_libpaths=True,
+        guard_symbols=True, no_srcinfo=True,
+        windows_cross=True,
+    )
+    shutil.copyfile(BindingsFile, RefBindingsFile)
+    assert RefBindingsFile.exists()
+
+
+def log_changes(summary, v_info: VersionInfo):
+    
+    pdfium_msg = f"## {v_info.new_tag} ({time.strftime('%Y-%m-%d')})\n\n"
+    if v_info.prev_pdfium != v_info.new_pdfium:
+        pdfium_msg += f"- Updated pdfium-binaries from `{v_info.prev_pdfium}` to `{v_info.new_pdfium}`."
     else:
-        pdfium_msg += f"- No pdfium-binaries update, still at `{new_pdfium}`."
+        pdfium_msg += f"- No pdfium-binaries update, still at `{v_info.new_pdfium}`."
     pdfium_msg += " Additional builds may use various other versions of pdfium."
     
     content = Changelog.read_text()
@@ -107,13 +119,15 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     part_a = content[:pos].strip() + "\n"
     part_b = content[pos:].strip() + "\n"
     content = part_a + "\n" + pdfium_msg + "\n"
-    if is_beta:
-        content += f"- See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/{new_tag})\n"
+    if v_info.is_beta:
+        content += f"- See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/{v_info.new_tag})\n"
     else:
         content += summary
     content += "\n\n" + part_b
     Changelog.write_text(content)
 
+
+# TODO(geisserml) do not pass in so many individual parameters here
 
 def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag, target_known):
     clog = "\n<details>\n"
@@ -130,18 +144,40 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     return clog
 
 
+GitRegisterPaths = (AutoreleaseDir, Changelog, ChangelogStaging, RefBindingsFile)
+
+def _run_local(*args, **kws):
+    return run_cmd(*args, **kws, cwd=ProjectDir)
+
+def register_changes(args, v_info: VersionInfo):
+    
+    _run_local(["git", "checkout", "-B", args.branch])
+    _run_local(["git", "add", *GitRegisterPaths])
+    _run_local(["git", "commit", "-m", f"[autorelease main] update {v_info.new_tag}"])
+    # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
+    _run_local(["git", "tag", "-a", v_info.new_tag, "-m", "Autorelease"])
+    
+    parsed_info = parse_git_tag()
+    if v_info.new_helpers_info != parsed_info:
+        log(
+            "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
+            f"In: {v_info.new_helpers_info}\n" + f"Out: {parsed_info}"
+        )
+        assert not IS_CI
+
+
 def _strlist(iterable):
     return f"`[{', '.join(iterable)}]`"
 
-def make_releasenotes(summary, prev_pdfium, new_pdfium, prev_tag, new_tag, c_updates, register, strategy_file, output_dir, with_pdfium_history):
+def make_releasenotes(summary, args, v_info: VersionInfo):
     
     relnotes = ""
-    relnotes += f"## Release {new_tag}\n\n"
+    relnotes += f"## Release {v_info.new_tag}\n\n"
     if summary:
         relnotes += "### Summary\n\n"
         relnotes += summary
-    if strategy_file:
-        strategies = strategy_file["strategies"]
+    if args.strategy_file:
+        strategies = args.strategy_file["strategies"]
         relnotes += f"""
 ### Build info\n
 This release was made with the following build strategies:
@@ -154,18 +190,19 @@ This release was made with the following build strategies:
     clog = "### Commit logs\n"
     clog += _get_log(
         "pypdfium2", RepositoryURL, ProjectDir,
-        prev_tag, new_tag,
+        v_info.prev_tag, v_info.new_tag,
         "/tree/", "/commit/", "",
-        target_known=register
+        target_known=bool(args.branch)
     )
     
-    if c_updates and with_pdfium_history:
+    if v_info.pdfium_update and args.pdfium_history:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
+            # nb: prev_pdfium / new_pdfium are integer (build number)
             clog += _get_log(
                 "PDFium", PdfiumURL, tmpdir/"pdfium_history",
-                str(prev_pdfium), str(new_pdfium),
+                str(v_info.prev_pdfium), str(v_info.new_pdfium),
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
                 target_known=True
             )
@@ -182,11 +219,10 @@ This release was made with the following build strategies:
         relnotes += "\n" + "*Commit logs skipped (too big).*"
     relnotes += "\n"
     
-    (output_dir/"RELEASE.md").write_text(relnotes)
+    (args.output_dir/"RELEASE.md").write_text(relnotes)
 
 
-def main():
-    
+def parse_args():
     parser = argparse.ArgumentParser(
         description = "Automatic update script for pypdfium2, to be run in the CI release workflow."
     )
@@ -211,34 +247,20 @@ def main():
         action = "store_true",
         help = "Whether to include pdfium commit log (requires cloning pdfium)",
     )
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
     
-    latest_pdfium = PdfiumVer.get_latest()
-    config = read_json(AR_ConfigFile)
-    record = read_json(AR_RecordFile)
-    prev_helpers = parse_git_tag()
-    (c_updates, new_pdfium), (py_updates, new_helpers) = \
-        do_versioning(config, record, prev_helpers, latest_pdfium)
+    args = parse_args()
+    v_info = handle_versions()
+    update_refbindings(v_info.new_pdfium)
     
-    prev_tag = merge_tag(prev_helpers, mode=None)
-    assert prev_tag == record["tag"], f"{prev_tag} != {record['tag']}"
-    new_tag = merge_tag(new_helpers, mode=None)
-    write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
-    
-    update_refbindings(latest_pdfium)
-    is_beta = new_helpers["beta"] is not None
-    summary = get_next_changelog(flush=(not is_beta))
-    log_changes(summary, record["pdfium"], new_pdfium, new_tag, is_beta)
+    summary = get_next_changelog(flush=(not v_info.is_beta))
+    log_changes(summary, v_info)
     if args.branch:
-        register_changes(new_tag, args.branch)
-        parsed_helpers = parse_git_tag()
-        if new_helpers != parsed_helpers:
-            log(
-                "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
-                f"In: {new_helpers}\n" + f"Out: {parsed_helpers}"
-            )
-            assert not IS_CI
-    make_releasenotes(summary, record["pdfium"], new_pdfium, prev_tag, new_tag, c_updates, bool(args.branch), args.strategy_file, args.output_dir, args.pdfium_history)
+        register_changes(args, v_info)
+    make_releasenotes(summary, args, v_info)
 
 
 if __name__ == "__main__":
