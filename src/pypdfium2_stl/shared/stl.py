@@ -1,6 +1,11 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# See also
+# https://gist.github.com/mara004/f2926b1fcc8847a69e0af6f4e33934fd (comments)
+# https://gist.github.com/mara004/1170f7bfb0fb6fd8dd1e9872696c2d4e
+# https://stackoverflow.com/a/78825819/15547292
+
 class cached_property:
     """
     Custom cached property implementation.
