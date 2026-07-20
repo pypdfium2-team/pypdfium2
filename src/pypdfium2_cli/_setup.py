@@ -6,7 +6,6 @@ import logging
 import warnings
 from collections import defaultdict
 import pypdfium2_cfg
-from pypdfium2_stl import cached_property
 
 
 def _get_loglevel(envvar, default):

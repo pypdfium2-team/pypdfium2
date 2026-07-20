@@ -4,16 +4,13 @@
 class cached_property:
     """
     Custom cached property implementation.
-    To clear a cached property from an object, simply ``del`` it (e.g. ``del obj.name``).
     
-    Note:
-        
-        Though this implementation does not explicitly access ``__dict__``, attempts to use cached_property in a slotted class will fail just as the stdlib's, because attributes cannot be shadowed on instance level, which however is essential for a descriptor-based cached property that should assume zero overhead after initialization.
-        
-        While this is a limitation of Python's ``__slots__`` feature, it may be possible to achieve the same goal through a different approach.
-        We would probably try implementing a ``__getattr__`` method with a dict of cached property names and functions, and add the names to the slots.
-        This should also be overhead-free, since once the slot is assigned ``__getattr__`` would no longer be called, and you can use ``del`` likewise to unassign the slot and reroute access to ``__getattr__``.
-        This transformation could be automated with a metaclass.
+    Powered by the descriptor protocol. Zero overhead after the property has been loaded.
+    Similar to functools.cached_property, but cleaner and more backward compatible.
+    
+    Important:
+        Descriptor-based cached properties are inherently incompatible with slotted classes (``__slots__``), as they do not allow for instance-level shadowing of class-level attributes, which however is essential to this cached property model.
+        With slots, you need to take a different approach that does not work with a decorator API: Add the property names to your slots and implement a ``__getattr__`` method which dispatches the cached property functions through a map or similar and assigns the result to the object. This is also zero overhead after load.
     """
     
     def __init__(self, func):
@@ -21,7 +18,7 @@ class cached_property:
         self.assigned_name = None
         self.__doc__ = func.__doc__
     
-    # Optional. On older Python versions that do not call this hook, the func's __name__ will be used as fallback.
+    # Optional. On older Python versions (< 3.6) that do not call this hook, the func's __name__ will be used as fallback.
     def __set_name__(self, cls, name):
         if self.assigned_name is None:
             self.assigned_name = name
