@@ -23,10 +23,10 @@ def _versioning_impl(config, record, prev_helpers, new_pdfium):
         log("Warning: dirty state. This should not happen in CI.")
         assert not IS_CI
     
-    py_updates = prev_helpers["n_commits"] > 0
-    c_updates = record["pdfium"] < new_pdfium
+    helpers_update = prev_helpers["n_commits"] > 0
+    pdfium_update = record["pdfium"] < new_pdfium
     
-    if not c_updates and not py_updates:
+    if not pdfium_update and not helpers_update:
         log("Warning: Neither pypdfium2 code nor pdfium-binaries updated. New release pointless?")
     
     # reset prev_helpers to release state
@@ -42,7 +42,7 @@ def _versioning_impl(config, record, prev_helpers, new_pdfium):
         new_config["major"] = False
     elif prev_helpers["beta"] is None:
         # If we're not doing a major update and the previous version was not a beta, update minor and/or patch. Note that we still want to run this if adding a new beta tag.
-        if (py_updates and not config["humble"]) or config["humble"] is False:
+        if (helpers_update and not config["humble"]) or config["humble"] is False:
             # py code update, or manually requested minor release -> increment minor version and reset patch version
             new_helpers["minor"] += 1
             new_helpers["patch"] = 0
@@ -64,10 +64,10 @@ def _versioning_impl(config, record, prev_helpers, new_pdfium):
     
     write_json(AR_ConfigFile, new_config)
     
-    return new_helpers, py_updates, c_updates
+    return new_helpers, helpers_update, pdfium_update
 
 
-VersionInfo = namedtuple("VersionInfo", ("prev_tag", "new_tag", "is_beta", "new_info", "prev_pdfium", "new_pdfium", "updated_py_src", "updated_pdfium"))
+VersionInfo = namedtuple("VersionInfo", ("prev_tag", "new_tag", "is_beta", "new_helpers_info", "prev_pdfium", "new_pdfium", "helpers_update", "pdfium_update"))
 
 def handle_versions():
     
@@ -77,16 +77,16 @@ def handle_versions():
     prev_pdfium = record["pdfium"]
     new_pdfium = PdfiumVer.get_latest()
     
-    prev_info = parse_git_tag()
-    prev_tag = merge_tag(prev_info, mode=None)
+    prev_helpers_info = parse_git_tag()
+    prev_tag = merge_tag(prev_helpers_info, mode=None)
     assert prev_tag == record['tag'], f"{prev_tag} != {record['tag']}"
     
-    new_info, updated_py_src, updated_pdfium = _versioning_impl(config, record, prev_info, new_pdfium)
-    new_tag = merge_tag(new_info, mode=None)
+    new_helpers_info, helpers_update, pdfium_update = _versioning_impl(config, record, prev_helpers_info, new_pdfium)
+    new_tag = merge_tag(new_helpers_info, mode=None)
     write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
     
-    is_beta = new_info["beta"] is not None
-    return VersionInfo(prev_tag, new_tag, is_beta, new_info, prev_pdfium, new_pdfium, updated_py_src, updated_pdfium)
+    is_beta = new_helpers_info["beta"] is not None
+    return VersionInfo(prev_tag, new_tag, is_beta, new_helpers_info, prev_pdfium, new_pdfium, helpers_update, pdfium_update)
 
 
 def update_refbindings(version):
@@ -153,10 +153,10 @@ def register_changes(args, v_info: VersionInfo):
     _run_local(["git", "tag", "-a", v_info.new_tag, "-m", "Autorelease"])
     
     parsed_info = parse_git_tag()
-    if v_info.new_info != parsed_info:
+    if v_info.new_helpers_info != parsed_info:
         log(
             "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
-            f"In: {v_info.new_info}\n" + f"Out: {parsed_info}"
+            f"In: {v_info.new_helpers_info}\n" + f"Out: {parsed_info}"
         )
         assert not IS_CI
 
@@ -190,7 +190,7 @@ This release was made with the following build strategies:
         target_known=bool(args.branch)
     )
     
-    if v_info.updated_pdfium and args.pdfium_history:
+    if v_info.pdfium_update and args.pdfium_history:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
