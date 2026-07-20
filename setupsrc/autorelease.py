@@ -107,7 +107,7 @@ def log_changes(summary, prev_pdfium, new_pdfium, new_tag, is_beta):
     pos = content.index("\n", content.index("# Changelog")) + 1
     part_a = content[:pos].strip() + "\n"
     part_b = content[pos:].strip() + "\n"
-    content = part_a + "\n\n" + pdfium_msg + "\n"
+    content = part_a + "\n" + pdfium_msg + "\n"
     if is_beta:
         content += f"- See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/{new_tag})\n"
     else:

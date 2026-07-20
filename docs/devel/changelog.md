@@ -3,9 +3,7 @@
 
 <!-- MyST Syntax -->
 
-
 # Changelog
-
 
 ## 5.12.1 (2026-07-17)
 
