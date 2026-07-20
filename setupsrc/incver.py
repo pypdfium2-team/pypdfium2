@@ -15,12 +15,6 @@ from base import *
 from system_pdfium import _yield_lo_candidates
 
 
-PlacesToRegister = (AutoreleaseDir, Changelog, ChangelogStaging, RefBindingsFile)
-
-def run_local(*args, **kws):
-    return run_cmd(*args, **kws, cwd=ProjectDir)
-
-
 def _versioning_impl(config, record, prev_helpers, new_pdfium):
     
     # make sure we have a valid state
@@ -108,23 +102,6 @@ def update_refbindings(version):
     assert RefBindingsFile.exists()
 
 
-def register_changes(args, v_info: VersionInfo):
-    
-    run_local(["git", "checkout", "-B", args.branch])
-    run_local(["git", "add", *PlacesToRegister])
-    run_local(["git", "commit", "-m", f"[autorelease main] update {v_info.new_tag}"])
-    # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
-    run_local(["git", "tag", "-a", v_info.new_tag, "-m", "Autorelease"])
-    
-    parsed_info = parse_git_tag()
-    if v_info.new_info != parsed_info:
-        log(
-            "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
-            f"In: {v_info.new_info}\n" + f"Out: {parsed_info}"
-        )
-        assert not IS_CI
-
-
 def log_changes(summary, v_info: VersionInfo):
     
     pdfium_msg = f"## {v_info.new_tag} ({time.strftime('%Y-%m-%d')})\n\n"
@@ -160,6 +137,28 @@ def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag
     )
     clog += "\n\n</details>\n"
     return clog
+
+
+GitRegisterPaths = (AutoreleaseDir, Changelog, ChangelogStaging, RefBindingsFile)
+
+def _run_local(*args, **kws):
+    return run_cmd(*args, **kws, cwd=ProjectDir)
+
+def register_changes(args, v_info: VersionInfo):
+    
+    _run_local(["git", "checkout", "-B", args.branch])
+    _run_local(["git", "add", *GitRegisterPaths])
+    _run_local(["git", "commit", "-m", f"[autorelease main] update {v_info.new_tag}"])
+    # Note, the actually published tag will be a different one (though with same name), but it's nevertheless convenient to have this here because of changelog and git describe
+    _run_local(["git", "tag", "-a", v_info.new_tag, "-m", "Autorelease"])
+    
+    parsed_info = parse_git_tag()
+    if v_info.new_info != parsed_info:
+        log(
+            "Warning: Written and parsed helpers do not match. This should not happen in CI.\n"
+            f"In: {v_info.new_info}\n" + f"Out: {parsed_info}"
+        )
+        assert not IS_CI
 
 
 def _strlist(iterable):
