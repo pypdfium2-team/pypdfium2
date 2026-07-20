@@ -26,7 +26,7 @@ on:
       cibw:
         type: string
         default: ''
-      autorelease:
+      inc_ver:
         type: boolean
         default: true
       sdist:
@@ -53,7 +53,7 @@ permissions: {}
 jobs:
   
   prepare:
-    name: Prepare build (matrix, checks, autorelease)
+    name: Prepare build (matrix, checks, versioning)
     permissions:
       contents: write  # needed for push
     outputs:
@@ -64,7 +64,7 @@ jobs:
       sbuild_matrix: ${{ steps.get_matrix.outputs.sbuild_matrix }}
       cibw_matrix: ${{ steps.get_matrix.outputs.cibw_matrix }}
       ref: ${{ steps.get_version.outputs.ref }}
-      version: ${{ inputs.autorelease && steps.get_version.outputs.version || '' }}
+      version: ${{ inputs.inc_ver && steps.get_version.outputs.version || '' }}
     
     runs-on: ${{ inputs.runner_os }}
     steps:
@@ -72,8 +72,8 @@ jobs:
       - name: Check out pypdfium2
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: ${{ !inputs.autorelease && 1 || 0 }}
-          persist-credentials: ${{ inputs.autorelease }}  # zizmor: ignore[artipacked]
+          fetch-depth: ${{ !inputs.inc_ver && 1 || 0 }}
+          persist-credentials: ${{ inputs.inc_ver }}  # zizmor: ignore[artipacked]
       
       # run get_matrix.py using the runner's pre-installed python
       - name: Determine build matrix
@@ -91,22 +91,22 @@ jobs:
           CIBW_TARGETS: ${{ inputs.cibw }}
       
       - name: Set up Python
-        if: ${{ inputs.autorelease }}
+        if: ${{ inputs.inc_ver }}
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.14'
           pip-install: -U -r req/check.txt -r req/setup.txt -r req/test.txt
       
-      - name: Checks & Autorelease
-        if: ${{ inputs.autorelease }}
-        id: autorelease
+      - name: Checks & Version increment
+        if: ${{ inputs.inc_ver }}
+        id: inc_ver
         run: |
           ./utils/check.sh
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
           python3 setupsrc/emplace.py auto:latest
           BRANCH_NAME="autorelease_tmp_${RUN_ID}"
-          python3 setupsrc/autorelease.py --to-branch "$BRANCH_NAME" --strategy-file release_info/strategy.json -o release_info/ $PDFIUM_HISTORY_OPT
+          python3 setupsrc/incver.py --to-branch "$BRANCH_NAME" --strategy-file release_info/strategy.json -o release_info/ $PDFIUM_HISTORY_OPT
           python3 -m pip install -v --no-build-isolation -e .
           python3 -m pytest tests/ -sv
           git push -u origin "$BRANCH_NAME"  # just the branch (not tag)
@@ -115,7 +115,7 @@ jobs:
           PDFIUM_HISTORY_OPT: ${{ inputs.publish && '--pdfium-history' || '' }}
       
       - name: Upload release info
-        if: ${{ inputs.autorelease }}
+        if: ${{ inputs.inc_ver }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release_info
@@ -294,7 +294,7 @@ jobs:
         run: |
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
-          # TODO assert HEAD commit hash matches the autorelease commit (no tampering)
+          # TODO assert HEAD commit hash matches the incver commit (no tampering)
           git checkout main
           git merge "origin/autorelease_tmp_${RUN_ID}"
           git tag -a "$NEW_VERSION" -m "Autorelease"
@@ -377,7 +377,7 @@ jobs:
   cleanup:
     name: Clean up temporary branch
     needs: [prepare, publish, gh_pages, conda]
-    if: ${{ inputs.autorelease && !cancelled() }}
+    if: ${{ inputs.inc_ver && !cancelled() }}
     permissions:
       contents: write  # needed for push
     

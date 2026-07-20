@@ -30,7 +30,7 @@ jobs:
           "pbin": "",
           "sbuild": "",
           "cibw": "",
-          "autorelease": "true",
+          "inc_ver": "true",
           "sdist": "true",
           "conda": "true",
           "gh_pages": "true",
