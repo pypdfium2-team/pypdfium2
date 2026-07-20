@@ -61,9 +61,7 @@ def _versioning_impl(config, prev_helpers, prev_pdfium, new_pdfium):
         # If the previous version was a beta but the new one shall not be, remove the tag
         new_helpers["beta"] = None
     
-    write_json(AR_ConfigFile, new_config)
-    
-    return new_helpers, helpers_update, pdfium_update
+    return new_config, new_helpers, helpers_update, pdfium_update
 
 
 VersionInfo = namedtuple("VersionInfo", ("prev_tag", "new_tag", "is_beta", "new_helpers_info", "prev_pdfium", "new_pdfium", "helpers_update", "pdfium_update"))
@@ -80,7 +78,9 @@ def handle_versions():
     prev_tag = merge_tag(prev_helpers_info, mode=None)
     assert prev_tag == record['tag'], f"{prev_tag} != {record['tag']}"
     
-    new_helpers_info, helpers_update, pdfium_update = _versioning_impl(config, prev_helpers_info, prev_pdfium, new_pdfium)
+    new_config, new_helpers_info, helpers_update, pdfium_update = _versioning_impl(config, prev_helpers_info, prev_pdfium, new_pdfium)
+    
+    write_json(AR_ConfigFile, new_config)
     new_tag = merge_tag(new_helpers_info, mode=None)
     write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
     
