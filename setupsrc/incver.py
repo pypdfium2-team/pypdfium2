@@ -197,9 +197,10 @@ This release was made with the following build strategies:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             run_cmd(["git", "clone", "--filter=blob:none", "--no-checkout", PdfiumURL, "pdfium_history"], cwd=tmpdir)
+            # nb: prev_pdfium / new_pdfium are integer (build number)
             clog += _get_log(
                 "PDFium", PdfiumURL, tmpdir/"pdfium_history",
-                v_info.prev_pdfium, v_info.new_pdfium,
+                str(v_info.prev_pdfium), str(v_info.new_pdfium),
                 "/+/refs/heads/chromium/", "/+/", "origin/chromium/",
                 target_known=True
             )
