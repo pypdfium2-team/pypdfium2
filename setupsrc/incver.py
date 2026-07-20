@@ -127,6 +127,8 @@ def log_changes(summary, v_info: VersionInfo):
     Changelog.write_text(content)
 
 
+# TODO(geisserml) do not pass in so many individual parameters here
+
 def _get_log(name, url, cwd, ver_a, ver_b, prefix_ver, prefix_commit, prefix_tag, target_known):
     clog = "\n<details>\n"
     clog += f"  <summary>{name} commit log</summary>\n\n"
