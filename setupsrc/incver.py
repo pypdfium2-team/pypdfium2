@@ -25,15 +25,14 @@ def _versioning_impl(config, prev_helpers, prev_pdfium, new_pdfium):
     
     helpers_update = prev_helpers["n_commits"] > 0
     pdfium_update = prev_pdfium < new_pdfium
-    
     if not pdfium_update and not helpers_update:
         log("Warning: Neither pypdfium2 code nor pdfium-binaries updated. New release pointless?")
     
-    # reset prev_helpers to release state
-    prev_helpers["n_commits"] = 0
-    prev_helpers["hash"] = None
     new_config = deepcopy(config)
     new_helpers = deepcopy(prev_helpers)
+    # reset new_helpers to release state
+    new_helpers["n_commits"] = 0
+    new_helpers["hash"] = None
     
     if config["major"]:
         new_helpers["major"] += 1
