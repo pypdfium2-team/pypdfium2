@@ -14,18 +14,17 @@ class cached_property:
     Similar to :obj:`functools.cached_property`, but cleaner and more backward compatible.
     
     Note:
-        Descriptor-based cached properties are inherently incompatible with slotted classes (``__slots__``), as they do not allow for instance-level shadowing of class-level attributes, which however is essential to this cached property model.
-        
-        With slots, you need to take a different approach that does not work with a decorator API: Add the property names to your slots and implement a ``__getattr__`` method which dispatches the cached property functions through a map or similar and assigns the result to the object. This is also overhead-free after load.
+        Descriptor-based cached properties are inherently incompatible with ``__slots__``, as slotted classes do not allow for instance-level shadowing of class-level attributes, which however is essential for this cached property model.\n
+        With slots, you need to take a different approach that does not work with a decorator API: Add the property names to your slots and implement a ``__getattr__`` method which dispatches the cached property functions through a map or similar, and assigns the result to the object. This is also overhead-free after load.
     
     Important:
-        Don't be tempted to think you could replace :class:`.cached_property` by stacking :class:`property` and :func:`functools.lru_cache`. You cannot.
-        LRU cache operates on class level, not instance level, which has a ton of negative though not immediately obvious implications.
+        Don't be tempted to think :class:`.cached_property` could be replaced (or backported) by stacking :class:`property` and :func:`functools.lru_cache`. It cannot.
+        :func:`~functools.lru_cache` operates on class level, not instance level, which has a ton of negative implications.
         
-        When setting a maxsize, caches will be lost once there are more instance objects.
-        E.g. with maxsize=1 only one instance object (the most recently used) can have a cache, whereas any other cached values are silently lost and re-created on access.
-        Without a maxsize, the cache will grow indefinitely, and mind the strong references causing your values to never be garbage collected!
-        Also, lru_cache uses hashing, so your classes must be hashable, which is not the case with :class:`.cached_property`.
+        In particular, when there are more instance objects than ``maxsize``, caches would be lost, whereas an unbounded class-level cache would never be cleared.
+        Cached properties belong to instance level so that cached values remain with their objects, and eventually get garbage collected together.
+        
+        In general, you almost never want :func:`functools.lru_cache` except on standalone functions. It is inappropriate on methods. Unfortunately, there is no instance-level LRU cache in the standard library, but you could consider something like ``methodtools.lru_cache()``.
     """
     
     def __init__(self, func):
@@ -33,7 +32,6 @@ class cached_property:
         self.assigned_name = None
         self.__doc__ = func.__doc__
     
-    # Optional. On older Python versions (< 3.6) that do not call this hook, the func's __name__ will be used as fallback.
     def __set_name__(self, cls, name):
         if self.assigned_name is None:
             self.assigned_name = name
@@ -44,6 +42,6 @@ class cached_property:
         if obj is None:
             return self
         value = self.func(obj)
-        name = self.assigned_name or self.func.__name__
+        name = self.assigned_name  # or self.func.__name__ (py < 3.6)
         setattr(obj, name, value)
         return value
