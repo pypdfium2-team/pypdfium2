@@ -6,7 +6,7 @@ class cached_property:
     Custom cached property implementation.
     
     Powered by the descriptor protocol. Zero overhead after the property has been loaded.
-    Similar to :class:`functools.cached_property`, but cleaner and more backward compatible.
+    Similar to :deco:`functools.cached_property`, but cleaner and more backward compatible.
     
     Note:
         Descriptor-based cached properties are inherently incompatible with slotted classes (``__slots__``), as they do not allow for instance-level shadowing of class-level attributes, which however is essential to this cached property model.
