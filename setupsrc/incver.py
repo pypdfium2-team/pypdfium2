@@ -15,16 +15,16 @@ from base import *
 from system_pdfium import _yield_lo_candidates
 
 
-def _versioning_impl(config, record, prev_helpers, new_pdfium):
+def _versioning_impl(config, prev_helpers, prev_pdfium, new_pdfium):
     
     # make sure we have a valid state
-    assert not record["pdfium"] > new_pdfium
+    assert not prev_pdfium > new_pdfium
     if prev_helpers["dirty"]:
         log("Warning: dirty state. This should not happen in CI.")
         assert not IS_CI
     
     helpers_update = prev_helpers["n_commits"] > 0
-    pdfium_update = record["pdfium"] < new_pdfium
+    pdfium_update = prev_pdfium < new_pdfium
     
     if not pdfium_update and not helpers_update:
         log("Warning: Neither pypdfium2 code nor pdfium-binaries updated. New release pointless?")
@@ -81,7 +81,7 @@ def handle_versions():
     prev_tag = merge_tag(prev_helpers_info, mode=None)
     assert prev_tag == record['tag'], f"{prev_tag} != {record['tag']}"
     
-    new_helpers_info, helpers_update, pdfium_update = _versioning_impl(config, record, prev_helpers_info, new_pdfium)
+    new_helpers_info, helpers_update, pdfium_update = _versioning_impl(config, prev_helpers_info, prev_pdfium, new_pdfium)
     new_tag = merge_tag(new_helpers_info, mode=None)
     write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
     
