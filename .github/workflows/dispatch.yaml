@@ -11,9 +11,6 @@ on:
       inputs:
         type: string
         required: true
-      runner_os:
-        type: string
-        default: 'ubuntu-26.04'
 
 permissions: {}
 
@@ -23,7 +20,7 @@ jobs:
     permissions:
       actions: write  # allow workflow dispatch
     
-    runs-on: ${{ inputs.runner_os }}
+    runs-on: ubuntu-slim
     steps:
       - name: Dispatch ${{ inputs.workflow_file }} with GH CLI
         run: echo "$INPUTS" | gh workflow run "$WORKFLOW_FILE" -R "$REPOSITORY" --ref "$REF_NAME" --json

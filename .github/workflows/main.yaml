@@ -7,9 +7,6 @@ name: Main packaging
 on:
   workflow_dispatch:
     inputs:
-      runner_os:
-        type: string
-        default: 'ubuntu-26.04'
       py_vers:
         type: string
         default: '3.8 3.11 3.14'
@@ -66,7 +63,7 @@ jobs:
       ref: ${{ steps.get_version.outputs.ref }}
       version: ${{ inputs.inc_ver && steps.get_version.outputs.version || '' }}
     
-    runs-on: ${{ inputs.runner_os }}
+    runs-on: ubuntu-slim
     steps:
       
       - name: Check out pypdfium2
@@ -134,7 +131,7 @@ jobs:
     permissions:
       contents: read  # recommended by checkout and setup-python actions
     
-    runs-on: 'ubuntu-24.04'
+    runs-on: ubuntu-slim  # 24.04
     steps:
       
       - name: Check out pypdfium2
@@ -248,7 +245,7 @@ jobs:
       attestations: write  # GH attestation
       contents: write      # git push
     
-    runs-on: ${{ inputs.runner_os }}
+    runs-on: ubuntu-slim
     steps:
       
       - name: Check out pypdfium2 (deep, authenticated)
@@ -359,7 +356,6 @@ jobs:
     
     uses: ./.github/workflows/dispatch.yaml
     with:
-      runner_os: ${{ inputs.runner_os }}
       workflow_file: conda.yaml
       inputs: |
         {
@@ -380,7 +376,7 @@ jobs:
     permissions:
       contents: write  # needed for push
     
-    runs-on: ${{ inputs.runner_os }}
+    runs-on: ubuntu-slim
     steps:
       
       - name: Check out pypdfium2 (shallow, authenticated)

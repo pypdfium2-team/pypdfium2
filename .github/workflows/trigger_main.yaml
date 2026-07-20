@@ -24,7 +24,6 @@ jobs:
       workflow_file: main.yaml
       inputs: |
         {
-          "runner_os": "ubuntu-26.04",
           "py_vers": "3.8 3.11 3.14",
           "profile": "default",
           "pbin": "",
