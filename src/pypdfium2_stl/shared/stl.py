@@ -3,7 +3,7 @@
 
 # See also
 # https://gist.github.com/mara004/f2926b1fcc8847a69e0af6f4e33934fd (comments)
-# https://gist.github.com/mara004/1170f7bfb0fb6fd8dd1e9872696c2d4e
+# https://gist.github.com/mara004/076e3110aba8e8a3f8a6f2c84af350ee
 # https://stackoverflow.com/a/78825819/15547292
 
 class cached_property:
