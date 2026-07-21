@@ -15,7 +15,7 @@ class cached_property:
     
     Note:
         :class:`.cached_property` is inherently incompatible with ``__slots__``, as slotted classes do not allow for instance-level shadowing of class-level attributes, which however is essential to any descriptor-based cached property implementation.\n
-        With slotted classes, you need to take a different approach (which cannot be managed through a decorator API): Add the property names to your slots, and implement a ``__getattr__`` method that dispatches the cached property functions using a map or similar, and assigns the result to the object. This is also overhead-free after load.
+        With slotted classes, you need to take a different approach (which cannot be managed through a decorator API): Add the property names to your slots, and implement a ``__getattr__`` method that dispatches the cached property functions through a map or similar, and assigns the result to the object. This is also overhead-free after load.
     
     Important:
         Don't be tempted to think :class:`.cached_property` could be replaced (or backported) by stacking :class:`property` and :func:`functools.lru_cache`. It cannot.
