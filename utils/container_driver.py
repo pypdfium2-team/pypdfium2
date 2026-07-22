@@ -72,17 +72,19 @@ python3 -m pytest tests/
 
 def write_script(args, cibw_cpu, sys_install):
     pip_packages = []
+    
     if args.wheel_path:
         if cibw_cpu.startswith("mips"):
             pip_packages.append("wheel")
             lib_install = f'bash "{MountPoint}/utils/enforce_install.sh" "$1"'
         else:
             lib_install = 'pip install "$1"'
-        if args.image == "manylinux2014":
-            pip_packages.append("pytest")
     else:
-        pip_packages += ("setuptools", "packaging", "wheel", "build", "pytest")
+        pip_packages += ("setuptools", "packaging", "wheel", "build")
         lib_install = 'pip install --no-build-isolation -v .'
+    
+    if args.image == "manylinux2014":
+        pip_packages.append("pytest")
     
     pip_install = ('pip install -U ' + " ".join(pip_packages)) if pip_packages else ""
     return SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
