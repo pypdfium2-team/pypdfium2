@@ -235,7 +235,7 @@ jobs:
   
   
   publish:
-    name: Publish to PyPI & GH
+    name: ${{ inputs.actually_publish && 'Publish to PyPI & GH (actually)' || 'Publish (dry run)' }}
     needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     
