@@ -36,7 +36,6 @@ PLATFORM_CPU_MAP = {
 # The following platform names match across conventions, so they do not need to be explicitly handled above:
 # loong64, mips64le, ppc64le, riscv64, s390x
 
-
 def _get_container(cibw_os, cibw_cpu, docker_cpu, image):
     prefix = f"ghcr.io/" if docker_cpu == "loong64" else ""
     if cibw_os == "manylinux":
@@ -50,6 +49,7 @@ def _get_container(cibw_os, cibw_cpu, docker_cpu, image):
         assert image == "alpine"
         return f"{prefix}{docker_cpu}/alpine:3", "sh", _ALPINE_CMD
     assert False, f"{cibw_os} {image} is not a supported combination"
+
 
 MountPoint = "/projects/pypdfium2"
 ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
@@ -99,7 +99,6 @@ def parse_args():
     parser.add_argument("-w", "--wheel-path")
     args = parser.parse_args(sys.argv[1:])
     return args
-
 
 def main():
     
