@@ -54,13 +54,6 @@ def _get_container(image, os_class, cibw_cpu, docker_cpu):
         assert False, os_class
 
 
-def get_initial_info(args, os_class, cibw_cpu):
-    platform_cpu = PLATFORM_CPU_MAP.get(cibw_cpu, cibw_cpu)
-    docker_cpu = DOCKER_CPU_MAP.get(cibw_cpu, cibw_cpu)
-    docker_flags = ("--platform", f"linux/{platform_cpu}")
-    return docker_flags, *_get_container(args.image, os_class, cibw_cpu, docker_cpu)
-
-
 MountPoint = "/projects/pypdfium2"
 ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
 
@@ -121,9 +114,13 @@ def main():
     if not args.image:
         args.image = {"manylinux": "debian", "musllinux": "alpine"}[os_class]
     
-    docker_flags, container, shell, sys_install = get_initial_info(args, os_class, cibw_cpu)
+    docker_cpu = DOCKER_CPU_MAP.get(cibw_cpu, cibw_cpu)
+    platform_cpu = PLATFORM_CPU_MAP.get(cibw_cpu, cibw_cpu)
+    
+    container, shell, sys_install = _get_container(args.image, os_class, cibw_cpu, docker_cpu)
     script = write_script(args, cibw_cpu, MountPoint, sys_install)
     
+    docker_flags = ("--platform", f"linux/{platform_cpu}")
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{MountPoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.wheel_path:
         wheel_path = str(Path(MountPoint)/args.wheel_path)
