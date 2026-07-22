@@ -44,6 +44,7 @@ def _get_container(image, os_class, cibw_cpu):
         which_debian = "bookworm" if docker_cpu == "mips64le" else "trixie"
         return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", _DEBIAN_CMD, "bash"
     elif image == "manylinux2014":
+        # manylinux2014 is useful to test both python 3.6 and glibc 2.17 compatibility in one go
         assert os_class == "manylinux"
         return f"quay.io/pypa/manylinux2014_{cibw_cpu}", _RHEL_CMD, "bash"
     elif image == "alpine":
