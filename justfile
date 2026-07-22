@@ -28,7 +28,7 @@ docs-clean:
 	rm -rf docs/build/html
 
 clean:
-	rm -rf pypdfium2*.egg-info/ src/pypdfium2*.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
+	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
 check:
 	./utils/check.sh
 distcheck:
@@ -51,5 +51,11 @@ craft *args:
 	python3 setupsrc/craft.py {{args}}
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
+
+sdist: (craft '--sdist')
+sdist-simple:
+	# See the notes in craft.py for why removing previous .egg-info is essential
+	rm -rf pypdfium2.egg-info/
+	PDFIUM_PLATFORM=sdist python3 -m build -sxn
 
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck

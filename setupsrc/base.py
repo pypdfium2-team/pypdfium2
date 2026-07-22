@@ -197,9 +197,12 @@ def libname_for_system(system, name="pdfium", prefix=None):
 def mkdir(path, exist_ok=True, parents=True):
     path.mkdir(exist_ok=exist_ok, parents=parents)
 
-def mkdir_clean(path):
-    if path.exists():
+def rmtree(path):
+    if path.is_dir():
         shutil.rmtree(path)
+
+def mkdir_clean(path):
+    rmtree(path)
     mkdir(path)
 
 def read_json(fp):

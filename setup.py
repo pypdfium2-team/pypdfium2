@@ -110,8 +110,6 @@ LICENSES_SDIST = (
 
 def run_setup(modnames, pl_name, datagen):
     
-    # FIXME ambiguity between `pl_name == ExtPlats.sdist` and `ModuleRaw not in modnames` ?
-    
     kwargs = dict(
         name = "pypdfium2",
         description = "Python bindings to PDFium",
@@ -121,15 +119,6 @@ def run_setup(modnames, pl_name, datagen):
         package_dir = {},
         package_data = {},
     )
-    
-    platfiles = []
-    dll_path = None
-    if pl_name != ExtPlats.sdist:
-        platfiles += (BindingsFN, VersionFN)
-        if pl_name != ExtPlats.system:
-            sys_name = plat_to_system(pl_name)
-            dll_path = ModuleDir_Raw / libname_for_system(sys_name)
-            platfiles.append(dll_path.name)
     
     license_files = list(LICENSES_SHARED)
     if pl_name == ExtPlats.sdist:
@@ -165,13 +154,19 @@ def run_setup(modnames, pl_name, datagen):
     
     if ModuleRaw in modnames:
         kwargs["package_dir"]["pypdfium2_raw"] = "src/pypdfium2_raw"
-        if platfiles:
-            kwargs["package_data"]["pypdfium2_raw"] = platfiles
         if pl_name == ExtPlats.sdist:
             kwargs["exclude_package_data"] = {"pypdfium2_raw": (VersionFN, *LIBNAME_GLOBS)}
         elif pl_name == ExtPlats.system:
+            kwargs["package_data"]["pypdfium2_raw"] = (BindingsFN, VersionFN)
             kwargs["exclude_package_data"] = {"pypdfium2_raw": LIBNAME_GLOBS}
         else:
+            sys_name = plat_to_system(pl_name)
+            dll_path = ModuleDir_Raw / libname_for_system(sys_name)
+            kwargs["package_data"]["pypdfium2_raw"] = (BindingsFN, VersionFN, dll_path.name)
+            
+            kwargs["distclass"] = BinaryDistribution
+            kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name, dll_path)
+            
             if pl_name == ExtPlats.sourcebuild:
                 use_tarball_licenses = False
             else:  # pdfium-binaries
@@ -180,27 +175,28 @@ def run_setup(modnames, pl_name, datagen):
                 license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
             else:
                 license_files.append("BUILD_LICENSES/**")
-            kwargs["distclass"] = BinaryDistribution
-            kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name, dll_path)
     
     kwargs["cmdclass"]["build_py"] = buildpy_factory(pl_name, modnames, datagen, helpers_info, kwargs["package_data"])
     kwargs["license_files"] = license_files
     
     # An explicit package finder is required for older versions of Python which are stuck with older setuptools (e.g. Python 3.6 has max setuptools 59.6.0).
-    # Note that this cannot be moved to pyproject.toml because a) we need it to be dynamic b) older setuptools versions did not honor pyproject.toml [tool.setuptools.packages.find] yet.
     # With setuptools >= 61 this could just be omitted entirely thanks to auto-discovery.
     kwargs["packages"] = setuptools.find_packages(where='src', include=include_rules, exclude=exclude_rules)
     
     setuptools.setup(**kwargs)
 
 
-def _parse_modspec(modspec):
-    if modspec:
-        modnames = modspec.split(",")
+def _parse_modspec(modspec, pl_name):
+    if not modspec:
+        return ModulesAll
+    
+    modnames = modspec.split(",")
+    if pl_name == ExtPlats.sdist:
+        assert set(modnames) == set(ModulesAll)
+    else:
         assert set(modnames).issubset(ModulesAll)
         assert len(modnames) in (1, 2)
-    else:
-        modnames = ModulesAll
+    
     return modnames
 
 def _resolve_platname(pl_name):
@@ -219,10 +215,8 @@ def main():
     raw_modspec = os.environ.get(ModulesSpec_EnvVar, "")
     raw_platspec = os.environ.get(PlatSpec_EnvVar, "")
     
-    modnames = _parse_modspec(raw_modspec)
     pl_name, *args = parse_pl_spec(raw_platspec)
-    if pl_name == ExtPlats.sdist and modnames != ModulesAll:
-        raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
+    modnames = _parse_modspec(raw_modspec, pl_name)
     
     datagen = partial(prepare_setup, pl_name, *args)
     run_setup(modnames, _resolve_platname(pl_name), datagen)

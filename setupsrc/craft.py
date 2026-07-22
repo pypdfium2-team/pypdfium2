@@ -92,6 +92,12 @@ def main_pypi(args):
     assert args.sdist or args.wheels
     
     if args.sdist:
+        
+        # To avoid file inclusion bugs, you really wanna get rid of any previous .egg-info before ever building an sdist.
+        # Let's say you accidentally did `python3 -m build -sxn`, then running `PDFIUM_PLATFORM=sdist python3 -m build -sxn` will NOT fix file inclusion UNLESS the previous pypdfium2.egg-info is removed. (At least, that is the case with the author's current setup depenencies as of this writing.)
+        # This can get extremely confusing when working on setup.py / MANIFEST.in include rules.
+        rmtree(ProjectDir/"pypdfium2.egg-info")
+        
         os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
         helpers_info = get_helpers_info()
         with tmp_ctypesgen_pin():
