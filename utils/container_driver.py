@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import ProjectDir, log  # local
 
-_RHEL_CMD   = "yum install -y python3 python3-virtualenv python3-pillow python3-numpy"  # python3-pytest
+_RHEL_CMD   = "yum install -y python3 python3-pillow python3-numpy"  # python3-pytest
 _DEBIAN_CMD = "apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
 _ALPINE_CMD = "apk add python3 py3-pip py3-pillow py3-numpy py3-pytest"
 
