@@ -187,8 +187,8 @@ def run_setup(modnames, pl_name, datagen):
     kwargs["license_files"] = license_files
     
     # An explicit package finder is required for older versions of Python which are stuck with older setuptools (e.g. Python 3.6 has max setuptools 59.6.0).
-    # Note that this finder cannot be moved to pyproject.toml because older setuptools do not look for it there yet, whereas with newer setuptools (>= 61) this could just be omitted entirely thanks to auto-discovery.
-    # kwargs["include_package_data"] = True
+    # Note that this cannot be moved to pyproject.toml because a) we need it to be dynamic b) older setuptools versions did not honor pyproject.toml [tool.setuptools.packages.find] yet.
+    # With setuptools >= 61 this could just be omitted entirely thanks to auto-discovery.
     kwargs["packages"] = setuptools.find_packages(where='src', include=include_rules, exclude=exclude_rules)
     
     setuptools.setup(**kwargs)
@@ -224,8 +224,6 @@ def main():
     if pl_name == ExtPlats.sdist and modnames != ModulesAll:
         raise ValueError(f"Partial sdist does not make sense - unset {ModulesSpec_EnvVar}.")
     
-    # if pl_name == ExtPlats.sdist:
-    #     clean_platfiles()
     datagen = partial(prepare_setup, pl_name, *args)
     run_setup(modnames, _resolve_platname(pl_name), datagen)
 
