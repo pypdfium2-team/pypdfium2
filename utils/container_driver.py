@@ -36,21 +36,19 @@ PLATFORM_CPU_MAP = {
 # loong64, mips64le, ppc64le, riscv64, s390x
 
 
-def _get_container(image, os_class, cpu):
-    docker_cpu = DOCKER_CPU_MAP.get(cpu, cpu)
-    platform_cpu = PLATFORM_CPU_MAP.get(cpu, cpu)
-    docker_flags = ("--platform", f"linux/{platform_cpu}")
+def _get_container(image, os_class, cibw_cpu):
+    docker_cpu = DOCKER_CPU_MAP.get(cibw_cpu, cibw_cpu)
     prefix = f"ghcr.io/" if docker_cpu == "loong64" else ""
     if image == "debian":
         assert os_class == "manylinux"
         which_debian = "bookworm" if docker_cpu == "mips64le" else "trixie"
-        return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", docker_flags, _DEBIAN_CMD, "bash"
+        return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", _DEBIAN_CMD, "bash"
     elif image == "manylinux2014":
         assert os_class == "manylinux"
-        return f"quay.io/pypa/manylinux2014_{cpu}", docker_flags, _RHEL_CMD, "bash"
+        return f"quay.io/pypa/manylinux2014_{cibw_cpu}", _RHEL_CMD, "bash"
     elif image == "alpine":
         assert os_class == "musllinux"
-        return f"{prefix}{docker_cpu}/alpine:3", docker_flags, _ALPINE_CMD, "sh"
+        return f"{prefix}{docker_cpu}/alpine:3", _ALPINE_CMD, "sh"
     else:
         assert False, os_class
 
@@ -104,15 +102,17 @@ def main():
         print("Debian i686 container has network problems on GHA. Skipping.", file=sys.stderr)
         return
     
-    os_class, cpu = args.target.split("_", maxsplit=1)
-    cpu = {"loongarch64": "loong64"}.get(cpu, cpu)
+    os_class, cibw_cpu = args.target.split("_", maxsplit=1)
+    cibw_cpu = {"loongarch64": "loong64"}.get(cibw_cpu, cibw_cpu)
+    platform_cpu = PLATFORM_CPU_MAP.get(cibw_cpu, cibw_cpu)
+    docker_flags = ("--platform", f"linux/{platform_cpu}")
     if not args.image:
         args.image = {"manylinux": "debian", "musllinux": "alpine"}[os_class]
     
-    container, docker_flags, install_pkgs, shell = _get_container(args.image, os_class, cpu)
+    container, install_pkgs, shell = _get_container(args.image, os_class, cibw_cpu)
     if args.wheel_path:
         # https://github.com/pypa/pip/issues/14095
-        install_lib = INSTALL_WHEEL if not cpu.startswith("mips") else INSTALL_WHEEL_BYFORCE
+        install_lib = INSTALL_WHEEL if not cibw_cpu.startswith("mips") else INSTALL_WHEEL_BYFORCE
     else:
         install_lib = INSTALL_FROM_SRC
     
