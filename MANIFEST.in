@@ -15,6 +15,9 @@ include autorelease/record.json
 include autorelease/bindings.py
 
 recursive-exclude src/pypdfium_raw *
+# For some reason, the above recursive-exclude does not catch the bindings
+# This does not prevent bindings from landing in wheels (they are enrolled as data file), it prevents them from accidentally ending up in an sdist.
+exclude src/pypdfium2_raw/bindings.py
 include src/pypdfium2_raw/__init__.py
 include src/pypdfium2_raw/version.py
 
