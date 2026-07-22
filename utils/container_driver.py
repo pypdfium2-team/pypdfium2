@@ -114,6 +114,7 @@ def main():
     
     pip_install = ('pip install ' + " ".join(pip_packages)) if pip_packages else ""
     script = SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
+    
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:/pypdfium2", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.wheel_path:
         args.wheel_path = Path("/pypdfium2") / args.wheel_path
