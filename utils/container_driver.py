@@ -84,7 +84,7 @@ def write_script(args, cibw_cpu, sys_install):
         pip_packages += ("setuptools", "packaging", "wheel", "build", "pytest")
         lib_install = 'pip install --no-build-isolation -v .'
     
-    pip_install = ('pip install ' + " ".join(pip_packages)) if pip_packages else ""
+    pip_install = ('pip install -U ' + " ".join(pip_packages)) if pip_packages else ""
     return SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
 
 
