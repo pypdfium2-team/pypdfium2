@@ -137,10 +137,13 @@ def run_setup(modnames, pl_name, datagen):
     if pl_name == ExtPlats.sdist:
         license_files.extend(LICENSES_SDIST)
     
+    exclude_rules = []
     if modnames == [ModuleHelpers]:
         kwargs["name"] += "_helpers"
         kwargs["description"] += " (helpers module)"
         kwargs["install_requires"] = ["pypdfium2_raw"]
+        include_rules = ["pypdfium2*"]
+        exclude_rules.append("pypdfium2_raw*")
     elif modnames == [ModuleRaw]:
         kwargs["name"] += "_raw"
         kwargs["description"] += " (raw module)"
@@ -148,9 +151,9 @@ def run_setup(modnames, pl_name, datagen):
         log(f"Warning: PYPDFIUM_MODULES=raw expects pre-generated version file at src/pypdfium2_raw/{VersionFN}. Callers must ensure this matches the version being built!")
         pdfium_fullver, _ = read_pdfium_info(ModuleDir_Raw)
         kwargs["version"] = str(pdfium_fullver)
+        include_rules = ["pypdfium2_raw*"]
     else:
-        assert any(m in modnames for m in (ModuleHelpers, ModuleRaw)), \
-               f"At least one core module is required. Check {ModulesSpec_EnvVar}."
+        include_rules = ["pypdfium2*"]
     
     helpers_info = None
     if ModuleHelpers in modnames:
@@ -171,17 +174,14 @@ def run_setup(modnames, pl_name, datagen):
     elif pl_name == ExtPlats.system:
         kwargs["exclude_package_data"] = {"pypdfium2_raw": LIBNAME_GLOBS}
     else:
-        
         if pl_name == ExtPlats.sourcebuild:
             use_tarball_licenses = False
         else:  # pdfium-binaries
             use_tarball_licenses = bool(int( os.getenv("USE_TARBALL_LICENSES", 0) ))
-        
         if use_tarball_licenses:
             license_files.append(f"data/{pl_name}/BUILD_LICENSES/**")
         else:
             license_files.append("BUILD_LICENSES/**")
-        
         kwargs["distclass"] = BinaryDistribution
         kwargs["cmdclass"]["bdist_wheel"] = bdist_factory(pl_name, dll_path)
     
@@ -190,7 +190,8 @@ def run_setup(modnames, pl_name, datagen):
     
     # An explicit package finder is required for older versions of Python which are stuck with older setuptools (e.g. Python 3.6 has max setuptools 59.6.0).
     # Note that this finder cannot be moved to pyproject.toml because older setuptools do not look for it there yet, whereas with newer setuptools (>= 61) this could just be omitted entirely thanks to auto-discovery.
-    kwargs["packages"] = setuptools.find_packages(where='src', include=['pypdfium2*'])
+    # kwargs["include_package_data"] = True
+    kwargs["packages"] = setuptools.find_packages(where='src', include=include_rules, exclude=exclude_rules)
     
     setuptools.setup(**kwargs)
 
