@@ -374,7 +374,8 @@ def parse_git_tag():
 
 def get_helpers_info():
     
-    if (ProjectDir/".git").exists():
+    HAVE_GIT = (ProjectDir/".git").exists() and shutil.which("git")
+    if HAVE_GIT:
         try:
             helpers_info = parse_git_tag()
         except subprocess.CalledProcessError as e:
