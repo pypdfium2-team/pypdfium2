@@ -74,8 +74,7 @@ set -exuo pipefail
 VENV_DIR="/testenv"
 python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
-which python3
-python3 --version
+which python3; python3 --version
 python3 -m pip install -U pip
 cd /pypdfium2
 %(install_lib)s
