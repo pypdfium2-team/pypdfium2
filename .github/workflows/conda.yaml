@@ -161,7 +161,7 @@ jobs:
   
   publish:
     
-    name: ${{ inputs.actually_publish && 'Publish to Anaconda' || 'Publish (dry run)' }}
+    name: ${{ inputs.actually_publish && 'Publish to Anaconda (actually)' || 'Publish (dry run)' }}
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     needs: [build, test]
     permissions:
