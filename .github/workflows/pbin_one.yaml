@@ -95,7 +95,7 @@ jobs:
           runner_os: ${{ inputs.runner_os }}
           py_vers: ${{ inputs.py_vers }}
           test_on_host: ${{ inputs.test_on_host || '' }}
-          docker: ${{ startsWith(inputs.pbin_target, 'linux_') || '' }}
+          docker: ${{ startsWith(inputs.pbin_target, 'linux_') && !endsWith(inputs.pbin_target, '_mipsle') || '' }}
           windows_32bit: ${{ inputs.pbin_target == 'windows_x86' || '' }}
           mac_consider_rosetta: ${{ inputs.pbin_target == 'darwin_x64' || inputs.pbin_target == 'darwin_univ2' || '' }}
   
