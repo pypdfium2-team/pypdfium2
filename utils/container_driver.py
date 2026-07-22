@@ -73,7 +73,7 @@ pypdfium2
 python3 -m pytest tests/
 """
 
-def write_script(args, cibw_cpu, MountPoint, sys_install):
+def write_script(args, cibw_cpu, sys_install):
     pip_packages = []
     if args.wheel_path:
         if cibw_cpu.startswith("mips"):
@@ -118,7 +118,7 @@ def main():
     platform_cpu = PLATFORM_CPU_MAP.get(cibw_cpu, cibw_cpu)
     
     container, shell, sys_install = _get_container(args.image, cibw_os, cibw_cpu, docker_cpu)
-    script = write_script(args, cibw_cpu, MountPoint, sys_install)
+    script = write_script(args, cibw_cpu, sys_install)
     
     docker_flags = ("--platform", f"linux/{platform_cpu}")
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{MountPoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
