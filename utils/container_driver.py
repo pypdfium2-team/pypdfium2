@@ -37,22 +37,19 @@ PLATFORM_CPU_MAP = {
 # loong64, mips64le, ppc64le, riscv64, s390x
 
 
-def _get_container(image, cibw_os, cibw_cpu, docker_cpu):
+def _get_container(cibw_os, cibw_cpu, docker_cpu, image):
     prefix = f"ghcr.io/" if docker_cpu == "loong64" else ""
-    if image == "debian":
-        assert cibw_os == "manylinux"
-        which_debian = "bookworm" if docker_cpu == "mips64le" else "trixie"
-        return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", "bash", _DEBIAN_CMD
-    elif image == "manylinux2014":
-        # manylinux2014 is useful to test both python 3.6 and glibc 2.17 compatibility in one go, though perhaps only for x86_64, the others seem to lack dependencies
-        assert cibw_os == "manylinux"
-        return f"quay.io/pypa/manylinux2014_{cibw_cpu}", "bash", _RHEL_CMD
-    elif image == "alpine":
-        assert cibw_os == "musllinux"
+    if cibw_os == "manylinux":
+        if image == "debian":
+            which_debian = "bookworm" if docker_cpu == "mips64le" else "trixie"
+            return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", "bash", _DEBIAN_CMD
+        elif image == "manylinux2014":
+            # manylinux2014 is useful to test both python 3.6 and glibc 2.17 compatibility in one go (though perhaps only for x86_64)
+            return f"quay.io/pypa/manylinux2014_{cibw_cpu}", "bash", _RHEL_CMD
+    elif cibw_os == "musllinux":
+        assert image == "alpine"
         return f"{prefix}{docker_cpu}/alpine:3", "sh", _ALPINE_CMD
-    else:
-        assert False, cibw_os
-
+    assert False, f"{cibw_os} {image} is not a supported combination"
 
 MountPoint = "/projects/pypdfium2"
 ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
@@ -117,7 +114,7 @@ def main():
     docker_cpu = DOCKER_CPU_MAP.get(cibw_cpu, cibw_cpu)
     platform_cpu = PLATFORM_CPU_MAP.get(cibw_cpu, cibw_cpu)
     
-    container, shell, sys_install = _get_container(args.image, cibw_os, cibw_cpu, docker_cpu)
+    container, shell, sys_install = _get_container(cibw_os, cibw_cpu, docker_cpu, args.image)
     script = write_script(args, cibw_cpu, sys_install)
     
     docker_flags = ("--platform", f"linux/{platform_cpu}")
