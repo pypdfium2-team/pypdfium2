@@ -68,28 +68,17 @@ def parse_args():
 SCRIPT_TEMPLATE = """\
 set -exuo pipefail
 
-%(install_pkgs)s
+%(install_sys_pkgs)s
 VENV_DIR="/testenv"
 python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
 python3 -m pip install -U pip
+%(install_pip_pkgs)s
 cd /pypdfium2
 %(install_lib)s
 pypdfium2
 python3 -m pytest tests/
-"""
-
-INSTALL_WHEEL = """
-python3 -m pip install "$1"
-"""
-INSTALL_WHEEL_BYFORCE = """
-python3 -m pip install -U wheel
-bash "/pypdfium2/utils/enforce_install.sh" "$1"
-"""
-INSTALL_FROM_SRC = """
-python3 -m pip install -U setuptools packaging wheel build pytest
-python3 -m pip install --no-build-isolation -v .
 """
 
 def main():
@@ -106,14 +95,26 @@ def main():
     if not args.image:
         args.image = {"manylinux": "debian", "musllinux": "alpine"}[os_class]
     
-    container, install_pkgs, shell = _get_container(args.image, os_class, cibw_cpu)
+    container, install_sys_pkgs, shell = _get_container(args.image, os_class, cibw_cpu)
+    pip_packages = []
     if args.wheel_path:
-        # https://github.com/pypa/pip/issues/14095
-        install_lib = INSTALL_WHEEL if not cibw_cpu.startswith("mips") else INSTALL_WHEEL_BYFORCE
+        if cibw_cpu.startswith("mips"):
+            pip_packages.append("wheel")
+            install_lib = 'bash "/pypdfium2/utils/enforce_install.sh" "$1"'
+        else:
+            install_lib = 'pip install "$1"'
+        if args.image == "manylinux2014":
+            pip_packages.append("pytest")
     else:
-        install_lib = INSTALL_FROM_SRC
+        pip_packages += ("setuptools", "packaging", "wheel", "build", "pytest")
+        install_lib = 'pip install --no-build-isolation -v .'
     
-    script = SCRIPT_TEMPLATE % dict(install_pkgs=install_pkgs, install_lib=install_lib.strip())
+    install_pip_pkgs = ('pip install ' + " ".join(pip_packages)) if pip_packages else ""
+    script = SCRIPT_TEMPLATE % dict(
+        install_sys_pkgs = install_sys_pkgs,
+        install_pip_pkgs = install_pip_pkgs,
+        install_lib = install_lib,
+    )
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:/pypdfium2", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.wheel_path:
         args.wheel_path = Path("/pypdfium2") / args.wheel_path
