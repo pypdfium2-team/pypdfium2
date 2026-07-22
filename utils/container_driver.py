@@ -6,6 +6,7 @@ import sys
 import argparse
 import subprocess
 from pathlib import Path
+from collections import namedtuple
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import ProjectDir, log  # local
@@ -68,18 +69,20 @@ def parse_args():
 SCRIPT_TEMPLATE = """\
 set -exuo pipefail
 
-%(install_sys_pkgs)s
+%(sys_install)s
 VENV_DIR="/testenv"
 python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
 python3 -m pip install -U pip
-%(install_pip_pkgs)s
+%(pip_install)s
 cd /pypdfium2
-%(install_lib)s
+%(lib_install)s
 pypdfium2
 python3 -m pytest tests/
 """
+
+ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
 
 def main():
     
@@ -95,26 +98,22 @@ def main():
     if not args.image:
         args.image = {"manylinux": "debian", "musllinux": "alpine"}[os_class]
     
-    container, install_sys_pkgs, shell = _get_container(args.image, os_class, cibw_cpu)
+    container, sys_install, shell = _get_container(args.image, os_class, cibw_cpu)
     pip_packages = []
     if args.wheel_path:
         if cibw_cpu.startswith("mips"):
             pip_packages.append("wheel")
-            install_lib = 'bash "/pypdfium2/utils/enforce_install.sh" "$1"'
+            lib_install = 'bash "/pypdfium2/utils/enforce_install.sh" "$1"'
         else:
-            install_lib = 'pip install "$1"'
+            lib_install = 'pip install "$1"'
         if args.image == "manylinux2014":
             pip_packages.append("pytest")
     else:
         pip_packages += ("setuptools", "packaging", "wheel", "build", "pytest")
-        install_lib = 'pip install --no-build-isolation -v .'
+        lib_install = 'pip install --no-build-isolation -v .'
     
-    install_pip_pkgs = ('pip install ' + " ".join(pip_packages)) if pip_packages else ""
-    script = SCRIPT_TEMPLATE % dict(
-        install_sys_pkgs = install_sys_pkgs,
-        install_pip_pkgs = install_pip_pkgs,
-        install_lib = install_lib,
-    )
+    pip_install = ('pip install ' + " ".join(pip_packages)) if pip_packages else ""
+    script = SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:/pypdfium2", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.wheel_path:
         args.wheel_path = Path("/pypdfium2") / args.wheel_path
