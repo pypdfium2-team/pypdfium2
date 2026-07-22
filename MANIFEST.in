@@ -3,23 +3,23 @@
 
 # MANIFEST.in defines the files to include in an sdist. sdists are also the starting point for wheels.
 # Additional files may be included using setuptools (e.g. package_data, license_files)
-
 # We want this to be a tight ruleset, i.e. only include the minimum of files we actually need for packaging/installation.
 # Note: If setuptools-scm is installed, it will include all files checked into version control, and as of this writing, it is not possible to opt out: https://github.com/pypa/setuptools_scm/issues/190
 
-# Include library and setup sources
-recursive-include src/pypdfium2 *.py
+# We do not need to explicitly include anything src/ here - other setup include rules take care of that.
+
+# Prevent pypdfium2_raw's data files from accidentally landing in an sdist.
+# This does not prevent them from landing in wheels, because they are generated during setup and enrolled as data files with setuptools.
+recursive-exclude src/pypdfium_raw *
+# For some reason, the above recursive-exclude does not catch the bindings
+exclude src/pypdfium2_raw/bindings.py
+include src/pypdfium2_raw/__init__.py
+include src/pypdfium2_raw/version.py
+
 recursive-include setupsrc *.py
 recursive-include patches *
 include autorelease/record.json
 include autorelease/bindings.py
-
-recursive-exclude src/pypdfium_raw *
-# For some reason, the above recursive-exclude does not catch the bindings
-# This does not prevent bindings from landing in wheels (they are enrolled as data file), it prevents them from accidentally ending up in an sdist.
-exclude src/pypdfium2_raw/bindings.py
-include src/pypdfium2_raw/__init__.py
-include src/pypdfium2_raw/version.py
 
 # Include all of licenses in an sdist (also wheel licenses), since we may build a wheel from the sdist
 recursive-include LICENSES/ *
