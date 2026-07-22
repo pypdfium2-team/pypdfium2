@@ -116,7 +116,7 @@ def main():
         install_lib = INSTALL_FROM_SRC
     
     script = SCRIPT_TEMPLATE % dict(install_pkgs=install_pkgs, install_lib=install_lib.strip())
-    docker_cmd = ["docker", "run", "--security-opt", "label=disable", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell]
+    docker_cmd = ["docker", "run", "--security-opt", "label=disable", "-i", "--rm", "-v", f"{ProjectDir}:/pypdfium2", *docker_flags, container, shell, "-s"]
     if args.wheel_path:
         docker_cmd += ["--", args.wheel_path]
     
