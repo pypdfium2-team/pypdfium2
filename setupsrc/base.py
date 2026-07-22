@@ -789,20 +789,16 @@ def build_pdfium_bindings(version, **kwargs):
 
 
 def clean_platfiles():
-    
-    deletables = [
-        ProjectDir / "build",
-        ModuleDir_Raw / BindingsFN,
-        ModuleDir_Raw / VersionFN,
+    delete_groups = [
+        (ModuleDir_Raw/BindingsFN, ModuleDir_Raw/VersionFN),
+        *(ModuleDir_Raw.glob(pat) for pat in LIBNAME_GLOBS)
     ]
-    for pattern in LIBNAME_GLOBS:
-        deletables += ModuleDir_Raw.glob(pattern)
-    
-    for fp in deletables:
-        if fp.is_file():
-            fp.unlink()
-        elif fp.is_dir():
-            shutil.rmtree(fp)
+    for iterable in delete_groups:
+        for fp in iterable:
+            if fp.is_file():
+                fp.unlink()
+            elif fp.is_dir():
+                shutil.rmtree(fp)
 
 
 def parse_pl_spec(pl_spec):

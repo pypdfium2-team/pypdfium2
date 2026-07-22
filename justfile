@@ -52,10 +52,11 @@ craft *args:
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 
+# see the notes in craft.py for why clearing egg-info and build cache is essential
+pkg platform='' *args='-w':
+	rm -rf pypdfium2.egg-info/ build/
+	PDFIUM_PLATFORM={{platform}} python3 -m build -xn {{args}}
 sdist: (craft '--sdist')
-sdist-simple:
-	# See the notes in craft.py for why removing previous .egg-info is essential
-	rm -rf pypdfium2.egg-info/
-	PDFIUM_PLATFORM=sdist python3 -m build -sxn
+sdist-unassisted: (pkg 'sdist' '-s')
 
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck

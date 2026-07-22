@@ -81,8 +81,18 @@ def _build_pl_suffix(version, use_v8):
     return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
 
 def _run_pypi_build(caller_args):
-    # -nx: --no-isolation --skip-dependency-check
     assert build_module, "Module 'build' is not importable. Cannot craft PyPI packages."
+    
+    # To avoid file inclusion bugs, you really wanna get rid of any previous .egg-info before ever building an sdist.
+    # Let's say you accidentally did `python3 -m build -sxn`, then running `PDFIUM_PLATFORM=sdist python3 -m build -sxn` will NOT fix file inclusion UNLESS the previous pypdfium2.egg-info is removed. (At least, that is the case with the author's current setup dependencies as of this writing.)
+    # This can get extremely confusing when working on setup.py / MANIFEST.in include rules.
+    rmtree(ProjectDir/"pypdfium2.egg-info")
+    
+    # Likewise, clearing the build cache is essential for wheel builds to avoid pulling in files from the previous build.
+    # To be on the safe side, we clear both pypdfium2.egg-info/ and build/ before either type of build (sdist or wheel).
+    rmtree(ProjectDir/"build")
+    
+    # -nx: --no-isolation --skip-dependency-check
     with tmp_cwd_context(ProjectDir):
         build_module.main([str(ProjectDir), "-nx", *caller_args])
 
@@ -92,12 +102,6 @@ def main_pypi(args):
     assert args.sdist or args.wheels
     
     if args.sdist:
-        
-        # To avoid file inclusion bugs, you really wanna get rid of any previous .egg-info before ever building an sdist.
-        # Let's say you accidentally did `python3 -m build -sxn`, then running `PDFIUM_PLATFORM=sdist python3 -m build -sxn` will NOT fix file inclusion UNLESS the previous pypdfium2.egg-info is removed. (At least, that is the case with the author's current setup depenencies as of this writing.)
-        # This can get extremely confusing when working on setup.py / MANIFEST.in include rules.
-        rmtree(ProjectDir/"pypdfium2.egg-info")
-        
         os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
         helpers_info = get_helpers_info()
         with tmp_ctypesgen_pin():
@@ -119,7 +123,7 @@ def main_pypi(args):
         for plat in args.platforms:
             os.environ[PlatSpec_EnvVar] = plat + suffix
             _run_pypi_build(["--wheel"])
-            clean_platfiles()
+        clean_platfiles()
 
 
 def main():
