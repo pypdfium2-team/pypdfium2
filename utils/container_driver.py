@@ -37,34 +37,32 @@ PLATFORM_CPU_MAP = {
 # loong64, mips64le, ppc64le, riscv64, s390x
 
 
-def _get_container(image, os_class, cibw_cpu):
-    docker_cpu = DOCKER_CPU_MAP.get(cibw_cpu, cibw_cpu)
+def _get_container(image, os_class, cibw_cpu, docker_cpu):
     prefix = f"ghcr.io/" if docker_cpu == "loong64" else ""
     if image == "debian":
         assert os_class == "manylinux"
         which_debian = "bookworm" if docker_cpu == "mips64le" else "trixie"
-        return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", _DEBIAN_CMD, "bash"
+        return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", "bash", _DEBIAN_CMD
     elif image == "manylinux2014":
         # manylinux2014 is useful to test both python 3.6 and glibc 2.17 compatibility in one go
         assert os_class == "manylinux"
-        return f"quay.io/pypa/manylinux2014_{cibw_cpu}", _RHEL_CMD, "bash"
+        return f"quay.io/pypa/manylinux2014_{cibw_cpu}", "bash", _RHEL_CMD
     elif image == "alpine":
         assert os_class == "musllinux"
-        return f"{prefix}{docker_cpu}/alpine:3", _ALPINE_CMD, "sh"
+        return f"{prefix}{docker_cpu}/alpine:3", "sh", _ALPINE_CMD
     else:
         assert False, os_class
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description = "Install and test pypdfium2 in docker container",
-    )
-    parser.add_argument("target")
-    parser.add_argument("--image")
-    parser.add_argument("-w", "--wheel-path")
-    args = parser.parse_args(sys.argv[1:])
-    return args
+def get_initial_info(args, os_class, cibw_cpu):
+    platform_cpu = PLATFORM_CPU_MAP.get(cibw_cpu, cibw_cpu)
+    docker_cpu = DOCKER_CPU_MAP.get(cibw_cpu, cibw_cpu)
+    docker_flags = ("--platform", f"linux/{platform_cpu}")
+    return docker_flags, *_get_container(args.image, os_class, cibw_cpu, docker_cpu)
 
+
+MountPoint = "/projects/pypdfium2"
+ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
 
 SCRIPT_TEMPLATE = """\
 set -exuo pipefail
@@ -82,7 +80,34 @@ pypdfium2
 python3 -m pytest tests/
 """
 
-ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
+def write_script(args, cibw_cpu, MountPoint, sys_install):
+    pip_packages = []
+    if args.wheel_path:
+        if cibw_cpu.startswith("mips"):
+            pip_packages.append("wheel")
+            lib_install = f'bash "{MountPoint}/utils/enforce_install.sh" "$1"'
+        else:
+            lib_install = 'pip install "$1"'
+        if args.image == "manylinux2014":
+            pip_packages.append("pytest")
+    else:
+        pip_packages += ("setuptools", "packaging", "wheel", "build", "pytest")
+        lib_install = 'pip install --no-build-isolation -v .'
+    
+    pip_install = ('pip install ' + " ".join(pip_packages)) if pip_packages else ""
+    return SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description = "Install and test pypdfium2 in docker container",
+    )
+    parser.add_argument("target")
+    parser.add_argument("--image")
+    parser.add_argument("-w", "--wheel-path")
+    args = parser.parse_args(sys.argv[1:])
+    return args
+
 
 def main():
     
@@ -93,32 +118,15 @@ def main():
     
     os_class, cibw_cpu = args.target.split("_", maxsplit=1)
     cibw_cpu = {"loongarch64": "loong64"}.get(cibw_cpu, cibw_cpu)
-    platform_cpu = PLATFORM_CPU_MAP.get(cibw_cpu, cibw_cpu)
-    docker_flags = ("--platform", f"linux/{platform_cpu}")
     if not args.image:
         args.image = {"manylinux": "debian", "musllinux": "alpine"}[os_class]
     
-    container, sys_install, shell = _get_container(args.image, os_class, cibw_cpu)
-    mountpoint = "/projects/pypdfium2"
-    pip_packages = []
-    if args.wheel_path:
-        if cibw_cpu.startswith("mips"):
-            pip_packages.append("wheel")
-            lib_install = f'bash "{mountpoint}/utils/enforce_install.sh" "$1"'
-        else:
-            lib_install = 'pip install "$1"'
-        if args.image == "manylinux2014":
-            pip_packages.append("pytest")
-    else:
-        pip_packages += ("setuptools", "packaging", "wheel", "build", "pytest")
-        lib_install = 'pip install --no-build-isolation -v .'
+    docker_flags, container, shell, sys_install = get_initial_info(args, os_class, cibw_cpu)
+    script = write_script(args, cibw_cpu, MountPoint, sys_install)
     
-    pip_install = ('pip install ' + " ".join(pip_packages)) if pip_packages else ""
-    script = SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
-    
-    docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{mountpoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
+    docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{MountPoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.wheel_path:
-        wheel_path = str(Path(mountpoint)/args.wheel_path)
+        wheel_path = str(Path(MountPoint)/args.wheel_path)
         docker_cmd += ["--", wheel_path]
     
     log(docker_cmd)
