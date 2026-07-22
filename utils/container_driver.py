@@ -70,13 +70,13 @@ SCRIPT_TEMPLATE = """\
 set -exuo pipefail
 
 %(sys_install)s
-VENV_DIR="/testenv"
+VENV_DIR="/projects/testenv"
 python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
 python3 -m pip install -U pip
 %(pip_install)s
-cd /pypdfium2
+cd /projects/pypdfium2
 %(lib_install)s
 pypdfium2
 python3 -m pytest tests/
@@ -99,11 +99,12 @@ def main():
         args.image = {"manylinux": "debian", "musllinux": "alpine"}[os_class]
     
     container, sys_install, shell = _get_container(args.image, os_class, cibw_cpu)
+    mountpoint = "/projects/pypdfium2"
     pip_packages = []
     if args.wheel_path:
         if cibw_cpu.startswith("mips"):
             pip_packages.append("wheel")
-            lib_install = 'bash "/pypdfium2/utils/enforce_install.sh" "$1"'
+            lib_install = f'bash "{mountpoint}/utils/enforce_install.sh" "$1"'
         else:
             lib_install = 'pip install "$1"'
         if args.image == "manylinux2014":
@@ -115,10 +116,10 @@ def main():
     pip_install = ('pip install ' + " ".join(pip_packages)) if pip_packages else ""
     script = SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
     
-    docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:/pypdfium2", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
+    docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{mountpoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.wheel_path:
-        args.wheel_path = Path("/pypdfium2") / args.wheel_path
-        docker_cmd += ["--", str(args.wheel_path)]
+        wheel_path = str(Path(mountpoint)/args.wheel_path)
+        docker_cmd += ["--", wheel_path]
     
     log(docker_cmd)
     log(script)
