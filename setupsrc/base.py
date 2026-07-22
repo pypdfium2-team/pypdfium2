@@ -137,6 +137,7 @@ class PlatNames:
 PdfiumBinariesMap = {
     PlatNames.darwin_x64:       "mac-x64",
     PlatNames.darwin_arm64:     "mac-arm64",
+    PlatNames.darwin_univ2:     "mac-univ",
     PlatNames.windows_x64:      "win-x64",
     PlatNames.windows_x86:      "win-x86",
     PlatNames.windows_arm64:    "win-arm64",
@@ -145,14 +146,13 @@ PdfiumBinariesMap = {
     PlatNames.linux_arm64:      "linux-arm64",
     PlatNames.linux_arm32:      "linux-arm",
     PlatNames.linux_ppc64le:    "linux-ppc64",
-    PlatNames.android_arm64:    "android-arm64",
-    PlatNames.android_arm32:    "android-arm",
     PlatNames.linux_mips64le:   "linux-mips64el",
     PlatNames.linux_mipsle:     "linux-mipsel",
     PlatNames.linux_musl_x64:   "linux-musl-x64",
     PlatNames.linux_musl_x86:   "linux-musl-x86",
     PlatNames.linux_musl_arm64: "linux-musl-arm64",
-    PlatNames.darwin_univ2:     "mac-univ",
+    PlatNames.android_arm64:    "android-arm64",
+    PlatNames.android_arm32:    "android-arm",
     PlatNames.android_x64:      "android-x64",
     PlatNames.android_x86:      "android-x86",
     PlatNames.ios_arm64_dev:    "ios-device-arm64",
@@ -789,16 +789,16 @@ def build_pdfium_bindings(version, **kwargs):
 
 
 def clean_platfiles():
-    delete_groups = [
+    delete_groups = (
         (ModuleDir_Raw/BindingsFN, ModuleDir_Raw/VersionFN),
         *(ModuleDir_Raw.glob(pat) for pat in LIBNAME_GLOBS)
-    ]
-    for iterable in delete_groups:
-        for fp in iterable:
-            if fp.is_file():
-                fp.unlink()
-            elif fp.is_dir():
-                shutil.rmtree(fp)
+    )
+    delete_paths = (fp for group in delete_groups for fp in group)
+    for fp in delete_paths:
+        if fp.is_file():
+            fp.unlink()
+        elif fp.is_dir():
+            shutil.rmtree(fp)
 
 
 def parse_pl_spec(pl_spec):

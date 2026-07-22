@@ -84,7 +84,7 @@ def _run_pypi_build(caller_args):
     assert build_module, "Module 'build' is not importable. Cannot craft PyPI packages."
     
     # To avoid file inclusion bugs, you really wanna get rid of any previous .egg-info before ever building an sdist.
-    # Let's say you accidentally did `python3 -m build -sxn`, then running `PDFIUM_PLATFORM=sdist python3 -m build -sxn` will NOT fix file inclusion UNLESS the previous pypdfium2.egg-info is removed. (At least, that is the case with the author's current setup dependencies as of this writing.)
+    # Let's say you accidentally did `python3 -m build -sxn`, then running `PDFIUM_PLATFORM=sdist python3 -m build -sxn` will NOT fix file inclusion UNLESS the previous pypdfium2.egg-info is removed. (At least, that's the case with the author's setup dependencies as of this writing.)
     # This can get extremely confusing when working on setup.py / MANIFEST.in include rules.
     rmtree(ProjectDir/"pypdfium2.egg-info")
     
