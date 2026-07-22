@@ -60,10 +60,7 @@ def parse_args():
     )
     parser.add_argument("target")
     parser.add_argument("--image")
-    parser.add_argument(
-        "-w", "--wheel-path",
-        type = lambda p: Path("/pypdfium2") / p,
-    )
+    parser.add_argument("-w", "--wheel-path")
     args = parser.parse_args(sys.argv[1:])
     return args
 
@@ -119,7 +116,8 @@ def main():
     script = SCRIPT_TEMPLATE % dict(install_pkgs=install_pkgs, install_lib=install_lib.strip())
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:/pypdfium2", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.wheel_path:
-        docker_cmd += ["--", args.wheel_path]
+        args.wheel_path = Path("/pypdfium2") / args.wheel_path
+        docker_cmd += ["--", str(args.wheel_path)]
     
     log(docker_cmd)
     log(script)
