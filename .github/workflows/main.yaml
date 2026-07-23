@@ -155,7 +155,7 @@ jobs:
       - name: Build & test sdist
         run: |
           python3 setupsrc/craft.py --sdist
-          python3 utils/multitest.py -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
+          python3 utils/multitest.py --venv -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
         env:
           PY_VERS: ${{ inputs.py_vers }}
       

@@ -32,7 +32,7 @@ runs:
     - name: Test wheel on host
       if: ${{ inputs.test_on_host }}
       shell: bash
-      run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv
+      run: python3 utils/multitest.py --venv -w dist/*.whl --py-vers $PY_VERS
       env:
         PY_VERS: "${{ inputs.py_vers }}"
         WINDOWS_32BIT: "${{ inputs.windows_32bit && 1 || 0 }}"
@@ -41,7 +41,7 @@ runs:
       if: ${{ startsWith(inputs.runner_os, 'macos-') && !endsWith(inputs.runner_os, '-intel') && inputs.mac_consider_rosetta }}
       shell: bash
       # assuming macOS python is universal (it should be)
-      run: python3 utils/multitest.py -w dist/*.whl --py-vers $PY_VERS --venv --prefix "arch -x86_64"
+      run: python3 utils/multitest.py --venv -w dist/*.whl --py-vers $PY_VERS --prefix "arch -x86_64"
       env:
         PY_VERS: "${{ inputs.py_vers }}"
     
