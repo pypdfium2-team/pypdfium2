@@ -21,7 +21,7 @@ def _install_dep(exename, reqfile=None, cooldown=True):  # pkgname=None
     
     log(f"- {exename} not found, installing...")
     env = os.environ.copy()
-    env["PIP_UPLOADED_PRIOR_TO"] = "P8D" if cooldown else ""
+    env["PIP_UPLOADED_PRIOR_TO"] = "P8D" if cooldown else "P0D"
     run_cmd([sys.executable, "-m", "pip", "install", *pkg_args], env=env, cwd=None)
 
 def install_buildtools():
