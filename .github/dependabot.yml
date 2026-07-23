@@ -8,9 +8,9 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "quarterly"
     cooldown:
-      default-days: 8
+      default-days: 12
     groups:
       actions:
         patterns:
