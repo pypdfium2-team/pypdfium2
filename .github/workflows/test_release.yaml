@@ -21,10 +21,12 @@ jobs:
         # stick with ubuntu-24.04 for now so we can keep testing python 3.8
         os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-arm']
         py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
-        exclude:
-          # `python3` executable is unavailable with windows-latest + 3.8 for some reason
+        include:
+          # on windows with python 3.8, the `python3` executable does not seem to exit for some reason
           - os: windows-latest
             py: '3.8'
+            initial_python: python
+        exclude:
           # not available with setup-python action
           - os: windows-11-arm
             py: '3.8'
@@ -53,6 +55,7 @@ jobs:
           runner_os: ${{ matrix.os }}
           pip_install: -U -r req/converters.txt -r req/test.txt
           pip_install_hot: --pre pypdfium2
+          initial_python: ${{ matrix.initial_python || 'python3' }}
       
       - name: Check out the right tag
         run: |
