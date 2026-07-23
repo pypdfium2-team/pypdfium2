@@ -60,10 +60,10 @@ archprefix = []
 if args.prefix:
     archprefix = shlex.split(args.prefix)
 
-def run(cmd):
+def run(cmd, **kwargs):
     cmd = archprefix + cmd
     log(cmd)
-    subprocess.run(cmd, check=True, cwd=PROJECT_DIR)
+    subprocess.run(cmd, check=True, cwd=PROJECT_DIR, **kwargs)
 
 PyExeMap = _get_python_exe_map()
 
@@ -82,13 +82,14 @@ for py_ver in reversed(args.py_vers):
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
         run([python, "-m", "pip", "install", "-U", "pip"])
-        # NB: Python 3.8's max pip is 25.0.1, which silently ignores this option
-        run([python, "-m", "pip", "config", "set", "--site", "install.uploaded-prior-to", "P8D"])
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
     if archprefix:
         run([python, "-c", "import platform as p; print(p.machine())"])
     
+    # NB: Python 3.8's max pip is 25.0.1, which silently ignores this option
+    # Cooldown does not affect local or @git+ installs, but it matters for possible PyPI dependencies thereof.
+    os.environ["PIP_UPLOADED_PRIOR_TO"] = "P8D"
     run([python, "-m", "pip", "install", args.wheel_path])
     run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
     try:
