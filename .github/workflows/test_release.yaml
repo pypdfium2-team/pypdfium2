@@ -4,13 +4,6 @@
 name: Test PyPI Release
 on:
   workflow_dispatch:
-    inputs:
-      index_url:
-        type: choice
-        default: 'https://pypi.org/simple'
-        options:
-          - 'https://pypi.org/simple'
-          - 'https://test.pypi.org/simple'
 
 defaults:
   run:
@@ -40,6 +33,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
@@ -49,17 +48,12 @@ jobs:
         uses: ./.github/actions/install_step
         with:
           pip_install: -U -r req/converters.txt -r req/test.txt
-          pip_install_hot: --pre pypdfium2 --index-url "${{ inputs.index_url }}"
+          pip_install_hot: --pre pypdfium2
       
-      - name: Get pypdfium2 version
-        id: version
-        run: python3 -c "from pypdfium2.version import *; print(f'version={PYPDFIUM_INFO.tag}')" >> $GITHUB_OUTPUT
-      
-      - name: Check out pypdfium2 ${{ steps.version.outputs.version }} (shallow)
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-          ref: ${{ steps.version.outputs.version }}
+      - name: Check out the right tag
+        run: |
+          TAG=$(python3 -c "from pypdfium2.version import *; print(f'version={PYPDFIUM_INFO.tag}')")
+          git checkout "$TAG"
       
       - name: Run tests
         run: python3 -m pytest tests/
