@@ -36,9 +36,12 @@ runs:
     - name: Install with pip (cool)
       if: ${{ inputs.pip_install }}
       shell: bash
-      run: python3 -m pip install --uploaded-prior-to P8D $PIP_INSTALL
+      run: python3 -m pip install $PIP_INSTALL
       env:
         PIP_INSTALL: ${{ inputs.pip_install }}
+        # With some older versions of Python (e.g. 3.8), the max available pip version is incapable of dependency cooldown.
+        # Since we still want to use these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to so the cooldown is just ignored if pip is too old.
+        PIP_UPLOADED_PRIOR_TO: P8D
     
     - name: Install with pip (hot)
       if: ${{ inputs.pip_install_hot }}
@@ -49,4 +52,5 @@ runs:
     
     - name: Write cooldown to config
       shell: bash
+      # NB: Like PIP_UPLOADED_PRIOR_TO, this will be silently ignored if pip is too old.
       run: python3 -m pip config set install.uploaded-prior-to P8D
