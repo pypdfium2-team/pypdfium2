@@ -42,7 +42,7 @@ jobs:
             # ldd /usr/local/lib/libopenjp2.so /usr/local/lib/libabsl_strings.so
             
             python3 -m venv .venv --system-site-packages
-            export PATH="${PWD}/.venv/bin/${PATH}"
+            export PATH="${PWD}/.venv/bin/:${PATH}"
             
             # facultative: set LD_PRELOAD just on bindings compile time so library loading will work. at runtime, workaround code in pypdfium2_raw's __init__.py takes over.
             export LD_PRELOAD="/usr/local/lib/libabsl_strings.so:/usr/local/lib/libopenjp2.so"
