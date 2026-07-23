@@ -47,6 +47,6 @@ runs:
       env:
         PIP_INSTALL_HOT: ${{ inputs.pip_install_hot }}
     
-    - name: Define global cooldown
+    - name: Write cooldown to config
       shell: bash
       run: python3 -m pip config set install.uploaded-prior-to P8D
