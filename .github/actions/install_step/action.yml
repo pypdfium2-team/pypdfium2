@@ -21,7 +21,7 @@ runs:
     
     - name: Create venv
       shell: bash
-      run: |
+      run: |  # zizmor: ignore[github-env]
         $PYTHON -m venv .venv
         echo "${PWD}/.venv/bin" >> "$GITHUB_PATH"
       env:
