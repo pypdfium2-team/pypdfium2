@@ -5,6 +5,9 @@ name: 'Install'
 description: 'Install pip dependencies'
 
 inputs:
+  runner_os:
+    description: 'Runner OS'
+    default: ''
   pip_install:
     description: 'Arguments to pip install'
     default: ''
@@ -23,9 +26,10 @@ runs:
       shell: bash
       run: |  # zizmor: ignore[github-env]
         $PYTHON -m venv .venv
-        echo "${PWD}/.venv/bin" >> "$GITHUB_PATH"
+        echo "${PWD}/.venv/${BIN_DIR_NAME}" >> "$GITHUB_PATH"
       env:
         PYTHON: ${{ inputs.initial_python }}
+        BIN_DIR_NAME: ${{ startsWith(inputs.runner_os, 'windows-') && 'Scripts' || 'bin' }}
     
     - name: Update pip itself
       shell: bash

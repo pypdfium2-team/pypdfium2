@@ -69,6 +69,7 @@ jobs:
       - name: Create venv & install pip packages
         uses: ./.github/actions/install_step
         with:
+          runner_os: ${{ inputs.runner_os }}
           pip_install: -U -r req/setup.txt
       
       - name: Build wheel

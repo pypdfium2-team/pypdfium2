@@ -22,7 +22,7 @@ jobs:
         os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-arm']
         py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
         exclude:
-          # not supported by setup-python action
+          # not available with setup-python action
           - os: windows-11-arm
             py: '3.8'
           # - os: windows-11-arm
@@ -47,6 +47,7 @@ jobs:
       - name: Create venv & install pip packages
         uses: ./.github/actions/install_step
         with:
+          runner_os: ${{ matrix.os }}
           pip_install: -U -r req/converters.txt -r req/test.txt
           pip_install_hot: --pre pypdfium2
       
