@@ -60,4 +60,6 @@ jobs:
           git checkout "$TAG"
       
       - name: Run tests
-        run: python3 -m pytest tests/
+        run: |
+          pypdfium2 --version
+          python3 -m pytest tests/

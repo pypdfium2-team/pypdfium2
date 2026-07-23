@@ -67,7 +67,7 @@ python3 -m pip install -U pip
 %(pip_install)s
 cd /projects/pypdfium2
 %(lib_install)s
-pypdfium2
+pypdfium2 --version
 python3 -m pytest tests/
 """
 
