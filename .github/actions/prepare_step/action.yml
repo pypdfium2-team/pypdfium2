@@ -15,12 +15,6 @@ inputs:
   py_arch:
     description: 'Passthrough to architecture input of setup-python'
     default: ''
-  pip_install:
-    description: 'Passthrough to pip install.'
-    default: ''
-  pip_install_hot:
-    description: 'Passthrough to pip install (without cooldown).'
-    default: ''
 
 runs:
   using: 'composite'
@@ -53,10 +47,3 @@ runs:
       with:
         python-version-file: '.python-version'
         architecture: ${{ inputs.py_arch }}
-    
-    - name: Create venv & install pip packages
-      if: ${{ inputs.pip_install }}
-      uses: ./.github/actions/install_step
-      with:
-        pip_install: ${{ inputs.pip_install }}
-        pip_install_hot: ${{ inputs.pip_install_hot }}

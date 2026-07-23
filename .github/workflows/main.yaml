@@ -150,6 +150,10 @@ jobs:
         with:
           replicate_tag: ${{ needs.prepare.outputs.version }}
           py_vers: ${{ inputs.py_vers }}
+      
+      - name: Create venv & install pip packages
+        uses: ./.github/actions/install_step
+        with:
           pip_install: -U -r req/setup.txt
       
       - name: Build & test sdist
