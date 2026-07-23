@@ -27,7 +27,7 @@ runs:
       run: |  # zizmor: ignore[github-env]
         $INITIAL_PYTHON -m venv .venv
         VENV_BIN="${PWD}/.venv/${BIN_DIR_NAME}"
-        # Confirm we got VENV_BIN right, or we might risk silently falling for system-level python.
+        # Confirm we got VENV_BIN right, or we might silently fall for system-level python
         $VENV_BIN/python3 --version
         echo "$VENV_BIN" >> "$GITHUB_PATH"
       env:
