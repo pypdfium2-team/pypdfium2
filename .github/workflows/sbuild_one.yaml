@@ -77,6 +77,7 @@ jobs:
         with:
           runner_os: ${{ inputs.runner_os }}
           pip_install: -U -r req/setup.txt
+          # gn-dist is our own project (also maintained within pypdfium2-team org) which must be exempted from dependency cooldown. When we build a new version and update the pin, we want that update to unconditionally take effect.
           pip_install_hot: -r req/gn.txt
       
       - name: Update package list
