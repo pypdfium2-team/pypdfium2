@@ -62,6 +62,7 @@ VENV_DIR="/projects/testenv"
 python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
+python3 -m pip config set install.uploaded-prior-to P8D
 python3 -m pip install -U pip
 %(pip_install)s
 cd /projects/pypdfium2

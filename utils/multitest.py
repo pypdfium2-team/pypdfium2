@@ -81,6 +81,8 @@ for py_ver in reversed(args.py_vers):
         run([python, "-m", "venv", venv_name])
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
+        run([python, "-m", "pip", "install", "-U", "pip"])
+        run([python, "-m", "pip", "config", "set", "install.uploaded-prior-to", "P8D"])
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
     if archprefix:

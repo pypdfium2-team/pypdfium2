@@ -1,17 +1,18 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import os
 import re
 import shutil
 from base import *  # local
 
 
-def _install_dep(exename, reqfile=None):  # pkgname=None
+def _install_dep(exename, reqfile=None, cooldown=True):  # pkgname=None
     
     if reqfile:
-        install_args = ("-r", str(reqfile))
+        pkg_args = ("-r", str(reqfile))
     else:
-        install_args = (exename, )  # (pkgname or exename, )
+        pkg_args = (exename, )
     
     which_exe = shutil.which(exename)
     if which_exe:
@@ -19,14 +20,16 @@ def _install_dep(exename, reqfile=None):  # pkgname=None
         return
     
     log(f"- {exename} not found, installing...")
-    run_cmd([sys.executable, "-m", "pip", "install", *install_args], cwd=None)
+    env = os.environ.copy()
+    env["PIP_UPLOADED_PRIOR_TO"] = "P8D" if cooldown else ""
+    run_cmd([sys.executable, "-m", "pip", "install", *pkg_args], env=env, cwd=None)
 
 def install_buildtools():
     log("Check build tool dependencies...")
     # https://github.com/scikit-build/ninja-python-distributions
     _install_dep("ninja")
     # https://github.com/pypdfium2-team/gn-dist/
-    _install_dep("gn", reqfile=ProjectDir/"req"/"gn.txt")
+    _install_dep("gn", reqfile=ProjectDir/"req"/"gn.txt", cooldown=False)
 
 def get_clang_version(clang_root):
     from packaging.version import Version

@@ -42,7 +42,11 @@ jobs:
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.14'
-          pip-install: -r req/docs.txt
+      
+      - name: Install pip packages
+        uses: ./.github/actions/install_step
+        with:
+          pip_install: -U -r req/docs.txt
       
       - name: Install pypdfium2
         run: python3 -m pip install -v .

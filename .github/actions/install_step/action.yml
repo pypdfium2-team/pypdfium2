@@ -1,0 +1,49 @@
+name: 'Install'
+description: 'Install pip dependencies'
+
+inputs:
+  pip_install:
+    description: 'Arguments to pip install'
+    default: ''
+  pip_install_hot:
+    description: 'Arguments to pip install (before dependency cooldown)'
+    default: ''
+  initial_python:
+    description: 'The initial python executable to use'
+    default: 'python3'
+
+runs:
+  using: 'composite'
+  steps:
+    
+    - name: Create venv
+      shell: bash
+      run: |
+        $PYTHON -m venv .venv
+        echo "${PWD}/.venv/bin" >> "$GITHUB_PATH"
+      env:
+        PYTHON: ${{ inputs.initial_python }}
+    
+    - name: Update pip itself
+      shell: bash
+      run: |
+        which python3
+        python3 -m pip install -U pip
+    
+    - name: Install with pip (cool)
+      if: ${{ inputs.pip_install }}
+      shell: bash
+      run: python3 -m pip install --uploaded-prior-to P8D $PIP_INSTALL
+      env:
+        PIP_INSTALL: ${{ inputs.pip_install }}
+    
+    - name: Install with pip (hot)
+      if: ${{ inputs.pip_install_hot }}
+      shell: bash
+      run: python3 -m pip install $PIP_INSTALL_HOT
+      env:
+        PIP_INSTALL_HOT: ${{ inputs.pip_install_hot }}
+    
+    - name: Define global cooldown
+      shell: bash
+      run: python3 -m pip config set install.uploaded-prior-to P8D

@@ -45,10 +45,13 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       
+      - name: Install pip packages
+        uses: ./.github/actions/install_step
+        with:
+          pip_install: -U -r req/converters.txt -r req/test.txt
+      
       - name: Install pypdfium2 from package index
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U --pre pypdfium2 --index-url "$INDEX_URL"
+        run: python3 -m pip install -U --pre pypdfium2 --index-url "$INDEX_URL"
         env:
           INDEX_URL: ${{ inputs.index_url }}
       
@@ -61,9 +64,6 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ steps.version.outputs.version }}
-      
-      - name: Install/update deps
-        run: python3 -m pip install -U -r req/converters.txt -r req/test.txt
       
       - name: Run tests
         run: python3 -m pytest tests/

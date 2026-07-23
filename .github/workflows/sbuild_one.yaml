@@ -72,6 +72,7 @@ jobs:
           py_vers: ${{ inputs.py_vers }}
           py_arch: ${{ (startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86') && 'x86' || '' }}
           pip_install: -U -r req/setup.txt
+          pip_install_hot: -r req/gn.txt
       
       - name: Update package list
         if: ${{ startsWith(inputs.runner_os, 'ubuntu') && (inputs.target_cpu || endsWith(inputs.runner_os, '-arm')) }}
@@ -91,7 +92,6 @@ jobs:
         if: ${{ startsWith(inputs.runner_os, 'ubuntu') && endsWith(inputs.runner_os, '-arm') }}
         run: |
           sudo apt-get install -y ninja-build  # generate-ninja
-          python3 -m pip install -r req/gn.txt
           #python3 -c "from gn_dist import GN; print(str(GN.parent))" >> $GITHUB_PATH
       
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.

@@ -80,8 +80,12 @@ jobs:
           conda install -y conda-build conda-verify
           git config --global user.email "geisserml@gmail.com"
           git config --global user.name "geisserml"
-          python -m pip install -U pip
-          python -m pip install -U -r req/setup.txt
+      
+      - name: Install pip packages
+        uses: ./.github/actions/install_step
+        with:
+          pip_install: -U -r req/setup.txt
+          initial_python: python
       
       - name: Build package
         run: python conda/craft_conda_pkgs.py "$PACKAGE" $VERSION_PARAM $MAYBE_NEW_ONLY

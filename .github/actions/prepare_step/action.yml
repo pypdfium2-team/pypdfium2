@@ -16,7 +16,7 @@ inputs:
     description: 'Passthrough to architecture input of setup-python'
     default: ''
   pip_install:
-    description: 'Passthrough to pip-install input of setup-python.'
+    description: 'Passthrough to pip install.'
     default: ''
 
 runs:
@@ -50,4 +50,9 @@ runs:
       with:
         python-version-file: '.python-version'
         architecture: ${{ inputs.py_arch }}
-        pip-install: ${{ inputs.pip_install }}
+    
+    - name: Install pip packages
+      if: ${{ inputs.pip_install }}
+      uses: ./.github/actions/install_step
+      with:
+        pip_install: ${{ inputs.pip_install }}
