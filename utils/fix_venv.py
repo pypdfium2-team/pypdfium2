@@ -8,9 +8,12 @@ VENV_BIN_DIR = Path(sys.argv[1]).resolve()
 assert VENV_BIN_DIR.exists()
 
 if sys.platform.startswith("win32"):
-    python_exe = VENV_BIN_DIR/"python"
-    python3_exe = VENV_BIN_DIR/"python3"
-    assert python_exe.exists()
+    python_exe = VENV_BIN_DIR/"python.exe"
+    pip_exe = VENV_BIN_DIR/"pip.exe"
+    python3_exe = VENV_BIN_DIR/"python3.exe"
+    pip3_exe = VENV_BIN_DIR/"pip3.exe"
+    assert python_exe.exists() and pip_exe.exists()
     if not python3_exe.exists():
         python3_exe.symlink_to(python_exe)
-        (VENV_BIN_DIR/"pip3").symlink_to(VENV_BIN_DIR/"pip")
+    if not pip3_exe.exists():
+        pip3_exe.symlink_to(pip_exe)
