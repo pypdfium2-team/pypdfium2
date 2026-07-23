@@ -25,7 +25,6 @@ runs:
     - name: Create venv
       shell: bash
       run: |  # zizmor: ignore[github-env]
-        
         $INITIAL_PYTHON -m venv .venv
         VENV_BIN="${PWD}/.venv/${BIN_DIR_NAME}"
         
@@ -39,7 +38,6 @@ runs:
         $VENV_BIN/pip3 --version
         
         echo "$VENV_BIN" >> "$GITHUB_PATH"
-      
       env:
         INITIAL_PYTHON: ${{ inputs.initial_python }}
         BIN_DIR_NAME: ${{ startsWith(inputs.runner_os, 'windows-') && 'Scripts' || 'bin' }}
