@@ -52,7 +52,7 @@ jobs:
       
       - name: Check out the right tag
         run: |
-          TAG=$(python3 -c "from pypdfium2.version import *; print(PYPDFIUM_INFO.tag)
+          TAG=$(python3 -c "from pypdfium2.version import *; print(PYPDFIUM_INFO.tag)")
           git checkout "$TAG"
       
       - name: Run tests
