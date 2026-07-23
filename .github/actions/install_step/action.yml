@@ -47,7 +47,8 @@ runs:
     - name: Update pip itself
       shell: bash
       run: |
-        which python3  # this should point to the venv
+        # TODO(geisserml) add validation that this actually points to the venv
+        which python3
         python3 -m pip install -U pip
     
     - name: Install with pip (cool)
