@@ -25,17 +25,19 @@ runs:
     - name: Create venv
       shell: bash
       run: |  # zizmor: ignore[github-env]
-        $PYTHON -m venv .venv
-        echo "${PWD}/.venv/${BIN_DIR_NAME}" >> "$GITHUB_PATH"
+        $INITIAL_PYTHON -m venv .venv
+        VENV_BIN="${PWD}/.venv/${BIN_DIR_NAME}"
+        # Confirm we got VENV_BIN right, or we might risk silently falling for system-level python.
+        $VENV_BIN/python3 --version
+        echo "$VENV_BIN" >> "$GITHUB_PATH"
       env:
-        PYTHON: ${{ inputs.initial_python }}
-        # TODO(geisserml) confirm if this distinction is really necessary
+        INITIAL_PYTHON: ${{ inputs.initial_python }}
         BIN_DIR_NAME: ${{ startsWith(inputs.runner_os, 'windows-') && 'Scripts' || 'bin' }}
     
     - name: Update pip itself
       shell: bash
       run: |
-        which python3
+        which python3  # this should point to the venv
         python3 -m pip install -U pip
     
     - name: Install with pip (cool)

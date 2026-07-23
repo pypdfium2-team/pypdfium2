@@ -79,7 +79,6 @@ for py_ver in reversed(args.py_vers):
     if args.venv:
         venv_name = f"testenv_{py_ver}" + ("_emu" if archprefix else "")
         run([python, "-m", "venv", venv_name])
-        # TODO(geisserml) confirm if this distinction is really necessary
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
         run([python, "-m", "pip", "install", "-U", "pip"])
