@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       
-      - name: Install pip packages
+      - name: Create venv & install pip packages
         uses: ./.github/actions/install_step
         with:
           pip_install: -U -r req/converters.txt -r req/test.txt

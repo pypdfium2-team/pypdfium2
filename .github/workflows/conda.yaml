@@ -81,7 +81,7 @@ jobs:
           git config --global user.email "geisserml@gmail.com"
           git config --global user.name "geisserml"
       
-      - name: Install pip packages
+      - name: Create venv & install pip packages
         uses: ./.github/actions/install_step
         with:
           pip_install: -U -r req/setup.txt
