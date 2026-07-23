@@ -29,6 +29,9 @@ runs:
         $INITIAL_PYTHON -m venv .venv
         VENV_BIN="${PWD}/.venv/${BIN_DIR_NAME}"
         
+        # Fix VENV_BIN layout on some systems (windows, cough)
+        $INITIAL_PYTHON utils/fix_venv.py "$VENV_BIN"
+        
         # Confirm we got VENV_BIN right and it has all the usual executables, or we might silently fall for system-level python
         $VENV_BIN/python --version
         $VENV_BIN/pip --version
