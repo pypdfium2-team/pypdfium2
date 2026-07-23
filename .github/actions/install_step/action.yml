@@ -43,10 +43,10 @@ runs:
       shell: bash
       run: python3 -m pip install $PIP_INSTALL
       env:
-        PIP_INSTALL: ${{ inputs.pip_install }}
         # With some older versions of Python (e.g. 3.8), the max available pip version is incapable of dependency cooldown.
         # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to so the cooldown is just ignored if pip is too old.
         PIP_UPLOADED_PRIOR_TO: P8D
+        PIP_INSTALL: ${{ inputs.pip_install }}
     
     - name: Install with pip (hot)
       if: ${{ inputs.pip_install_hot }}
