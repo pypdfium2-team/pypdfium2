@@ -20,7 +20,7 @@ import urllib.request as url_request
 ProjectDir = Path(__file__).resolve().parents[1]
 
 # Add this path to your IDE's search path, e.g. VS Code python.analysis.extraPaths
-sys.path.insert(0, str(ProjectDir/"src"/"pypdfium2_stl"/"shared"))
+sys.path.insert(0, str(ProjectDir/"src"/"pypdfium2_cfg"/"shared"))
 from stl import cached_property
 
 if sys.version_info < (3, 8):

@@ -126,9 +126,9 @@ Internal API
    The following helpers are considered internal, so their API may change any time.
    They are isolated their own namespaces.
 
-pypdfium2_stl
--------------
-.. automodule:: pypdfium2_stl.shared.stl
+pypdfium2_cfg.stl
+-----------------
+.. automodule:: pypdfium2_cfg.shared.stl
 
 pypdfium2.internal
 ------------------

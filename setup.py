@@ -147,8 +147,8 @@ def run_setup(modnames, pl_name, datagen):
         helpers_info = _get_fixed_helpers_info(pl_name)
         kwargs["version"] = merge_tag(helpers_info, mode="py")
         kwargs["package_dir"]["pypdfium2"] = "src/pypdfium2"
-        for sm in ("cli", "cfg", "stl"):
-            kwargs["package_dir"][f"pypdfium2_{sm}"] = f"src/pypdfium2_{sm}"
+        kwargs["package_dir"]["pypdfium2_cfg"] = "src/pypdfium2_cfg"
+        kwargs["package_dir"]["pypdfium2_cli"] = "src/pypdfium2_cli"
         kwargs["package_data"]["pypdfium2"] = (VersionFN, )
         kwargs["entry_points"] = dict(console_scripts=["pypdfium2 = pypdfium2_cli.__main__:cli_main"])
     

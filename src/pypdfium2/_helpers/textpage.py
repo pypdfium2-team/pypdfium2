@@ -10,7 +10,7 @@ import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.pageobjects import PdfTextObj
-from pypdfium2_stl import cached_property
+from pypdfium2_cfg.stl import cached_property
 
 c_double = ctypes.c_double
 logger = logging.getLogger(__name__)
