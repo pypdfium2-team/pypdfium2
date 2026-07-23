@@ -138,7 +138,7 @@ class _DeferredDeps:
     
     @cached_property  # included from base.py
     def deps(self):
-        # TODO get a proper parser for the DEPS file format?
+        # TODO parse out the gn version for later validation?
         deps_content = (PDFIUM_DIR/"DEPS").read_text()
         result = {}
         for field in self.deps_fields:

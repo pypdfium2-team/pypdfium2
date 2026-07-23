@@ -12,8 +12,8 @@ from base import *
 from _build_helpers import *
 
 SBDir = ProjectDir / "sbuild" / "toolchained"
-DepotToolsDir  = SBDir / "depot_tools"
-PDFiumDir      = SBDir / "pdfium"
+DepotToolsDir = SBDir / "depot_tools"
+PDFiumDir = SBDir / "pdfium"
 PDFiumDir_build = PDFiumDir / "build"
 PDFiumOutDir = PDFiumDir / "out" / "Default"
 
