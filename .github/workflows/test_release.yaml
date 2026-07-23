@@ -22,6 +22,9 @@ jobs:
         os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-arm']
         py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
         exclude:
+          # `python3` executable is unavailable with windows-latest + 3.8 for some reason
+          - os: windows-latest
+            py: '3.8'
           # not available with setup-python action
           - os: windows-11-arm
             py: '3.8'

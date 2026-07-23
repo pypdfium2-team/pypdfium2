@@ -29,6 +29,7 @@ runs:
         echo "${PWD}/.venv/${BIN_DIR_NAME}" >> "$GITHUB_PATH"
       env:
         PYTHON: ${{ inputs.initial_python }}
+        # TODO(geisserml) confirm if this distinction is really necessary
         BIN_DIR_NAME: ${{ startsWith(inputs.runner_os, 'windows-') && 'Scripts' || 'bin' }}
     
     - name: Update pip itself
