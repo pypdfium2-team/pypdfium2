@@ -19,7 +19,7 @@ def _install_dep(exename, reqfile=None, cooldown_days=12):  # pkgname=None
         log(f"+ {exename} found at {which_exe}")
         return
     
-    log(f"- {exename} not found, installing...")
+    log(f"- {exename} not found, installing (cooldown: {cooldown_days}d)...")
     env = os.environ.copy()
     extra_args = ()
     env["PIP_UPLOADED_PRIOR_TO"] = "P{}D".format(cooldown_days)
@@ -32,7 +32,7 @@ def install_buildtools():
     # https://github.com/scikit-build/ninja-python-distributions
     _install_dep("ninja")
     # https://github.com/pypdfium2-team/gn-dist/
-    # No cooldown here because gn-dist is our own project (also maintained within pypdfium2-team org) and pinned to an exact version. (This even overrides any user-configured cooldown to avoid breakage if the pin has been recently updated.)
+    # No cooldown here because gn-dist is our own project (also maintained within pypdfium2-team org) and pinned to an exact version. (Even try to override user-configured cooldown to avoid breakage if the pin has been recently updated.)
     _install_dep("gn", reqfile=ProjectDir/"req"/"gn.txt", cooldown_days=0)
 
 def get_clang_version(clang_root):
