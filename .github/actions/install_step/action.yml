@@ -45,10 +45,10 @@ runs:
         INITIAL_PYTHON: ${{ inputs.initial_python }}
         BIN_DIR_NAME: ${{ startsWith(inputs.runner_os, 'windows-') && 'Scripts' || 'bin' }}
     
+    # TODO(geisserml) add validation that `which python3` now actually points to the venv
     - name: Update pip itself
       shell: bash
       run: |
-        # TODO(geisserml) add validation that this actually points to the venv
         which python3
         python3 -m pip install -U pip
     
