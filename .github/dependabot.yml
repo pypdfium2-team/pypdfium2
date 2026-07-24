@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: "quarterly"
     cooldown:
-      default-days: 12
+      default-days: 14
     groups:
       actions:
         patterns:
