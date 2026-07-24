@@ -5,9 +5,6 @@ name: 'Install'
 description: 'Install pip dependencies'
 
 inputs:
-  runner_os:
-    description: 'Runner OS (need to know if it is windows)'
-    default: ''
   pip_install:
     description: 'Arguments to pip install'
     default: ''
@@ -44,10 +41,8 @@ runs:
       shell: bash
       run: |  # zizmor: ignore[github-env]
         $INITIAL_PYTHON -m venv .venv
-        VENV_BIN="${PWD}/.venv/${BIN_DIR_NAME}"
-        
-        # Fix VENV_BIN layout on some systems (windows, cough)
-        $INITIAL_PYTHON utils/fix_venv.py "$VENV_BIN"
+        VENV_BIN=$($INITIAL_PYTHON utils/fix_venv.py .venv)
+        echo "Resolved VENV_BIN to ${VENV_BIN}"
         
         # Confirm we got VENV_BIN right and it has all the usual executables, or we might silently fall for system-level python
         $VENV_BIN/python --version
@@ -58,7 +53,6 @@ runs:
         echo "$VENV_BIN" >> "$GITHUB_PATH"
       env:
         INITIAL_PYTHON: ${{ inputs.initial_python }}
-        BIN_DIR_NAME: ${{ startsWith(inputs.runner_os, 'windows-') && 'Scripts' || 'bin' }}
     
     # TODO(geisserml) Should we try to subject pip itself to a cooldown, too?
     - name: Update pip itself
