@@ -11,15 +11,15 @@ inputs:
   pip_install_hot:
     description: 'Arguments to pip install (without dependency cooldown)'
     default: ''
-  initial_python:
-    description: 'The initial python executable to use'
-    default: 'python3'
   cooldown_days:
     description: 'Dependency cooldown interval'
     default: '12'
   freeze_date:
     description: 'Hard dependency freeze date (overrides cooldown_days)'
     default: ''
+  initial_python:
+    description: 'The initial python executable to use'
+    default: 'python3'
 
 runs:
   using: 'composite'
