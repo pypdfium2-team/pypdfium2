@@ -167,6 +167,7 @@ path = [
     "utils/check.sh",
     "utils/enforce_install.sh",
     "utils/regextract.py",
+    "utils/fix_venv.py",
     "utils/get_cool_date.py",
 ]
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
