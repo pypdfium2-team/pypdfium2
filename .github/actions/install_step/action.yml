@@ -60,11 +60,11 @@ runs:
         INITIAL_PYTHON: ${{ inputs.initial_python }}
         BIN_DIR_NAME: ${{ startsWith(inputs.runner_os, 'windows-') && 'Scripts' || 'bin' }}
     
-    # TODO(geisserml) add validation that `which python3` now actually points to the venv
+    # TODO(geisserml) Should we try to subject pip itself to a cooldown, too?
     - name: Update pip itself
       shell: bash
       run: |
-        which python3
+        which python3  # this should point to the venv
         python3 -m pip install -U pip
     
     - name: Install with pip (cool if pip >= 26)
