@@ -190,7 +190,7 @@ jobs:
           name: conda_package
           path: conda_dist/
       
-      - name: Install deps
+      - name: Install Anaconda client
         run: conda install -y "anaconda-client==1.14.1"
       
       - name: Upload to Anaconda
