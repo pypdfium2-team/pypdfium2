@@ -77,7 +77,7 @@ jobs:
       # here we do not use a venv because we are already in a conda env
       - name: Install dependencies
         run: |
-          conda install -y conda-build conda-verify
+          conda install -y conda-build==26.5.0 conda-verify==3.4.2
           python -VV
           python -m pip install -U pip
           python -m pip install -U -r req/setup.txt
