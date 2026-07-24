@@ -21,7 +21,7 @@ inputs:
     description: 'Dependency cooldown interval'
     default: '12'
   freeze_date:
-    description: 'Hard freeze date (overrides cooldown_days)'
+    description: 'Hard dependency freeze date (overrides cooldown_days)'
     default: ''
 
 runs:
