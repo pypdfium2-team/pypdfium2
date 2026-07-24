@@ -82,6 +82,6 @@ runs:
     - name: Write cooldown to config
       shell: bash
       # NB: Like PIP_UPLOADED_PRIOR_TO, this will be silently ignored if pip is too old.
-      run: python3 -m pip config set --site install.uploaded-prior-to "$COOLDOWN_DATE"
+      run: python3 -m pip config set install.uploaded-prior-to "$COOLDOWN_DATE"
       env:
         COOLDOWN_DATE: ${{ steps.cooldown.outputs.cooldown_date }}
