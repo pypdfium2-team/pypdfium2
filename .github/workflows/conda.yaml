@@ -193,7 +193,7 @@ jobs:
           path: conda_dist/
       
       - name: Install Anaconda client
-        run: conda install -y "anaconda-client==1.14.1"
+        run: conda install -y anaconda-client==1.14.1
       
       - name: Upload to Anaconda
         if: ${{ inputs.actually_publish }}
