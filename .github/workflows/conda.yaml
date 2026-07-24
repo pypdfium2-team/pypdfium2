@@ -74,18 +74,21 @@ jobs:
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
       
-      - name: Prepare
+      # here we do not use a venv because we are already in a conda env
+      - name: Install dependencies
         run: |
-          python -VV
           conda install -y conda-build conda-verify
+          python -VV
+          python -m pip install -U pip
+          python -m pip install -U -r req/setup.txt
+        env:
+          PIP_UPLOADED_PRIOR_TO: P12D
+      
+      # this is needed for craft_conda_pkgs.py, which uses git commands for data file transfer
+      - name: Configure git
+        run: |
           git config --global user.email "geisserml@gmail.com"
           git config --global user.name "geisserml"
-      
-      - name: Create venv & install pip packages
-        uses: ./.github/actions/install_step
-        with:
-          pip_install: -U -r req/setup.txt
-          initial_python: python
       
       - name: Build package
         run: python conda/craft_conda_pkgs.py "$PACKAGE" $VERSION_PARAM $MAYBE_NEW_ONLY

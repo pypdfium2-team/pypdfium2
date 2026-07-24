@@ -98,6 +98,10 @@ jobs:
         with:
           pip_install: -U -r req/check.txt -r req/setup.txt -r req/test.txt
       
+      # confirm that GITHUB_PATH changes persist beyond a composite action
+      - name: Check python executable
+        run: which python3  # this should point to the venv
+      
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
         run: |
@@ -285,7 +289,7 @@ jobs:
         with:
           pip_install: -U -r req/distcheck.txt
           freeze_date: '2026-07-12T10:15:00Z'
-        
+      
       - name: Check artifacts
         run: |
           twine check dist/*
