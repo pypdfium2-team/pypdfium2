@@ -55,7 +55,7 @@ jobs:
           runner_os: ${{ matrix.os }}
           pip_install: -U -r req/converters.txt -r req/test.txt
           # The project itself must be exempted from dependency cooldown, we unconditionally want to be able to test the latest version here, including beta.
-          pip_install_hot: --pre pypdfium2 --no-deps --only-binary ':all:'
+          pip_install_hot: --pre pypdfium2 --only-binary ':all:'
           initial_python: ${{ matrix.initial_python || 'python3' }}
       
       - name: Check out the right tag
