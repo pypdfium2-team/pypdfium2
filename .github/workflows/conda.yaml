@@ -79,10 +79,10 @@ jobs:
         run: |
           conda install -y conda-build==26.5.0 conda-verify==3.4.2
           python -VV
+          export PIP_UPLOADED_PRIOR_TO=$(python utils/get_cool_date.py 3)
           python -m pip install -U pip
+          export PIP_UPLOADED_PRIOR_TO=$(python utils/get_cool_date.py 12)
           python -m pip install -U -r req/setup.txt
-        env:
-          PIP_UPLOADED_PRIOR_TO: P12D
       
       # this is needed for craft_conda_pkgs.py, which uses git commands for data file transfer
       - name: Configure git

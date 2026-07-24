@@ -9,7 +9,7 @@ from pathlib import Path
 from collections import namedtuple
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from base import ProjectDir, log  # local
+from base import ProjectDir, log, get_cool_date  # local
 
 _RHEL_CMD   = "yum install -y python3 python3-pillow python3-numpy"  # python3-pytest
 _DEBIAN_CMD = "apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
@@ -54,7 +54,7 @@ def _get_container(cibw_os, cibw_cpu, docker_cpu, image):
 MountPoint = "/projects/pypdfium2"
 ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
 
-SCRIPT_TEMPLATE = """\
+SCRIPT_TEMPLATE = f"""\
 set -exuo pipefail
 
 %(sys_install)s
@@ -62,8 +62,8 @@ VENV_DIR="/projects/testenv"
 python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
-python3 -m pip install -U pip
-python3 -m pip config set install.uploaded-prior-to P12D
+PIP_UPLOADED_PRIOR_TO="{get_cool_date(3)}" python3 -m pip install -U pip
+python3 -m pip config set install.uploaded-prior-to "{get_cool_date(12)}"
 %(pip_install)s
 cd /projects/pypdfium2
 %(lib_install)s

@@ -30,8 +30,11 @@ runs:
       id: cooldown
       run: |
         COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py "$COOLDOWN_DAYS" "$FREEZE_DATE")
-        echo "Cooldown date is ${COOLDOWN_DATE}"
+        PIP_COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py 3)
+        echo "Cooldown date: ${COOLDOWN_DATE}"
+        echo "Cooldown date for pip itself (may or may not be honored): ${PIP_COOLDOWN_DATE}"
         echo "cooldown_date=${COOLDOWN_DATE}" >> "$GITHUB_OUTPUT"
+        echo "pip_cooldown_date=${PIP_COOLDOWN_DATE}" >> "$GITHUB_OUTPUT"
       env:
         PYTHON: ${{ inputs.initial_python }}
         COOLDOWN_DAYS: ${{ inputs.cooldown_days }}
@@ -54,27 +57,32 @@ runs:
       env:
         INITIAL_PYTHON: ${{ inputs.initial_python }}
     
-    # TODO(geisserml) Should we try to subject pip itself to a cooldown, too?
     - name: Update pip itself
       shell: bash
       run: |
         which python3  # this should point to the venv
         python3 -m pip install -U pip
+      env:
+        # At least *try* to use a (shorter) dependency cooldown for pip itself. However, if the initial pip is < 26, which is not unlikely, this will just be ignored.
+        # NOTE setup-python has the unfortunate habit of auto-updating pip (at least for the main python version), in which case we would already have a non-cooled version of pip. If that happens, this cooldown is rendered useless. To prevent that, we'd have to pin setup-python's initial pip-version. However, the problem that adds complexity is how to deal with unsupported python versions that are stuck with older pip?
+        PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.pip_cooldown_date }}
     
     - name: Install with pip (cool if pip >= 26)
       if: ${{ inputs.pip_install }}
       shell: bash
       run: python3 -m pip install $PIP_INSTALL
       env:
-        # With some older versions of Python (e.g. 3.8), the max available pip version is incapable of dependency cooldown.
-        # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to so the cooldown is just ignored if pip is too old.
+        # With some older versions of Python, the max available pip version is incapable of dependency cooldown (e.g. Python 3.8 / pip 25.0.1).
+        # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to. This means the cooldown will be silently ignored if pip is too old.
+        # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P12D.
         PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.cooldown_date }}
         PIP_INSTALL: ${{ inputs.pip_install }}
     
     - name: Install with pip (hot, no dependencies)
       if: ${{ inputs.pip_install_hot }}
       shell: bash
-      # For safety and predictability, we only install the specified packages here, no runtime or setup dependencies (which should be subjected to cooldown if possible).
+      # For safety and predictability, we only install the specified packages here, no runtime or setup dependencies, which should ideally be subjected to cooldown.
+      # Tip: first install the package cool to get dependencies, then explicitly install the exceptions without cooldown (pinning recommended).
       run: python3 -m pip install --no-deps --no-build-isolation $PIP_INSTALL_HOT
       env:
         PIP_INSTALL_HOT: ${{ inputs.pip_install_hot }}

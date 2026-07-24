@@ -78,15 +78,15 @@ for py_ver in reversed(args.py_vers):
         run([python, "-m", "venv", venv_name])
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
-        run([python, "-m", "pip", "install", "-U", "pip"])
+        # This may or may not be honored (see the notes in install_step/action.yml)
+        env = os.environ.copy()
+        env["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(3)
+        run([python, "-m", "pip", "install", "-U", "pip"], env=env)
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
     if archprefix:
         run([python, "-c", "import platform as p; print(p.machine())"])
     
-    # Cooldown does not affect local or @git+ installs, but it matters for possible PyPI dependencies thereof.
-    # Note: Python 3.8's max pip is 25.0.1, which silently ignores this option.
-    # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P12D.
     os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(12)
     run([python, "-m", "pip", "install", args.wheel_path])
     run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
