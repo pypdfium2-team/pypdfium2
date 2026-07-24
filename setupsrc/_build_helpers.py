@@ -7,7 +7,7 @@ import shutil
 from base import *  # local
 
 
-def _install_dep(exename, reqfile=None, cooldown=True):  # pkgname=None
+def _install_dep(exename, reqfile=None, cooldown_days=8):  # pkgname=None
     
     if reqfile:
         pkg_args = ("-r", str(reqfile))
@@ -21,15 +21,19 @@ def _install_dep(exename, reqfile=None, cooldown=True):  # pkgname=None
     
     log(f"- {exename} not found, installing...")
     env = os.environ.copy()
-    env["PIP_UPLOADED_PRIOR_TO"] = "P8D" if cooldown else "P0D"
-    run_cmd([sys.executable, "-m", "pip", "install", *pkg_args], env=env, cwd=None)
+    extra_args = ()
+    env["PIP_UPLOADED_PRIOR_TO"] = "P{}D".format(cooldown_days)
+    if not cooldown_days:
+        extra_args = ("--no-deps", "--no-build-isolation")
+    run_cmd([sys.executable, "-m", "pip", "install", *extra_args, *pkg_args], env=env, cwd=None)
 
 def install_buildtools():
     log("Check build tool dependencies...")
     # https://github.com/scikit-build/ninja-python-distributions
     _install_dep("ninja")
     # https://github.com/pypdfium2-team/gn-dist/
-    _install_dep("gn", reqfile=ProjectDir/"req"/"gn.txt", cooldown=False)
+    # No cooldown because gn-dist is our own project (also maintained within pypdfium2-team org) and pinned to an exact version. (This even overrides user-configured cooldown to avoid potentially breaking the installation.)
+    _install_dep("gn", reqfile=ProjectDir/"req"/"gn.txt", cooldown_days=0)
 
 def get_clang_version(clang_root):
     from packaging.version import Version
