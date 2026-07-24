@@ -14,6 +14,7 @@ recursive-include src/pypdfium2_raw *.py
 exclude src/pypdfium2_raw/bindings.py
 
 recursive-include setupsrc *.py
+recursive-include utils/spoof *.h
 include autorelease/record.json
 include autorelease/bindings.py
 graft patches
