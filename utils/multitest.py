@@ -89,7 +89,7 @@ for py_ver in reversed(args.py_vers):
     
     # NB: Python 3.8's max pip is 25.0.1, which silently ignores this option
     # Cooldown does not affect local or @git+ installs, but it matters for possible PyPI dependencies thereof.
-    os.environ["PIP_UPLOADED_PRIOR_TO"] = "P8D"
+    os.environ["PIP_UPLOADED_PRIOR_TO"] = "P12D"
     run([python, "-m", "pip", "install", args.wheel_path])
     run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
     try:

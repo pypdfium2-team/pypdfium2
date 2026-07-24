@@ -7,7 +7,7 @@ import shutil
 from base import *  # local
 
 
-def _install_dep(exename, reqfile=None, cooldown_days=8):  # pkgname=None
+def _install_dep(exename, reqfile=None, cooldown_days=12):  # pkgname=None
     
     if reqfile:
         pkg_args = ("-r", str(reqfile))

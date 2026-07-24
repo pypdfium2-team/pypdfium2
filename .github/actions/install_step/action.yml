@@ -13,7 +13,7 @@ inputs:
     default: ''
   cooldown:
     description: 'pip dependency cooldown argument'
-    default: 'P8D'
+    default: 'P12D'
   pip_install_hot:
     description: 'Arguments to pip install (before dependency cooldown)'
     default: ''

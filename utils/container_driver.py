@@ -63,7 +63,7 @@ python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
 python3 -m pip install -U pip
-python3 -m pip config set --site install.uploaded-prior-to P8D
+python3 -m pip config set --site install.uploaded-prior-to P12D
 %(pip_install)s
 cd /projects/pypdfium2
 %(lib_install)s
