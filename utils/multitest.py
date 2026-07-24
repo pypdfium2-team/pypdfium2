@@ -12,7 +12,6 @@ import platform
 import argparse
 import subprocess
 from pathlib import Path
-from datetime import date, timedelta
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import ProjectDir, log, get_cool_date
