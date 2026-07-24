@@ -6,7 +6,7 @@ description: 'Install pip dependencies'
 
 inputs:
   runner_os:
-    description: 'Runner OS'
+    description: 'Runner OS (need to know if it is windows)'
     default: ''
   pip_install:
     description: 'Arguments to pip install'
