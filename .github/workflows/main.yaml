@@ -94,17 +94,16 @@ jobs:
           python-version: '3.14'
       
       - name: Create venv & install pip packages
+        if: ${{ inputs.inc_ver }}
         uses: ./.github/actions/install_step
         with:
           pip_install: -U -r req/check.txt -r req/setup.txt -r req/test.txt
       
-      # confirm that GITHUB_PATH changes persist beyond a composite action
-      - name: Check python executable
-        run: which python3  # this should point to the venv
-      
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
         run: |
+          # confirm that GITHUB_PATH changes persist beyond a composite action
+          which python3  # this should point to the venv
           ./utils/check.sh
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
