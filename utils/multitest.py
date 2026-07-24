@@ -14,18 +14,12 @@ import subprocess
 from pathlib import Path
 from datetime import date, timedelta
 
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
+from base import ProjectDir, log, get_cool_date
 
-UTILS_DIR = Path(__file__).resolve().parent
-PROJECT_DIR = UTILS_DIR.parent
 IS_WINDOWS = sys.platform.startswith("win32")
 PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")
 WINDOWS_32BIT = bool(int( os.environ.get("WINDOWS_32BIT", 0) ))
-
-def log(*args, **kwargs):
-    print(*args, **kwargs, file=sys.stderr)
-
-def get_cool_date(cooldown_days):
-    return (date.today() - timedelta(days=cooldown_days)).isoformat()
 
 
 # work around https://github.com/actions/setup-python/issues/1079
@@ -67,7 +61,7 @@ if args.prefix:
 def run(cmd, **kwargs):
     cmd = archprefix + cmd
     log(cmd)
-    subprocess.run(cmd, check=True, cwd=PROJECT_DIR, **kwargs)
+    subprocess.run(cmd, check=True, cwd=ProjectDir, **kwargs)
 
 PyExeMap = _get_python_exe_map()
 
