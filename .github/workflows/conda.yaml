@@ -74,14 +74,21 @@ jobs:
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
       
-      - name: Prepare
+      # here we do not use a venv because we are already in a conda env
+      - name: Install dependencies
         run: |
+          conda install -y conda-build==26.5.0 conda-verify==3.4.2
           python -VV
-          conda install -y conda-build conda-verify
-          git config --global user.email "geisserml@gmail.com"
-          git config --global user.name "geisserml"
           python -m pip install -U pip
           python -m pip install -U -r req/setup.txt
+        env:
+          PIP_UPLOADED_PRIOR_TO: P12D
+      
+      # this is needed for craft_conda_pkgs.py, which uses git commands for data file transfer
+      - name: Configure git
+        run: |
+          git config --global user.email "geisserml@gmail.com"
+          git config --global user.name "geisserml"
       
       - name: Build package
         run: python conda/craft_conda_pkgs.py "$PACKAGE" $VERSION_PARAM $MAYBE_NEW_ONLY
@@ -167,20 +174,17 @@ jobs:
     permissions:
       contents: read  # recommended by checkout action
     
+    # TODO(geisserml) Should we refactor integration to attach at least pypdfium2_helpers to the GH release as well? pypdfium2_raw would be more of a problem though.
+    
     runs-on: ubuntu-slim
     steps:
       
-      # NOTE custom channels may not be actually necessary here
       - name: Miniconda setup
         uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.py }}
-          channels: pypdfium2-team,bblanchon,defaults
-          channel-priority: strict
-      
-      - name: Install deps
-        run: conda install -y anaconda-client
+          channels: defaults  # no custom channels needed here
       
       - name: Download artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -188,7 +192,8 @@ jobs:
           name: conda_package
           path: conda_dist/
       
-      # TODO upload as GH release as well?
+      - name: Install Anaconda client
+        run: conda install -y anaconda-client==1.14.1
       
       - name: Upload to Anaconda
         if: ${{ inputs.actually_publish }}

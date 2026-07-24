@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: 'Install'
+description: 'Install pip dependencies'
+
+inputs:
+  pip_install:
+    description: 'Arguments to pip install'
+    default: ''
+  pip_install_hot:
+    description: 'Arguments to pip install (without dependency cooldown)'
+    default: ''
+  cooldown_days:
+    description: 'Dependency cooldown interval'
+    default: '12'
+  freeze_date:
+    description: 'Hard dependency freeze date (overrides cooldown_days)'
+    default: ''
+  initial_python:
+    description: 'The initial python executable to use'
+    default: 'python3'
+
+runs:
+  using: 'composite'
+  steps:
+    
+    - name: Determine cooldown date
+      shell: bash
+      id: cooldown
+      run: |
+        COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py "$COOLDOWN_DAYS" "$FREEZE_DATE")
+        echo "Cooldown date is ${COOLDOWN_DATE}"
+        echo "cooldown_date=${COOLDOWN_DATE}" >> "$GITHUB_OUTPUT"
+      env:
+        PYTHON: ${{ inputs.initial_python }}
+        COOLDOWN_DAYS: ${{ inputs.cooldown_days }}
+        FREEZE_DATE: ${{ inputs.freeze_date }}
+    
+    - name: Create venv
+      shell: bash
+      run: |  # zizmor: ignore[github-env]
+        $INITIAL_PYTHON -m venv .venv
+        VENV_BIN=$($INITIAL_PYTHON utils/fix_venv.py .venv)
+        echo "Resolved VENV_BIN to ${VENV_BIN}"
+        
+        # Confirm we got VENV_BIN right and it has all the usual executables, or we might silently fall for system-level python
+        $VENV_BIN/python --version
+        $VENV_BIN/pip --version
+        $VENV_BIN/python3 --version
+        $VENV_BIN/pip3 --version
+        
+        echo "$VENV_BIN" >> "$GITHUB_PATH"
+      env:
+        INITIAL_PYTHON: ${{ inputs.initial_python }}
+    
+    # TODO(geisserml) Should we try to subject pip itself to a cooldown, too?
+    - name: Update pip itself
+      shell: bash
+      run: |
+        which python3  # this should point to the venv
+        python3 -m pip install -U pip
+    
+    - name: Install with pip (cool if pip >= 26)
+      if: ${{ inputs.pip_install }}
+      shell: bash
+      run: python3 -m pip install $PIP_INSTALL
+      env:
+        # With some older versions of Python (e.g. 3.8), the max available pip version is incapable of dependency cooldown.
+        # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to so the cooldown is just ignored if pip is too old.
+        PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.cooldown_date }}
+        PIP_INSTALL: ${{ inputs.pip_install }}
+    
+    - name: Install with pip (hot, no dependencies)
+      if: ${{ inputs.pip_install_hot }}
+      shell: bash
+      # For safety and predictability, we only install the specified packages here, no runtime or setup dependencies (which should be subjected to cooldown if possible).
+      run: python3 -m pip install --no-deps --no-build-isolation $PIP_INSTALL_HOT
+      env:
+        PIP_INSTALL_HOT: ${{ inputs.pip_install_hot }}
+    
+    - name: Write cooldown to config
+      shell: bash
+      # NB: Like PIP_UPLOADED_PRIOR_TO, this will be silently ignored if pip is too old.
+      run: python3 -m pip config set install.uploaded-prior-to "$COOLDOWN_DATE"
+      env:
+        COOLDOWN_DATE: ${{ steps.cooldown.outputs.cooldown_date }}

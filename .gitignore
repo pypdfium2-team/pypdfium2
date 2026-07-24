@@ -6,6 +6,7 @@ dist/
 gh_only/
 conda/*/out/
 tests/output/
+.venv/
 
 data/
 !data/.gitkeep

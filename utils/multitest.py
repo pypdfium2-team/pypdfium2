@@ -13,15 +13,12 @@ import argparse
 import subprocess
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
+from base import ProjectDir, log, get_cool_date
 
-UTILS_DIR = Path(__file__).resolve().parent
-PROJECT_DIR = UTILS_DIR.parent
 IS_WINDOWS = sys.platform.startswith("win32")
 PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")
 WINDOWS_32BIT = bool(int( os.environ.get("WINDOWS_32BIT", 0) ))
-
-def log(*args, **kwargs):
-    print(*args, **kwargs, file=sys.stderr)
 
 
 # work around https://github.com/actions/setup-python/issues/1079
@@ -60,10 +57,10 @@ archprefix = []
 if args.prefix:
     archprefix = shlex.split(args.prefix)
 
-def run(cmd):
+def run(cmd, **kwargs):
     cmd = archprefix + cmd
     log(cmd)
-    subprocess.run(cmd, check=True, cwd=PROJECT_DIR)
+    subprocess.run(cmd, check=True, cwd=ProjectDir, **kwargs)
 
 PyExeMap = _get_python_exe_map()
 
@@ -81,11 +78,16 @@ for py_ver in reversed(args.py_vers):
         run([python, "-m", "venv", venv_name])
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
+        run([python, "-m", "pip", "install", "-U", "pip"])
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
     if archprefix:
         run([python, "-c", "import platform as p; print(p.machine())"])
     
+    # Cooldown does not affect local or @git+ installs, but it matters for possible PyPI dependencies thereof.
+    # Note: Python 3.8's max pip is 25.0.1, which silently ignores this option.
+    # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P12D.
+    os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(12)
     run([python, "-m", "pip", "install", args.wheel_path])
     run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
     try:

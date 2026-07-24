@@ -92,11 +92,17 @@ jobs:
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.14'
-          pip-install: -U -r req/check.txt -r req/setup.txt -r req/test.txt
+      
+      - name: Create venv & install pip packages
+        if: ${{ inputs.inc_ver }}
+        uses: ./.github/actions/install_step
+        with:
+          pip_install: -U -r req/check.txt -r req/setup.txt -r req/test.txt
       
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
         run: |
+          which python3  # this should point to the venv
           ./utils/check.sh
           git config user.email "geisserml@gmail.com"
           git config user.name "geisserml"
@@ -146,12 +152,16 @@ jobs:
         with:
           replicate_tag: ${{ needs.prepare.outputs.version }}
           py_vers: ${{ inputs.py_vers }}
+      
+      - name: Create venv & install pip packages
+        uses: ./.github/actions/install_step
+        with:
           pip_install: -U -r req/setup.txt
       
       - name: Build & test sdist
         run: |
           python3 setupsrc/craft.py --sdist
-          python3 utils/multitest.py -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
+          python3 utils/multitest.py --venv -w dist/pypdfium2-*.tar.gz --py-vers $PY_VERS
         env:
           PY_VERS: ${{ inputs.py_vers }}
       
@@ -271,7 +281,12 @@ jobs:
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.14'
-          pip-install: -U -r req/distcheck.txt
+        
+      - name: Create venv & install pip packages
+        uses: ./.github/actions/install_step
+        with:
+          pip_install: -U -r req/distcheck.txt
+          freeze_date: '2026-07-12T10:15:00Z'
       
       - name: Check artifacts
         run: |

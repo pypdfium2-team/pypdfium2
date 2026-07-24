@@ -15,9 +15,6 @@ inputs:
   py_arch:
     description: 'Passthrough to architecture input of setup-python'
     default: ''
-  pip_install:
-    description: 'Passthrough to pip-install input of setup-python.'
-    default: ''
 
 runs:
   using: 'composite'
@@ -50,4 +47,3 @@ runs:
       with:
         python-version-file: '.python-version'
         architecture: ${{ inputs.py_arch }}
-        pip-install: ${{ inputs.pip_install }}

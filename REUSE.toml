@@ -165,9 +165,10 @@ SPDX-FileComment = "Licenses for compiled binaries of pdfium."
 [[annotations]]
 path = [
     "utils/check.sh",
-    "utils/regextract.py",
     "utils/enforce_install.sh",
-    "utils/inside_docker.sh",
+    "utils/regextract.py",
+    "utils/fix_venv.py",
+    "utils/get_cool_date.py",
 ]
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"

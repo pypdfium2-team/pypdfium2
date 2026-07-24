@@ -5,12 +5,9 @@ name: Test PyPI Release
 on:
   workflow_dispatch:
     inputs:
-      index_url:
-        type: choice
-        default: 'https://pypi.org/simple'
-        options:
-          - 'https://pypi.org/simple'
-          - 'https://test.pypi.org/simple'
+      use_sdist:
+        type: boolean
+        default: false
 
 defaults:
   run:
@@ -28,8 +25,13 @@ jobs:
         # stick with ubuntu-24.04 for now so we can keep testing python 3.8
         os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-arm']
         py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
+        include:
+          # on windows with python 3.8, the `python3` executable does not seem to exit for some reason
+          - os: windows-latest
+            py: '3.8'
+            initial_python: python
         exclude:
-          # not supported by setup-python action
+          # not available with setup-python action
           - os: windows-11-arm
             py: '3.8'
           # - os: windows-11-arm
@@ -40,30 +42,31 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       
+      - name: Check out pypdfium2 (deep)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: ${{ matrix.py }}
       
-      - name: Install pypdfium2 from package index
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -U --pre pypdfium2 --index-url "$INDEX_URL"
-        env:
-          INDEX_URL: ${{ inputs.index_url }}
-      
-      - name: Get pypdfium2 version
-        id: version
-        run: python3 -c "from pypdfium2.version import *; print(f'version={PYPDFIUM_INFO.tag}')" >> $GITHUB_OUTPUT
-      
-      - name: Check out pypdfium2 ${{ steps.version.outputs.version }} (shallow)
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Create venv & install pip packages
+        uses: ./.github/actions/install_step
         with:
-          persist-credentials: false
-          ref: ${{ steps.version.outputs.version }}
+          pip_install: -U -r req/converters.txt -r req/test.txt ${{ inputs.use_sdist && '-r req/setup.txt' || '' }}
+          # The project itself must be exempted from dependency cooldown, we unconditionally want to be able to test the latest version here, including beta.
+          pip_install_hot: --pre pypdfium2 ${{ inputs.use_sdist && '--no-binary' || '--only-binary' }} pypdfium2
+          initial_python: ${{ matrix.initial_python || 'python3' }}
       
-      - name: Install/update deps
-        run: python3 -m pip install -U -r req/converters.txt -r req/test.txt
+      - name: Check out the right tag
+        run: |
+          TAG=$(python3 -c "from pypdfium2.version import *; print(PYPDFIUM_INFO.tag)")
+          git checkout "$TAG"
       
       - name: Run tests
-        run: python3 -m pytest tests/
+        run: |
+          pypdfium2 --version
+          python3 -m pytest tests/
