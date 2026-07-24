@@ -16,6 +16,7 @@ import contextlib
 from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
+from datetime import date, timedelta
 
 ProjectDir = Path(__file__).resolve().parents[1]
 
@@ -231,6 +232,9 @@ def set_envs(**kwargs):
 
 def query_envs(**kwargs):
     return {k: os.environ.get(k, d) for k, d in kwargs.items()}
+
+def get_cool_date(cooldown_days):
+    return (date.today() - timedelta(days=cooldown_days)).isoformat()
 
 
 IGNORE_FULLVER = bool(int(os.environ.get("IGNORE_FULLVER", 0)))

@@ -22,7 +22,7 @@ def _install_dep(exename, reqfile=None, cooldown_days=12):
     log(f"- {exename} not found, installing (cooldown: {cooldown_days}d)...")
     env = os.environ.copy()
     extra_args = ()
-    env["PIP_UPLOADED_PRIOR_TO"] = "P{}D".format(cooldown_days)
+    env["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(cooldown_days)
     if not cooldown_days:
         extra_args = ("--no-deps", "--no-build-isolation")
     run_cmd([sys.executable, "-m", "pip", "install", *extra_args, *pkg_args], env=env, cwd=None)
