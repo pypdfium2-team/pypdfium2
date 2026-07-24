@@ -52,6 +52,7 @@ jobs:
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: ${{ matrix.py }}
+          pip-version: ${{ case(matrix.py == '3.8', '25.0.1', matrix.py == '3.9', '26.0.1', '26.1.2') }}
       
       - name: Create venv & install pip packages
         uses: ./.github/actions/install_step

@@ -63,8 +63,9 @@ runs:
         which python3  # this should point to the venv
         python3 -m pip install -U pip
       env:
-        # At least *try* to use a (shorter) dependency cooldown for pip itself. However, if the initial pip is < 26, which is not unlikely, this will just be ignored.
-        # NOTE setup-python has the unfortunate habit of auto-updating pip (at least for the main python version), in which case we would already have a non-cooled version of pip. If that happens, this cooldown is rendered useless. To prevent that, we'd have to pin setup-python's initial pip-version. However, the problem that adds complexity is how to deal with unsupported python versions that are stuck with older pip?
+        # At least *try* to use a (shorter) dependency cooldown for pip itself.
+        # Note: setup-python has the unfortunate habit of auto-updating pip, which would render this cooldown useless. To prevent that, we have to pin the initial pip-version, then update on our own using this step.
+        # FIXME prepare_step does not do this yet, because it is difficult to pin pip when multiple versions of python are being set up, with unsupported python versions being stuck with older pip.
         PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.pip_cooldown_date }}
     
     - name: Install with pip (cool if pip >= 26)

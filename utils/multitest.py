@@ -78,7 +78,7 @@ for py_ver in reversed(args.py_vers):
         run([python, "-m", "venv", venv_name])
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
-        # This may or may not be honored (see the notes in install_step/action.yml)
+        # NB: If the initial pip is < 26, cooldown would just be ignored.
         env = os.environ.copy()
         env["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(3)
         run([python, "-m", "pip", "install", "-U", "pip"], env=env)

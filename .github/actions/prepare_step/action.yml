@@ -47,3 +47,4 @@ runs:
       with:
         python-version-file: '.python-version'
         architecture: ${{ inputs.py_arch }}
+        # TODO pin pip-version
