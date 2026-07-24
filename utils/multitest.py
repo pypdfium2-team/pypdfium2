@@ -12,6 +12,7 @@ import platform
 import argparse
 import subprocess
 from pathlib import Path
+from datetime import date, timedelta
 
 
 UTILS_DIR = Path(__file__).resolve().parent
@@ -22,6 +23,9 @@ WINDOWS_32BIT = bool(int( os.environ.get("WINDOWS_32BIT", 0) ))
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
+
+def get_cool_date(cooldown_days):
+    return (date.today() - timedelta(days=cooldown_days)).isoformat()
 
 
 # work around https://github.com/actions/setup-python/issues/1079
@@ -88,8 +92,9 @@ for py_ver in reversed(args.py_vers):
         run([python, "-c", "import platform as p; print(p.machine())"])
     
     # Cooldown does not affect local or @git+ installs, but it matters for possible PyPI dependencies thereof.
-    # NB: Python 3.8's max pip is 25.0.1, which silently ignores this option.
-    os.environ["PIP_UPLOADED_PRIOR_TO"] = "P12D"
+    # Note: Python 3.8's max pip is 25.0.1, which silently ignores this option.
+    # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P12D.
+    os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(12)
     run([python, "-m", "pip", "install", args.wheel_path])
     run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
     try:
