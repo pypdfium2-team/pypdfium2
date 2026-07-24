@@ -247,8 +247,7 @@ jobs:
     needs: [prepare, sdist, pbin, sbuild, cibw]
     if: ${{ inputs.publish && !cancelled() && !contains(needs.*.result, 'failure') }}
     
-    # !!! THIS MUST BE RE-ENABLED BEFORE MERGE !!!
-    # environment: release  # PyPI upload   # XXX TESTING
+    environment: release  # PyPI upload
     permissions:
       id-token: write      # PyPI upload, GH attestation
       attestations: write  # GH attestation
