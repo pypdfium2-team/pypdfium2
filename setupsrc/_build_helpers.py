@@ -32,7 +32,7 @@ def install_buildtools():
     # https://github.com/scikit-build/ninja-python-distributions
     _install_dep("ninja")
     # https://github.com/pypdfium2-team/gn-dist/
-    # No cooldown because gn-dist is our own project (also maintained within pypdfium2-team org) and pinned to an exact version. (This even overrides user-configured cooldown to avoid potentially breaking the installation.)
+    # No cooldown here because gn-dist is our own project (also maintained within pypdfium2-team org) and pinned to an exact version. (This even overrides any user-configured cooldown to avoid breakage if the pin has been recently updated.)
     _install_dep("gn", reqfile=ProjectDir/"req"/"gn.txt", cooldown_days=0)
 
 def get_clang_version(clang_root):
