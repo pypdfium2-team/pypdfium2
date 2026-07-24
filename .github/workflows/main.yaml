@@ -102,7 +102,6 @@ jobs:
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
         run: |
-          # confirm that GITHUB_PATH changes persist beyond a composite action
           which python3  # this should point to the venv
           ./utils/check.sh
           git config user.email "geisserml@gmail.com"
