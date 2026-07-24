@@ -284,6 +284,7 @@ jobs:
         uses: ./.github/actions/install_step
         with:
           pip_install: -U -r req/distcheck.txt
+          freeze_date: '2026-07-12T10:15:00Z'
         
       - name: Check artifacts
         run: |
