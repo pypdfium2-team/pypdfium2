@@ -11,19 +11,34 @@ inputs:
   pip_install:
     description: 'Arguments to pip install'
     default: ''
-  cooldown:
-    description: 'pip dependency cooldown argument'
-    default: 'P12D'
   pip_install_hot:
-    description: 'Arguments to pip install (before dependency cooldown)'
+    description: 'Arguments to pip install (without dependency cooldown)'
     default: ''
   initial_python:
     description: 'The initial python executable to use'
     default: 'python3'
+  cooldown_days:
+    description: 'Dependency cooldown interval'
+    default: '12'
+  freeze_date:
+    description: 'Hard freeze date (overrides cooldown_days)'
+    default: ''
 
 runs:
   using: 'composite'
   steps:
+    
+    - name: Determine cooldown date
+      shell: bash
+      id: cooldown
+      run: |
+        COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py "$COOLDOWN_DAYS" "$FREEZE_DATE")
+        echo "Cooldown date is ${COOLDOWN_DATE}"
+        echo "cooldown_date=${COOLDOWN_DATE}" >> "$GITHUB_OUTPUT"
+      env:
+        PYTHON: ${{ inputs.initial_python }}
+        COOLDOWN_DAYS: ${{ inputs.cooldown_days }}
+        FREEZE_DATE: ${{ inputs.freeze_date }}
     
     - name: Create venv
       shell: bash
@@ -59,7 +74,7 @@ runs:
       env:
         # With some older versions of Python (e.g. 3.8), the max available pip version is incapable of dependency cooldown.
         # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to so the cooldown is just ignored if pip is too old.
-        PIP_UPLOADED_PRIOR_TO: ${{ inputs.cooldown }}
+        PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.cooldown_date }}
         PIP_INSTALL: ${{ inputs.pip_install }}
     
     - name: Install with pip (hot, no dependencies)
@@ -73,6 +88,6 @@ runs:
     - name: Write cooldown to config
       shell: bash
       # NB: Like PIP_UPLOADED_PRIOR_TO, this will be silently ignored if pip is too old.
-      run: python3 -m pip config set --site install.uploaded-prior-to "$COOLDOWN"
+      run: python3 -m pip config set --site install.uploaded-prior-to "$COOLDOWN_DATE"
       env:
-        COOLDOWN: ${{ inputs.cooldown }}
+        COOLDOWN_DATE: ${{ steps.cooldown.outputs.cooldown_date }}
