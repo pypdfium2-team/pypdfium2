@@ -17,8 +17,8 @@ build:
   tools:
     python: '3.14'
   jobs:
-    post_install:
-      - pip install --group docs .
     post_checkout:
       # for git describe in conf.py
       - git fetch --unshallow || true
+    post_install:
+      - pip install --group docs .
