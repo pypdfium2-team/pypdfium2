@@ -286,9 +286,7 @@ jobs:
       - name: Create venv & install pip packages
         uses: ./.github/actions/install_step
         with:
-          # TODO use lockfile + dependabot security updates
-          pip_install: -U --group distcheck
-          cooldown_days: '7'
+          pip_install: --require-hashes -r lock/distcheck.txt
       
       - name: Check artifacts
         run: |

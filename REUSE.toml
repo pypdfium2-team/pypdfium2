@@ -181,3 +181,9 @@ path = [
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
 SPDX-FileComment = "Build strategy tables."
+
+[[annotations]]
+path = "lock/*"
+SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
+SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
+SPDX-FileComment = "Auto-generated lock files. Not actually copyrighted."

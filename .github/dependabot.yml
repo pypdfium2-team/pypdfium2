@@ -15,3 +15,13 @@ updates:
       actions:
         patterns:
           - "*"
+  - package-ecosystem: "pip"
+    directory: "/lock"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      python-packages:
+        patterns:
+          - "*"
