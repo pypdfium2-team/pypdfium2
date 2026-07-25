@@ -10,7 +10,6 @@ SPDX-PackageDownloadLocation = "https://github.com/pypdfium2-team/pypdfium2"
 
 [[annotations]]
 path = [
-    "req/*.txt",
     "autorelease/record.json",
     "autorelease/config.json",
     ".github/PULL_REQUEST_TEMPLATE.md",

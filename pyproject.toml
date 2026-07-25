@@ -6,11 +6,32 @@ build-backend = "setuptools.build_meta"
 requires = [
     # We do not declare an explicit setuptools min version for a variety of reasons. Last time it was tested, setuptools 59 (max with Python 3.6) still kind of worked.
     "setuptools",
+    "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
     "packaging",
     # XXX dependence on wheel is historical, with setuptools >= v70.1.0 this is not needed anymore
     "wheel !=0.38.0, !=0.38.1",
-    "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
 ]
+
+[dependency-groups]
+converters = ["pillow", "numpy"]
+test = ["pytest", "tabulate", {include-group = "converters"}]
+setup = [
+    "setuptools >= v70.1.0",  # or older setuptools + `wheel`
+    "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
+    "build",
+    "macholib; sys_platform == 'darwin'",
+]
+docs = [
+    "sphinx >= 7.2.5",
+    "sphinx-rtd-theme",
+    "sphinxcontrib-programoutput",
+    "sphinx-issues",
+    "myst-parser",
+]
+check = ["autoflake", "codespell", "reuse"]
+distcheck = ["twine", "check-wheel-contents"]
+# When updating the GN version, remember to update any other references as well. Best do a global search & replace against the previous version.
+gn = ["gn-dist==2407.1"]
 
 [tool.check-wheel-contents]
 # W002: erroneous detection of __init__.py files as duplicates
@@ -21,7 +42,7 @@ ignore = ["W002", "W009", "W010"]
 [tool.cibuildwheel]
 build-frontend = {name="build", args=["-xn"]}
 before-build = [
-    "pip install -r {project}/req/setup.txt",
+    "pip install --group setup",
 ]
 test-command = [
     "python -m pypdfium2_cli --version",
@@ -87,7 +108,7 @@ environment.PATH = "/usr/lib/ninja-build/bin:$PATH"
 select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64}"  # not loongarch64
 inherit.before-build = "append"
 before-build = [
-    "pip install --only-binary :all: -r {project}/req/gn.txt",
+    "pip install --only-binary :all: --group gn",
 ]
 
 [[tool.cibuildwheel.overrides]]

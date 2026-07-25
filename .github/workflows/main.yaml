@@ -97,7 +97,7 @@ jobs:
         if: ${{ inputs.inc_ver }}
         uses: ./.github/actions/install_step
         with:
-          pip_install: -U -r req/check.txt -r req/setup.txt -r req/test.txt
+          pip_install: -U --group check --group setup --group test
       
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
@@ -157,7 +157,7 @@ jobs:
       - name: Create venv & install pip packages
         uses: ./.github/actions/install_step
         with:
-          pip_install: -U -r req/setup.txt
+          pip_install: -U --group setup
       
       - name: Build & test sdist
         run: |
@@ -287,7 +287,7 @@ jobs:
         uses: ./.github/actions/install_step
         with:
           # TODO use lockfile + dependabot security updates
-          pip_install: -U -r req/distcheck.txt
+          pip_install: -U --group distcheck
           cooldown_days: '7'
       
       - name: Check artifacts

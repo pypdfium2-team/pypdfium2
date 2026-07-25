@@ -1,3 +1,0 @@
-# Rendering CLI may also use `opencv-python[-headless]`, but we don't currently cover that internally. The import is lazy so we don't have to require it here.
-pillow
-numpy

@@ -20,9 +20,10 @@ build:
     post_checkout:
       # for git describe in conf.py
       - git fetch --unshallow || true
+    post_install:
+      - pip install --group docs
 
 python:
   install:
-    - requirements: req/docs.txt
     - method: pip
       path: .

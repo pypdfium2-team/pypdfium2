@@ -1,3 +1,0 @@
-autoflake
-codespell
-reuse

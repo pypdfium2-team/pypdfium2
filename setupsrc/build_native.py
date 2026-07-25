@@ -486,7 +486,7 @@ Whether this might also work on other OSes depends on PDFium's build system and 
 See the notes in pypdfium2's README.md for more information.
 
 Note that pdfium is picky about the GN version, and requires newer GN than what stable distributions usually provide. Outdated GN may fail with the most obscure errors.
-We suggest that you `pip install -r req/gn.txt` which will install an appropriate version of gn-dist from PyPI. gn-dist is also maintained by the pypdfium2 authors.
+We suggest that you `pip install --group gn` which will install an appropriate version of gn-dist from PyPI. gn-dist is also maintained by the pypdfium2 authors.
 
 Likewise, clang users should note that pdfium expects a very recent version of clang.
 Upstream does not aim for compatibility with clang older than the version they currently use.

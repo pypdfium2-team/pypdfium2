@@ -1,3 +1,0 @@
-pytest
--r converters.txt
-tabulate
