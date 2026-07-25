@@ -26,6 +26,7 @@ WINDOWS_32BIT = bool(int( os.environ.get("WINDOWS_32BIT", 0) ))
 
 
 # work around https://github.com/actions/setup-python/issues/1079
+
 def _get_python_exe_map():
     
     exemap = {}
