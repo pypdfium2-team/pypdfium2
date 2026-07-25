@@ -89,7 +89,7 @@ runs:
       if: ${{ inputs.pip_install_hot }}
       shell: bash
       # For safety and predictability, we only install the specified packages here, no runtime or setup dependencies, which should ideally be subjected to cooldown.
-      # Tip: first install the package cool to get dependencies, then explicitly install the exceptions without cooldown (pinning recommended).
+      # Tip: first install all packages cool to get dependencies, then explicitly install any exceptions without cooldown (pinning recommended).
       run: python3 -m pip install --no-deps --no-build-isolation $PIP_INSTALL_HOT
       env:
         PIP_INSTALL_HOT: ${{ inputs.pip_install_hot }}
