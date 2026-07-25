@@ -177,9 +177,9 @@ Dependencies:
 > PDFium requires recent GN. Outdated GN may fail with the most obscure errors.<br>
 > With `build_native.py`, we recommend that you install [`gn-dist`](https://github.com/pypdfium2-team/gn-dist/) from PyPI, which is also maintained by pypdfium2-team:
 > ```bash
-> python3 -m pip install -r req/gn.txt
+> python3 -m pip install --group gn
 > ```
-> Using the requirements file found in this repo will ensure you install a GN version appropriate to the PDFium version pinned by pypdfium2's build scripts.
+> Using the dependency group from our `pyproject.toml` will ensure you install a GN version appropriate to the PDFium version pinned by pypdfium2's build scripts.
 > 
 > GN packages provided by stable distributions are typically too old for PDFium, so we do not recommend installing GN with a system package manager like `apt`.
 > 
@@ -195,7 +195,7 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 Or for the native build, on Ubuntu 24.04, you could do e.g.:
 ```bash
 # Install dependencies
-python -m pip install -r req/gn.txt  # see above
+python -m pip install --group gn  # see above
 sudo apt-get install ninja-build libfreetype-dev liblcms2-dev libjpeg-dev libopenjp2-7-dev libpng-dev libtiff-dev zlib1g-dev libicu-dev libglib2.0-dev libharfbuzz-dev  # generate-ninja
 ```
 ```bash
@@ -238,7 +238,7 @@ To install the dependencies, you'll need something like
 ```bash
 pkg install gn ninja freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff harfbuzz glib
 ```
-Assuming Termux provides recent enough GN. If in doubt, check the expected version in `req/gn.txt` against the version provided by Termux.
+Assuming Termux provides recent enough GN. If in doubt, check the expected version in `pyproject.toml` against the version provided by Termux.
 We have not yet sorted out how to build GN on Android natively (it fails with linkage errors).
 
 Then apply the clang symlinks. It works slightly different on Android, e.g.:

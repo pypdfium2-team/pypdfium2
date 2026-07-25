@@ -1,2 +1,0 @@
-# When updating this version, remember to update the references in pyproject.toml as well. Best do a global search & replace against the previous version.
-gn-dist==2407.1

@@ -23,6 +23,7 @@ build:
 
 python:
   install:
-    - requirements: req/docs.txt
-    - method: pip
-      path: .
+    - method: uv
+      command: sync
+      groups:
+        - docs

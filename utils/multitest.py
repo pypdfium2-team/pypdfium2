@@ -89,7 +89,8 @@ for py_ver in reversed(args.py_vers):
     
     os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(7)
     run([python, "-m", "pip", "install", args.wheel_path])
-    run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
+    # FIXME do all our python/pip versions support PEP 735 dependency groups yet?
+    run([python, "-m", "pip", "install", "-U", "--group", "test"])
     try:
         run([pypdfium2_exe, "--version"])
         run([python, "-m", "pytest", "tests/"])
