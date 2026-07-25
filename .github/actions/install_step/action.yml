@@ -11,6 +11,9 @@ inputs:
   pip_install_hot:
     description: 'Arguments to pip install (without dependency cooldown)'
     default: ''
+  pip_install_lockfile:
+    description: 'Install with the given lockfile'
+    default: ''
   cooldown_days:
     description: 'Dependency cooldown interval'
     default: '7'
@@ -77,22 +80,29 @@ runs:
     - name: Install with pip (cool if pip >= 26)
       if: ${{ inputs.pip_install }}
       shell: bash
-      run: python3 -m pip install $PIP_INSTALL
+      run: python3 -m pip install $PACKAGES
       env:
         # With some older versions of Python, the max available pip version is incapable of dependency cooldown (e.g. Python 3.8 / pip 25.0.1).
         # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to. This means the cooldown will be silently ignored if pip is too old.
         # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P12D.
         PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.cooldown_date }}
-        PIP_INSTALL: ${{ inputs.pip_install }}
+        PACKAGES: ${{ inputs.pip_install }}
     
     - name: Install with pip (hot, no dependencies)
       if: ${{ inputs.pip_install_hot }}
       shell: bash
       # For safety and predictability, we only install the specified packages here, no runtime or setup dependencies, which should ideally be subjected to cooldown.
       # Tip: First install packages cool to get dependencies, then explicitly install any exceptions without cooldown (pinning recommended). The new --only-deps option (pip 26.2) may come in handy to install dependencies cooled.
-      run: python3 -m pip install --no-deps --no-build-isolation $PIP_INSTALL_HOT
+      run: python3 -m pip install --no-deps --no-build-isolation $HOT_PACKAGES
       env:
-        PIP_INSTALL_HOT: ${{ inputs.pip_install_hot }}
+        HOT_PACKAGES: ${{ inputs.pip_install_hot }}
+    
+    - name: Install with pip (locked)
+      if: ${{ inputs.pip_install_lockfile }}
+      shell: bash
+      run: python3 -m pip install --no-deps --only-binary ':all:' --require-hashes -r "$LOCKFILE"
+      env:
+        LOCKFILE: ${{ inputs.pip_install_lockfile }}
     
     - name: Write cooldown to config
       shell: bash

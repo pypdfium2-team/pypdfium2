@@ -286,7 +286,7 @@ jobs:
       - name: Create venv & install pip packages
         uses: ./.github/actions/install_step
         with:
-          pip_install: --require-hashes -r lock/distcheck.txt
+          pip_install_lockfile: lock/distcheck.txt
       
       - name: Check artifacts
         run: |
