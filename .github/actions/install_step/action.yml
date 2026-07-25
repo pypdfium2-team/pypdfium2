@@ -57,7 +57,7 @@ runs:
         INITIAL_PYTHON: ${{ inputs.initial_python }}
     
     # Try to get a pip version that honors PIP_UPLOADED_PRIOR_TO before updating pip without upper bound.
-    # Note: setup-python has the unfortunate habit of auto-updating pip, without cooldown. However, AFAIK, venvs are initialized with the python version's bundled pip, so we do not actually use setup-python's pip. Also, we can pin setup-python's initial pip-version to avoid installing a non-cooled version.
+    # Note: setup-python has the unfortunate habit of auto-updating pip, without cooldown. However, AFAIK, venvs are initialized with the python version's bundled pip, so we do not actually use setup-python's pip.
     - name: Install intermediate pip
       if: ${{ inputs.tmp_pip_cap }}
       shell: bash
