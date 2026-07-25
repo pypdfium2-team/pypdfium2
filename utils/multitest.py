@@ -48,6 +48,8 @@ def _get_python_exe_map():
     return exemap
 
 
+# Work around python 3.8's max pip not supporting PEP 735 dependency groups yet. Requires python >= 3.11 as dispatcher.
+
 def _parse_group(groups, key):
     group = []
     for entry in groups[key]:
@@ -58,7 +60,7 @@ def _parse_group(groups, key):
     return group
 
 def read_dependency_group(key):
-    assert tomllib, "tomllib / python >= 3.11 is reqired to parse dependency groups"
+    assert tomllib, "If testing python 3.8 is desired, python >= 3.11 is required as dispatcher, or you need to provide a tomllib backport"
     with (ProjectDir/"pyproject.toml").open("rb") as fh:
         pyproject_toml = tomllib.load(fh)
     return _parse_group(pyproject_toml["dependency-groups"], key)
@@ -109,10 +111,7 @@ for py_ver in reversed(args.py_vers):
     
     os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(7)
     run([python, "-m", "pip", "install", args.wheel_path])
-    if py_ver == "3.8":
-        pip_args = read_dependency_group("test")
-    else:
-        pip_args = ("--group", "test")
+    pip_args = read_dependency_group("test") if py_ver == "3.8" else ("--group", "test")
     run([python, "-m", "pip", "install", "-U", *pip_args])
     try:
         run([pypdfium2_exe, "--version"])
