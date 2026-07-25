@@ -57,10 +57,10 @@ archprefix = []
 if args.prefix:
     archprefix = shlex.split(args.prefix)
 
-def run(cmd, **kwargs):
+def run(cmd, check=True, **kwargs):
     cmd = archprefix + cmd
     log(cmd)
-    subprocess.run(cmd, check=True, cwd=ProjectDir, **kwargs)
+    subprocess.run(cmd, cwd=ProjectDir, check=check, **kwargs)
 
 PyExeMap = _get_python_exe_map()
 
@@ -78,9 +78,9 @@ for py_ver in reversed(args.py_vers):
         run([python, "-m", "venv", venv_name])
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
-        # NB: If the initial pip is < 26, cooldown would just be ignored.
         env = os.environ.copy()
         env["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(3)
+        run([python, "-m", "pip", "install", "pip>=26,<=26.1.2"], env=env, check=False)
         run([python, "-m", "pip", "install", "-U", "pip"], env=env)
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
