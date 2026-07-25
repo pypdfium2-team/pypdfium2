@@ -48,7 +48,7 @@ def _get_python_exe_map():
     return exemap
 
 
-# Work around python 3.8's max pip not supporting PEP 735 dependency groups yet. Requires python >= 3.11 as dispatcher.
+# Work around python 3.8's max pip being too old for PEP 735 dependency groups
 
 def _parse_group(groups, key):
     group = []
