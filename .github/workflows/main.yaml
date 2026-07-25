@@ -9,7 +9,7 @@ on:
     inputs:
       py_vers:
         type: string
-        default: ''
+        default: '3.8 3.11 3.14'
       profile:
         # see strategy/profiles.json for choices
         type: string
@@ -151,6 +151,7 @@ jobs:
         uses: ./.github/actions/prepare_step
         with:
           replicate_tag: ${{ needs.prepare.outputs.version }}
+          # TODO obtain resolved versions from get_matrix.py
           py_vers: ${{ inputs.py_vers }}
       
       - name: Create venv & install pip packages
