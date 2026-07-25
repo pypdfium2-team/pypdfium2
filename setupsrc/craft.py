@@ -49,9 +49,9 @@ class ArtifactStash:
 
 
 @contextlib.contextmanager
-def tmp_replace_ctx(fp, orig, tmp):
+def tmp_replace_ctx(fp, orig, tmp, exp_count):
     orig_txt = fp.read_text()
-    assert orig_txt.count(orig) == 1
+    assert orig_txt.count(orig) == exp_count
     tmp_txt = orig_txt.replace(orig, tmp)
     fp.write_text(tmp_txt)
     try:
@@ -70,7 +70,7 @@ def tmp_ctypesgen_pin():
         log(f"Resolved pypdfium2 ctypesgen HEAD to SHA {pin}")
     
     base_txt = "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@"
-    ctx = tmp_replace_ctx(ProjectDir/"pyproject.toml", base_txt+"pypdfium2", base_txt+pin)
+    ctx = tmp_replace_ctx(ProjectDir/"pyproject.toml", base_txt+"pypdfium2", base_txt+pin, exp_count=2)
     with ctx:
         log(f"Wrote temporary pyproject.toml with ctypesgen pin")
         yield
