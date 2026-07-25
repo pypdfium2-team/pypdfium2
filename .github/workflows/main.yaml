@@ -288,7 +288,7 @@ jobs:
         uses: ./.github/actions/install_step
         with:
           pip_install: -U -r req/distcheck.txt
-          cooldown_days: '12'
+          cooldown_days: '7'
       
       - name: Check artifacts
         run: |

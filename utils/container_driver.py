@@ -63,7 +63,7 @@ python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
 PIP_UPLOADED_PRIOR_TO="{get_cool_date(3)}" python3 -m pip install -U pip
-python3 -m pip config set install.uploaded-prior-to "{get_cool_date(12)}"
+python3 -m pip config set install.uploaded-prior-to "{get_cool_date(7)}"
 %(pip_install)s
 cd /projects/pypdfium2
 %(lib_install)s

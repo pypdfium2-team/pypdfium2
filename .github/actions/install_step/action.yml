@@ -13,7 +13,7 @@ inputs:
     default: ''
   cooldown_days:
     description: 'Dependency cooldown interval'
-    default: '12'
+    default: '7'
   initial_python:
     description: 'The initial python executable to use'
     default: 'python3'

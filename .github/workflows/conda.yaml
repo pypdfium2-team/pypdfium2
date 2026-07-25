@@ -81,7 +81,7 @@ jobs:
           python -VV
           export PIP_UPLOADED_PRIOR_TO=$(python utils/get_cool_date.py 3)
           python -m pip install -U pip
-          export PIP_UPLOADED_PRIOR_TO=$(python utils/get_cool_date.py 12)
+          export PIP_UPLOADED_PRIOR_TO=$(python utils/get_cool_date.py 7)
           python -m pip install -U -r req/setup.txt
       
       # this is needed for craft_conda_pkgs.py, which uses git commands for data file transfer

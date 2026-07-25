@@ -87,7 +87,7 @@ for py_ver in reversed(args.py_vers):
     if archprefix:
         run([python, "-c", "import platform as p; print(p.machine())"])
     
-    os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(12)
+    os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(7)
     run([python, "-m", "pip", "install", args.wheel_path])
     run([python, "-m", "pip", "install", "-U", "-r", "req/test.txt"])
     try:
