@@ -14,9 +14,6 @@ inputs:
   cooldown_days:
     description: 'Dependency cooldown interval'
     default: '12'
-  freeze_date:
-    description: 'Hard dependency freeze date (overrides cooldown_days)'
-    default: ''
   initial_python:
     description: 'The initial python executable to use'
     default: 'python3'
@@ -29,7 +26,7 @@ runs:
       shell: bash
       id: cooldown
       run: |
-        COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py "$COOLDOWN_DAYS" "$FREEZE_DATE")
+        COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py "$COOLDOWN_DAYS")
         PIP_COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py 3)
         echo "Cooldown date: ${COOLDOWN_DATE}"
         echo "Cooldown date for pip itself (may or may not be honored): ${PIP_COOLDOWN_DATE}"
@@ -38,7 +35,6 @@ runs:
       env:
         PYTHON: ${{ inputs.initial_python }}
         COOLDOWN_DAYS: ${{ inputs.cooldown_days }}
-        FREEZE_DATE: ${{ inputs.freeze_date }}
     
     - name: Create venv
       shell: bash
