@@ -21,4 +21,9 @@ build:
       # for git describe in conf.py
       - git fetch --unshallow || true
     post_install:
-      - pip install --group docs .
+      - pip install --group docs
+
+python:
+  install:
+    - method: pip
+      path: .
