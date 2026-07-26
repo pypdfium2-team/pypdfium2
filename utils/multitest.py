@@ -18,7 +18,7 @@ except ImportError:
     tomllib = None
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from base import ProjectDir, log, get_cool_date
+from simplebase import ProjectDir, log, get_cool_date
 
 IS_WINDOWS = sys.platform.startswith("win32")
 PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")

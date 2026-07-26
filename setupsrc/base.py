@@ -16,22 +16,13 @@ import contextlib
 from pathlib import Path
 from collections import namedtuple
 import urllib.request as url_request
-from datetime import datetime, timezone, timedelta
 
-ProjectDir = Path(__file__).resolve().parents[1]
+from simplebase import *  # local
 
 # Add this path to your IDE's search path, e.g. VS Code python.analysis.extraPaths
 sys.path.insert(0, str(ProjectDir/"src"/"pypdfium2_cfg"/"shared"))
 from stl import cached_property
 
-if sys.version_info < (3, 8):
-    class ExtendAction (argparse.Action):
-        def __call__(self, parser, namespace, values, option_string=None):
-            items = getattr(namespace, self.dest) or []
-            items.extend(values)
-            setattr(namespace, self.dest, items)
-else:
-    ExtendAction = None
 
 PDFIUM_MIN_REQ = 6635
 
@@ -164,9 +155,6 @@ PdfiumBinariesMap = {
 ALL_PLATFORMS = tuple(PdfiumBinariesMap.keys())
 
 
-def log(*args, **kwargs):
-    print(*args, **kwargs, file=sys.stderr)
-
 def plat_to_system(pl_name):
     if pl_name == ExtPlats.sourcebuild:
         # Note, this may be None if on an unknown host
@@ -232,9 +220,6 @@ def set_envs(**kwargs):
 
 def query_envs(**kwargs):
     return {k: os.environ.get(k, d) for k, d in kwargs.items()}
-
-def get_cool_date(cooldown_days):
-    return (datetime.now(timezone.utc) - timedelta(days=cooldown_days)).isoformat(timespec='seconds')
 
 
 IGNORE_FULLVER = bool(int(os.environ.get("IGNORE_FULLVER", 0)))
@@ -859,3 +844,13 @@ def handle_platforms(platforms):
     elif platforms == ["all"]:
         platforms = ALL_PLATFORMS
     return platforms
+
+
+if sys.version_info < (3, 8):
+    class ExtendAction (argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            items = getattr(namespace, self.dest) or []
+            items.extend(values)
+            setattr(namespace, self.dest, items)
+else:
+    ExtendAction = None

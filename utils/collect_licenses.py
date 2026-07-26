@@ -7,7 +7,9 @@ import argparse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from base import ProjectDir, DataDir, DataDir_Bindings
+from simplebase import ProjectDir
+
+DataDir = ProjectDir/"data"
 
 
 def main():
@@ -23,7 +25,7 @@ def main():
     args = parser.parse_args()
     
     data_dirs = [p for p in DataDir.iterdir() if p.is_dir()]
-    data_dirs.remove(DataDir_Bindings)
+    data_dirs.remove(DataDir/"bindings")
     data_dirs.remove(DataDir/"sourcebuild")
     
     licenses = {}

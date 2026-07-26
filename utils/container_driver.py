@@ -9,7 +9,7 @@ from pathlib import Path
 from collections import namedtuple
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from base import ProjectDir, log, get_cool_date  # local
+from simplebase import ProjectDir, log, get_cool_date  # local
 
 _RHEL_CMD   = "yum install -y python3 python3-pillow python3-numpy"  # python3-pytest
 _DEBIAN_CMD = "apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
