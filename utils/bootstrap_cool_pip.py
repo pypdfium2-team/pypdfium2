@@ -19,16 +19,15 @@ def get_version(cmd, progname):
     version = re.search(fR"{progname} ([\d.]+)", output, flags=re.IGNORECASE).group(1)
     return tuple(int(v) for v in version.split("."))
 
-python = sys.argv[1] if len(sys.argv) > 1 else sys.executable
-pip_version = get_version([python, "-m", "pip", "--version"], "pip")
+pip_version = get_version([sys.executable, "-m", "pip", "--version"], "pip")
 pip_major = pip_version[0]
-log(f"Determined pip version {pip_version}")
+log(f"pip version is {pip_version}")
 
 # try to obtain a pip version that honors cooldown before updating pip unbounded
 if pip_major < 26:
     # TODO add hash checking
-    py_version = get_version([python, "--version"], "Python")[:2]
-    log(f"Determined python version: {py_version}")
+    py_version = sys.version_info[:2]
+    log(f"Python version is {py_version}")
     if py_version == (3, 9):
         pip_pin, update_ok = "26.0.1", True
     elif py_version == (3, 8):
@@ -37,10 +36,10 @@ if pip_major < 26:
     else:
         assert py_version >= (3, 10)
         pip_pin, update_ok = "26.1.2", True
-    run([python, "-m", "pip", "install", f"pip=={pip_pin}"])
+    run([sys.executable, "-m", "pip", "install", f"pip=={pip_pin}"])
 else:
     update_ok = True
 
 if update_ok:
     cool_date = get_cool_date(3)
-    run([python, "-m", "pip", "install", "--uploaded-prior-to", cool_date, "-U", "pip"])
+    run([sys.executable, "-m", "pip", "install", "--uploaded-prior-to", cool_date, "-U", "pip"])
