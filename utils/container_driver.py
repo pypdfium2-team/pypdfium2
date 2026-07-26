@@ -62,12 +62,10 @@ VENV_DIR="/projects/testenv"
 python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
-export PIP_UPLOADED_PRIOR_TO="{get_cool_date(3)}"
-python3 -m pip install "pip>=26,<=26.1.2" || true
-python3 -m pip install -U pip
+cd {MountPoint}
+python3 utils/bootstrap_cool_pip.py
 export PIP_UPLOADED_PRIOR_TO="{get_cool_date(7)}"
 %(pip_install)s
-cd /projects/pypdfium2
 %(lib_install)s
 pypdfium2 --version
 python3 -m pytest tests/

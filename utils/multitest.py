@@ -101,10 +101,7 @@ for py_ver in reversed(args.py_vers):
         run([python, "-m", "venv", venv_name])
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
-        env = os.environ.copy()
-        env["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(3)
-        run([python, "-m", "pip", "install", "pip>=26,<=26.1.2"], env=env, check=False)
-        run([python, "-m", "pip", "install", "-U", "pip"], env=env)
+        run([python, str(ProjectDir/"utils"/"bootstrap_cool_pip.py")])
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
     if archprefix:

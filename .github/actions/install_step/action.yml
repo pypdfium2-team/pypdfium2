@@ -20,9 +20,6 @@ inputs:
   initial_python:
     description: 'The initial python executable to use'
     default: 'python3'
-  tmp_pip_cap:
-    description: 'Update pip to an intermediate version constrained by this upper bound, then update it with cooldown.'
-    default: '26.1.2'
 
 runs:
   using: 'composite'
@@ -33,11 +30,8 @@ runs:
       id: cooldown
       run: |
         COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py "$COOLDOWN_DAYS")
-        PIP_COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py 3)
         echo "Cooldown date: ${COOLDOWN_DATE}"
-        echo "Cooldown date for pip itself: ${PIP_COOLDOWN_DATE}"
         echo "cooldown_date=${COOLDOWN_DATE}" >> "$GITHUB_OUTPUT"
-        echo "pip_cooldown_date=${PIP_COOLDOWN_DATE}" >> "$GITHUB_OUTPUT"
       env:
         PYTHON: ${{ inputs.initial_python }}
         COOLDOWN_DAYS: ${{ inputs.cooldown_days }}
@@ -58,23 +52,13 @@ runs:
       env:
         INITIAL_PYTHON: ${{ inputs.initial_python }}
     
-    # Try to get a pip version that honors PIP_UPLOADED_PRIOR_TO before updating pip without upper bound.
     # Note: setup-python has the unfortunate habit of auto-updating pip, without cooldown. However, AFAIK, venvs are initialized with the python version's bundled pip, so we do not actually use setup-python's pip.
-    - name: Install intermediate pip
-      if: ${{ inputs.tmp_pip_cap }}
-      shell: bash
-      run: python3 -m pip install "pip>=26,<=$TMP_PIP_CAP" || true
-      env:
-        TMP_PIP_CAP: ${{ inputs.tmp_pip_cap }}
-        PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.pip_cooldown_date }}
-    
-    - name: Update pip itself
+    - name: Update pip
       shell: bash
       run: |
         which python3  # this should point to the venv
-        python3 -m pip install -U pip
-      env:
-        PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.pip_cooldown_date }}
+        python3 utils/bootstrap_cool_pip.py
+        python3 -m pip --version
     
     # With some older versions of Python, the max available pip version is incapable of dependency cooldown (e.g. Python 3.8 / pip 25.0.1).
     # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to. This means the cooldown will be silently ignored if pip is too old.
