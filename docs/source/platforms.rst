@@ -47,7 +47,7 @@ Legend
 ^^^^^^
 
 - **MinVer**: Minimum required OS versions for present release.
-  Other build strategies may result in different min versions, and older versions of pypdfium2 may have lower requirements.
+  Other build strategies may result in different min versions, and older versions of pypdfium2/pdfium may have lower requirements.
   
   + 🟢 Low/Good, 🔵 Reasonable, 🟡 Medium, 🟠 Elevated, 🔴 High, ⚪ Not tagged
 
