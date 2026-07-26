@@ -76,22 +76,22 @@ runs:
       env:
         PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.pip_cooldown_date }}
     
+    # With some older versions of Python, the max available pip version is incapable of dependency cooldown (e.g. Python 3.8 / pip 25.0.1).
+    # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to. This means the cooldown will be silently ignored if pip is too old.
+    # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P12D.
     - name: Install with pip (cool if pip >= 26)
       if: ${{ inputs.pip_install }}
       shell: bash
       run: python3 -m pip install $PACKAGES
       env:
-        # With some older versions of Python, the max available pip version is incapable of dependency cooldown (e.g. Python 3.8 / pip 25.0.1).
-        # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to. This means the cooldown will be silently ignored if pip is too old.
-        # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P12D.
         PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.cooldown_date }}
         PACKAGES: ${{ inputs.pip_install }}
     
+    # For safety and predictability, we only install explicitly specified packages here, no runtime or setup dependencies, which should ideally be subjected to cooldown.
+    # Tip: First install packages cool to get dependencies, then explicitly install any exceptions without cooldown (pinning recommended). The new --only-deps option (pip 26.2) may come in handy to install dependencies cooled.
     - name: Install with pip (hot, no dependencies)
       if: ${{ inputs.pip_install_hot }}
       shell: bash
-      # For safety and predictability, we only install the specified packages here, no runtime or setup dependencies, which should ideally be subjected to cooldown.
-      # Tip: First install packages cool to get dependencies, then explicitly install any exceptions without cooldown (pinning recommended). The new --only-deps option (pip 26.2) may come in handy to install dependencies cooled.
       run: python3 -m pip install --no-deps --no-build-isolation $HOT_PACKAGES
       env:
         HOT_PACKAGES: ${{ inputs.pip_install_hot }}
@@ -101,13 +101,13 @@ runs:
       shell: bash
       run: python3 -m pip install --no-deps --only-binary ':all:' --require-hashes -r "$LOCKFILE"
       env:
-        LOCKFILE: ${{ inputs.pip_install_lockfile }}
         # Honor the cooldown as a sanity check for our lockfile. If urgent updates were needed (e.g. security), cooldown_days can be lowered at the call site.
         PIP_UPLOADED_PRIOR_TO: ${{ steps.cooldown.outputs.cooldown_date }}
+        LOCKFILE: ${{ inputs.pip_install_lockfile }}
     
     - name: Write cooldown to config
       shell: bash
-      # NB: Like PIP_UPLOADED_PRIOR_TO, this will be silently ignored if pip is too old.
+      # Like PIP_UPLOADED_PRIOR_TO, the config entry will be silently ignored if pip is too old.
       run: python3 -m pip config set install.uploaded-prior-to "$COOLDOWN_DATE"
       env:
         COOLDOWN_DATE: ${{ steps.cooldown.outputs.cooldown_date }}
