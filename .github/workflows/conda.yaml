@@ -79,7 +79,7 @@ jobs:
         run: |
           conda install -y conda-build==26.5.0 conda-verify==3.4.2
           python -VV
-          python utils/bootstrap_cool_pip.py
+          python utils/update_pip_cool.py
           export PIP_UPLOADED_PRIOR_TO=$(python utils/get_cool_date.py 7)
           python -m pip install -U --group setup
       

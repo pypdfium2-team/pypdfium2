@@ -57,7 +57,7 @@ runs:
       shell: bash
       run: |
         which python3  # this should point to the venv
-        python3 utils/bootstrap_cool_pip.py
+        python3 utils/update_pip_cool.py
         python3 -m pip --version
     
     # With some older versions of Python, the max available pip version is incapable of dependency cooldown (e.g. Python 3.8 / pip 25.0.1).
