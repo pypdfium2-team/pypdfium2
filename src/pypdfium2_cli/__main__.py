@@ -8,8 +8,8 @@ import sys
 import argparse
 from os.path import basename
 from importlib import import_module
-from pypdfium2_cfg.stl import cached_property
-from pypdfium2_cli._setup import setup_logging, keydefaultdict
+from pypdfium2_cfg.stl import cached_property, keydefaultdict
+from pypdfium2_cli._setup import setup_logging
 
 ModuleLoader = keydefaultdict(import_module)
 

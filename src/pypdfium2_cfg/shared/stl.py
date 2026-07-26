@@ -45,3 +45,17 @@ class cached_property:
         name = self.assigned_name  # or self.func.__name__  # py < 3.6
         setattr(obj, name, value)
         return value
+
+
+# see also collections.defaultdict
+
+class keydefaultdict (dict):
+    
+    def __init__(self, default_factory):
+        self.default_factory = default_factory
+        super().__init__()
+    
+    def __missing__(self, key):
+        value = self.default_factory(key)
+        self[key] = value
+        return value
