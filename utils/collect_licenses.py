@@ -25,8 +25,9 @@ def main():
     args = parser.parse_args()
     
     data_dirs = [p for p in DataDir.iterdir() if p.is_dir()]
-    data_dirs.remove(DataDir/"bindings")
-    data_dirs.remove(DataDir/"sourcebuild")
+    for d in (DataDir/"bindings", DataDir/"sourcebuild"):
+        if d in data_dirs:
+            data_dirs.remove(d)
     
     licenses = {}
     for dir in data_dirs:
