@@ -4,14 +4,19 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
-    # We do not declare an explicit setuptools min version for a variety of reasons. Last time it was tested, setuptools 59 (max with Python 3.6) still mostly worked.
+    # We do not declare an explicit setuptools min version for a variety of reasons. FWIW, last time it was tested, setuptools 59 (max with Python 3.6) still mostly worked.
     "setuptools",
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
     "packaging",
-    # XXX dependence on wheel is historical, with setuptools >= v70.1.0 this is not needed anymore
+    # NB: wheel is no longer needed with setuptools >= v70.1.0, but we still specify it for backward compatibility
     "wheel !=0.38.0, !=0.38.1",
 ]
 
+# We prefer dependency-groups (PEP 735) over optional-dependencies (extras), for two reasons:
+# - Installation is independent of pypdfium2 itself. e.g. you can install the setup group first, then install pypdfium2 with --no-build-isolation. Likewise, you may want to install the converters or test dependencies without re-installing pypdfium2.
+# - BUG(177): PyPI actually refuses upload if external (@ git+) dependencies end up in package metadata. PEP 735 emphasizes the idea that dependency groups "are not included in any built distribution of the project".
+# The historical alternative is requirements files, but dependency groups are a little more succinct.
+# Note: As of 07/2026, pip has finally gained an --only-deps option, but this does not distinguish between required and extra dependencies, and there is no way to exclude extras from package metadata, so dependency groups are still merited.
 [dependency-groups]
 converters = ["pillow", "numpy"]
 test = ["pytest", "tabulate", {include-group = "converters"}]
