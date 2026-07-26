@@ -4,7 +4,7 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
-    # We do not declare an explicit setuptools min version for a variety of reasons. Last time it was tested, setuptools 59 (max with Python 3.6) still kind of worked.
+    # We do not declare an explicit setuptools min version for a variety of reasons. Last time it was tested, setuptools 59 (max with Python 3.6) still mostly worked.
     "setuptools",
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
     "packaging",
@@ -72,7 +72,7 @@ PDFIUM_PLATFORM = "sourcebuild-toolchained"
 
 [[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
-select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_amd64 *-win32"
+select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_{amd64,arm64} *-win32"
 test-requires = ["pytest", "pillow", "numpy"]
 inherit.test-command = "append"
 test-command = [
