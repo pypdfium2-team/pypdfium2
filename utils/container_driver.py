@@ -90,7 +90,7 @@ def write_script(args, cibw_cpu, sys_install, image):
     if args.wheel_path:
         if cibw_cpu.startswith("mips"):
             pip_packages.append("wheel")
-            lib_install = f'bash "{MountPoint}/utils/enforce_install.sh" "$1"'
+            lib_install = './utils/enforce_install.sh "$1"'
         else:
             lib_install = 'pip install "$1"'
     else:
