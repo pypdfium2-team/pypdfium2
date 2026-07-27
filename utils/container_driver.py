@@ -11,12 +11,6 @@ from collections import namedtuple
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from simplebase import ProjectDir, log, get_cool_date  # local
 
-# With manylinux2014 or debian bullseye, you should pass --update-with-pip pytest.
-# manylinux2014's pytest causes a lot of erroneous test failures because it lacks APIs etc., whereas debian bullseye's pytest fails right on startup at parsing our pyproject.toml.
-_RHEL_CMD   = "yum install -y python3 && yum install -y python3-pillow python3-numpy python3-pytest || true"
-_DEBIAN_CMD = "apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
-_ALPINE_CMD = "apk add python3 py3-pip py3-pillow py3-numpy py3-pytest"
-
 # Map uname-style machine name to docker container arch name
 # Check the respective docker hub pages for a list of platforms (e.g. https://hub.docker.com/_/debian#quick-reference-cont)
 DOCKER_CPU_MAP = {
@@ -38,13 +32,17 @@ PLATFORM_CPU_MAP = {
 # The following platform names match across conventions, so they do not need to be explicitly handled above:
 # loong64, mips64le, ppc64le, riscv64, s390x
 
+# Note: With manylinux2014 or debian bullseye, you should pass --update-with-pip pytest.
+# manylinux2014's pytest causes a lot of erroneous test failures because it lacks APIs etc., whereas debian bullseye's pytest fails right on startup at parsing our pyproject.toml.
 ImageCmdMap = {
-    "debian": ("bash", _DEBIAN_CMD),
-    "manylinux2014": ("bash", _RHEL_CMD),
-    "alpine": ("sh", _ALPINE_CMD),
+    "debian": ("bash", "apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"),
+    "manylinux2014": ("bash", "yum install -y python3 && yum install -y python3-pillow python3-numpy python3-pytest || true"),
+    "alpine": ("sh", "apk add python3 py3-pip py3-pillow py3-numpy py3-pytest"),
 }
 ValidImagesMap = {"manylinux": ("debian", "manylinux2014"), "musllinux": ("alpine", )}
+MountPoint = "/projects/pypdfium2"
 ImageInfo = namedtuple("ImageInfo", ("name", "version"))
+ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
 
 
 def get_image(image, cibw_os, docker_cpu):
@@ -65,9 +63,6 @@ def get_image(image, cibw_os, docker_cpu):
     
     return ImageInfo(image, version)
 
-
-MountPoint = "/projects/pypdfium2"
-ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
 
 # IMPORTANT: The container's venv *must not* be managed in the mounted directory, since it should never end up on the host. In particular, don't use the usual //.venv, as that would conflict with the host's venv.
 SCRIPT_TEMPLATE = f"""\
