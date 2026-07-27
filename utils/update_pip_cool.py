@@ -27,7 +27,7 @@ pip_major = pip_version[0]
 log(f"pip version is {pip_version}")
 
 # Try to obtain a pip version that honors cooldown before updating pip unbounded
-# NOTE: We're always using lockfiles here, because for some reason pip supports --hash in requirements files earlier than it does on a normal pip install command.
+# NOTE: We're always using requirements files here, because for some reason pip supports --hash in requirements files earlier than it does on a normal pip install command.
 update_ok = True
 if pip_major < 26:
     py_version = sys.version_info[:2]
