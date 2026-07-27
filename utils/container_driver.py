@@ -11,7 +11,9 @@ from collections import namedtuple
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from simplebase import ProjectDir, log, get_cool_date  # local
 
-_RHEL_CMD   = "yum install -y python3 python3-pillow python3-numpy"  # python3-pytest
+# With manylinux2014 or debian bullseye, you should pass --update-with-pip pytest.
+# manylinux2014's pytest causes a lot of erroneous test failures because it lacks APIs etc., whereas debian bullseye's pytest fails right on startup at parsing our pyproject.toml.
+_RHEL_CMD   = "yum install -y python3 && yum install -y python3-pillow python3-numpy python3-pytest || true"
 _DEBIAN_CMD = "apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"
 _ALPINE_CMD = "apk add python3 py3-pip py3-pillow py3-numpy py3-pytest"
 
@@ -36,23 +38,35 @@ PLATFORM_CPU_MAP = {
 # The following platform names match across conventions, so they do not need to be explicitly handled above:
 # loong64, mips64le, ppc64le, riscv64, s390x
 
-def _get_container(cibw_os, cibw_cpu, docker_cpu, image):
-    prefix = f"ghcr.io/" if docker_cpu == "loong64" else ""
-    if cibw_os == "manylinux":
-        if image == "debian":
-            which_debian = "bookworm" if docker_cpu == "mips64le" else "trixie"
-            return f"{prefix}{docker_cpu}/debian:{which_debian}-slim", "bash", _DEBIAN_CMD
-        elif image == "manylinux2014":
-            # manylinux2014 is useful to test both python 3.6 and glibc 2.17 compatibility in one go (though perhaps only for x86_64)
-            return f"quay.io/pypa/manylinux2014_{cibw_cpu}", "bash", _RHEL_CMD
-    elif cibw_os == "musllinux":
-        assert image == "alpine"
-        return f"{prefix}{docker_cpu}/alpine:3", "sh", _ALPINE_CMD
-    assert False, f"{cibw_os} {image} is not a supported combination"
-
-
 MountPoint = "/projects/pypdfium2"
+ImageCmdMap = {
+    "debian": ("bash", _DEBIAN_CMD),
+    "manylinux2014": ("bash", _RHEL_CMD),
+    "alpine": ("sh", _ALPINE_CMD),
+}
+ValidImagesMap = {"manylinux": ("debian", "manylinux2014"), "musllinux": ("alpine", )}
+ImageInfo = namedtuple("ImageInfo", ("name", "version"))
 ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
+
+
+def get_image(image, cibw_os, docker_cpu):
+    
+    if not image:
+        image = {"manylinux": "debian", "musllinux": "alpine"}[cibw_os]
+    image, *version = image.split(":", maxsplit=1)
+    assert image in ValidImagesMap[cibw_os]
+    
+    if not version:
+        version = {
+            "debian": ("bookworm-slim" if docker_cpu == "mips64le" else "trixie-slim"),
+            "manylinux2014": None,
+            "alpine": '3',
+        }[image]
+    else:
+        version, = version
+    
+    return ImageInfo(image, version)
+
 
 SCRIPT_TEMPLATE = f"""\
 set -exuo pipefail
@@ -71,8 +85,10 @@ pypdfium2 --version
 python3 -m pytest tests/
 """
 
-def write_script(args, cibw_cpu, sys_install):
+def write_script(args, cibw_cpu, sys_install, image):
     pip_packages = []
+    if args.update_with_pip:
+        pip_packages.extend(args.update_with_pip)
     
     if args.wheel_path:
         if cibw_cpu.startswith("mips"):
@@ -84,8 +100,10 @@ def write_script(args, cibw_cpu, sys_install):
         pip_packages += ("setuptools", "packaging", "wheel", "build")
         lib_install = 'pip install --no-build-isolation -v .'
     
-    if args.image == "manylinux2014":
-        pip_packages.append("pytest")
+    if image.name == "debian" and image.version in ("buster", "buster-slim"):
+        sys_install = """\
+sed -i.bak "s|deb.debian.org|archive.debian.org|g" /etc/apt/sources.list
+""" + sys_install
     
     pip_install = ('pip install -U ' + " ".join(pip_packages)) if pip_packages else ""
     return SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
@@ -98,8 +116,10 @@ def parse_args():
     parser.add_argument("target")
     parser.add_argument("--image")
     parser.add_argument("-w", "--wheel-path")
+    parser.add_argument("-u", "--update-with-pip", nargs="+")
     args = parser.parse_args(sys.argv[1:])
     return args
+
 
 def main():
     
@@ -110,14 +130,18 @@ def main():
     
     cibw_os, cibw_cpu = args.target.split("_", maxsplit=1)
     cibw_cpu = {"loongarch64": "loong64"}.get(cibw_cpu, cibw_cpu)
-    if not args.image:
-        args.image = {"manylinux": "debian", "musllinux": "alpine"}[cibw_os]
-    
     docker_cpu = DOCKER_CPU_MAP.get(cibw_cpu, cibw_cpu)
     platform_cpu = PLATFORM_CPU_MAP.get(cibw_cpu, cibw_cpu)
     
-    container, shell, sys_install = _get_container(cibw_os, cibw_cpu, docker_cpu, args.image)
-    script = write_script(args, cibw_cpu, sys_install)
+    image = get_image(args.image, cibw_os, docker_cpu)
+    shell, sys_install = ImageCmdMap[image.name]
+    if image.name == "manylinux2014":
+        image_prefix = "quay.io/pypa/"
+        container = f"{image_prefix}{image.name}_{cibw_cpu}"
+    else:
+        image_prefix = "ghcr.io/" if docker_cpu == "loong64" else ""
+        container = f"{image_prefix}{docker_cpu}/{image.name}:{image.version}"
+    script = write_script(args, cibw_cpu, sys_install, image)
     
     docker_flags = ("--platform", f"linux/{platform_cpu}")
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{MountPoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
