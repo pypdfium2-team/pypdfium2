@@ -24,24 +24,27 @@ pip_major = pip_version[0]
 log(f"pip version is {pip_version}")
 
 # try to obtain a pip version that honors cooldown before updating pip unbounded
+pass_cooldown = True
 if pip_major < 26:
     py_version = sys.version_info[:2]
     log(f"Python version is {py_version}")
-    pass_cooldown = True
+    # NOTE: we're always using lockfiles here, because for some reason pip supports --hash in requirements files earlier than it does on a normal pip install command
     if py_version >= (3, 10):
         pip_lock, update_ok = "py_current", True
-    if py_version == (3, 9):
-        pip_lock, update_ok = "py_39", True  # supports cooldown
+    elif py_version == (3, 9):
+        pip_lock, update_ok = "py_39", True
     elif py_version == (3, 8):
-        log("WARNING: Python 3.8's max pip does not support dependency cooldowns!")
         pip_lock, update_ok = "py_38", False
+    # TODO handle 3.7 (what is its max pip version?)
+    elif py_version == (3, 6):
+        pip_lock, update_ok = "py_36", False
     else:
-        # Python 3.6 max pip is 21.3.1. Not sure about Python 3.7.
-        log("WARNING: Unhandled python version below 3.8. Doing unsafe update to the max pip version. It will not support dependency cooldowns!")
-        pip_lock, update_ok = None, True
-        pass_cooldown = False
+        pip_lock, update_ok, pass_cooldown = None, True, False
+        log("WARNING: Unhandled python version - don't have a pip pin. Will proceed with unsafe update to the max pip version. Dependency cooldowns will not be supported!")
     if pip_lock:
-        run([sys.executable, "-m", "pip", "install", "--require-hashes", "--no-deps", "-r", ProjectDir/"lock"/"pip"/f"{pip_lock}.txt"])
+        run([sys.executable, "-m", "pip", "install", "--no-deps", "--require-hashes", "-r", str(ProjectDir/"lock"/"pip"/f"{pip_lock}.txt")])
+    if not update_ok:
+        log("WARNING: Max known pip version does not support dependency cooldown. Will not attempt to update pip further.")
 else:
     update_ok = True
 
