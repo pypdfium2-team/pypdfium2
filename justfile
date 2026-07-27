@@ -6,9 +6,26 @@ BROWSER := env('BROWSER', 'google-chrome')
 
 list:
 	just -l
-
 test *args:
 	python3 -m pytest tests/ {{args}}
+clean:
+	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
+
+check:
+	./utils/check.sh
+distcheck:
+	twine check dist/*
+	check-wheel-contents dist/*.whl
+zizmor *args:
+     zizmor .github/ --persona auditor {{args}}
+zizmor-noisy *args: (zizmor '--no-ignores --no-config' args)
+
+docs-build:  # *args
+	python3 -m sphinx -b html docs/source docs/build/html
+docs-open:
+	{{BROWSER}} docs/build/html/index.html &>/dev/null &
+docs-clean:
+	rm -rf docs/build/html
 
 _coverage_impl OMISSIONS *args:
 	python3 -m coverage run --omit "{{OMISSIONS}}" -m pytest tests/ {{args}}
@@ -19,25 +36,6 @@ coverage *args:
 	just _coverage_impl "src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 coverage-core *args:
 	just _coverage_impl "src/pypdfium2/__main__.py,src/pypdfium2_cli/*,src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
-
-docs-build:  # *args
-	python3 -m sphinx -b html docs/source docs/build/html
-docs-open:
-	{{BROWSER}} docs/build/html/index.html &>/dev/null &
-docs-clean:
-	rm -rf docs/build/html
-
-clean:
-	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
-check:
-	./utils/check.sh
-distcheck:
-	twine check dist/*
-	check-wheel-contents dist/*.whl
-
-zizmor *args:
-     zizmor .github/ --persona auditor {{args}}
-zizmor-noisy *args: (zizmor '--no-ignores --no-config' args)
 
 download *args:
 	python3 setupsrc/update.py --verify {{args}}
@@ -55,8 +53,14 @@ craft-conda *args:
 # see the notes in craft.py for why clearing egg-info and build cache is essential
 pkg platform='' *args='-w':
 	rm -rf pypdfium2.egg-info/ build/
-	PDFIUM_PLATFORM={{platform}} python3 -m build -xn {{args}}
+	PDFIUM_PLATFORM="{{platform}}" python3 -m build -xn {{args}}
 sdist: (craft '--sdist')
 sdist-unassisted: (pkg 'sdist' '-s')
-
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
+
+venv-create envname='.venv':
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    python3 -m venv --clear {{envname}}
+    VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
+    $VENV_BIN/python3 utils/update_pip_cool.py
