@@ -9,6 +9,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from simplebase import ProjectDir, log, get_cool_date
 
+LockDir = ProjectDir/"lock"
+LockDir_Pip = LockDir/"unmanaged"/"pip"
+
 def run(cmd, check=True, **kwargs):
     log(cmd)
     return subprocess.run(cmd, check=check, **kwargs)
@@ -23,30 +26,24 @@ pip_version = get_version([sys.executable, "-m", "pip", "--version"], "pip")
 pip_major = pip_version[0]
 log(f"pip version is {pip_version}")
 
-# try to obtain a pip version that honors cooldown before updating pip unbounded
-pass_cooldown = True
+# Try to obtain a pip version that honors cooldown before updating pip unbounded
+# NOTE: We're always using lockfiles here, because for some reason pip supports --hash in requirements files earlier than it does on a normal pip install command.
+update_ok, pass_cooldown = True, True
 if pip_major < 26:
-    py_version = sys.version_info[:2]
-    log(f"Python version is {py_version}")
-    # NOTE: we're always using lockfiles here, because for some reason pip supports --hash in requirements files earlier than it does on a normal pip install command
+    py_version = sys.version_info
+    log(f"Python version is {tuple(py_version)}")
     if py_version >= (3, 10):
-        pip_lock, update_ok = "py_current", True
-    elif py_version == (3, 9):
-        pip_lock, update_ok = "py_39", True
-    elif py_version == (3, 8):
-        pip_lock, update_ok = "py_38", False
-    # TODO handle 3.7 (what is its max pip version?)
-    elif py_version == (3, 6):
-        pip_lock, update_ok = "py_36", False
+        pip_lock = LockDir/"pip.txt"
+    elif py_version >= (3, 6):
+        pip_lock = LockDir_Pip/f"py{py_version.major}{py_version.minor}.txt"
+        update_ok = py_version >= (3, 9)
+        if not update_ok:
+            log("WARNING: Max known pip version does not support dependency cooldown. Will not attempt to update pip further.")
     else:
-        pip_lock, update_ok, pass_cooldown = None, True, False
-        log("WARNING: Unhandled python version - don't have a pip pin. Will proceed with unsafe update to the max pip version. Dependency cooldowns will not be supported!")
+        pip_lock, pass_cooldown = None, False
+        log("WARNING: Unhandled python version below 3.6 - don't have a pip pin. Will proceed with unsafe update to the max pip version. Dependency cooldown will not be supported.")
     if pip_lock:
-        run([sys.executable, "-m", "pip", "install", "--no-deps", "--require-hashes", "-r", str(ProjectDir/"lock"/"pip"/f"{pip_lock}.txt")])
-    if not update_ok:
-        log("WARNING: Max known pip version does not support dependency cooldown. Will not attempt to update pip further.")
-else:
-    update_ok = True
+        run([sys.executable, "-m", "pip", "install", "--no-deps", "--require-hashes", "-r", str(pip_lock)])
 
 if update_ok:
     cooldown_args = ("--uploaded-prior-to", get_cool_date(3)) if pass_cooldown else ()

@@ -16,7 +16,9 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "pip"
-    directory: "/lock"
+    directory: "/"
+    exclude-paths:
+      - "lock/unmanaged/**"
     schedule:
       interval: "monthly"
     cooldown:
