@@ -38,7 +38,6 @@ PLATFORM_CPU_MAP = {
 # The following platform names match across conventions, so they do not need to be explicitly handled above:
 # loong64, mips64le, ppc64le, riscv64, s390x
 
-MountPoint = "/projects/pypdfium2"
 ImageCmdMap = {
     "debian": ("bash", _DEBIAN_CMD),
     "manylinux2014": ("bash", _RHEL_CMD),
@@ -46,7 +45,6 @@ ImageCmdMap = {
 }
 ValidImagesMap = {"manylinux": ("debian", "manylinux2014"), "musllinux": ("alpine", )}
 ImageInfo = namedtuple("ImageInfo", ("name", "version"))
-ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
 
 
 def get_image(image, cibw_os, docker_cpu):
@@ -68,6 +66,10 @@ def get_image(image, cibw_os, docker_cpu):
     return ImageInfo(image, version)
 
 
+MountPoint = "/projects/pypdfium2"
+ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
+
+# IMPORTANT: The container's venv *must not* be managed in the mounted directory, since it should never end up on the host. In particular, don't use the usual //.venv, as that would conflict with the host's venv.
 SCRIPT_TEMPLATE = f"""\
 set -exuo pipefail
 
