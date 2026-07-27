@@ -110,6 +110,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description = "Install and test pypdfium2 in docker container",
     )
+    # TODO Make `target` a flag argument and inline inference from wheel filename, if a wheel is provided. (See .github/actions/test_step/action.yml for how the inference works.) Then we'd no longer need an individual regextract.py utility, and calling container_driver.py would be a little easier for everyone.
     parser.add_argument("target")
     parser.add_argument("--image")
     parser.add_argument("-w", "--wheel-path")
