@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env sh
 set -exuo pipefail
 
 WHEEL_PATH="$1"
