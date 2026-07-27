@@ -31,7 +31,7 @@ log(f"pip version is {pip_version}")
 update_ok = True
 if pip_major < 26:
     py_version = sys.version_info[:2]
-    log(f"Python version is {tuple(py_version)}")
+    log(f"Python version is {py_version}")
     if py_version >= (3, 10):
         pip_lock = LockDir/"pip.txt"
     elif py_version >= (3, 6):
