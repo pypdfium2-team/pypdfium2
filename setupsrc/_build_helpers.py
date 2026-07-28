@@ -46,7 +46,7 @@ def get_clang_version(clang_root):
 
 
 def git_apply_patch(patch, cwd, git_args=()):
-    run_cmd(["git", *git_args, "apply", "--ignore-space-change", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
+    run_cmd(["git", *git_args, "apply", "--ignore-whitespace", "-v", patch], cwd=cwd, check=True)
 
 def autopatch(file, pattern, repl, is_regex, exp_count=None):
     log(f"Patch {pattern!r} -> {repl!r} (is_regex={is_regex}) on {file}")
