@@ -117,7 +117,6 @@ def main_pypi(args):
             args.pdfium_ver = int(args.pdfium_ver)
         
         args.platforms = handle_platforms(args.platforms)
-        
         os.environ["USE_TARBALL_LICENSES"] = "1"
         suffix = _build_pl_suffix(args.pdfium_ver, args.use_v8)
         for plat in args.platforms:

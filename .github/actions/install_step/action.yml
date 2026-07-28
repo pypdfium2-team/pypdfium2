@@ -52,7 +52,8 @@ runs:
       env:
         INITIAL_PYTHON: ${{ inputs.initial_python }}
     
-    # Note: setup-python has the unfortunate habit of auto-updating pip, without cooldown. However, AFAIK, venvs are initialized with the python version's bundled pip, so we do not actually use setup-python's pip.
+    # Note: setup-python has the unfortunate habit of auto-updating pip, without cooldown. As of v6.3.0 this behavior is not configurable. venvs are initialized with the python version's bundled pip, so we do not actually use setup-python's pip, but install-time attacks are still a problem.
+    # See https://github.com/actions/setup-python/issues/1346
     - name: Update pip
       shell: bash
       run: |
