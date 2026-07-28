@@ -42,7 +42,7 @@ if pip_major < 26:
     else:
         raise ValueError("Unsupported Python version below 3.6 - don't know max pip version.")
     if pip_lock:
-        run([sys.executable, "-m", "pip", "install", "--no-deps", "--require-hashes", "-r", str(pip_lock)])
+        run([sys.executable, "-m", "pip", "install", "--only-binary", ":all:", "--no-deps", "--require-hashes", "-r", str(pip_lock)])
 
 if update_ok:
-    run([sys.executable, "-m", "pip", "install", "--uploaded-prior-to", get_cool_date(3), "-U", "pip"])
+    run([sys.executable, "-m", "pip", "install", "--only-binary", ":all:", "--uploaded-prior-to", get_cool_date(3), "-U", "pip"])
