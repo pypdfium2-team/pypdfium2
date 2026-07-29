@@ -63,7 +63,7 @@ runs:
     
     # With some older versions of Python, the max available pip version is incapable of dependency cooldown (e.g. Python 3.8 / pip 25.0.1).
     # Since we still want to (or have to) test these versions, use $PIP_UPLOADED_PRIOR_TO rather than --uploaded-prior-to. This means the cooldown will be silently ignored if pip is too old.
-    # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P12D.
+    # Also note: Python 3.9's max pip is 26.0.1 which only supports ISO date format, not relative values like P7D.
     - name: Install with pip (cool if pip >= 26)
       if: ${{ inputs.pip_install }}
       shell: bash

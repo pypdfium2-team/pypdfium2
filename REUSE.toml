@@ -165,7 +165,6 @@ SPDX-FileComment = "Licenses for compiled binaries of pdfium."
 path = [
     "utils/check.sh",
     "utils/enforce_install.sh",
-    "utils/regextract.py",
     "utils/fix_venv.py",
     "utils/get_cool_date.py",
 ]

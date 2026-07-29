@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import re
 import sys
 import argparse
 import subprocess
@@ -32,8 +33,6 @@ PLATFORM_CPU_MAP = {
 # The following platform names match across conventions, so they do not need to be explicitly handled above:
 # loong64, mips64le, ppc64le, riscv64, s390x
 
-# Note: With manylinux2014 or debian bullseye, you should pass --update-with-pip pytest.
-# manylinux2014's pytest causes a lot of erroneous test failures because it lacks APIs etc., whereas debian bullseye's pytest fails right on startup at parsing our pyproject.toml.
 ImageCmdMap = {
     "debian": ("bash", "apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python3-venv python3-pillow python3-numpy python3-pytest"),
     "manylinux2014": ("bash", "yum install -y python3 && yum install -y python3-pillow python3-numpy python3-pytest || true"),
@@ -43,6 +42,21 @@ ValidImagesMap = {"manylinux": ("debian", "manylinux2014"), "musllinux": ("alpin
 MountPoint = "/projects/pypdfium2"
 ImageInfo = namedtuple("ImageInfo", ("name", "version"))
 ScriptFields = namedtuple("ScriptFields", ("sys_install", "pip_install", "lib_install"))
+
+
+def infer_target(target, artifact):
+    if not artifact or artifact.endswith(".tar.gz"):
+        assert target, "With source installation, a --target must be given, e.g. manylinux_x86_64"
+    elif artifact.endswith(".whl"):
+        inferred = "%s_%s" % re.search(r"-(\w+linux)_[\d_]+_(\w+)\.", artifact).groups()
+        if target:
+            assert target == inferred, f"Given vs. inferred target mismatch: {target!r} != {inferred!r}"
+        else:
+            log(f"Inferred target {inferred!r}")
+            target = inferred
+    else:
+        assert False, f"Invalid artifact (neither sdist nor wheel): {artifact!r}"
+    return target
 
 
 def get_image(image, cibw_os, docker_cpu):
@@ -87,8 +101,8 @@ def write_script(args, cibw_cpu, sys_install, image):
     if args.update_with_pip:
         pip_packages.extend(args.update_with_pip)
     
-    if args.wheel_path:
-        if cibw_cpu.startswith("mips"):
+    if args.artifact:
+        if cibw_cpu.startswith("mips") and args.artifact.endswith(".whl"):
             pip_packages.append("wheel")
             lib_install = './utils/enforce_install.sh "$1"'
         else:
@@ -108,14 +122,27 @@ sed -i.bak "s|deb.debian.org|archive.debian.org|g" /etc/apt/sources.list
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description = "Install and test pypdfium2 in docker container",
+        description = "Install and test pypdfium2 in a docker container",
     )
-    # TODO Make `target` a flag argument and inline inference from wheel filename, if a wheel is provided. (See .github/actions/test_step/action.yml for how the inference works.) Then we'd no longer need an individual regextract.py utility, and calling container_driver.py would be a little easier for everyone.
-    parser.add_argument("target")
-    parser.add_argument("--image")
-    parser.add_argument("-w", "--wheel-path")
-    parser.add_argument("-u", "--update-with-pip", nargs="+")
+    parser.add_argument(
+        "-a", "--artifact",
+        help = "The artifact (wheel or sdist) to install. Optional. If not given, pypdfium2 will be installed from the mounted repository directly, rather than from a packaged distribution."
+    )
+    parser.add_argument(
+        "-t", "--target",
+        help = "The target platform, in CIBW/wheeltag-like notation. Required if installing from source. Optional if a wheel artifact is given, where the target will be inferred from the wheel filename, with this option just used for validation."
+    )
+    parser.add_argument(
+        "-i", "--image",
+        help = "The container image to use. Supported images are: (manylinux) debian, manylinux2014. (musllinux) alpine. Optionally, a colon-separated version specifier can be added, e.g. debian:bookworm-slim or alpine:3. If not given, a default version will be used."
+    )
+    parser.add_argument(
+        "-u", "--update-with-pip",
+        nargs="+",
+        help = "Packages to install/update with pip. E.g. with manylinux2014 or debian:bullseye, getting pytest from PyPI is recommended, as these containers' system packages of pytest are known to be incompatible with pypdfium2. With x86_64 or aarch64, it is also possible (and sometimes necessary) to install pillow and numpy from PyPI."
+    )
     args = parser.parse_args(sys.argv[1:])
+    args.target = infer_target(args.target, args.artifact)
     return args
 
 
@@ -143,8 +170,8 @@ def main():
     
     docker_flags = ("--platform", f"linux/{platform_cpu}")
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{MountPoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
-    if args.wheel_path:
-        wheel_path = str(Path(MountPoint)/args.wheel_path)
+    if args.artifact:
+        wheel_path = str(Path(MountPoint)/args.artifact)
         docker_cmd += ["--", wheel_path]
     
     log(docker_cmd)

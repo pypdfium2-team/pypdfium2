@@ -64,3 +64,6 @@ venv-create envname='.venv':
     python3 -m venv --clear {{envname}}
     VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
     $VENV_BIN/python3 utils/update_pip_cool.py
+
+container *args:
+	python3 utils/container_driver.py {{args}}
