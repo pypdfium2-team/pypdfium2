@@ -256,7 +256,7 @@ jobs:
       attestations: write  # GH attestation
       contents: write      # git push
     
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-24.04  # gh-action-pypi-publish doesn't seem to like ubuntu-slim
     steps:
       
       - name: Check out pypdfium2 (deep, authenticated)
