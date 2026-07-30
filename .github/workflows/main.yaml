@@ -254,7 +254,7 @@ jobs:
     permissions:
       id-token: write      # PyPI upload, GH attestation
       attestations: write  # GH attestation
-      contents: write      # git push
+      contents: write      # GH release, git push
     
     runs-on: ubuntu-24.04  # gh-action-pypi-publish doesn't seem to like ubuntu-slim
     steps:
