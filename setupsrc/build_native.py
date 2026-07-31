@@ -486,15 +486,14 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     # XXX
     run_cmd([
         "em++",
+        str(build_dir/"obj"/"libpdfium.a"),
         "-shared",
         # "-fPIC",
-        str(build_dir/"obj"/"libpdfium.a"),
         "-o", str(build_dir/"libpdfium.so"),
         "-s", "SIDE_MODULE=1",
+        "-s", "EXPORT_ALL=1",
         "-s", "ALLOW_MEMORY_GROWTH=1",
         "-s", "ALLOW_TABLE_GROWTH=1",
-        "-s", "LLD_REPORT_UNDEFINED",
-        "-s", "EXPORT_ALL=1",
         "-O2",
     ], cwd=build_dir)
     
