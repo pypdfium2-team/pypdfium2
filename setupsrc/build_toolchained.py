@@ -126,7 +126,7 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc):
         is_mips = target_cpu in ("mips64el", "mipsel")
         is_mips_clang = is_mips and not prefer_gcc
         if target_cpu == "ppc64":
-            git_apply_patch(PatchDir/"ppc64_cross.patch", PDFiumDir)
+            git_apply_patch(PatchDir/"unknown_cpu.patch", PDFiumDir)
         if is_mips_clang:
             git_apply_patch(PatchDir/"mips_cross.patch", PDFiumDir_build)
         if (PORTABLE_MODE and patch_clang) or is_mips_clang:

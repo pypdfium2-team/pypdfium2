@@ -98,7 +98,7 @@ Obtained from img2pdf. No individual license stated for this data file.
 [[annotations]]
 path = [
     "patches/android_cross.patch",
-    "patches/ppc64_cross.patch",
+    "patches/unknown_cpu.patch",
     "patches/wasm/pdfium.patch",
     "patches/wasm/build.patch",
     "patches/wasm/config.gn",

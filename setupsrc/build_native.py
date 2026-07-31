@@ -242,7 +242,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
         if is_pyodide:
-            git_apply_patch(PatchDir/"ppc64_cross.patch", cwd=PDFIUM_DIR)  # TODO rename
+            git_apply_patch(PatchDir/"unknown_cpu.patch", cwd=PDFIUM_DIR)
             git_apply_patch(PatchDir/"wasm"/"pdfium.patch", cwd=PDFIUM_DIR)
     
     df = DepsFetcher(deps_info)
