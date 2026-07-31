@@ -408,8 +408,8 @@ def _pyodide_link(build_dir):
     libpdfium_a = build_dir/"obj"/"libpdfium.a"
     libpdfium_so = build_dir/"libpdfium.so"
     # Is this all right? Not sure, but it seems to work.
-    # TODO(geisserml) Should we pass -O2 here? It appears to result in smaller builds.
-    em_cmd = ["em++", str(libpdfium_a), "-shared", "-o", str(libpdfium_so)]
+    # See also https://emscripten.org/docs/tools_reference/emcc.html#arguments
+    em_cmd = ["em++", str(libpdfium_a), "-shared", "-o", str(libpdfium_so), "-O2"]
     s_opts = dict(SIDE_MODULE=1, EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
     em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
     run_cmd(em_cmd, cwd=build_dir)
