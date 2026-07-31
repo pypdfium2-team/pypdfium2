@@ -242,6 +242,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
         if is_pyodide:
+            git_apply_patch(PatchDir/"ppc64_cross.patch", cwd=PDFIUM_DIR)  # TODO rename
             git_apply_patch(PatchDir/"wasm"/"pdfium.patch", cwd=PDFIUM_DIR)
     
     df = DepsFetcher(deps_info)
@@ -264,7 +265,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             git_apply_patch(PatchDir/"android_native.patch", cwd=PDFIUM_DIR_build)
         if is_pyodide:
             assert compiler is Compiler.gcc, "Pyodide is only handled in --compiler gcc mode at this time."
-            git_apply_patch(PatchDir/"ppc64_cross.patch", cwd=PDFIUM_DIR_build)  # TODO rename
             git_apply_patch(PatchDir/"wasm"/"build.patch", cwd=PDFIUM_DIR_build)
             wasm_config_dir = PDFIUM_DIR_build/"config"/"wasm"
             mkdir(wasm_config_dir)
