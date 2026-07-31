@@ -89,6 +89,9 @@ DefaultConfig = {
     "pdf_use_partition_alloc": False,
     "use_sysroot": False,
     "use_cxx23": False,
+    # XXX
+    "target_os": "emscripten",
+    "target_cpu": "wasm",
 }
 
 IS_ANDROID = Host.system == SysNames.android
@@ -241,6 +244,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         )
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
+        git_apply_patch(PatchDir/"wasm"/"pdfium.patch", cwd=PDFIUM_DIR)  # XXX
     
     df = DepsFetcher(deps_info)
     do_patches = df.fetch("build", PDFIUM_DIR_build, reset=reset)
@@ -260,6 +264,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:  # fix linkage step
             git_apply_patch(PatchDir/"android_native.patch", cwd=PDFIUM_DIR_build)
+        
+        git_apply_patch(PatchDir/"wasm"/"build.patch", cwd=PDFIUM_DIR_build)  # XXX
+        wasm_config_dir = PDFIUM_DIR_build / "config" / "wasm"
+        mkdir(wasm_config_dir)
+        shutil.copyfile(PatchDir/"wasm"/"config.gn", wasm_config_dir/"BUILD.gn")
+        
         if compiler is Compiler.clang:
             if clang_ver < 23:
                 git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
