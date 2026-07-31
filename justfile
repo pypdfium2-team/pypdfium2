@@ -74,3 +74,10 @@ pyodide-venv-create envname='.pyodide-venv':
 	# then run e.g. `. .pyodide-venv/bin/activate` to enter, and `deactivate` to leave, as usual
 pyodide-build *args:
 	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--reset --vendor all --no-vendor libc++ --pyodide" pyodide build .
+pyodide-test wheel: pyodide-venv-create
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
+    pip install {{wheel}}
+    pip install pillow numpy pytest
+    pytest tests/
