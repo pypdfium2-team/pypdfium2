@@ -71,18 +71,18 @@ def shared_autopatches(pdfium_dir, so_bundle_deps=True):
         r'"public/(.+)"', r'"../\1"',
         is_regex=True, exp_count=None,
     )
+    autopatch(
+        pdfium_dir/"public"/"fpdfview.h",
+        "#if defined(COMPONENT_BUILD)",
+        "#if 1  // defined(COMPONENT_BUILD)",
+        is_regex=False, exp_count=1,
+    )
     if so_bundle_deps:
         # bundle dependencies (e.g. abseil) into the pdfium DLL
         autopatch(
             pdfium_dir/"BUILD.gn",
             'component("pdfium")',
             'shared_library("pdfium")',
-            is_regex=False, exp_count=1,
-        )
-        autopatch(
-            pdfium_dir/"public"/"fpdfview.h",
-            "#if defined(COMPONENT_BUILD)",
-            "#if 1  // defined(COMPONENT_BUILD)",
             is_regex=False, exp_count=1,
         )
 
