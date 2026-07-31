@@ -58,12 +58,16 @@ sdist: (craft '--sdist')
 sdist-unassisted: (pkg 'sdist' '-s')
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
 
-venv-create envname='.venv':
+container *args:
+	python3 utils/container_driver.py {{args}}
+venv envname='.venv':
     #!/usr/bin/env bash
     set -euxo pipefail
     python3 -m venv --clear {{envname}}
     VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
     $VENV_BIN/python3 utils/update_pip_cool.py
 
-container *args:
-	python3 utils/container_driver.py {{args}}
+pyodide-venv:
+	pyodide venv --clear .pyodide-venv
+pyodide *args:
+	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--reset --vendor all --no-vendor libc++ --pyodide" pyodide build .

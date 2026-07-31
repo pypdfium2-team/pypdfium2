@@ -7,6 +7,8 @@ gh_only/
 conda/*/out/
 tests/output/
 .venv/
+.pyodide*/
+.python-history
 
 data/
 !data/.gitkeep

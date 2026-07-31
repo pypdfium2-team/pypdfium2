@@ -97,11 +97,14 @@ Obtained from img2pdf. No individual license stated for this data file.
 
 [[annotations]]
 path = [
+    "patches/android_cross.patch",
+    "patches/ppc64_cross.patch",
+    "patches/wasm/pdfium.patch",
+    "patches/wasm/build.patch",
+    "patches/wasm/config.gn",
     "patches/win/use_resources_rc.patch",
     "patches/win/build.patch",
     "patches/win/resources.rc",
-    "patches/android_cross.patch",
-    "patches/ppc64_cross.patch",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
