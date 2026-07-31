@@ -350,6 +350,7 @@ def setup_compiler(config, compiler, clang_ver, clang_path):
     if compiler is Compiler.gcc:
         config["is_clang"] = False
         # this ought to match CUSTOM_TOOLCHAIN_DIR
+        # XXX actually use upstream's gcc_toolchain("wasm") ?
         config["custom_toolchain"] = "//build/toolchain/linux/custom:default"
         config["host_toolchain"] = "//build/toolchain/linux/custom:default"
     elif compiler is Compiler.clang:
