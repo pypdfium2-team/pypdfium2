@@ -435,6 +435,26 @@ def test(build_dir, vendor_deps, compiler):
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
+def _collect_symbols(build_dir, libpdfium_a):
+    obj_names = tuple(
+        f"{fp.stem}.o:" for fp in (PDFIUM_DIR/"fpdfsdk").iterdir()
+        if fp.name.startswith("fpdf_") and fp.name.endswith(".cpp") and not fp.name.endswith("_embeddertest.cpp")
+    )
+    log(obj_names)
+    output = run_cmd(["llvm-nm", libpdfium_a, "--format=just-symbols"], capture=True, cwd=build_dir)
+    consume = False
+    symbols = []
+    for line in output.splitlines():  # TODO iterator?
+        if consume:
+            if not line:
+                consume = False
+            elif not line.startswith(("_", ".")):
+                symbols.append(line)
+        elif line in obj_names:
+            consume = True
+    return symbols
+
+
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, use_sysroot=False):
     
     if build_ver is None:
@@ -483,15 +503,22 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         test(build_dir, vendor_deps, compiler)
     
     # XXX
+    libpdfium_a = str(build_dir/"obj"/"libpdfium.a")
+    symbols = _collect_symbols(build_dir, libpdfium_a)
+    symbols = ','.join(symbols)
+    log(symbols)
     run_cmd([
         "em++",
         "-shared",
-        str(build_dir/"obj"/"libpdfium.a"),
+        "-fPIC",
+        "-Wl,--whole-archive",
+        libpdfium_a,
         "-o", str(build_dir/"libpdfium.so"),
         "-s", "SIDE_MODULE=1",
         "-s", "ALLOW_MEMORY_GROWTH=1",
         "-s", "ALLOW_TABLE_GROWTH=1",
-        "-s", "LLD_REPORT_UNDEFINED",
+        "-s", "EXPORT_ALL=1",
+        "-O2",
     ], cwd=build_dir)
     
     return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver)
