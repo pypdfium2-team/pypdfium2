@@ -69,5 +69,8 @@ venv-create envname='.venv':
 
 pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
+	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
+	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
+	# then run e.g. `. .pyodide-venv/bin/activate` to enter, and `deactivate` to leave, as usual
 pyodide-build *args:
 	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--reset --vendor all --no-vendor libc++ --pyodide" pyodide build .
