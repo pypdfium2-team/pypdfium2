@@ -65,7 +65,7 @@ def autopatch_dir(dir, globexpr, pattern, repl, is_regex, exp_count=None):
     for file in dir.glob(globexpr):
         autopatch(file, pattern, repl, is_regex, exp_count)
 
-def shared_autopatches(pdfium_dir, so_bundle_deps=True):
+def shared_autopatches(pdfium_dir, nonstatic=True):
     autopatch_dir(
         pdfium_dir/"public"/"cpp", "*.h",
         r'"public/(.+)"', r'"../\1"',
@@ -77,7 +77,7 @@ def shared_autopatches(pdfium_dir, so_bundle_deps=True):
         "#if 1  // defined(COMPONENT_BUILD)",
         is_regex=False, exp_count=1,
     )
-    if so_bundle_deps:
+    if nonstatic:
         # bundle dependencies (e.g. abseil) into the pdfium DLL
         autopatch(
             pdfium_dir/"BUILD.gn",

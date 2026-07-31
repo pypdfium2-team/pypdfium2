@@ -237,7 +237,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     df = DepsFetcher({"pdfium": pdfium_rev})
     do_patches = df.fetch("pdfium", PDFIUM_DIR, reset=reset)
     if do_patches:
-        shared_autopatches(PDFIUM_DIR, so_bundle_deps=False)  # XXX
+        shared_autopatches(PDFIUM_DIR, nonstatic=False)  # XXX
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
