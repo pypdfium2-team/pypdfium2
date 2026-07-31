@@ -611,7 +611,7 @@ Some params take a default from an environment variable, for easy passthrough wi
         "--pyodide",
         dest = "is_pyodide",
         action = "store_true",
-        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build` and should target WASM.",
+        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should target WASM.",
     )
     
     args = parser.parse_args(argv)
