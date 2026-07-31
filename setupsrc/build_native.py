@@ -399,17 +399,18 @@ def handle_sysroot(use_sysroot, config, compiler, vendor_deps):
         log("Warning: --use-sysroot works best with clang and vendored libc++. It may or may not work with GCC / system libc++.")
 
 
-def _perma_yield_value(value):
-    while True:
+def _prepend_each(value, iterable):
+    for item in iterable:
         yield value
+        yield item
 
 def _pyodide_link(build_dir):
     libpdfium_a = build_dir/"obj"/"libpdfium.a"
     libpdfium_so = build_dir/"libpdfium.so"
     # Is this all right? Not sure, but it seems to work.
     s_opts = dict(SIDE_MODULE=1, EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
-    em_cmd = ["em++", str(libpdfium_a), "-shared", "-o", str(libpdfium_so), "-O2"]
-    em_cmd += zip(_perma_yield_value("-s"), (f"{k}={v}" for k, v in s_opts.items()))
+    em_cmd = ["em++", str(libpdfium_a), "-shared", "-o", str(libpdfium_so)]
+    em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
     run_cmd(em_cmd, cwd=build_dir)
 
 
