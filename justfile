@@ -72,8 +72,8 @@ pyodide-venv-create envname='.pyodide-venv':
 	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
 	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
 	# then run e.g. `. .pyodide-venv/bin/activate` to enter, and `deactivate` to leave, as usual
-pyodide-build *args:
-	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--reset --vendor all --no-vendor libc++ --pyodide" pyodide build .
+pyodide-build:
+	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--reset --vendor all --no-vendor libc++ --pyodide" pyodide build . -vv
 pyodide-test wheel: pyodide-venv-create
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -81,3 +81,4 @@ pyodide-test wheel: pyodide-venv-create
     pip install {{wheel}}
     pip install pillow numpy pytest
     pytest tests/
+pyodide: pyodide-build (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')

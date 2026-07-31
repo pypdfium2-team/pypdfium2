@@ -613,7 +613,8 @@ Some params take a default from an environment variable, for easy passthrough wi
         "--pyodide",
         dest = "is_pyodide",
         action = "store_true",
-        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should thus target WASM. Currently requires GCC build mode. Warning: pypdfium2 on WASM is experimental and appears to be flaky (i.e. occasional crashes of unknown cause) - use with caution!.",
+        default = bool(os.environ.get("PYODIDE")),
+        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should thus target WASM. Currently requires GCC build mode. Automatically enabled if the PYODIDE env var is set. Warning: pypdfium2 on WASM is experimental and appears to be flaky (i.e. occasional crashes of unknown cause) - use with caution!.",
     )
     
     args = parser.parse_args(argv)
