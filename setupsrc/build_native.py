@@ -92,6 +92,7 @@ DefaultConfig = {
     # XXX
     "target_os": "emscripten",
     "target_cpu": "wasm",
+    "pdf_is_complete_lib": True,
 }
 
 IS_ANDROID = Host.system == SysNames.android
@@ -236,7 +237,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     df = DepsFetcher({"pdfium": pdfium_rev})
     do_patches = df.fetch("pdfium", PDFIUM_DIR, reset=reset)
     if do_patches:
-        shared_autopatches(PDFIUM_DIR)
+        shared_autopatches(PDFIUM_DIR, so_bundle_deps=False)  # XXX
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
@@ -480,6 +481,18 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     build(build_dir, config, with_tests, n_jobs)
     if with_tests:
         test(build_dir, vendor_deps, compiler)
+    
+    # XXX
+    run_cmd([
+        "em++",
+        "-shared",
+        str(build_dir/"obj"/"libpdfium.a"),
+        "-o", str(build_dir/"libpdfium.so"),
+        "-s", "SIDE_MODULE=1",
+        "-s", "ALLOW_MEMORY_GROWTH=1",
+        "-s", "ALLOW_TABLE_GROWTH=1",
+        "-s", "LLD_REPORT_UNDEFINED",
+    ], cwd=build_dir)
     
     return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver)
 
