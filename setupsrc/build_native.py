@@ -369,6 +369,8 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
             "pdf_is_complete_lib": True,
             "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
         })
+        # Note: There's also `pyodide config list` and `pyodide config get $key`, but for some reason this does not work within a running `pyodide build` session. Thus get flags from the (undocumented) build-time variables below.
+        # See also https://pyodide-build.readthedocs.io/en/latest/how-to/compiler-flags.html and https://pyodide-build.readthedocs.io/en/latest/how-to/debugging.html#check-active-configuration
         os.environ["CFLAGS"] = os.environ["SIDE_MODULE_CFLAGS"]
         os.environ["CXXFLAGS"] = os.environ["SIDE_MODULE_CXXFLAGS"]
         os.environ["LDFLAGS"] = os.environ["SIDE_MODULE_LDFLAGS"]
