@@ -622,7 +622,8 @@ Some params take a default from an environment variable, for easy passthrough wi
         dest = "is_pyodide",
         action = "store_true",
         default = bool(os.environ.get("PYODIDE")),
-        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should thus target WASM. Automatically enabled if the PYODIDE env var is set. Warning: pypdfium2 on WASM is experimental and known to be flaky (i.e. occasional random crashes or halts) - use with caution!.",
+        # FIXME HELPWANTED: If you can track down and fix the cause of these memory bugs, please reach out. Thanks!
+        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should target WASM. Automatically enabled if $PYODIDE is set. Both --compiler gcc or clang can be used as base config; the actual compiler will be emscripten either way. WARNING: The resuling builds are known to have memory issues (i.e. random crashes or halts on object closing) - use with caution! Don't publish and don't use in a production environment!",
     )
     
     args = parser.parse_args(argv)
