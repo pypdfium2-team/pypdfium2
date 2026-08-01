@@ -111,11 +111,6 @@ def write_script(args, cibw_cpu, sys_install, image):
         pip_packages += ("setuptools", "packaging", "wheel", "build")
         lib_install = 'pip install --no-build-isolation -v .'
     
-    if image.name == "debian" and image.version in ("buster", "buster-slim"):
-        sys_install = """\
-sed -i.bak "s|deb.debian.org|archive.debian.org|g" /etc/apt/sources.list
-""" + sys_install
-    
     pip_install = ('pip install -U ' + " ".join(pip_packages)) if pip_packages else ""
     return SCRIPT_TEMPLATE % ScriptFields(sys_install, pip_install, lib_install)._asdict()
 
