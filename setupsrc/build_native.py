@@ -373,8 +373,6 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
             "target_os": "emscripten",
             "target_cpu": "wasm",
             "pdf_is_complete_lib": True,
-            "pdf_use_partition_alloc": True,
-            #"use_allocator_shim": True,  # TODO test this also
             #"use_sized_deallocation": True,  # XXX only supported on clang
         })
 
