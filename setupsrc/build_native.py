@@ -36,7 +36,6 @@ DEPS_URLS = dict(
     libpng      = _CR_PREFIX + "chromium/src/third_party/libpng",
     zlib        = _CR_PREFIX + "chromium/src/third_party/zlib",
     harfbuzz    = _CR_PREFIX + "external/github.com/harfbuzz/harfbuzz",
-    partition_allocator = _CR_PREFIX + "chromium/src/base/allocator/partition_allocator",
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
@@ -161,8 +160,6 @@ def handle_deps(config, vendor_deps, with_tests, is_pyodide):
     deps_fields = ["build", "abseil", "fast_float", "simdutf"]
     if IS_ANDROID:
         deps_fields.append("catapult")
-    if is_pyodide:
-        deps_fields.append("partition_allocator")
     
     if "libc++" in vendor_deps:
         deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
@@ -267,7 +264,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if IS_ANDROID:  # fix linkage step
             git_apply_patch(PatchDir/"android_native.patch", cwd=PDFIUM_DIR_build)
         if is_pyodide:
-            assert compiler is Compiler.gcc, "Pyodide is only handled in --compiler gcc mode at this time."
             git_apply_patch(PatchDir/"wasm"/"build.patch", cwd=PDFIUM_DIR_build)
             wasm_config_dir = PDFIUM_DIR_build/"config"/"wasm"
             mkdir(wasm_config_dir)
@@ -312,8 +308,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
     if IS_ANDROID:
         df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
-    if is_pyodide:
-        df.fetch("partition_allocator", PDFIUM_DIR/"base"/"allocator"/"partition_allocator")
     
     if "libc++" in vendor_deps:
         df.fetch("buildtools", PDFIUM_DIR/"buildtools")
@@ -350,13 +344,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
 
 
 def configure(config, compiler, clang_ver, clang_path, is_pyodide):
-    # compiler config
     if compiler is Compiler.gcc:
         config["is_clang"] = False
-        # this ought to match CUSTOM_TOOLCHAIN_DIR
-        # TODO If it's pyodide/wasm, consider using the default toolchain/wasm/BUILD.gn and setting emscripten_path. This (i.e. our usual gcc toolchain) should also work though, thanks to the environment created by pyodide-build.
-        config["custom_toolchain"] = "//build/toolchain/linux/custom:default"
-        config["host_toolchain"] = "//build/toolchain/linux/custom:default"
+        if not is_pyodide:
+            # this ought to match CUSTOM_TOOLCHAIN_DIR
+            config["custom_toolchain"] = "//build/toolchain/linux/custom:default"
+            config["host_toolchain"] = "//build/toolchain/linux/custom:default"
     elif compiler is Compiler.clang:
         assert clang_path, "Clang path must be set"
         config.update({
@@ -366,14 +359,14 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
         })
     else:
         assert False, f"Unhandled compiler {compiler}"
-    
-    # pyodide config
     if is_pyodide:
+        # the toolchain is //build/toolchain/wasm/BUILD.gn by default
         config.update({
             "target_os": "emscripten",
             "target_cpu": "wasm",
             "pdf_is_complete_lib": True,
-            #"use_sized_deallocation": True,  # XXX only supported on clang
+            "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
+            #"use_sized_deallocation": True,
         })
 
 
@@ -495,7 +488,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         if clang_path is None:
             clang_path = Host.usr
         clang_ver = get_clang_version(clang_path)
-        if clang_ver < 22:
+        if clang_ver < 22 and not is_pyodide:
             log("Warning: Clang below version 22 is not supported with upstream's clang config - implicitly switching to --clang-as-gcc mode. If you mean to manually patch pdfium's //build for compatibility with older clang (possible, but no fun to maintain), take out this check.")
             clang_as_gcc = True
             clang_ver = None
@@ -620,7 +613,7 @@ Some params take a default from an environment variable, for easy passthrough wi
         dest = "is_pyodide",
         action = "store_true",
         default = bool(os.environ.get("PYODIDE")),
-        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should thus target WASM. Currently requires GCC build mode. Automatically enabled if the PYODIDE env var is set. Warning: pypdfium2 on WASM is experimental and appears to be flaky (i.e. occasional crashes of unknown cause) - use with caution!.",
+        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should thus target WASM. Automatically enabled if the PYODIDE env var is set. Warning: pypdfium2 on WASM is experimental and appears to be flaky (i.e. occasional crashes of unknown cause) - use with caution!.",
     )
     
     args = parser.parse_args(argv)
