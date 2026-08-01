@@ -268,7 +268,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             wasm_config_dir = PDFIUM_DIR_build/"config"/"wasm"
             mkdir(wasm_config_dir)
             shutil.copyfile(PatchDir/"wasm"/"config.gn", wasm_config_dir/"BUILD.gn")
-        if compiler is Compiler.clang:  # also is_pyodide
+        if compiler is Compiler.clang:
             if "libc++" not in vendor_deps:
                 # historically, https://crbug.com/410883044
                 autopatch(
@@ -345,6 +345,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
 
 
 def configure(config, compiler, clang_ver, clang_path, is_pyodide):
+    
     if compiler is Compiler.gcc:
         config["is_clang"] = False
         # this ought to match CUSTOM_TOOLCHAIN_DIR
@@ -359,6 +360,7 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
         })
     else:
         assert False, f"Unhandled compiler {compiler}"
+    
     if is_pyodide:
         config.update({
             "target_os": "emscripten",
