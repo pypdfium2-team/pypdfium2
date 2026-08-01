@@ -36,6 +36,7 @@ DEPS_URLS = dict(
     libpng      = _CR_PREFIX + "chromium/src/third_party/libpng",
     zlib        = _CR_PREFIX + "chromium/src/third_party/zlib",
     harfbuzz    = _CR_PREFIX + "external/github.com/harfbuzz/harfbuzz",
+    partition_allocator = _CR_PREFIX + "chromium/src/base/allocator/partition_allocator",
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
@@ -155,11 +156,13 @@ class _DeferredDeps:
         return out
 
 
-def handle_deps(config, vendor_deps, with_tests):
+def handle_deps(config, vendor_deps, with_tests, is_pyodide):
     
     deps_fields = ["build", "abseil", "fast_float", "simdutf"]
     if IS_ANDROID:
         deps_fields.append("catapult")
+    if is_pyodide:
+        deps_fields.append("partition_allocator")
     
     if "libc++" in vendor_deps:
         deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
@@ -309,6 +312,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
     if IS_ANDROID:
         df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
+    if is_pyodide:
+        df.fetch("partition_allocator", PDFIUM_DIR/"base"/"allocator"/"partition_allocator")
     
     if "libc++" in vendor_deps:
         df.fetch("buildtools", PDFIUM_DIR/"buildtools")
@@ -368,6 +373,9 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
             "target_os": "emscripten",
             "target_cpu": "wasm",
             "pdf_is_complete_lib": True,
+            "pdf_use_partition_alloc": True,
+            #"use_allocator_shim": True,  # TODO test this also
+            #"use_sized_deallocation": True,  # XXX only supported on clang
         })
 
 
@@ -503,7 +511,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
     log(vendor_deps)
-    deps_info = handle_deps(config, vendor_deps, with_tests)
+    deps_info = handle_deps(config, vendor_deps, with_tests, is_pyodide)
     
     mkdir(SOURCES_DIR)
     full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, is_pyodide)
