@@ -68,6 +68,7 @@ venv-create envname='.venv':
     VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
     $VENV_BIN/python3 utils/update_pip_cool.py
 
+# Concerning pypdfium2 on Pyodide, note the warning in build_native.py
 pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
 	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
