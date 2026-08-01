@@ -75,7 +75,8 @@ pyodide-venv-create envname='.pyodide-venv':
 	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
 	# then run e.g. `. .pyodide-venv/bin/activate` to enter, and `deactivate` to leave, as usual
 pyodide-build:
-	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ --reset {{BUILD_PARAMS}}" pyodide build . -vv
+	# you may want to set BUILD_PARAMS="--reset" on your side, or e.g. BUILD_PARAMS="-c clang --clang-path ~/Downloads/static-clang-22.1.7.0" to use clang base config
+	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv
 pyodide-test wheel:
     #!/usr/bin/env bash
     set -euxo pipefail
