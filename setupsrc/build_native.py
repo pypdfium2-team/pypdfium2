@@ -269,11 +269,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             wasm_config_dir = PDFIUM_DIR_build/"config"/"wasm"
             mkdir(wasm_config_dir)
             shutil.copyfile(PatchDir/"wasm"/"config.gn", wasm_config_dir/"BUILD.gn")
-        elif compiler is Compiler.clang:
-            if clang_ver < 23:
-                git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
-            if no_libclang_rt:
-                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
+        if compiler in (Compiler.clang, Compiler.emscripten):
             if "libc++" not in vendor_deps:
                 # historically, https://crbug.com/410883044
                 autopatch(
@@ -282,6 +278,11 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                     "use_libcxx_modules = false",
                     is_regex=False, exp_count=2,
                 )
+            if clang_ver < 23:
+                git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
+        if compiler is Compiler.clang:
+            if no_libclang_rt:
+                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
@@ -350,28 +351,27 @@ def configure(config, compiler, clang_ver, clang_path):
         # this ought to match CUSTOM_TOOLCHAIN_DIR
         config["custom_toolchain"] = "//build/toolchain/linux/custom:default"
         config["host_toolchain"] = "//build/toolchain/linux/custom:default"
-    elif compiler is Compiler.clang:
+    elif compiler in (Compiler.clang, Compiler.emscripten):
         assert clang_path, "Clang path must be set"
         config.update({
             "is_clang": True,
             "clang_base_path": str(clang_path),  # without trailing slash
             "clang_version": clang_ver,
         })
-    elif compiler is Compiler.emscripten:
+    else:
+        assert False, f"Unhandled compiler {compiler}"
+    if compiler is Compiler.emscripten:
         # the toolchain is //build/toolchain/wasm/BUILD.gn by default
         config.update({
-            "is_clang": False,
             "target_os": "emscripten",
             "target_cpu": "wasm",
             "pdf_is_complete_lib": True,
             "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
-            #"use_sized_deallocation": True,
+            "use_sized_deallocation": True,
         })
         os.environ["CFLAGS"] = os.environ["SIDE_MODULE_CFLAGS"]
         os.environ["CXXFLAGS"] = os.environ["SIDE_MODULE_CXXFLAGS"]
         os.environ["LDFLAGS"] = os.environ["SIDE_MODULE_LDFLAGS"]
-    else:
-        assert False, f"Unhandled compiler {compiler}"
 
 
 _SysrootMap = sysroot_cpu = {
@@ -488,11 +488,11 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             raise RuntimeError("Neither gcc nor clang installed.")
     
     clang_ver = None
-    if compiler is Compiler.clang:
+    if compiler in (Compiler.clang, Compiler.emscripten):
         if clang_path is None:
             clang_path = Host.usr
         clang_ver = get_clang_version(clang_path)
-        if clang_ver < 22:
+        if clang_ver < 22 and Compiler is not Compiler.emscripten:
             log("Warning: Clang below version 22 is not supported with upstream's clang config - implicitly switching to --clang-as-gcc mode. If you mean to manually patch pdfium's //build for compatibility with older clang (possible, but no fun to maintain), take out this check.")
             clang_as_gcc = True
             clang_ver = None
