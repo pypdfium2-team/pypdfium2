@@ -6,6 +6,7 @@
 import os
 import re
 import sys
+import shlex
 import shutil
 import argparse
 from enum import Enum
@@ -224,7 +225,7 @@ def _get_shimheaders_tool(pdfium_dir, rev="main"):
         url_request.urlretrieve(shimheaders_url, shimheaders_file)
 
 
-def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps):
+def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, is_pyodide):
     
     assert not IGNORE_FULLVER
     full_ver, pdfium_rev, chromium_rev = handle_sbuild_vers(short_ver)
@@ -233,7 +234,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     df = DepsFetcher({"pdfium": pdfium_rev})
     do_patches = df.fetch("pdfium", PDFIUM_DIR, reset=reset)
     if do_patches:
-        shared_autopatches(PDFIUM_DIR)
+        shared_autopatches(PDFIUM_DIR, nonstatic=(not is_pyodide))
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
@@ -241,6 +242,9 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         )
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
+        if is_pyodide:
+            git_apply_patch(PatchDir/"unknown_cpu.patch", cwd=PDFIUM_DIR)
+            git_apply_patch(PatchDir/"wasm"/"pdfium.patch", cwd=PDFIUM_DIR)
     
     df = DepsFetcher(deps_info)
     do_patches = df.fetch("build", PDFIUM_DIR_build, reset=reset)
@@ -260,11 +264,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if IS_ANDROID:  # fix linkage step
             git_apply_patch(PatchDir/"android_native.patch", cwd=PDFIUM_DIR_build)
+        if is_pyodide:
+            git_apply_patch(PatchDir/"wasm"/"build.patch", cwd=PDFIUM_DIR_build)
+            wasm_config_dir = PDFIUM_DIR_build/"config"/"wasm"
+            mkdir(wasm_config_dir)
+            shutil.copyfile(PatchDir/"wasm"/"config.gn", wasm_config_dir/"BUILD.gn")
         if compiler is Compiler.clang:
-            if clang_ver < 23:
-                git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
-            if no_libclang_rt:
-                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             if "libc++" not in vendor_deps:
                 # historically, https://crbug.com/410883044
                 autopatch(
@@ -273,6 +278,11 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                     "use_libcxx_modules = false",
                     is_regex=False, exp_count=2,
                 )
+            if clang_ver < 23:
+                git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
+        if compiler is Compiler.clang and not is_pyodide:
+            if no_libclang_rt:
+                git_apply_patch(PatchDir/"no_libclang_rt.patch", cwd=PDFIUM_DIR_build)
             # TODO should we handle other OSes here?
             # see also https://groups.google.com/g/llvm-dev/c/k3q_ATl-K_0/m/MjEb6gsCCAAJ
             lld_path = clang_path/"bin"/"ld.lld"
@@ -335,7 +345,8 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     return full_ver
 
 
-def setup_compiler(config, compiler, clang_ver, clang_path):
+def configure(config, compiler, clang_ver, clang_path, is_pyodide):
+    
     if compiler is Compiler.gcc:
         config["is_clang"] = False
         # this ought to match CUSTOM_TOOLCHAIN_DIR
@@ -350,6 +361,25 @@ def setup_compiler(config, compiler, clang_ver, clang_path):
         })
     else:
         assert False, f"Unhandled compiler {compiler}"
+    
+    if is_pyodide:
+        config.update({
+            "target_os": "emscripten",
+            "target_cpu": "wasm",
+            "pdf_is_complete_lib": True,
+            "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
+        })
+        # Note: There's also `pyodide config list` and `pyodide config get $key`, but for some reason this does not work within a running `pyodide build` session. Thus get flags from the (undocumented) build-time variables below.
+        # See also https://pyodide-build.readthedocs.io/en/latest/how-to/compiler-flags.html and https://pyodide-build.readthedocs.io/en/latest/how-to/debugging.html#check-active-configuration
+        os.environ["CFLAGS"] = os.environ["SIDE_MODULE_CFLAGS"]
+        os.environ["CXXFLAGS"] = os.environ["SIDE_MODULE_CXXFLAGS"]
+        os.environ["LDFLAGS"] = os.environ["SIDE_MODULE_LDFLAGS"]
+        # use the default //build/toolchain/wasm/BUILD.gn toolchain even if base mode is gcc
+        # (comment this out if you want to use our plain gcc toolchain)
+        if compiler is Compiler.gcc:
+            del config["custom_toolchain"], config["host_toolchain"]
+        if compiler is Compiler.clang:
+            config["use_sized_deallocation"] = True
 
 
 _SysrootMap = sysroot_cpu = {
@@ -380,7 +410,24 @@ def handle_sysroot(use_sysroot, config, compiler, vendor_deps):
         log("Warning: --use-sysroot works best with clang and vendored libc++. It may or may not work with GCC / system libc++.")
 
 
-def build(build_dir, config_dict, with_tests, n_jobs):
+def _prepend_each(value, iterable):
+    for item in iterable:
+        yield value
+        yield item
+
+def _pyodide_link(build_dir):
+    libpdfium_a = build_dir/"obj"/"libpdfium.a"
+    libpdfium_so = build_dir/"libpdfium.so"
+    # Is this all right? Not sure, but it seems to work.
+    # See also https://emscripten.org/docs/tools_reference/emcc.html#arguments and https://emscripten.org/docs/tools_reference/settings_reference.html
+    ldflags = shlex.split(os.environ["LDFLAGS"])
+    em_cmd = ["em++", str(libpdfium_a), "-shared", *ldflags, "-o", str(libpdfium_so)]
+    s_opts = dict(EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
+    em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
+    run_cmd(em_cmd, cwd=build_dir)
+
+
+def build(build_dir, config_dict, with_tests, n_jobs, compiler, is_pyodide):
     
     # Create target dir, or reuse existing
     mkdir(build_dir)
@@ -405,6 +452,9 @@ def build(build_dir, config_dict, with_tests, n_jobs):
     build_dir_rel = build_dir.relative_to(PDFIUM_DIR)
     run_cmd(["gn", "gen", str(build_dir_rel)], cwd=PDFIUM_DIR)
     run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
+    
+    if is_pyodide:
+        _pyodide_link(build_dir)
 
 
 def test(build_dir, vendor_deps, compiler):
@@ -424,7 +474,9 @@ def test(build_dir, vendor_deps, compiler):
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, use_sysroot=False):
+# TODO(geisserml) refactor to pass along an args object?
+
+def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, use_sysroot=False, is_pyodide=False):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -449,7 +501,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         if clang_path is None:
             clang_path = Host.usr
         clang_ver = get_clang_version(clang_path)
-        if clang_ver < 22:
+        if clang_ver < 22 and not is_pyodide:
             log("Warning: Clang below version 22 is not supported with upstream's clang config - implicitly switching to --clang-as-gcc mode. If you mean to manually patch pdfium's //build for compatibility with older clang (possible, but no fun to maintain), take out this check.")
             clang_as_gcc = True
             clang_ver = None
@@ -457,6 +509,8 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             env_prepend("PATH", str(clang_path/"bin"), os.pathsep)
             set_envs(CC="clang", CXX="clang++", TOOLPREFIX="llvm-")
             compiler = Compiler.gcc
+    if clang_as_gcc or is_pyodide:
+        env_append("CPPFLAGS", "-Wno-unknown-warning-option", " ")
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
@@ -464,14 +518,14 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     deps_info = handle_deps(config, vendor_deps, with_tests)
     
     mkdir(SOURCES_DIR)
-    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps)
-    setup_compiler(config, compiler, clang_ver, clang_path)
+    full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, is_pyodide)
+    configure(config, compiler, clang_ver, clang_path, is_pyodide)
     handle_sysroot(use_sysroot, config, compiler, vendor_deps)
-    build(build_dir, config, with_tests, n_jobs)
+    build(build_dir, config, with_tests, n_jobs, compiler, is_pyodide)
     if with_tests:
         test(build_dir, vendor_deps, compiler)
     
-    return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver)
+    return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver, load_lib=(not is_pyodide))
 
 
 def parse_args(argv):
@@ -524,7 +578,7 @@ Some params take a default from an environment variable, for easy passthrough wi
     parser.add_argument(
         "-c", "--compiler",
         type = str.lower,
-        help = "The compiler to use (gcc or clang). Defaults to gcc if available.",
+        help = "The compiler to use (gcc, clang). Defaults to gcc if available.",
     )
     parser.add_argument(
         "--reset",
@@ -567,12 +621,18 @@ Some params take a default from an environment variable, for easy passthrough wi
         default = bool(int( os.environ.get("USE_SYSROOT", 0) )),
         help = "Attempt to use a Google-processed Debian sysroot for the build. This may help achieve a lower glibc requirement. This option is Linux glibc only, and ignored on other platforms. If no sysroot is available for the host CPU, this will fail.",
     )
+    parser.add_argument(
+        "--pyodide",
+        dest = "is_pyodide",
+        action = "store_true",
+        default = bool(os.environ.get("PYODIDE")),
+        # FIXME HELPWANTED: If you can track down and fix the cause of these memory bugs, please reach out. Thanks!
+        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should target WASM. Automatically enabled if $PYODIDE is set. Both --compiler gcc or clang can be used as base config; the actual compiler will be emscripten either way. WARNING: The resulting builds are known to have memory issues (i.e. random crashes or halts on object closing) - use with caution! Don't publish, and don't use in a production environment!",
+    )
     
     args = parser.parse_args(argv)
-    
     if args.compiler:
         args.compiler = Compiler[args.compiler]
-    
     if args.vendor_deps:
         if args.vendor_deps == ["all"]:
             args.vendor_deps = VendorableDeps

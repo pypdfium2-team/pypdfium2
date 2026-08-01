@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 BROWSER := env('BROWSER', 'google-chrome')
+BUILD_PARAMS := env('BUILD_PARAMS', '')
 
 list:
 	just -l
@@ -58,6 +59,8 @@ sdist: (craft '--sdist')
 sdist-unassisted: (pkg 'sdist' '-s')
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
 
+container *args:
+	python3 utils/container_driver.py {{args}}
 venv-create envname='.venv':
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -65,5 +68,20 @@ venv-create envname='.venv':
     VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
     $VENV_BIN/python3 utils/update_pip_cool.py
 
-container *args:
-	python3 utils/container_driver.py {{args}}
+# Concerning pypdfium2 on Pyodide, note the warning in build_native.py
+pyodide-venv-create envname='.pyodide-venv':
+	pyodide venv --clear {{envname}}
+	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
+	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
+	# then run e.g. `. .pyodide-venv/bin/activate` to enter, and `deactivate` to leave, as usual
+pyodide-build:
+	# you may want to set BUILD_PARAMS="--reset" on your side, or e.g. BUILD_PARAMS="-c clang --clang-path ~/Downloads/static-clang-22.1.7.0" to use clang base config
+	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv
+pyodide-test wheel:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
+    pip install {{wheel}}
+    pip install pillow numpy pytest
+    pytest tests/
+pyodide: pyodide-build pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
