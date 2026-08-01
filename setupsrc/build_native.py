@@ -367,6 +367,9 @@ def configure(config, compiler, clang_ver, clang_path):
             "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
             #"use_sized_deallocation": True,
         })
+        os.environ["CFLAGS"] = os.environ["SIDE_MODULE_CFLAGS"]
+        os.environ["CXXFLAGS"] = os.environ["SIDE_MODULE_CXXFLAGS"]
+        os.environ["LDFLAGS"] = os.environ["SIDE_MODULE_LDFLAGS"]
     else:
         assert False, f"Unhandled compiler {compiler}"
 
@@ -409,7 +412,7 @@ def _pyodide_link(build_dir):
     libpdfium_so = build_dir/"libpdfium.so"
     # Is this all right? Not sure, but it seems to work.
     # See also https://emscripten.org/docs/tools_reference/emcc.html#arguments and https://emscripten.org/docs/tools_reference/settings_reference.html
-    em_cmd = ["em++", str(libpdfium_a), "-shared", "-fPIC", "-o", str(libpdfium_so)]  # "-O2",
+    em_cmd = ["em++", str(libpdfium_a), "-shared", "-O2", "-fPIC", "-o", str(libpdfium_so)]
     s_opts = dict(SIDE_MODULE=1, EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
     em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
     run_cmd(em_cmd, cwd=build_dir)
@@ -465,6 +468,9 @@ def test(build_dir, vendor_deps, compiler):
 # TODO(geisserml) refactor to pass along an args object
 
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, use_sysroot=False):
+    
+    # for k, v in os.environ.items():
+    #     log(f"{k}={v!r}")
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
