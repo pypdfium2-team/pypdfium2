@@ -427,7 +427,7 @@ def _pyodide_link(build_dir):
     run_cmd(em_cmd, cwd=build_dir)
 
 
-def build(build_dir, config_dict, with_tests, n_jobs, compiler, is_pyodide):
+def build(build_dir, config_dict, with_tests, n_jobs, is_pyodide):
     
     # Create target dir, or reuse existing
     mkdir(build_dir)
@@ -521,7 +521,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     full_ver = get_sources(deps_info, build_ver, with_tests, compiler, clang_ver, clang_path, no_libclang_rt, reset, vendor_deps, is_pyodide)
     configure(config, compiler, clang_ver, clang_path, is_pyodide)
     handle_sysroot(use_sysroot, config, compiler, vendor_deps)
-    build(build_dir, config, with_tests, n_jobs, compiler, is_pyodide)
+    build(build_dir, config, with_tests, n_jobs, is_pyodide)
     if with_tests:
         test(build_dir, vendor_deps, compiler)
     
