@@ -488,7 +488,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         if clang_path is None:
             clang_path = Host.usr
         clang_ver = get_clang_version(clang_path)
-        if clang_ver < 22 and not is_pyodide:
+        if clang_ver < 22:
             log("Warning: Clang below version 22 is not supported with upstream's clang config - implicitly switching to --clang-as-gcc mode. If you mean to manually patch pdfium's //build for compatibility with older clang (possible, but no fun to maintain), take out this check.")
             clang_as_gcc = True
             clang_ver = None
