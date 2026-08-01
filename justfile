@@ -82,6 +82,6 @@ pyodide-test wheel:
     #!/usr/bin/env bash
     set -euxo pipefail
     export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
-    pip install {{wheel}}
-    pip install pillow numpy pytest
-    pytest tests/
+    python -m pip install {{wheel}}
+    python -m pip install pillow numpy pytest
+    python -m pytest tests/
