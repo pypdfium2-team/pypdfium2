@@ -465,12 +465,9 @@ def test(build_dir, vendor_deps, compiler):
     run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
 
 
-# TODO(geisserml) refactor to pass along an args object
+# TODO(geisserml) refactor to pass along an args object?
 
 def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, use_sysroot=False):
-    
-    # for k, v in os.environ.items():
-    #     log(f"{k}={v!r}")
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
