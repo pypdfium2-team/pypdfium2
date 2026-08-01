@@ -247,7 +247,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     
     df = DepsFetcher(deps_info)
     do_patches = df.fetch("build", PDFIUM_DIR_build, reset=reset)
-    if compiler is Compiler.gcc:  # regardless of do_patches
+    if compiler is Compiler.gcc and not is_pyodide:  # regardless of do_patches
         # declare custom GCC toolchain
         mkdir(CUSTOM_TOOLCHAIN_DIR)
         (CUSTOM_TOOLCHAIN_DIR/"BUILD.gn").write_text(
