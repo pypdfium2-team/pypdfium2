@@ -344,12 +344,21 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
 
 
 def configure(config, compiler, clang_ver, clang_path, is_pyodide):
-    if compiler is Compiler.gcc:
+    if is_pyodide:
+        # the toolchain is //build/toolchain/wasm/BUILD.gn by default
+        config.update({
+            "is_clang": False,
+            "target_os": "emscripten",
+            "target_cpu": "wasm",
+            "pdf_is_complete_lib": True,
+            "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
+            #"use_sized_deallocation": True,
+        })
+    elif compiler is Compiler.gcc:
         config["is_clang"] = False
-        if not is_pyodide:
-            # this ought to match CUSTOM_TOOLCHAIN_DIR
-            config["custom_toolchain"] = "//build/toolchain/linux/custom:default"
-            config["host_toolchain"] = "//build/toolchain/linux/custom:default"
+        # this ought to match CUSTOM_TOOLCHAIN_DIR
+        config["custom_toolchain"] = "//build/toolchain/linux/custom:default"
+        config["host_toolchain"] = "//build/toolchain/linux/custom:default"
     elif compiler is Compiler.clang:
         assert clang_path, "Clang path must be set"
         config.update({
@@ -359,15 +368,6 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
         })
     else:
         assert False, f"Unhandled compiler {compiler}"
-    if is_pyodide:
-        # the toolchain is //build/toolchain/wasm/BUILD.gn by default
-        config.update({
-            "target_os": "emscripten",
-            "target_cpu": "wasm",
-            "pdf_is_complete_lib": True,
-            "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
-            #"use_sized_deallocation": True,
-        })
 
 
 _SysrootMap = sysroot_cpu = {
