@@ -496,7 +496,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             env_prepend("PATH", str(clang_path/"bin"), os.pathsep)
             set_envs(CC="clang", CXX="clang++", TOOLPREFIX="llvm-")
             compiler = Compiler.gcc
-    if clang_as_gcc or is_pyodide:
+    if clang_as_gcc:
         os.environ["CPPFLAGS"] = "-Wno-unknown-warning-option"
     
     build_dir = PDFIUM_DIR/"out"/"Default"
