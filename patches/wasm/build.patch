@@ -37,3 +37,18 @@ index e1da11405..7a8dddecd 100644
            # Not available on aix.
            cflags += [ "-fstack-protector" ]
          }
+diff --git a/toolchain/wasm/BUILD.gn b/toolchain/wasm/BUILD.gn
+index 6bdb7db..e88c6ea 100644
+--- a/toolchain/wasm/BUILD.gn
++++ b/toolchain/wasm/BUILD.gn
+@@ -25,6 +25,10 @@ gcc_toolchain("wasm") {
+   nm = cc
+   ld = cxx
+ 
++  _common_flags = "-fPIC -Wno-unknown-warning-option"
++  extra_cflags = _common_flags
++  extra_cxxflags = _common_flags
++
+   toolchain_args = {
+     current_cpu = "wasm"
+     current_os = "emscripten"
