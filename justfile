@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 BROWSER := env('BROWSER', 'google-chrome')
+BUILD_PARAMS := env('BUILD_PARAMS', '')
 
 list:
 	just -l
@@ -73,7 +74,7 @@ pyodide-venv-create envname='.pyodide-venv':
 	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
 	# then run e.g. `. .pyodide-venv/bin/activate` to enter, and `deactivate` to leave, as usual
 pyodide-build:
-	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ --reset $BUILD_PARAMS" pyodide build . -vv
+	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ --reset {{BUILD_PARAMS}}" pyodide build . -vv
 pyodide-test wheel:
     #!/usr/bin/env bash
     set -euxo pipefail

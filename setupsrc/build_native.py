@@ -365,7 +365,6 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
             "target_cpu": "wasm",
             "pdf_is_complete_lib": True,
             "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
-            "use_sized_deallocation": True,
         })
         os.environ["CFLAGS"] = os.environ["SIDE_MODULE_CFLAGS"]
         os.environ["CXXFLAGS"] = os.environ["SIDE_MODULE_CXXFLAGS"]
@@ -374,6 +373,8 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
         # (comment this out if you want to use our plain gcc toolchain)
         if compiler is Compiler.gcc:
             del config["custom_toolchain"], config["host_toolchain"]
+        if compiler is Compiler.clang:
+            config["use_sized_deallocation"] = True
 
 
 _SysrootMap = sysroot_cpu = {
