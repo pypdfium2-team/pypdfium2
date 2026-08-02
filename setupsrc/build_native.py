@@ -23,7 +23,6 @@ DEPS_URLS = dict(
     abseil     = _CR_PREFIX + "chromium/src/third_party/abseil-cpp",
     fast_float = _CR_PREFIX + "external/github.com/fastfloat/fast_float",
     simdutf    = _CR_PREFIX + "chromium/src/third_party/simdutf",
-    catapult   = _CR_PREFIX + "catapult",  # android
     # vendorable dependencies
     icu         = _CR_PREFIX + "chromium/deps/icu",
     buildtools  = _CR_PREFIX + "chromium/src/buildtools",
@@ -39,12 +38,34 @@ DEPS_URLS = dict(
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
+    # opt-in dependencies
+    partition_allocator = _CR_PREFIX + "chromium/src/base/allocator/partition_allocator",
+    #catapult = _CR_PREFIX + "catapult",  # android
 )
 SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_DIR_build = PDFIUM_DIR / "build"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 CUSTOM_TOOLCHAIN_DIR = PDFIUM_DIR_build/"toolchain"/"linux"/"custom"
+USE_PA = bool(int( os.environ.get("USE_PARTITION_ALLOC", "0") ))
+
+DefaultConfig = {
+    "is_debug": False,
+    "use_glib": False,
+    "use_siso": False,
+    "treat_warnings_as_errors": False,
+    "clang_use_chrome_plugins": False,
+    "is_component_build": False,
+    "pdf_is_standalone": True,
+    "pdf_enable_v8": False,
+    "pdf_enable_xfa": False,
+    "pdf_use_skia": False,
+    "pdf_use_partition_alloc": False,
+    "use_sysroot": False,
+    "use_cxx23": False,
+}
+
+
 # for docs / available options, see the comments in //build/toolchain/gcc_toolchain.gni - they're really helpful
 # further options e.g. enable_linker_map, extra_asmflags, shlib_extension
 # see also https://chromium.googlesource.com/chromium/src/+/6488187212e7e2f1c1decb5dcf72d4fce888428a/build/toolchain/linux/unbundle/
@@ -72,41 +93,6 @@ gcc_toolchain("default") {
   }
 }
 """
-
-DefaultConfig = {
-    "is_debug": False,
-    "use_glib": False,
-    "use_siso": False,
-    "treat_warnings_as_errors": False,
-    "clang_use_chrome_plugins": False,
-    "is_component_build": False,
-    "pdf_is_standalone": True,
-    "pdf_enable_v8": False,
-    "pdf_enable_xfa": False,
-    "pdf_use_skia": False,
-    "pdf_use_partition_alloc": False,
-    "use_sysroot": False,
-    "use_cxx23": False,
-}
-
-IS_ANDROID = Host.system == SysNames.android
-if IS_ANDROID:
-    DefaultConfig.update({
-        "sysroot": str(Host.usr.parent),
-        "current_os": "android",
-        "target_os": "android",
-        "use_mold": False,
-    })
-    DefaultConfig["use_sysroot"] = True
-    # On Android, it seems that the build system's CPU type statically defaults to "arm", but we want this script to be host-adaptive (plus, "arm64" is the more likely candidate).
-    # TODO(future) refactor platform constants from base.py so we can access abstracted OS/CPU separately through sub-attributes
-    AndroidCPUMap = {"aarch64": "arm64", "armv7l": "arm", "x86_64": "x64", "i686": "x86"}
-    raw_cpu = Host._raw_machine
-    if raw_cpu in AndroidCPUMap:
-        cpu = AndroidCPUMap[raw_cpu]
-        DefaultConfig.update(current_cpu=cpu, target_cpu=cpu)
-    else:
-        log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
 class DepsFetcher:
@@ -156,8 +142,10 @@ class _DeferredDeps:
 def handle_deps(config, vendor_deps, with_tests):
     
     deps_fields = ["build", "abseil", "fast_float", "simdutf"]
-    if IS_ANDROID:
-        deps_fields.append("catapult")
+    if USE_PA:
+        deps_fields.append("partition_allocator")
+    # if IS_ANDROID:
+    #     deps_fields.append("catapult")
     
     if "libc++" in vendor_deps:
         deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
@@ -259,8 +247,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         if full_ver.build <= 7928:
             # it says gcc_toolchain but actually needed for clang as well
             git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
-        if IS_ANDROID:  # fix linkage step
-            git_apply_patch(PatchDir/"android_native.patch", cwd=PDFIUM_DIR_build)
         if is_pyodide:
             git_apply_patch(PatchDir/"wasm"/"build.patch", cwd=PDFIUM_DIR_build)
             wasm_config_dir = PDFIUM_DIR_build/"config"/"wasm"
@@ -305,8 +291,10 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     df.fetch("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     df.fetch("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
-    if IS_ANDROID:
-        df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
+    if USE_PA:
+        df.fetch("partition_allocator", PDFIUM_DIR/"base"/"allocator"/"partition_allocator")
+    # if IS_ANDROID:
+    #     df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
     
     if "libc++" in vendor_deps:
         df.fetch("buildtools", PDFIUM_DIR/"buildtools")
@@ -358,6 +346,8 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
     else:
         assert False, f"Unhandled compiler {compiler}"
     
+    if USE_PA:
+        config["pdf_use_partition_alloc"] = True
     if is_pyodide:
         pyodide_utils.configure(config, compiler)
 

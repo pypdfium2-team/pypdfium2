@@ -51,6 +51,6 @@ def link(build_dir):
     # See also https://emscripten.org/docs/tools_reference/emcc.html#arguments and https://emscripten.org/docs/tools_reference/settings_reference.html
     ldflags = shlex.split(os.environ["LDFLAGS"])
     em_cmd = ["em++", str(libpdfium_a), "-shared", *ldflags, "-o", str(libpdfium_so)]
-    s_opts = dict(EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
+    s_opts = dict(EXPORT_ALL=1)  # ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1
     em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
     run_cmd(em_cmd, cwd=build_dir)

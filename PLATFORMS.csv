@@ -23,7 +23,7 @@ Linux musl ppc64le,🟢 1.2,✅📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑�
 Linux musl s390x,🟢 1.2,✅📌 CIBW,🔴 4,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
 Linux musl riscv64,🟢 1.2,✅📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
 Linux musl loong64,🟢 1.2,🟩📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Android arm64,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,🚧,
+Android arm64,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,❌,
 Android armeabi,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,NA,
 Android x86_64,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,
 Android x86,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,

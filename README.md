@@ -221,62 +221,6 @@ PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 > macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible – use the toolchain-based build for now.
 > Community help / pull requests to extend platform support would be welcome.
 
-##### Android (Termux)
-
-The native build may also work on Android with Termux in principle.
-
-<details>
-<summary>Click to expand for instructions</summary>
-
-First, make sure git can work in your checkout of pypdfium2:
-```bash
-# set $PROJECTS_FOLDER accordingly
-git config --global --add safe.directory '$PROJECTS_FOLDER/*'
-```
-
-To install the dependencies, you'll need something like
-```bash
-pkg install gn ninja freetype littlecms libjpeg-turbo openjpeg libpng zlib libicu libtiff harfbuzz glib
-```
-Assuming Termux provides recent enough GN. If in doubt, check the expected version in `pyproject.toml` against the version provided by Termux.
-We have not yet sorted out how to build GN on Android natively (it fails with linkage errors).
-
-Then apply the clang symlinks. It works slightly different on Android, e.g.:
-```bash
-VERSION=21
-ARCH=$(uname -m)-android
-ln -s "$PREFIX/lib/clang/$VERSION/lib/linux" "$PREFIX/lib/clang/$VERSION/lib/$ARCH-unknown-linux-gnu"
-ln -s "$PREFIX/lib/clang/$VERSION/lib/linux/libclang_rt.builtins-$ARCH.a" "$PREFIX/lib/clang/$VERSION/lib/linux/libclang_rt.builtins.a"
-```
-
-Last time we tested `build_native` on Android, there were some bugs with freetype/openjpeg includes. A *quick & dirty* workaround with symlinks is:
-```bash
-# freetype
-ln -s "$PREFIX/include/freetype2/ft2build.h" "$PREFIX/include/ft2build.h"
-ln -s "$PREFIX/include/freetype2/freetype" "$PREFIX/include/freetype"
-
-# openjpeg
-OPJ_VER="2.5"  # adapt this to your setup
-ln -s "$PREFIX/include/openjpeg-$OPJ_VER/openjpeg.h" "$PREFIX/include/openjpeg.h"
-ln -s "$PREFIX/include/openjpeg-$OPJ_VER/opj_config.h" "$PREFIX/include/opj_config.h"
-```
-
-Now, you should be ready to run the build.
-
-On Android, PDFium's build system outputs `libpdfium.cr.so` by default, thus you'll want to rename the binary so pypdfium2's library search can find it:
-```bash
-mv data/sourcebuild/libpdfium.cr.so data/sourcebuild/libpdfium.so
-```
-Then install with `PDFIUM_PLATFORM=sourcebuild`.
-
-In case dependency libraries were built separately, you may also need to adjust the OS library search path, e.g.:
-```bash
-PY_VERSION="3.12"  # adapt this to your setup
-LD_LIBRARY_PATH="$PREFIX/lib/python$PY_VERSION/site-packages/pypdfium2_raw"
-```
-By default, our build script currently bundles everything into a single DLL, though.
-
-</details>
 
 ##### cibuildwheel
 
