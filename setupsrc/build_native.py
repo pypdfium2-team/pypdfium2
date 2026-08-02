@@ -278,7 +278,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                     "use_libcxx_modules = false",
                     is_regex=False, exp_count=2,
                 )
-            if clang_ver < 23:
+            if clang_ver < 23 or is_pyodide:
                 git_apply_patch(PatchDir/"clang_22_compat.patch", cwd=PDFIUM_DIR_build)
         if compiler is Compiler.clang and not is_pyodide:
             if no_libclang_rt:
@@ -371,9 +371,10 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
         })
         # Note: There's also `pyodide config list` and `pyodide config get $key`, but for some reason this does not work within a running `pyodide build` session. Thus get flags from the (undocumented) build-time variables below.
         # See also https://pyodide-build.readthedocs.io/en/latest/how-to/compiler-flags.html and https://pyodide-build.readthedocs.io/en/latest/how-to/debugging.html#check-active-configuration
-        os.environ["CFLAGS"] = os.environ["SIDE_MODULE_CFLAGS"]
-        os.environ["CXXFLAGS"] = os.environ["SIDE_MODULE_CXXFLAGS"]
-        os.environ["LDFLAGS"] = os.environ["SIDE_MODULE_LDFLAGS"]
+        for flags_group in ("C", "CXX", "LD"):
+            flags_var = flags_group + "FLAGS"
+            env_prepend(flags_var, os.environ[f"SIDE_MODULE_{flags_var}"], " ")
+        env_prepend("CPPFLAGS", "-Wno-unknown-warning-option -Wno-deprecated-pragma", " ")
         # use the default //build/toolchain/wasm/BUILD.gn toolchain even if base mode is gcc
         # (comment this out if you want to use our plain gcc toolchain)
         if compiler is Compiler.gcc:
@@ -509,8 +510,8 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             env_prepend("PATH", str(clang_path/"bin"), os.pathsep)
             set_envs(CC="clang", CXX="clang++", TOOLPREFIX="llvm-")
             compiler = Compiler.gcc
-    if clang_as_gcc or is_pyodide:
-        env_append("CPPFLAGS", "-Wno-unknown-warning-option", " ")
+    if clang_as_gcc:
+        env_prepend("CPPFLAGS", "-Wno-unknown-warning-option", " ")
     
     build_dir = PDFIUM_DIR/"out"/"Default"
     config = DefaultConfig.copy()
