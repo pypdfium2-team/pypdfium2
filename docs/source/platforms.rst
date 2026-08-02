@@ -44,6 +44,7 @@ Covered platforms
    Pull requests to pypdfium2 and/or ctypesgen welcome.
 .. [6] Though the ``pdfium-binaries`` project does provide WASM builds, they are actually incompatible with Pyodide/ctypes, which require a ``.so`` shared library side module, not a ``.wasm`` blob.
 .. [7] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime and susceptible to various types of random crashes. For that reason, PyEmscripten wheels are not included in releases, although we are theoretically able to produce them. If you can help fix these issues, please reach out!
+.. [8] Native compilation on Android (Termux) once worked in the past, with a rather early version of ``build_native.py`` and a pre-PEP738 interpreter, but this broke at some point, and it was eventually decided to remove the code passages. See `here <https://github.com/pypdfium2-team/pypdfium2/blob/35ea0c1687d92f5828d5f84316fddfa311975b03/README.md?plain=1#L224-L279>`_ for historical instructions.
 
 .. TODO consider uploading pyodide wheels to GH only
 
