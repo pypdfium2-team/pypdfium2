@@ -112,6 +112,54 @@ if IS_ANDROID:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
 
 
+# Pyodide support helpers
+# TODO(geisserml) see if this could be moved to another file, to avoid cluttering build_native.py itself with overly target-specific work
+
+def _prepend_each(value, iterable):
+    for item in iterable:
+        yield value
+        yield item
+
+def _pyodide_info(compiler):
+    log(
+        "Warning: pyodide support is experimental. The resulting builds are known to be flaky and susceptible to various types of occasional, random crashes. Use with caution!\n"
+        "HELP WANTED: If you are in a position to track down and fix these issues, please reach out. Thanks!"
+    )
+    if compiler is not None:
+        log("WARNING: With --pyodide, non-default compiler config is not recommended. Using anything other than the exact same clang as pyodide-build may result in serious runtime issues with respect to object closing/deallocation.")
+
+def _pyodide_configure(config, compiler):
+    config.update({
+        "target_os": "emscripten",
+        "target_cpu": "wasm",
+        "pdf_is_complete_lib": True,
+        "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
+    })
+    # Note: There's also `pyodide config list` and `pyodide config get $key`, but for some reason this does not work within a running `pyodide build` session. Thus get flags from the (undocumented) build-time variables below.
+    # See also https://pyodide-build.readthedocs.io/en/latest/how-to/compiler-flags.html and https://pyodide-build.readthedocs.io/en/latest/how-to/debugging.html#check-active-configuration
+    for flags_group in ("C", "CXX", "LD"):
+        flags_var = flags_group + "FLAGS"
+        env_prepend(flags_var, os.environ[f"SIDE_MODULE_{flags_var}"], " ")
+    env_prepend("CPPFLAGS", "-Wno-unknown-warning-option -Wno-deprecated-pragma", " ")
+    # use the default //build/toolchain/wasm/BUILD.gn toolchain even if base mode is gcc
+    # (comment this out if you want to use our plain gcc toolchain)
+    if compiler is Compiler.gcc:
+        del config["custom_toolchain"], config["host_toolchain"]
+    if compiler is Compiler.clang:
+        config["use_sized_deallocation"] = True
+
+def _pyodide_link(build_dir):
+    libpdfium_a = build_dir/"obj"/"libpdfium.a"
+    libpdfium_so = build_dir/"libpdfium.so"
+    # Is this all right? Not sure, but it seems to work.
+    # See also https://emscripten.org/docs/tools_reference/emcc.html#arguments and https://emscripten.org/docs/tools_reference/settings_reference.html
+    ldflags = shlex.split(os.environ["LDFLAGS"])
+    em_cmd = ["em++", str(libpdfium_a), "-shared", *ldflags, "-o", str(libpdfium_so)]
+    s_opts = dict(EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
+    em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
+    run_cmd(em_cmd, cwd=build_dir)
+
+
 class DepsFetcher:
     
     def __init__(self, deps_info):
@@ -346,7 +394,6 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
 
 
 def configure(config, compiler, clang_ver, clang_path, is_pyodide):
-    
     if compiler is Compiler.gcc:
         config["is_clang"] = False
         # this ought to match CUSTOM_TOOLCHAIN_DIR
@@ -363,24 +410,7 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
         assert False, f"Unhandled compiler {compiler}"
     
     if is_pyodide:
-        config.update({
-            "target_os": "emscripten",
-            "target_cpu": "wasm",
-            "pdf_is_complete_lib": True,
-            "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
-        })
-        # Note: There's also `pyodide config list` and `pyodide config get $key`, but for some reason this does not work within a running `pyodide build` session. Thus get flags from the (undocumented) build-time variables below.
-        # See also https://pyodide-build.readthedocs.io/en/latest/how-to/compiler-flags.html and https://pyodide-build.readthedocs.io/en/latest/how-to/debugging.html#check-active-configuration
-        for flags_group in ("C", "CXX", "LD"):
-            flags_var = flags_group + "FLAGS"
-            env_prepend(flags_var, os.environ[f"SIDE_MODULE_{flags_var}"], " ")
-        env_prepend("CPPFLAGS", "-Wno-unknown-warning-option -Wno-deprecated-pragma", " ")
-        # use the default //build/toolchain/wasm/BUILD.gn toolchain even if base mode is gcc
-        # (comment this out if you want to use our plain gcc toolchain)
-        if compiler is Compiler.gcc:
-            del config["custom_toolchain"], config["host_toolchain"]
-        if compiler is Compiler.clang:
-            config["use_sized_deallocation"] = True
+        _pyodide_configure(config, compiler)
 
 
 _SysrootMap = sysroot_cpu = {
@@ -411,41 +441,18 @@ def handle_sysroot(use_sysroot, config, compiler, vendor_deps):
         log("Warning: --use-sysroot works best with clang and vendored libc++. It may or may not work with GCC / system libc++.")
 
 
-def _prepend_each(value, iterable):
-    for item in iterable:
-        yield value
-        yield item
-
-def _pyodide_link(build_dir):
-    libpdfium_a = build_dir/"obj"/"libpdfium.a"
-    libpdfium_so = build_dir/"libpdfium.so"
-    # Is this all right? Not sure, but it seems to work.
-    # See also https://emscripten.org/docs/tools_reference/emcc.html#arguments and https://emscripten.org/docs/tools_reference/settings_reference.html
-    ldflags = shlex.split(os.environ["LDFLAGS"])
-    em_cmd = ["em++", str(libpdfium_a), "-shared", *ldflags, "-o", str(libpdfium_so)]
-    s_opts = dict(EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
-    em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
-    run_cmd(em_cmd, cwd=build_dir)
-
-
 def build(build_dir, config_dict, with_tests, n_jobs, is_pyodide):
     
-    # Create target dir, or reuse existing
     mkdir(build_dir)
-    
-    # Remove existing libraries from the build dir, to avoid packing unnecessary DLLs when a single-lib build is done after a separate-libs build. This also ensures we really built a new DLL in the end.
-    # Leave the object files in place to reuse as much as possible, though.
     for lib in build_dir.glob(Host.libname_glob):
         lib.unlink()
     
-    # Write GN config
     config_str = serialize_gn_config(config_dict)
     (build_dir/"args.gn").write_text(config_str)
     
     ninja_args = []
     if n_jobs is not None:
         ninja_args.extend(["-j", str(n_jobs)])
-    
     targets = ["pdfium"]
     if with_tests:
         targets.append("pdfium_unittests")
@@ -490,17 +497,12 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         vendor_deps = set()
     
     if is_pyodide:
-        log(
-            "WARNING: pyodide support is experimental. The resulting builds are known to be flaky and susceptible to various types of occasional, random crashes. Use with caution!\n"
-            "HELP WANTED: If you are in a position to track down and fix these issues, please reach out. Thanks!"
-        )
-        if compiler is None:
+        _pyodide_info(compiler)
+    if compiler is None:
+        if is_pyodide:
             compiler = Compiler.clang
             clang_path = Path(os.environ["PYODIDE_EMSCRIPTEN_DIR"]).parent
-        else:
-            log("WARNING: With --pyodide, non-default compiler config is not recommended. Using anything other than the exact same clang as pyodide-build may result in serious runtime issues with respect to object closing/deallocation.")
-    elif compiler is None:
-        if shutil.which("gcc"):
+        elif shutil.which("gcc"):
             compiler = Compiler.gcc
         elif shutil.which("clang"):
             log("gcc not available, will try clang. Note, you may need to set up some symlinks to match the clang directory layout expected by pdfium. Also, make sure libclang_rt builtins are installed, or pass --no-libclang-rt.")
