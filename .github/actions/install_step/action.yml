@@ -29,7 +29,7 @@ runs:
       shell: bash
       id: cooldown
       run: |
-        COOLDOWN_DATE=$($PYTHON utils/get_cool_date.py "$COOLDOWN_DAYS")
+        COOLDOWN_DATE=$($PYTHON utils/misc/get_cool_date.py "$COOLDOWN_DAYS")
         echo "Cooldown date: ${COOLDOWN_DATE}"
         echo "cooldown_date=${COOLDOWN_DATE}" >> "$GITHUB_OUTPUT"
       env:
@@ -40,7 +40,7 @@ runs:
       shell: bash
       run: |  # zizmor: ignore[github-env]
         $INITIAL_PYTHON -m venv .venv
-        VENV_BIN=$($INITIAL_PYTHON utils/fix_venv.py .venv)
+        VENV_BIN=$($INITIAL_PYTHON utils/misc/fix_venv.py .venv)
         echo "Resolved VENV_BIN to ${VENV_BIN}"
         # Confirm we got VENV_BIN right and it has all the usual executables, or we might silently fall for system-level python
         $VENV_BIN/python --version
@@ -58,7 +58,7 @@ runs:
       shell: bash
       run: |
         which python3  # this should point to the venv
-        python3 utils/update_pip_cool.py
+        python3 utils/misc/update_pip_cool.py
         python3 -m pip --version
     
     # With some older versions of Python, the max available pip version is incapable of dependency cooldown (e.g. Python 3.8 / pip 25.0.1).

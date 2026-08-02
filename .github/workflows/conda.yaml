@@ -79,8 +79,8 @@ jobs:
         run: |
           conda install -y conda-build==26.5.0 conda-verify==3.4.2
           python -VV
-          python utils/update_pip_cool.py
-          export PIP_UPLOADED_PRIOR_TO=$(python utils/get_cool_date.py 7)
+          python utils/misc/update_pip_cool.py
+          export PIP_UPLOADED_PRIOR_TO=$(python utils/misc/get_cool_date.py 7)
           python -m pip install -U --group setup
       
       # this is needed for craft_conda_pkgs.py, which uses git commands for data file transfer

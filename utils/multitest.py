@@ -99,7 +99,7 @@ for py_ver in reversed(args.py_vers):
         run([python, "-m", "venv", venv_name])
         bin_dir = Path(venv_name) / ("Scripts" if IS_WINDOWS else "bin")
         python = str(bin_dir/PYTHON_EXE)
-        run([python, str(ProjectDir/"utils"/"update_pip_cool.py")])
+        run([python, str(ProjectDir/"utils"/"misc"/"update_pip_cool.py")])
     
     pypdfium2_exe = str(bin_dir/"pypdfium2")
     if archprefix:

@@ -13,7 +13,7 @@ clean:
 	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
 
 check:
-	./utils/check.sh
+	./utils/misc/check.sh
 distcheck:
 	twine check dist/*
 	check-wheel-contents dist/*.whl
@@ -65,8 +65,8 @@ venv-create envname='.venv':
 	#!/usr/bin/env bash
 	set -euxo pipefail
 	python3 -m venv --clear {{envname}}
-	VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
-	$VENV_BIN/python3 utils/update_pip_cool.py
+	VENV_BIN=$(python3 utils/misc/fix_venv.py {{envname}})
+	$VENV_BIN/python3 utils/misc/update_pip_cool.py
 
 # Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
 pyodide: pyodide-build pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')

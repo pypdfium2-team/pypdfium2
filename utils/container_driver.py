@@ -88,7 +88,7 @@ python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
 cd {MountPoint}
-python3 utils/update_pip_cool.py
+python3 utils/misc/update_pip_cool.py
 export PIP_UPLOADED_PRIOR_TO="{get_cool_date(7)}"
 %(pip_install)s
 %(lib_install)s
@@ -104,7 +104,7 @@ def write_script(args, cibw_cpu, sys_install, image):
     if args.artifact:
         if cibw_cpu.startswith("mips") and args.artifact.endswith(".whl"):
             pip_packages.append("wheel")
-            lib_install = './utils/enforce_install.sh "$1"'
+            lib_install = './utils/misc/enforce_install.sh "$1"'
         else:
             lib_install = 'pip install "$1"'
     else:
