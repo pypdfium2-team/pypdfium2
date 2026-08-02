@@ -6,82 +6,82 @@ BROWSER := env('BROWSER', 'google-chrome')
 BUILD_PARAMS := env('BUILD_PARAMS', '')
 
 list:
-    just -l
+	just -l
 test *args:
-    python3 -m pytest tests/ {{args}}
+	python3 -m pytest tests/ {{args}}
 clean:
-    rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
+	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
 
 check:
-    ./utils/check.sh
+	./utils/check.sh
 distcheck:
-    twine check dist/*
-    check-wheel-contents dist/*.whl
+	twine check dist/*
+	check-wheel-contents dist/*.whl
 zizmor *args:
-     zizmor .github/ --persona auditor {{args}}
+	zizmor .github/ --persona auditor {{args}}
 zizmor-noisy *args: (zizmor '--no-ignores --no-config' args)
 
 docs-build:  # *args
-    python3 -m sphinx -b html docs/source docs/build/html
+	python3 -m sphinx -b html docs/source docs/build/html
 docs-open:
-    {{BROWSER}} docs/build/html/index.html &>/dev/null &
+	{{BROWSER}} docs/build/html/index.html &>/dev/null &
 docs-clean:
-    rm -rf docs/build/html
+	rm -rf docs/build/html
 
 _coverage_impl OMISSIONS *args:
-    python3 -m coverage run --omit "{{OMISSIONS}}" -m pytest tests/ {{args}}
-    python3 -m coverage report
-    python3 -m coverage html
-    {{BROWSER}} ./htmlcov/index.html &
+	python3 -m coverage run --omit "{{OMISSIONS}}" -m pytest tests/ {{args}}
+	python3 -m coverage report
+	python3 -m coverage html
+	{{BROWSER}} ./htmlcov/index.html &
 coverage *args:
-    just _coverage_impl "src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
+	just _coverage_impl "src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 coverage-core *args:
-    just _coverage_impl "src/pypdfium2/__main__.py,src/pypdfium2_cli/*,src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
+	just _coverage_impl "src/pypdfium2/__main__.py,src/pypdfium2_cli/*,src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 
 download *args:
-    python3 setupsrc/update.py --verify {{args}}
+	python3 setupsrc/update.py --verify {{args}}
 emplace *args:
-    python3 setupsrc/emplace.py {{args}}
+	python3 setupsrc/emplace.py {{args}}
 build-native *args:
-    python3 setupsrc/build_native.py {{args}}
+	python3 setupsrc/build_native.py {{args}}
 build-toolchained *args:
-    python3 setupsrc/build_toolchained.py {{args}}
+	python3 setupsrc/build_toolchained.py {{args}}
 craft *args:
-    python3 setupsrc/craft.py {{args}}
+	python3 setupsrc/craft.py {{args}}
 craft-conda *args:
-    python3 conda/craft_conda_pkgs.py {{args}}
+	python3 conda/craft_conda_pkgs.py {{args}}
 
 pkg platform='' *args='-w':
-    # see the notes in craft.py for why clearing egg-info and build cache is essential
-    rm -rf pypdfium2.egg-info/ build/
-    PDFIUM_PLATFORM="{{platform}}" python3 -m build -xn {{args}}
+	# see the notes in craft.py for why clearing egg-info and build cache is essential
+	rm -rf pypdfium2.egg-info/ build/
+	PDFIUM_PLATFORM="{{platform}}" python3 -m build -xn {{args}}
 sdist: (craft '--sdist')
 sdist-unassisted: (pkg 'sdist' '-s')
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
 
 container *args:
-    python3 utils/container_driver.py {{args}}
+	python3 utils/container_driver.py {{args}}
 venv-create envname='.venv':
-    #!/usr/bin/env bash
-    set -euxo pipefail
-    python3 -m venv --clear {{envname}}
-    VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
-    $VENV_BIN/python3 utils/update_pip_cool.py
+	#!/usr/bin/env bash
+	set -euxo pipefail
+	python3 -m venv --clear {{envname}}
+	VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
+	$VENV_BIN/python3 utils/update_pip_cool.py
 
 # Concerning pypdfium2 on Pyodide, note the warning in build_native.py
 pyodide: pyodide-build pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
 pyodide-build:
-    # you may want to set BUILD_PARAMS="--reset" on your side
-    PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv
+	# you may want to set BUILD_PARAMS="--reset" on your side
+	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv
 pyodide-venv-create envname='.pyodide-venv':
-    pyodide venv --clear {{envname}}
-    # Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
-    {{envname}}/bin/pip config set --site install.uploaded-prior-to ""
-    # then run e.g. `. .pyodide-venv/bin/activate` to enter, and `deactivate` to leave, as usual
+	pyodide venv --clear {{envname}}
+	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
+	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
+	# then run e.g. `. .pyodide-venv/bin/activate` to enter, and `deactivate` to leave, as usual
 pyodide-test wheel:
-    #!/usr/bin/env bash
-    set -euxo pipefail
-    export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
-    python -m pip install {{wheel}}
-    python -m pip install pillow numpy pytest
-    python -m pytest tests/
+	#!/usr/bin/env bash
+	set -euxo pipefail
+	export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
+	python -m pip install {{wheel}}
+	python -m pip install pillow numpy pytest
+	python -m pytest tests/
