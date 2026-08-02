@@ -83,21 +83,11 @@ build-frontend = {name="pyodide-build", args=["-xn"]}
 
 [[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
-select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_{amd64,arm64} *-win32"
+select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_{amd64,arm64} *-win32 *-pyodide_*"
 test-requires = ["pytest", "pillow", "numpy"]
 inherit.test-command = "append"
 test-command = [
     "python -m pytest {project}/tests",
-]
-
-# Suppress possible test failure with pyodide (it's flaky).
-# The builds are experimental, so we do not publish them to PyPI, just GH.
-[[tool.cibuildwheel.overrides]]
-select = "*-pyodide_*"
-test-requires = ["pytest", "pillow", "numpy"]
-inherit.test-command = "append"
-test-command = [
-    "python -m pytest {project}/tests || true",
 ]
 
 [[tool.cibuildwheel.overrides]]
