@@ -488,7 +488,18 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     
     if vendor_deps is None:
         vendor_deps = set()
-    if compiler is None:
+    
+    if is_pyodide:
+        log(
+            "WARNING: pyodide support is experimental. The resulting builds are known to be flaky and susceptible to various types of occasional, random crashes. Use with caution!\n"
+            "HELP WANTED: If you are in a position to track down and fix these issues, please reach out. Thanks!"
+        )
+        if compiler is None:
+            compiler = Compiler.clang
+            clang_path = Path(os.environ["PYODIDE_EMSCRIPTEN_DIR"]).parent
+        else:
+            log("WARNING: With --pyodide, non-default compiler config is not recommended. Using anything other than the exact same clang as pyodide-build may result in serious runtime issues with respect to object closing/deallocation.")
+    elif compiler is None:
         if shutil.which("gcc"):
             compiler = Compiler.gcc
         elif shutil.which("clang"):
@@ -627,8 +638,7 @@ Some params take a default from an environment variable, for easy passthrough wi
         dest = "is_pyodide",
         action = "store_true",
         default = bool(os.environ.get("PYODIDE")),
-        # FIXME HELPWANTED: If you can track down and fix the cause of these memory bugs, please reach out. Thanks!
-        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should target WASM. Automatically enabled if $PYODIDE is set. Both --compiler gcc or clang can be used as base config; the actual compiler will be emscripten either way. WARNING: The resulting builds are known to have memory issues (i.e. random crashes or halts on object closing) - use with caution! Don't publish, and don't use in a production environment!",
+        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should target WASM. Automatically enabled if $PYODIDE is set.",
     )
     
     args = parser.parse_args(argv)
