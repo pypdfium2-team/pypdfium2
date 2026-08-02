@@ -6,7 +6,7 @@ import shutil
 import argparse
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
+sys.path.insert(0, str(Path(__file__).parents[2]/"setupsrc"))
 from simplebase import ProjectDir
 
 DataDir = ProjectDir/"data"
