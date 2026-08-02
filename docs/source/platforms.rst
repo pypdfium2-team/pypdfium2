@@ -43,7 +43,7 @@ Covered platforms
    You should be prepared to patch the library search path in ``pypdfium2_raw/bindings.py``.
    Pull requests to pypdfium2 and/or ctypesgen welcome.
 .. [6] Though the ``pdfium-binaries`` project does provide WASM builds, they are actually incompatible with Pyodide/ctypes, which require a ``.so`` shared library side module, not a ``.wasm`` blob.
-.. [7] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime and susceptible to various types of random crashes. For that reason, pyemscripten wheels are not included in releases, although we are theoretically able to produce them.
+.. [7] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime and susceptible to various types of random crashes. For that reason, PyEmscripten wheels are not included in releases, although we are theoretically able to produce them. If you can help fix these issues, please reach out!
 
 .. TODO consider uploading pyodide wheels to GH only
 
@@ -57,7 +57,7 @@ Legend
 
 - **Release**: status, version tracked, build strategy
   
-  + ✅ Wheels on PyPI/GH, 🟩 Wheels on GH only [#gh_only]_, 🟦 Setup only, 🟨 dto. (open issues)
+  + ✅ Wheels on PyPI/GH, 🟩/❎ GH only [#gh_only_a]_ [#gh_only_b]_ 🟦 Setup only, 🟨 dto. (open issues)
   + 🔄 Latest version, 📌 Pinned version
 
 - **Tier**: Platform support level
@@ -106,7 +106,8 @@ Legend
   + 👷 Work in progress
   + 🚧 This used to work in the past, but is currently broken
 
-.. [#gh_only] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse).
+.. [#gh_only_a] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse).
+.. [#gh_only_b] We have decided not to upload certain builds (PyEmscripten) to PyPI, because they are buggy and not ready for use in a production environment. As a middle ground, experimental builds will be published to GitHub so you can still give them a cautious try if you like.
 
 .. admonition:: Help wanted
    

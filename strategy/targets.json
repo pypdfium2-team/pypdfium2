@@ -216,6 +216,8 @@
         "musllinux_riscv64": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_loongarch64": {
+            "runner_os": "ubuntu-26.04"},
+        "pyodide_wasm32": {
             "runner_os": "ubuntu-26.04"}
     }
 }

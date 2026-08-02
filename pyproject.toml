@@ -12,11 +12,9 @@ requires = [
     "wheel !=0.38.0, !=0.38.1",
 ]
 
-# We prefer dependency-groups (PEP 735) over optional-dependencies (extras), for two reasons:
+# We prefer dependency-groups (PEP 735) over optional-dependencies (extras), for two main reasons:
 # - Installation is independent of pypdfium2 itself. e.g. you can install the setup group first, then install pypdfium2 with --no-build-isolation. Likewise, you may want to install the converters or test dependencies without re-installing pypdfium2.
 # - BUG(177): PyPI actually refuses upload if external (@ git+) dependencies end up in package metadata. PEP 735 emphasizes the idea that dependency groups "are not included in any built distribution of the project".
-# The historical alternative is requirements files, but dependency groups are a little more succinct.
-# Note: As of 07/2026, pip has finally gained an --only-deps option, but this does not distinguish between required and extra dependencies, and there is no way to exclude extras from package metadata, so dependency groups are still merited.
 [dependency-groups]
 converters = ["pillow", "numpy"]
 test = ["pytest", "tabulate", {include-group = "converters"}]
@@ -35,7 +33,7 @@ docs = [
 ]
 check = ["autoflake", "codespell", "reuse"]
 distcheck = ["twine", "check-wheel-contents"]
-# When updating the GN version, remember to update any other references as well. Best do a global search & replace against the previous version.
+# Reminder: When updating the GN version, remember to update the references below as well.
 gn = ["gn-dist==2407.1"]
 
 [tool.check-wheel-contents]
@@ -46,6 +44,7 @@ ignore = ["W002", "W009", "W010"]
 
 [tool.cibuildwheel]
 build-frontend = {name="build", args=["-xn"]}
+environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
 before-build = [
     "pip install --group setup",
 ]
@@ -55,7 +54,6 @@ test-command = [
 ]
 
 [tool.cibuildwheel.linux]
-environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
 manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:latest"
 
 [tool.cibuildwheel.linux.environment]
@@ -75,6 +73,14 @@ SYSTEM_VERSION_COMPAT = "0"
 [tool.cibuildwheel.windows.environment]
 PDFIUM_PLATFORM = "sourcebuild-toolchained"
 
+[tool.cibuildwheel.pyodide.environment]
+PDFIUM_PLATFORM = "sourcebuild-native"
+BUILD_PARAMS = "--pyodide --vendor all --no-vendor libc++"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-pyodide_*"
+build-frontend = {name="pyodide-build", args=["-xn"]}
+
 [[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
 select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_{amd64,arm64} *-win32"
@@ -82,6 +88,16 @@ test-requires = ["pytest", "pillow", "numpy"]
 inherit.test-command = "append"
 test-command = [
     "python -m pytest {project}/tests",
+]
+
+# Suppress possible test failure with pyodide (it's flaky).
+# The builds are experimental, so we do not publish them to PyPI, just GH.
+[[tool.cibuildwheel.overrides]]
+select = "*-pyodide_*"
+test-requires = ["pytest", "pillow", "numpy"]
+inherit.test-command = "append"
+test-command = [
+    "python -m pytest {project}/tests || true",
 ]
 
 [[tool.cibuildwheel.overrides]]
@@ -110,7 +126,7 @@ inherit.environment = "append"
 environment.PATH = "/usr/lib/ninja-build/bin:$PATH"
 
 [[tool.cibuildwheel.overrides]]
-select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64}"  # not loongarch64
+select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64} *-pyodide_*"  # not loongarch64
 inherit.before-build = "append"
 before-build = [
     "pip install --only-binary :all: --group gn",

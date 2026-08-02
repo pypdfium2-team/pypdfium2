@@ -243,6 +243,7 @@ jobs:
       use_sysroot: ${{ matrix.use_sysroot || false }}
       ref: ${{ needs.prepare.outputs.ref }}
       replicate_tag: ${{ needs.prepare.outputs.version }}
+      test_pdfium: ${{ !startsWith(matrix.cibw_target, 'pyodide') }}
   
   
   publish:
@@ -299,7 +300,8 @@ jobs:
         run: |
           mkdir artifacts/ && cp dist/* -t artifacts/
           shopt -s nullglob
-          rm -f dist/*linux_*_loongarch64*.whl dist/*linux_*_mips64le*.whl dist/*linux_*_mipsle*.whl
+          cd dist/
+          rm -f *linux_*_loongarch64*.whl *linux_*_mips64le*.whl *linux_*_mipsle*.whl *-pyemscripten_*_wasm32.whl
       
       - name: Apply and push repository changes
         if: ${{ inputs.actually_publish }}
