@@ -4,8 +4,10 @@
 import os
 import re
 import shutil
+from enum import Enum
 from base import *  # local
 
+Compiler = Enum("Compiler", "gcc clang")
 
 def _install_dep(exename, reqfile=None, cooldown_days=7):
     

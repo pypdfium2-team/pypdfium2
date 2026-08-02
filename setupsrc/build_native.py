@@ -6,16 +6,15 @@
 import os
 import re
 import sys
-import shlex
 import shutil
 import argparse
-from enum import Enum
 from pathlib import Path
 import urllib.request as url_request
 
 # local
 from base import *
 from _build_helpers import *
+import _pyodide as pyodide_utils
 
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
@@ -74,8 +73,6 @@ gcc_toolchain("default") {
 }
 """
 
-Compiler = Enum("Compiler", "gcc clang")
-
 DefaultConfig = {
     "is_debug": False,
     "use_glib": False,
@@ -110,54 +107,6 @@ if IS_ANDROID:
         DefaultConfig.update(current_cpu=cpu, target_cpu=cpu)
     else:
         log(f"Warning: Unknown Android CPU {raw_cpu}")
-
-
-# Pyodide support helpers
-# TODO(geisserml) see if this could be moved to another file, to avoid cluttering build_native.py itself with overly target-specific work
-
-def _prepend_each(value, iterable):
-    for item in iterable:
-        yield value
-        yield item
-
-def _pyodide_info(compiler):
-    log(
-        "Warning: pyodide support is experimental. The resulting builds are known to be flaky and susceptible to various types of occasional, random crashes. Use with caution!\n"
-        "HELP WANTED: If you are in a position to track down and fix these issues, please reach out. Thanks!"
-    )
-    if compiler is not None:
-        log("WARNING: With --pyodide, non-default compiler config is not recommended. Using anything other than the exact same clang as pyodide-build may result in serious runtime issues with respect to object closing/deallocation.")
-
-def _pyodide_configure(config, compiler):
-    config.update({
-        "target_os": "emscripten",
-        "target_cpu": "wasm",
-        "pdf_is_complete_lib": True,
-        "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
-    })
-    # Note: There's also `pyodide config list` and `pyodide config get $key`, but for some reason this does not work within a running `pyodide build` session. Thus get flags from the (undocumented) build-time variables below.
-    # See also https://pyodide-build.readthedocs.io/en/latest/how-to/compiler-flags.html and https://pyodide-build.readthedocs.io/en/latest/how-to/debugging.html#check-active-configuration
-    for flags_group in ("C", "CXX", "LD"):
-        flags_var = flags_group + "FLAGS"
-        env_prepend(flags_var, os.environ[f"SIDE_MODULE_{flags_var}"], " ")
-    env_prepend("CPPFLAGS", "-Wno-unknown-warning-option -Wno-deprecated-pragma", " ")
-    # use the default //build/toolchain/wasm/BUILD.gn toolchain even if base mode is gcc
-    # (comment this out if you want to use our plain gcc toolchain)
-    if compiler is Compiler.gcc:
-        del config["custom_toolchain"], config["host_toolchain"]
-    if compiler is Compiler.clang:
-        config["use_sized_deallocation"] = True
-
-def _pyodide_link(build_dir):
-    libpdfium_a = build_dir/"obj"/"libpdfium.a"
-    libpdfium_so = build_dir/"libpdfium.so"
-    # Is this all right? Not sure, but it seems to work.
-    # See also https://emscripten.org/docs/tools_reference/emcc.html#arguments and https://emscripten.org/docs/tools_reference/settings_reference.html
-    ldflags = shlex.split(os.environ["LDFLAGS"])
-    em_cmd = ["em++", str(libpdfium_a), "-shared", *ldflags, "-o", str(libpdfium_so)]
-    s_opts = dict(EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
-    em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
-    run_cmd(em_cmd, cwd=build_dir)
 
 
 class DepsFetcher:
@@ -410,7 +359,7 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
         assert False, f"Unhandled compiler {compiler}"
     
     if is_pyodide:
-        _pyodide_configure(config, compiler)
+        pyodide_utils.configure(config, compiler)
 
 
 _SysrootMap = sysroot_cpu = {
@@ -462,7 +411,7 @@ def build(build_dir, config_dict, with_tests, n_jobs, is_pyodide):
     run_cmd(["ninja", *ninja_args, "-C", str(build_dir_rel), *targets], cwd=PDFIUM_DIR)
     
     if is_pyodide:
-        _pyodide_link(build_dir)
+        pyodide_utils.link(build_dir)
 
 
 def test(build_dir, vendor_deps, compiler):
@@ -497,7 +446,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
         vendor_deps = set()
     
     if is_pyodide:
-        _pyodide_info(compiler)
+        pyodide_utils.info(compiler)
     if compiler is None:
         if is_pyodide:
             compiler = Compiler.clang

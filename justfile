@@ -68,7 +68,7 @@ venv-create envname='.venv':
 	VENV_BIN=$(python3 utils/fix_venv.py {{envname}})
 	$VENV_BIN/python3 utils/update_pip_cool.py
 
-# Concerning pypdfium2 on Pyodide, note the warning in build_native.py
+# Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
 pyodide: pyodide-build pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
 pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
@@ -77,7 +77,7 @@ pyodide-venv-create envname='.pyodide-venv':
 # You may want to set BUILD_PARAMS="--reset" on your side
 pyodide-build:
 	# Note, it's up to you to ensure the interpreter that hosts pyodide has the setup dependencies installed.
-	# You also have to make sure that `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a #!/usr/bin/env python3 shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
+	# You also have to make sure that `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
 	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -nx -vv
 pyodide-test wheel:
 	#!/usr/bin/env bash
