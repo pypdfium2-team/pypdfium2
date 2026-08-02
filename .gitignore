@@ -8,6 +8,7 @@ conda/*/out/
 tests/output/
 .venv/
 .pyodide*/
+.python_symlinks/
 .python-history
 
 data/

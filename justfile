@@ -74,10 +74,15 @@ pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
 	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
 	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
-# You may want to set BUILD_PARAMS="--reset" on your side
+# Note, it's up to you to ensure the interpreter that hosts pyodide has the setup dependencies installed. Also, you may want to set BUILD_PARAMS="--reset" on your side.
 pyodide-build:
-	# Note, it's up to you to ensure the interpreter that hosts pyodide has the setup dependencies installed.
-	# You also have to make sure that `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
+	#!/usr/bin/env bash
+	set -euxo pipefail
+	# Make sure that `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
+	PY_VERSION=$(pyodide config get python_version | cut -d. -f1,2)
+	SYMLINKS_DIR="$PWD/.python_symlinks"
+	./utils/misc/symlink_py.sh "$SYMLINKS_DIR" "$PY_VERSION"
+	export PATH="$SYMLINKS_DIR:$PATH"
 	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -nx -vv
 pyodide-test wheel:
 	#!/usr/bin/env bash
