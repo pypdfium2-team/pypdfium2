@@ -47,7 +47,7 @@ build-native *args:
 build-toolchained *args:
 	python3 setupsrc/build_toolchained.py {{args}}
 craft *args:
-	python3 setupsrc/craft.py {{args}}
+	python3 utils/craft.py {{args}}
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
 

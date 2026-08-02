@@ -2,8 +2,6 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Author's note: This basically replicates a small chunk of what cibuildwheel does internally. I'm starting to really see what cibuildwheel exists for...
-
 import re
 import os
 import sys

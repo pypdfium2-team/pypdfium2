@@ -3,12 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import os
+import sys
 import shutil
 import argparse
 import tempfile
 import contextlib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import *  # local
 
 try:

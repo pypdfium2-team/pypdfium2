@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import sys
 import time
 import shutil
 import argparse
@@ -10,7 +11,7 @@ from pathlib import Path
 from copy import deepcopy
 from collections import namedtuple
 
-# local
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import *
 from system_pdfium import _yield_lo_candidates
 
