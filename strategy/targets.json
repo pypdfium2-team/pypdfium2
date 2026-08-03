@@ -36,7 +36,7 @@
             "pbin_target": "linux_x64",
             "test_on_host": true},
         "manylinux_i686": {
-            "runner_os": "ubuntu-26.04",
+            "runner_os": "ubuntu-24.04",
             "pbin_target": "linux_x86",
             "test_on_host": false},
         "manylinux_aarch64": {
@@ -128,7 +128,7 @@
         "manylinux_x86_64": {
             "runner_os": "ubuntu-24.04"},
         "manylinux_i686": {
-            "runner_os": "ubuntu-26.04",
+            "runner_os": "ubuntu-24.04",
             "target_cpu": "x86"},
         "manylinux_aarch64": {
             "runner_os": "ubuntu-26.04",
@@ -182,7 +182,7 @@
         "manylinux_x86_64": {
             "runner_os": "ubuntu-26.04"},
         "manylinux_i686": {
-            "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-24.04"},
         "manylinux_aarch64": {
             "runner_os": "ubuntu-26.04-arm"},
         "manylinux_armv7l": {
