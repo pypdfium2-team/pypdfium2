@@ -2,8 +2,14 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# Good to know:
+# - https://github.com/casey/just/blob/13bf03f642f4cec7799c19f1f8f039e1cb3b095d/README.md
+#   sections: #reference, #script-recipes, #shebang-recipes, #safer-bash-shebang-recipes, #python-recipes-with-uv, #activating-environments
+# - https://blog.yossarian.net/2020/01/23/Anybody-can-write-good-bash-with-a-little-effort#basics
+
 BROWSER := env('BROWSER', 'google-chrome')
 BUILD_PARAMS := env('BUILD_PARAMS', '')
+set script-interpreter := ['bash', '-euo', 'pipefail']
 
 list:
 	just -l
@@ -55,38 +61,38 @@ pkg platform='' *args='-w':
 	# see the notes in craft.py for why clearing egg-info and build cache is essential
 	rm -rf pypdfium2.egg-info/ build/
 	PDFIUM_PLATFORM="{{platform}}" python3 -m build -xn {{args}}
+container *args:
+	python3 utils/container_driver.py {{args}}
 sdist: (craft '--sdist')
 sdist-unassisted: (pkg 'sdist' '-s')
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
 
-container *args:
-	python3 utils/container_driver.py {{args}}
-venv-create envname='.venv':
-	#!/usr/bin/env bash
-	set -euxo pipefail
+[script]
+@venv-create envname='.venv':
 	python3 -m venv --clear {{envname}}
 	VENV_BIN=$(python3 utils/misc/fix_venv.py {{envname}})
 	$VENV_BIN/python3 utils/misc/update_pip_cool.py
 
 # Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
 pyodide: pyodide-build pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
+
 pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
 	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
 	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
+
 # Note, it's up to you to ensure the interpreter that hosts pyodide has the setup dependencies installed. Also, you may want to set BUILD_PARAMS="--reset" on your side.
-pyodide-build:
-	#!/usr/bin/env bash
-	set -euxo pipefail
+[script]
+@pyodide-build:
 	# Make sure that `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
 	PY_VERSION=$(pyodide config get python_version | cut -d. -f1,2)
 	SYMLINKS_DIR="$PWD/.python_symlinks"
 	./utils/misc/symlink_py.sh "$SYMLINKS_DIR" "$PY_VERSION"
 	export PATH="$SYMLINKS_DIR:$PATH"
 	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -nx -vv
-pyodide-test wheel:
-	#!/usr/bin/env bash
-	set -euxo pipefail
+
+[script]
+@pyodide-test wheel:
 	export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
 	pip install {{wheel}}
 	pip install pillow numpy pytest
