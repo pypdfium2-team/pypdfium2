@@ -48,7 +48,7 @@ def infer_target(target, artifact):
     if not artifact or artifact.endswith(".tar.gz"):
         assert target, "With source installation, a --target must be given, e.g. manylinux_x86_64"
     elif artifact.endswith(".whl"):
-        inferred = "%s_%s" % re.search(r"-(\w+linux)_[\d_]+_(\w+)\.", artifact).groups()
+        inferred = "%s_%s" % re.search(r"(\w+linux)_[\d_]+_(\w+)\.", artifact).groups()
         if target:
             assert target == inferred, f"Given vs. inferred target mismatch: {target!r} != {inferred!r}"
         else:
