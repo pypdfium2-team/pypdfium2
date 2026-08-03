@@ -9,12 +9,10 @@ from base import *  # local
 
 Compiler = Enum("Compiler", "gcc clang")
 
-def _install_dep(exename, reqfile=None, cooldown_days=7):
+def _install_dep(exename, install_args=None, cooldown_days=7):
     
-    if reqfile:
-        pkg_args = ("-r", str(reqfile))
-    else:
-        pkg_args = (exename, )
+    if not install_args:
+        install_args = (exename, )
     
     which_exe = shutil.which(exename)
     if which_exe:
@@ -27,7 +25,7 @@ def _install_dep(exename, reqfile=None, cooldown_days=7):
     env["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(cooldown_days)
     if not cooldown_days:
         extra_args = ("--no-deps", "--no-build-isolation")
-    run_cmd([sys.executable, "-m", "pip", "install", *extra_args, *pkg_args], env=env, cwd=None)
+    run_cmd([sys.executable, "-m", "pip", "install", *extra_args, *install_args], env=env, cwd=None)
 
 def install_buildtools():
     log("Check build tool dependencies...")
@@ -35,7 +33,7 @@ def install_buildtools():
     _install_dep("ninja")
     # https://github.com/pypdfium2-team/gn-dist/
     # gn-dist is our own project (also maintained within pypdfium2-team org) and pinned to an exact version. To make sure that the pinned requirement can be satisfied, there should be no cooldown.
-    _install_dep("gn", reqfile=ProjectDir/"req"/"gn.txt", cooldown_days=0)
+    _install_dep("gn", ("--group", "gn"), cooldown_days=0)
 
 def get_clang_version(clang_root):
     from packaging.version import Version
