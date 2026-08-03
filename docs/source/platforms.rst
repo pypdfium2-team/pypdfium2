@@ -34,17 +34,16 @@ Covered platforms
    :header-rows: 1
 
 .. [1] Since v5.12.0, build strategies used and platforms included may vary between releases. pypdfium2's GitHub releases contain the authoritative strategy info, while this table currently reflects our ``default`` release profile.
-.. [2] Testing is temporarily disabled, due to issues with the Docker container when called from GHA. It does work locally. To be investigated.
-.. [3] MIPS platforms are not officially part of the manylinux standard, so the wheel tags we use are actually rejected by ``pip``, as they are not in its internal whitelist.
+.. [2] MIPS platforms are not officially part of the manylinux standard, so the wheel tags we use are actually rejected by ``pip``, as they are not in its internal whitelist.
    This can be remedied by re-tagging with ``wheel`` locally to match the host's ``sysconfig.get_platform()`` value.
    ``pip`` maintainers have been informed of this situation.
-.. [4] Untested, for lack of a container and binfmt handler.
-.. [5] iOS is untested, and has special considerations regarding the `management of binary extension modules <https://docs.python.org/3/using/ios.html#binary-extension-modules>`_.
+.. [3] Untested, for lack of a container and binfmt handler.
+.. [4] iOS is untested, and has special considerations regarding the `management of binary extension modules <https://docs.python.org/3/using/ios.html#binary-extension-modules>`_.
    You should be prepared to patch the library search path in ``pypdfium2_raw/bindings.py``.
    Pull requests to pypdfium2 and/or ctypesgen welcome.
-.. [6] Though the ``pdfium-binaries`` project does provide WASM builds, they are actually incompatible with Pyodide/ctypes, which require a ``.so`` shared library side module, not a ``.wasm`` blob.
-.. [7] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime and susceptible to various types of random crashes. Use with caution and not in a production environment! If you can help fix these issues, please reach out :)
-.. [8] Native compilation on Android (Termux) once worked in the past, with a rather early version of ``build_native.py`` and a pre-PEP738 interpreter, but this broke at some point, and it was eventually decided to remove the code passages. See `here <https://github.com/pypdfium2-team/pypdfium2/blob/35ea0c1687d92f5828d5f84316fddfa311975b03/README.md?plain=1#L224-L279>`_ for historical instructions.
+.. [5] Though the ``pdfium-binaries`` project does provide WASM builds, they are actually incompatible with Pyodide/ctypes, which require a ``.so`` shared library side module, not a ``.wasm`` blob.
+.. [6] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime and susceptible to various types of random crashes. Use with caution and not in a production environment! If you can help fix these issues, please reach out :)
+.. [7] Native compilation on Android (Termux) once worked in the past, with a rather early version of ``build_native.py`` and a pre-PEP738 interpreter, but this broke at some point, and it was eventually decided to remove the code passages. See `here <https://github.com/pypdfium2-team/pypdfium2/blob/35ea0c1687d92f5828d5f84316fddfa311975b03/README.md?plain=1#L224-L279>`_ for historical instructions.
 
 Legend
 ^^^^^^
