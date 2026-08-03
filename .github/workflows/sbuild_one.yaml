@@ -96,7 +96,7 @@ jobs:
         run: |
           sudo apt-get install -y ninja-build  # generate-ninja
           # gn-dist is our own project (also maintained within pypdfium2-team org) which must be exempted from dependency cooldown. When we build a new version and update the pin, we want that update to unconditionally take effect.
-          PIP_UPLOADED_PRIOR_TO="P0D" --no-deps --only-binary ':all:' --group gn
+          PIP_UPLOADED_PRIOR_TO="P0D" pip install --no-deps --only-binary ':all:' --group gn
       
       # GHA windows-2025 image Windows SDK is incomplete, lacks "Debugging Tools for Windows" feature requested by PDFium's build system for the cross targets. So we're using this action to install the SDK properly.
       - name: Install Windows cross deps
