@@ -7,8 +7,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from base import *
-from craft import ArtifactStash
 from emplace import stage_platfiles
+# TODO(geisserml) move ArtifactStash to base?
+sys.path.insert(0, str(Path(__file__).parents[1]/"utils"))
+from craft import ArtifactStash
 
 CondaDir = ProjectDir / "conda"
 CondaRaw_BuildNumF = CondaDir / "raw" / "build_num.txt"
