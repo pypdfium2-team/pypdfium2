@@ -25,6 +25,8 @@ runs:
   using: 'composite'
   steps:
     
+    # TODO add an assertion that none of the pip_install_* inputs accidentally became the strings 'true', 'false', '1', '0'. It must be either a sequence of install args, or an empty string.
+    
     - name: Determine cooldown date
       shell: bash
       id: cooldown
