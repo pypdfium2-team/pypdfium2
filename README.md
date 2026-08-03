@@ -1,10 +1,6 @@
 <!-- SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com> -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-> [!IMPORTANT]
-> **AI-"assisted" issues and PRs are banned from this project!**
-> [See below.](#no-ai-issues-and-prs)
-
 # pypdfium2
 
 <!-- [![Downloads](https://pepy.tech/badge/pypdfium2/month)](https://pepy.tech/project/pypdfium2) -->
@@ -76,12 +72,6 @@ Python dependencies should be automatically installed, unless `--no-build-isolat
 > pypdfium2 and its ctypesgen fork are developed in sync, i.e. each pypdfium2 commit ought to be coupled with the then `HEAD` of pypdfium2-ctypesgen.<br>
 > Our release sdists, and latest pypdfium2 from git, will automatically use matching ctypesgen.<br>
 > However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own, and install pypdfium2 without build isolation.
-
-> [!CAUTION]
-> **ctypesgen works best on Linux.**
-> Caution is advised when building bindings natively on other OSes.<br>
-> In particular, there have been some known bindings generation issues on Windows, when system headers are involved.
-> Consider opting into the [reference bindings](autorelease/bindings.py) via `PDFIUM_BINDINGS=reference`.
 
 #### Get the code
 
