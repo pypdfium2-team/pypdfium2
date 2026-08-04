@@ -132,12 +132,13 @@ class Inference:
 
 def get_matrices(args, all_targets):
     matrices = {}
+    inference_obj = Inference(args.py_vers)
     
     for strategy in STRATEGIES:
         
         targets = all_targets[strategy]
         matrices[strategy] = matrix_entries = []
-        inference = getattr(Inference(args.py_vers), strategy)
+        inference = getattr(inference_obj, strategy)
         
         for key in getattr(args, strategy):
             entry = {"label": f"{strategy}-{key}", **inference(_target_only(key), targets[key])}
