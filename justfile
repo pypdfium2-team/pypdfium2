@@ -89,7 +89,7 @@ pyodide-venv-create envname='.pyodide-venv':
 	SYMLINKS_DIR="$PWD/.python_symlinks"
 	./utils/misc/symlink_py.sh "$SYMLINKS_DIR" "$PY_VERSION"
 	export PATH="$SYMLINKS_DIR:$PATH"
-	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ --reset {{BUILD_PARAMS}}" pyodide build . -vv  # -nx
+	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv -nx
 
 [script]
 @pyodide-test wheel:

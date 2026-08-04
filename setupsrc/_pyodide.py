@@ -55,32 +55,8 @@ def configure(config, compiler):
         assert False, compiler
 
 
-# def _collect_symbols(build_dir, libpdfium_a):
-#     # alternative approach: https://github.com/bblanchon/pdfium-binaries/blob/c6529b58791d142002f819beb46e370e668797d7/steps/06-build.sh#L12
-#     obj_names = {
-#         f"{fp.stem}.o:" for fp in (PDFIUM_DIR/"fpdfsdk").iterdir()
-#         if fp.name.startswith("fpdf_") and fp.name.endswith(".cpp") and not fp.name.endswith("_embeddertest.cpp")
-#     }
-#     log(obj_names)
-#     output = run_cmd(["llvm-nm", libpdfium_a, "--format=just-symbols"], capture=True, cwd=build_dir)
-#     consumer = None
-#     symbols_dict = {}
-#     for line in output.splitlines():  # TODO iterator?
-#         if consumer is not None:
-#             if not line:
-#                 consumer = None
-#             elif not line.startswith(("_", ".")):
-#                 consumer.append(line)
-#         elif line in obj_names:
-#             symbols_dict[line] = consumer = []
-#     log(symbols_dict)
-#     return tuple(f"_{s}" for group in symbols_dict.values() for s in group)
-
-
 def link(build_dir):
     # FIXME Is this all right? Not sure. While the command itself works, there are runtime issues.
-    # TODO(geisserml) Should we pass -sSIDE_MODULE=2 and -sEXPORTED_FUNCTIONS with an explicit list of symbols here, as suggested on [1] ? The above code can produce them.
-    # [1]: https://pyodide.org/en/latest/development/abi.html#controlling-the-set-of-exported-symbols
     libpdfium_a = build_dir/"obj"/"libpdfium.a"
     libpdfium_so = build_dir/"libpdfium.so"
     # log(_collect_symbols(build_dir, libpdfium_a))
