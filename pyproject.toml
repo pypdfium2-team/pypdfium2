@@ -79,10 +79,6 @@ PDFIUM_PLATFORM = "sourcebuild-native"
 BUILD_PARAMS = "--pyodide --vendor all --no-vendor libc++"
 
 [[tool.cibuildwheel.overrides]]
-select = "*-pyodide_*"
-build-frontend = {name="pyodide-build", args=["-xn"]}
-
-[[tool.cibuildwheel.overrides]]
 # run actual test suite on platforms that have pillow and numpy prebuilds on PyPI
 select = "*-*linux_{x86_64,aarch64} *-macosx_{x86_64,arm64} *-win_{amd64,arm64} *-win32 *-pyodide_*"
 test-requires = ["pytest", "pillow", "numpy"]
@@ -90,6 +86,10 @@ inherit.test-command = "append"
 test-command = [
     "python -m pytest {project}/tests",
 ]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-pyodide_*"
+build-frontend = {name="pyodide-build", args=["-xn"]}
 
 # Suppress possible test suite failure with pyodide (it's flaky).
 # We don't publish pyemscripten wheels to PyPI because of these known issues, just upload the experimental builds to GH, so suppression is OK here, and actually necessary to not risk failing the entire release (otherwise we'd just have to exclude pyodide, while this allows us to carry it along as experimental).

@@ -7,14 +7,22 @@ import os
 import shlex
 
 # local
-from base import log, env_prepend, run_cmd
+from base import (
+    log, env_prepend, run_cmd, ProjectDir
+)
 from _build_helpers import Compiler
 
+PDFIUM_DIR = ProjectDir/"sbuild"/"native"/"pdfium"
 
-def _prepend_each(value, iterable):
-    for item in iterable:
-        yield value
-        yield item
+
+# Documentation reference:
+# https://pyodide.org/en/latest/development/abi.html
+# https://pyodide-build.readthedocs.io/en/latest/how-to/compiler-flags.html
+# https://pyodide-build.readthedocs.io/en/latest/how-to/debugging.html#check-active-configuration
+# https://emscripten.org/docs/compiling/Dynamic-Linking.html
+# https://emscripten.org/docs/tools_reference/emcc.html#arguments
+# https://emscripten.org/docs/tools_reference/settings_reference.html
+
 
 def info(compiler):
     log(
@@ -24,6 +32,7 @@ def info(compiler):
     if compiler is not None:
         log("CAUTION: With --pyodide, using a non-default compiler config is not recommended.")
 
+
 def configure(config, compiler):
     config.update({
         "target_os": "emscripten",
@@ -32,7 +41,6 @@ def configure(config, compiler):
         "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
     })
     # Note: There's also `pyodide config list` and `pyodide config get $key`, but for some reason this does not work within a running `pyodide build` session. Thus get flags from the (undocumented) build-time variables below.
-    # See also https://pyodide-build.readthedocs.io/en/latest/how-to/compiler-flags.html and https://pyodide-build.readthedocs.io/en/latest/how-to/debugging.html#check-active-configuration
     for flags_group in ("C", "CXX", "LD"):
         flags_var = flags_group + "FLAGS"
         env_prepend(flags_var, os.environ[f"SIDE_MODULE_{flags_var}"], " ")
@@ -46,13 +54,37 @@ def configure(config, compiler):
     else:
         assert False, compiler
 
+
+# def _collect_symbols(build_dir, libpdfium_a):
+#     # alternative approach: https://github.com/bblanchon/pdfium-binaries/blob/c6529b58791d142002f819beb46e370e668797d7/steps/06-build.sh#L12
+#     obj_names = {
+#         f"{fp.stem}.o:" for fp in (PDFIUM_DIR/"fpdfsdk").iterdir()
+#         if fp.name.startswith("fpdf_") and fp.name.endswith(".cpp") and not fp.name.endswith("_embeddertest.cpp")
+#     }
+#     log(obj_names)
+#     output = run_cmd(["llvm-nm", libpdfium_a, "--format=just-symbols"], capture=True, cwd=build_dir)
+#     consumer = None
+#     symbols_dict = {}
+#     for line in output.splitlines():  # TODO iterator?
+#         if consumer is not None:
+#             if not line:
+#                 consumer = None
+#             elif not line.startswith(("_", ".")):
+#                 consumer.append(line)
+#         elif line in obj_names:
+#             symbols_dict[line] = consumer = []
+#     log(symbols_dict)
+#     return tuple(f"_{s}" for group in symbols_dict.values() for s in group)
+
+
 def link(build_dir):
+    # FIXME Is this all right? Not sure. While the command itself works, there are runtime issues.
+    # TODO(geisserml) Should we pass -sSIDE_MODULE=2 and -sEXPORTED_FUNCTIONS with an explicit list of symbols here, as suggested on [1] ? The above code can produce them.
+    # [1]: https://pyodide.org/en/latest/development/abi.html#controlling-the-set-of-exported-symbols
     libpdfium_a = build_dir/"obj"/"libpdfium.a"
     libpdfium_so = build_dir/"libpdfium.so"
-    # Is this all right? Not sure, but it seems to work.
-    # See also https://emscripten.org/docs/tools_reference/emcc.html#arguments and https://emscripten.org/docs/tools_reference/settings_reference.html
+    # log(_collect_symbols(build_dir, libpdfium_a))
     ldflags = shlex.split(os.environ["LDFLAGS"])
     em_cmd = ["em++", str(libpdfium_a), "-shared", *ldflags, "-o", str(libpdfium_so)]
-    s_opts = dict(EXPORT_ALL=1, ALLOW_MEMORY_GROWTH=1, ALLOW_TABLE_GROWTH=1)
-    em_cmd += _prepend_each("-s", (f"{k}={v}" for k, v in s_opts.items()))
+    # em_cmd += ["-sALLOW_MEMORY_GROWTH=1", "-sALLOW_TABLE_GROWTH=1"]  # "-sEXPORT_ALL=1",
     run_cmd(em_cmd, cwd=build_dir)
