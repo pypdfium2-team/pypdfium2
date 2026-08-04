@@ -53,16 +53,24 @@ Legend
   
   + 🟢 Low/Good, 🔵 Reasonable, 🟡 Medium, 🟠 Elevated, 🔴 High, ⚪ Not tagged
 
-- **Release**: status, version tracked, build strategy
+- **Release**:
   
-  + ✅ Wheels on PyPI/GH, 🟩 [#gh_only_a]_ ❎ [#gh_only_b]_ GH only, 🟦 Setup only 🟨 & open issues
-  + 🔄 Latest version, 📌 Pinned version
+  + Status:
+    
+    * ✅ Wheels on PyPI & GH
+    * 🟩 GH only - Rejected by PyPI (not whitelisted in backend)
+    * ❎ GH only - Intentionally not uploaded to PyPI (known issues or other unsuitability)
+    * 🟦 Setup only
+    * 🟨 Setup only (unresolved issues)
+  
+  + Version tracked: 🔄 Latest / 📌 Pinned
+  + Strategy: see below
 
 - **Tier**: Platform support level
   
   + 🟢 1 Core, 🔵 2 Secondary, 🟡 3 Complicated, 🔴 4 Major issues, ⚪ Not classified
 
-- Build strategies
+- **Strategies**
   
   + **PBIN** = Repack external builds from ``bblanchon/pdfium-binaries``.
   + **SBLD** = Built at pypdfium2 via ``sbuild.yaml`` (``build_toolchained.py``).
@@ -104,8 +112,6 @@ Legend
   + 👷 Work in progress
   + 🚧 This used to work in the past, but is currently broken
 
-.. [#gh_only_a] GH only – Rejected by PyPI (not whitelisted in its backend). Applies to: LoongArch, MIPS.
-.. [#gh_only_b] GH only – Intentionally not uploaded to PyPI, due to known issues. Applies to: PyEmscripten.
 .. admonition:: Help wanted
    
    Reckon you can turn more ❌ into ✅ ? Please give it a try and open a PR.
