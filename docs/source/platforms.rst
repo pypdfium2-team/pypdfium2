@@ -104,9 +104,8 @@ Legend
   + 👷 Work in progress
   + 🚧 This used to work in the past, but is currently broken
 
-.. [#gh_only_a] Some platforms (LoongArch, MIPS) are rejected by PyPI, as they are not whitelisted in its backend (warehouse).
-.. [#gh_only_b] We have decided not to upload certain builds (PyEmscripten) to PyPI, because they are considered too buggy. As a middle ground, experimental builds will be published to GitHub so you can still give them a cautious try if you like.
-
+.. [#gh_only_a] GH only – Rejected by PyPI (not whitelisted in its backend). Applies to: LoongArch, MIPS.
+.. [#gh_only_b] GH only – Intentionally not uploaded to PyPI, due to known issues. Applies to: PyEmscripten.
 .. admonition:: Help wanted
    
    Reckon you can turn more ❌ into ✅ ? Please give it a try and open a PR.
