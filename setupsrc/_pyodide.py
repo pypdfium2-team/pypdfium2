@@ -35,15 +35,15 @@ def info(compiler):
 
 def configure(config, compiler):
     config.update({
-        "is_debug": True,
+        "is_debug": True,  # XXX
         "target_os": "emscripten",
         "target_cpu": "wasm",
         "pdf_is_complete_lib": True,
         "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
     })
-    env_prepend("CFLAGS", f"{os.environ['CFLAGS_BASE']} -I{os.environ['PYTHONINCLUDE']} -O0 -g", " ")
-    env_prepend("CXXFLAGS", f"{os.environ['CFLAGS_BASE']} -O0 -g", " ")
-    env_prepend("LDFLAGS", f"{os.environ['LDFLAGS_BASE']} -sSIDE_MODULE=1 -O0 -g", " ")
+    env_prepend("CFLAGS", f"{os.environ['CFLAGS_BASE']} -I{os.environ['PYTHONINCLUDE']} -O1 -g", " ")
+    env_prepend("CXXFLAGS", f"{os.environ['CFLAGS_BASE']} -O1 -g", " ")
+    env_prepend("LDFLAGS", f"{os.environ['LDFLAGS_BASE']} -sSIDE_MODULE=1 -O1 -g", " ")
     env_prepend("CPPFLAGS", "-Wno-unknown-warning-option -Wno-deprecated-pragma", " ")
     # use the default //build/toolchain/wasm/BUILD.gn toolchain even if base mode is gcc
     # (comment this out if you want to use our plain gcc toolchain)
