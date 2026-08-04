@@ -43,7 +43,9 @@ Covered platforms
    Pull requests to pypdfium2 and/or ctypesgen welcome.
 .. [5] Native compilation on Android (Termux) once worked in the past, with a rather early version of ``build_native.py`` and a pre-PEP738 interpreter, but this broke at some point, and it was eventually decided to remove the code passages. See `here <https://github.com/pypdfium2-team/pypdfium2/blob/35ea0c1687d92f5828d5f84316fddfa311975b03/README.md?plain=1#L224-L279>`_ for historical instructions.
 .. [6] Though the ``pdfium-binaries`` project does provide WASM builds, they are actually incompatible with Pyodide/ctypes, which require a ``.so`` shared library side module, not a ``.wasm`` blob.
-.. [7] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime and susceptible to various types of random crashes. Use with caution and not in a production environment! If you can help fix these issues, please reach out :)
+.. [7] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime and susceptible to various types of random crashes and (even worse) infinite halts, with one CPU core stuck at 100% usage, pending manual termination. Use with caution and not in a production environment! If you can help fix these issues, please reach out :)
+
+.. TODO consider publishing macOS universal & android x86_64/x86 wheels to GH ?
 
 Legend
 ^^^^^^
@@ -59,7 +61,7 @@ Legend
     
     * ✅ Wheels on PyPI & GH
     * 🟩 GH only - Rejected by PyPI (not whitelisted in backend)
-    * ❎ GH only - Intentionally not uploaded to PyPI (known issues or other unsuitability)
+    * ❎ GH only - Intentionally not uploaded to PyPI (major issues or other unsuitability)
     * 🟦 Setup only
     * 🟨 Setup only (unresolved issues)
   

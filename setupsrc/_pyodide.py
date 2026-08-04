@@ -38,9 +38,9 @@ def configure(config, compiler):
         "pdf_is_complete_lib": True,
         "emscripten_path": os.environ["PYODIDE_EMSCRIPTEN_DIR"],
     })
-    env_prepend("CFLAGS", f"{os.environ['CFLAGS_BASE']} -I{os.environ['PYTHONINCLUDE']} -O1 -g", " ")
-    env_prepend("CXXFLAGS", f"{os.environ['CFLAGS_BASE']} -O1 -g", " ")
-    env_prepend("LDFLAGS", f"{os.environ['LDFLAGS_BASE']} -sSIDE_MODULE=1 -O1 -g", " ")
+    env_prepend("CFLAGS", f"{os.environ['CFLAGS_BASE']} -I{os.environ['PYTHONINCLUDE']} -O2 -g", " ")
+    env_prepend("CXXFLAGS", f"{os.environ['CFLAGS_BASE']} -O2 -g", " ")
+    env_prepend("LDFLAGS", f"{os.environ['LDFLAGS_BASE']} -sSIDE_MODULE=1 -O2 -g", " ")
     env_prepend("CPPFLAGS", "-Wno-unknown-warning-option -Wno-deprecated-pragma", " ")
     if compiler is Compiler.clang:
         config["use_sized_deallocation"] = True
@@ -53,7 +53,7 @@ def configure(config, compiler):
 
 
 def link(build_dir):
-    # FIXME Is this all right? Not sure. While the command itself works, there are runtime issues.
+    # FIXME Is this all right? Not sure. Linkage itself works, but there are runtime issues.
     libpdfium_a = build_dir/"obj"/"libpdfium.a"
     libpdfium_so = build_dir/"libpdfium.so"
     ldflags = shlex.split(os.environ["LDFLAGS"])
