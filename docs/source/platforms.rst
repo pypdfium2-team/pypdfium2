@@ -61,9 +61,9 @@ Legend
     
     * ✅ Wheels on PyPI & GH
     * 🟩 GH only - Rejected by PyPI (not whitelisted in backend)
-    * ❎ GH only - Intentionally not uploaded to PyPI (major issues or other unsuitability)
+    * ❎ GH only - Intentionally not uploaded to PyPI
     * 🟦 Setup only
-    * 🟨 Setup only (unresolved issues)
+    * 🟨 Setup only (unresolved issues / untested)
   
   + Version tracked: 🔄 Latest / 📌 Pinned
   + Strategy: see below
@@ -72,7 +72,7 @@ Legend
   
   + 🟢 1 Core, 🔵 2 Secondary, 🟡 3 Complicated, 🔴 4 Major issues, ⚪ Not classified
 
-- **Strategies**
+- Strategies
   
   + **PBIN** = Repack external builds from ``bblanchon/pdfium-binaries``.
   + **SBLD** = Built at pypdfium2 via ``sbuild.yaml`` (``build_toolchained.py``).
