@@ -74,23 +74,23 @@ xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platfo
 	$VENV_BIN/python3 utils/misc/update_pip_cool.py
 
 # Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
-pyodide: pyodide-build pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
+pyodide *args: (pyodide-build args) pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
 
 pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
 	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
 	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
 
-# Note, it's up to you to ensure the interpreter that hosts pyodide has the setup dependencies installed.
 [script]
-@pyodide-build:
+@pyodide-build *args:
 	# Make sure that `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
 	PY_VERSION=$(pyodide config get python_version | cut -d. -f1,2)
 	SYMLINKS_DIR="$PWD/.python_symlinks"
 	./utils/misc/symlink_py.sh "$SYMLINKS_DIR" "$PY_VERSION"
 	export PATH="$SYMLINKS_DIR:$PATH"
 	# Note, you may want to set BUILD_PARAMS="--reset" on your side!
-	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv  # -nx
+	# If -nx is passed, it's up to you to ensure the interpreter that hosts pyodide has the setup dependencies installed.
+	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv {{args}}  # -nx
 
 [script]
 @pyodide-test wheel:
