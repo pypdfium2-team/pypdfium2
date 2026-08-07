@@ -6,6 +6,7 @@
 # https://stackoverflow.com/questions/69647983/how-to-add-platform-specific-package-data-in-setup-py
 # https://github.com/tim-mitchell/prebuilt_binaries
 # https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
+# https://build.pypa.io/en/latest/how-to/config-settings.html#id1
 
 import os
 import sys
