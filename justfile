@@ -85,9 +85,7 @@ pyodide-venv-create envname='.pyodide-venv':
 @pyodide-build *args:
 	# Make sure that `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
 	PY_VERSION=$(pyodide config get python_version | cut -d. -f1,2)
-	SYMLINKS_DIR="$PWD/.python_symlinks"
-	./utils/misc/symlink_py.sh "$SYMLINKS_DIR" "$PY_VERSION"
-	export PATH="$SYMLINKS_DIR:$PATH"
+	export PATH=$(./utils/misc/symlink_py.sh ".python_symlinks" "$PY_VERSION")
 	# Note, you may want to set BUILD_PARAMS="--reset" on your side!
 	# If -nx is passed, it's up to you to ensure the interpreter that hosts pyodide has the setup dependencies installed.
 	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv {{args}}  # -nx
