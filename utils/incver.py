@@ -168,6 +168,9 @@ def register_changes(args, v_info: VersionInfo):
 
 _CAUTION_TARGETS = ("manylinux_s390x", "musllinux_s390x", "pyodide_wasm32")
 
+def _pformat_targets(targets):
+    return f"`[{', '.join(targets)}]`"
+
 def make_releasenotes(summary, args, v_info: VersionInfo):
     
     relnotes = ""
@@ -183,16 +186,16 @@ def make_releasenotes(summary, args, v_info: VersionInfo):
         relnotes += f"""
 ### Build info\n
 This release was made with the following build strategies:
-- PBIN: `[{', '.join(strategies["pbin"])}]`
-- SBLD: `[{', '.join(strategies["sbuild"])}]`
-- CIBW: `[{', '.join(strategies["cibw"])}]`
+- PBIN: {_pformat_targets(strategies["pbin"])}
+- SBLD: {_pformat_targets(strategies["sbuild"])}
+- CIBW: {_pformat_targets(strategies["cibw"])}
 """
         caution_targets = all_targets.intersection(_CAUTION_TARGETS)
         if caution_targets:
             relnotes += f"""
 > [!CAUTION]
-> The following builds have known, major issues (e.g. endianness bugs, crashes, freezes) and are **NOT** considered ready for production use:
-> `[{', '.join(sorted(caution_targets))}]`
+> The following builds are affected by known, major issues (e.g. endianness bugs, crashes, freezes) and are **NOT** considered ready for production use:
+> {_pformat_targets(sorted(caution_targets))}
 """
     
     # even if python code was not updated, there will be a release commit
@@ -243,7 +246,7 @@ def parse_args():
     )
     parser.add_argument(
         "--strategy-file",
-        type = lambda p: read_json(Path(p).expanduser().resolve()),
+        type = lambda p: Path(p).expanduser().resolve(),
         help = "Build strategy info written by //strategy/get_matrix.py",
     )
     parser.add_argument(
@@ -257,7 +260,10 @@ def parse_args():
         action = "store_true",
         help = "Whether to include pdfium commit log (requires cloning pdfium)",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.strategy_file:
+        args.strategy_file = read_json(args.strategy_file)
+    return args
 
 
 def main():
