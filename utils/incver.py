@@ -166,6 +166,8 @@ def register_changes(args, v_info: VersionInfo):
         assert not IS_CI
 
 
+_CAUTION_TARGETS = ("manylinux_s390x", "musllinux_s390x", "pyodide_wasm32")
+
 def make_releasenotes(summary, args, v_info: VersionInfo):
     
     relnotes = ""
@@ -175,12 +177,22 @@ def make_releasenotes(summary, args, v_info: VersionInfo):
         relnotes += summary
     if args.strategy_file:
         strategies = args.strategy_file["strategies"]
+        all_targets = set()
+        for group in strategies.values():
+            all_targets.update(group)
         relnotes += f"""
 ### Build info\n
 This release was made with the following build strategies:
-- PBIN: [{', '.join(strategies["pbin"])}]
-- SBLD: [{', '.join(strategies["sbuild"])}]
-- CIBW: [{', '.join(strategies["cibw"])}]
+- PBIN: `[{', '.join(strategies["pbin"])}]`
+- SBLD: `[{', '.join(strategies["sbuild"])}]`
+- CIBW: `[{', '.join(strategies["cibw"])}]`
+"""
+        caution_targets = all_targets.intersection(_CAUTION_TARGETS)
+        if caution_targets:
+            relnotes += f"""
+> [!CAUTION]
+> The following builds have known, major issues (e.g. endianness bugs, crashes, freezes) and are **NOT** considered ready for production use:
+> `[{', '.join(sorted(caution_targets))}]`
 """
     
     # even if python code was not updated, there will be a release commit
@@ -216,6 +228,7 @@ This release was made with the following build strategies:
         relnotes += "\n" + "*Commit logs skipped (too big).*"
     relnotes += "\n"
     
+    mkdir(args.output_dir)
     (args.output_dir/"RELEASE.md").write_text(relnotes)
 
 
