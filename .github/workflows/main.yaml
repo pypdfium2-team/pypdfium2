@@ -77,7 +77,7 @@ jobs:
         id: get_matrix
         run: |
           mkdir release_info/
-          python3 utils/strategy/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --strategy-file release_info/strategy.json > release_info/matrix.txt
+          python3 utils/get_matrix.py $PROFILE_OPT $PYVERS_OPT $DUPLICATES_OPT --pbin $PBIN_TARGETS --sbuild $SBUILD_TARGETS --cibw $CIBW_TARGETS --reveal --strategy-file release_info/strategy.json > release_info/matrix.txt
           cat release_info/matrix.txt >> "$GITHUB_OUTPUT"
         env:
           PROFILE_OPT: ${{ inputs.profile && format('--profile {0}', inputs.profile) || '' }}

@@ -11,7 +11,7 @@ from pathlib import Path
 from collections import namedtuple
 
 
-THIS_DIR = Path(__file__).resolve().parent
+STRATEGY_DIR = Path(__file__).resolve().parent / "strategy"
 STRATEGIES = ("pbin", "sbuild", "cibw")
 
 def log(*args, **kwargs):
@@ -243,7 +243,7 @@ See targets.json for canonical configuration, or below for available targets per
     args.py_vers = PyVers.from_str(args.py_vers)
     
     if args.profile:
-        profile_json = read_json(THIS_DIR/"profiles.json")[args.profile]
+        profile_json = read_json(STRATEGY_DIR/"profiles.json")[args.profile]
         for s in STRATEGIES:
             setattr(args, s, profile_json[s]+getattr(args, s))
     
@@ -265,7 +265,7 @@ See targets.json for canonical configuration, or below for available targets per
 
 def main():
     
-    all_targets = read_json(THIS_DIR/"targets.json")
+    all_targets = read_json(STRATEGY_DIR/"targets.json")
     args = parse_args(sys.argv[1:], all_targets)
     
     matrices = get_matrices(args, all_targets)
