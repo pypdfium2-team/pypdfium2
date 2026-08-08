@@ -34,7 +34,7 @@ docs = [
 check = ["autoflake", "codespell", "reuse"]
 distcheck = ["twine", "check-wheel-contents"]
 # Reminder: When updating the GN version, remember to update the references below as well.
-gn = ["gn-dist==2407.1"]
+gn = ["gn-dist==2407.3"]
 
 [tool.check-wheel-contents]
 # W002: erroneous detection of __init__.py files as duplicates
@@ -132,6 +132,7 @@ environment.PATH = "/usr/lib/ninja-build/bin:$PATH"
 select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64} *-pyodide_*"  # not loongarch64
 inherit.before-build = "append"
 before-build = [
+    # TODO install latest gn-dist if it's latest pdfium
     "pip install --only-binary :all: --group gn",
 ]
 
@@ -139,7 +140,7 @@ before-build = [
 select = "*-manylinux_loongarch64"
 inherit.before-build = "append"
 before-build = [
-    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407.1/gn_dist-2407.1-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407.3/gn_dist-2407.3-py3-none-manylinux_2_36_loongarch64.manylinux_2_38_loongarch64.whl'",
     "pip install ./gn_dist-*_loongarch64.whl"
 ]
 
@@ -147,7 +148,7 @@ before-build = [
 select = "*-musllinux_loongarch64"
 inherit.before-build = "append"
 before-build = [
-    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407.1/gn_dist-2407.1-py3-none-musllinux_1_2_loongarch64.whl'",
+    "curl -LO 'https://github.com/pypdfium2-team/gn-dist/releases/download/2407.3/gn_dist-2407.3-py3-none-musllinux_1_2_loongarch64.whl'",
     "pip install ./gn_dist-*_loongarch64.whl"
 ]
 
