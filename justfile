@@ -71,7 +71,7 @@ xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platfo
 @venv-create envname='.venv':
 	python3 -m venv --clear {{envname}}
 	VENV_BIN=$(python3 utils/misc/fix_venv.py {{envname}})
-	$VENV_BIN/python3 utils/misc/update_pip_cool.py
+	$VENV_BIN/python3 utils/update_pip.py
 
 # Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
 pyodide *args: (pyodide-build args) pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')

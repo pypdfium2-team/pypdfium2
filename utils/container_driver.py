@@ -88,7 +88,7 @@ python3 -m venv "$VENV_DIR" --system-site-packages
 export PATH="$VENV_DIR/bin:$PATH"
 which python3; python3 --version
 cd {MountPoint}
-python3 utils/misc/update_pip_cool.py
+python3 utils/update_pip.py
 export PIP_UPLOADED_PRIOR_TO="{get_cool_date(7)}"
 %(pip_install)s
 %(lib_install)s

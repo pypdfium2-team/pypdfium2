@@ -6,7 +6,7 @@ import sys
 import subprocess
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[2]/"setupsrc"))
+sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
 from simplebase import ProjectDir, log, get_cool_date
 
 LockDir = ProjectDir/"lock"
