@@ -20,7 +20,7 @@ import urllib.request as url_request
 from simplebase import *  # local
 
 # Add this path to your IDE's search path, e.g. VS Code python.analysis.extraPaths
-sys.path.insert(0, str(ProjectDir/"src"/"pypdfium2_cfg"/"shared"))
+sys.path.insert(0, str(ProjectDir/"src"/"pypdfium2_cfg"/"_shared"))
 from stl import cached_property
 
 

@@ -128,7 +128,7 @@ Internal API
 
 pypdfium2_cfg.stl
 -----------------
-.. automodule:: pypdfium2_cfg.shared.stl
+.. automodule:: pypdfium2_cfg._shared.stl
 
 pypdfium2.internal
 ------------------

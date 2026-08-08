@@ -4,10 +4,10 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- Experimental ``pyemscripten_2026_0_wasm32`` (Pyodide) build support added. However, the resulting builds are flaky at runtime and susceptible to various kinds of random crashes. Freezes at shutdown have also been observed.
-  Given that, PyEmscripten wheels will not be uploaded to PyPI at this time, but they are included in the release process and can be downloaded from GitHub for experimentation.
+- Experimental ``pyemscripten_2026_0_wasm32`` (Pyodide) build support added. However, the resulting builds are flaky at runtime and susceptible to various kinds of random crashes. Freezes on shutdown have also been observed.
+  While these issues persist, PyEmscripten wheels will not be uploaded to PyPI, but they are included in the release process and can be downloaded from GitHub on an experimental basis.
   If you can help track down and fix these issues, please reach out.
-  Note: Our PyEmscripten wheels are bigger than usual, since they are built with debug symbols. A non-debug build would be smaller but is not considered useful at this time.
+  Note: Our PyEmscripten wheels are bigger than usual, as they are built with debug symbols (a non-debug build is not considered useful at this time).
 - Fixed compatibility with Python 3.6 and 3.7.
   * Runtime support was inadvertently broken due to a faulty cached property backport which held only one cache per class, not per instance as should have been.
     The accidental loss of caches broke key assumptions of our autoclose logic, which relies on `cached_property` since 5.8.0. (Earlier versions that did not make extensive use of cached properties should work in essentials, but have not been explicitly tested.)
