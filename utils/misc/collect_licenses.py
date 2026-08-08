@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2]/"setupsrc"))
-from simplebase import ProjectDir
+from shared_base import ProjectDir
 
 DataDir = ProjectDir/"data"
 

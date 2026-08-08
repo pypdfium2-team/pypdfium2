@@ -10,7 +10,7 @@ from pathlib import Path
 from collections import namedtuple
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from simplebase import ProjectDir, log, get_cool_date  # local
+from shared_base import ProjectDir, log, get_cool_date  # local
 
 # Map uname-style machine name to docker container arch name
 # Check the respective docker hub pages for a list of platforms (e.g. https://hub.docker.com/_/debian#quick-reference-cont)
