@@ -247,7 +247,7 @@ def parse_args():
     parser.add_argument(
         "--strategy-file",
         type = lambda p: Path(p).expanduser().resolve(),
-        help = "Build strategy info written by //strategy/get_matrix.py",
+        help = "Build strategy info written by utils/strategy/get_matrix.py",
     )
     parser.add_argument(
         "-o", "--output-dir",

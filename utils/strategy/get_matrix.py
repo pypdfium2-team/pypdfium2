@@ -195,12 +195,12 @@ def parse_args(argv, all_targets):
         formatter_class = argparse.RawTextHelpFormatter,
         description = f"""\
 Generate build matrices for given targets. This is intended for use in pypdfium2's GHA workflows.
-See //strategy/targets.json for canonical configuration, or below for available targets per build strategy.\n
+See targets.json for canonical configuration, or below for available targets per build strategy.\n
 """ + targets_help,
     )
     parser.add_argument(
         "--profile",
-        help = "Targets profile or template to use. Check //strategy/profiles.json for available profiles. (The target options below append to the template.)",
+        help = "Targets profile or template to use. Check profiles.json for available profiles. (The target options below append to the template.)",
     )
     parser.add_argument(
         "--pbin", nargs="*", default=[],

@@ -175,8 +175,8 @@ SPDX-FileComment = "Small utility scripts."
 
 [[annotations]]
 path = [
-    "strategy/targets.json",
-    "strategy/profiles.json",
+    "utils/strategy/targets.json",
+    "utils/strategy/profiles.json",
 ]
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"
