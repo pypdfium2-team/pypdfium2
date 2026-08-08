@@ -694,16 +694,16 @@ def run_ctypesgen(
         args += ["-D"] + [PdfiumFlagsDict[f] for f in flags]
     
     # include windows-only members (e.g. refbindings, cross-packaging)
-    # see the comments in spoof_headers/windows/windows.h for more info on this approach
+    # see the comments in include/windows/windows.h for more info on this approach
     # actually, also do this on windows natively to save ctypesgen from a lot of trouble processing windows system headers (where it keeps running into syntax errors) and even prevent actual mistakes in output
     is_windows_host = sys.platform.startswith("win32")
     if windows_cross and not is_windows_host:
         args += ["-D", "_WIN32"]
     if windows_cross or is_windows_host:
         # -I seems to be prioritized over system include paths
-        win_spoof_headers = ProjectDir/"setupsrc"/"spoof_headers"/"windows"
-        assert win_spoof_headers.exists()
-        args += ["-I", str(win_spoof_headers)]
+        windows_include_dir = ProjectDir/"setupsrc"/"include"/"windows"
+        assert windows_include_dir.exists()
+        args += ["-I", str(windows_include_dir)]
     
     # symbols - try to exclude some garbage aliases that get pulled in from struct tags
     # (this captures anything that ends with _, _t, or begins with _, and is not needed by other symbols)
