@@ -43,7 +43,7 @@ Covered platforms
    You should be prepared to patch the library search path in ``pypdfium2_raw/bindings.py``.
    Pull requests to pypdfium2 and/or ctypesgen welcome.
 .. [6] Though the ``pdfium-binaries`` project does provide WASM builds, they are actually incompatible with Pyodide/ctypes, which require a ``.so`` shared library side module, not a ``.wasm`` blob.
-.. [7] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime and susceptible to various types of random crashes and (even worse) infinite halts, with one CPU core stuck at 100% usage, pending manual termination. Use with caution and not in a production environment! If you can help fix these issues, please reach out :)
+.. [7] While there is experimental Pyodide build support, the resulting builds are known to be flaky at runtime. Use with caution and not in a production environment! If you can help fix these issues, please reach out :)
 
 .. TODO consider publishing macOS universal & android x86_64/x86 wheels to GH ?
 
