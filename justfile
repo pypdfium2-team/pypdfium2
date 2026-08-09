@@ -102,11 +102,12 @@ pyodide-venv-create envname='.pyodide-venv':
 pinact min_age='7':
     pinact run -update -min-age {{min_age}} || true
 
-# TODO(geisserml) update pip.txt as well
 [script]
 @refresh-lock:
     export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
-    unlink lock/distcheck.txt
+    rm lock/pip.txt lock/distcheck.txt
+    pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
     pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
 
+# TODO(geisserml) update conda/lock/*.txt as well
 refresh-all-pins: pinact refresh-lock
