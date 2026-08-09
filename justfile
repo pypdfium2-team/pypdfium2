@@ -68,10 +68,11 @@ sdist-unassisted: (pkg 'sdist' '-s')
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
 
 [script]
-@venv-create envname='.venv':
-	python3 -m venv --clear {{envname}}
+venv-create envname='.venv':
+	set -x && python3 -m venv --clear {{envname}}
 	VENV_BIN=$(python3 utils/misc/fix_venv.py {{envname}})
 	$VENV_BIN/python3 utils/update_pip.py
+
 
 # Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
 pyodide *args: (pyodide-build args) pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
@@ -82,7 +83,8 @@ pyodide-venv-create envname='.pyodide-venv':
 	{{envname}}/bin/pip config set --site install.uploaded-prior-to ""
 
 [script]
-@pyodide-build *args:
+pyodide-build *args:
+	set -x
 	# Make sure that `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
 	PY_VERSION=$(pyodide config get python_version | cut -d. -f1,2)
 	export PATH=$(./utils/misc/symlink_py.sh ".python_symlinks" "$PY_VERSION")
@@ -91,23 +93,24 @@ pyodide-venv-create envname='.pyodide-venv':
 	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv {{args}}  # -nx
 
 [script]
-@pyodide-test wheel:
-	export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
+pyodide-test wheel:
+	set -x && export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
 	pip install {{wheel}}
 	pip install pillow numpy pytest
 	python -m pytest tests/
 
-# NOTE you may want to make pinact a wrapper script that translates to
+
+# NOTE you may want to make pinact a wrapper script that translates to something like
 # GITHUB_TOKEN=$(kwallet-query -f Passwords -r pinact kdewallet) pinact_raw $@
 pinact min_age='7':
-    pinact run -update -min-age {{min_age}} || true
+	pinact run -update -min-age {{min_age}} || true
 
 [script]
-@refresh-lock:
-    export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
-    rm lock/pip.txt lock/distcheck.txt
-    pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
-    pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
+refresh-lock:
+	set -x && export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
+	rm lock/pip.txt lock/distcheck.txt
+	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
+	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
 
 # TODO(geisserml) update conda/lock/*.txt as well
 refresh-all-pins: pinact refresh-lock
