@@ -97,6 +97,16 @@ pyodide-venv-create envname='.pyodide-venv':
 	pip install pillow numpy pytest
 	python -m pytest tests/
 
+# NOTE you may want to make pinact a wrapper script that translates to
+# GITHUB_TOKEN=$(kwallet-query -f Passwords -r pinact kdewallet) pinact_raw $@
+pinact min_age='7':
+    pinact run -update -min-age {{min_age}} || true
+
 # TODO(geisserml) update pip.txt as well
-refresh-lock:
-    pip-compile --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
+[script]
+@refresh-lock:
+    export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
+    unlink lock/distcheck.txt
+    pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
+
+refresh-all-pins: pinact refresh-lock
