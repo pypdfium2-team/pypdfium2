@@ -8,10 +8,6 @@ on:
       package:
         type: string  # choices: "raw" or "helpers"
         required: true
-      py_ver:
-        type: string
-        # AOTW, conda still has some problems with 3.13 and 3.14
-        default: '3.12'
       pdfium_ver:
         type: string
         default: ''  # implies latest
@@ -56,17 +52,6 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
-        with:
-          auto-update-conda: true
-          python-version: ${{ inputs.py_ver }}
-          # priority: highest to lowest
-          # https://github.com/conda-incubator/setup-miniconda/blob/3afdf12ae89a97ee81acc85f1490189fba144938/README.md#example-4-conda-options
-          channels: pypdfium2-team,bblanchon,defaults
-          channel-priority: strict
-          show-channel-urls: true
-      
       - name: Check out pypdfium2 (deep)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -74,10 +59,21 @@ jobs:
           persist-credentials: false
           ref: ${{ inputs.ref || github.ref_name }}
       
-      # here we do not use a venv because we are already in a conda env
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
+        with:
+          # https://github.com/conda-incubator/setup-miniconda/blob/6dac52eade0e1662156b83daccd2d9b975215624/README.md#example-7-lockfiles
+          auto-update-conda: false
+          activate-environment: build
+          environment-file: conda/lock/build.txt
+          # priority: highest to lowest
+          # https://github.com/conda-incubator/setup-miniconda/blob/3afdf12ae89a97ee81acc85f1490189fba144938/README.md#example-4-conda-options
+          channels: pypdfium2-team,bblanchon,defaults
+          channel-priority: strict
+          show-channel-urls: true
+      
       - name: Install dependencies
         run: |
-          conda install -y conda-build==26.5.0 conda-verify==3.4.2
           python -VV
           python utils/update_pip.py
           export PIP_UPLOADED_PRIOR_TO=$(python utils/misc/get_cool_date.py 7)
@@ -178,11 +174,19 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       
+      # make the lockfile available
+      - name: Check out pypdfium2 (shallow)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.ref || github.ref_name }}
+      
       - name: Miniconda setup
         uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
-          auto-update-conda: true
-          python-version: ${{ matrix.py }}
+          auto-update-conda: false
+          activate-environment: publish
+          environment-file: conda/lock/publish.txt
           channels: defaults  # no custom channels needed here
       
       - name: Download artifact
@@ -190,9 +194,6 @@ jobs:
         with:
           name: conda_package
           path: conda_dist/
-      
-      - name: Install Anaconda client
-        run: conda install -y anaconda-client==1.14.1
       
       - name: Upload to Anaconda
         if: ${{ inputs.actually_publish }}
