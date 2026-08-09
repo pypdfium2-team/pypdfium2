@@ -108,15 +108,15 @@ pinact min_age='7':
 [script]
 refresh-lock:
 	set -x && export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
-	rm lock/pip.txt lock/distcheck.txt
+	rm -f lock/{pip,distcheck}.txt
 	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
 	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
 
 [script]
 refresh-conda-lock:
 	set -x && rm -f conda/lock/{build,publish}.txt
-	./utils/misc/conda_lockgen.sh build "3.12" "conda-build==26.5.0 conda-verify==3.4.2"
-	./utils/misc/conda_lockgen.sh publish "3.12" "anaconda-client==1.14.1"
+	./utils/misc/conda_lockgen.sh build "3.12" "conda-build conda-verify"  # 26.5.0, 3.4.2
+	./utils/misc/conda_lockgen.sh publish "3.12" "anaconda-client"  # 1.14.1
 
 # TODO(geisserml) update conda/lock/*.txt as well
 refresh-all-pins: pinact refresh-lock refresh-conda-lock
