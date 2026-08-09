@@ -149,7 +149,7 @@ https://repo.anaconda.com/pkgs/main/linux-64/conda-package-streaming-0.13.0-py31
 https://repo.anaconda.com/pkgs/main/linux-64/conda-package-handling-2.5.0-py312h06a4308_0.conda#4b105cbe2110fc0cd8a72f3fea775760190274efb95dfc643e9a0b903466e517
 https://repo.anaconda.com/pkgs/main/noarch/conda-verify-3.4.2-py_1.conda#39df5f79c2368182ce93193e9ff1377fc52f19f3066ff4ad16b15ea333169f1b
 https://repo.anaconda.com/pkgs/main/linux-64/conda-index-0.12.1-py312h06a4308_0.conda#093f12fbd0cda994ea712dfae11b4342f6210280d95ebb7f1d78f6fe7009860c
-https://repo.anaconda.com/pkgs/main/linux-64/conda-build-26.5.0-py312h945cf10_0.conda#dc9336375b380a08ff5521a4d96d7065423b4bbdd3ebf4c11de4cfc8be475962
+https://repo.anaconda.com/pkgs/main/linux-64/conda-build-26.7.0-py312h945cf10_0.conda#efe0aab39ec3f5d3fef21ff9a156b8c5a1bffab743a53bcd5a7e70980b5a66fb
 https://repo.anaconda.com/pkgs/main/linux-64/conda-lockfiles-0.2.1-py312h06a4308_0.conda#c8c849ee37c213f8d703679fe485e0ecefe93657117171aca07e49d95db64ebf
 https://repo.anaconda.com/pkgs/main/linux-64/conda-pypi-0.11.0-py312h06a4308_0.conda#2599b2f4eab7be31cd805a3c47a6b5c12b8b79ff1ba851c3bf409ca9e0735690
 https://repo.anaconda.com/pkgs/main/linux-64/conda-rattler-solver-0.1.1-py312h06a4308_0.conda#3c264f9eabbda5cbdb93c2a5b3bf7440ae3daed764d8cbbc03fed0f4750a80df

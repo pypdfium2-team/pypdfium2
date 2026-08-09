@@ -107,4 +107,4 @@ https://repo.anaconda.com/pkgs/main/linux-64/conda-package-streaming-0.13.0-py31
 https://repo.anaconda.com/pkgs/main/linux-64/requests-toolbelt-1.0.0-py312h06a4308_0.conda#728a5e39804fd2cd2144ec8ab40513a0095585d8289be25bc808488064b05cb3
 https://repo.anaconda.com/pkgs/main/linux-64/anaconda-auth-0.15.1-py312h06a4308_0.conda#00f4abcf8fbeb415dad1913d6a494ea94255ee93c8d7bc6c145f9ee6515dfb5a
 https://repo.anaconda.com/pkgs/main/linux-64/conda-package-handling-2.5.0-py312h06a4308_0.conda#4b105cbe2110fc0cd8a72f3fea775760190274efb95dfc643e9a0b903466e517
-https://repo.anaconda.com/pkgs/main/linux-64/anaconda-client-1.14.1-py312h06a4308_0.conda#78b3ea12a76743de23f6bc6f2934529bee70bd1e72f1e9300090d2fccb90a065
+https://repo.anaconda.com/pkgs/main/linux-64/anaconda-client-1.15.0-py312h06a4308_0.conda#43804e5110a3d080d4c6e0d2b67826ab6177021e774809b00313d076764314e1
