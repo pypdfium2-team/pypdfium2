@@ -62,8 +62,7 @@ if HAVE_MACHOLIB:
 
 def _mac_iter_versions(dll_path):
     # adapted from matthew-brett/delocate
-    macho = MachO(dll_path)
-    for header in macho.headers:
+    for header in MachO(dll_path).headers:
         for cmd in header.commands:
             if cmd[0].cmd == mach_o.LC_BUILD_VERSION:
                 raw_version = cmd[1].minos
