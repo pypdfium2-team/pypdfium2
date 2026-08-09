@@ -112,5 +112,11 @@ refresh-lock:
 	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
 	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
 
+[script]
+refresh-conda-lock:
+	set -x && rm -f conda/lock/{build,publish}.txt
+	./utils/misc/conda_lockgen.sh build "3.12" "conda-build==26.5.0 conda-verify==3.4.2"
+	./utils/misc/conda_lockgen.sh publish "3.12" "anaconda-client==1.14.1"
+
 # TODO(geisserml) update conda/lock/*.txt as well
-refresh-all-pins: pinact refresh-lock
+refresh-all-pins: pinact refresh-lock refresh-conda-lock
