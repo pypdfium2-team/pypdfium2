@@ -59,7 +59,7 @@ jobs:
     steps:
       
       - name: Check out pypdfium2 (deep)
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0  # for git describe
           persist-credentials: false
@@ -83,7 +83,7 @@ jobs:
       
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
       - name: Build wheels
-        uses: loong64/cibuildwheel@e1f483ac54bae73808efc6e5888b05eae9c478ba # v4.1.1
+        uses: loong64/cibuildwheel@17768452a199071a2d69bc22931b395f9794e8db # v4.2.0
         env:
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time.
           # Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.

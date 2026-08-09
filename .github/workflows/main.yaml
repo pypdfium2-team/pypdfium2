@@ -67,7 +67,7 @@ jobs:
     steps:
       
       - name: Check out pypdfium2
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: ${{ !inputs.inc_ver && 1 || 0 }}
           persist-credentials: ${{ inputs.inc_ver }}  # zizmor: ignore[artipacked]
@@ -89,7 +89,7 @@ jobs:
       
       - name: Set up Python
         if: ${{ inputs.inc_ver }}
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.14'
       
@@ -141,7 +141,7 @@ jobs:
     steps:
       
       - name: Check out pypdfium2
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0  # for git describe
           persist-credentials: false
@@ -261,7 +261,7 @@ jobs:
     steps:
       
       - name: Check out pypdfium2 (deep, authenticated)
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0  # for git describe
           persist-credentials: true  # zizmor: ignore[artipacked]
@@ -280,7 +280,7 @@ jobs:
           merge-multiple: true
       
       - name: Set up Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.14'
       
@@ -337,7 +337,7 @@ jobs:
       
       - name: Publish to PyPI
         if: ${{ inputs.actually_publish }}
-        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: dist/  # the default
           # skip-existing: true
@@ -398,7 +398,7 @@ jobs:
     steps:
       
       - name: Check out pypdfium2 (shallow, authenticated)
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           persist-credentials: true  # zizmor: ignore[artipacked]
