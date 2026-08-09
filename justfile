@@ -96,3 +96,7 @@ pyodide-venv-create envname='.pyodide-venv':
 	pip install {{wheel}}
 	pip install pillow numpy pytest
 	python -m pytest tests/
+
+# TODO(geisserml) update pip.txt as well
+refresh-lock:
+    pip-compile --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
