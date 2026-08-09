@@ -115,8 +115,7 @@ refresh-lock:
 [script]
 refresh-conda-lock:
 	set -x && rm -f conda/lock/{build,publish}.txt
-	./utils/misc/conda_lockgen.sh build "3.12" "conda-build conda-verify"  # 26.5.0, 3.4.2
-	./utils/misc/conda_lockgen.sh publish "3.12" "anaconda-client"  # 1.14.1
+	./utils/misc/conda_lockgen.sh build "3.12" "conda-build conda-verify"  # 26.7.0, 3.4.2
+	./utils/misc/conda_lockgen.sh publish "3.12" "anaconda-client"  # 1.15.0
 
-# TODO(geisserml) update conda/lock/*.txt as well
 refresh-all-pins: pinact refresh-lock refresh-conda-lock

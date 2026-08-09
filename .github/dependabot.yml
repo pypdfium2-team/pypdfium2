@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
-# Set update schedule for GitHub Actions
+# NOTE: We mainly use dependabot for notification purposes (e.g. security updates, or just as a reminder to update all the locks & pins from time to time).
+# For on-demand updates, please use `just refresh-all-pins`.
 
 version: 2
 updates:
@@ -20,7 +21,7 @@ updates:
     exclude-paths:
       - "lock/unmanaged/**"
     schedule:
-      interval: "monthly"
+      interval: "quarterly"
     cooldown:
       default-days: 7
     groups:
