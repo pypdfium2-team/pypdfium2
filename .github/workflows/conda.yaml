@@ -8,10 +8,6 @@ on:
       package:
         type: string  # choices: "raw" or "helpers"
         required: true
-      py_ver:
-        type: string
-        # AOTW, conda still has some problems with 3.13 and 3.14
-        default: '3.12'
       pdfium_ver:
         type: string
         default: ''  # implies latest
@@ -60,7 +56,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
-          python-version: ${{ inputs.py_ver }}
+          python-version: '3.12'
           # priority: highest to lowest
           # https://github.com/conda-incubator/setup-miniconda/blob/3afdf12ae89a97ee81acc85f1490189fba144938/README.md#example-4-conda-options
           channels: pypdfium2-team,bblanchon,defaults
@@ -182,7 +178,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
-          python-version: ${{ inputs.py_ver }}
+          python-version: '3.12'
           channels: defaults  # no custom channels needed here
       
       - name: Download artifact
