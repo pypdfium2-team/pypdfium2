@@ -188,7 +188,7 @@ jobs:
           path: conda_dist/
       
       - name: Install Anaconda client
-        run: conda install -y --file conda/lock/publish.txt  # TODO
+        run: conda install -y --file conda/lock/publish.txt
       
       - name: Upload to Anaconda
         if: ${{ inputs.actually_publish }}
