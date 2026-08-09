@@ -182,7 +182,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           auto-update-conda: true
-          python-version: ${{ matrix.py }}
+          python-version: ${{ inputs.py_ver }}
           channels: defaults  # no custom channels needed here
       
       - name: Download artifact
