@@ -99,8 +99,7 @@ jobs:
       
       - name: Install pip packages
         if: ${{ inputs.inc_ver }}
-        run: |
-          pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group check --group setup --group test
+        run: pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group check --group setup --group test
       
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
