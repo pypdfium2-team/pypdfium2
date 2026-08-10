@@ -133,7 +133,7 @@ select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64} *-pyodide_
 inherit.before-build = "append"
 before-build = [
     # TODO install latest gn-dist if it's latest pdfium
-    "pip install --only-binary :all: --group gn",
+    "pip install --no-deps --only-binary :all: --group gn",
 ]
 
 [[tool.cibuildwheel.overrides]]
