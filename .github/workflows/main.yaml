@@ -385,7 +385,6 @@ jobs:
       inputs: |
         {
           "package": "helpers",
-          "py_ver": "3.12",
           "pdfium_ver": "",
           "new_only": "true",
           "test": "true",
