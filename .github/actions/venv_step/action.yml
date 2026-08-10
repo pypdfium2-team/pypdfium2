@@ -31,7 +31,6 @@ runs:
     - name: Create venv
       shell: bash
       run: |  # zizmor: ignore[github-env]
-        echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
         $INITIAL_PYTHON -m venv .venv
         VENV_BIN=$($INITIAL_PYTHON utils/misc/fix_venv.py .venv)
         echo "Resolved VENV_BIN to ${VENV_BIN}"
@@ -50,6 +49,7 @@ runs:
       shell: bash
       run: |
         which python3  # this should point to the venv
+        echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"  # ensure cooldown is set
         python3 utils/update_pip.py
         pip --version
     
