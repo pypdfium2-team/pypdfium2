@@ -35,13 +35,13 @@ def _import_with_fallback(*candidates):
         else:
             return module
 
-def _parse_dep_group(groups, key):
+def _parse_dep_group(raw_groups, key):
     group = []
-    for entry in groups[key]:
+    for entry in raw_groups[key]:
         if isinstance(entry, str):
             group.append(entry)
         else:
-            group.extend(_parse_dep_group(groups, entry["include-group"]))
+            group.extend(_parse_dep_group(raw_groups, entry["include-group"]))
     return group
 
 _DEPGROUP_FALLBACK = sys.version_info < (3, 9)
