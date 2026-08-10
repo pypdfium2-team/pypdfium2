@@ -93,11 +93,14 @@ jobs:
         with:
           python-version: '3.14'
       
-      - name: Create venv & install pip packages
+      - name: Create venv
         if: ${{ inputs.inc_ver }}
-        uses: ./.github/actions/install_step
-        with:
-          pip_install: -U --group check --group setup --group test
+        uses: ./.github/actions/venv_step
+      
+      - name: Install pip packages
+        if: ${{ inputs.inc_ver }}
+        run: |
+          pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group check --group setup --group test
       
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
@@ -152,12 +155,13 @@ jobs:
         with:
           replicate_tag: ${{ needs.prepare.outputs.version }}
           # TODO obtain resolved versions from get_matrix.py
-          py_vers: ${{ inputs.py_vers }}
+          py_vers: ${{ inputs.py_vers }}  # >= 3.9 expected as main version
       
-      - name: Create venv & install pip packages
-        uses: ./.github/actions/install_step
-        with:
-          pip_install: -U --group setup
+      - name: Create venv
+        uses: ./.github/actions/venv_step
+      
+      - name: Install pip packages
+        run: pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group setup
       
       - name: Build & test sdist
         run: |
@@ -284,10 +288,10 @@ jobs:
         with:
           python-version: '3.14'
       
-      - name: Create venv & install pip packages
-        uses: ./.github/actions/install_step
+      - name: Create venv & install from lockfile
+        uses: ./.github/actions/venv_step
         with:
-          pip_install_lockfile: lock/distcheck.txt
+          lockfile: lock/distcheck.txt
           cooldown_days: '7'  # lockfile sanity check
       
       - name: Check artifacts

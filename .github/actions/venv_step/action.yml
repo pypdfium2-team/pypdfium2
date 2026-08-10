@@ -1,0 +1,62 @@
+# SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
+
+name: 'Venv'
+description: 'Prepare virtual environment for pip'
+
+inputs:
+  cooldown_days:
+    description: 'Dependency cooldown interval'
+    default: '7'
+  lockfile:
+    description: 'Install with the given lockfile. Note: the cooldown is honored as a sanity check. If urgent updates are needed, set a lower cooldown_days value at the call site.'
+    default: ''
+  initial_python:
+    description: 'The initial python executable to use'
+    default: 'python3'
+
+runs:
+  using: 'composite'
+  steps:
+    
+    - name: Set up cooldown
+      shell: bash
+      id: cooldown
+      run: |  # zizmor: ignore[github-env]
+        COOLDOWN_DATE=$($PYTHON utils/misc/get_cool_date.py "$COOLDOWN_DAYS")
+        echo "PIP_UPLOADED_PRIOR_TO=\"$COOLDOWN_DATE\"" >> "$GITHUB_ENV"
+      env:
+        PYTHON: ${{ inputs.initial_python }}
+        COOLDOWN_DAYS: ${{ inputs.cooldown_days }}
+    
+    - name: Create venv
+      shell: bash
+      run: |  # zizmor: ignore[github-env]
+        echo "Cooldown date: ${PIP_UPLOADED_PRIOR_TO:?}"
+        $INITIAL_PYTHON -m venv .venv
+        VENV_BIN=$($INITIAL_PYTHON utils/misc/fix_venv.py .venv)
+        echo "Resolved VENV_BIN to ${VENV_BIN}"
+        # Confirm we got VENV_BIN right and it has all the usual executables, or we might silently fall for system-level python
+        $VENV_BIN/python --version
+        $VENV_BIN/pip --version
+        $VENV_BIN/python3 --version
+        $VENV_BIN/pip3 --version
+        # Prepend our venv to PATH for all following steps, including beyond this reusable action
+        echo "$VENV_BIN" >> "$GITHUB_PATH"
+      env:
+        INITIAL_PYTHON: ${{ inputs.initial_python }}
+    
+    # https://github.com/actions/setup-python/issues/1346 ...
+    - name: Update pip
+      shell: bash
+      run: |
+        which python3  # this should point to the venv
+        python3 utils/update_pip.py
+        pip --version
+    
+    - name: Install from lockfile
+      if: ${{ inputs.lockfile }}
+      shell: bash
+      run: pip install --no-deps --only-binary ':all:' --require-hashes -r "$LOCKFILE"
+      env:
+        LOCKFILE: ${{ inputs.lockfile }}

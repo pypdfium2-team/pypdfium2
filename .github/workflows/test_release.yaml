@@ -53,13 +53,20 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       
-      - name: Create venv & install pip packages
-        uses: ./.github/actions/install_step
+      - name: Create venv
+        uses: ./.github/actions/venv_step
         with:
-          pip_install: -U --group converters --group test ${{ inputs.use_sdist && '--group setup' || '' }}
-          # The project itself must be exempted from dependency cooldown, we unconditionally want to be able to test the latest version here, including beta.
-          pip_install_hot: --pre pypdfium2 ${{ inputs.use_sdist && '--no-binary' || '--only-binary' }} pypdfium2
           initial_python: ${{ matrix.initial_python || 'python3' }}
+      
+      # The project itself must be exempted from dependency cooldown, we unconditionally want to be able to test the latest version here, including beta.
+      - name: Install pip packages
+        run: |
+          echo "Cooldown date: ${PIP_UPLOADED_PRIOR_TO:?}"
+          pip install -U --group converters --group test $GROUP_SETUP
+          env -u PIP_UPLOADED_PRIOR_TO pip install --no-deps --no-build-isolation --pre pypdfium2 $WHEEL_CTRL pypdfium2
+        env:
+          GROUP_SETUP: ${{ inputs.use_sdist && '--group setup' || '' }}
+          WHEEL_CTRL: ${{ inputs.use_sdist && '--no-binary' || '--only-binary' }}
       
       - name: Check out the right tag
         run: |

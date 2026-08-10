@@ -43,10 +43,12 @@ jobs:
         with:
           python-version: '3.14'
       
-      - name: Create venv & install pip packages
-        uses: ./.github/actions/install_step
-        with:
-          pip_install: -U --group docs
+      - name: Create venv
+        uses: ./.github/actions/venv_step
+      
+      - name: Install pip packages
+        run: |
+          pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group docs
       
       - name: Install pypdfium2
         run: python3 -m pip install -v .

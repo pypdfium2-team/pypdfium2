@@ -46,7 +46,7 @@ ignore = ["W002", "W009", "W010"]
 build-frontend = {name="build", args=["-xn"]}
 environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
 before-build = [
-    "pip install --group setup",
+    "pip install --uploaded-prior-to P7D --group setup",
 ]
 test-command = [
     "python -m pypdfium2_cli --help",

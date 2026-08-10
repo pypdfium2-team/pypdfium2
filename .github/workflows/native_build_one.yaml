@@ -14,7 +14,7 @@ on:
         default: gcc
       py_ver:
         type: string
-        default: '3.14'
+        default: '3.14'  # >=3.9 expected
       pdfium_ver:
         type: string
         default: ''
@@ -57,12 +57,14 @@ jobs:
         with:
           python-version: ${{ inputs.py_ver }}
       
-      - name: Create venv & install pip packages
-        uses: ./.github/actions/install_step
-        with:
-          pip_install: -U --group setup --group test
-          # gn-dist is our own project (also maintained within pypdfium2-team org) which must be exempted from dependency cooldown. When we build a new version and update the pin, we want that update to unconditionally take effect.
-          pip_install_hot: --only-binary ':all:' --group gn
+      - name: Create venv
+        uses: ./.github/actions/venv_step
+      
+      - name: Install pip packages
+        run: |
+          pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group setup --group test
+          # gn-dist is a first-party dependency which must be exempted from cooldown
+          env -u PIP_UPLOADED_PRIOR_TO pip install --no-deps --only-binary ':all:' --group gn
       
       - name: Install build deps
         run: |
@@ -90,14 +92,14 @@ jobs:
         run: file data/sourcebuild/*pdfium.*
       
       - name: Build wheel
-        run: python3 -m build -wxn
+        run: pyproject-build -wxn
         env:
           PDFIUM_PLATFORM: sourcebuild
       
       - name: Post-process with auditwheel
         run: |
-          python3 -m pip install -U auditwheel
-          python3 -m auditwheel repair dist/*.whl -w wheelhouse
+          pip install -U auditwheel
+          auditwheel repair dist/*.whl -w wheelhouse
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -107,6 +109,6 @@ jobs:
       
       - name: Install and test wheel
         run: |
-          python3 -m pip install ./wheelhouse/*.whl
+          pip install ./wheelhouse/*.whl
           pypdfium2 -v
-          python3 -m pytest tests/
+          pytest tests/

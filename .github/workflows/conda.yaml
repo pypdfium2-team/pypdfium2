@@ -76,8 +76,7 @@ jobs:
         run: |
           python -VV
           python utils/update_pip.py
-          export PIP_UPLOADED_PRIOR_TO=$(python utils/misc/get_cool_date.py 7)
-          python -m pip install -U --group setup
+          python -m pip install -U --uploaded-prior-to P7D --group setup
       
       # this is needed for craft_conda_pkgs.py, which uses git commands for data file transfer
       - name: Configure git
