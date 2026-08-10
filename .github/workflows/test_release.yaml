@@ -58,12 +58,12 @@ jobs:
         with:
           initial_python: ${{ matrix.initial_python || 'python3' }}
       
-      # The project itself must be exempted from dependency cooldown, we unconditionally want to be able to test the latest version here, including beta.
       - name: Install pip packages
         run: |
           echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
-          # TODO(geisserml) if it's python 3.8, need to install a tomllib backport first
+          pip install "tomli; python_version < '3.11'"
           python ./utils/misc/install_dep_group.py test $MAYBE_SETUP
+          # The project itself must be exempted from dependency cooldown, we unconditionally want to be able to test the latest version here, including beta.
           env -u PIP_UPLOADED_PRIOR_TO pip install --no-deps --no-build-isolation --pre pypdfium2 $WHEEL_CTRL pypdfium2
         env:
           MAYBE_SETUP: ${{ inputs.use_sdist && 'setup' || '' }}

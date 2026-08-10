@@ -11,7 +11,10 @@ from datetime import datetime, timezone, timedelta
 try:
     import tomllib
 except ImportError:
-    tomllib = None
+    try:
+        import tomli as tomllib
+    except ImportError:
+        tomllib = None
 
 
 ProjectDir = Path(__file__).resolve().parents[1]
