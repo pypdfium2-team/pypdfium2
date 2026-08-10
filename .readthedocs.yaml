@@ -21,7 +21,7 @@ build:
       # for git describe in conf.py
       - git fetch --unshallow || true
     post_install:
-      - pip install --group docs
+      - pip install --uploaded-prior-to P7D --group docs
 
 python:
   install:

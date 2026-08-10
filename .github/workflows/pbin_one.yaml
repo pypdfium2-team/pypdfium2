@@ -66,10 +66,13 @@ jobs:
           py_vers: ${{ inputs.py_vers }}
           py_arch: ${{ inputs.pbin_target == 'windows_x86' && 'x86' || '' }}
       
-      - name: Create venv & install pip packages
-        uses: ./.github/actions/install_step
-        with:
-          pip_install: -U --group setup
+      - name: Create venv
+        uses: ./.github/actions/venv_step
+      
+      - name: Install pip packages
+        run: |
+          echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
+          pip install -U --group setup
       
       - name: Build wheel
         run: |

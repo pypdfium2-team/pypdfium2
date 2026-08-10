@@ -8,6 +8,9 @@ on:
       use_sdist:
         type: boolean
         default: false
+      py_vers_json:
+        type: string
+        default: '["3.8", "3.11", "3.14"]'
 
 defaults:
   run:
@@ -15,6 +18,8 @@ defaults:
 permissions: {}
 
 jobs:
+  
+  # TODO(geisserml) migrate away from matrix - use prepare_step & an updated multitest.py instead?
   test-release:
     name: Test PyPI Release
     permissions:
@@ -24,7 +29,7 @@ jobs:
       matrix:
         # stick with ubuntu-24.04 for now so we can keep testing python 3.8
         os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-arm']
-        py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
+        py: ${{ fromJSON(inputs.py_vers_json) }}
         include:
           # on windows with python 3.8, the `python3` executable does not seem to exit for some reason
           - os: windows-latest
@@ -53,13 +58,21 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       
-      - name: Create venv & install pip packages
-        uses: ./.github/actions/install_step
+      - name: Create venv
+        uses: ./.github/actions/venv_step
         with:
-          pip_install: -U --group converters --group test ${{ inputs.use_sdist && '--group setup' || '' }}
-          # The project itself must be exempted from dependency cooldown, we unconditionally want to be able to test the latest version here, including beta.
-          pip_install_hot: --pre pypdfium2 ${{ inputs.use_sdist && '--no-binary' || '--only-binary' }} pypdfium2
           initial_python: ${{ matrix.initial_python || 'python3' }}
+      
+      - name: Install pip packages
+        run: |
+          echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
+          pip install "tomli; python_version < '3.11'"
+          python ./utils/misc/install_dep_group.py test $MAYBE_SETUP
+          # The project itself must be exempted from dependency cooldown, we unconditionally want to be able to test the latest version here, including beta.
+          env -u PIP_UPLOADED_PRIOR_TO pip install --no-deps --no-build-isolation --pre pypdfium2 $WHEEL_CTRL pypdfium2
+        env:
+          MAYBE_SETUP: ${{ inputs.use_sdist && 'setup' || '' }}
+          WHEEL_CTRL: ${{ inputs.use_sdist && '--no-binary' || '--only-binary' }}
       
       - name: Check out the right tag
         run: |

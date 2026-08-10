@@ -46,7 +46,7 @@ ignore = ["W002", "W009", "W010"]
 build-frontend = {name="build", args=["-xn"]}
 environment-pass = ["TEST_PDFIUM", "PDFIUM_VER", "USE_SYSROOT"]
 before-build = [
-    "pip install --group setup",
+    "pip install --uploaded-prior-to P7D --group setup",
 ]
 test-command = [
     "python -m pypdfium2_cli --help",
@@ -133,7 +133,7 @@ select = "*-*linux_{x86_64,i686,aarch64,armv7l,ppc64le,s390x,riscv64} *-pyodide_
 inherit.before-build = "append"
 before-build = [
     # TODO install latest gn-dist if it's latest pdfium
-    "pip install --only-binary :all: --group gn",
+    "pip install --no-deps --only-binary :all: --group gn",
 ]
 
 [[tool.cibuildwheel.overrides]]

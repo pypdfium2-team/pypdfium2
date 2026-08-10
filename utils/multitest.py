@@ -10,13 +10,9 @@ import platform
 import argparse
 import subprocess
 from pathlib import Path
-try:
-    import tomllib
-except ImportError:
-    tomllib = None
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
-from shared_base import ProjectDir, log, get_cool_date
+from shared_base import *
 
 IS_WINDOWS = sys.platform.startswith("win32")
 PYTHON_EXE = "python" + (".exe" if IS_WINDOWS else "")
@@ -45,24 +41,6 @@ def _get_python_exe_map():
         exemap[match.group(1)] = str(subdir/cpu_id/PYTHON_EXE)
     
     return exemap
-
-
-# Work around python 3.8's max pip being too old for PEP 735 dependency groups
-
-def _parse_group(groups, key):
-    group = []
-    for entry in groups[key]:
-        if isinstance(entry, str):
-            group.append(entry)
-        else:
-            group.extend(_parse_group(groups, entry["include-group"]))
-    return group
-
-def read_dependency_group(key):
-    assert tomllib, "If testing python 3.8 is desired, python >= 3.11 is required as dispatcher, or you need to provide a tomllib backport"
-    with (ProjectDir/"pyproject.toml").open("rb") as fh:
-        pyproject_toml = tomllib.load(fh)
-    return _parse_group(pyproject_toml["dependency-groups"], key)
 
 
 parser = argparse.ArgumentParser(
@@ -107,8 +85,7 @@ for py_ver in reversed(args.py_vers):
     
     os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(7)
     run([python, "-m", "pip", "install", args.wheel_path])
-    pip_args = read_dependency_group("test") if py_ver == "3.8" else ("--group", "test")
-    run([python, "-m", "pip", "install", "-U", *pip_args])
+    install_dep_groups(["test"], python, (py_ver == "3.8"))
     try:
         run([pypdfium2_exe, "--version"])
         run([python, "-m", "pytest", "tests/"])
