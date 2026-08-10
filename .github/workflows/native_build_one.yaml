@@ -99,6 +99,7 @@ jobs:
       
       - name: Post-process with auditwheel
         run: |
+          echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
           pip install -U auditwheel
           auditwheel repair dist/*.whl -w wheelhouse
       
