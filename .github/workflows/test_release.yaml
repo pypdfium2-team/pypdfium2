@@ -62,6 +62,7 @@ jobs:
       - name: Install pip packages
         run: |
           echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
+          # TODO(geisserml) if it's python 3.8, need to install a tomllib backport first
           python ./utils/misc/install_dep_group.py test $MAYBE_SETUP
           env -u PIP_UPLOADED_PRIOR_TO pip install --no-deps --no-build-isolation --pre pypdfium2 $WHEEL_CTRL pypdfium2
         env:
