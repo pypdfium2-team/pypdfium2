@@ -13,7 +13,7 @@ on:
         default: ''
       py_vers:
         type: string
-        default: '3.14'  # >= 3.9 expected as main version
+        default: '3.14'
       testos_py_vers:
         type: string
         default: ''
@@ -70,7 +70,9 @@ jobs:
         uses: ./.github/actions/venv_step
       
       - name: Install pip packages
-        run: pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group setup
+        run: |
+          echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
+          pip install -U --group setup
       
       - name: Build wheel
         run: |

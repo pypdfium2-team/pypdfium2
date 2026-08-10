@@ -99,7 +99,9 @@ jobs:
       
       - name: Install pip packages
         if: ${{ inputs.inc_ver }}
-        run: pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group check --group setup --group test
+        run: |
+          echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
+          pip install -U --group check --group setup --group test
       
       - name: Checks & Version increment
         if: ${{ inputs.inc_ver }}
@@ -154,13 +156,15 @@ jobs:
         with:
           replicate_tag: ${{ needs.prepare.outputs.version }}
           # TODO obtain resolved versions from get_matrix.py
-          py_vers: ${{ inputs.py_vers }}  # >= 3.9 expected as main version
+          py_vers: ${{ inputs.py_vers }}
       
       - name: Create venv
         uses: ./.github/actions/venv_step
       
       - name: Install pip packages
-        run: pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group setup
+        run: |
+          echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
+          pip install -U --group setup
       
       - name: Build & test sdist
         run: |

@@ -35,6 +35,6 @@ runs:
       if: ${{ startsWith(inputs.runner_os, 'ubuntu-') && inputs.auditwheel }}
       shell: bash
       run: |
-        echo "Cooldown date: ${PIP_UPLOADED_PRIOR_TO:?}"
+        echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
         pip install -U auditwheel
         auditwheel show dist/*.whl

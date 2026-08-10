@@ -14,7 +14,7 @@ on:
         default: gcc
       py_ver:
         type: string
-        default: '3.14'  # >=3.9 expected
+        default: '3.14'
       pdfium_ver:
         type: string
         default: ''
@@ -62,7 +62,8 @@ jobs:
       
       - name: Install pip packages
         run: |
-          pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group setup --group test
+          echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
+          pip install -U --group setup --group test
           # gn-dist is a first-party dependency which must be exempted from cooldown
           env -u PIP_UPLOADED_PRIOR_TO pip install --no-deps --only-binary ':all:' --group gn
       

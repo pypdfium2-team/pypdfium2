@@ -32,7 +32,7 @@ runs:
     - name: Create venv
       shell: bash
       run: |  # zizmor: ignore[github-env]
-        echo "Cooldown date: ${PIP_UPLOADED_PRIOR_TO:?}"
+        echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
         $INITIAL_PYTHON -m venv .venv
         VENV_BIN=$($INITIAL_PYTHON utils/misc/fix_venv.py .venv)
         echo "Resolved VENV_BIN to ${VENV_BIN}"

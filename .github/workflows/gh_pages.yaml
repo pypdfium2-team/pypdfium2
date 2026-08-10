@@ -47,7 +47,9 @@ jobs:
         uses: ./.github/actions/venv_step
       
       - name: Install pip packages
-        run: pip install --uploaded-prior-to "${PIP_UPLOADED_PRIOR_TO:?}" -U --group docs
+        run: |
+          echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
+          pip install -U --group docs
       
       - name: Install pypdfium2
         run: python3 -m pip install -v .
