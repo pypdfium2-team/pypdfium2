@@ -44,14 +44,12 @@ def _parse_dep_group(groups, key):
             group.extend(_parse_dep_group(groups, entry["include-group"]))
     return group
 
-# NOTE(geisserml) it's actually the pip version what matters ...
 _DEPGROUP_FALLBACK = sys.version_info < (3, 9)
-
 tomllib = _import_with_fallback("tomllib", "tomli")
 
 def install_dep_groups(groups, python=sys.executable, need_fallback=_DEPGROUP_FALLBACK):
     
-    assert tomllib, "If testing python 3.8 is desired, python >= 3.11 is required as dispatcher, or you need to provide a tomllib backport"
+    assert tomllib, "No toml library found. You want to install tomli, or use python >= 3.11 as dispatcher."
     with (ProjectDir/"pyproject.toml").open("rb") as fh:
         pyproject_toml = tomllib.load(fh)
     
