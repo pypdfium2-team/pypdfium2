@@ -7,14 +7,7 @@ import sys
 import subprocess
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
-
-try:
-    import tomllib
-except ImportError:
-    try:
-        import tomli as tomllib
-    except ImportError:
-        tomllib = None
+from importlib import import_module
 
 
 ProjectDir = Path(__file__).resolve().parents[1]
@@ -25,12 +18,22 @@ def log(*args, **kwargs):
 def get_cool_date(cooldown_days):
     return (datetime.now(timezone.utc) - timedelta(days=cooldown_days)).isoformat(timespec='seconds')
 
-
-# Work around python 3.8's max pip being too old for PEP 735 dependency groups
-
+# TODO rename & make public? or replace with run_cmd() from base.py?
 def _run(cmd, check=True, **kwargs):
     log(cmd)
     subprocess.run(cmd, check=check, **kwargs)
+
+
+# Work around python 3.8's max pip being too old for PEP 735 dependency groups
+
+def _import_with_fallback(*candidates):
+    for candidate in candidates:
+        try:
+            module = import_module(candidate)
+        except ImportError:
+            continue
+        else:
+            return module
 
 def _parse_dep_group(groups, key):
     group = []
@@ -43,6 +46,8 @@ def _parse_dep_group(groups, key):
 
 # NOTE(geisserml) it's actually the pip version what matters ...
 _DEPGROUP_FALLBACK = sys.version_info < (3, 9)
+
+tomllib = _import_with_fallback("tomllib", "tomli")
 
 def install_dep_groups(groups, python=sys.executable, need_fallback=_DEPGROUP_FALLBACK):
     
