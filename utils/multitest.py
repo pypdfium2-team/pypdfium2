@@ -85,7 +85,7 @@ for py_ver in reversed(args.py_vers):
     
     os.environ["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(7)
     run([python, "-m", "pip", "install", args.wheel_path])
-    install_dep_groups(["test"], python, (py_ver == "3.8"))
+    install_dep_groups(["test"], python, (py_ver == "3.8"), archprefix)
     try:
         run([pypdfium2_exe, "--version"])
         run([python, "-m", "pytest", "tests/"])

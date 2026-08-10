@@ -47,7 +47,7 @@ def _parse_dep_group(raw_groups, key):
 _DEPGROUP_FALLBACK = sys.version_info < (3, 9)
 tomllib = _import_with_fallback("tomllib", "tomli")
 
-def install_dep_groups(groups, python=sys.executable, need_fallback=_DEPGROUP_FALLBACK):
+def install_dep_groups(groups, python=sys.executable, need_fallback=_DEPGROUP_FALLBACK, prefix=()):
     
     assert tomllib, "No toml library found. You want to install tomli, or use python >= 3.11 as dispatcher."
     with (ProjectDir/"pyproject.toml").open("rb") as fh:
@@ -61,4 +61,4 @@ def install_dep_groups(groups, python=sys.executable, need_fallback=_DEPGROUP_FA
         for group in groups:
             pip_args.extend(("--group", group))
     
-    _run([python, "-m", "pip", "install", "-U", *pip_args])
+    _run([*prefix, python, "-m", "pip", "install", "-U", *pip_args])
