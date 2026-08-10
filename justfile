@@ -3,9 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # Good to know:
+# 
+# *Just*
 # - https://github.com/casey/just/blob/13bf03f642f4cec7799c19f1f8f039e1cb3b095d/README.md
 #   sections: #reference, #script-recipes, #shebang-recipes, #safer-bash-shebang-recipes, #python-recipes-with-uv, #activating-environments
+# 
+# *Shell*
 # - https://blog.yossarian.net/2020/01/23/Anybody-can-write-good-bash-with-a-little-effort#basics
+# - https://google.github.io/styleguide/shellguide.html
 
 BROWSER := env('BROWSER', 'google-chrome')
 BUILD_PARAMS := env('BUILD_PARAMS', '')
@@ -74,9 +79,6 @@ venv-create envname='.venv':
 	$VENV_BIN/python3 utils/update_pip.py
 
 
-# Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
-pyodide *args: (pyodide-build args) pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
-
 pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
 	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
@@ -98,23 +100,26 @@ pyodide-test wheel:
 	pip install pillow numpy pytest
 	python -m pytest tests/
 
+# Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
+pyodide *args: (pyodide-build args) pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
+
 
 # NOTE you may want to make pinact a wrapper script that translates to something like
 # GITHUB_TOKEN=$(kwallet-query -f Passwords -r pinact kdewallet) pinact_raw $@
-pinact min_age='7':
+update-actions min_age='7':
 	pinact run -update -min-age {{min_age}} || true
 
 [script]
-refresh-lock:
+update-locks:
 	set -x && export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
 	rm -f lock/{pip,distcheck}.txt
 	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
 	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
 
 [script]
-refresh-conda-lock:
+update-conda-locks:
 	set -x && rm -f conda/lock/{build,publish}.txt
 	./utils/misc/conda_lockgen.sh build "3.12" "conda-build conda-verify"  # 26.7.0, 3.4.2
 	./utils/misc/conda_lockgen.sh publish "3.12" "anaconda-client"  # 1.15.0
 
-refresh-all-pins: pinact refresh-lock refresh-conda-lock
+update-all-pins: update-actions update-locks update-conda-locks
