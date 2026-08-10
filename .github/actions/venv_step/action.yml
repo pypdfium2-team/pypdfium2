@@ -21,7 +21,6 @@ runs:
     
     - name: Set up cooldown
       shell: bash
-      id: cooldown
       run: |  # zizmor: ignore[github-env]
         COOLDOWN_DATE=$($PYTHON utils/misc/get_cool_date.py "$COOLDOWN_DAYS")
         echo "PIP_UPLOADED_PRIOR_TO=$COOLDOWN_DATE" >> "$GITHUB_ENV"
