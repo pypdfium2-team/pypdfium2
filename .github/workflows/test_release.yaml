@@ -8,6 +8,9 @@ on:
       use_sdist:
         type: boolean
         default: false
+      py_vers_json:
+        type: string
+        default: '["3.8", "3.11", "3.14"]'
 
 defaults:
   run:
@@ -15,6 +18,8 @@ defaults:
 permissions: {}
 
 jobs:
+  
+  # TODO(geisserml) migrate away from matrix - use prepare_step & an updated multitest.py instead?
   test-release:
     name: Test PyPI Release
     permissions:
@@ -24,7 +29,7 @@ jobs:
       matrix:
         # stick with ubuntu-24.04 for now so we can keep testing python 3.8
         os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest', 'windows-11-arm']
-        py: ['3.8', '3.11', '3.14']  # '3.9', '3.10', '3.12', '3.13',
+        py: ${{ fromJSON(inputs.py_vers_json) }}
         include:
           # on windows with python 3.8, the `python3` executable does not seem to exit for some reason
           - os: windows-latest
