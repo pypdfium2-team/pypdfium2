@@ -455,7 +455,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
             clang_path = Host.usr
         clang_ver = get_clang_version(clang_path)
         if clang_ver < 22 and not is_pyodide:
-            log("Warning: Clang below version 22 is not supported with upstream's clang config - implicitly switching to --clang-as-gcc mode. If you mean to manually patch pdfium's //build for compatibility with older clang (possible, but no fun to maintain), take out this check.")
+            log("Warning: Clang below version 22 is not supported with upstream's clang config - implicitly switching to --clang-as-gcc mode. (If you mean to manually patch pdfium's //build for compatibility with older clang (possible, but no fun to maintain), feel free to disable this check.)")
             clang_as_gcc = True
             clang_ver = None
         if clang_as_gcc:
@@ -552,7 +552,7 @@ Some params take a default from an environment variable, for easy passthrough wi
     parser.add_argument(
         "--clang-as-gcc",
         action = "store_true",
-        help = "Use clang, but pretend to pdfium's build system that it were gcc. Passing `--compiler clang` is a prerequisite.",
+        help = "Use gcc build config, but actually build with clang by setting CC, CXX etc. Passing `--compiler clang` is a prerequisite.",
     )
     # nb: libicudata pulled in from the system via `auditwheel repair` is quite big. Using vendored ICU reduces wheel size by about 10 MB (compressed).
     parser.add_argument(
@@ -572,7 +572,7 @@ Some params take a default from an environment variable, for easy passthrough wi
         "--use-sysroot",
         action = "store_true",
         default = bool(int( os.environ.get("USE_SYSROOT", 0) )),
-        help = "Attempt to use a Google-processed Debian sysroot for the build. This may help achieve a lower glibc requirement. This option is Linux glibc only, and ignored on other platforms. If no sysroot is available for the host CPU, this will fail.",
+        help = "Attempt to build with one of upstream's sysroots. This should help achieve a lower glibc requirement. This option is Linux glibc only, and ignored on other platforms. If no sysroot is available for the host CPU, this will fail. Probably only effective in clang build mode.",
     )
     parser.add_argument(
         "--pyodide",
