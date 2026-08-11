@@ -7,24 +7,33 @@ import sys
 import subprocess
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[2]/"setupsrc"))
-from shared_base import ProjectDir
+ProjectDir = Path(__file__).resolve().parents[2]
 
-proc = subprocess.run(["git", "diff", "--numstat", sys.argv[1], sys.argv[2]], cwd=ProjectDir, stdout=subprocess.PIPE)
-raw_output = proc.stdout.decode().strip()
+def _git_diff(difftype):
+    proc = subprocess.run(["git", "diff", difftype, sys.argv[1], sys.argv[2]], cwd=ProjectDir, stdout=subprocess.PIPE)
+    return proc.stdout.decode().strip()
 
+raw_output = _git_diff("--numstat")
 info = {}
-total = 0
 for line in raw_output.splitlines():
-    additions, deletions, filepath = line.strip().split("\t")
-    additions, deletions = int(additions), int(deletions)
-    net_additions = additions - deletions
-    total += net_additions
-    info[filepath] = (net_additions, additions, deletions)
+    a, d, fp = line.strip().split("\t")
+    a, d = int(a), int(d)
+    info[fp] = (a-d, a, d)
 
-# TODO use itemgetter?
-info = sorted(info.items(), key=lambda entry: entry[1][0], reverse=True)
-for filepath, stats in info:
-    print(*stats, filepath, sep="\t")
-print("-----")
-print(f"{total:+}")
+print("\t".join(("delta", "add(+)", "del(-)", "file")))
+print("-" * 75)
+
+sorted_info = sorted(info.items(), key=lambda entry: entry[1][0], reverse=True)
+for fp, (net, a, d) in sorted_info:
+    print(f"{net:+}\t{a}\t{d}\t{fp}")
+
+t_net, t_add, t_del = tuple(sum(col) for col in zip(*info.values()))
+print("-" * 75)
+print(f"{t_net:+}\t+{t_add}\t-{t_del}\t{len(info)}")
+
+# sanity check
+raw_shortstat = _git_diff("--shortstat")
+n_files, c_add, c_del = tuple(int(p.split(" ")[0]) for p in raw_shortstat.split(", "))
+assert t_net == t_add - t_del
+assert (c_add, c_del) == (t_add, t_del)
+assert n_files == len(info) == len(sorted_info)

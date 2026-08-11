@@ -1,11 +1,8 @@
-import sys
 import shutil
 import argparse
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[2]/"setupsrc"))
-from shared_base import ProjectDir
-
+ProjectDir = Path(__file__).resolve().parents[2]
 DataDir = ProjectDir/"data"
 
 
