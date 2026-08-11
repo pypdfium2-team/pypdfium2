@@ -12,24 +12,35 @@ from operator import itemgetter
 
 ProjectDir = Path(__file__).resolve().parents[2]
 
-def _git_diff(difftype):
-    proc = subprocess.run(["git", "diff", difftype, sys.argv[1], sys.argv[2]], cwd=ProjectDir, stdout=subprocess.PIPE)
-    return proc.stdout.decode().strip()
 
-def _to_int(value, fp):
+class _PseudoInt (int):
+    
+    @classmethod
+    def from_context(cls, num, src):
+        obj = cls(num)
+        obj._src = src
+        return obj
+    
+    def __repr__(self):
+        return f'{super().__repr__()}#{self._src!r}'
+
+def _to_int(value):
     try:
         return int(value)
     except ValueError as e:
         # Although emphasizing machine readability, git diff --numstat explicitly outputs "-" for binary files, rather than 0. Seems counter-intuitive to a parser writer (not sure why they don't indicate binary files in some other way). Anyway, that's how it is.
-        print(f"{value!r}: {e!r} from {fp!r}", file=sys.stderr)
-        return 0
+        return _PseudoInt.from_context(0, value)
+
+
+def _git_diff(difftype):
+    proc = subprocess.run(["git", "diff", difftype, sys.argv[1], sys.argv[2]], cwd=ProjectDir, stdout=subprocess.PIPE)
+    return proc.stdout.decode().strip()
 
 raw_output = _git_diff("--numstat")
 info = []
 for line in raw_output.splitlines():
     a, d, fp = line.strip().split("\t")
-    a = _to_int(a, fp)
-    d = _to_int(d, fp)
+    a, d = _to_int(a), _to_int(d)
     info.append((a, d, a-d, a+d, fp))
 
 print("add(+)", "del(-)", "delta", "churn", "file", sep="\t")
