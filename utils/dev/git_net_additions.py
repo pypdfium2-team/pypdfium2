@@ -13,7 +13,7 @@ from operator import itemgetter
 ProjectDir = Path(__file__).resolve().parents[2]
 
 
-class _PseudoInt (int):
+class _AnnotatedInt (int):
     
     def __new__(cls, num, src):
         obj = super().__new__(cls, num)
@@ -27,8 +27,8 @@ def _to_int(value):
     try:
         return int(value)
     except ValueError as e:
-        # Although emphasizing machine readability, git diff --numstat explicitly outputs "-" for binary files, rather than 0. Seems counter-intuitive to a parser writer (not sure why they don't indicate binary files in some other way). Anyway, that's how it is.
-        return _PseudoInt(0, value)
+        # Although emphasizing machine readability, git diff --numstat explicitly outputs "-" for binary files, rather than 0.
+        return _AnnotatedInt(0, value)
 
 
 def _git_diff(difftype):
