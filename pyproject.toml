@@ -4,8 +4,7 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
-    # We do not declare an explicit setuptools min version for a variety of reasons. FWIW, last time it was tested, setuptools 59 (max with Python 3.6) still mostly worked.
-    "setuptools",
+    "setuptools",  # >= 59 ?
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
     "packaging",
     # NB: wheel is no longer needed with setuptools >= v70.1.0, but we still specify it for backward compatibility
@@ -16,8 +15,15 @@ requires = [
 # - Installation is independent of pypdfium2 itself. e.g. you can install the setup group first, then install pypdfium2 with --no-build-isolation. Likewise, you may want to install the converters or test dependencies without re-installing pypdfium2.
 # - BUG(177): PyPI actually refuses upload if external (@ git+) dependencies end up in package metadata. PEP 735 emphasizes the idea that dependency groups "are not included in any built distribution of the project".
 [dependency-groups]
-converters = ["pillow", "numpy"]
-test = ["pytest", "tabulate", {include-group = "converters"}]
+converters = [
+    "pillow",
+    "numpy",
+]
+test = [
+    "pytest",
+    "tabulate",
+    {include-group = "converters"}
+]
 setup = [
     "setuptools >= v70.1.0",  # or older setuptools + `wheel`
     "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
@@ -31,8 +37,16 @@ docs = [
     "sphinx-issues",
     "myst-parser",
 ]
-check = ["autoflake", "codespell", "reuse"]
-distcheck = ["twine", "check-wheel-contents"]
+check = [
+    "autoflake",
+    "codespell",
+    "reuse",
+    "zizmor",
+]
+distcheck = [
+    "twine",
+    "check-wheel-contents",
+]
 # Reminder: When updating the GN version, remember to update the references below as well.
 gn = ["gn-dist==2407.3"]
 
