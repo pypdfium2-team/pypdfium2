@@ -10,8 +10,11 @@ from itertools import chain
 from importlib import import_module
 from datetime import datetime, timezone, timedelta
 
-
 ProjectDir = Path(__file__).resolve().parents[1]
+
+# Add this path to your IDE's search path, e.g. VS Code python.analysis.extraPaths
+sys.path.insert(0, str(ProjectDir/"src"/"pypdfium2_cfg"/"_shared"))
+
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
@@ -51,12 +54,12 @@ def _parse_dep_group(raw_groups, key):
             group.extend(_parse_dep_group(raw_groups, entry["include-group"]))
     return group
 
-_DEPGROUP_FALLBACK = sys.version_info < (3, 9)
 tomllib = _import_with_fallback("tomllib", "tomli")  # TODO make lazy
+_DEPGROUP_FALLBACK = tomllib or (sys.version_info < (3, 9))
 
-def install_dep_groups(groups, python=sys.executable, need_fallback=_DEPGROUP_FALLBACK, prefix=()):
+def install_dep_groups(groups, python=sys.executable, use_fallback=_DEPGROUP_FALLBACK, prefix=(), env=None):
     
-    if need_fallback:
+    if use_fallback:
         assert tomllib, "No toml library found. You want to install tomli, or use python >= 3.11 as dispatcher."
         with (ProjectDir/"pyproject.toml").open("rb") as fh:
             pyproject_toml = tomllib.load(fh)
@@ -65,4 +68,4 @@ def install_dep_groups(groups, python=sys.executable, need_fallback=_DEPGROUP_FA
     else:
         pip_args = _prepend_each("--group", groups)
     
-    _run([*prefix, python, "-m", "pip", "install", "-U", *pip_args])
+    _run([*prefix, python, "-m", "pip", "install", "-U", *pip_args], env=env)

@@ -19,8 +19,8 @@ from pypdfium2_cli._setup import setup_logging
 from pypdfium2_cli._parsers import (
     add_input, get_input,
     iterator_hasvalue,
-    BooleanOptionalAction,
 )
+from pypdfium2_cfg.stl import BooleanOptionalAction
 
 have_pil = find_spec("PIL") is not None
 have_cv2 = find_spec("cv2") is not None

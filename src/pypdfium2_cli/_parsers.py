@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import sys
-import argparse
 from pathlib import Path
 import pypdfium2._helpers as pdfium
 
@@ -116,29 +114,3 @@ def iterator_hasvalue(iterator):
         return False, None
     else:
         return True, _postpeek_generator(first_value, iterator)
-
-
-if sys.version_info >= (3, 9):
-    from argparse import BooleanOptionalAction
-
-else:
-    # backport, adapted from argparse sources
-    class BooleanOptionalAction (argparse.Action):
-        def __init__(self, option_strings, dest, **kwargs):
-            
-            _option_strings = []
-            for option_string in option_strings:
-                _option_strings.append(option_string)
-                
-                if option_string.startswith('--'):
-                    option_string = '--no-' + option_string[2:]
-                    _option_strings.append(option_string)
-            
-            super().__init__(option_strings=_option_strings, dest=dest, nargs=0, **kwargs)
-        
-        def __call__(self, parser, namespace, values, option_string=None):
-            if option_string in self.option_strings:
-                setattr(namespace, self.dest, not option_string.startswith('--no-'))
-        
-        def format_usage(self):
-            return ' | '.join(self.option_strings)

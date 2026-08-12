@@ -22,7 +22,8 @@
 - Internal improvements (non-exhaustive):
   * Properly clean up `*.egg-info/` and `build/` before packaging, to avoid mad file inclusion bugs (ran into this while working on setup include rules).
   * Migrated from requirements files to PEP 735 dependency groups (`pyproject.toml`).
-    Recent enough `pip` should be available to Python >= 3.9. For compatibility with older versions, feel free to use `./utils/misc/install_dep_group.py -f`.
+    Recent enough `pip` should be available to Python >= 3.9. For compatibility with older versions, feel free to use `./utils/misc/install_dep_group.py`.
   * Applied dependency cooldowns to internal callers of `pip install`. Always use virtual environments. Use lockfiles in sensitive areas (e.g. publish jobs).
   * Rearranged & improved utilities. Cleaner distinction between `setupsrc/` and `utils/`.
   * Fixed persistent i686 container network issues by downgrading host runner to `24.04`.
+  * Let `setupsrc/` share code from `src/` by adding the new `pypdfium2_cfg._shared` to `sys.path`.

@@ -13,6 +13,7 @@ import urllib.request as url_request
 
 # local
 from base import *
+from stl import cached_property
 from _build_helpers import *
 import _pyodide as pyodide_utils
 
@@ -120,7 +121,7 @@ class _DeferredDeps:
     def __init__(self, deps_fields):
         self.deps_fields = deps_fields
     
-    @cached_property  # included from base.py
+    @cached_property
     def deps(self):
         # TODO parse out the gn version for later validation?
         deps_content = (PDFIUM_DIR/"DEPS").read_text()

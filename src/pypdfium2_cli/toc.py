@@ -6,8 +6,8 @@ import pypdfium2.internal as pdfium_i
 from pypdfium2_cli._parsers import (
     add_input, add_n_digits,
     get_input, round_list,
-    BooleanOptionalAction,
 )
+from pypdfium2_cfg.stl import BooleanOptionalAction
 from pypdfium2.version import PDFIUM_INFO
 
 

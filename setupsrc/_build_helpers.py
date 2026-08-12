@@ -3,37 +3,35 @@
 
 import os
 import re
+import sys
 import shutil
 from enum import Enum
 from base import *  # local
 
 Compiler = Enum("Compiler", "gcc clang")
 
-def _install_dep(exename, install_args=None, cooldown_days=7):
-    
-    if not install_args:
-        install_args = (exename, )
-    
-    which_exe = shutil.which(exename)
-    if which_exe:
-        log(f"+ {exename} found at {which_exe}")
-        return
-    
-    log(f"- {exename} not found, installing (cooldown: {cooldown_days}d)...")
+
+def _cool_env(cooldown_days, soft=False):
+    if "PIP_UPLOADED_PRIOR_TO" in os.environ:
+        log(f"Existing cooldown (respected={soft}):", os.environ["PIP_UPLOADED_PRIOR_TO"])
+        if soft:
+            return os.environ
+    log(f"Set cooldown: {cooldown_days}d")
     env = os.environ.copy()
-    extra_args = ()
     env["PIP_UPLOADED_PRIOR_TO"] = get_cool_date(cooldown_days)
-    if not cooldown_days:
-        extra_args = ("--no-deps", "--no-build-isolation")
-    run_cmd([sys.executable, "-m", "pip", "install", *extra_args, *install_args], env=env, cwd=None)
+    return env
 
 def install_buildtools():
-    log("Check build tool dependencies...")
+    log("Check for ninja/gn and install if missing...")
     # https://github.com/scikit-build/ninja-python-distributions
-    _install_dep("ninja")
     # https://github.com/pypdfium2-team/gn-dist/
-    # gn-dist is our own project (also maintained within pypdfium2-team org) and pinned to an exact version. To make sure that the pinned requirement can be satisfied, there should be no cooldown.
-    _install_dep("gn", ("--group", "gn"), cooldown_days=0)
+    if not shutil.which("ninja"):
+        env = _cool_env(7, soft=True)
+        run_cmd([sys.executable, "-m", "pip", "install", "ninja"], env=env, cwd=None)
+    if not shutil.which("gn"):
+        # gn-dist is a first-party dependency and pinned to an exact verison.
+        # To make sure that the pinned requirement can be satisfied, there should be no cooldown.
+        install_dep_groups(["gn"], env=_cool_env(0))
 
 def get_clang_version(clang_root):
     from packaging.version import Version
