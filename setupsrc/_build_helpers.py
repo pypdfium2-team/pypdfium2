@@ -29,7 +29,7 @@ def install_buildtools():
         env = _cool_env(7, soft=True)
         run_cmd([sys.executable, "-m", "pip", "install", "ninja"], env=env, cwd=None)
     if not shutil.which("gn"):
-        # gn-dist is a first-party dependency and pinned to an exact verison.
+        # gn-dist is a first-party dependency and pinned to an exact version.
         # To make sure that the pinned requirement can be satisfied, there should be no cooldown.
         install_dep_groups(["gn"], env=_cool_env(0))
 
