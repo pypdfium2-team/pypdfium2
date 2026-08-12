@@ -57,7 +57,7 @@ _Note, unlike helpers, pypdfium2's setup is not bound by API stability promises,
 #### Setup Dependencies
 
 *System*
-+ C pre-processor (`gcc`/`clang` – alternatively, specify the command to invoke via `$CPP`)
++ `gcc` or `clang` as C pre-processor (or set `$CPP` to whatever pre-processor command you want to use)
 + `git` (Used e.g. to determine the latest pdfium-binaries version, to get `git describe` info, or to check out pdfium on sourcebuild. Might be optional on default setup.)
 + [`gh >= 2.47.0`](https://github.com/cli/cli/) (optional; used to verify pdfium-binaries build attestations)
 
@@ -112,26 +112,23 @@ Look for a system-provided pdfium shared library, and bind against it.
 
 Standard, portable [`ctypes.util.find_library()`](https://docs.python.org/3/library/ctypes.html#finding-shared-libraries) means will be used to probe for system pdfium at setup time, and the result will be hardcoded into the bindings. Alternatively, set `$PDFIUM_BINARY` to the path of the out-of-tree DLL to use.
 
-If system pdfium was found, we will look for pdfium headers from which to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
+Assuming system pdfium was found, we will look for pdfium headers from which to generate the bindings (e.g. in `/usr/include`). If the headers are in a location not recognized by our code, set `$PDFIUM_HEADERS` to the directory in question.
 
-Also, we try to determine the pdfium version, either from the library filename itself, or via `pkg-config`.
-If this fails, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
+Also, we try to determine the pdfium version, either from the library filename itself, or via `pkg-config`.[^full_ver]
+Where this does not work, you can pass the version alongside the setup target, e.g. `PDFIUM_PLATFORM=system-search:XXXX`, where `XXXX` is the pdfium build version.
 If the version is not known in the end, `NaN` placeholders will be set.
 
 If the version is known but no headers were found, they will be downloaded from upstream.
 If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
 
-If `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and – if available – determining its version.<br>
+In case `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and – if available – determining its version.<br>
 Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `/usr`), but contributions for other systems are welcome.
 
-> [!IMPORTANT]
-> When pypdfium2 is installed with system pdfium, the bindings ought to be re-generated with the new headers whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]<br>
-> For distributors, we highly recommend the use of versioned libraries (e.g. `libpdfium.so.140.0.7269.0`) or similar concepts that enforce binary/bindings version match, so outdated bindings will safely stop working with a meaningful error, rather than silently continue unsafely, at risk of hard crashes.
+> [!CAUTION]
+> When pypdfium2 is installed with system pdfium, bindings ought to be re-generated with the new headers whenever the out-of-tree pdfium DLL is updated, for ABI safety reasons.[^upstream_abi_policy]<br>
+> For distributors, we suggest that you use versioned libraries (e.g. `libpdfium.so.140.0.7269.0`) or similar concepts that enforce binary/bindings version match, so outdated bindings will safely stop working with a meaningful error, rather than silently continue unsafely, at risk of hard crashes.
 
-> [!TIP]
-> If you mind pypdfium2's setup making a web request to resolve the full version, you may pass it in manually via `GIVEN_FULLVER=$major.$minor.$build.$patch` (colon-separated if there are multiple versions), or less ideally, set `IGNORE_FULLVER=1` to use `NaN` placeholders.
-> This applies to other setup targets as well.<br>
-> For distributors, we recommend that you use the full version in binary filename or pkgconfig info, so pypdfium2's setup will not need to resolve it in the first place.
+[^full_ver]: If this did not reveal the full version, setup will try to resolve it with a git web request. Set `GIVEN_FULLVER=$major.$minor.$build.$patch` or `IGNORE_FULLVER=1` to override that behavior.
 
 [^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still prudent to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
 
@@ -150,10 +147,9 @@ This project comes with two scripts to automate the build process: `build_toolch
 - `build_toolchained` is based on the build instructions in pdfium's Readme, and uses Google's toolchain (this means foreign binaries and sysroots). This results in a heavy checkout process that may take a lot of time and space. Dependency libraries are vendored. An advantage of the toolchain is its powerful cross-compilation support (including symbol reversioning).
 - `build_native` is an attempt to address some shortcomings of the toolchained build. It performs a lean, self-managed checkout, and is tailored towards native compilation. It uses system dependencies (compiler/gn/ninja), which must be installed by the caller beforehand. This script should theoretically work on arbitrary Linux architectures. As a drawback, this process is not supported or even documented upstream, so it might be hard to maintain.
 
-> [!TIP]
-> The native sourcebuild can either use system libraries, or pdfium's vendored libraries.
-> When invoked directly, by default, system libraries need to be installed. However, when invoked through fallback setup (`PDFIUM_PLATFORM=fallback`), vendored libraries will be used.<br>
-> The `--vendor ...` and `--no-vendor ...` options can be used to control vendoring on a per-library basis. See `build_native.py --help` for details.
+The native sourcebuild can either use system libraries, or pdfium's vendored libraries.
+When invoked directly, by default, system libraries will be used. However, when invoked through fallback setup, vendored libraries are used instead.
+Use the `--vendor ...` and `--no-vendor ...` options to control vendoring on a per-library basis. See `build_native.py --help` for details.
 
 You can also set `PDFIUM_PLATFORM` to `sourcebuild-native` or `sourcebuild-toolchained` to trigger either build script through setup, and pass command-line flags with `$BUILD_PARAMS`.
 However, for simplicity, both scripts/subtargets share just `sourcebuild` as staging directory.
@@ -206,13 +202,12 @@ python ./setupsrc/build_native.py --compiler clang
 PDFIUM_PLATFORM="sourcebuild" python -m pip install -v .
 ```
 
-> [!NOTE]
-> The native sourcebuild currently supports Linux (or similar).
-> macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible – use the toolchain-based build for now.
-> Community help / pull requests to extend platform support would be welcome.
+The native sourcebuild currently supports Linux (or similar environments).
+macOS and Windows are not handled, as we do not have access to these systems, and working over CI did not turn out feasible – use the toolchain-based build for now.
+Community help / pull requests to extend platform support would be welcome.
 
 
-##### cibuildwheel
+#### cibuildwheel
 
 Sourcebuild can be run through cibuildwheel. For targets configured in our [`pyproject.toml`](./pyproject.toml), the basic invocation is as simple as p.ex.
 ```bash
@@ -222,13 +217,18 @@ A more involved use case could look like this:
 ```bash
 CIBW_BUILD="cp314-musllinux_s390x" CIBW_ARCHS=s390x CIBW_CONTAINER_ENGINE=podman TEST_PDFIUM=1 cibuildwheel
 ```
-See also our [cibuildwheel](.github/workflows/cibw.yaml) [workflow](.github/workflows/cibw_one.yaml).
-For more options, see the [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
+See also our [cibuildwheel workflow](.github/workflows/cibw_one.yaml).
+For more options, consult the comprehensive [upstream documentation](https://cibuildwheel.pypa.io/en/stable/options).
 
 On Linux, this will use the native sourcebuild with vendored dependency libraries.
 On Windows and macOS, the toolchained sourcebuild is used.
 
-Note, for Linux, cibuildwheel requires Docker, or Podman.
+Bear in mind that cibuildwheel copies the project directory into a container, not taking `.gitignore` rules into account.
+Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel.
+In particular, a toolchained checkout of pdfium within pypdfium2 is problematic, and will cause a halt on the `Copying project into container...` step.
+For development, make sure the fresh checkout is in sync with the working copy.
+
+Concerning Linux, cibuildwheel requires either Docker or Podman.
 On the author's version of Fedora, Docker can be installed as follows:
 ```bash
 sudo dnf in moby-engine  # this provides the docker command
@@ -239,34 +239,30 @@ sudo usermod -aG docker $USER
 ```
 For other ways of installing Docker, refer to the cibuildwheel docs ([Setup](https://cibuildwheel.pypa.io/en/stable/setup/), [Platforms](https://cibuildwheel.pypa.io/en/stable/platforms/)) and the links therein.
 
-> [!WARNING]
-> cibuildwheel copies the project directory into a container, not taking `.gitignore` rules into account.
-> Thus, it is advisable to make a fresh checkout of pypdfium2 before running cibuildwheel.
-> In particular, a toolchained checkout of pdfium within pypdfium2 is problematic, and will cause a halt on the `Copying project into container...` step.
-> For development, make sure the fresh checkout is in sync with the working copy.
+<!-- TODO this tip might be a better fit in the build section above, which does not point out cross-compilation yet -->
 
 > [!TIP]
-> pdfium itself has first-class cross-compilation support.
-> In particular, for Linux architectures supported by upstream's toolchain but not available natively on CI, we recommend to forego cibuildwheel, and instead cross-build pdfium using its own toolchain, e.g.:
+> Note that pdfium itself has first-class cross-compilation support.
+> For platforms covered upstream, we tend to sidestep cibuildwheel and cross-compile pdfium using its own toolchain instead, e.g.:
 > ```bash
 > # assuming cross-compilation dependencies are installed
 > python setupsrc/build_toolchained.py --target-cpu arm
 > PDFIUM_PLATFORM=sourcebuild CROSS_TAG="manylinux_2_17_armv7l" python -m build -wxn
 > ```
-> This typically achieves a lower glibc requirement than we can with cibuildwheel.
+> This typically achieves a lower glibc requirement than we can with cibuildwheel, and is especially useful for platforms that are not available natively on CI.
 
 
 #### With caller-provided data files
 
 pypdfium2 is like any other Python project in essentials, except that it needs some data files: a pdfium DLL (either bundled or out-of-tree), a bindings interface (generated via ctypesgen), and pdfium version info (JSON).
 
-The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users / contributors, and our PyPI packaging.
+The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users/contributors as well as our PyPI packaging.
 
 However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's own setup code.<br>
 The idea is basically to put your data files in a staging directory, `data/sourcebuild` or `data/system` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume from that directory on setup.
 
 This setup strategy should be inherently free of web requests.
-Mind though, we don't support the result. If you bring your own files, it's your own responsibility, and it's quite possible your pypdfium2 might turn out subtly different from ours.
+Please don't expect us to support the result, though. If you bring your own files, that's your own responsibility, and it is quite possible your version of pypdfium2 may turn out subtly different than ours.
 
 ```bash
 # First, ask yourself: Do you want to bundle pdfium (in-tree), or use system
@@ -904,9 +900,8 @@ PDFium's dependencies might change over time. Please notify us if you think a re
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries capable of PDF rendering while not being covered by strong-copyleft licenses.[^liberal_pdf_renderlibs]
 
-> [!IMPORTANT]
-> The exact licensing situation depends on how the builds were made.<br>
-> Note that a subset of pypdfium2 builds might link with the `libgcc` runtime library. Check the builds you use and, if affected, libgcc's license to see if that's OK for your use.
+Note, however, that the precise licensing situation depends on the build config/environment used.<br>
+In particular, a subset of pypdfium2 builds may link with the `libgcc` runtime library. Check the builds you use and, if affected, libgcc's license [to evaluate if that's OK for your use](https://wiki.osdev.org/Libgcc#What_is_the_libgcc_license?).
 
 [^liberal_pdf_renderlibs]: Other mature, liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). While they can be accessed from Python in principle, as shown in the author's gists ([pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7)), there don't seem to be proper python bindings projects to these libraries yet. These days, novel options have surfaced, including `docling-parse` and `pdf_oxide`, but the author is not familiar with them.
 
