@@ -900,10 +900,10 @@ PDFium's dependencies might change over time. Please notify us if you think a re
 
 To the author's knowledge, pypdfium2 is one of the rare Python libraries capable of PDF rendering while not being covered by strong-copyleft licenses.[^liberal_pdf_renderlibs]
 
-Note, however, that the precise licensing situation depends on the build config/environment used.<br>
+Note that the exact licensing situation depends on the build config/environment used.<br>
 In particular, a subset of pypdfium2 builds may link with the `libgcc` runtime library. Check the builds you use and, if affected, libgcc's license [to evaluate if that's OK for your use](https://wiki.osdev.org/Libgcc#What_is_the_libgcc_license?).
 
-[^liberal_pdf_renderlibs]: Other mature, liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). While they can be accessed from Python in principle, as shown in the author's gists ([pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7)), there don't seem to be proper python bindings projects to these libraries yet. These days, novel options have surfaced, including `docling-parse` and `pdf_oxide`, but the author is not familiar with them.
+[^liberal_pdf_renderlibs]: Other mature, liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). While they can be accessed from Python in principle, as shown in the author's gists ([pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7)), there don't seem to be proper python bindings projects to these libraries yet. These days, novel options have surfaced, including `docling-parse` and `pdf_oxide`, but the author is not familiar with them yet.
 
 
 ## Issues / Contributions
@@ -928,7 +928,7 @@ Roadmap:
 Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide much usage support.
 
 The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and PRs that we consider unsuitable will be rejected without further ado.
-If the code owner decides a change is inappropriate, that's it, and we will not enter any time-wasting discussion.
+If the code owner decides a change is inappropriate, that's it, and further discussion will not be accepted.
 Any attempts to pressure us to merge a PR will not be tolerated, and may result in the offender being blocked.
 
 ### No AI issues and PRs
