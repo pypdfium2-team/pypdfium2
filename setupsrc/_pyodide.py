@@ -23,7 +23,7 @@ from _build_helpers import Compiler
 
 def info(compiler):
     log(
-        "Warning: pyodide support is experimental. The resulting builds are known to be flaky and susceptible to various types of occasional, random crashes. Use with caution!\n"
+        "Warning: pyodide support is experimental. The resulting builds are known to be flaky and subject to various types of random crashes. Use with caution!\n"
         "HELP WANTED: If you are in a position to track down and fix these issues, please reach out. Thanks!"
     )
     if compiler is not None:
@@ -32,7 +32,7 @@ def info(compiler):
 
 def configure(config, compiler):
     config.update({
-        "is_debug": True,  # XXX
+        "is_debug": True,
         "target_os": "emscripten",
         "target_cpu": "wasm",
         "pdf_is_complete_lib": True,

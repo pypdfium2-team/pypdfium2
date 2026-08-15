@@ -93,14 +93,14 @@ pyodide-build *args:
 	PDFIUM_PLATFORM="sourcebuild-native" BUILD_PARAMS="--pyodide --vendor all --no-vendor libc++ {{BUILD_PARAMS}}" pyodide build . -vv {{args}}  # -nx
 
 [script]
-pyodide-test wheel:
+pyodide-test wheel='dist/pypdfium2-*-pyemscripten_*_wasm32.whl':
 	set -x && export PATH="${PWD}/.pyodide-venv/bin:${PATH}"
 	pip install {{wheel}}
 	pip install pillow numpy pytest
 	python -m pytest tests/
 
 # Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
-pyodide *args: (pyodide-build args) pyodide-venv-create (pyodide-test 'dist/pypdfium2-*-pyemscripten_*_wasm32.whl')
+pyodide *args: (pyodide-build args) pyodide-venv-create pyodide-test
 
 
 # NOTE you may want to make pinact a wrapper script that translates to something like

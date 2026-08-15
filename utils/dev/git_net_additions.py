@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 # Augment `git diff --numstat` with a delta column (net additions, i.e. additions-deletions), and sort the output by that column.
-# This helps maintainers analyze net growth (or degrowth) between refs on a per file basis, ordered by relevance, with the highest net additions shown first. (Author's note: AOTW, neither git itself, nor GitHub, nor any other tool I'm aware of seemed to offer that functionality.)
+# This helps maintainers analyze net growth (or degrowth) between refs on a per file basis, ordered by relevance, with the highest net additions shown first.
+# (Author's note: AOTW, neither git itself, nor GitHub, nor any other tool I'm aware of seemed to offer that functionality.)
 # For completeness, this script also adds a churn column (absolute additions+deletions) as in `git diff --stat`. Validates the final result against `git diff --shortstat`.
 
 import sys

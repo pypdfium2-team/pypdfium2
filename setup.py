@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-# Background reading:
+# Reading material:
 # https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it
 # https://stackoverflow.com/questions/69647983/how-to-add-platform-specific-package-data-in-setup-py
 # https://github.com/tim-mitchell/prebuilt_binaries
+# https://stackoverflow.com/a/48015772/15547292
 # https://cibuildwheel.pypa.io/en/stable/faq/#actions-you-need-to-perform-before-building
 # https://build.pypa.io/en/latest/how-to/config-settings.html#id1
 
