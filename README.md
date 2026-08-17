@@ -358,9 +358,9 @@ As it is hard to keep up with constantly evolving setup code, it is possible thi
 
 [^pypi_reasons]: To name some reasons:
     + pypdfium2 from PyPI covers platforms that we cannot cover on conda.
-    + pypdfium2 from PyPI has extensive fallback setup, while conda does not provide an opportunity to run custom setup code.
+    + pypdfium2 from PyPI has extensive fallback setup, while conda does not seem to provide an opportunity to run custom setup code.
     + With conda, in-project publishing / custom channels are second class.
-    + With conda, it seems there is no way to create platform-specific but interpreter-independent python packages, so we cannot reasonably bundle pdfium. Thus, we have to use external pdfium, which is more complex and has some pitfalls.
+    + By the time pypdfium2's conda packaging was created, there used to be no way to create platform-specific but interpreter-independent python packages. That meant we had to unbundle pdfium, which is more complex and has some pitfalls. [CEP 20's](https://github.com/conda/ceps/blob/ff39eb01d1664d041f8733659a344620be1d6c2d/cep-0020.md) [`python_version_independent` setting](https://docs.conda.io/projects/conda-build/en/stable/resources/define-metadata.html#python-version-independent-packages) might have resolved this limitation by now, but this remains to be re-evaluated. Anyway, dealing with conda's packaging side has been but an awful experience so far.
 
 + To install
   
