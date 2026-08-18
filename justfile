@@ -52,24 +52,25 @@ download *args:
 	python3 setupsrc/update.py --verify {{args}}
 emplace *args:
 	python3 setupsrc/emplace.py {{args}}
-build-native *args:
-	python3 setupsrc/build_native.py {{args}}
-build-toolchained *args:
-	python3 setupsrc/build_toolchained.py {{args}}
 craft *args:
 	python3 utils/craft.py {{args}}
 craft-conda *args:
 	python3 conda/craft_conda_pkgs.py {{args}}
-
-pkg platform='' *args='-w':
+pkg *platforms='auto': (craft '-p' platforms '--wheels')
+pkg-unassisted platform='' *args='-w':
 	# see the notes in craft.py for why clearing egg-info and build cache is essential
 	rm -rf pypdfium2.egg-info/ build/
 	PDFIUM_PLATFORM="{{platform}}" python3 -m build -xn {{args}}
+sdist: (craft '--sdist')
+sdist-unassisted: (pkg-unassisted 'sdist' '-s')
 container *args:
 	python3 utils/container_driver.py {{args}}
-sdist: (craft '--sdist')
-sdist-unassisted: (pkg 'sdist' '-s')
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
+
+build-native *args:
+	python3 setupsrc/build_native.py {{args}}
+build-toolchained *args:
+	python3 setupsrc/build_toolchained.py {{args}}
 
 [script]
 venv-create envname='.venv':
