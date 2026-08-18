@@ -10,9 +10,9 @@ def _manylinux_tag(arch):
     return "manylinux_{}" + f"_{arch}" + f".manylinux2014_{arch}"  # see below
 
 _WheeltagPatterns = {
-    # -- Minver info is provided on an "AS OF THIS WRITING" basis (06/2026) --
+    # -- MinVer info is provided on an "AS OF THIS WRITING" basis (08/2026) --
     
-    # Minver can be auto-detected from the dylib header (via macholib or vtool).
+    # MinVer can be auto-detected from the dylib header (via macholib or vtool).
     # That said, upstream define mac_deployment_target and mac_min_system_version in //build/config/mac/mac_sdk.gni:
     # https://chromium.googlesource.com/chromium/src/build.git/+/73c0fa98c5cf963c60ea685c57826fa7ba6253d8/config/mac/mac_sdk.gni#17
     PlatNames.darwin_x64:       ("macosx_{}_x86_64", "13_0"),
@@ -25,7 +25,7 @@ _WheeltagPatterns = {
     PlatNames.windows_arm64:    ("win_arm64", None),
     PlatNames.windows_x86:      ("win32",     None),
     
-    # Minver can be checked with `auditwheel show`. Upstream build system uses sysroots with symbol reversioning, hence consistently low glibc requirement. Need to watch out for changes, though.
+    # MinVer can be checked with `auditwheel show`. Upstream build system uses sysroots with symbol reversioning, hence consistently low glibc requirement. Need to watch out for changes, though.
     PlatNames.linux_x64:        (_manylinux_tag("x86_64"),   "2_17"),
     PlatNames.linux_x86:        (_manylinux_tag("i686"),     "2_17"),
     PlatNames.linux_arm64:      (_manylinux_tag("aarch64"),  "2_17"),
@@ -48,10 +48,11 @@ _WheeltagPatterns = {
     
     # iOS - see PEP 730 # Packaging
     # We do not currently build wheels for iOS, but again, add the handlers so it could be done on demand. Untested. See the notes in docs/source/platforms.rst concerning binary extension modules on iOS.
-    # Minver can be (cross-)checked with `macholib`.
-    PlatNames.ios_arm64_dev:    ("ios_{}_arm64_iphoneos",         "26_0"),
-    PlatNames.ios_arm64_simu:   ("ios_{}_arm64_iphonesimulator",  "26_0"),
-    PlatNames.ios_x64_simu:     ("ios_{}_x86_64_iphonesimulator", "26_0"),
+    # MinVer can be (cross-)checked with `macholib`.
+    # FIXME MinVer differs for V8/XFA build (17.4) - not sure how to handle that.
+    PlatNames.ios_arm64_dev:    ("ios_{}_arm64_iphoneos",         "17_0"),
+    PlatNames.ios_arm64_simu:   ("ios_{}_arm64_iphonesimulator",  "17_0"),
+    PlatNames.ios_x64_simu:     ("ios_{}_x86_64_iphonesimulator", "17_0"),
 }
 
 
@@ -78,19 +79,20 @@ def mac_get_version(dll_path):
     return max(_mac_iter_versions(dll_path))
 
 
-def errlog(msg, skip_err):
-    if skip_err:
-        log(msg)
-    else:
+def errlog(msg, strict):
+    if strict:
         raise RuntimeError(msg)
+    else:
+        log(msg)
 
-def autominver(dll_path, sys_name, hardcoded_ver, skip_err=(not IS_CI)):
+def autominver(dll_path, sys_name, hardcoded_ver, strict=IS_CI):
     
     autotag_ok = bool(int( os.environ.get("AUTOTAG_OK", 1) ))
     if not autotag_ok:
         return None
     
-    # TODO implement auto-versioning for other OSes
+    # TODO Implement auto-versioning for Linux glibc?
+    # NOTE For targets other than this, min version is tied to the build env rather than being recorded in the binary itself.
     detected_ver = None
     if sys_name in (SysNames.darwin, SysNames.ios) and HAVE_MACHOLIB:
         mac_major, mac_minor = mac_get_version(dll_path)
@@ -98,7 +100,7 @@ def autominver(dll_path, sys_name, hardcoded_ver, skip_err=(not IS_CI)):
         detected_ver = f"{mac_major}_{mac_minor}"
     
     if detected_ver and (hardcoded_ver != detected_ver):
-        errlog(f"Warning: hardcoded {hardcoded_ver!r} != detected {detected_ver!r}. Probably the hardcoded version is outdated, or the detected version might be incorrect.", skip_err)
+        errlog(f"Warning: hardcoded {hardcoded_ver!r} != detected {detected_ver!r}. Probably the hardcoded version is outdated, or the detected version might be incorrect.", strict)
     
     return detected_ver
 
