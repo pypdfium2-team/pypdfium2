@@ -340,10 +340,11 @@ As it is hard to keep up with constantly evolving setup code, it is possible thi
 
 ### Unofficial packages
 
-The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use our official packages where possible.
-If you have an issue with a third-party build, either contact your distributor, or try to reproduce with our official builds.
+The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them.
+If you have an issue with a third-party build, please contact your distributor – not us.
+Third-party packaging tends to produce poorer results. Downstream distributors may or may not have a good understanding of what they are working with.
 
-Do not expect us to add/change code for downstream-specific setup tasks.
+Please do not expect us to add/change code for downstream-specific setup tasks.
 Related issues or PRs may be closed without further notice if we don't see fit for upstream.
 Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
 
