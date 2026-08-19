@@ -19,8 +19,11 @@ list:
 	just -l
 test *args:
 	python3 -m pytest tests/ {{args}}
-clean:
-	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/*
+clean-before-build:
+    # see the notes in utils/craft.py why clearing this is essential before running pyproject-build
+    rm -rf pypdfium2.egg-info/ build/
+clean: clean-before-build
+    rm -rf data/* tests/output/* dist/ .pytest_cache/ .mypy_cache/ .venv/ .pyodide-venv/ .pyodide_build/ .python_symlinks/
 
 check:
 	./utils/misc/check.sh
@@ -55,12 +58,10 @@ emplace *args:
 craft *args:
 	python3 utils/craft.py {{args}}
 pkg *platforms='auto': (craft '-p' platforms '--wheels')
-pkg-unassisted platform='' *args='-w':
-	# see the notes in craft.py for why clearing egg-info and build cache is essential
-	rm -rf pypdfium2.egg-info/ build/
+pyproject-build platform='' *args='-w': clean-before-build
 	PDFIUM_PLATFORM="{{platform}}" python3 -m build -xn {{args}}
 sdist: (craft '--sdist')
-sdist-unassisted: (pkg-unassisted 'sdist' '-s')
+sdist-unassisted: (pyproject-build 'sdist' '-s')
 container *args:
 	python3 utils/container_driver.py {{args}}
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
