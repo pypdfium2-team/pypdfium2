@@ -20,7 +20,7 @@ list:
 test *args:
 	python3 -m pytest tests/ {{args}}
 clean:
-	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
+	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/*
 
 check:
 	./utils/misc/check.sh
@@ -54,8 +54,6 @@ emplace *args:
 	python3 setupsrc/emplace.py {{args}}
 craft *args:
 	python3 utils/craft.py {{args}}
-craft-conda *args:
-	python3 conda/craft_conda_pkgs.py {{args}}
 pkg *platforms='auto': (craft '-p' platforms '--wheels')
 pkg-unassisted platform='' *args='-w':
 	# see the notes in craft.py for why clearing egg-info and build cache is essential
@@ -116,10 +114,4 @@ update-locks:
 	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
 	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
 
-[script]
-update-conda-locks:
-	set -x && rm -f conda/lock/{build,publish}.txt
-	./utils/misc/conda_lockgen.sh build "3.12" "conda-build conda-verify"  # 26.7.0, 3.4.2
-	./utils/misc/conda_lockgen.sh publish "3.12" "anaconda-client"  # 1.15.0
-
-update-all-pins: update-actions update-locks update-conda-locks
+update-all-pins: update-actions update-locks

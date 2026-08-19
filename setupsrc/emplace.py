@@ -57,18 +57,11 @@ def _end_subtargets(sub_target, pdfium_ver):
 def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params=""):
     
     if pl_name == ExtPlats.system:
-        pl_dir = DataDir/pl_name
-        if sub_target:
-            mkdir_clean(pl_dir)
         if sub_target == "search":
+            pl_dir = DataDir/pl_name
+            mkdir_clean(pl_dir)
             full_ver = PdfiumVer.to_full(pdfium_ver) if pdfium_ver else None
             full_ver = system_pdfium.main(full_ver, flags=flags)
-        elif sub_target == "generate":
-            assert pdfium_ver, "system-generate target requires pdfium build version from caller"
-            build_pdfium_bindings(pdfium_ver, flags=flags, guard_symbols=True, windows_cross=True, rt_paths=())
-            shutil.copyfile(BindingsFile, pl_dir/BindingsFN)
-            full_ver = PdfiumVer.to_full(pdfium_ver)
-            write_pdfium_info(pl_dir, full_ver, origin="system-generate", flags=flags)
         else:
             _end_subtargets(sub_target, pdfium_ver)
     

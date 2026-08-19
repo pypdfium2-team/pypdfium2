@@ -40,11 +40,6 @@ BindSpec_EnvVar = "PDFIUM_BINDINGS"
 IS_CI = bool(os.getenv("GITHUB_ACTIONS")) or bool(int(os.getenv("CIBUILDWHEEL", 0)))
 USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not any((shutil.which("ctypesgen"), IS_CI))
 
-ModulesSpec_EnvVar = "PYPDFIUM_MODULES"
-ModuleRaw          = "raw"
-ModuleHelpers      = "helpers"
-ModulesAll         = (ModuleRaw, ModuleHelpers)
-
 BindingsFN = "bindings.py"
 VersionFN  = "version.json"
 

@@ -186,7 +186,6 @@ SPDX-FileComment = "Build strategy tables."
 path = [
     "lock/*.in",
     "lock/**/*.txt",
-    "conda/lock/*.txt",
 ]
 SPDX-FileCopyrightText = "2026 geisserml <geisserml@gmail.com>"
 SPDX-License-Identifier = "BSD-3-Clause OR Apache-2.0"

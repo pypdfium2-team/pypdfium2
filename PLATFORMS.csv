@@ -1,33 +1,33 @@
-Platform,MinVer,Release [1]_,Tier,PBIN,🐍,🧪,🛠️,SBLD,🧪,🛠️,CIBW,🧪,🛠️,⚙️,DEV,N
-macOS arm64,🟡 13,✅🔄 PBIN,🟢 1,✅,✅,✅,⬜,✅,✅,🔲,✅,✅,⬜,clang,✅,
-macOS x86_64,🟡 13,✅🔄 PBIN,🔵 2,✅,✅,✅,🔳,✅,✅,🔲,✅,✅,🔲,clang,✅,
-macOS universal,🟡 13,🟦🔄 PBIN,🔵 2,✅,NA,✅,🔲,❌,NA,NA,❌,NA,NA,NA,NA,
-Windows x86_64,⚪ ?,✅🔄 PBIN,🟢 1,✅,✅,✅,⬜,✅,✅,⬜,✅,✅,⬜,clang,✅,
-Windows x86,⚪ ?,✅🔄 PBIN,🔵 2,✅,⏸️,✅,🔳,✅,✅,🔳,✅,✅,🔳,clang,NA,
-Windows arm64,⚪ 10?,✅🔄 PBIN,🔵 2,✅,✅,✅,🔳,✅,✅,🔲,✅,✅,🔲,clang,✅,
-Linux glibc x86_64,🟢 2.17,✅🔄 PBIN,🟢 1,✅,✅,✅,⬜,✅,✅,⬜,✅,✅,⬜,gcc,✅,
-Linux glibc i686,🟢 2.17,✅🔄 PBIN,🟢 1-2,✅,⏸️,☑️,🔳,✅,☑️,🔳,✅,☑️,⬜,gcc,✅,
-Linux glibc aarch64,🟢 2.17,✅🔄 PBIN,🟢 1,✅,✅,✅,🔳,✅,✅,🔲,✅,✅,⬜,gcc,✅,
-Linux glibc armv7l,🟢 2.17,✅🔄 PBIN,🟢 1-2,✅,⏸️,☑️,🔳,✅,☑️,🔳,✅,☑️,⬜,gcc,✅,
-Linux glibc ppc64le,🟢 2.17,✅🔄 PBIN,🔵 2-3,✅,✅,☑️,🔳,✅,☑️,🔳,✅,☑️,🔳,clang,☑️,
-Linux glibc s390x,🟡 2.28,✅📌 CIBW,🔴 4,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Linux glibc riscv64,🟠 2.34,✅📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Linux glibc loong64,🔴 2.38,🟩📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Linux glibc mips64le,🟢 2.17,🟩🔄 PBIN,🟡 3,✅,❓,☑️,🔳,✅,☑️,🔳,❌,NA,NA,NA,🅿️,[2]_
-Linux glibc mipsle,🟢 2.17,🟩📌 SBLD,🟡 3,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,🅿️,[2]_ [3]_
-Linux musl x86_64,🟢 1.2,✅🔄 CIBW,🔵 2,✅,❓,✅,🔳,❌,NA,NA,✅,✅,⬜,gcc,✅,
-Linux musl i686,🟢 1.2,✅🔄 CIBW,🔵 2-3,✅,❓,☑️,🔳,❌,NA,NA,✅,☑️,⬜,gcc,✅,
-Linux musl aarch64,🟢 1.2,✅🔄 CIBW,🔵 2,✅,❓,✅,🔳,❌,NA,NA,✅,✅,⬜,gcc,✅,
-Linux musl armv7l,🟢 1.2,✅🔄 CIBW,🔵 2-3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,⬜,gcc,✅,
-Linux musl ppc64le,🟢 1.2,✅📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Linux musl s390x,🟢 1.2,✅📌 CIBW,🔴 4,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Linux musl riscv64,🟢 1.2,✅📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Linux musl loong64,🟢 1.2,🟩📌 CIBW,🟡 3,❌,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
-Android arm64,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,❌ [4]_,
-Android armeabi,🔵 23,✅🔄 PBIN,🔵 2,✅,❓,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,❌,
-Android x86_64,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,❌,
-Android x86,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,❌,
-iOS arm64 device,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
-iOS arm64 simulator,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
-iOS x86_64 simulator,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❓,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
-PyEmscripten wasm32,🟠 2026,❎📌 CIBW,🔴 4 (!),❌ [6]_,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,emcc,NA,[7]_
+Platform,MinVer,Release [1]_,Tier,PBIN,🧪,🛠️,SBLD,🧪,🛠️,CIBW,🧪,🛠️,⚙️,DEV,N
+macOS arm64,🟡 13,✅🔄 PBIN,🟢 1,✅,✅,⬜,✅,✅,🔲,✅,✅,⬜,clang,✅,
+macOS x86_64,🟡 13,✅🔄 PBIN,🔵 2,✅,✅,🔳,✅,✅,🔲,✅,✅,🔲,clang,✅,
+macOS universal,🟡 13,🟦🔄 PBIN,🔵 2,✅,✅,🔲,❌,NA,NA,❌,NA,NA,NA,NA,
+Windows x86_64,⚪ ?,✅🔄 PBIN,🟢 1,✅,✅,⬜,✅,✅,⬜,✅,✅,⬜,clang,✅,
+Windows x86,⚪ ?,✅🔄 PBIN,🔵 2,✅,✅,🔳,✅,✅,🔳,✅,✅,🔳,clang,NA,
+Windows arm64,⚪ 10?,✅🔄 PBIN,🔵 2,✅,✅,🔳,✅,✅,🔲,✅,✅,🔲,clang,✅,
+Linux glibc x86_64,🟢 2.17,✅🔄 PBIN,🟢 1,✅,✅,⬜,✅,✅,⬜,✅,✅,⬜,gcc,✅,
+Linux glibc i686,🟢 2.17,✅🔄 PBIN,🟢 1-2,✅,☑️,🔳,✅,☑️,🔳,✅,☑️,⬜,gcc,✅,
+Linux glibc aarch64,🟢 2.17,✅🔄 PBIN,🟢 1,✅,✅,🔳,✅,✅,🔲,✅,✅,⬜,gcc,✅,
+Linux glibc armv7l,🟢 2.17,✅🔄 PBIN,🟢 1-2,✅,☑️,🔳,✅,☑️,🔳,✅,☑️,⬜,gcc,✅,
+Linux glibc ppc64le,🟢 2.17,✅🔄 PBIN,🔵 2-3,✅,☑️,🔳,✅,☑️,🔳,✅,☑️,🔳,clang,☑️,
+Linux glibc s390x,🟡 2.28,✅📌 CIBW,🔴 4,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
+Linux glibc riscv64,🟠 2.34,✅📌 CIBW,🟡 3,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
+Linux glibc loong64,🔴 2.38,🟩📌 CIBW,🟡 3,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
+Linux glibc mips64le,🟢 2.17,🟩🔄 PBIN,🟡 3,✅,☑️,🔳,✅,☑️,🔳,❌,NA,NA,NA,🅿️,[2]_
+Linux glibc mipsle,🟢 2.17,🟩📌 SBLD,🟡 3,✅,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,🅿️,[2]_ [3]_
+Linux musl x86_64,🟢 1.2,✅🔄 CIBW,🔵 2,✅,✅,🔳,❌,NA,NA,✅,✅,⬜,gcc,✅,
+Linux musl i686,🟢 1.2,✅🔄 CIBW,🔵 2-3,✅,☑️,🔳,❌,NA,NA,✅,☑️,⬜,gcc,✅,
+Linux musl aarch64,🟢 1.2,✅🔄 CIBW,🔵 2,✅,✅,🔳,❌,NA,NA,✅,✅,⬜,gcc,✅,
+Linux musl armv7l,🟢 1.2,✅🔄 CIBW,🔵 2-3,❌,NA,NA,❌,NA,NA,✅,☑️,⬜,gcc,✅,
+Linux musl ppc64le,🟢 1.2,✅📌 CIBW,🟡 3,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
+Linux musl s390x,🟢 1.2,✅📌 CIBW,🔴 4,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
+Linux musl riscv64,🟢 1.2,✅📌 CIBW,🟡 3,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
+Linux musl loong64,🟢 1.2,🟩📌 CIBW,🟡 3,❌,NA,NA,❌,NA,NA,✅,☑️,🔳,clang,☑️,
+Android arm64,🔵 23,✅🔄 PBIN,🔵 2,✅,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,❌ [4]_,
+Android armeabi,🔵 23,✅🔄 PBIN,🔵 2,✅,❌,🔳,✅,❌,🔳,❌,NA,NA,NA,❌,
+Android x86_64,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,❌,
+Android x86,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,❌,
+iOS arm64 device,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
+iOS arm64 simulator,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
+iOS x86_64 simulator,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
+PyEmscripten wasm32,🟠 2026,❎📌 CIBW,🔴 4 (!),❌ [6]_,NA,NA,❌,NA,NA,✅,☑️,🔳,emcc,NA,[7]_
