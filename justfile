@@ -85,10 +85,9 @@ update-actions min_age='7':
 
 [script]
 update-locks:
-	set -x && export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
-	rm -f lock/{pip,distcheck}.txt
-	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
-	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
+	set -x && rm -f lock/{pip,distcheck}.txt
+	pip-compile -v --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
+	pip-compile -v --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
 
 update-all-pins: update-actions update-locks
 
