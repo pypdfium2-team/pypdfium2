@@ -77,6 +77,23 @@ venv-create envname='.venv':
 	$VENV_BIN/python3 utils/update_pip.py
 
 
+# NOTE you may want to make pinact a wrapper script that translates to something like
+# GITHUB_TOKEN=$(kwallet-query -f Passwords -r pinact kdewallet) pinact_raw $@
+update-actions min_age='7':
+	pinact run -update -min-age {{min_age}} || true
+
+[script]
+update-locks:
+	set -x && export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
+	rm -f lock/{pip,distcheck}.txt
+	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
+	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
+
+update-all-pins: update-actions update-locks
+
+
+# Pyodide support (note the warning in setupsrc/_pyodide.py though)
+
 pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
 	# Avoid "Index ... does not provide upload-time metadata" error when user-level pip config is configured with a dependency cooldown.
@@ -98,20 +115,4 @@ pyodide-test wheel='dist/pypdfium2-*-pyemscripten_*_wasm32.whl':
 	pip install pillow numpy pytest
 	python -m pytest tests/
 
-# Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
 pyodide *args: (pyodide-build args) pyodide-venv-create pyodide-test
-
-
-# NOTE you may want to make pinact a wrapper script that translates to something like
-# GITHUB_TOKEN=$(kwallet-query -f Passwords -r pinact kdewallet) pinact_raw $@
-update-actions min_age='7':
-	pinact run -update -min-age {{min_age}} || true
-
-[script]
-update-locks:
-	set -x && export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
-	rm -f lock/{pip,distcheck}.txt
-	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
-	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
-
-update-all-pins: update-actions update-locks
