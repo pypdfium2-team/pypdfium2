@@ -252,11 +252,8 @@ pypdfium2 is like any other Python project in essentials, except that it needs s
 
 The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users/contributors as well as our PyPI packaging.
 
-However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's own setup code.<br>
+However, if you want to (or have to) forego this automation (e.g. to avoid setup-time web requests), you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's own setup code.<br>
 The idea is basically to put your data files in a staging directory, `data/sourcebuild` or `data/system` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume from that directory on setup.
-
-This setup strategy should be inherently free of web requests.
-Please don't expect us to support the result, though. If you bring your own files, that's your own responsibility, and it is quite possible your version of pypdfium2 may turn out subtly different than ours.
 
 ```bash
 # First, ask yourself: Do you want to bundle pdfium (in-tree), or use system
@@ -304,6 +301,11 @@ END
 PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 ```
 
+Note though, if you bring your own files, that's your own responsibility, and it is quite possible your version of pypdfium2 may turn out subtly different than ours.
+
+If this option still isn't good enough for you, by all means remove pypdfium2's `setup.py` and bring your own.
+In either case, please do not expect us to help with that process, let alone support the result.
+
 
 #### Further setup info (formal summary)
 
@@ -342,15 +344,17 @@ As it is hard to keep up with constantly evolving setup code, it is possible thi
 
 The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them.
 If you have an issue with a third-party build, please contact your distributor – not us.
-Third-party packaging tends to produce poorer results. Downstream distributors may or may not have a good understanding of what they are working with.
 
-Please do not expect us to add/change code for downstream-specific setup tasks.
-Related issues or PRs may be closed without further notice if we don't see fit for upstream.
-Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
+With third-party package recipes, there is always a risk they might be poor quality.
+The schemes of downstream distributors do not necessarily align with those of upstream authors.
 
 > [!IMPORTANT]
-> If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.<br>
-> In particular, if you feel like you need patches to package pypdfium2, please submit them on the Discussions page so we can figure out if there isn't a better way (there usually is).
+> If you are a downstream distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.<br>
+> In particular, if you feel like you need patches to package pypdfium2, we'd like you to submit them on the Discussions page so we can figure out if there isn't a better way (there usually is).
+
+Please do not expect us to add/change code for downstream-specific setup tasks, though.
+Related issues or PRs may be closed without further notice if we don't see fit for upstream.
+Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
 
 
 ## Usage
