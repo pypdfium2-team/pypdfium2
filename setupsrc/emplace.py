@@ -49,7 +49,7 @@ def _end_subtargets(sub_target, pdfium_ver):
     if sub_target:
         assert False, sub_target
     else:
-        log("No sub-target set, will use existing data files.")
+        log("No sub-target set, will consume existing data files.")
         if pdfium_ver:
             raise ValueError(f"Pdfium version {pdfium_ver} was passed, but this does not make sense with caller-provided data files.")
 
