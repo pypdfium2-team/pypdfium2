@@ -335,11 +335,6 @@ As it is hard to keep up with constantly evolving setup code, it is possible thi
 [^platform_ids]: Intended for packaging, so that wheels can be crafted for any platform without access to a native host.
 
 
-### If you're using conda
-
-...
-
-
 ### Unofficial packages
 
 The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them.
