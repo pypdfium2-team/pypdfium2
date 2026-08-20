@@ -8,4 +8,4 @@ mkdir -p "$SYMLINKS_DIR"
 ln -sf "$PYTHON" "$SYMLINKS_DIR/python3"
 ln -sf "$PYTHON" "$SYMLINKS_DIR/python"
 
-printf "$SYMLINKS_DIR:$PATH"
+printf "$SYMLINKS_DIR"
