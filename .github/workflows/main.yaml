@@ -29,9 +29,6 @@ on:
       sdist:
         type: boolean
         default: true
-      conda:
-        type: boolean
-        default: false
       gh_pages:
         type: boolean
         default: false
@@ -372,30 +369,9 @@ jobs:
       publish: ${{ inputs.publish }}
   
   
-  conda:
-    name: Trigger conda pypdfium2_helpers
-    needs: publish
-    if: ${{ inputs.conda && !cancelled() && !contains(needs.*.result, 'failure') }}
-    permissions:
-      actions: write  # needed by dispatch.yaml
-    
-    uses: ./.github/workflows/dispatch.yaml
-    with:
-      workflow_file: conda.yaml
-      inputs: |
-        {
-          "package": "helpers",
-          "pdfium_ver": "",
-          "new_only": "true",
-          "test": "true",
-          "publish": "${{ inputs.publish }}",
-          "actually_publish": "${{ inputs.actually_publish }}"
-        }
-  
-  
   cleanup:
     name: Clean up temporary branch
-    needs: [prepare, publish, gh_pages, conda]
+    needs: [prepare, publish, gh_pages]
     if: ${{ inputs.inc_ver && !cancelled() }}
     permissions:
       contents: write  # needed for push

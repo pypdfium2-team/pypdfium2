@@ -19,8 +19,11 @@ list:
 	just -l
 test *args:
 	python3 -m pytest tests/ {{args}}
-clean:
-	rm -rf pypdfium2.egg-info/ build/ dist/ data/* tests/output/* conda/bundle/out/ conda/helpers/out/ conda/raw/out/
+clean-before-build:
+    # see the notes in utils/craft.py why clearing this is essential before running pyproject-build
+    rm -rf pypdfium2.egg-info/ build/
+clean: clean-before-build
+    rm -rf data/* tests/output/* dist/ .pytest_cache/ .mypy_cache/ .venv/ .pyodide-venv/ .pyodide_build/ .python_symlinks/
 
 check:
 	./utils/misc/check.sh
@@ -54,15 +57,11 @@ emplace *args:
 	python3 setupsrc/emplace.py {{args}}
 craft *args:
 	python3 utils/craft.py {{args}}
-craft-conda *args:
-	python3 conda/craft_conda_pkgs.py {{args}}
 pkg *platforms='auto': (craft '-p' platforms '--wheels')
-pkg-unassisted platform='' *args='-w':
-	# see the notes in craft.py for why clearing egg-info and build cache is essential
-	rm -rf pypdfium2.egg-info/ build/
+pyproject-build platform='' *args='-w': clean-before-build
 	PDFIUM_PLATFORM="{{platform}}" python3 -m build -xn {{args}}
 sdist: (craft '--sdist')
-sdist-unassisted: (pkg-unassisted 'sdist' '-s')
+sdist-unassisted: (pyproject-build 'sdist' '-s')
 container *args:
 	python3 utils/container_driver.py {{args}}
 xpack *platforms='all': clean check (download '-p' platforms) (craft '-p' platforms) distcheck
@@ -78,6 +77,22 @@ venv-create envname='.venv':
 	VENV_BIN=$(python3 utils/misc/fix_venv.py {{envname}})
 	$VENV_BIN/python3 utils/update_pip.py
 
+
+# NOTE you may want to make pinact a wrapper script that translates to something like
+# GITHUB_TOKEN=$(kwallet-query -f Passwords -r pinact kdewallet) pinact_raw $@
+update-actions min_age='7':
+	pinact run -update -min-age {{min_age}} || true
+
+[script]
+update-locks:
+	set -x && rm -f lock/{pip,distcheck}.txt
+	pip-compile -v --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
+	pip-compile -v --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
+
+update-all-pins: update-actions update-locks
+
+
+# Pyodide support (note the warning in setupsrc/_pyodide.py though)
 
 pyodide-venv-create envname='.pyodide-venv':
 	pyodide venv --clear {{envname}}
@@ -100,26 +115,4 @@ pyodide-test wheel='dist/pypdfium2-*-pyemscripten_*_wasm32.whl':
 	pip install pillow numpy pytest
 	python -m pytest tests/
 
-# Concerning pypdfium2 on Pyodide, note the warning in setupsrc/_pyodide.py
 pyodide *args: (pyodide-build args) pyodide-venv-create pyodide-test
-
-
-# NOTE you may want to make pinact a wrapper script that translates to something like
-# GITHUB_TOKEN=$(kwallet-query -f Passwords -r pinact kdewallet) pinact_raw $@
-update-actions min_age='7':
-	pinact run -update -min-age {{min_age}} || true
-
-[script]
-update-locks:
-	set -x && export PATH="${PWD}/.venv/bin:${PATH}"  # for the author's convenience
-	rm -f lock/{pip,distcheck}.txt
-	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P3D --allow-unsafe lock/pip.in -o lock/pip.txt
-	pip-compile --upgrade --generate-hashes --uploaded-prior-to=P7D lock/distcheck.in -o lock/distcheck.txt
-
-[script]
-update-conda-locks:
-	set -x && rm -f conda/lock/{build,publish}.txt
-	./utils/misc/conda_lockgen.sh build "3.12" "conda-build conda-verify"  # 26.7.0, 3.4.2
-	./utils/misc/conda_lockgen.sh publish "3.12" "anaconda-client"  # 1.15.0
-
-update-all-pins: update-actions update-locks update-conda-locks

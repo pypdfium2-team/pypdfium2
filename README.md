@@ -132,12 +132,6 @@ Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `
 
 [^upstream_abi_policy]: Luckily, upstream tend to be careful not to change the ABI of existing stable APIs, but they don't mind ABI-breaking changes to APIs that have not been promoted to stable tier yet, and pypdfium2 uses many of them, so it is still prudent to care about downstream ABI safety as well (it always is). You can read more about upstream's policy [here](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/CONTRIBUTING.md#stability).
 
-##### Related targets
-
-There is also a `system-generate:$VERSION` target, to produce system pdfium bindings in a host-independent fashion. This will call `find_library()` at runtime, and may be useful for packaging.
-
-Further, you can set just `system` to consume pre-generated files from the `data/system` staging directory. See the section on [caller-provided data files](#with-caller-provided-data-files) for more info.
-
 
 #### With self-built pdfium
 
@@ -258,11 +252,8 @@ pypdfium2 is like any other Python project in essentials, except that it needs s
 
 The main point of pypdfium2's custom setup is to automate deployment of these files, in a way that suits end users/contributors as well as our PyPI packaging.
 
-However, if you want to (or have to) forego this automation, you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's own setup code.<br>
+However, if you want to (or have to) forego this automation (e.g. to avoid setup-time web requests), you can also *just supply these files yourself*, as shown below. This allows to largely sidestep pypdfium2's own setup code.<br>
 The idea is basically to put your data files in a staging directory, `data/sourcebuild` or `data/system` (depending on whether you want to bundle or use system pdfium), and set the matching `$PDFIUM_PLATFORM` target to consume from that directory on setup.
-
-This setup strategy should be inherently free of web requests.
-Please don't expect us to support the result, though. If you bring your own files, that's your own responsibility, and it is quite possible your version of pypdfium2 may turn out subtly different than ours.
 
 ```bash
 # First, ask yourself: Do you want to bundle pdfium (in-tree), or use system
@@ -310,6 +301,11 @@ END
 PDFIUM_PLATFORM=$TARGET python -m pip install --no-build-isolation -v .
 ```
 
+Note though, if you bring your own files, that's your own responsibility, and it is quite possible your version of pypdfium2 may turn out subtly different than ours.
+
+If this option still isn't good enough for you, by all means remove pypdfium2's `setup.py` and bring your own.
+In either case, please do not expect us to help with that process, let alone support the result.
+
 
 #### Further setup info (formal summary)
 
@@ -332,11 +328,6 @@ As it is hard to keep up with constantly evolving setup code, it is possible thi
     + If `sourcebuild`, binary and bindings will be taken from `data/sourcebuild/`, assuming a prior run of the native or toolchained build scripts. `sourcebuild-native` or `sourcebuild-toolchained` can also be used to trigger either build through setup (use `$BUILD_PARAMS` to pass custom options).
     + If `sdist`, no platform-specific files will be included, so as to create a source distribution.
 
-* `$PYPDFIUM_MODULES=[raw,helpers]` defines the modules to include. Metadata adapts dynamically.
-  - May be used by packagers to decouple raw bindings and helpers, which may be relevant if packaging against system pdfium.
-  - Would also allow to install only the raw module without helpers, or only helpers with a custom raw module.
-  - Be careful, `PYPDFIUM_MODULES=raw` requires a pre-generated version file to infer the package version.
-
 * `$PDFIUM_BINDINGS=reference` allows to override ctypesgen and use the reference bindings file `autorelease/bindings.py` instead.
   - This is a convenience option to get pypdfium2 installed from source even if a working ctypesgen / C pre-processor is not available in the install env. *May be automatically enabled under given circumstances.*
   - Warning: This may not be ABI-safe. Please make sure binary/bindings build headers match to avoid ABI issues.
@@ -344,86 +335,21 @@ As it is hard to keep up with constantly evolving setup code, it is possible thi
 [^platform_ids]: Intended for packaging, so that wheels can be crafted for any platform without access to a native host.
 
 
-### From Conda
-
-> [!WARNING]
-> **Beware:** Any conda packages/recipes of pypdfium2 or pdfium-binaries that might be provided by other distributors, including `anaconda/main` or `conda-forge` default channels, are [unofficial](#unofficial-packages).
-
-> [!NOTE]
-> **Wait a moment:** Do you really need this?
-> pypdfium2 is best installed from `PyPI` (e.g. via `pip`),[^pypi_reasons] which you can also do in a conda env. Rather than asking your users to add custom channels, consider making pypdfium2 optional at install time, and ask them to install it via pip instead.<br>
-> This library has no hard runtime dependencies, so you don't need to worry about breaking the conda env.
-> 
-> As of mid 2026, conda finally seems to get better integration with the PyPI world thanks to the [`conda‑pypi`](https://conda.github.io/conda-pypi/) bridge, so we might eventually want to deprecate pypdfium2's conda packaging.
-
-[^pypi_reasons]: To name some reasons:
-    + pypdfium2 from PyPI covers platforms that we cannot cover on conda.
-    + pypdfium2 from PyPI has extensive fallback setup, while conda does not seem to provide an opportunity to run custom setup code.
-    + With conda, in-project publishing / custom channels are second class.
-    + By the time pypdfium2's conda packaging was created, there used to be no way to create platform-specific but interpreter-independent python packages. That meant we had to unbundle pdfium, which is more complex and has some pitfalls. [CEP 20's](https://github.com/conda/ceps/blob/ff39eb01d1664d041f8733659a344620be1d6c2d/cep-0020.md) [`python_version_independent` setting](https://docs.conda.io/projects/conda-build/en/stable/resources/define-metadata.html#python-version-independent-packages) might have resolved this limitation by now, but this remains to be re-evaluated. Anyway, dealing with conda's packaging side has been but an awful experience so far.
-
-+ To install
-  
-  With permanent channel config (encouraged):
-  ```bash
-  conda config --add channels bblanchon
-  conda config --add channels pypdfium2-team
-  conda config --set channel_priority strict
-  conda install pypdfium2-team::pypdfium2_helpers
-  ```
-  
-  Alternatively, with temporary channel config:
-  ```bash
-  conda install pypdfium2-team::pypdfium2_helpers --override-channels -c pypdfium2-team -c bblanchon -c defaults
-  ```
-  
-  If desired, you may limit the channel config to the current environment by adding `--env`.
-  Adding the channels permanently and tightening priority is encouraged to include pypdfium2 in `conda update` by default, and to avoid accidentally replacing the install with a different channel.
-  Otherwise, you should be cautious when making changes to the environment.
-
-+ To depend on pypdfium2 in a `conda-build` recipe
-  ```yaml
-  requirements:
-    run:
-      - pypdfium2-team::pypdfium2_helpers
-  ```
-  You'll want to have downstream callers handle the custom channels as shown above, otherwise conda will not be able to satisfy requirements.
-
-+ To set up channels in a GH workflow
-  ```yaml
-  - name: ...
-    uses: conda-incubator/setup-miniconda@v4  # or pin to hash
-    with:
-      # ... your options
-      channels: pypdfium2-team,bblanchon
-      channel-priority: strict
-  ```
-  This is just a suggestion, you can also call `conda config` manually, or pass channels on command basis using `-c`, as discussed above.
-
-+ To verify the sources
-  ```bash
-  conda list --show-channel-urls "pypdfium2|pdfium-binaries"
-  conda config --show-sources
-  ```
-  The table should show `pypdfium2-team` and `bblanchon` in the channels column.
-  If added permanently, the config should also include these channels, ideally with top priority.
-  Please check this before reporting any issue with a conda install of pypdfium2.
-
-_**Note:** Conda packages are normally managed using recipe feedstocks driven by third parties, in a Linux repository like fashion. However, with some quirks it is also possible to do conda packaging within the original project and publish to a custom channel, which is what pypdfium2-team does, and the above instructions are referring to._
-
-
 ### Unofficial packages
 
-The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them. Please use our official packages where possible.
-If you have an issue with a third-party build, either contact your distributor, or try to reproduce with our official builds.
+The authors of this project have no control over and are not responsible for possible third-party builds of pypdfium2, and we do not support them.
+If you have an issue with a third-party build, please contact your distributor – not us.
 
-Do not expect us to add/change code for downstream-specific setup tasks.
-Related issues or PRs may be closed without further notice if we don't see fit for upstream.
-Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
+With third-party package recipes, there is always a risk they might be poor quality.
+The schemes of downstream distributors do not necessarily align with those of upstream authors.
 
 > [!IMPORTANT]
-> If you are a third-party distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.<br>
-> In particular, if you feel like you need patches to package pypdfium2, please submit them on the Discussions page so we can figure out if there isn't a better way (there usually is).
+> If you are a downstream distributor, please point out in the description that your package is unofficial, i.e. not affiliated with or endorsed by the pypdfium2 authors.<br>
+> In particular, if you feel like you need patches to package pypdfium2, we'd like you to submit them on the Discussions page so we can figure out if there isn't a better way (there usually is).
+
+Please do not expect us to add/change code for downstream-specific setup tasks, though.
+Related issues or PRs may be closed without further notice if we don't see fit for upstream.
+Enhancements of general value that are maintainable and align well with the idea of our setup code are welcome, though.
 
 
 ## Usage
