@@ -14,8 +14,7 @@
 BROWSER := env('BROWSER', 'google-chrome')
 BUILD_PARAMS := env('BUILD_PARAMS', '')
 set script-interpreter := ['bash', '-euo', 'pipefail']
-verbose := '''set -x
-'''
+verbose := 'set -x &&'
 
 list:
 	just -l
