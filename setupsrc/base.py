@@ -9,7 +9,6 @@ import struct
 import shutil
 import tarfile
 import platform
-import argparse
 import functools
 import subprocess
 import contextlib
