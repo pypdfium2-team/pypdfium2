@@ -11,13 +11,6 @@ from pypdfium2.internal import FPDF_WCHAR_size
 from pypdfium2._helpers.misc import PdfiumError
 
 
-def _encode_key(key):
-    if isinstance(key, str):
-        return (key + "\x00").encode("utf-8")
-    else:
-        raise TypeError(f"Key must be str, but {type(key).__name__} was given.")
-
-
 class PdfAttachment (pdfium_i.AutoCastable):
     """
     Attachment helper class.
@@ -32,10 +25,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
     
     # TODO consider using AutoCloseable machienery to guarantee `pdf` remains alive as long as the attachment object exists
     
-    # Problems with PDFium's attachment API:
-    # - https://crbug.com/pdfium/1939
-    # - https://crbug.com/pdfium/893
-    
+    # Limitations of PDFium's attachment API: https://crbug.com/pdfium/893
     
     def __init__(self, raw, pdf):
         self.raw = raw
@@ -101,7 +91,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         Returns:
             bool: True if *key* is contained in the params dictionary, False otherwise.
         """
-        return pdfium_c.FPDFAttachment_HasKey(self, _encode_key(key))
+        return pdfium_c.FPDFAttachment_HasKey(self, (key+"\x00").encode("utf-8"))
     
     
     def get_value_type(self, key):
@@ -109,7 +99,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         Returns:
             int: Type of the value of *key* in the params dictionary (:attr:`FPDF_OBJECT_*`).
         """
-        return pdfium_c.FPDFAttachment_GetValueType(self, _encode_key(key))
+        return pdfium_c.FPDFAttachment_GetValueType(self, (key+"\x00").encode("utf-8"))
     
     
     def get_str_value(self, key):
@@ -119,7 +109,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
             Otherwise, an empty string will be returned. On other failures, an exception will be raised.
         """
         
-        enc_key = _encode_key(key)
+        enc_key = (key+"\x00").encode("utf-8")
         n_bytes = pdfium_c.FPDFAttachment_GetStringValue(self, enc_key, None, 0)
         if n_bytes <= 0:
             raise PdfiumError(f"Failed to get value of key '{key}'.")
@@ -138,8 +128,32 @@ class PdfAttachment (pdfium_i.AutoCastable):
         Parameters:
             value (str): New string value for the attribute.
         """
-        enc_value = (value + "\x00").encode("utf-16-le")
+        enc_key = (key+"\x00").encode("utf-8")
+        enc_value = (value+"\x00").encode("utf-16-le")
         enc_value_ptr = ctypes.cast(enc_value, pdfium_c.FPDF_WIDESTRING)
-        ok = pdfium_c.FPDFAttachment_SetStringValue(self, _encode_key(key), enc_value_ptr)
+        ok = pdfium_c.FPDFAttachment_SetStringValue(self, enc_key, enc_value_ptr)
         if not ok:
             raise PdfiumError(f"Failed to set attachment param '{key}' to '{value}'.")
+    
+    
+    # TODO(geisserml) needs test cases
+    
+    def get_desc(self):
+        in_bytes = pdfium_c.FPDFAttachment_GetDescription(self, None, 0)  # including NUL
+        if in_bytes == FPDF_WCHAR_size:
+            return ""
+        elif not in_bytes:
+            raise PdfiumError("Failed to get attachment description")
+        n_units = -(in_bytes // -FPDF_WCHAR_size)  # ceildiv
+        buffer = (pdfium_c.FPDF_WCHAR * n_units)()
+        # NOTE If the provided buflen is incorrect (too small), buffer would silently not be modified. The API does not give us a way to catch that (theoretical) case here.
+        out_bytes = pdfium_c.FPDFAttachment_GetDescription(self, buffer, in_bytes)
+        assert in_bytes == out_bytes
+        return decode(memoryview(buffer)[:n_units], "utf-16-le")
+    
+    def set_desc(self, string):
+        enc_string = (string+"\x00").encode("utf-16-le")
+        enc_string_ptr = ctypes.cast(enc_string, pdfium_c.FPDF_WIDESTRING)
+        ok = pdfium_c.FPDFAttachment_SetDescription(self, enc_string_ptr)
+        if not ok:
+            raise PdfiumError("Failed to set attachment description")

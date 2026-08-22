@@ -56,7 +56,7 @@ def main(args):
     if args.action == ACTION_LIST:
         for i in range(n_attachments):
             attachment = pdf.get_attachment(i)
-            print(f"[{i+1}]", attachment.get_name())
+            print(f"[{i+1}] {attachment.get_name()}: {attachment.get_desc()}")
     
     elif args.action == ACTION_EXTRACT:
         
@@ -71,6 +71,8 @@ def main(args):
             out_path.write_bytes( attachment.get_data() )
     
     elif args.action == ACTION_EDIT:
+        
+        # TODO expose .set_desc()
         
         if args.del_numbers:
             for i in sorted(args.del_numbers, reverse=True):
