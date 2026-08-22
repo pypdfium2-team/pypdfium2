@@ -8,8 +8,12 @@ import sys
 import argparse
 from os.path import basename
 from importlib import import_module
-from pypdfium2_cfg.stl import cached_property, keydefaultdict
 from pypdfium2_cli._setup import setup_logging
+from pypdfium2_cfg.stl import (
+    cached_property,
+    keydefaultdict,
+    # argparse_compat_actions,
+)
 
 ModuleLoader = keydefaultdict(import_module)
 
@@ -83,6 +87,7 @@ Environment variables:
             sc_name, help=help, description=desc,
             formatter_class=argparse.RawTextHelpFormatter,
         )
+        # argparse_compat_actions(subparser)
         mod.attach(subparser)
     
     for name, help in other_scs.items():

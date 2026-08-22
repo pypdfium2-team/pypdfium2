@@ -71,8 +71,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
     def set_data(self, data):
         """
         Set the attachment's file data.
-        If this function is called on an existing attachment, it will be changed to point at the new data,
-        but the previous data will not be removed from the file (as of PDFium 5418).
+        If this function is called on an existing attachment, it will be changed to point at the new data, but the previous data will not be removed from the file (as of PDFium 5418).
         
         Parameters:
             data (bytes | ctypes.Array):
@@ -146,7 +145,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
             raise PdfiumError("Failed to get attachment description")
         n_units = -(in_bytes // -FPDF_WCHAR_size)  # ceildiv
         buffer = (pdfium_c.FPDF_WCHAR * n_units)()
-        # NOTE If the provided buflen is incorrect (too small), buffer would silently not be modified. The API does not give us a way to catch that (theoretical) case here.
+        # NOTE The API unconditionally returns the string's length and does not give feedback whether buffer has actually been modified or not. This means an incorrect buflen value would go unnoticed by the adapter (if buflen is too small, buffer will silently not be modified). The API offers no way to detect that theoretical case.
         out_bytes = pdfium_c.FPDFAttachment_GetDescription(self, buffer, in_bytes)
         assert in_bytes == out_bytes
         return decode(memoryview(buffer)[:n_units], "utf-16-le")

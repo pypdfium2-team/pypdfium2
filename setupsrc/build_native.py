@@ -13,9 +13,9 @@ import urllib.request as url_request
 
 # local
 from base import *
-from stl import cached_property
 from _build_helpers import *
 import _pyodide as pyodide_utils
+from stl import cached_property, argparse_compat_actions
 
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
@@ -504,10 +504,9 @@ In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAG
 In clang mode, --clang-path lets you choose the clang build used, but flags are not honored yet.
 
 Some params take a default from an environment variable, for easy passthrough with cibuildwheel.\
-""",
+"""
     )
-    if ExtendAction is not None:  # from base.py
-        parser.register("action", "extend", ExtendAction)
+    argparse_compat_actions(parser)
     
     parser.add_argument(
         "--version",

@@ -11,6 +11,9 @@ ACTION_LIST    = "list"
 ACTION_EXTRACT = "extract"
 ACTION_EDIT    = "edit"
 
+# TODO would like to add action="extend", but conflicts with default being a tuple, and beware: it cannot be made a list here (perilous!)
+# Also note that compat actions don't propagate into subparsers, i.e. they'd need to be re-registered on each subparser individually. Not sure if there's a good way to fix that. Maybe just subclassing ArgumentParser might work, provided parser.add_parser() in turn constructs an instance of type(parser) ...
+NARGS_PLUS = dict(nargs="+", default=())
 
 def attach(parser):  # hook
     
@@ -21,7 +24,7 @@ def attach(parser):  # hook
     
     parser_extract = subparsers.add_parser(ACTION_EXTRACT)
     parser_extract.add_argument(
-        "--numbers",
+        "--nums",
         type = parse_numtext,
     )
     parser_extract.add_argument(
@@ -32,12 +35,18 @@ def attach(parser):  # hook
     
     parser_edit = subparsers.add_parser(ACTION_EDIT)
     parser_edit.add_argument(
-        "--del-numbers", "-d",
-        type = parse_numtext,
+        "--set-desc",
+        **NARGS_PLUS,
+        help = f"Syntax: n=desc, where n is the attachment number, and desc the new description to be set. Example: '1=Hello world'. Use `pypdfium2 attachments list` to determine the attachment numbers. To be clear, this option refers to the original order, before --del-nums or --add-files.",
     )
     parser_edit.add_argument(
-        "--add-files", "-a",
-        nargs = "+",
+        "--del-nums",
+        type = parse_numtext,
+        default = (),
+    )
+    parser_edit.add_argument(
+        "--add-files",
+        **NARGS_PLUS,
         metavar = "F",
         type = Path,
     )
@@ -60,11 +69,11 @@ def main(args):
     
     elif args.action == ACTION_EXTRACT:
         
-        if not args.numbers:
-            args.numbers = range(n_attachments)
-        n_digits = len(str( max(args.numbers) + 1 ))
+        if not args.nums:
+            args.nums = range(n_attachments)
+        n_digits = len(str( max(args.nums) + 1 ))
         
-        for i in args.numbers:
+        for i in args.nums:
             attachment = pdf.get_attachment(i)
             name = attachment.get_name()
             out_path = args.output_dir / ("%0*d_%s" % (n_digits, i+1, name))
@@ -72,16 +81,18 @@ def main(args):
     
     elif args.action == ACTION_EDIT:
         
-        # TODO expose .set_desc()
+        for spec in args.set_desc:
+            num_str, desc = spec.split("=", maxsplit=1)
+            i = int(num_str) - 1
+            attachment = pdf.get_attachment(i)
+            attachment.set_desc(desc)
         
-        if args.del_numbers:
-            for i in sorted(args.del_numbers, reverse=True):
-                pdf.del_attachment(i)
+        for i in sorted(args.del_nums, reverse=True):
+            pdf.del_attachment(i)
         
-        if args.add_files:
-            for fp in args.add_files:
-                attachment = pdf.new_attachment(fp.name)
-                attachment.set_data( fp.read_bytes() )
+        for fp in args.add_files:
+            attachment = pdf.new_attachment(fp.name)
+            attachment.set_data( fp.read_bytes() )
         
         pdf.save(args.output)
     

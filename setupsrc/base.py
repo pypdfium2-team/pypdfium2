@@ -838,13 +838,3 @@ def handle_platforms(platforms):
     elif platforms == ["all"]:
         platforms = ALL_PLATFORMS
     return platforms
-
-
-if sys.version_info < (3, 8):
-    class ExtendAction (argparse.Action):
-        def __call__(self, parser, namespace, values, option_string=None):
-            items = getattr(namespace, self.dest) or []
-            items.extend(values)
-            setattr(namespace, self.dest, items)
-else:
-    ExtendAction = None
