@@ -2,10 +2,10 @@
 
 SYMLINKS_DIR=$(realpath "$1")
 PY_VERSION="$2"
-PYTHON=$(which python$PY_VERSION)
+PYTHON=$(which "python${PY_VERSION}")
 
 mkdir -p "$SYMLINKS_DIR"
-ln -sf "$PYTHON" "$SYMLINKS_DIR/python3"
-ln -sf "$PYTHON" "$SYMLINKS_DIR/python"
+ln -sf "$PYTHON" "${SYMLINKS_DIR}/python3"
+ln -sf "$PYTHON" "${SYMLINKS_DIR}/python"
 
-printf "$SYMLINKS_DIR"
+printf '%s' "$SYMLINKS_DIR"

@@ -5,6 +5,7 @@ AUTOFLAKE_DIFF=$(autoflake src/ setupsrc/ tests/ setup.py docs/source/conf.py --
 codespell --skip="./docs/build,./tests/resources,./tests/output,./data,./sbuild,./patches,./dist,./LICENSES,./BUILD_LICENSES,./RELEASE.md,./.git,./htmlcov,__pycache__,.mypy_cache,.hypothesis" -L "FitH,flate,intoto"
 reuse lint
 zizmor .github/ --persona auditor
+# TODO add shellcheck utils/**/*.sh or something
 
 if [[ -n "$AUTOFLAKE_DIFF" ]]; then
   exit 1
