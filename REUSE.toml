@@ -99,7 +99,6 @@ Obtained from img2pdf. No individual license stated for this data file.
 path = [
     "patches/android_cross.patch",
     "patches/unknown_cpu.patch",
-    "patches/wasm/pdfium.patch",
     "patches/wasm/build.patch",
     "patches/wasm/config.gn",
     "patches/win/use_resources_rc.patch",
@@ -115,6 +114,19 @@ SPDX-License-Identifier = "MIT"
 SPDX-FileComment = '''
 Derived from https://github.com/bblanchon/pdfium-binaries/tree/master/patches
 See also //BUILD_LICENSES/pdfium-binaries.txt for a copy of upstream's license file as embedded in the tarballs.
+'''
+
+[[annotations]]
+path = ["patches/wasm/pdfium.patch"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2026 Benoît Blanchon and pdfium-binaries contributors",
+    "2026 geisserml",
+    "2026 Hood Chatham <roberthoodchatham@gmail.com>",
+]
+SPDX-License-Identifier = "MIT"
+SPDX-FileComment = '''
+See https://github.com/pyodide/pyodide/discussions/6426
 '''
 
 [[annotations]]
