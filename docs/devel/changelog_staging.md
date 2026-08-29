@@ -4,6 +4,8 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Pyodide platform: Patch freetype load flags to avoid `FT_Load_Glyph()` somehow corrupting the heap. It seems that this addresses the previously encountered crashes/freezes; however, the exact cause remains elusive. Anyway, many thanks to Hood Chatham for the fix.
+  - Dropped debug symbols. Enabled PyPI upload. Updated documentation.
 - Removed pypdfium2's conda packaging following [thorough](https://github.com/mindee/doctr/discussions/2127) [consideration](https://github.com/mindee/doctr/issues/113#issuecomment-5340008535).
   * Key reasons include that it ended up covering far less platforms than we do with PyPI wheels, did not integrate with our own build strategies, and seemed fraught with workarounds.
   In part, this has been a result of outsourcing the pdfium dependency (which seemed about the only viable option prior to [CEP 20](https://github.com/conda/ceps/blob/main/cep-0020.md)), along with other limitations, like conda generally supporting less platforms, and tight storage limits at `anaconda.org` that leave maintainers with tradeoffs between release frequency and platform inclusion vs. sustainability.

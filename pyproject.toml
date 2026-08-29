@@ -105,18 +105,6 @@ test-command = [
 select = "*-pyodide_*"
 build-frontend = {name="pyodide-build", args=["-xn"]}
 
-# Suppress possible test suite failure with pyodide (it's flaky).
-# We don't publish pyemscripten wheels to PyPI because of these known issues, just upload the experimental builds to GH, so suppression is OK here, and actually necessary to not risk failing the entire release (otherwise we'd just have to exclude pyodide, while this allows us to carry it along as experimental).
-[[tool.cibuildwheel.overrides]]
-select = "*-pyodide_*"
-inherit.test-command = "none"
-test-command = [
-    "python -m pypdfium2_cli --help",
-    "python -m pypdfium2_cli --version",
-    "python {project}/utils/minitest.py",
-    "sh -c 'python -m pytest {project}/tests || true'",
-]
-
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
 before-all = [

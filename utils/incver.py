@@ -194,8 +194,9 @@ This release was made with the following build strategies:
         if caution_targets:
             relnotes += f"""
 > [!CAUTION]
-> The following builds are affected by known, major issues (e.g. endianness bugs, crashes, freezes) and are **NOT** considered ready for production use:
+> The following builds are experimental and affected by, or prone to, major stability issues (e.g. endianness bugs, memory corruption):
 > {_pformat_targets(sorted(caution_targets))}
+> Caution is advised when using these builds, as they are **not** considered production ready.
 """
     
     # even if python code was not updated, there will be a release commit

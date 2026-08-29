@@ -436,8 +436,6 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     if vendor_deps is None:
         vendor_deps = set()
     
-    if is_pyodide:
-        pyodide_utils.info(compiler)
     if compiler is None:
         if is_pyodide:
             compiler = Compiler.clang
@@ -579,7 +577,7 @@ Some params take a default from an environment variable, for easy passthrough wi
         dest = "is_pyodide",
         action = "store_true",
         default = bool(os.environ.get("PYODIDE")),
-        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should target WASM. Automatically enabled if $PYODIDE is set.",
+        help = "Indicate that build_native.py is running in an emscripten cross environment as provided by `pyodide build`, and should target WASM. Automatically enabled if $PYODIDE is set. WARNING: Pyodide support is experimental.",
     )
     
     args = parser.parse_args(argv)

@@ -306,7 +306,7 @@ jobs:
           mkdir artifacts/ && cp dist/* -t artifacts/
           shopt -s nullglob
           cd dist/
-          rm -f *linux_*_loongarch64*.whl *linux_*_mips64le*.whl *linux_*_mipsle*.whl *-pyemscripten_*_wasm32.whl
+          rm -f *linux_*_loongarch64*.whl *linux_*_mips64le*.whl *linux_*_mipsle*.whl
       
       - name: Apply and push repository changes
         if: ${{ inputs.actually_publish }}

@@ -30,4 +30,4 @@ Android x86,🔵 23,🟦🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,�
 iOS arm64 device,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
 iOS arm64 simulator,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
 iOS x86_64 simulator,🟡 17,🟨🔄 PBIN,⚪ nan,✅,❌,🔳,❌,NA,NA,❌,NA,NA,NA,NA,[5]_
-PyEmscripten wasm32,🟠 2026,❎📌 CIBW,🔴 4 (!),❌ [6]_,NA,NA,❌,NA,NA,✅,☑️,🔳,emcc,NA,[7]_
+PyEmscripten wasm32,🟠 2026,✅📌 CIBW,🔴 4,❌ [6]_,NA,NA,❌,NA,NA,✅,☑️,🔳,emcc,NA,[7]_
