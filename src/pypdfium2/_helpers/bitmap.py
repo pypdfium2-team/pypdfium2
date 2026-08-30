@@ -64,13 +64,27 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         # NB: For pdfium-internal buffers freed by FPDFBitmap_Destroy(), the finalizer ought to be attached to the buffer object itself. For external buffers unaffected by FPDFBitmap_Destroy(), it's fine to couple the FPDF_BITMAP's scope with the PdfBitmap wrapper directly, as only the shell is released (not the buffer).
         super().__init__(pdfium_c.FPDFBitmap_Destroy, obj=fin_obj, tracked=False)
     
-    def __repr__(self):
-        status = "native" if self._fin_obj is self else f"foreign"
-        return f"{super().__repr__()[:-1]} @ {status}>"
-    
     @property
     def parent(self):  # AutoCloseable hook
         return None
+    
+    def __repr__(self):
+        status = "native" if self._fin_obj is self else "foreign"
+        return f"{super().__repr__()[:-1]} @ {status}>"
+    
+    def close(self, warn=True, **kwargs):
+        """
+        Explicitly close the bitmap.
+        
+        If the bitmap buffer is owned by pdfium ("foreign"), this will free the buffer, which is a potentially unsafe operation.
+        If the bitmap was created with an external, python-side buffer ("native"), only the FPDF_BITMAP shim is invalidated, but the buffer remains unaffected.
+        
+        Caution:
+            Only call this method if you fully understand the memory safety implications.
+        """
+        if warn:
+            logger.warning(f"Explicitly closing {self!r}. This is a potentially unsafe operation!")
+        super().close(**kwargs)
     
     # NOTE To test all bitmap creation strategies through the CLI:
     # MAKERS=(native foreign foreign_packed foreign_simple)
