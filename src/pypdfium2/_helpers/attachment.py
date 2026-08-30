@@ -31,7 +31,6 @@ class PdfAttachment (pdfium_i.AutoCastable):
         self.raw = raw
         self.pdf = pdf
     
-    
     def get_name(self):
         """
         Returns:
@@ -42,7 +41,6 @@ class PdfAttachment (pdfium_i.AutoCastable):
         buffer = (pdfium_c.FPDF_WCHAR * n_units)()
         pdfium_c.FPDFAttachment_GetName(self, buffer, n_bytes)
         return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
-    
     
     def get_data(self):
         """
@@ -67,7 +65,6 @@ class PdfAttachment (pdfium_i.AutoCastable):
         
         return buffer
     
-    
     def set_data(self, data):
         """
         Set the attachment's file data.
@@ -81,7 +78,6 @@ class PdfAttachment (pdfium_i.AutoCastable):
         if not ok:
             raise PdfiumError("Failed to set attachment data.")
     
-    
     def has_key(self, key):
         """
         Parameters:
@@ -92,14 +88,12 @@ class PdfAttachment (pdfium_i.AutoCastable):
         """
         return pdfium_c.FPDFAttachment_HasKey(self, (key+"\x00").encode("utf-8"))
     
-    
     def get_value_type(self, key):
         """
         Returns:
             int: Type of the value of *key* in the params dictionary (:attr:`FPDF_OBJECT_*`).
         """
         return pdfium_c.FPDFAttachment_GetValueType(self, (key+"\x00").encode("utf-8"))
-    
     
     def get_str_value(self, key):
         """
@@ -119,7 +113,6 @@ class PdfAttachment (pdfium_i.AutoCastable):
         
         return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
     
-    
     def set_str_value(self, key, value):
         """
         Set the attribute specified by *key* to the string *value*.
@@ -134,10 +127,13 @@ class PdfAttachment (pdfium_i.AutoCastable):
         if not ok:
             raise PdfiumError(f"Failed to set attachment param '{key}' to '{value}'.")
     
-    
     # TODO(geisserml) needs test cases
     
     def get_desc(self):
+        """
+        Returns:
+            str: The attachment's description, or an empty string if the attachment has no description.
+        """
         in_bytes = pdfium_c.FPDFAttachment_GetDescription(self, None, 0)  # including NUL
         if in_bytes == FPDF_WCHAR_size:
             return ""
@@ -145,12 +141,16 @@ class PdfAttachment (pdfium_i.AutoCastable):
             raise PdfiumError("Failed to get attachment description")
         n_units = -(in_bytes // -FPDF_WCHAR_size)  # ceildiv
         buffer = (pdfium_c.FPDF_WCHAR * n_units)()
-        # NOTE The API unconditionally returns the string's length and does not give feedback whether buffer has actually been modified or not. This means an incorrect buflen value would go unnoticed by the adapter (if buflen is too small, buffer will silently not be modified). The API offers no way to detect that theoretical case.
+        # NOTE The API unconditionally returns the string's length and does not give feedback whether buffer has actually been modified or not. This means an incorrect buflen value would go unnoticed by the adapter (if buflen is too small, buffer will silently not be modified). The API offers no way to catch that theoretical case.
         out_bytes = pdfium_c.FPDFAttachment_GetDescription(self, buffer, in_bytes)
         assert in_bytes == out_bytes
         return decode(memoryview(buffer)[:n_units], "utf-16-le")
     
     def set_desc(self, string):
+        """
+        Parameters:
+            string (str): Set the attachment description to this value.
+        """
         enc_string = (string+"\x00").encode("utf-16-le")
         enc_string_ptr = ctypes.cast(enc_string, pdfium_c.FPDF_WIDESTRING)
         ok = pdfium_c.FPDFAttachment_SetDescription(self, enc_string_ptr)

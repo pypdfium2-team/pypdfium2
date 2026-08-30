@@ -4,6 +4,8 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Added new APIs `PdfAttachment.{get,set}_desc()` to read/write attachment descriptions, along with CLI integration. Thanks to Aryan Krishnan for the upstream part.
+  - Note: On platforms where we pin the PDFium version, the underlying PDFium APIs have not arrived yet, but they will become available once the build scripts are updated to a new base.
 - Pyodide platform: Patch freetype load flags to avoid `FT_Load_Glyph()` somehow corrupting the heap. It seems that this addresses the previously encountered crashes/freezes; however, the exact cause remains elusive. Anyway, many thanks to Hood Chatham for the fix.
   - Dropped debug symbols. Enabled PyPI upload. Updated documentation.
 - Removed pypdfium2's conda packaging following [thorough](https://github.com/mindee/doctr/discussions/2127) [consideration](https://github.com/mindee/doctr/issues/113#issuecomment-5340008535).

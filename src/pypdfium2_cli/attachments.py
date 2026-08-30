@@ -18,7 +18,7 @@ NARGS_PLUS = dict(nargs="+", default=())
 def attach(parser):  # hook
     
     add_input(parser, pages=False)
-    subparsers = parser.add_subparsers(dest="action")
+    subparsers = parser.add_subparsers(dest="action")  # required=True  # >= 3.7
     
     subparsers.add_parser(ACTION_LIST)
     
@@ -97,4 +97,4 @@ def main(args):
         pdf.save(args.output)
     
     else:
-        assert False
+        raise ValueError("No valid subcommand provided")
