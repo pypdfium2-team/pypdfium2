@@ -46,8 +46,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             The bitmap format as string (see `PIL Modes`_).
     """
     
-    def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, needs_free):
-        
+    def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, fin_obj):
         self.raw = raw
         self.buffer = buffer
         self.width = width
@@ -60,17 +59,18 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else \
             pdfium_i.BitmapTypeToStr
         )[self.format]
-        
         # slot to store arguments for PdfPosConv, set on page rendering
         self._render_args = None
-        
-        super().__init__(pdfium_c.FPDFBitmap_Destroy, needs_free=needs_free, obj=self.buffer, tracked=False)
+        # NB: For pdfium-internal buffers freed by FPDFBitmap_Destroy(), the finalizer ought to be attached to the buffer object itself. For external buffers unaffected by FPDFBitmap_Destroy(), it's fine to couple the FPDF_BITMAP's scope with the PdfBitmap wrapper directly, as only the shell is released (not the buffer).
+        super().__init__(pdfium_c.FPDFBitmap_Destroy, obj=fin_obj, tracked=False)
     
+    def __repr__(self):
+        status = "native" if self._fin_obj is self else f"foreign"
+        return f"{super().__repr__()[:-1]} @ {status}>"
     
     @property
     def parent(self):  # AutoCloseable hook
         return None
-    
     
     # NOTE To test all bitmap creation strategies through the CLI:
     # MAKERS=(native foreign foreign_packed foreign_simple)
@@ -96,7 +96,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Construct a :class:`.PdfBitmap` wrapper around a raw PDFium bitmap handle.
         
         Note:
-            This method is primarily meant for bitmaps provided by pdfium (as in :meth:`.PdfImage.get_bitmap`). For bitmaps created by the caller, where the parameters are already known, it may be preferable to call the :class:`.PdfBitmap` constructor directly.
+            This method is primarily meant for bitmaps provided by pdfium (as in :meth:`.PdfImage.get_bitmap`).
+            (For bitmaps created on our side, the parameters are already known, so the :class:`.PdfBitmap` can be constructed directly.)
         
         Parameters:
             raw (FPDF_BITMAP):
@@ -106,18 +107,17 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             ex_buffer (~ctypes.Array[~ctypes.c_ubyte] | None):
                 If the bitmap was created from a buffer allocated by Python/ctypes, pass in the ctypes array to keep it referenced.
         """
-        
         width = pdfium_c.FPDFBitmap_GetWidth(raw)
         height = pdfium_c.FPDFBitmap_GetHeight(raw)
         stride = pdfium_c.FPDFBitmap_GetStride(raw)
         format = pdfium_c.FPDFBitmap_GetFormat(raw)
-        
         if ex_buffer is None:
-            needs_free, buffer = True, cls._get_buffer(raw, stride, height)
+            buffer = cls._get_buffer(raw, stride, height)
+            fin_obj = buffer
         else:
-            needs_free, buffer = False, ex_buffer
-        
-        return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free)
+            buffer = ex_buffer
+            fin_obj = None  # self
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, fin_obj=fin_obj)
     
     
     @classmethod
@@ -145,7 +145,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             assert len(buffer) >= stride * height
         
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
-        return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=False)
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, fin_obj=None)
         
         # Alternatively, we could do:
         # return cls.from_raw(raw, rev_byteorder, buffer)
@@ -166,7 +166,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         if not force_packed:  # stride == 0
             stride = pdfium_c.FPDFBitmap_GetStride(raw)
         buffer = cls._get_buffer(raw, stride, height)
-        return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=True)
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, fin_obj=buffer)
     
     
     @classmethod
@@ -184,7 +184,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         stride = width * 4  # see above
         buffer = cls._get_buffer(raw, stride, height)
         format = pdfium_c.FPDFBitmap_BGRA if use_alpha else pdfium_c.FPDFBitmap_BGRx
-        return cls(raw, buffer, width, height, stride, format, rev_byteorder, needs_free=True)
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, fin_obj=buffer)
     
     
     def fill_rect(self, color, left, top, width, height):
