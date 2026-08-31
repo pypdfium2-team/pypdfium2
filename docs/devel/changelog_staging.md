@@ -4,7 +4,8 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- In `PdfBitmap`, unconditionally call `FPDFBitmap_Destroy()` when the bitmap is closed/finalized, i.e. including bitmaps created from an external buffer (the default). The API does not affect the external buffer, but assumably should still be called to release the `FPDF_BITMAP` shell itself.
+- In `PdfBitmap`, unconditionally call `FPDFBitmap_Destroy()` when the bitmap is closed/finalized, i.e. including bitmaps created from an external buffer (the default). The API does not affect external buffers, but assumably should still be called to release the `FPDF_BITMAP` shell itself.
+- `PdfBitmap.close()` now warns about being a potentially unsafe operation, since it frees the buffer of foreign bitmaps.
 - Added new APIs `PdfAttachment.{get,set}_desc()` to read/write attachment descriptions, along with CLI integration. Thanks to Aryan Krishnan for the upstream part.
   * Note: On platforms where we pin the PDFium version, the underlying PDFium APIs have not arrived yet, but they will become available once the build scripts are updated to a new base.
 - Pyodide platform: Patch freetype load flags to avoid `FT_Load_Glyph()` somehow corrupting the heap. It seems that this addresses the previously encountered crashes/freezes; however, the exact cause remains elusive. Anyway, many thanks to Hood Chatham for the fix.

@@ -18,11 +18,18 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     """
     Bitmap helper class.
     
-    .. _PIL Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
+    Note:
+        There are two types of bitmaps, "native" (python or caller-side) and "foreign" (pdfium-internal). When bitmap construction is controlled by the embedder, using the native type is recommended.
     
-    Warning:
-        ``bitmap.close()``, which frees the buffer of foreign bitmaps, is not validated for safety.
-        A bitmap must not be closed while other objects still depend on its buffer!
+    Important:
+        Closing/finalization behavior differs between native and foreign bitmaps.\n
+        Closing a native bitmap releases the :attr:`.raw` ``FPDF_BITMAP`` shell but does not affect the buffer, and the finalizer is attached to the :class:`.PdfBitmap` wrapper directly.\n
+        **However, closing a foreign bitmap also frees (invalidates) the buffer, which is a potentially unsafe operation, in that it's down to the caller to ensure the memory represented by** :attr:`.buffer` **is not used after free**, whether directly or indirectly through wrapper objects (such as a numpy array or PIL image derived from the bitmap). In this case, the finalizer is attached to the buffer, so by default the underlying memory remains valid as long as the buffer object is held.
+    
+    .. versionchanged:: 3.14
+        ``FPDFBitmap_Destroy()`` is now unconditionally called on closing/finalization, including on native bitmaps, to release the ``FPDF_BITMAP`` shell itself. In prior versions, native bitmaps were not finalized and calling :meth:`.close` on a native bitmap was a no-op. This may have caused a small leak.
+    
+    .. _PIL Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
     
     Attributes:
         raw (FPDF_BITMAP):
@@ -74,17 +81,25 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     def close(self, warn=True, **kwargs):
         """
-        Explicitly close the bitmap.
+        Explicitly close the bitmap, and *potentially* free its buffer, depending on the bitmap type: Closing a foreign bitmap invalidates the buffer, whereas a native bitmap buffer survives.
+        Confer the top-level :class:`.PdfBitmap` documentation for details.
         
-        If the bitmap buffer is owned by pdfium ("foreign"), this will free the buffer, which is a potentially unsafe operation.
-        If the bitmap was created with an external, python-side buffer ("native"), only the FPDF_BITMAP shim is invalidated, but the buffer remains unaffected.
+        Warning:
+            Only call this method if you are fully aware of the potential memory safety implications, and are sure your use is safe and appropriate.\n
+            **Advice:** Where possible, consider enforcing the use of a native bitmap.
         
-        Caution:
-            Only call this method if you fully understand the memory safety implications.
+        Parameters:
+            warn (bool):
+                Whether to log a warning when this function is called. Defaults to True to help prevent embedders from creating a possible use after free situation.
+                If you are sure your use of :meth:`.PdfBitmap.close` is safe, you may set `warn=False`.
+        
+        .. versionadded:: 3.14
+            Added the ``warn`` parameter and this documentation.
         """
         if warn:
             logger.warning(f"Explicitly closing {self!r}. This is a potentially unsafe operation!")
         super().close(**kwargs)
+    
     
     # NOTE To test all bitmap creation strategies through the CLI:
     # MAKERS=(native foreign foreign_packed foreign_simple)
