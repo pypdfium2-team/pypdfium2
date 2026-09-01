@@ -144,7 +144,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         # NOTE The API unconditionally returns the string's length and does not give feedback whether buffer has actually been modified or not. This means an incorrect buflen value would go unnoticed by the adapter (if buflen is too small, buffer will silently not be modified). The API offers no way to catch that theoretical case.
         out_bytes = pdfium_c.FPDFAttachment_GetDescription(self, buffer, in_bytes)
         assert in_bytes == out_bytes
-        return decode(memoryview(buffer)[:n_units], "utf-16-le")
+        return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
     
     def set_desc(self, string):
         """
