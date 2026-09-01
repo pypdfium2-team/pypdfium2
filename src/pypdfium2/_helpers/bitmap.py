@@ -86,7 +86,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         Warning:
             Only call this method if you are fully aware of the potential memory safety implications, and are sure your use is safe and appropriate.\n
-            **Advice:** Where possible, consider enforcing the use of a native bitmap.
+            **Tip:** Where possible, consider enforcing the use of a native bitmap.
         
         Parameters:
             warn (bool):
@@ -126,7 +126,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         Note:
             This method is primarily meant for bitmaps provided by pdfium (as in :meth:`.PdfImage.get_bitmap`).
-            (For bitmaps created on our side, the parameters are already known, so the :class:`.PdfBitmap` can be constructed directly.)
+            For bitmaps created on our side, the parameters are already known, so the :class:`.PdfBitmap` can be constructed directly.
         
         Parameters:
             raw (FPDF_BITMAP):
@@ -233,19 +233,9 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         if not ok and PDFIUM_INFO.build >= 6635:
             raise PdfiumError("Failed to fill bitmap rectangle.")
     
-    
-    # Requirement: If the result is a view of the buffer (not a copy), it keeps the referenced memory valid.
-    # 
-    # Note that memory management differs between native and foreign bitmap buffers:
-    # - With native bitmaps, the memory is allocated by python on creation of the buffer object (transparent).
-    # - With foreign bitmaps, the buffer object is merely a view of memory allocated by pdfium and will be freed by finalizer (opaque).
-    # 
-    # It is necessary that receivers correctly handle both cases, e.g. by keeping the buffer object itself alive.
-    # As of May 2023, this seems to hold true for NumPy and PIL. New converters should be carefully tested.
-    # 
-    # We could consider attaching a buffer keep-alive finalizer to any converted objects referencing the buffer,
-    # but then we'd have to rely on third parties to actually create a reference at all times, otherwise we would unnecessarily delay releasing memory.
-    
+    # IMPORTANT: When a wrapper is constructed around a foreign bitmap without copying (i.e. as a view of the same memory), we rely on the assumption that the wrapper holds a reference to the input buffer object itself while the represented memory is used.
+    # This appears to be the case with Pillow and NumPy, as of 2026. When adding a new adapter, it must be carefully checked to fulfil this requirement.
+    # Why not attach a buffer keep-alive finalizer to wrapper objects?, you might ask. That's a good question, and we could consider doing that, but there are issues: Suppose the adapter made a copy after all, we'd unnecessarily delay releasing memory. Copying is kind of an implementation detail of the adapter's (consider Pillow, where it is format dependent; consider things like copy-on-write). Or suppose the buffer is transferred to another object, we still face the original problem. So this isn't necessarily helpful, is it?
     
     def to_numpy(self):
         """
