@@ -1,6 +1,16 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
+data/
+!data/.gitkeep
+deps/
+docs/build/
+!docs/build/.gitkeep
+sbuild/
+src/pypdfium2/version.json
+src/pypdfium2_raw/version.json
+src/pypdfium2_raw/bindings.py
+
 build/
 dist/
 gh_only/
@@ -9,15 +19,6 @@ tests/output/
 .pyodide*/
 .python_symlinks/
 .python-history
-
-data/
-!data/.gitkeep
-docs/build/
-!docs/build/.gitkeep
-sbuild/
-src/pypdfium2/version.json
-src/pypdfium2_raw/version.json
-src/pypdfium2_raw/bindings.py
 
 *.so
 *.dll

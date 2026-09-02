@@ -37,10 +37,13 @@ PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
 IS_CI = bool(os.getenv("GITHUB_ACTIONS")) or bool(int(os.getenv("CIBUILDWHEEL", 0)))
-USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference" or not any((shutil.which("ctypesgen"), IS_CI))
+USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference"
 
 BindingsFN = "bindings.py"
 VersionFN  = "version.json"
+
+CtypesgenDir = ProjectDir/"deps"/"ctypesgen"
+CtypesgenSrc = CtypesgenDir/"src"
 
 DataDir           = ProjectDir / "data"
 DataDir_Bindings  = DataDir / "bindings"
@@ -634,11 +637,38 @@ def tmp_cwd_context(tmp_cwd):
 CTG_LIBPATTERN = "{prefix}{name}.{suffix}"
 
 def _apply_refbindings(target_path, version):
-    log("Using reference bindings - this will bypass all bindings params. If this is not intentional, make sure ctypesgen is installed.")
+    log("Using reference bindings - this will bypass all bindings params.")
     record_ver = PdfiumVer.pinned
     if version != record_ver:
         log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
     shutil.copyfile(RefBindingsFile, target_path)
+
+
+class _LazyClass:
+    
+    @cached_property
+    def ctypesgen(self):
+        
+        mkdir(CtypesgenDir.parent)
+        if not CtypesgenDir.exists():
+            log("Warning: ctypesgen is not present yet, we'll clone it for you...")
+            run_cmd(["git", "clone", "https://github.com/pypdfium2-team/ctypesgen"], cwd=CtypesgenDir.parent)
+        
+        assert CtypesgenSrc.exists(), f"{CtypesgenSrc} is required"
+        sys.path.insert(0, str(CtypesgenSrc))
+        
+        import ctypesgen
+        import ctypesgen.__main__
+        assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires the pypdfium2-team fork of ctypesgen. Do not remove this check."
+        
+        return ctypesgen
+    
+    @cached_property
+    def ctypesgen_main(self):
+        return self.ctypesgen.__main__.main
+
+Lazy = _LazyClass()
+
 
 # TODO make version mandatory
 def run_ctypesgen(
@@ -651,11 +681,6 @@ def run_ctypesgen(
     
     if USE_REFBINDINGS:
         return _apply_refbindings(target_path, version)
-    
-    # Import ctypesgen only in this function so it does not have to be available for other setup tasks
-    import ctypesgen
-    assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires fork of ctypesgen"
-    import ctypesgen.__main__
     
     # library loading
     args = ["-l", "pdfium"]
@@ -704,7 +729,7 @@ def run_ctypesgen(
     args += ["--headers"] + [h.name for h in sorted(headers_dir.glob("*.h"))] + ["-o", target_path]
     
     with tmp_cwd_context(headers_dir):
-        ctypesgen.__main__.main([str(a) for a in args])
+        Lazy.ctypesgen_main([str(a) for a in args])
 
 
 def _make_json_compat(obj):

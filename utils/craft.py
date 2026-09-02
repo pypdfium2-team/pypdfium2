@@ -62,23 +62,6 @@ def tmp_replace_ctx(fp, orig, tmp, exp_count):
         fp.write_text(orig_txt)
 
 
-@contextlib.contextmanager
-def tmp_ctypesgen_pin():
-    
-    pin = os.environ.get("CTYPESGEN_PIN", None)
-    if not pin:
-        git_output = run_cmd(["git", "ls-remote", "https://github.com/pypdfium2-team/ctypesgen", "refs/heads/pypdfium2"], cwd=None, capture=True)
-        pin = git_output.split()[0]
-        log(f"Resolved pypdfium2 ctypesgen HEAD to SHA {pin}")
-    
-    base_txt = "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@"
-    ctx = tmp_replace_ctx(ProjectDir/"pyproject.toml", base_txt+"pypdfium2", base_txt+pin, exp_count=2)
-    with ctx:
-        log(f"Wrote temporary pyproject.toml with ctypesgen pin")
-        yield
-    log(f"Reset pyproject.toml")
-
-
 def _build_pl_suffix(version, use_v8):
     return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
 
@@ -105,11 +88,8 @@ def main_pypi(args):
     
     if args.sdist:
         os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
-        helpers_info = get_helpers_info()
-        with tmp_ctypesgen_pin():
-            if not helpers_info["dirty"]:
-                os.environ["SDIST_IGNORE_DIRTY"] = "1"
-            _run_pypi_build(["--sdist"])
+        assert CtypesgenSrc.exists(), f"{CtypesgenSrc} is required for bundling in sdist"
+        _run_pypi_build(["--sdist"])
     
     if args.wheels:
         
