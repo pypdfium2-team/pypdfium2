@@ -76,7 +76,8 @@ Python dependencies should be automatically installed, unless `--no-build-isolat
 #### Get the code
 
 ```bash
-git clone "https://github.com/pypdfium2-team/pypdfium2.git"
+git clone "https://github.com/pypdfium2-team/pypdfium2"
+git clone "https://github.com/pypdfium2-team/ctypesgen" pypdfium2/deps/ctypesgen
 cd pypdfium2/
 ```
 
