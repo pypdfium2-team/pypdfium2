@@ -654,7 +654,7 @@ class _LazyClass:
             mkdir(CtypesgenDir.parent)
             run_cmd(["git", "clone", "https://github.com/pypdfium2-team/ctypesgen"], cwd=CtypesgenDir.parent)
         else:
-            log("Using existing clone of ctypesgen. Remember: when updating pypdfium2, ctypesgen ought to be updated as well (i.e. if you git pull'ed one, you also need to pull the other).")
+            log("Using existing clone of ctypesgen. Reminder: when updating pypdfium2, ctypesgen ought to be updated as well (i.e. if you git pull'ed one, you also need to pull the other).")
         
         assert CtypesgenSrc.exists(), f"{CtypesgenSrc} is required"
         sys.path.insert(0, str(CtypesgenSrc))
