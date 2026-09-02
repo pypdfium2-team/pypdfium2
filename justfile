@@ -15,6 +15,10 @@ verbose := 'set -x'
 BROWSER := env('BROWSER', 'google-chrome')
 BUILD_PARAMS := env('BUILD_PARAMS', '')
 
+pull:
+    git pull
+    git -C deps/ctypesgen pull
+
 list:
 	just -l
 test *args:
