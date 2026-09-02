@@ -97,7 +97,6 @@ jobs:
       - name: Install dependencies
         if: ${{ inputs.inc_ver }}
         run: |
-          git clone "https://github.com/pypdfium2-team/ctypesgen" deps/ctypesgen
           echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
           pip install -U --group check --group setup --group test
       
@@ -162,7 +161,6 @@ jobs:
       
       - name: Install dependencies
         run: |
-          git clone "https://github.com/pypdfium2-team/ctypesgen" deps/ctypesgen
           echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
           pip install -U --group setup
       

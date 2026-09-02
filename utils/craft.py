@@ -88,6 +88,7 @@ def main_pypi(args):
     
     if args.sdist:
         os.environ[PlatSpec_EnvVar] = ExtPlats.sdist
+        id(Lazy.ctypesgen)  # ensure ctypesgen
         assert CtypesgenSrc.exists(), f"{CtypesgenSrc} is required for bundling in sdist"
         _run_pypi_build(["--sdist"])
     
