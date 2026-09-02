@@ -51,9 +51,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             Number of channels per pixel.
         mode (str):
             The bitmap format as string (see `PIL Modes`_).
+        warn_on_close (bool):
+            See :meth:`.close`.
     """
     
-    def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, fin_obj):
+    def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, is_foreign):
         self.raw = raw
         self.buffer = buffer
         self.width = width
@@ -66,39 +68,37 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             pdfium_i.BitmapTypeToStrReverse if self.rev_byteorder else \
             pdfium_i.BitmapTypeToStr
         )[self.format]
+        self._is_foreign = is_foreign
+        self.warn_on_close = True  # or = is_foreign
         # slot to store arguments for PdfPosConv, set on page rendering
         self._render_args = None
-        # NB: For pdfium-internal buffers freed by FPDFBitmap_Destroy(), the finalizer ought to be attached to the buffer object itself. For external buffers unaffected by FPDFBitmap_Destroy(), it's fine to couple the FPDF_BITMAP's scope with the PdfBitmap wrapper directly, as only the shell is released (not the buffer).
-        super().__init__(pdfium_c.FPDFBitmap_Destroy, obj=fin_obj, tracked=False)
+        # NB: With foreign (pdfium-internal) buffers freed by FPDFBitmap_Destroy(), the finalizer ought to be attached to the buffer object itself.
+        # With native (pdfium-external) buffers unaffected by FPDFBitmap_Destroy(), it's fine to couple the FPDF_BITMAP's scope with the PdfBitmap wrapper directly, as only the shell is released (not the buffer).
+        super().__init__(pdfium_c.FPDFBitmap_Destroy, obj=(self.buffer if is_foreign else None), tracked=False)
     
     @property
     def parent(self):  # AutoCloseable hook
         return None
     
     def __repr__(self):
-        status = "native" if self._fin_obj is self else "foreign"
+        status = "foreign" if self._is_foreign else "native"
         return f"{super().__repr__()[:-1]} @ {status}>"
     
-    def close(self, warn=True, **kwargs):
+    def close(self, *args, **kwargs):
         """
         Explicitly close the bitmap, and *potentially* free its buffer, depending on the bitmap type: Closing a foreign bitmap invalidates the buffer, whereas a native bitmap buffer survives.
         Confer the top-level :class:`.PdfBitmap` documentation for details.
         
         Warning:
-            Only call this method if you are fully aware of the potential memory safety implications, and are sure your use is safe and appropriate.\n
+            Only call this method if you are fully aware of the potential memory safety implications, and are sure your use is safe and appropriate.
+            
+            By default, calling this method logs a warning to help prevent embedders from creating a possible use-after-free situation. If you are sure your use of :meth:`.PdfBitmap.close` is safe, you may set :attr:`.warn_on_close` to False.
+            
             **Tip:** Where possible, consider enforcing the use of a native bitmap.
-        
-        Parameters:
-            warn (bool):
-                Whether to log a warning when this function is called. Defaults to True to help prevent embedders from creating a possible use after free situation.
-                If you are sure your use of :meth:`.PdfBitmap.close` is safe, you may set `warn=False`.
-        
-        .. versionadded:: 3.14
-            Added the ``warn`` parameter and this documentation.
         """
-        if warn:
+        if self.warn_on_close:
             logger.warning(f"Explicitly closing {self!r}. This is a potentially unsafe operation!")
-        super().close(**kwargs)
+        super().close(*args, **kwargs)
     
     
     # NOTE To test all bitmap creation strategies through the CLI:
@@ -142,11 +142,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         format = pdfium_c.FPDFBitmap_GetFormat(raw)
         if ex_buffer is None:
             buffer = cls._get_buffer(raw, stride, height)
-            fin_obj = buffer
+            is_foreign = True
         else:
             buffer = ex_buffer
-            fin_obj = None  # self
-        return cls(raw, buffer, width, height, stride, format, rev_byteorder, fin_obj=fin_obj)
+            is_foreign = False
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, is_foreign)
     
     
     @classmethod
@@ -174,7 +174,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             assert len(buffer) >= stride * height
         
         raw = pdfium_c.FPDFBitmap_CreateEx(width, height, format, buffer, stride)
-        return cls(raw, buffer, width, height, stride, format, rev_byteorder, fin_obj=None)
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, is_foreign=False)
         
         # Alternatively, we could do:
         # return cls.from_raw(raw, rev_byteorder, buffer)
@@ -195,7 +195,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         if not force_packed:  # stride == 0
             stride = pdfium_c.FPDFBitmap_GetStride(raw)
         buffer = cls._get_buffer(raw, stride, height)
-        return cls(raw, buffer, width, height, stride, format, rev_byteorder, fin_obj=buffer)
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, is_foreign=True)
     
     
     @classmethod
@@ -213,7 +213,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         stride = width * 4  # see above
         buffer = cls._get_buffer(raw, stride, height)
         format = pdfium_c.FPDFBitmap_BGRA if use_alpha else pdfium_c.FPDFBitmap_BGRx
-        return cls(raw, buffer, width, height, stride, format, rev_byteorder, fin_obj=buffer)
+        return cls(raw, buffer, width, height, stride, format, rev_byteorder, is_foreign=True)
     
     
     def fill_rect(self, color, left, top, width, height):
