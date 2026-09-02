@@ -21,7 +21,8 @@ include autorelease/bindings.py
 graft patches
 
 # Include ctypesgen src/
-graft deps/ctypesgen/src
+recursive-include deps/ctypesgen/src *.py
+# alternatively: graft + global-exclude *.pyc or something
 
 # Include all of licenses in an sdist (also wheel licenses), since we may build a wheel from the sdist
 graft LICENSES/
