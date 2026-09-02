@@ -653,13 +653,15 @@ class _LazyClass:
         if not CtypesgenDir.exists():
             log("Warning: ctypesgen is not present yet, we'll clone it for you...")
             run_cmd(["git", "clone", "https://github.com/pypdfium2-team/ctypesgen"], cwd=CtypesgenDir.parent)
+        else:
+            log("Using existing clone of ctypesgen. Remember: when updating pypdfium2, ctypesgen ought to be updated as well (i.e. if you `git pull`ed one, you also need to pull the other).")
         
         assert CtypesgenSrc.exists(), f"{CtypesgenSrc} is required"
         sys.path.insert(0, str(CtypesgenSrc))
         
         import ctypesgen
         import ctypesgen.__main__
-        assert getattr(ctypesgen, "PYPDFIUM2_SPECIFIC", False), "pypdfium2 requires the pypdfium2-team fork of ctypesgen. Do not remove this check."
+        assert ctypesgen.__version__.split(" ")[0] == "pypdfium2-ctypesgen", "You are using the wrong version of ctypesgen. pypdfium2 requires the pypdfium2-team fork of ctypesgen. Do not remove this check."
         
         return ctypesgen
     
