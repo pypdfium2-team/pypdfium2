@@ -635,6 +635,7 @@ def tmp_cwd_context(tmp_cwd):
 
 
 CTG_LIBPATTERN = "{prefix}{name}.{suffix}"
+_CTG_BRANCH = "remove_setup"  # XXX "pypdfium2"
 
 def _apply_refbindings(target_path, version):
     log("Using reference bindings - this will bypass all bindings params.")
@@ -650,9 +651,9 @@ class _LazyClass:
     def ctypesgen(self):
         
         if not CtypesgenDir.exists():
-            log("Warning: ctypesgen is not present yet, we'll clone it for you...")
+            log("Warning: ctypesgen is not in place yet, we'll clone it for you...")
             mkdir(CtypesgenDir.parent)
-            run_cmd(["git", "clone", "https://github.com/pypdfium2-team/ctypesgen"], cwd=CtypesgenDir.parent)
+            run_cmd(["git", "clone", "--depth", "1", "-b", _CTG_BRANCH, "https://github.com/pypdfium2-team/ctypesgen"], cwd=CtypesgenDir.parent)
         else:
             log("Using existing clone of ctypesgen. Reminder: when updating pypdfium2, ctypesgen ought to be updated as well (i.e. if you git pull'ed one, you also need to pull the other).")
         
