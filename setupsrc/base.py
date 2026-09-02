@@ -649,9 +649,9 @@ class _LazyClass:
     @cached_property
     def ctypesgen(self):
         
-        mkdir(CtypesgenDir.parent)
         if not CtypesgenDir.exists():
             log("Warning: ctypesgen is not present yet, we'll clone it for you...")
+            mkdir(CtypesgenDir.parent)
             run_cmd(["git", "clone", "https://github.com/pypdfium2-team/ctypesgen"], cwd=CtypesgenDir.parent)
         else:
             log("Using existing clone of ctypesgen. Remember: when updating pypdfium2, ctypesgen ought to be updated as well (i.e. if you `git pull`ed one, you also need to pull the other).")
