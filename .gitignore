@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: CC-BY-4.0
 
+deps/
+!deps/.gitkeep
 data/
 !data/.gitkeep
-deps/
 docs/build/
 !docs/build/.gitkeep
 sbuild/
