@@ -110,7 +110,7 @@ class AutoCloseable (AutoCastable):
         assert not hasattr(self, "_finalizer")
         
         self._fin_info = _FinalizerInfo(close_func, args, kwargs, tracked)
-        self._fin_obj = self if obj is None else obj
+        self._fin_obj = obj
         self._finalizer = None
         
         if needs_free:
@@ -130,12 +130,12 @@ class AutoCloseable (AutoCastable):
     
     def _attach_finalizer(self):
         assert self._finalizer is None
-        own_type = type(self)
         # note, this captures the object's parent, repr and so on at finalizer installation time
         # in case they ever change, we'd have to store the owner in an attribute and update it
-        owner = _FinalizerOwner(self.raw, self.parent, self._wref_to_self, own_type, repr(self))
-        self._finalizer = weakref.finalize(self._fin_obj, _close_template, self._fin_info, owner)
-        ObjectTracker[own_type].add(self._wref_to_self)
+        owner = _FinalizerOwner(self.raw, self.parent, self._wref_to_self, type(self), repr(self))
+        obj = self if self._fin_obj is None else self._fin_obj
+        self._finalizer = weakref.finalize(obj, _close_template, self._fin_info, owner)
+        ObjectTracker[type(self)].add(self._wref_to_self)
     
     def _detach_finalizer(self):
         self._finalizer.detach()
