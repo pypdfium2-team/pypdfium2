@@ -163,6 +163,7 @@ def main():
     docker_flags = ("--platform", f"linux/{platform_cpu}")
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{MountPoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.artifact:
+        assert Path(args.artifact).exists(), "Given artifact path does not actually exist"
         wheel_path = str(Path(MountPoint)/args.artifact)
         docker_cmd += ["--", wheel_path]
     
