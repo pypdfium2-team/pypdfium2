@@ -65,7 +65,7 @@ cd pypdfium2/
 #### Setup Dependencies
 
 *Python*
-+ [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen). To be cloned into pypdfium2's source tree, [as shown above](#get-the-code). Not managed as a classical package. For compatibility reasons, setup will automatically clone ctypesgen if you forgot to do so.
++ [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen). To be cloned into pypdfium2's source tree, [as shown above](#get-the-code). Not managed as a classical package. As a matter of convenience (and compatibility), setup will automatically clone ctypesgen if you don't.
 + `setuptools`
 + `wheel`, if setuptools is `< v70.1.0`
 
