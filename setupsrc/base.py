@@ -661,7 +661,8 @@ class _LazyClass:
         
         import ctypesgen
         import ctypesgen.__main__
-        assert ctypesgen.__version__.split(" ")[0] == "pypdfium2-ctypesgen", "You are using a wrong brand or version of ctypesgen. pypdfium2 depends on a modernized, debloated fork of ctypesgen, and both codebases are maintained in sync. This means each pypdfium2 commit ought to be coupled with the then head of pypdfium2-team/ctypesgen@pypdfium2. Do not remove this check."
+        if not ctypesgen.__version__.split(" ")[0] == "pypdfium2-ctypesgen":
+            raise ValueError("You are using a wrong version or brand of ctypesgen. pypdfium2 depends on a modernized, debloated fork of ctypesgen, and both codebases are maintained in sync, i.e. each pypdfium2 commit ought to be coupled with the then head of pypdfium2-team/ctypesgen@pypdfium2. Do not remove this check.")
         
         return ctypesgen
     
