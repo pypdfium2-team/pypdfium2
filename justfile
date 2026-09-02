@@ -23,10 +23,10 @@ list:
 	just -l
 test *args:
 	python3 -m pytest tests/ {{args}}
-clean-before-build:
+clean-before-pack:
 	# see the notes in utils/craft.py why clearing this is essential before running pyproject-build
 	rm -rf pypdfium2.egg-info/ build/
-clean: clean-before-build
+clean: clean-before-pack
 	rm -rf data/* tests/output/* dist/ .pytest_cache/ .mypy_cache/ .venv/ .pyodide-venv/ .pyodide_build/ .python_symlinks/
 
 check:
@@ -64,7 +64,7 @@ emplace *args:
 craft *args:
 	python3 utils/craft.py {{args}}
 pkg *platforms='auto': (craft '-p' platforms '--wheels')
-pyproject-build $PDFIUM_PLATFORM='' *args='-w': clean-before-build
+pyproject-build $PDFIUM_PLATFORM='' *args='-w': clean-before-pack
 	python3 -m build -xn {{args}}
 sdist: (craft '--sdist')
 sdist-unassisted: (pyproject-build 'sdist' '-s')
@@ -87,6 +87,7 @@ venv-create $ENVNAME='.venv':
 
 # NOTE you may want to make pinact a wrapper script that translates to something like
 # GITHUB_TOKEN=$(kwallet-query -f Passwords -r pinact kdewallet) pinact_raw $@
+
 update-actions $MIN_AGE='7':
 	pinact run -update -min-age "$MIN_AGE" || true
 
@@ -100,7 +101,7 @@ update-locks:
 update-all-pins: update-actions update-locks
 
 
-# Pyodide support recipes (note the warning in setupsrc/_pyodide.py though)
+# Pyodide support recipes (note the warning in docs/source/platforms.rst though)
 
 pyodide-venv-create $ENVNAME='.pyodide-venv':
 	pyodide venv --clear "$ENVNAME"
@@ -110,8 +111,8 @@ pyodide-venv-create $ENVNAME='.pyodide-venv':
 [script]
 [env('BUILD_PARAMS', BUILD_PARAMS)]
 pyodide-build *args:
-	# Make sure `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
 	{{verbose}}
+	# Make sure `python3` points to the interpreter that hosts pyodide, because .pyodide_build/pywasmcross_symlinks/pywasmcross.py contains a `#!/usr/bin/env python3` shebang. If it's a different python, ctypesgen will run into issues when invoking pyodide's `gcc` which points to the wrapper script.
 	PY_VERSION=$(pyodide config get python_version | cut -d. -f1,2)
 	SYMLINKS_DIR=$(./utils/misc/symlink_py.sh ".python_symlinks" "$PY_VERSION")
 	export PATH="${SYMLINKS_DIR}:${PATH}"
