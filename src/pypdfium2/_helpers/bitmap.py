@@ -53,10 +53,8 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             The bitmap format as string (see `PIL Modes`_).
         warn_on_close (bool):
             Whether to warn on explicit closing about being a potentially unsafe operation.
-            Defaults to True with foreign bitmaps. Set this to False if you are sure your usage of :meth:`.close` is safe. Or set to True to warn regardless of bitmap type.
-    
-    .. versionadded:: 5.14
-        The `warn_on_close` attribute.
+            Defaults to True on foreign bitmaps. Set this to False if you are sure your usage of :meth:`.close` is safe. Or set to True to warn regardless of bitmap type.\n
+            .. versionadded:: 5.14
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, is_foreign):
@@ -80,13 +78,6 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         # With native (pdfium-external) buffers unaffected by FPDFBitmap_Destroy(), it's fine to couple the FPDF_BITMAP's scope with the PdfBitmap wrapper directly, as only the shell is released (not the buffer).
         super().__init__(pdfium_c.FPDFBitmap_Destroy, obj=(self.buffer if is_foreign else None), tracked=False)
     
-    @property
-    def parent(self):  # AutoCloseable hook
-        return None
-    
-    def __repr__(self):
-        status = "foreign" if self._is_foreign else "native"
-        return f"{super().__repr__()[:-1]} @ {status}>"
     
     def close(self, *args, **kwargs):
         """
@@ -95,7 +86,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         Warning:
             Only call this method if you are fully aware of the potential memory safety implications, and are sure your use is safe and appropriate.\n
-            **Tip:** Where possible, consider enforcing the use of a native bitmap.
+            **Tip:** Where possible, consider ensuring the use of native bitmaps only.
         
         .. versionchanged:: 5.14
             Calling this method on a foreign bitmap now logs a warning by default, to help prevent callers from creating a possible use-after-free situation. See :attr:`.warn_on_close`.
@@ -103,6 +94,15 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         if self.warn_on_close:
             logger.warning(f"Explicitly closing {self!r}. This is a potentially unsafe operation!")
         super().close(*args, **kwargs)
+    
+    
+    def __repr__(self):
+        status = "foreign" if self._is_foreign else "native"
+        return f"{super().__repr__()[:-1]} @ {status}>"
+    
+    @property
+    def parent(self):  # AutoCloseable hook
+        return None
     
     
     # NOTE To test all bitmap creation strategies through the CLI:
