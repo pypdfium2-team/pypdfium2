@@ -304,6 +304,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
         df.fetch("llvm_libc", PDFIUM_3RDPARTY/"llvm-libc"/"src")
     
     if "icu" in vendor_deps:
+        # NOTE If an unbundled build was made previously, need to manually remove //third_party/icu
         df.fetch("icu", PDFIUM_3RDPARTY/"icu")
     else:
         # unbundle (alternatively, we could call build/linux/unbundle/replace_gn_files.py --system-libraries icu)
