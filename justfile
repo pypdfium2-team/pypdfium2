@@ -15,9 +15,7 @@ verbose := 'set -x'
 BROWSER := env('BROWSER', 'google-chrome')
 BUILD_PARAMS := env('BUILD_PARAMS', '')
 
-pull:
-    git pull
-    git -C deps/ctypesgen pull
+# NOTE: When run without arguments, just implicitly calls the first command - this means `list` should go first here.
 
 list:
 	just -l
@@ -28,6 +26,9 @@ clean-before-pack:
 	rm -rf pypdfium2.egg-info/ build/
 clean: clean-before-pack
 	rm -rf data/* tests/output/* dist/ .pytest_cache/ .mypy_cache/ .venv/ .pyodide-venv/ .pyodide_build/ .python_symlinks/
+pull:
+    git pull
+    git -C deps/ctypesgen pull
 
 check:
 	./utils/misc/check.sh
