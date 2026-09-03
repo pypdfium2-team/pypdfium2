@@ -636,7 +636,7 @@ def tmp_cwd_context(tmp_cwd):
 
 
 CTG_LIBPATTERN = "{prefix}{name}.{suffix}"
-_CTG_BRANCH = "remove_setup"  # XXX "pypdfium2"
+_CTG_BRANCH = "pypdfium2"
 
 def _apply_refbindings(target_path, version):
     log("Using reference bindings - this will bypass all bindings params.")
