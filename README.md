@@ -54,31 +54,32 @@ pypdfium2 tries to defer imports of optional dependencies until they are actuall
 
 _Note, unlike helpers, pypdfium2's setup is not bound by API stability promises, so it may change any time._
 
+#### Get the code
+
+```bash
+git clone "https://github.com/pypdfium2-team/pypdfium2"
+git clone "https://github.com/pypdfium2-team/ctypesgen" pypdfium2/deps/ctypesgen
+cd pypdfium2/
+```
+
 #### Setup Dependencies
 
-*System*
-+ `gcc` or `clang` as C pre-processor (or set `$CPP` to whatever pre-processor command you want to use)
-+ `git` (Used e.g. to determine the latest pdfium-binaries version, to get `git describe` info, or to check out pdfium on sourcebuild. Might be optional on default setup.)
-+ [`gh >= 2.47.0`](https://github.com/cli/cli/) (optional; used to verify pdfium-binaries build attestations)
-
 *Python*
-+ [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen)
++ [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen). To be cloned into pypdfium2's source tree, [as shown above](#get-the-code). Not managed as a classical package. As a matter of convenience (and compatibility), setup will automatically clone ctypesgen if you don't.
 + `setuptools`
 + `wheel`, if setuptools is `< v70.1.0`
+
+*System*
++ A C pre-processor (`gcc` or `clang`, or set `$CPP` to whatever pre-processor command you want to attempt), as a dependency of ctypesgen.
++ `git` (Used e.g. to determine the latest pdfium-binaries version, to get `git describe` info, or to check out pdfium on sourcebuild. Should be optional on default setup.)
++ [`gh >= 2.47.0`](https://github.com/cli/cli/) (optional; used to verify pdfium-binaries build attestations)
 
 Python dependencies should be automatically installed, unless `--no-build-isolation` is passed to pip.
 
 > [!NOTE]
 > pypdfium2 and its ctypesgen fork are developed in sync, i.e. each pypdfium2 commit ought to be coupled with the then `HEAD` of pypdfium2-ctypesgen.<br>
 > Our release sdists, and latest pypdfium2 from git, will automatically use matching ctypesgen.<br>
-> However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own, and install pypdfium2 without build isolation.
-
-#### Get the code
-
-```bash
-git clone "https://github.com/pypdfium2-team/pypdfium2.git"
-cd pypdfium2/
-```
+> However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own.
 
 #### Default setup
 

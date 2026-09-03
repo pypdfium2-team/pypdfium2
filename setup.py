@@ -76,22 +76,6 @@ def bdist_factory(pl_name, dll_path):
     return pypdfium_bdist
 
 
-def _get_fixed_helpers_info(pl_name):
-    
-    helpers_info = get_helpers_info()
-    if pl_name != ExtPlats.sdist:
-        return helpers_info
-    
-    if helpers_info["dirty"]:
-        # ignore dirty state due to craft.py::tmp_ctypesgen_pin()
-        if int(os.environ.get("SDIST_IGNORE_DIRTY", 0)):
-            helpers_info["dirty"] = False
-    else:
-        log("Warning: sdist without ctypesgen pin, or git describe not working?")
-    
-    return helpers_info
-
-
 def assert_exists(dir, data_files):
     missing = tuple(f for f in data_files if not (dir/f).exists())
     if missing:
@@ -124,8 +108,9 @@ def run_setup(pl_name, datagen):
     license_files = list(LICENSES_SHARED)
     if pl_name == ExtPlats.sdist:
         license_files.extend(LICENSES_SDIST)
+        assert CtypesgenSrc.exists(), f"ctypesgen src is required for bundling in sdist: {CtypesgenSrc}"
     
-    helpers_info = _get_fixed_helpers_info(pl_name)
+    helpers_info = get_helpers_info()
     kwargs["version"] = merge_tag(helpers_info, mode="py")
     kwargs["package_dir"]["pypdfium2"] = "src/pypdfium2"
     kwargs["package_dir"]["pypdfium2_cfg"] = "src/pypdfium2_cfg"

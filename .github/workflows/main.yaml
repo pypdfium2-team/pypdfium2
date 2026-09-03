@@ -94,7 +94,7 @@ jobs:
         if: ${{ inputs.inc_ver }}
         uses: ./.github/actions/venv_step
       
-      - name: Install pip packages
+      - name: Install dependencies
         if: ${{ inputs.inc_ver }}
         run: |
           echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
@@ -159,7 +159,7 @@ jobs:
       - name: Create venv
         uses: ./.github/actions/venv_step
       
-      - name: Install pip packages
+      - name: Install dependencies
         run: |
           echo "Cooldown: ${PIP_UPLOADED_PRIOR_TO:?}"
           pip install -U --group setup

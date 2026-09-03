@@ -106,7 +106,8 @@ def write_script(args, cibw_cpu, sys_install, image):
             pip_packages.append("wheel")
             lib_install = './utils/misc/enforce_install.sh "$1"'
         else:
-            lib_install = 'pip install "$1"'
+            # TODO for sdist: add an option to set PDFIUM_BINDINGS=reference
+            lib_install = 'pip install -v "$1"'
     else:
         pip_packages += ("setuptools", "packaging", "wheel", "build")
         lib_install = 'pip install --no-build-isolation -v .'
@@ -162,6 +163,7 @@ def main():
     docker_flags = ("--platform", f"linux/{platform_cpu}")
     docker_cmd = ["docker", "run", "-i", "--rm", "--volume", f"{ProjectDir}:{MountPoint}", "--security-opt", "label=disable", *docker_flags, container, shell, "-s"]
     if args.artifact:
+        assert Path(args.artifact).exists(), "Given artifact path does not actually exist"
         wheel_path = str(Path(MountPoint)/args.artifact)
         docker_cmd += ["--", wheel_path]
     

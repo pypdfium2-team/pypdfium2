@@ -5,7 +5,6 @@
 build-backend = "setuptools.build_meta"
 requires = [
     "setuptools",  # >= 59 ?
-    "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
     "packaging",
     # NB: wheel is no longer needed with setuptools >= v70.1.0, but we still specify it for backward compatibility
     "wheel !=0.38.0, !=0.38.1",
@@ -26,7 +25,6 @@ test = [
 ]
 setup = [
     "setuptools >= v70.1.0",  # or older setuptools + `wheel`
-    "ctypesgen @ git+https://github.com/pypdfium2-team/ctypesgen@pypdfium2",
     "build",
     "macholib; sys_platform == 'darwin'",
 ]
