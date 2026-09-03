@@ -209,7 +209,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         
         PDFium docs specify that each line uses width * 4 bytes, with no gap between adjacent lines, i.e. the resulting buffer should be packed.
         
-        Contrary to the other ``PdfBitmap.new_*()`` methods, this method does not take a format constant, but a *use_alpha* boolean. If True, the format will be :attr:`FPDFBitmap_BGRA`, :attr:`FPFBitmap_BGRx` otherwise. Other bitmap formats cannot be used with this method.
+        Contrary to the other ``PdfBitmap.new_*()`` APIs, this method does not take a format constant, but a *use_alpha* boolean. If True, the format will be :attr:`FPDFBitmap_BGRA`, :attr:`FPFBitmap_BGRx` otherwise. Other bitmap formats cannot be used with this method.
         
         Note, the recommended default bitmap creation strategy is :meth:`.new_native`.
         """
@@ -238,7 +238,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to fill bitmap rectangle.")
     
     # IMPORTANT: When a wrapper is constructed around a foreign bitmap without copying (i.e. as a view of the same memory), we rely on the assumption that the wrapper holds a reference to the input buffer object itself while the represented memory is used.
-    # This appears to be the case with Pillow and NumPy, as of 2026. When adding a new adapter, it must be carefully checked to fulfil this requirement.
+    # This appears to be the case with Pillow and NumPy, as of 2026. When adding a new adapter, it needs to be carefully tested to fulfill this requirement.
     # Why not attach a buffer keep-alive finalizer to wrapper objects?, you might ask. That's a good question, and we could consider doing that, but there are issues: Suppose the adapter made a copy after all, we'd unnecessarily delay releasing memory. Copying is kind of an implementation detail of the adapter's (consider Pillow, where it is format dependent; consider things like copy-on-write). Or suppose the buffer is transferred to another object, we still face the original problem. So this isn't necessarily helpful, is it?
     
     def to_numpy(self):

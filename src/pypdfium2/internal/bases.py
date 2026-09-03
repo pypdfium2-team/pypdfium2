@@ -66,7 +66,7 @@ class _FinalizerOwner:  # (_Dataclass)
 
 def _close_template(info, owner):
     
-    # This function must not pull in any strong reference to the object being finalized
+    # This function must not pull in a reference to the object being finalized!
     # https://docs.python.org/3/library/weakref.html#weakref.finalize
     # > It is important to ensure that func, args and kwargs do not own any references to obj, either directly or indirectly, since otherwise obj will never be garbage collected. In particular, func should not be a bound method of obj.
     
