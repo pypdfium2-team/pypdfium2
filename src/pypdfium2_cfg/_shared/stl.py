@@ -59,8 +59,7 @@ class keydefaultdict (dict):
         super().__init__()
     
     def __missing__(self, key):
-        value = self.default_factory(key)
-        self[key] = value
+        self[key] = value = self.default_factory(key)
         return value
 
 
