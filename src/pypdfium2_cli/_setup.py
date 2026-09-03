@@ -48,7 +48,7 @@ def setup_logging():
     # Read these settings from environment variables
     # (Could also consider using CLI flags, but this seemed easiest for now ...)
     loglevel          = _env("PYPDFIUM_LOGLEVEL", logging.DEBUG, cast=str.lower, map=_LogLevelMap)
-    debug_autoclose   = _env("DEBUG_AUTOCLOSE",   0, cast=int, map=_DebugAutocloseMap)
+    debug_autoclose   = _env("DEBUG_AUTOCLOSE",   logging.WARNING, cast=int, map=_DebugAutocloseMap)
     debug_unsupported = _env("DEBUG_UNSUPPORTED", 1, cast=_readbool)
     debug_sysfonts    = _env("DEBUG_SYSFONTS",    0, cast=_readbool)
     
