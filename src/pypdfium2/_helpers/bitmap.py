@@ -52,7 +52,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         mode (str):
             The bitmap format as string (see `PIL Modes`_).
         warn_on_close (bool):
-            See :meth:`.close`.
+            Whether to warn on explicit closing about being a potentially unsafe operation.
+            Defaults to True with foreign bitmaps. Set this to False if you are sure your usage of :meth:`.close` is safe. Or set to True to warn regardless of bitmap type.
+    
+    .. versionadded:: 5.14
+        The `warn_on_close` attribute.
     """
     
     def __init__(self, raw, buffer, width, height, stride, format, rev_byteorder, is_foreign):
@@ -69,7 +73,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
             pdfium_i.BitmapTypeToStr
         )[self.format]
         self._is_foreign = is_foreign
-        self.warn_on_close = True  # or = is_foreign
+        self.warn_on_close = is_foreign
         # slot to store arguments for PdfPosConv, set on page rendering
         self._render_args = None
         # NB: With foreign (pdfium-internal) buffers freed by FPDFBitmap_Destroy(), the finalizer ought to be attached to the buffer object itself.
@@ -90,11 +94,11 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         Confer the top-level :class:`.PdfBitmap` documentation for details.
         
         Warning:
-            Only call this method if you are fully aware of the potential memory safety implications, and are sure your use is safe and appropriate.
-            
-            By default, calling this method logs a warning to help prevent embedders from creating a possible use-after-free situation. If you are sure your use of :meth:`.PdfBitmap.close` is safe, you may set :attr:`.warn_on_close` to False.
-            
+            Only call this method if you are fully aware of the potential memory safety implications, and are sure your use is safe and appropriate.\n
             **Tip:** Where possible, consider enforcing the use of a native bitmap.
+        
+        .. versionchanged:: 5.14
+            Calling this method on a foreign bitmap now logs a warning by default, to help prevent callers from creating a possible use-after-free situation. See :attr:`.warn_on_close`.
         """
         if self.warn_on_close:
             logger.warning(f"Explicitly closing {self!r}. This is a potentially unsafe operation!")
