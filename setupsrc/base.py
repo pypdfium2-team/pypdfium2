@@ -37,6 +37,7 @@ PlatSpec_V8Sym  = "-v8"
 
 BindSpec_EnvVar = "PDFIUM_BINDINGS"
 IS_CI = bool(os.getenv("GITHUB_ACTIONS")) or bool(int(os.getenv("CIBUILDWHEEL", 0)))
+# TODO(geisserml) ctypesgen requires python >= 3.8 - should we implicitly enable the refbindings for python 3.6-3.7 ?
 USE_REFBINDINGS = os.getenv(BindSpec_EnvVar) == "reference"
 
 BindingsFN = "bindings.py"
