@@ -4,30 +4,65 @@
 import os
 import logging
 import warnings
-import pypdfium2_cfg
 
 
-def _get_loglevel(envvar, default):
-    return getattr(logging, os.environ.get(envvar, default).upper())
+_LogLevelMap = {
+    'debug':    logging.DEBUG,
+    'info':     logging.INFO,
+    'warning':  logging.WARNING,
+    'error':    logging.ERROR,
+    'critical': logging.CRITICAL,
+}
+
+_DebugAutocloseMap = {
+    -1: logging.CRITICAL,
+    0: logging.WARNING,
+    1: logging.DEBUG,
+}
+
+def _readbool(string):
+    return bool(int(string))
+
+def _do_cast(cast, value, exc_type, choices=None):
+    try:
+        return cast(value)
+    except exc_type as e:
+        if choices:
+            raise ValueError(f"{value!r} not in {tuple(choices)}") from e
+        else:
+            raise ValueError(f"{value!r} cannot be casted via {cast.__name__}") from e
+
+def _env(key, default, cast=None, map=None):
+    value = os.environ.get(key)
+    if value is None:
+        return default
+    if cast:
+        value = _do_cast(cast, value, ValueError)
+    if map:
+        value = _do_cast(map.__getitem__, value, KeyError, choices=map)
+    return value
+
 
 def setup_logging():
     
-    # could also pass through the log level by parameter, but using an env var seemed easiest for now
-    loglevel = _get_loglevel("PYPDFIUM_LOGLEVEL", "debug")
+    # Read these settings from environment variables
+    # (Could also consider using CLI flags, but this seemed easiest for now ...)
+    loglevel          = _env("PYPDFIUM_LOGLEVEL", logging.DEBUG, cast=str.lower, map=_LogLevelMap)
+    debug_autoclose   = _env("DEBUG_AUTOCLOSE",   0, cast=int, map=_DebugAutocloseMap)
+    debug_unsupported = _env("DEBUG_UNSUPPORTED", 1, cast=_readbool)
+    debug_sysfonts    = _env("DEBUG_SYSFONTS",    0, cast=_readbool)
+    
     loggers = [logging.getLogger("pypdfium2"+m) for m in ("", "_raw", "_cfg", "_cli")]
     streamhandler = logging.StreamHandler()
     for l in loggers:
         l.addHandler(streamhandler)
         l.setLevel(loglevel)
-    
     warnings.simplefilter("always")
-    
     # cli_logger = logging.getLogger("pypdfium2_cli")
     # cli_logger.debug("Just set up logging")
     
-    debug_unsupported = bool(int( os.environ.get("DEBUG_UNSUPPORTED", 1) ))
-    debug_sysfonts = bool(int( os.environ.get("DEBUG_SYSFONTS", 0) ))
-    pypdfium2_cfg.DEBUG_AUTOCLOSE.value = _get_loglevel("DEBUG_AUTOCLOSE", "warning")
+    import pypdfium2_cfg
+    pypdfium2_cfg.DEBUG_AUTOCLOSE.value = debug_autoclose
     
     import pypdfium2._helpers as pdfium
     from pypdfium2_cli._sysfonts import PdfSysfontListener
