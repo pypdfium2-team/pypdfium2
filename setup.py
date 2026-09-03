@@ -108,6 +108,7 @@ def run_setup(pl_name, datagen):
     license_files = list(LICENSES_SHARED)
     if pl_name == ExtPlats.sdist:
         license_files.extend(LICENSES_SDIST)
+        assert CtypesgenSrc.exists(), f"ctypesgen src is required for bundling in sdist: {CtypesgenSrc}"
     
     helpers_info = get_helpers_info()
     kwargs["version"] = merge_tag(helpers_info, mode="py")

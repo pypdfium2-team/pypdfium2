@@ -657,7 +657,7 @@ class _LazyClass:
         else:
             log("Using existing clone of ctypesgen. Reminder: when updating pypdfium2, ctypesgen ought to be updated as well (i.e. if you git pull'ed one, you also need to pull the other).")
         
-        assert CtypesgenSrc.exists(), f"{CtypesgenSrc} is required"
+        assert CtypesgenSrc.exists(), f"{CtypesgenSrc} does not exist"
         sys.path.insert(0, str(CtypesgenSrc))
         
         import ctypesgen
