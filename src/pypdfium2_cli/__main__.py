@@ -12,7 +12,7 @@ from pypdfium2_cli._setup import setup_logging
 from pypdfium2_cfg.stl import (
     cached_property,
     keydefaultdict,
-    # argparse_compat_actions,
+    ArgparseCompatParser,
 )
 
 ModuleLoader = keydefaultdict(import_module)
@@ -44,7 +44,7 @@ SubCommands = {
 
 def get_parser(argv):
     
-    main_parser = argparse.ArgumentParser(
+    main_parser = ArgparseCompatParser(
         prog = "pypdfium2",
         formatter_class = argparse.RawTextHelpFormatter,
         description = """\
@@ -87,7 +87,6 @@ Environment variables:
             sc_name, help=help, description=desc,
             formatter_class=argparse.RawTextHelpFormatter,
         )
-        # argparse_compat_actions(subparser)
         mod.attach(subparser)
     
     for name, help in other_scs.items():

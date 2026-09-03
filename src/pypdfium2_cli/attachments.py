@@ -12,7 +12,6 @@ ACTION_EXTRACT = "extract"
 ACTION_EDIT    = "edit"
 
 # TODO would like to add action="extend", but conflicts with default being a tuple, and beware: it cannot be made a list here (perilous!)
-# Also note that compat actions don't propagate into subparsers, i.e. they'd need to be re-registered on each subparser individually. Not sure if there's a good way to fix that. Maybe just subclassing ArgumentParser might work, provided parser.add_parser() in turn constructs an instance of type(parser) ...
 NARGS_PLUS = dict(nargs="+", default=())
 
 def attach(parser):  # hook

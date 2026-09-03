@@ -15,7 +15,7 @@ import urllib.request as url_request
 from base import *
 from _build_helpers import *
 import _pyodide as pyodide_utils
-from stl import cached_property, argparse_compat_actions
+from stl import cached_property, ArgparseCompatParser
 
 _CR_PREFIX = "https://chromium.googlesource.com/"
 DEPS_URLS = dict(
@@ -482,7 +482,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
 
 def parse_args(argv):
     
-    parser = argparse.ArgumentParser(
+    parser = ArgparseCompatParser(
         formatter_class = argparse.RawTextHelpFormatter,
         description = """\
 Build PDFium from source natively with a self-managed checkout and system tools/libraries (depending on config).
@@ -504,7 +504,6 @@ In clang mode, --clang-path lets you choose the clang build used, but flags are 
 Some params take a default from an environment variable, for easy passthrough with cibuildwheel.\
 """
     )
-    argparse_compat_actions(parser)
     
     parser.add_argument(
         "--version",

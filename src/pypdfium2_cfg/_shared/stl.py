@@ -98,9 +98,10 @@ if sys.version_info < (3, 8):
             items.extend(values)
             setattr(namespace, self.dest, items)
     
-    def argparse_compat_actions(parser):
-        parser.register("action", "extend", _ExtendAction)
+    class ArgparseCompatParser (argparse.ArgumentParser):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.register("action", "extend", _ExtendAction)
     
 else:
-    def argparse_compat_actions(parser):
-        pass
+    ArgparseCompatParser = argparse.ArgumentParser
