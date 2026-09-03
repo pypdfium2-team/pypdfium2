@@ -150,7 +150,7 @@ def configure(config):
 
 def build(target):
     ninja = _get_tool("ninja")
-    run_cmd([ninja, "-C", PDFiumOutDir, target], cwd=PDFiumDir)
+    run_cmd([ninja, "-v", "-C", PDFiumOutDir, target], cwd=PDFiumDir)
 
 
 def handle_portable_mode(config, use_sysroot, clang_path):

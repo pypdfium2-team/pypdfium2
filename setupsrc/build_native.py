@@ -390,7 +390,7 @@ def build(build_dir, config_dict, with_tests, n_jobs, is_pyodide):
     config_str = serialize_gn_config(config_dict)
     (build_dir/"args.gn").write_text(config_str)
     
-    ninja_args = []
+    ninja_args = ["-v"]
     if n_jobs is not None:
         ninja_args.extend(["-j", str(n_jobs)])
     targets = ["pdfium"]
