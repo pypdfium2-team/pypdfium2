@@ -127,8 +127,6 @@ class PdfAttachment (pdfium_i.AutoCastable):
         if not ok:
             raise PdfiumError(f"Failed to set attachment param '{key}' to '{value}'.")
     
-    # TODO(geisserml) needs test cases
-    
     def get_desc(self):
         """
         Returns:

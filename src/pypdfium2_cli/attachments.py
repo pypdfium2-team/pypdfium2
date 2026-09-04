@@ -36,13 +36,14 @@ def attach(parser):  # hook
     parser_edit.add_argument(
         "--set-desc",
         **NARGS_PLUS,
-        help = f"Syntax: n=desc, where n is the attachment number, and desc the new description to be set. Example: '1=Hello world'. Use `pypdfium2 attachments list` to determine the attachment numbers. To be clear, this option refers to the original order, before --del-nums or --add-files.",
+        help = f"Syntax: n=desc, where n is the attachment number, and desc the new description to be set. Example: '1=Hello world'. Use `pypdfium2 attachments list` to determine the attachment numbers.",
     )
     parser_edit.add_argument(
         "--del-nums",
         type = parse_numtext,
         default = (),
     )
+    # TODO need a way to set the name and description of new attachments
     parser_edit.add_argument(
         "--add-files",
         **NARGS_PLUS,

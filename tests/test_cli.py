@@ -100,6 +100,7 @@ def test_attachments(tmp_path):
     run_cli(["attachments", TestFiles.attachments, "extract", "-o", tmp_path])
     assert _get_files(tmp_path) == ["1_1.txt", "2_attached.pdf"]
     
+    # TODO test --set-desc
     edited_pdf = tmp_path / "edited.pdf"
     run_cli(["attachments", TestFiles.attachments, "edit", "--del-nums", "1,2", "--add-files", TestFiles.mona_lisa, "-o", edited_pdf])
     run_cli(["attachments", edited_pdf, "list"], "[1] mona_lisa.jpg: \n", capture=["out"])
