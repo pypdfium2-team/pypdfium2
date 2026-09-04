@@ -6,7 +6,7 @@
 # Changelog for next release
 
 *Runtime*
-- In `PdfBitmap`, unconditionally call `FPDFBitmap_Destroy()` when the bitmap is closed/finalized, i.e. including bitmaps created from an external buffer (the default). The API does not affect external buffers, but assumably should still be called to release the `FPDF_BITMAP` shell itself.
+- In `PdfBitmap`, unconditionally call `FPDFBitmap_Destroy()` when the bitmap is closed/finalized, i.e. including bitmaps created from an native (pdfium-external) buffer (the default). The API does not affect external buffers, but assumably should still be called to release the `FPDF_BITMAP` shell itself.
 - On foreign bitmaps, `PdfBitmap.close()` now warns about being a potentially unsafe operation, since it frees the C-side buffer. Set `.warn_on_close = False` to silence the warning, if you have made sure your usage is safe.
 - In `AutoCloseable`, avoid assigning `self` to an instance attribute. This should result in improved GC behavior. Many thanks to James Barlow for pointing this out.
 - Added new APIs `PdfAttachment.{get,set}_desc()` to read/write attachment descriptions, along with CLI integration. Thanks to Aryan Krishnan for the upstream part.
@@ -17,10 +17,10 @@
   * Dropped debug symbols. Enabled PyPI upload. Updated documentation.
 
 *Setup*
-- Refactored ctypesgen integration. It is now cloned into pypdfium2's source tree and bundled in sdists. ctypesgen's setup code has been removed. See the [updated pypdfium2-ctypesgen `README.md`](https://github.com/pypdfium2-team/ctypesgen/blob/acf905804b2ae50d2b230308e1ca62875f4fe16c/README.md#installation) for an explanation.
+- Refactored ctypesgen integration. It is now cloned into pypdfium2's source tree and bundled in sdists. This avoids having an external git URL in pyproject setup dependencies that defeats the idea of a hermetic (self-contained) package index. ctypesgen's own setup and versioning code has been removed, owing to the project's special status as setup-only dependency with a head-to-head development model that allows for a constantly evolving API. See the [updated pypdfium2-ctypesgen `README.md`](https://github.com/pypdfium2-team/ctypesgen/blob/acf905804b2ae50d2b230308e1ca62875f4fe16c/README.md#installation) for integration instructions. This also made Python 3.6 compatibility straightforward to restore after all, aligning to a common baseline with pypdfium2 and gn-dist.
+- Dropped module splitting (`PYPDFIUM_MODULES={raw,helpers}`) and the `system-generate` target, which had been introduced for pypdfium2's own conda packaging (see below).<br>
+  We recognize that module splitting may still be desirable in some downstream packaging contexts; however, the dynamic implementation had been standing in the way of a proper `pyproject.toml` migration, since the `[project]` table does not allow for `name` to be specified dynamically. This means we could not retain a first-party dynamic setting much longer without impairing the project's progress. Instead we suggest you just patch the project name / module include rules (possibly via some kind of automation) if module splitting is needed. This change does not affect the module layout in `src/` which upholds the separate logical units.
 - Lowered iOS min version from `26_0` to `17_0` thanks to an upstream contribution. (We have not released any iOS wheels yet, but it is handled in setup.)
-- Dropped module splitting (`PYPDFIUM_MODULES={raw,helpers}`) and the `system-generate` target, which had been introduced for pypdfium2's own conda packaging (see below).
-  * We recognize that module splitting may still be desirable in some downstream packaging contexts; however, the dynamic implementation had been standing in the way of a proper `pyproject.toml` migration, since the `[project]` table does not allow for `name` to be specified dynamically. This means we could not retain a first-party dynamic setting much longer without impairing the project's progress. Instead we suggest you just patch the project name / module include rules (possibly via some kind of automation) if module splitting is needed. The module layout in `src/` remains the same.
 
 *Conda*
 
