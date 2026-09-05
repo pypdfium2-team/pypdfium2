@@ -1,0 +1,150 @@
+%PDF-1.7
+% ò¤ô
+1 0 obj <<
+  /Type /Catalog
+  /Pages 2 0 R
+  /Outlines 8 0 R
+>>
+endobj
+2 0 obj <<
+  /Type /Pages
+  /Count 2
+  /Kids [
+    3 0 R
+    4 0 R
+  ]
+>>
+endobj
+% Page number 0.
+3 0 obj <<
+  /Type /Page
+  /Parent 2 0 R
+  /Resources <<
+    /Font <<
+      /F1 5 0 R
+    >>
+  >>
+  /Contents [6 0 R]
+  /MediaBox [0 0 612 792]
+>>
+endobj
+% Page number 1.
+4 0 obj <<
+  /Type /Page
+  /Parent 2 0 R
+  /Resources  <<
+    /Font <<
+      /F1 5 0 R
+    >>
+  >>
+  /Contents [7 0 R]
+  /MediaBox [0 0 612 792]
+>>
+endobj
+% Font resource.
+5 0 obj <<
+  /Type /Font
+  /Subtype /Type1
+  /BaseFont /Arial
+>>
+endobj
+% Content for page 0.
+6 0 obj <<
+  /Length 37
+>>
+stream
+BT
+/F1 20 Tf
+100 600 TD
+(Page1) Tj
+ET
+endstream
+endobj
+7 0 obj <<
+  /Length 37
+>>
+stream
+BT
+/F1 20 Tf
+100 600 TD
+(Page2) Tj
+ET
+endstream
+endobj
+8 0 obj <<
+  /Type /Outlines
+  /Count 5
+  /First 9 0 R
+  /Last 13 0 R
+>>
+endobj
+9 0 obj <<
+  /Title (No Style)
+  /Parent 8 0 R
+  /Next 10 0 R
+  /Dest (foo)
+>>
+endobj
+10 0 obj <<
+  /Title (Style Is Not An Int)
+  /Parent 8 0 R
+  /First 11 0 R
+  /Last 11 0 R
+  /Prev 9 0 R
+  /Next 12 0 R
+  /Count 1
+  /F (Bold)
+  /A <<
+    /Type /Action
+    /S /URI
+    /URI (https://theplay.test)
+  >>
+>>
+endobj
+11 0 obj <<
+  /Title (Style Is 15)
+  /Parent 10 0 R
+  /Dest [3 0 R /XYZ 100 200 0]
+  /F 15 % 1111 in binary.
+>>
+endobj
+12 0 obj <<
+  /Title (Style is Normal)
+  /Prev 10 0 R
+  /Parent 8 0 R
+  /Next 13 0 R
+  /Dest (bar)
+  /F 0
+>>
+endobj
+13 0 obj <<
+  /Title (Style is Bold and Italic)
+  /Parent 8 0 R
+  /Dest (bar)
+  /Prev 12 0 R
+  /F 3
+>>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000015 00000 n 
+0000000086 00000 n 
+0000000184 00000 n 
+0000000355 00000 n 
+0000000527 00000 n 
+0000000621 00000 n 
+0000000710 00000 n 
+0000000799 00000 n 
+0000000879 00000 n 
+0000000965 00000 n 
+0000001192 00000 n 
+0000001311 00000 n 
+0000001427 00000 n 
+trailer <<
+  /Root 1 0 R
+  /Size 14
+>>
+startxref
+1537
+%%EOF
