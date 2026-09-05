@@ -19,9 +19,6 @@ import urllib.request as url_request
 from shared_base import *  # local
 from stl import cached_property
 
-
-PDFIUM_MIN_REQ = 6635
-
 # The PDFium versions our build scripts have last been tested with.
 # Ideally, they should be close to the release version in autorelease/record.json
 # To bump these versions, first test locally and update any patches as needed.
