@@ -50,18 +50,6 @@ class ArtifactStash:
         self.tmpdir.cleanup()
 
 
-@contextlib.contextmanager
-def tmp_replace_ctx(fp, orig, tmp, exp_count):
-    orig_txt = fp.read_text()
-    assert orig_txt.count(orig) == exp_count
-    tmp_txt = orig_txt.replace(orig, tmp)
-    fp.write_text(tmp_txt)
-    try:
-        yield
-    finally:
-        fp.write_text(orig_txt)
-
-
 def _build_pl_suffix(version, use_v8):
     return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
 
