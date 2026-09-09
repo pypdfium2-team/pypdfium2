@@ -49,7 +49,10 @@ class PdfObject (pdfium_i.AutoCloseable):
     """
     
     def __new__(cls, raw, *args, **kwargs):
+        assert raw, "The `raw` parameter must be non-null."
         raw_type = pdfium_c.FPDFPageObj_GetType(raw)
+        if raw_type == pdfium_c.FPDF_PAGEOBJ_UNKNOWN:
+            raise PdfiumError("Failed to determine pageobject type, did you pass in a valid FPDF_PAGEOBJECT handle?")
         py_type = {
             pdfium_c.FPDF_PAGEOBJ_IMAGE: PdfImage,
             pdfium_c.FPDF_PAGEOBJ_TEXT:  PdfTextObj,
