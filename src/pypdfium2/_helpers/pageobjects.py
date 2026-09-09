@@ -236,7 +236,7 @@ class PdfFont (pdfium_i.AutoCloseable):
     def is_embedded(self):
         """
         bool: The font's embedding status. True if it is embedded (bundled) in the PDF, False otherwise.
-        This is a cached property, as a font object's embedding status is unlikely to change.
+        This is a cached property.
         """
         rc = pdfium_c.FPDFFont_GetIsEmbedded(self)
         if rc == -1:
