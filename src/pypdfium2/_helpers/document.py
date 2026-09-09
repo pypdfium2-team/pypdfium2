@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfDest")
+__all__ = ("PdfDocument", "PdfFormEnv", "PdfXObject", "PdfBookmark", "PdfBookmarkStyle", "PdfDest")
 
 import sys
+import enum
 import ctypes
 import logging
 import warnings
@@ -662,6 +663,10 @@ class PdfXObject (pdfium_i.AutoCloseable):
         return PdfObject(raw=raw_pageobj, pdf=self.pdf)  # tracked=False
 
 
+class PdfBookmarkStyle (enum.Flag):
+    ITALIC = 0b01
+    BOLD   = 0b10
+
 class PdfBookmark (pdfium_i.AutoCastable):
     """
     Bookmark helper class.
@@ -712,6 +717,14 @@ class PdfBookmark (pdfium_i.AutoCastable):
         if not ok:
             return None
         return r.value, g.value, b.value
+    
+    def get_style(self):
+        """
+        Returns:
+            PdfBookmarkStyle: The bookmark's text style (none, bold, italic, or both) as :class:`enum.Flag`.
+        """
+        style_int = pdfium_c.FPDFBookmark_GetStyle(self)
+        return PdfBookmarkStyle(style_int)
     
     def get_dest(self):
         """

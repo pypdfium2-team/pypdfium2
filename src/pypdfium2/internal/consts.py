@@ -189,9 +189,3 @@ RenderStatusToStr = _fallback_dict({
     pdfium_c.FPDF_RENDER_DONE:          "done",
     pdfium_c.FPDF_RENDER_FAILED:        "failed",
 })
-
-class PdfFontPitchFamilyFlags (enum.Flag):
-    "Map PDFium font pitch and family flags to python :class:`enum.Flag`."
-    FIXEDPITCH = pdfium_c.FXFONT_FF_FIXEDPITCH
-    ROMAN      = pdfium_c.FXFONT_FF_ROMAN
-    SCRIPT     = pdfium_c.FXFONT_FF_SCRIPT
