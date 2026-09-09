@@ -49,16 +49,13 @@ class PdfObject (pdfium_i.AutoCloseable):
     """
     
     def __new__(cls, raw, *args, **kwargs):
-        
-        type = pdfium_c.FPDFPageObj_GetType(raw)
-        if type == pdfium_c.FPDF_PAGEOBJ_IMAGE:
-            instance = super().__new__(PdfImage)
-        elif type == pdfium_c.FPDF_PAGEOBJ_TEXT:
-            instance = super().__new__(PdfTextObj)
-        else:
-            instance = super().__new__(PdfObject)
-        
-        instance.type = type
+        raw_type = pdfium_c.FPDFPageObj_GetType(raw)
+        py_type = {
+            pdfium_c.FPDF_PAGEOBJ_IMAGE: PdfImage,
+            pdfium_c.FPDF_PAGEOBJ_TEXT:  PdfTextObj,
+        }.get(raw_type, cls)
+        instance = super().__new__(py_type)
+        instance.type = raw_type
         return instance
     
     
@@ -117,8 +114,7 @@ class PdfObject (pdfium_i.AutoCloseable):
             tuple[tuple[float*2] * 4]: Corner positions as (x, y) tuples, counter-clockwise from origin, i.e. bottom-left, bottom-right, top-right, top-left, in PDF page coordinates.
         """
         
-        if self.type not in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
-            # as of pdfium 5921
+        if not isinstance(self, (PdfImage, PdfTextObj)):  # as of pdfium 5921
             raise RuntimeError("Quad points only supported for image and text objects.")
         
         q = pdfium_c.FS_QUADPOINTSF()
