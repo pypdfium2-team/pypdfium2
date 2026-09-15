@@ -1,13 +1,21 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+import enum
 import ctypes
 import logging
 import pypdfium2._helpers as pdfium
+import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 
 logger = logging.getLogger("pypdfium2_cli")
 
+
+class FontPitchFamilyFlags (enum.Flag):
+    "Map PDFium font pitch and family flags to python :class:`enum.Flag`."
+    FIXEDPITCH = pdfium_c.FXFONT_FF_FIXEDPITCH
+    ROMAN      = pdfium_c.FXFONT_FF_ROMAN
+    SCRIPT     = pdfium_c.FXFONT_FF_SCRIPT
 
 class PdfSysfontListener (pdfium.PdfSysfontBase):
     
@@ -22,7 +30,7 @@ class PdfSysfontListener (pdfium.PdfSysfontBase):
     
     def MapFont(self, _, weight, bItalic, charset, pitch_family, face, _ignored):
         face_bstr = ctypes.cast(face, ctypes.c_char_p).value
-        logger.debug(f"fontinfo::MapFont:in (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={pdfium_i.PdfFontPitchFamilyFlags(pitch_family).name!r}, face={face_bstr!r})")
+        logger.debug(f"fontinfo::MapFont:in (weight={weight}, bItalic={bool(bItalic)}, charset={pdfium_i.CharsetToStr.get(charset)!r}, pitch_family={FontPitchFamilyFlags(pitch_family).name!r}, face={face_bstr!r})")
         out = self.default.MapFont(self.default, weight, bItalic, charset, pitch_family, face, _ignored)
         # For internal substitution, check the family names in `pypdfium2 fonts` CLI output.
         # If you see names like "Chrom Sans OTF" or "Chrom Serif OTF" then you probably got internal substitution.
