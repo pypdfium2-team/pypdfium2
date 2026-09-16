@@ -15,7 +15,7 @@ body:
       description: |
         Unofficial / third-party packages of pypdfium2 may exist (e.g. conda, nixpkgs, linux distros).
         **We do not support third-party builds, and they are not eligible for a bug report!**
-        This project only accepts issues pertaining to the packages we distribute. Otherwise, contact your distributor.
+        This project only accepts issues pertaining to the packages we distribute. Otherwise, contact your packager.
       options:
         - label: I understand that **AI issues are banned** from this project. *Issues that show typical characteristics of AI will be closed immediately and the reporter may be blocked.*
           required: true

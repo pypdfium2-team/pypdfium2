@@ -285,7 +285,7 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                         is_regex=False,
                     )
                 # confirm there have been a couple of substitutions
-                assert n_subs > 3  # likely much more than that
+                assert n_subs > 3  # probably more
         # Create pseudo gclient config included by //build
         (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("build_with_chromium = false")
     
