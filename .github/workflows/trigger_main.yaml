@@ -19,7 +19,7 @@ jobs:
     permissions:
       actions: write  # needed by dispatch.yaml
     
-    uses: ./.github/workflows/dispatch.yaml
+    uses: $/.github/workflows/dispatch.yaml
     with:
       workflow_file: main.yaml
       inputs: |

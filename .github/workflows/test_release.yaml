@@ -59,7 +59,7 @@ jobs:
           python-version: ${{ matrix.py }}
       
       - name: Create venv
-        uses: ./.github/actions/venv_step
+        uses: $/.github/actions/venv_step
         with:
           initial_python: ${{ matrix.initial_python || 'python3' }}
       

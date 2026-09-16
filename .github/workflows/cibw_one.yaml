@@ -66,7 +66,7 @@ jobs:
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Prepare
-        uses: ./.github/actions/prepare_step
+        uses: $/.github/actions/prepare_step
         with:
           replicate_tag: ${{ inputs.replicate_tag }}
       
@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read  # needed by called workflow
     
-    uses: ./.github/workflows/test_one.yaml
+    uses: $/.github/workflows/test_one.yaml
     with:
       runner_os: ${{ inputs.test_os }}
       artifact_id: ${{ needs.build.outputs.artifact_id }}

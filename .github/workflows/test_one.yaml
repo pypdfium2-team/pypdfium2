@@ -50,12 +50,12 @@ jobs:
       
       - name: Prepare
         if: ${{ !inputs.docker }}
-        uses: ./.github/actions/prepare_step
+        uses: $/.github/actions/prepare_step
         with:
           py_vers: ${{ inputs.py_vers }}
       
       - name: Test
-        uses: ./.github/actions/test_step
+        uses: $/.github/actions/test_step
         with:
           runner_os: ${{ inputs.runner_os }}
           py_vers: ${{ inputs.py_vers }}

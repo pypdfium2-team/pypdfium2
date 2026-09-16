@@ -66,14 +66,14 @@ jobs:
           ref: ${{ inputs.ref || github.ref_name }}
       
       - name: Prepare
-        uses: ./.github/actions/prepare_step
+        uses: $/.github/actions/prepare_step
         with:
           replicate_tag: ${{ inputs.replicate_tag }}
           py_vers: ${{ inputs.py_vers }}
           py_arch: ${{ (startsWith(inputs.runner_os, 'windows') && inputs.target_cpu == 'x86') && 'x86' || '' }}
       
       - name: Create venv
-        uses: ./.github/actions/venv_step
+        uses: $/.github/actions/venv_step
       
       - name: Install pip packages
         run: |
@@ -135,14 +135,14 @@ jobs:
       # Using empty/non-empty string as bool substitute should be OK for if conditionals though.
       
       - name: Inspect build
-        uses: ./.github/actions/inspect_step
+        uses: $/.github/actions/inspect_step
         with:
           runner_os: ${{ inputs.runner_os }}
           auditwheel: ${{ !inputs.target_os && !startsWith(inputs.target_cpu, 'mips') || '' }}
           dll_glob: 'data/sourcebuild/*pdfium.*'
       
       - name: Test wheel
-        uses: ./.github/actions/test_step
+        uses: $/.github/actions/test_step
         with:
           runner_os: ${{ inputs.runner_os }}
           py_vers: ${{ inputs.py_vers }}
@@ -158,7 +158,7 @@ jobs:
     permissions:
       contents: read  # needed by called workflow
     
-    uses: ./.github/workflows/test_one.yaml
+    uses: $/.github/workflows/test_one.yaml
     with:
       runner_os: ${{ inputs.test_os }}
       artifact_id: ${{ needs.build.outputs.artifact_id }}

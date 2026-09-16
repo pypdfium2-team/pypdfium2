@@ -44,7 +44,7 @@ jobs:
           python-version: '3.14'
       
       - name: Create venv
-        uses: ./.github/actions/venv_step
+        uses: $/.github/actions/venv_step
       
       - name: Install pip packages
         run: |
