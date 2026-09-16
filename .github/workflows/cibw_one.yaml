@@ -72,7 +72,7 @@ jobs:
       
       - name: Set up QEMU
         if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
       
       - name: Install Windows cross deps
         if: ${{ startsWith(inputs.runner_os, 'windows') && inputs.cibw_arch != 'AMD64' }}
@@ -83,7 +83,7 @@ jobs:
       
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
       - name: Build wheels
-        uses: loong64/cibuildwheel@17768452a199071a2d69bc22931b395f9794e8db # v4.2.0
+        uses: loong64/cibuildwheel@68b120a4eebfced99ef9c9f4c7c57bd7bdd04cbb # v4.2.1
         env:
           # Will be tagged as not python specific by our setup.py. inputs.cibw_py_ver only controls the version used at build time.
           # Could also use `*`, then cibuildwheel would build with the oldest supported version, and walk through the others but skip because a compatible wheel is around already.
