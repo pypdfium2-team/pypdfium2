@@ -156,6 +156,9 @@ def main(platforms, version, max_workers=None, use_v8=False, verify=None):
     do_extract(archives, version, flags)
     if Host.system == SysNames.android and Host.platform in platforms:
         postprocess_android()
+    
+    # return the resolved version to the caller
+    return version
 
 
 # low-level interface for internal use - end users should go with cached, higher-level emplace.py or setup.py instead
