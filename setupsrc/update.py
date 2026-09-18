@@ -10,6 +10,7 @@ import tarfile
 import argparse
 import functools
 from pathlib import Path
+from subprocess import PIPE
 import urllib.request as url_request
 from concurrent.futures import ThreadPoolExecutor
 
@@ -115,8 +116,9 @@ def do_verify(verify, archives, version):
     if not attest_path.exists():
         urlretrieve(f"{ReleaseURL}{version}/pdfium-attestation.json", attest_path)
     if not trusted_root.exists():
-        with trusted_root.open("wb") as fh:
-            run_cmd(["gh", "attestation", "trusted-root"], stdout=fh, cwd=DataDir)
+        trusted_root_data = run_cmd(["gh", "attestation", "trusted-root"], stdout=PIPE, cwd=None).stdout
+        assert trusted_root_data, "Failed to obtain attestation trusted root"
+        trusted_root.write_bytes(trusted_root_data)
     
     for artifact_path in archives.values():
         run_cmd(["gh", "attestation", "verify", str(artifact_path), "-R", "bblanchon/pdfium-binaries", "-b", str(attest_path), "--custom-trusted-root", str(trusted_root)], cwd=DataDir, check=True)
@@ -134,6 +136,13 @@ def postprocess_android():
 
 
 def main(platforms, version, max_workers=None, use_v8=False, verify=None):
+    
+    if not version or version == "latest":
+        version = PdfiumVer.get_latest()
+    elif version == "pinned":
+        version = PdfiumVer.pinned
+    else:
+        version = int(version)
     
     platforms = handle_platforms(platforms)
     if len(platforms) != len(set(platforms)):
@@ -186,12 +195,6 @@ def parse_args(argv):
 
 def cli_main(argv=sys.argv[1:]):
     args = parse_args(argv)
-    if not args.version or args.version == "latest":
-        args.version = PdfiumVer.get_latest()
-    elif args.version == "pinned":
-        args.version = PdfiumVer.pinned
-    else:
-        args.version = int(args.version)
     main(**vars(args))
 
 

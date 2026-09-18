@@ -99,12 +99,9 @@ def stage_platfiles(pl_name, sub_target, pdfium_ver, flags, default_build_params
                 raise RuntimeError("-> sourcebuild failed. Manual action may be needed, such as installing system dependencies, or possibly patching the sources. See pypdfium2's README.md for more information.")
     
     else:
-        if not pdfium_ver or pdfium_ver == "pinned":
+        if not pdfium_ver:
             pdfium_ver = PdfiumVer.pinned
             log(f"Using pinned pdfium version {pdfium_ver!r}. If this is not intentional, set e.g. {PlatSpec_EnvVar}=auto:latest to use the latest version instead.")
-        elif pdfium_ver == "latest":
-            pdfium_ver = PdfiumVer.get_latest()
-            log(f"Using latest pdfium-binaries version {pdfium_ver!r}.")
         assert pl_name and hasattr(PlatNames, pl_name)
         _get_pdfium_with_cache(pl_name, pdfium_ver, flags)
     
