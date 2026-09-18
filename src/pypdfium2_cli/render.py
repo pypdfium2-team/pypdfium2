@@ -12,7 +12,7 @@ import multiprocessing as mp
 import concurrent.futures as ft
 from importlib.util import find_spec
 
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium
 import pypdfium2.internal as pdfium_i
 import pypdfium2.raw as pdfium_c
 from pypdfium2_cli._setup import setup_logging

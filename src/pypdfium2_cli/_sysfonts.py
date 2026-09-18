@@ -3,7 +3,7 @@
 
 import ctypes
 import logging
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium
 import pypdfium2.internal as pdfium_i
 
 logger = logging.getLogger("pypdfium2_cli")

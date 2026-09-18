@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 import ctypes
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium
 import pypdfium2.internal as pdfium_i
 from pypdfium2_cli.fonts import _show_table
 

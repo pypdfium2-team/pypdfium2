@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium
 from pypdfium2_cli._parsers import parse_numtext
 
 

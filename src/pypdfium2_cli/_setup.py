@@ -64,7 +64,7 @@ def setup_logging():
     import pypdfium2_cfg
     pypdfium2_cfg.DEBUG_AUTOCLOSE.value = debug_autoclose
     
-    import pypdfium2._helpers as pdfium
+    import pypdfium2 as pdfium
     from pypdfium2_cli._sysfonts import PdfSysfontListener
     if debug_unsupported:
         pdfium.PdfUnspHandler().setup()

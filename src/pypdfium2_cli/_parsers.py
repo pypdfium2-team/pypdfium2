@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
 from pathlib import Path
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium
 
 
 def parse_numtext(numtext):

@@ -4,7 +4,7 @@
 # TODO test-cover converting non-jpeg format
 
 from pathlib import Path
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium
 from pypdfium2._lazy import Lazy
 
 def attach(parser):
