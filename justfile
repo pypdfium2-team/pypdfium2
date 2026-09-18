@@ -27,8 +27,8 @@ clean-before-pack:
 clean: clean-before-pack
 	rm -rf data/* tests/output/* dist/ .pytest_cache/ .mypy_cache/ .venv/ .pyodide-venv/ .pyodide_build/ .python_symlinks/
 pull:
-    git pull
-    git -C deps/ctypesgen pull
+	git pull
+	git -C deps/ctypesgen pull
 
 check:
 	./utils/misc/check.sh
