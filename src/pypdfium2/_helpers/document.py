@@ -663,7 +663,11 @@ class PdfXObject (pdfium_i.AutoCloseable):
         return PdfObject(raw=raw_pageobj, pdf=self.pdf)  # tracked=False
 
 
-class PdfBookmarkStyle (enum.IntFlag):  # or enum.Flag, boundary=enum.KEEP (python >= 3.11)
+_flag_kws = dict()
+if sys.version_info >= (3, 11):
+    _flag_kws["boundary"] = enum.KEEP
+
+class PdfBookmarkStyle (enum.Flag, **_flag_kws):
     ITALIC = 0b01
     BOLD   = 0b10
 
@@ -721,9 +725,9 @@ class PdfBookmark (pdfium_i.AutoCastable):
     def get_style(self):
         """
         Returns:
-            PdfBookmarkStyle: The bookmark's text style (none, bold, italic, or both).
+            PdfBookmarkStyle: The bookmark's text style (none, bold, italic, or both) as :class:`enum.Flag`.
         Note:
-            Treatment of unhandled values is down to :class:`enum.IntFlag` (it should handle them gracefully).
+            In Python >= 3.11, unhandled values are treated gracefully via :class:`enum.FlagBoundary.KEEP`.
         """
         style_int = pdfium_c.FPDFBookmark_GetStyle(self)
         return PdfBookmarkStyle(style_int)
