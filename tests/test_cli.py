@@ -83,14 +83,23 @@ def _get_text(pdf, index):
     return pdf[index].get_textpage().get_text_bounded()
 
 
-@pytest.mark.parametrize("resource", ["toc", "toc_viewmodes", "toc_maxdepth", "toc_circular"])
-def test_toc_part1(resource):
+@pytest.mark.parametrize("resource", ["toc", "toc_maxdepth", "toc_circular"])
+def test_toc_basic(resource):
     run_cli(["toc", getattr(TestFiles, resource), "--no-highlight"], getattr(TestExpectations, resource))
+
+def test_toc_viewmodes():
+    expected = TestExpectations.toc_viewmodes.read_text()
+    if sys.version_info < (3, 11):
+        expected = expected.replace("italic+bold", "bold+italic")
+    run_cli(["toc", TestFiles.toc_viewmodes, "--no-highlight"], expected)
 
 # ANSI escape sequences do look weird in plain text but they achieve what they're supposed to achieve in a shell
 @pytest.mark.skipif(sys.platform.startswith("win32"), reason="Output differs on Windows, TBI.")
 def test_toc_colorized():
-    run_cli(["toc", TestFiles.toc_viewmodes, "--highlight"], TestExpectations.toc_viewmodes_colored)
+    expected = TestExpectations.toc_viewmodes_colored.read_text()
+    if sys.version_info < (3, 11):
+        expected = expected.replace("italic+bold", "bold+italic")
+    run_cli(["toc", TestFiles.toc_viewmodes, "--highlight"], expected)
 
 
 def test_attachments(tmp_path):
