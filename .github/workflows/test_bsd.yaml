@@ -24,7 +24,7 @@ jobs:
           persist-credentials: false
       
       - name: Test in FreeBSD VM
-        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
+        uses: cross-platform-actions/action@faa0c6197e94aacf1c5956460152c8380d3560a5 # v1.5.0
         with:
           operating_system: freebsd
           version: '15.0'
@@ -42,7 +42,7 @@ jobs:
             # ldd /usr/local/lib/libopenjp2.so /usr/local/lib/libabsl_strings.so
             
             python3 -m venv .venv --system-site-packages
-            export PATH="${PWD}/.venv/bin/:${PATH}"
+            export PATH="${PWD}/.venv/bin:${PATH}"
             
             # facultative: set LD_PRELOAD just on bindings compile time so library loading will work. at runtime, workaround code in pypdfium2_raw's __init__.py takes over.
             export LD_PRELOAD="/usr/local/lib/libabsl_strings.so:/usr/local/lib/libopenjp2.so"

@@ -52,7 +52,7 @@ jobs:
           - runner_os: ubuntu-24.04-arm
             os_condition: ${{ inputs.arm64 }}
     
-    uses: ./.github/workflows/native_build_one.yaml
+    uses: $/.github/workflows/native_build_one.yaml
     with:
       runner_os: ${{ matrix.runner_os }}
       condition: ${{ matrix.cc_condition && matrix.os_condition }}

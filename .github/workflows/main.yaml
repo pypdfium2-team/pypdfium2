@@ -92,7 +92,7 @@ jobs:
       
       - name: Create venv
         if: ${{ inputs.inc_ver }}
-        uses: ./.github/actions/venv_step
+        uses: $/.github/actions/venv_step
       
       - name: Install dependencies
         if: ${{ inputs.inc_ver }}
@@ -150,14 +150,14 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
       
       - name: Prepare Python
-        uses: ./.github/actions/prepare_step
+        uses: $/.github/actions/prepare_step
         with:
           replicate_tag: ${{ needs.prepare.outputs.version }}
           # TODO obtain resolved versions from get_matrix.py
           py_vers: ${{ inputs.py_vers }}
       
       - name: Create venv
-        uses: ./.github/actions/venv_step
+        uses: $/.github/actions/venv_step
       
       - name: Install dependencies
         run: |
@@ -188,7 +188,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.pbin_matrix) }}
     
-    uses: ./.github/workflows/pbin_one.yaml
+    uses: $/.github/workflows/pbin_one.yaml
     with:
       runner_os: ${{ matrix.runner_os }}
       test_os: ${{ matrix.test_os }}
@@ -210,7 +210,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.sbuild_matrix) }}
     
-    uses: ./.github/workflows/sbuild_one.yaml
+    uses: $/.github/workflows/sbuild_one.yaml
     with:
       # TODO pdfium_ver: propagate exact version from prepare step instead of latest-binaries?
       runner_os: ${{ matrix.runner_os }}
@@ -236,7 +236,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.cibw_matrix) }}
     
-    uses: ./.github/workflows/cibw_one.yaml
+    uses: $/.github/workflows/cibw_one.yaml
     with:
       runner_os: ${{ matrix.runner_os }}
       test_os: ${{ matrix.test_os }}
@@ -290,7 +290,7 @@ jobs:
           python-version: '3.14'
       
       - name: Create venv & install from lockfile
-        uses: ./.github/actions/venv_step
+        uses: $/.github/actions/venv_step
         with:
           lockfile: lock/distcheck.txt
           cooldown_days: '7'  # lockfile sanity check
@@ -330,7 +330,7 @@ jobs:
       - name: Attest build provenance
         if: ${{ inputs.actually_publish }}
         id: provenance
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: 'artifacts/*'
       
@@ -365,7 +365,7 @@ jobs:
       pages: write     # dto.
       id-token: write  # dto.
     
-    uses: ./.github/workflows/gh_pages.yaml
+    uses: $/.github/workflows/gh_pages.yaml
     with:
       publish: ${{ inputs.publish }}
   

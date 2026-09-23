@@ -127,6 +127,8 @@ def _get_pdfium():
     raise PdfiumNotFoundError("Could not find system pdfium.")
 
 
+PDFIUM_MIN_VER = 6635  # ...
+
 def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     
     log("Looking for system pdfium ...")
@@ -160,8 +162,8 @@ def main(given_fullver=None, flags=(), target_dir=DataDir/ExtPlats.system):
     write_pdfium_info(target_dir, full_ver, origin=f"system-{finder}", flags=flags)
     if bindings_path != target_path:
         shutil.copyfile(bindings_path, target_path)
-    if full_ver.build < PDFIUM_MIN_REQ:
-        log(f"Warning: pdfium version {full_ver.build} does not conform with minimum requirement {PDFIUM_MIN_REQ}. Some APIs may not work. Run pypdfium2's test suite for details.")
+    if full_ver.build < PDFIUM_MIN_VER:
+        log(f"Warning: pdfium version {full_ver.build} < {PDFIUM_MIN_VER}. Some APIs may not work. Run pypdfium2's test suite for details.")
     
     return full_ver
 

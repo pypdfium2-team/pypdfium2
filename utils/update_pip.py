@@ -19,7 +19,7 @@ def run(cmd, check=True, **kwargs):
 def get_version(cmd, progname):
     p = run(cmd, stdout=subprocess.PIPE)
     output = p.stdout.decode()
-    version = re.search(fR"{progname} ([\d.]+)", output, flags=re.IGNORECASE).group(1)
+    version = re.search(rf"{progname} ([\d.]+)", output, flags=re.IGNORECASE).group(1)
     return tuple(int(v) for v in version.split("."))
 
 pip_version = get_version([sys.executable, "-m", "pip", "--version"], "pip")

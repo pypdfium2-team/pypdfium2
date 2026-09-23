@@ -3,8 +3,7 @@
 
 # TODO test-confirm filter and info params
 
-from collections import OrderedDict
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium
 import pypdfium2.internal as pdfium_i
 from pypdfium2_cli._parsers import (
     add_input,
@@ -53,7 +52,7 @@ def attach(parser):
 
 def print_img_metadata(m, n_digits, pad=""):
     
-    members = OrderedDict(
+    members = dict(  # ordered
         width = m.width,
         height = m.height,
         horizontal_dpi = round(m.horizontal_dpi, n_digits),

@@ -7,7 +7,6 @@ import sys
 import shutil
 import argparse
 import tempfile
-import contextlib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1]/"setupsrc"))
@@ -50,20 +49,9 @@ class ArtifactStash:
         self.tmpdir.cleanup()
 
 
-@contextlib.contextmanager
-def tmp_replace_ctx(fp, orig, tmp, exp_count):
-    orig_txt = fp.read_text()
-    assert orig_txt.count(orig) == exp_count
-    tmp_txt = orig_txt.replace(orig, tmp)
-    fp.write_text(tmp_txt)
-    try:
-        yield
-    finally:
-        fp.write_text(orig_txt)
-
-
 def _build_pl_suffix(version, use_v8):
-    return (PlatSpec_V8Sym if use_v8 else "") + PlatSpec_VerSep + str(version)
+    maybe_v8 = PlatSpec_V8Sym if use_v8 else ""
+    return f"{maybe_v8}{PlatSpec_VerSep}{version}"
 
 def _run_pypi_build(caller_args):
     assert build_module, "Module 'build' is not importable. Cannot craft PyPI packages."
@@ -92,12 +80,9 @@ def main_pypi(args):
         _run_pypi_build(["--sdist"])
     
     if args.wheels:
-        
+        # resolve latest once for all targets
         if not args.pdfium_ver or args.pdfium_ver == "latest":
             args.pdfium_ver = PdfiumVer.get_latest()
-        else:
-            args.pdfium_ver = int(args.pdfium_ver)
-        
         args.platforms = handle_platforms(args.platforms)
         #os.environ["USE_TARBALL_LICENSES"] = "1"
         suffix = _build_pl_suffix(args.pdfium_ver, args.use_v8)

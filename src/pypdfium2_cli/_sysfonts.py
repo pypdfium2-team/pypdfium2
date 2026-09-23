@@ -4,7 +4,7 @@
 import enum
 import ctypes
 import logging
-import pypdfium2._helpers as pdfium
+import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 

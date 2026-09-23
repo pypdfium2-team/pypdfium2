@@ -854,7 +854,7 @@ Roadmap:
 
 Given this is a volunteer open-source project, it is possible you may not get a response to your issue, or it may be closed without much feedback. Conversations may be locked if we feel like our attention is getting DDOSed. We may not have time to provide much usage support.
 
-The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and PRs that we consider unsuitable will be rejected without further ado.
+The same applies to Pull Requests. We will accept contributions only if we find them suitable. Do not reach out with a strong expectation to get your change merged; it is solely up to the repository owner to decide if and when a PR will be merged, and PRs that we consider unsuitable may be rejected without further ado.
 If the code owner decides a change is inappropriate, that's it, and further discussion will not be accepted.
 Any attempts to pressure us to merge a PR will not be tolerated, and may result in the offender being blocked.
 

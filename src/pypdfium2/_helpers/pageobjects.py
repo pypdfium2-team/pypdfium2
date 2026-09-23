@@ -49,16 +49,16 @@ class PdfObject (pdfium_i.AutoCloseable):
     """
     
     def __new__(cls, raw, *args, **kwargs):
-        
-        type = pdfium_c.FPDFPageObj_GetType(raw)
-        if type == pdfium_c.FPDF_PAGEOBJ_IMAGE:
-            instance = super().__new__(PdfImage)
-        elif type == pdfium_c.FPDF_PAGEOBJ_TEXT:
-            instance = super().__new__(PdfTextObj)
-        else:
-            instance = super().__new__(PdfObject)
-        
-        instance.type = type
+        assert raw, "The `raw` parameter must be non-null."
+        raw_type = pdfium_c.FPDFPageObj_GetType(raw)
+        if raw_type == pdfium_c.FPDF_PAGEOBJ_UNKNOWN:
+            raise PdfiumError("Failed to determine pageobject type, did you pass in a valid FPDF_PAGEOBJECT handle?")
+        py_type = {
+            pdfium_c.FPDF_PAGEOBJ_IMAGE: PdfImage,
+            pdfium_c.FPDF_PAGEOBJ_TEXT:  PdfTextObj,
+        }.get(raw_type, cls)
+        instance = super().__new__(py_type)
+        instance.type = raw_type
         return instance
     
     
@@ -117,8 +117,7 @@ class PdfObject (pdfium_i.AutoCloseable):
             tuple[tuple[float*2] * 4]: Corner positions as (x, y) tuples, counter-clockwise from origin, i.e. bottom-left, bottom-right, top-right, top-left, in PDF page coordinates.
         """
         
-        if self.type not in (pdfium_c.FPDF_PAGEOBJ_IMAGE, pdfium_c.FPDF_PAGEOBJ_TEXT):
-            # as of pdfium 5921
+        if not isinstance(self, (PdfImage, PdfTextObj)):  # as of pdfium 5921
             raise RuntimeError("Quad points only supported for image and text objects.")
         
         q = pdfium_c.FS_QUADPOINTSF()
@@ -236,7 +235,7 @@ class PdfFont (pdfium_i.AutoCloseable):
     def is_embedded(self):
         """
         bool: The font's embedding status. True if it is embedded (bundled) in the PDF, False otherwise.
-        This is a cached property, as a font object's embedding status is unlikely to change.
+        This is a cached property.
         """
         rc = pdfium_c.FPDFFont_GetIsEmbedded(self)
         if rc == -1:

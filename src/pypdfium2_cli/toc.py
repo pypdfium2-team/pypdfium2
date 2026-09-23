@@ -7,7 +7,7 @@ from pypdfium2_cli._parsers import (
     get_input, round_list,
 )
 from pypdfium2_cfg.stl import BooleanOptionalAction
-from pypdfium2 import PDFIUM_INFO, PdfBookmark, PdfBookmarkStyle
+from pypdfium2 import PDFIUM_INFO, PdfBookmark
 
 
 def attach(parser):
