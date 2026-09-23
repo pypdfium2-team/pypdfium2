@@ -220,7 +220,7 @@ class PdfPage (pdfium_i.AutoCloseable):
             raise ValueError("The pageobject you attempted to insert belongs to a different PDF.")
         
         ok = pdfium_c.FPDFPage_InsertObject(self, pageobj)
-        if not ok and PDFIUM_INFO.build >= 7809:
+        if not ok:
             raise PdfiumError("Failed to insert object.")
         pageobj._detach_finalizer()
         pageobj.page = self

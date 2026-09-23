@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import enum
 import pypdfium2.raw as pdfium_c
 from pypdfium2.version import PDFIUM_INFO
 
@@ -33,6 +32,7 @@ BitmapTypeToNChannels = {
     pdfium_c.FPDFBitmap_BGR:  3,
     pdfium_c.FPDFBitmap_BGRx: 4,
     pdfium_c.FPDFBitmap_BGRA: 4,
+    pdfium_c.FPDFBitmap_BGRA_Premul: 4,
 }
 
 #: Convert a PDFium bitmap format to string, assuming BGR byte order. (:attr:`FPDFBitmap_Unknown` is deliberately not handled.)
@@ -41,6 +41,7 @@ BitmapTypeToStr = {
     pdfium_c.FPDFBitmap_BGR:  "BGR",
     pdfium_c.FPDFBitmap_BGRx: "BGRX",
     pdfium_c.FPDFBitmap_BGRA: "BGRA",
+    pdfium_c.FPDFBitmap_BGRA_Premul: "BGRa"
 }
 
 #: Convert a PDFium bitmap format to string, assuming RGB byte order. (:attr:`FPDFBitmap_Unknown` is deliberately not handled.)
@@ -49,14 +50,8 @@ BitmapTypeToStrReverse = {
     pdfium_c.FPDFBitmap_BGR:  "RGB",
     pdfium_c.FPDFBitmap_BGRx: "RGBX",
     pdfium_c.FPDFBitmap_BGRA: "RGBA",
+    pdfium_c.FPDFBitmap_BGRA_Premul: "RGBa"
 }
-
-if PDFIUM_INFO.build >= 7098:
-    # New pixel format FPDFBitmap_BGRA_Premul
-    # Skia-only at the time of writing. Added for completeness and to satisfy the test suite.
-    BitmapTypeToNChannels[pdfium_c.FPDFBitmap_BGRA_Premul] = 4
-    BitmapTypeToStr[pdfium_c.FPDFBitmap_BGRA_Premul] = "BGRa"
-    BitmapTypeToStrReverse[pdfium_c.FPDFBitmap_BGRA_Premul] = "RGBa"
 
 # TODO consider a bi-directional dict in the future?
 #: Convert a string to PDFium bitmap format, assuming BGR byte order. Inversion of :data:`BitmapTypeToStr`.

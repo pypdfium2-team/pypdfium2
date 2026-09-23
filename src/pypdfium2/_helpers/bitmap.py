@@ -234,7 +234,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         """
         c_color = pdfium_i.color_tohex(color, self.rev_byteorder)
         ok = pdfium_c.FPDFBitmap_FillRect(self, left, top, width, height, c_color)
-        if not ok and PDFIUM_INFO.build >= 6635:
+        if not ok:
             raise PdfiumError("Failed to fill bitmap rectangle.")
     
     # IMPORTANT: When a wrapper is constructed around a foreign bitmap without copying (i.e. as a view of the same memory), we rely on the assumption that the wrapper holds a reference to the input buffer object itself while the represented memory is used.
