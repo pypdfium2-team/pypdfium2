@@ -42,12 +42,11 @@ class ColorIndicator:
         return ""
 
 
-_NO_STYLE = PdfBookmarkStyle(0)
 if PDFIUM_INFO.build > 8031:
     get_style = PdfBookmark.get_style
 else:
     def get_style(bm):
-        return _NO_STYLE
+        return None
 
 
 def main(args):
@@ -61,8 +60,8 @@ def main(args):
     for bm in pdf.get_toc(max_depth=args.max_depth):
         
         title = bm.get_title()
-        color = bm.get_color()
         style = get_style(bm)
+        color = bm.get_color()
         count = bm.get_count()
         count_str = f"{count:+}" if count != 0 else "*"
         out = "    " * bm.level
