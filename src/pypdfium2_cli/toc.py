@@ -61,6 +61,7 @@ def main(args):
         
         title = bm.get_title()
         style = get_style(bm)
+        # TODO apply style to title via ANSI escape sequence
         color = bm.get_color()
         count = bm.get_count()
         count_str = f"{count:+}" if count != 0 else "*"
@@ -82,8 +83,8 @@ def main(args):
         
         extras = []
         if style:
-            # TODO apply to title via ANSI escape sequence
-            extras.append(style.name.replace("|","+").lower())
+            # is this awful? yes. but it's for compatibility with python < 3.11 ...
+            extras.append(str(style).split(".", maxsplit=1)[1].replace("|", "+").lower())
         if color:
             extras.append(icol(color) + f"RGB{round_list(color, args.n_digits)}")
         if extras:
