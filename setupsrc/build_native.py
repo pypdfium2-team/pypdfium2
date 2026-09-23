@@ -36,6 +36,7 @@ DEPS_URLS = dict(
     libpng      = _CR_PREFIX + "chromium/src/third_party/libpng",
     zlib        = _CR_PREFIX + "chromium/src/third_party/zlib",
     harfbuzz    = _CR_PREFIX + "external/github.com/harfbuzz/harfbuzz",
+    dragonbox   = _CR_PREFIX + "external/github.com/jk-jeon/dragonbox",
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
@@ -142,7 +143,7 @@ class _DeferredDeps:
 
 def handle_deps(config, vendor_deps, with_tests):
     
-    deps_fields = ["build", "abseil", "fast_float", "simdutf"]
+    deps_fields = ["build", "abseil", "fast_float", "simdutf", "dragonbox"]
     if USE_PA:
         deps_fields.append("partition_allocator")
     # if IS_ANDROID:
@@ -226,6 +227,13 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
+        if full_ver.build > 8015:
+            # https://pdfium.googlesource.com/pdfium/+/2ca2e91deab056540c3e05049b4a6029c262ec90
+            autopatch(
+                PDFIUM_DIR/".gn",
+                r'(script_executable) = "(.+)"', rf'\1 = "{sys.executable}"',
+                is_regex=True, exp_count=1,
+            )
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
         if is_pyodide:
@@ -234,6 +242,11 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     
     df = DepsFetcher(deps_info)
     do_patches = df.fetch("build", PDFIUM_DIR_build, reset=reset)
+    # Create pseudo gclient config included by //build
+    (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("""\
+build_with_chromium = false
+checkout_libpng = true\
+""")
     if compiler is Compiler.gcc:  # regardless of do_patches
         # declare custom GCC toolchain
         mkdir(CUSTOM_TOOLCHAIN_DIR)
@@ -286,12 +299,11 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
                     )
                 # confirm there have been a couple of substitutions
                 assert n_subs > 3  # probably more
-        # Create pseudo gclient config included by //build
-        (PDFIUM_DIR_build/"config"/"gclient_args.gni").write_text("build_with_chromium = false")
     
     df.fetch("abseil", PDFIUM_3RDPARTY/"abseil-cpp")
     df.fetch("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
+    df.fetch("dragonbox", PDFIUM_3RDPARTY/"dragonbox"/"src")
     if USE_PA:
         df.fetch("partition_allocator", PDFIUM_DIR/"base"/"allocator"/"partition_allocator")
     # if IS_ANDROID:
@@ -496,7 +508,7 @@ Note that pdfium is picky about the GN version, and requires newer GN than what 
 We suggest that you `pip install --group gn` which will install an appropriate version of gn-dist from PyPI. gn-dist is also maintained by the pypdfium2 authors.
 
 Likewise, clang users should note that pdfium expects a very recent version of clang.
-Upstream does not aim for compatibility with clang older than the version they currently use.
+Upstream do not aim for compatibility with clang older than the version they currently use.
 pypdfium2 patches pdfium for compatibility with clang 22. For versions older than that, --clang-as-gcc mode is implicitly enabled.
 
 In GCC build mode, the usual environment variables are respected: CC, CXX, CFLAGS, CPPFLAGS, CXXFLAGS, LDFLAGS. Also, a TOOLPREFIX can be set for ar/nm/readelf.
