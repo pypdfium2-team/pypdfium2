@@ -1,14 +1,13 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-import pypdfium2._helpers as pdfium
 import pypdfium2.internal as pdfium_i
 from pypdfium2_cli._parsers import (
     add_input, add_n_digits,
     get_input, round_list,
 )
 from pypdfium2_cfg.stl import BooleanOptionalAction
-from pypdfium2.version import PDFIUM_INFO
+from pypdfium2 import PDFIUM_INFO, PdfBookmark, PdfBookmarkStyle
 
 
 def attach(parser):
@@ -21,10 +20,10 @@ def attach(parser):
         help = "Maximum recursion depth to consider when parsing the table of contents",
     )
     parser.add_argument(
-        "--color-indicator",
+        "--highlight",
         action = BooleanOptionalAction,
         default = True,
-        help = "Whether to add a color indicator to bookmarks that declare a color. The indicator is a Unicode symbol wrapped in an ANSI escape sequence. Default is enabled.",
+        help = "Whether console ANSI escape sequences may be used to indicate color/style. Defauls to true.",
     )
 
 
@@ -43,17 +42,18 @@ class ColorIndicator:
         return ""
 
 
-if PDFIUM_INFO.build > 7912:
-    get_color = pdfium.PdfBookmark.get_color
+_NO_STYLE = PdfBookmarkStyle(0)
+if PDFIUM_INFO.build > 8031:
+    get_style = PdfBookmark.get_style
 else:
-    def get_color(bm):
-        return None
+    def get_style(bm):
+        return _NO_STYLE
 
 
 def main(args):
     
     pdf = get_input(args)
-    if args.color_indicator:
+    if args.highlight:
         icol = ColorIndicator("⬤", sep=" ")
     else:
         icol = ColorIndicator.noop
@@ -61,6 +61,8 @@ def main(args):
     for bm in pdf.get_toc(max_depth=args.max_depth):
         
         title = bm.get_title()
+        color = bm.get_color()
+        style = get_style(bm)
         count = bm.get_count()
         count_str = f"{count:+}" if count != 0 else "*"
         out = "    " * bm.level
@@ -79,8 +81,12 @@ def main(args):
         else:
             out += "_"
         
-        color = get_color(bm)
+        extras = []
+        if style:
+            extras.append(style.name.replace("|","+").lower())
         if color:
-            out += " | " + icol(color) + f"RGB{round_list(color, args.n_digits)}"
+            extras.append(icol(color) + f"RGB{round_list(color, args.n_digits)}")
+        if extras:
+            out += " | " + ", ".join(extras)
         
         print(out)
