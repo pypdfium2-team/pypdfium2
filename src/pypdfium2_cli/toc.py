@@ -23,7 +23,7 @@ def attach(parser):
         "--highlight",
         action = BooleanOptionalAction,
         default = True,
-        help = "Whether console ANSI escape sequences may be used to indicate color/style. Defauls to true.",
+        help = "Whether console ANSI escape sequences may be used for styling or color indication. Defauls to true.",
     )
 
 
@@ -82,6 +82,7 @@ def main(args):
         
         extras = []
         if style:
+            # TODO apply to title via ANSI escape sequence
             extras.append(style.name.replace("|","+").lower())
         if color:
             extras.append(icol(color) + f"RGB{round_list(color, args.n_digits)}")
