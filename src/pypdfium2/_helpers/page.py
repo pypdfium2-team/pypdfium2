@@ -13,7 +13,6 @@ from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._helpers.bitmap import PdfBitmap
 from pypdfium2._helpers.textpage import PdfTextPage
 from pypdfium2._helpers.pageobjects import PdfObject
-from pypdfium2.version import PDFIUM_INFO
 
 c_float = ctypes.c_float
 logger = logging.getLogger(__name__)

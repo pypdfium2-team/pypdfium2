@@ -23,7 +23,7 @@ def attach(parser):
         "--highlight",
         action = BooleanOptionalAction,
         default = True,
-        help = "Whether console ANSI escape sequences may be used for styling or color indication. Defauls to true.",
+        help = "Whether console ANSI escape sequences may be used for styling or color indication. Defaults to true.",
     )
 
 

@@ -9,7 +9,6 @@ import pypdfium2.raw as pdfium_c
 import pypdfium2.internal as pdfium_i
 from pypdfium2._helpers.misc import PdfiumError
 from pypdfium2._lazy import Lazy
-from pypdfium2.version import PDFIUM_INFO
 
 logger = logging.getLogger(__name__)
 

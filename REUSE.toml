@@ -52,9 +52,10 @@ path = [
     "tests/resources/attachments.pdf",
     "tests/resources/mona_lisa.jpg",
     "tests/resources/form_object_with_image.pdf",
+    "tests/resources/toc_style.pdf",
 ]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2022 PDFium developers"
+SPDX-FileCopyrightText = "2022-present PDFium developers"
 SPDX-License-Identifier = "BSD-3-Clause AND Apache-2.0"
 SPDX-FileComment = '''
 Test files obtained from pdfium's //testing/resources or the pdfium_tests corpus:
@@ -65,6 +66,7 @@ https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/listb
 https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/embedded_attachments.pdf
 https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/mona_lisa.jpg
 https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/form_object_with_image.pdf
+toc_style.pdf is from a specific revision of https://pdfium-review.googlesource.com/c/pdfium/+/155630
 
 pdfium's LICENSE file includes both BSD-3-Clause and Apache-2.0 texts
 We're not sure if this meant as SPDX "AND" or "OR", so use the conservative (safe) assumption "AND".
