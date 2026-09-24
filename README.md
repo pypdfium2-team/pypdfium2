@@ -120,7 +120,7 @@ Where this does not work, you can pass the version alongside the setup target, e
 If the version is not known in the end, `NaN` placeholders will be set.
 
 If the version is known but no headers were found, they will be downloaded from upstream.
-If neither headers nor version are known (or ctypesgen is not installed), the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
+If neither headers nor version are known, the reference bindings will be used as a last resort. This is ABI-unsafe and thus discouraged.
 
 In case `find_library()` failed to find pdfium, we *may* do additional, custom search, such as checking for a pdfium shared library included with LibreOffice, and – if available – determining its version.<br>
 Our search heuristics currently expect a Linux-like filesystem hierarchy (e.g. `/usr`), but contributions for other systems are welcome.
