@@ -28,8 +28,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
     
     Parameters:
         input (str | pathlib.Path | bytes | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
-            The input PDF given as file path, bytes, ctypes array, byte stream, or raw PDFium document handle.
-            A byte stream is defined as an object that implements ``seek() tell() read() readinto()``.
+            The input PDF given as file path, bytes, ctypes array, readable byte stream, or raw PDFium document handle.
+            A readable byte stream is considered an object that implements ``seek() tell() read() readinto()`` in line with the usual :mod:`io` protocols.
+            If input is file-based (as opposed to in-memory), the backing file must (obviously) remain intact and not be modified while the document handle is used. This goes for both file paths and streams.
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
             If a password is given but the PDF is not encrypted, it will be ignored (as of PDFium 5418).
@@ -251,7 +252,9 @@ class PdfDocument (pdfium_i.AutoCloseable):
         
         Parameters:
             dest (str | pathlib.Path | io.BytesIO):
-                File path or byte stream the document shall be written to.
+                File path or output byte stream the document shall be written to.
+                An output byte stream is considered an object that implements a ``write()`` method which acts like :meth:`io.BufferedIOBase.write`.
+                Implementation detail: The ``write()`` adapter is expected to have written out all bytes given, if it returned without raising an exception. The return value is not checked.
             version (int | None):
                 The PDF version to use, given as an integer (14 for 1.4, 15 for 1.5, ...).
                 If None (the default), PDFium will set a version automatically.
