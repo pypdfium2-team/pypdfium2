@@ -6,6 +6,8 @@
 # Changelog for next release
 
 *Runtime*
+- `PdfDocument` and `PdfImage.load_jpeg`: With byte stream input, in the `_buffer_reader` callback, check that the number of bytes read into the buffer matches the buffer's size, otherwise indicate error.
+  `@Stjorn` filed a security ticket that triggered this change; however we consider this more of a theoretical safety *enhancement* and not actually a vulnerability, since we do not envisage a situation where `readinto()` would fall short on data under valid cirucmstances. It is obviously invalid to modify a file while bound by an object handle, and an attacker being able to do that would imply an already heavily compromised system. [No exploit from the heavens.](https://vulnbrocards.com/brocards/vb002-no-exploit-from-heavens/). Clarified documentation accordingly.
 - In `PdfBitmap`, unconditionally call `FPDFBitmap_Destroy()` when the bitmap is closed/finalized, i.e. including bitmaps created from a native, pdfium-external buffer (the default). The API does not affect external buffers, but assumably should still be called to release the `FPDF_BITMAP` shell itself.
 - On foreign bitmaps, `PdfBitmap.close()` now warns about being a potentially unsafe operation, since it frees the C-side buffer. Set `.warn_on_close = False` to silence the warning, if you have made sure your usage is safe.
 - In `AutoCloseable`, avoid assigning `self` to an instance attribute. This should result in improved GC behavior. Many thanks to James Barlow for pointing this out.
