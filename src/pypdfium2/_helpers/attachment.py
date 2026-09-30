@@ -126,7 +126,7 @@ class PdfAttachment (pdfium_i.AutoCastable):
         if not ok:
             raise PdfiumError(f"Failed to set attachment param '{key}' to '{value}'.")
     
-    # The interface of FPDFAttachment_GetSubtype() and FPDFAttachment_GetDescription() seems pretty much the same, just targetting different fields.
+    # The interface of FPDFAttachment_GetSubtype() and FPDFAttachment_GetDescription() seems pretty much the same, just targeting different fields.
     
     def get_subtype(self):
         """
