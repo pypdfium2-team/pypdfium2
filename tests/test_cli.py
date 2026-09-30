@@ -112,7 +112,7 @@ def test_attachments(tmp_path):
     # TODO test --set-desc
     edited_pdf = tmp_path / "edited.pdf"
     run_cli(["attachments", TestFiles.attachments, "edit", "--del-nums", "1,2", "--add-files", TestFiles.mona_lisa, "-o", edited_pdf])
-    run_cli(["attachments", edited_pdf, "list"], "[1] mona_lisa.jpg: \n", capture=["out"])
+    run_cli(["attachments", edited_pdf, "list"], "[1] mona_lisa.jpg ()\n", capture=["out"])
 
 
 def test_images(tmp_path):

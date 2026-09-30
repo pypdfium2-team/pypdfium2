@@ -716,7 +716,7 @@ class PdfBookmark (pdfium_i.AutoCastable):
         Returns:
             tuple[float,float,float] | None: The bookmark's RGB color as float values between 0 and 1, or None if the bookmark does not define a (valid) color.
         
-        .. versionadded:: 5.11.0
+        .. versionadded:: 5.11
         """
         # requires pdfium > 7912
         r, g, b = ctypes.c_float(), ctypes.c_float(), ctypes.c_float()
@@ -731,6 +731,8 @@ class PdfBookmark (pdfium_i.AutoCastable):
             PdfBookmarkStyle: The bookmark's text style (none, bold, italic, or both) as :class:`enum.Flag`.
         Note:
             In Python >= 3.11, unhandled values are treated gracefully via :class:`enum.FlagBoundary.KEEP`.
+        
+        .. versionadded:: 5.14
         """
         style_int = pdfium_c.FPDFBookmark_GetStyle(self)
         return PdfBookmarkStyle(style_int)

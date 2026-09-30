@@ -11,8 +11,10 @@
 - In `PdfBitmap`, unconditionally call `FPDFBitmap_Destroy()` when the bitmap is closed/finalized, i.e. including bitmaps created from a native, pdfium-external buffer (the default). The API does not affect external buffers, but assumably should still be called to release the `FPDF_BITMAP` shell itself.
 - On foreign bitmaps, `PdfBitmap.close()` now warns about being a potentially unsafe operation, since it frees the C-side buffer. Set `.warn_on_close = False` to silence the warning, if you have made sure your usage is safe.
 - In `AutoCloseable`, avoid assigning `self` to an instance attribute. This should result in improved GC behavior. Many thanks to James Barlow for pointing this out.
-- Added new APIs `PdfAttachment.{get,set}_desc()` to read/write attachment descriptions, along with CLI integration. Thanks to Aryan Krishnan for the upstream part.
-  * Note: On platforms where we pin the PDFium version, the underlying PDFium APIs have not arrived yet, but they will become available once the build scripts are updated to a new base.
+- Added bindings to some new PDFium APIs, along with CLI integration:
+  * `PdfAttachment`: `.{get,set}_desc()` to read/write attachment descriptions, and `.get_subtype()` to obtain the MIME type.
+  * `PdfBookmark.get_style()` and `PdfBookmarkStyle`.
+  * _Note: On platforms where we pin the PDFium version, the underlying PDFium APIs are not available yet, but they will be once the build scripts are updated to a new base._
 
 *Platforms*
 - Pyodide: Patch freetype load flags to avoid `FT_Load_Glyph()` somehow corrupting the heap. It seems that this addresses the previously encountered crashes/freezes; however, the exact cause remains elusive. Anyway, many thanks to Hood Chatham for this finding.

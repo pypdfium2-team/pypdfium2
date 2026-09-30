@@ -13,8 +13,7 @@ from pypdfium2._helpers.misc import PdfiumError
 
 class PdfAttachment (pdfium_i.AutoCastable):
     """
-    Attachment helper class.
-    See PDF 1.7, Section 7.11 "File Specifications".
+    Attachment helper class. See PDF 1.7, Section 7.11 "File Specifications".
     
     Attributes:
         raw (FPDF_ATTACHMENT):
@@ -127,27 +126,49 @@ class PdfAttachment (pdfium_i.AutoCastable):
         if not ok:
             raise PdfiumError(f"Failed to set attachment param '{key}' to '{value}'.")
     
+    # The interface of FPDFAttachment_GetSubtype() and FPDFAttachment_GetDescription() seems pretty much the same, just targetting different fields.
+    
+    def get_subtype(self):
+        """
+        Returns:
+            str: The attachment's MIME type (``/Subtype``), as string.
+            Returns an empty string if the attachment does not specify the subtype key.
+        Hint:
+            Checking the attached file's signature with ``libmagic`` may be a more reliable way of determining the MIME type; however, this implies calling :meth:`.get_data`.
+        """
+        n_bytes = pdfium_c.FPDFAttachment_GetSubtype(self, None, 0)  # including NUL
+        if n_bytes == FPDF_WCHAR_size:
+            return ""
+        elif not n_bytes:
+            raise PdfiumError("Failed to get attachment subtype")
+        n_units = -(n_bytes // -FPDF_WCHAR_size)  # ceildiv
+        buffer = (pdfium_c.FPDF_WCHAR * n_units)()
+        pdfium_c.FPDFAttachment_GetSubtype(self, buffer, n_bytes)
+        return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
+    
     def get_desc(self):
         """
         Returns:
             str: The attachment's description, or an empty string if the attachment has no description.
         """
-        in_bytes = pdfium_c.FPDFAttachment_GetDescription(self, None, 0)  # including NUL
-        if in_bytes == FPDF_WCHAR_size:
+        n_bytes = pdfium_c.FPDFAttachment_GetDescription(self, None, 0)  # including NUL
+        if n_bytes == FPDF_WCHAR_size:
             return ""
-        elif not in_bytes:
+        elif not n_bytes:
             raise PdfiumError("Failed to get attachment description")
-        n_units = -(in_bytes // -FPDF_WCHAR_size)  # ceildiv
+        n_units = -(n_bytes // -FPDF_WCHAR_size)  # ceildiv
         buffer = (pdfium_c.FPDF_WCHAR * n_units)()
-        # NOTE The API unconditionally returns the string's length and does not give feedback whether buffer has actually been modified or not. This means an incorrect buflen value would go unnoticed by the adapter (if buflen is too small, buffer will silently not be modified). The API offers no way to catch that theoretical case.
-        out_bytes = pdfium_c.FPDFAttachment_GetDescription(self, buffer, in_bytes)
-        assert in_bytes == out_bytes
+        # NOTE The API unconditionally returns the same value as the previous call, and does not give feedback whether buffer has been actually modified or not.
+        pdfium_c.FPDFAttachment_GetDescription(self, buffer, n_bytes)
         return decode(memoryview(buffer)[:n_units-1], "utf-16-le")
     
     def set_desc(self, string):
         """
         Parameters:
             string (str): Set the attachment description to this value.
+        
+        .. versionadded:: 5.14
+            :meth:`.get_subtype`, :meth:`.get_desc`, :meth:`.set_desc`
         """
         enc_string = (string+"\x00").encode("utf-16-le")
         enc_string_ptr = ctypes.cast(enc_string, pdfium_c.FPDF_WIDESTRING)

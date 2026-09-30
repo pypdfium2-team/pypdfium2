@@ -64,8 +64,10 @@ def main(args):
     
     if args.action == ACTION_LIST:
         for i in range(n_attachments):
-            attachment = pdf.get_attachment(i)
-            print(f"[{i+1}] {attachment.get_name()}: {attachment.get_desc()}")
+            atm = pdf.get_attachment(i)
+            desc = atm.get_desc()
+            desc_str = f": {desc!r}" if desc else ""
+            print(f"[{i+1}] {atm.get_name()} ({atm.get_subtype()})" + desc_str)
     
     elif args.action == ACTION_EXTRACT:
         
@@ -74,25 +76,25 @@ def main(args):
         n_digits = len(str( max(args.nums) + 1 ))
         
         for i in args.nums:
-            attachment = pdf.get_attachment(i)
-            name = attachment.get_name()
+            atm = pdf.get_attachment(i)
+            name = atm.get_name()
             out_path = args.output_dir / ("%0*d_%s" % (n_digits, i+1, name))
-            out_path.write_bytes( attachment.get_data() )
+            out_path.write_bytes( atm.get_data() )
     
     elif args.action == ACTION_EDIT:
         
         for spec in args.set_desc:
             num_str, desc = spec.split("=", maxsplit=1)
             i = int(num_str) - 1
-            attachment = pdf.get_attachment(i)
-            attachment.set_desc(desc)
+            atm = pdf.get_attachment(i)
+            atm.set_desc(desc)
         
         for i in sorted(args.del_nums, reverse=True):
             pdf.del_attachment(i)
         
         for fp in args.add_files:
-            attachment = pdf.new_attachment(fp.name)
-            attachment.set_data( fp.read_bytes() )
+            atm = pdf.new_attachment(fp.name)
+            atm.set_data( fp.read_bytes() )
         
         pdf.save(args.output)
     
